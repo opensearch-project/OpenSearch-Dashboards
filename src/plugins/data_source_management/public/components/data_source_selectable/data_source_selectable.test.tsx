@@ -174,8 +174,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
-        selectedOption={[{id: 'test-id', label: 'test-label'}]}
-
+        selectedOption={[{ id: 'test-id', label: 'test-label' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
@@ -184,7 +183,6 @@ describe('DataSourceSelectable', () => {
     const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
     expect(button).toHaveTextContent('test-label');
   });
-
 
   it('should display Local Cluster when not provide selectedOption', async () => {
     const onSelectedDataSource = jest.fn();
@@ -199,59 +197,104 @@ describe('DataSourceSelectable', () => {
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
-
     await nextTick();
     const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
     expect(button).toHaveTextContent('Local cluster');
   });
 
   it('should render normally even only provide dataSourceId', async () => {
-    const fetchDataMock = jest.fn(() => Promise.resolve([{ id: 'test-id', attributes: { title: 'test-label' } }]));
-     // Spy on componentDidMount
-     jest.spyOn(DataSourceSelectable.prototype, 'componentDidMount').mockImplementation(async function () {
-      await fetchDataMock();
-    });
-
-
     const onSelectedDataSource = jest.fn();
-    // const container = render(
-    //   <DataSourceSelectable
-    //     savedObjectsClient={client}
-    //     notifications={toasts}
-    //     onSelectedDataSources={onSelectedDataSource}
-    //     disabled={false}
-    //     hideLocalCluster={false}
-    //     fullWidth={false}
-    //     selectedOption={[{id: 'test1'}]}
-    //     dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-    //   />
-    // );
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        selectedOption={[{ id: 'test2' }]}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(button).toHaveTextContent('test2');
+  });
 
-      // Render the component
-      const wrapper = shallow(
-        <DataSourceSelectable
-          savedObjectsClient={client}
-          notifications={toasts}
-          onSelectedDataSources={jest.fn()}
-          disabled={false}
-          hideLocalCluster={false}
-          fullWidth={false}
-          selectedOption={[{id: 'test-id'}]}
-          dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-        />
-      );
+  it('should render warning if provide undefined dataSourceId', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        selectedOption={[{ id: undefined }]}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(button).toHaveTextContent('');
+    expect(toasts.addWarning).toBeCalledTimes(1);
+    expect(toasts.addWarning).toBeCalledWith('Data source with id undefined is not available');
+  });
 
-
-      expect(DataSourceSelectable.prototype.componentDidMount).toHaveBeenCalled();
-      expect(fetchDataMock).toHaveBeenCalled();
-      // expect(wrapper.state('dataSourceOptions')).toEqual([{ id: 'test-id', label: 'test-label' }]);
-      expect(wrapper.state('selectedOption')).toEqual([{ id: 'test-id', label: 'test-label' }]);
-
-    // const containerInstance =  component.instance();
-    // containerInstance.componentDidMount!();
-
-    // await nextTick();
-    // expect(component).toMatchSnapshot();
-    // const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+  it('should render warning if provide empty object', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        selectedOption={[{}]}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(button).toHaveTextContent('');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id undefined is not available');
+  });
+  it('should warning if only provide label', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        selectedOption={[{ label: 'test-label' }]}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id undefined is not available');
+  });
+  it('should warning if only provide empty label', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        selectedOption={[{ label: '' }]}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id undefined is not available');
   });
 });

@@ -98,12 +98,9 @@ export const DataSourceSelectableExample = ({
           fullWidth: false,
           savedObjects: savedObjects.client,
           notifications,
-          // activeOption: [{id: "234e19a0-f215-11ee-b511"}],
-          activeOption: [{id: "234e19a0-f215-11ee-b511-bf00d40e7377", label: ''}],
           onSelectedDataSources: (ds) => {
             setSelectedDataSources(ds);
           },
-          dataSourceFilter: (ds) => ds.attributes.auth.type !== AuthType.NoAuth
         }}
       />
     );
