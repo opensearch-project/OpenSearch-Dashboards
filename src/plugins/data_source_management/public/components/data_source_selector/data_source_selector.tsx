@@ -37,6 +37,7 @@ interface DataSourceSelectorState {
   selectedOption: DataSourceOption[];
   allDataSources: Array<SavedObject<DataSourceAttributes>>;
   defaultDataSource: string | null;
+  dataSourceOptions?: DataSourceOption[];
 }
 
 export interface DataSourceOption {
@@ -72,44 +73,35 @@ export class DataSourceSelector extends React.Component<
   handleSelectedOption(
     dataSourceOptions: DataSourceOption[],
     allDataSources: Array<SavedObject<DataSourceAttributes>>,
-    defaultDataSource?: string
+    defaultDataSource: string | null
   ) {
     const [{ id }] = this.props.defaultOption!;
     const dataSource = dataSourceOptions.find((ds) => ds.id === id);
-    // invalid id
+    const selectedOption = dataSource ? [{ id, label: dataSource.label }] : [];
+
+    // Invalid/filtered out datasource
     if (!dataSource) {
-      // TODO: pass in a valid datasource but filtered out
       this.props.notifications.addWarning(
         i18n.translate('dataSource.fetchDataSourceError', {
           defaultMessage: 'Data source with id is not available',
         })
       );
-      this.setState({
-        ...this.state,
-        dataSourceOptions,
-        selectedOption: [],
-        defaultDataSource,
-        allDataSources,
-      });
-      this.props.onSelectedDataSource([]);
-      return;
     }
-    // TODO: setState for valid case
+
     this.setState({
       ...this.state,
       dataSourceOptions,
-      selectedOption: [{ id, label: dataSource.label }],
+      selectedOption,
       defaultDataSource,
       allDataSources,
     });
-    // good
-    this.props.onSelectedDataSource([{ id, label: dataSource.label }]);
+    this.props.onSelectedDataSource(selectedOption);
   }
 
   handleDefaultDataSource(
     dataSourceOptions: DataSourceOption[],
     allDataSources: Array<SavedObject<DataSourceAttributes>>,
-    defaultDataSource?: string
+    defaultDataSource: string | null
   ) {
     const selectedDataSource = getDefaultDataSource(
       dataSourceOptions,
@@ -118,10 +110,9 @@ export class DataSourceSelector extends React.Component<
       this.props.hideLocalCluster
     );
 
-    // no active option, didnot find valid option
+    // No active option, did not find valid option
     if (selectedDataSource.length === 0) {
       this.props.notifications.addWarning('No connected data source available.');
-      // TODO: trigger callback to return []
       this.props.onSelectedDataSource([]);
       return;
     }
@@ -133,7 +124,6 @@ export class DataSourceSelector extends React.Component<
       defaultDataSource,
       allDataSources,
     });
-
     this.props.onSelectedDataSource(selectedDataSource);
   }
 
@@ -151,15 +141,16 @@ export class DataSourceSelector extends React.Component<
       const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(
         fetchedDataSources,
         this.props.dataSourceFilter
-      );
+      ).map((ds) => {
+        return { label: ds.attributes.title, id: ds.id };
+      });
 
       // 3. Add local cluster as option
       if (!this.props.hideLocalCluster) {
         dataSourceOptions.unshift(LocalCluster);
       }
 
-      const defaultDataSource =
-        this.props.uiSettings?.get('defaultDataSource', undefined) ?? undefined;
+      const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
 
       // 4.1 empty default option, [], just want to show placeholder
       // devtool, add sample, tsvb, search relevance
@@ -185,7 +176,7 @@ export class DataSourceSelector extends React.Component<
     }
   }
 
-  onChange(e) {
+  onChange(e: DataSourceOption[]) {
     if (!this._isMounted) return;
     this.setState({
       selectedOption: e,

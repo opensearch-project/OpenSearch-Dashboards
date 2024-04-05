@@ -16,7 +16,8 @@ import {
   noAuthCredentialAuthMethod,
 } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
-import { DataSourceOption } from './data_source_menu/types';
+import { DataSourceOption as DataSourceOptionOptional } from './data_source_menu/types';
+import { DataSourceOption } from './data_source_selector/data_source_selector';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -87,27 +88,26 @@ export function getFilteredDataSources(
 }
 
 export function getDefaultDataSource(
-  dataSources: Array<SavedObject<DataSourceAttributes>>,
+  dataSources: DataSourceOption[],
   LocalCluster: DataSourceOption,
-  uiSettings?: IUiSettingsClient,
+  defaultDataSource: string | null,
   hideLocalCluster?: boolean,
-  defaultOption?: DataSourceOption[]
+  defaultOption?: DataSourceOptionOptional[]
 ) {
   const defaultOptionId = defaultOption?.[0]?.id;
   const defaultOptionDataSource = dataSources.find(
     (dataSource) => dataSource.id === defaultOptionId
   );
 
-  const defaultDataSourceId = uiSettings?.get('defaultDataSource', null) ?? null;
   const defaultDataSourceAfterCheck = dataSources.find(
-    (dataSource) => dataSource.id === defaultDataSourceId
+    (dataSource) => dataSource.id === defaultDataSource
   );
 
   if (defaultOptionDataSource) {
     return [
       {
         id: defaultOptionDataSource.id,
-        label: defaultOption?.[0]?.label || defaultOptionDataSource.attributes?.title,
+        label: defaultOptionDataSource.label,
       },
     ];
   }
@@ -115,7 +115,7 @@ export function getDefaultDataSource(
     return [
       {
         id: defaultDataSourceAfterCheck.id,
-        label: defaultDataSourceAfterCheck.attributes?.title || '',
+        label: defaultDataSourceAfterCheck.label,
       },
     ];
   }
@@ -126,7 +126,7 @@ export function getDefaultDataSource(
     return [
       {
         id: dataSources[0].id,
-        label: dataSources[0].attributes.title,
+        label: dataSources[0].label,
       },
     ];
   }
