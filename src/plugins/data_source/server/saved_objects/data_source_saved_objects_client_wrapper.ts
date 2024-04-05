@@ -148,7 +148,7 @@ export class DataSourceSavedObjectsClientWrapper {
   private async validateAndEncryptAttributes<T = unknown>(attributes: T) {
     await this.validateAttributes(attributes);
 
-    const { endpoint, auth } = attributes;
+    const { endpoint, auth } = attributes as DataSourceAttributes;
 
     switch (auth.type) {
       case AuthType.NoAuth:
@@ -185,7 +185,7 @@ export class DataSourceSavedObjectsClientWrapper {
     attributes: Partial<T>,
     options: SavedObjectsUpdateOptions = {}
   ) {
-    const { auth, endpoint } = attributes;
+    const { auth, endpoint } = attributes as Partial<DataSourceAttributes>;
 
     if (endpoint) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
@@ -251,7 +251,7 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private async validateAttributes<T = unknown>(attributes: T) {
-    const { title, endpoint, auth } = attributes;
+    const { title, endpoint, auth } = attributes as DataSourceAttributes;
     if (!title?.trim?.().length) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         '"title" attribute must be a non-empty string'
@@ -272,7 +272,7 @@ export class DataSourceSavedObjectsClientWrapper {
   }
 
   private async validateAuth<T = unknown>(auth: T) {
-    const { type, credentials } = auth;
+    const { type, credentials } = auth as Partial<DataSourceAttributes['auth']>;
 
     if (!type) {
       throw SavedObjectsErrorHelpers.createBadRequestError('"auth.type" attribute is required');
@@ -464,7 +464,7 @@ export class DataSourceSavedObjectsClientWrapper {
   ) {
     const {
       credentials: { username, password },
-    } = auth;
+    } = auth as { credentials: UsernamePasswordTypedContent };
 
     return {
       ...auth,
@@ -478,7 +478,7 @@ export class DataSourceSavedObjectsClientWrapper {
   private async encryptSigV4Credential<T = unknown>(auth: T, encryptionContext: EncryptionContext) {
     const {
       credentials: { accessKey, secretKey, region, service },
-    } = auth;
+    } = auth as { credentials: SigV4Content };
 
     return {
       ...auth,
