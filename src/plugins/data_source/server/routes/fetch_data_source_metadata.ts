@@ -12,7 +12,7 @@ import { CryptographyServiceSetup } from '../cryptography_service';
 import { IAuthenticationMethodRegistry } from '../auth_registry';
 import { CustomApiSchemaRegistry } from '../schema_registry/custom_api_schema_registry';
 
-export const registerFetchDataSourceVersionRoute = async (
+export const registerFetchDataSourceMetaDataRoute = async (
   router: IRouter,
   dataSourceServiceSetup: DataSourceServiceSetup,
   cryptography: CryptographyServiceSetup,
@@ -22,7 +22,7 @@ export const registerFetchDataSourceVersionRoute = async (
   const authRegistry = await authRegistryPromise;
   router.post(
     {
-      path: '/internal/data-source-management/fetchDataSourceVersion',
+      path: '/internal/data-source-management/fetchDataSourceMetaData',
       validate: {
         body: schema.object({
           id: schema.maybe(schema.string()),
@@ -75,7 +75,6 @@ export const registerFetchDataSourceVersionRoute = async (
     },
     async (context, request, response) => {
       const { dataSourceAttr, id: dataSourceId } = request.body;
-      let dataSourceVersion = '';
 
       try {
         const dataSourceClient: OpenSearchClient = await dataSourceServiceSetup.getDataSourceClient(
@@ -95,11 +94,13 @@ export const registerFetchDataSourceVersionRoute = async (
           dataSourceAttr
         );
 
-        dataSourceVersion = await dataSourceValidator.fetchDataSourceVersion();
+        const dataSourceVersion = await dataSourceValidator.fetchDataSourceVersion();
+        const installedPlugins = Array.from(await dataSourceValidator.fetchInstalledPlugins());
 
         return response.ok({
           body: {
             dataSourceVersion,
+            installedPlugins,
           },
         });
       } catch (err) {
