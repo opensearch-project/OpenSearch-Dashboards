@@ -49,7 +49,22 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
         data-test-subj="dataSourceSelectable"
         isPreFiltered={false}
         onChange={[Function]}
-        options={Array []}
+        options={
+          Array [
+            Object {
+              "id": "",
+              "label": "Local cluster",
+            },
+            Object {
+              "id": "test2",
+              "label": "test2",
+            },
+            Object {
+              "id": "test3",
+              "label": "test3",
+            },
+          ]
+        }
         renderOption={[Function]}
         searchProps={
           Object {
@@ -280,11 +295,16 @@ Object {
                         >
                           <input
                             aria-activedescendant=""
+                            aria-autocomplete="list"
+                            aria-controls="generated-id_listbox"
+                            aria-expanded="true"
                             aria-haspopup="listbox"
                             aria-label="Search"
+                            aria-owns="generated-id_listbox"
                             autocomplete="off"
                             class="euiFieldSearch euiFieldSearch--fullWidth euiSelectableSearch"
                             placeholder="Search"
+                            role="combobox"
                             type="search"
                             value=""
                           />
@@ -304,15 +324,24 @@ Object {
                         </div>
                       </div>
                       <div
-                        class="euiText euiText--extraSmall euiSelectableMessage"
-                        id="generated-id_messageContent"
+                        class="euiSelectableList"
                       >
                         <div
-                          class="euiTextColor euiTextColor--subdued"
+                          style="overflow: visible; width: 0px;"
+                        />
+                        <div
+                          class="resize-triggers"
                         >
-                          <p>
-                            No options available
-                          </p>
+                          <div
+                            class="expand-trigger"
+                          >
+                            <div
+                              style="width: 1px; height: 1px;"
+                            />
+                          </div>
+                          <div
+                            class="contract-trigger"
+                          />
                         </div>
                       </div>
                     </div>

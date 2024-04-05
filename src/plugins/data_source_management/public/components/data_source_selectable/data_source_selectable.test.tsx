@@ -302,4 +302,23 @@ describe('DataSourceSelectable', () => {
     const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
     expect(toasts.addWarning).toBeCalledWith('Data source with id is not available');
   });
+
+  it('should warning if only provide empty array', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={true}
+        fullWidth={false}
+        selectedOption={[]}
+        // dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id is not available');
+  });
 });

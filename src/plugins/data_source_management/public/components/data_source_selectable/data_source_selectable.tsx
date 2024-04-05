@@ -92,6 +92,7 @@ export class DataSourceSelectable extends React.Component<
       );
       this.setState({
         ...this.state,
+        dataSourceOptions,
         selectedOption: [],
       });
       this.props.onSelectedDataSources([]);
@@ -99,6 +100,7 @@ export class DataSourceSelectable extends React.Component<
     }
     this.setState({
       ...this.state,
+      dataSourceOptions,
       selectedOption: [{ id, label: dsOption.label }],
     });
     this.props.onSelectedDataSources([{ id, label: dsOption.label }]);
@@ -122,6 +124,7 @@ export class DataSourceSelectable extends React.Component<
     this.setState({
       ...this.state,
       selectedOption: selectedDataSource,
+      dataSourceOptions,
     });
 
     this.props.onSelectedDataSources(selectedDataSource);
