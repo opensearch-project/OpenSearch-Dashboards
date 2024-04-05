@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { featureMatchesConfig } from './utils';
+import { AppNavLinkStatus } from '../../../core/public';
+import { featureMatchesConfig, isAppAccessibleInWorkspace } from './utils';
 
 describe('workspace utils: featureMatchesConfig', () => {
   it('feature configured with `*` should match any features', () => {
@@ -89,5 +90,62 @@ describe('workspace utils: featureMatchesConfig', () => {
     expect(match({ id: 'integrations', category: { id: 'management', label: 'Management' } })).toBe(
       true
     );
+  });
+});
+
+describe('workspace utils: isAppAccessibleInWorkspace', () => {
+  it('any app is accessible when workspace has no features configured', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        { id: 'any_app', title: 'Any app', mount: jest.fn() },
+        { id: 'workspace_id', name: 'workspace name' }
+      )
+    ).toBe(true);
+  });
+
+  it('An app is accessible when the workspace has the app configured', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        { id: 'dev_tools', title: 'Any app', mount: jest.fn() },
+        { id: 'workspace_id', name: 'workspace name', features: ['dev_tools'] }
+      )
+    ).toBe(true);
+  });
+
+  it('An app is not accessible when the workspace does not have the app configured', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        { id: 'dev_tools', title: 'Any app', mount: jest.fn() },
+        { id: 'workspace_id', name: 'workspace name', features: [] }
+      )
+    ).toBe(false);
+  });
+
+  it('An app is accessible if the nav link is hidden', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'dev_tools',
+          title: 'Any app',
+          mount: jest.fn(),
+          navLinkStatus: AppNavLinkStatus.hidden,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: [] }
+      )
+    ).toBe(true);
+  });
+
+  it('An app is accessible if it is chromeless', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'dev_tools',
+          title: 'Any app',
+          mount: jest.fn(),
+          chromeless: true,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: [] }
+      )
+    ).toBe(true);
   });
 });

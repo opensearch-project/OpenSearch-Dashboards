@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Subscription } from 'rxjs';
+import { BehaviorSubject, type Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import {
@@ -12,7 +12,8 @@ import {
   CoreSetup,
   AppMountParameters,
   AppNavLinkStatus,
-  LinksUpdater,
+  AppUpdater,
+  AppStatus,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -26,7 +27,7 @@ import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
-import { featureMatchesConfig } from './utils';
+import { isAppAccessibleInWorkspace } from './utils';
 
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
 
@@ -38,6 +39,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private currentWorkspaceIdSubscription?: Subscription;
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}))
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
@@ -54,50 +56,24 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
    */
   private filterNavLinks(core: CoreStart) {
     const currentWorkspace$ = core.workspaces.currentWorkspace$;
-    let filterLinksByWorkspace: LinksUpdater;
-
     this.currentWorkspaceSubscription?.unsubscribe();
+
     this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
-      const linkUpdaters$ = core.chrome.navLinks.getLinkUpdaters$();
-      let linkUpdaters = linkUpdaters$.value;
-
-      /**
-       * It should only have one link filter exist based on the current workspace at a given time
-       * So we need to filter out previous workspace link filter before adding new one after changing workspace
-       */
-      linkUpdaters = linkUpdaters.filter((updater) => updater !== filterLinksByWorkspace);
-
-      /**
-       * Whenever workspace changed, this function will filter out those links that should not
-       * be displayed. For example, some workspace may not have Observability features configured, in such case,
-       * the nav links of Observability features should not be displayed in left nav bar
-       */
-      filterLinksByWorkspace = (navLinks) => {
-        /**
-         * Do not filter the nav links when currently not in a workspace, or the current workspace
-         * has no feature configured
-         */
-        if (!currentWorkspace || !currentWorkspace.features) return navLinks;
-
-        const featureFilter = featureMatchesConfig(currentWorkspace.features);
-        const filteredNavLinks = [...navLinks.values()].filter((linkWrapper) =>
-          featureFilter(linkWrapper.properties)
-        );
-
-        const newNavLinks = new Map();
-        filteredNavLinks.forEach((chromeNavLink) => {
-          newNavLinks.set(chromeNavLink.id, chromeNavLink);
-        });
-        return newNavLinks;
-      };
-
-      linkUpdaters$.next([...linkUpdaters, filterLinksByWorkspace]);
+      if (currentWorkspace) {
+        this.appUpdater$.next((app) => {
+          if (isAppAccessibleInWorkspace(app, currentWorkspace)) {
+            return
+          }
+          return {status: AppStatus.inaccessible}
+        })
+      }
     });
   }
 
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
+    core.application.registerAppUpdater(this.appUpdater$)
 
     /**
      * Retrieve workspace id from url

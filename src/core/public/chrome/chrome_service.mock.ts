@@ -30,13 +30,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { PublicMethodsOf } from '@osd/utility-types';
-import {
-  ChromeBadge,
-  ChromeBreadcrumb,
-  ChromeService,
-  InternalChromeStart,
-  LinksUpdater,
-} from './';
+import { ChromeBadge, ChromeBreadcrumb, ChromeService, InternalChromeStart } from './';
 import { getLogosMock } from '../../common/mocks';
 
 const createSetupContractMock = () => {
@@ -46,7 +40,6 @@ const createSetupContractMock = () => {
 };
 
 const createStartContractMock = () => {
-  const linkUpdatersMock$ = new BehaviorSubject<LinksUpdater[]>([]);
   const startContract: DeeplyMockedKeys<InternalChromeStart> = {
     getHeaderComponent: jest.fn(),
     navLinks: {
@@ -58,7 +51,6 @@ const createStartContractMock = () => {
       update: jest.fn(),
       enableForcedAppSwitcherNavigation: jest.fn(),
       getForceAppSwitcherNavigation$: jest.fn(),
-      getLinkUpdaters$: jest.fn().mockReturnValue(linkUpdatersMock$),
     },
     recentlyAccessed: {
       add: jest.fn(),

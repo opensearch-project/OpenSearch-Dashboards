@@ -54,13 +54,6 @@ export interface ChromeNavLinks {
   getNavLinks$(): Observable<Array<Readonly<ChromeNavLink>>>;
 
   /**
-   * Get an observable for the current link updaters. Link updater is used to modify the
-   * nav links, for example, filter the nav links or update a specific nav link's properties.
-   * {@link LinksUpdater}
-   */
-  getLinkUpdaters$(): BehaviorSubject<LinksUpdater[]>;
-
-  /**
    * Get the state of a navlink at this point in time.
    * @param id
    */
@@ -119,7 +112,7 @@ export interface ChromeNavLinks {
   getForceAppSwitcherNavigation$(): Observable<boolean>;
 }
 
-export type LinksUpdater = (navLinks: Map<string, NavLinkWrapper>) => Map<string, NavLinkWrapper>;
+type LinksUpdater = (navLinks: Map<string, NavLinkWrapper>) => Map<string, NavLinkWrapper>;
 
 export class NavLinksService {
   private readonly stop$ = new ReplaySubject(1);
@@ -156,10 +149,6 @@ export class NavLinksService {
     return {
       getNavLinks$: () => {
         return navLinks$.pipe(map(sortNavLinks), takeUntil(this.stop$));
-      },
-
-      getLinkUpdaters$: () => {
-        return linkUpdaters$;
       },
 
       get(id: string) {
