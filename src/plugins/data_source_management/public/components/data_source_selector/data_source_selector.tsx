@@ -69,51 +69,120 @@ export class DataSourceSelector extends React.Component<
     this._isMounted = false;
   }
 
-  async componentDidMount() {
-    this._isMounted = true;
-
-    const currentDefaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
+  handleSelectedOption(
+    dataSourceOptions: DataSourceOption[],
+    allDataSources: Array<SavedObject<DataSourceAttributes>>,
+    defaultDataSource?: string
+  ) {
+    const [{ id }] = this.props.defaultOption!;
+    const dataSource = dataSourceOptions.find((ds) => ds.id === id);
+    // invalid id
+    if (!dataSource) {
+      // TODO: pass in a valid datasource but filtered out
+      this.props.notifications.addWarning(
+        i18n.translate('dataSource.fetchDataSourceError', {
+          defaultMessage: 'Data source with id is not available',
+        })
+      );
+      this.setState({
+        ...this.state,
+        dataSourceOptions,
+        selectedOption: [],
+        defaultDataSource,
+        allDataSources,
+      });
+      this.props.onSelectedDataSource([]);
+      return;
+    }
+    // TODO: setState for valid case
     this.setState({
       ...this.state,
-      defaultDataSource: currentDefaultDataSource,
+      dataSourceOptions,
+      selectedOption: [{ id, label: dataSource.label }],
+      defaultDataSource,
+      allDataSources,
+    });
+    // good
+    this.props.onSelectedDataSource([{ id, label: dataSource.label }]);
+  }
+
+  handleDefaultDataSource(
+    dataSourceOptions: DataSourceOption[],
+    allDataSources: Array<SavedObject<DataSourceAttributes>>,
+    defaultDataSource?: string
+  ) {
+    const selectedDataSource = getDefaultDataSource(
+      dataSourceOptions,
+      LocalCluster,
+      defaultDataSource,
+      this.props.hideLocalCluster
+    );
+
+    // no active option, didnot find valid option
+    if (selectedDataSource.length === 0) {
+      this.props.notifications.addWarning('No connected data source available.');
+      // TODO: trigger callback to return []
+      this.props.onSelectedDataSource([]);
+      return;
+    }
+
+    this.setState({
+      ...this.state,
+      dataSourceOptions,
+      selectedOption: selectedDataSource,
+      defaultDataSource,
+      allDataSources,
     });
 
-    getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
-      .then((fetchedDataSources) => {
-        if (fetchedDataSources?.length) {
-          if (!this._isMounted) return;
-          this.setState({
-            ...this.state,
-            allDataSources: fetchedDataSources,
-          });
-        }
-        const dataSources = getFilteredDataSources(
-          this.state.allDataSources,
-          this.props.dataSourceFilter
-        );
-        const selectedDataSource = getDefaultDataSource(
-          dataSources,
-          LocalCluster,
-          this.props.uiSettings,
-          this.props.hideLocalCluster,
-          this.props.defaultOption
-        );
-        if (selectedDataSource.length === 0) {
-          this.props.notifications.addWarning('No connected data source available.');
-        } else {
-          this.props.onSelectedDataSource(selectedDataSource);
-          this.setState({
-            selectedOption: selectedDataSource,
-          });
-        }
-      })
-      .catch(() => {
-        this.props.notifications.addWarning(
-          i18n.translate('dataSource.fetchDataSourceError', {
-            defaultMessage: 'Unable to fetch existing data sources',
-          })
-        );
-      });
+    this.props.onSelectedDataSource(selectedDataSource);
+  }
+
+  async componentDidMount() {
+    this._isMounted = true;
+    try {
+      // 1. Fetch
+      const fetchedDataSources = await getDataSourcesWithFields(this.props.savedObjectsClient, [
+        'id',
+        'title',
+        'auth.type',
+      ]);
+
+      // 2. Process
+      const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(
+        fetchedDataSources,
+        this.props.dataSourceFilter
+      );
+
+      // 3. Add local cluster as option
+      if (!this.props.hideLocalCluster) {
+        dataSourceOptions.unshift(LocalCluster);
+      }
+
+      const defaultDataSource =
+        this.props.uiSettings?.get('defaultDataSource', undefined) ?? undefined;
+
+      // 4.1 empty default option, [], just want to show placeholder
+      // devtool, add sample, tsvb, search relevance
+      if (this.props.defaultOption?.length === 0) {
+        // don't trigger callback
+        return;
+      }
+
+      // 4.2 handle active option, [{}]
+      if (this.props.defaultOption?.length) {
+        this.handleSelectedOption(dataSourceOptions, fetchedDataSources, defaultDataSource);
+        return;
+      }
+
+      // 4.3 handle default data source
+      this.handleDefaultDataSource(dataSourceOptions, fetchedDataSources, defaultDataSource);
+    } catch (err) {
+      this.props.notifications.addWarning(
+        i18n.translate('dataSource.fetchDataSourceError', {
+          defaultMessage: 'Unable to fetch existing data sources',
+        })
+      );
+    }
   }
 
   onChange(e) {
