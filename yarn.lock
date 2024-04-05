@@ -3691,6 +3691,13 @@
   dependencies:
     "@types/react" "*"
 
+"@types/redux-mock-store@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@types/redux-mock-store/-/redux-mock-store-1.0.6.tgz#0a03b2655028b7cf62670d41ac1de5ca1b1f5958"
+  integrity sha512-eg5RDfhJTXuoJjOMyXiJbaDb1B8tfTaJixscmu+jOusj6adGC0Krntz09Tf4gJgXeCqCrM5bBMd+B7ez0izcAQ==
+  dependencies:
+    redux "^4.0.5"
+
 "@types/refractor@^3.0.0":
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/@types/refractor/-/refractor-3.0.2.tgz#2d42128d59f78f84d2c799ffc5ab5cadbcba2d82"
@@ -14864,6 +14871,13 @@ redent@^3.0.0:
   dependencies:
     indent-string "^4.0.0"
     strip-indent "^3.0.0"
+
+redux-mock-store@^1.5.4:
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/redux-mock-store/-/redux-mock-store-1.5.4.tgz#90d02495fd918ddbaa96b83aef626287c9ab5872"
+  integrity sha512-xmcA0O/tjCLXhh9Fuiq6pMrJCwFRaouA8436zcikdIpYWWCjU76CRk+i2bHx8EeiSiMGnB85/lZdU3wIJVXHTA==
+  dependencies:
+    lodash.isplainobject "^4.0.6"
 
 redux-thunk@^2.3.0, redux-thunk@^2.4.1:
   version "2.4.1"
