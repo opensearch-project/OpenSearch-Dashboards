@@ -169,4 +169,137 @@ describe('DataSourceSelectable', () => {
     expect(onSelectedDataSource).toHaveBeenCalled();
     expect(utils.getDefaultDataSource).toHaveBeenCalled();
   });
+
+  it('should display selected option label normally', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        selectedOption={[{ id: 'test2', label: 'test2' }]}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(button).toHaveTextContent('test2');
+  });
+
+  it('should display Local Cluster when not provide selectedOption', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(button).toHaveTextContent('Local cluster');
+  });
+
+  it('should render normally even only provide dataSourceId', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        selectedOption={[{ id: 'test2' }]}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(button).toHaveTextContent('test2');
+  });
+
+  it('should render warning if provide undefined dataSourceId', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        selectedOption={[{ id: undefined }]}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(button).toHaveTextContent('');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id is not available');
+  });
+
+  it('should render warning if provide empty object', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        selectedOption={[{}]}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(button).toHaveTextContent('');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id is not available');
+  });
+  it('should warning if only provide label', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        selectedOption={[{ label: 'test-label' }]}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id is not available');
+  });
+  it('should warning if only provide empty label', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        selectedOption={[{ label: '' }]}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id is not available');
+  });
 });
