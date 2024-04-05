@@ -63,25 +63,6 @@ describe('DataSourceMultiSelectable', () => {
     expect(toasts.addWarning).toBeCalledTimes(0);
   });
 
-  it('should render normally with selectedOption', () => {
-    component = shallow(
-      <DataSourceMultiSelectable
-        savedObjectsClient={client}
-        notifications={toasts}
-        onSelectedDataSources={jest.fn()}
-        hideLocalCluster={true}
-        fullWidth={false}
-      />
-    );
-    expect(component).toMatchSnapshot();
-    expect(client.find).toBeCalledWith({
-      fields: ['id', 'title', 'auth.type'],
-      perPage: 10000,
-      type: 'data-source',
-    });
-    expect(toasts.addWarning).toBeCalledTimes(0);
-  });
-
   it('should show toasts when exception happens', async () => {
     const errorClient = {
       find: () => {

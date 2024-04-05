@@ -46,12 +46,11 @@ export class DataSourceMultiSelectable extends React.Component<
     getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
         if (fetchedDataSources?.length) {
-          console.log(`fetchedDataSources ${fetchedDataSources}`)
           // all data sources are selected by default on initial page load
           const selectedOptions: SelectedDataSourceOption[] = fetchedDataSources.map(
             (dataSource) => ({
               id: dataSource.id,
-              label: dataSource.attributes.title,
+              label: dataSource.attributes?.title || '',
               checked: 'on',
               visible: true,
             })
