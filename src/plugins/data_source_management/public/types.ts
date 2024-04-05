@@ -141,6 +141,7 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   description?: string;
   endpoint?: string;
   dataSourceVersion?: string;
+  installedPlugins?: string[];
   auth: {
     type: AuthType | string;
     credentials:
