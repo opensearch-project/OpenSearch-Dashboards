@@ -11,6 +11,7 @@ import { DataSourceSelectable } from './data_source_selectable';
 import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
 import { render } from '@testing-library/react';
+import * as utils from '../utils';
 
 describe('DataSourceSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -109,6 +110,7 @@ describe('DataSourceSelectable', () => {
 
   it('should callback if changed state', async () => {
     const onSelectedDataSource = jest.fn();
+    spyOn(utils, 'getDefaultDataSource').and.returnValue([{ id: 'test2', label: 'test2' }]);
     const container = mount(
       <DataSourceSelectable
         savedObjectsClient={client}
@@ -125,7 +127,7 @@ describe('DataSourceSelectable', () => {
     const containerInstance = container.instance();
 
     containerInstance.onChange([{ id: 'test2', label: 'test2' }]);
-    expect(onSelectedDataSource).toBeCalledTimes(0);
+    expect(onSelectedDataSource).toBeCalledTimes(1);
     expect(containerInstance.state).toEqual({
       dataSourceOptions: [
         {
@@ -133,11 +135,12 @@ describe('DataSourceSelectable', () => {
           label: 'test2',
         },
       ],
+      defaultDataSource: null,
       isPopoverOpen: false,
       selectedOption: [
         {
-          id: '',
-          label: 'Local cluster',
+          id: 'test2',
+          label: 'test2',
         },
       ],
     });
@@ -151,6 +154,7 @@ describe('DataSourceSelectable', () => {
           label: 'test2',
         },
       ],
+      defaultDataSource: null,
       isPopoverOpen: false,
       selectedOption: [
         {
@@ -160,8 +164,10 @@ describe('DataSourceSelectable', () => {
         },
       ],
     });
+
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
-    expect(onSelectedDataSource).toBeCalledTimes(1);
+    expect(onSelectedDataSource).toHaveBeenCalled();
+    expect(utils.getDefaultDataSource).toHaveBeenCalled();
   });
 
   it('should display selected option label normally', async () => {
