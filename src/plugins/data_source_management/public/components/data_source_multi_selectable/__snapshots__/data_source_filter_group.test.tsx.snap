@@ -62,7 +62,17 @@ exports[`DataSourceFilterGroup should render normally 1`] = `
         }
       }
     >
-      name1
+      <DataSourceOptionItem
+        defaultDataSource="1"
+        item={
+          Object {
+            "checked": "on",
+            "id": "1",
+            "label": "name1",
+            "visible": true,
+          }
+        }
+      />
     </EuiFilterSelectItem>
   </div>
   <EuiPopoverFooter>
@@ -204,7 +214,33 @@ Object {
                   <span
                     class="euiFlexItem euiFilterSelectItem__content"
                   >
-                    name1
+                    <div
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrow1"
+                      >
+                        name1
+                      </div>
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <span
+                          class="euiBadge euiBadge--iconLeft"
+                          style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
+                        >
+                          <span
+                            class="euiBadge__content"
+                          >
+                            <span
+                              class="euiBadge__text"
+                            >
+                              Default
+                            </span>
+                          </span>
+                        </span>
+                      </div>
+                    </div>
                   </span>
                 </span>
               </button>
@@ -497,7 +533,15 @@ Object {
                   <span
                     class="euiFlexItem euiFilterSelectItem__content"
                   >
-                    name1
+                    <div
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                    >
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrow1"
+                      >
+                        name1
+                      </div>
+                    </div>
                   </span>
                 </span>
               </button>
