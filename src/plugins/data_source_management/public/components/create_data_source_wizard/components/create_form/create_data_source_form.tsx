@@ -152,7 +152,7 @@ export class CreateDataSourceForm extends React.Component<
     });
   };
 
-  onChangeAuthType = (authType: AuthType | string) => {
+  onChangeAuthType = (authType: AuthType) => {
     const credentials = this.state.auth.credentials;
 
     const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
@@ -406,7 +406,7 @@ export class CreateDataSourceForm extends React.Component<
   };
 
   /* Render create new credentials*/
-  renderCreateNewCredentialsForm = (type: AuthType | string) => {
+  renderCreateNewCredentialsForm = (type: AuthType) => {
     switch (type) {
       case AuthType.NoAuth:
         return null;
@@ -672,7 +672,7 @@ export class CreateDataSourceForm extends React.Component<
               <EuiSuperSelect
                 options={this.authOptions}
                 valueOfSelected={this.state.auth.type}
-                onChange={(value) => this.onChangeAuthType(value)}
+                onChange={(value) => this.onChangeAuthType(value as AuthType)}
                 disabled={this.authOptions.length <= 1}
                 name="Credential"
                 data-test-subj="createDataSourceFormAuthTypeSelect"
@@ -680,7 +680,7 @@ export class CreateDataSourceForm extends React.Component<
             </EuiFormRow>
 
             {/* Create New credentials */}
-            {this.renderCreateNewCredentialsForm(this.state.auth.type)}
+            {this.renderCreateNewCredentialsForm(this.state.auth.type as AuthType)}
 
             <EuiSpacer size="xl" />
             <EuiFormRow>
