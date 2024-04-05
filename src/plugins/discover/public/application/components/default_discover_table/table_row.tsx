@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import dompurify from 'dompurify';
 import { TableCell } from './table_cell';
@@ -23,10 +23,10 @@ export interface TableRowProps {
   row: OpenSearchSearchHit;
   columns: string[];
   indexPattern: IndexPattern;
-  onRemoveColumn: (column: string) => void;
-  onAddColumn: (column: string) => void;
-  onFilter: DocViewFilterFn;
-  onClose: () => void;
+  onRemoveColumn?: (column: string) => void;
+  onAddColumn?: (column: string) => void;
+  onFilter?: DocViewFilterFn;
+  onClose?: () => void;
   isShortDots: boolean;
 }
 
@@ -42,12 +42,16 @@ export const TableRow = ({
 }: TableRowProps) => {
   const flattened = indexPattern.flattenHit(row);
   const [isExpanded, setIsExpanded] = useState(false);
+  const handleExpanding = useCallback(() => setIsExpanded((prevState) => !prevState), [
+    setIsExpanded,
+  ]);
+
   const tableRow = (
     <tr key={row._id}>
       <td data-test-subj="docTableExpandToggleColumn" className="osdDocTableCell__toggleDetails">
         <EuiButtonIcon
           color="text"
-          onClick={() => setIsExpanded(!isExpanded)}
+          onClick={handleExpanding}
           iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
           aria-label="Next"
           data-test-subj="docTableExpandToggleColumn"
@@ -156,16 +160,16 @@ export const TableRow = ({
               columns={columns}
               indexPattern={indexPattern}
               onRemoveColumn={(columnName: string) => {
-                onRemoveColumn(columnName);
-                onClose();
+                onRemoveColumn?.(columnName);
+                onClose?.();
               }}
               onAddColumn={(columnName: string) => {
-                onAddColumn(columnName);
-                onClose();
+                onAddColumn?.(columnName);
+                onClose?.();
               }}
               filter={(mapping, value, mode) => {
-                onFilter(mapping, value, mode);
-                onClose();
+                onFilter?.(mapping, value, mode);
+                onClose?.();
               }}
             />
           </EuiFlexItem>

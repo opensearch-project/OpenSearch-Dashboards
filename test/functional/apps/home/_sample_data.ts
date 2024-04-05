@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Checking area, bar and heatmap charts rendered');
         await dashboardExpect.seriesElementCount(15);
         log.debug('Checking saved searches rendered');
-        await dashboardExpect.savedSearchRowCountFromLegacyTable(100);
+        await dashboardExpect.rowCountFromDefaultDiscoverTable(10);
         log.debug('Checking input controls rendered');
         await dashboardExpect.inputControlItemCount(3);
         log.debug('Checking tag cloud rendered');
