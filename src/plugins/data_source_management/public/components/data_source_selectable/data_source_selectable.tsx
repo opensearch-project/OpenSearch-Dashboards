@@ -168,16 +168,68 @@ export class DataSourceSelectable extends React.Component<
     }
   }
 
+  getEmptyIdLabel() : string{
+    /**
+     * The selected option will be the Local Cluster.
+     * If Local Cluster is hidden or filtered out, the component will choose the `defaultDataSource`.
+     * If this is filtered out, a random compatible datasource is selected.
+     * If nothing is left, the component will throw a toast error. Plugins should handle this toast error.
+     */
+    try {
+      console.log("this.props.hideLocalCluster", this.props.hideLocalCluster)
+      if (!this.props.hideLocalCluster) {
+        return LocalCluster.label;
+      } else {
+        const {dataSourceOptions, selectedOption} = this.state;
+        return dataSourceOptions.find(option => option.id === selectedOption.id) ? selectedOption.label : dataSourceOptions[0].label
+      }
+    } catch (error) {
+      this.props.notifications.addWarning(
+        i18n.translate('dataSource.fetchDataSourceError', {
+          defaultMessage: 'No connected data source available.',
+        })
+      );
+    }
+  }
+
+  getNoSelectedOptionLabel(): string{
+    // defaultDataSource -> local cluster -> random datasource -> toast error from component
+    try {
+      if (this.state.selectedOption[0]){
+        console.log("should render from this.state.selectedOption", this.state.selectedOption[0].label)
+        return this.state.selectedOption[0].label;
+      } else if (!this.props.hideLocalCluster) {
+        console.log("should render from LocalCluster")
+        return LocalCluster.label;
+      } else {
+        console.log("should render from random ", this.state.dataSourceOptions[0].label)
+        return this.state.dataSourceOptions[0].label
+      }
+    } catch (error) {
+      this.props.notifications.addWarning(
+        i18n.translate('dataSource.fetchDataSourceError', {
+          defaultMessage: 'No connected data source available since there is no selected data source' + error ,
+        })
+      );
+    }
+
+  }
+
   getLable(): string {
     const selectedOption =
-      this.state.selectedOption &&
-      this.state.selectedOption.length > 0 &&
-      this.state.selectedOption[0]
-        ? this.state.selectedOption[0]
+      this.props.selectedOption &&
+      this.props.selectedOption.length > 0 &&
+      this.props.selectedOption[0]
+        ? this.props.selectedOption[0]
         : '';
-    if (!selectedOption) return '';
+console.log("selectedOption", !selectedOption)
+console.log("this.state.selectedOption", this.state.selectedOption)
+    if (!selectedOption) return this.getNoSelectedOptionLabel(); //this.state.selectedOption.label;
     else {
-      if (selectedOption.id === '' || (selectedOption.id && selectedOption.label)) {
+      if (selectedOption.id === '' ) {
+        return this.getEmptyIdLabel();
+      }
+      else if (selectedOption.id && selectedOption.label){
         return selectedOption.label;
       } else {
         // label not exist, get it from dataSourceOptions

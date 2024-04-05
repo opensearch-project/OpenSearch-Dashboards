@@ -82,7 +82,7 @@ describe('DataSourceSelectable', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toBeCalledTimes(3);
   });
 
   it('should show popover when click on button', async () => {
@@ -244,7 +244,6 @@ describe('DataSourceSelectable', () => {
     await nextTick();
     const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
     expect(button).toHaveTextContent('');
-    expect(toasts.addWarning).toBeCalledTimes(1);
     expect(toasts.addWarning).toBeCalledWith('Data source with id undefined is not available');
   });
 

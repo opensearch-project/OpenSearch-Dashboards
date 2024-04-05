@@ -98,9 +98,7 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
         id="dataSourceSelectableContextMenuHeaderLink"
         onClick={[Function]}
         size="s"
-      >
-        
-      </EuiButtonEmpty>
+      />
     </React.Fragment>
   }
   closePopover={[Function]}
@@ -165,9 +163,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
         id="dataSourceSelectableContextMenuHeaderLink"
         onClick={[Function]}
         size="s"
-      >
-        
-      </EuiButtonEmpty>
+      />
     </React.Fragment>
   }
   closePopover={[Function]}
