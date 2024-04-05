@@ -203,7 +203,7 @@ export async function testConnection(
   });
 }
 
-export async function fetchDataSourceVersion(
+export async function fetchDataSourceMetaData(
   http: HttpStart,
   { endpoint, auth: { type, credentials } }: DataSourceAttributes,
   dataSourceID?: string
@@ -219,7 +219,7 @@ export async function fetchDataSourceVersion(
     },
   };
 
-  return await http.post(`/internal/data-source-management/fetchDataSourceVersion`, {
+  return await http.post(`/internal/data-source-management/fetchDataSourceMetaData`, {
     body: JSON.stringify(query),
   });
 }
