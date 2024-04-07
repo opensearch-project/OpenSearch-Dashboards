@@ -54,8 +54,37 @@ export class DataSourceConnectionValidator {
 
       return dataSourceVersion;
     } catch (e) {
-      // return empty dataSoyrce version instead of throwing exception in case info() api call fails
+      // return empty dataSource version instead of throwing exception in case info() api call fails
       return dataSourceVersion;
+    }
+  }
+
+  async fetchInstalledPlugins() {
+    const installedPlugins = new Set();
+    try {
+      // TODO : retrieve installed plugins from OpenSearch Serverless datasource
+      if (
+        this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
+      ) {
+        return installedPlugins;
+      }
+
+      await this.callDataCluster.cat
+        .plugins({
+          format: 'JSON',
+          v: true,
+        })
+        .then((response) => response.body)
+        .then((body) => {
+          body.forEach((plugin) => {
+            installedPlugins.add(plugin.component);
+          });
+        });
+
+      return installedPlugins;
+    } catch (e) {
+      // return empty installedPlugins instead of throwing exception in case cat.plugins() api call fails
+      return installedPlugins;
     }
   }
 }

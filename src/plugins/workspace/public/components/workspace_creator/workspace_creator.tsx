@@ -22,6 +22,29 @@ export const WorkspaceCreator = () => {
       let result;
       try {
         result = await workspaceClient.create(data);
+        if (result?.success) {
+          notifications?.toasts.addSuccess({
+            title: i18n.translate('workspace.create.success', {
+              defaultMessage: 'Create workspace successfully',
+            }),
+          });
+          if (application && http) {
+            const newWorkspaceId = result.result.id;
+            // Redirect page after one second, leave one second time to show create successful toast.
+            window.setTimeout(() => {
+              window.location.href = formatUrlWithWorkspaceId(
+                application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+                  absolute: true,
+                }),
+                newWorkspaceId,
+                http.basePath
+              );
+            }, 1000);
+          }
+          return;
+        } else {
+          throw new Error(result?.error ? result?.error : 'create workspace failed');
+        }
       } catch (error) {
         notifications?.toasts.addDanger({
           title: i18n.translate('workspace.create.failed', {
@@ -31,33 +54,6 @@ export const WorkspaceCreator = () => {
         });
         return;
       }
-      if (result?.success) {
-        notifications?.toasts.addSuccess({
-          title: i18n.translate('workspace.create.success', {
-            defaultMessage: 'Create workspace successfully',
-          }),
-        });
-        if (application && http) {
-          const newWorkspaceId = result.result.id;
-          // Redirect page after one second, leave one second time to show create successful toast.
-          window.setTimeout(() => {
-            window.location.href = formatUrlWithWorkspaceId(
-              application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
-                absolute: true,
-              }),
-              newWorkspaceId,
-              http.basePath
-            );
-          }, 1000);
-        }
-        return;
-      }
-      notifications?.toasts.addDanger({
-        title: i18n.translate('workspace.create.failed', {
-          defaultMessage: 'Failed to create workspace',
-        }),
-        text: result?.error,
-      });
     },
     [notifications?.toasts, http, application, workspaceClient]
   );

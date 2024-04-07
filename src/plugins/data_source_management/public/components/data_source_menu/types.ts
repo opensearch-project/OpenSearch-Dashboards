@@ -7,6 +7,7 @@ import {
   NotificationsStart,
   SavedObjectsClientContract,
   SavedObject,
+  IUiSettingsClient,
 } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 
@@ -23,6 +24,7 @@ export interface DataSourceBaseConfig {
 export interface DataSourceMenuProps<T = any> {
   componentType: DataSourceComponentType;
   componentConfig: T;
+  uiSettings?: IUiSettingsClient;
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
 }
 

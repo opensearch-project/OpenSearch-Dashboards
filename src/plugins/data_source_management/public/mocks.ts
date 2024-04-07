@@ -78,6 +78,42 @@ export const getSingleDataSourceResponse = {
   ],
 };
 
+export const getDataSource = [
+  {
+    id: '1',
+    type: '',
+    references: [],
+    attributes: {
+      title: 'DataSource 1',
+      endpoint: '',
+      auth: { type: AuthType.NoAuth, credentials: undefined },
+      name: AuthType.NoAuth,
+    },
+  },
+  {
+    id: '2',
+    type: '',
+    references: [],
+    attributes: {
+      title: 'DataSource 2',
+      endpoint: '',
+      auth: { type: AuthType.NoAuth, credentials: undefined },
+      name: AuthType.NoAuth,
+    },
+  },
+  {
+    id: '3',
+    type: '',
+    references: [],
+    attributes: {
+      title: 'DataSource 1',
+      endpoint: '',
+      auth: { type: AuthType.NoAuth, credentials: undefined },
+      name: AuthType.NoAuth,
+    },
+  },
+];
+
 /* Mock data responses - JSON*/
 export const getDataSourcesResponse = {
   savedObjects: [
@@ -196,8 +232,9 @@ export const getMappedDataSources = [
   },
 ];
 
-export const fetchDataSourceVersion = {
+export const fetchDataSourceMetaData = {
   dataSourceVersion: '2.11.0',
+  installedPlugins: ['opensearch-ml', 'opensearch-sql'],
 };
 
 export const mockDataSourceAttributesWithAuth = {

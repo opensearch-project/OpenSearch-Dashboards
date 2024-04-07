@@ -41,6 +41,38 @@ describe('DataSourceManagement: data_source_connection_validator.ts', () => {
       expect(fetchDataSourcesVersionResponse).toBe('2.11.0');
     });
 
+    test('fetchInstalledPlugins - Success: opensearch client response code is 200 and response body have installed plugin list', async () => {
+      const opensearchClient = opensearchServiceMock.createOpenSearchClient();
+      opensearchClient.info.mockResolvedValue(
+        opensearchServiceMock.createApiResponse({
+          statusCode: 200,
+          body: [
+            {
+              name: 'b40f6833d895d3a95333e325e8bea79b',
+              component: ' analysis-icu',
+              version: '2.11.0',
+            },
+            {
+              name: 'b40f6833d895d3a95333e325e8bea79b',
+              component: 'analysis-ik',
+              version: '2.11.0',
+            },
+            {
+              name: 'b40f6833d895d3a95333e325e8bea79b',
+              component: 'analysis-seunjeon',
+              version: '2.11.0',
+            },
+          ],
+        })
+      );
+      const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {});
+      const fetchInstalledPluginsReponse = Array.from(
+        await dataSourceValidator.fetchInstalledPlugins()
+      );
+      const installedPlugins = ['analysis-icu', 'analysis-ik', 'analysis-seunjeon'];
+      fetchInstalledPluginsReponse.map((plugin) => expect(installedPlugins).toContain(plugin));
+    });
+
     test('failure: opensearch client response code is 200 but response body not have cluster name', async () => {
       try {
         const opensearchClient = opensearchServiceMock.createOpenSearchClient();

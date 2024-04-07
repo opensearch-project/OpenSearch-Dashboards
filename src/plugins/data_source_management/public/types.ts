@@ -141,6 +141,7 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   description?: string;
   endpoint?: string;
   dataSourceVersion?: string;
+  installedPlugins?: string[];
   auth: {
     type: AuthType | string;
     credentials:
@@ -161,4 +162,9 @@ export interface SigV4Content extends SavedObjectAttributes {
   secretKey: string;
   region: string;
   service?: SigV4ServiceName;
+}
+
+export interface MenuPanelItem {
+  name?: string;
+  disabled: boolean;
 }
