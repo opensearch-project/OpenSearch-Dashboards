@@ -61,7 +61,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
       if (currentWorkspace) {
         this.appUpdater$.next((app) => {
-          console.log(app)
           if (isAppAccessibleInWorkspace(app, currentWorkspace)) {
             return
           }
@@ -187,7 +186,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
   public start(core: CoreStart) {
     this.coreStart = core;
-    console.log(core.chrome.navLinks.getAll())
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
 
