@@ -39,7 +39,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private currentWorkspaceIdSubscription?: Subscription;
-  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}))
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined)
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
@@ -61,6 +61,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
       if (currentWorkspace) {
         this.appUpdater$.next((app) => {
+          console.log(app)
           if (isAppAccessibleInWorkspace(app, currentWorkspace)) {
             return
           }
@@ -186,6 +187,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
   public start(core: CoreStart) {
     this.coreStart = core;
+    console.log(core.chrome.navLinks.getAll())
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
 
