@@ -19,7 +19,7 @@ import {
 import { DataSourceSelectable } from '../data_source_selectable';
 
 export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement | null {
-  const { componentType, componentConfig } = props;
+  const { componentType, componentConfig, uiSettings } = props;
 
   function renderDataSourceView(config: DataSourceViewConfig): ReactElement | null {
     const { activeOption, fullWidth, savedObjects, notifications } = config;
@@ -75,6 +75,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         dataSourceFilter={dataSourceFilter}
         hideLocalCluster={hideLocalCluster || false}
         fullWidth={fullWidth}
+        uiSettings={uiSettings}
       />
     );
   }
