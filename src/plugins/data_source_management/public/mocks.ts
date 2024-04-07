@@ -114,6 +114,21 @@ export const getDataSource = [
   },
 ];
 
+export const getDataSourceOptions = [
+  {
+    id: '1',
+    label: 'DataSource 1',
+  },
+  {
+    id: '2',
+    label: 'DataSource 2',
+  },
+  {
+    id: '3',
+    label: 'DataSource 1',
+  },
+];
+
 /* Mock data responses - JSON*/
 export const getDataSourcesResponse = {
   savedObjects: [
