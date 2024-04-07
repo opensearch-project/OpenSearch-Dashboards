@@ -83,6 +83,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Pass selected data sources to plugin consumers when the multi-select component initially loads ([#6333](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6333))
 - [Multiple Datasource] Add installedPlugins list to data source saved object ([#6348](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6348))
 - [Multiple Datasource] Add default icon in multi-selectable picker ([#6357](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6357))
+- [Multiple Datasource] Enhance UI for readonly view picker ([#6363](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6363))
 - [Workspace] Add APIs to support plugin state in request ([#6303](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6303))
 
 ### 🐛 Bug Fixes

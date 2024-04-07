@@ -98,6 +98,8 @@ export const DataSourceSelectableExample = ({
           fullWidth: false,
           savedObjects: savedObjects.client,
           notifications,
+          activeOption: [{ id: 'd04750b0a647-03a002129500' }],
+          dataSourceFilter: (ds) => ds.id !== 'cb7221f0-f790-11ee-a647-03a002129500',
           onSelectedDataSources: (ds) => {
             setSelectedDataSources(ds);
           },

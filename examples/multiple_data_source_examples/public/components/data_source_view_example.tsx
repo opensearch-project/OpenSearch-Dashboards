@@ -34,6 +34,8 @@ export const DataSourceViewExample = ({
   dataSourceEnabled,
   setActionMenu,
   dataSourceManagement,
+  notifications,
+  savedObjects,
 }: DataSourceViewExampleProps) => {
   const DataSourceMenu = dataSourceManagement.ui.getDataSourceMenu<DataSourceViewConfig>();
   const data: ComponentProp[] = [
@@ -76,6 +78,8 @@ export const DataSourceViewExample = ({
             setMenuMountPoint={setActionMenu}
             componentType={'DataSourceView'}
             componentConfig={{
+              savedObjects: savedObjects.client,
+              notifications,
               fullWidth: false,
               activeOption: [{ id: 'example id', label: 'example data source' }],
             }}

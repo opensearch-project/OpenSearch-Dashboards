@@ -8,7 +8,9 @@ import {
   SavedObjectsClientContract,
   SavedObject,
   IUiSettingsClient,
+  ToastsStart,
 } from 'src/core/public';
+import { i18n } from '@osd/i18n';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -146,6 +148,20 @@ export async function createSingleDataSource(
   attributes: DataSourceAttributes
 ) {
   return savedObjectsClient.create('data-source', attributes);
+}
+
+export function handleDataSourceFetchError(
+  optionId: string,
+  notifications: ToastsStart,
+  error?: any
+) {
+  notifications.addWarning(
+    i18n.translate('dataSource.fetchDataSourceError', {
+      defaultMessage: error
+        ? `Failed to fetch data source due to ${error}`
+        : `Data source with id ${optionId} is not available`,
+    })
+  );
 }
 
 export async function updateDataSourceById(
