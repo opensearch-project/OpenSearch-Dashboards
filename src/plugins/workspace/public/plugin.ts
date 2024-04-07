@@ -64,6 +64,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           if (isAppAccessibleInWorkspace(app, currentWorkspace)) {
             return
           }
+          /**
+           * Change the app to `inaccessible` if it is not configured in the workspace
+           * If trying to access such app, an "Application Not Found" page will be displayed
+           */
           return {status: AppStatus.inaccessible}
         })
       }

@@ -75,8 +75,8 @@ export function isAppAccessibleInWorkspace(app: App, workspace: WorkspaceObject)
   /**
    * The app is configured into a workspace, it is accessible after entering the workspace
    */
-  const featureMatch = featureMatchesConfig(workspace.features);
-  if (featureMatch({ id: app.id, category: app.category })) {
+  const featureMatcher = featureMatchesConfig(workspace.features);
+  if (featureMatcher({ id: app.id, category: app.category })) {
     return true;
   }
 
