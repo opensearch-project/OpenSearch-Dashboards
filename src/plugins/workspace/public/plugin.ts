@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, type Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import {
@@ -40,7 +40,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private currentWorkspaceIdSubscription?: Subscription;
-  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined)
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
@@ -63,14 +63,14 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       if (currentWorkspace) {
         this.appUpdater$.next((app) => {
           if (isAppAccessibleInWorkspace(app, currentWorkspace)) {
-            return
+            return;
           }
           /**
            * Change the app to `inaccessible` if it is not configured in the workspace
            * If trying to access such app, an "Application Not Found" page will be displayed
            */
-          return {status: AppStatus.inaccessible}
-        })
+          return { status: AppStatus.inaccessible };
+        });
       }
     });
   }
@@ -78,7 +78,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
-    core.application.registerAppUpdater(this.appUpdater$)
+    core.application.registerAppUpdater(this.appUpdater$);
 
     /**
      * Retrieve workspace id from url
