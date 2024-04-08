@@ -204,7 +204,7 @@ export const createSavedObjects = async <T>({
     const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {
       namespace,
       overwrite,
-      workspaces,
+      ...(workspaces ? { workspaces } : {}),
     });
     expectedResults = bulkCreateResponse.saved_objects;
   }
