@@ -87,7 +87,7 @@ export class DataSourceSelectable extends React.Component<
     if (!dsOption) {
       this.props.notifications.addWarning(
         i18n.translate('dataSource.fetchDataSourceError', {
-          defaultMessage: 'Data source with id is not available',
+          defaultMessage: `Data source with id: ${id} is not available`,
         })
       );
       this.setState({
@@ -101,7 +101,7 @@ export class DataSourceSelectable extends React.Component<
     this.setState({
       ...this.state,
       dataSourceOptions,
-      selectedOption: [{ id, label: dsOption.label }],
+      selectedOption: [{ id, label: dsOption.label, checked: 'on' }],
     });
     this.props.onSelectedDataSources([{ id, label: dsOption.label }]);
   }
@@ -114,7 +114,7 @@ export class DataSourceSelectable extends React.Component<
       this.props.hideLocalCluster
     );
 
-    // no active option, didnot find valid option
+    // no active option, show warning
     if (selectedDataSource.length === 0) {
       this.props.notifications.addWarning('No connected data source available.');
       this.props.onSelectedDataSources([]);
@@ -133,45 +133,40 @@ export class DataSourceSelectable extends React.Component<
   async componentDidMount() {
     this._isMounted = true;
     try {
-      // 1. Fetch
       const fetchedDataSources = await getDataSourcesWithFields(this.props.savedObjectsClient, [
         'id',
         'title',
         'auth.type',
       ]);
 
-      // 2. Process
       const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(
         fetchedDataSources,
         this.props.dataSourceFilter
       );
 
-      // 3. Add local cluster as option
       if (!this.props.hideLocalCluster) {
         dataSourceOptions.unshift(LocalCluster);
       }
 
       const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
 
-      // 4.1 empty default option, [], just want to show placeholder
-      // devtool, add sample, tsvb, search relevance
+      // no active option pass in, do nothing
       if (this.props.selectedOption?.length === 0) {
-        // don't trigger callback
+        // don't trigger callback since the selectedOption is empty
         return;
       }
 
-      // 4.2 handle active option, [{}]
       if (this.props.selectedOption?.length) {
         this.handleSelectedOption(dataSourceOptions, fetchedDataSources, defaultDataSource);
         return;
       }
 
-      // 4.3 handle default data source
+      // handle default data source if there is no valid active option
       this.handleDefaultDataSource(dataSourceOptions, fetchedDataSources, defaultDataSource);
-    } catch (err) {
+    } catch (error) {
       this.props.notifications.addWarning(
         i18n.translate('dataSource.fetchDataSourceError', {
-          defaultMessage: 'Unable to fetch existing data sources' + err,
+          defaultMessage: 'Unable to fetch existing data sources',
         })
       );
     }

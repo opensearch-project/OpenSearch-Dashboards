@@ -244,7 +244,7 @@ describe('DataSourceSelectable', () => {
     await nextTick();
     const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
     expect(button).toHaveTextContent('');
-    expect(toasts.addWarning).toBeCalledWith('Data source with id is not available');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
   });
 
   it('should render warning if provide empty object', async () => {
@@ -264,7 +264,7 @@ describe('DataSourceSelectable', () => {
     await nextTick();
     const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
     expect(button).toHaveTextContent('');
-    expect(toasts.addWarning).toBeCalledWith('Data source with id is not available');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
   });
   it('should warning if only provide label', async () => {
     const onSelectedDataSource = jest.fn();
@@ -282,7 +282,7 @@ describe('DataSourceSelectable', () => {
     );
     await nextTick();
     const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
-    expect(toasts.addWarning).toBeCalledWith('Data source with id is not available');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
   });
   it('should warning if only provide empty label', async () => {
     const onSelectedDataSource = jest.fn();
@@ -300,7 +300,7 @@ describe('DataSourceSelectable', () => {
     );
     await nextTick();
     const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
-    expect(toasts.addWarning).toBeCalledWith('Data source with id is not available');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
   });
 
   it('should warning if only provide empty array', async () => {
@@ -319,6 +319,6 @@ describe('DataSourceSelectable', () => {
     );
     await nextTick();
     const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
-    expect(toasts.addWarning).toBeCalledWith('Data source with id is not available');
+    expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
   });
 });
