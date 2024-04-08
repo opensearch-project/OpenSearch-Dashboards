@@ -10,7 +10,7 @@ import React from 'react';
 import { DataSourceSelectable } from './data_source_selectable';
 import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
-import { render } from '@testing-library/react';
+import { getByRole, render } from '@testing-library/react';
 import * as utils from '../utils';
 
 describe('DataSourceSelectable', () => {
@@ -281,7 +281,6 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
     expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
   });
   it('should warning if only provide empty label', async () => {
@@ -299,7 +298,6 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
     expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
   });
 
@@ -314,11 +312,51 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={true}
         fullWidth={false}
         selectedOption={[]}
-        // dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
       />
     );
     await nextTick();
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
     expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
+  });
+
+  it('should render the selected option when pass in the valid dataSourceId', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = mount(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={true}
+        fullWidth={false}
+        selectedOption={[{ id: 'test2' }]}
+      />
+    );
+    await nextTick();
+    const containerInstance = container.instance();
+    expect(containerInstance.state).toEqual({
+      dataSourceOptions: [
+        {
+          id: 'test1',
+          label: 'test1',
+        },
+        {
+          checked: 'on',
+          id: 'test2',
+          label: 'test2',
+        },
+        {
+          id: 'test3',
+          label: 'test3',
+        },
+      ],
+      defaultDataSource: null,
+      isPopoverOpen: false,
+      selectedOption: [
+        {
+          id: 'test2',
+          label: 'test2',
+        },
+      ],
+    });
   });
 });

@@ -116,7 +116,7 @@ export class DataSourceSelectable extends React.Component<
     this.setState({
       ...this.state,
       dataSourceOptions: updatedDataSourceOptions,
-      selectedOption: [{ id, label: dsOption.label, checked: 'on' }],
+      selectedOption: [{ id, label: dsOption.label }],
     });
     this.props.onSelectedDataSources([{ id, label: dsOption.label }]);
   }
