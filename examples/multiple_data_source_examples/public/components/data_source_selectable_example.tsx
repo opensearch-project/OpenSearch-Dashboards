@@ -98,17 +98,9 @@ export const DataSourceSelectableExample = ({
           fullWidth: false,
           savedObjects: savedObjects.client,
           notifications,
-          hideLocalCluster: false,
-          // activeOption: [{id: "fcff3d50-f2f1-11ee-8da7-63a1072e6128"}], // invalid ds only
-          // activeOption: [{id: "cef124c0-f399-11ee-b119-0769c634fdbe", label: "test2"}], // valid ds only should display test2
-          // activeOption: [{id: ""}], // invalid ds only
-          // activeOption: [], // invalid ds only
-          // activeOption: [{id: "b707f5b0-f5d7-11ee-9951-911715e0878f"}],
           onSelectedDataSources: (ds) => {
             setSelectedDataSources(ds);
           },
-          // dataSourceFilter: (ds) => ds.attributes.title !== 'default-ds'
-
         }}
       />
     );
