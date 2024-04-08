@@ -518,64 +518,55 @@ describe('DataSourceManagement: Utils.ts', () => {
 
       const result = getFilteredDataSources(dataSources);
 
-      expect(result).toEqual(dataSources);
+      expect(result).toEqual([{ id: '1', label: 'DataSource 1' }]);
     });
 
     test('should return filtered data sources when a filter is provided', () => {
       const filter = (dataSource: SavedObject<DataSourceAttributes>) => dataSource.id === '2';
       const result = getFilteredDataSources(getDataSource, filter);
 
-      expect(result).toEqual([
-        {
-          id: '2',
-          type: '',
-          references: [],
-          attributes: {
-            title: 'DataSource 2',
-            endpoint: '',
-            auth: { type: AuthType.NoAuth, credentials: undefined },
-            name: AuthType.NoAuth,
-          },
-        },
-      ]);
+      expect(result).toEqual([{ id: '2', label: 'DataSource 2' }]);
     });
   });
+
   describe('getDefaultDataSource', () => {
-    const LocalCluster = { id: 'local', label: 'Local Cluster' };
+    const LocalCluster = { id: '', label: 'Local Cluster' };
     const hideLocalCluster = false;
-    const defaultOption = [{ id: '2', label: 'Default Option' }];
+    const defaultDataSourceId = 2;
+    const dataSourcesOptions = getDataSource.map((dataSource) => {
+      return { id: dataSource.id, label: dataSource.attributes.title };
+    });
 
     it('should return the default option if it exists in the data sources', () => {
       const result = getDefaultDataSource(
-        getDataSource,
+        dataSourcesOptions,
         LocalCluster,
-        uiSettings,
-        hideLocalCluster,
-        defaultOption
+        defaultDataSourceId.toString(),
+        hideLocalCluster
       );
-      expect(result).toEqual([defaultOption[0]]);
+      expect(result).toEqual([{ id: '2', label: 'DataSource 2' }]);
     });
 
     it('should return local cluster if it exists and no default options in the data sources', () => {
       mockUiSettingsCalls(uiSettings, 'get', null);
-      const result = getDefaultDataSource(
-        getDataSource,
-        LocalCluster,
-        uiSettings,
-        hideLocalCluster
-      );
+      const result = getDefaultDataSource(dataSourcesOptions, LocalCluster, '4', hideLocalCluster);
       expect(result).toEqual([LocalCluster]);
     });
 
     it('should return the default datasource if hideLocalCluster is false', () => {
       mockUiSettingsCalls(uiSettings, 'get', '2');
-      const result = getDefaultDataSource(getDataSource, LocalCluster, uiSettings, true);
+      const result = getDefaultDataSource(
+        dataSourcesOptions,
+        LocalCluster,
+        defaultDataSourceId.toString(),
+        true
+      );
       expect(result).toEqual([{ id: '2', label: 'DataSource 2' }]);
     });
 
-    it('should return the first data source if no default option, hideLocalCluster is ture and no default datasource', () => {
+    it('should return the first data source if no default option, hideLocalCluster is true, and no default datasource', () => {
       mockUiSettingsCalls(uiSettings, 'get', null);
-      const result = getDefaultDataSource(getDataSource, LocalCluster, uiSettings, true);
+      const result = getDefaultDataSource(dataSourcesOptions, LocalCluster, '4', true);
       expect(result).toEqual([{ id: '1', label: 'DataSource 1' }]);
     });
   });

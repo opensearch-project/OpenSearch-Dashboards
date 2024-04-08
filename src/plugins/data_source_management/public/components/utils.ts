@@ -16,7 +16,6 @@ import {
   noAuthCredentialAuthMethod,
 } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
-import { DataSourceOption as DataSourceOptionOptional } from './data_source_menu/types';
 import { DataSourceOption } from './data_source_selector/data_source_selector';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
@@ -82,35 +81,27 @@ export async function setFirstDataSourceAsDefault(
 
 export function getFilteredDataSources(
   dataSources: Array<SavedObject<DataSourceAttributes>>,
-  filter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean
-) {
-  return filter ? dataSources.filter((ds) => filter!(ds)) : dataSources;
+  filter = (ds: SavedObject<DataSourceAttributes>) => true
+): DataSourceOption[] {
+  return dataSources
+    .filter((ds) => filter!(ds))
+    .map((ds) => ({
+      id: ds.id,
+      label: ds.attributes?.title || '',
+    }))
+    .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 }
 
 export function getDefaultDataSource(
-  dataSources: DataSourceOption[],
+  dataSourcesOptions: DataSourceOption[],
   LocalCluster: DataSourceOption,
-  defaultDataSource: string | null,
-  hideLocalCluster?: boolean,
-  defaultOption?: DataSourceOptionOptional[]
+  defaultDataSourceId: string | null,
+  hideLocalCluster?: boolean
 ) {
-  const defaultOptionId = defaultOption?.[0]?.id;
-  const defaultOptionDataSource = dataSources.find(
-    (dataSource) => dataSource.id === defaultOptionId
+  const defaultDataSourceAfterCheck = dataSourcesOptions.find(
+    (dataSource) => dataSource.id === defaultDataSourceId
   );
 
-  const defaultDataSourceAfterCheck = dataSources.find(
-    (dataSource) => dataSource.id === defaultDataSource
-  );
-
-  if (defaultOptionDataSource) {
-    return [
-      {
-        id: defaultOptionDataSource.id,
-        label: defaultOptionDataSource.label,
-      },
-    ];
-  }
   if (defaultDataSourceAfterCheck) {
     return [
       {
@@ -119,14 +110,16 @@ export function getDefaultDataSource(
       },
     ];
   }
+
   if (!hideLocalCluster) {
     return [LocalCluster];
   }
-  if (dataSources.length > 0) {
+
+  if (dataSourcesOptions.length > 0) {
     return [
       {
-        id: dataSources[0].id,
-        label: dataSources[0].label,
+        id: dataSourcesOptions[0].id,
+        label: dataSourcesOptions[0].label,
       },
     ];
   }

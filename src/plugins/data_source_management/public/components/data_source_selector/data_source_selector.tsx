@@ -138,34 +138,43 @@ export class DataSourceSelector extends React.Component<
       ]);
 
       // 2. Process
-      const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(
+      const dataSourceOptions = getFilteredDataSources(
         fetchedDataSources,
         this.props.dataSourceFilter
-      ).map((ds) => {
-        return { label: ds.attributes.title, id: ds.id };
-      });
+      );
 
       // 3. Add local cluster as option
       if (!this.props.hideLocalCluster) {
         dataSourceOptions.unshift(LocalCluster);
       }
 
-      const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
-
-      // 4.1 empty default option, [], just want to show placeholder
-      // devtool, add sample, tsvb, search relevance
-      if (this.props.defaultOption?.length === 0) {
-        // don't trigger callback
+      // 4. Error state if filter filters out everything
+      if (!dataSourceOptions.length) {
+        this.props.notifications.addWarning('No connected data source available.');
+        this.props.onSelectedDataSource([]);
         return;
       }
 
-      // 4.2 handle active option, [{}]
+      const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
+      // 5.1 Empty default option, [], just want to show placeholder
+      if (this.props.defaultOption?.length === 0) {
+        this.setState({
+          ...this.state,
+          dataSourceOptions,
+          selectedOption: [],
+          defaultDataSource,
+          allDataSources: fetchedDataSources,
+        });
+        return;
+      }
+
+      // 5.2 Handle active option, [{}]
       if (this.props.defaultOption?.length) {
         this.handleSelectedOption(dataSourceOptions, fetchedDataSources, defaultDataSource);
         return;
       }
 
-      // 4.3 handle default data source
+      // 5.3 Handle default data source
       this.handleDefaultDataSource(dataSourceOptions, fetchedDataSources, defaultDataSource);
     } catch (err) {
       this.props.notifications.addWarning(
@@ -191,12 +200,8 @@ export class DataSourceSelector extends React.Component<
         : this.props.placeholderText;
 
     // The filter condition can be changed, thus we filter again here to make sure each time we will get the filtered data sources before rendering
-    const dataSources = getFilteredDataSources(
-      this.state.allDataSources,
-      this.props.dataSourceFilter
-    );
+    const options = getFilteredDataSources(this.state.allDataSources, this.props.dataSourceFilter);
 
-    const options = dataSources.map((ds) => ({ id: ds.id, label: ds.attributes?.title || '' }));
     if (!this.props.hideLocalCluster) {
       options.unshift(LocalCluster);
     }
