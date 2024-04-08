@@ -85,7 +85,7 @@ export const registerFindRoute = (router: IRouter) => {
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
         namespaces,
-        workspaces,
+        ...(workspaces ? { workspaces } : {}),
       });
 
       return res.ok({ body: result });

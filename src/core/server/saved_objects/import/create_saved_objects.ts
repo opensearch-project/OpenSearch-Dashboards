@@ -28,7 +28,12 @@
  * under the License.
  */
 
-import { SavedObject, SavedObjectsClientContract, SavedObjectsImportError } from '../types';
+import {
+  SavedObject,
+  SavedObjectsBaseOptions,
+  SavedObjectsClientContract,
+  SavedObjectsImportError,
+} from '../types';
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from './types';
 import { extractVegaSpecFromSavedObject, updateDataSourceNameInVegaSpec } from './utils';
@@ -42,7 +47,7 @@ interface CreateSavedObjectsParams<T> {
   overwrite?: boolean;
   dataSourceId?: string;
   dataSourceTitle?: string;
-  workspaces?: string[];
+  workspaces?: SavedObjectsBaseOptions['workspaces'];
 }
 interface CreateSavedObjectsResult<T> {
   createdObjects: Array<CreatedObject<T>>;

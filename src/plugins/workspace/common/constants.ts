@@ -23,3 +23,5 @@ export enum WorkspacePermissionMode {
   LibraryRead = 'library_read',
   LibraryWrite = 'library_write',
 }
+
+export const WORKSPACE_ID_CONSUMER_WRAPPER_ID = 'workspace_id_consumer';

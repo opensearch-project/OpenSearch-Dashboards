@@ -71,7 +71,7 @@ export const registerCreateRoute = (router: IRouter) => {
         migrationVersion,
         references,
         initialNamespaces,
-        workspaces,
+        ...(workspaces ? { workspaces } : {}),
       };
       const result = await context.core.savedObjects.client.create(type, attributes, options);
       return res.ok({ body: result });
