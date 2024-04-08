@@ -10,9 +10,9 @@ import { DataSourceSelector, DataSourceSelectorProps } from './data_source_selec
 
 export function createDataSourceSelector(
   uiSettings: IUiSettingsClient,
-  dataSource: DataSourcePluginSetup
+  dataSourcePluginSetup: DataSourcePluginSetup
 ) {
-  const { hideLocalCluster } = dataSource;
+  const { hideLocalCluster } = dataSourcePluginSetup;
   return (props: DataSourceSelectorProps) => (
     <DataSourceSelector {...props} uiSettings={uiSettings} hideLocalCluster={hideLocalCluster} />
   );

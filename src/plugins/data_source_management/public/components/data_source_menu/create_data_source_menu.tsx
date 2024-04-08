@@ -13,10 +13,10 @@ import { MountPointPortal } from '../../../../opensearch_dashboards_react/public
 
 export function createDataSourceMenu<T>(
   uiSettings: IUiSettingsClient,
-  dataSource: DataSourcePluginSetup
+  dataSourcePluginSetup: DataSourcePluginSetup
 ) {
   return (props: DataSourceMenuProps<T>) => {
-    const { hideLocalCluster } = dataSource;
+    const { hideLocalCluster } = dataSourcePluginSetup;
     if (props.setMenuMountPoint) {
       return (
         <MountPointPortal setMountPoint={props.setMenuMountPoint}>
