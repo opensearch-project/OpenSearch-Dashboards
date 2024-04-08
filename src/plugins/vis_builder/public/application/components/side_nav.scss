@@ -9,11 +9,6 @@
 .vbSidenav {
   @include scrollNavParent(auto 1fr);
 
-  &.config {
-    border-right: $euiBorderThin;
-    grid-area: leftNav;
-  }
-
   &.right {
     border-left: $euiBorderThin;
     grid-area: rightNav;

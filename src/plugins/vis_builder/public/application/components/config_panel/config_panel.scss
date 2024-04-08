@@ -5,10 +5,15 @@
 .vbConfig {
   @include euiYScrollWithShadows;
 
-  background: $euiColorLightestShade;
+  background: transparent;
   border-left: $euiBorderThin;
   position: relative;
   overflow-x: hidden;
+
+  &__container {
+    border-right: $euiBorderThin;
+    height: 100%;
+  }
 
   &__section {
     width: 100%;
@@ -44,5 +49,12 @@
 
   &.showSecondary > .vbConfig__section {
     transform: translateX(-100%);
+  }
+}
+
+.vbSidenav {
+  &.left {
+    border-right: $euiBorderThin;
+    height: 100%;
   }
 }
