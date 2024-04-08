@@ -81,6 +81,17 @@ export class DataSourceSelectable extends React.Component<
     this.setState({ ...this.state, isPopoverOpen: false });
   }
 
+  // Update the checked status of the selected data source.
+  getUpdatedDataSourceOptions(
+    selectedDataSourceId: string,
+    dataSourceOptions: DataSourceOption[]
+  ): SelectedDataSourceOption[] {
+    return dataSourceOptions.map((option) => ({
+      ...option,
+      ...(option.id === selectedDataSourceId && { checked: 'on' }),
+    }));
+  }
+
   handleSelectedOption(dataSourceOptions: DataSourceOption[]) {
     const [{ id }] = this.props.selectedOption!;
     const dsOption = dataSourceOptions.find((ds) => ds.id === id);
@@ -98,9 +109,13 @@ export class DataSourceSelectable extends React.Component<
       this.props.onSelectedDataSources([]);
       return;
     }
+    const updatedDataSourceOptions: SelectedDataSourceOption[] = this.getUpdatedDataSourceOptions(
+      id,
+      dataSourceOptions
+    );
     this.setState({
       ...this.state,
-      dataSourceOptions,
+      dataSourceOptions: updatedDataSourceOptions,
       selectedOption: [{ id, label: dsOption.label, checked: 'on' }],
     });
     this.props.onSelectedDataSources([{ id, label: dsOption.label }]);
@@ -121,10 +136,15 @@ export class DataSourceSelectable extends React.Component<
       return;
     }
 
+    const updatedDataSourceOptions: SelectedDataSourceOption[] = this.getUpdatedDataSourceOptions(
+      selectedDataSource[0].id,
+      dataSourceOptions
+    );
+
     this.setState({
       ...this.state,
       selectedOption: selectedDataSource,
-      dataSourceOptions,
+      dataSourceOptions: updatedDataSourceOptions,
     });
 
     this.props.onSelectedDataSources(selectedDataSource);
