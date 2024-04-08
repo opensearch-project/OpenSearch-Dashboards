@@ -49,7 +49,7 @@ export function createCspRulesPreResponseHandler(
 
       const [coreStart] = await core.getStartServices();
 
-      const client = getConfigurationClient(coreStart.opensearch.client.asScoped(request));
+      const client = getConfigurationClient(request);
 
       const cspRules = await client.getEntityConfig(CSP_RULES_CONFIG_KEY, {
         headers: request.headers,
