@@ -51,6 +51,7 @@ import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 import { Branding } from '../';
 import { getLogos } from '../../common';
 import type { Logos } from '../../common/types';
+import { OverlayStart } from '../overlays';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -89,14 +90,17 @@ interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
 
-interface StartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
+  overlays: OverlayStart;
 }
+
+type CollapsibleNavHeaderRender = () => JSX.Element | null;
 
 /** @internal */
 export class ChromeService {
@@ -107,6 +111,7 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
+  private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -142,6 +147,20 @@ export class ChromeService {
     );
   }
 
+  public setup() {
+    return {
+      registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
+        if (this.collapsibleNavHeaderRender) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            '[ChromeService] An existing custom collapsible navigation bar header render has been overridden.'
+          );
+        }
+        this.collapsibleNavHeaderRender = render;
+      },
+    };
+  }
+
   public async start({
     application,
     docLinks,
@@ -149,6 +168,7 @@ export class ChromeService {
     injectedMetadata,
     notifications,
     uiSettings,
+    overlays,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
@@ -160,6 +180,7 @@ export class ChromeService {
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
+    const sidecarConfig$ = overlays.sidecar.getSidecarConfig$();
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
@@ -262,6 +283,8 @@ export class ChromeService {
           branding={injectedMetadata.getBranding()}
           logos={logos}
           survey={injectedMetadata.getSurvey()}
+          collapsibleNavHeaderRender={this.collapsibleNavHeaderRender}
+          sidecarConfig$={sidecarConfig$}
         />
       ),
 
@@ -323,6 +346,20 @@ export class ChromeService {
     this.navLinks.stop();
     this.stop$.next();
   }
+}
+
+/**
+ * ChromeSetup allows plugins to customize the global chrome header UI rendering
+ * before the header UI is mounted.
+ *
+ * @example
+ * Customize the Collapsible Nav's (left nav menu) header section:
+ * ```ts
+ * core.chrome.registerCollapsibleNavHeader(() => <CustomNavHeader />)
+ * ```
+ */
+export interface ChromeSetup {
+  registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
 }
 
 /**

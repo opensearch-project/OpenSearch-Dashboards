@@ -58,6 +58,10 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
       validate: {
         query: schema.object({
           createNewCopies: schema.boolean({ defaultValue: false }),
+          dataSourceId: schema.maybe(schema.string({ defaultValue: '' })),
+          workspaces: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
         }),
         body: schema.object({
           file: schema.stream(),
@@ -89,6 +93,24 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         return res.badRequest({ body: `Invalid file extension ${fileExtension}` });
       }
 
+      const dataSourceId = req.query.dataSourceId;
+
+      // get datasource from saved object service
+
+      const dataSource = dataSourceId
+        ? await context.core.savedObjects.client
+            .get('data-source', dataSourceId)
+            .then((response) => {
+              const attributes: any = response?.attributes || {};
+              return {
+                id: response.id,
+                title: attributes.title,
+              };
+            })
+        : '';
+
+      const dataSourceTitle = dataSource ? dataSource.title : '';
+
       let readStream: Readable;
       try {
         readStream = await createSavedObjectsStreamFromNdJson(file);
@@ -98,6 +120,11 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         });
       }
 
+      let workspaces = req.query.workspaces;
+      if (typeof workspaces === 'string') {
+        workspaces = [workspaces];
+      }
+
       const result = await resolveSavedObjectsImportErrors({
         typeRegistry: context.core.savedObjects.typeRegistry,
         savedObjectsClient: context.core.savedObjects.client,
@@ -105,6 +132,9 @@ export const registerResolveImportErrorsRoute = (router: IRouter, config: SavedO
         retries: req.body.retries,
         objectLimit: maxImportExportSize,
         createNewCopies: req.query.createNewCopies,
+        workspaces,
+        dataSourceId,
+        dataSourceTitle,
       });
 
       return res.ok({ body: result });

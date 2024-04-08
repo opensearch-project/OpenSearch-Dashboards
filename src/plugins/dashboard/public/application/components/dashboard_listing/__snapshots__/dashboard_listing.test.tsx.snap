@@ -856,7 +856,9 @@ exports[`dashboard listing hideWriteControls 1`] = `
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -922,6 +924,13 @@ exports[`dashboard listing hideWriteControls 1`] = `
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
+              "sidecar": Object {
+                "getSidecarConfig$": [MockFunction],
+                "hide": [MockFunction],
+                "open": [MockFunction],
+                "setSidecarConfig": [MockFunction],
+                "show": [MockFunction],
+              },
             },
             "savedObjects": Object {
               "client": Object {
@@ -932,6 +941,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "delete": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "setCurrentWorkspace": [MockFunction],
                 "update": [MockFunction],
               },
             },
@@ -1988,7 +1998,9 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -2054,6 +2066,13 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
+              "sidecar": Object {
+                "getSidecarConfig$": [MockFunction],
+                "hide": [MockFunction],
+                "open": [MockFunction],
+                "setSidecarConfig": [MockFunction],
+                "show": [MockFunction],
+              },
             },
             "savedObjects": Object {
               "client": Object {
@@ -2064,6 +2083,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "delete": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "setCurrentWorkspace": [MockFunction],
                 "update": [MockFunction],
               },
             },
@@ -3181,7 +3201,9 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -3247,6 +3269,13 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
+              "sidecar": Object {
+                "getSidecarConfig$": [MockFunction],
+                "hide": [MockFunction],
+                "open": [MockFunction],
+                "setSidecarConfig": [MockFunction],
+                "show": [MockFunction],
+              },
             },
             "savedObjects": Object {
               "client": Object {
@@ -3257,6 +3286,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "delete": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "setCurrentWorkspace": [MockFunction],
                 "update": [MockFunction],
               },
             },
@@ -4374,7 +4404,9 @@ exports[`dashboard listing renders table rows 1`] = `
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -4440,6 +4472,13 @@ exports[`dashboard listing renders table rows 1`] = `
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
+              "sidecar": Object {
+                "getSidecarConfig$": [MockFunction],
+                "hide": [MockFunction],
+                "open": [MockFunction],
+                "setSidecarConfig": [MockFunction],
+                "show": [MockFunction],
+              },
             },
             "savedObjects": Object {
               "client": Object {
@@ -4450,6 +4489,7 @@ exports[`dashboard listing renders table rows 1`] = `
                 "delete": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "setCurrentWorkspace": [MockFunction],
                 "update": [MockFunction],
               },
             },
@@ -5567,7 +5607,9 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -5633,6 +5675,13 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
+              "sidecar": Object {
+                "getSidecarConfig$": [MockFunction],
+                "hide": [MockFunction],
+                "open": [MockFunction],
+                "setSidecarConfig": [MockFunction],
+                "show": [MockFunction],
+              },
             },
             "savedObjects": Object {
               "client": Object {
@@ -5643,6 +5692,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "delete": [MockFunction],
                 "find": [MockFunction],
                 "get": [MockFunction],
+                "setCurrentWorkspace": [MockFunction],
                 "update": [MockFunction],
               },
             },

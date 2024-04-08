@@ -31,13 +31,18 @@
 import { i18n } from '@osd/i18n';
 import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { VisBuilderStart } from '../../vis_builder/public';
 import { ManagementSetup } from '../../management/public';
 import { UiActionsSetup, UiActionsStart } from '../../ui_actions/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { DashboardStart } from '../../dashboard/public';
 import { DiscoverStart } from '../../discover/public';
-import { HomePublicPluginSetup, FeatureCatalogueCategory } from '../../home/public';
+import {
+  HomePublicPluginSetup,
+  HomePublicPluginStart,
+  FeatureCatalogueCategory,
+} from '../../home/public';
 import { VisualizationsStart } from '../../visualizations/public';
 import { VisAugmenterStart } from '../../vis_augmenter/public';
 import {
@@ -73,9 +78,11 @@ export interface SetupDependencies {
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
   uiActions: UiActionsSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 export interface StartDependencies {
+  home?: HomePublicPluginStart;
   data: DataPublicPluginStart;
   dashboard?: DashboardStart;
   visualizations?: VisualizationsStart;
@@ -100,7 +107,7 @@ export class SavedObjectsManagementPlugin
 
   public setup(
     core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>,
-    { home, management, uiActions }: SetupDependencies
+    { home, management, uiActions, dataSource }: SetupDependencies
   ): SavedObjectsManagementPluginSetup {
     const actionSetup = this.actionService.setup();
     const columnSetup = this.columnService.setup();
@@ -136,6 +143,8 @@ export class SavedObjectsManagementPlugin
           core,
           serviceRegistry: this.serviceRegistry,
           mountParams,
+          dataSourceEnabled: !!dataSource,
+          hideLocalCluster: dataSource?.hideLocalCluster ?? false,
         });
       },
     });

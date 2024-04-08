@@ -13,6 +13,14 @@ import stylelint from 'stylelint';
 
 const { validateOptions } = stylelint.utils;
 
+/**
+ * Validates options for a Stylelint rule.
+ *
+ * @param postcssResult - The PostCSS result object.
+ * @param ruleName - The name of the Stylelint rule.
+ * @param primaryOption - The primary option for the rule.
+ * @returns {boolean} - A boolean indicating whether the options are valid.
+ */
 export const isValidOptions = (
   postcssResult: any,
   ruleName: string,

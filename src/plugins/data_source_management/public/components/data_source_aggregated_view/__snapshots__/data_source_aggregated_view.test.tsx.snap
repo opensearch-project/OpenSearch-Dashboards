@@ -1,0 +1,793 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceAggregatedView should render normally with data source filter 1`] = `
+<DataSourceAggregatedView
+  dataSourceFilter={[Function]}
+  displayAllCompatibleDataSources={true}
+  fullWidth={false}
+  hideLocalCluster={false}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "fields": Array [
+                "id",
+                "title",
+                "auth.type",
+              ],
+              "perPage": 10000,
+              "type": "data-source",
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+    }
+  }
+>
+  <EuiButtonEmpty
+    aria-label="dataSourceAggregatedViewMenuButton"
+    className="euiHeaderLink"
+    data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+    disabled={true}
+    iconSide="left"
+    iconType="database"
+    size="s"
+  >
+    <button
+      aria-label="dataSourceAggregatedViewMenuButton"
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty-isDisabled euiHeaderLink"
+      data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+      disabled={true}
+      type="button"
+    >
+      <EuiButtonContent
+        className="euiButtonEmpty__content"
+        iconSide="left"
+        iconSize="m"
+        iconType="database"
+        textProps={
+          Object {
+            "className": "euiButtonEmpty__text",
+          }
+        }
+      >
+        <span
+          className="euiButtonContent euiButtonEmpty__content"
+        >
+          <EuiIcon
+            className="euiButtonContent__icon"
+            color="inherit"
+            size="m"
+            type="database"
+          >
+            <span
+              className="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+              size="m"
+            />
+          </EuiIcon>
+          <span
+            className="euiButtonEmpty__text"
+          >
+            Data sources
+          </span>
+        </span>
+      </EuiButtonContent>
+    </button>
+  </EuiButtonEmpty>
+  <EuiNotificationBadge
+    color="subdued"
+  >
+    <span
+      className="euiNotificationBadge euiNotificationBadge--subdued"
+    >
+      All
+    </span>
+  </EuiNotificationBadge>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiButtonIcon
+        aria-label="show data sources"
+        data-test-subj="dataSourceAggregatedViewInfoButton"
+        display="empty"
+        iconType="iInCircle"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <div
+      className="euiPopover euiPopover--anchorDownLeft"
+      id="dataSourceSViewContextMenuPopover"
+    >
+      <div
+        className="euiPopover__anchor"
+      >
+        <EuiButtonIcon
+          aria-label="show data sources"
+          data-test-subj="dataSourceAggregatedViewInfoButton"
+          display="empty"
+          iconType="iInCircle"
+          onClick={[Function]}
+        >
+          <button
+            aria-label="show data sources"
+            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            data-test-subj="dataSourceAggregatedViewInfoButton"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+          >
+            <EuiIcon
+              aria-hidden="true"
+              className="euiButtonIcon__icon"
+              color="inherit"
+              size="m"
+              type="iInCircle"
+            >
+              <span
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="iInCircle"
+                size="m"
+              />
+            </EuiIcon>
+          </button>
+        </EuiButtonIcon>
+      </div>
+    </div>
+  </EuiPopover>
+</DataSourceAggregatedView>
+`;
+
+exports[`DataSourceAggregatedView should render normally with local cluster and actice selections 1`] = `
+<DataSourceAggregatedView
+  activeDataSourceIds={
+    Array [
+      "test1",
+    ]
+  }
+  displayAllCompatibleDataSources={false}
+  fullWidth={false}
+  hideLocalCluster={false}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "fields": Array [
+                "id",
+                "title",
+                "auth.type",
+              ],
+              "perPage": 10000,
+              "type": "data-source",
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+    }
+  }
+>
+  <EuiButtonEmpty
+    aria-label="dataSourceAggregatedViewMenuButton"
+    className="euiHeaderLink"
+    data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+    disabled={true}
+    iconSide="left"
+    iconType="database"
+    size="s"
+  >
+    <button
+      aria-label="dataSourceAggregatedViewMenuButton"
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty-isDisabled euiHeaderLink"
+      data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+      disabled={true}
+      type="button"
+    >
+      <EuiButtonContent
+        className="euiButtonEmpty__content"
+        iconSide="left"
+        iconSize="m"
+        iconType="database"
+        textProps={
+          Object {
+            "className": "euiButtonEmpty__text",
+          }
+        }
+      >
+        <span
+          className="euiButtonContent euiButtonEmpty__content"
+        >
+          <EuiIcon
+            className="euiButtonContent__icon"
+            color="inherit"
+            size="m"
+            type="database"
+          >
+            <span
+              className="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+              size="m"
+            />
+          </EuiIcon>
+          <span
+            className="euiButtonEmpty__text"
+          >
+            Data sources
+          </span>
+        </span>
+      </EuiButtonContent>
+    </button>
+  </EuiButtonEmpty>
+  <EuiNotificationBadge
+    color="subdued"
+  >
+    <span
+      className="euiNotificationBadge euiNotificationBadge--subdued"
+    >
+      1
+    </span>
+  </EuiNotificationBadge>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiButtonIcon
+        aria-label="show data sources"
+        data-test-subj="dataSourceAggregatedViewInfoButton"
+        display="empty"
+        iconType="iInCircle"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <div
+      className="euiPopover euiPopover--anchorDownLeft"
+      id="dataSourceSViewContextMenuPopover"
+    >
+      <div
+        className="euiPopover__anchor"
+      >
+        <EuiButtonIcon
+          aria-label="show data sources"
+          data-test-subj="dataSourceAggregatedViewInfoButton"
+          display="empty"
+          iconType="iInCircle"
+          onClick={[Function]}
+        >
+          <button
+            aria-label="show data sources"
+            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            data-test-subj="dataSourceAggregatedViewInfoButton"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+          >
+            <EuiIcon
+              aria-hidden="true"
+              className="euiButtonIcon__icon"
+              color="inherit"
+              size="m"
+              type="iInCircle"
+            >
+              <span
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="iInCircle"
+                size="m"
+              />
+            </EuiIcon>
+          </button>
+        </EuiButtonIcon>
+      </div>
+    </div>
+  </EuiPopover>
+</DataSourceAggregatedView>
+`;
+
+exports[`DataSourceAggregatedView should render normally with local cluster hidden and all options 1`] = `
+<DataSourceAggregatedView
+  activeDataSourceIds={Array []}
+  displayAllCompatibleDataSources={false}
+  fullWidth={false}
+  hideLocalCluster={true}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "fields": Array [
+                "id",
+                "title",
+                "auth.type",
+              ],
+              "perPage": 10000,
+              "type": "data-source",
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Promise {},
+          },
+        ],
+      },
+    }
+  }
+>
+  <EuiButtonEmpty
+    aria-label="dataSourceAggregatedViewMenuButton"
+    className="euiHeaderLink"
+    data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+    disabled={true}
+    iconSide="left"
+    iconType="database"
+    size="s"
+  >
+    <button
+      aria-label="dataSourceAggregatedViewMenuButton"
+      className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty-isDisabled euiHeaderLink"
+      data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+      disabled={true}
+      type="button"
+    >
+      <EuiButtonContent
+        className="euiButtonEmpty__content"
+        iconSide="left"
+        iconSize="m"
+        iconType="database"
+        textProps={
+          Object {
+            "className": "euiButtonEmpty__text",
+          }
+        }
+      >
+        <span
+          className="euiButtonContent euiButtonEmpty__content"
+        >
+          <EuiIcon
+            className="euiButtonContent__icon"
+            color="inherit"
+            size="m"
+            type="database"
+          >
+            <span
+              className="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+              size="m"
+            />
+          </EuiIcon>
+          <span
+            className="euiButtonEmpty__text"
+          >
+            Data sources
+          </span>
+        </span>
+      </EuiButtonContent>
+    </button>
+  </EuiButtonEmpty>
+  <EuiNotificationBadge
+    color="subdued"
+  >
+    <span
+      className="euiNotificationBadge euiNotificationBadge--subdued"
+    >
+      0
+    </span>
+  </EuiNotificationBadge>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiButtonIcon
+        aria-label="show data sources"
+        data-test-subj="dataSourceAggregatedViewInfoButton"
+        display="empty"
+        iconType="iInCircle"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <div
+      className="euiPopover euiPopover--anchorDownLeft"
+      id="dataSourceSViewContextMenuPopover"
+    >
+      <div
+        className="euiPopover__anchor"
+      >
+        <EuiButtonIcon
+          aria-label="show data sources"
+          data-test-subj="dataSourceAggregatedViewInfoButton"
+          display="empty"
+          iconType="iInCircle"
+          onClick={[Function]}
+        >
+          <button
+            aria-label="show data sources"
+            className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            data-test-subj="dataSourceAggregatedViewInfoButton"
+            disabled={false}
+            onClick={[Function]}
+            type="button"
+          >
+            <EuiIcon
+              aria-hidden="true"
+              className="euiButtonIcon__icon"
+              color="inherit"
+              size="m"
+              type="iInCircle"
+            >
+              <span
+                aria-hidden="true"
+                className="euiButtonIcon__icon"
+                color="inherit"
+                data-euiicon-type="iInCircle"
+                size="m"
+              />
+            </EuiIcon>
+          </button>
+        </EuiButtonIcon>
+      </div>
+    </div>
+  </EuiPopover>
+</DataSourceAggregatedView>
+`;
+
+exports[`DataSourceAggregatedView should render normally with local cluster not hidden and all options 1`] = `
+<Fragment>
+  <EuiButtonEmpty
+    aria-label="dataSourceAggregatedViewMenuButton"
+    className="euiHeaderLink"
+    data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+    disabled={true}
+    iconSide="left"
+    iconType="database"
+    size="s"
+  >
+    Data sources
+  </EuiButtonEmpty>
+  <EuiNotificationBadge
+    color="subdued"
+  >
+    All
+  </EuiNotificationBadge>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiButtonIcon
+        aria-label="show data sources"
+        data-test-subj="dataSourceAggregatedViewInfoButton"
+        display="empty"
+        iconType="iInCircle"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <EuiContextMenu
+      initialPanelId={0}
+      panels={
+        Array [
+          Object {
+            "id": 0,
+            "items": Array [],
+            "title": "Data sources (0)",
+          },
+        ]
+      }
+      size="m"
+    />
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView should render popup when clicking on info icon 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <button
+        aria-label="dataSourceAggregatedViewMenuButton"
+        class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty-isDisabled euiHeaderLink"
+        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+        disabled=""
+        type="button"
+      >
+        <span
+          class="euiButtonContent euiButtonEmpty__content"
+        >
+          <span
+            class="euiButtonContent__icon"
+            color="inherit"
+            data-euiicon-type="database"
+          />
+          <span
+            class="euiButtonEmpty__text"
+          >
+            Data sources
+          </span>
+        </span>
+      </button>
+      <span
+        class="euiNotificationBadge euiNotificationBadge--subdued"
+      >
+        1
+      </span>
+      <div
+        class="euiPopover euiPopover--anchorDownLeft"
+        id="dataSourceSViewContextMenuPopover"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            aria-label="show data sources"
+            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            data-test-subj="dataSourceAggregatedViewInfoButton"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="iInCircle"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div
+        data-eui="EuiFocusTrap"
+      >
+        <div
+          aria-describedby="generated-id"
+          aria-live="off"
+          aria-modal="true"
+          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--bottom"
+          role="dialog"
+          style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
+          tabindex="0"
+        >
+          <div
+            class="euiPopover__panelArrow euiPopover__panelArrow--bottom"
+            style="left: 10px; top: 0px;"
+          />
+          <p
+            class="euiScreenReaderOnly"
+            id="generated-id"
+          >
+            You are in a dialog. To close this dialog, hit escape.
+          </p>
+          <div>
+            <div
+              class="euiContextMenu"
+              style="height: 0px;"
+            >
+              <div
+                class="euiContextMenuPanel euiContextMenu__panel"
+                tabindex="-1"
+              >
+                <div
+                  class="euiContextMenuPanelTitle"
+                >
+                  <span
+                    class="euiContextMenu__itemLayout"
+                  >
+                    Selected data sources
+                  </span>
+                </div>
+                <div>
+                  <div>
+                    <button
+                      class="euiContextMenuItem euiContextMenuItem-isDisabled"
+                      disabled=""
+                      type="button"
+                    >
+                      <span
+                        class="euiContextMenu__itemLayout"
+                      >
+                        <span
+                          class="euiContextMenuItem__text"
+                        >
+                          test1
+                        </span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <button
+      aria-label="dataSourceAggregatedViewMenuButton"
+      class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty-isDisabled euiHeaderLink"
+      data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+      disabled=""
+      type="button"
+    >
+      <span
+        class="euiButtonContent euiButtonEmpty__content"
+      >
+        <span
+          class="euiButtonContent__icon"
+          color="inherit"
+          data-euiicon-type="database"
+        />
+        <span
+          class="euiButtonEmpty__text"
+        >
+          Data sources
+        </span>
+      </span>
+    </button>
+    <span
+      class="euiNotificationBadge euiNotificationBadge--subdued"
+    >
+      1
+    </span>
+    <div
+      class="euiPopover euiPopover--anchorDownLeft"
+      id="dataSourceSViewContextMenuPopover"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <button
+          aria-label="show data sources"
+          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+          data-test-subj="dataSourceAggregatedViewInfoButton"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="iInCircle"
+          />
+        </button>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

@@ -491,6 +491,7 @@ describe('PluginsService', () => {
         requiredPlugins: [],
         requiredBundles: [],
         optionalPlugins: [],
+        requiredEnginePlugins: {},
       },
     ];
 

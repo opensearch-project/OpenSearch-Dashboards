@@ -143,53 +143,82 @@ const parseStringWithLongNumerals = (
    * To find those instances, we try to parse and watch for the location of any errors. If an error
    * is caused by the marking, we remove that single marking and try again.
    */
-  do {
-    try {
-      hadException = false;
-      obj = parseMarkedText(markedJSON);
-    } catch (e) {
-      hadException = true;
-      /* There are two types of exception objects that can be raised:
-       *  1) a proper object with lineNumber and columnNumber which we can use
-       *  2) a textual message with the position that we need to parse
-       */
-      let { lineNumber, columnNumber } = e;
-      if (!lineNumber || !columnNumber) {
-        const match = e?.message?.match?.(/^Unexpected token.*at position (\d+)$/);
-        if (match) {
-          lineNumber = 1;
-          // The position is zero-indexed; adding 1 to normalize it for the -2 that comes later
-          columnNumber = parseInt(match[1], 10) + 1;
+  try {
+    do {
+      try {
+        hadException = false;
+        obj = parseMarkedText(markedJSON);
+      } catch (e) {
+        hadException = true;
+        /* There are two types of exception objects that can be raised:
+         *  1) a textual message with the position that we need to parse
+         *     i. Unexpected [token|string ...] at position ...
+         *    ii. Expected ',' or ... after ... in JSON at position ...
+         *   iii. expected ',' or ... after ... in object at line ... column ...
+         *  2) a proper object with lineNumber and columnNumber which we can use
+         *    Note: this might refer to the part of the code that threw the exception but
+         *          we will try it anyway; the regex is specific enough to not produce
+         *          false-positives.
+         */
+        let { lineNumber, columnNumber } = e;
+
+        if (typeof e?.message === 'string') {
+          /* Check for 1-i and 1-ii
+           * Finding "..."෴1111"..." inside a string value, the extra quotes throw a syntax error
+           * and the position points to " that is assumed to be the begining of a value.
+           */
+          let match = e.message.match(/^(?:Un)?expected .*at position (\d+)(\D|$)/i);
+          if (match) {
+            lineNumber = 1;
+            // Add 1 to reach the marker
+            columnNumber = parseInt(match[1], 10) + 1;
+          } else {
+            /* Check for 1-iii
+             * Finding "...,"෴1111"..." inside a string value, the extra quotes throw a syntax error
+             * and the column number points to the marker after the " that is assumed to be terminating the
+             * value.
+             * PS: There are different versions of this error across browsers and platforms.
+             */
+            // ToDo: Add functional tests for this path
+            match = e.message.match(/expected .*line (\d+) column (\d+)(\D|$)/i);
+            if (match) {
+              lineNumber = parseInt(match[1], 10);
+              columnNumber = parseInt(match[2], 10);
+            }
+          }
         }
-      }
 
-      if (lineNumber < 1 || columnNumber < 2) {
-        /* The problem is not with this replacement.
-         * Note: This will never happen because the outer parse would have already thrown.
+        if (lineNumber < 1 || columnNumber < 2) {
+          /* The problem is not with this replacement.
+           * Note: This will never happen because the outer parse would have already thrown.
+           */
+          // coverage:ignore-line
+          throw e;
+        }
+
+        /* We need to skip e.lineNumber - 1 number of `\n` occurrences.
+         * Then, we need to go to e.columnNumber - 2 to look for `"<mark>\d+"`; we need to `-1` to
+         * account for the quote but an additional `-1` is needed because columnNumber starts from 1.
          */
-        // coverage:ignore-line
-        throw e;
-      }
+        const re = new RegExp(
+          `^((?:.*\\n){${lineNumber - 1}}[^\\n]{${columnNumber - 2}})"${marker}(-?\\d+)"`
+        );
+        if (!re.test(markedJSON)) {
+          /* The exception is not caused by adding the marker.
+           * Note: This will never happen because the outer parse would have already thrown.
+           */
+          // coverage:ignore-line
+          throw e;
+        }
 
-      /* We need to skip e.lineNumber - 1 number of `\n` occurrences.
-       * Then, we need to go to e.columnNumber - 2 to look for `"<mark>\d+"`; we need to `-1` to
-       * account for the quote but an additional `-1` is needed because columnNumber starts from 1.
-       */
-      const re = new RegExp(
-        `^((?:.*\\n){${lineNumber - 1}}[^\\n]{${columnNumber - 2}})"${marker}(-?\\d+)"`
-      );
-      if (!re.test(markedJSON)) {
-        /* The exception is not caused by adding the marker.
-         * Note: This will never happen because the outer parse would have already thrown.
-         */
-        // coverage:ignore-line
-        throw e;
+        // We have found a bad replacement; let's remove it.
+        markedJSON = markedJSON.replace(re, '$1$2');
       }
-
-      // We have found a bad replacement; let's remove it.
-      markedJSON = markedJSON.replace(re, '$1$2');
-    }
-  } while (hadException);
+    } while (hadException);
+  } catch (ex) {
+    // If parsing of marked `text` fails, fallback to parsing the original `text`
+    obj = JSON.parse(text, reviver || undefined);
+  }
 
   return obj;
 };
@@ -285,6 +314,7 @@ export const parse = (
     if (
       numeralsAreNumbers &&
       typeof val === 'number' &&
+      isFinite(val) &&
       (val < Number.MAX_SAFE_INTEGER || val > Number.MAX_SAFE_INTEGER)
     ) {
       numeralsAreNumbers = false;

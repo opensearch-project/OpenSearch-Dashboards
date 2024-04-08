@@ -66,4 +66,18 @@ describe('filterMatchesIndex', () => {
 
     expect(filterMatchesIndex(filter, indexPattern)).toBe(true);
   });
+
+  it('should return false if the custom filter is a different index id', () => {
+    const filter = { meta: { index: 'foo', key: 'bar', type: 'custom' } } as Filter;
+    const indexPattern = { id: 'bar', fields: [{ name: 'foo' }] } as IIndexPattern;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(false);
+  });
+
+  it('should return true if the custom filter is the same index id', () => {
+    const filter = { meta: { index: 'foo', key: 'bar', type: 'custom' } } as Filter;
+    const indexPattern = { id: 'foo', fields: [{ name: 'barf' }] } as IIndexPattern;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(true);
+  });
 });

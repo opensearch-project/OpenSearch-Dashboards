@@ -11,6 +11,7 @@ import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
+import './index.scss';
 
 export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
@@ -58,23 +59,31 @@ export const Sidebar: FC = ({ children }) => {
     }
   }, [indexPatternId, activeDataSources, dataSourceOptionList]);
 
+  const redirectToLogExplorer = useCallback(
+    (dsName: string, dsType: string) => {
+      return application.navigateToUrl(
+        `../observability-logs#/explorer?datasourceName=${dsName}&datasourceType=${dsType}`
+      );
+    },
+    [application]
+  );
+
   const handleSourceSelection = useCallback(
     (selectedDataSources: DataSourceOption[]) => {
       if (selectedDataSources.length === 0) {
         setSelectedSources(selectedDataSources);
         return;
       }
-      // Temporary redirection solution for 2.11, where clicking non-index-pattern datasource
-      // will redirect user to Observability event explorer
+      // Temporary redirection solution for 2.11, where clicking non-index-pattern data sources
+      // will prompt users with modal explaining they are being redirected to Observability log explorer
       if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
-        return application.navigateToUrl(
-          `../observability-logs#/explorer?datasourceName=${selectedDataSources[0].label}&datasourceType=${selectedDataSources[0].type}`
-        );
+        redirectToLogExplorer(selectedDataSources[0].label, selectedDataSources[0].type);
+        return;
       }
       setSelectedSources(selectedDataSources);
       dispatch(setIndexPattern(selectedDataSources[0].value));
     },
-    [application, dispatch]
+    [dispatch, redirectToLogExplorer, setSelectedSources]
   );
 
   const handleGetDataSetError = useCallback(
@@ -91,8 +100,18 @@ export const Sidebar: FC = ({ children }) => {
 
   return (
     <EuiPageSideBar className="deSidebar" sticky>
-      <EuiSplitPanel.Outer className="eui-yScroll" hasBorder={true} borderRadius="none">
-        <EuiSplitPanel.Inner paddingSize="s" color="subdued" grow={false}>
+      <EuiSplitPanel.Outer
+        className="eui-yScroll deSidebar_panel"
+        hasBorder={true}
+        borderRadius="none"
+        color="transparent"
+      >
+        <EuiSplitPanel.Inner
+          paddingSize="s"
+          grow={false}
+          color="transparent"
+          className="deSidebar_dataSource"
+        >
           <DataSourceSelectable
             dataSources={activeDataSources}
             dataSourceOptionList={dataSourceOptionList}
@@ -100,9 +119,10 @@ export const Sidebar: FC = ({ children }) => {
             onDataSourceSelect={handleSourceSelection}
             selectedSources={selectedSources}
             onGetDataSetError={handleGetDataSetError}
+            fullWidth
           />
         </EuiSplitPanel.Inner>
-        <EuiSplitPanel.Inner paddingSize="none" color="subdued" className="eui-yScroll">
+        <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>

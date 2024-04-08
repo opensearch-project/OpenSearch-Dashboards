@@ -32,15 +32,15 @@ import './discover_sidebar.scss';
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiTitle,
   EuiDragDropContext,
   DropResult,
   EuiDroppable,
   EuiDraggable,
   EuiPanel,
   EuiSplitPanel,
+  EuiButtonEmpty,
 } from '@elastic/eui';
-import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
+import { I18nProvider } from '@osd/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
@@ -50,6 +50,7 @@ import { getDetails } from './lib/get_details';
 import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { getServices } from '../../../opensearch_dashboards_services';
+import { FieldDetails } from './types';
 
 export interface DiscoverSidebarProps {
   /**
@@ -87,16 +88,8 @@ export interface DiscoverSidebarProps {
   selectedIndexPattern?: IndexPattern;
 }
 
-export function DiscoverSidebar({
-  columns,
-  fieldCounts,
-  hits,
-  onAddField,
-  onAddFilter,
-  onRemoveField,
-  onReorderFields,
-  selectedIndexPattern,
-}: DiscoverSidebarProps) {
+export function DiscoverSidebar(props: DiscoverSidebarProps) {
+  const { columns, fieldCounts, hits, onAddField, onReorderFields, selectedIndexPattern } = props;
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
@@ -120,7 +113,7 @@ export function DiscoverSidebar({
   );
 
   const popularLimit = services.uiSettings.get(FIELDS_LIMIT_SETTING);
-  const useShortDots = services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
+  const shortDotsEnabled = services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE);
 
   const {
     selected: selectedFields,
@@ -193,6 +186,7 @@ export function DiscoverSidebar({
           )}
           borderRadius="none"
           color="transparent"
+          hasBorder={false}
         >
           <EuiSplitPanel.Inner grow={false} paddingSize="s">
             <DiscoverFieldSearch
@@ -204,148 +198,38 @@ export function DiscoverSidebar({
           <EuiSplitPanel.Inner className="eui-yScroll" paddingSize="none">
             {fields.length > 0 && (
               <>
-                <EuiTitle size="xxxs" id="selected_fields" className="dscSideBarFieldListHeader">
-                  <h3>
-                    <FormattedMessage
-                      id="discover.fieldChooser.filter.selectedFieldsTitle"
-                      defaultMessage="Selected fields"
-                    />
-                  </h3>
-                </EuiTitle>
-                <EuiDroppable
-                  droppableId="SELECTED_FIELDS"
-                  spacing="m"
-                  data-test-subj={`fieldList-selected`}
-                >
-                  {selectedFields.map((field: IndexPatternField, index) => {
-                    return (
-                      <EuiDraggable
-                        spacing="m"
-                        key={`field${field.name}`}
-                        draggableId={field.name}
-                        index={index}
-                      >
-                        <EuiPanel
-                          data-attr-field={field.name}
-                          paddingSize="s"
-                          className="dscSidebar__item"
-                          data-test-subj={`fieldList-field`}
-                        >
-                          {/* The panel cannot exist in the DiscoverField component if the on focus highlight during keyboard navigation is needed */}
-                          <DiscoverField
-                            field={field}
-                            selected
-                            onAddField={onAddField}
-                            onRemoveField={onRemoveField}
-                            columns={columns}
-                            indexPattern={selectedIndexPattern}
-                            getDetails={getDetailsByField}
-                            useShortDots={useShortDots}
-                            onAddFilter={onAddFilter}
-                          />
-                        </EuiPanel>
-                      </EuiDraggable>
-                    );
+                <FieldList
+                  category="selected"
+                  fields={selectedFields}
+                  getDetailsByField={getDetailsByField}
+                  shortDotsEnabled={shortDotsEnabled}
+                  title={i18n.translate('discover.fieldChooser.filter.selectedFieldsTitle', {
+                    defaultMessage: 'Selected fields',
                   })}
-                </EuiDroppable>
-                <EuiTitle size="xxxs" id="available_fields" className="dscSideBarFieldListHeader">
-                  <h3>
-                    <FormattedMessage
-                      id="discover.fieldChooser.filter.availableFieldsTitle"
-                      defaultMessage="Available fields"
-                    />
-                  </h3>
-                </EuiTitle>
-
+                  {...props}
+                />
                 {popularFields.length > 0 && (
-                  <EuiPanel
-                    hasBorder={false}
-                    paddingSize="none"
-                    hasShadow={false}
-                    className={`dscFieldList dscFieldList--popular`}
-                    aria-labelledby="available_fields available_fields_popular"
-                    data-test-subj={`fieldList-popular`}
-                    color="primary"
-                  >
-                    <EuiTitle size="xxxs" className="dscSideBarFieldListHeader">
-                      <h4 style={{ fontWeight: 'normal' }} id="available_fields_popular">
-                        <FormattedMessage
-                          id="discover.fieldChooser.filter.popularTitle"
-                          defaultMessage="Popular"
-                        />
-                      </h4>
-                    </EuiTitle>
-                    <EuiDroppable droppableId="POPULAR_FIELDS" spacing="m" cloneDraggables={true}>
-                      {popularFields.map((field: IndexPatternField, index) => {
-                        return (
-                          <EuiDraggable
-                            spacing="m"
-                            key={`field${field.name}`}
-                            draggableId={field.name}
-                            index={index}
-                          >
-                            <EuiPanel
-                              data-attr-field={field.name}
-                              paddingSize="s"
-                              className="dscSidebar__item"
-                              data-test-subj={`fieldList-field`}
-                            >
-                              {/* The panel cannot exist in the DiscoverField component if the on focus highlight during keyboard navigation is needed */}
-                              <DiscoverField
-                                columns={columns}
-                                field={field}
-                                indexPattern={selectedIndexPattern}
-                                onAddField={onAddField}
-                                onRemoveField={onRemoveField}
-                                onAddFilter={onAddFilter}
-                                getDetails={getDetailsByField}
-                                useShortDots={useShortDots}
-                              />
-                            </EuiPanel>
-                          </EuiDraggable>
-                        );
-                      })}
-                    </EuiDroppable>
-                  </EuiPanel>
+                  <FieldList
+                    category="popular"
+                    fields={popularFields}
+                    getDetailsByField={getDetailsByField}
+                    shortDotsEnabled={shortDotsEnabled}
+                    title={i18n.translate('discover.fieldChooser.filter.popularTitle', {
+                      defaultMessage: 'Popular fields',
+                    })}
+                    {...props}
+                  />
                 )}
-                <EuiDroppable
-                  droppableId="UNPOPULAR_FIELDS"
-                  spacing="m"
-                  cloneDraggables={true}
-                  className="dscFieldList dscFieldList--unpopular"
-                  aria-labelledby="available_fields"
-                  data-test-subj="fieldList-unpopular"
-                >
-                  {unpopularFields.map((field: IndexPatternField, index) => {
-                    return (
-                      <EuiDraggable
-                        spacing="m"
-                        key={`field${field.name}`}
-                        draggableId={field.name}
-                        index={index}
-                      >
-                        <EuiPanel
-                          data-attr-field={field.name}
-                          paddingSize="s"
-                          className="dscSidebar__item"
-                          data-test-subj={`fieldList-field`}
-                        >
-                          {/* The panel cannot exist in the DiscoverField component if the on focus highlight during keyboard navigation is needed */}
-                          <DiscoverField
-                            columns={columns}
-                            field={field}
-                            indexPattern={selectedIndexPattern}
-                            onAddField={onAddField}
-                            onRemoveField={onRemoveField}
-                            onAddFilter={onAddFilter}
-                            getDetails={getDetailsByField}
-                            useShortDots={useShortDots}
-                          />
-                        </EuiPanel>
-                      </EuiDraggable>
-                    );
+                <FieldList
+                  category="unpopular"
+                  fields={unpopularFields}
+                  getDetailsByField={getDetailsByField}
+                  shortDotsEnabled={shortDotsEnabled}
+                  title={i18n.translate('discover.fieldChooser.filter.availableFieldsTitle', {
+                    defaultMessage: 'Available fields',
                   })}
-                </EuiDroppable>
+                  {...props}
+                />
               </>
             )}
           </EuiSplitPanel.Inner>
@@ -354,3 +238,85 @@ export function DiscoverSidebar({
     </I18nProvider>
   );
 }
+
+interface FieldGroupProps extends DiscoverSidebarProps {
+  category: 'selected' | 'popular' | 'unpopular';
+  title: string;
+  fields: IndexPatternField[];
+  getDetailsByField: (field: IndexPatternField) => FieldDetails;
+  shortDotsEnabled: boolean;
+}
+
+const FieldList = ({
+  category,
+  title,
+  fields,
+  columns,
+  selectedIndexPattern,
+  onAddField,
+  onRemoveField,
+  onAddFilter,
+  getDetailsByField,
+  shortDotsEnabled,
+}: FieldGroupProps) => {
+  const [expanded, setExpanded] = useState(true);
+
+  if (!selectedIndexPattern) return null;
+
+  return (
+    <>
+      <EuiButtonEmpty
+        iconSide="right"
+        color="text"
+        iconType={expanded ? 'arrowDown' : 'arrowRight'}
+        onClick={() => setExpanded(!expanded)}
+        size="xs"
+        className="dscSideBar_fieldGroup"
+      >
+        {title}
+      </EuiButtonEmpty>
+      {expanded && (
+        <EuiDroppable
+          droppableId={`${category.toUpperCase()}_FIELDS`}
+          spacing="m"
+          data-test-subj={`fieldList-${category}`}
+          cloneDraggables={category !== 'selected'}
+        >
+          {fields.map((field: IndexPatternField, index) => {
+            return (
+              <EuiDraggable
+                spacing="m"
+                key={`field${field.name}`}
+                draggableId={field.name}
+                index={index}
+              >
+                <EuiPanel
+                  data-attr-field={field.name}
+                  paddingSize="none"
+                  hasBorder={false}
+                  hasShadow={false}
+                  color="transparent"
+                  className="dscSidebar__item"
+                  data-test-subj={`fieldList-field`}
+                >
+                  {/* The panel cannot exist in the DiscoverField component if the on focus highlight during keyboard navigation is needed */}
+                  <DiscoverField
+                    selected={category === 'selected'}
+                    field={field}
+                    columns={columns}
+                    indexPattern={selectedIndexPattern}
+                    onAddField={onAddField}
+                    onRemoveField={onRemoveField}
+                    onAddFilter={onAddFilter}
+                    getDetails={getDetailsByField}
+                    useShortDots={shortDotsEnabled}
+                  />
+                </EuiPanel>
+              </EuiDraggable>
+            );
+          })}
+        </EuiDroppable>
+      )}
+    </>
+  );
+};

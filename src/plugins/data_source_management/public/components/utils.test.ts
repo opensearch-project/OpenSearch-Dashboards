@@ -7,11 +7,17 @@ import {
   createSingleDataSource,
   deleteDataSourceById,
   deleteMultipleDataSources,
+  extractRegisteredAuthTypeCredentials,
   getDataSourceById,
   getDataSources,
+  getDefaultAuthMethod,
   isValidUrl,
   testConnection,
   updateDataSourceById,
+  handleSetDefaultDatasource,
+  setFirstDataSourceAsDefault,
+  getFilteredDataSources,
+  getDefaultDataSource,
 } from './utils';
 import { coreMock } from '../../../../core/public/mocks';
 import {
@@ -22,11 +28,23 @@ import {
   mockDataSourceAttributesWithAuth,
   mockErrorResponseForSavedObjectsCalls,
   mockResponseForSavedObjectsCalls,
+  mockUiSettingsCalls,
+  getSingleDataSourceResponse,
+  getDataSource,
 } from '../mocks';
-import { AuthType } from '../types';
-import { HttpStart } from 'opensearch-dashboards/public';
+import {
+  AuthType,
+  noAuthCredentialAuthMethod,
+  sigV4AuthMethod,
+  usernamePasswordAuthMethod,
+} from '../types';
+import { HttpStart, SavedObject } from 'opensearch-dashboards/public';
+import { AuthenticationMethod, AuthenticationMethodRegistry } from '../auth_registry';
+import { deepEqual } from 'assert';
+import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
 
 const { savedObjects } = coreMock.createStart();
+const { uiSettings } = coreMock.createStart();
 
 describe('DataSourceManagement: Utils.ts', () => {
   describe('Get data source', () => {
@@ -218,5 +236,347 @@ describe('DataSourceManagement: Utils.ts', () => {
 
     /* True cases: port number scenario*/
     expect(isValidUrl('http://192.168.1.1:1234/')).toBeTruthy();
+  });
+
+  describe('Check default auth method', () => {
+    test('default auth method is Username & Password when Username & Password is enabled', () => {
+      const authMethodCombinationsToBeTested = [
+        [usernamePasswordAuthMethod],
+        [sigV4AuthMethod, usernamePasswordAuthMethod],
+        [noAuthCredentialAuthMethod, usernamePasswordAuthMethod],
+        [noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod],
+      ];
+
+      authMethodCombinationsToBeTested.forEach((authOptions) => {
+        const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+
+        authOptions.forEach((authMethod) => {
+          authenticationMethodRegistry.registerAuthenticationMethod(authMethod);
+        });
+
+        expect(getDefaultAuthMethod(authenticationMethodRegistry)?.name).toBe(
+          AuthType.UsernamePasswordType
+        );
+      });
+    });
+
+    test('default auth method is first one in AuthList when Username & Password is not enabled', () => {
+      const authMethodCombinationsToBeTested = [
+        [sigV4AuthMethod],
+        [noAuthCredentialAuthMethod],
+        [sigV4AuthMethod, noAuthCredentialAuthMethod],
+      ];
+
+      authMethodCombinationsToBeTested.forEach((authOptions) => {
+        const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+
+        authOptions.forEach((authMethod) => {
+          authenticationMethodRegistry.registerAuthenticationMethod(authMethod);
+        });
+
+        expect(getDefaultAuthMethod(authenticationMethodRegistry)?.name).toBe(authOptions[0].name);
+      });
+    });
+
+    test('default auth type is NoAuth when no auth options registered in authenticationMethodRegistry, this should not happen in real customer scenario for MD', () => {
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      expect(getDefaultAuthMethod(authenticationMethodRegistry)?.name).toBe(AuthType.NoAuth);
+    });
+  });
+  describe('handle set default datasource', () => {
+    beforeEach(() => {
+      jest.clearAllMocks(); // Reset all mock calls before each test
+    });
+    test('should set default datasource when it does not have default datasource ', async () => {
+      mockUiSettingsCalls(uiSettings, 'get', null);
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should not set default datasource when it has default datasouce', async () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'test');
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      expect(uiSettings.set).not.toHaveBeenCalled();
+    });
+  });
+  describe('set first aataSource as default', () => {
+    beforeEach(() => {
+      jest.clearAllMocks(); // Reset all mock calls before each test
+    });
+    test('should set defaultDataSource if more than one data source exists', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should set defaultDataSource if only one data source exists', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getSingleDataSourceResponse);
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should not set defaultDataSource if no data source exists', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
+      expect(uiSettings.remove).toHaveBeenCalled();
+      expect(uiSettings.set).not.toHaveBeenCalled();
+    });
+    test('should not set defaultDataSource if no data source exists and no default datasouce', async () => {
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', { savedObjects: [] });
+      await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, false);
+      expect(uiSettings.remove).not.toHaveBeenCalled();
+      expect(uiSettings.set).not.toHaveBeenCalled();
+    });
+  });
+  describe('Check extractRegisteredAuthTypeCredentials method', () => {
+    test('Should extract credential field successfully', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+        credentialFormField: {
+          userNameRegistered: '',
+          passWordRegistered: '',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        userName: 'some userName',
+        passWord: 'some password',
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+        passWordRegistered: 'some filled in password from registed auth credential form',
+      } as { [key: string]: string };
+
+      const expectExtractedAuthCredentials = {
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+        passWordRegistered: 'some filled in password from registed auth credential form',
+      };
+
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistry
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
+    });
+
+    test('Should extract empty object when no credentialFormField registered ', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        userName: 'some userName',
+        passWord: 'some password',
+      } as { [key: string]: string };
+
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistry
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, {}));
+    });
+
+    test('Should fill in empty value when credentail state not have registered field', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+        credentialFormField: {
+          userNameRegistered: '',
+          passWordRegistered: '',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        userName: 'some userName',
+        passWord: 'some password',
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+      } as { [key: string]: string };
+
+      const expectExtractedAuthCredentials = {
+        userNameRegistered: 'some filled in userName from registed auth credential form',
+        passWordRegistered: '',
+      };
+
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistry
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
+    });
+
+    test('Should inherit value from registered field when credential state not have registered field', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+        credentialFormField: {
+          registeredField: 'some value',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {} as { [key: string]: string };
+
+      const expectExtractedAuthCredentials = {
+        registeredField: 'some value',
+      };
+
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistry
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
+    });
+
+    test('Should not inherit value from registered field when credentail state have registered field', () => {
+      const authTypeToBeTested = 'Some Auth Type';
+
+      const authMethodToBeTested = {
+        name: authTypeToBeTested,
+        credentialSourceOption: {
+          value: authTypeToBeTested,
+          inputDisplay: 'some input',
+        },
+        credentialFormField: {
+          registeredField: 'Some value',
+        },
+      } as AuthenticationMethod;
+
+      const mockedCredentialState = {
+        registeredField: 'some other values',
+      } as { [key: string]: string };
+
+      const expectExtractedAuthCredentials = {
+        registeredField: 'some other values',
+      };
+
+      const authenticationMethodRegistry = new AuthenticationMethodRegistry();
+      authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTested);
+
+      const registedAuthTypeCredentials = extractRegisteredAuthTypeCredentials(
+        mockedCredentialState,
+        authTypeToBeTested,
+        authenticationMethodRegistry
+      );
+
+      expect(deepEqual(registedAuthTypeCredentials, expectExtractedAuthCredentials));
+    });
+  });
+
+  describe('Check on get filter datasource', () => {
+    test('should return all data sources when no filter is provided', () => {
+      const dataSources: Array<SavedObject<DataSourceAttributes>> = [
+        {
+          id: '1',
+          type: '',
+          references: [],
+          attributes: {
+            title: 'DataSource 1',
+            endpoint: '',
+            auth: { type: AuthType.NoAuth, credentials: undefined },
+            name: AuthType.NoAuth,
+          },
+        },
+      ];
+
+      const result = getFilteredDataSources(dataSources);
+
+      expect(result).toEqual(dataSources);
+    });
+
+    test('should return filtered data sources when a filter is provided', () => {
+      const filter = (dataSource: SavedObject<DataSourceAttributes>) => dataSource.id === '2';
+      const result = getFilteredDataSources(getDataSource, filter);
+
+      expect(result).toEqual([
+        {
+          id: '2',
+          type: '',
+          references: [],
+          attributes: {
+            title: 'DataSource 2',
+            endpoint: '',
+            auth: { type: AuthType.NoAuth, credentials: undefined },
+            name: AuthType.NoAuth,
+          },
+        },
+      ]);
+    });
+  });
+  describe('getDefaultDataSource', () => {
+    const LocalCluster = { id: 'local', label: 'Local Cluster' };
+    const hideLocalCluster = false;
+    const defaultOption = [{ id: '2', label: 'Default Option' }];
+
+    it('should return the default option if it exists in the data sources', () => {
+      const result = getDefaultDataSource(
+        getDataSource,
+        LocalCluster,
+        uiSettings,
+        hideLocalCluster,
+        defaultOption
+      );
+      expect(result).toEqual([defaultOption[0]]);
+    });
+
+    it('should return local cluster if it exists and no default options in the data sources', () => {
+      mockUiSettingsCalls(uiSettings, 'get', null);
+      const result = getDefaultDataSource(
+        getDataSource,
+        LocalCluster,
+        uiSettings,
+        hideLocalCluster
+      );
+      expect(result).toEqual([LocalCluster]);
+    });
+
+    it('should return the default datasource if hideLocalCluster is false', () => {
+      mockUiSettingsCalls(uiSettings, 'get', '2');
+      const result = getDefaultDataSource(getDataSource, LocalCluster, uiSettings, true);
+      expect(result).toEqual([{ id: '2', label: 'DataSource 2' }]);
+    });
+
+    it('should return the first data source if no default option, hideLocalCluster is ture and no default datasource', () => {
+      mockUiSettingsCalls(uiSettings, 'get', null);
+      const result = getDefaultDataSource(getDataSource, LocalCluster, uiSettings, true);
+      expect(result).toEqual([{ id: '1', label: 'DataSource 1' }]);
+    });
   });
 });

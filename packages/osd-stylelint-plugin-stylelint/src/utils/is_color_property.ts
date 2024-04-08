@@ -57,10 +57,21 @@ const COLOR_PROPERTIES = [
  * each one, therefore this is to optimize the linter to
  * skip any property that does not impact colors.
  */
+
+/**
+ * Checks if a given CSS property potentially modifies a color.
+ * @param prop - The CSS property to check.
+ * @returns A boolean indicating whether the property can impact colors.
+ */
 export const isColorProperty = (prop: string) => {
   return COLOR_PROPERTIES.includes(prop);
 };
 
+/**
+ * Gets the parent rule of a declaration if the declaration is a color property.
+ * @param decl - The CSS declaration.
+ * @returns The parent rule if the declaration is a color property, otherwise undefined.
+ */
 export const getColorPropertyParent = (decl: Declaration) => {
   if (!isColorProperty(decl.prop)) {
     return undefined;

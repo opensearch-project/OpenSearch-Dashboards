@@ -88,24 +88,42 @@ export interface HttpSetup {
 export type HttpStart = HttpSetup;
 
 /**
+ * prepend options
+ *
+ * withoutClientBasePath option will prepend a relative url with serverBasePath only.
+ * For now, clientBasePath is consist of:
+ * workspacePath, which has the pattern of /w/{workspaceId}.
+ *
+ * In the future, clientBasePath may have other parts but keep `withoutClientBasePath` for now to not over-design the interface,
+ */
+export interface PrependOptions {
+  withoutClientBasePath?: boolean;
+}
+
+/**
  * APIs for manipulating the basePath on URL segments.
  * @public
  */
 export interface IBasePath {
   /**
-   * Gets the `basePath` string.
+   * Gets the `basePath + clientBasePath` string.
    */
   get: () => string;
 
   /**
-   * Prepends `path` with the basePath.
+   * Gets the `basePath` string
    */
-  prepend: (url: string) => string;
+  getBasePath: () => string;
 
   /**
-   * Removes the prepended basePath from the `path`.
+   * Prepends `path` with the basePath + clientBasePath.
    */
-  remove: (url: string) => string;
+  prepend: (url: string, prependOptions?: PrependOptions) => string;
+
+  /**
+   * Removes the prepended basePath + clientBasePath from the `path`.
+   */
+  remove: (url: string, prependOptions?: PrependOptions) => string;
 
   /**
    * Returns the server's root basePath as configured, without any namespace prefix.
@@ -262,6 +280,9 @@ export interface HttpFetchOptions extends HttpRequestInit {
    * When `true`, if the response has a JSON mime type, the {@link HttpResponse} will use an alternate JSON parser
    * that converts long numerals to BigInts. Defaults to `false`.
    */
+  withLongNumeralsSupport?: boolean;
+
+  /** @deprecated use {@link withLongNumeralsSupport} instead */
   withLongNumerals?: boolean;
 }
 

@@ -28,18 +28,10 @@
  * under the License.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { HashRouter as Router, Switch, Route, Redirect } from 'react-router-dom';
-import {
-  EuiTab,
-  EuiTabs,
-  EuiToolTip,
-  EuiComboBox,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiComboBoxOptionOption,
-} from '@elastic/eui';
+import { EuiTab, EuiTabs, EuiToolTip, EuiComboBoxOptionOption } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
@@ -47,18 +39,16 @@ import {
   ApplicationStart,
   ChromeStart,
   CoreStart,
+  IUiSettingsClient,
   NotificationsStart,
   SavedObjectsStart,
   ScopedHistory,
 } from 'src/core/public';
 
-import { useEffectOnce } from 'react-use';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { getDataSources } from '../../data_source_management/public/components/utils';
+import { DataSourceSelector } from '../../data_source_management/public';
 import { DevToolApp } from './dev_tool';
 import { DevToolsSetupDependencies } from './plugin';
 import { addHelpMenuToAppChrome } from './utils/util';
-
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
@@ -66,17 +56,14 @@ interface DevToolsWrapperProps {
   savedObjects: SavedObjectsStart;
   notifications: NotificationsStart;
   dataSourceEnabled: boolean;
+  hideLocalCluster: boolean;
+  uiSettings: IUiSettingsClient;
 }
 
 interface MountedDevToolDescriptor {
   devTool: DevToolApp;
   mountpoint: HTMLElement;
   unmountHandler: () => void;
-}
-
-interface DataSourceOption extends EuiComboBoxOptionOption {
-  id: string;
-  label: string;
 }
 
 function DevToolsWrapper({
@@ -86,10 +73,11 @@ function DevToolsWrapper({
   savedObjects,
   notifications: { toasts },
   dataSourceEnabled,
+  hideLocalCluster,
+  uiSettings,
 }: DevToolsWrapperProps) {
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
-  const [dataSources, setDataSources] = useState<DataSourceOption[]>([]);
-  const [selectedOptions, setSelectedOptions] = useState<DataSourceOption[]>([]);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
   useEffect(
     () => () => {
@@ -100,33 +88,8 @@ function DevToolsWrapper({
     []
   );
 
-  useEffectOnce(() => {
-    fetchDataSources();
-  });
-
-  const fetchDataSources = () => {
-    getDataSources(savedObjects.client)
-      .then((fetchedDataSources) => {
-        if (fetchedDataSources?.length) {
-          const dataSourceOptions = fetchedDataSources.map((dataSource) => ({
-            id: dataSource.id,
-            label: dataSource.title,
-          }));
-          setDataSources(dataSourceOptions);
-        }
-      })
-      .catch(() => {
-        toasts.addDanger(
-          i18n.translate('devTools.devToolWrapper.fetchDataSourceError', {
-            defaultMessage: 'Unable to fetch existing data sources',
-          })
-        );
-      });
-  };
-
   const onChange = async (e: Array<EuiComboBoxOptionOption<any>>) => {
     const dataSourceId = e[0] ? e[0].id : undefined;
-    setSelectedOptions(e);
     await remount(mountedTool.current!.mountpoint, dataSourceId);
   };
 
@@ -151,6 +114,7 @@ function DevToolsWrapper({
       mountpoint: mountPoint,
       unmountHandler,
     };
+    setIsLoading(false);
   };
 
   return (
@@ -171,22 +135,16 @@ function DevToolsWrapper({
             </EuiTab>
           </EuiToolTip>
         ))}
-        {dataSourceEnabled ? (
-          <div className="devAppDataSourcePicker">
-            <EuiComboBox
-              aria-label={i18n.translate('devTools.devToolWrapper.DataSourceComboBoxAriaLabel', {
-                defaultMessage: 'Select a Data Source',
-              })}
-              placeholder={i18n.translate('devTools.devToolWrapper.DataSourceComboBoxPlaceholder', {
-                defaultMessage: 'Select a Data Source',
-              })}
-              singleSelection={{ asPlainText: true }}
-              options={dataSources}
-              selectedOptions={selectedOptions}
-              onChange={onChange}
-              prepend="DataSource"
-              compressed
-              isDisabled={!dataSourceEnabled}
+        {dataSourceEnabled && !isLoading ? (
+          <div className="devAppDataSourceSelector">
+            <DataSourceSelector
+              savedObjectsClient={savedObjects.client}
+              notifications={toasts}
+              onSelectedDataSource={onChange}
+              disabled={!dataSourceEnabled}
+              hideLocalCluster={hideLocalCluster}
+              fullWidth={false}
+              uiSettings={uiSettings}
             />
           </div>
         ) : null}
@@ -203,7 +161,12 @@ function DevToolsWrapper({
               mountedTool.current.devTool !== activeDevTool ||
               mountedTool.current.mountpoint !== element)
           ) {
-            await remount(element);
+            let initialDataSourceId;
+            if (!dataSourceEnabled || (dataSourceEnabled && !hideLocalCluster)) {
+              initialDataSourceId = '';
+            }
+
+            await remount(element, initialDataSourceId);
           }
         }}
       />
@@ -255,13 +218,14 @@ function setBreadcrumbs(chrome: ChromeStart) {
 }
 
 export function renderApp(
-  { application, chrome, docLinks, savedObjects, notifications }: CoreStart,
+  { application, chrome, docLinks, savedObjects, notifications, uiSettings }: CoreStart,
   element: HTMLElement,
   history: ScopedHistory,
   devTools: readonly DevToolApp[],
   { dataSource }: DevToolsSetupDependencies
 ) {
   const dataSourceEnabled = !!dataSource;
+  const hideLocalCluster = dataSource?.hideLocalCluster ?? false;
   if (redirectOnMissingCapabilities(application)) {
     return () => {};
   }
@@ -291,6 +255,8 @@ export function renderApp(
                     savedObjects={savedObjects}
                     notifications={notifications}
                     dataSourceEnabled={dataSourceEnabled}
+                    hideLocalCluster={hideLocalCluster}
+                    uiSettings={uiSettings}
                   />
                 )}
               />

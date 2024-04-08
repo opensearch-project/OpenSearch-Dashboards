@@ -29,7 +29,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { SharedGlobalConfig, Logger } from 'opensearch-dashboards/server';
+import { SharedGlobalConfig, Logger, OpenSearchServiceSetup } from 'opensearch-dashboards/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '@opensearch-project/opensearch';
@@ -49,11 +49,12 @@ export const opensearchSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   usage?: SearchUsage,
-  dataSource?: DataSourcePluginSetup
+  dataSource?: DataSourcePluginSetup,
+  openSearchServiceSetup?: OpenSearchServiceSetup,
+  withLongNumeralsSupport?: boolean
 ): ISearchStrategy => {
   return {
     search: async (context, request, options) => {
-      logger.debug(`search ${request.params?.index}`);
       const config = await config$.pipe(first()).toPromise();
       const uiSettingsClient = await context.core.uiSettings.client;
 
@@ -73,7 +74,14 @@ export const opensearchSearchStrategyProvider = (
       });
 
       try {
-        const client = await decideClient(context, request);
+        const isOpenSearchHostsEmpty =
+          openSearchServiceSetup?.legacy?.client?.config?.hosts?.length === 0;
+
+        if (dataSource?.dataSourceEnabled() && isOpenSearchHostsEmpty && !request.dataSourceId) {
+          throw new Error(`Data source id is required when no openseach hosts config provided`);
+        }
+
+        const client = await decideClient(context, request, withLongNumeralsSupport);
         const promise = shimAbortSignal(client.search(params), options?.abortSignal);
 
         const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;
@@ -87,11 +95,12 @@ export const opensearchSearchStrategyProvider = (
           isRunning: false,
           rawResponse,
           ...getTotalLoaded(rawResponse._shards),
+          withLongNumeralsSupport,
         };
       } catch (e) {
         if (usage) usage.trackError();
 
-        if (dataSource && request.dataSourceId) {
+        if (dataSource?.dataSourceEnabled()) {
           throw dataSource.createDataSourceError(e);
         }
         throw e;

@@ -171,10 +171,12 @@ export class CoreSystem {
       });
       const application = this.application.setup({ context, http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
+      const chrome = this.chrome.setup();
 
       const core: InternalCoreSetup = {
         application,
         context,
+        chrome,
         fatalErrors: this.fatalErrorsSetup,
         http,
         injectedMetadata,
@@ -233,6 +235,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
         uiSettings,
+        overlays,
       });
 
       this.coreApp.start({ application, http, notifications, uiSettings });

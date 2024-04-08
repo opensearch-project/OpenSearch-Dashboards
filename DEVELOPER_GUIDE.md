@@ -26,6 +26,8 @@ This guide applies to all development within the OpenSearch Dashboards project a
   - [React](#react)
   - [API endpoints](#api-endpoints)
 
+> To view these docs and all the readme's in this repository as webpages, visit https://opensearch-project.github.io/OpenSearch-Dashboards/docs/index.html#/
+
 ## Getting started guide
 
 This guide is for any developer who wants a running local development environment where you can make, see, and test changes. It's opinionated to get you running as quickly and easily as possible, but it's not the only way to set up a development environment.
@@ -179,6 +181,7 @@ For windows:
 $ wsl -d docker-desktop
 $ sysctl -w vm.max_map_count=262144
 ```
+
 ### Next Steps
 
 Now that you have a development environment to play with, there are a number of different paths you may take next.
@@ -235,6 +238,7 @@ $ yarn opensearch snapshot --P https://repo1.maven.org/maven2/org/opensearch/plu
 Note - if you add the [`security` plugin](https://github.com/opensearch-project/security), you'll also need to [configure OpenSearch Dashboards for security](#configure-opensearch-dashboards-for-security).
 
 ### Plugin development
+
 The osd-plugin-generator tool makes it easier to create a plugin for OpenSearch Dashboards. It sets up the basic structure of the project and provides scripts to build it. Refer to [osd-plugin-generator](https://github.com/opensearch-project/OpenSearch-Dashboards/tree/main/packages/osd-plugin-generator) for more details.
 
 #### Other snapshot configuration options
@@ -252,11 +256,18 @@ Options:
       -E                Additional key=value settings to pass to OpenSearch
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on OpenSearch
+      --security        Installs and sets up OpenSearch Security plugin on the cluster
       --P               OpenSearch plugin artifact URL to install it on the cluster.
 
 ```bash
-$ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip
+$ yarn opensearch snapshot --version 2.2.0 -E cluster.name=test -E path.data=/tmp/opensearch-data --P org.opensearch.plugin:test-plugin:2.2.0.0 --P file:/home/user/opensearch-test-plugin-2.2.0.0.zip --security
 ```
+
+#### Read Only capabilities
+
+_This feature will only work if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
+
+Please follow the design described in [the docs](https://github.com/opensearch-project/OpenSearch/blob/main/docs/capabilities/read_only_mode.md#design)
 
 ### Alternative - Run OpenSearch from tarball
 
@@ -273,17 +284,26 @@ This method can also be used to develop against the [full distribution of OpenSe
 
 ### Configure OpenSearch Dashboards for security
 
-_This step is only mandatory if you have the [`security` plugin](https://github.com/opensearch-project/security) installed on your OpenSearch cluster with https/authentication enabled._
+_This step is only needed if you want your dev environment to also start with security. To do so both the OpenSearch node and OpenSearch Dashboards cluster need to have the security plugin installed. Follow the steps below to get setup correctly._
 
-Once the bootstrap of OpenSearch Dashboards is finished, you need to apply some
-changes to the default [`opensearch_dashboards.yml`](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/config/opensearch_dashboards.yml#L25-L72) in order to connect to OpenSearch.
+To startup the OpenSearch snapshot with security
 
-```yml
-opensearch.hosts: ["https://localhost:9200"]
-opensearch.username: "admin" # Default username on the docker image
-opensearch.password: "admin" # Default password on the docker image
-opensearch.ssl.verificationMode: none
-```
+> OpenSearch has strong password requirements and will fail to bootstrap if the password requirements are not met. e.g. myStrongPassword123!
+
+1. Run `export OPENSEARCH_INITIAL_ADMIN_PASSWORD=<initial admin password>` since it's needed by the configuration script
+2. Run `yarn opensearch snapshot --security`
+3. Wait a few seconds while the plugin is installed, configured, and OpenSearch starts up.
+
+Then within another window you can start OpenSearch Dashboards:
+
+_First make sure to clone the https://github.com/opensearch-project/security-dashboards-plugin repo into the plugins folder and build it (Using `yarn build`). You can follow the instructions here https://github.com/opensearch-project/security-dashboards-plugin/blob/main/DEVELOPER_GUIDE.md#install-opensearch-dashboards-with-security-dashboards-plugin._
+
+> You do not have to edit the `config/opensearch-dashboards.yml` file since the `yarn start:security` command sets up the default overrides automatically
+
+Then do the following:
+
+1. Run `yarn start:security`
+2. Navigate to OpenSearch Dashboards and login with the username `admin` and password `<initial admin password>`.
 
 For more detailed documentation, see [Configure TLS for OpenSearch Dashboards](https://opensearch.org/docs/latest/install-and-configure/install-dashboards/tls).
 

@@ -6,6 +6,17 @@
   /* stylelint-disable-next-line */
   container-name: canvas;
   height: 100%;
+
+  &_results {
+    margin-left: $euiSizeM;
+    position: relative;
+  }
+
+  &_options {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
 }
 
 // TopNav styles for the Discover
