@@ -28,7 +28,7 @@ const PANEL_KEY = 'SECONDARY_PANEL';
 export function SecondaryPanel() {
   const { indexPattern, rootState } = useVisBuilderContext();
   const { draftAgg, aggConfigParams } = rootState.visualization.activeVisualization!;
-  const isEditorValid = rootState.editor.errors[PANEL_KEY];
+  const isEditorValid = !rootState.editor.errors[PANEL_KEY];
   const [touched, setTouched] = useState(false);
   const dispatch = useTypedDispatch();
   const vizType = useVisualizationType();
