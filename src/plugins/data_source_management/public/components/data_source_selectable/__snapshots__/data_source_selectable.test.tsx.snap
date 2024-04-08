@@ -34,7 +34,6 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
   >
     <EuiPanel
       color="transparent"
-      data-test-subj="dataSourceSelectablePanel"
       paddingSize="s"
       style={
         Object {
@@ -115,7 +114,6 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
   >
     <EuiPanel
       color="transparent"
-      data-test-subj="dataSourceSelectablePanel"
       paddingSize="s"
       style={
         Object {
@@ -180,7 +178,6 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
   >
     <EuiPanel
       color="transparent"
-      data-test-subj="dataSourceSelectablePanel"
       paddingSize="s"
       style={
         Object {
@@ -282,7 +279,6 @@ Object {
                 <div>
                   <div
                     class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow"
-                    data-test-subj="dataSourceSelectablePanel"
                     style="width: 300px;"
                   >
                     <div
