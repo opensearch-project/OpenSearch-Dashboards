@@ -92,7 +92,7 @@ export class DataSourceSelectable extends React.Component<
     }));
   }
 
-  handleSelectedOption(dataSourceOptions: DataSourceOption[]) {
+  handleSelectedOption(dataSourceOptions: DataSourceOption[], defaultDataSource?: string) {
     const [{ id }] = this.props.selectedOption!;
     const dsOption = dataSourceOptions.find((ds) => ds.id === id);
     if (!dsOption) {
@@ -117,6 +117,7 @@ export class DataSourceSelectable extends React.Component<
       ...this.state,
       dataSourceOptions: updatedDataSourceOptions,
       selectedOption: [{ id, label: dsOption.label }],
+      defaultDataSource,
     });
     this.props.onSelectedDataSources([{ id, label: dsOption.label }]);
   }
@@ -145,6 +146,7 @@ export class DataSourceSelectable extends React.Component<
       ...this.state,
       selectedOption: selectedDataSource,
       dataSourceOptions: updatedDataSourceOptions,
+      defaultDataSource,
     });
 
     this.props.onSelectedDataSources(selectedDataSource);
@@ -168,7 +170,8 @@ export class DataSourceSelectable extends React.Component<
         dataSourceOptions.unshift(LocalCluster);
       }
 
-      const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
+      const defaultDataSource =
+        this.props.uiSettings?.get('defaultDataSource', undefined) ?? undefined;
 
       // no active option pass in, do nothing
       if (this.props.selectedOption?.length === 0) {
@@ -177,12 +180,12 @@ export class DataSourceSelectable extends React.Component<
       }
 
       if (this.props.selectedOption?.length) {
-        this.handleSelectedOption(dataSourceOptions, fetchedDataSources, defaultDataSource);
+        this.handleSelectedOption(dataSourceOptions, defaultDataSource);
         return;
       }
 
       // handle default data source if there is no valid active option
-      this.handleDefaultDataSource(dataSourceOptions, fetchedDataSources, defaultDataSource);
+      this.handleDefaultDataSource(dataSourceOptions, defaultDataSource);
     } catch (error) {
       this.props.notifications.addWarning(
         i18n.translate('dataSource.fetchDataSourceError', {
