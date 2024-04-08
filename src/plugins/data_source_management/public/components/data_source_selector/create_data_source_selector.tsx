@@ -5,10 +5,15 @@
 
 import React from 'react';
 import { IUiSettingsClient } from 'src/core/public';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { DataSourceSelector, DataSourceSelectorProps } from './data_source_selector';
 
-export function createDataSourceSelector(uiSettings: IUiSettingsClient) {
+export function createDataSourceSelector(
+  uiSettings: IUiSettingsClient,
+  dataSource: DataSourcePluginSetup
+) {
+  const { hideLocalCluster } = dataSource;
   return (props: DataSourceSelectorProps) => (
-    <DataSourceSelector {...props} uiSettings={uiSettings} />
+    <DataSourceSelector {...props} uiSettings={uiSettings} hideLocalCluster={hideLocalCluster} />
   );
 }
