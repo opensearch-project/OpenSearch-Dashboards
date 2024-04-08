@@ -4,7 +4,7 @@
  */
 
 export const capabilitiesProvider = () => ({
-  'visualization-visbuilder-new': {
+  'visualization-visbuilder': {
     // TODO: investigate which capabilities we need to provide
     // createNew: true,
     // createShortUrl: true,
