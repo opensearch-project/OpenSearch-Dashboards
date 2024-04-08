@@ -4,19 +4,13 @@
  */
 
 import { schema } from '@osd/config-schema';
-import {
-  CoreSetup,
-  Logger,
-  exportSavedObjectsToStream,
-  importSavedObjectsFromStream,
-  PrincipalType,
-  ACL,
-} from '../../../../core/server';
+import { CoreSetup, Logger, PrincipalType, ACL } from '../../../../core/server';
 import { WorkspacePermissionMode } from '../../common/constants';
 import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
+import { registerDuplicateRoute } from './duplicate';
 
-const WORKSPACES_API_BASE_URL = '/api/workspaces';
+export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
 const workspacePermissionMode = schema.oneOf([
   schema.literal(WorkspacePermissionMode.Read),
@@ -218,80 +212,5 @@ export function registerRoutes({
   );
 
   // duplicate saved objects among workspaces
-  router.post(
-    {
-      path: `${WORKSPACES_API_BASE_URL}/_duplicate_saved_objects`,
-      validate: {
-        body: schema.object({
-          objects: schema.arrayOf(
-            schema.object({
-              type: schema.string(),
-              id: schema.string(),
-            })
-          ),
-          includeReferencesDeep: schema.boolean({ defaultValue: false }),
-          targetWorkspace: schema.string(),
-        }),
-      },
-    },
-    router.handleLegacyErrors(async (context, req, res) => {
-      const savedObjectsClient = context.core.savedObjects.client;
-      const { objects, includeReferencesDeep, targetWorkspace } = req.body;
-
-      // need to access the registry for type validation, can't use the schema for this
-      const supportedTypes = context.core.savedObjects.typeRegistry
-        .getImportableAndExportableTypes()
-        .map((t) => t.name);
-
-      const invalidObjects = objects.filter((obj) => !supportedTypes.includes(obj.type));
-      if (invalidObjects.length) {
-        return res.badRequest({
-          body: {
-            message: `Trying to duplicate object(s) with unsupported types: ${invalidObjects
-              .map((obj) => `${obj.type}:${obj.id}`)
-              .join(', ')}`,
-          },
-        });
-      }
-
-      // check whether the target workspace exists or not
-      const getTargetWorkspaceResult = await client.get(
-        {
-          context,
-          request: req,
-          logger,
-        },
-        targetWorkspace
-      );
-      if (!getTargetWorkspaceResult.success) {
-        return res.badRequest({
-          body: {
-            message: `Get target workspace ${targetWorkspace} error: ${getTargetWorkspaceResult.error}`,
-          },
-        });
-      }
-
-      // fetch all the details of the specified saved objects
-      const objectsListStream = await exportSavedObjectsToStream({
-        savedObjectsClient,
-        objects,
-        exportSizeLimit: maxImportExportSize,
-        includeReferencesDeep,
-        excludeExportDetails: true,
-      });
-
-      // import the saved objects into the target workspace
-      const result = await importSavedObjectsFromStream({
-        savedObjectsClient: context.core.savedObjects.client,
-        typeRegistry: context.core.savedObjects.typeRegistry,
-        readStream: objectsListStream,
-        objectLimit: maxImportExportSize,
-        overwrite: false,
-        createNewCopies: true,
-        workspaces: [targetWorkspace],
-      });
-
-      return res.ok({ body: result });
-    })
-  );
+  registerDuplicateRoute(router, logger, client, maxImportExportSize);
 }
