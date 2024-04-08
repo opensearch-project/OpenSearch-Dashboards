@@ -98,11 +98,10 @@ export function getDefaultDataSource(
   defaultDataSourceId?: string,
   hideLocalCluster?: boolean
 ) {
-
   const defaultDataSourceAfterCheck = dataSourcesOptions.find(
     (dataSource) => dataSource.id === defaultDataSourceId
   );
-// console.log("defaultDataSourceAfterCheck", defaultDataSourceAfterCheck)
+  // console.log("defaultDataSourceAfterCheck", defaultDataSourceAfterCheck)
   if (defaultDataSourceAfterCheck) {
     return [
       {
