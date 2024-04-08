@@ -238,5 +238,33 @@ describe('workspace_id_consumer integration test', () => {
         )
       );
     });
+
+    it('import within workspace', async () => {
+      await clearFooAndBar();
+
+      const importWithWorkspacesResult = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_import?overwrite=false`)
+        .attach(
+          'file',
+          Buffer.from(
+            [
+              JSON.stringify({
+                ...dashboard,
+                id: 'bar',
+              }),
+            ].join('\n'),
+            'utf-8'
+          ),
+          'tmp.ndjson'
+        )
+        .expect(200);
+
+      const findResult = await osdTestServer.request
+        .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=${dashboard.type}`)
+        .expect(200);
+
+      expect(importWithWorkspacesResult.body.success).toEqual(true);
+      expect(findResult.body.saved_objects[0].workspaces).toEqual([createdFooWorkspace.id]);
+    });
   });
 });
