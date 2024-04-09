@@ -31,16 +31,16 @@
 import { resolve } from 'path';
 import { readFile } from 'fs';
 
-import { fromNode as fcb } from 'bluebird';
+import { promisify } from 'util';
 import glob from 'glob';
 
 export async function getBundledNotices(packageDirectory) {
   const pattern = resolve(packageDirectory, '*{LICENSE,NOTICE}*');
-  const paths = await fcb((cb) => glob(pattern, cb));
+  const paths = await promisify(glob)(pattern);
   return Promise.all(
     paths.map(async (path) => ({
       path,
-      text: await fcb((cb) => readFile(path, 'utf8', cb)),
+      text: await promisify(readFile)(path, 'utf8'),
     }))
   );
 }
