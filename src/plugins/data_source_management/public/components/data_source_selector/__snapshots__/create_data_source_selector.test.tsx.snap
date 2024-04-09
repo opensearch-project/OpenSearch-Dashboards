@@ -29,12 +29,11 @@ Object {
               data-test-subj="comboBoxInput"
               tabindex="-1"
             >
-              <span
-                class="euiComboBoxPill euiComboBoxPill--plainText"
-                id=""
+              <p
+                class="euiComboBoxPlaceholder"
               >
-                Local cluster
-              </span>
+                Select a data source
+              </p>
               <div
                 class="euiComboBox__input"
                 style="font-size: 14px; display: inline-block;"
@@ -54,17 +53,6 @@ Object {
             <div
               class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
             >
-              <button
-                aria-label="Clear input"
-                class="euiFormControlLayoutClearButton"
-                data-test-subj="comboBoxClearButton"
-                type="button"
-              >
-                <span
-                  class="euiFormControlLayoutClearButton__icon"
-                  data-euiicon-type="cross"
-                />
-              </button>
               <button
                 aria-label="Open list of options"
                 class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
@@ -108,12 +96,11 @@ Object {
             data-test-subj="comboBoxInput"
             tabindex="-1"
           >
-            <span
-              class="euiComboBoxPill euiComboBoxPill--plainText"
-              id=""
+            <p
+              class="euiComboBoxPlaceholder"
             >
-              Local cluster
-            </span>
+              Select a data source
+            </p>
             <div
               class="euiComboBox__input"
               style="font-size: 14px; display: inline-block;"
@@ -133,17 +120,6 @@ Object {
           <div
             class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
           >
-            <button
-              aria-label="Clear input"
-              class="euiFormControlLayoutClearButton"
-              data-test-subj="comboBoxClearButton"
-              type="button"
-            >
-              <span
-                class="euiFormControlLayoutClearButton__icon"
-                data-euiicon-type="cross"
-              />
-            </button>
             <button
               aria-label="Open list of options"
               class="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
