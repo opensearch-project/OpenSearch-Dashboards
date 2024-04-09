@@ -190,24 +190,6 @@ describe('DataSourceSelectable', () => {
     expect(button).toHaveTextContent('test2');
   });
 
-  it('should display Local Cluster when not provide selectedOption', async () => {
-    const onSelectedDataSource = jest.fn();
-    const container = render(
-      <DataSourceSelectable
-        savedObjectsClient={client}
-        notifications={toasts}
-        onSelectedDataSources={onSelectedDataSource}
-        disabled={false}
-        hideLocalCluster={false}
-        fullWidth={false}
-        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-      />
-    );
-    await nextTick();
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
-    expect(button).toHaveTextContent('Local cluster');
-  });
-
   it('should render normally even only provide dataSourceId', async () => {
     const onSelectedDataSource = jest.fn();
     const container = render(
@@ -358,5 +340,55 @@ describe('DataSourceSelectable', () => {
         },
       ],
     });
+  });
+
+  it('should render nothing when no default option or activeOption', async () => {
+    const onSelectedDataSource = jest.fn();
+    spyOn(utils, 'getDefaultDataSource').and.returnValue(undefined);
+    const container = mount(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+
+    const containerInstance = container.instance();
+
+    expect(onSelectedDataSource).toBeCalledTimes(0);
+    expect(containerInstance.state).toEqual({
+      dataSourceOptions: [],
+      defaultDataSource: null,
+      isPopoverOpen: false,
+      selectedOption: [],
+    });
+
+    containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
+    expect(containerInstance.state).toEqual({
+      dataSourceOptions: [
+        {
+          checked: 'on',
+          id: 'test2',
+          label: 'test2',
+        },
+      ],
+      defaultDataSource: null,
+      isPopoverOpen: false,
+      selectedOption: [
+        {
+          checked: 'on',
+          id: 'test2',
+          label: 'test2',
+        },
+      ],
+    });
+
+    expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
+    expect(onSelectedDataSource).toHaveBeenCalled();
   });
 });

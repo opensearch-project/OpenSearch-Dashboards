@@ -95,7 +95,7 @@ export function getFilteredDataSources(
 export function getDefaultDataSource(
   dataSourcesOptions: DataSourceOption[],
   LocalCluster: DataSourceOption,
-  defaultDataSourceId?: string,
+  defaultDataSourceId: string | null,
   hideLocalCluster?: boolean
 ) {
   const defaultDataSourceAfterCheck = dataSourcesOptions.find(

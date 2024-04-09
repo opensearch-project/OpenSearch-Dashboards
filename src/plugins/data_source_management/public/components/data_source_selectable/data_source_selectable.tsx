@@ -43,7 +43,7 @@ interface DataSourceSelectableState {
   dataSourceOptions: SelectedDataSourceOption[];
   isPopoverOpen: boolean;
   selectedOption?: SelectedDataSourceOption[];
-  defaultDataSource?: string;
+  defaultDataSource: string | null;
 }
 
 interface SelectedDataSourceOption extends DataSourceOption {
@@ -92,7 +92,7 @@ export class DataSourceSelectable extends React.Component<
     }));
   }
 
-  handleSelectedOption(dataSourceOptions: DataSourceOption[], defaultDataSource?: string) {
+  handleSelectedOption(dataSourceOptions: DataSourceOption[], defaultDataSource: string | null) {
     const [{ id }] = this.props.selectedOption!;
     const dsOption = dataSourceOptions.find((ds) => ds.id === id);
     if (!dsOption) {
@@ -105,6 +105,7 @@ export class DataSourceSelectable extends React.Component<
         ...this.state,
         dataSourceOptions,
         selectedOption: [],
+        defaultDataSource,
       });
       this.props.onSelectedDataSources([]);
       return;
@@ -122,7 +123,7 @@ export class DataSourceSelectable extends React.Component<
     this.props.onSelectedDataSources([{ id, label: dsOption.label }]);
   }
 
-  handleDefaultDataSource(dataSourceOptions: DataSourceOption[], defaultDataSource?: string) {
+  handleDefaultDataSource(dataSourceOptions: DataSourceOption[], defaultDataSource: string | null) {
     const selectedDataSource = getDefaultDataSource(
       dataSourceOptions,
       LocalCluster,
@@ -154,6 +155,7 @@ export class DataSourceSelectable extends React.Component<
 
   async componentDidMount() {
     this._isMounted = true;
+
     try {
       const fetchedDataSources = await getDataSourcesWithFields(this.props.savedObjectsClient, [
         'id',
@@ -170,14 +172,7 @@ export class DataSourceSelectable extends React.Component<
         dataSourceOptions.unshift(LocalCluster);
       }
 
-      const defaultDataSource =
-        this.props.uiSettings?.get('defaultDataSource', undefined) ?? undefined;
-
-      // no active option pass in, do nothing
-      if (this.props.selectedOption?.length === 0) {
-        // don't trigger callback since the selectedOption is empty
-        return;
-      }
+      const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
 
       if (this.props.selectedOption?.length) {
         this.handleSelectedOption(dataSourceOptions, defaultDataSource);
