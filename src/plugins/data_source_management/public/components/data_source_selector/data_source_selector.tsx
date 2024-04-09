@@ -58,7 +58,7 @@ export class DataSourceSelector extends React.Component<
     this.state = {
       allDataSources: [],
       defaultDataSource: '',
-      selectedOption: [],
+      selectedOption: this.props.hideLocalCluster ? [] : [LocalCluster],
     };
   }
 

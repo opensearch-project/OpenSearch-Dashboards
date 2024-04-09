@@ -45,7 +45,14 @@ exports[`DataSourceSelector should render normally with local cluster not hidden
   placeholder="Select a data source"
   prepend="Data source"
   renderOption={[Function]}
-  selectedOptions={Array []}
+  selectedOptions={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
   singleSelection={
     Object {
       "asPlainText": true,
@@ -271,7 +278,14 @@ exports[`DataSourceSelector: check dataSource options should not render options 
   placeholder="Select a data source"
   prepend="Data source"
   renderOption={[Function]}
-  selectedOptions={Array []}
+  selectedOptions={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
   singleSelection={
     Object {
       "asPlainText": true,
