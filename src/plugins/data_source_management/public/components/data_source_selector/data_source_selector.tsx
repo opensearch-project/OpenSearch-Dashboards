@@ -23,8 +23,8 @@ export interface DataSourceSelectorProps {
   notifications: ToastsStart;
   onSelectedDataSource: (dataSourceOption: DataSourceOption[]) => void;
   disabled: boolean;
-  hideLocalCluster: boolean;
   fullWidth: boolean;
+  hideLocalCluster?: boolean;
   defaultOption?: DataSourceOption[];
   placeholderText?: string;
   removePrepend?: boolean;
