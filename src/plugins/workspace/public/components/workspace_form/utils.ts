@@ -3,14 +3,28 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
+
 import {
   AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
   PublicAppInfo,
 } from '../../../../../core/public';
-import { DEFAULT_SELECTED_FEATURES_IDS } from '../../../common/constants';
+import type { SavedObjectPermissions } from '../../../../../core/types';
+import { DEFAULT_SELECTED_FEATURES_IDS, WorkspacePermissionMode } from '../../../common/constants';
+import {
+  optionIdToWorkspacePermissionModesMap,
+  PermissionModeId,
+  WorkspacePermissionItemType,
+} from './constants';
 
-import { WorkspaceFeature, WorkspaceFeatureGroup, WorkspaceFormErrors } from './types';
+import {
+  WorkspaceFeature,
+  WorkspaceFeatureGroup,
+  WorkspaceFormErrors,
+  WorkspaceFormSubmitData,
+  WorkspacePermissionSetting,
+} from './types';
 
 export const isWorkspaceFeatureGroup = (
   featureOrGroup: WorkspaceFeature | WorkspaceFeatureGroup
@@ -37,6 +51,9 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   }
   if (formErrors.description) {
     numberOfErrors += 1;
+  }
+  if (formErrors.permissionSettings) {
+    numberOfErrors += Object.keys(formErrors.permissionSettings).length;
   }
   return numberOfErrors;
 };
@@ -97,4 +114,220 @@ export const convertApplicationsToFeaturesOrGroups = (
       },
     ];
   }, []);
+};
+
+export const isUserOrGroupPermissionSettingDuplicated = (
+  permissionSettings: Array<Partial<WorkspacePermissionSetting>>,
+  permissionSettingToCheck: WorkspacePermissionSetting
+) =>
+  permissionSettings.some(
+    (permissionSetting) =>
+      (permissionSettingToCheck.type === WorkspacePermissionItemType.User &&
+        permissionSetting.type === WorkspacePermissionItemType.User &&
+        permissionSettingToCheck.userId === permissionSetting.userId) ||
+      (permissionSettingToCheck.type === WorkspacePermissionItemType.Group &&
+        permissionSetting.type === WorkspacePermissionItemType.Group &&
+        permissionSettingToCheck.group === permissionSetting.group)
+  );
+
+// default permission mode is read
+export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
+  for (const key in optionIdToWorkspacePermissionModesMap) {
+    if (optionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
+      return key;
+    }
+  }
+  return PermissionModeId.Read;
+};
+
+export const convertPermissionSettingsToPermissions = (
+  permissionItems: WorkspacePermissionSetting[] | undefined
+) => {
+  if (!permissionItems || permissionItems.length === 0) {
+    return undefined;
+  }
+  return permissionItems.reduce<SavedObjectPermissions>((previous, current) => {
+    current.modes.forEach((mode) => {
+      if (!previous[mode]) {
+        previous[mode] = {};
+      }
+      switch (current.type) {
+        case 'user':
+          previous[mode].users = previous[mode].users?.includes(current.userId)
+            ? previous[mode].users
+            : [...(previous[mode].users || []), current.userId];
+          break;
+        case 'group':
+          previous[mode].groups = previous[mode].groups?.includes(current.group)
+            ? previous[mode].groups
+            : [...(previous[mode].groups || []), current.group];
+          break;
+      }
+    });
+    return previous;
+  }, {});
+};
+
+const isWorkspacePermissionMode = (test: string): test is WorkspacePermissionMode =>
+  test === WorkspacePermissionMode.LibraryRead ||
+  test === WorkspacePermissionMode.LibraryWrite ||
+  test === WorkspacePermissionMode.Read ||
+  test === WorkspacePermissionMode.Write;
+
+export const convertPermissionsToPermissionSettings = (permissions: SavedObjectPermissions) => {
+  const permissionSettings: WorkspacePermissionSetting[] = [];
+  const finalPermissionSettings: WorkspacePermissionSetting[] = [];
+  const settingType2Modes: { [key: string]: WorkspacePermissionMode[] } = {};
+
+  Object.keys(permissions).forEach((mode) => {
+    if (!isWorkspacePermissionMode(mode)) {
+      return;
+    }
+    permissions[mode].users?.forEach((userId) => {
+      const settingTypeKey = `userId-${userId}`;
+      const modes = settingType2Modes[settingTypeKey] ?? [];
+
+      modes.push(mode);
+      if (modes.length === 1) {
+        permissionSettings.push({
+          // This id is for type safe, and will be overwrite in below.
+          id: 0,
+          type: WorkspacePermissionItemType.User,
+          userId,
+          modes,
+        });
+        settingType2Modes[settingTypeKey] = modes;
+      }
+    });
+    permissions[mode].groups?.forEach((group) => {
+      const settingTypeKey = `group-${group}`;
+      const modes = settingType2Modes[settingTypeKey] ?? [];
+
+      modes.push(mode);
+      if (modes.length === 1) {
+        permissionSettings.push({
+          // This id is for type safe, and will be overwrite in below.
+          id: 0,
+          type: WorkspacePermissionItemType.Group,
+          group,
+          modes,
+        });
+        settingType2Modes[settingTypeKey] = modes;
+      }
+    });
+  });
+  let id = 0;
+  /**
+   * One workspace permission setting may include multi setting options,
+   * for loop the workspace permission setting array to separate it to multi rows.
+   **/
+  permissionSettings.forEach((currentPermissionSettings) => {
+    /**
+     * For loop the option id to workspace permission modes map,
+     * if one settings includes all permission modes in a specific option,
+     * add these permission modes to the result array.
+     */
+    for (const key in optionIdToWorkspacePermissionModesMap) {
+      if (!Object.prototype.hasOwnProperty.call(optionIdToWorkspacePermissionModesMap, key)) {
+        continue;
+      }
+      const modesForCertainPermissionId = optionIdToWorkspacePermissionModesMap[key];
+      if (
+        modesForCertainPermissionId.every((mode) => currentPermissionSettings.modes?.includes(mode))
+      ) {
+        finalPermissionSettings.push({
+          ...currentPermissionSettings,
+          id,
+          modes: modesForCertainPermissionId,
+        });
+        id++;
+      }
+    }
+  });
+
+  return finalPermissionSettings;
+};
+
+export const validateWorkspaceForm = (
+  formData: Omit<Partial<WorkspaceFormSubmitData>, 'permissionSettings'> & {
+    permissionSettings?: Array<
+      Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
+    >;
+  }
+) => {
+  const formErrors: WorkspaceFormErrors = {};
+  const { name, description, permissionSettings } = formData;
+  if (name) {
+    if (!isValidFormTextInput(name)) {
+      formErrors.name = i18n.translate('workspace.form.detail.name.invalid', {
+        defaultMessage: 'Invalid workspace name',
+      });
+    }
+  } else {
+    formErrors.name = i18n.translate('workspace.form.detail.name.empty', {
+      defaultMessage: "Name can't be empty.",
+    });
+  }
+  if (description && !isValidFormTextInput(description)) {
+    formErrors.description = i18n.translate('workspace.form.detail.description.invalid', {
+      defaultMessage: 'Invalid workspace description',
+    });
+  }
+  if (permissionSettings) {
+    const permissionSettingsErrors: { [key: number]: string } = {};
+    for (let i = 0; i < permissionSettings.length; i++) {
+      const setting = permissionSettings[i];
+      if (!setting.type) {
+        permissionSettingsErrors[setting.id] = i18n.translate(
+          'workspace.form.permission.invalidate.type',
+          {
+            defaultMessage: 'Invalid type',
+          }
+        );
+      } else if (!setting.modes || setting.modes.length === 0) {
+        permissionSettingsErrors[setting.id] = i18n.translate(
+          'workspace.form.permission.invalidate.modes',
+          {
+            defaultMessage: 'Invalid permission modes',
+          }
+        );
+      } else if (setting.type === WorkspacePermissionItemType.User && !setting.userId) {
+        permissionSettingsErrors[setting.id] = i18n.translate(
+          'workspace.form.permission.invalidate.userId',
+          {
+            defaultMessage: 'Invalid user id',
+          }
+        );
+      } else if (setting.type === WorkspacePermissionItemType.Group && !setting.group) {
+        permissionSettingsErrors[setting.id] = i18n.translate(
+          'workspace.form.permission.invalidate.group',
+          {
+            defaultMessage: 'Invalid user group',
+          }
+        );
+      } else if (
+        isUserOrGroupPermissionSettingDuplicated(
+          permissionSettings.slice(0, i),
+          setting as WorkspacePermissionSetting
+        )
+      ) {
+        permissionSettingsErrors[setting.id] = i18n.translate(
+          'workspace.form.permission.invalidate.group',
+          {
+            defaultMessage: 'Duplicate permission setting',
+          }
+        );
+      }
+    }
+    if (Object.keys(permissionSettingsErrors).length > 0) {
+      formErrors.permissionSettings = permissionSettingsErrors;
+    }
+  }
+  return formErrors;
+};
+
+export const generateNextPermissionSettingsId = (permissionSettings: Array<{ id: number }>) => {
+  return permissionSettings.length === 0
+    ? 0
+    : Math.max(...permissionSettings.map(({ id }) => id)) + 1;
 };
