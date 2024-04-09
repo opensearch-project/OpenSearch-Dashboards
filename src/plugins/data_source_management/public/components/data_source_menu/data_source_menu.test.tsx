@@ -29,7 +29,6 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceSelectable}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: false,
           onSelectedDataSources: jest.fn(),
           savedObjects: client,
           notifications,
@@ -43,9 +42,9 @@ describe('DataSourceMenu', () => {
     component = shallow(
       <DataSourceMenu
         componentType={DataSourceComponentType.DataSourceSelectable}
+        hideLocalCluster={true}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           onSelectedDataSources: jest.fn(),
           savedObjects: client,
           notifications,
@@ -61,7 +60,6 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceView}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           savedObjects: client,
           notifications,
         }}
@@ -76,7 +74,6 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceView}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           notifications,
         }}
       />
@@ -90,7 +87,6 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceView}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           savedObjects: client,
           notifications,
           activeOption: [{ id: 'test', label: 'test-label' }],
@@ -106,7 +102,6 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceView}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           savedObjects: client,
           notifications,
           activeOption: [{ id: 'test' }],
@@ -122,7 +117,6 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceAggregatedView}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           savedObjects: client,
           notifications,
           displayAllCompatibleDataSources: true,
@@ -138,7 +132,6 @@ describe('DataSourceMenu', () => {
         componentType={''}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           savedObjects: client,
           notifications,
         }}
