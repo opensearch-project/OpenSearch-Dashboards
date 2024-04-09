@@ -29,3 +29,17 @@
  */
 
 export { TimelineFunctionInterface, TimelineFunctionConfig } from './lib/classes/timeline_function';
+
+export interface OpenSearchFunctionConfig {
+  q: string | null;
+  metric: string | null;
+  split: string | null;
+  index: string | null;
+  timefield: string | null;
+  kibana: boolean | null;
+  /**
+   * @deprecated The interval picker should be used instead
+   */
+  interval: string | null;
+  data_source_name?: string | null;
+}
