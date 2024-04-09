@@ -55,10 +55,11 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   private getFlattenedResultWithSavedObject(
     savedObject: SavedObject<WorkspaceAttribute>
-  ): WorkspaceAttribute {
+  ): WorkspaceAttributeWithPermission {
     return {
       ...savedObject.attributes,
       id: savedObject.id,
+      permissions: savedObject.permissions,
     };
   }
   private formatError(error: Error | any): string {
@@ -160,7 +161,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   public async update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
+    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>>
   ): Promise<IResponse<boolean>> {
     const { permissions, ...attributes } = payload;
     try {
@@ -179,12 +180,16 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
         }
       }
-      await client.create<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, attributes, {
-        id,
-        permissions,
-        overwrite: true,
-        version: workspaceInDB.version,
-      });
+      await client.create<Omit<WorkspaceAttribute, 'id'>>(
+        WORKSPACE_TYPE,
+        { ...workspaceInDB.attributes, ...attributes },
+        {
+          id,
+          permissions,
+          overwrite: true,
+          version: workspaceInDB.version,
+        }
+      );
       return {
         success: true,
         result: true,
