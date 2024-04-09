@@ -111,17 +111,17 @@ export class DataSourceAggregatedView extends React.Component<
     let items = [];
 
     // only display active data sources
-    if (this.props.activeDataSourceIds && this.props.activeDataSourceIds.length > 0) {
-      items = this.props.activeDataSourceIds.map((id) => {
+    if (this.props.displayAllCompatibleDataSources) {
+      items = [...this.state.allDataSourcesIdToTitleMap.values()].map((title) => {
         return {
-          name: this.state.allDataSourcesIdToTitleMap.get(id),
+          name: title,
           disabled: true,
         };
       });
     } else {
-      items = [...this.state.allDataSourcesIdToTitleMap.values()].map((title) => {
+      items = this.props.activeDataSourceIds!.map((id) => {
         return {
-          name: title,
+          name: this.state.allDataSourcesIdToTitleMap.get(id),
           disabled: true,
         };
       });
@@ -155,7 +155,8 @@ export class DataSourceAggregatedView extends React.Component<
           {'Data sources'}
         </EuiButtonEmpty>
         <EuiNotificationBadge color={'subdued'}>
-          {this.props.activeDataSourceIds?.length || 'All'}
+          {(this.props.displayAllCompatibleDataSources && 'All') ||
+            this.props.activeDataSourceIds!.length}
         </EuiNotificationBadge>
         <EuiPopover
           id={'dataSourceSViewContextMenuPopover'}

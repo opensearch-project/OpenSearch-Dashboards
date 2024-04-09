@@ -29,7 +29,6 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceSelectable}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: false,
           onSelectedDataSources: jest.fn(),
           savedObjects: client,
           notifications,
@@ -43,9 +42,9 @@ describe('DataSourceMenu', () => {
     component = shallow(
       <DataSourceMenu
         componentType={DataSourceComponentType.DataSourceSelectable}
+        hideLocalCluster={true}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           onSelectedDataSources: jest.fn(),
           savedObjects: client,
           notifications,
@@ -59,7 +58,54 @@ describe('DataSourceMenu', () => {
     component = shallow(
       <DataSourceMenu
         componentType={DataSourceComponentType.DataSourceView}
-        componentConfig={{ fullWidth: true, hideLocalCluster: true }}
+        componentConfig={{
+          fullWidth: true,
+          savedObjects: client,
+          notifications,
+        }}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render data source view if not pass saved object or notification', () => {
+    component = shallow(
+      <DataSourceMenu
+        componentType={DataSourceComponentType.DataSourceView}
+        componentConfig={{
+          fullWidth: true,
+          notifications,
+        }}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('can render data source view when provide activeOption', () => {
+    component = shallow(
+      <DataSourceMenu
+        componentType={DataSourceComponentType.DataSourceView}
+        componentConfig={{
+          fullWidth: true,
+          savedObjects: client,
+          notifications,
+          activeOption: [{ id: 'test', label: 'test-label' }],
+        }}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
+
+  it('can render data source view when only pass id in the activeOption', () => {
+    component = shallow(
+      <DataSourceMenu
+        componentType={DataSourceComponentType.DataSourceView}
+        componentConfig={{
+          fullWidth: true,
+          savedObjects: client,
+          notifications,
+          activeOption: [{ id: 'test' }],
+        }}
       />
     );
     expect(component).toMatchSnapshot();
@@ -71,9 +117,9 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceAggregatedView}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           savedObjects: client,
           notifications,
+          displayAllCompatibleDataSources: true,
         }}
       />
     );
@@ -86,7 +132,6 @@ describe('DataSourceMenu', () => {
         componentType={''}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           savedObjects: client,
           notifications,
         }}
@@ -98,12 +143,12 @@ describe('DataSourceMenu', () => {
   it('should render data source multi select component', () => {
     const container = render(
       <DataSourceMenu
-        showDataSourceMultiSelectable={true}
-        appName={'myapp'}
-        fullWidth={true}
-        className={'myclass'}
-        savedObjects={client}
-        notifications={notifications}
+        componentType={DataSourceComponentType.DataSourceMultiSelectable}
+        componentConfig={{
+          fullWidth: true,
+          savedObjects: client,
+          notifications,
+        }}
       />
     );
     expect(container).toMatchSnapshot();

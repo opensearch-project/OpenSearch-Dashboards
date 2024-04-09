@@ -54,6 +54,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Add workspace id in basePath ([#6060](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6060))
 - Implement new home page ([#6065](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6065))
 - Add sidecar service ([#5920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5920))
+- Allow the use of `ignoreVersionMismatch` in non-dev configuration ([#6347](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6347))
 - [Multiple Datasource] Use data source filter function before rendering ([#6175](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6175))
 - [Chrome] Introduce registerCollapsibleNavHeader to allow plugins to customize the rendering of nav menu header ([#5244](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5244))
 - [Dynamic Configurations] Pass request headers when making application config calls ([#6164](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6164))
@@ -69,9 +70,18 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Refactor data source menu and interface to allow cleaner selection of component and related configurations ([#6256](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6256))
 - [Multiple Datasource] Allow top nav menu to mount data source menu for use case when both menus are mounted ([#6268](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6268))
 - [Workspace] Add create workspace page ([#6179](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6179))
+- [Workspace] Add update workspace page ([#6270](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6270))
 - [Multiple Datasource] Make sure customer always have a default datasource ([#6237](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6237))
 - [Workspace] Add workspace list page ([#6182](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6182))
+- [Workspace] Add workspaces column to saved objects page ([#6225](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6225))
+- [Multiple Datasource] Enhanced data source selector with default datasource shows as first choice ([#6293](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6293))
 - [Multiple Datasource] Add multi data source support to sample vega visualizations ([#6218](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6218))
+- [Multiple Datasource] Fetch data source title for DataSourceView when only id is provided ([#6315](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6315)
+- [Workspace] Add permission control logic ([#6052](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6052))
+- [Multiple Datasource] Add default icon for selectable component and make sure the default datasource shows automatically ([#6327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6327))
+- [Multiple Datasource] Pass selected data sources to plugin consumers when the multi-select component initially loads ([#6333](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6333))
+- [Multiple Datasource] Add installedPlugins list to data source saved object ([#6348](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6348))
+- [Workspace] Add APIs to support plugin state in request ([#6303](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6303))
 
 ### 🐛 Bug Fixes
 
@@ -93,6 +103,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Multiple Datasource] Fix obsolete snapshots for test within data source management plugin ([#6185](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6185))
 - [Workspace] Add base path when parse url in http service ([#6233](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6233))
 - [Multiple Datasource] Fix sslConfig for multiple datasource to handle when certificateAuthorities is unset ([#6282](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6282))
+- [BUG][Multiple Datasource]Fix bug in data source aggregated view to change it to depend on displayAllCompatibleDataSources property to show the badge value ([#6291](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6291))
+- [BUG][Multiple Datasource]Read hideLocalCluster setting from yml and set in data source selector and data source menu ([#6361](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6361))
 - [BUG] Fix for checkForFunctionProperty so that order does not matter ([#6248](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6248))
 
 ### 🚞 Infrastructure
@@ -125,6 +137,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🪛 Refactoring
 
 - Remove unused Sass in `tile_map` plugin ([#4110](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4110))
+- [Multiple Datasource] Move data source selectable to its own folder, fix test and a few type errors for data source selectable component ([#6287](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6287))
 
 ### 🔩 Tests
 
@@ -163,6 +176,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Discover] Enhanced the data source selector with added sorting functionality ([#5719](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5719))
 - [Multiple Datasource] Add datasource picker component and use it in devtools and tutorial page when multiple datasource is enabled ([#5756](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5756))
 - [Multiple Datasource] Add datasource picker to import saved object flyout when multiple data source is enabled ([#5781](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5781))
+- [Discover] Add extension group title to non-index data source groups to indicate log explorer redirection in discover data source selector. ([#5815](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5815))
 
 ### 🐛 Bug Fixes
 

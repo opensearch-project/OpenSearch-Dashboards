@@ -236,6 +236,7 @@ class TutorialDirectoryUi extends React.Component {
           onSelectedDataSource={this.onSelectedDataSourceChange}
           disabled={!isDataSourceEnabled}
           hideLocalCluster={isLocalClusterHidden}
+          uiSettings={getServices().uiSettings}
         />
       </div>
     ) : null;

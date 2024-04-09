@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { IBasePath } from 'src/core/public';
+import { IBasePath, WorkspaceAttribute } from 'src/core/public';
 import React, { PureComponent, Fragment } from 'react';
 import moment from 'moment';
 import {
@@ -56,6 +56,7 @@ import {
   SavedObjectsManagementAction,
   SavedObjectsManagementColumnServiceStart,
 } from '../../../services';
+import { formatUrlWithWorkspaceId } from '../../../../../../core/public/utils';
 
 export interface TableProps {
   basePath: IBasePath;
@@ -83,6 +84,8 @@ export interface TableProps {
   onShowRelationships: (object: SavedObjectWithMetadata) => void;
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   dateFormat: string;
+  availableWorkspaces?: WorkspaceAttribute[];
+  currentWorkspaceId?: string;
 }
 
 interface TableState {
@@ -177,7 +180,11 @@ export class Table extends PureComponent<TableProps, TableState> {
       columnRegistry,
       namespaceRegistry,
       dateFormat,
+      availableWorkspaces,
+      currentWorkspaceId,
     } = this.props;
+
+    const visibleWsIds = availableWorkspaces?.map((ws) => ws.id) || [];
 
     const pagination = {
       pageIndex,
@@ -231,9 +238,19 @@ export class Table extends PureComponent<TableProps, TableState> {
           if (!canGoInApp) {
             return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
           }
-          return (
-            <EuiLink href={basePath.prepend(path)}>{title || getDefaultTitle(object)}</EuiLink>
-          );
+          let inAppUrl = basePath.prepend(path);
+          if (object.workspaces?.length) {
+            if (currentWorkspaceId) {
+              inAppUrl = formatUrlWithWorkspaceId(path, currentWorkspaceId, basePath);
+            } else {
+              // find first workspace user have permission
+              const workspaceId = object.workspaces.find((wsId) => visibleWsIds.includes(wsId));
+              if (workspaceId) {
+                inAppUrl = formatUrlWithWorkspaceId(path, workspaceId, basePath);
+              }
+            }
+          }
+          return <EuiLink href={inAppUrl}>{title || getDefaultTitle(object)}</EuiLink>;
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
       {

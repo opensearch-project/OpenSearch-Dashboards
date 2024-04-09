@@ -70,6 +70,10 @@ export class DataSourceMultiSelectable extends React.Component<
             ...this.state,
             selectedOptions,
           });
+
+          this.props.onSelectedDataSources(
+            selectedOptions.filter((option) => option.checked === 'on')
+          );
         }
       })
       .catch(() => {

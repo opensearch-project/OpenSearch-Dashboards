@@ -5,9 +5,10 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart, SavedObject } from 'opensearch-dashboards/public';
-import { getDataSourcesWithFields } from '../utils';
+import { IUiSettingsClient } from 'src/core/public';
+import { getDataSourcesWithFields, getDefaultDataSource, getFilteredDataSources } from '../utils';
 import { DataSourceAttributes } from '../../types';
 
 export const LocalCluster: DataSourceOption = {
@@ -22,18 +23,20 @@ export interface DataSourceSelectorProps {
   notifications: ToastsStart;
   onSelectedDataSource: (dataSourceOption: DataSourceOption[]) => void;
   disabled: boolean;
-  hideLocalCluster: boolean;
   fullWidth: boolean;
+  hideLocalCluster?: boolean;
   defaultOption?: DataSourceOption[];
   placeholderText?: string;
   removePrepend?: boolean;
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   compressed?: boolean;
+  uiSettings?: IUiSettingsClient;
 }
 
 interface DataSourceSelectorState {
   selectedOption: DataSourceOption[];
   allDataSources: Array<SavedObject<DataSourceAttributes>>;
+  defaultDataSource: string | null;
 }
 
 export interface DataSourceOption {
@@ -53,6 +56,7 @@ export class DataSourceSelector extends React.Component<
 
     this.state = {
       allDataSources: [],
+      defaultDataSource: '',
       selectedOption: this.props.defaultOption
         ? this.props.defaultOption
         : this.props.hideLocalCluster
@@ -67,6 +71,13 @@ export class DataSourceSelector extends React.Component<
 
   async componentDidMount() {
     this._isMounted = true;
+
+    const currentDefaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
+    this.setState({
+      ...this.state,
+      defaultDataSource: currentDefaultDataSource,
+    });
+
     getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
         if (fetchedDataSources?.length) {
@@ -74,6 +85,25 @@ export class DataSourceSelector extends React.Component<
           this.setState({
             ...this.state,
             allDataSources: fetchedDataSources,
+          });
+        }
+        const dataSources = getFilteredDataSources(
+          this.state.allDataSources,
+          this.props.dataSourceFilter
+        );
+        const selectedDataSource = getDefaultDataSource(
+          dataSources,
+          LocalCluster,
+          this.props.uiSettings,
+          this.props.hideLocalCluster,
+          this.props.defaultOption
+        );
+        if (selectedDataSource.length === 0) {
+          this.props.notifications.addWarning('No connected data source available.');
+        } else {
+          this.props.onSelectedDataSource(selectedDataSource);
+          this.setState({
+            selectedOption: selectedDataSource,
           });
         }
       })
@@ -100,9 +130,11 @@ export class DataSourceSelector extends React.Component<
         ? 'Select a data source'
         : this.props.placeholderText;
 
-    const dataSources = this.props.dataSourceFilter
-      ? this.state.allDataSources.filter((ds) => this.props.dataSourceFilter!(ds))
-      : this.state.allDataSources;
+    // The filter condition can be changed, thus we filter again here to make sure each time we will get the filtered data sources before rendering
+    const dataSources = getFilteredDataSources(
+      this.state.allDataSources,
+      this.props.dataSourceFilter
+    );
 
     const options = dataSources.map((ds) => ({ id: ds.id, label: ds.attributes?.title || '' }));
     if (!this.props.hideLocalCluster) {
@@ -140,6 +172,16 @@ export class DataSourceSelector extends React.Component<
         isDisabled={this.props.disabled}
         fullWidth={this.props.fullWidth || false}
         data-test-subj={'dataSourceSelectorComboBox'}
+        renderOption={(option) => (
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={1}>{option.label}</EuiFlexItem>
+            {option.id === this.state.defaultDataSource && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge iconSide="left">Default</EuiBadge>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        )}
       />
     );
   }
