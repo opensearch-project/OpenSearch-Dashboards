@@ -34,6 +34,7 @@ import { OPENSEARCH_SEARCH_STRATEGY } from '../../../../data/server';
 import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
+import { fetchDataSourceIdByName } from '../../lib/fetch_data_source_id';
 
 export default new Datasource('es', {
   args: [
@@ -156,7 +157,15 @@ export default new Datasource('es', {
 
     const opensearchShardTimeout = tlConfig.opensearchShardTimeout;
 
-    const body = await buildRequest(config, tlConfig, scriptedFields, opensearchShardTimeout);
+    const dataSourceId = await fetchDataSourceIdByName(config, tlConfig.savedObjectsClient);
+
+    const body = buildRequest(
+      config,
+      tlConfig,
+      scriptedFields,
+      opensearchShardTimeout,
+      dataSourceId
+    );
 
     const deps = (await tlConfig.getStartServices())[1];
 

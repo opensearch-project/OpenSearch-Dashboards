@@ -33,9 +33,8 @@ import moment from 'moment';
 import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
 import { UI_SETTINGS } from '../../../../../data/server';
-import { fetchDataSourceIdByName } from '../../../lib/fetch_data_source_id';
 
-export default async function buildRequest(config, tlConfig, scriptedFields, timeout) {
+export default function buildRequest(config, tlConfig, scriptedFields, timeout, dataSourceId) {
   const bool = { must: [] };
 
   const timeFilter = {
@@ -48,8 +47,6 @@ export default async function buildRequest(config, tlConfig, scriptedFields, tim
     },
   };
   bool.must.push(timeFilter);
-
-  const dataSourceId = await fetchDataSourceIdByName(config, tlConfig.savedObjectsClient);
 
   // Use the opensearchDashboards and kibana filter bar filters
   if (config.opensearchDashboards && config.kibana) {
