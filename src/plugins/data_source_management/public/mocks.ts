@@ -7,6 +7,7 @@ import React from 'react';
 import { throwError } from 'rxjs';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { AuthType, DataSourceAttributes } from './types';
 import { coreMock } from '../../../core/public/mocks';
 import {
@@ -362,3 +363,16 @@ export const createAuthenticationMethod = (
   },
   ...authMethod,
 });
+
+export const mockDataSourcePluginSetupWithShowLocalCluster: DataSourcePluginSetup = {
+  dataSourceEnabled: true,
+  hideLocalCluster: false,
+  noAuthenticationTypeEnabled: true,
+  usernamePasswordAuthEnabled: true,
+  awsSigV4AuthEnabled: true,
+};
+
+export const mockDataSourcePluginSetupWithHideLocalCluster: DataSourcePluginSetup = {
+  ...mockDataSourcePluginSetupWithShowLocalCluster,
+  hideLocalCluster: true,
+};
