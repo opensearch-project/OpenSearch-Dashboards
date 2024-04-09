@@ -75,7 +75,6 @@ describe('create data source menu', () => {
       type: 'data-source',
     });
     expect(notifications.toasts.addWarning).toBeCalledTimes(2);
-    // expect(getByText(component.container, 'Local cluster')).toBeInTheDocument();
   });
 });
 
