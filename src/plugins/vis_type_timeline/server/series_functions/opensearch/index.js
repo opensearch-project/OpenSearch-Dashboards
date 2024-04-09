@@ -114,7 +114,7 @@ export default new Datasource('es', {
     },
     {
       name: 'data_source_name',
-      types: ['string, null'], // If null, the query will proceed with local cluster
+      types: ['string', 'null'], // If null, the query will proceed with local cluster
       help: i18n.translate('timeline.help.functions.opensearch.args.dataSourceNameHelpText', {
         defaultMessage:
           'Specify a data source to query from. This will only work if multiple data sources is enabled',
