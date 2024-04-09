@@ -18,7 +18,6 @@ jest.mock('../../../../core/server/saved_objects/export', () => ({
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
-const { v4: uuidv4 } = jest.requireActual('uuid');
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard'];
 const URL = '/api/workspaces/_duplicate_saved_objects';
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
@@ -86,8 +85,6 @@ describe(`duplicate saved objects among workspaces`, () => {
   };
 
   beforeEach(async () => {
-    exportMock.mockUuidv4.mockReset();
-    exportMock.mockUuidv4.mockImplementation(() => uuidv4());
     ({ server, httpSetup, handlerContext } = await setupServer());
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
