@@ -107,6 +107,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Fix sslConfig for multiple datasource to handle when certificateAuthorities is unset ([#6282](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6282))
 - [BUG][Multiple Datasource]Fix bug in data source aggregated view to change it to depend on displayAllCompatibleDataSources property to show the badge value ([#6291](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6291))
 - [BUG][Multiple Datasource]Read hideLocalCluster setting from yml and set in data source selector and data source menu ([#6361](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6361))
+- [BUG] Fix for checkForFunctionProperty so that order does not matter ([#6248](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6248))
 
 ### 🚞 Infrastructure
 
