@@ -80,15 +80,15 @@ exports[`DataSourceSelector: check dataSource options should always place local 
       },
       Object {
         "id": "test1",
-        "label": "",
+        "label": "test1",
       },
       Object {
         "id": "test2",
-        "label": "",
+        "label": "test2",
       },
       Object {
         "id": "test3",
-        "label": "",
+        "label": "test3",
       },
     ]
   }
@@ -130,11 +130,11 @@ exports[`DataSourceSelector: check dataSource options should filter options if c
       },
       Object {
         "id": "test2",
-        "label": "",
+        "label": "test2",
       },
       Object {
         "id": "test3",
-        "label": "",
+        "label": "test3",
       },
     ]
   }
@@ -226,15 +226,15 @@ exports[`DataSourceSelector: check dataSource options should hide prepend if rem
       },
       Object {
         "id": "test1",
-        "label": "",
+        "label": "test1",
       },
       Object {
         "id": "test2",
-        "label": "",
+        "label": "test2",
       },
       Object {
         "id": "test3",
-        "label": "",
+        "label": "test3",
       },
     ]
   }
@@ -337,15 +337,15 @@ exports[`DataSourceSelector: check dataSource options should show custom placeho
       },
       Object {
         "id": "test1",
-        "label": "",
+        "label": "test1",
       },
       Object {
         "id": "test2",
-        "label": "",
+        "label": "test2",
       },
       Object {
         "id": "test3",
-        "label": "",
+        "label": "test3",
       },
     ]
   }

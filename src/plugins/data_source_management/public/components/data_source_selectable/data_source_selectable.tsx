@@ -131,7 +131,6 @@ export class DataSourceSelectable extends React.Component<
       this.props.hideLocalCluster
     );
 
-
     // no active option, show warning
     if (selectedDataSource.length === 0) {
       this.props.notifications.addWarning('No connected data source available.');

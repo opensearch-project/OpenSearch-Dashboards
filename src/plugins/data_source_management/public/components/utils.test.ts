@@ -538,9 +538,8 @@ describe('DataSourceManagement: Utils.ts', () => {
       ]);
     });
   });
-
   describe('getDefaultDataSource', () => {
-    const LocalCluster = { id: '', label: 'Local Cluster' };
+    const LocalCluster = { id: 'local', label: 'Local Cluster' };
     const hideLocalCluster = false;
     const defaultOption = [{ id: '2', label: 'DataSource 2' }];
 
@@ -552,7 +551,7 @@ describe('DataSourceManagement: Utils.ts', () => {
         '2',
         hideLocalCluster
       );
-      expect(result).toEqual([{ id: '2', label: 'DataSource 2' }]);
+      expect(result).toEqual([defaultOption[0]]);
     });
 
     it('should return local cluster if it exists and no default options in the data sources', () => {
@@ -567,7 +566,7 @@ describe('DataSourceManagement: Utils.ts', () => {
       expect(result).toEqual([{ id: '2', label: 'DataSource 2' }]);
     });
 
-    it('should return the first data source if no default option, hideLocalCluster is true, and no default datasource', () => {
+    it('should return the first data source if no default option, hideLocalCluster is ture and no default datasource', () => {
       mockUiSettingsCalls(uiSettings, 'get', null);
       const result = getDefaultDataSource(getDataSourceOptions, LocalCluster, uiSettings, true);
       expect(result).toEqual([{ id: '1', label: 'DataSource 1' }]);

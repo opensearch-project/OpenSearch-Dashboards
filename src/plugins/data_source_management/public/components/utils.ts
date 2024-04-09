@@ -101,7 +101,6 @@ export function getDefaultDataSource(
   const defaultDataSourceAfterCheck = dataSourcesOptions.find(
     (dataSource) => dataSource.id === defaultDataSourceId
   );
-
   if (defaultDataSourceAfterCheck) {
     return [
       {
