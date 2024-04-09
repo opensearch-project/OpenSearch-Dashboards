@@ -5,7 +5,7 @@
 
 import React from 'react';
 import {
-  fetchDataSourceVersion,
+  fetchDataSourceMetaData,
   getMappedDataSources,
   mockDataSourceAttributesWithAuth,
   mockManagementPlugin,
@@ -28,8 +28,8 @@ describe('Datasource Management: Create Datasource Wizard', () => {
   describe('case1: should load resources successfully', () => {
     beforeEach(async () => {
       spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
-      spyOn(utils, 'fetchDataSourceVersion').and.returnValue(
-        Promise.resolve(fetchDataSourceVersion)
+      spyOn(utils, 'fetchDataSourceMetaData').and.returnValue(
+        Promise.resolve(fetchDataSourceMetaData)
       );
       await act(async () => {
         component = mount(
