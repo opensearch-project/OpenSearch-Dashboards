@@ -29,9 +29,7 @@ Object {
               />
               <span
                 class="euiButtonEmpty__text"
-              >
-                Local cluster
-              </span>
+              />
             </span>
           </button>
         </div>
@@ -63,9 +61,7 @@ Object {
             />
             <span
               class="euiButtonEmpty__text"
-            >
-              Local cluster
-            </span>
+            />
           </span>
         </button>
       </div>
