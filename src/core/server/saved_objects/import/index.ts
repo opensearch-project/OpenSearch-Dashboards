@@ -44,3 +44,4 @@ export {
   SavedObjectsImportRetry,
 } from './types';
 export { updateDataSourceNameInVegaSpec, extractVegaSpecFromSavedObject } from './utils';
+export { mockUuidv4 } from './__mocks__';

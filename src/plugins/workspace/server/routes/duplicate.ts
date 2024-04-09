@@ -30,7 +30,7 @@ export const registerDuplicateRoute = (
               id: schema.string(),
             })
           ),
-          includeReferencesDeep: schema.boolean({ defaultValue: false }),
+          includeReferencesDeep: schema.boolean({ defaultValue: true }),
           targetWorkspace: schema.string(),
         }),
       },

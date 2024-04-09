@@ -331,7 +331,7 @@ GET <osd host>:<port>/api/saved_objects/_find
 | `sort_field` | String | NO  | The field used for sorting the response. |
 | `has_reference` | Object | NO  | Filters to objects that have a relationship with the type and ID combination. |
 | `filter` | String | NO  | The query string used to filter the attribute of the saved object. |
-| `workspaces` | String|Array | NO  | The ID of the workspace which the saved objects exist in. |
+| `workspaces` | String\|Array | NO  | The ID of the workspace which the saved objects exist in. |
 
 * Example request
 
@@ -425,7 +425,7 @@ The following table lists the available path parameters.
 | :--- | :--- | :--- | :--- |
 | `attributes` | Object | YES | The attributes of the saved object. |
 | `references` | Array | NO | The attributes of the referenced objects. |
-| `workspaces` | String|Array | NO  | The ID of the workspace which the saved objects exist in. |
+| `workspaces` | String\|Array | NO  | The ID of the workspace which the saved objects exist in. |
 
 * Example request
 
@@ -486,7 +486,7 @@ POST <osd host>:<port>/api/saved_objects/_bulk_create
 | `attributes` | Object | YES | The attributes of the saved object. |
 | `references` | Array | NO | The attributes of the referenced objects. |
 | `version` | String | NO | The version of the saved object. |
-| `workspaces` | String|Array | NO  | The ID of the workspace which the saved objects exist in. |
+| `workspaces` | String\|Array | NO  | The ID of the workspace which the saved objects exist in. |
 
 * Example request
 
@@ -630,7 +630,7 @@ POST <osd host>:<port>/api/saved_objects/_export
 | `objects` | Array | NO | A list of saved objects to export. |
 | `includeReferencesDeep` | Boolean | NO | Includes all of the referenced objects in the export. |
 | `excludeExportDetails` | Boolean | NO  | Exclude the export summary in the export. |
-| `workspaces` | String|Array | NO  | The ID of the workspace which the saved objects exist in. |
+| `workspaces` | String\|Array | NO  | The ID of the workspace which the saved objects exist in. |
 
 * Example request
 
@@ -667,7 +667,7 @@ POST <osd host>:<port>/api/saved_objects/_import
 | `createNewCopies` | Boolean | NO | Creates copies of the saved objects, genereate new IDs for the imported saved obejcts and resets the reference. |
 | `overwrite` | Boolean | NO | Overwrites the saved objects when they already exist. |
 | `dataSourceId` | String | NO  | The ID of the data source. |
-| `workspaces` | String|Array | NO  | The ID of the workspace which the saved objects exist in. |
+| `workspaces` | String\|Array | NO  | The ID of the workspace which the saved objects exist in. |
 
 * Request body
 
@@ -733,7 +733,7 @@ POST <osd host>:<port>/api/saved_objects/_resolve_import_errors
 | :--- | :--- | :--- | :--- |
 | `createNewCopies` | Boolean | NO | Creates copies of the saved objects, genereate new IDs for the imported saved obejcts and resets the reference. |
 | `dataSourceId` | String | NO  | The ID of the data source. |
-| `workspaces` | String|Array | NO  | The ID of the workspace which the saved objects exist in. |
+| `workspaces` | String\|Array | NO  | The ID of the workspace which the saved objects exist in. |
 
 * Request body
 

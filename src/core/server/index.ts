@@ -328,6 +328,7 @@ export {
   SavedObjectsDeleteByWorkspaceOptions,
   updateDataSourceNameInVegaSpec,
   extractVegaSpecFromSavedObject,
+  mockUuidv4,
 } from './saved_objects';
 
 export {

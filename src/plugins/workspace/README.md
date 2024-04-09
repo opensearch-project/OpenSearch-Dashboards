@@ -274,7 +274,7 @@ POST <osd host>:<port>/api/workspaces/_duplicate_saved_objects
 | :--- | :--- | :--- | :--- |
 | `objects` | Array | YES | A list of saved objects to copy. |
 | `targetWorkspace` | String | YES  | The ID of the workspace to copy to. |
-| `includeReferencesDeep` | Boolean | NO | Copy all of the referenced objects of the specified objects to the target workspace . |
+| `includeReferencesDeep` | Boolean | NO | Copy all of the referenced objects of the specified objects to the target workspace . Defaults to `true`.|
 
 The attrbutes of the object in the `objects` parameter are as follows:
 | Parameter | Data type | Required | Description |

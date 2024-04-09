@@ -3,22 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import * as exportMock from '../../../../core/server/saved_objects/export';
+import * as exportMock from '../../../../core/server';
 import supertest from 'supertest';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { SavedObjectsErrorHelpers } from '../../../../core/server/saved_objects';
+import { SavedObjectsErrorHelpers } from '../../../../core/server';
 import { UnwrapPromise } from '@osd/utility-types';
 import { loggingSystemMock, savedObjectsClientMock } from '../../../../core/server/mocks';
 import { setupServer } from '../../../../core/server/test_utils';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { workspaceClientMock } from '../../public/workspace_client.mock';
 import { registerDuplicateRoute } from '../routes/duplicate';
 import { createListStream } from '../../../../core/server/utils/streams';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { mockUuidv4 } from '../../../../core/server/saved_objects/import/__mocks__';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { createExportableType } from '../../../../core/server/saved_objects/routes/test_utils';
 
 jest.mock('../../../../core/server/saved_objects/export', () => ({
   exportSavedObjectsToStream: jest.fn(),
@@ -32,10 +24,33 @@ const URL = '/api/workspaces/_duplicate_saved_objects';
 const exportSavedObjectsToStream = exportMock.exportSavedObjectsToStream as jest.Mock;
 const logger = loggingSystemMock.create();
 const clientMock = {
-  ...workspaceClientMock,
+  init: jest.fn(),
+  enterWorkspace: jest.fn(),
+  getCurrentWorkspaceId: jest.fn(),
+  getCurrentWorkspace: jest.fn(),
+  create: jest.fn(),
+  delete: jest.fn(),
+  list: jest.fn(),
+  get: jest.fn(),
+  update: jest.fn(),
+  stop: jest.fn(),
   setup: jest.fn(),
   destroy: jest.fn(),
   setSavedObjects: jest.fn(),
+};
+
+export const createExportableType = (name: string): exportMock.SavedObjectsType => {
+  return {
+    name,
+    hidden: false,
+    namespaceType: 'single',
+    mappings: {
+      properties: {},
+    },
+    management: {
+      importableAndExportable: true,
+    },
+  };
 };
 
 describe(`duplicate saved objects among workspaces`, () => {
@@ -71,8 +86,8 @@ describe(`duplicate saved objects among workspaces`, () => {
   };
 
   beforeEach(async () => {
-    mockUuidv4.mockReset();
-    mockUuidv4.mockImplementation(() => uuidv4());
+    exportMock.mockUuidv4.mockReset();
+    exportMock.mockUuidv4.mockImplementation(() => uuidv4());
     ({ server, httpSetup, handlerContext } = await setupServer());
     handlerContext.savedObjects.typeRegistry.getImportableAndExportableTypes.mockReturnValue(
       allowedTypes.map(createExportableType)
