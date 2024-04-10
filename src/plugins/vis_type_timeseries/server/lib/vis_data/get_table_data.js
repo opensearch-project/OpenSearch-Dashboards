@@ -34,11 +34,10 @@ import { get } from 'lodash';
 import { processBucket } from './table/process_bucket';
 import { getOpenSearchQueryConfig } from './helpers/get_opensearch_query_uisettings';
 import { getIndexPatternObject } from './helpers/get_index_pattern';
-import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 
 export async function getTableData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
-  const panelDataSourceId = panel[DATA_SOURCE_ID_KEY];
+  const panelDataSourceId = panel.data_source_id;
 
   const {
     searchStrategy,

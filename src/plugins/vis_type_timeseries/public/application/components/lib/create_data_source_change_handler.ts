@@ -5,7 +5,7 @@
 import _ from 'lodash';
 
 import { PanelSchema } from 'src/plugins/vis_type_timeseries/common/types';
-import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
+import { DATA_SOURCE_ID_KEY } from '../../../../common/constants';
 
 export const createDataSourcePickerHandler = (handleChange: (e: PanelSchema) => void) => {
   return (selectedOptions: []): void => {

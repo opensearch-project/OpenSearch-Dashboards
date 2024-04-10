@@ -39,6 +39,7 @@ import {
   IndexPatternsFetcher,
 } from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
+import { decideLegacyClient } from '../../../data_source/server';
 
 export async function getFields(
   requestContext: RequestHandlerContext,
@@ -51,10 +52,8 @@ export async function getFields(
   // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
-  const client =
-    !!dataSourceId && !!requestContext.dataSource
-      ? requestContext.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
-      : requestContext.core.opensearch.legacy.client.callAsCurrentUser;
+  const client = decideLegacyClient(requestContext, dataSourceId);
+
   const reqFacade: ReqFacade = {
     requestContext,
     ...request,

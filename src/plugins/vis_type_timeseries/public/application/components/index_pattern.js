@@ -41,7 +41,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
-import { createDataSourcePickerHandler } from './data_source_picker';
+import { createDataSourcePickerHandler } from './lib/create_data_source_change_handler';
 import {
   getSavedObjectsClient,
   getNotifications,
@@ -123,8 +123,9 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
   const dataSourceManagementEnabled =
     !!getDataSourceManagementSetup().dataSourceManagement || false;
   const handleDataSourceSelectChange = createDataSourcePickerHandler(onChange);
-  const DataSourceSelector = getDataSourceManagementSetup().dataSourceManagement.ui
-    .DataSourceSelector;
+  const DataSourceSelector = dataSourceManagementEnabled
+    ? getDataSourceManagementSetup().dataSourceManagement.ui.DataSourceSelector
+    : undefined;
 
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const intervalValidation = validateIntervalValue(model[intervalName]);

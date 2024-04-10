@@ -31,7 +31,6 @@
 import { handleAnnotationResponse } from './response_processors/annotations';
 import { getAnnotationRequestParams } from './annotations/get_request_params';
 import { getLastSeriesTimestamp } from './helpers/timestamp';
-import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 
 function validAnnotation(annotation) {
   return (
@@ -55,7 +54,7 @@ export async function getAnnotations({
   const annotations = panel.annotations.filter(validAnnotation);
   const lastSeriesTimestamp = getLastSeriesTimestamp(series);
   const handleAnnotationResponseBy = handleAnnotationResponse(lastSeriesTimestamp);
-  const panelDataSourceId = panel[DATA_SOURCE_ID_KEY];
+  const panelDataSourceId = panel.data_source_id;
 
   const bodiesPromises = annotations.map((annotation) =>
     getAnnotationRequestParams(req, panel, annotation, opensearchQueryConfig, capabilities)
