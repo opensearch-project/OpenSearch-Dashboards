@@ -16,7 +16,7 @@ import {
   noAuthCredentialAuthMethod,
 } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
-import { DataSourceOption } from './data_source_menu/types';
+import { DataSourceOption } from './data_source_selector/data_source_selector';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
