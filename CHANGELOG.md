@@ -84,6 +84,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Add installedPlugins list to data source saved object ([#6348](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6348))
 - [Multiple Datasource] Add default icon in multi-selectable picker ([#6357](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6357))
 - [Workspace] Add APIs to support plugin state in request ([#6303](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6303))
+- [Workspace] Filter left nav menu items according to the current workspace ([#6234](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6234))
 
 ### 🐛 Bug Fixes
 
