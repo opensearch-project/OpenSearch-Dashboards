@@ -41,7 +41,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
-import { DataSourcePicker, createDataSourcePickerHandler } from './data_source_picker';
+import { createDataSourcePickerHandler } from './data_source_picker';
 import {
   getSavedObjectsClient,
   getNotifications,
@@ -64,7 +64,6 @@ import { TIME_RANGE_DATA_MODES, TIME_RANGE_MODE_KEY } from '../../../common/time
 import { PANEL_TYPES } from '../../../common/panel_types';
 import { isTimerangeModeEnabled } from '../lib/check_ui_restrictions';
 import { VisDataContext } from '../contexts/vis_data_context';
-import { DATA_SOURCE_ID_KEY } from '../../../common/constants';
 
 const RESTRICT_FIELDS = [OSD_FIELD_TYPES.DATE];
 
@@ -124,7 +123,8 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
   const dataSourceManagementEnabled =
     !!getDataSourceManagementSetup().dataSourceManagement || false;
   const handleDataSourceSelectChange = createDataSourcePickerHandler(onChange);
-  const DataSourceSelector = getDataSourceManagementSetup().dataSourceManagement.ui.DataSourceSelector;
+  const DataSourceSelector = getDataSourceManagementSetup().dataSourceManagement.ui
+    .DataSourceSelector;
 
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const intervalValidation = validateIntervalValue(model[intervalName]);
@@ -184,10 +184,11 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 savedObjectsClient={getSavedObjectsClient().client}
                 notifications={getNotifications().toasts}
                 onSelectedDataSource={handleDataSourceSelectChange}
-                defaultOption={model.data_source_id ? [{ id: model.data_source_id }] : [{id: ""}]}
+                defaultOption={model.data_source_id ? [{ id: model.data_source_id }] : [{ id: '' }]}
                 disabled={false}
                 fullWidth={false}
                 removePrepend={true}
+                isClearable={false}
                 hideLocalCluster={!!getHideLocalCluster().hideLocalCluster}
               />
             </EuiFormRow>
@@ -199,13 +200,17 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
           <EuiFormRow
             id={htmlId('indexPattern')}
             label={i18n.translate('visTypeTimeseries.indexPatternLabel', {
-              defaultMessage: 'Index pattern',
+              defaultMessage: 'Index name',
             })}
             helpText={
-              isDefaultIndexPatternUsed &&
-              i18n.translate('visTypeTimeseries.indexPattern.searchByDefaultIndex', {
-                defaultMessage: 'Default index pattern is used. To query all indexes use *',
-              })
+              isDefaultIndexPatternUsed
+                ? i18n.translate('visTypeTimeseries.indexPattern.searchByDefaultIndex', {
+                    defaultMessage: 'Default index pattern is used. To query all indexes use *',
+                  })
+                : i18n.translate('visTypeTimeseries.indexPattern.searchByIndex', {
+                    defaultMessage:
+                      'Use an asterisk (*) to match multiple indices. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
+                  })
             }
           >
             <EuiFieldText
