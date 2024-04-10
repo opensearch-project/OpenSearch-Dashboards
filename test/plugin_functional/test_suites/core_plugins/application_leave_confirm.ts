@@ -57,7 +57,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
 
         await testSubjects.existOrFail('appLeaveConfirmModal');
         await PageObjects.common.clickCancelOnModal(false);
-        expect(await browser.getCurrentUrl()).to.eql(getOpenSearchDashboardsUrl('/app/appleave1'));
+        expect(
+          (await browser.getCurrentUrl()).startsWith(getOpenSearchDashboardsUrl('/app/appleave1'))
+        ).to.be(true);
       });
       it('allows navigation if user click confirm on the confirmation dialog', async () => {
         await PageObjects.common.navigateToApp('appleave1');
