@@ -5,7 +5,11 @@
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
-import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
+import {
+  getDataSourcesWithFieldsResponse,
+  mockResponseForSavedObjectsCalls,
+  mockManagementPlugin,
+} from '../../mocks';
 import { ShallowWrapper, shallow } from 'enzyme';
 import { DataSourceMultiSelectable } from './data_source_multi_selectable';
 import React from 'react';
@@ -17,8 +21,12 @@ describe('DataSourceMultiSelectable', () => {
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
   const nextTick = () => new Promise((res) => process.nextTick(res));
+  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  const uiSettings = mockedContext.uiSettings;
 
   beforeEach(() => {
+    jest.clearAllMocks();
+
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
@@ -101,5 +109,41 @@ describe('DataSourceMultiSelectable', () => {
     fireEvent.click(screen.getByText('Deselect all'));
 
     expect(callbackMock).toBeCalledWith([]);
+  });
+
+  it('should retrun correct state when ui Settings provided', async () => {
+    spyOn(uiSettings, 'get').and.returnValue('test1');
+    component = shallow(
+      <DataSourceMultiSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={jest.fn()}
+        hideLocalCluster={true}
+        fullWidth={false}
+        uiSettings={uiSettings}
+      />
+    );
+    await component.instance().componentDidMount!();
+    expect(uiSettings.get).toBeCalledWith('defaultDataSource', null);
+    expect(component.state('defaultDataSource')).toEqual('test1');
+    expect(component.state('selectedOptions')).toHaveLength(3);
+  });
+
+  it('should retrun correct state when ui Settings provided and hide cluster is false', async () => {
+    spyOn(uiSettings, 'get').and.returnValue('test1');
+    component = shallow(
+      <DataSourceMultiSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={jest.fn()}
+        hideLocalCluster={false}
+        fullWidth={false}
+        uiSettings={uiSettings}
+      />
+    );
+    await component.instance().componentDidMount!();
+    expect(uiSettings.get).toBeCalledWith('defaultDataSource', null);
+    expect(component.state('defaultDataSource')).toEqual('test1');
+    expect(component.state('selectedOptions')).toHaveLength(4);
   });
 });

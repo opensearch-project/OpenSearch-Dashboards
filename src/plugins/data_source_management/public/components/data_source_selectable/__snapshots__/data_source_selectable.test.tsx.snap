@@ -96,9 +96,7 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
         iconType="database"
         onClick={[Function]}
         size="s"
-      >
-        
-      </EuiButtonEmpty>
+      />
     </React.Fragment>
   }
   closePopover={[Function]}
@@ -162,9 +160,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
         iconType="database"
         onClick={[Function]}
         size="s"
-      >
-        
-      </EuiButtonEmpty>
+      />
     </React.Fragment>
   }
   closePopover={[Function]}

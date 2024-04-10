@@ -16,6 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { DataSourceOption } from '../data_source_selector/data_source_selector';
+import { DataSourceOptionItem } from '../data_source_option';
 
 export interface SelectedDataSourceOption extends DataSourceOption {
   label: string;
@@ -27,6 +28,7 @@ export interface SelectedDataSourceOption extends DataSourceOption {
 export interface DataSourceFilterGroupProps {
   selectedOptions: SelectedDataSourceOption[];
   setSelectedOptions: (options: SelectedDataSourceOption[]) => void;
+  defaultDataSource: string | null;
 }
 
 type SelectionToggleOptionIds = 'select_all' | 'deselect_all';
@@ -45,6 +47,7 @@ const selectionToggleButtons = [
 export const DataSourceFilterGroup: React.FC<DataSourceFilterGroupProps> = ({
   selectedOptions,
   setSelectedOptions,
+  defaultDataSource,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectionToggleSelectedId, setSelectionToggleSelectedId] = useState<
@@ -148,7 +151,7 @@ export const DataSourceFilterGroup: React.FC<DataSourceFilterGroupProps> = ({
               showIcons={true}
               style={itemStyle}
             >
-              {item.label}
+              <DataSourceOptionItem item={item} defaultDataSource={defaultDataSource} />
             </EuiFilterSelectItem>
           );
         })}
