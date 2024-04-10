@@ -33,6 +33,7 @@ import {
   SavedObjectsImportError,
   SavedObjectsImportResponse,
   SavedObjectsImportOptions,
+  SavedObjectsImportUnsupportedTypeError,
 } from './types';
 import { validateReferences } from './validate_references';
 import { checkOriginConflicts } from './check_origin_conflicts';
@@ -58,6 +59,7 @@ export async function importSavedObjectsFromStream({
   dataSourceId,
   dataSourceTitle,
   workspaces,
+  dataSourceEnabled,
 }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportError[] = [];
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
@@ -69,6 +71,26 @@ export async function importSavedObjectsFromStream({
     supportedTypes,
     dataSourceId,
   });
+  // if not enable data_source, throw error early
+  if (!dataSourceEnabled) {
+    const dataSourceObj = collectSavedObjectsResult.collectedObjects.find(
+      (object) => object.type === 'data-source'
+    );
+    if (dataSourceObj) {
+      const error: SavedObjectsImportUnsupportedTypeError = { type: 'unsupported_type' };
+      const { title } = dataSourceObj.attributes;
+      const errors: SavedObjectsImportError[] = [
+        { error, type: dataSourceObj.type, id: dataSourceObj.id, title, meta: { title } },
+      ];
+      return {
+        successCount: 0,
+        success: false,
+        errors,
+      };
+    }
+  }
+
+  // console.log('NNNNNNNNNNNNNNNNNNNNNNNNNNshoud not dispaly');
   errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
   /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
   let importIdMap = collectSavedObjectsResult.importIdMap;

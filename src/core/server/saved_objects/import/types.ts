@@ -191,6 +191,8 @@ export interface SavedObjectsImportOptions {
   dataSourceTitle?: string;
   /** if specified, will import in given workspaces */
   workspaces?: string[];
+  /** if false, then not support mudltiple data source*/
+  dataSourceEnabled?: boolean;
 }
 
 /**

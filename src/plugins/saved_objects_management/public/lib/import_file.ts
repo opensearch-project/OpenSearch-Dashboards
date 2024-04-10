@@ -41,7 +41,8 @@ export async function importFile(
   http: HttpStart,
   file: File,
   { createNewCopies, overwrite }: ImportMode,
-  selectedDataSourceId?: string
+  selectedDataSourceId?: string,
+  dataSourceEnabled?: boolean
 ) {
   const formData = new FormData();
   formData.append('file', file);
@@ -49,6 +50,7 @@ export async function importFile(
   if (selectedDataSourceId) {
     query.dataSourceId = selectedDataSourceId;
   }
+  query.dataSourceEnabled = dataSourceEnabled;
   return await http.post<ImportResponse>('/api/saved_objects/_import', {
     body: formData,
     headers: {
