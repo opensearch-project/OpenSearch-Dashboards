@@ -8,8 +8,13 @@ import { DataSourceSelector } from './data_source_selector';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
-import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
+import {
+  getDataSourcesWithFieldsResponse,
+  mockManagementPlugin,
+  mockResponseForSavedObjectsCalls,
+} from '../../mocks';
 import { AuthType } from 'src/plugins/data_source/common/data_sources';
+import * as utils from '../utils';
 
 describe('DataSourceSelector', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -69,8 +74,11 @@ describe('DataSourceSelector: check dataSource options', () => {
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
   const nextTick = () => new Promise((res) => process.nextTick(res));
+  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  const uiSettings = mockedContext.uiSettings;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
@@ -168,6 +176,47 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalled();
+  });
+
+  it('should get default datasource if uiSettings exists', async () => {
+    spyOn(uiSettings, 'get').and.returnValue('test1');
+    spyOn(utils, 'getFilteredDataSources').and.returnValue([]);
+    spyOn(utils, 'getDefaultDataSource').and.returnValue([]);
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        uiSettings={uiSettings}
+      />
+    );
+
+    component.instance().componentDidMount!();
+    await nextTick();
+    expect(component).toMatchSnapshot();
+    expect(uiSettings.get).toBeCalledWith('defaultDataSource', null);
+    expect(utils.getFilteredDataSources).toHaveBeenCalled();
+    expect(utils.getDefaultDataSource).toHaveBeenCalled();
+    expect(toasts.addWarning).toHaveBeenCalled();
+  });
+
+  it('should not render options with default badge when id does not matches defaultDataSource', () => {
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        uiSettings={uiSettings}
+      />
+    );
+    expect(component).toMatchSnapshot();
+    expect(component.find('EuiComboBox').exists()).toBe(true);
   });
 });

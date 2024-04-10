@@ -5,6 +5,7 @@
 
 import type { Subscription } from 'rxjs';
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import {
   Plugin,
   CoreStart,
@@ -12,15 +13,27 @@ import {
   AppMountParameters,
   AppNavLinkStatus,
 } from '../../../core/public';
-import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
+import {
+  WORKSPACE_FATAL_ERROR_APP_ID,
+  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_CREATE_APP_ID,
+  WORKSPACE_UPDATE_APP_ID,
+  WORKSPACE_LIST_APP_ID,
+} from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services } from './types';
 import { WorkspaceClient } from './workspace_client';
+import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
+import { getWorkspaceColumn } from './components/workspace_column';
 
 type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
 
-export class WorkspacePlugin implements Plugin<{}, {}, {}> {
+interface WorkspacePluginSetupDeps {
+  savedObjectsManagement?: SavedObjectsManagementPluginSetup;
+}
+
+export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private _changeSavedObjectCurrentWorkspace() {
@@ -33,7 +46,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
     }
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
 
@@ -89,6 +102,32 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
       return renderApp(params, services);
     };
 
+    // create
+    core.application.register({
+      id: WORKSPACE_CREATE_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceCreate', {
+        defaultMessage: 'Create Workspace',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderCreatorApp } = await import('./application');
+        return mountWorkspaceApp(params, renderCreatorApp);
+      },
+    });
+
+    // update
+    core.application.register({
+      id: WORKSPACE_UPDATE_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceUpdate', {
+        defaultMessage: 'Update Workspace',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderUpdaterApp } = await import('./application');
+        return mountWorkspaceApp(params, renderUpdaterApp);
+      },
+    });
+
     // workspace fatal error
     core.application.register({
       id: WORKSPACE_FATAL_ERROR_APP_ID,
@@ -109,6 +148,22 @@ export class WorkspacePlugin implements Plugin<{}, {}, {}> {
       }
       return React.createElement(WorkspaceMenu, { coreStart: this.coreStart });
     });
+
+    // workspace list
+    core.application.register({
+      id: WORKSPACE_LIST_APP_ID,
+      title: '',
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderListApp } = await import('./application');
+        return mountWorkspaceApp(params, renderListApp);
+      },
+    });
+
+    /**
+     * register workspace column into saved objects table
+     */
+    savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
 
     return {};
   }

@@ -25,7 +25,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import deepEqual from 'fast-deep-equal';
-import { AuthenticationMethodRegistery } from '../../../../auth_registry';
+import { AuthenticationMethodRegistry } from '../../../../auth_registry';
 import { SigV4Content, SigV4ServiceName } from '../../../../../../data_source/common/data_sources';
 import { Header } from '../header';
 import {
@@ -81,19 +81,19 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   public readonly context!: DataSourceManagementContextValue;
   maskedPassword: string = '********';
   authOptions: Array<EuiSuperSelectOption<string>> = [];
-  authenticationMethodRegistery: AuthenticationMethodRegistery;
+  authenticationMethodRegistry: AuthenticationMethodRegistry;
 
   constructor(props: EditDataSourceProps, context: DataSourceManagementContextValue) {
     super(props, context);
 
-    this.authenticationMethodRegistery = context.services.authenticationMethodRegistery;
-    this.authOptions = this.authenticationMethodRegistery
+    this.authenticationMethodRegistry = context.services.authenticationMethodRegistry;
+    this.authOptions = this.authenticationMethodRegistry
       .getAllAuthenticationMethods()
       .map((authMethod) => {
         return authMethod.credentialSourceOption;
       });
 
-    const initialSelectedAuthMethod = getDefaultAuthMethod(this.authenticationMethodRegistery);
+    const initialSelectedAuthMethod = getDefaultAuthMethod(this.authenticationMethodRegistry);
 
     this.state = {
       formErrorsByField: { ...defaultValidation },
@@ -129,7 +129,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
         (auth.credentials ?? {}) as { [key: string]: string },
         auth.type,
-        this.authenticationMethodRegistery
+        this.authenticationMethodRegistry
       );
 
       this.setState({
@@ -153,7 +153,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       this.state,
       this.props.existingDatasourceNamesList,
       this.props.existingDataSource.title,
-      this.authenticationMethodRegistery
+      this.authenticationMethodRegistry
     );
   };
 
@@ -186,7 +186,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
       (credentials ?? {}) as { [key: string]: string },
       authType,
-      this.authenticationMethodRegistery
+      this.authenticationMethodRegistry
     );
 
     this.setState(
@@ -374,7 +374,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           formValues.auth.credentials = extractRegisteredAuthTypeCredentials(
             currentCredentials,
             this.state.auth.type,
-            this.authenticationMethodRegistery
+            this.authenticationMethodRegistry
           );
           break;
       }
@@ -440,7 +440,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         credentials = extractRegisteredAuthTypeCredentials(
           currentCredentials,
           this.state.auth.type,
-          this.authenticationMethodRegistery
+          this.authenticationMethodRegistry
         );
         break;
     }
@@ -557,7 +557,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   };
 
   getCredentialFormFromRegistry = (authType: string) => {
-    const registeredAuthMethod = this.authenticationMethodRegistery.getAuthenticationMethod(
+    const registeredAuthMethod = this.authenticationMethodRegistry.getAuthenticationMethod(
       authType
     );
     const authCredentialForm = registeredAuthMethod?.credentialForm;
@@ -1078,13 +1078,13 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     const existingAuthCredentials = extractRegisteredAuthTypeCredentials(
       (auth?.credentials ?? {}) as { [key: string]: string },
       currentAuth.type,
-      this.authenticationMethodRegistery
+      this.authenticationMethodRegistry
     );
 
     const registeredAuthCredentials = extractRegisteredAuthTypeCredentials(
       (currentAuth?.credentials ?? {}) as { [key: string]: string },
       currentAuth.type,
-      this.authenticationMethodRegistery
+      this.authenticationMethodRegistry
     );
 
     return !deepEqual(existingAuthCredentials, registeredAuthCredentials);

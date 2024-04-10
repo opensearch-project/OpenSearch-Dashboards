@@ -20,7 +20,8 @@ import {
   createSingleDataSource,
   getDataSources,
   testConnection,
-  fetchDataSourceVersion,
+  fetchDataSourceMetaData,
+  handleSetDefaultDatasource,
 } from '../utils';
 import { LoadingMask } from '../loading_mask';
 
@@ -35,6 +36,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
     setBreadcrumbs,
     http,
     notifications: { toasts },
+    uiSettings,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   /* State Variables */
@@ -73,9 +75,13 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
   const handleSubmit = async (attributes: DataSourceAttributes) => {
     setIsLoading(true);
     try {
-      const version = await fetchDataSourceVersion(http, attributes);
-      attributes.dataSourceVersion = version.dataSourceVersion;
+      // Fetch data source metadata from added OS/ES domain/cluster
+      const metadata = await fetchDataSourceMetaData(http, attributes);
+      attributes.dataSourceVersion = metadata.dataSourceVersion;
+      attributes.installedPlugins = metadata.installedPlugins;
       await createSingleDataSource(savedObjects.client, attributes);
+      // Set the first create data source as default data source.
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
       props.history.push('');
     } catch (e) {
       setIsLoading(false);
