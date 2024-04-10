@@ -6,11 +6,16 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiPopover, EuiButtonEmpty, EuiButtonIcon, EuiContextMenu } from '@elastic/eui';
+import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
 import { DataSourceOption } from '../data_source_menu/types';
+import { getDataSourceById } from '../utils';
+import { MenuPanelItem } from '../../types';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
-  selectedOption?: DataSourceOption[];
+  selectedOption: DataSourceOption[];
+  savedObjectsClient?: SavedObjectsClientContract;
+  notifications?: ToastsStart;
 }
 
 interface DataSourceViewState {
@@ -19,6 +24,8 @@ interface DataSourceViewState {
 }
 
 export class DataSourceView extends React.Component<DataSourceViewProps, DataSourceViewState> {
+  private _isMounted: boolean = false;
+
   constructor(props: DataSourceViewProps) {
     super(props);
 
@@ -26,6 +33,41 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       isPopoverOpen: false,
       selectedOption: this.props.selectedOption ? this.props.selectedOption : [],
     };
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+  async componentDidMount() {
+    this._isMounted = true;
+    const selectedOption = this.props.selectedOption;
+    // early return if not possible to fetch data source
+
+    const option = selectedOption[0];
+    const optionId = option.id;
+    if (!option.label) {
+      try {
+        const title = (await getDataSourceById(optionId, this.props.savedObjectsClient)).title;
+        if (!title) {
+          this.props.notifications.addWarning(
+            i18n.translate('dataSource.fetchDataSourceError', {
+              defaultMessage: `Data source with id ${optionId} is not available`,
+            })
+          );
+        } else {
+          if (!this._isMounted) return;
+          this.setState({
+            selectedOption: [{ id: optionId, label: title }],
+          });
+        }
+      } catch (error) {
+        this.props.notifications.addWarning(
+          i18n.translate('dataSource.fetchDataSourceError', {
+            defaultMessage: `Failed to fetch data source due to ${error}`,
+          })
+        );
+      }
+    }
   }
 
   onClick() {
@@ -36,20 +78,10 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this.setState({ ...this.state, isPopoverOpen: false });
   }
 
-  render() {
-    const button = (
-      <EuiButtonIcon
-        iconType="iInCircle"
-        display="empty"
-        aria-label="Next"
-        onClick={this.onClick.bind(this)}
-      />
-    );
-
-    let items = [];
-
-    if (this.props.selectedOption) {
-      items = this.props.selectedOption.map((option) => {
+  getPanels() {
+    let items: MenuPanelItem[] = [];
+    if (this.state.selectedOption) {
+      items = this.state.selectedOption.map((option) => {
         return {
           name: option.label,
           disabled: true,
@@ -65,6 +97,20 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       },
     ];
 
+    return { panels };
+  }
+
+  render() {
+    const { panels } = this.getPanels();
+
+    const button = (
+      <EuiButtonIcon
+        iconType="iInCircle"
+        display="empty"
+        aria-label="Next"
+        onClick={this.onClick.bind(this)}
+      />
+    );
     return (
       <>
         <EuiButtonEmpty
@@ -78,8 +124,8 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
           size="s"
           disabled={true}
         >
-          {this.props.selectedOption && this.props.selectedOption.length > 0
-            ? this.props.selectedOption[0].label
+          {this.state.selectedOption && this.state.selectedOption.length > 0
+            ? this.state.selectedOption[0].label
             : ''}
         </EuiButtonEmpty>
         <EuiPopover

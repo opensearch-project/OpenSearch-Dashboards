@@ -4,12 +4,18 @@
  */
 
 import { ShallowWrapper, shallow } from 'enzyme';
-import { DataSourceSelector } from './data_source_selector';
+import { DataSourceSelector, LocalCluster } from './data_source_selector';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
-import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
+import {
+  getDataSourcesWithFieldsResponse,
+  mockManagementPlugin,
+  mockResponseForSavedObjectsCalls,
+} from '../../mocks';
 import { AuthType } from 'src/plugins/data_source/common/data_sources';
+import * as utils from '../utils';
+import { EuiComboBox } from '@elastic/eui';
 
 describe('DataSourceSelector', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -18,6 +24,7 @@ describe('DataSourceSelector', () => {
   const { toasts } = notificationServiceMock.createStartContract();
 
   beforeEach(() => {
+    jest.clearAllMocks();
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
@@ -69,8 +76,11 @@ describe('DataSourceSelector: check dataSource options', () => {
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
   const nextTick = () => new Promise((res) => process.nextTick(res));
+  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  const uiSettings = mockedContext.uiSettings;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
@@ -168,6 +178,341 @@ describe('DataSourceSelector: check dataSource options', () => {
     component.instance().componentDidMount!();
     await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(0);
+    expect(toasts.addWarning).toHaveBeenCalled();
   });
+
+  it('should get default datasource if uiSettings exists', async () => {
+    spyOn(uiSettings, 'get').and.returnValue('test1');
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        uiSettings={uiSettings}
+      />
+    );
+
+    component.instance().componentDidMount!();
+    await nextTick();
+    expect(component).toMatchSnapshot();
+    expect(uiSettings.get).toBeCalledWith('defaultDataSource', null);
+  });
+
+  it('should not render options with default badge when id does not matches defaultDataSource', () => {
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        uiSettings={uiSettings}
+      />
+    );
+    expect(component).toMatchSnapshot();
+    expect(component.find('EuiComboBox').exists()).toBe(true);
+  });
+});
+
+describe('DataSourceSelector: check defaultOption behavior', () => {
+  /**
+   * Test Cases
+   * - []: 2 cases
+   * - Some value: 4 * 3 = 12 cases
+   */
+  let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
+  let client: SavedObjectsClientContract;
+  const { toasts } = notificationServiceMock.createStartContract();
+  const nextTick = () => new Promise((res) => process.nextTick(res));
+  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  const uiSettings = mockedContext.uiSettings;
+  const getMockedDataSourceOptions = () => {
+    return getDataSourcesWithFieldsResponse.savedObjects.map((response) => {
+      return { id: response.id, label: response.attributes.title };
+    });
+  };
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    client = {
+      find: jest.fn().mockResolvedValue([]),
+    } as any;
+    mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
+  });
+
+  // When defaultOption is undefined
+  it('should render defaultDataSource as the selected option', async () => {
+    spyOn(uiSettings, 'get').and.returnValue('test1');
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        uiSettings={uiSettings}
+      />
+    );
+    component.instance().componentDidMount!();
+    await nextTick();
+    const euiComboBox = component.find(EuiComboBox);
+    expect(euiComboBox.prop('selectedOptions')).toEqual(
+      expect.arrayContaining([
+        {
+          id: 'test1',
+          label: 'test1',
+        },
+      ])
+    );
+  });
+
+  it('should render Local Cluster as the selected option when hideLocalCluster is false', async () => {
+    spyOn(uiSettings, 'get').and.returnValue(null);
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        uiSettings={uiSettings}
+      />
+    );
+    component.instance().componentDidMount!();
+    await nextTick();
+    const euiComboBox = component.find(EuiComboBox);
+    expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([LocalCluster]));
+  });
+
+  it('should render random datasource as the selected option if defaultDataSource and Local Cluster are not present', async () => {
+    spyOn(uiSettings, 'get').and.returnValue(null);
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={true}
+        fullWidth={false}
+        uiSettings={uiSettings}
+        dataSourceFilter={(dataSource) => {
+          return dataSource.id !== 'test1';
+        }}
+      />
+    );
+    component.instance().componentDidMount!();
+    await nextTick();
+    const euiComboBox = component.find(EuiComboBox);
+    expect(euiComboBox.prop('selectedOptions')).toEqual(
+      expect.arrayContaining([
+        {
+          id: 'test2',
+          label: 'test2',
+        },
+      ])
+    );
+  });
+
+  it('should return toast', async () => {
+    spyOn(uiSettings, 'get').and.returnValue(null);
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={true}
+        fullWidth={false}
+        uiSettings={uiSettings}
+        dataSourceFilter={(_) => {
+          return false;
+        }}
+      />
+    );
+    component.instance().componentDidMount!();
+    await nextTick();
+    const euiComboBox = component.find(EuiComboBox);
+    expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([]));
+    expect(toasts.addWarning).toBeCalled();
+  });
+
+  // When defaultOption is []
+  it('should render placeholder and all options when Local Cluster is not hidden', async () => {
+    spyOn(uiSettings, 'get').and.returnValue('test1');
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        uiSettings={uiSettings}
+        defaultOption={[]}
+      />
+    );
+    component.instance().componentDidMount!();
+    await nextTick();
+    const euiComboBox = component.find(EuiComboBox);
+    expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([]));
+    expect(euiComboBox.prop('options')).toEqual(
+      expect.arrayContaining(getMockedDataSourceOptions().concat([LocalCluster]))
+    );
+  });
+
+  it('should render placeholder and all options when Local Cluster is hidden', async () => {
+    spyOn(uiSettings, 'get').and.returnValue('test1');
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={true}
+        fullWidth={false}
+        uiSettings={uiSettings}
+        defaultOption={[]}
+      />
+    );
+    component.instance().componentDidMount!();
+    await nextTick();
+    const euiComboBox = component.find(EuiComboBox);
+    expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([]));
+    expect(euiComboBox.prop('options')).toEqual(
+      expect.arrayContaining(getMockedDataSourceOptions())
+    );
+  });
+
+  // When defaultOption is [{id}]
+  it.each([
+    {
+      id: undefined,
+    },
+    {
+      id: '',
+    },
+    {
+      id: 'test2',
+    },
+    {
+      id: 'non-existent-id',
+    },
+  ])('should all throw a toast warning when the available dataSources is empty', async ({ id }) => {
+    spyOn(uiSettings, 'get').and.returnValue('test1');
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={true}
+        fullWidth={false}
+        uiSettings={uiSettings}
+        dataSourceFilter={(_) => {
+          return false;
+        }}
+        // @ts-expect-error
+        defaultOption={[{ id }]}
+      />
+    );
+    component.instance().componentDidMount!();
+    await nextTick();
+    const euiComboBox = component.find(EuiComboBox);
+    expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([]));
+    expect(toasts.addWarning).toBeCalled();
+  });
+
+  it.each([
+    {
+      id: undefined,
+    },
+    {
+      id: '',
+    },
+    {
+      id: 'test2',
+    },
+    {
+      id: 'non-existent-id',
+    },
+  ])('should all throw a toast warning when the id is filtered out', async ({ id }) => {
+    spyOn(uiSettings, 'get').and.returnValue('test1');
+    component = shallow(
+      <DataSourceSelector
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSource={jest.fn()}
+        disabled={false}
+        hideLocalCluster={true}
+        fullWidth={false}
+        uiSettings={uiSettings}
+        dataSourceFilter={(dataSource) => {
+          return dataSource.attributes.title !== id;
+        }}
+        // @ts-expect-error
+        defaultOption={[{ id }]}
+      />
+    );
+    component.instance().componentDidMount!();
+    await nextTick();
+    const euiComboBox = component.find(EuiComboBox);
+    expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining([]));
+    expect(toasts.addWarning).toBeCalled();
+  });
+
+  it.each([
+    {
+      id: undefined,
+      error: true,
+      selectedOption: [],
+    },
+    {
+      id: '',
+      error: false,
+      selectedOption: [LocalCluster],
+    },
+    {
+      id: 'test2',
+      error: false,
+      selectedOption: [{ id: 'test2', label: 'test2' }],
+    },
+    {
+      id: 'non-existent-id',
+      error: true,
+      selectedOption: [],
+    },
+  ])(
+    'should handle selectedOption correctly when defaultOption = [{id}]',
+    async ({ id, error, selectedOption }) => {
+      spyOn(uiSettings, 'get').and.returnValue('test1');
+      component = shallow(
+        <DataSourceSelector
+          savedObjectsClient={client}
+          notifications={toasts}
+          onSelectedDataSource={jest.fn()}
+          disabled={false}
+          hideLocalCluster={false}
+          fullWidth={false}
+          uiSettings={uiSettings}
+          // @ts-expect-error
+          defaultOption={[{ id }]}
+        />
+      );
+      component.instance().componentDidMount!();
+      await nextTick();
+      const euiComboBox = component.find(EuiComboBox);
+      expect(euiComboBox.prop('selectedOptions')).toEqual(expect.arrayContaining(selectedOption));
+      if (error) {
+        expect(toasts.addWarning).toBeCalled();
+      } else {
+        expect(toasts.addWarning).toBeCalledTimes(0);
+      }
+    }
+  );
 });

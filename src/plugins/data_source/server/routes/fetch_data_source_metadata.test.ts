@@ -12,16 +12,17 @@ import { authenticationMethodRegistryMock } from '../auth_registry/authenticatio
 import { CustomApiSchemaRegistry } from '../schema_registry';
 import { DataSourceServiceSetup } from '../../server/data_source_service';
 import { CryptographyServiceSetup } from '../cryptography_service';
-import { registerFetchDataSourceVersionRoute } from './fetch_data_source_version';
+import { registerFetchDataSourceMetaDataRoute } from './fetch_data_source_metadata';
 import { AuthType } from '../../common/data_sources';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { opensearchClientMock } from '../../../../../src/core/server/opensearch/client/mocks';
+import { index } from 'mathjs';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
-const URL = '/internal/data-source-management/fetchDataSourceVersion';
+const URL = '/internal/data-source-management/fetchDataSourceMetaData';
 
-describe(`Fetch DataSource Version ${URL}`, () => {
+describe(`Fetch DataSource MetaData ${URL}`, () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
   let handlerContext: SetupServerReturn['handlerContext'];
@@ -167,7 +168,16 @@ describe(`Fetch DataSource Version ${URL}`, () => {
     dataSourceClient.info.mockImplementationOnce(() =>
       opensearchClientMock.createSuccessTransportRequestPromise({ version: { number: '2.11.0' } })
     );
-    registerFetchDataSourceVersionRoute(
+
+    const installedPlugins = [
+      { name: 'b40f6833d895d3a95333e325e8bea79b', component: 'opensearch-ml', version: '2.11.0' },
+      { name: 'b40f6833d895d3a95333e325e8bea79b', component: 'opensearch-sql', version: '2.11.0' },
+    ];
+    dataSourceClient.cat.plugins.mockImplementationOnce(() =>
+      opensearchClientMock.createSuccessTransportRequestPromise(installedPlugins)
+    );
+
+    registerFetchDataSourceMetaDataRoute(
       router,
       dataSourceServiceSetupMock,
       cryptographyMock,
@@ -190,7 +200,10 @@ describe(`Fetch DataSource Version ${URL}`, () => {
         dataSourceAttr,
       })
       .expect(200);
-    expect(result.body).toEqual({ dataSourceVersion: '2.11.0' });
+    expect(result.body).toEqual({
+      dataSourceVersion: '2.11.0',
+      installedPlugins: ['opensearch-ml', 'opensearch-sql'],
+    });
     expect(dataSourceServiceSetupMock.getDataSourceClient).toHaveBeenCalledWith(
       expect.objectContaining({
         savedObjects: handlerContext.savedObjects.client,
@@ -210,7 +223,10 @@ describe(`Fetch DataSource Version ${URL}`, () => {
         dataSourceAttr: dataSourceAttrMissingCredentialForNoAuth,
       })
       .expect(200);
-    expect(result.body).toEqual({ dataSourceVersion: '2.11.0' });
+    expect(result.body).toEqual({
+      dataSourceVersion: '2.11.0',
+      installedPlugins: ['opensearch-ml', 'opensearch-sql'],
+    });
   });
 
   it('no credential with basic auth should fail', async () => {
@@ -307,7 +323,10 @@ describe(`Fetch DataSource Version ${URL}`, () => {
         dataSourceAttr: dataSourceAttrForSigV4Auth,
       })
       .expect(200);
-    expect(result.body).toEqual({ dataSourceVersion: '2.11.0' });
+    expect(result.body).toEqual({
+      dataSourceVersion: '2.11.0',
+      installedPlugins: ['opensearch-ml', 'opensearch-sql'],
+    });
   });
 
   it('credential with registered auth type should success', async () => {
@@ -318,7 +337,10 @@ describe(`Fetch DataSource Version ${URL}`, () => {
         dataSourceAttr: dataSourceAttrForRegisteredAuthWithCredentials,
       })
       .expect(200);
-    expect(result.body).toEqual({ dataSourceVersion: '2.11.0' });
+    expect(result.body).toEqual({
+      dataSourceVersion: '2.11.0',
+      installedPlugins: ['opensearch-ml', 'opensearch-sql'],
+    });
   });
 
   it('empty credential with registered auth type should success', async () => {
@@ -329,7 +351,10 @@ describe(`Fetch DataSource Version ${URL}`, () => {
         dataSourceAttr: dataSourceAttrForRegisteredAuthWithEmptyCredentials,
       })
       .expect(200);
-    expect(result.body).toEqual({ dataSourceVersion: '2.11.0' });
+    expect(result.body).toEqual({
+      dataSourceVersion: '2.11.0',
+      installedPlugins: ['opensearch-ml', 'opensearch-sql'],
+    });
   });
 
   it('no credential with registered auth type should success', async () => {
@@ -340,6 +365,9 @@ describe(`Fetch DataSource Version ${URL}`, () => {
         dataSourceAttr: dataSourceAttrForRegisteredAuthWithoutCredentials,
       })
       .expect(200);
-    expect(result.body).toEqual({ dataSourceVersion: '2.11.0' });
+    expect(result.body).toEqual({
+      dataSourceVersion: '2.11.0',
+      installedPlugins: ['opensearch-ml', 'opensearch-sql'],
+    });
   });
 });

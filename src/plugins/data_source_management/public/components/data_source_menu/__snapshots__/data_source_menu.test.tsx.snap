@@ -1,5 +1,66 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`DataSourceMenu can render data source view when only pass id in the activeOption 1`] = `
+<DataSourceView
+  fullWidth={true}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction],
+    }
+  }
+  selectedOption={
+    Array [
+      Object {
+        "id": "test",
+      },
+    ]
+  }
+/>
+`;
+
+exports[`DataSourceMenu can render data source view when provide activeOption 1`] = `
+<DataSourceView
+  fullWidth={true}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction],
+    }
+  }
+  selectedOption={
+    Array [
+      Object {
+        "id": "test",
+        "label": "test-label",
+      },
+    ]
+  }
+/>
+`;
+
 exports[`DataSourceMenu should render data source aggregated view 1`] = `
 Object {
   "asFragment": [Function],
@@ -165,9 +226,79 @@ exports[`DataSourceMenu should render data source multi select component 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
-    <div />
+    <div>
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+        id="popoverExampleMultiSelect"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+            data-test-subj="dataSourceFilterGroupButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="database"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Data sources
+              </span>
+            </span>
+          </button>
+          <span
+            class="euiNotificationBadge euiNotificationBadge--subdued"
+          >
+            0
+          </span>
+        </div>
+      </div>
+    </div>
   </body>,
-  "container": <div />,
+  "container": <div>
+    <div
+      class="euiPopover euiPopover--anchorDownCenter"
+      id="popoverExampleMultiSelect"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <button
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+          data-test-subj="dataSourceFilterGroupButton"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              class="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+            />
+            <span
+              class="euiButtonEmpty__text"
+            >
+              Data sources
+            </span>
+          </span>
+        </button>
+        <span
+          class="euiNotificationBadge euiNotificationBadge--subdued"
+        >
+          0
+        </span>
+      </div>
+    </div>
+  </div>,
   "debug": [Function],
   "findAllByAltText": [Function],
   "findAllByDisplayValue": [Function],
@@ -274,9 +405,44 @@ exports[`DataSourceMenu should render data source selectable only with local clu
 />
 `;
 
+exports[`DataSourceMenu should render data source view if not pass saved object or notification 1`] = `
+<DataSourceView
+  fullWidth={true}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+/>
+`;
+
 exports[`DataSourceMenu should render data source view only 1`] = `
 <DataSourceView
   fullWidth={true}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction],
+    }
+  }
 />
 `;
 

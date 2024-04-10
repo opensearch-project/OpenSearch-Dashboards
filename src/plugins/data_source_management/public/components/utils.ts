@@ -16,6 +16,7 @@ import {
   noAuthCredentialAuthMethod,
 } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
+import { DataSourceOption } from './data_source_selector/data_source_selector';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -76,6 +77,52 @@ export async function setFirstDataSourceAsDefault(
     const datasourceId = listOfDataSources[0].id;
     return await uiSettings.set('defaultDataSource', datasourceId);
   }
+}
+
+export function getFilteredDataSources(
+  dataSources: Array<SavedObject<DataSourceAttributes>>,
+  filter = (ds: SavedObject<DataSourceAttributes>) => true
+): DataSourceOption[] {
+  return dataSources
+    .filter((ds) => filter!(ds))
+    .map((ds) => ({
+      id: ds.id,
+      label: ds.attributes?.title || '',
+    }))
+    .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
+}
+
+export function getDefaultDataSource(
+  dataSourcesOptions: DataSourceOption[],
+  LocalCluster: DataSourceOption,
+  defaultDataSourceId: string | null,
+  hideLocalCluster?: boolean
+) {
+  const defaultDataSourceAfterCheck = dataSourcesOptions.find(
+    (dataSource) => dataSource.id === defaultDataSourceId
+  );
+  if (defaultDataSourceAfterCheck) {
+    return [
+      {
+        id: defaultDataSourceAfterCheck.id,
+        label: defaultDataSourceAfterCheck.label,
+      },
+    ];
+  }
+
+  if (!hideLocalCluster) {
+    return [LocalCluster];
+  }
+
+  if (dataSourcesOptions.length > 0) {
+    return [
+      {
+        id: dataSourcesOptions[0].id,
+        label: dataSourcesOptions[0].label,
+      },
+    ];
+  }
+  return [];
 }
 
 export async function getDataSourceById(
@@ -148,7 +195,7 @@ export async function testConnection(
   });
 }
 
-export async function fetchDataSourceVersion(
+export async function fetchDataSourceMetaData(
   http: HttpStart,
   { endpoint, auth: { type, credentials } }: DataSourceAttributes,
   dataSourceID?: string
@@ -164,7 +211,7 @@ export async function fetchDataSourceVersion(
     },
   };
 
-  return await http.post(`/internal/data-source-management/fetchDataSourceVersion`, {
+  return await http.post(`/internal/data-source-management/fetchDataSourceMetaData`, {
     body: JSON.stringify(query),
   });
 }

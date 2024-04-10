@@ -7,6 +7,7 @@ import React from 'react';
 import { throwError } from 'rxjs';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { AuthType, DataSourceAttributes } from './types';
 import { coreMock } from '../../../core/public/mocks';
 import {
@@ -78,6 +79,57 @@ export const getSingleDataSourceResponse = {
   ],
 };
 
+export const getDataSource = [
+  {
+    id: '1',
+    type: '',
+    references: [],
+    attributes: {
+      title: 'DataSource 1',
+      endpoint: '',
+      auth: { type: AuthType.NoAuth, credentials: undefined },
+      name: AuthType.NoAuth,
+    },
+  },
+  {
+    id: '2',
+    type: '',
+    references: [],
+    attributes: {
+      title: 'DataSource 2',
+      endpoint: '',
+      auth: { type: AuthType.NoAuth, credentials: undefined },
+      name: AuthType.NoAuth,
+    },
+  },
+  {
+    id: '3',
+    type: '',
+    references: [],
+    attributes: {
+      title: 'DataSource 1',
+      endpoint: '',
+      auth: { type: AuthType.NoAuth, credentials: undefined },
+      name: AuthType.NoAuth,
+    },
+  },
+];
+
+export const getDataSourceOptions = [
+  {
+    id: '1',
+    label: 'DataSource 1',
+  },
+  {
+    id: '2',
+    label: 'DataSource 2',
+  },
+  {
+    id: '3',
+    label: 'DataSource 1',
+  },
+];
+
 /* Mock data responses - JSON*/
 export const getDataSourcesResponse = {
   savedObjects: [
@@ -141,7 +193,7 @@ export const getDataSourcesWithFieldsResponse = {
       type: 'data-source',
       description: 'test datasource2',
       attributes: {
-        title: 'test3',
+        title: 'test2',
         auth: {
           type: AuthType.UsernamePasswordType,
         },
@@ -196,8 +248,9 @@ export const getMappedDataSources = [
   },
 ];
 
-export const fetchDataSourceVersion = {
+export const fetchDataSourceMetaData = {
   dataSourceVersion: '2.11.0',
+  installedPlugins: ['opensearch-ml', 'opensearch-sql'],
 };
 
 export const mockDataSourceAttributesWithAuth = {
@@ -325,3 +378,16 @@ export const createAuthenticationMethod = (
   },
   ...authMethod,
 });
+
+export const mockDataSourcePluginSetupWithShowLocalCluster: DataSourcePluginSetup = {
+  dataSourceEnabled: true,
+  hideLocalCluster: false,
+  noAuthenticationTypeEnabled: true,
+  usernamePasswordAuthEnabled: true,
+  awsSigV4AuthEnabled: true,
+};
+
+export const mockDataSourcePluginSetupWithHideLocalCluster: DataSourcePluginSetup = {
+  ...mockDataSourcePluginSetupWithShowLocalCluster,
+  hideLocalCluster: true,
+};

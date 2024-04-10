@@ -57,6 +57,7 @@ export class DataSourceManagementPlugin
     { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
   ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
+    const uiSettings = core.uiSettings;
 
     if (!opensearchDashboardsSection) {
       throw new Error('`opensearchDashboards` management section not found.');
@@ -102,8 +103,8 @@ export class DataSourceManagementPlugin
     return {
       registerAuthenticationMethod,
       ui: {
-        DataSourceSelector: createDataSourceSelector(),
-        getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
+        DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
+        getDataSourceMenu: <T>() => createDataSourceMenu<T>(uiSettings, dataSource),
       },
     };
   }

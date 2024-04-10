@@ -5,15 +5,17 @@
 
 import { createDataSourceMenu } from './create_data_source_menu';
 import { MountPoint, SavedObjectsClientContract } from '../../../../../core/public';
-import { notificationServiceMock } from '../../../../../core/public/mocks';
+import { coreMock, notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
-import { act, render } from '@testing-library/react';
+import { act, getByText, render } from '@testing-library/react';
 import { DataSourceComponentType, DataSourceSelectableConfig } from './types';
 import { ReactWrapper } from 'enzyme';
+import { mockDataSourcePluginSetupWithShowLocalCluster } from '../../mocks';
 
 describe('create data source menu', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
+  const { uiSettings } = coreMock.createSetup();
 
   beforeEach(() => {
     client = {
@@ -26,13 +28,16 @@ describe('create data source menu', () => {
       componentType: DataSourceComponentType.DataSourceSelectable,
       componentConfig: {
         fullWidth: true,
-        hideLocalCluster: true,
         onSelectedDataSources: jest.fn(),
         savedObjects: client,
         notifications,
       },
     };
-    const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
+    const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>(
+      uiSettings,
+      mockDataSourcePluginSetupWithShowLocalCluster
+    );
+
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
     expect(client.find).toBeCalledWith({
@@ -41,6 +46,35 @@ describe('create data source menu', () => {
       type: 'data-source',
     });
     expect(notifications.toasts.addWarning).toBeCalledTimes(0);
+  });
+
+  it('should ignore props.hideLocalCluster, and show local cluster when data_source.hideLocalCluster is set to false', async () => {
+    let component;
+    const props = {
+      componentType: DataSourceComponentType.DataSourceSelectable,
+      hideLocalCluster: true,
+      componentConfig: {
+        fullWidth: true,
+        onSelectedDataSources: jest.fn(),
+        savedObjects: client,
+        notifications,
+      },
+    };
+    const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>(
+      uiSettings,
+      mockDataSourcePluginSetupWithShowLocalCluster
+    );
+    await act(async () => {
+      component = render(<TestComponent {...props} />);
+    });
+
+    expect(component).toMatchSnapshot();
+    expect(client.find).toBeCalledWith({
+      fields: ['id', 'title', 'auth.type'],
+      perPage: 10000,
+      type: 'data-source',
+    });
+    expect(notifications.toasts.addWarning).toBeCalledTimes(2);
   });
 });
 
@@ -52,6 +86,7 @@ describe('when setMenuMountPoint is provided', () => {
 
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
+  const { uiSettings } = coreMock.createSetup();
 
   const refresh = () => {
     new Promise(async (resolve) => {
@@ -91,7 +126,10 @@ describe('when setMenuMountPoint is provided', () => {
         notifications,
       },
     };
-    const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
+    const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>(
+      uiSettings,
+      mockDataSourcePluginSetupWithShowLocalCluster
+    );
     const component = render(<TestComponent {...props} />);
     act(() => {
       mountPoint(portalTarget);

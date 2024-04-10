@@ -21,5 +21,9 @@ describe('#dataSourceManagement', () => {
     const start = doStart();
     const registry = start.getAuthenticationMethodRegistry();
     expect(registry.getAuthenticationMethod('typeA')).toEqual(typeA);
+    expect(setup.ui).toEqual({
+      DataSourceSelector: expect.any(Function),
+      getDataSourceMenu: expect.any(Function),
+    });
   });
 });
