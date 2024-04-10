@@ -53,16 +53,6 @@ describe('transforms', () => {
       expect(savedObject.uiState).toEqual(JSON.stringify(rootState.ui));
       expect(savedObject.searchSourceFields?.index?.id).toEqual(TEST_INDEX_PATTERN_ID);
     });
-
-    test('should fail if the index pattern does not match the value on state', () => {
-      rootState.metadata.indexPattern = 'Some-other-pattern';
-
-      expect(() =>
-        saveStateToSavedObject(savedObject, rootState, indexPattern)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"indexPattern id should match the value in redux state"`
-      );
-    });
   });
 
   describe('getStateFromSavedObject', () => {

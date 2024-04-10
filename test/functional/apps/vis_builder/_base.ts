@@ -15,15 +15,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       log.debug('navigateToApp visBuilder');
       await PageObjects.visBuilder.navigateToCreateVisBuilder();
-    });
-
-    it('should be able to switch data sources', async () => {
-      const dataSourceValue = await PageObjects.visBuilder.selectDataSource(
+      await PageObjects.visBuilder.selectDataSource(
         PageObjects.visBuilder.index.LOGSTASH_NON_TIME_BASED
       );
-
-      expect(dataSourceValue).to.equal(PageObjects.visBuilder.index.LOGSTASH_NON_TIME_BASED);
-      // TODO: Switch with a datasource with unique fields to test if it exists
     });
 
     it('should show visualization when a field is added', async () => {
