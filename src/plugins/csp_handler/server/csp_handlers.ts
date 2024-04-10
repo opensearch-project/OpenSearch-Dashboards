@@ -3,10 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ConfigurationClient } from '../../application_config/server';
+import { ConfigurationClient, CONFIG_KEYS } from '../../application_config/server';
 import {
   CoreSetup,
-  IScopedClusterClient,
   Logger,
   OnPreResponseHandler,
   OnPreResponseInfo,
@@ -14,7 +13,7 @@ import {
   OpenSearchDashboardsRequest,
 } from '../../../core/server';
 
-const CSP_RULES_CONFIG_KEY = 'csp.rules';
+const FRAME_ANCESTORS_DIRECTIVE = 'frame-ancestors';
 
 /**
  * This function creates a pre-response handler to dynamically set the CSP rules.
@@ -38,6 +37,8 @@ export function createCspRulesPreResponseHandler(
     response: OnPreResponseInfo,
     toolkit: OnPreResponseToolkit
   ) => {
+    let parsedCspHeader: Map<string, string[]> = new Map();
+
     try {
       const shouldCheckDest = ['document', 'frame', 'iframe', 'embed', 'object'];
 
@@ -49,37 +50,69 @@ export function createCspRulesPreResponseHandler(
 
       const client = getConfigurationClient(request);
 
-      const cspRules = await client.getEntityConfig(CSP_RULES_CONFIG_KEY, {
+      parsedCspHeader = parseCspHeader(cspHeader);
+
+      const frameAncestors = await client.getEntityConfig(CONFIG_KEYS.CSP_RULES_FRAME_ANCESTORS, {
         headers: request.headers,
       });
 
-      if (!cspRules) {
-        return appendFrameAncestorsWhenMissing(cspHeader, toolkit);
+      if (!frameAncestors || !frameAncestors.trim()) {
+        return appendFrameAncestorsWhenMissing(parsedCspHeader, toolkit);
       }
 
-      const additionalHeaders = {
-        'content-security-policy': cspRules,
-      };
-
-      return toolkit.next({ headers: additionalHeaders });
+      return updateNext(parsedCspHeader, frameAncestors.trim(), toolkit);
     } catch (e) {
       logger.error(`Failure happened in CSP rules pre response handler due to ${e}`);
-      return appendFrameAncestorsWhenMissing(cspHeader, toolkit);
+      return appendFrameAncestorsWhenMissing(parsedCspHeader, toolkit);
     }
   };
+}
+
+function updateNext(
+  parsedCspHeader: Map<string, string[]>,
+  frameAncestors: string,
+  toolkit: OnPreResponseToolkit
+) {
+  parsedCspHeader.set(FRAME_ANCESTORS_DIRECTIVE, frameAncestors.split(' '));
+
+  const additionalHeaders = {
+    'content-security-policy': stringifyCspHeader(parsedCspHeader),
+  };
+
+  return toolkit.next({ headers: additionalHeaders });
 }
 
 /**
  * Append frame-ancestors with default value 'self' when it is missing.
  */
-function appendFrameAncestorsWhenMissing(cspHeader: string, toolkit: OnPreResponseToolkit) {
-  if (cspHeader.includes('frame-ancestors')) {
+function appendFrameAncestorsWhenMissing(
+  parsedCspHeader: Map<string, string[]>,
+  toolkit: OnPreResponseToolkit
+) {
+  if (parsedCspHeader.has(FRAME_ANCESTORS_DIRECTIVE)) {
     return toolkit.next({});
   }
 
-  const additionalHeaders = {
-    'content-security-policy': "frame-ancestors 'self'; " + cspHeader,
-  };
+  return updateNext(parsedCspHeader, "'self'", toolkit);
+}
 
-  return toolkit.next({ headers: additionalHeaders });
+function parseCspHeader(cspHeader: string) {
+  const directives: string[] = cspHeader.split(';');
+
+  return directives.reduce((accumulator, directive) => {
+    const trimmed = directive.trim().split(' ');
+
+    accumulator.set(trimmed[0], trimmed.slice(1));
+
+    return accumulator;
+  }, new Map<string, string[]>());
+}
+
+function stringifyCspHeader(parsedCspHeader: Map<string, string[]>) {
+  const strings: string[] = [];
+  parsedCspHeader.forEach((values: string[], directive: string) => {
+    strings.push(directive + ' ' + values.join(' '));
+  });
+
+  return strings.join('; ');
 }

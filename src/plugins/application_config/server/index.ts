@@ -24,4 +24,5 @@ export {
   ApplicationConfigPluginSetup,
   ApplicationConfigPluginStart,
   ConfigurationClient,
+  CONFIG_KEYS,
 } from './types';
