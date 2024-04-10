@@ -50,7 +50,9 @@ export async function importFile(
   if (selectedDataSourceId) {
     query.dataSourceId = selectedDataSourceId;
   }
-  query.dataSourceEnabled = dataSourceEnabled;
+  if (dataSourceEnabled) {
+    query.dataSourceEnabled = dataSourceEnabled;
+  }
   return await http.post<ImportResponse>('/api/saved_objects/_import', {
     body: formData,
     headers: {
