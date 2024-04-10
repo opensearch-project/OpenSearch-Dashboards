@@ -17,6 +17,9 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WORKSPACE_ID_CONSUMER_WRAPPER_ID,
+  PRIORITY_FOR_WORKSPACE_CONFLICT_CONTROL_WRAPPER,
+  PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
+  PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
 } from '../common/constants';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -81,14 +84,14 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     this.workspaceConflictControl = new WorkspaceConflictSavedObjectsClientWrapper();
 
     core.savedObjects.addClientWrapper(
-      -1,
+      PRIORITY_FOR_WORKSPACE_CONFLICT_CONTROL_WRAPPER,
       WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
       this.workspaceConflictControl.wrapperFactory
     );
     this.proxyWorkspaceTrafficToRealHandler(core);
 
     core.savedObjects.addClientWrapper(
-      -2,
+      PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
       WORKSPACE_ID_CONSUMER_WRAPPER_ID,
       new WorkspaceIdConsumerWrapper().wrapperFactory
     );
@@ -102,7 +105,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       );
 
       core.savedObjects.addClientWrapper(
-        0,
+        PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
         WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
         this.workspaceSavedObjectsClientWrapper.wrapperFactory
       );
