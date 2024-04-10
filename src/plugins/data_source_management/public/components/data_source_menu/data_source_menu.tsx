@@ -94,6 +94,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         activeDataSourceIds={activeDataSourceIds}
         dataSourceFilter={dataSourceFilter}
         displayAllCompatibleDataSources={displayAllCompatibleDataSources || false}
+        uiSettings={uiSettings}
       />
     );
   }

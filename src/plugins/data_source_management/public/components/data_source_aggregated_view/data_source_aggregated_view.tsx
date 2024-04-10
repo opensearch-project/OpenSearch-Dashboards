@@ -6,16 +6,36 @@
 import React from 'react';
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiNotificationBadge,
   EuiPopover,
+  EuiBadge,
+  EuiSelectable,
+  EuiContextMenuPanel,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
-import { getDataSourcesWithFields } from '../utils';
+import { IUiSettingsClient } from 'src/core/public';
+import { getDataSourcesWithFields, getFilteredDataSources } from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
+import { DataSourceOption } from '../data_source_menu/types';
+
+export const LocalCluster: DataSourceOption = {
+  label: i18n.translate('dataSource.localCluster', {
+    defaultMessage: 'Local cluster',
+  }),
+  id: '',
+};
+
+interface PanelOption {
+  id: string;
+  label: string;
+  disabled?: boolean;
+  checked?: string;
+}
 
 interface DataSourceAggregatedViewProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -25,11 +45,13 @@ interface DataSourceAggregatedViewProps {
   activeDataSourceIds?: string[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   displayAllCompatibleDataSources: boolean;
+  uiSettings?: IUiSettingsClient;
 }
 
 interface DataSourceAggregatedViewState {
   isPopoverOpen: boolean;
-  allDataSourcesIdToTitleMap: Map<string, any>;
+  dataSourceOptions: DataSourceOption[];
+  defaultDataSource: string | null;
 }
 
 export class DataSourceAggregatedView extends React.Component<
@@ -43,7 +65,8 @@ export class DataSourceAggregatedView extends React.Component<
 
     this.state = {
       isPopoverOpen: false,
-      allDataSourcesIdToTitleMap: new Map(),
+      dataSourceOptions: [],
+      defaultDataSource: '',
     };
   }
 
@@ -61,103 +84,76 @@ export class DataSourceAggregatedView extends React.Component<
 
   async componentDidMount() {
     this._isMounted = true;
-    getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
-      .then((fetchedDataSources) => {
-        if (fetchedDataSources?.length) {
-          let filteredDataSources = fetchedDataSources;
-          if (this.props.dataSourceFilter) {
-            filteredDataSources = fetchedDataSources.filter((ds) =>
-              this.props.dataSourceFilter!(ds)
-            );
-          }
+    try {
+      const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
+      const fetchedDataSources = await getDataSourcesWithFields(this.props.savedObjectsClient, [
+        'id',
+        'title',
+        'auth.type',
+      ]);
 
-          const allDataSourcesIdToTitleMap = new Map();
+      const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(
+        fetchedDataSources,
+        this.props.dataSourceFilter
+      );
 
-          filteredDataSources.forEach((ds) => {
-            allDataSourcesIdToTitleMap.set(ds.id, ds.attributes!.title || '');
-          });
+      if (!this.props.hideLocalCluster) {
+        dataSourceOptions.unshift(LocalCluster);
+      }
 
-          if (!this.props.hideLocalCluster) {
-            allDataSourcesIdToTitleMap.set('', 'Local cluster');
-          }
+      if (!this._isMounted) return;
 
-          if (!this._isMounted) return;
-          this.setState({
-            ...this.state,
-            allDataSourcesIdToTitleMap,
-          });
-        }
-      })
-      .catch(() => {
-        this.props.notifications.addWarning(
-          i18n.translate('dataSource.fetchDataSourceError', {
-            defaultMessage: 'Unable to fetch existing data sources',
-          })
-        );
+      this.setState({
+        ...this.state,
+        dataSourceOptions,
+        defaultDataSource,
       });
+    } catch (error) {
+      this.props.notifications.addWarning(
+        i18n.translate('dataSource.fetchDataSourceError', {
+          defaultMessage: 'Unable to fetch existing data sources',
+        })
+      );
+    }
   }
 
   render() {
-    const button = (
-      <EuiButtonIcon
-        data-test-subj="dataSourceAggregatedViewInfoButton"
-        iconType="iInCircle"
-        display="empty"
-        aria-label="show data sources"
-        onClick={this.onClick.bind(this)}
-      />
-    );
-
-    let items = [];
+    let items: PanelOption[] = [];
 
     // only display active data sources
     if (this.props.displayAllCompatibleDataSources) {
-      items = [...this.state.allDataSourcesIdToTitleMap.values()].map((title) => {
-        return {
-          name: title,
-          disabled: true,
-        };
-      });
+      items = this.state.dataSourceOptions.map((dataSource) => ({
+        id: dataSource.id,
+        label: dataSource.label!,
+        disabled: true,
+        checked: 'on',
+      }));
     } else {
-      items = this.props.activeDataSourceIds!.map((id) => {
-        return {
-          name: this.state.allDataSourcesIdToTitleMap.get(id),
+      items = this.state.dataSourceOptions
+        .filter((dataSource) => this.props.activeDataSourceIds!.includes(dataSource.id))
+        .map((dataSource) => ({
+          id: dataSource.id,
+          label: dataSource.label!,
           disabled: true,
-        };
-      });
+          checked: 'on',
+        }));
     }
 
-    const title = this.props.displayAllCompatibleDataSources
-      ? `Data sources (${this.state.allDataSourcesIdToTitleMap.size})`
-      : 'Selected data sources';
-
-    const panels = [
-      {
-        id: 0,
-        title,
-        items,
-      },
-    ];
+    const button = (
+      <EuiButtonEmpty
+        data-test-subj="dataSourceAggregatedViewInfoButton"
+        iconType="database"
+        iconSide="left"
+        size="s"
+        aria-label="show data sources"
+        onClick={this.onClick.bind(this)}
+      >
+        Data sources
+      </EuiButtonEmpty>
+    );
 
     return (
       <>
-        <EuiButtonEmpty
-          className="euiHeaderLink"
-          data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-          aria-label={i18n.translate('dataSourceAggregatedView.dataSourceOptionsButtonAriaLabel', {
-            defaultMessage: 'dataSourceAggregatedViewMenuButton',
-          })}
-          iconType="database"
-          iconSide="left"
-          size="s"
-          disabled={true}
-        >
-          {'Data sources'}
-        </EuiButtonEmpty>
-        <EuiNotificationBadge color={'subdued'}>
-          {(this.props.displayAllCompatibleDataSources && 'All') ||
-            this.props.activeDataSourceIds!.length}
-        </EuiNotificationBadge>
         <EuiPopover
           id={'dataSourceSViewContextMenuPopover'}
           button={button}
@@ -166,7 +162,27 @@ export class DataSourceAggregatedView extends React.Component<
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
-          <EuiContextMenu initialPanelId={0} panels={panels} />
+          <EuiContextMenuPanel title="Data sources">
+            <EuiPanel color="transparent" paddingSize="s" style={{ width: '300px' }}>
+              <EuiSpacer size="s" />
+              <EuiSelectable
+                options={items}
+                data-test-subj={'dataSourceSelectable'}
+                renderOption={(option) => (
+                  <EuiFlexGroup alignItems="center">
+                    <EuiFlexItem grow={1}>{option.label}</EuiFlexItem>
+                    {option.id === this.state.defaultDataSource && (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge iconSide="left">Default</EuiBadge>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                )}
+              >
+                {(list) => list}
+              </EuiSelectable>
+            </EuiPanel>
+          </EuiContextMenuPanel>
         </EuiPopover>
       </>
     );
