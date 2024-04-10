@@ -19,7 +19,7 @@ import {
 import { DataSourceSelectable } from '../data_source_selectable';
 
 export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement | null {
-  const { componentType, componentConfig } = props;
+  const { componentType, componentConfig, uiSettings, hideLocalCluster } = props;
 
   function renderDataSourceView(config: DataSourceViewConfig): ReactElement | null {
     const { activeOption, fullWidth, savedObjects, notifications } = config;
@@ -36,13 +36,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
   function renderDataSourceMultiSelectable(
     config: DataSourceMultiSelectableConfig
   ): ReactElement | null {
-    const {
-      fullWidth,
-      hideLocalCluster,
-      savedObjects,
-      notifications,
-      onSelectedDataSources,
-    } = config;
+    const { fullWidth, savedObjects, notifications, onSelectedDataSources } = config;
     return (
       <DataSourceMultiSelectable
         fullWidth={fullWidth}
@@ -50,6 +44,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         savedObjectsClient={savedObjects!}
         notifications={notifications!.toasts}
         onSelectedDataSources={onSelectedDataSources!}
+        uiSettings={uiSettings}
       />
     );
   }
@@ -59,7 +54,6 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
       onSelectedDataSources,
       disabled,
       activeOption,
-      hideLocalCluster,
       fullWidth,
       savedObjects,
       notifications,
@@ -75,6 +69,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         dataSourceFilter={dataSourceFilter}
         hideLocalCluster={hideLocalCluster || false}
         fullWidth={fullWidth}
+        uiSettings={uiSettings}
       />
     );
   }
@@ -84,7 +79,6 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
   ): ReactElement | null {
     const {
       fullWidth,
-      hideLocalCluster,
       activeDataSourceIds,
       displayAllCompatibleDataSources,
       savedObjects,

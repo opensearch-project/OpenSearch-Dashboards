@@ -81,52 +81,44 @@ export async function setFirstDataSourceAsDefault(
 
 export function getFilteredDataSources(
   dataSources: Array<SavedObject<DataSourceAttributes>>,
-  filter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean
-) {
-  return filter ? dataSources.filter((ds) => filter!(ds)) : dataSources;
+  filter = (ds: SavedObject<DataSourceAttributes>) => true
+): DataSourceOption[] {
+  return dataSources
+    .filter((ds) => filter!(ds))
+    .map((ds) => ({
+      id: ds.id,
+      label: ds.attributes?.title || '',
+    }))
+    .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 }
 
 export function getDefaultDataSource(
-  dataSources: Array<SavedObject<DataSourceAttributes>>,
+  dataSourcesOptions: DataSourceOption[],
   LocalCluster: DataSourceOption,
-  uiSettings?: IUiSettingsClient,
-  hideLocalCluster?: boolean,
-  defaultOption?: DataSourceOption[]
+  defaultDataSourceId: string | null,
+  hideLocalCluster?: boolean
 ) {
-  const defaultOptionId = defaultOption?.[0]?.id;
-  const defaultOptionDataSource = dataSources.find(
-    (dataSource) => dataSource.id === defaultOptionId
-  );
-
-  const defaultDataSourceId = uiSettings?.get('defaultDataSource', null) ?? null;
-  const defaultDataSourceAfterCheck = dataSources.find(
+  const defaultDataSourceAfterCheck = dataSourcesOptions.find(
     (dataSource) => dataSource.id === defaultDataSourceId
   );
-
-  if (defaultOptionDataSource) {
-    return [
-      {
-        id: defaultOptionDataSource.id,
-        label: defaultOption?.[0]?.label || defaultOptionDataSource.attributes?.title,
-      },
-    ];
-  }
   if (defaultDataSourceAfterCheck) {
     return [
       {
         id: defaultDataSourceAfterCheck.id,
-        label: defaultDataSourceAfterCheck.attributes?.title || '',
+        label: defaultDataSourceAfterCheck.label,
       },
     ];
   }
+
   if (!hideLocalCluster) {
     return [LocalCluster];
   }
-  if (dataSources.length > 0) {
+
+  if (dataSourcesOptions.length > 0) {
     return [
       {
-        id: dataSources[0].id,
-        label: dataSources[0].attributes.title,
+        id: dataSourcesOptions[0].id,
+        label: dataSourcesOptions[0].label,
       },
     ];
   }
@@ -203,7 +195,7 @@ export async function testConnection(
   });
 }
 
-export async function fetchDataSourceVersion(
+export async function fetchDataSourceMetaData(
   http: HttpStart,
   { endpoint, auth: { type, credentials } }: DataSourceAttributes,
   dataSourceID?: string
@@ -219,7 +211,7 @@ export async function fetchDataSourceVersion(
     },
   };
 
-  return await http.post(`/internal/data-source-management/fetchDataSourceVersion`, {
+  return await http.post(`/internal/data-source-management/fetchDataSourceMetaData`, {
     body: JSON.stringify(query),
   });
 }

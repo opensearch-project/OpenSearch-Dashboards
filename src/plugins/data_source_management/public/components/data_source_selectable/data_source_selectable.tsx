@@ -12,9 +12,16 @@ import {
   EuiButtonEmpty,
   EuiSelectable,
   EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
 } from '@elastic/eui';
-import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
-import { getDataSourcesWithFields } from '../utils';
+import {
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  ToastsStart,
+} from 'opensearch-dashboards/public';
+import { getDataSourcesWithFields, getDefaultDataSource, getFilteredDataSources } from '../utils';
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
@@ -29,16 +36,18 @@ interface DataSourceSelectableProps {
   fullWidth: boolean;
   selectedOption?: DataSourceOption[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
+  uiSettings?: IUiSettingsClient;
 }
 
 interface DataSourceSelectableState {
   dataSourceOptions: SelectedDataSourceOption[];
   isPopoverOpen: boolean;
   selectedOption?: SelectedDataSourceOption[];
+  defaultDataSource: string | null;
 }
 
 interface SelectedDataSourceOption extends DataSourceOption {
-  checked?: boolean;
+  checked?: string;
 }
 
 export class DataSourceSelectable extends React.Component<
@@ -53,11 +62,8 @@ export class DataSourceSelectable extends React.Component<
     this.state = {
       dataSourceOptions: [],
       isPopoverOpen: false,
-      selectedOption: this.props.selectedOption
-        ? this.props.selectedOption
-        : this.props.hideLocalCluster
-        ? []
-        : [LocalCluster],
+      selectedOption: [],
+      defaultDataSource: null,
     };
 
     this.onChange.bind(this);
@@ -75,46 +81,113 @@ export class DataSourceSelectable extends React.Component<
     this.setState({ ...this.state, isPopoverOpen: false });
   }
 
+  // Update the checked status of the selected data source.
+  getUpdatedDataSourceOptions(
+    selectedDataSourceId: string,
+    dataSourceOptions: DataSourceOption[]
+  ): SelectedDataSourceOption[] {
+    return dataSourceOptions.map((option) => ({
+      ...option,
+      ...(option.id === selectedDataSourceId && { checked: 'on' }),
+    }));
+  }
+
+  handleSelectedOption(dataSourceOptions: DataSourceOption[], defaultDataSource: string | null) {
+    const [{ id }] = this.props.selectedOption!;
+    const dsOption = dataSourceOptions.find((ds) => ds.id === id);
+    if (!dsOption) {
+      this.props.notifications.addWarning(
+        i18n.translate('dataSource.fetchDataSourceError', {
+          defaultMessage: `Data source with id: ${id} is not available`,
+        })
+      );
+      this.setState({
+        ...this.state,
+        dataSourceOptions,
+        selectedOption: [],
+        defaultDataSource,
+      });
+      this.props.onSelectedDataSources([]);
+      return;
+    }
+    const updatedDataSourceOptions: SelectedDataSourceOption[] = this.getUpdatedDataSourceOptions(
+      id,
+      dataSourceOptions
+    );
+    this.setState({
+      ...this.state,
+      dataSourceOptions: updatedDataSourceOptions,
+      selectedOption: [{ id, label: dsOption.label }],
+      defaultDataSource,
+    });
+    this.props.onSelectedDataSources([{ id, label: dsOption.label }]);
+  }
+
+  handleDefaultDataSource(dataSourceOptions: DataSourceOption[], defaultDataSource: string | null) {
+    const selectedDataSource = getDefaultDataSource(
+      dataSourceOptions,
+      LocalCluster,
+      defaultDataSource,
+      this.props.hideLocalCluster
+    );
+
+    // no active option, show warning
+    if (selectedDataSource.length === 0) {
+      this.props.notifications.addWarning('No connected data source available.');
+      this.props.onSelectedDataSources([]);
+      return;
+    }
+
+    const updatedDataSourceOptions: SelectedDataSourceOption[] = this.getUpdatedDataSourceOptions(
+      selectedDataSource[0].id,
+      dataSourceOptions
+    );
+
+    this.setState({
+      ...this.state,
+      selectedOption: selectedDataSource,
+      dataSourceOptions: updatedDataSourceOptions,
+      defaultDataSource,
+    });
+
+    this.props.onSelectedDataSources(selectedDataSource);
+  }
+
   async componentDidMount() {
     this._isMounted = true;
-    getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
-      .then((fetchedDataSources) => {
-        if (fetchedDataSources?.length) {
-          let filteredDataSources: Array<SavedObject<DataSourceAttributes>> = [];
-          if (this.props.dataSourceFilter) {
-            filteredDataSources = fetchedDataSources.filter((ds) =>
-              this.props.dataSourceFilter!(ds)
-            );
-          }
 
-          if (filteredDataSources.length === 0) {
-            filteredDataSources = fetchedDataSources;
-          }
+    try {
+      const fetchedDataSources = await getDataSourcesWithFields(this.props.savedObjectsClient, [
+        'id',
+        'title',
+        'auth.type',
+      ]);
 
-          const dataSourceOptions = filteredDataSources
-            .map((dataSource) => ({
-              id: dataSource.id,
-              label: dataSource.attributes?.title || '',
-            }))
-            .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
-          if (!this.props.hideLocalCluster) {
-            dataSourceOptions.unshift(LocalCluster);
-          }
+      const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(
+        fetchedDataSources,
+        this.props.dataSourceFilter
+      );
 
-          if (!this._isMounted) return;
-          this.setState({
-            ...this.state,
-            dataSourceOptions,
-          });
-        }
-      })
-      .catch(() => {
-        this.props.notifications.addWarning(
-          i18n.translate('dataSource.fetchDataSourceError', {
-            defaultMessage: 'Unable to fetch existing data sources',
-          })
-        );
-      });
+      if (!this.props.hideLocalCluster) {
+        dataSourceOptions.unshift(LocalCluster);
+      }
+
+      const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
+
+      if (this.props.selectedOption?.length) {
+        this.handleSelectedOption(dataSourceOptions, defaultDataSource);
+        return;
+      }
+
+      // handle default data source if there is no valid active option
+      this.handleDefaultDataSource(dataSourceOptions, defaultDataSource);
+    } catch (error) {
+      this.props.notifications.addWarning(
+        i18n.translate('dataSource.fetchDataSourceError', {
+          defaultMessage: 'Unable to fetch existing data sources',
+        })
+      );
+    }
   }
 
   onChange(options: SelectedDataSourceOption[]) {
@@ -149,10 +222,9 @@ export class DataSourceSelectable extends React.Component<
           size="s"
           disabled={this.props.disabled || false}
         >
-          {(this.state.selectedOption &&
+          {this.state.selectedOption &&
             this.state.selectedOption.length > 0 &&
-            this.state.selectedOption[0].label) ||
-            ''}
+            this.state.selectedOption[0]?.label}
         </EuiButtonEmpty>
       </>
     );
@@ -168,7 +240,7 @@ export class DataSourceSelectable extends React.Component<
         data-test-subj={'dataSourceSelectableContextMenuPopover'}
       >
         <EuiContextMenuPanel>
-          <EuiPanel color="transparent" paddingSize="s">
+          <EuiPanel color="transparent" paddingSize="s" style={{ width: '300px' }}>
             <EuiSpacer size="s" />
             <EuiSelectable
               aria-label="Search"
@@ -180,6 +252,16 @@ export class DataSourceSelectable extends React.Component<
               onChange={(newOptions) => this.onChange(newOptions)}
               singleSelection={true}
               data-test-subj={'dataSourceSelectable'}
+              renderOption={(option) => (
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem grow={1}>{option.label}</EuiFlexItem>
+                  {option.id === this.state.defaultDataSource && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge iconSide="left">Default</EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              )}
             >
               {(list, search) => (
                 <>

@@ -103,8 +103,8 @@ export class DataSourceManagementPlugin
     return {
       registerAuthenticationMethod,
       ui: {
-        DataSourceSelector: createDataSourceSelector(uiSettings),
-        getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
+        DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
+        getDataSourceMenu: <T>() => createDataSourceMenu<T>(uiSettings, dataSource),
       },
     };
   }
