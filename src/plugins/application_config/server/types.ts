@@ -64,4 +64,5 @@ export interface ConfigurationClient {
 
 export const CONFIG_KEYS = {
   CSP_RULES_FRAME_ANCESTORS: 'csp.rules.frame_ancestors',
+  CSP_RULES: 'csp.rules', // deprecated
 };

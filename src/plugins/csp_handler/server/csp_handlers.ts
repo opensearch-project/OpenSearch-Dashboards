@@ -38,7 +38,7 @@ export function createCspRulesPreResponseHandler(
     response: OnPreResponseInfo,
     toolkit: OnPreResponseToolkit
   ) => {
-    let parsedCspHeader: Map<string, string[]> = new Map();
+    const parsedCspHeader = parseCspHeader(cspHeader);
 
     try {
       const shouldCheckDest = ['document', 'frame', 'iframe', 'embed', 'object'];
@@ -50,8 +50,6 @@ export function createCspRulesPreResponseHandler(
       }
 
       const client = getConfigurationClient(request);
-
-      parsedCspHeader = parseCspHeader(cspHeader);
 
       const frameAncestors = await client.getEntityConfig(CONFIG_KEYS.CSP_RULES_FRAME_ANCESTORS, {
         headers: request.headers,
