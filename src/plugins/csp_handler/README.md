@@ -26,7 +26,7 @@ application_config.enabled: true
 For OSD users who want to make changes to allow a new site to embed OSD pages, they can update the `frame-ancestors` directive through CURL. (See the README of `applicationConfig` for more details about the APIs.) **Please note that use backslash as string wrapper for single quotes inside the `data-raw` parameter. E.g use `'\''` to represent `'`**
 
 ```
-curl '{osd endpoint}/api/appconfig/csp.rules.frame_ancestors' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty' --data-raw '{"newValue":"{new site}"}'
+curl '{osd endpoint}/api/appconfig/csp.rules.frame_ancestors' -X POST -H 'Accept: application/json' -H 'Content-Type: application/json' -H 'osd-xsrf: osd-fetch' -H 'Sec-Fetch-Dest: empty' --data-raw '{"newValue":"{new value}"}'
 
 ```
 
