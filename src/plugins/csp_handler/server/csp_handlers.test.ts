@@ -19,7 +19,7 @@ describe('CSP handlers', () => {
     logger = loggerMock.create();
   });
 
-  it('adds the frame ancestors provided by the client', async () => {
+  it('adds the frame-ancestors provided by the client', async () => {
     const coreSetup = coreMock.createSetup();
     const frameAncestorsFromIndex = "'self' localsystem";
     const cspRulesFromYML = "script-src 'unsafe-eval' 'self'";
@@ -96,6 +96,12 @@ describe('CSP handlers', () => {
     expect(toolkit.next).toHaveBeenCalledWith({});
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+
+    expect(configurationClient.getEntityConfig).toBeCalledWith(
+      CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY,
+      { headers: { 'sec-fetch-dest': 'document' } }
+    );
+
     expect(getConfigurationClient).toBeCalledWith(request);
   });
 
@@ -136,10 +142,16 @@ describe('CSP handlers', () => {
     });
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+
+    expect(configurationClient.getEntityConfig).toBeCalledWith(
+      CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY,
+      { headers: { 'sec-fetch-dest': 'document' } }
+    );
+
     expect(getConfigurationClient).toBeCalledWith(request);
   });
 
-  it('do not add CSP headers when the configuration does not exist and CSP from YML already has frame-ancestors', async () => {
+  it('do not add frame-ancestors when the configuration does not exist and CSP from YML already has frame-ancestors', async () => {
     const coreSetup = coreMock.createSetup();
     const cspRulesFromYML = "script-src 'unsafe-eval' 'self'; frame-ancestors 'self'";
 
@@ -173,6 +185,12 @@ describe('CSP handlers', () => {
     expect(toolkit.next).toBeCalledWith({});
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+
+    expect(configurationClient.getEntityConfig).toBeCalledWith(
+      CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY,
+      { headers: { 'sec-fetch-dest': 'document' } }
+    );
+
     expect(getConfigurationClient).toBeCalledWith(request);
   });
 
@@ -210,6 +228,12 @@ describe('CSP handlers', () => {
     });
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+
+    expect(configurationClient.getEntityConfig).toBeCalledWith(
+      CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY,
+      { headers: { 'sec-fetch-dest': 'document' } }
+    );
+
     expect(getConfigurationClient).toBeCalledWith(request);
   });
 
