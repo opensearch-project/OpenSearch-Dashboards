@@ -6,14 +6,16 @@
 import { Observable } from 'rxjs';
 import { first } from 'rxjs/operators';
 
+import LRUCache from 'lru-cache';
 import {
   PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Plugin,
   Logger,
-  IScopedClusterClient,
   SharedGlobalConfig,
+  OpenSearchDashboardsRequest,
+  IClusterClient,
 } from '../../../core/server';
 
 import {
@@ -31,11 +33,20 @@ export class ApplicationConfigPlugin
 
   private configurationClient: ConfigurationClient;
   private configurationIndexName: string;
+  private clusterClient: IClusterClient;
+
+  private cache: LRUCache<string, string | undefined>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config$ = initializerContext.config.legacy.globalConfig$;
     this.configurationIndexName = '';
+    this.clusterClient = null;
+
+    this.cache = new LRUCache({
+      max: 100, // at most 100 entries
+      maxAge: 10 * 60 * 1000, // 10 mins
+    });
   }
 
   private registerConfigurationClient(configurationClient: ConfigurationClient) {
@@ -50,15 +61,16 @@ export class ApplicationConfigPlugin
     this.configurationClient = configurationClient;
   }
 
-  private getConfigurationClient(scopedClusterClient: IScopedClusterClient): ConfigurationClient {
+  private getConfigurationClient(request?: OpenSearchDashboardsRequest): ConfigurationClient {
     if (this.configurationClient) {
       return this.configurationClient;
     }
 
     const openSearchConfigurationClient = new OpenSearchConfigurationClient(
-      scopedClusterClient,
+      this.clusterClient.asScoped(request),
       this.configurationIndexName,
-      this.logger
+      this.logger,
+      this.cache
     );
 
     return openSearchConfigurationClient;
@@ -81,6 +93,8 @@ export class ApplicationConfigPlugin
   }
 
   public start(core: CoreStart) {
+    this.clusterClient = core.opensearch.client;
+
     return {};
   }
 

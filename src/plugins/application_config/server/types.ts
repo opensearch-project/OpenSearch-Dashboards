@@ -3,10 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IScopedClusterClient, Headers } from 'src/core/server';
+import { Headers, OpenSearchDashboardsRequest } from 'src/core/server';
 
 export interface ApplicationConfigPluginSetup {
-  getConfigurationClient: (inputOpenSearchClient: IScopedClusterClient) => ConfigurationClient;
+  getConfigurationClient: (request?: OpenSearchDashboardsRequest) => ConfigurationClient;
   registerConfigurationClient: (inputConfigurationClient: ConfigurationClient) => void;
 }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
