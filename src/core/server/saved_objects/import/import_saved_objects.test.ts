@@ -96,7 +96,7 @@ describe('#importSavedObjectsFromStream', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let typeRegistry: jest.Mocked<ISavedObjectTypeRegistry>;
   const namespace = 'some-namespace';
-  const testDataSourceId = 'some-datasource';
+  const testDataSourceId = uuidv4();
 
   const setupOptions = (
     createNewCopies: boolean = false,
