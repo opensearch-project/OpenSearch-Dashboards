@@ -11,6 +11,7 @@ import { loggingSystemMock, savedObjectsClientMock } from '../../../../core/serv
 import { setupServer } from '../../../../core/server/test_utils';
 import { registerDuplicateRoute } from '../routes/duplicate';
 import { createListStream } from '../../../../core/server/utils/streams';
+import Boom from '@hapi/boom';
 
 jest.mock('../../../../core/server/saved_objects/export', () => ({
   exportSavedObjectsToStream: jest.fn(),
@@ -110,9 +111,16 @@ describe(`duplicate saved objects among workspaces`, () => {
     await server.stop();
   });
 
-  it('formats successful response if all requested saved objects are not valid', async () => {
+  it('duplicate failed if the requested saved objects are not valid', async () => {
+    const savedObjects = [mockIndexPattern, mockDashboard];
     clientMock.get.mockResolvedValueOnce({ success: true });
-    exportSavedObjectsToStream.mockResolvedValueOnce(createListStream([]));
+    exportSavedObjectsToStream.mockImplementation(() => {
+      const err = Boom.badRequest();
+      err.output.payload.attributes = {
+        objects: savedObjects,
+      };
+      throw err;
+    });
 
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
@@ -130,9 +138,9 @@ describe(`duplicate saved objects among workspaces`, () => {
         includeReferencesDeep: true,
         targetWorkspace: 'test_workspace',
       })
-      .expect(200);
+      .expect(400);
 
-    expect(result.body).toEqual({ success: true, successCount: 0 });
+    expect(result.body.error).toEqual('Bad Request');
     expect(savedObjectsClient.bulkCreate).not.toHaveBeenCalled(); // no objects were created
   });
 
