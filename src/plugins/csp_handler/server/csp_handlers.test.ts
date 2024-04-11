@@ -55,6 +55,7 @@ describe('CSP handlers', () => {
     });
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+    expect(getConfigurationClient).toBeCalledWith(request);
   });
 
   it('do not add CSP headers when the client returns empty and CSP from YML already has frame-ancestors', async () => {
@@ -89,6 +90,7 @@ describe('CSP handlers', () => {
     expect(toolkit.next).toHaveBeenCalledWith({});
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+    expect(getConfigurationClient).toBeCalledWith(request);
   });
 
   it('add frame-ancestors CSP headers when the client returns empty and CSP from YML has no frame-ancestors', async () => {
@@ -128,6 +130,7 @@ describe('CSP handlers', () => {
     });
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+    expect(getConfigurationClient).toBeCalledWith(request);
   });
 
   it('do not add CSP headers when the configuration does not exist and CSP from YML already has frame-ancestors', async () => {
@@ -164,6 +167,7 @@ describe('CSP handlers', () => {
     expect(toolkit.next).toBeCalledWith({});
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+    expect(getConfigurationClient).toBeCalledWith(request);
   });
 
   it('add frame-ancestors CSP headers when the configuration does not exist and CSP from YML has no frame-ancestors', async () => {
@@ -200,6 +204,7 @@ describe('CSP handlers', () => {
     });
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
+    expect(getConfigurationClient).toBeCalledWith(request);
   });
 
   it('do not add CSP headers when request dest exists and shall skip', async () => {
@@ -235,6 +240,7 @@ describe('CSP handlers', () => {
     expect(toolkit.next).toBeCalledWith({});
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(0);
+    expect(getConfigurationClient).toBeCalledTimes(0);
   });
 
   it('do not add CSP headers when request dest does not exist', async () => {
@@ -269,5 +275,6 @@ describe('CSP handlers', () => {
     expect(toolkit.next).toBeCalledWith({});
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(0);
+    expect(getConfigurationClient).toBeCalledTimes(0);
   });
 });
