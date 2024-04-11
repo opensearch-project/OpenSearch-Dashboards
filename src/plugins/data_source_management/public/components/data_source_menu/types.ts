@@ -16,6 +16,11 @@ export interface DataSourceOption {
   label?: string;
 }
 
+export interface DataSourceGroupLabelOption extends DataSourceOption {
+  label: string;
+  isGroupLabel: true;
+}
+
 export interface DataSourceBaseConfig {
   fullWidth: boolean;
   disabled?: boolean;

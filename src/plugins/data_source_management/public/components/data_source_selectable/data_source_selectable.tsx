@@ -25,7 +25,7 @@ import { getDataSourcesWithFields, getDefaultDataSource, getFilteredDataSources 
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
-import { DataSourceOption } from '../data_source_menu/types';
+import { DataSourceGroupLabelOption, DataSourceOption } from '../data_source_menu/types';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -49,6 +49,12 @@ interface DataSourceSelectableState {
 interface SelectedDataSourceOption extends DataSourceOption {
   checked?: string;
 }
+
+export const opensearchClusterGroupLabel: DataSourceGroupLabelOption = {
+  id: 'opensearchClusterGroupLabel',
+  label: 'OpenSearch cluster',
+  isGroupLabel: true,
+};
 
 export class DataSourceSelectable extends React.Component<
   DataSourceSelectableProps,
@@ -207,6 +213,16 @@ export class DataSourceSelectable extends React.Component<
     }
   }
 
+  getOptionsWithGroupLabel = (dataSourceOptions: DataSourceOption[]): DataSourceOption[] => {
+    let optionsWithGroupLabel: DataSourceOption[] = [];
+    if (dataSourceOptions.length === 0) {
+      optionsWithGroupLabel = [];
+    } else {
+      optionsWithGroupLabel = [opensearchClusterGroupLabel, ...dataSourceOptions];
+    }
+    return optionsWithGroupLabel;
+  };
+
   render() {
     const button = (
       <>
@@ -248,7 +264,7 @@ export class DataSourceSelectable extends React.Component<
               searchProps={{
                 placeholder: 'Search',
               }}
-              options={this.state.dataSourceOptions}
+              options={this.getOptionsWithGroupLabel(this.state.dataSourceOptions)}
               onChange={(newOptions) => this.onChange(newOptions)}
               singleSelection={true}
               data-test-subj={'dataSourceSelectable'}
