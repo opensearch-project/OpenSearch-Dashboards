@@ -118,6 +118,10 @@ export const slice = createSlice({
     setState: (_state, action: PayloadAction<VisualizationState>) => {
       return action.payload;
     },
+    cleanActiveVisualization: (state, action: PayloadAction<void>) => {
+      state.activeVisualization!.aggConfigParams = [];
+      state.activeVisualization!.draftAgg = undefined;
+    },
   },
   extraReducers(builder) {
     builder.addCase(setActiveVisualization, (state, action) => {
@@ -138,4 +142,5 @@ export const {
   setAggParamValue,
   reorderAgg,
   setState,
+  cleanActiveVisualization,
 } = slice.actions;
