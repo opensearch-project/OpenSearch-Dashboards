@@ -66,7 +66,7 @@ export class AbstractSearchStrategy {
     this.additionalParams = additionalParams;
   }
 
-  async search(req: ReqFacade, bodies: any[], options = {}, dataSourceId: string) {
+  async search(req: ReqFacade, bodies: any[], options = {}, dataSourceId?: string) {
     const [, deps] = await req.framework.core.getStartServices();
     const requests: any[] = [];
     bodies.forEach((body) => {
