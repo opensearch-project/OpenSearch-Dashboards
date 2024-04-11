@@ -61,8 +61,3 @@ export interface ConfigurationClient {
    */
   deleteEntityConfig(entity: string, options?: ConfigurationClientOptions): Promise<string>;
 }
-
-export const CONFIG_KEYS = {
-  CSP_RULES_FRAME_ANCESTORS: 'csp.rules.frame_ancestors',
-  CSP_RULES: 'csp.rules', // deprecated
-};

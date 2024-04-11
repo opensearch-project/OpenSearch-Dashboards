@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// parse an input CSP header string into a Map where the key of the Map is the directive name
+// and the value of the key is a string array of the directive values
 export function parseCspHeader(cspHeader: string) {
   const directives: string[] = cspHeader.split(';');
 
@@ -15,6 +17,7 @@ export function parseCspHeader(cspHeader: string) {
   }, new Map<string, string[]>());
 }
 
+// stringify a CSP header Map to a string
 export function stringifyCspHeader(parsedCspHeader: Map<string, string[]>) {
   const strings: string[] = [];
   parsedCspHeader.forEach((values: string[], directive: string) => {
