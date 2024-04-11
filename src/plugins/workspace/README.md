@@ -179,7 +179,7 @@ POST api/workspaces
 
 ### Update workspace API
 
-Update workspace.
+Update the attributes and permissions of a workspace.
 
 * Path and HTTP methods
 
