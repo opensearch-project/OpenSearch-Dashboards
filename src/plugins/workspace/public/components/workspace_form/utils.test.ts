@@ -173,7 +173,7 @@ describe('convertPermissionSettingsToPermissions', () => {
     });
   });
 
-  it('should return consistent permission settings', () => {
+  it('should return consistent permissions', () => {
     expect(
       convertPermissionSettingsToPermissions([
         {

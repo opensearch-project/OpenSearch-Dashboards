@@ -179,43 +179,37 @@ export const convertPermissionsToPermissionSettings = (permissions: SavedObjectP
   const finalPermissionSettings: WorkspacePermissionSetting[] = [];
   const settingType2Modes: { [key: string]: WorkspacePermissionMode[] } = {};
 
+  const processUsersOrGroups = (
+    usersOrGroups: string[] | undefined,
+    type: WorkspacePermissionItemType,
+    mode: WorkspacePermissionMode
+  ) => {
+    usersOrGroups?.forEach((userOrGroup) => {
+      const settingTypeKey = `${type}-${userOrGroup}`;
+      const modes = settingType2Modes[settingTypeKey] ?? [];
+
+      modes.push(mode);
+      if (modes.length === 1) {
+        permissionSettings.push({
+          // This id is for type safe, and will be overwrite in below.
+          id: 0,
+          modes,
+          ...(type === WorkspacePermissionItemType.User
+            ? { type: WorkspacePermissionItemType.User, userId: userOrGroup }
+            : { type: WorkspacePermissionItemType.Group, group: userOrGroup }),
+        });
+        settingType2Modes[settingTypeKey] = modes;
+      }
+    });
+  };
+
   Object.keys(permissions).forEach((mode) => {
-    if (!isWorkspacePermissionMode(mode)) {
-      return;
+    if (isWorkspacePermissionMode(mode)) {
+      processUsersOrGroups(permissions[mode].users, WorkspacePermissionItemType.User, mode);
+      processUsersOrGroups(permissions[mode].groups, WorkspacePermissionItemType.Group, mode);
     }
-    permissions[mode].users?.forEach((userId) => {
-      const settingTypeKey = `userId-${userId}`;
-      const modes = settingType2Modes[settingTypeKey] ?? [];
-
-      modes.push(mode);
-      if (modes.length === 1) {
-        permissionSettings.push({
-          // This id is for type safe, and will be overwrite in below.
-          id: 0,
-          type: WorkspacePermissionItemType.User,
-          userId,
-          modes,
-        });
-        settingType2Modes[settingTypeKey] = modes;
-      }
-    });
-    permissions[mode].groups?.forEach((group) => {
-      const settingTypeKey = `group-${group}`;
-      const modes = settingType2Modes[settingTypeKey] ?? [];
-
-      modes.push(mode);
-      if (modes.length === 1) {
-        permissionSettings.push({
-          // This id is for type safe, and will be overwrite in below.
-          id: 0,
-          type: WorkspacePermissionItemType.Group,
-          group,
-          modes,
-        });
-        settingType2Modes[settingTypeKey] = modes;
-      }
-    });
   });
+
   let id = 0;
   /**
    * One workspace permission setting may include multi setting options,
