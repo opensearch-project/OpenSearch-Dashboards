@@ -110,7 +110,7 @@ describe(`duplicate saved objects among workspaces`, () => {
     await server.stop();
   });
 
-  it('formats successful response', async () => {
+  it('formats successful response if all requested saved objects are not valid', async () => {
     clientMock.get.mockResolvedValueOnce({ success: true });
     exportSavedObjectsToStream.mockResolvedValueOnce(createListStream([]));
 
