@@ -1,13 +1,13 @@
 # CHANGELOG
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## [Unreleased](https://github.com/opensearch-project/OpenSearch-Dashboards/compare/1.3.14...1.3)
+## [Unreleased](https://github.com/opensearch-project/OpenSearch-Dashboards/compare/1.3.15...1.3)
 
 ### 💥 Breaking Changes
 
 ### Deprecations
 
-### 🛡 Security
+### 🛡  Security
 
 ### 📈 Features/Enhancements
 
@@ -17,16 +17,36 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 📝 Documentation
 
+### 🛠  Maintenance
+
+- [Version] Increment version to 1.3.16 ([#6415](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6415))
+
+### 🪛  Refactoring
+
+### 🔩 Tests
+
+## [1.3.15 - 2024-03-05](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/1.3.15)
+
+### 🛡 Security
+
+### 📈 Features/Enhancements
+
+### 🐛 Bug Fixes
+
+- [OSCI][fix] Discover: Fix the Subfields Display Issue ([#5429](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5429))
+- [BUG][data] Support for custom filters with heterogeneous data fields ([#5577](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5577))
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
 ### 🛠 Maintenance
 
 - [Version] Increment version to 1.3.15 ([#5596](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5596))
 - Add @SuZhou-Joe as a maintainer. ([#5594](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5594))
+- Move @seanneumann to emeritus maintainer ([#5634](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5634))
 
-### 🪛 Refactoring
-
-### 🔩 Tests
-
-## [1.3.14](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/1.3.14)
+## [1.3.14 - 2023-12-12](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/1.3.14)
 
 ### 🛡 Security
 
