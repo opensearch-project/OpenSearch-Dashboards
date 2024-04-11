@@ -44,6 +44,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         savedObjectsClient={savedObjects!}
         notifications={notifications!.toasts}
         onSelectedDataSources={onSelectedDataSources!}
+        uiSettings={uiSettings}
       />
     );
   }
