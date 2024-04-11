@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiBasicTable,
   EuiPageBody,
@@ -34,8 +34,11 @@ export const DataSourceViewExample = ({
   dataSourceEnabled,
   setActionMenu,
   dataSourceManagement,
+  notifications,
+  savedObjects,
 }: DataSourceViewExampleProps) => {
   const DataSourceMenu = dataSourceManagement.ui.getDataSourceMenu<DataSourceViewConfig>();
+  const [selectedDataSources, setSelectedDataSources] = useState<string[]>([]);
   const data: ComponentProp[] = [
     {
       name: 'savedObjects',
@@ -68,19 +71,31 @@ export const DataSourceViewExample = ({
     },
   ];
 
+  const renderDataSourceComponent = useMemo(() => {
+    return (
+      <DataSourceMenu
+        setMenuMountPoint={setActionMenu}
+        componentType={'DataSourceView'}
+        componentConfig={{
+          notifications,
+          savedObjects: savedObjects.client,
+          fullWidth: false,
+          activeOption: [{ id: '' }],
+          dataSourceFilter: (ds) => {
+            return true;
+          },
+          onSelectedDataSources: (ds) => {
+            setSelectedDataSources(ds);
+          },
+        }}
+      />
+    );
+  }, [setActionMenu, notifications, savedObjects]);
+
   return (
     <EuiPageBody component="main">
       <EuiPageHeader>
-        {dataSourceEnabled && (
-          <DataSourceMenu
-            setMenuMountPoint={setActionMenu}
-            componentType={'DataSourceView'}
-            componentConfig={{
-              fullWidth: false,
-              activeOption: [{ id: 'example id', label: 'example data source' }],
-            }}
-          />
-        )}
+        {dataSourceEnabled && renderDataSourceComponent}
         <EuiPageHeaderSection>
           <EuiTitle size="l">
             <h1>Data Source View Example</h1>
