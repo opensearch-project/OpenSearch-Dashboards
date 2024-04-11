@@ -444,6 +444,7 @@ describe('SavedObjectsRepository', () => {
       references: [{ name: 'ref_0', type: 'test', id: '2' }],
     };
     const namespace = 'foo-namespace';
+    const workspace = 'foo-workspace';
 
     const getMockBulkCreateResponse = (objects, namespace) => {
       return {
@@ -729,6 +730,16 @@ describe('SavedObjectsRepository', () => {
         ];
         await bulkCreateSuccess(objects, { namespace });
         expectClientCallArgsAction(objects, { method: 'create', getId });
+      });
+
+      it(`adds workspaces to request body for any types`, async () => {
+        await bulkCreateSuccess([obj1, obj2], { workspaces: [workspace] });
+        const expected = expect.objectContaining({ workspaces: [workspace] });
+        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        expect(client.bulk).toHaveBeenCalledWith(
+          expect.objectContaining({ body }),
+          expect.anything()
+        );
       });
     });
 
