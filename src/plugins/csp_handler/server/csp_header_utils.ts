@@ -19,10 +19,10 @@ export function parseCspHeader(cspHeader: string) {
 
 // stringify a CSP header Map to a string
 export function stringifyCspHeader(parsedCspHeader: Map<string, string[]>) {
-  const strings: string[] = [];
+  const directives: string[] = [];
   parsedCspHeader.forEach((values: string[], directive: string) => {
-    strings.push(directive + ' ' + values.join(' '));
+    directives.push(directive + ' ' + values.join(' '));
   });
 
-  return strings.join('; ');
+  return directives.join('; ');
 }
