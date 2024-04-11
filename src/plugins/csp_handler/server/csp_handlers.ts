@@ -17,6 +17,17 @@ import { parseCspHeader, stringifyCspHeader } from './csp_header_utils';
 const FRAME_ANCESTORS_DIRECTIVE = 'frame-ancestors';
 const CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY = 'csp.rules.frame_ancestors';
 
+// add new directives to this Map when onboarding.
+const SUPPORTED_DIRECTIVES = new Map([
+  [
+    CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY,
+    {
+      directiveName: FRAME_ANCESTORS_DIRECTIVE,
+      defaultValue: ["'self'"],
+    },
+  ],
+]);
+
 /**
  * This function creates a pre-response handler to dynamically set the CSP rules.
  * It give precedence to the rules from application config plugin over those from YML.
@@ -52,46 +63,63 @@ export function createCspRulesPreResponseHandler(
 
       const client = getConfigurationClient(request);
 
-      const frameAncestors = await client.getEntityConfig(CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY, {
-        headers: request.headers,
-      });
+      await updateDirectivesFromConfigurationClient(parsedCspHeader, client, request, logger);
 
-      if (!frameAncestors || !frameAncestors.trim()) {
-        return appendFrameAncestorsWhenMissing(parsedCspHeader, toolkit);
-      }
-
-      return updateNext(parsedCspHeader, frameAncestors.trim(), toolkit);
+      return updateNext(parsedCspHeader, toolkit);
     } catch (e) {
       logger.error(`Failure happened in CSP rules pre response handler due to ${e}`);
-      return appendFrameAncestorsWhenMissing(parsedCspHeader, toolkit);
+
+      updateDirectivesFromDefault(parsedCspHeader);
+      return updateNext(parsedCspHeader, toolkit);
     }
   };
 }
 
-function updateNext(
+async function updateDirectivesFromConfigurationClient(
   parsedCspHeader: Map<string, string[]>,
-  frameAncestors: string,
-  toolkit: OnPreResponseToolkit
+  client: ConfigurationClient,
+  request: OpenSearchDashboardsRequest,
+  logger: Logger
 ) {
-  parsedCspHeader.set(FRAME_ANCESTORS_DIRECTIVE, frameAncestors.split(' '));
+  for (const [configKey, directive] of SUPPORTED_DIRECTIVES) {
+    try {
+      const value = await client.getEntityConfig(configKey, {
+        headers: request.headers,
+      });
 
+      if (!value || !value.trim()) {
+        return addDirectiveWhenMissing(parsedCspHeader, directive);
+      }
+
+      parsedCspHeader.set(directive.directiveName, value.trim().split(' '));
+    } catch (e) {
+      logger.error(
+        `Failure happened when handling CSP directive ${directive.directiveName} due to ${e}`
+      );
+
+      addDirectiveWhenMissing(parsedCspHeader, directive);
+    }
+  }
+}
+
+function updateDirectivesFromDefault(parsedCspHeader: Map<string, string[]>) {
+  SUPPORTED_DIRECTIVES.forEach(async (directive) => {
+    addDirectiveWhenMissing(parsedCspHeader, directive);
+  });
+}
+
+function addDirectiveWhenMissing(parsedCspHeader: Map<string, string[]>, directive) {
+  if (parsedCspHeader.has(directive.directiveName)) {
+    return;
+  }
+
+  parsedCspHeader.set(directive.directiveName, directive.defaultValue);
+}
+
+function updateNext(parsedCspHeader: Map<string, string[]>, toolkit: OnPreResponseToolkit) {
   const additionalHeaders = {
     'content-security-policy': stringifyCspHeader(parsedCspHeader),
   };
 
   return toolkit.next({ headers: additionalHeaders });
-}
-
-/**
- * Append frame-ancestors with default value 'self' when it is missing.
- */
-function appendFrameAncestorsWhenMissing(
-  parsedCspHeader: Map<string, string[]>,
-  toolkit: OnPreResponseToolkit
-) {
-  if (parsedCspHeader.has(FRAME_ANCESTORS_DIRECTIVE)) {
-    return toolkit.next({});
-  }
-
-  return updateNext(parsedCspHeader, "'self'", toolkit);
 }

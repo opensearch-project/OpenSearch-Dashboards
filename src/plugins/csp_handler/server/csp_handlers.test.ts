@@ -64,10 +64,10 @@ describe('CSP handlers', () => {
     expect(getConfigurationClient).toBeCalledWith(request);
   });
 
-  it('do not add frame-ancestors when the client returns empty and CSP from YML already has frame-ancestors', async () => {
+  it('do not modify frame-ancestors when the client returns empty and CSP from YML already has frame-ancestors', async () => {
     const coreSetup = coreMock.createSetup();
     const emptyFrameAncestors = '';
-    const cspRulesFromYML = "script-src 'unsafe-eval' 'self'; frame-ancestors 'self'";
+    const cspRulesFromYML = "script-src 'unsafe-eval' 'self'; frame-ancestors localsystem";
 
     const configurationClient = {
       getEntityConfig: jest.fn().mockReturnValue(emptyFrameAncestors),
@@ -93,7 +93,11 @@ describe('CSP handlers', () => {
     expect(result).toEqual('next');
 
     expect(toolkit.next).toHaveBeenCalledTimes(1);
-    expect(toolkit.next).toHaveBeenCalledWith({});
+    expect(toolkit.next).toHaveBeenCalledWith({
+      headers: {
+        'content-security-policy': cspRulesFromYML,
+      },
+    });
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
 
@@ -151,9 +155,9 @@ describe('CSP handlers', () => {
     expect(getConfigurationClient).toBeCalledWith(request);
   });
 
-  it('do not add frame-ancestors when the configuration does not exist and CSP from YML already has frame-ancestors', async () => {
+  it('do not modify frame-ancestors when the configuration does not exist and CSP from YML already has frame-ancestors', async () => {
     const coreSetup = coreMock.createSetup();
-    const cspRulesFromYML = "script-src 'unsafe-eval' 'self'; frame-ancestors 'self'";
+    const cspRulesFromYML = "script-src 'unsafe-eval' 'self'; frame-ancestors localsystem";
 
     const configurationClient = {
       getEntityConfig: jest.fn().mockImplementation(() => {
@@ -182,7 +186,11 @@ describe('CSP handlers', () => {
     expect(result).toEqual('next');
 
     expect(toolkit.next).toBeCalledTimes(1);
-    expect(toolkit.next).toBeCalledWith({});
+    expect(toolkit.next).toBeCalledWith({
+      headers: {
+        'content-security-policy': cspRulesFromYML,
+      },
+    });
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(1);
 
