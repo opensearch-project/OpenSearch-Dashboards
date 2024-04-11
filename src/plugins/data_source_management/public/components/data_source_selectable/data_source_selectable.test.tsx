@@ -7,11 +7,12 @@ import { ShallowWrapper, shallow, mount } from 'enzyme';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
-import { DataSourceSelectable } from './data_source_selectable';
+import { DataSourceSelectable, opensearchClusterGroupLabel } from './data_source_selectable';
 import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
-import { getByRole, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import * as utils from '../utils';
+import { EuiSelectable } from '@elastic/eui';
 
 describe('DataSourceSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -390,5 +391,44 @@ describe('DataSourceSelectable', () => {
 
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toHaveBeenCalled();
+  });
+
+  it('should render opensearch cluster group label at the top of options, when there are options availiable', async () => {
+    const onSelectedDataSource = jest.fn();
+    component = shallow(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+      />
+    );
+
+    component.instance().componentDidMount!();
+    await nextTick();
+    const optionsProp = component.find(EuiSelectable).prop('options');
+    expect(optionsProp[0]).toEqual(opensearchClusterGroupLabel);
+  });
+
+  it('should not render opensearch cluster group label, when there is no option availiable', async () => {
+    const onSelectedDataSource = jest.fn();
+    spyOn(utils, 'getDefaultDataSource').and.returnValue([]);
+    component = shallow(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+      />
+    );
+
+    component.instance().componentDidMount!();
+    await nextTick();
+    const optionsProp = component.find(EuiSelectable).prop('options');
+    expect(optionsProp).toEqual([]);
   });
 });
