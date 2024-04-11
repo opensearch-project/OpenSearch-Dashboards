@@ -61,12 +61,8 @@ it('executes a command, logs the command, and logs the output', async () => {
   await exec(log, process.execPath, ['-e', 'console.log("hi")']);
   expect(testWriter.messages).toMatchInlineSnapshot(`
     Array [
-      " debg $ <nodedir>/node -e console.log(\\"hi\\")",
-      " debg Debugger listening on ws://127.0.0.1:53158/81635f3e-3b20-418f-bd2c-b2948911e3c6",
-      " debg For help, see: https://nodejs.org/en/docs/inspector",
-      " debg Debugger attached.",
+      " debg $ <nodedir>${escapedPathToNode} -e console.log(\\"hi\\")",
       " debg hi",
-      " debg Waiting for the debugger to disconnect...",
     ]
   `);
 });
@@ -77,12 +73,8 @@ it('logs using level: option', async () => {
   });
   expect(testWriter.messages).toMatchInlineSnapshot(`
     Array [
-      " info $ <nodedir>/node -e console.log(\\"hi\\")",
-      " info Debugger listening on ws://127.0.0.1:53402/d29a80ba-1c6e-414f-80be-fa996c85fe74",
-      " info For help, see: https://nodejs.org/en/docs/inspector",
-      " info Debugger attached.",
+      " info $ <nodedir>${escapedPathToNode} -e console.log(\\"hi\\")",
       " info hi",
-      " info Waiting for the debugger to disconnect...",
     ]
   `);
 });
