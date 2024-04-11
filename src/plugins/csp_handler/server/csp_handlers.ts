@@ -15,7 +15,7 @@ import {
 import { parseCspHeader, stringifyCspHeader } from './csp_header_utils';
 
 const FRAME_ANCESTORS_DIRECTIVE = 'frame-ancestors';
-const CSP_RULES_FRAME_ANCESTORS = 'csp.rules.frame_ancestors';
+const CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY = 'csp.rules.frame_ancestors';
 
 /**
  * This function creates a pre-response handler to dynamically set the CSP rules.
@@ -52,7 +52,7 @@ export function createCspRulesPreResponseHandler(
 
       const client = getConfigurationClient(request);
 
-      const frameAncestors = await client.getEntityConfig(CSP_RULES_FRAME_ANCESTORS, {
+      const frameAncestors = await client.getEntityConfig(CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY, {
         headers: request.headers,
       });
 
