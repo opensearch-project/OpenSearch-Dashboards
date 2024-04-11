@@ -93,6 +93,12 @@ describe('buildActiveMappings', () => {
     expect(hashes.aaa).not.toEqual(hashes.ccc);
   });
 
+  test('permissions field is added when permission control flag is enabled', () => {
+    const rawConfig = configMock.create();
+    rawConfig.get.mockReturnValue(true);
+    expect(buildActiveMappings({}, rawConfig)).toHaveProperty('properties.permissions');
+  });
+
   test('workspaces field is added when workspace feature flag is enabled', () => {
     const rawConfig = configMock.create();
     rawConfig.get.mockReturnValue(true);
