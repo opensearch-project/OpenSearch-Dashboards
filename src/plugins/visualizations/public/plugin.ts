@@ -63,6 +63,7 @@ import {
   setSavedSearchLoader,
   setEmbeddable,
   setNotifications,
+  setDocLinks,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -96,6 +97,7 @@ import {
 import { createSavedSearchesLoader } from '../../discover/public';
 import { DashboardStart } from '../../dashboard/public';
 import { createSavedAugmentVisLoader } from '../../vis_augmenter/public';
+import { DocLinksStart } from '../../../core/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -133,6 +135,7 @@ export interface VisualizationsStartDeps {
   getAttributeService: DashboardStart['getAttributeService'];
   savedObjectsClient: SavedObjectsClientContract;
   notifications: NotificationsStart;
+  docLinks: DocLinksStart;
 }
 
 /**
@@ -224,6 +227,7 @@ export class VisualizationsPlugin
     });
     setSavedSearchLoader(savedSearchLoader);
     setNotifications(core.notifications);
+    setDocLinks(core.docLinks);
     return {
       ...types,
       showNewVisModal,
