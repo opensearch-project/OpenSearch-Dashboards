@@ -192,7 +192,7 @@ describe(`duplicate saved objects among workspaces`, () => {
     );
   });
 
-  it('copy unsupported objects', async () => {
+  it('duplicate unsupported objects', async () => {
     clientMock.get.mockResolvedValueOnce({ success: true });
     const result = await supertest(httpSetup.server.listener)
       .post(URL)
@@ -213,7 +213,7 @@ describe(`duplicate saved objects among workspaces`, () => {
     );
   });
 
-  it('copy index pattern and dashboard into a workspace successfully', async () => {
+  it('duplicate index pattern and dashboard into a workspace successfully', async () => {
     const targetWorkspace = 'target_workspace_id';
     const savedObjects = [mockIndexPattern, mockDashboard];
     clientMock.get.mockResolvedValueOnce({ success: true });
@@ -258,7 +258,7 @@ describe(`duplicate saved objects among workspaces`, () => {
     expect(savedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
   });
 
-  it('copy a visualization with missing references', async () => {
+  it('duplicate a saved object failed if its references are missing', async () => {
     const targetWorkspace = 'target_workspace_id';
     const savedObjects = [mockVisualization];
     const exportDetail = {
