@@ -4,13 +4,12 @@
  */
 
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
-import { chromeServiceMock, coreMock } from '../../../core/public/mocks';
+import { coreMock } from '../../../core/public/mocks';
 import { WorkspacePlugin } from './plugin';
 
 describe('Workspace plugin', () => {
   const getSetupMock = () => ({
     ...coreMock.createSetup(),
-    chrome: chromeServiceMock.createSetupContract(),
   });
   beforeEach(() => {
     WorkspaceClientMock.mockClear();
