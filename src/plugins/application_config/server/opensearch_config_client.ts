@@ -12,13 +12,13 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
   private client: IScopedClusterClient;
   private configurationIndexName: string;
   private readonly logger: Logger;
-  private cache: LRUCache<string, string>;
+  private cache: LRUCache<string, string | undefined>;
 
   constructor(
     scopedClusterClient: IScopedClusterClient,
     configurationIndexName: string,
     logger: Logger,
-    cache: LRUCache<string, string>
+    cache: LRUCache<string, string | undefined>
   ) {
     this.client = scopedClusterClient;
     this.configurationIndexName = configurationIndexName;
@@ -29,21 +29,18 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
   async getEntityConfig(entity: string) {
     const entityValidated = validate(entity, this.logger);
 
-    const cachedValue = this.cache.get(entityValidated);
-
     if (this.cache.has(entityValidated)) {
-      this.logger.info(`found value ${cachedValue} from cache`);
-      return cachedValue;
+      return this.cache.get(entityValidated);
     }
 
-    this.logger.info('No value found in cache');
+    this.logger.info(`Key ${entityValidated} is not found from cache.`);
 
     try {
       const data = await this.client.asInternalUser.get({
         index: this.configurationIndexName,
         id: entityValidated,
       });
-      const value = data?.body?._source?.value || '';
+      const value = data?.body?._source?.value;
 
       this.cache.set(entityValidated, value);
 
@@ -53,7 +50,7 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
 
       this.logger.error(errorMessage);
 
-      this.cache.set(entityValidated, '');
+      this.cache.set(entityValidated, undefined);
       throw e;
     }
   }
@@ -98,11 +95,13 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
     } catch (e) {
       if (e?.body?.error?.type === 'index_not_found_exception') {
         this.logger.info('Attemp to delete a not found index.');
+        this.cache.del(entityValidated);
         return entityValidated;
       }
 
       if (e?.body?.result === 'not_found') {
         this.logger.info('Attemp to delete a not found document.');
+        this.cache.del(entityValidated);
         return entityValidated;
       }
 

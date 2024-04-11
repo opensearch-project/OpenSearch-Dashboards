@@ -13,7 +13,6 @@ import {
   CoreStart,
   Plugin,
   Logger,
-  IScopedClusterClient,
   SharedGlobalConfig,
   OpenSearchDashboardsRequest,
   IClusterClient,
@@ -36,7 +35,7 @@ export class ApplicationConfigPlugin
   private configurationIndexName: string;
   private clusterClient: IClusterClient;
 
-  private cache: LRUCache<string, string>;
+  private cache: LRUCache<string, string | undefined>;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -45,8 +44,8 @@ export class ApplicationConfigPlugin
     this.clusterClient = null;
 
     this.cache = new LRUCache({
-      max: 30,
-      maxAge: 100 * 1000,
+      max: 100, // at most 100 entries
+      maxAge: 10 * 60 * 1000, // 10 mins
     });
   }
 
@@ -62,7 +61,7 @@ export class ApplicationConfigPlugin
     this.configurationClient = configurationClient;
   }
 
-  private getConfigurationClient(request: OpenSearchDashboardsRequest): ConfigurationClient {
+  private getConfigurationClient(request?: OpenSearchDashboardsRequest): ConfigurationClient {
     if (this.configurationClient) {
       return this.configurationClient;
     }
