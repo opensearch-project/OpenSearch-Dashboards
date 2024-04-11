@@ -305,7 +305,6 @@ describe('CSP handlers', () => {
     expect(toolkit.next).toBeCalledWith({});
 
     expect(configurationClient.getEntityConfig).toBeCalledTimes(0);
-
     expect(getConfigurationClient).toBeCalledTimes(0);
   });
 });
