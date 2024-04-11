@@ -41,7 +41,7 @@ export async function fetchFields(indexPatterns = ['*'], dataSourceId = undefine
         return getCoreStart().http.get('/api/metrics/fields', {
           query: {
             index: pattern,
-            dataSourceId,
+            data_source: dataSourceId,
           },
         });
       })

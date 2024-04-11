@@ -25,5 +25,3 @@ export {
   DataSourcePluginStart,
   DataSourcePluginRequestContext,
 } from './types';
-
-export { decideLegacyClient } from './util/decide_client';

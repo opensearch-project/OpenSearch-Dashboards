@@ -37,22 +37,21 @@ import {
   indexPatterns,
   IndexPatternFieldDescriptor,
   IndexPatternsFetcher,
+  decideClient,
 } from '../../../data/server';
 import { ReqFacade } from './search_strategies/strategies/abstract_search_strategy';
-import { decideLegacyClient } from '../../../data_source/server';
 
 export async function getFields(
   requestContext: RequestHandlerContext,
   request: OpenSearchDashboardsRequest,
   framework: Framework,
-  indexPattern: string,
-  dataSourceId: string | null
+  indexPattern: string
 ) {
   // NOTE / TODO: This facade has been put in place to make migrating to the New Platform easier. It
   // removes the need to refactor many layers of dependencies on "req", and instead just augments the top
   // level object passed from here. The layers should be refactored fully at some point, but for now
   // this works and we are still using the New Platform services for these vis data portions.
-  const client = decideLegacyClient(requestContext, dataSourceId);
+  const client = await decideClient(requestContext, request);
 
   const reqFacade: ReqFacade = {
     requestContext,
