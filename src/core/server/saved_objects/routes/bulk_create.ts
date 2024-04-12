@@ -70,7 +70,7 @@ export const registerBulkCreateRoute = (router: IRouter) => {
         : undefined;
       const result = await context.core.savedObjects.client.bulkCreate(req.body, {
         overwrite,
-        workspaces,
+        ...(workspaces ? { workspaces } : {}),
       });
       return res.ok({ body: result });
     })

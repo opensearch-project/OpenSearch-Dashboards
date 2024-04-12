@@ -23,3 +23,15 @@ export enum WorkspacePermissionMode {
   LibraryRead = 'library_read',
   LibraryWrite = 'library_write',
 }
+
+export const WORKSPACE_ID_CONSUMER_WRAPPER_ID = 'workspace_id_consumer';
+
+/**
+ * The priority for these wrappers matters:
+ * 1. WORKSPACE_ID_CONSUMER should be placed before the other two wrappers(smaller than the other two wrappers) as it cost little
+ *    and will append the essential workspaces field into the options, which will be honored by permission control wrapper and conflict wrapper.
+ * 2. The order of permission wrapper and conflict wrapper does not matter as no dependency between these two wrappers.
+ */
+export const PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER = -2;
+export const PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER = 0;
+export const PRIORITY_FOR_WORKSPACE_CONFLICT_CONTROL_WRAPPER = -1;

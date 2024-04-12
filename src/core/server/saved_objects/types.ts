@@ -112,7 +112,7 @@ export interface SavedObjectsFindOptions {
   /** An optional OpenSearch preference value to be used for the query **/
   preference?: string;
   /** If specified, will only retrieve objects that are in the workspaces */
-  workspaces?: string[];
+  workspaces?: SavedObjectsBaseOptions['workspaces'];
   /** By default the operator will be 'AND' */
   workspacesSearchOperator?: 'AND' | 'OR';
   /**
@@ -132,7 +132,7 @@ export interface SavedObjectsBaseOptions {
   /** Specify the namespace for this operation */
   namespace?: string;
   /** Specify the workspaces for this operation */
-  workspaces?: string[];
+  workspaces?: SavedObject['workspaces'] | null;
 }
 
 /**
