@@ -23,6 +23,7 @@ describe('fetchDataSourceIdByName()', () => {
     index: null,
     timefield: null,
     kibana: null,
+    opensearchDashboards: null,
     interval: null,
   };
   const client = savedObjectsClientMock.create();
@@ -104,7 +105,9 @@ describe('fetchDataSourceIdByName()', () => {
   it('should throw errors when MDS is disabled', async () => {
     await expect(
       fetchDataSourceIdByName({ ...config, data_source_name: 'Some Data Source' }, client)
-    ).rejects.toThrowError('data_source_name cannot be used because data_source.enabled is false');
+    ).rejects.toThrowError(
+      'To query from multiple data sources, first enable the data sources feature'
+    );
   });
 
   it.each([
