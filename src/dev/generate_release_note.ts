@@ -6,7 +6,7 @@
 import { join, resolve } from 'path';
 import { readFileSync, writeFileSync, Dirent, rm, rename, promises as fsPromises } from 'fs';
 import { load as loadYaml } from 'js-yaml';
-import { mkdir, readdir } from 'fs/promises';
+import { readdir } from 'fs/promises';
 import { version as pkgVersion } from '../../package.json';
 import {
   validateFragment,
@@ -27,12 +27,12 @@ function addContentAfterUnreleased(path: string, newContent: string): void {
 
   if (targetIndex !== -1) {
     const endOfLineIndex = fileContent.indexOf('\n', targetIndex);
-
     if (endOfLineIndex !== -1) {
       fileContent =
         fileContent.slice(0, endOfLineIndex + 1) +
         '\n' +
         newContent +
+        '\n' +
         fileContent.slice(endOfLineIndex + 1);
     } else {
       throw new Error('End of line for "Unreleased" section not found.');
@@ -102,9 +102,9 @@ function generateChangelog(sections: Changelog) {
 
   // Generate full changelog
   const currentDate = getCurrentDateFormatted();
-  const changelog = `## [${pkgVersion}-${currentDate}](
-  ${changelogSections.join('\n\n')}
-  `;
+  const changelog = `## [${pkgVersion}-${currentDate}](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/${pkgVersion})\n\n${changelogSections.join(
+    '\n\n'
+  )}`;
   // Update changelog file
   addContentAfterUnreleased(filePath, changelog);
   return changelogSections;
