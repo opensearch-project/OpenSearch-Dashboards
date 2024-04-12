@@ -42,7 +42,7 @@ const MAX_ENTRY_LENGTH = 100;
 
 // validate format of fragment files
 export function validateFragment(content: string) {
-  const sections = content.split('\n\n');
+  const sections = content.split(/(?:\r?\n){2,}/);
 
   // validate each section
   for (const section of sections) {
