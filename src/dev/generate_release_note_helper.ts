@@ -11,15 +11,7 @@ export const fragmentTempDirPath = resolve(__dirname, '..', '..', 'changelogs', 
 export const releaseNotesDirPath = resolve(__dirname, '..', '..', 'release-notes');
 
 export function getCurrentDateFormatted(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const day = now.getDate();
-
-  const formattedMonth = month.toString().padStart(2, '0');
-  const formattedDay = day.toString().padStart(2, '0');
-
-  return `${year}-${formattedMonth}-${formattedDay}`;
+  return new Date().toISOString().substr(0, 10) 
 }
 
 export const SECTION_MAPPING = {
