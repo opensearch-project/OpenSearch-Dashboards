@@ -11,7 +11,7 @@ export const fragmentTempDirPath = resolve(__dirname, '..', '..', 'changelogs', 
 export const releaseNotesDirPath = resolve(__dirname, '..', '..', 'release-notes');
 
 export function getCurrentDateFormatted(): string {
-  return new Date().toISOString().substr(0, 10) 
+  return new Date().toISOString().slice(0, 10);
 }
 
 export const SECTION_MAPPING = {

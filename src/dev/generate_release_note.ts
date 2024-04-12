@@ -4,7 +4,7 @@
  */
 
 import { resolve } from 'path';
-import { readFileSync, writeFileSync, Dirent, renameSync, rm } from 'fs';
+import { readFileSync, writeFileSync, Dirent, rm, rename } from 'fs';
 import { load as loadYaml } from 'js-yaml';
 import { mkdir, readdir } from 'fs/promises';
 import { version as pkgVersion } from '../../package.json';
@@ -91,7 +91,7 @@ async function moveFragments(fragmentPaths: Dirent[]): Promise<void> {
   for (const fragmentFilename of fragmentPaths) {
     const fragmentPath = resolve(fragmentDirPath, fragmentFilename.name);
     const fragmentTempPath = resolve(fragmentTempDirPath, fragmentFilename.name);
-    await rename(fragmentPath, fragmentTempPath);
+    rename(fragmentPath, fragmentTempPath, () => {});
   }
 }
 
