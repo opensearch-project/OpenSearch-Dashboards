@@ -11,7 +11,9 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
       },
       "basePath": BasePath {
         "basePath": "",
+        "clientBasePath": "",
         "get": [Function],
+        "getBasePath": [Function],
         "prepend": [Function],
         "remove": [Function],
         "serverBasePath": "",
@@ -378,7 +380,9 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
       },
       "basePath": BasePath {
         "basePath": "",
+        "clientBasePath": "",
         "get": [Function],
+        "getBasePath": [Function],
         "prepend": [Function],
         "remove": [Function],
         "serverBasePath": "",
@@ -755,7 +759,9 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
       },
       "basePath": BasePath {
         "basePath": "",
+        "clientBasePath": "",
         "get": [Function],
+        "getBasePath": [Function],
         "prepend": [Function],
         "remove": [Function],
         "serverBasePath": "",

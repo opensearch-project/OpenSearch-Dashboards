@@ -29,4 +29,22 @@ describe('Workspace plugin', () => {
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
   });
+
+  it('#setup when workspace id is in url and enterWorkspace return error', async () => {
+    const windowSpy = jest.spyOn(window, 'window', 'get');
+    windowSpy.mockImplementation(
+      () =>
+        ({
+          location: {
+            href: 'http://localhost/w/workspaceId/app',
+          },
+        } as any)
+    );
+    const setupMock = getSetupMock();
+
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock);
+    expect(setupMock.workspaces.currentWorkspaceId$.getValue()).toEqual('workspaceId');
+    windowSpy.mockRestore();
+  });
 });

@@ -74,6 +74,32 @@ describe('#setup()', () => {
     // We don't verify that this Observable comes from Fetch#getLoadingCount$() to avoid complex mocking
     expect(loadingServiceSetup.addLoadingCountSource).toHaveBeenCalledWith(expect.any(Observable));
   });
+
+  it('setup basePath without workspaceId provided in window.location.href', () => {
+    const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+    const fatalErrors = fatalErrorsServiceMock.createSetupContract();
+    const httpService = new HttpService();
+    const setupResult = httpService.setup({ fatalErrors, injectedMetadata });
+    expect(setupResult.basePath.get()).toEqual('');
+  });
+
+  it('setup basePath with workspaceId provided in window.location.href', () => {
+    const windowSpy = jest.spyOn(window, 'window', 'get');
+    windowSpy.mockImplementation(
+      () =>
+        ({
+          location: {
+            href: 'http://localhost/w/workspaceId/app',
+          },
+        } as any)
+    );
+    const injectedMetadata = injectedMetadataServiceMock.createSetupContract();
+    const fatalErrors = fatalErrorsServiceMock.createSetupContract();
+    const httpService = new HttpService();
+    const setupResult = httpService.setup({ fatalErrors, injectedMetadata });
+    expect(setupResult.basePath.get()).toEqual('/w/workspaceId');
+    windowSpy.mockRestore();
+  });
 });
 
 describe('#stop()', () => {
