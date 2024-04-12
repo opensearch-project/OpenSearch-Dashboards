@@ -37,8 +37,9 @@ export interface OpenSearchFunctionConfig {
   index: string | null;
   timefield: string | null;
   kibana: boolean | null;
+  opensearchDashboards: boolean | null;
   /**
-   * @deprecated The interval picker should be used instead
+   * @deprecated This property should not be set in the Timeline expression. Users should use the interval picker React component instead
    */
   interval: string | null;
   data_source_name?: string | null;

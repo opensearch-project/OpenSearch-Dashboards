@@ -14,7 +14,7 @@ export const fetchDataSourceIdByName = async (
 ) => {
   if (config.data_source_name) {
     if (!getDataSourceEnabled().enabled) {
-      throw new Error('data_source_name cannot be used because data_source.enabled is false');
+      throw new Error('To query from multiple data sources, first enable the data sources feature');
     }
 
     const dataSources = await client.find<DataSourceAttributes>({
