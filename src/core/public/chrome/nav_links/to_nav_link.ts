@@ -28,14 +28,22 @@
  * under the License.
  */
 
-import { PublicAppInfo, AppNavLinkStatus, AppStatus } from '../../application';
+import {
+  PublicAppInfo,
+  AppNavLinkStatus,
+  AppStatus,
+  WorkspaceAccessibility,
+} from '../../application';
 import { IBasePath } from '../../http';
 import { NavLinkWrapper } from './nav_link';
 import { appendAppPath } from '../../application/utils';
 
 export function toNavLink(app: PublicAppInfo, basePath: IBasePath): NavLinkWrapper {
   const useAppStatus = app.navLinkStatus === AppNavLinkStatus.default;
-  const relativeBaseUrl = basePath.prepend(app.appRoute!);
+  let relativeBaseUrl = basePath.prepend(app.appRoute!);
+  if (app.workspaceAccessibility === WorkspaceAccessibility.NO) {
+    relativeBaseUrl = basePath.prepend(app.appRoute!, { withoutClientBasePath: true });
+  }
   const url = relativeToAbsolute(appendAppPath(relativeBaseUrl, app.defaultPath));
   const baseUrl = relativeToAbsolute(relativeBaseUrl);
 

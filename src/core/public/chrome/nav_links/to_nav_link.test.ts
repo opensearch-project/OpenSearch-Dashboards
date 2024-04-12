@@ -28,7 +28,12 @@
  * under the License.
  */
 
-import { PublicAppInfo, AppNavLinkStatus, AppStatus } from '../../application';
+import {
+  PublicAppInfo,
+  AppNavLinkStatus,
+  AppStatus,
+  WorkspaceAccessibility,
+} from '../../application';
 import { toNavLink } from './to_nav_link';
 
 import { httpServiceMock } from '../../mocks';
@@ -171,6 +176,40 @@ describe('toNavLink', () => {
       expect.objectContaining({
         disabled: true,
         hidden: false,
+      })
+    );
+  });
+
+  it('uses the workspaceVisibility of the application to construct the url', () => {
+    const httpMock = httpServiceMock.createStartContract({
+      basePath: '/base_path',
+      clientBasePath: '/client_base_path',
+    });
+    expect(
+      toNavLink(
+        app({
+          workspaceAccessibility: WorkspaceAccessibility.NO,
+        }),
+        httpMock.basePath
+      ).properties
+    ).toEqual(
+      expect.objectContaining({
+        url: 'http://localhost/base_path/app/some-id',
+        baseUrl: 'http://localhost/base_path/app/some-id',
+      })
+    );
+
+    expect(
+      toNavLink(
+        app({
+          workspaceAccessibility: WorkspaceAccessibility.YES,
+        }),
+        httpMock.basePath
+      ).properties
+    ).toEqual(
+      expect.objectContaining({
+        url: 'http://localhost/base_path/client_base_path/app/some-id',
+        baseUrl: 'http://localhost/base_path/client_base_path/app/some-id',
       })
     );
   });

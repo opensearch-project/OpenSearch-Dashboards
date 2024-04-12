@@ -16,6 +16,7 @@ import {
   AppUpdater,
   AppStatus,
   PublicAppInfo,
+  WorkspaceAccessibility,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -199,6 +200,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         const { renderCreatorApp } = await import('./application');
         return mountWorkspaceApp(params, renderCreatorApp);
       },
+      workspaceAccessibility: WorkspaceAccessibility.NO,
     });
 
     // update
@@ -244,6 +246,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
       },
+      workspaceAccessibility: WorkspaceAccessibility.NO,
     });
 
     /**

@@ -226,8 +226,8 @@ export class CoreSystem {
         overlays,
         targetDomElement: notificationsTargetDomElement,
       });
-      const application = await this.application.start({ http, overlays });
       const workspaces = this.workspaces.start();
+      const application = await this.application.start({ http, overlays, workspaces });
       const chrome = await this.chrome.start({
         application,
         docLinks,

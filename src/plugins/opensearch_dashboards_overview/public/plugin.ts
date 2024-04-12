@@ -40,6 +40,7 @@ import {
   AppStatus,
   AppNavLinkStatus,
   Branding,
+  WorkspaceAccessibility,
 } from '../../../core/public';
 import {
   OpenSearchDashboardsOverviewPluginSetup,
@@ -106,6 +107,7 @@ export class OpenSearchDashboardsOverviewPlugin
         // Render the application
         return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
       },
+      workspaceAccessibility: WorkspaceAccessibility.NO,
     });
 
     if (home) {

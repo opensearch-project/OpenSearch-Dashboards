@@ -44,8 +44,16 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { overlayServiceMock } from '../overlays/overlay_service.mock';
 import { MockLifecycle } from './test_types';
 import { ApplicationService } from './application_service';
-import { App, PublicAppInfo, AppNavLinkStatus, AppStatus, AppUpdater } from './types';
+import {
+  App,
+  PublicAppInfo,
+  AppNavLinkStatus,
+  AppStatus,
+  AppUpdater,
+  WorkspaceAccessibility,
+} from './types';
 import { act } from 'react-dom/test-utils';
+import { workspacesServiceMock } from '../mocks';
 
 const createApp = (props: Partial<App>): App => {
   return {
@@ -68,7 +76,11 @@ describe('#setup()', () => {
       context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      workspaces: workspacesServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -398,7 +410,11 @@ describe('#start()', () => {
       context: contextServiceMock.createSetupContract(),
       redirectTo: jest.fn(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      workspaces: workspacesServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -538,6 +554,32 @@ describe('#start()', () => {
       expect(getUrlForApp('app2', { path: 'deep/link', absolute: true })).toBe(
         'http://localhost/base-path/app/app2/deep/link'
       );
+    });
+
+    it('creates URL when the app is not accessible in a workspace', async () => {
+      const httpMock = httpServiceMock.createSetupContract({
+        basePath: '/base-path',
+        clientBasePath: '/client-base-path',
+      });
+      const { register } = service.setup({
+        ...setupDeps,
+        http: httpMock,
+      });
+      // register a app that can only be accessed out of a workspace
+      register(
+        Symbol(),
+        createApp({
+          id: 'app1',
+          workspaceAccessibility: WorkspaceAccessibility.NO,
+        })
+      );
+      const { getUrlForApp } = await service.start({
+        ...startDeps,
+        http: httpMock,
+      });
+
+      expect(getUrlForApp('app1')).toBe('/base-path/app/app1');
+      expect(getUrlForApp('app2')).toBe('/base-path/client-base-path/app/app2');
     });
   });
 
@@ -766,6 +808,46 @@ describe('#start()', () => {
       `);
     });
 
+    it('navigate by using window.location.assign if navigate to a app not accessible within a workspace', async () => {
+      // Save the original assign method
+      const originalLocation = window.location;
+      delete (window as any).location;
+
+      // Mocking the window object
+      window.location = {
+        ...originalLocation,
+        assign: jest.fn(),
+      };
+
+      const { register } = service.setup(setupDeps);
+      // register a app that can only be accessed out of a workspace
+      register(
+        Symbol(),
+        createApp({
+          id: 'app1',
+          workspaceAccessibility: WorkspaceAccessibility.NO,
+        })
+      );
+      const workspaces = workspacesServiceMock.createStartContract();
+      workspaces.currentWorkspaceId$.next('foo');
+      const http = httpServiceMock.createStartContract({
+        basePath: '/base-path',
+        clientBasePath: '/client-base-path',
+      });
+      const { navigateToApp } = await service.start({
+        ...startDeps,
+        workspaces,
+        http,
+      });
+      await navigateToApp('app1');
+
+      expect(window.location.assign).toBeCalledWith('/base-path/app/app1');
+      await navigateToApp('app2');
+      // assign should not be called
+      expect(window.location.assign).toBeCalledTimes(1);
+      window.location = originalLocation;
+    });
+
     describe('when `replace` option is true', () => {
       it('use `history.replace` instead of `history.push`', async () => {
         service.setup(setupDeps);
@@ -869,7 +951,11 @@ describe('#stop()', () => {
       http,
       context: contextServiceMock.createSetupContract(),
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      workspaces: workspacesServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 

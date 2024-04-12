@@ -54,9 +54,11 @@ import {
   InternalApplicationStart,
   Mounter,
   NavigateToAppOptions,
+  WorkspaceAccessibility,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
+import { WorkspacesStart } from '../workspace';
 
 interface SetupDeps {
   context: ContextSetup;
@@ -69,6 +71,7 @@ interface SetupDeps {
 interface StartDeps {
   http: HttpStart;
   overlays: OverlayStart;
+  workspaces: WorkspacesStart;
 }
 
 // Mount functions with two arguments are assumed to expect deprecated `context` object.
@@ -213,7 +216,7 @@ export class ApplicationService {
     };
   }
 
-  public async start({ http, overlays }: StartDeps): Promise<InternalApplicationStart> {
+  public async start({ http, overlays, workspaces }: StartDeps): Promise<InternalApplicationStart> {
     if (!this.mountContext) {
       throw new Error('ApplicationService#setup() must be invoked before start.');
     }
@@ -259,6 +262,22 @@ export class ApplicationService {
       const shouldNavigate = navigatingToSameApp ? true : await this.shouldNavigate(overlays);
 
       if (shouldNavigate) {
+        const targetApp = applications$.value.get(appId);
+        if (
+          workspaces.currentWorkspaceId$.value &&
+          targetApp?.workspaceAccessibility === WorkspaceAccessibility.NO
+        ) {
+          // If user is inside a workspace and the target app is not accessible within a workspace
+          // refresh the page by doing a hard navigation
+          window.location.assign(
+            http.basePath.prepend(getAppUrl(availableMounters, appId, path), {
+              // Set withoutClientBasePath to true remove the workspace path prefix
+              withoutClientBasePath: true,
+            })
+          );
+          return;
+        }
+
         if (path === undefined) {
           path = applications$.value.get(appId)?.defaultPath;
         }
@@ -293,7 +312,10 @@ export class ApplicationService {
         appId,
         { path, absolute = false }: { path?: string; absolute?: boolean } = {}
       ) => {
-        const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path));
+        const targetApp = applications$.value.get(appId);
+        const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path), {
+          withoutClientBasePath: targetApp?.workspaceAccessibility === WorkspaceAccessibility.NO,
+        });
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },
       navigateToApp,
