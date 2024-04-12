@@ -91,7 +91,7 @@ async function moveFragments(fragmentPaths: Dirent[]): Promise<void> {
   for (const fragmentFilename of fragmentPaths) {
     const fragmentPath = resolve(fragmentDirPath, fragmentFilename.name);
     const fragmentTempPath = resolve(fragmentTempDirPath, fragmentFilename.name);
-    renameSync(fragmentPath, fragmentTempPath);
+    await rename(fragmentPath, fragmentTempPath);
   }
 }
 
