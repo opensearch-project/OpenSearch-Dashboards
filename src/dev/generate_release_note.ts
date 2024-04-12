@@ -63,7 +63,7 @@ async function readFragments() {
   const fragmentPaths = await readdir(fragmentDirPath, { withFileTypes: true });
   for (const fragmentFilename of fragmentPaths) {
     // skip non yml or yaml files
-    if (!fragmentFilename.name.endsWith('.yml') && !fragmentFilename.name.endsWith('.yaml')) {
+    if (!/\.ya?ml$/i.test(fragmentFilename.name)) {
       // eslint-disable-next-line no-console
       console.warn(`Skipping non yml or yaml file ${fragmentFilename.name}`);
       continue;
