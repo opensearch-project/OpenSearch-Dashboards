@@ -234,10 +234,21 @@ export class DataSourceSelector extends React.Component<
         fullWidth={this.props.fullWidth || false}
         data-test-subj={'dataSourceSelectorComboBox'}
         renderOption={(option) => (
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={1}>{option.label}</EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem
+              grow={false}
+              component="span"
+              style={{
+                'text-overflow': 'ellipsis',
+                overflow: 'hidden',
+                'white-space': 'nowrap',
+                display: 'inline-block',
+              }}
+            >
+              {option.label}
+            </EuiFlexItem>
             {option.id === this.state.defaultDataSource && (
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} component="span">
                 <EuiBadge iconSide="left">Default</EuiBadge>
               </EuiFlexItem>
             )}
