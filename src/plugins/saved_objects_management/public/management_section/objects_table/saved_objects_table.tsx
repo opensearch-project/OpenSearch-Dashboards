@@ -69,7 +69,7 @@ import {
   WorkspaceAttribute,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
-import { DEFAULT_WORKSPACE_ID } from '../../../../../core/public';
+import { PUBLIC_WORKSPACE_ID, PUBLIC_WORKSPACE_NAME } from '../../../../../core/public';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -192,21 +192,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     } else {
       // application home
       if (!currentWorkspaceId) {
-        return availableWorkspaces?.map((ws) => ws.id).concat(DEFAULT_WORKSPACE_ID);
+        return availableWorkspaces?.map((ws) => ws.id).concat(PUBLIC_WORKSPACE_ID);
       } else {
         return [currentWorkspaceId];
       }
     }
   }
 
-  private get wsNameIdLookup() {
+  private get workspaceNameIdLookup() {
     const { availableWorkspaces } = this.state;
     const workspaceNameIdMap = new Map<string, string>();
-    workspaceNameIdMap.set(DEFAULT_WORKSPACE_ID, DEFAULT_WORKSPACE_ID);
-    // Assumption: workspace name is unique across the system
-    availableWorkspaces?.reduce((map, ws) => {
-      return map.set(ws.name, ws.id);
-    }, workspaceNameIdMap);
+    workspaceNameIdMap.set(PUBLIC_WORKSPACE_NAME, PUBLIC_WORKSPACE_ID);
+    // workspace name is unique across the system
+    availableWorkspaces?.forEach((workspace) => {
+      workspaceNameIdMap.set(workspace.name, workspace.id);
+    });
     return workspaceNameIdMap;
   }
 
@@ -254,7 +254,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
     if (visibleWorkspaces?.length) {
       filteredCountOptions.workspaces = visibleWorkspaces
-        .map((wsName) => this.wsNameIdLookup?.get(wsName) || '')
+        .map((wsName) => this.workspaceNameIdLookup?.get(wsName) || '')
         .filter((wsId) => !!wsId);
     }
 
@@ -350,13 +350,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     if (visibleWorkspaces?.length) {
       const workspaceIds: string[] = visibleWorkspaces.map(
-        (wsName) => this.wsNameIdLookup?.get(wsName) || ''
+        (wsName) => this.workspaceNameIdLookup?.get(wsName) || ''
       );
       findOptions.workspaces = workspaceIds;
     }
 
     if (findOptions.workspaces) {
-      if (findOptions.workspaces.indexOf(DEFAULT_WORKSPACE_ID) !== -1) {
+      if (findOptions.workspaces.indexOf(PUBLIC_WORKSPACE_ID) !== -1) {
         // search both saved objects with workspace and without workspace
         findOptions.workspacesSearchOperator = 'OR';
       }
@@ -949,6 +949,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     // Add workspace filter
     if (workspaceEnabled && availableWorkspaces?.length) {
       const wsCounts = savedObjectCounts.workspaces || {};
+      const publicWorkspaceExists =
+        availableWorkspaces.findIndex((workspace) => workspace.id === PUBLIC_WORKSPACE_ID) > -1;
       const wsFilterOptions = availableWorkspaces
         .filter((ws) => {
           return this.workspaceIdQuery?.includes(ws.id);
@@ -961,11 +963,12 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           };
         });
 
-      if (!currentWorkspaceId) {
+      // add public workspace option only if we don't have it as real workspace
+      if (!currentWorkspaceId && !publicWorkspaceExists) {
         wsFilterOptions.push({
-          name: DEFAULT_WORKSPACE_ID,
-          value: DEFAULT_WORKSPACE_ID,
-          view: `Default (${wsCounts[DEFAULT_WORKSPACE_ID] || 0})`,
+          name: PUBLIC_WORKSPACE_NAME,
+          value: PUBLIC_WORKSPACE_ID,
+          view: `${PUBLIC_WORKSPACE_NAME} (${wsCounts[PUBLIC_WORKSPACE_ID] || 0})`,
         });
       }
 

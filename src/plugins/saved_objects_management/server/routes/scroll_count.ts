@@ -30,7 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, SavedObjectsFindOptions } from 'src/core/server';
-import { DEFAULT_WORKSPACE_ID } from '../../../../core/server';
+import { PUBLIC_WORKSPACE_ID } from '../../../../core/server';
 import { findAll } from '../lib';
 
 export const registerScrollForCountRoute = (router: IRouter) => {
@@ -69,7 +69,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       if (requestHasWorkspaces) {
         counts.workspaces = {};
         findOptions.workspaces = req.body.workspaces;
-        if (findOptions.workspaces.indexOf(DEFAULT_WORKSPACE_ID) !== -1) {
+        if (findOptions.workspaces.indexOf(PUBLIC_WORKSPACE_ID) !== -1) {
           // search both saved objects with workspace and without workspace
           findOptions.workspacesSearchOperator = 'OR';
         }
@@ -95,7 +95,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
           });
         }
         if (requestHasWorkspaces) {
-          const resultWorkspaces = result.workspaces || [DEFAULT_WORKSPACE_ID];
+          const resultWorkspaces = result.workspaces || [PUBLIC_WORKSPACE_ID];
           resultWorkspaces.forEach((ws) => {
             counts.workspaces[ws] = counts.workspaces[ws] || 0;
             counts.workspaces[ws]++;

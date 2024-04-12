@@ -64,7 +64,7 @@ import {
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
 import { WorkspaceObject } from 'opensearch-dashboards/public';
-import { DEFAULT_WORKSPACE_ID } from '../../../../../core/public';
+import { PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
 import { TableProps } from './components/table';
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
@@ -627,7 +627,7 @@ describe('SavedObjectsTable', () => {
       expect(filters[1].options.length).toBe(3);
       expect(filters[1].options[0].value).toBe('foo');
       expect(filters[1].options[1].value).toBe('bar');
-      expect(filters[1].options[2].value).toBe(DEFAULT_WORKSPACE_ID);
+      expect(filters[1].options[2].value).toBe(PUBLIC_WORKSPACE_ID);
     });
 
     it('show workspace filter when workspace turn on and enter a workspace', async () => {
@@ -763,7 +763,7 @@ describe('SavedObjectsTable', () => {
         expect(findObjectsMock).toBeCalledWith(
           http,
           expect.objectContaining({
-            workspaces: expect.arrayContaining(['workspace1', 'default']),
+            workspaces: expect.arrayContaining(['workspace1', PUBLIC_WORKSPACE_ID]),
             workspacesSearchOperator: expect.stringMatching('OR'),
           })
         );
