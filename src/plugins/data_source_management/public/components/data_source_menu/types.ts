@@ -8,6 +8,7 @@ import {
   SavedObjectsClientContract,
   SavedObject,
   IUiSettingsClient,
+  ApplicationStart,
 } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 
@@ -32,6 +33,7 @@ export interface DataSourceMenuProps<T = any> {
   componentConfig: T;
   hideLocalCluster?: boolean;
   uiSettings?: IUiSettingsClient;
+  application?: ApplicationStart;
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
 }
 

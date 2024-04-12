@@ -5,17 +5,28 @@
 
 import { createDataSourceMenu } from './create_data_source_menu';
 import { MountPoint, SavedObjectsClientContract } from '../../../../../core/public';
-import { coreMock, notificationServiceMock } from '../../../../../core/public/mocks';
+import {
+  applicationServiceMock,
+  coreMock,
+  notificationServiceMock,
+} from '../../../../../core/public/mocks';
 import React from 'react';
-import { act, getByText, render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { DataSourceComponentType, DataSourceSelectableConfig } from './types';
 import { ReactWrapper } from 'enzyme';
 import { mockDataSourcePluginSetupWithShowLocalCluster } from '../../mocks';
+import * as utils from '../utils';
 
 describe('create data source menu', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const { uiSettings } = coreMock.createSetup();
+
+  beforeAll(() => {
+    jest
+      .spyOn(utils, 'getApplication')
+      .mockImplementation(() => applicationServiceMock.createStartContract());
+  });
 
   beforeEach(() => {
     client = {
