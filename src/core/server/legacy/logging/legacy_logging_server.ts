@@ -32,6 +32,7 @@
 
 import { ServerExtType } from 'hapi';
 import Podium from 'podium';
+import { cleanControlSequences } from '@osd/std';
 // @ts-expect-error: implicit any for JS file
 import { Config } from '../../../../legacy/server/config';
 // @ts-expect-error: implicit any for JS file
@@ -123,7 +124,7 @@ export class LegacyLoggingServer {
     const { tags = [], ...metadata } = meta;
 
     this.events.emit('log', {
-      data: getDataToLog(error, metadata, message),
+      data: getDataToLog(error, metadata, cleanControlSequences(message)),
       tags: [getLegacyLogLevel(level), ...context.split('.'), ...tags],
       timestamp: timestamp.getTime(),
     });
