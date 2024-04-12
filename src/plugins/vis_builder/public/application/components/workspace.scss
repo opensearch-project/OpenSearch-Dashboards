@@ -11,7 +11,7 @@ $keyframe-multiplier: calc(1 / $animation-multiplier);
 .vbWorkspace {
   display: grid;
   -ms-grid-rows: auto $euiSizeM 1fr;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 1fr;
   grid-area: workspace;
   grid-gap: $euiSizeM;
   padding: $euiSizeM;

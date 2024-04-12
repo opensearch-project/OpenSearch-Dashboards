@@ -39,7 +39,6 @@ describe('VisBuilderPlugin', () => {
           title: PLUGIN_NAME,
           aliasPath: '#/',
           aliasApp: PLUGIN_ID,
-          stage: 'experimental',
         })
       );
     });

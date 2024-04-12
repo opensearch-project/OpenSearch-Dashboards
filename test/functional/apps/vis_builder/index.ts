@@ -34,6 +34,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./_base'));
-    loadTestFile(require.resolve('./_experimental_vis'));
   });
 }
