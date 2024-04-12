@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { resolve } from 'path';
-import { readFileSync, writeFileSync, Dirent, rm, rename } from 'fs';
+import { join, resolve } from 'path';
+import { readFileSync, writeFileSync, Dirent, rm, rename, promises as fsPromises } from 'fs';
 import { load as loadYaml } from 'js-yaml';
 import { mkdir, readdir } from 'fs/promises';
 import { version as pkgVersion } from '../../package.json';
@@ -14,7 +14,6 @@ import {
   Changelog,
   SECTION_MAPPING,
   fragmentDirPath,
-  fragmentTempDirPath,
   SectionKey,
   releaseNotesDirPath,
   filePath,
@@ -45,7 +44,7 @@ function addContentAfterUnreleased(path: string, newContent: string): void {
   writeFileSync(path, fileContent);
 }
 
-async function deleteFragments() {
+async function deleteFragments(fragmentTempDirPath: string) {
   rm(fragmentTempDirPath, { recursive: true }, (err: any) => {
     if (err) {
       throw err;
@@ -83,10 +82,7 @@ async function readFragments() {
   return { sections, fragmentPaths };
 }
 
-async function moveFragments(fragmentPaths: Dirent[]): Promise<void> {
-  // create folder for temp fragments at fragmentTempDirPath
-  await mkdir(fragmentTempDirPath, { recursive: true });
-
+async function moveFragments(fragmentPaths: Dirent[], fragmentTempDirPath: string): Promise<void> {
   // Move fragment files to temp fragments folder
   for (const fragmentFilename of fragmentPaths) {
     const fragmentPath = resolve(fragmentDirPath, fragmentFilename.name);
@@ -124,14 +120,15 @@ function generateReleaseNote(changelogSections: string[]) {
 
 (async () => {
   const { sections, fragmentPaths } = await readFragments();
-
+  // create folder for temp fragments
+  const fragmentTempDirPath = await fsPromises.mkdtemp(join(fragmentDirPath, 'tmp_fragments-'));
   // move fragments to temp fragments folder
-  await moveFragments(fragmentPaths);
+  await moveFragments(fragmentPaths, fragmentTempDirPath);
 
   const changelogSections = generateChangelog(sections);
 
   generateReleaseNote(changelogSections);
 
   // remove temp fragments folder
-  await deleteFragments();
+  await deleteFragments(fragmentTempDirPath);
 })();

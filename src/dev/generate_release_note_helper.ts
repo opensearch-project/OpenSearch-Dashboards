@@ -7,7 +7,6 @@ import { resolve } from 'path';
 
 export const filePath = resolve(__dirname, '..', '..', 'CHANGELOG.md');
 export const fragmentDirPath = resolve(__dirname, '..', '..', 'changelogs', 'fragments');
-export const fragmentTempDirPath = resolve(__dirname, '..', '..', 'changelogs', 'temp_fragments');
 export const releaseNotesDirPath = resolve(__dirname, '..', '..', 'release-notes');
 
 export function getCurrentDateFormatted(): string {
@@ -31,6 +30,8 @@ export type SectionKey = keyof typeof SECTION_MAPPING;
 export type Changelog = Record<SectionKey, string[]>;
 
 const MAX_ENTRY_LENGTH = 100;
+// Each entry must start with '-' and a space, followed by a non-empty string, and be no longer that MAX_ENTRY_LENGTH characters
+const entryRegex = new RegExp(`^-.{1,${MAX_ENTRY_LENGTH}}\\(\\[#.+]\\(.+\\)\\)$`);
 
 // validate format of fragment files
 export function validateFragment(content: string) {
@@ -45,8 +46,6 @@ export function validateFragment(content: string) {
     if (!SECTION_MAPPING[sectionKey as SectionKey] || !sectionName.endsWith(':')) {
       throw new Error(`Unknown section ${sectionKey}.`);
     }
-    // Each entry must start with '-' and a space, followed by a non-empty string, and be no longer that MAX_ENTRY_LENGTH characters
-    const entryRegex = new RegExp(`^-.{1,${MAX_ENTRY_LENGTH}}\\(\\[#.+]\\(.+\\)\\)$`);
     for (const entry of lines.slice(1)) {
       if (entry === '') {
         continue;
