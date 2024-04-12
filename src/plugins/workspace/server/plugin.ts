@@ -89,13 +89,14 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       this.workspaceConflictControl.wrapperFactory
     );
     this.proxyWorkspaceTrafficToRealHandler(core);
-
+    
     core.savedObjects.addClientWrapper(
       PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
       WORKSPACE_ID_CONSUMER_WRAPPER_ID,
       new WorkspaceIdConsumerWrapper().wrapperFactory
     );
 
+    const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
     this.logger.info('Workspace permission control enabled:' + isPermissionControlEnabled);
     if (isPermissionControlEnabled) {
       this.permissionControl = new SavedObjectsPermissionControl(this.logger);
@@ -115,6 +116,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       http: core.http,
       logger: this.logger,
       client: this.client as IWorkspaceClientImpl,
+      maxImportExportSize,
       permissionControlClient: this.permissionControl,
       isPermissionControlEnabled,
     });

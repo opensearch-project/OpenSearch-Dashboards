@@ -30,7 +30,7 @@ const CSP_RULES_CONFIG_KEY = 'csp.rules';
 export function createCspRulesPreResponseHandler(
   core: CoreSetup,
   cspHeader: string,
-  getConfigurationClient: (scopedClusterClient: IScopedClusterClient) => ConfigurationClient,
+  getConfigurationClient: (request?: OpenSearchDashboardsRequest) => ConfigurationClient,
   logger: Logger
 ): OnPreResponseHandler {
   return async (
@@ -47,9 +47,7 @@ export function createCspRulesPreResponseHandler(
         return toolkit.next({});
       }
 
-      const [coreStart] = await core.getStartServices();
-
-      const client = getConfigurationClient(coreStart.opensearch.client.asScoped(request));
+      const client = getConfigurationClient(request);
 
       const cspRules = await client.getEntityConfig(CSP_RULES_CONFIG_KEY, {
         headers: request.headers,
