@@ -21,7 +21,12 @@ import {
   PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
   PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
 } from '../common/constants';
-import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
+import {
+  IWorkspaceClientImpl,
+  WorkspacePluginSetup,
+  WorkspacePluginStart,
+  AppPluginSetupDependencies,
+} from './types';
 import { WorkspaceClient } from './workspace_client';
 import { registerRoutes } from './routes';
 import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
@@ -35,6 +40,11 @@ import {
   SavedObjectsPermissionControl,
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
+import {
+  getApplicationOSDAdminConfig,
+  getOSDAdminConfig,
+  updateDashboardAdminStateForRequest,
+} from './utils';
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
 
 export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
@@ -67,12 +77,51 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     });
   }
 
+  private setupPermission(core: CoreSetup, { applicationConfig }: AppPluginSetupDependencies) {
+    this.permissionControl = new SavedObjectsPermissionControl(this.logger);
+
+    core.http.registerOnPostAuth(async (request, response, toolkit) => {
+      let groups: string[];
+      let users: string[];
+      let configGroups: string[];
+      let configUsers: string[];
+
+      // There may be calls to saved objects client before user get authenticated, need to add a try catch here as `getPrincipalsFromRequest` will throw error when user is not authenticated.
+      try {
+        ({ groups = [], users = [] } = this.permissionControl!.getPrincipalsFromRequest(request));
+      } catch (e) {
+        return toolkit.next();
+      }
+
+      if (!!applicationConfig) {
+        [configGroups, configUsers] = await getApplicationOSDAdminConfig(
+          { applicationConfig },
+          request
+        );
+      } else {
+        [configGroups, configUsers] = await getOSDAdminConfig(this.globalConfig$);
+      }
+      updateDashboardAdminStateForRequest(request, groups, users, configGroups, configUsers);
+      return toolkit.next();
+    });
+
+    this.workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
+      this.permissionControl
+    );
+
+    core.savedObjects.addClientWrapper(
+      0,
+      WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+      this.workspaceSavedObjectsClientWrapper.wrapperFactory
+    );
+  }
+
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get('plugins', 'workspace');
     this.globalConfig$ = initializerContext.config.legacy.globalConfig$;
   }
 
-  public async setup(core: CoreSetup) {
+  public async setup(core: CoreSetup, { applicationConfig }: AppPluginSetupDependencies) {
     this.logger.debug('Setting up Workspaces service');
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
     const isPermissionControlEnabled = globalConfig.savedObjects.permission.enabled === true;
@@ -98,19 +147,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
 
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
     this.logger.info('Workspace permission control enabled:' + isPermissionControlEnabled);
-    if (isPermissionControlEnabled) {
-      this.permissionControl = new SavedObjectsPermissionControl(this.logger);
-
-      this.workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
-        this.permissionControl
-      );
-
-      core.savedObjects.addClientWrapper(
-        PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
-        WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-        this.workspaceSavedObjectsClientWrapper.wrapperFactory
-      );
-    }
+    if (isPermissionControlEnabled) this.setupPermission(core, { applicationConfig });
 
     registerRoutes({
       http: core.http,

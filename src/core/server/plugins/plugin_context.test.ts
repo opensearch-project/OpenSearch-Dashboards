@@ -101,6 +101,7 @@ describe('createPluginInitializerContext', () => {
         configIndex: '.opensearch_dashboards_config',
         autocompleteTerminateAfter: duration(100000),
         autocompleteTimeout: duration(1000),
+        dashboardAdmin: { groups: [], users: [] },
       },
       opensearch: {
         shardTimeout: duration(30, 's'),

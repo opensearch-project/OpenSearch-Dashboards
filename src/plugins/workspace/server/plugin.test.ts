@@ -6,9 +6,17 @@
 import { OnPreRoutingHandler } from 'src/core/server';
 import { coreMock, httpServerMock } from '../../../core/server/mocks';
 import { WorkspacePlugin } from './plugin';
+import { AppPluginSetupDependencies } from './types';
 import { getWorkspaceState } from '../../../core/server/utils';
 
 describe('Workspace server plugin', () => {
+  const mockApplicationConfig = {
+    getConfigurationClient: jest.fn().mockResolvedValue({}),
+    registerConfigurationClient: jest.fn().mockResolvedValue({}),
+  };
+  const mockDependencies: AppPluginSetupDependencies = {
+    applicationConfig: mockApplicationConfig,
+  };
   it('#setup', async () => {
     let value;
     const setupMock = coreMock.createSetup();
@@ -17,7 +25,7 @@ describe('Workspace server plugin', () => {
     });
     setupMock.capabilities.registerProvider.mockImplementationOnce((fn) => (value = fn()));
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock, mockDependencies);
     expect(value).toMatchInlineSnapshot(`
       Object {
         "workspaces": Object {
@@ -43,7 +51,7 @@ describe('Workspace server plugin', () => {
       return fn;
     });
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock, mockDependencies);
     const toolKitMock = httpServerMock.createToolkit();
 
     const requestWithWorkspaceInUrl = httpServerMock.createOpenSearchDashboardsRequest({
@@ -78,7 +86,7 @@ describe('Workspace server plugin', () => {
     });
 
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
-    await workspacePlugin.setup(setupMock);
+    await workspacePlugin.setup(setupMock, mockDependencies);
     await workspacePlugin.start(startMock);
     expect(startMock.savedObjects.createSerializer).toBeCalledTimes(1);
   });

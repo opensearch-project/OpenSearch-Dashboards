@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ApplicationConfigPluginSetup } from 'src/plugins/application_config/server';
 import {
   Logger,
   OpenSearchDashboardsRequest,
@@ -128,6 +129,9 @@ export interface AuthInfo {
   user_name?: string;
 }
 
+export interface AppPluginSetupDependencies {
+  applicationConfig: ApplicationConfigPluginSetup;
+}
 export interface WorkspacePluginSetup {
   client: IWorkspaceClientImpl;
 }

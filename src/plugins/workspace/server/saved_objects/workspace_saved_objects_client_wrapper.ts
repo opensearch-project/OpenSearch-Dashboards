@@ -5,6 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 
+import { getWorkspaceState } from '../../../../core/server/utils';
 import {
   OpenSearchDashboardsRequest,
   SavedObject,
@@ -518,6 +519,11 @@ export class WorkspaceSavedObjectsClientWrapper {
 
       return await wrapperOptions.client.deleteByWorkspace(workspace, options);
     };
+
+    const isDashboardAdmin = getWorkspaceState(wrapperOptions.request)?.isDashboardAdmin;
+    if (isDashboardAdmin) {
+      return wrapperOptions.client;
+    }
 
     return {
       ...wrapperOptions.client,

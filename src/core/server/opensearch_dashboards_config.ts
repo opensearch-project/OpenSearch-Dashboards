@@ -91,6 +91,14 @@ export const config = {
         defaultValue: 'https://survey.opensearch.org',
       }),
     }),
+    dashboardAdmin: schema.object({
+      groups: schema.arrayOf(schema.string(), {
+        defaultValue: [],
+      }),
+      users: schema.arrayOf(schema.string(), {
+        defaultValue: [],
+      }),
+    }),
   }),
   deprecations,
 };
