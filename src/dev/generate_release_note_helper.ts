@@ -45,7 +45,7 @@ export function validateFragment(content: string) {
     if (!SECTION_MAPPING[sectionKey as SectionKey] || !sectionName.endsWith(':')) {
       throw new Error(`Unknown section ${sectionKey}.`);
     }
-    // validate entries. each entry must start with '-' and a space. then followed by a string. string must be non-empty and less than 50 characters
+    // Each entry must start with '-' and a space, followed by a non-empty string, and be no longer that MAX_ENTRY_LENGTH characters
     const entryRegex = new RegExp(`^-.{1,${MAX_ENTRY_LENGTH}}\\(\\[#.+]\\(.+\\)\\)$`);
     for (const entry of lines.slice(1)) {
       if (entry === '') {
