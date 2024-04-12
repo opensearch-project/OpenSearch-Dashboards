@@ -17,6 +17,7 @@ import {
   DataSourceViewConfig,
 } from './types';
 import { DataSourceSelectable } from '../data_source_selectable';
+import { NoDataSource } from '../no_data_source';
 
 export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement | null {
   const { componentType, componentConfig, uiSettings, hideLocalCluster } = props;
@@ -98,6 +99,13 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     );
   }
 
+  function renderNoDataSource() :ReactElement | null {
+    return (
+      <NoDataSource />
+    );
+  }
+
+
   function renderLayout(): ReactElement | null {
     switch (componentType) {
       case DataSourceComponentType.DataSourceAggregatedView:
@@ -108,6 +116,8 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         return renderDataSourceView(componentConfig as DataSourceViewConfig);
       case DataSourceComponentType.DataSourceMultiSelectable:
         return renderDataSourceMultiSelectable(componentConfig as DataSourceMultiSelectableConfig);
+      case DataSourceComponentType.NoDataSource:
+          return renderNoDataSource();
       default:
         return null;
     }
