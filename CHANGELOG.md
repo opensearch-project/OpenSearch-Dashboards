@@ -77,11 +77,17 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Enhanced data source selector with default datasource shows as first choice ([#6293](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6293))
 - [Multiple Datasource] Add multi data source support to sample vega visualizations ([#6218](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6218))
 - [Multiple Datasource] Fetch data source title for DataSourceView when only id is provided ([#6315](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6315)
+- [Multiple Datasource] Get data source label when only id is provided in DataSourceSelectable ([#6358](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6358)
 - [Workspace] Add permission control logic ([#6052](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6052))
 - [Multiple Datasource] Add default icon for selectable component and make sure the default datasource shows automatically ([#6327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6327))
 - [Multiple Datasource] Pass selected data sources to plugin consumers when the multi-select component initially loads ([#6333](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6333))
 - [Multiple Datasource] Add installedPlugins list to data source saved object ([#6348](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6348))
+- [Multiple Datasource] Add default icon in multi-selectable picker ([#6357](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6357))
 - [Workspace] Add APIs to support plugin state in request ([#6303](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6303))
+- [Workspace] Filter left nav menu items according to the current workspace ([#6234](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6234))
+- [Multiple Datasource] Refactor data source selector component to include placeholder and add tests ([#6372](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6372))
+- [Dynamic Configurations] Improve dynamic configurations by adding cache and simplifying client fetch ([#6364](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6364))
+- [MD] Add OpenSearch cluster group label to top of single selectable dropdown  ([#6400](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6400))
 
 ### 🐛 Bug Fixes
 
@@ -105,6 +111,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Fix sslConfig for multiple datasource to handle when certificateAuthorities is unset ([#6282](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6282))
 - [BUG][Multiple Datasource]Fix bug in data source aggregated view to change it to depend on displayAllCompatibleDataSources property to show the badge value ([#6291](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6291))
 - [BUG][Multiple Datasource]Read hideLocalCluster setting from yml and set in data source selector and data source menu ([#6361](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6361))
+- [BUG] Fix for checkForFunctionProperty so that order does not matter ([#6248](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6248))
 
 ### 🚞 Infrastructure
 
@@ -137,6 +144,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - Remove unused Sass in `tile_map` plugin ([#4110](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4110))
 - [Multiple Datasource] Move data source selectable to its own folder, fix test and a few type errors for data source selectable component ([#6287](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6287))
+- Remove KUI usage in `disabled_lab_visualization` ([#5462](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5462))
 
 ### 🔩 Tests
 
