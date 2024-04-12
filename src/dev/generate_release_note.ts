@@ -4,7 +4,7 @@
  */
 
 import { resolve } from 'path';
-import { readFileSync, writeFileSync, Dirent, renameSync, rm } from 'fs';
+import { readFileSync, writeFileSync, Dirent, rm, rename } from 'fs';
 import { load as loadYaml } from 'js-yaml';
 import { mkdir, readdir } from 'fs/promises';
 import { version as pkgVersion } from '../../package.json';
@@ -63,13 +63,13 @@ async function readFragments() {
   const fragmentPaths = await readdir(fragmentDirPath, { withFileTypes: true });
   for (const fragmentFilename of fragmentPaths) {
     // skip non yml or yaml files
-    if (!fragmentFilename.name.endsWith('.yml') && !fragmentFilename.name.endsWith('.yaml')) {
+    if (!/\.ya?ml$/i.test(fragmentFilename.name)) {
       // eslint-disable-next-line no-console
       console.warn(`Skipping non yml or yaml file ${fragmentFilename.name}`);
       continue;
     }
 
-    const fragmentPath = resolve(fragmentDirPath, fragmentFilename.name);
+    const fragmentPath = join(fragmentDirPath, fragmentFilename.name);
     const fragmentContents = readFileSync(fragmentPath, { encoding: 'utf-8' });
 
     validateFragment(fragmentContents);
@@ -91,7 +91,7 @@ async function moveFragments(fragmentPaths: Dirent[]): Promise<void> {
   for (const fragmentFilename of fragmentPaths) {
     const fragmentPath = resolve(fragmentDirPath, fragmentFilename.name);
     const fragmentTempPath = resolve(fragmentTempDirPath, fragmentFilename.name);
-    renameSync(fragmentPath, fragmentTempPath);
+    rename(fragmentPath, fragmentTempPath, () => {});
   }
 }
 

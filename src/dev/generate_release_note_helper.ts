@@ -11,15 +11,7 @@ export const fragmentTempDirPath = resolve(__dirname, '..', '..', 'changelogs', 
 export const releaseNotesDirPath = resolve(__dirname, '..', '..', 'release-notes');
 
 export function getCurrentDateFormatted(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
-  const day = now.getDate();
-
-  const formattedMonth = month.toString().padStart(2, '0');
-  const formattedDay = day.toString().padStart(2, '0');
-
-  return `${year}-${formattedMonth}-${formattedDay}`;
+  return new Date().toISOString().slice(0, 10);
 }
 
 export const SECTION_MAPPING = {
@@ -42,7 +34,7 @@ const MAX_ENTRY_LENGTH = 100;
 
 // validate format of fragment files
 export function validateFragment(content: string) {
-  const sections = content.split('\n\n');
+  const sections = content.split(/(?:\r?\n){2,}/);
 
   // validate each section
   for (const section of sections) {
@@ -53,7 +45,7 @@ export function validateFragment(content: string) {
     if (!SECTION_MAPPING[sectionKey as SectionKey] || !sectionName.endsWith(':')) {
       throw new Error(`Unknown section ${sectionKey}.`);
     }
-    // validate entries. each entry must start with '-' and a space. then followed by a string. string must be non-empty and less than 50 characters
+    // Each entry must start with '-' and a space, followed by a non-empty string, and be no longer that MAX_ENTRY_LENGTH characters
     const entryRegex = new RegExp(`^-.{1,${MAX_ENTRY_LENGTH}}\\(\\[#.+]\\(.+\\)\\)$`);
     for (const entry of lines.slice(1)) {
       if (entry === '') {
