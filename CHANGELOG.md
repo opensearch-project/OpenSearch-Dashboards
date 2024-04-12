@@ -88,8 +88,10 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Add APIs to support plugin state in request ([#6303](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6303))
 - [Workspace] Filter left nav menu items according to the current workspace ([#6234](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6234))
 - [Multiple Datasource] Refactor data source selector component to include placeholder and add tests ([#6372](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6372))
+- Replace control characters before logging ([#6402](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6402))
 - [Dynamic Configurations] Improve dynamic configurations by adding cache and simplifying client fetch ([#6364](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6364))
 - [MD] Add OpenSearch cluster group label to top of single selectable dropdown  ([#6400](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6400))
+- [Workspace] Support workspace in saved objects client in server side. ([#6365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6365))
 
 ### 🐛 Bug Fixes
 
