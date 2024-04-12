@@ -15,7 +15,7 @@ import {
 import { parseCspHeader, stringifyCspHeader } from './csp_header_utils';
 
 const FRAME_ANCESTORS_DIRECTIVE = 'frame-ancestors';
-const CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY = 'csp.rules.frame_ancestors';
+const CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY = 'csp.rules.frame-ancestors';
 
 // add new directives to this Map when onboarding.
 const SUPPORTED_DIRECTIVES = new Map([

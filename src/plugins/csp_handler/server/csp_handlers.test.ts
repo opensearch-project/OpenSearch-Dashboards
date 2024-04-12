@@ -8,7 +8,7 @@ import { createCspRulesPreResponseHandler } from './csp_handlers';
 import { MockedLogger, loggerMock } from '@osd/logging/target/mocks';
 
 const ERROR_MESSAGE = 'Service unavailable';
-const CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY = 'csp.rules.frame_ancestors';
+const CSP_RULES_FRAME_ANCESTORS_CONFIG_KEY = 'csp.rules.frame-ancestors';
 
 describe('CSP handlers', () => {
   let toolkit: ReturnType<typeof httpServerMock.createToolkit>;
