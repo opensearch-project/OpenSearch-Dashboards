@@ -29,7 +29,7 @@
  */
 
 import { Readable } from 'stream';
-import { SavedObjectsClientContract, SavedObject } from '../types';
+import { SavedObjectsClientContract, SavedObject, SavedObjectsBaseOptions } from '../types';
 import { ISavedObjectTypeRegistry } from '..';
 
 /**
@@ -190,7 +190,7 @@ export interface SavedObjectsImportOptions {
   dataSourceId?: string;
   dataSourceTitle?: string;
   /** if specified, will import in given workspaces */
-  workspaces?: string[];
+  workspaces?: SavedObjectsBaseOptions['workspaces'];
 }
 
 /**
@@ -215,7 +215,7 @@ export interface SavedObjectsResolveImportErrorsOptions {
   dataSourceId?: string;
   dataSourceTitle?: string;
   /** if specified, will import in given workspaces */
-  workspaces?: string[];
+  workspaces?: SavedObjectsBaseOptions['workspaces'];
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
