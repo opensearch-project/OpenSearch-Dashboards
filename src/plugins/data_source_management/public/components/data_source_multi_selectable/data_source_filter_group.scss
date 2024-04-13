@@ -1,0 +1,14 @@
+.dataSourceFilterGroupItems {
+  max-height: 400px;
+  overflow: scroll;
+  max-width: 300px;
+
+  .dataSourceFilterGroupOuiFlexGroup {
+    .dataSourceFilterGroupOuiFlexItem {
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      display: inline-block;
+    }
+  }
+}

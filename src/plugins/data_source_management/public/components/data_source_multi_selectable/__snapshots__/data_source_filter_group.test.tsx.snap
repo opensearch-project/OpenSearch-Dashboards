@@ -43,13 +43,8 @@ exports[`DataSourceFilterGroup should render normally 1`] = `
     />
   </EuiPopoverTitle>
   <div
-    className="ouiFilterSelect__items"
-    style={
-      Object {
-        "maxHeight": 400,
-        "overflow": "scroll",
-      }
-    }
+    className="dataSourceFilterGroupItems"
+    style={Object {}}
   >
     <EuiFilterSelectItem
       checked="on"
@@ -62,9 +57,10 @@ exports[`DataSourceFilterGroup should render normally 1`] = `
         }
       }
     >
-      <DataSourceOptionItem
+      <DataSourceItem
+        className="dataSourceFilterGroup"
         defaultDataSource="1"
-        item={
+        option={
           Object {
             "checked": "on",
             "id": "1",
@@ -192,8 +188,7 @@ Object {
               </div>
             </div>
             <div
-              class="ouiFilterSelect__items"
-              style="max-height: 400px; overflow: scroll;"
+              class="dataSourceFilterGroupItems"
             >
               <button
                 class="euiFilterSelectItem"
@@ -215,10 +210,10 @@ Object {
                     class="euiFlexItem euiFilterSelectItem__content"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive dataSourceFilterGroupOuiFlexGroup"
                     >
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrow1"
+                        class="euiFlexItem euiFlexItem--flexGrowZero dataSourceFilterGroupOuiFlexItem"
                       >
                         name1
                       </div>
@@ -511,8 +506,7 @@ Object {
               </div>
             </div>
             <div
-              class="ouiFilterSelect__items"
-              style="max-height: 400px; overflow: scroll;"
+              class="dataSourceFilterGroupItems"
             >
               <button
                 class="euiFilterSelectItem"
@@ -534,10 +528,10 @@ Object {
                     class="euiFlexItem euiFilterSelectItem__content"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive dataSourceFilterGroupOuiFlexGroup"
                     >
                       <div
-                        class="euiFlexItem euiFlexItem--flexGrow1"
+                        class="euiFlexItem euiFlexItem--flexGrowZero dataSourceFilterGroupOuiFlexItem"
                       >
                         name1
                       </div>

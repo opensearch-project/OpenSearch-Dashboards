@@ -16,7 +16,8 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { DataSourceOption } from '../data_source_selector/data_source_selector';
-import { DataSourceOptionItem } from '../data_source_option';
+import { DataSourceItem } from '../data_source_item';
+import './data_source_filter_group.scss';
 
 export interface SelectedDataSourceOption extends DataSourceOption {
   label: string;
@@ -138,7 +139,7 @@ export const DataSourceFilterGroup: React.FC<DataSourceFilterGroupProps> = ({
           data-test-subj="dataSourceMultiSelectFieldSearch"
         />
       </EuiPopoverTitle>
-      <div className="ouiFilterSelect__items" style={{ maxHeight: 400, overflow: 'scroll' }}>
+      <div className="dataSourceFilterGroupItems" style={{}}>
         {selectedOptions.map((item, index) => {
           const itemStyle: any = {};
           itemStyle.display = !item.visible ? 'none' : itemStyle.display;
@@ -151,7 +152,11 @@ export const DataSourceFilterGroup: React.FC<DataSourceFilterGroupProps> = ({
               showIcons={true}
               style={itemStyle}
             >
-              <DataSourceOptionItem item={item} defaultDataSource={defaultDataSource} />
+              <DataSourceItem
+                option={item}
+                defaultDataSource={defaultDataSource}
+                className={'dataSourceFilterGroup'}
+              />
             </EuiFilterSelectItem>
           );
         })}

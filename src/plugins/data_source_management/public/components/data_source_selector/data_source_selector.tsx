@@ -5,11 +5,13 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiComboBox, EuiBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart, SavedObject } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { getDataSourcesWithFields, getDefaultDataSource, getFilteredDataSources } from '../utils';
 import { DataSourceAttributes } from '../../types';
+import { DataSourceItem } from '../data_source_item';
+import './data_source_selector.scss';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSource.localCluster', {
@@ -234,25 +236,11 @@ export class DataSourceSelector extends React.Component<
         fullWidth={this.props.fullWidth || false}
         data-test-subj={'dataSourceSelectorComboBox'}
         renderOption={(option) => (
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem
-              grow={false}
-              component="span"
-              style={{
-                'text-overflow': 'ellipsis',
-                overflow: 'hidden',
-                'white-space': 'nowrap',
-                display: 'inline-block',
-              }}
-            >
-              {option.label}
-            </EuiFlexItem>
-            {option.id === this.state.defaultDataSource && (
-              <EuiFlexItem grow={false} component="span">
-                <EuiBadge iconSide="left">Default</EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <DataSourceItem
+            className={'dataSourceSelector'}
+            option={option}
+            defaultDataSource={this.state.defaultDataSource}
+          />
         )}
       />
     );
