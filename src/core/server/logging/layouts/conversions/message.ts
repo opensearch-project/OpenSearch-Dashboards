@@ -29,12 +29,14 @@
  */
 
 import { LogRecord } from '@osd/logging';
+import { cleanControlSequences } from '@osd/std';
 import { Conversion } from './type';
 
 export const MessageConversion: Conversion = {
   pattern: /%message/g,
   convert(record: LogRecord) {
     // Error stack is much more useful than just the message.
-    return (record.error && record.error.stack) || record.message;
+    const msg = (record.error && record.error.stack) || record.message;
+    return cleanControlSequences(msg);
   },
 };
