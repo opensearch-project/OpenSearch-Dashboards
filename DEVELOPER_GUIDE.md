@@ -978,7 +978,7 @@ Do not use setters, they cause more problems than they can solve.
 Use strict equality operators (===/!==) to compare the operands. The equality (==/!=) operator will try to convert and compare operands that are of different types causing unexpected behavior.
 
 #### Use uppercase for constants
-Constants should be declared in uppercase letters.
+Constants should be declared in uppercase letters especially for primitives because they are truly immutable.
 
 
 #### Use named exports
