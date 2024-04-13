@@ -66,6 +66,11 @@ export interface MigrationOpts {
    * prior to running migrations. For example: 'opensearch_dashboards_index_template*'
    */
   obsoleteIndexTemplatePattern?: string;
+  /**
+   * If specified, types matching the specified list will be removed prior to
+   * running migrations. Useful for removing types that are not supported.
+   */
+  typesToDelete?: string[];
   opensearchDashboardsRawConfig?: Config;
 }
 
@@ -84,6 +89,7 @@ export interface Context {
   scrollDuration: string;
   serializer: SavedObjectsSerializer;
   obsoleteIndexTemplatePattern?: string;
+  typesToDelete?: string[];
   convertToAliasScript?: string;
 }
 
@@ -114,6 +120,7 @@ export async function migrationContext(opts: MigrationOpts): Promise<Context> {
     scrollDuration: opts.scrollDuration,
     serializer: opts.serializer,
     obsoleteIndexTemplatePattern: opts.obsoleteIndexTemplatePattern,
+    typesToDelete: opts.typesToDelete,
     convertToAliasScript: opts.convertToAliasScript,
   };
 }
@@ -140,6 +147,8 @@ function createDestContext(
     source.mappings
   );
 
+  deleteTypeMappingsFields(targetMappings, opensearchDashboardsRawConfig);
+
   return {
     aliases: {},
     exists: false,
@@ -162,7 +171,7 @@ function createDestContext(
  * type's mappings are set to `dynamic: false`.
  *
  * (Since we're using the source index mappings instead of looking at actual
- * document types in the inedx, we potentially add more "unknown types" than
+ * document types in the index, we potentially add more "unknown types" than
  * what would be necessary to support migrating all the data over to the
  * target index.)
  *
@@ -197,6 +206,37 @@ export function disableUnknownTypeMappingFields(
       ...activeMappings.properties,
     },
   };
+}
+
+/**
+ * This function is used to modify the target mappings object by deleting specified type mappings fields.
+ *
+ * The function operates under the following conditions:
+ * - It checks if the 'migrations.delete.enabled' configuration is set to true.
+ * - If true, it retrieves the 'migrations.delete.types' configuration
+ * - For each type, it deletes the corresponding property from the target mappings object.
+ *
+ * The purpose of this function is to allow for dynamic modification of the target mappings object
+ * based on the application's configuration. This can be useful in scenarios where certain type
+ * mappings are no longer needed and should be removed from the target mappings.
+ *
+ * Note: The function does not return a value. It directly modifies the targetMappings object passed to it.
+ *
+ * @param {Object} targetMappings - The target mappings object to be modified.
+ * @param {Object} opensearchDashboardsRawConfig - The application's configuration object.
+ */
+export function deleteTypeMappingsFields(
+  targetMappings: IndexMapping,
+  opensearchDashboardsRawConfig?: Config
+) {
+  if (opensearchDashboardsRawConfig?.get('migrations.delete.enabled')) {
+    const deleteTypes = new Set(opensearchDashboardsRawConfig.get('migrations.delete.types'));
+    targetMappings.properties = Object.keys(targetMappings.properties)
+      .filter((key) => !deleteTypes.has(key))
+      .reduce((obj, key) => {
+        return { ...obj, [key]: targetMappings.properties[key] };
+      }, {});
+  }
 }
 
 /**

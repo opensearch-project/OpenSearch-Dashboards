@@ -123,6 +123,7 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
   const { client, alias, source, dest, log } = context;
 
   await deleteIndexTemplates(context);
+  await deleteSavedObjectsByType(context);
 
   log.info(`Creating index ${dest.indexName}.`);
 
@@ -169,6 +170,31 @@ async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern 
   log.info(`Removing index templates: ${templateNames}`);
 
   return Promise.all(templateNames.map((name) => client.indices.deleteTemplate({ name: name! })));
+}
+
+/**
+ * Delete saved objects by type. This is used to remove saved object types that
+ * are not compatible with the current version of OpenSearch Dashboards.
+ */
+async function deleteSavedObjectsByType(context: Context) {
+  const { client, source, log, typesToDelete } = context;
+  if (!source.exists || !typesToDelete || typesToDelete.length === 0) {
+    return;
+  }
+
+  log.info(`Removing saved objects of types: ${typesToDelete.join(', ')}`);
+  return client.deleteByQuery({
+    index: source.indexName,
+    body: {
+      query: {
+        bool: {
+          should: [...typesToDelete.map((type) => ({ term: { type } }))],
+        },
+      },
+    },
+    conflicts: 'proceed',
+    refresh: true,
+  });
 }
 
 /**
