@@ -15,7 +15,7 @@ import {
   EuiButtonGroup,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { DataSourceOption } from '../data_source_selector/data_source_selector';
+import { DataSourceOption } from '../data_source_menu/types';
 import { DataSourceItem } from '../data_source_item';
 import './data_source_filter_group.scss';
 

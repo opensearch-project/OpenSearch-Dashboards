@@ -12,6 +12,7 @@ import { getDataSourcesWithFields, getDefaultDataSource, getFilteredDataSources 
 import { DataSourceAttributes } from '../../types';
 import { DataSourceItem } from '../data_source_item';
 import './data_source_selector.scss';
+import { DataSourceOption } from '../data_source_menu/types';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSource.localCluster', {
@@ -39,13 +40,7 @@ interface DataSourceSelectorState {
   selectedOption: DataSourceOption[];
   allDataSources: Array<SavedObject<DataSourceAttributes>>;
   defaultDataSource: string | null;
-  dataSourceOptions?: DataSourceOption[];
-}
-
-export interface DataSourceOption {
-  label: string;
-  id: string;
-  checked?: string;
+  dataSourceOptions: DataSourceOption[];
 }
 
 export class DataSourceSelector extends React.Component<
@@ -61,6 +56,7 @@ export class DataSourceSelector extends React.Component<
       allDataSources: [],
       defaultDataSource: '',
       selectedOption: this.props.hideLocalCluster ? [] : [LocalCluster],
+      dataSourceOptions: [],
     };
   }
 

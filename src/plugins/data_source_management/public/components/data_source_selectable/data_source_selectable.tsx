@@ -12,9 +12,6 @@ import {
   EuiButtonEmpty,
   EuiSelectable,
   EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
 } from '@elastic/eui';
 import {
   IUiSettingsClient,
