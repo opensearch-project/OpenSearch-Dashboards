@@ -2,7 +2,8 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { i18n } from '@osd/i18n';
+import { ToastsStart } from 'opensearch-dashboards/public';
 import {
   HttpStart,
   SavedObjectsClientContract,
@@ -256,4 +257,18 @@ export const extractRegisteredAuthTypeCredentials = (
   });
 
   return registeredCredentials;
+};
+
+export const handleDataSourceFetchError = (
+  changeState: (state: { showError: boolean }) => void,
+  notifications: ToastsStart,
+  callback?: (ds: DataSourceOption[]) => void
+) => {
+  changeState({ showError: true });
+  if (callback) callback([]);
+  notifications.addWarning(
+    i18n.translate('dataSource.fetchDataSourceError', {
+      defaultMessage: 'Failed to fetch data source',
+    })
+  );
 };

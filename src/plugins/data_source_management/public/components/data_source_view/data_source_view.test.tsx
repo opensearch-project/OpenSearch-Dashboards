@@ -70,6 +70,6 @@ describe('DataSourceView', () => {
     expect(component).toMatchSnapshot();
     mockErrorResponseForSavedObjectsCalls(client, 'get');
     expect(toasts.addWarning).toBeCalledTimes(1);
-    expect(toasts.addWarning).toBeCalledWith(`Data source with id test1 is not available`);
+    expect(toasts.addWarning).toBeCalledWith(`Failed to fetch data source`);
   });
 });

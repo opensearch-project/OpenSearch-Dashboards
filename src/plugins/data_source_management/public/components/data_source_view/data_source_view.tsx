@@ -7,9 +7,10 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiPopover, EuiButtonEmpty, EuiButtonIcon, EuiContextMenu } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
-import { DataSourceOption } from '../data_source_menu/types';
-import { getDataSourceById } from '../utils';
+import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
+import { getDataSourceById, handleDataSourceFetchError } from '../utils';
 import { MenuPanelItem } from '../../types';
+import { DataSourceErrorMenu } from '../data_source_error_menu';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
@@ -18,7 +19,7 @@ interface DataSourceViewProps {
   notifications?: ToastsStart;
 }
 
-interface DataSourceViewState {
+interface DataSourceViewState extends DataSourceBaseState {
   selectedOption: DataSourceOption[];
   isPopoverOpen: boolean;
 }
@@ -32,6 +33,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this.state = {
       isPopoverOpen: false,
       selectedOption: this.props.selectedOption ? this.props.selectedOption : [],
+      showError: false,
     };
   }
 
@@ -47,13 +49,9 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     const optionId = option.id;
     if (!option.label) {
       try {
-        const title = (await getDataSourceById(optionId, this.props.savedObjectsClient)).title;
+        const title = (await getDataSourceById(optionId, this.props.savedObjectsClient!)).title;
         if (!title) {
-          this.props.notifications.addWarning(
-            i18n.translate('dataSource.fetchDataSourceError', {
-              defaultMessage: `Data source with id ${optionId} is not available`,
-            })
-          );
+          throw new Error('Failed to get title for data source');
         } else {
           if (!this._isMounted) return;
           this.setState({
@@ -61,13 +59,13 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
           });
         }
       } catch (error) {
-        this.props.notifications.addWarning(
-          i18n.translate('dataSource.fetchDataSourceError', {
-            defaultMessage: `Failed to fetch data source due to ${error}`,
-          })
-        );
+        handleDataSourceFetchError(this.onError.bind(this), this.props.notifications!);
       }
     }
+  }
+
+  onError() {
+    this.setState({ showError: true });
   }
 
   onClick() {
@@ -101,6 +99,9 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
   }
 
   render() {
+    if (this.state.showError) {
+      return <DataSourceErrorMenu />;
+    }
     const { panels } = this.getPanels();
 
     const button = (
