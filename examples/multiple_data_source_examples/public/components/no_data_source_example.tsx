@@ -4,34 +4,23 @@
  */
 import React from 'react';
 import {
-  EuiButtonEmpty,
-  EuiIcon,
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
-  EuiSpacer,
   EuiText,
-  EuiTextColor,
   EuiTitle,
-  OuiButtonEmpty,
-  OuiFlexGroup,
-  OuiFlexItem,
-  OuiIcon,
-  OuiTextColor,
-  // OuiWarningTextColor
 } from '@elastic/eui';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { NoDataSourceConfig } from 'src/plugins/data_source_management/public/components/data_source_menu';
-import { CoreStart, MountPoint } from 'opensearch-dashboards/public';
+import { MountPoint } from 'opensearch-dashboards/public';
 
 
 interface NoDataSourceExampleProps {
   dataSourceEnabled: boolean;
   dataSourceManagement: DataSourceManagementPluginSetup;
   setActionMenu?: (menuMount: MountPoint | undefined) => void;
-
 }
 
 export const NoDataSourceExample = ({
@@ -40,7 +29,6 @@ export const NoDataSourceExample = ({
   setActionMenu
 }: NoDataSourceExampleProps) => {
   const DataSourceMenu = dataSourceManagement.ui.getDataSourceMenu<NoDataSourceConfig>();
-const label = "    No data sources";
   return (
     <EuiPageBody component="main">
       <EuiPageHeader>
@@ -53,21 +41,6 @@ const label = "    No data sources";
             }}
           />
         )}
-        {/* {dataSourceEnabled && (
-
- <>
-            <EuiButtonEmpty
-              className="euiHeaderLink"
-              data-test-subj="dataSourceViewContextMenuHeaderLink"
-              iconType="alert"
-              iconSide="left"
-              size="s"
-              color='warning'
-            >
-              {label}
-            </EuiButtonEmpty></>
-
-        )} */}
         <EuiPageHeaderSection>
           <EuiTitle size="l">
             <h1>No data source example</h1>
