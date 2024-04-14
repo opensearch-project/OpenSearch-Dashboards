@@ -306,6 +306,7 @@ export {
   ISavedObjectsRepository,
   SavedObjectsRepository,
   SavedObjectsDeleteByNamespaceOptions,
+  SavedObjectsDeleteByWorkspaceOptions,
   SavedObjectsIncrementCounterOptions,
   SavedObjectsFieldMapping,
   SavedObjectsTypeMappingDefinition,
