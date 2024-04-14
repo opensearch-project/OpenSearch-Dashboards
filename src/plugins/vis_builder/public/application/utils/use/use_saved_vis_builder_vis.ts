@@ -35,6 +35,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
     const {
       application: { navigateToApp },
       chrome,
+      data,
       history,
       http: { basePath },
       toastNotifications,
@@ -61,6 +62,19 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
           const { title, state } = getStateFromSavedObject(savedVisBuilderVis);
           chrome.setBreadcrumbs(getEditBreadcrumbs(title, navigateToApp));
           chrome.docTitle.change(title);
+          // sync initial app filters from savedObject to filterManager
+          const filters = savedVisBuilderVis.searchSourceFields.filter;
+          const query =
+            savedVisBuilderVis.searchSourceFields.query || data.query.queryString.getDefaultQuery();
+          const actualFilters = [];
+          if (filters !== undefined) {
+            const result = typeof filters === 'function' ? filters() : filters;
+            if (result !== undefined) {
+              actualFilters.push(...(Array.isArray(result) ? result : [result]));
+            }
+          }
+          data.query.filterManager.setAppFilters(actualFilters);
+          data.query.queryString.setQuery(query);
 
           dispatch(setUIStateState(state.ui));
           dispatch(setStyleState(state.style));

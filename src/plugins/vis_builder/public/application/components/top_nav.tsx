@@ -14,7 +14,6 @@ import './top_nav.scss';
 import { useIndexPatterns, useSavedVisBuilderVis } from '../utils/use';
 import { useTypedSelector, useTypedDispatch } from '../utils/state_management';
 import { setEditorState } from '../utils/state_management/metadata_slice';
-import { useCanSave } from '../utils/use/use_can_save';
 import { saveStateToSavedObject } from '../../saved_visualizations/transforms';
 import { TopNavMenuData } from '../../../../navigation/public';
 import { opensearchFilters, connectStorageToQueryState } from '../../../../data/public';
@@ -33,7 +32,6 @@ export const TopNav = () => {
   const rootState = useTypedSelector((state) => state);
   const dispatch = useTypedDispatch();
 
-  const saveDisabledReason = useCanSave();
   const savedVisBuilderVis = useSavedVisBuilderVis(visualizationIdFromUrl);
   connectStorageToQueryState(services.data.query, services.osdUrlStateStorage, {
     filters: opensearchFilters.FilterStateStore.APP_STATE,
@@ -53,7 +51,6 @@ export const TopNav = () => {
         {
           visualizationIdFromUrl,
           savedVisBuilderVis: saveStateToSavedObject(savedVisBuilderVis, rootState, indexPattern),
-          saveDisabledReason,
           dispatch,
           originatingApp,
         },
@@ -67,7 +64,6 @@ export const TopNav = () => {
     savedVisBuilderVis,
     services,
     visualizationIdFromUrl,
-    saveDisabledReason,
     dispatch,
     indexPattern,
     originatingApp,

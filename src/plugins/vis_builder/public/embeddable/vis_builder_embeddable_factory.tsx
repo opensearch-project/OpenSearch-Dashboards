@@ -84,6 +84,7 @@ export class VisBuilderEmbeddableFactory
         getTimeFilter(),
         {
           savedVis,
+          savedObject,
           editUrl,
           editPath,
           editable: true,

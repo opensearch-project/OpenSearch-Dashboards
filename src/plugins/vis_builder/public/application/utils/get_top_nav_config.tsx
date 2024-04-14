@@ -41,22 +41,16 @@ import { VisBuilderSavedObject } from '../../types';
 import { AppDispatch } from './state_management';
 import { EDIT_PATH, VISBUILDER_SAVED_OBJECT } from '../../../common';
 import { setEditorState } from './state_management/metadata_slice';
+
 export interface TopNavConfigParams {
   visualizationIdFromUrl: string;
   savedVisBuilderVis: VisBuilderSavedObject;
-  saveDisabledReason?: string;
   dispatch: AppDispatch;
   originatingApp?: string;
 }
 
 export const getTopNavConfig = (
-  {
-    visualizationIdFromUrl,
-    savedVisBuilderVis,
-    saveDisabledReason,
-    dispatch,
-    originatingApp,
-  }: TopNavConfigParams,
+  { visualizationIdFromUrl, savedVisBuilderVis, dispatch, originatingApp }: TopNavConfigParams,
   services: VisBuilderServices
 ) => {
   const {
@@ -84,8 +78,7 @@ export const getTopNavConfig = (
               defaultMessage: 'save',
             }),
       testId: 'visBuilderSaveButton',
-      disableButton: !!saveDisabledReason,
-      tooltip: saveDisabledReason,
+      disableButton: false,
       run: (_anchorElement) => {
         const saveModal = (
           <SavedObjectSaveModalOrigin
@@ -123,8 +116,7 @@ export const getTopNavConfig = (
               }
             ),
             testId: 'visBuilderSaveAndReturnButton',
-            disableButton: !!saveDisabledReason,
-            tooltip: saveDisabledReason,
+            disableButton: false,
             run: async () => {
               const saveOptions = {
                 newTitle: savedVisBuilderVis.title,
@@ -172,7 +164,7 @@ export const getOnSave = (
     returnToOrigin: boolean;
     newDescription?: string;
   }) => {
-    const { embeddable, toastNotifications, application, history } = services;
+    const { data, embeddable, toastNotifications, application, history } = services;
     const stateTransfer = embeddable.getStateTransfer();
 
     if (!savedVisBuilderVis) {
@@ -183,6 +175,10 @@ export const getOnSave = (
     savedVisBuilderVis.title = newTitle;
     savedVisBuilderVis.description = newDescription;
     savedVisBuilderVis.copyOnSave = newCopyOnSave;
+    const searchSourceInstance = savedVisBuilderVis.searchSourceFields;
+    searchSourceInstance.query = data.query.queryString.getQuery() || null;
+    searchSourceInstance.filter = data.query.filterManager.getFilters() || null;
+    savedVisBuilderVis.searchSourceFields = searchSourceInstance;
     const newlyCreated = !savedVisBuilderVis.id || savedVisBuilderVis.copyOnSave;
 
     try {

@@ -35,16 +35,18 @@ import {
   getTypeService,
   getUIActions,
 } from '../plugin_services';
-import { PersistedState } from '../../../visualizations/public';
+import { PersistedState, prepareJson } from '../../../visualizations/public';
 import { VisBuilderSavedVis } from '../saved_visualizations/transforms';
 import { handleVisEvent } from '../application/utils/handle_vis_event';
 import { VisBuilderEmbeddableFactoryDeps } from './vis_builder_embeddable_factory';
+import { VisBuilderSavedObject } from '../types';
 
 // Apparently this needs to match the saved object type for the clone and replace panel actions to work
 export const VISBUILDER_EMBEDDABLE = VISBUILDER_SAVED_OBJECT;
 
 export interface VisBuilderEmbeddableConfiguration {
   savedVis: VisBuilderSavedVis;
+  savedObject: VisBuilderSavedObject;
   indexPatterns?: IIndexPattern[];
   editPath: string;
   editUrl: string;
@@ -79,6 +81,7 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
   private subscriptions: Subscription[] = [];
   private node?: HTMLElement;
   private savedVis?: VisBuilderSavedVis;
+  private savedObject?: VisBuilderSavedObject;
   private serializedState?: string;
   private uiState: PersistedState;
   private readonly deps: VisBuilderEmbeddableFactoryDeps;
@@ -87,6 +90,7 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
     timefilter: TimefilterContract,
     {
       savedVis,
+      savedObject,
       editPath,
       editUrl,
       editable,
@@ -116,6 +120,7 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
 
     this.deps = deps;
     this.savedVis = savedVis;
+    this.savedObject = savedObject;
     this.uiState = new PersistedState(savedVis.state.ui);
     this.uiState.on('change', this.uiStateChangeHandler);
     this.uiState.on('reload', this.reload);
@@ -246,6 +251,28 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
     this.autoRefreshFetchSubscription.unsubscribe();
   }
 
+  private async updateExpression() {
+    // Construct the initial part of the pipeline with context management.
+    let pipeline = `opensearchDashboards | opensearch_dashboards_context `;
+
+    // Access the query and filters from savedObject if available.
+    const query = this.savedObject?.searchSourceFields?.query;
+    const filters = this.savedObject?.searchSourceFields?.filter;
+
+    // Append query and filters to the pipeline string if they exist.
+    if (query) {
+      pipeline += prepareJson('query', query);
+    }
+    if (filters) {
+      pipeline += prepareJson('filters', filters);
+    }
+
+    const currentExpression = (await this.getExpression()) ?? '';
+
+    // Replace 'opensearchDashboards' with the constructed pipeline in the existing expression.
+    return currentExpression.replace('opensearchDashboards', pipeline);
+  }
+
   private async updateHandler() {
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
@@ -260,6 +287,8 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
     }
     this.abortController = new AbortController();
     const abortController = this.abortController;
+
+    this.expression = await this.updateExpression();
 
     if (this.handler && !abortController.signal.aborted) {
       this.handler.update(this.expression, expressionParams);
@@ -296,12 +325,8 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
       dirty = true;
     }
 
-    if (dirty) {
-      this.expression = (await this.getExpression()) ?? '';
-
-      if (this.handler) {
-        this.updateHandler();
-      }
+    if (this.handler && dirty) {
+      this.updateHandler();
     }
   }
 
