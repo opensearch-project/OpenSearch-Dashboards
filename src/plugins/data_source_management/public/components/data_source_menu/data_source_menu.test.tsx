@@ -153,4 +153,16 @@ describe('DataSourceMenu', () => {
     );
     expect(container).toMatchSnapshot();
   });
+
+  it('should render no data source', () => {
+    component = shallow(
+      <DataSourceMenu
+        componentType={DataSourceComponentType.NoDataSource}
+        componentConfig={{
+          fullWidth: true,
+        }}
+      />
+    );
+    expect(component).toMatchSnapshot();
+  });
 });
