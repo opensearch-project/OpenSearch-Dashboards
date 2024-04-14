@@ -5,15 +5,19 @@
 import React from 'react';
 import {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
   EuiButtonEmpty,
   EuiIcon,
 >>>>>>> add empty state WIP
+=======
+>>>>>>> remove commentted code
   EuiPageBody,
   EuiPageContent,
   EuiPageContentBody,
   EuiPageHeader,
   EuiPageHeaderSection,
+<<<<<<< HEAD
 <<<<<<< HEAD
   EuiText,
   EuiTitle,
@@ -23,22 +27,17 @@ import { MountPoint } from 'opensearch-dashboards/public';
 import { DataSourceBaseConfig } from 'src/plugins/data_source_management/public';
 =======
   EuiSpacer,
+=======
+>>>>>>> remove commentted code
   EuiText,
-  EuiTextColor,
   EuiTitle,
-  OuiButtonEmpty,
-  OuiFlexGroup,
-  OuiFlexItem,
-  OuiIcon,
-  OuiTextColor,
-  // OuiWarningTextColor
 } from '@elastic/eui';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 <<<<<<< HEAD
 >>>>>>> add empty state WIP
 =======
 import { NoDataSourceConfig } from 'src/plugins/data_source_management/public/components/data_source_menu';
-import { CoreStart, MountPoint } from 'opensearch-dashboards/public';
+import { MountPoint } from 'opensearch-dashboards/public';
 
 >>>>>>> add no-data-source component in examples
 
@@ -52,8 +51,11 @@ interface NoDataSourceExampleProps {
 >>>>>>> add empty state WIP
 =======
   setActionMenu?: (menuMount: MountPoint | undefined) => void;
+<<<<<<< HEAD
 
 >>>>>>> add no-data-source component in examples
+=======
+>>>>>>> remove commentted code
 }
 
 export const NoDataSourceExample = ({
@@ -72,8 +74,11 @@ export const NoDataSourceExample = ({
 >>>>>>> add no-data-source component in examples
 }: NoDataSourceExampleProps) => {
   const DataSourceMenu = dataSourceManagement.ui.getDataSourceMenu<NoDataSourceConfig>();
+<<<<<<< HEAD
 const label = "    No data sources";
 >>>>>>> add empty state WIP
+=======
+>>>>>>> remove commentted code
   return (
     <EuiPageBody component="main">
       <EuiPageHeader>
@@ -96,6 +101,7 @@ const label = "    No data sources";
 =======
 =======
         )}
+<<<<<<< HEAD
         {/* {dataSourceEnabled && (
 >>>>>>> add no-data-source component in examples
 
@@ -117,6 +123,8 @@ const label = "    No data sources";
 =======
         )} */}
 >>>>>>> add no-data-source component in examples
+=======
+>>>>>>> remove commentted code
         <EuiPageHeaderSection>
           <EuiTitle size="l">
             <h1>No data source example</h1>
