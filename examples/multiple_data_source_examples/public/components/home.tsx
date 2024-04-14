@@ -170,6 +170,7 @@ export const Home = ({
         <NoDataSourceExample
           dataSourceEnabled={dataSourceEnabled}
           dataSourceManagement={dataSourceManagement}
+          setActionMenu={setActionMenu}
 
           />
       ),

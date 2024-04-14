@@ -74,3 +74,6 @@ export interface DataSourceMultiSelectableConfig extends DataSourceBaseConfig {
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
 }
+
+export interface NoDataSourceConfig extends DataSourceBaseConfig {
+}
