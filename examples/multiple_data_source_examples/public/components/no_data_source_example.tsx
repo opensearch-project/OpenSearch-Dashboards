@@ -23,6 +23,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
+<<<<<<< HEAD
 import { MountPoint } from 'opensearch-dashboards/public';
 import { DataSourceBaseConfig } from 'src/plugins/data_source_management/public';
 =======
@@ -40,6 +41,10 @@ import { NoDataSourceConfig } from 'src/plugins/data_source_management/public/co
 import { MountPoint } from 'opensearch-dashboards/public';
 
 >>>>>>> add no-data-source component in examples
+=======
+import { MountPoint } from 'opensearch-dashboards/public';
+import { DataSourceBaseConfig } from 'src/plugins/data_source_management/public';
+>>>>>>> fix style
 
 interface NoDataSourceExampleProps {
   dataSourceEnabled: boolean;
@@ -70,6 +75,7 @@ export const NoDataSourceExample = ({
   dataSourceManagement
 =======
   dataSourceManagement,
+<<<<<<< HEAD
   setActionMenu
 >>>>>>> add no-data-source component in examples
 }: NoDataSourceExampleProps) => {
@@ -92,6 +98,17 @@ const label = "    No data sources";
           <DataSourceMenu
           setMenuMountPoint={setActionMenu}
 >>>>>>> add no-data-source component in examples
+=======
+  setActionMenu,
+}: NoDataSourceExampleProps) => {
+  const DataSourceMenu = dataSourceManagement.ui.getDataSourceMenu<DataSourceBaseConfig>();
+  return (
+    <EuiPageBody component="main">
+      <EuiPageHeader>
+        {dataSourceEnabled && (
+          <DataSourceMenu
+            setMenuMountPoint={setActionMenu}
+>>>>>>> fix style
             componentType={'NoDataSource'}
             componentConfig={{
               fullWidth: false,
@@ -147,6 +164,7 @@ const label = "    No data sources";
             OuiPopOver as the base components. When multi data source feature is enabled, this
 =======
             The no data source component is introduced in 2.14 which uses OuiButton as the base
+<<<<<<< HEAD
             component. When multi data source feature is enabled, this
 >>>>>>> add no-data-source component in examples
             component can be consumed by adding dataSourceManagement as option plugin, and then
@@ -154,6 +172,13 @@ const label = "    No data sources";
             the getDataSourceMenu function exposed from the plugin. This component can be used to
             show no connected data sources in the page. Find the mounted example in the
             navigation bar
+=======
+            component. When multi data source feature is enabled, this component can be consumed by
+            adding dataSourceManagement as option plugin, and then mounted to the navigation bar by
+            passing setHeaderActionMenu from AppMountParameters to the getDataSourceMenu function
+            exposed from the plugin. This component can be used to show no connected data sources in
+            the page. Find the mounted example in the navigation bar
+>>>>>>> fix style
           </EuiText>
 <<<<<<< HEAD
           <EuiSpacer />
