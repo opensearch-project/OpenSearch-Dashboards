@@ -16,7 +16,7 @@ import { DataSourceSelectableExample } from './data_source_selectable_example';
 import { DataSourceSelectorExample } from './data_source_selector_example';
 import { DataSourceViaTopNavMenuExample } from './data_source_via_top_nav_menu';
 import { DataSourceViewExample } from './data_source_view_example';
-import { NoDataSourceExample } from './no_data_source_example'
+import { NoDataSourceExample } from './no_data_source_example';
 
 export interface HomeProps {
   basename: string;
@@ -171,8 +171,7 @@ export const Home = ({
           dataSourceEnabled={dataSourceEnabled}
           dataSourceManagement={dataSourceManagement}
           setActionMenu={setActionMenu}
-
-          />
+        />
       ),
     },
   ];
