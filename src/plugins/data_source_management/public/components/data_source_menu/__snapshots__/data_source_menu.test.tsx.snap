@@ -446,6 +446,8 @@ exports[`DataSourceMenu should render data source view only 1`] = `
 />
 `;
 
+exports[`DataSourceMenu should render no data source 1`] = `<NoDataSource />`;
+
 exports[`DataSourceMenu should render nothing 1`] = `
 Object {
   "asFragment": [Function],
