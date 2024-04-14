@@ -23,6 +23,5 @@ export {
   DataSourceViewConfig,
   DataSourceMenuProps,
   DataSourceMultiSelectableConfig,
+  DataSourceBaseConfig,
 } from './components/data_source_menu';
-
-export { NoDataSource } from './components/no_data_source'
