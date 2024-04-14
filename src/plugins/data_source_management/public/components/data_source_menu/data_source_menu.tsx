@@ -15,6 +15,7 @@ import {
   DataSourceMultiSelectableConfig,
   DataSourceSelectableConfig,
   DataSourceViewConfig,
+  NoDataSourceConfig,
 } from './types';
 import { DataSourceSelectable } from '../data_source_selectable';
 
