@@ -133,24 +133,20 @@ describe('DataSourceManagement: data_source_connection_validator.ts', () => {
       expect(validateDataSourcesResponse.statusCode).toBe(200);
     });
 
-    test('failure: opensearch client response code is 200 and response body is empty', async () => {
-      try {
-        const opensearchClient = opensearchServiceMock.createOpenSearchClient();
-        opensearchClient.cat.indices.mockResolvedValue(opensearchServiceMock.createApiResponse());
-        const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {
-          auth: {
-            statusCode: 200,
-            body: '',
-            credentials: {
-              service: SigV4ServiceName.OpenSearchServerless,
-            },
+    test('Success: opensearch client response code is 200 and response body is empty', async () => {
+      const opensearchClient = opensearchServiceMock.createOpenSearchClient();
+      opensearchClient.cat.indices.mockResolvedValue(opensearchServiceMock.createApiResponse());
+      const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {
+        auth: {
+          statusCode: 200,
+          body: '',
+          credentials: {
+            service: SigV4ServiceName.OpenSearchServerless,
           },
-        });
-        const validateDataSourcesResponse = await dataSourceValidator.validate();
-        expect(validateDataSourcesResponse.statusCode).toBe(200);
-      } catch (e) {
-        expect(e).toBeTruthy();
-      }
+        },
+      });
+      const validateDataSourcesResponse = await dataSourceValidator.validate();
+      expect(validateDataSourcesResponse.statusCode).toBe(200);
     });
 
     test('failure: opensearch client response code is other than 200', async () => {
