@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoDataSource should render normally 1`] = `
+<EuiButtonEmpty
+  className="euiHeaderLink"
+  color="warning"
+  data-test-subj="dataSourceViewContextMenuHeaderLink"
+  iconSide="left"
+  iconType="alert"
+  size="s"
+>
+      No data sources
+</EuiButtonEmpty>
+`;
