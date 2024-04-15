@@ -152,12 +152,12 @@ export const convertPermissionSettingsToPermissions = (
         previous[mode] = {};
       }
       switch (current.type) {
-        case 'user':
+        case WorkspacePermissionItemType.User:
           previous[mode].users = previous[mode].users?.includes(current.userId)
             ? previous[mode].users
             : [...(previous[mode].users || []), current.userId];
           break;
-        case 'group':
+        case WorkspacePermissionItemType.Group:
           previous[mode].groups = previous[mode].groups?.includes(current.group)
             ? previous[mode].groups
             : [...(previous[mode].groups || []), current.group];

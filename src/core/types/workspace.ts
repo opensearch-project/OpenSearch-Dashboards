@@ -13,7 +13,6 @@ export interface WorkspaceAttribute {
   color?: string;
   icon?: string;
   reserved?: boolean;
-  defaultVISTheme?: string;
 }
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
