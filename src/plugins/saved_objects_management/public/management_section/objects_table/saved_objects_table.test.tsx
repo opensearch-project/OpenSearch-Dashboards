@@ -139,6 +139,7 @@ describe('SavedObjectsTable', () => {
         edit: false,
         delete: false,
       },
+      workspaces: {},
     };
 
     http.post.mockResolvedValue([]);
@@ -371,7 +372,8 @@ describe('SavedObjectsTable', () => {
         http,
         allowedTypes,
         undefined,
-        true
+        true,
+        {}
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -401,7 +403,8 @@ describe('SavedObjectsTable', () => {
         http,
         allowedTypes,
         'test*',
-        true
+        true,
+        {}
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({

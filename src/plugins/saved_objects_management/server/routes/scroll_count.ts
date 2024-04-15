@@ -42,6 +42,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
           typesToInclude: schema.arrayOf(schema.string()),
           namespacesToInclude: schema.maybe(schema.arrayOf(schema.string())),
           searchString: schema.maybe(schema.string()),
+          workspaces: schema.maybe(schema.arrayOf(schema.string())),
         }),
       },
     },

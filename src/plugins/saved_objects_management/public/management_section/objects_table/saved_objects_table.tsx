@@ -192,6 +192,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     } else {
       // application home
       if (!currentWorkspaceId) {
+        // public workspace is virtual at this moment
         return availableWorkspaces?.map((ws) => ws.id).concat(PUBLIC_WORKSPACE_ID);
       } else {
         return [currentWorkspaceId];
@@ -208,6 +209,17 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       workspaceNameIdMap.set(workspace.name, workspace.id);
     });
     return workspaceNameIdMap;
+  }
+
+  /**
+   * convert workspace names to ids
+   * @param workspaceNames workspace name list
+   * @returns workspace id list
+   */
+  private workspaceNamesToIds(workspaceNames?: string[]): string[] | undefined {
+    return workspaceNames
+      ?.map((wsName) => this.workspaceNameIdLookup.get(wsName) || '')
+      .filter((wsId) => !!wsId);
   }
 
   private formatWorkspaceIdParams<T extends { workspaces?: string[] }>(
@@ -243,19 +255,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
 
-    const filteredCountOptions: SavedObjectCountOptions = {
+    const filteredCountOptions: SavedObjectCountOptions = this.formatWorkspaceIdParams({
       typesToInclude: filteredTypes,
       searchString: queryText,
-    };
+      workspaces: this.workspaceIdQuery,
+    });
 
     if (availableNamespaces.length) {
       const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
       filteredCountOptions.namespacesToInclude = filteredNamespaces;
     }
     if (visibleWorkspaces?.length) {
-      filteredCountOptions.workspaces = visibleWorkspaces
-        .map((wsName) => this.workspaceNameIdLookup?.get(wsName) || '')
-        .filter((wsId) => !!wsId);
+      filteredCountOptions.workspaces = this.workspaceNamesToIds(visibleWorkspaces);
     }
 
     // These are the saved objects visible in the table.
@@ -280,10 +291,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllSelectedOptions[id] = true;
     });
 
-    const countOptions: SavedObjectCountOptions = {
+    const countOptions: SavedObjectCountOptions = this.formatWorkspaceIdParams({
       typesToInclude: allowedTypes,
       searchString: queryText,
-    };
+      workspaces: this.workspaceIdQuery,
+    });
 
     if (availableNamespaces.length) {
       countOptions.namespacesToInclude = availableNamespaces;
@@ -334,13 +346,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const filteredTypes = filterQuery(allowedTypes, visibleTypes);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
-    const findOptions: SavedObjectsFindOptions = {
+    const findOptions: SavedObjectsFindOptions = this.formatWorkspaceIdParams({
       search: queryText ? `${queryText}*` : undefined,
       perPage,
       page: page + 1,
       fields: ['id'],
       type: filteredTypes,
-    };
+      workspaces: this.workspaceIdQuery,
+    });
 
     const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
     if (availableNamespaces.length) {
@@ -349,17 +362,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }
 
     if (visibleWorkspaces?.length) {
-      const workspaceIds: string[] = visibleWorkspaces.map(
-        (wsName) => this.workspaceNameIdLookup?.get(wsName) || ''
-      );
-      findOptions.workspaces = workspaceIds;
-    }
-
-    if (findOptions.workspaces) {
-      if (findOptions.workspaces.indexOf(PUBLIC_WORKSPACE_ID) !== -1) {
-        // search both saved objects with workspace and without workspace
-        findOptions.workspacesSearchOperator = 'OR';
-      }
+      findOptions.workspaces = this.workspaceNamesToIds(visibleWorkspaces);
     }
 
     if (findOptions.type.length > 1) {
@@ -516,7 +519,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const { exportAllSelectedOptions, isIncludeReferencesDeepChecked, activeQuery } = this.state;
     const { notifications, http } = this.props;
 
-    const { queryText } = parseQuery(activeQuery);
+    const { queryText, visibleWorkspaces } = parseQuery(activeQuery);
     const exportTypes = Object.entries(exportAllSelectedOptions).reduce((accum, [id, selected]) => {
       if (selected) {
         accum.push(id);
@@ -524,13 +527,18 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       return accum;
     }, [] as string[]);
 
+    const filteredWorkspaceIds = this.workspaceNamesToIds(visibleWorkspaces);
+
     let blob;
     try {
       blob = await fetchExportByTypeAndSearch(
         http,
         exportTypes,
         queryText ? `${queryText}*` : undefined,
-        isIncludeReferencesDeepChecked
+        isIncludeReferencesDeepChecked,
+        this.formatWorkspaceIdParams({
+          workspaces: filteredWorkspaceIds || this.workspaceIdQuery,
+        })
       );
     } catch (e) {
       notifications.toasts.addDanger({
@@ -967,7 +975,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       if (!currentWorkspaceId && !publicWorkspaceExists) {
         wsFilterOptions.push({
           name: PUBLIC_WORKSPACE_NAME,
-          value: PUBLIC_WORKSPACE_ID,
+          value: PUBLIC_WORKSPACE_NAME,
           view: `${PUBLIC_WORKSPACE_NAME} (${wsCounts[PUBLIC_WORKSPACE_ID] || 0})`,
         });
       }

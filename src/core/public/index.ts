@@ -94,7 +94,7 @@ export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES, WORKSPACE_TYPE, cleanWorkspaceId } from '../utils';
+export { DEFAULT_APP_CATEGORIES } from '../utils';
 export {
   AppCategory,
   UiSettingsParams,

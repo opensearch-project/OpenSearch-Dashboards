@@ -29,11 +29,12 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter } from 'src/core/server';
+import { IRouter, SavedObjectsFindOptions } from 'src/core/server';
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
 import { getIndexPatternTitle } from '../../../data/common/index_patterns/utils';
 import { injectMetaAttributes } from '../lib';
 import { ISavedObjectsManagement } from '../services';
+import { PUBLIC_WORKSPACE_ID } from '../../../../core/server';
 
 export const registerFindRoute = (
   router: IRouter,
@@ -64,7 +65,9 @@ export const registerFindRoute = (
           fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
             defaultValue: [],
           }),
-          workspacesSearchOperator: schema.maybe(schema.string()),
+          workspaces: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
         }),
       },
     },
@@ -91,11 +94,19 @@ export const registerFindRoute = (
         return await client.get<DataSourceAttributes>('data-source', id);
       };
 
-      const findResponse = await client.find<any>({
+      const findOptions = {
         ...req.query,
         fields: undefined,
         searchFields: [...searchFields],
-      });
+        workspaces: req.query.workspaces ? Array<string>().concat(req.query.workspaces) : undefined,
+      } as SavedObjectsFindOptions;
+
+      if (findOptions.workspaces && findOptions.workspaces.indexOf(PUBLIC_WORKSPACE_ID) !== -1) {
+        // search both saved objects with workspace and without workspace
+        findOptions.workspacesSearchOperator = 'OR';
+      }
+
+      const findResponse = await client.find<any>(findOptions);
 
       const savedObjects = await Promise.all(
         findResponse.saved_objects.map(async (obj) => {

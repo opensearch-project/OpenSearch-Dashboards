@@ -68,7 +68,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   }
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get('plugins', 'workspace');
+    this.logger = initializerContext.logger.get();
     this.globalConfig$ = initializerContext.config.legacy.globalConfig$;
   }
 
