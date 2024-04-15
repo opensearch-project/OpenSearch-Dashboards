@@ -129,6 +129,20 @@ test('`format()` correctly formats record with custom pattern.', () => {
   }
 });
 
+test('`format()` correctly removes control sequences.', () => {
+  const layout = new PatternLayout();
+
+  expect(
+    layout.format({
+      context: 'context-7',
+      level: LogLevel.Error,
+      message: 'some\u001b[33mCOLORED\u001b[0m',
+      timestamp,
+      pid: 5355,
+    })
+  ).toBe('[2012-02-01T14:30:22.011Z][ERROR][context-7] some(U+001b)[33mCOLORED(U+001b)[0m');
+});
+
 test('`format()` correctly formats record with meta data.', () => {
   const layout = new PatternLayout();
 

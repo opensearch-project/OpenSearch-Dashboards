@@ -8,8 +8,9 @@ import { CoreSetup, Logger, PrincipalType, ACL } from '../../../../core/server';
 import { WorkspacePermissionMode } from '../../common/constants';
 import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
+import { registerDuplicateRoute } from './duplicate';
 
-const WORKSPACES_API_BASE_URL = '/api/workspaces';
+export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
 const workspacePermissionMode = schema.oneOf([
   schema.literal(WorkspacePermissionMode.Read),
@@ -42,12 +43,14 @@ export function registerRoutes({
   client,
   logger,
   http,
+  maxImportExportSize,
   permissionControlClient,
   isPermissionControlEnabled,
 }: {
   client: IWorkspaceClientImpl;
   logger: Logger;
   http: CoreSetup['http'];
+  maxImportExportSize: number;
   permissionControlClient?: SavedObjectsPermissionControlContract;
   isPermissionControlEnabled: boolean;
 }) {
@@ -207,4 +210,7 @@ export function registerRoutes({
       return res.ok({ body: result });
     })
   );
+
+  // duplicate saved objects among workspaces
+  registerDuplicateRoute(router, logger, client, maxImportExportSize);
 }

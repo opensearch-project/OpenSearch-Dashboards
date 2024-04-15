@@ -20,7 +20,7 @@ export class DataSourceConnectionValidator {
         this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
       ) {
         validationResponse = await this.callDataCluster.cat.indices();
-        if (validationResponse?.statusCode === 200 && validationResponse?.body) {
+        if (validationResponse?.statusCode === 200) {
           return validationResponse;
         }
       } else {

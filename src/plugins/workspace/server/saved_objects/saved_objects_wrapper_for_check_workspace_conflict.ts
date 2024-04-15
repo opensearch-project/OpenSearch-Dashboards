@@ -20,8 +20,8 @@ import {
 const errorContent = (error: Boom.Boom) => error.output.payload;
 
 const filterWorkspacesAccordingToSourceWorkspaces = (
-  targetWorkspaces?: string[],
-  baseWorkspaces?: string[]
+  targetWorkspaces?: SavedObjectsBaseOptions['workspaces'],
+  baseWorkspaces?: SavedObjectsBaseOptions['workspaces']
 ): string[] => targetWorkspaces?.filter((item) => !baseWorkspaces?.includes(item)) || [];
 
 export class WorkspaceConflictSavedObjectsClientWrapper {
@@ -110,7 +110,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
             })
         : [];
       const objectsConflictWithWorkspace: SavedObject[] = [];
-      const objectsMapWorkspaces: Record<string, string[] | undefined> = {};
+      const objectsMapWorkspaces: Record<string, SavedObjectsBaseOptions['workspaces']> = {};
       if (bulkGetDocs.length) {
         /**
          * Get latest status of objects

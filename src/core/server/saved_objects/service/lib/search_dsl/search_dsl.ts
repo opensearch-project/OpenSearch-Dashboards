@@ -53,7 +53,7 @@ interface GetSearchDslOptions {
     id: string;
   };
   kueryNode?: KueryNode;
-  workspaces?: string[];
+  workspaces?: SavedObjectsFindOptions['workspaces'];
   workspacesSearchOperator?: 'AND' | 'OR';
   ACLSearchParams?: SavedObjectsFindOptions['ACLSearchParams'];
 }
