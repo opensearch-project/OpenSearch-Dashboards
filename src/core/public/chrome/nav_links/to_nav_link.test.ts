@@ -32,7 +32,7 @@ import {
   PublicAppInfo,
   AppNavLinkStatus,
   AppStatus,
-  WorkspaceAccessibility,
+  WorkspaceAvailability,
 } from '../../application';
 import { toNavLink } from './to_nav_link';
 
@@ -188,7 +188,7 @@ describe('toNavLink', () => {
     expect(
       toNavLink(
         app({
-          workspaceAccessibility: WorkspaceAccessibility.NO,
+          workspaceAvailability: WorkspaceAvailability.outOfWorkspace,
         }),
         httpMock.basePath
       ).properties
@@ -202,7 +202,7 @@ describe('toNavLink', () => {
     expect(
       toNavLink(
         app({
-          workspaceAccessibility: WorkspaceAccessibility.YES,
+          workspaceAvailability: WorkspaceAvailability.inWorkspace,
         }),
         httpMock.basePath
       ).properties

@@ -10,7 +10,7 @@ import {
   DEFAULT_APP_CATEGORIES,
   PublicAppInfo,
   WorkspaceObject,
-  WorkspaceAccessibility,
+  WorkspaceAvailability,
 } from '../../../core/public';
 import { DEFAULT_SELECTED_FEATURES_IDS } from '../common/constants';
 
@@ -75,9 +75,9 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
  */
 export function isAppAccessibleInWorkspace(app: App, workspace: WorkspaceObject) {
   /**
-   * App is not accessible within workspace if it explicitly declare itself as workspaceAccessibility.No
+   * App is not accessible within workspace if it explicitly declare itself as WorkspaceAvailability.outOfWorkspace
    */
-  if (app.workspaceAccessibility === WorkspaceAccessibility.NO) {
+  if (app.workspaceAvailability === WorkspaceAvailability.outOfWorkspace) {
     return false;
   }
 

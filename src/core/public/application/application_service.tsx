@@ -54,7 +54,7 @@ import {
   InternalApplicationStart,
   Mounter,
   NavigateToAppOptions,
-  WorkspaceAccessibility,
+  WorkspaceAvailability,
 } from './types';
 import { getLeaveAction, isConfirmAction } from './application_leave';
 import { appendAppPath, parseAppUrl, relativeToAbsolute, getAppInfo } from './utils';
@@ -265,9 +265,9 @@ export class ApplicationService {
         const targetApp = applications$.value.get(appId);
         if (
           workspaces.currentWorkspaceId$.value &&
-          targetApp?.workspaceAccessibility === WorkspaceAccessibility.NO
+          targetApp?.workspaceAvailability === WorkspaceAvailability.outOfWorkspace
         ) {
-          // If user is inside a workspace and the target app is not accessible within a workspace
+          // If user is inside a workspace and the target app is not available within a workspace
           // refresh the page by doing a hard navigation
           window.location.assign(
             http.basePath.prepend(getAppUrl(availableMounters, appId, path), {
@@ -314,7 +314,8 @@ export class ApplicationService {
       ) => {
         const targetApp = applications$.value.get(appId);
         const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path), {
-          withoutClientBasePath: targetApp?.workspaceAccessibility === WorkspaceAccessibility.NO,
+          withoutClientBasePath:
+            targetApp?.workspaceAvailability === WorkspaceAvailability.outOfWorkspace,
         });
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },

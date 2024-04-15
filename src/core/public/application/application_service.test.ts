@@ -50,7 +50,7 @@ import {
   AppNavLinkStatus,
   AppStatus,
   AppUpdater,
-  WorkspaceAccessibility,
+  WorkspaceAvailability,
 } from './types';
 import { act } from 'react-dom/test-utils';
 import { workspacesServiceMock } from '../mocks';
@@ -570,7 +570,7 @@ describe('#start()', () => {
         Symbol(),
         createApp({
           id: 'app1',
-          workspaceAccessibility: WorkspaceAccessibility.NO,
+          workspaceAvailability: WorkspaceAvailability.outOfWorkspace,
         })
       );
       const { getUrlForApp } = await service.start({
@@ -825,7 +825,7 @@ describe('#start()', () => {
         Symbol(),
         createApp({
           id: 'app1',
-          workspaceAccessibility: WorkspaceAccessibility.NO,
+          workspaceAvailability: WorkspaceAvailability.outOfWorkspace,
         })
       );
       const workspaces = workspacesServiceMock.createStartContract();

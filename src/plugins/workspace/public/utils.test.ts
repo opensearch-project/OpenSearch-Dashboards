@@ -9,7 +9,7 @@ import {
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
 } from './utils';
-import { WorkspaceAccessibility } from '../../../core/public';
+import { WorkspaceAvailability } from '../../../core/public';
 
 describe('workspace utils: featureMatchesConfig', () => {
   it('feature configured with `*` should match any features', () => {
@@ -154,14 +154,14 @@ describe('workspace utils: isAppAccessibleInWorkspace', () => {
     ).toBe(true);
   });
 
-  it('An app is not accessible if its workspaceAccessibility is no', () => {
+  it('An app is not accessible if its workspaceAvailability is outOfWorkspace', () => {
     expect(
       isAppAccessibleInWorkspace(
         {
           id: 'home',
           title: 'Any app',
           mount: jest.fn(),
-          workspaceAccessibility: WorkspaceAccessibility.NO,
+          workspaceAvailability: WorkspaceAvailability.outOfWorkspace,
         },
         { id: 'workspace_id', name: 'workspace name', features: [] }
       )

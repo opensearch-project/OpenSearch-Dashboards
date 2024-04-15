@@ -108,15 +108,19 @@ export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
  *
  * @public
  */
-export enum WorkspaceAccessibility {
+export enum WorkspaceAvailability {
   /**
    * The application is not accessible when user is in a workspace.
    */
-  NO = 0,
+  outOfWorkspace = 2,
   /**
    * The application is only accessible when user is in a workspace.
    */
-  YES = 1,
+  inWorkspace = 1,
+  /**
+   * The application is accessible when user is in or not in a workspace.
+   */
+  both = 0,
 }
 
 /**
@@ -263,10 +267,10 @@ export interface App<HistoryLocationState = unknown> {
   exactRoute?: boolean;
 
   /**
-   * Declare if page is accessible when inside a workspace.
-   * Defaults to undefined to indicate the application can be accessible within or out of workspace.
+   * Declare if page is available when inside a workspace.
+   * Defaults to WorkspaceAvailability.both to indicate the application is available within or out of workspace.
    */
-  workspaceAccessibility?: WorkspaceAccessibility;
+  workspaceAvailability?: WorkspaceAvailability;
 }
 
 /**
