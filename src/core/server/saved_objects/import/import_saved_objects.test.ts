@@ -660,7 +660,7 @@ describe('#importSavedObjectsFromStream', () => {
       getMockFn(collectSavedObjects).mockResolvedValue({
         errors: [],
         collectedObjects,
-        importIdMap: new Map(), // doesn't matter
+        importIdMap: new Map(),
       });
       const result = await importSavedObjectsFromStream(options);
       const expectedErrors = errors.map(({ type, id }) => expect.objectContaining({ type, id }));

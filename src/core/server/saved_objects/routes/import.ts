@@ -117,10 +117,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         workspaces = [workspaces];
       }
 
-      let dataSourceEnabled = req.query.dataSourceEnabled;
-      if (typeof dataSourceEnabled === 'boolean') {
-        dataSourceEnabled = dataSourceEnabled;
-      }
+      const dataSourceEnabled = req.query.dataSourceEnabled;
 
       const result = await importSavedObjectsFromStream({
         savedObjectsClient: context.core.savedObjects.client,
