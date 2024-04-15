@@ -106,7 +106,7 @@ describe('fetchDataSourceIdByName()', () => {
     await expect(
       fetchDataSourceIdByName({ ...config, data_source_name: 'Some Data Source' }, client)
     ).rejects.toThrowError(
-      'To query from multiple data sources, first enable the data sources feature'
+      'To query from multiple data sources, first enable the data source feature'
     );
   });
 
