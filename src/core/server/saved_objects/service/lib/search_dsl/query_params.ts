@@ -151,25 +151,6 @@ function getClauseForWorkspace(workspace: string) {
   };
 }
 
-/**
- * build DSL for workspace id terms query
- * @param workspace workspace id list
- * @returns workspace clause DSL
- */
-function getClauseForWorkspaces(workspaces: string[]) {
-  if (workspaces.indexOf('*') !== -1) {
-    return {
-      match_all: {},
-    };
-  }
-
-  return {
-    terms: {
-      workspaces: [...workspaces],
-    },
-  };
-}
-
 interface HasReferenceQueryParams {
   type: string;
   id: string;
@@ -309,14 +290,18 @@ export function getQueryParams({
     if (workspacesSearchOperator === 'OR') {
       ACLSearchParamsShouldClause.push({
         bool: {
-          should: [getClauseForWorkspaces(workspaces)],
+          should: workspaces.map((workspace) => {
+            return getClauseForWorkspace(workspace);
+          }),
           minimum_should_match: 1,
         },
       });
     } else {
       bool.filter.push({
         bool: {
-          should: [getClauseForWorkspaces(workspaces)],
+          should: workspaces.map((workspace) => {
+            return getClauseForWorkspace(workspace);
+          }),
           minimum_should_match: 1,
         },
       });
