@@ -585,7 +585,7 @@ describe('SavedObjectsTable', () => {
   });
 
   describe('workspace filter', () => {
-    it('show workspace filter when workspace turn on and not in any workspace', async () => {
+    it('workspace filter include all visible workspaces when not in any workspace', async () => {
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
         navLinks: {},
@@ -633,7 +633,7 @@ describe('SavedObjectsTable', () => {
       expect(filters[1].options[2].value).toBe(PUBLIC_WORKSPACE_ID);
     });
 
-    it('show workspace filter when workspace turn on and enter a workspace', async () => {
+    it('workspace filter only include current workspaces when in a workspace', async () => {
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
         navLinks: {},
@@ -678,7 +678,7 @@ describe('SavedObjectsTable', () => {
       expect(wsFilter[0].options[0].value).toBe('foo');
     });
 
-    it('workspace exists in find options when workspace on', async () => {
+    it('current workspace in find options when workspace on', async () => {
       findObjectsMock.mockClear();
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
@@ -726,7 +726,7 @@ describe('SavedObjectsTable', () => {
       });
     });
 
-    it('workspace exists in find options when workspace on and not in any workspace', async () => {
+    it('all visible workspaces in find options when not in any workspace', async () => {
       findObjectsMock.mockClear();
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {

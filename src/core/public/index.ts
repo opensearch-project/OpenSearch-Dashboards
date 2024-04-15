@@ -94,7 +94,13 @@ export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  DEFAULT_APP_CATEGORIES,
+  WORKSPACE_TYPE,
+  cleanWorkspaceId,
+  PUBLIC_WORKSPACE_ID,
+  PUBLIC_WORKSPACE_NAME,
+} from '../utils';
 export {
   AppCategory,
   UiSettingsParams,
@@ -358,12 +364,5 @@ export {
 export { __osdBootstrap__ } from './osd_bootstrap';
 
 export { WorkspacesStart, WorkspacesSetup, WorkspacesService, WorkspaceObject } from './workspace';
-
-export {
-  WORKSPACE_TYPE,
-  cleanWorkspaceId,
-  PUBLIC_WORKSPACE_ID,
-  PUBLIC_WORKSPACE_NAME,
-} from '../utils';
 
 export { debounce } from './utils';
