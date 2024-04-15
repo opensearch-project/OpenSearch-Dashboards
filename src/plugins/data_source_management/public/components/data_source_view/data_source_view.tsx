@@ -8,7 +8,7 @@ import { i18n } from '@osd/i18n';
 import { EuiPopover, EuiButtonEmpty, EuiButtonIcon, EuiContextMenu } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
-import { DataSourceOption } from '../data_source_menu/types';
+import { DataSourceOption, DataSourceBaseState } from '../data_source_menu/types';
 import {
   getDataSourceById,
   handleDataSourceFetchError,
@@ -28,7 +28,7 @@ interface DataSourceViewProps {
   onSelectedDataSources?: (dataSources: DataSourceOption[]) => void;
 }
 
-interface DataSourceViewState {
+interface DataSourceViewState extends DataSourceBaseState{
   selectedOption: DataSourceOption[];
   isPopoverOpen: boolean;
 }
@@ -42,6 +42,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this.state = {
       isPopoverOpen: false,
       selectedOption: this.props.selectedOption ? this.props.selectedOption : [],
+      showEmptyState: false
     };
   }
 
