@@ -26,6 +26,11 @@ export interface DataSourceBaseConfig {
   disabled?: boolean;
 }
 
+export interface DataSourceBaseState {
+  // showError: boolean;
+  showEmptyState: boolean;
+}
+
 export interface DataSourceMenuProps<T = any> {
   componentType: DataSourceComponentType;
   componentConfig: T;
