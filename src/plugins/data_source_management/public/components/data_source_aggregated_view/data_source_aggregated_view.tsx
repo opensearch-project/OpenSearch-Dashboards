@@ -16,6 +16,8 @@ import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/p
 import { getDataSourcesWithFields } from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
+import { DataSourceBaseState } from '../data_source_menu/types';
+import { NoDataSource } from '../no_data_source';
 
 interface DataSourceAggregatedViewProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -27,7 +29,7 @@ interface DataSourceAggregatedViewProps {
   displayAllCompatibleDataSources: boolean;
 }
 
-interface DataSourceAggregatedViewState {
+interface DataSourceAggregatedViewState extends DataSourceBaseState {
   isPopoverOpen: boolean;
   allDataSourcesIdToTitleMap: Map<string, any>;
 }
@@ -44,6 +46,7 @@ export class DataSourceAggregatedView extends React.Component<
     this.state = {
       isPopoverOpen: false,
       allDataSourcesIdToTitleMap: new Map(),
+      showEmptyState: false,
     };
   }
 
@@ -63,6 +66,11 @@ export class DataSourceAggregatedView extends React.Component<
     this._isMounted = true;
     getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
+        if (fetchedDataSources?.length === 0) {
+          this.setState({
+            showEmptyState: true,
+          });
+        }
         if (fetchedDataSources?.length) {
           let filteredDataSources = fetchedDataSources;
           if (this.props.dataSourceFilter) {
@@ -98,6 +106,9 @@ export class DataSourceAggregatedView extends React.Component<
   }
 
   render() {
+    if (this.state.showEmptyState) {
+      return <NoDataSource />;
+    }
     const button = (
       <EuiButtonIcon
         data-test-subj="dataSourceAggregatedViewInfoButton"

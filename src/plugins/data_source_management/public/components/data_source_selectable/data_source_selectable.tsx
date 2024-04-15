@@ -25,7 +25,12 @@ import { getDataSourcesWithFields, getDefaultDataSource, getFilteredDataSources 
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
-import { DataSourceGroupLabelOption, DataSourceOption } from '../data_source_menu/types';
+import {
+  DataSourceBaseState,
+  DataSourceGroupLabelOption,
+  DataSourceOption,
+} from '../data_source_menu/types';
+import { NoDataSource } from '../no_data_source';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -39,7 +44,7 @@ interface DataSourceSelectableProps {
   uiSettings?: IUiSettingsClient;
 }
 
-interface DataSourceSelectableState {
+interface DataSourceSelectableState extends DataSourceBaseState {
   dataSourceOptions: SelectedDataSourceOption[];
   isPopoverOpen: boolean;
   selectedOption?: SelectedDataSourceOption[];
@@ -70,6 +75,7 @@ export class DataSourceSelectable extends React.Component<
       isPopoverOpen: false,
       selectedOption: [],
       defaultDataSource: null,
+      showEmptyState: false,
     };
 
     this.onChange.bind(this);
@@ -168,6 +174,9 @@ export class DataSourceSelectable extends React.Component<
         'title',
         'auth.type',
       ]);
+      if (fetchedDataSources?.length === 0) {
+        this.setState({ showEmptyState: true });
+      }
 
       const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(
         fetchedDataSources,
@@ -224,6 +233,9 @@ export class DataSourceSelectable extends React.Component<
   };
 
   render() {
+    if (this.state.showEmptyState) {
+      return <NoDataSource />;
+    }
     const button = (
       <>
         <EuiButtonEmpty

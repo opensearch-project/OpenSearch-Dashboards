@@ -10,6 +10,7 @@ import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/p
 import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
 import { getDataSourceById } from '../utils';
 import { MenuPanelItem } from '../../types';
+import { NoDataSource } from '../no_data_source';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
@@ -18,7 +19,7 @@ interface DataSourceViewProps {
   notifications?: ToastsStart;
 }
 
-interface DataSourceViewState extends DataSourceBaseState{
+interface DataSourceViewState extends DataSourceBaseState {
   selectedOption: DataSourceOption[];
   isPopoverOpen: boolean;
 }
@@ -32,7 +33,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this.state = {
       isPopoverOpen: false,
       selectedOption: this.props.selectedOption ? this.props.selectedOption : [],
-      showEmptyState: false
+      showEmptyState: !(this.props.selectedOption?.length ?? 0),
     };
   }
 
@@ -102,6 +103,9 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
   }
 
   render() {
+    if (this.state.showEmptyState) {
+      return <NoDataSource />;
+    }
     const { panels } = this.getPanels();
 
     const button = (
