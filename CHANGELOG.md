@@ -99,6 +99,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Support workspace in saved objects client in server side. ([#6365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6365))
 - [MD] Add dropdown header to data source single selector ([#6431](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6431))
 - [Workspace] Add permission tab to workspace create update page ([#6378](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6378))
+- [Workspace] Hide datasource and advanced settings menu in dashboard management when in workspace. ([#6455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6455))
 
 ### 🐛 Bug Fixes
 
