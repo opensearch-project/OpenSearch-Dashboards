@@ -180,7 +180,7 @@ describe('toNavLink', () => {
     );
   });
 
-  it('uses the workspaceVisibility of the application to construct the url', () => {
+  it('uses the workspaceAvailability of the application to construct the url', () => {
     const httpMock = httpServiceMock.createStartContract({
       basePath: '/base_path',
       clientBasePath: '/client_base_path',
