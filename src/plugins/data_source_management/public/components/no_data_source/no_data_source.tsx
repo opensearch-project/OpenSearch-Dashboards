@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 
 export const NoDataSource = () => {
-  const label = '    No data sources';
+  const label = ' No data sources';
 
   return (
     <EuiButtonEmpty
