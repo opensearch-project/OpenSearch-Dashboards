@@ -31,7 +31,7 @@ const isUUID = (candidate: string): boolean => {
  * @param id single object id
  * @returns
  */
-export const isObjectWithDataSource = (id: string): boolean => {
+export const isSavedObjectWithDataSource = (id: string): boolean => {
   const idParts = id.split('_');
   /**
    * check with the
