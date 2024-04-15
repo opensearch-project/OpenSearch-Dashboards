@@ -7,6 +7,43 @@ import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../../../core/pu
 import { convertApplicationsToFeaturesOrGroups } from './utils';
 
 describe('convertApplicationsToFeaturesOrGroups', () => {
+  it('should not filter out restrict Apps', () => {
+    expect(
+      convertApplicationsToFeaturesOrGroups(
+        [
+          { id: 'foo1', title: 'Foo 1', navLinkStatus: AppNavLinkStatus.hidden },
+          { id: 'foo2', title: 'Foo 2', navLinkStatus: AppNavLinkStatus.visible, chromeless: true },
+          {
+            id: 'foo3',
+            title: 'Foo 3',
+            navLinkStatus: AppNavLinkStatus.visible,
+            category: DEFAULT_APP_CATEGORIES.management,
+          },
+          {
+            id: 'workspace_overview',
+            title: 'Workspace Overview',
+            navLinkStatus: AppNavLinkStatus.visible,
+          },
+          {
+            id: 'bar',
+            title: 'Bar',
+            navLinkStatus: AppNavLinkStatus.visible,
+          },
+        ],
+        new Set(['foo1'])
+      )
+    ).toEqual([
+      {
+        id: 'foo1',
+        name: 'Foo 1',
+      },
+      {
+        id: 'bar',
+        name: 'Bar',
+      },
+    ]);
+  });
+
   it('should filter out invisible features', () => {
     expect(
       convertApplicationsToFeaturesOrGroups([

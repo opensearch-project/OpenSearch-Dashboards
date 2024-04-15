@@ -136,6 +136,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
             applications={applications}
             selectedFeatures={formData.features}
             onChange={handleFeaturesChange}
+            restrictedApps={props.restrictedApps}
           />
         </EuiPanel>
       )}

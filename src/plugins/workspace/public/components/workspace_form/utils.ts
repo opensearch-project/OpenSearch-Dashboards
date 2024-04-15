@@ -44,18 +44,28 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
 export const convertApplicationsToFeaturesOrGroups = (
   applications: Array<
     Pick<PublicAppInfo, 'id' | 'title' | 'category' | 'navLinkStatus' | 'chromeless'>
-  >
+  >,
+  restrictedApps?: Set<string>
 ) => {
   const UNDEFINED = 'undefined';
 
   // Filter out all hidden applications and management applications and default selected features
-  const visibleApplications = applications.filter(
-    ({ navLinkStatus, chromeless, category, id }) =>
+  const visibleApplications = applications.filter(({ navLinkStatus, chromeless, category, id }) => {
+    /**
+     * Restrict apps are apps that can be configured into a workspace, but restrict to access
+     * because the current workspace didn't have the apps configured, such apps should NOT filter out
+     */
+    if (restrictedApps && restrictedApps.has(id)) {
+      return true;
+    }
+
+    return (
       navLinkStatus !== AppNavLinkStatus.hidden &&
       !chromeless &&
       !DEFAULT_SELECTED_FEATURES_IDS.includes(id) &&
       category?.id !== DEFAULT_APP_CATEGORIES.management.id
-  );
+    );
+  });
 
   /**
    *

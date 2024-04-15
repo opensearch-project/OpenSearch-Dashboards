@@ -35,4 +35,5 @@ export interface WorkspaceFormProps {
   onSubmit?: (formData: WorkspaceFormSubmitData) => void;
   defaultValues?: WorkspaceFormData;
   operationType?: WorkspaceOperationType;
+  restrictedApps?: Set<string>;
 }

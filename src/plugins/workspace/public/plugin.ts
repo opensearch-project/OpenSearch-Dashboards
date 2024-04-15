@@ -14,6 +14,7 @@ import {
   AppNavLinkStatus,
   AppUpdater,
   AppStatus,
+  DEFAULT_APP_CATEGORIES,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -30,7 +31,11 @@ import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { isAppAccessibleInWorkspace } from './utils';
 
-type WorkspaceAppType = (params: AppMountParameters, services: Services) => () => void;
+type WorkspaceAppType = (
+  params: AppMountParameters,
+  services: Services,
+  props: Record<string, any>
+) => () => void;
 
 interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
@@ -41,6 +46,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private currentWorkspaceSubscription?: Subscription;
   private currentWorkspaceIdSubscription?: Subscription;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
+  private restrictedApps$ = new BehaviorSubject(new Set<string>());
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
@@ -65,6 +71,20 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           if (isAppAccessibleInWorkspace(app, currentWorkspace)) {
             return;
           }
+
+          if (app.status === AppStatus.inaccessible) {
+            return;
+          }
+
+          /**
+           * Restricted apps can be configured into a workspace, but they are not configured by the
+           * current workspace. Apps of management category can NOT configured into a workspace, so
+           * needs to be excluded.
+           */
+          if (app.category?.id !== DEFAULT_APP_CATEGORIES.management.id) {
+            this.restrictedApps$.next(this.restrictedApps$.value.add(app.id));
+          }
+
           /**
            * Change the app to `inaccessible` if it is not configured in the workspace
            * If trying to access such app, an "Application Not Found" page will be displayed
@@ -129,7 +149,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         workspaceClient,
       };
 
-      return renderApp(params, services);
+      return renderApp(params, services, { restrictedApps$: this.restrictedApps$ });
     };
 
     // create

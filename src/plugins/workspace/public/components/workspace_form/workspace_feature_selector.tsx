@@ -24,16 +24,19 @@ export interface WorkspaceFeatureSelectorProps {
   >;
   selectedFeatures: string[];
   onChange: (newFeatures: string[]) => void;
+  restrictedApps?: Set<string>;
 }
 
 export const WorkspaceFeatureSelector = ({
   applications,
   selectedFeatures,
   onChange,
+  restrictedApps,
 }: WorkspaceFeatureSelectorProps) => {
-  const featuresOrGroups = useMemo(() => convertApplicationsToFeaturesOrGroups(applications), [
-    applications,
-  ]);
+  const featuresOrGroups = useMemo(
+    () => convertApplicationsToFeaturesOrGroups(applications, restrictedApps),
+    [applications, restrictedApps]
+  );
 
   const handleFeatureChange = useCallback<EuiCheckboxGroupProps['onChange']>(
     (featureId) => {
