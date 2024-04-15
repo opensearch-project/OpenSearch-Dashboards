@@ -85,7 +85,7 @@ export async function importSavedObjectsFromStream({
       },
       []
     );
-    if (notSupportedErrors && notSupportedErrors.length > 0) {
+    if (notSupportedErrors?.length > 0) {
       return {
         successCount: 0,
         success: false,
