@@ -17,6 +17,7 @@ describe('DataSourceFilterGroup', () => {
       <DataSourceFilterGroup
         selectedOptions={[{ id: '1', label: 'name1', checked: 'on', visible: true }]}
         setSelectedOptions={(items) => mockCallBack(items)}
+        defaultDataSource="1"
       />
     );
     expect(component).toMatchSnapshot();
@@ -28,6 +29,7 @@ describe('DataSourceFilterGroup', () => {
       <DataSourceFilterGroup
         selectedOptions={[{ id: '1', label: 'name1', checked: 'on', visible: true }]}
         setSelectedOptions={(items) => mockCallBack(items)}
+        defaultDataSource="1"
       />
     );
     const button = await container.findByTestId('dataSourceFilterGroupButton');

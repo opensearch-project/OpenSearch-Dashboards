@@ -52,6 +52,11 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
         options={
           Array [
             Object {
+              "id": "opensearchClusterGroupLabel",
+              "isGroupLabel": true,
+              "label": "OpenSearch cluster",
+            },
+            Object {
               "checked": "on",
               "id": "",
               "label": "Local cluster",
@@ -96,9 +101,7 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
         iconType="database"
         onClick={[Function]}
         size="s"
-      >
-        
-      </EuiButtonEmpty>
+      />
     </React.Fragment>
   }
   closePopover={[Function]}
@@ -162,9 +165,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
         iconType="database"
         onClick={[Function]}
         size="s"
-      >
-        
-      </EuiButtonEmpty>
+      />
     </React.Fragment>
   }
   closePopover={[Function]}

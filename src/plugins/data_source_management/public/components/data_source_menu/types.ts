@@ -16,6 +16,11 @@ export interface DataSourceOption {
   label?: string;
 }
 
+export interface DataSourceGroupLabelOption extends DataSourceOption {
+  label: string;
+  isGroupLabel: true;
+}
+
 export interface DataSourceBaseConfig {
   fullWidth: boolean;
   disabled?: boolean;
@@ -24,6 +29,7 @@ export interface DataSourceBaseConfig {
 export interface DataSourceMenuProps<T = any> {
   componentType: DataSourceComponentType;
   componentConfig: T;
+  hideLocalCluster?: boolean;
   uiSettings?: IUiSettingsClient;
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
 }
@@ -47,7 +53,6 @@ export interface DataSourceAggregatedViewConfig extends DataSourceBaseConfig {
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
   activeDataSourceIds?: string[];
-  hideLocalCluster?: boolean;
   displayAllCompatibleDataSources?: boolean;
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
 }
@@ -57,7 +62,6 @@ export interface DataSourceSelectableConfig extends DataSourceBaseConfig {
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
   activeOption?: DataSourceOption[];
-  hideLocalCluster?: boolean;
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
 }
 
@@ -65,5 +69,4 @@ export interface DataSourceMultiSelectableConfig extends DataSourceBaseConfig {
   onSelectedDataSources: (dataSources: DataSourceOption[]) => void;
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
-  hideLocalCluster?: boolean;
 }
