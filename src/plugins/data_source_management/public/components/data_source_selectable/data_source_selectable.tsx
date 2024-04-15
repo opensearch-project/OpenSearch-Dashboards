@@ -37,8 +37,9 @@ import {
 } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
 import { DataSourceItem } from '../data_source_item';
-import './data_source_selectable.scss';
 import { DataSourceDropDownHeader } from '../drop_down_header';
+import '../button_title.scss';
+import './data_source_selectable.scss';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -248,7 +249,7 @@ export class DataSourceSelectable extends React.Component<
     const button = (
       <>
         <EuiButtonEmpty
-          className="euiHeaderLink"
+          className={`euiHeaderLink dataSourceComponentButtonTitle`}
           onClick={this.onClick.bind(this)}
           data-test-subj="dataSourceSelectableContextMenuHeaderLink"
           aria-label={i18n.translate('dataSourceSelectable.dataSourceOptionsButtonAriaLabel', {
