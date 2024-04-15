@@ -22,9 +22,18 @@ import { getDataSourcesWithFields, getDefaultDataSource, getFilteredDataSources 
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
-import { DataSourceGroupLabelOption, DataSourceOption } from '../data_source_menu/types';
+<<<<<<< HEAD
+import { DataSourceBaseState, DataSourceGroupLabelOption, DataSourceOption } from '../data_source_menu/types';
 import { DataSourceItem } from '../data_source_item';
 import './data_source_selectable.scss';
+=======
+import {
+  DataSourceBaseState,
+  DataSourceGroupLabelOption,
+  DataSourceOption,
+} from '../data_source_menu/types';
+import { NoDataSource } from '../no_data_source';
+>>>>>>> add empty state for all data source menu sub components
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -38,7 +47,7 @@ interface DataSourceSelectableProps {
   uiSettings?: IUiSettingsClient;
 }
 
-interface DataSourceSelectableState {
+interface DataSourceSelectableState extends DataSourceBaseState {
   dataSourceOptions: DataSourceOption[];
   isPopoverOpen: boolean;
   selectedOption?: DataSourceOption[];
@@ -65,6 +74,7 @@ export class DataSourceSelectable extends React.Component<
       isPopoverOpen: false,
       selectedOption: [],
       defaultDataSource: null,
+      showEmptyState: false,
     };
 
     this.onChange.bind(this);
@@ -163,6 +173,9 @@ export class DataSourceSelectable extends React.Component<
         'title',
         'auth.type',
       ]);
+      if (fetchedDataSources?.length === 0) {
+        this.setState({ showEmptyState: true });
+      }
 
       const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(
         fetchedDataSources,
@@ -219,6 +232,9 @@ export class DataSourceSelectable extends React.Component<
   };
 
   render() {
+    if (this.state.showEmptyState) {
+      return <NoDataSource />;
+    }
     const button = (
       <>
         <EuiButtonEmpty
