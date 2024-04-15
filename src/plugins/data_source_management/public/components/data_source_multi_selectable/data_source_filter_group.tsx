@@ -139,7 +139,7 @@ export const DataSourceFilterGroup: React.FC<DataSourceFilterGroupProps> = ({
           data-test-subj="dataSourceMultiSelectFieldSearch"
         />
       </EuiPopoverTitle>
-      <div className="dataSourceFilterGroupItems" style={{}}>
+      <div className="dataSourceFilterGroupItems">
         {selectedOptions.map((item, index) => {
           const itemStyle: any = {};
           itemStyle.display = !item.visible ? 'none' : itemStyle.display;
