@@ -34,7 +34,6 @@ import { DataSourceAttributes } from 'src/plugins/data_source/common/data_source
 import { getIndexPatternTitle } from '../../../data/common/index_patterns/utils';
 import { injectMetaAttributes } from '../lib';
 import { ISavedObjectsManagement } from '../services';
-import { PUBLIC_WORKSPACE_ID } from '../../../../core/server';
 
 export const registerFindRoute = (
   router: IRouter,
@@ -100,11 +99,6 @@ export const registerFindRoute = (
         searchFields: [...searchFields],
         workspaces: req.query.workspaces ? Array<string>().concat(req.query.workspaces) : undefined,
       } as SavedObjectsFindOptions;
-
-      if (findOptions.workspaces && findOptions.workspaces.indexOf(PUBLIC_WORKSPACE_ID) !== -1) {
-        // search both saved objects with workspace and without workspace
-        findOptions.workspacesSearchOperator = 'OR';
-      }
 
       const findResponse = await client.find<any>(findOptions);
 

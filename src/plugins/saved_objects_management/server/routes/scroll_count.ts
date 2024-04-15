@@ -70,10 +70,6 @@ export const registerScrollForCountRoute = (router: IRouter) => {
       if (requestHasWorkspaces) {
         counts.workspaces = {};
         findOptions.workspaces = req.body.workspaces;
-        if (findOptions.workspaces.indexOf(PUBLIC_WORKSPACE_ID) !== -1) {
-          // search both saved objects with workspace and without workspace
-          findOptions.workspacesSearchOperator = 'OR';
-        }
       }
 
       if (req.body.searchString) {

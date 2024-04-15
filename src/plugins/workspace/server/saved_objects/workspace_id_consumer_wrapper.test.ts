@@ -5,6 +5,7 @@
 
 import { updateWorkspaceState } from '../../../../core/server/utils';
 import { SavedObject } from '../../../../core/public';
+import { PUBLIC_WORKSPACE_ID } from '../../../../core/server';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
 
@@ -112,6 +113,31 @@ describe('WorkspaceIdConsumerWrapper', () => {
       expect(mockedClient.find).toBeCalledWith({
         type: 'dashboard',
         workspaces: ['foo'],
+      });
+    });
+
+    it(`Should set workspacesSearchOperator when search with public workspace`, async () => {
+      await wrapperClient.find({
+        type: 'dashboard',
+        workspaces: ['bar', PUBLIC_WORKSPACE_ID],
+      });
+      expect(mockedClient.find).toBeCalledWith({
+        type: 'dashboard',
+        workspaces: ['bar', PUBLIC_WORKSPACE_ID],
+        workspacesSearchOperator: 'OR',
+      });
+    });
+
+    it(`Should not override workspacesSearchOperator when search with public workspace`, async () => {
+      await wrapperClient.find({
+        type: 'dashboard',
+        workspaces: [PUBLIC_WORKSPACE_ID],
+        workspacesSearchOperator: 'AND',
+      });
+      expect(mockedClient.find).toBeCalledWith({
+        type: 'dashboard',
+        workspaces: [PUBLIC_WORKSPACE_ID],
+        workspacesSearchOperator: 'AND',
       });
     });
   });

@@ -12,6 +12,7 @@ import {
   SavedObjectsCheckConflictsObject,
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
+  PUBLIC_WORKSPACE_ID,
 } from '../../../../core/server';
 
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
@@ -63,8 +64,19 @@ export class WorkspaceIdConsumerWrapper {
           this.formatWorkspaceIdParams(wrapperOptions.request, options)
         ),
       delete: wrapperOptions.client.delete,
-      find: (options: SavedObjectsFindOptions) =>
-        wrapperOptions.client.find(this.formatWorkspaceIdParams(wrapperOptions.request, options)),
+      find: (options: SavedObjectsFindOptions) => {
+        const findOptions = this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        // `PUBLIC_WORKSPACE_ID` includes both saved objects without any workspace and with `public` workspace
+        // remove the condition until when public workspace is real, and we have all data migrated to global workspace
+        if (
+          !findOptions.workspacesSearchOperator &&
+          findOptions.workspaces &&
+          findOptions.workspaces.indexOf(PUBLIC_WORKSPACE_ID) !== -1
+        ) {
+          findOptions.workspacesSearchOperator = 'OR';
+        }
+        return wrapperOptions.client.find(findOptions);
+      },
       bulkGet: wrapperOptions.client.bulkGet,
       get: wrapperOptions.client.get,
       update: wrapperOptions.client.update,
