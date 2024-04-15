@@ -85,7 +85,7 @@ describe('DataSourceView', () => {
     expect(toasts.addWarning).toBeCalledTimes(0);
     expect(utils.getDataSourceById).toBeCalledTimes(1);
   });
-  it('should call getDataSourceById when only pass id no label', async () => {
+  it('should call getDataSourceById when only pass id with no label', async () => {
     spyOn(utils, 'getDataSourceById').and.returnValue([{ id: 'test1', label: 'test1' }]);
     component = shallow(
       <DataSourceView
