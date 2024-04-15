@@ -95,6 +95,7 @@ import {
 } from '../../services';
 import { Header, Table, Flyout, Relationships } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
+import { formatWorkspaceIdParams } from '../../utils';
 
 interface ExportAllOption {
   id: string;
@@ -222,16 +223,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       .filter((wsId) => !!wsId);
   }
 
-  private formatWorkspaceIdParams<T extends { workspaces?: string[] }>(
-    obj: T
-  ): T | Omit<T, 'workspaces'> {
-    const { workspaces, ...others } = obj;
-    if (workspaces) {
-      return obj;
-    }
-    return others;
-  }
-
   componentDidMount() {
     this._isMounted = true;
     this.subscribeWorkspace();
@@ -255,7 +246,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
 
-    const filteredCountOptions: SavedObjectCountOptions = this.formatWorkspaceIdParams({
+    const filteredCountOptions: SavedObjectCountOptions = formatWorkspaceIdParams({
       typesToInclude: filteredTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
@@ -291,7 +282,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllSelectedOptions[id] = true;
     });
 
-    const countOptions: SavedObjectCountOptions = this.formatWorkspaceIdParams({
+    const countOptions: SavedObjectCountOptions = formatWorkspaceIdParams({
       typesToInclude: allowedTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
@@ -346,7 +337,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const filteredTypes = filterQuery(allowedTypes, visibleTypes);
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
-    const findOptions: SavedObjectsFindOptions = this.formatWorkspaceIdParams({
+    const findOptions: SavedObjectsFindOptions = formatWorkspaceIdParams({
       search: queryText ? `${queryText}*` : undefined,
       perPage,
       page: page + 1,
@@ -528,6 +519,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     }, [] as string[]);
 
     const filteredWorkspaceIds = this.workspaceNamesToIds(visibleWorkspaces);
+    const workspaces = filteredWorkspaceIds || this.workspaceIdQuery;
 
     let blob;
     try {
@@ -536,9 +528,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         exportTypes,
         queryText ? `${queryText}*` : undefined,
         isIncludeReferencesDeepChecked,
-        this.formatWorkspaceIdParams({
-          workspaces: filteredWorkspaceIds || this.workspaceIdQuery,
-        })
+        workspaces
       );
     } catch (e) {
       notifications.toasts.addDanger({

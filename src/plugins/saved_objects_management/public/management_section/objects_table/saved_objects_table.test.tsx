@@ -373,7 +373,7 @@ describe('SavedObjectsTable', () => {
         allowedTypes,
         undefined,
         true,
-        {}
+        undefined
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -404,7 +404,38 @@ describe('SavedObjectsTable', () => {
         allowedTypes,
         'test*',
         true,
-        {}
+        undefined
+      );
+      expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
+      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Your file is downloading in the background',
+      });
+    });
+
+    it('should export all, accounting for the current workspace criteria', async () => {
+      const component = shallowRender();
+
+      component.instance().onQueryChange({
+        query: Query.parse(`test workspaces:("${PUBLIC_WORKSPACE_NAME}")`),
+      });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set up mocks
+      const blob = new Blob([JSON.stringify(allSavedObjects)], { type: 'application/ndjson' });
+      fetchExportByTypeAndSearchMock.mockImplementation(() => blob);
+
+      await component.instance().onExportAll();
+
+      expect(fetchExportByTypeAndSearchMock).toHaveBeenCalledWith(
+        http,
+        allowedTypes,
+        'test*',
+        true,
+        [PUBLIC_WORKSPACE_ID]
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({

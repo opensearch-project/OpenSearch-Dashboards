@@ -28,21 +28,24 @@
  * under the License.
  */
 
-import { HttpStart } from 'src/core/public';
+import { HttpStart, SavedObjectsBaseOptions } from 'src/core/public';
+import { formatWorkspaceIdParams } from '../utils';
 
 export async function fetchExportByTypeAndSearch(
   http: HttpStart,
   types: string[],
   search: string | undefined,
   includeReferencesDeep: boolean = false,
-  body?: Record<string, unknown>
+  workspaces: SavedObjectsBaseOptions['workspaces']
 ): Promise<Blob> {
   return http.post('/api/saved_objects/_export', {
-    body: JSON.stringify({
-      ...body,
-      type: types,
-      search,
-      includeReferencesDeep,
-    }),
+    body: JSON.stringify(
+      formatWorkspaceIdParams({
+        workspaces,
+        type: types,
+        search,
+        includeReferencesDeep,
+      })
+    ),
   });
 }
