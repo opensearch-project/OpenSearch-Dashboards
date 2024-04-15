@@ -16,6 +16,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           badges: '[first-time-contributor,repeat-contributor,valued-contributor,seasoned-contributor,all-star-contributor,distinguished-contributor]'
-          thresholds: '[0,3,6,13,25,50]'
+          thresholds: '[0,1,6,13,25,50]'
           badge-type: 'achievement'
           ignore-usernames: '[opensearch-ci-bot, dependabot, opensearch-trigger-bot]'

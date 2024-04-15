@@ -167,7 +167,7 @@ interface QueryParams {
   defaultSearchOperator?: string;
   hasReference?: HasReferenceQueryParams;
   kueryNode?: KueryNode;
-  workspaces?: string[];
+  workspaces?: SavedObjectsFindOptions['workspaces'];
   workspacesSearchOperator?: 'AND' | 'OR';
   ACLSearchParams?: SavedObjectsFindOptions['ACLSearchParams'];
 }

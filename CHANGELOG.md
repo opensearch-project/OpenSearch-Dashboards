@@ -74,6 +74,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Add update workspace page ([#6270](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6270))
 - [Multiple Datasource] Make sure customer always have a default datasource ([#6237](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6237))
 - [Workspace] Add workspace list page ([#6182](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6182))
+- [Workspace] Add API to duplicate saved objects among workspaces ([#6288](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6288))
 - [Workspace] Add workspaces column to saved objects page ([#6225](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6225))
 - [Multiple Datasource] Enhanced data source selector with default datasource shows as first choice ([#6293](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6293))
 - [Multiple Datasource] Add multi data source support to sample vega visualizations ([#6218](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6218))
@@ -87,8 +88,10 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Add APIs to support plugin state in request ([#6303](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6303))
 - [Workspace] Filter left nav menu items according to the current workspace ([#6234](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6234))
 - [Multiple Datasource] Refactor data source selector component to include placeholder and add tests ([#6372](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6372))
+- Replace control characters before logging ([#6402](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6402))
 - [Dynamic Configurations] Improve dynamic configurations by adding cache and simplifying client fetch ([#6364](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6364))
 - [MD] Add OpenSearch cluster group label to top of single selectable dropdown  ([#6400](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6400))
+- [Workspace] Support workspace in saved objects client in server side. ([#6365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6365))
 
 ### 🐛 Bug Fixes
 
@@ -113,6 +116,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Multiple Datasource]Fix bug in data source aggregated view to change it to depend on displayAllCompatibleDataSources property to show the badge value ([#6291](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6291))
 - [BUG][Multiple Datasource]Read hideLocalCluster setting from yml and set in data source selector and data source menu ([#6361](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6361))
 - [BUG] Fix for checkForFunctionProperty so that order does not matter ([#6248](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6248))
+- [BUG][Multiple Datasource] Validation succeed as long as status code in response is 200 ([#6399](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6399))
 
 ### 🚞 Infrastructure
 
