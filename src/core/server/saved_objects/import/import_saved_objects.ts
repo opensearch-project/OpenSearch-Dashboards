@@ -41,7 +41,7 @@ import { createSavedObjects } from './create_saved_objects';
 import { checkConflicts } from './check_conflicts';
 import { regenerateIds } from './regenerate_ids';
 import { checkConflictsForDataSource } from './check_conflict_for_data_source';
-import { isObjectWithDataSource } from './validate_object_id';
+import { isSavedObjectWithDataSource } from './validate_object_id';
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
@@ -76,7 +76,7 @@ export async function importSavedObjectsFromStream({
   if (!dataSourceEnabled) {
     const notSupportedErrors: SavedObjectsImportError[] = collectSavedObjectsResult.collectedObjects.reduce(
       (errors: SavedObjectsImportError[], obj) => {
-        if (obj.type === 'data-source' || isObjectWithDataSource(obj.id)) {
+        if (obj.type === 'data-source' || isSavedObjectWithDataSource(obj.id)) {
           const error: SavedObjectsImportUnsupportedTypeError = { type: 'unsupported_type' };
           const { title } = obj.attributes;
           errors.push({ error, type: obj.type, id: obj.id, title, meta: { title } });
