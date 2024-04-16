@@ -5,12 +5,13 @@
 
 import React from 'react';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
-import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceFilterGroup, SelectedDataSourceOption } from './data_source_filter_group';
-import { getDataSourcesWithFields } from '../utils';
-import { DataSourceBaseState } from '../data_source_menu/types';
 import { NoDataSource } from '../no_data_source';
+import { getDataSourcesWithFields, handleDataSourceFetchError } from '../utils';
+import { DataSourceBaseState } from '../data_source_menu/types';
+import { DataSourceErrorMenu } from '../data_source_error_menu';
+
 
 export interface DataSourceMultiSeletableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -41,6 +42,7 @@ export class DataSourceMultiSelectable extends React.Component<
       selectedOptions: [],
       defaultDataSource: null,
       showEmptyState: false,
+      showError: false,
     };
   }
 
@@ -88,12 +90,16 @@ export class DataSourceMultiSelectable extends React.Component<
 
       this.props.onSelectedDataSources(selectedOptions);
     } catch (error) {
-      this.props.notifications.addWarning(
-        i18n.translate('dataSource.fetchDataSourceError', {
-          defaultMessage: 'Unable to fetch existing data sources',
-        })
+      handleDataSourceFetchError(
+        this.onError.bind(this),
+        this.props.notifications,
+        this.props.onSelectedDataSources
       );
     }
+  }
+
+  onError() {
+    this.setState({ showError: true });
   }
 
   onChange(selectedOptions: SelectedDataSourceOption[]) {
@@ -107,6 +113,8 @@ export class DataSourceMultiSelectable extends React.Component<
   render() {
     if (this.state.showEmptyState) {
       return <NoDataSource />;
+    if (this.state.showError) {
+      return <DataSourceErrorMenu />;
     }
     return (
       <DataSourceFilterGroup

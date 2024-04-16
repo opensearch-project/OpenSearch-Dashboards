@@ -8,13 +8,14 @@ import { i18n } from '@osd/i18n';
 import { EuiPopover, EuiButtonEmpty, EuiButtonIcon, EuiContextMenu } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
-import { DataSourceOption, DataSourceBaseState } from '../data_source_menu/types';
+import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
+import { MenuPanelItem } from '../../types';
+import { DataSourceErrorMenu } from '../data_source_error_menu';
 import {
   getDataSourceById,
   handleDataSourceFetchError,
   handleNoAvailableDataSourceError,
 } from '../utils';
-import { MenuPanelItem } from '../../types';
 import { LocalCluster } from '../constants';
 import { NoDataSource } from '../no_data_source';
 
@@ -44,6 +45,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       isPopoverOpen: false,
       selectedOption: this.props.selectedOption ? this.props.selectedOption : [],
       showEmptyState: !this.props.selectedOption?.length && this.props.hideLocalCluster,
+      showError: false,
     };
   }
 
@@ -96,17 +98,15 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
           this.props.onSelectedDataSources([{ id: optionId, label: selectedDataSource.title }]);
         }
       } catch (error) {
-        this.setState({
-          selectedOption: [],
-        });
-        if (this.props.onSelectedDataSources) {
-          this.props.onSelectedDataSources([]);
-        }
-        handleDataSourceFetchError(this.props.notifications!);
+        handleDataSourceFetchError(this.onError.bind(this), this.props.notifications!);
       }
     } else if (this.props.onSelectedDataSources) {
       this.props.onSelectedDataSources([option]);
     }
+  }
+
+  onError() {
+    this.setState({ showError: true });
   }
 
   onClick() {
@@ -142,6 +142,8 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
   render() {
     if (this.state.showEmptyState) {
       return <NoDataSource />;
+    if (this.state.showError) {
+      return <DataSourceErrorMenu />;
     }
     const { panels } = this.getPanels();
 
