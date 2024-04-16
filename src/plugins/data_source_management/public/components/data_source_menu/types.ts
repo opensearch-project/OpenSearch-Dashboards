@@ -8,12 +8,14 @@ import {
   SavedObjectsClientContract,
   SavedObject,
   IUiSettingsClient,
+  ApplicationStart,
 } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 
 export interface DataSourceOption {
   id: string;
   label?: string;
+  checked?: string;
 }
 
 export interface DataSourceGroupLabelOption extends DataSourceOption {
@@ -31,6 +33,7 @@ export interface DataSourceMenuProps<T = any> {
   componentConfig: T;
   hideLocalCluster?: boolean;
   uiSettings?: IUiSettingsClient;
+  application?: ApplicationStart;
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
 }
 
@@ -47,6 +50,8 @@ export interface DataSourceViewConfig extends DataSourceBaseConfig {
   activeOption: DataSourceOption[];
   savedObjects?: SavedObjectsClientContract;
   notifications?: NotificationsStart;
+  dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
+  onSelectedDataSources?: (dataSources: DataSourceOption[]) => void;
 }
 
 export interface DataSourceAggregatedViewConfig extends DataSourceBaseConfig {

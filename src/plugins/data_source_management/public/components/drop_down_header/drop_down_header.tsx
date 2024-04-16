@@ -1,0 +1,50 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import './drop_down_header.scss';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import React from 'react';
+import { ApplicationStart } from 'opensearch-dashboards/public';
+import { DSM_APP_ID } from '../../plugin';
+
+interface DataSourceOptionItemProps {
+  totalDataSourceCount: number;
+  activeDataSourceCount?: number;
+  application?: ApplicationStart;
+}
+
+export const DataSourceDropDownHeader: React.FC<DataSourceOptionItemProps> = ({
+  activeDataSourceCount,
+  totalDataSourceCount,
+  application,
+}) => {
+  const dataSourceCounterPrefix = totalDataSourceCount === 1 ? 'DATA SOURCE' : 'DATA SOURCES';
+  const dataSourceCounter =
+    activeDataSourceCount !== undefined
+      ? `${activeDataSourceCount}/${totalDataSourceCount}`
+      : totalDataSourceCount;
+
+  return (
+    <EuiTitle size="xxxs">
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem>
+          {dataSourceCounterPrefix} ({dataSourceCounter})
+        </EuiFlexItem>
+        <div tabIndex={0} className="dataSourceDropDownHeaderInvisibleFocusable" />
+        <EuiFlexItem grow={false}>
+          <EuiLink
+            onClick={() =>
+              application?.navigateToApp('management', {
+                path: `opensearch-dashboards/${DSM_APP_ID}`,
+              })
+            }
+          >
+            Manage
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiTitle>
+  );
+};
