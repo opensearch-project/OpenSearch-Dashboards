@@ -7,12 +7,13 @@ import { ShallowWrapper, shallow, mount } from 'enzyme';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
-import { DataSourceSelectable, opensearchClusterGroupLabel } from './data_source_selectable';
+import { DataSourceSelectable } from './data_source_selectable';
 import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
 import { render } from '@testing-library/react';
 import * as utils from '../utils';
 import { EuiSelectable } from '@elastic/eui';
+import { dataSourceOptionGroupLabel } from '../utils';
 
 describe('DataSourceSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -414,7 +415,7 @@ describe('DataSourceSelectable', () => {
     component.instance().componentDidMount!();
     await nextTick();
     const optionsProp = component.find(EuiSelectable).prop('options');
-    expect(optionsProp[0]).toEqual(opensearchClusterGroupLabel);
+    expect(optionsProp[0]).toEqual(dataSourceOptionGroupLabel.opensearchCluster);
   });
 
   it('should not render opensearch cluster group label, when there is no option availiable', async () => {
@@ -435,5 +436,51 @@ describe('DataSourceSelectable', () => {
     await nextTick();
     const optionsProp = component.find(EuiSelectable).prop('options');
     expect(optionsProp).toEqual([]);
+  });
+
+  it('should render group lablel normally after onChange', async () => {
+    const onSelectedDataSource = jest.fn();
+    component = shallow(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={true}
+        fullWidth={false}
+        selectedOption={[{ id: 'test1', label: 'test1' }]}
+      />
+    );
+    const componentInstance = component.instance();
+
+    componentInstance.componentDidMount!();
+    await nextTick();
+    const optionsPropBefore = component.find(EuiSelectable).prop('options');
+    expect(optionsPropBefore).toEqual([
+      dataSourceOptionGroupLabel.opensearchCluster,
+      {
+        id: 'test1',
+        label: 'test1',
+        checked: 'on',
+      },
+      {
+        id: 'test2',
+        label: 'test2',
+      },
+      {
+        id: 'test3',
+        label: 'test3',
+      },
+    ]);
+    componentInstance.onChange([
+      dataSourceOptionGroupLabel.opensearchCluster,
+      { id: 'test2', label: 'test2', checked: 'on' },
+    ]);
+    await nextTick();
+    const optionsPropAfter = component.find(EuiSelectable).prop('options');
+    expect(optionsPropAfter).toEqual([
+      dataSourceOptionGroupLabel.opensearchCluster,
+      { id: 'test2', label: 'test2', checked: 'on' },
+    ]);
   });
 });

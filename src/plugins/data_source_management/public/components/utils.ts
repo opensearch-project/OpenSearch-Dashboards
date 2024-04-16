@@ -9,7 +9,9 @@ import {
   SavedObject,
   IUiSettingsClient,
   ToastsStart,
+  ApplicationStart,
 } from 'src/core/public';
+import { deepFreeze } from '@osd/std';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -18,6 +20,8 @@ import {
 } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
 import { DataSourceOption } from './data_source_menu/types';
+import { DataSourceGroupLabelOption } from './data_source_menu/types';
+import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -284,3 +288,18 @@ export const handleDataSourceFetchError = (
     })
   );
 };
+
+interface DataSourceOptionGroupLabel {
+  [key: string]: DataSourceGroupLabelOption;
+}
+
+export const dataSourceOptionGroupLabel = deepFreeze<Readonly<DataSourceOptionGroupLabel>>({
+  opensearchCluster: {
+    id: 'opensearchClusterGroupLabel',
+    label: 'OpenSearch cluster',
+    isGroupLabel: true,
+  },
+  // TODO: add other group labels if needed
+});
+
+export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');

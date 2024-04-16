@@ -12,13 +12,16 @@ import {
   EuiButtonEmpty,
   EuiSelectable,
   EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import {
+  ApplicationStart,
   IUiSettingsClient,
   SavedObjectsClientContract,
   ToastsStart,
 } from 'opensearch-dashboards/public';
 import {
+  dataSourceOptionGroupLabel,
   getDataSourcesWithFields,
   getDefaultDataSource,
   getFilteredDataSources,
@@ -35,6 +38,7 @@ import {
 import { DataSourceErrorMenu } from '../data_source_error_menu';
 import { DataSourceItem } from '../data_source_item';
 import './data_source_selectable.scss';
+import { DataSourceDropDownHeader } from '../drop_down_header';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -43,6 +47,7 @@ interface DataSourceSelectableProps {
   disabled: boolean;
   hideLocalCluster: boolean;
   fullWidth: boolean;
+  application?: ApplicationStart;
   selectedOption?: DataSourceOption[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   uiSettings?: IUiSettingsClient;
@@ -208,9 +213,12 @@ export class DataSourceSelectable extends React.Component<
 
   onChange(options: DataSourceOption[]) {
     if (!this._isMounted) return;
+    const optionsWithoutGroupLabel = options.filter(
+      (option) => !option.hasOwnProperty('isGroupLabel')
+    );
     const selectedDataSource = options.find(({ checked }) => checked);
 
-    this.setState({ dataSourceOptions: options });
+    this.setState({ dataSourceOptions: optionsWithoutGroupLabel });
 
     if (selectedDataSource) {
       this.setState({
@@ -228,7 +236,7 @@ export class DataSourceSelectable extends React.Component<
     if (dataSourceOptions.length === 0) {
       optionsWithGroupLabel = [];
     } else {
-      optionsWithGroupLabel = [opensearchClusterGroupLabel, ...dataSourceOptions];
+      optionsWithGroupLabel = [dataSourceOptionGroupLabel.opensearchCluster, ...dataSourceOptions];
     }
     return optionsWithGroupLabel;
   };
@@ -260,6 +268,7 @@ export class DataSourceSelectable extends React.Component<
 
     return (
       <EuiPopover
+        initialFocus={'.euiSelectableSearch'}
         id={'dataSourceSelectableContextMenuPopover'}
         button={button}
         isOpen={this.state.isPopoverOpen}
@@ -270,12 +279,18 @@ export class DataSourceSelectable extends React.Component<
       >
         <EuiContextMenuPanel>
           <EuiPanel className={'dataSourceSelectableOuiPanel'} color="transparent" paddingSize="s">
+            <DataSourceDropDownHeader
+              totalDataSourceCount={this.state.dataSourceOptions.length}
+              application={this.props.application}
+            />
+            <EuiHorizontalRule margin="none" />
             <EuiSpacer size="s" />
             <EuiSelectable
               aria-label="Search"
               searchable
               searchProps={{
                 placeholder: 'Search',
+                compressed: true,
               }}
               options={this.getOptionsWithGroupLabel(this.state.dataSourceOptions)}
               onChange={(newOptions) => this.onChange(newOptions)}
