@@ -44,7 +44,6 @@ exports[`DataSourceFilterGroup should render normally 1`] = `
   </EuiPopoverTitle>
   <div
     className="dataSourceFilterGroupItems"
-    style={Object {}}
   >
     <EuiFilterSelectItem
       checked="on"
