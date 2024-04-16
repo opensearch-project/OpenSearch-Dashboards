@@ -315,6 +315,17 @@ export const getDataSourceByIdWithoutCredential = {
   references: [],
 };
 
+export const getDataSourceByIdWithError = {
+  attributes: {
+    ...getDataSourceByIdWithCredential.attributes,
+    Error: {
+      statusCode: 404,
+      errorMessage: 'Unable to find data source',
+    },
+  },
+  references: [],
+};
+
 export const mockResponseForSavedObjectsCalls = (
   savedObjectsClient: SavedObjectsClientContract,
   savedObjectsMethodName: 'get' | 'find' | 'create' | 'delete' | 'update',
