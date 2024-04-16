@@ -50,8 +50,14 @@ export const isTitleValid = (
     error: '',
   };
   /* Title validation */
-  if (!title?.trim?.().length) {
+  if (!title.trim().length) {
     isValid.valid = false;
+  } else if (title.length > 32) {
+    /* title length validation */
+    isValid.valid = false;
+    isValid.error = i18n.translate('dataSourcesManagement.validation.titleLength', {
+      defaultMessage: 'Title must be no longer than 32 characters',
+    });
   } else if (
     title.toLowerCase() !== existingTitle.toLowerCase() &&
     Array.isArray(existingDatasourceNamesList) &&
