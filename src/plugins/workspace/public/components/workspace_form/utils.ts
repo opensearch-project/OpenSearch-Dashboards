@@ -130,7 +130,13 @@ export const isUserOrGroupPermissionSettingDuplicated = (
         permissionSettingToCheck.group === permissionSetting.group)
   );
 
-// default permission mode is read
+/**
+ * This function is for converting passed permission modes to permission option id,
+ * it will return Read as default if permission modes not matched.
+ *
+ * @param modes permission modes
+ * @returns permission option id
+ */
 export const getPermissionModeId = (modes: WorkspacePermissionMode[]) => {
   for (const key in optionIdToWorkspacePermissionModesMap) {
     if (optionIdToWorkspacePermissionModesMap[key].every((mode) => modes?.includes(mode))) {
