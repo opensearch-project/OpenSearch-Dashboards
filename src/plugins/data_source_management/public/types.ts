@@ -14,8 +14,8 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { SavedObjectAttributes } from 'src/core/types';
 import { i18n } from '@osd/i18n';
+import { AuthType } from '../../data_source/common/data_sources';
 import { SigV4ServiceName } from '../../data_source/common/data_sources';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
 import { AuthenticationMethodRegistry } from './auth_registry';
@@ -52,13 +52,6 @@ export interface ToastMessageItem {
 export type DataSourceManagementContextValue = OpenSearchDashboardsReactContextValue<
   DataSourceManagementContext
 >;
-
-/* Datasource types */
-export enum AuthType {
-  NoAuth = 'no_auth',
-  UsernamePasswordType = 'username_password',
-  SigV4 = 'sigv4',
-}
 
 export const defaultAuthType = AuthType.UsernamePasswordType;
 
@@ -136,35 +129,14 @@ export const credentialSourceOptions = [
   sigV4CredentialOption,
 ];
 
-export interface DataSourceAttributes extends SavedObjectAttributes {
-  title: string;
-  description?: string;
-  endpoint?: string;
-  dataSourceVersion?: string;
-  installedPlugins?: string[];
-  auth: {
-    type: AuthType | string;
-    credentials:
-      | UsernamePasswordTypedContent
-      | SigV4Content
-      | { [key: string]: string }
-      | undefined;
-  };
-}
-
-export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
-  username: string;
-  password?: string;
-}
-
-export interface SigV4Content extends SavedObjectAttributes {
-  accessKey: string;
-  secretKey: string;
-  region: string;
-  service?: SigV4ServiceName;
-}
-
 export interface MenuPanelItem {
   name?: string;
   disabled: boolean;
 }
+
+export {
+  AuthType,
+  UsernamePasswordTypedContent,
+  SigV4Content,
+  DataSourceAttributes,
+} from '../../data_source/common/data_sources';
