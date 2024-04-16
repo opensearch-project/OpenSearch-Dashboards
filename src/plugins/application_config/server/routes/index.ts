@@ -6,7 +6,6 @@
 import { schema } from '@osd/config-schema';
 import {
   IRouter,
-  IScopedClusterClient,
   Logger,
   OpenSearchDashboardsRequest,
   OpenSearchDashboardsResponseFactory,
@@ -15,7 +14,7 @@ import { ConfigurationClient } from '../types';
 
 export function defineRoutes(
   router: IRouter,
-  getConfigurationClient: (configurationClient: IScopedClusterClient) => ConfigurationClient,
+  getConfigurationClient: (request?: OpenSearchDashboardsRequest) => ConfigurationClient,
   logger: Logger
 ) {
   router.get(
@@ -24,8 +23,7 @@ export function defineRoutes(
       validate: false,
     },
     async (context, request, response) => {
-      const client = getConfigurationClient(context.core.opensearch.client);
-
+      const client = getConfigurationClient(request);
       return await handleGetConfig(client, request, response, logger);
     }
   );
@@ -39,7 +37,7 @@ export function defineRoutes(
       },
     },
     async (context, request, response) => {
-      const client = getConfigurationClient(context.core.opensearch.client);
+      const client = getConfigurationClient(request);
 
       return await handleGetEntityConfig(client, request, response, logger);
     }
@@ -57,7 +55,7 @@ export function defineRoutes(
       },
     },
     async (context, request, response) => {
-      const client = getConfigurationClient(context.core.opensearch.client);
+      const client = getConfigurationClient(request);
 
       return await handleUpdateEntityConfig(client, request, response, logger);
     }
@@ -72,7 +70,7 @@ export function defineRoutes(
       },
     },
     async (context, request, response) => {
-      const client = getConfigurationClient(context.core.opensearch.client);
+      const client = getConfigurationClient(request);
 
       return await handleDeleteEntityConfig(client, request, response, logger);
     }
