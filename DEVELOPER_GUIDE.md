@@ -25,6 +25,9 @@ This guide applies to all development within the OpenSearch Dashboards project a
   - [TypeScript/JavaScript](#typescriptjavascript)
   - [React](#react)
   - [API endpoints](#api-endpoints)
+- [Submit pull request](#submit-pull-request)
+  - [Before submit pull request](#before-submit-a-pull-request)
+  - [Best practices for pull request](#best-practices-for-pull-request)
 
 ## Getting started guide
 
@@ -984,3 +987,34 @@ POST /api/opensearch-dashboards/index_patterns
   ]
 }
 ```
+
+## Submit pull request
+### Before submit a pull request
+First-time contributors should head to the [contributing guide](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/CONTRIBUTING.md) to get started.
+
+Make sure your pull request adheres to our [code guidelines](#code-guidelines). 
+
+Follow [testing guideline](https://github.com/opensearch-project/OpenSearch-Dashboards/blob/main/TESTING.md) about current tests in the repo, writing tests and running tests locally.
+
+
+### Best practices for pull request
+We deeply appreciate everyone who takes the time to make a contribution. We will review all contributions as quickly as possible. As a best practice, opening an issue and discussing your change before you make it is the best way to smooth the PR process. This will prevent a rejection because someone else is already working on the problem, or because the solution is incompatible with the architectural direction.
+
+In addition, below are a few best practices so your pull request gets reviewed quickly.
+
+#### Mark unfinished pull requests
+It's okay to submit a draft PR if you want to solicit reviews before the implementation of your pull request is complete. To do that, you may add a `WIP` or `[WIP]` prefix to your pull request title and [convert the PR to a draft](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/changing-the-stage-of-a-pull-request#converting-a-pull-request-to-a-draft)
+
+#### Clear title and description for pull request
+Make sure that the title of the PR is easy to understand about the intent, and it should not conflict with the PR description or the implementation. To help reviewers get better context of the PR, we suggest to have a clear summary of the intent of the change as well as detailed steps for the manual tests that have been performed for this PR. 
+
+#### Small pull request is better
+Small pull requests get reviewed faster and are more likely to be correct than big ones. Breaking your change into small pull requests while keep in mind that every pull request should be useful on its own.
+
+#### Check and fix tests
+The repository uses codecov to gather coverage information, contributors submitting pull requests to the codebase are required to ensure that their code changes include appropriate testing coverage. Very few pull requests can touch the code and NOT touch the tests. 
+
+If you don't know how to test a feature, please ask! Pull requests lacking sufficient testing coverage may be subject to delays in review or rejection until adequate tests are provided.
+
+The repository has automated test workflows, and contributors submitting pull requests are required to check the failed test workflows and fix the tests related to their code change. If flaky test is identified, please ask a maintainer to retry the workflow. 
+
