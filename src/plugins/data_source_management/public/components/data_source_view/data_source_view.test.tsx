@@ -132,7 +132,7 @@ describe('DataSourceView', () => {
         fullWidth={false}
       />
     );
-    const button = await container.findByTestId('dataSourceViewContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceViewButton');
     button.click();
     expect(container).toMatchSnapshot();
   });
