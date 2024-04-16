@@ -92,6 +92,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CSP Handler] Update CSP handler to only query and modify frame ancestors instead of all CSP directives ([#6398](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6398))
 - [MD] Add OpenSearch cluster group label to top of single selectable dropdown  ([#6400](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6400))
 - [Workspace] Support workspace in saved objects client in server side. ([#6365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6365))
+- [MD] Add dropdown header to data source single selector ([#6431](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6431))
 
 ### 🐛 Bug Fixes
 
