@@ -139,6 +139,7 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           id: 'test2',
@@ -158,6 +159,7 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           checked: 'on',
@@ -335,6 +337,7 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           id: 'test2',
@@ -368,6 +371,7 @@ describe('DataSourceSelectable', () => {
       defaultDataSource: null,
       isPopoverOpen: false,
       selectedOption: [],
+      showEmptyState: false,
     });
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
@@ -381,6 +385,7 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           checked: 'on',
