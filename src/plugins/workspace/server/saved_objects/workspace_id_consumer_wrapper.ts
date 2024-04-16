@@ -13,6 +13,7 @@ import {
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
   PUBLIC_WORKSPACE_ID,
+  WORKSPACE_TYPE,
 } from '../../../../core/server';
 
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
@@ -66,6 +67,14 @@ export class WorkspaceIdConsumerWrapper {
       delete: wrapperOptions.client.delete,
       find: (options: SavedObjectsFindOptions) => {
         const findOptions = this.formatWorkspaceIdParams(wrapperOptions.request, options);
+        if (findOptions.type && findOptions.type === WORKSPACE_TYPE) {
+          return wrapperOptions.client.find(findOptions);
+        }
+
+        // if workspace is enabled, we always find by workspace
+        if (!findOptions.workspaces || findOptions.workspaces.length === 0) {
+          findOptions.workspaces = [PUBLIC_WORKSPACE_ID];
+        }
 
         // `PUBLIC_WORKSPACE_ID` includes both saved objects without any workspace and with `PUBLIC_WORKSPACE_ID` workspace
         const index = findOptions.workspaces
