@@ -43,7 +43,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this.state = {
       isPopoverOpen: false,
       selectedOption: this.props.selectedOption ? this.props.selectedOption : [],
-      showEmptyState: !(this.props.selectedOption?.length ?? 0),
+      showEmptyState: !this.props.selectedOption?.length && this.props.hideLocalCluster,
     };
   }
 

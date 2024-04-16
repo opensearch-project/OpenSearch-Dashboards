@@ -16,7 +16,7 @@ export const NoDataSource = () => {
       iconType="alert"
       iconSide="left"
       size="s"
-      color="warning"
+      color="primary"
     >
       {label}
     </EuiButtonEmpty>
