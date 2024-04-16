@@ -2,7 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { i18n } from '@osd/i18n';
 import {
   HttpStart,
   SavedObjectsClientContract,
@@ -11,7 +11,6 @@ import {
   ToastsStart,
   ApplicationStart,
 } from 'src/core/public';
-import { i18n } from '@osd/i18n';
 import { deepFreeze } from '@osd/std';
 import {
   DataSourceAttributes,
@@ -83,14 +82,6 @@ export async function setFirstDataSourceAsDefault(
     const datasourceId = listOfDataSources[0].id;
     return await uiSettings.set('defaultDataSource', datasourceId);
   }
-}
-
-export function handleDataSourceFetchError(notifications: ToastsStart) {
-  notifications.addWarning(
-    i18n.translate('dataSource.fetchDataSourceError', {
-      defaultMessage: `Failed to fetch data source`,
-    })
-  );
 }
 
 export function handleNoAvailableDataSourceError(notifications: ToastsStart) {
@@ -282,6 +273,20 @@ export const extractRegisteredAuthTypeCredentials = (
   });
 
   return registeredCredentials;
+};
+
+export const handleDataSourceFetchError = (
+  changeState: (state: { showError: boolean }) => void,
+  notifications: ToastsStart,
+  callback?: (ds: DataSourceOption[]) => void
+) => {
+  changeState({ showError: true });
+  if (callback) callback([]);
+  notifications.addWarning(
+    i18n.translate('dataSource.fetchDataSourceError', {
+      defaultMessage: 'Failed to fetch data source',
+    })
+  );
 };
 
 interface DataSourceOptionGroupLabel {
