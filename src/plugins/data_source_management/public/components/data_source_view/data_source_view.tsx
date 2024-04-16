@@ -7,10 +7,10 @@ import React from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiPopover, EuiButtonEmpty, EuiButtonIcon, EuiContextMenu } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
+import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
 import { MenuPanelItem } from '../../types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
-import { IUiSettingsClient } from 'src/core/public';
 import {
   getDataSourceById,
   handleDataSourceFetchError,
