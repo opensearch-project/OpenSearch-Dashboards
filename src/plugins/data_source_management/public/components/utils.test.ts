@@ -18,8 +18,10 @@ import {
   setFirstDataSourceAsDefault,
   getFilteredDataSources,
   getDefaultDataSource,
+  handleDataSourceFetchError,
+  handleNoAvailableDataSourceError,
 } from './utils';
-import { coreMock } from '../../../../core/public/mocks';
+import { coreMock, notificationServiceMock } from '../../../../core/public/mocks';
 import {
   getDataSourceByIdWithCredential,
   getDataSourceByIdWithoutCredential,
@@ -32,6 +34,7 @@ import {
   getSingleDataSourceResponse,
   getDataSource,
   getDataSourceOptions,
+  getDataSourceByIdWithError,
 } from '../mocks';
 import {
   AuthType,
@@ -69,6 +72,24 @@ describe('DataSourceManagement: Utils.ts', () => {
     });
   });
 
+  describe('Handle fetch data source error', () => {
+    const { toasts } = notificationServiceMock.createStartContract();
+
+    test('should send warning when data source fetch failed', () => {
+      handleDataSourceFetchError(toasts);
+      expect(toasts.addWarning).toHaveBeenCalledWith(`Failed to fetch data source`);
+    });
+  });
+
+  describe('Handle no available data source error', () => {
+    const { toasts } = notificationServiceMock.createStartContract();
+
+    test('should  send warning when data source is not available', () => {
+      handleNoAvailableDataSourceError(toasts);
+      expect(toasts.addWarning).toHaveBeenCalledWith(`Data source is not available`);
+    });
+  });
+
   describe('Get data source by ID', () => {
     test('Success: getting data source by ID with credential', async () => {
       mockResponseForSavedObjectsCalls(savedObjects.client, 'get', getDataSourceByIdWithCredential);
@@ -94,6 +115,14 @@ describe('DataSourceManagement: Utils.ts', () => {
     test('failure: getting data source by ID', async () => {
       try {
         mockErrorResponseForSavedObjectsCalls(savedObjects.client, 'get');
+        await getDataSourceById('alpha-test', savedObjects.client);
+      } catch (e) {
+        expect(e).toBeTruthy();
+      }
+    });
+    test('failure: gets error when response contains error', async () => {
+      try {
+        mockResponseForSavedObjectsCalls(savedObjects.client, 'get', getDataSourceByIdWithError);
         await getDataSourceById('alpha-test', savedObjects.client);
       } catch (e) {
         expect(e).toBeTruthy();

@@ -141,6 +141,5 @@ export const getAuthenticationMethod = (
   dataSourceAttr: DataSourceAttributes,
   authRegistry?: IAuthenticationMethodRegistry
 ): AuthenticationMethod => {
-  const name = dataSourceAttr.name ?? dataSourceAttr.auth.type;
-  return authRegistry?.getAuthenticationMethod(name) as AuthenticationMethod;
+  return authRegistry?.getAuthenticationMethod(dataSourceAttr.auth.type) as AuthenticationMethod;
 };

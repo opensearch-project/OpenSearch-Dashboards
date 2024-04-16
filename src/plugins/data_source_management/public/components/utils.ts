@@ -9,7 +9,9 @@ import {
   SavedObjectsClientContract,
   SavedObject,
   IUiSettingsClient,
+  ToastsStart,
 } from 'src/core/public';
+import { i18n } from '@osd/i18n';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -80,6 +82,22 @@ export async function setFirstDataSourceAsDefault(
   }
 }
 
+export function handleDataSourceFetchError(notifications: ToastsStart) {
+  notifications.addWarning(
+    i18n.translate('dataSource.fetchDataSourceError', {
+      defaultMessage: `Failed to fetch data source`,
+    })
+  );
+}
+
+export function handleNoAvailableDataSourceError(notifications: ToastsStart) {
+  notifications.addWarning(
+    i18n.translate('dataSource.noAvailableDataSourceError', {
+      defaultMessage: `Data source is not available`,
+    })
+  );
+}
+
 export function getFilteredDataSources(
   dataSources: Array<SavedObject<DataSourceAttributes>>,
   filter = (ds: SavedObject<DataSourceAttributes>) => true
@@ -130,16 +148,20 @@ export async function getDataSourceById(
   id: string,
   savedObjectsClient: SavedObjectsClientContract
 ) {
-  return savedObjectsClient.get('data-source', id).then((response) => {
-    const attributes: any = response?.attributes || {};
-    return {
-      id: response.id,
-      title: attributes.title,
-      endpoint: attributes.endpoint,
-      description: attributes.description || '',
-      auth: attributes.auth,
-    };
-  });
+  const response = await savedObjectsClient.get('data-source', id);
+
+  if (!response || response.error) {
+    throw new Error('Unable to find data source');
+  }
+
+  const attributes: any = response?.attributes || {};
+  return {
+    id: response.id,
+    title: attributes.title,
+    endpoint: attributes.endpoint,
+    description: attributes.description || '',
+    auth: attributes.auth,
+  };
 }
 
 export async function createSingleDataSource(
