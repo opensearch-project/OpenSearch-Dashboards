@@ -14,6 +14,7 @@ import { DataSourceAttributes } from '../../types';
 export interface DataSourceOption {
   id: string;
   label?: string;
+  checked?: string;
 }
 
 export interface DataSourceGroupLabelOption extends DataSourceOption {
@@ -47,6 +48,8 @@ export interface DataSourceViewConfig extends DataSourceBaseConfig {
   activeOption: DataSourceOption[];
   savedObjects?: SavedObjectsClientContract;
   notifications?: NotificationsStart;
+  dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
+  onSelectedDataSources?: (dataSources: DataSourceOption[]) => void;
 }
 
 export interface DataSourceAggregatedViewConfig extends DataSourceBaseConfig {

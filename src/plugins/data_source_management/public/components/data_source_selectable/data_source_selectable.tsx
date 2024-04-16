@@ -12,9 +12,6 @@ import {
   EuiButtonEmpty,
   EuiSelectable,
   EuiSpacer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
 } from '@elastic/eui';
 import {
   IUiSettingsClient,
@@ -26,6 +23,8 @@ import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 import { DataSourceGroupLabelOption, DataSourceOption } from '../data_source_menu/types';
+import { DataSourceItem } from '../data_source_item';
+import './data_source_selectable.scss';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -40,14 +39,10 @@ interface DataSourceSelectableProps {
 }
 
 interface DataSourceSelectableState {
-  dataSourceOptions: SelectedDataSourceOption[];
+  dataSourceOptions: DataSourceOption[];
   isPopoverOpen: boolean;
-  selectedOption?: SelectedDataSourceOption[];
+  selectedOption?: DataSourceOption[];
   defaultDataSource: string | null;
-}
-
-interface SelectedDataSourceOption extends DataSourceOption {
-  checked?: string;
 }
 
 export const opensearchClusterGroupLabel: DataSourceGroupLabelOption = {
@@ -91,7 +86,7 @@ export class DataSourceSelectable extends React.Component<
   getUpdatedDataSourceOptions(
     selectedDataSourceId: string,
     dataSourceOptions: DataSourceOption[]
-  ): SelectedDataSourceOption[] {
+  ): DataSourceOption[] {
     return dataSourceOptions.map((option) => ({
       ...option,
       ...(option.id === selectedDataSourceId && { checked: 'on' }),
@@ -116,7 +111,7 @@ export class DataSourceSelectable extends React.Component<
       this.props.onSelectedDataSources([]);
       return;
     }
-    const updatedDataSourceOptions: SelectedDataSourceOption[] = this.getUpdatedDataSourceOptions(
+    const updatedDataSourceOptions: DataSourceOption[] = this.getUpdatedDataSourceOptions(
       id,
       dataSourceOptions
     );
@@ -144,7 +139,7 @@ export class DataSourceSelectable extends React.Component<
       return;
     }
 
-    const updatedDataSourceOptions: SelectedDataSourceOption[] = this.getUpdatedDataSourceOptions(
+    const updatedDataSourceOptions: DataSourceOption[] = this.getUpdatedDataSourceOptions(
       selectedDataSource[0].id,
       dataSourceOptions
     );
@@ -196,7 +191,7 @@ export class DataSourceSelectable extends React.Component<
     }
   }
 
-  onChange(options: SelectedDataSourceOption[]) {
+  onChange(options: DataSourceOption[]) {
     if (!this._isMounted) return;
     const selectedDataSource = options.find(({ checked }) => checked);
 
@@ -256,7 +251,7 @@ export class DataSourceSelectable extends React.Component<
         data-test-subj={'dataSourceSelectableContextMenuPopover'}
       >
         <EuiContextMenuPanel>
-          <EuiPanel color="transparent" paddingSize="s" style={{ width: '300px' }}>
+          <EuiPanel className={'dataSourceSelectableOuiPanel'} color="transparent" paddingSize="s">
             <EuiSpacer size="s" />
             <EuiSelectable
               aria-label="Search"
@@ -269,14 +264,11 @@ export class DataSourceSelectable extends React.Component<
               singleSelection={true}
               data-test-subj={'dataSourceSelectable'}
               renderOption={(option) => (
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem grow={1}>{option.label}</EuiFlexItem>
-                  {option.id === this.state.defaultDataSource && (
-                    <EuiFlexItem grow={false}>
-                      <EuiBadge iconSide="left">Default</EuiBadge>
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
+                <DataSourceItem
+                  option={option}
+                  defaultDataSource={this.state.defaultDataSource}
+                  className={'dataSourceSelectable'}
+                />
               )}
             >
               {(list, search) => (
