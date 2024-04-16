@@ -37,6 +37,7 @@ import { getIndexPatternObject } from './helpers/get_index_pattern';
 
 export async function getTableData(req, panel) {
   const panelIndexPattern = panel.index_pattern;
+  const panelDataSourceId = panel.data_source_id;
 
   const {
     searchStrategy,
@@ -58,12 +59,17 @@ export async function getTableData(req, panel) {
       indexPatternObject,
       capabilities
     );
-    const [resp] = await searchStrategy.search(req, [
-      {
-        body,
-        index: panelIndexPattern,
-      },
-    ]);
+    const [resp] = await searchStrategy.search(
+      req,
+      [
+        {
+          body,
+          index: panelIndexPattern,
+        },
+      ],
+      {},
+      panelDataSourceId
+    );
 
     const buckets = get(
       resp.rawResponse ? resp.rawResponse : resp,
