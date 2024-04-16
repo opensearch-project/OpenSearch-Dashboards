@@ -29,6 +29,7 @@ export interface DataSourceBaseConfig {
 }
 
 export interface DataSourceBaseState {
+  showEmptyState: boolean;
   showError: boolean;
 }
 

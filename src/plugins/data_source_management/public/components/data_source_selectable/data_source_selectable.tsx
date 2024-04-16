@@ -37,6 +37,7 @@ import {
 } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
 import { DataSourceItem } from '../data_source_item';
+import { NoDataSource } from '../no_data_source';
 import './data_source_selectable.scss';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 
@@ -80,6 +81,7 @@ export class DataSourceSelectable extends React.Component<
       isPopoverOpen: false,
       selectedOption: [],
       defaultDataSource: null,
+      showEmptyState: false,
       showError: false,
     };
 
@@ -179,6 +181,9 @@ export class DataSourceSelectable extends React.Component<
         'title',
         'auth.type',
       ]);
+      if (fetchedDataSources?.length === 0 && this.props.hideLocalCluster) {
+        this.setState({ showEmptyState: true });
+      }
 
       const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(
         fetchedDataSources,
@@ -242,6 +247,9 @@ export class DataSourceSelectable extends React.Component<
   };
 
   render() {
+    if (this.state.showEmptyState) {
+      return <NoDataSource />;
+    }
     if (this.state.showError) {
       return <DataSourceErrorMenu />;
     }

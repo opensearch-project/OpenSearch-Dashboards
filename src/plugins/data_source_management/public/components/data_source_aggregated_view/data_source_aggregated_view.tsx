@@ -16,6 +16,7 @@ import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/p
 import { getDataSourcesWithFields, handleDataSourceFetchError } from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
+import { NoDataSource } from '../no_data_source';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
 import { DataSourceBaseState } from '../data_source_menu/types';
 
@@ -46,6 +47,7 @@ export class DataSourceAggregatedView extends React.Component<
     this.state = {
       isPopoverOpen: false,
       allDataSourcesIdToTitleMap: new Map(),
+      showEmptyState: false,
       showError: false,
     };
   }
@@ -73,7 +75,6 @@ export class DataSourceAggregatedView extends React.Component<
               this.props.dataSourceFilter!(ds)
             );
           }
-
           const allDataSourcesIdToTitleMap = new Map();
 
           filteredDataSources.forEach((ds) => {
@@ -101,6 +102,9 @@ export class DataSourceAggregatedView extends React.Component<
   }
 
   render() {
+    if (this.state.showEmptyState) {
+      return <NoDataSource />;
+    }
     if (this.state.showError) {
       return <DataSourceErrorMenu />;
     }

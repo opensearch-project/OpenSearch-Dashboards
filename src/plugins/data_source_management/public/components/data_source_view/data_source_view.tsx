@@ -17,6 +17,7 @@ import {
   handleNoAvailableDataSourceError,
 } from '../utils';
 import { LocalCluster } from '../constants';
+import { NoDataSource } from '../no_data_source';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
@@ -43,6 +44,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this.state = {
       isPopoverOpen: false,
       selectedOption: this.props.selectedOption ? this.props.selectedOption : [],
+      showEmptyState: !this.props.selectedOption?.length && this.props.hideLocalCluster,
       showError: false,
     };
   }
@@ -138,6 +140,9 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
   }
 
   render() {
+    if (this.state.showEmptyState) {
+      return <NoDataSource />;
+    }
     if (this.state.showError) {
       return <DataSourceErrorMenu />;
     }
