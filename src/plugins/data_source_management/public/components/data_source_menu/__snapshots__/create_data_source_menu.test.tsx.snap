@@ -136,7 +136,7 @@ Object {
         >
           <button
             aria-label="dataSourceMenuButton"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink dataSourceComponentButtonTitle"
             data-test-subj="dataSourceSelectableContextMenuHeaderLink"
             type="button"
           >
@@ -168,7 +168,7 @@ Object {
       >
         <button
           aria-label="dataSourceMenuButton"
-          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink dataSourceComponentButtonTitle"
           data-test-subj="dataSourceSelectableContextMenuHeaderLink"
           type="button"
         >
@@ -265,7 +265,7 @@ Object {
             >
               <button
                 aria-label="dataSourceMenuButton"
-                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink dataSourceComponentButtonTitle"
                 data-test-subj="dataSourceSelectableContextMenuHeaderLink"
                 type="button"
               >
