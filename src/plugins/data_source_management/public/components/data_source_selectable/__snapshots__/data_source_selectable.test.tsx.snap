@@ -33,13 +33,9 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
     items={Array []}
   >
     <EuiPanel
+      className="dataSourceSelectableOuiPanel"
       color="transparent"
       paddingSize="s"
-      style={
-        Object {
-          "width": "300px",
-        }
-      }
     >
       <EuiSpacer
         size="s"
@@ -118,13 +114,9 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
     items={Array []}
   >
     <EuiPanel
+      className="dataSourceSelectableOuiPanel"
       color="transparent"
       paddingSize="s"
-      style={
-        Object {
-          "width": "300px",
-        }
-      }
     >
       <EuiSpacer
         size="s"
@@ -182,13 +174,9 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
     items={Array []}
   >
     <EuiPanel
+      className="dataSourceSelectableOuiPanel"
       color="transparent"
       paddingSize="s"
-      style={
-        Object {
-          "width": "300px",
-        }
-      }
     >
       <EuiSpacer
         size="s"
@@ -283,8 +271,7 @@ Object {
               <div>
                 <div>
                   <div
-                    class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow"
-                    style="width: 300px;"
+                    class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow dataSourceSelectableOuiPanel"
                   >
                     <div
                       class="euiSpacer euiSpacer--s"

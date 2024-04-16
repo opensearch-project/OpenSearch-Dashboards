@@ -14,6 +14,7 @@ import { DataSourceAttributes } from '../../types';
 export interface DataSourceOption {
   id: string;
   label?: string;
+  checked?: string;
 }
 
 export interface DataSourceGroupLabelOption extends DataSourceOption {
