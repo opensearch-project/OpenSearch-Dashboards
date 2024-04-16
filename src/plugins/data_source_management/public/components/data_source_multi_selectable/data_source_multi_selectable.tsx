@@ -12,7 +12,6 @@ import { getDataSourcesWithFields, handleDataSourceFetchError } from '../utils';
 import { DataSourceBaseState } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
 
-
 export interface DataSourceMultiSeletableProps {
   savedObjectsClient: SavedObjectsClientContract;
   notifications: ToastsStart;
