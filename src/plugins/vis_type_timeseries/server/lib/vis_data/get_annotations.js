@@ -54,6 +54,7 @@ export async function getAnnotations({
   const annotations = panel.annotations.filter(validAnnotation);
   const lastSeriesTimestamp = getLastSeriesTimestamp(series);
   const handleAnnotationResponseBy = handleAnnotationResponse(lastSeriesTimestamp);
+  const panelDataSourceId = panel.data_source_id;
 
   const bodiesPromises = annotations.map((annotation) =>
     getAnnotationRequestParams(req, panel, annotation, opensearchQueryConfig, capabilities)
@@ -67,7 +68,7 @@ export async function getAnnotations({
   if (!searches.length) return { responses: [] };
 
   try {
-    const data = await searchStrategy.search(req, searches);
+    const data = await searchStrategy.search(req, searches, {}, panelDataSourceId);
 
     return annotations.reduce((acc, annotation, index) => {
       acc[annotation.id] = handleAnnotationResponseBy(data[index].rawResponse, annotation);

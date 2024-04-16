@@ -43,3 +43,4 @@ export { getFlattenedObject } from './get_flattened_object';
 export { validateObject } from './validate_object';
 export * from './rxjs_7';
 export { parse, stringify } from './json';
+export * from './clean';

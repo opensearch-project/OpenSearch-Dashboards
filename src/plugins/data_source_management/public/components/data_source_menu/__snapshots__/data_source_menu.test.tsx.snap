@@ -3,6 +3,7 @@
 exports[`DataSourceMenu can render data source view when only pass id in the activeOption 1`] = `
 <DataSourceView
   fullWidth={true}
+  hideLocalCluster={false}
   notifications={
     Object {
       "add": [MockFunction],
@@ -33,6 +34,7 @@ exports[`DataSourceMenu can render data source view when only pass id in the act
 exports[`DataSourceMenu can render data source view when provide activeOption 1`] = `
 <DataSourceView
   fullWidth={true}
+  hideLocalCluster={false}
   notifications={
     Object {
       "add": [MockFunction],
@@ -408,6 +410,7 @@ exports[`DataSourceMenu should render data source selectable only with local clu
 exports[`DataSourceMenu should render data source view if not pass saved object or notification 1`] = `
 <DataSourceView
   fullWidth={true}
+  hideLocalCluster={false}
   notifications={
     Object {
       "add": [MockFunction],
@@ -426,6 +429,7 @@ exports[`DataSourceMenu should render data source view if not pass saved object 
 exports[`DataSourceMenu should render data source view only 1`] = `
 <DataSourceView
   fullWidth={true}
+  hideLocalCluster={false}
   notifications={
     Object {
       "add": [MockFunction],
