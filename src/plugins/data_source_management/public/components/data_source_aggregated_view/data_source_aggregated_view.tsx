@@ -66,7 +66,7 @@ export class DataSourceAggregatedView extends React.Component<
     this._isMounted = true;
     getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
-        if (fetchedDataSources?.length === 0) {
+        if (fetchedDataSources?.length === 0 && this.props.hideLocalCluster) {
           this.setState({
             showEmptyState: true,
           });

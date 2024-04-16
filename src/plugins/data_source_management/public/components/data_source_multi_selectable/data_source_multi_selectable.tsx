@@ -83,7 +83,7 @@ export class DataSourceMultiSelectable extends React.Component<
         ...this.state,
         selectedOptions,
         defaultDataSource,
-        showEmptyState: fetchedDataSources?.length === 0 || false,
+        showEmptyState: (fetchedDataSources?.length === 0 && this.props.hideLocalCluster) || false,
       });
 
       this.props.onSelectedDataSources(selectedOptions);

@@ -178,7 +178,7 @@ export class DataSourceSelectable extends React.Component<
         'title',
         'auth.type',
       ]);
-      if (fetchedDataSources?.length === 0) {
+      if (fetchedDataSources?.length === 0 && this.props.hideLocalCluster) {
         this.setState({ showEmptyState: true });
       }
 
