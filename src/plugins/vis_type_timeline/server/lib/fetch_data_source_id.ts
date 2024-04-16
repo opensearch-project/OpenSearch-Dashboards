@@ -12,31 +12,31 @@ export const fetchDataSourceIdByName = async (
   config: OpenSearchFunctionConfig,
   client: SavedObjectsClientContract
 ) => {
-  if (config.data_source_name) {
-    if (!getDataSourceEnabled().enabled) {
-      throw new Error('To query from multiple data sources, first enable the data source feature');
-    }
-
-    const dataSources = await client.find<DataSourceAttributes>({
-      type: 'data-source',
-      perPage: 100,
-      search: `"${config.data_source_name}"`,
-      searchFields: ['title'],
-      fields: ['id', 'title'],
-    });
-
-    const possibleDataSourceIds = dataSources.saved_objects.filter(
-      (obj) => obj.attributes.title === config.data_source_name
-    );
-
-    if (possibleDataSourceIds.length !== 1) {
-      throw new Error(
-        `Expected exactly 1 result for data_source_name "${config.data_source_name}" but got ${possibleDataSourceIds.length} results`
-      );
-    }
-
-    return possibleDataSourceIds.pop()?.id;
+  if (!config.data_source_name) {
+    return undefined;
   }
 
-  return undefined;
+  if (!getDataSourceEnabled().enabled) {
+    throw new Error('To query from multiple data sources, first enable the data source feature');
+  }
+
+  const dataSources = await client.find<DataSourceAttributes>({
+    type: 'data-source',
+    perPage: 100,
+    search: `"${config.data_source_name}"`,
+    searchFields: ['title'],
+    fields: ['id', 'title'],
+  });
+
+  const possibleDataSourceIds = dataSources.saved_objects.filter(
+    (obj) => obj.attributes.title === config.data_source_name
+  );
+
+  if (possibleDataSourceIds.length !== 1) {
+    throw new Error(
+      `Expected exactly 1 result for data_source_name "${config.data_source_name}" but got ${possibleDataSourceIds.length} results`
+    );
+  }
+
+  return possibleDataSourceIds.pop()?.id;
 };
