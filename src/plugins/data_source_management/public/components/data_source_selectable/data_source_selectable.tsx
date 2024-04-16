@@ -249,6 +249,7 @@ export class DataSourceSelectable extends React.Component<
   render() {
     if (this.state.showEmptyState) {
       return <NoDataSource />;
+    }
     if (this.state.showError) {
       return <DataSourceErrorMenu />;
     }
