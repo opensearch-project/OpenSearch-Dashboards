@@ -68,17 +68,17 @@ export class DataSourceAggregatedView extends React.Component<
     this._isMounted = true;
     getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
-        if (fetchedDataSources?.length === 0 && this.props.hideLocalCluster) {
-          this.setState({
-            showEmptyState: true,
-          });
-        }
         if (fetchedDataSources?.length) {
           let filteredDataSources = fetchedDataSources;
           if (this.props.dataSourceFilter) {
             filteredDataSources = fetchedDataSources.filter((ds) =>
               this.props.dataSourceFilter!(ds)
             );
+          }
+          if (fetchedDataSources?.length === 0 && this.props.hideLocalCluster) {
+            this.setState({
+              showEmptyState: true,
+            });
           }
 
           const allDataSourcesIdToTitleMap = new Map();
@@ -110,6 +110,7 @@ export class DataSourceAggregatedView extends React.Component<
   render() {
     if (this.state.showEmptyState) {
       return <NoDataSource />;
+    }
     if (this.state.showError) {
       return <DataSourceErrorMenu />;
     }
