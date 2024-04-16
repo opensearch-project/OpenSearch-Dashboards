@@ -249,7 +249,7 @@ export class DataSourceSelectable extends React.Component<
     const button = (
       <>
         <EuiButtonEmpty
-          className={`euiHeaderLink dataSourceComponentButtonTitle`}
+          className={'euiHeaderLink dataSourceComponentButtonTitle'}
           onClick={this.onClick.bind(this)}
           data-test-subj="dataSourceSelectableContextMenuHeaderLink"
           aria-label={i18n.translate('dataSourceSelectable.dataSourceOptionsButtonAriaLabel', {
