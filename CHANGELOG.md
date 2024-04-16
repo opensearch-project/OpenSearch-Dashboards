@@ -92,6 +92,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Dynamic Configurations] Improve dynamic configurations by adding cache and simplifying client fetch ([#6364](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6364))
 - [CSP Handler] Update CSP handler to only query and modify frame ancestors instead of all CSP directives ([#6398](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6398))
 - [MD] Add OpenSearch cluster group label to top of single selectable dropdown  ([#6400](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6400))
+- [Multiple Datasource] Add error state to all data source menu components to show error component and consolidate all fetch errors ([#6440](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6440))
 - [Workspace] Support workspace in saved objects client in server side. ([#6365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6365))
 - [MD] Add dropdown header to data source single selector ([#6431](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6431))
 
