@@ -93,6 +93,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [CSP Handler] Update CSP handler to only query and modify frame ancestors instead of all CSP directives ([#6398](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6398))
 - [MD] Add OpenSearch cluster group label to top of single selectable dropdown  ([#6400](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6400))
 - [Workspace] Support workspace in saved objects client in server side. ([#6365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6365))
+- [MD] Add dropdown header to data source single selector ([#6431](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6431))
 
 ### 🐛 Bug Fixes
 
@@ -119,7 +120,9 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Multiple Datasource]Read hideLocalCluster setting from yml and set in data source selector and data source menu ([#6361](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6361))
 - [BUG][Multiple Datasource] Refactor read-only component to cover more edge cases ([#6416](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6416))
 - [BUG] Fix for checkForFunctionProperty so that order does not matter ([#6248](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6248))
+- [Dynamic Configurations] Fix dynamic config API calls to pass correct input ([#6474](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6474))
 - [BUG][Multiple Datasource] Validation succeed as long as status code in response is 200 ([#6399](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6399))
+- [BUG][Multiple Datasource] Add validation for title length to be no longer than 32 characters [#6452](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6452))
 
 ### 🚞 Infrastructure
 
