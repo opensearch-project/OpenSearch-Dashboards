@@ -53,7 +53,6 @@ import {
   setChartsSetup,
   setDataSourceManagementSetup,
   setNotifications,
-  setHideLocalCluster,
 } from './services';
 import { DataPublicPluginStart } from '../../data/public';
 import { ChartsPluginSetup } from '../../charts/public';
@@ -95,7 +94,6 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
     setChartsSetup(charts);
     visualizations.createReactVisualization(metricsVisDefinition);
     setDataSourceManagementSetup({ dataSourceManagement });
-    setHideLocalCluster({ hideLocalCluster: dataSource?.hideLocalCluster });
   }
 
   public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {

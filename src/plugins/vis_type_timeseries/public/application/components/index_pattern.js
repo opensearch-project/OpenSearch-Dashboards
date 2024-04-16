@@ -46,7 +46,6 @@ import {
   getSavedObjectsClient,
   getNotifications,
   getDataSourceManagementSetup,
-  getHideLocalCluster,
 } from '../../services';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
@@ -190,7 +189,6 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 fullWidth={false}
                 removePrepend={true}
                 isClearable={false}
-                hideLocalCluster={!!getHideLocalCluster().hideLocalCluster}
               />
             </EuiFormRow>
           </EuiFlexItem>
