@@ -676,6 +676,42 @@ if (width < 300) {
 }
 ```
 
+#### Avoid using `var` to declare variables
+Use `const` by default, and never use `var` to declare variables. `const` and `let` are block scoped, like variables in most other languages. `var` in JavaScript is function scoped, which can cause difficult to understand bugs. 
+
+#### Avoid using the `Array` constructor
+Do not use the Array() constructor, with or without new. It has confusing and contradictory usage. 
+
+Instead, always use bracket notation to initialize arrays.
+
+```js
+// good
+const arr = [2];
+
+// bad
+const arr = new Array(2); //[undefined, undefined]
+const arr = new Array(2, 3); //[2, 3];
+```
+
+#### Avoid line continuations in string literals
+Do not use line continuations (that is, ending a line inside a string literal with a backslash) in either ordinary or template string literals. Even though ES5 allows this, it can lead to tricky errors if any trailing whitespace comes after the slash, and is less obvious to readers.
+
+```js
+// good
+const LONG_STRING = 'This is a very very very very very very long string. ' +
+    'It does not contain long stretches of spaces because it uses ' +
+    'concatenated strings.';
+
+// bad
+const LONG_STRING = 'This is a very very very very very very very long string. \
+    It inadvertently contains long stretches of spaces due to how the \
+    continued lines are indented.';
+```
+
+#### Avoid using `@ts-ignore`
+Do not use @ts-ignore nor the variants @ts-expect-error or @ts-nocheck. They superficially seem to be an easy way to fix a compiler error, but in practice, a specific compiler error is often caused by a larger problem that can be fixed more directly.
+
+
 #### Use native ES2015 module syntax
 
 Module dependencies should be written using native ES2015 syntax wherever
@@ -938,6 +974,31 @@ providing a length property for a collection class.
 Do not use setters, they cause more problems than they can solve.
 
 [sideeffect]: http://en.wikipedia.org/wiki/Side_effect_(computer_science)
+
+#### Use strict equality checks
+Use strict equality operators (===/!==) to compare the operands. The equality (==/!=) operator will try to convert and compare operands that are of different types causing unexpected behavior.
+
+#### Use uppercase for constants
+Constants should be declared in uppercase letters especially for primitives because they are truly immutable.
+
+
+#### Use named exports
+Use named exports instead of default exports. Default exports provide no canonical name, which makes central maintenance difficult with relatively little benefit to code owners, including potentially decreased readability.
+
+```js
+// good
+export class User { ... }
+
+// bad
+export default class User { ... }
+// why bad
+import User from './user';  // Legal.
+import Group from './user';  // Also legal.
+```
+
+#### Use single quotes for string literals
+Ordinary string literals are delimited with single quotes ('), rather than double quotes ("). If a string contains a single quote character, consider using a template string to avoid having to escape the quote.
+
 
 #### Attribution
 
