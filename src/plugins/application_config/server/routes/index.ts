@@ -23,8 +23,7 @@ export function defineRoutes(
       validate: false,
     },
     async (context, request, response) => {
-      const client = getConfigurationClient(request);
-      return await handleGetConfig(client, request, response, logger);
+      return await handleGetConfig(getConfigurationClient, request, response, logger);
     }
   );
   router.get(
@@ -37,9 +36,7 @@ export function defineRoutes(
       },
     },
     async (context, request, response) => {
-      const client = getConfigurationClient(request);
-
-      return await handleGetEntityConfig(client, request, response, logger);
+      return await handleGetEntityConfig(getConfigurationClient, request, response, logger);
     }
   );
   router.post(
@@ -55,9 +52,7 @@ export function defineRoutes(
       },
     },
     async (context, request, response) => {
-      const client = getConfigurationClient(request);
-
-      return await handleUpdateEntityConfig(client, request, response, logger);
+      return await handleUpdateEntityConfig(getConfigurationClient, request, response, logger);
     }
   );
   router.delete(
@@ -70,20 +65,20 @@ export function defineRoutes(
       },
     },
     async (context, request, response) => {
-      const client = getConfigurationClient(request);
-
-      return await handleDeleteEntityConfig(client, request, response, logger);
+      return await handleDeleteEntityConfig(getConfigurationClient, request, response, logger);
     }
   );
 }
 
 export async function handleGetEntityConfig(
-  client: ConfigurationClient,
+  getConfigurationClient: (request?: OpenSearchDashboardsRequest) => ConfigurationClient,
   request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
   logger.info(`Received a request to get entity config for ${request.params.entity}.`);
+
+  const client = getConfigurationClient(request);
 
   try {
     const result = await client.getEntityConfig(request.params.entity, {
@@ -101,7 +96,7 @@ export async function handleGetEntityConfig(
 }
 
 export async function handleUpdateEntityConfig(
-  client: ConfigurationClient,
+  getConfigurationClient: (request?: OpenSearchDashboardsRequest) => ConfigurationClient,
   request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
@@ -109,6 +104,8 @@ export async function handleUpdateEntityConfig(
   logger.info(
     `Received a request to update entity ${request.params.entity} with new value ${request.body.newValue}.`
   );
+
+  const client = getConfigurationClient(request);
 
   try {
     const result = await client.updateEntityConfig(request.params.entity, request.body.newValue, {
@@ -126,12 +123,14 @@ export async function handleUpdateEntityConfig(
 }
 
 export async function handleDeleteEntityConfig(
-  client: ConfigurationClient,
+  getConfigurationClient: (request?: OpenSearchDashboardsRequest) => ConfigurationClient,
   request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
   logger.info(`Received a request to delete entity ${request.params.entity}.`);
+
+  const client = getConfigurationClient(request);
 
   try {
     const result = await client.deleteEntityConfig(request.params.entity, {
@@ -149,12 +148,14 @@ export async function handleDeleteEntityConfig(
 }
 
 export async function handleGetConfig(
-  client: ConfigurationClient,
+  getConfigurationClient: (request?: OpenSearchDashboardsRequest) => ConfigurationClient,
   request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
   logger.info('Received a request to get all configurations.');
+
+  const client = getConfigurationClient(request);
 
   try {
     const result = await client.getConfig({ headers: request.headers });
