@@ -7,7 +7,7 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
     <React.Fragment>
       <EuiButtonEmpty
         aria-label="dataSourceMenuButton"
-        className="euiHeaderLink"
+        className="euiHeaderLink dataSourceComponentButtonTitle"
         data-test-subj="dataSourceSelectableContextMenuHeaderLink"
         disabled={false}
         iconSide="left"
@@ -98,7 +98,7 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
     <React.Fragment>
       <EuiButtonEmpty
         aria-label="dataSourceMenuButton"
-        className="euiHeaderLink"
+        className="euiHeaderLink dataSourceComponentButtonTitle"
         data-test-subj="dataSourceSelectableContextMenuHeaderLink"
         disabled={false}
         iconSide="left"
@@ -166,7 +166,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
     <React.Fragment>
       <EuiButtonEmpty
         aria-label="dataSourceMenuButton"
-        className="euiHeaderLink"
+        className="euiHeaderLink dataSourceComponentButtonTitle"
         data-test-subj="dataSourceSelectableContextMenuHeaderLink"
         disabled={false}
         iconSide="left"
@@ -242,7 +242,7 @@ Object {
         >
           <button
             aria-label="dataSourceMenuButton"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink dataSourceComponentButtonTitle"
             data-test-subj="dataSourceSelectableContextMenuHeaderLink"
             type="button"
           >
@@ -411,7 +411,7 @@ Object {
       >
         <button
           aria-label="dataSourceMenuButton"
-          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink dataSourceComponentButtonTitle"
           data-test-subj="dataSourceSelectableContextMenuHeaderLink"
           type="button"
         >
