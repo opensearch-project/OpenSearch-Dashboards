@@ -5,11 +5,14 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiComboBox, EuiBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart, SavedObject } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { getDataSourcesWithFields, getDefaultDataSource, getFilteredDataSources } from '../utils';
 import { DataSourceAttributes } from '../../types';
+import { DataSourceItem } from '../data_source_item';
+import './data_source_selector.scss';
+import { DataSourceOption } from '../data_source_menu/types';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSource.localCluster', {
@@ -37,13 +40,7 @@ interface DataSourceSelectorState {
   selectedOption: DataSourceOption[];
   allDataSources: Array<SavedObject<DataSourceAttributes>>;
   defaultDataSource: string | null;
-  dataSourceOptions?: DataSourceOption[];
-}
-
-export interface DataSourceOption {
-  label: string;
-  id: string;
-  checked?: string;
+  dataSourceOptions: DataSourceOption[];
 }
 
 export class DataSourceSelector extends React.Component<
@@ -59,6 +56,7 @@ export class DataSourceSelector extends React.Component<
       allDataSources: [],
       defaultDataSource: '',
       selectedOption: this.props.hideLocalCluster ? [] : [LocalCluster],
+      dataSourceOptions: [],
     };
   }
 
@@ -234,14 +232,11 @@ export class DataSourceSelector extends React.Component<
         fullWidth={this.props.fullWidth || false}
         data-test-subj={'dataSourceSelectorComboBox'}
         renderOption={(option) => (
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={1}>{option.label}</EuiFlexItem>
-            {option.id === this.state.defaultDataSource && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge iconSide="left">Default</EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <DataSourceItem
+            className={'dataSourceSelector'}
+            option={option}
+            defaultDataSource={this.state.defaultDataSource}
+          />
         )}
       />
     );
