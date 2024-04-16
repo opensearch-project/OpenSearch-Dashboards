@@ -34,6 +34,7 @@ export interface DataSourceSelectorProps {
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   compressed?: boolean;
   uiSettings?: IUiSettingsClient;
+  isClearable?: boolean;
 }
 
 interface DataSourceSelectorState {
@@ -202,6 +203,7 @@ export class DataSourceSelector extends React.Component<
 
     return (
       <EuiComboBox
+        isClearable={this.props.isClearable}
         aria-label={
           placeholderText
             ? i18n.translate('dataSourceSelectorComboBoxAriaLabel', {
