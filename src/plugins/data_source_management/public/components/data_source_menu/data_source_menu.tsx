@@ -10,19 +10,17 @@ import { DataSourceView } from '../data_source_view';
 import { DataSourceMultiSelectable } from '../data_source_multi_selectable';
 import {
   DataSourceAggregatedViewConfig,
-  DataSourceBaseConfig,
   DataSourceComponentType,
   DataSourceMenuProps,
   DataSourceMultiSelectableConfig,
   DataSourceSelectableConfig,
   DataSourceViewConfig,
-  NoDataSourceConfig,
 } from './types';
 import { DataSourceSelectable } from '../data_source_selectable';
-import { NoDataSource } from '../no_data_source';
 
 export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement | null {
-  const { componentType, componentConfig, uiSettings, hideLocalCluster, application } = props;
+  const { componentType, componentConfig, uiSettings, hideLocalCluster } = props;
+
   function renderDataSourceView(config: DataSourceViewConfig): ReactElement | null {
     const {
       activeOption,
@@ -83,7 +81,6 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         hideLocalCluster={hideLocalCluster || false}
         fullWidth={fullWidth}
         uiSettings={uiSettings}
-        application={application}
       />
     );
   }
@@ -112,10 +109,6 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
     );
   }
 
-  function renderNoDataSource(config: DataSourceBaseConfig): ReactElement | null {
-    return <NoDataSource />;
-  }
-
   function renderLayout(): ReactElement | null {
     switch (componentType) {
       case DataSourceComponentType.DataSourceAggregatedView:
@@ -126,8 +119,6 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         return renderDataSourceView(componentConfig as DataSourceViewConfig);
       case DataSourceComponentType.DataSourceMultiSelectable:
         return renderDataSourceMultiSelectable(componentConfig as DataSourceMultiSelectableConfig);
-      case DataSourceComponentType.NoDataSource:
-        return renderNoDataSource(componentConfig as DataSourceBaseConfig);
       default:
         return null;
     }
