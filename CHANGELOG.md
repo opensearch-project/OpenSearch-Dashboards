@@ -120,6 +120,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Multiple Datasource] Refactor read-only component to cover more edge cases ([#6416](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6416))
 - [BUG] Fix for checkForFunctionProperty so that order does not matter ([#6248](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6248))
 - [BUG][Multiple Datasource] Validation succeed as long as status code in response is 200 ([#6399](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6399))
+- [BUG][Multiple Datasource] Add validation for title length to be no longer than 32 characters [#6452](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6452))
 
 ### 🚞 Infrastructure
 
