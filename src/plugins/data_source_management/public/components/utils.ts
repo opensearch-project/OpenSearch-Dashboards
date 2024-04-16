@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { i18n } from '@osd/i18n';
-import { ToastsStart } from 'opensearch-dashboards/public';
 import {
   HttpStart,
   SavedObjectsClientContract,
@@ -11,7 +10,6 @@ import {
   IUiSettingsClient,
   ToastsStart,
 } from 'src/core/public';
-import { i18n } from '@osd/i18n';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -80,14 +78,6 @@ export async function setFirstDataSourceAsDefault(
     const datasourceId = listOfDataSources[0].id;
     return await uiSettings.set('defaultDataSource', datasourceId);
   }
-}
-
-export function handleDataSourceFetchError(notifications: ToastsStart) {
-  notifications.addWarning(
-    i18n.translate('dataSource.fetchDataSourceError', {
-      defaultMessage: `Failed to fetch data source`,
-    })
-  );
 }
 
 export function handleNoAvailableDataSourceError(notifications: ToastsStart) {
