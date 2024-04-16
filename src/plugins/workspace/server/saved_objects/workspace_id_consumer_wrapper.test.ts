@@ -123,7 +123,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       });
       expect(mockedClient.find).toBeCalledWith({
         type: 'dashboard',
-        workspaces: ['bar', PUBLIC_WORKSPACE_ID],
+        workspaces: ['bar'],
         workspacesSearchOperator: 'OR',
       });
     });

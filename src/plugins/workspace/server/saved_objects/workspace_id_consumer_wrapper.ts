@@ -68,11 +68,11 @@ export class WorkspaceIdConsumerWrapper {
         const findOptions = this.formatWorkspaceIdParams(wrapperOptions.request, options);
         // `PUBLIC_WORKSPACE_ID` includes both saved objects without any workspace and with `public` workspace
         // remove the condition until when public workspace is real, and we have all data migrated to global workspace
-        if (
-          !findOptions.workspacesSearchOperator &&
-          findOptions.workspaces &&
-          findOptions.workspaces.indexOf(PUBLIC_WORKSPACE_ID) !== -1
-        ) {
+        const index = findOptions.workspaces?.indexOf(PUBLIC_WORKSPACE_ID) || -1;
+        if (!findOptions.workspacesSearchOperator && findOptions.workspaces && index !== -1) {
+          // remove public workspace to make sure we can pass permission control
+          // remove this logic when public workspace becomes to real
+          findOptions.workspaces.splice(index, 1);
           findOptions.workspacesSearchOperator = 'OR';
         }
         return wrapperOptions.client.find(findOptions);
