@@ -22,18 +22,14 @@ import { getDataSourcesWithFields, getDefaultDataSource, getFilteredDataSources 
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
-<<<<<<< HEAD
-import { DataSourceBaseState, DataSourceGroupLabelOption, DataSourceOption } from '../data_source_menu/types';
-import { DataSourceItem } from '../data_source_item';
-import './data_source_selectable.scss';
-=======
 import {
   DataSourceBaseState,
   DataSourceGroupLabelOption,
   DataSourceOption,
 } from '../data_source_menu/types';
+import { DataSourceItem } from '../data_source_item';
 import { NoDataSource } from '../no_data_source';
->>>>>>> add empty state for all data source menu sub components
+import './data_source_selectable.scss';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
