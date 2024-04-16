@@ -32,3 +32,4 @@ export { Header } from './header';
 export { Table } from './table';
 export { Flyout } from './flyout';
 export { Relationships } from './relationships';
+export { SavedObjectsDuplicateModal, DuplicateMode } from './duplicate_modal';

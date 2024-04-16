@@ -47,3 +47,8 @@ export interface SubmittedFormData {
   attributes: any;
   references: SavedObjectReference[];
 }
+
+export enum DuplicateMode {
+  Selected = 'selected',
+  All = 'all',
+}

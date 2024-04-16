@@ -84,6 +84,7 @@ import {
   findObject,
   extractExportDetails,
   SavedObjectsExportResultDetails,
+  duplicateSavedObjects,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
@@ -92,14 +93,14 @@ import {
   SavedObjectsManagementColumnServiceStart,
   SavedObjectsManagementNamespaceServiceStart,
 } from '../../services';
-import { Header, Table, Flyout, Relationships } from './components';
+import { Header, Table, Flyout, Relationships, SavedObjectsDuplicateModal } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
+import { DuplicateMode } from '../types';
 
 interface ExportAllOption {
   id: string;
   label: string;
 }
-
 export interface SavedObjectsTableProps {
   allowedTypes: string[];
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
@@ -130,7 +131,10 @@ export interface SavedObjectsTableState {
   savedObjectCounts: Record<string, number>;
   activeQuery: Query;
   selectedSavedObjects: SavedObjectWithMetadata[];
+  duplicateSelectedSavedObjects: SavedObjectWithMetadata[];
   isShowingImportFlyout: boolean;
+  duplicateMode: DuplicateMode;
+  isShowingDuplicateModal: boolean;
   isSearching: boolean;
   filteredItemCount: number;
   isShowingRelationships: boolean;
@@ -143,11 +147,13 @@ export interface SavedObjectsTableState {
   isIncludeReferencesDeepChecked: boolean;
   currentWorkspaceId?: string;
   availableWorkspaces?: WorkspaceAttribute[];
+  workspaceEnabled: boolean;
 }
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
   private currentWorkspaceIdSubscription?: Subscription;
   private workspacesSubscription?: Subscription;
+  private workspacesEnabledSubscription?: Subscription;
 
   constructor(props: SavedObjectsTableProps) {
     super(props);
@@ -163,7 +169,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       }, {} as Record<string, number>),
       activeQuery: Query.parse(''),
       selectedSavedObjects: [],
+      duplicateSelectedSavedObjects: [],
       isShowingImportFlyout: false,
+      duplicateMode: DuplicateMode.Selected,
+      isShowingDuplicateModal: false,
       isSearching: false,
       filteredItemCount: 0,
       isShowingRelationships: false,
@@ -174,7 +183,36 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       exportAllOptions: [],
       exportAllSelectedOptions: {},
       isIncludeReferencesDeepChecked: true,
+      workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
     };
+  }
+
+  private get findOptions() {
+    const { activeQuery: query, page, perPage } = this.state;
+    const { allowedTypes, namespaceRegistry } = this.props;
+    const { queryText, visibleTypes } = parseQuery(query);
+    const filteredTypes = filterQuery(allowedTypes, visibleTypes);
+    // "searchFields" is missing from the "findOptions" but gets injected via the API.
+    // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
+    const findOptions: SavedObjectsFindOptions = {
+      search: queryText ? `${queryText}*` : undefined,
+      perPage,
+      page: page + 1,
+      fields: ['id'],
+      type: filteredTypes,
+    };
+
+    const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
+    if (availableNamespaces.length) {
+      const filteredNamespaces = filterQuery(availableNamespaces);
+      findOptions.namespaces = filteredNamespaces;
+    }
+
+    if (findOptions.type.length > 1) {
+      findOptions.sortField = 'type';
+    }
+
+    return findOptions;
   }
 
   componentDidMount() {
@@ -188,11 +226,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this._isMounted = false;
     this.debouncedFetchObjects.cancel();
     this.unSubscribeWorkspace();
+    this.currentWorkspaceIdSubscription?.unsubscribe();
+    this.workspacesSubscription?.unsubscribe();
+    this.workspacesEnabledSubscription?.unsubscribe();
   }
 
   fetchCounts = async () => {
     const { allowedTypes, namespaceRegistry } = this.props;
-    const { queryText, visibleTypes, visibleNamespaces } = parseQuery(this.state.activeQuery);
+    const { queryText, visibleTypes } = parseQuery(this.state.activeQuery);
 
     const filteredTypes = filterQuery(allowedTypes, visibleTypes);
 
@@ -204,7 +245,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     };
 
     if (availableNamespaces.length) {
-      const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
+      const filteredNamespaces = filterQuery(availableNamespaces);
       filteredCountOptions.namespacesToInclude = filteredNamespaces;
     }
 
@@ -278,32 +319,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   debouncedFetchObjects = debounce(async () => {
-    const { activeQuery: query, page, perPage } = this.state;
-    const { notifications, http, allowedTypes, namespaceRegistry } = this.props;
-    const { queryText, visibleTypes, visibleNamespaces } = parseQuery(query);
-    const filteredTypes = filterQuery(allowedTypes, visibleTypes);
-    // "searchFields" is missing from the "findOptions" but gets injected via the API.
-    // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
-    const findOptions: SavedObjectsFindOptions = {
-      search: queryText ? `${queryText}*` : undefined,
-      perPage,
-      page: page + 1,
-      fields: ['id'],
-      type: filteredTypes,
-    };
-
-    const availableNamespaces = namespaceRegistry.getAll()?.map((ns) => ns.id) || [];
-    if (availableNamespaces.length) {
-      const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
-      findOptions.namespaces = filteredNamespaces;
-    }
-
-    if (findOptions.type.length > 1) {
-      findOptions.sortField = 'type';
-    }
+    const { activeQuery: query } = this.state;
+    const { notifications, http } = this.props;
 
     try {
-      const resp = await findObjects(http, findOptions);
+      const resp = await findObjects(http, this.findOptions);
       if (!this._isMounted) {
         return;
       }
@@ -591,6 +611,117 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         hideLocalCluster={this.props.hideLocalCluster}
         savedObjects={this.props.savedObjectsClient}
         notifications={this.props.notifications}
+      />
+    );
+  }
+
+  hideDuplicateModal = () => {
+    this.setState({ isShowingDuplicateModal: false });
+  };
+
+  onDuplicateAll = async () => {
+    const { notifications, http } = this.props;
+    let duplicateAllSavedObjects: SavedObjectWithMetadata[] = [];
+    const findOptions = this.findOptions;
+    findOptions.sortField = 'updated_at';
+    findOptions.page = 1;
+
+    while (duplicateAllSavedObjects.length < this.state.filteredItemCount) {
+      try {
+        const resp = await findObjects(http, findOptions);
+        const savedObjects = resp.savedObjects;
+        duplicateAllSavedObjects = duplicateAllSavedObjects.concat(savedObjects);
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: i18n.translate(
+            'savedObjectsManagement.objectsTable.unableFindSavedObjectsNotificationMessage',
+            { defaultMessage: 'Unable find saved objects' }
+          ),
+          text: `${error}`,
+        });
+        break;
+      }
+      findOptions.page++;
+    }
+
+    this.setState({
+      duplicateSelectedSavedObjects: duplicateAllSavedObjects,
+      isShowingDuplicateModal: true,
+      duplicateMode: DuplicateMode.All,
+    });
+  };
+
+  onDuplicate = async (
+    savedObjects: SavedObjectWithMetadata[],
+    includeReferencesDeep: boolean,
+    targetWorkspace: string
+  ) => {
+    const { http, notifications } = this.props;
+    const objectsToDuplicate = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
+    let result;
+    try {
+      result = await duplicateSavedObjects(
+        http,
+        objectsToDuplicate,
+        includeReferencesDeep,
+        targetWorkspace
+      );
+      if (result.success) {
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'savedObjectsManagement.objectsTable.duplicate.successNotification',
+            {
+              defaultMessage:
+                'Duplicate ' + savedObjects.length.toString() + ' saved objects successfully',
+            }
+          ),
+        });
+      } else {
+        const errorIdMessages = result.errors
+          ? ' These objects cannot be duplicated:' +
+            result.errors.map((item: { id: string }) => item.id).join(', ')
+          : '';
+        notifications.toasts.addDanger({
+          title: i18n.translate(
+            'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
+            {
+              defaultMessage:
+                'Unable to duplicate ' +
+                savedObjects.length.toString() +
+                ' saved objects.' +
+                errorIdMessages,
+            }
+          ),
+        });
+      }
+    } catch (e) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
+          defaultMessage:
+            'Unable to duplicate ' + savedObjects.length.toString() + ' saved objects',
+        }),
+      });
+    }
+    this.hideDuplicateModal();
+    await this.refreshObjects();
+  };
+
+  renderDuplicateModal() {
+    const { isShowingDuplicateModal, duplicateSelectedSavedObjects, duplicateMode } = this.state;
+
+    if (!isShowingDuplicateModal) {
+      return null;
+    }
+
+    return (
+      <SavedObjectsDuplicateModal
+        http={this.props.http}
+        workspaces={this.props.workspaces}
+        onDuplicate={this.onDuplicate}
+        notifications={this.props.notifications}
+        duplicateMode={duplicateMode}
+        onClose={this.hideDuplicateModal}
+        selectedSavedObjects={duplicateSelectedSavedObjects}
       />
     );
   }
@@ -887,11 +1018,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         {this.renderRelationships()}
         {this.renderDeleteConfirmModal()}
         {this.renderExportAllOptionsModal()}
+        {this.renderDuplicateModal()}
         <Header
           onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}
+          showDuplicateAll={this.state.workspaceEnabled}
+          onDuplicate={this.onDuplicateAll}
           onRefresh={this.refreshObjects}
           filteredCount={filteredItemCount}
+          objectCount={savedObjects.length}
         />
         <EuiSpacer size="xs" />
         <RedirectAppLinks application={applications}>
@@ -908,6 +1043,20 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
+            onDuplicateSelected={() =>
+              this.setState({
+                isShowingDuplicateModal: true,
+                duplicateMode: DuplicateMode.Selected,
+                duplicateSelectedSavedObjects: selectedSavedObjects,
+              })
+            }
+            onDuplicateSingle={(object) =>
+              this.setState({
+                duplicateSelectedSavedObjects: [object],
+                isShowingDuplicateModal: true,
+                duplicateMode: DuplicateMode.Selected,
+              })
+            }
             onActionRefresh={this.refreshObject}
             goInspectObject={this.props.goInspectObject}
             pageIndex={page}
@@ -920,6 +1069,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             dateFormat={this.props.dateFormat}
             availableWorkspaces={availableWorkspaces}
             currentWorkspaceId={currentWorkspaceId}
+            showDuplicate={this.state.workspaceEnabled}
           />
         </RedirectAppLinks>
       </EuiPageContent>

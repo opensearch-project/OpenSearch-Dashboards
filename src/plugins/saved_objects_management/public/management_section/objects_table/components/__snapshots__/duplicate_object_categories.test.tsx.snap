@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`RenderDuplicateObjectCategories renders checkboxes correctly 1`] = `
+Array [
+  <EuiCheckbox
+    checked={true}
+    compressed={false}
+    disabled={false}
+    id="includeSavedObjectType.type1"
+    indeterminate={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Type1 (5)"
+        id="savedObjectsManagement.objectsTable.duplicateModal.savedObjectType.type1"
+        values={Object {}}
+      />
+    }
+    onChange={[Function]}
+  />,
+  <EuiCheckbox
+    checked={false}
+    compressed={false}
+    disabled={false}
+    id="includeSavedObjectType.type2"
+    indeterminate={false}
+    label={
+      <FormattedMessage
+        defaultMessage="Type2 (10)"
+        id="savedObjectsManagement.objectsTable.duplicateModal.savedObjectType.type2"
+        values={Object {}}
+      />
+    }
+    onChange={[Function]}
+  />,
+]
+`;

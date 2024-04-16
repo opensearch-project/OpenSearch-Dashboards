@@ -43,13 +43,19 @@ import { FormattedMessage } from '@osd/i18n/react';
 export const Header = ({
   onExportAll,
   onImport,
+  onDuplicate,
   onRefresh,
   filteredCount,
+  objectCount,
+  showDuplicateAll = false,
 }: {
   onExportAll: () => void;
   onImport: () => void;
+  onDuplicate: () => void;
   onRefresh: () => void;
   filteredCount: number;
+  objectCount: number;
+  showDuplicateAll: boolean;
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
@@ -66,6 +72,21 @@ export const Header = ({
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
+          {showDuplicateAll && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                data-test-subj="duplicateObjects"
+                onClick={onDuplicate}
+                disabled={objectCount === 0}
+              >
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
+                  defaultMessage="Duplicate All"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
