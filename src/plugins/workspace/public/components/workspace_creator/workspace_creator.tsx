@@ -6,16 +6,27 @@
 import React, { useCallback } from 'react';
 import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { useObservable } from 'react-use';
+
+import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
+import { BehaviorSubject, of } from 'rxjs';
 
-export const WorkspaceCreator = () => {
+export interface WorkspaceCreatorProps {
+  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+}
+
+export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const {
     services: { application, notifications, http, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
+  const workspaceConfigurableApps = useObservable(
+    props.workspaceConfigurableApps$ ?? of(undefined)
+  );
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
@@ -80,6 +91,7 @@ export const WorkspaceCreator = () => {
               application={application}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
+              workspaceConfigurableApps={workspaceConfigurableApps}
             />
           )}
         </EuiPageContent>

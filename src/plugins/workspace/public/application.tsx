@@ -13,11 +13,16 @@ import { WorkspaceUpdaterApp } from './components/workspace_updater_app';
 import { WorkspaceListApp } from './components/workspace_list_app';
 import { WorkspaceUpdaterProps } from './components/workspace_updater';
 import { Services } from './types';
+import { WorkspaceCreatorProps } from './components/workspace_creator/workspace_creator';
 
-export const renderCreatorApp = ({ element }: AppMountParameters, services: Services) => {
+export const renderCreatorApp = (
+  { element }: AppMountParameters,
+  services: Services,
+  props: WorkspaceCreatorProps
+) => {
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={services}>
-      <WorkspaceCreatorApp />
+      <WorkspaceCreatorApp {...props} />
     </OpenSearchDashboardsContextProvider>,
     element
   );

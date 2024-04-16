@@ -19,23 +19,19 @@ import { PublicAppInfo } from '../../../../../core/public';
 import { isWorkspaceFeatureGroup, convertApplicationsToFeaturesOrGroups } from './utils';
 
 export interface WorkspaceFeatureSelectorProps {
-  applications: Array<
-    Pick<PublicAppInfo, 'id' | 'title' | 'category' | 'chromeless' | 'navLinkStatus'>
-  >;
   selectedFeatures: string[];
   onChange: (newFeatures: string[]) => void;
-  restrictedApps?: Set<string>;
+  workspaceConfigurableApps?: PublicAppInfo[];
 }
 
 export const WorkspaceFeatureSelector = ({
-  applications,
   selectedFeatures,
   onChange,
-  restrictedApps,
+  workspaceConfigurableApps,
 }: WorkspaceFeatureSelectorProps) => {
   const featuresOrGroups = useMemo(
-    () => convertApplicationsToFeaturesOrGroups(applications, restrictedApps),
-    [applications, restrictedApps]
+    () => convertApplicationsToFeaturesOrGroups(workspaceConfigurableApps ?? []),
+    [workspaceConfigurableApps]
   );
 
   const handleFeatureChange = useCallback<EuiCheckboxGroupProps['onChange']>(

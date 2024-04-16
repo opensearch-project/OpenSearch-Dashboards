@@ -32,7 +32,6 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     formData,
     formErrors,
     selectedTab,
-    applications,
     numberOfErrors,
     handleFormSubmit,
     handleColorChange,
@@ -133,10 +132,9 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           <EuiHorizontalRule margin="xs" />
           <EuiSpacer size="s" />
           <WorkspaceFeatureSelector
-            applications={applications}
             selectedFeatures={formData.features}
             onChange={handleFeaturesChange}
-            restrictedApps={props.restrictedApps}
+            workspaceConfigurableApps={props.workspaceConfigurableApps}
           />
         </EuiPanel>
       )}

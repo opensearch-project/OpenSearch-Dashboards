@@ -14,7 +14,7 @@ import {
   AppNavLinkStatus,
   AppUpdater,
   AppStatus,
-  DEFAULT_APP_CATEGORIES,
+  PublicAppInfo,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -29,7 +29,8 @@ import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
-import { isAppAccessibleInWorkspace } from './utils';
+import { filterWorkspaceConfigurableApps, isAppAccessibleInWorkspace } from './utils';
+import { first } from 'rxjs/operators';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -46,7 +47,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private currentWorkspaceSubscription?: Subscription;
   private currentWorkspaceIdSubscription?: Subscription;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
-  private restrictedApps$ = new BehaviorSubject(new Set<string>());
+  private workspaceConfigurableApps$ = new BehaviorSubject<PublicAppInfo[]>([]);
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
@@ -61,7 +62,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
    * Filter nav links by the current workspace, once the current workspace change, the nav links(left nav bar)
    * should also be updated according to the configured features of the current workspace
    */
-  private filterNavLinks(core: CoreStart) {
+  private filterNavLinks = (core: CoreStart) => {
     const currentWorkspace$ = core.workspaces.currentWorkspace$;
     this.currentWorkspaceSubscription?.unsubscribe();
 
@@ -77,15 +78,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           }
 
           /**
-           * Restricted apps can be configured into a workspace, but they are not configured by the
-           * current workspace. Apps of management category can NOT configured into a workspace, so
-           * needs to be excluded.
-           */
-          if (app.category?.id !== DEFAULT_APP_CATEGORIES.management.id) {
-            this.restrictedApps$.next(this.restrictedApps$.value.add(app.id));
-          }
-
-          /**
            * Change the app to `inaccessible` if it is not configured in the workspace
            * If trying to access such app, an "Application Not Found" page will be displayed
            */
@@ -93,7 +85,20 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         });
       }
     });
-  }
+  };
+
+  /**
+   * Initiate an observable with the value of all applications which can be configured by workspace
+   */
+  private setWorkspaceConfigurableApps = async (core: CoreStart) => {
+    const allApps = await new Promise<PublicAppInfo[]>((resolve) => {
+      core.application.applications$.pipe(first()).subscribe((apps) => {
+        resolve([...apps.values()]);
+      });
+    });
+    const availableApps = filterWorkspaceConfigurableApps(allApps);
+    this.workspaceConfigurableApps$.next(availableApps);
+  };
 
   public async setup(core: CoreSetup, { savedObjectsManagement }: WorkspacePluginSetupDeps) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
@@ -149,7 +154,9 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         workspaceClient,
       };
 
-      return renderApp(params, services, { restrictedApps$: this.restrictedApps$ });
+      return renderApp(params, services, {
+        workspaceConfigurableApps$: this.workspaceConfigurableApps$,
+      });
     };
 
     // create
@@ -223,8 +230,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
 
-    // When starts, filter the nav links based on the current workspace
-    this.filterNavLinks(core);
+    this.setWorkspaceConfigurableApps(core).then(() => {
+      // filter the nav links based on the current workspace
+      this.filterNavLinks(core);
+    });
 
     return {};
   }

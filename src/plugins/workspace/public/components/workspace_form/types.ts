@@ -4,7 +4,7 @@
  */
 
 import type { WorkspaceOperationType } from './constants';
-import type { ApplicationStart } from '../../../../../core/public';
+import type { ApplicationStart, PublicAppInfo } from '../../../../../core/public';
 
 export interface WorkspaceFormSubmitData {
   name: string;
@@ -35,5 +35,5 @@ export interface WorkspaceFormProps {
   onSubmit?: (formData: WorkspaceFormSubmitData) => void;
   defaultValues?: WorkspaceFormData;
   operationType?: WorkspaceOperationType;
-  restrictedApps?: Set<string>;
+  workspaceConfigurableApps?: PublicAppInfo[];
 }

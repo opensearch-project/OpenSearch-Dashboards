@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { WorkspaceAttribute } from 'opensearch-dashboards/public';
+import { PublicAppInfo, WorkspaceAttribute } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { BehaviorSubject, of } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -17,7 +17,7 @@ import { WorkspaceClient } from '../../workspace_client';
 import { WorkspaceFormData } from '../workspace_form/types';
 
 export interface WorkspaceUpdaterProps {
-  restrictedApps$?: BehaviorSubject<Set<string>>;
+  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
 }
 
 function getFormDataFromWorkspace(
@@ -32,7 +32,9 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
-  const restrictedApps = useObservable(props.restrictedApps$ ?? of(undefined));
+  const workspaceConfigurableApps = useObservable(
+    props.workspaceConfigurableApps$ ?? of(undefined)
+  );
   const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<WorkspaceFormData>(
     getFormDataFromWorkspace(currentWorkspace)
   );
@@ -113,7 +115,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
               defaultValues={currentWorkspaceFormData}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Update}
-              restrictedApps={restrictedApps}
+              workspaceConfigurableApps={workspaceConfigurableApps}
             />
           )}
         </EuiPageContent>
