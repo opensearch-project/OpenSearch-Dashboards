@@ -86,6 +86,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG] Remove duplicate sample data as id 90943e30-9a47-11e8-b64d-95841ca0b247 ([5668](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5668))
 - [BUG][Multiple Datasource] Fix datasource testing connection unexpectedly passed with wrong endpoint [#5663](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5663)
 - [BUG][Multiple Datasource] Fix missing customApiRegistryPromise param for test connection ([#5944](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5944))
+- [BUG][Multiple Datasource] Modify the button of selectable component to fix the title overflow issue ([#6465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6465))
 
 
 ### 🚞 Infrastructure
