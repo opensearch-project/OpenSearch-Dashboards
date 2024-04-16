@@ -33,7 +33,7 @@ import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
 import { AppUpdater } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
-
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
@@ -43,8 +43,9 @@ import './index.scss';
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 
 export interface DevToolsSetupDependencies {
-  dataSource?: DataSourcePluginSetup;
   urlForwarding: UrlForwardingSetup;
+  dataSource?: DataSourcePluginSetup;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
   managementOverview?: ManagementOverViewPluginSetup;
 }
 
