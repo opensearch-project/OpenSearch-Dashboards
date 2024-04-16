@@ -11,6 +11,8 @@ import { OsdError } from '../../../opensearch_dashboards_utils/common';
 export class DataSourceError extends OsdError {
   // must have statusCode to avoid route handler in search.ts to return 500
   statusCode: number;
+  body: any;
+
   constructor(error: any, context?: string, statusCode?: number) {
     let message: string;
     if (context) {
@@ -22,6 +24,10 @@ export class DataSourceError extends OsdError {
     }
 
     super('Data Source Error: ' + message);
+
+    if (error.body) {
+      this.body = error.body;
+    }
 
     if (statusCode) {
       this.statusCode = statusCode;
