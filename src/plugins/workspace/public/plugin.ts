@@ -79,7 +79,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   }
 
   /**
-   * If workspace is enabled and user has entered workspace, hide advance settings and dataSource menu and disable
+   * If workspace is enabled and user has entered workspace, hide advance settings and dataSource menu by disabling the corresponding apps.
    */
   private disableManagementApps(core: CoreSetup, management: ManagementSetup) {
     const currentWorkspaceId$ = core.workspaces.currentWorkspaceId$;
