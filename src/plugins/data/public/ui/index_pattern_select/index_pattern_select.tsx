@@ -171,18 +171,24 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
     // We need this check to handle the case where search results come back in a different
     // order than they were sent out. Only load results for the most recent search.
     if (searchValue === this.state.searchValue) {
-      const dataSourcesToFetch: Set<{ type: string; id: string }> = new Set();
+      const dataSourcesToFetch: Array<{ type: string; id: string }> = [];
+      const dataSourceIdSet = new Set();
       savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
         const dataSourceReference = getDataSourceReference(indexPatternSavedObject.references);
-        if (dataSourceReference && !this.state.dataSourceIdToTitle.has(dataSourceReference.id)) {
-          dataSourcesToFetch.add({ type: 'data-source', id: dataSourceReference.id });
+        if (
+          dataSourceReference &&
+          !this.state.dataSourceIdToTitle.has(dataSourceReference.id) &&
+          !dataSourceIdSet.has(dataSourceReference.id)
+        ) {
+          dataSourceIdSet.add(dataSourceReference.id);
+          dataSourcesToFetch.push({ type: 'data-source', id: dataSourceReference.id });
         }
       });
 
       const dataSourceIdToTitleToUpdate = new Map();
 
-      if (dataSourcesToFetch.size > 0) {
-        const resp = await savedObjectsClient.bulkGet(Array.from(dataSourcesToFetch));
+      if (dataSourcesToFetch.length > 0) {
+        const resp = await savedObjectsClient.bulkGet(dataSourcesToFetch);
         resp.savedObjects.map((dataSourceSavedObject: SimpleSavedObject<any>) => {
           dataSourceIdToTitleToUpdate.set(
             dataSourceSavedObject.id,
