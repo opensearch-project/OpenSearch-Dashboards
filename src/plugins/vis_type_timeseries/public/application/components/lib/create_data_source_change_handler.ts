@@ -10,7 +10,7 @@ import { DATA_SOURCE_ID_KEY } from '../../../../common/constants';
 export const createDataSourcePickerHandler = (handleChange: (e: PanelSchema) => void) => {
   return (selectedOptions: []): void => {
     return handleChange?.({
-      [DATA_SOURCE_ID_KEY]: _.get(selectedOptions, '[0].id', null),
+      [DATA_SOURCE_ID_KEY]: _.get(selectedOptions, '[0].id', undefined),
     } as PanelSchema);
   };
 };

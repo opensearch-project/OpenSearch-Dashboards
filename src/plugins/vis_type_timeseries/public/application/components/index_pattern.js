@@ -184,7 +184,9 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 savedObjectsClient={getSavedObjectsClient().client}
                 notifications={getNotifications().toasts}
                 onSelectedDataSource={handleDataSourceSelectChange}
-                defaultOption={model.data_source_id ? [{ id: model.data_source_id }] : [{ id: '' }]}
+                defaultOption={
+                  model.data_source_id !== undefined ? [{ id: model.data_source_id }] : undefined
+                }
                 disabled={false}
                 fullWidth={false}
                 removePrepend={true}
