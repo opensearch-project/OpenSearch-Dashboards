@@ -2,15 +2,16 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { i18n } from '@osd/i18n';
 import {
   HttpStart,
   SavedObjectsClientContract,
   SavedObject,
   IUiSettingsClient,
   ToastsStart,
+  ApplicationStart,
 } from 'src/core/public';
-import { i18n } from '@osd/i18n';
+import { deepFreeze } from '@osd/std';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -19,6 +20,8 @@ import {
 } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
 import { DataSourceOption } from './data_source_menu/types';
+import { DataSourceGroupLabelOption } from './data_source_menu/types';
+import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -79,14 +82,6 @@ export async function setFirstDataSourceAsDefault(
     const datasourceId = listOfDataSources[0].id;
     return await uiSettings.set('defaultDataSource', datasourceId);
   }
-}
-
-export function handleDataSourceFetchError(notifications: ToastsStart) {
-  notifications.addWarning(
-    i18n.translate('dataSource.fetchDataSourceError', {
-      defaultMessage: `Failed to fetch data source`,
-    })
-  );
 }
 
 export function handleNoAvailableDataSourceError(notifications: ToastsStart) {
@@ -279,3 +274,32 @@ export const extractRegisteredAuthTypeCredentials = (
 
   return registeredCredentials;
 };
+
+export const handleDataSourceFetchError = (
+  changeState: (state: { showError: boolean }) => void,
+  notifications: ToastsStart,
+  callback?: (ds: DataSourceOption[]) => void
+) => {
+  changeState({ showError: true });
+  if (callback) callback([]);
+  notifications.addWarning(
+    i18n.translate('dataSource.fetchDataSourceError', {
+      defaultMessage: 'Failed to fetch data source',
+    })
+  );
+};
+
+interface DataSourceOptionGroupLabel {
+  [key: string]: DataSourceGroupLabelOption;
+}
+
+export const dataSourceOptionGroupLabel = deepFreeze<Readonly<DataSourceOptionGroupLabel>>({
+  opensearchCluster: {
+    id: 'opensearchClusterGroupLabel',
+    label: 'OpenSearch cluster',
+    isGroupLabel: true,
+  },
+  // TODO: add other group labels if needed
+});
+
+export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
