@@ -128,7 +128,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       });
     });
 
-    it(`Should not override workspacesSearchOperator when search with public workspace`, async () => {
+    it(`Should not override workspacesSearchOperator when workspacesSearchOperator is specified`, async () => {
       await wrapperClient.find({
         type: 'dashboard',
         workspaces: [PUBLIC_WORKSPACE_ID],
