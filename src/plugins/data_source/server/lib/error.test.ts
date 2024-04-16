@@ -117,4 +117,27 @@ describe('CreateDataSourceError', () => {
       new DataSourceError(new Error('dummy'), 'Connection Failure', 400)
     );
   });
+
+  it('create data source error should be casted to a 400 DataSourceError', () => {
+    const error = new ResponseError({
+      statusCode: 401,
+      body: {
+        error: {
+          type: 'index_not_found_exception',
+        },
+      },
+      warnings: [],
+      headers: {
+        'WWW-Authenticate': 'content',
+      },
+      meta: {} as any,
+    });
+
+    const actual = new DataSourceError(error);
+
+    expect(actual).toMatchObject({
+      statusCode: 401,
+      body: { error: { type: 'index_not_found_exception' } },
+    });
+  });
 });
