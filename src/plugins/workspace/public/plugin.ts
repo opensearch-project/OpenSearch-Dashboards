@@ -6,6 +6,7 @@
 import { BehaviorSubject, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
+import { first } from 'rxjs/operators';
 import {
   Plugin,
   CoreStart,
@@ -30,7 +31,6 @@ import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_object
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { filterWorkspaceConfigurableApps, isAppAccessibleInWorkspace } from './utils';
-import { first } from 'rxjs/operators';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
