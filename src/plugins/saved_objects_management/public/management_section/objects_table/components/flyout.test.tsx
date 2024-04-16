@@ -231,6 +231,7 @@ describe('Flyout', () => {
           createNewCopies: true,
           overwrite: true,
         },
+        undefined,
         undefined
       );
       expect(component.state()).toMatchObject({
