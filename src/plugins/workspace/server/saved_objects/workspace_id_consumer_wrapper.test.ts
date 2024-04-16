@@ -119,6 +119,24 @@ describe('WorkspaceIdConsumerWrapper', () => {
     it(`Should set workspacesSearchOperator when search with public workspace`, async () => {
       await wrapperClient.find({
         type: 'dashboard',
+        workspaces: [PUBLIC_WORKSPACE_ID],
+      });
+      expect(mockedClient.find).toBeCalledWith({
+        type: 'dashboard',
+        workspaces: [PUBLIC_WORKSPACE_ID],
+        workspacesSearchOperator: 'OR',
+      });
+    });
+
+    it(`Should remove public workspace when permission control is enabled`, async () => {
+      const consumer = new WorkspaceIdConsumerWrapper(true);
+      const client = consumer.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: workspaceEnabledMockRequest,
+      });
+      await client.find({
+        type: 'dashboard',
         workspaces: ['bar', PUBLIC_WORKSPACE_ID],
       });
       expect(mockedClient.find).toBeCalledWith({

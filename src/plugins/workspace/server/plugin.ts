@@ -93,7 +93,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     core.savedObjects.addClientWrapper(
       PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
       WORKSPACE_ID_CONSUMER_WRAPPER_ID,
-      new WorkspaceIdConsumerWrapper().wrapperFactory
+      new WorkspaceIdConsumerWrapper(isPermissionControlEnabled).wrapperFactory
     );
 
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
