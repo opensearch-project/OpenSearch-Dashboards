@@ -155,7 +155,7 @@ export function registerRoutes(http: HttpServiceSetup) {
   );
 }
 
-const decideClient = async (
+export const decideClient = async (
   context: RequestHandlerContext,
   request: any
 ): Promise<LegacyAPICaller> => {

@@ -96,7 +96,7 @@ export interface IWorkspaceClientImpl {
   update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
+    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>>
   ): Promise<IResponse<boolean>>;
   /**
    * Delete a given workspace
