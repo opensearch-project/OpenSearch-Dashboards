@@ -4,6 +4,7 @@
   "opensearchDashboardsVersion": "opensearchDashboards",
   "server": true,
   "ui": true,
+  "optionalPlugins": ["dataSource"],
   "requiredPlugins": ["visualizations", "data", "expressions"],
   "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact", "visDefaultEditor"]
 }
