@@ -12,6 +12,7 @@ import {
   WorkspacesSetup,
 } from '../../../core/public';
 import { WorkspacePermissionMode } from '../common/constants';
+import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -161,7 +162,7 @@ export class WorkspaceClient {
   /**
    * A bypass layer to get current workspace id
    */
-  public getCurrentWorkspaceId(): IResponse<WorkspaceAttribute['id']> {
+  public getCurrentWorkspaceId(): IResponse<WorkspaceAttributeWithPermission['id']> {
     const currentWorkspaceId = this.workspaces.currentWorkspaceId$.getValue();
     if (!currentWorkspaceId) {
       return {
@@ -181,7 +182,7 @@ export class WorkspaceClient {
   /**
    * Do a find in the latest workspace list with current workspace id
    */
-  public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttribute>> {
+  public async getCurrentWorkspace(): Promise<IResponse<WorkspaceAttributeWithPermission>> {
     const currentWorkspaceIdResp = this.getCurrentWorkspaceId();
     if (currentWorkspaceIdResp.success) {
       const currentWorkspaceResp = await this.get(currentWorkspaceIdResp.result);
@@ -198,14 +199,16 @@ export class WorkspaceClient {
    * @returns {Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>>} id of the new created workspace
    */
   public async create(
-    attributes: Omit<WorkspaceAttribute, 'id'>
-  ): Promise<IResponse<Pick<WorkspaceAttribute, 'id'>>> {
+    attributes: Omit<WorkspaceAttribute, 'id'>,
+    permissions?: SavedObjectPermissions
+  ): Promise<IResponse<Pick<WorkspaceAttributeWithPermission, 'id'>>> {
     const path = this.getPath();
 
-    const result = await this.safeFetch<WorkspaceAttribute>(path, {
+    const result = await this.safeFetch<WorkspaceAttributeWithPermission>(path, {
       method: 'POST',
       body: JSON.stringify({
         attributes,
+        permissions,
       }),
     });
 
@@ -249,7 +252,7 @@ export class WorkspaceClient {
     options?: WorkspaceFindOptions
   ): Promise<
     IResponse<{
-      workspaces: WorkspaceAttribute[];
+      workspaces: WorkspaceAttributeWithPermission[];
       total: number;
       per_page: number;
       page: number;
@@ -266,9 +269,9 @@ export class WorkspaceClient {
    * Fetches a single workspace by a workspace id
    *
    * @param {string} id
-   * @returns {Promise<IResponse<WorkspaceAttribute>>} The metadata of the workspace for the given id.
+   * @returns {Promise<IResponse<WorkspaceAttributeWithPermission>>} The metadata of the workspace for the given id.
    */
-  public get(id: string): Promise<IResponse<WorkspaceAttribute>> {
+  public get(id: string): Promise<IResponse<WorkspaceAttributeWithPermission>> {
     const path = this.getPath(id);
     return this.safeFetch(path, {
       method: 'GET',
@@ -284,11 +287,13 @@ export class WorkspaceClient {
    */
   public async update(
     id: string,
-    attributes: Partial<WorkspaceAttribute>
+    attributes: Partial<WorkspaceAttribute>,
+    permissions?: SavedObjectPermissions
   ): Promise<IResponse<boolean>> {
     const path = this.getPath(id);
     const body = {
       attributes,
+      permissions,
     };
 
     const result = await this.safeFetch(path, {
