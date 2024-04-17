@@ -56,6 +56,9 @@ const WorkspaceUpdater = (props: any) => {
         ...mockCoreStart.application,
         capabilities: {
           ...mockCoreStart.application.capabilities,
+          workspaces: {
+            permissionEnabled: true,
+          },
         },
         navigateToApp,
         getUrlForApp: jest.fn(() => '/app/workspace_overview'),
@@ -165,7 +168,7 @@ describe('WorkspaceUpdater', () => {
   });
 
   it('update workspace successfully', async () => {
-    const { getByTestId } = render(
+    const { getByTestId, getByText, getAllByText } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
       />
@@ -190,6 +193,15 @@ describe('WorkspaceUpdater', () => {
     fireEvent.click(getByTestId('workspaceForm-workspaceFeatureVisibility-app1'));
     fireEvent.click(getByTestId('workspaceForm-workspaceFeatureVisibility-category1'));
 
+    fireEvent.click(getByText('Users & Permissions'));
+    fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-user-addNew'));
+    const userIdInput = getAllByText('Select')[0];
+    fireEvent.click(userIdInput);
+    fireEvent.input(getByTestId('comboBoxSearchInput'), {
+      target: { value: 'test user id' },
+    });
+    fireEvent.blur(getByTestId('comboBoxSearchInput'));
+
     fireEvent.click(getByTestId('workspaceForm-bottomBar-updateButton'));
     expect(workspaceClientUpdate).toHaveBeenCalledWith(
       expect.any(String),
@@ -198,7 +210,15 @@ describe('WorkspaceUpdater', () => {
         color: '#000000',
         description: 'test workspace description',
         features: expect.arrayContaining(['app1', 'app2', 'app3']),
-      })
+      }),
+      {
+        read: {
+          users: ['test user id'],
+        },
+        library_read: {
+          users: ['test user id'],
+        },
+      }
     );
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();

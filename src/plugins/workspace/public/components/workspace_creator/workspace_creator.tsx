@@ -15,6 +15,7 @@ import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
+import { convertPermissionSettingsToPermissions } from '../workspace_form';
 
 export interface WorkspaceCreatorProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
@@ -27,12 +28,17 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const workspaceConfigurableApps = useObservable(
     props.workspaceConfigurableApps$ ?? of(undefined)
   );
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
       let result;
       try {
-        result = await workspaceClient.create(data);
+        const { permissionSettings, ...attributes } = data;
+        result = await workspaceClient.create(
+          attributes,
+          convertPermissionSettingsToPermissions(permissionSettings)
+        );
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.create.success', {
@@ -92,6 +98,8 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
               workspaceConfigurableApps={workspaceConfigurableApps}
+              permissionEnabled={isPermissionEnabled}
+              permissionLastAdminItemDeletable
             />
           )}
         </EuiPageContent>
