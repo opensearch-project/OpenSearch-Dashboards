@@ -55,11 +55,6 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
         options={
           Array [
             Object {
-              "id": "opensearchClusterGroupLabel",
-              "isGroupLabel": true,
-              "label": "OpenSearch cluster",
-            },
-            Object {
               "checked": "on",
               "id": "",
               "label": "Local cluster",
