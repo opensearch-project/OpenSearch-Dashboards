@@ -12,19 +12,33 @@ import {
   EuiButtonEmpty,
   EuiSelectable,
   EuiSpacer,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import {
+  ApplicationStart,
   IUiSettingsClient,
   SavedObjectsClientContract,
   ToastsStart,
 } from 'opensearch-dashboards/public';
-import { getDataSourcesWithFields, getDefaultDataSource, getFilteredDataSources } from '../utils';
+import {
+  dataSourceOptionGroupLabel,
+  getDataSourcesWithFields,
+  getDefaultDataSource,
+  getFilteredDataSources,
+  handleDataSourceFetchError,
+} from '../utils';
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
-import { DataSourceGroupLabelOption, DataSourceOption } from '../data_source_menu/types';
+import {
+  DataSourceBaseState,
+  DataSourceGroupLabelOption,
+  DataSourceOption,
+} from '../data_source_menu/types';
+import { DataSourceErrorMenu } from '../data_source_error_menu';
 import { DataSourceItem } from '../data_source_item';
 import './data_source_selectable.scss';
+import { DataSourceDropDownHeader } from '../drop_down_header';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -33,12 +47,13 @@ interface DataSourceSelectableProps {
   disabled: boolean;
   hideLocalCluster: boolean;
   fullWidth: boolean;
+  application?: ApplicationStart;
   selectedOption?: DataSourceOption[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   uiSettings?: IUiSettingsClient;
 }
 
-interface DataSourceSelectableState {
+interface DataSourceSelectableState extends DataSourceBaseState {
   dataSourceOptions: DataSourceOption[];
   isPopoverOpen: boolean;
   selectedOption?: DataSourceOption[];
@@ -65,6 +80,7 @@ export class DataSourceSelectable extends React.Component<
       isPopoverOpen: false,
       selectedOption: [],
       defaultDataSource: null,
+      showError: false,
     };
 
     this.onChange.bind(this);
@@ -183,19 +199,26 @@ export class DataSourceSelectable extends React.Component<
       // handle default data source if there is no valid active option
       this.handleDefaultDataSource(dataSourceOptions, defaultDataSource);
     } catch (error) {
-      this.props.notifications.addWarning(
-        i18n.translate('dataSource.fetchDataSourceError', {
-          defaultMessage: 'Unable to fetch existing data sources',
-        })
+      handleDataSourceFetchError(
+        this.onError.bind(this),
+        this.props.notifications,
+        this.props.onSelectedDataSources
       );
     }
   }
 
+  onError() {
+    this.setState({ showError: true });
+  }
+
   onChange(options: DataSourceOption[]) {
     if (!this._isMounted) return;
+    const optionsWithoutGroupLabel = options.filter(
+      (option) => !option.hasOwnProperty('isGroupLabel')
+    );
     const selectedDataSource = options.find(({ checked }) => checked);
 
-    this.setState({ dataSourceOptions: options });
+    this.setState({ dataSourceOptions: optionsWithoutGroupLabel });
 
     if (selectedDataSource) {
       this.setState({
@@ -213,12 +236,15 @@ export class DataSourceSelectable extends React.Component<
     if (dataSourceOptions.length === 0) {
       optionsWithGroupLabel = [];
     } else {
-      optionsWithGroupLabel = [opensearchClusterGroupLabel, ...dataSourceOptions];
+      optionsWithGroupLabel = [dataSourceOptionGroupLabel.opensearchCluster, ...dataSourceOptions];
     }
     return optionsWithGroupLabel;
   };
 
   render() {
+    if (this.state.showError) {
+      return <DataSourceErrorMenu />;
+    }
     const button = (
       <>
         <EuiButtonEmpty
@@ -242,6 +268,7 @@ export class DataSourceSelectable extends React.Component<
 
     return (
       <EuiPopover
+        initialFocus={'.euiSelectableSearch'}
         id={'dataSourceSelectableContextMenuPopover'}
         button={button}
         isOpen={this.state.isPopoverOpen}
@@ -252,12 +279,18 @@ export class DataSourceSelectable extends React.Component<
       >
         <EuiContextMenuPanel>
           <EuiPanel className={'dataSourceSelectableOuiPanel'} color="transparent" paddingSize="s">
+            <DataSourceDropDownHeader
+              totalDataSourceCount={this.state.dataSourceOptions.length}
+              application={this.props.application}
+            />
+            <EuiHorizontalRule margin="none" />
             <EuiSpacer size="s" />
             <EuiSelectable
               aria-label="Search"
               searchable
               searchProps={{
                 placeholder: 'Search',
+                compressed: true,
               }}
               options={this.getOptionsWithGroupLabel(this.state.dataSourceOptions)}
               onChange={(newOptions) => this.onChange(newOptions)}
