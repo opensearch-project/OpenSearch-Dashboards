@@ -403,4 +403,22 @@ describe('DataSourceSelectable', () => {
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toHaveBeenCalled();
   });
+  it('should render no data source when no data source filtered out and hide local cluster', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={true}
+        fullWidth={false}
+        selectedOption={[{ id: 'test2' }]}
+        dataSourceFilter={(ds) => false}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceEmptyStateHeaderButton');
+    expect(button).toHaveTextContent('No data sources');
+  });
 });
