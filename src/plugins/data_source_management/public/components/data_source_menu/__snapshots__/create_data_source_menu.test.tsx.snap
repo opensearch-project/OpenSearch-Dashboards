@@ -5,65 +5,33 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
+      <span
+        color="danger"
+        data-euiicon-type="crossInCircleFilled"
+      />
       <div
-        class="euiPopover euiPopover--anchorDownLeft"
-        data-test-subj="dataSourceSelectableContextMenuPopover"
-        id="dataSourceSelectableContextMenuPopover"
+        class="euiText euiText--medium"
       >
         <div
-          class="euiPopover__anchor"
+          class="euiTextColor euiTextColor--danger"
         >
-          <button
-            aria-label="dataSourceMenuButton"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
-            data-test-subj="dataSourceSelectableContextMenuHeaderLink"
-            type="button"
-          >
-            <span
-              class="euiButtonContent euiButtonEmpty__content"
-            >
-              <span
-                class="euiButtonContent__icon"
-                color="inherit"
-                data-euiicon-type="database"
-              />
-              <span
-                class="euiButtonEmpty__text"
-              />
-            </span>
-          </button>
+          Error
         </div>
       </div>
     </div>
   </body>,
   "container": <div>
+    <span
+      color="danger"
+      data-euiicon-type="crossInCircleFilled"
+    />
     <div
-      class="euiPopover euiPopover--anchorDownLeft"
-      data-test-subj="dataSourceSelectableContextMenuPopover"
-      id="dataSourceSelectableContextMenuPopover"
+      class="euiText euiText--medium"
     >
       <div
-        class="euiPopover__anchor"
+        class="euiTextColor euiTextColor--danger"
       >
-        <button
-          aria-label="dataSourceMenuButton"
-          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
-          data-test-subj="dataSourceSelectableContextMenuHeaderLink"
-          type="button"
-        >
-          <span
-            class="euiButtonContent euiButtonEmpty__content"
-          >
-            <span
-              class="euiButtonContent__icon"
-              color="inherit"
-              data-euiicon-type="database"
-            />
-            <span
-              class="euiButtonEmpty__text"
-            />
-          </span>
-        </button>
+        Error
       </div>
     </div>
   </div>,
