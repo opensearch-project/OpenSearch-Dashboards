@@ -126,4 +126,11 @@ describe('Workspace plugin', () => {
     expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_OVERVIEW_APP_ID);
     windowSpy.mockRestore();
   });
+
+  it('#setup register workspace dropdown menu when setup', async () => {
+    const setupMock = coreMock.createSetup();
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock);
+    expect(setupMock.chrome.registerCollapsibleNavHeader).toBeCalledTimes(1);
+  });
 });

@@ -76,7 +76,9 @@ describe('DataSourceManagement: Utils.ts', () => {
     const { toasts } = notificationServiceMock.createStartContract();
 
     test('should send warning when data source fetch failed', () => {
-      handleDataSourceFetchError(toasts);
+      const changeStateMock = jest.fn();
+      handleDataSourceFetchError(changeStateMock, toasts);
+      expect(changeStateMock).toBeCalledWith({ showError: true });
       expect(toasts.addWarning).toHaveBeenCalledWith(`Failed to fetch data source`);
     });
   });
