@@ -8,7 +8,7 @@ exports[`DataSourceView Should render successfully when provided datasource has 
       <EuiButtonEmpty
         aria-label="dataSourceViewButton"
         className="dataSourceComponentButtonTitle"
-        data-test-subj="dataSourceViewrButton"
+        data-test-subj="dataSourceViewButton"
         iconSide="left"
         iconType="database"
         onClick={[Function]}
@@ -75,7 +75,7 @@ exports[`DataSourceView Should return error when provided datasource has been fi
       <EuiButtonEmpty
         aria-label="dataSourceViewButton"
         className="dataSourceComponentButtonTitle"
-        data-test-subj="dataSourceViewrButton"
+        data-test-subj="dataSourceViewButton"
         iconSide="left"
         iconType="database"
         onClick={[Function]}
@@ -136,7 +136,7 @@ exports[`DataSourceView When selected option is local cluster and hide local Clu
       <EuiButtonEmpty
         aria-label="dataSourceViewButton"
         className="dataSourceComponentButtonTitle"
-        data-test-subj="dataSourceViewrButton"
+        data-test-subj="dataSourceViewButton"
         iconSide="left"
         iconType="database"
         onClick={[Function]}
@@ -197,7 +197,7 @@ exports[`DataSourceView should call getDataSourceById when only pass id with no 
       <EuiButtonEmpty
         aria-label="dataSourceViewButton"
         className="dataSourceComponentButtonTitle"
-        data-test-subj="dataSourceViewrButton"
+        data-test-subj="dataSourceViewButton"
         iconSide="left"
         iconType="database"
         onClick={[Function]}
@@ -266,7 +266,7 @@ exports[`DataSourceView should render normally with local cluster not hidden 1`]
       <EuiButtonEmpty
         aria-label="dataSourceViewButton"
         className="dataSourceComponentButtonTitle"
-        data-test-subj="dataSourceViewrButton"
+        data-test-subj="dataSourceViewButton"
         iconSide="left"
         iconType="database"
         onClick={[Function]}
@@ -328,7 +328,7 @@ exports[`DataSourceView should render normally with local cluster not hidden 1`]
 </EuiPopover>
 `;
 
-exports[`DataSourceView should show popover when click on button 1`] = `
+exports[`DataSourceView should show popover when click on data source view button 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
@@ -343,7 +343,7 @@ Object {
           <button
             aria-label="dataSourceViewButton"
             class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
-            data-test-subj="dataSourceViewrButton"
+            data-test-subj="dataSourceViewButton"
             type="button"
           >
             <span
@@ -471,7 +471,7 @@ Object {
         <button
           aria-label="dataSourceViewButton"
           class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
-          data-test-subj="dataSourceViewrButton"
+          data-test-subj="dataSourceViewButton"
           type="button"
         >
           <span

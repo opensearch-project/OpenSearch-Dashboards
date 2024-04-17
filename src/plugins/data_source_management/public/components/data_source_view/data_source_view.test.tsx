@@ -118,7 +118,7 @@ describe('DataSourceView', () => {
     expect(utils.getDataSourceById).toBeCalledTimes(1);
   });
 
-  it('should show popover when click on button', async () => {
+  it('should show popover when click on data source view button', async () => {
     const onSelectedDataSource = jest.fn();
     spyOn(utils, 'getDataSourceById').and.returnValue([{ id: 'test1', label: 'test1' }]);
     spyOn(utils, 'handleDataSourceFetchError').and.returnValue('');
