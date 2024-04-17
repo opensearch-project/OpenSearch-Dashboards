@@ -7,6 +7,7 @@ import React from 'react';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceFilterGroup, SelectedDataSourceOption } from './data_source_filter_group';
+import { NoDataSource } from '../no_data_source';
 import { getDataSourcesWithFields, handleDataSourceFetchError } from '../utils';
 import { DataSourceBaseState } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
@@ -39,6 +40,7 @@ export class DataSourceMultiSelectable extends React.Component<
       dataSourceOptions: [],
       selectedOptions: [],
       defaultDataSource: null,
+      showEmptyState: false,
       showError: false,
     };
   }
@@ -82,6 +84,7 @@ export class DataSourceMultiSelectable extends React.Component<
         ...this.state,
         selectedOptions,
         defaultDataSource,
+        showEmptyState: (fetchedDataSources?.length === 0 && this.props.hideLocalCluster) || false,
       });
 
       this.props.onSelectedDataSources(selectedOptions);
@@ -107,6 +110,9 @@ export class DataSourceMultiSelectable extends React.Component<
   }
 
   render() {
+    if (this.state.showEmptyState) {
+      return <NoDataSource />;
+    }
     if (this.state.showError) {
       return <DataSourceErrorMenu />;
     }
