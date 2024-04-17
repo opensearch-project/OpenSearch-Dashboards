@@ -29,14 +29,23 @@ const workspacePermissions = schema.recordOf(
   schema.recordOf(principalType, schema.arrayOf(schema.string()), {})
 );
 
-const workspaceAttributesSchema = schema.object({
+const workspaceOptionalAttributesSchema = {
   description: schema.maybe(schema.string()),
-  name: schema.string(),
   features: schema.maybe(schema.arrayOf(schema.string())),
   color: schema.maybe(schema.string()),
   icon: schema.maybe(schema.string()),
   defaultVISTheme: schema.maybe(schema.string()),
   reserved: schema.maybe(schema.boolean()),
+};
+
+const createWorkspaceAttributesSchema = schema.object({
+  name: schema.string(),
+  ...workspaceOptionalAttributesSchema,
+});
+
+const updateWorkspaceAttributesSchema = schema.object({
+  name: schema.maybe(schema.string()),
+  ...workspaceOptionalAttributesSchema,
 });
 
 export function registerRoutes({
@@ -117,7 +126,7 @@ export function registerRoutes({
       path: `${WORKSPACES_API_BASE_URL}`,
       validate: {
         body: schema.object({
-          attributes: workspaceAttributesSchema,
+          attributes: createWorkspaceAttributesSchema,
           permissions: schema.maybe(workspacePermissions),
         }),
       },
@@ -163,7 +172,7 @@ export function registerRoutes({
           id: schema.string(),
         }),
         body: schema.object({
-          attributes: workspaceAttributesSchema,
+          attributes: updateWorkspaceAttributesSchema,
           permissions: schema.maybe(workspacePermissions),
         }),
       },
