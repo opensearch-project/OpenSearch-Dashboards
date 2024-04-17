@@ -813,6 +813,9 @@ exports[`dashboard listing hideWriteControls 1`] = `
                     "tls": "https://opensearch.org/docs/mocked-test-branch/dashboards/install/tls/",
                   },
                   "introduction": "https://opensearch.org/docs/mocked-test-branch/dashboards/index/",
+                  "management": Object {
+                    "advancedSettings": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/advanced-settings/",
+                  },
                   "mapTiles": "https://opensearch.org/docs/mocked-test-branch/dashboards/maptiles",
                   "notebooks": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/notebooks",
@@ -1955,6 +1958,9 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                     "tls": "https://opensearch.org/docs/mocked-test-branch/dashboards/install/tls/",
                   },
                   "introduction": "https://opensearch.org/docs/mocked-test-branch/dashboards/index/",
+                  "management": Object {
+                    "advancedSettings": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/advanced-settings/",
+                  },
                   "mapTiles": "https://opensearch.org/docs/mocked-test-branch/dashboards/maptiles",
                   "notebooks": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/notebooks",
@@ -3158,6 +3164,9 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                     "tls": "https://opensearch.org/docs/mocked-test-branch/dashboards/install/tls/",
                   },
                   "introduction": "https://opensearch.org/docs/mocked-test-branch/dashboards/index/",
+                  "management": Object {
+                    "advancedSettings": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/advanced-settings/",
+                  },
                   "mapTiles": "https://opensearch.org/docs/mocked-test-branch/dashboards/maptiles",
                   "notebooks": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/notebooks",
@@ -4361,6 +4370,9 @@ exports[`dashboard listing renders table rows 1`] = `
                     "tls": "https://opensearch.org/docs/mocked-test-branch/dashboards/install/tls/",
                   },
                   "introduction": "https://opensearch.org/docs/mocked-test-branch/dashboards/index/",
+                  "management": Object {
+                    "advancedSettings": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/advanced-settings/",
+                  },
                   "mapTiles": "https://opensearch.org/docs/mocked-test-branch/dashboards/maptiles",
                   "notebooks": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/notebooks",
@@ -5564,6 +5576,9 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                     "tls": "https://opensearch.org/docs/mocked-test-branch/dashboards/install/tls/",
                   },
                   "introduction": "https://opensearch.org/docs/mocked-test-branch/dashboards/index/",
+                  "management": Object {
+                    "advancedSettings": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/advanced-settings/",
+                  },
                   "mapTiles": "https://opensearch.org/docs/mocked-test-branch/dashboards/maptiles",
                   "notebooks": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/notebooks",

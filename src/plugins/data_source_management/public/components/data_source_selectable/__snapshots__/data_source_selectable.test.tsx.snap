@@ -7,7 +7,7 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
     <React.Fragment>
       <EuiButtonEmpty
         aria-label="dataSourceMenuButton"
-        className="euiHeaderLink"
+        className="euiHeaderLink dataSourceComponentButtonTitle"
         data-test-subj="dataSourceSelectableContextMenuHeaderLink"
         disabled={false}
         iconSide="left"
@@ -24,6 +24,7 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
   display="inlineBlock"
   hasArrow={true}
   id="dataSourceSelectableContextMenuPopover"
+  initialFocus=".euiSelectableSearch"
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
@@ -33,14 +34,16 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
     items={Array []}
   >
     <EuiPanel
+      className="dataSourceSelectableOuiPanel"
       color="transparent"
       paddingSize="s"
-      style={
-        Object {
-          "width": "300px",
-        }
-      }
     >
+      <DataSourceDropDownHeader
+        totalDataSourceCount={3}
+      />
+      <EuiHorizontalRule
+        margin="none"
+      />
       <EuiSpacer
         size="s"
       />
@@ -51,6 +54,11 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
         onChange={[Function]}
         options={
           Array [
+            Object {
+              "id": "opensearchClusterGroupLabel",
+              "isGroupLabel": true,
+              "label": "OpenSearch cluster",
+            },
             Object {
               "checked": "on",
               "id": "",
@@ -69,6 +77,7 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
         renderOption={[Function]}
         searchProps={
           Object {
+            "compressed": true,
             "placeholder": "Search",
           }
         }
@@ -89,7 +98,7 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
     <React.Fragment>
       <EuiButtonEmpty
         aria-label="dataSourceMenuButton"
-        className="euiHeaderLink"
+        className="euiHeaderLink dataSourceComponentButtonTitle"
         data-test-subj="dataSourceSelectableContextMenuHeaderLink"
         disabled={false}
         iconSide="left"
@@ -104,6 +113,7 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
   display="inlineBlock"
   hasArrow={true}
   id="dataSourceSelectableContextMenuPopover"
+  initialFocus=".euiSelectableSearch"
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
@@ -113,14 +123,16 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
     items={Array []}
   >
     <EuiPanel
+      className="dataSourceSelectableOuiPanel"
       color="transparent"
       paddingSize="s"
-      style={
-        Object {
-          "width": "300px",
-        }
-      }
     >
+      <DataSourceDropDownHeader
+        totalDataSourceCount={0}
+      />
+      <EuiHorizontalRule
+        margin="none"
+      />
       <EuiSpacer
         size="s"
       />
@@ -133,6 +145,7 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
         renderOption={[Function]}
         searchProps={
           Object {
+            "compressed": true,
             "placeholder": "Search",
           }
         }
@@ -153,7 +166,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
     <React.Fragment>
       <EuiButtonEmpty
         aria-label="dataSourceMenuButton"
-        className="euiHeaderLink"
+        className="euiHeaderLink dataSourceComponentButtonTitle"
         data-test-subj="dataSourceSelectableContextMenuHeaderLink"
         disabled={false}
         iconSide="left"
@@ -168,6 +181,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
   display="inlineBlock"
   hasArrow={true}
   id="dataSourceSelectableContextMenuPopover"
+  initialFocus=".euiSelectableSearch"
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
@@ -177,14 +191,16 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
     items={Array []}
   >
     <EuiPanel
+      className="dataSourceSelectableOuiPanel"
       color="transparent"
       paddingSize="s"
-      style={
-        Object {
-          "width": "300px",
-        }
-      }
     >
+      <DataSourceDropDownHeader
+        totalDataSourceCount={0}
+      />
+      <EuiHorizontalRule
+        margin="none"
+      />
       <EuiSpacer
         size="s"
       />
@@ -197,6 +213,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
         renderOption={[Function]}
         searchProps={
           Object {
+            "compressed": true,
             "placeholder": "Search",
           }
         }
@@ -225,7 +242,7 @@ Object {
         >
           <button
             aria-label="dataSourceMenuButton"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink dataSourceComponentButtonTitle"
             data-test-subj="dataSourceSelectableContextMenuHeaderLink"
             type="button"
           >
@@ -278,9 +295,37 @@ Object {
               <div>
                 <div>
                   <div
-                    class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow"
-                    style="width: 300px;"
+                    class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow dataSourceSelectableOuiPanel"
                   >
+                    <div
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiTitle euiTitle--xxxsmall"
+                    >
+                      <div
+                        class="euiFlexItem"
+                      >
+                        DATA SOURCES
+                         (
+                        3
+                        )
+                      </div>
+                      <div
+                        class="dataSourceDropDownHeaderInvisibleFocusable"
+                        tabindex="0"
+                      />
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <button
+                          class="euiLink euiLink--primary"
+                          type="button"
+                        >
+                          Manage
+                        </button>
+                      </div>
+                    </div>
+                    <hr
+                      class="euiHorizontalRule euiHorizontalRule--full"
+                    />
                     <div
                       class="euiSpacer euiSpacer--s"
                     />
@@ -289,7 +334,7 @@ Object {
                       data-test-subj="dataSourceSelectable"
                     >
                       <div
-                        class="euiFormControlLayout euiFormControlLayout--fullWidth"
+                        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                       >
                         <div
                           class="euiFormControlLayout__childrenWrapper"
@@ -303,7 +348,7 @@ Object {
                             aria-label="Search"
                             aria-owns="generated-id_listbox"
                             autocomplete="off"
-                            class="euiFieldSearch euiFieldSearch--fullWidth euiSelectableSearch"
+                            class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
                             placeholder="Search"
                             role="combobox"
                             type="search"
@@ -366,7 +411,7 @@ Object {
       >
         <button
           aria-label="dataSourceMenuButton"
-          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink dataSourceComponentButtonTitle"
           data-test-subj="dataSourceSelectableContextMenuHeaderLink"
           type="button"
         >

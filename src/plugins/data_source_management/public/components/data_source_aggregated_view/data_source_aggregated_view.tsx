@@ -13,9 +13,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
-import { getDataSourcesWithFields } from '../utils';
+import { getDataSourcesWithFields, handleDataSourceFetchError } from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
+import { NoDataSource } from '../no_data_source';
+import { DataSourceErrorMenu } from '../data_source_error_menu';
+import { DataSourceBaseState } from '../data_source_menu/types';
 
 interface DataSourceAggregatedViewProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -27,7 +30,7 @@ interface DataSourceAggregatedViewProps {
   displayAllCompatibleDataSources: boolean;
 }
 
-interface DataSourceAggregatedViewState {
+interface DataSourceAggregatedViewState extends DataSourceBaseState {
   isPopoverOpen: boolean;
   allDataSourcesIdToTitleMap: Map<string, any>;
 }
@@ -44,6 +47,8 @@ export class DataSourceAggregatedView extends React.Component<
     this.state = {
       isPopoverOpen: false,
       allDataSourcesIdToTitleMap: new Map(),
+      showEmptyState: false,
+      showError: false,
     };
   }
 
@@ -70,7 +75,6 @@ export class DataSourceAggregatedView extends React.Component<
               this.props.dataSourceFilter!(ds)
             );
           }
-
           const allDataSourcesIdToTitleMap = new Map();
 
           filteredDataSources.forEach((ds) => {
@@ -89,15 +93,21 @@ export class DataSourceAggregatedView extends React.Component<
         }
       })
       .catch(() => {
-        this.props.notifications.addWarning(
-          i18n.translate('dataSource.fetchDataSourceError', {
-            defaultMessage: 'Unable to fetch existing data sources',
-          })
-        );
+        handleDataSourceFetchError(this.onError.bind(this), this.props.notifications);
       });
   }
 
+  onError() {
+    this.setState({ showError: true });
+  }
+
   render() {
+    if (this.state.showEmptyState) {
+      return <NoDataSource />;
+    }
+    if (this.state.showError) {
+      return <DataSourceErrorMenu />;
+    }
     const button = (
       <EuiButtonIcon
         data-test-subj="dataSourceAggregatedViewInfoButton"

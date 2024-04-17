@@ -660,4 +660,14 @@ describe('#createSavedObjects', () => {
       });
     });
   });
+
+  describe('with a undefined workspaces', () => {
+    test('calls bulkCreate once with input objects', async () => {
+      const options = setupParams({ objects: objs });
+      setupMockResults(options);
+
+      await createSavedObjects(options);
+      expect(bulkCreate.mock.calls[0][1]?.hasOwnProperty('workspaces')).toEqual(false);
+    });
+  });
 });
