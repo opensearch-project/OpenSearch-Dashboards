@@ -139,6 +139,7 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           id: 'test2',
@@ -159,6 +160,7 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           checked: 'on',
@@ -337,6 +339,7 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           id: 'test2',
@@ -371,6 +374,7 @@ describe('DataSourceSelectable', () => {
       defaultDataSource: null,
       isPopoverOpen: false,
       selectedOption: [],
+      showEmptyState: false,
       showError: true,
     });
 
@@ -385,6 +389,7 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           checked: 'on',
