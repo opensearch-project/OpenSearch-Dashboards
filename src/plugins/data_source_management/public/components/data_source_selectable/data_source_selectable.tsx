@@ -25,14 +25,21 @@ import {
   getDataSourcesWithFields,
   getDefaultDataSource,
   getFilteredDataSources,
+  handleDataSourceFetchError,
 } from '../utils';
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
-import { DataSourceGroupLabelOption, DataSourceOption } from '../data_source_menu/types';
+import {
+  DataSourceBaseState,
+  DataSourceGroupLabelOption,
+  DataSourceOption,
+} from '../data_source_menu/types';
+import { DataSourceErrorMenu } from '../data_source_error_menu';
 import { DataSourceItem } from '../data_source_item';
-import './data_source_selectable.scss';
 import { DataSourceDropDownHeader } from '../drop_down_header';
+import '../button_title.scss';
+import './data_source_selectable.scss';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -47,7 +54,7 @@ interface DataSourceSelectableProps {
   uiSettings?: IUiSettingsClient;
 }
 
-interface DataSourceSelectableState {
+interface DataSourceSelectableState extends DataSourceBaseState {
   dataSourceOptions: DataSourceOption[];
   isPopoverOpen: boolean;
   selectedOption?: DataSourceOption[];
@@ -74,6 +81,7 @@ export class DataSourceSelectable extends React.Component<
       isPopoverOpen: false,
       selectedOption: [],
       defaultDataSource: null,
+      showError: false,
     };
 
     this.onChange.bind(this);
@@ -192,12 +200,16 @@ export class DataSourceSelectable extends React.Component<
       // handle default data source if there is no valid active option
       this.handleDefaultDataSource(dataSourceOptions, defaultDataSource);
     } catch (error) {
-      this.props.notifications.addWarning(
-        i18n.translate('dataSource.fetchDataSourceError', {
-          defaultMessage: 'Unable to fetch existing data sources',
-        })
+      handleDataSourceFetchError(
+        this.onError.bind(this),
+        this.props.notifications,
+        this.props.onSelectedDataSources
       );
     }
+  }
+
+  onError() {
+    this.setState({ showError: true });
   }
 
   onChange(options: DataSourceOption[]) {
@@ -231,10 +243,13 @@ export class DataSourceSelectable extends React.Component<
   };
 
   render() {
+    if (this.state.showError) {
+      return <DataSourceErrorMenu />;
+    }
     const button = (
       <>
         <EuiButtonEmpty
-          className="euiHeaderLink"
+          className={'euiHeaderLink dataSourceComponentButtonTitle'}
           onClick={this.onClick.bind(this)}
           data-test-subj="dataSourceSelectableContextMenuHeaderLink"
           aria-label={i18n.translate('dataSourceSelectable.dataSourceOptionsButtonAriaLabel', {

@@ -145,6 +145,7 @@ describe('DataSourceSelectable', () => {
           label: 'test2',
         },
       ],
+      showError: false,
     });
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
@@ -165,6 +166,7 @@ describe('DataSourceSelectable', () => {
           label: 'test2',
         },
       ],
+      showError: false,
     });
 
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
@@ -341,6 +343,7 @@ describe('DataSourceSelectable', () => {
           label: 'test2',
         },
       ],
+      showError: false,
     });
   });
 
@@ -362,12 +365,13 @@ describe('DataSourceSelectable', () => {
 
     const containerInstance = container.instance();
 
-    expect(onSelectedDataSource).toBeCalledTimes(0);
+    expect(onSelectedDataSource).toBeCalledWith([]);
     expect(containerInstance.state).toEqual({
       dataSourceOptions: [],
       defaultDataSource: null,
       isPopoverOpen: false,
       selectedOption: [],
+      showError: true,
     });
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
@@ -388,6 +392,7 @@ describe('DataSourceSelectable', () => {
           label: 'test2',
         },
       ],
+      showError: true,
     });
 
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
