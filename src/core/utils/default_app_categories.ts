@@ -73,4 +73,40 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     order: 5000,
     euiIconType: 'managementApp',
   },
+  // below categories are for workspace
+  getStarted: {
+    id: 'getStarted',
+    label: i18n.translate('core.ui.managementNavList.label', {
+      defaultMessage: 'Get started',
+    }),
+    order: 10000,
+  },
+  dashboardAndReport: {
+    id: 'dashboardReport',
+    label: i18n.translate('core.ui.managementNavList.label', {
+      defaultMessage: 'Dashboard and report',
+    }),
+    order: 11000,
+  },
+  investigate: {
+    id: 'investigate',
+    label: i18n.translate('core.ui.managementNavList.label', {
+      defaultMessage: 'Investigate',
+    }),
+    order: 12000,
+  },
+  detect: {
+    id: 'detect',
+    label: i18n.translate('core.ui.managementNavList.label', {
+      defaultMessage: 'Detect',
+    }),
+    order: 13000,
+  },
+  searchSolution: {
+    id: 'searchSolution',
+    label: i18n.translate('core.ui.managementNavList.label', {
+      defaultMessage: 'Build search solution',
+    }),
+    order: 14000,
+  },
 });

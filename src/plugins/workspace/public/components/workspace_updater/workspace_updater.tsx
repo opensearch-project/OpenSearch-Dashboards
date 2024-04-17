@@ -24,6 +24,8 @@ import {
 
 export interface WorkspaceUpdaterProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+  hideTitle?: boolean;
+  maxWidth?: number | string;
 }
 
 function getFormDataFromWorkspace(
@@ -119,14 +121,14 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   return (
     <EuiPage paddingSize="none">
       <EuiPageBody panelled>
-        <EuiPageHeader restrictWidth pageTitle="Update Workspace" />
+        {!props.hideTitle ? <EuiPageHeader restrictWidth pageTitle="Update Workspace" /> : null}
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}
-          style={{ width: '100%', maxWidth: 1000 }}
+          style={{ width: '100%', maxWidth: props.maxWidth ? props.maxWidth : 1000 }}
         >
           {application && (
             <WorkspaceForm
