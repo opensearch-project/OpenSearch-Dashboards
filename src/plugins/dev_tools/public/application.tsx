@@ -161,7 +161,12 @@ function DevToolsWrapper({
               mountedTool.current.devTool !== activeDevTool ||
               mountedTool.current.mountpoint !== element)
           ) {
-            await remount(element);
+            let initialDataSourceId;
+            if (!dataSourceEnabled) {
+              initialDataSourceId = '';
+            }
+
+            await remount(element, initialDataSourceId);
           }
         }}
       />
