@@ -35,10 +35,10 @@ interface DataSourceViewProps {
   fullWidth: boolean;
   selectedOption: DataSourceOption[];
   hideLocalCluster: boolean;
+  application?: ApplicationStart;
   savedObjectsClient?: SavedObjectsClientContract;
   notifications?: ToastsStart;
   uiSettings?: IUiSettingsClient;
-  application?: ApplicationStart;
   dataSourceFilter?: (dataSource: any) => boolean;
   onSelectedDataSources?: (dataSources: DataSourceOption[]) => void;
 }
@@ -93,7 +93,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     ) {
       this.setState({
         selectedOption: [],
-        defaultDataSource,
+        showEmptyState: true,
       });
       if (this.props.onSelectedDataSources) {
         this.props.onSelectedDataSources([]);
@@ -146,7 +146,12 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
 
   render() {
     if (this.state.showEmptyState) {
-      return <NoDataSource />;
+      return (
+        <NoDataSource
+          totalDataSourceCount={this.state.selectedOption.length}
+          application={this.props.application}
+        />
+      );
     }
     if (this.state.showError) {
       return <DataSourceErrorMenu />;
