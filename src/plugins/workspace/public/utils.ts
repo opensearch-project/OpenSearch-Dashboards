@@ -77,7 +77,7 @@ export function isAppAccessibleInWorkspace(app: App, workspace: WorkspaceObject)
   /**
    * App is not accessible within workspace if it explicitly declare itself as WorkspaceAvailability.outOfWorkspace
    */
-  if (app.workspaceAvailability === WorkspaceAvailability.outOfWorkspace) {
+  if (app.workspaceAvailability === WorkspaceAvailability.outsideWorkspace) {
     return false;
   }
 

@@ -570,7 +570,7 @@ describe('#start()', () => {
         Symbol(),
         createApp({
           id: 'app1',
-          workspaceAvailability: WorkspaceAvailability.outOfWorkspace,
+          workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
         })
       );
       const { getUrlForApp } = await service.start({
@@ -825,7 +825,7 @@ describe('#start()', () => {
         Symbol(),
         createApp({
           id: 'app1',
-          workspaceAvailability: WorkspaceAvailability.outOfWorkspace,
+          workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
         })
       );
       const workspaces = workspacesServiceMock.createStartContract();

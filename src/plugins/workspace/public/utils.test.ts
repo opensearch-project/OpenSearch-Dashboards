@@ -161,7 +161,7 @@ describe('workspace utils: isAppAccessibleInWorkspace', () => {
           id: 'home',
           title: 'Any app',
           mount: jest.fn(),
-          workspaceAvailability: WorkspaceAvailability.outOfWorkspace,
+          workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
         },
         { id: 'workspace_id', name: 'workspace name', features: [] }
       )

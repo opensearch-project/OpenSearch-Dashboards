@@ -112,15 +112,11 @@ export enum WorkspaceAvailability {
   /**
    * The application is not accessible when user is in a workspace.
    */
-  outOfWorkspace = 2,
+  outsideWorkspace = 2,
   /**
    * The application is only accessible when user is in a workspace.
    */
-  inWorkspace = 1,
-  /**
-   * The application is accessible when user is in or not in a workspace.
-   */
-  both = 0,
+  insideWorkspace = 1,
 }
 
 /**
@@ -268,7 +264,8 @@ export interface App<HistoryLocationState = unknown> {
 
   /**
    * Declare if page is available when inside a workspace.
-   * Defaults to WorkspaceAvailability.both to indicate the application is available within or out of workspace.
+   * Defaults to WorkspaceAvailability.outsideWorkspace | WorkspaceAvailability.insideWorkspace,
+   * indicating the application is available within or out of workspace.
    */
   workspaceAvailability?: WorkspaceAvailability;
 }

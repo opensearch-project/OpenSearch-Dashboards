@@ -107,7 +107,7 @@ export class OpenSearchDashboardsOverviewPlugin
         // Render the application
         return renderApp(coreStart, depsStart as AppPluginStartDependencies, params);
       },
-      workspaceAvailability: WorkspaceAvailability.outOfWorkspace,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
     if (home) {

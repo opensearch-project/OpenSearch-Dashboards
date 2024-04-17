@@ -135,7 +135,7 @@ export class HomePublicPlugin
         const { renderApp } = await import('./application');
         return await renderApp(params.element, coreStart, params.history);
       },
-      workspaceAvailability: WorkspaceAvailability.outOfWorkspace,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
     urlForwarding.forwardApp('home', 'home');
 

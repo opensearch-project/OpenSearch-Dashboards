@@ -200,7 +200,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         const { renderCreatorApp } = await import('./application');
         return mountWorkspaceApp(params, renderCreatorApp);
       },
-      workspaceAvailability: WorkspaceAvailability.outOfWorkspace,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
     // update
@@ -246,7 +246,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
       },
-      workspaceAvailability: WorkspaceAvailability.outOfWorkspace,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
     /**

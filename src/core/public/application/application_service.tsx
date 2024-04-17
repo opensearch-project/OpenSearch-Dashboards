@@ -265,7 +265,7 @@ export class ApplicationService {
         const targetApp = applications$.value.get(appId);
         if (
           workspaces.currentWorkspaceId$.value &&
-          targetApp?.workspaceAvailability === WorkspaceAvailability.outOfWorkspace
+          targetApp?.workspaceAvailability === WorkspaceAvailability.outsideWorkspace
         ) {
           // If user is inside a workspace and the target app is not available within a workspace
           // refresh the page by doing a hard navigation
@@ -315,7 +315,7 @@ export class ApplicationService {
         const targetApp = applications$.value.get(appId);
         const relUrl = http.basePath.prepend(getAppUrl(availableMounters, appId, path), {
           withoutClientBasePath:
-            targetApp?.workspaceAvailability === WorkspaceAvailability.outOfWorkspace,
+            targetApp?.workspaceAvailability === WorkspaceAvailability.outsideWorkspace,
         });
         return absolute ? relativeToAbsolute(relUrl) : relUrl;
       },

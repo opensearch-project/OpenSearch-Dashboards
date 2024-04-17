@@ -188,7 +188,7 @@ describe('toNavLink', () => {
     expect(
       toNavLink(
         app({
-          workspaceAvailability: WorkspaceAvailability.outOfWorkspace,
+          workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
         }),
         httpMock.basePath
       ).properties
@@ -202,7 +202,7 @@ describe('toNavLink', () => {
     expect(
       toNavLink(
         app({
-          workspaceAvailability: WorkspaceAvailability.inWorkspace,
+          workspaceAvailability: WorkspaceAvailability.insideWorkspace,
         }),
         httpMock.basePath
       ).properties
