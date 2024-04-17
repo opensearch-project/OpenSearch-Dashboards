@@ -183,14 +183,17 @@ export class DataSourceSelectable extends React.Component<
         'title',
         'auth.type',
       ]);
-      if (fetchedDataSources?.length === 0 && this.props.hideLocalCluster) {
-        this.setState({ showEmptyState: true });
-      }
 
       const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(
         fetchedDataSources,
         this.props.dataSourceFilter
       );
+
+      console.log("dataSourceOptions", dataSourceOptions)
+
+      if (dataSourceOptions.length === 0 && this.props.hideLocalCluster) {
+        this.setState({ showEmptyState: true });
+      }
 
       if (!this.props.hideLocalCluster) {
         dataSourceOptions.unshift(LocalCluster);
