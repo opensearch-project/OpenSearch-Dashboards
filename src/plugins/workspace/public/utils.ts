@@ -75,7 +75,7 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
  */
 export function isAppAccessibleInWorkspace(app: App, workspace: WorkspaceObject) {
   /**
-   * App is not accessible within workspace if it explicitly declare itself as WorkspaceAvailability.outOfWorkspace
+   * App is not accessible within workspace if it explicitly declare itself as WorkspaceAvailability.outsideWorkspace
    */
   if (app.workspaceAvailability === WorkspaceAvailability.outsideWorkspace) {
     return false;
