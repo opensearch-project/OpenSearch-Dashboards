@@ -54,6 +54,13 @@ export interface Limits {
   };
 }
 
+export interface SortedLimits {
+  pageLoadAssetSize?: {
+    'External Plugins': { [id: string]: number };
+    'OpenSearch Dashboards Plugins': { [id: string]: number };
+  };
+}
+
 function pickMaxWorkerCount(dist: boolean) {
   // don't break if cpus() returns nothing, or an empty array
   const cpuCount = Math.max(Os.cpus()?.length, 1);
