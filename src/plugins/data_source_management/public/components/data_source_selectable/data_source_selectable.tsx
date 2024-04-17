@@ -189,8 +189,6 @@ export class DataSourceSelectable extends React.Component<
         this.props.dataSourceFilter
       );
 
-      console.log("dataSourceOptions", dataSourceOptions)
-
       if (dataSourceOptions.length === 0 && this.props.hideLocalCluster) {
         this.setState({ showEmptyState: true });
       }
