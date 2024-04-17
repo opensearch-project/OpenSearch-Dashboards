@@ -6,6 +6,10 @@
 import React, { useCallback } from 'react';
 import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { useObservable } from 'react-use';
+import { BehaviorSubject, of } from 'rxjs';
+
+import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
@@ -13,10 +17,17 @@ import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
 
-export const WorkspaceCreator = () => {
+export interface WorkspaceCreatorProps {
+  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+}
+
+export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const {
     services: { application, notifications, http, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
+  const workspaceConfigurableApps = useObservable(
+    props.workspaceConfigurableApps$ ?? of(undefined)
+  );
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const handleWorkspaceFormSubmit = useCallback(
@@ -86,6 +97,7 @@ export const WorkspaceCreator = () => {
               application={application}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
+              workspaceConfigurableApps={workspaceConfigurableApps}
               permissionEnabled={isPermissionEnabled}
               permissionLastAdminItemDeletable
             />
