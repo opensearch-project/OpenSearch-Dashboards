@@ -39,6 +39,15 @@ export class WorkspaceIdConsumerWrapper {
       ...(finalWorkspaces.length ? { workspaces: finalWorkspaces } : {}),
     };
   }
+
+  private isWorkspaceType(type: SavedObjectsFindOptions['type']): boolean {
+    if (Array.isArray(type)) {
+      return type.every((item) => item === WORKSPACE_TYPE);
+    }
+
+    return type === WORKSPACE_TYPE;
+  }
+
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
     return {
       ...wrapperOptions.client,
@@ -67,7 +76,7 @@ export class WorkspaceIdConsumerWrapper {
       delete: wrapperOptions.client.delete,
       find: (options: SavedObjectsFindOptions) => {
         const findOptions = this.formatWorkspaceIdParams(wrapperOptions.request, options);
-        if (findOptions.type && findOptions.type === WORKSPACE_TYPE) {
+        if (this.isWorkspaceType(findOptions.type)) {
           return wrapperOptions.client.find(findOptions);
         }
 

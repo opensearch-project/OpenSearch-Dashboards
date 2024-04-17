@@ -116,13 +116,31 @@ describe('WorkspaceIdConsumerWrapper', () => {
       });
     });
 
-    it(`Should set workspacesSearchOperator when search with public workspace`, async () => {
+    it(`Should set workspacesSearchOperator to OR when search with public workspace`, async () => {
       await wrapperClient.find({
         type: 'dashboard',
         workspaces: [PUBLIC_WORKSPACE_ID],
       });
       expect(mockedClient.find).toBeCalledWith({
         type: 'dashboard',
+        workspaces: [PUBLIC_WORKSPACE_ID],
+        workspacesSearchOperator: 'OR',
+      });
+    });
+
+    it(`Should set workspace as pubic when workspace is not specified`, async () => {
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, {});
+      const mockedWrapperClient = wrapperInstance.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+      await mockedWrapperClient.find({
+        type: ['dashboard', 'visualization'],
+      });
+      expect(mockedClient.find).toBeCalledWith({
+        type: ['dashboard', 'visualization'],
         workspaces: [PUBLIC_WORKSPACE_ID],
         workspacesSearchOperator: 'OR',
       });
