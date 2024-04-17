@@ -199,10 +199,27 @@ describe('toNavLink', () => {
       })
     );
 
+    // When app is accessible inside workspace or outside workspace.
     expect(
       toNavLink(
         app({
           workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+        }),
+        httpMock.basePath
+      ).properties
+    ).toEqual(
+      expect.objectContaining({
+        url: 'http://localhost/base_path/client_base_path/app/some-id',
+        baseUrl: 'http://localhost/base_path/client_base_path/app/some-id',
+      })
+    );
+
+    expect(
+      toNavLink(
+        app({
+          workspaceAvailability:
+            // eslint-disable-next-line no-bitwise
+            WorkspaceAvailability.insideWorkspace | WorkspaceAvailability.outsideWorkspace,
         }),
         httpMock.basePath
       ).properties
