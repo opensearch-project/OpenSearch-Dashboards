@@ -40,6 +40,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         dataSourceFilter={dataSourceFilter}
         onSelectedDataSources={onSelectedDataSources}
         uiSettings={uiSettings}
+        application={application}
       />
     );
   }
