@@ -116,6 +116,7 @@ export class DataSourceAggregatedView extends React.Component<
           ...this.state,
           allDataSourcesIdToTitleMap,
           defaultDataSource: this.props.uiSettings?.get('defaultDataSource', null) ?? null,
+          showEmptyState: allDataSourcesIdToTitleMap.size === 0,
         });
       })
       .catch(() => {
