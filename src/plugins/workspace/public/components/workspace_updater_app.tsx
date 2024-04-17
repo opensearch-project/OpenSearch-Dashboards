@@ -7,9 +7,9 @@ import React, { useEffect } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { WorkspaceUpdater } from './workspace_updater';
+import { WorkspaceUpdater, WorkspaceUpdaterProps } from './workspace_updater';
 
-export const WorkspaceUpdaterApp = () => {
+export const WorkspaceUpdaterApp = (props: WorkspaceUpdaterProps) => {
   const {
     services: { chrome },
   } = useOpenSearchDashboards();
@@ -29,7 +29,7 @@ export const WorkspaceUpdaterApp = () => {
 
   return (
     <I18nProvider>
-      <WorkspaceUpdater />
+      <WorkspaceUpdater {...props} />
     </I18nProvider>
   );
 };

@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { WorkspaceUpdater } from './workspace_updater';
+export { WorkspaceUpdater, WorkspaceUpdaterProps } from './workspace_updater';
