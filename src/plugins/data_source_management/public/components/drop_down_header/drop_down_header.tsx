@@ -4,7 +4,7 @@
  */
 
 import './drop_down_header.scss';
-import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
+import { EuiTitle, EuiFlexGroup, EuiFlexItem, EuiLink, EuiPopoverTitle } from '@elastic/eui';
 import React from 'react';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { DSM_APP_ID } from '../../plugin';
@@ -27,7 +27,7 @@ export const DataSourceDropDownHeader: React.FC<DataSourceOptionItemProps> = ({
       : totalDataSourceCount;
 
   return (
-    <EuiTitle size="xxxs">
+    <EuiPopoverTitle paddingSize="s">
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           {dataSourceCounterPrefix} ({dataSourceCounter})
@@ -45,6 +45,6 @@ export const DataSourceDropDownHeader: React.FC<DataSourceOptionItemProps> = ({
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiTitle>
+    </EuiPopoverTitle>
   );
 };

@@ -24,24 +24,18 @@ exports[`DataSourceView Should render successfully when provided datasource has 
   ownFocus={true}
   panelPaddingSize="none"
 >
+  <DataSourceDropDownHeader
+    totalDataSourceCount={1}
+  />
   <EuiContextMenuPanel
+    className="dataSourceViewOuiPanel"
     hasFocus={true}
     items={Array []}
   >
     <EuiPanel
       borderRadius="none"
-      className="dataSourceViewOuiPanel"
-      color="transparent"
-      paddingSize="s"
-    >
-      <DataSourceDropDownHeader
-        totalDataSourceCount={1}
-      />
-    </EuiPanel>
-    <EuiPanel
-      borderRadius="none"
       color="subdued"
-      paddingSize="xs"
+      paddingSize="none"
     >
       <EuiSelectable
         compressed={true}
@@ -103,24 +97,18 @@ exports[`DataSourceView should call getDataSourceById when only pass id with no 
   ownFocus={true}
   panelPaddingSize="none"
 >
+  <DataSourceDropDownHeader
+    totalDataSourceCount={1}
+  />
   <EuiContextMenuPanel
+    className="dataSourceViewOuiPanel"
     hasFocus={true}
     items={Array []}
   >
     <EuiPanel
       borderRadius="none"
-      className="dataSourceViewOuiPanel"
-      color="transparent"
-      paddingSize="s"
-    >
-      <DataSourceDropDownHeader
-        totalDataSourceCount={1}
-      />
-    </EuiPanel>
-    <EuiPanel
-      borderRadius="none"
       color="subdued"
-      paddingSize="xs"
+      paddingSize="none"
     >
       <EuiSelectable
         compressed={true}
@@ -174,24 +162,18 @@ exports[`DataSourceView should render normally with local cluster not hidden 1`]
   ownFocus={true}
   panelPaddingSize="none"
 >
+  <DataSourceDropDownHeader
+    totalDataSourceCount={1}
+  />
   <EuiContextMenuPanel
+    className="dataSourceViewOuiPanel"
     hasFocus={true}
     items={Array []}
   >
     <EuiPanel
       borderRadius="none"
-      className="dataSourceViewOuiPanel"
-      color="transparent"
-      paddingSize="s"
-    >
-      <DataSourceDropDownHeader
-        totalDataSourceCount={1}
-      />
-    </EuiPanel>
-    <EuiPanel
-      borderRadius="none"
       color="subdued"
-      paddingSize="xs"
+      paddingSize="none"
     >
       <EuiSelectable
         compressed={true}
@@ -277,41 +259,41 @@ Object {
           </p>
           <div>
             <div
-              class="euiContextMenuPanel"
+              class="euiPopoverTitle euiPopoverTitle--paddingSmall"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+              >
+                <div
+                  class="euiFlexItem"
+                >
+                  DATA SOURCE
+                   (
+                  1
+                  )
+                </div>
+                <div
+                  class="dataSourceDropDownHeaderInvisibleFocusable"
+                  tabindex="0"
+                />
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <button
+                    class="euiLink euiLink--primary"
+                    type="button"
+                  >
+                    Manage
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiContextMenuPanel dataSourceViewOuiPanel"
               tabindex="-1"
             >
               <div>
                 <div>
-                  <div
-                    class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow dataSourceViewOuiPanel"
-                  >
-                    <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiTitle euiTitle--xxxsmall"
-                    >
-                      <div
-                        class="euiFlexItem"
-                      >
-                        DATA SOURCE
-                         (
-                        1
-                        )
-                      </div>
-                      <div
-                        class="dataSourceDropDownHeaderInvisibleFocusable"
-                        tabindex="0"
-                      />
-                      <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
-                      >
-                        <button
-                          class="euiLink euiLink--primary"
-                          type="button"
-                        >
-                          Manage
-                        </button>
-                      </div>
-                    </div>
-                  </div>
                   <div
                     class="euiPanel euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder"
                   >
