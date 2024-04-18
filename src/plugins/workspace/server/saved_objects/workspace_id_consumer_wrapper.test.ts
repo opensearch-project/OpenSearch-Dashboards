@@ -189,7 +189,7 @@ describe('WorkspaceIdConsumerWrapper', () => {
       await mockedWrapperClient.find({
         type: ['dashboard', 'visualization'],
       });
-      // empty workspace array will de deleted
+      // empty workspace array will get deleted
       expect(mockedClient.find).toBeCalledWith({
         type: ['dashboard', 'visualization'],
         workspacesSearchOperator: 'OR',

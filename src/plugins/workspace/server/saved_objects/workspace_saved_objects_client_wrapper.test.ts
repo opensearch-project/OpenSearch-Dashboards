@@ -576,12 +576,13 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           },
         });
 
-        // workspace is undefined
+        // workspaces parameter is undefined
+        clientMock.find.mockReset();
         await wrapper.find({
           type: 'dashboards',
           workspaces: undefined,
         });
-        expect(clientMock.find).toHaveBeenCalledWith({
+        expect(clientMock.find).toHaveBeenLastCalledWith({
           type: 'dashboards',
           ACLSearchParams: {
             principals: {
@@ -591,13 +592,15 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           },
         });
 
-        // empty workspace array
+        // empty workspaces array
+        clientMock.find.mockReset();
         await wrapper.find({
           type: 'dashboards',
           workspaces: [],
         });
-        expect(clientMock.find).toHaveBeenCalledWith({
+        expect(clientMock.find).toHaveBeenLastCalledWith({
           type: 'dashboards',
+          workspaces: [],
           ACLSearchParams: {
             principals: {
               users: ['user-1'],
