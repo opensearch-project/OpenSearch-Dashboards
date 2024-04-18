@@ -8,12 +8,19 @@ import {
   SavedObjectsClientContract,
   SavedObject,
   IUiSettingsClient,
+  ApplicationStart,
 } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 
 export interface DataSourceOption {
   id: string;
   label?: string;
+  checked?: string;
+}
+
+export interface DataSourceGroupLabelOption extends DataSourceOption {
+  label: string;
+  isGroupLabel: true;
 }
 
 export interface DataSourceBaseConfig {
@@ -21,11 +28,17 @@ export interface DataSourceBaseConfig {
   disabled?: boolean;
 }
 
+export interface DataSourceBaseState {
+  showEmptyState: boolean;
+  showError: boolean;
+}
+
 export interface DataSourceMenuProps<T = any> {
   componentType: DataSourceComponentType;
   componentConfig: T;
   hideLocalCluster?: boolean;
   uiSettings?: IUiSettingsClient;
+  application?: ApplicationStart;
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
 }
 
@@ -42,15 +55,26 @@ export interface DataSourceViewConfig extends DataSourceBaseConfig {
   activeOption: DataSourceOption[];
   savedObjects?: SavedObjectsClientContract;
   notifications?: NotificationsStart;
+  dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
+  onSelectedDataSources?: (dataSources: DataSourceOption[]) => void;
 }
 
-export interface DataSourceAggregatedViewConfig extends DataSourceBaseConfig {
+interface DataSourceAggregatedViewBaseConfig extends DataSourceBaseConfig {
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
-  activeDataSourceIds?: string[];
-  displayAllCompatibleDataSources?: boolean;
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
+  uiSettings?: IUiSettingsClient;
 }
+
+export type DataSourceAggregatedViewConfig =
+  | (DataSourceAggregatedViewBaseConfig & {
+      activeDataSourceIds: string[];
+      displayAllCompatibleDataSources: false;
+    })
+  | (DataSourceAggregatedViewBaseConfig & {
+      activeDataSourceIds?: string[];
+      displayAllCompatibleDataSources: true;
+    });
 
 export interface DataSourceSelectableConfig extends DataSourceBaseConfig {
   onSelectedDataSources: (dataSources: DataSourceOption[]) => void;

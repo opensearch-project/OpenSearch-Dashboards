@@ -32,6 +32,7 @@ import moment from 'moment-timezone';
 import { merge } from 'lodash';
 import { schema } from '@osd/config-schema';
 import { LogRecord, Layout } from '@osd/logging';
+import { cleanControlSequences } from '@osd/std';
 
 const { literal, object } = schema;
 
@@ -57,9 +58,9 @@ export class JsonLayout implements Layout {
     }
 
     return {
-      message: error.message,
+      message: cleanControlSequences(error.message),
       type: error.name,
-      stack_trace: error.stack,
+      stack_trace: error.stack && cleanControlSequences(error.stack),
     };
   }
 
@@ -68,7 +69,7 @@ export class JsonLayout implements Layout {
       merge(
         {
           '@timestamp': moment(record.timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-          message: record.message,
+          message: cleanControlSequences(record.message),
           error: JsonLayout.errorToSerializableObject(record.error),
           log: {
             level: record.level.id.toUpperCase(),

@@ -21,7 +21,10 @@ import {
 } from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId } from './utils';
-import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
+import {
+  WORKSPACE_ID_CONSUMER_WRAPPER_ID,
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+} from '../common/constants';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -41,7 +44,15 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     requestDetail: IRequestDetail
   ): SavedObjectsClientContract | undefined {
     return this.savedObjects?.getScopedClient(requestDetail.request, {
-      excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+      excludedWrappers: [
+        WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+        /**
+         * workspace object does not have workspaces field
+         * so need to bypass workspace id consumer wrapper
+         * for any kind of operation to saved objects client.
+         */
+        WORKSPACE_ID_CONSUMER_WRAPPER_ID,
+      ],
       includedHiddenTypes: [WORKSPACE_TYPE],
     });
   }
@@ -50,15 +61,17 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     requestDetail: IRequestDetail
   ): SavedObjectsClientContract {
     return this.savedObjects?.getScopedClient(requestDetail.request, {
+      excludedWrappers: [WORKSPACE_ID_CONSUMER_WRAPPER_ID],
       includedHiddenTypes: [WORKSPACE_TYPE],
     }) as SavedObjectsClientContract;
   }
   private getFlattenedResultWithSavedObject(
     savedObject: SavedObject<WorkspaceAttribute>
-  ): WorkspaceAttribute {
+  ): WorkspaceAttributeWithPermission {
     return {
       ...savedObject.attributes,
       id: savedObject.id,
+      permissions: savedObject.permissions,
     };
   }
   private formatError(error: Error | any): string {
@@ -160,7 +173,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   public async update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
+    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>>
   ): Promise<IResponse<boolean>> {
     const { permissions, ...attributes } = payload;
     try {
@@ -179,12 +192,16 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
         }
       }
-      await client.create<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, attributes, {
-        id,
-        permissions,
-        overwrite: true,
-        version: workspaceInDB.version,
-      });
+      await client.create<Omit<WorkspaceAttribute, 'id'>>(
+        WORKSPACE_TYPE,
+        { ...workspaceInDB.attributes, ...attributes },
+        {
+          id,
+          permissions,
+          overwrite: true,
+          version: workspaceInDB.version,
+        }
+      );
       return {
         success: true,
         result: true,

@@ -10,8 +10,10 @@ import React from 'react';
 import { DataSourceSelectable } from './data_source_selectable';
 import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
-import { getByRole, render } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import * as utils from '../utils';
+import { EuiSelectable } from '@elastic/eui';
+import { dataSourceOptionGroupLabel } from '../utils';
 
 describe('DataSourceSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -137,12 +139,14 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           id: 'test2',
           label: 'test2',
         },
       ],
+      showError: false,
     });
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
@@ -156,6 +160,7 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           checked: 'on',
@@ -163,6 +168,7 @@ describe('DataSourceSelectable', () => {
           label: 'test2',
         },
       ],
+      showError: false,
     });
 
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
@@ -333,12 +339,14 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           id: 'test2',
           label: 'test2',
         },
       ],
+      showError: false,
     });
   });
 
@@ -360,12 +368,14 @@ describe('DataSourceSelectable', () => {
 
     const containerInstance = container.instance();
 
-    expect(onSelectedDataSource).toBeCalledTimes(0);
+    expect(onSelectedDataSource).toBeCalledWith([]);
     expect(containerInstance.state).toEqual({
       dataSourceOptions: [],
       defaultDataSource: null,
       isPopoverOpen: false,
       selectedOption: [],
+      showEmptyState: false,
+      showError: true,
     });
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
@@ -379,6 +389,7 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           checked: 'on',
@@ -386,9 +397,28 @@ describe('DataSourceSelectable', () => {
           label: 'test2',
         },
       ],
+      showError: true,
     });
 
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toHaveBeenCalled();
+  });
+  it('should render no data source when no data source filtered out and hide local cluster', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        disabled={false}
+        hideLocalCluster={true}
+        fullWidth={false}
+        selectedOption={[{ id: 'test2' }]}
+        dataSourceFilter={(ds) => false}
+      />
+    );
+    await nextTick();
+    const button = await container.findByTestId('dataSourceEmptyStateHeaderButton');
+    expect(button).toHaveTextContent('No data sources');
   });
 });
