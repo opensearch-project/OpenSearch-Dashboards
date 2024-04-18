@@ -126,3 +126,5 @@ export interface SavedObjectError {
   statusCode: number;
   metadata?: Record<string, unknown>;
 }
+
+export type SavedObjectPermissions = Permissions;

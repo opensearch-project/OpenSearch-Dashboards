@@ -2,15 +2,26 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
-import { HttpStart, SavedObjectsClientContract } from 'src/core/public';
+import { i18n } from '@osd/i18n';
+import {
+  HttpStart,
+  SavedObjectsClientContract,
+  SavedObject,
+  IUiSettingsClient,
+  ToastsStart,
+  ApplicationStart,
+} from 'src/core/public';
+import { deepFreeze } from '@osd/std';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
   defaultAuthType,
   noAuthCredentialAuthMethod,
 } from '../types';
-import { AuthenticationMethodRegistery } from '../auth_registry';
+import { AuthenticationMethodRegistry } from '../auth_registry';
+import { DataSourceOption } from './data_source_menu/types';
+import { DataSourceGroupLabelOption } from './data_source_menu/types';
+import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -39,8 +50,8 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
 export async function getDataSourcesWithFields(
   savedObjectsClient: SavedObjectsClientContract,
   fields: string[]
-) {
-  const response = await savedObjectsClient.find({
+): Promise<Array<SavedObject<DataSourceAttributes>>> {
+  const response = await savedObjectsClient.find<DataSourceAttributes>({
     type: 'data-source',
     fields,
     perPage: 10000,
@@ -49,20 +60,102 @@ export async function getDataSourcesWithFields(
   return response?.savedObjects;
 }
 
+export async function handleSetDefaultDatasource(
+  savedObjectsClient: SavedObjectsClientContract,
+  uiSettings: IUiSettingsClient
+) {
+  if (uiSettings.get('defaultDataSource', null) === null) {
+    return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false);
+  }
+}
+
+export async function setFirstDataSourceAsDefault(
+  savedObjectsClient: SavedObjectsClientContract,
+  uiSettings: IUiSettingsClient,
+  exists: boolean
+) {
+  if (exists) {
+    uiSettings.remove('defaultDataSource');
+  }
+  const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
+  if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
+    const datasourceId = listOfDataSources[0].id;
+    return await uiSettings.set('defaultDataSource', datasourceId);
+  }
+}
+
+export function handleNoAvailableDataSourceError(notifications: ToastsStart) {
+  notifications.addWarning(
+    i18n.translate('dataSource.noAvailableDataSourceError', {
+      defaultMessage: `Data source is not available`,
+    })
+  );
+}
+
+export function getFilteredDataSources(
+  dataSources: Array<SavedObject<DataSourceAttributes>>,
+  filter = (ds: SavedObject<DataSourceAttributes>) => true
+): DataSourceOption[] {
+  return dataSources
+    .filter((ds) => filter!(ds))
+    .map((ds) => ({
+      id: ds.id,
+      label: ds.attributes?.title || '',
+    }))
+    .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
+}
+
+export function getDefaultDataSource(
+  dataSourcesOptions: DataSourceOption[],
+  LocalCluster: DataSourceOption,
+  defaultDataSourceId: string | null,
+  hideLocalCluster?: boolean
+) {
+  const defaultDataSourceAfterCheck = dataSourcesOptions.find(
+    (dataSource) => dataSource.id === defaultDataSourceId
+  );
+  if (defaultDataSourceAfterCheck) {
+    return [
+      {
+        id: defaultDataSourceAfterCheck.id,
+        label: defaultDataSourceAfterCheck.label,
+      },
+    ];
+  }
+
+  if (!hideLocalCluster) {
+    return [LocalCluster];
+  }
+
+  if (dataSourcesOptions.length > 0) {
+    return [
+      {
+        id: dataSourcesOptions[0].id,
+        label: dataSourcesOptions[0].label,
+      },
+    ];
+  }
+  return [];
+}
+
 export async function getDataSourceById(
   id: string,
   savedObjectsClient: SavedObjectsClientContract
 ) {
-  return savedObjectsClient.get('data-source', id).then((response) => {
-    const attributes: any = response?.attributes || {};
-    return {
-      id: response.id,
-      title: attributes.title,
-      endpoint: attributes.endpoint,
-      description: attributes.description || '',
-      auth: attributes.auth,
-    };
-  });
+  const response = await savedObjectsClient.get('data-source', id);
+
+  if (!response || response.error) {
+    throw new Error('Unable to find data source');
+  }
+
+  const attributes: any = response?.attributes || {};
+  return {
+    id: response.id,
+    title: attributes.title,
+    endpoint: attributes.endpoint,
+    description: attributes.description || '',
+    auth: attributes.auth,
+  };
 }
 
 export async function createSingleDataSource(
@@ -119,6 +212,27 @@ export async function testConnection(
   });
 }
 
+export async function fetchDataSourceMetaData(
+  http: HttpStart,
+  { endpoint, auth: { type, credentials } }: DataSourceAttributes,
+  dataSourceID?: string
+) {
+  const query: any = {
+    id: dataSourceID,
+    dataSourceAttr: {
+      endpoint,
+      auth: {
+        type,
+        credentials,
+      },
+    },
+  };
+
+  return await http.post(`/internal/data-source-management/fetchDataSourceMetaData`, {
+    body: JSON.stringify(query),
+  });
+}
+
 export const isValidUrl = (endpoint: string) => {
   try {
     const url = new URL(endpoint);
@@ -129,17 +243,17 @@ export const isValidUrl = (endpoint: string) => {
 };
 
 export const getDefaultAuthMethod = (
-  authenticationMethodRegistery: AuthenticationMethodRegistery
+  authenticationMethodRegistry: AuthenticationMethodRegistry
 ) => {
-  const registeredAuthMethods = authenticationMethodRegistery.getAllAuthenticationMethods();
+  const registeredAuthMethods = authenticationMethodRegistry.getAllAuthenticationMethods();
 
   const defaultAuthMethod =
     registeredAuthMethods.length > 0
-      ? authenticationMethodRegistery.getAuthenticationMethod(registeredAuthMethods[0].name)
+      ? authenticationMethodRegistry.getAuthenticationMethod(registeredAuthMethods[0].name)
       : noAuthCredentialAuthMethod;
 
   const initialSelectedAuthMethod =
-    authenticationMethodRegistery.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
+    authenticationMethodRegistry.getAuthenticationMethod(defaultAuthType) ?? defaultAuthMethod;
 
   return initialSelectedAuthMethod;
 };
@@ -147,15 +261,45 @@ export const getDefaultAuthMethod = (
 export const extractRegisteredAuthTypeCredentials = (
   currentCredentialState: { [key: string]: string },
   authType: string,
-  authenticationMethodRegistery: AuthenticationMethodRegistery
+  authenticationMethodRegistry: AuthenticationMethodRegistry
 ) => {
   const registeredCredentials = {} as { [key: string]: string };
   const registeredCredentialField =
-    authenticationMethodRegistery.getAuthenticationMethod(authType)?.crendentialFormField ?? {};
+    authenticationMethodRegistry.getAuthenticationMethod(authType)?.credentialFormField ?? {};
 
-  Object.keys(registeredCredentialField).forEach((credentialFiled) => {
-    registeredCredentials[credentialFiled] = currentCredentialState[credentialFiled] ?? '';
+  Object.keys(registeredCredentialField).forEach((credentialField) => {
+    registeredCredentials[credentialField] =
+      currentCredentialState[credentialField] ?? registeredCredentialField[credentialField];
   });
 
   return registeredCredentials;
 };
+
+export const handleDataSourceFetchError = (
+  changeState: (state: { showError: boolean }) => void,
+  notifications: ToastsStart,
+  callback?: (ds: DataSourceOption[]) => void
+) => {
+  changeState({ showError: true });
+  if (callback) callback([]);
+  notifications.addWarning(
+    i18n.translate('dataSource.fetchDataSourceError', {
+      defaultMessage: 'Failed to fetch data source',
+    })
+  );
+};
+
+interface DataSourceOptionGroupLabel {
+  [key: string]: DataSourceGroupLabelOption;
+}
+
+export const dataSourceOptionGroupLabel = deepFreeze<Readonly<DataSourceOptionGroupLabel>>({
+  opensearchCluster: {
+    id: 'opensearchClusterGroupLabel',
+    label: 'OpenSearch cluster',
+    isGroupLabel: true,
+  },
+  // TODO: add other group labels if needed
+});
+
+export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');

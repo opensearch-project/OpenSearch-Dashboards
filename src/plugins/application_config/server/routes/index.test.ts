@@ -79,6 +79,10 @@ describe('application config routes', () => {
         getConfig: jest.fn().mockReturnValue(configurations),
       };
 
+      const getConfigurationClient = jest.fn().mockReturnValue(client);
+
+      const request = {};
+
       const okResponse = {
         statusCode: 200,
       };
@@ -89,7 +93,12 @@ describe('application config routes', () => {
 
       const logger = loggerMock.create();
 
-      const returnedResponse = await handleGetConfig(client, response, logger);
+      const returnedResponse = await handleGetConfig(
+        getConfigurationClient,
+        request,
+        response,
+        logger
+      );
 
       expect(returnedResponse).toBe(okResponse);
 
@@ -98,6 +107,8 @@ describe('application config routes', () => {
           value: configurations,
         },
       });
+
+      expect(getConfigurationClient).toBeCalledWith(request);
     });
 
     it('return error response when client throws error', async () => {
@@ -109,13 +120,22 @@ describe('application config routes', () => {
         }),
       };
 
+      const getConfigurationClient = jest.fn().mockReturnValue(client);
+
+      const request = {};
+
       const response = {
         customError: jest.fn().mockReturnValue(ERROR_RESPONSE),
       };
 
       const logger = loggerMock.create();
 
-      const returnedResponse = await handleGetConfig(client, response, logger);
+      const returnedResponse = await handleGetConfig(
+        getConfigurationClient,
+        request,
+        response,
+        logger
+      );
 
       expect(returnedResponse).toBe(ERROR_RESPONSE);
 
@@ -127,6 +147,7 @@ describe('application config routes', () => {
       });
 
       expect(logger.error).toBeCalledWith(error);
+      expect(getConfigurationClient).toBeCalledWith(request);
     });
   });
 
@@ -135,6 +156,8 @@ describe('application config routes', () => {
       const client = {
         getEntityConfig: jest.fn().mockReturnValue(ENTITY_VALUE),
       };
+
+      const getConfigurationClient = jest.fn().mockReturnValue(client);
 
       const okResponse = {
         statusCode: 200,
@@ -152,7 +175,12 @@ describe('application config routes', () => {
 
       const logger = loggerMock.create();
 
-      const returnedResponse = await handleGetEntityConfig(client, request, response, logger);
+      const returnedResponse = await handleGetEntityConfig(
+        getConfigurationClient,
+        request,
+        response,
+        logger
+      );
 
       expect(returnedResponse).toBe(okResponse);
 
@@ -161,6 +189,8 @@ describe('application config routes', () => {
           value: ENTITY_VALUE,
         },
       });
+
+      expect(getConfigurationClient).toBeCalledWith(request);
     });
 
     it('return error response when client throws error', async () => {
@@ -171,6 +201,8 @@ describe('application config routes', () => {
           throw error;
         }),
       };
+
+      const getConfigurationClient = jest.fn().mockReturnValue(client);
 
       const request = {
         params: {
@@ -184,7 +216,12 @@ describe('application config routes', () => {
 
       const logger = loggerMock.create();
 
-      const returnedResponse = await handleGetEntityConfig(client, request, response, logger);
+      const returnedResponse = await handleGetEntityConfig(
+        getConfigurationClient,
+        request,
+        response,
+        logger
+      );
 
       expect(returnedResponse).toBe(ERROR_RESPONSE);
 
@@ -196,6 +233,8 @@ describe('application config routes', () => {
       });
 
       expect(logger.error).toBeCalledWith(error);
+
+      expect(getConfigurationClient).toBeCalledWith(request);
     });
   });
 
@@ -204,6 +243,8 @@ describe('application config routes', () => {
       const client = {
         updateEntityConfig: jest.fn().mockReturnValue(ENTITY_NEW_VALUE),
       };
+
+      const getConfigurationClient = jest.fn().mockReturnValue(client);
 
       const okResponse = {
         statusCode: 200,
@@ -224,7 +265,12 @@ describe('application config routes', () => {
 
       const logger = loggerMock.create();
 
-      const returnedResponse = await handleUpdateEntityConfig(client, request, response, logger);
+      const returnedResponse = await handleUpdateEntityConfig(
+        getConfigurationClient,
+        request,
+        response,
+        logger
+      );
 
       expect(returnedResponse).toBe(okResponse);
 
@@ -237,6 +283,8 @@ describe('application config routes', () => {
       });
 
       expect(logger.error).not.toBeCalled();
+
+      expect(getConfigurationClient).toBeCalledWith(request);
     });
 
     it('return error response when client fails', async () => {
@@ -247,6 +295,8 @@ describe('application config routes', () => {
           throw error;
         }),
       };
+
+      const getConfigurationClient = jest.fn().mockReturnValue(client);
 
       const request = {
         params: {
@@ -263,7 +313,12 @@ describe('application config routes', () => {
 
       const logger = loggerMock.create();
 
-      const returnedResponse = await handleUpdateEntityConfig(client, request, response, logger);
+      const returnedResponse = await handleUpdateEntityConfig(
+        getConfigurationClient,
+        request,
+        response,
+        logger
+      );
 
       expect(returnedResponse).toBe(ERROR_RESPONSE);
 
@@ -275,6 +330,8 @@ describe('application config routes', () => {
       });
 
       expect(logger.error).toBeCalledWith(error);
+
+      expect(getConfigurationClient).toBeCalledWith(request);
     });
   });
 
@@ -283,6 +340,8 @@ describe('application config routes', () => {
       const client = {
         deleteEntityConfig: jest.fn().mockReturnValue(ENTITY_NAME),
       };
+
+      const getConfigurationClient = jest.fn().mockReturnValue(client);
 
       const okResponse = {
         statusCode: 200,
@@ -300,7 +359,12 @@ describe('application config routes', () => {
 
       const logger = loggerMock.create();
 
-      const returnedResponse = await handleDeleteEntityConfig(client, request, response, logger);
+      const returnedResponse = await handleDeleteEntityConfig(
+        getConfigurationClient,
+        request,
+        response,
+        logger
+      );
 
       expect(returnedResponse).toBe(okResponse);
 
@@ -313,6 +377,7 @@ describe('application config routes', () => {
       });
 
       expect(logger.error).not.toBeCalled();
+      expect(getConfigurationClient).toBeCalledWith(request);
     });
 
     it('return error response when client fails', async () => {
@@ -323,6 +388,8 @@ describe('application config routes', () => {
           throw error;
         }),
       };
+
+      const getConfigurationClient = jest.fn().mockReturnValue(client);
 
       const request = {
         params: {
@@ -336,7 +403,12 @@ describe('application config routes', () => {
 
       const logger = loggerMock.create();
 
-      const returnedResponse = await handleDeleteEntityConfig(client, request, response, logger);
+      const returnedResponse = await handleDeleteEntityConfig(
+        getConfigurationClient,
+        request,
+        response,
+        logger
+      );
 
       expect(returnedResponse).toBe(ERROR_RESPONSE);
 
@@ -348,6 +420,8 @@ describe('application config routes', () => {
       });
 
       expect(logger.error).toBeCalledWith(error);
+
+      expect(getConfigurationClient).toBeCalledWith(request);
     });
   });
 });

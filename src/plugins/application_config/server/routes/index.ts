@@ -6,7 +6,6 @@
 import { schema } from '@osd/config-schema';
 import {
   IRouter,
-  IScopedClusterClient,
   Logger,
   OpenSearchDashboardsRequest,
   OpenSearchDashboardsResponseFactory,
@@ -15,7 +14,7 @@ import { ConfigurationClient } from '../types';
 
 export function defineRoutes(
   router: IRouter,
-  getConfigurationClient: (configurationClient: IScopedClusterClient) => ConfigurationClient,
+  getConfigurationClient: (request?: OpenSearchDashboardsRequest) => ConfigurationClient,
   logger: Logger
 ) {
   router.get(
@@ -24,9 +23,7 @@ export function defineRoutes(
       validate: false,
     },
     async (context, request, response) => {
-      const client = getConfigurationClient(context.core.opensearch.client);
-
-      return await handleGetConfig(client, response, logger);
+      return await handleGetConfig(getConfigurationClient, request, response, logger);
     }
   );
   router.get(
@@ -39,9 +36,7 @@ export function defineRoutes(
       },
     },
     async (context, request, response) => {
-      const client = getConfigurationClient(context.core.opensearch.client);
-
-      return await handleGetEntityConfig(client, request, response, logger);
+      return await handleGetEntityConfig(getConfigurationClient, request, response, logger);
     }
   );
   router.post(
@@ -57,9 +52,7 @@ export function defineRoutes(
       },
     },
     async (context, request, response) => {
-      const client = getConfigurationClient(context.core.opensearch.client);
-
-      return await handleUpdateEntityConfig(client, request, response, logger);
+      return await handleUpdateEntityConfig(getConfigurationClient, request, response, logger);
     }
   );
   router.delete(
@@ -72,21 +65,25 @@ export function defineRoutes(
       },
     },
     async (context, request, response) => {
-      const client = getConfigurationClient(context.core.opensearch.client);
-
-      return await handleDeleteEntityConfig(client, request, response, logger);
+      return await handleDeleteEntityConfig(getConfigurationClient, request, response, logger);
     }
   );
 }
 
 export async function handleGetEntityConfig(
-  client: ConfigurationClient,
+  getConfigurationClient: (request?: OpenSearchDashboardsRequest) => ConfigurationClient,
   request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
+  logger.info(`Received a request to get entity config for ${request.params.entity}.`);
+
+  const client = getConfigurationClient(request);
+
   try {
-    const result = await client.getEntityConfig(request.params.entity);
+    const result = await client.getEntityConfig(request.params.entity, {
+      headers: request.headers,
+    });
     return response.ok({
       body: {
         value: result,
@@ -99,13 +96,21 @@ export async function handleGetEntityConfig(
 }
 
 export async function handleUpdateEntityConfig(
-  client: ConfigurationClient,
+  getConfigurationClient: (request?: OpenSearchDashboardsRequest) => ConfigurationClient,
   request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
+  logger.info(
+    `Received a request to update entity ${request.params.entity} with new value ${request.body.newValue}.`
+  );
+
+  const client = getConfigurationClient(request);
+
   try {
-    const result = await client.updateEntityConfig(request.params.entity, request.body.newValue);
+    const result = await client.updateEntityConfig(request.params.entity, request.body.newValue, {
+      headers: request.headers,
+    });
     return response.ok({
       body: {
         newValue: result,
@@ -118,13 +123,19 @@ export async function handleUpdateEntityConfig(
 }
 
 export async function handleDeleteEntityConfig(
-  client: ConfigurationClient,
+  getConfigurationClient: (request?: OpenSearchDashboardsRequest) => ConfigurationClient,
   request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
+  logger.info(`Received a request to delete entity ${request.params.entity}.`);
+
+  const client = getConfigurationClient(request);
+
   try {
-    const result = await client.deleteEntityConfig(request.params.entity);
+    const result = await client.deleteEntityConfig(request.params.entity, {
+      headers: request.headers,
+    });
     return response.ok({
       body: {
         deletedEntity: result,
@@ -137,12 +148,17 @@ export async function handleDeleteEntityConfig(
 }
 
 export async function handleGetConfig(
-  client: ConfigurationClient,
+  getConfigurationClient: (request?: OpenSearchDashboardsRequest) => ConfigurationClient,
+  request: OpenSearchDashboardsRequest,
   response: OpenSearchDashboardsResponseFactory,
   logger: Logger
 ) {
+  logger.info('Received a request to get all configurations.');
+
+  const client = getConfigurationClient(request);
+
   try {
-    const result = await client.getConfig();
+    const result = await client.getConfig({ headers: request.headers });
     return response.ok({
       body: {
         value: result,

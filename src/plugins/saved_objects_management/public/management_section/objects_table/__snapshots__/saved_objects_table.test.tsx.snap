@@ -231,6 +231,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
             "edit": false,
             "read": true,
           },
+          "workspaces": Object {},
         },
         "currentAppId$": Observable {
           "_isScalar": false,
@@ -257,10 +258,13 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "has": [MockFunction],
         }
       }
+      availableWorkspaces={Array []}
       basePath={
         BasePath {
           "basePath": "",
+          "clientBasePath": "",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "",
@@ -274,6 +278,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "has": [MockFunction],
         }
       }
+      currentWorkspaceId=""
       filters={
         Array [
           Object {

@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NoDataSource should render correctly with the provided totalDataSourceCount 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <EuiButtonEmpty
+      className="euiHeaderLink"
+      color="primary"
+      data-test-subj="dataSourceEmptyStateHeaderButton"
+      iconSide="left"
+      iconType="alert"
+      onClick={[Function]}
+      size="s"
+    >
+       No data sources
+    </EuiButtonEmpty>
+  }
+  closePopover={[Function]}
+  data-test-subj="dataSourceEmptyStatePopover"
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceEmptyStatePopover"
+  initialFocus=".euiSelectableSearch"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <EuiContextMenuPanel
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      className="dataSourceSelectableOuiPanel"
+      color="transparent"
+      paddingSize="s"
+    >
+      <DataSourceDropDownHeader
+        totalDataSourceCount={0}
+      />
+      <EuiHorizontalRule
+        margin="none"
+      />
+      <EuiSpacer
+        size="s"
+      />
+      <EuiPanel
+        className="dataSourceEmptyStatePanel"
+        data-test-subj="datasourceTableEmptyState"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiText>
+          <FormattedMessage
+            defaultMessage="There is no data sources to display."
+            id="dataSourcesManagement.dataSourceMenu.noData"
+            values={Object {}}
+          />
+        </EuiText>
+        <EuiText>
+          <FormattedMessage
+            defaultMessage="Connect data source to get started"
+            id="dataSourcesManagement.dataSourceMenu.connect"
+            values={Object {}}
+          />
+        </EuiText>
+        <EuiSpacer />
+        <EuiButton
+          data-test-subj="dataSourceEmptyStateManageDataSourceButton"
+          fill={false}
+          iconSide="right"
+          iconType="popout"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Manage data sources"
+            id="dataSourcesManagement.dataSourceMenu.manageDataSource"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiPanel>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
+`;
+
+exports[`NoDataSource should render normally 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <EuiButtonEmpty
+      className="euiHeaderLink"
+      color="primary"
+      data-test-subj="dataSourceEmptyStateHeaderButton"
+      iconSide="left"
+      iconType="alert"
+      onClick={[Function]}
+      size="s"
+    >
+       No data sources
+    </EuiButtonEmpty>
+  }
+  closePopover={[Function]}
+  data-test-subj="dataSourceEmptyStatePopover"
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceEmptyStatePopover"
+  initialFocus=".euiSelectableSearch"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <EuiContextMenuPanel
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      className="dataSourceSelectableOuiPanel"
+      color="transparent"
+      paddingSize="s"
+    >
+      <DataSourceDropDownHeader
+        totalDataSourceCount={0}
+      />
+      <EuiHorizontalRule
+        margin="none"
+      />
+      <EuiSpacer
+        size="s"
+      />
+      <EuiPanel
+        className="dataSourceEmptyStatePanel"
+        data-test-subj="datasourceTableEmptyState"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiText>
+          <FormattedMessage
+            defaultMessage="There is no data sources to display."
+            id="dataSourcesManagement.dataSourceMenu.noData"
+            values={Object {}}
+          />
+        </EuiText>
+        <EuiText>
+          <FormattedMessage
+            defaultMessage="Connect data source to get started"
+            id="dataSourcesManagement.dataSourceMenu.connect"
+            values={Object {}}
+          />
+        </EuiText>
+        <EuiSpacer />
+        <EuiButton
+          data-test-subj="dataSourceEmptyStateManageDataSourceButton"
+          fill={false}
+          iconSide="right"
+          iconType="popout"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Manage data sources"
+            id="dataSourcesManagement.dataSourceMenu.manageDataSource"
+            values={Object {}}
+          />
+        </EuiButton>
+      </EuiPanel>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
+`;

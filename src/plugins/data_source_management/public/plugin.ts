@@ -14,13 +14,14 @@ import { IndexPatternManagementSetup } from '../../index_pattern_management/publ
 import { DataSourceColumn } from './components/data_source_column/data_source_column';
 import {
   AuthenticationMethod,
-  IAuthenticationMethodRegistery,
-  AuthenticationMethodRegistery,
+  IAuthenticationMethodRegistry,
+  AuthenticationMethodRegistry,
 } from './auth_registry';
 import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
-import { DataSourceMenuProps } from './components/data_source_menu/data_source_menu';
+import { DataSourceMenuProps } from './components/data_source_menu';
+import { setApplication } from './components/utils';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
@@ -32,15 +33,15 @@ export interface DataSourceManagementPluginSetup {
   registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
   ui: {
     DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
-    DataSourceMenu: React.ComponentType<DataSourceMenuProps>;
+    getDataSourceMenu: <T>() => React.ComponentType<DataSourceMenuProps<T>>;
   };
 }
 
 export interface DataSourceManagementPluginStart {
-  getAuthenticationMethodRegistery: () => IAuthenticationMethodRegistery;
+  getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
 }
 
-const DSM_APP_ID = 'dataSources';
+export const DSM_APP_ID = 'dataSourceManagement';
 
 export class DataSourceManagementPlugin
   implements
@@ -50,13 +51,14 @@ export class DataSourceManagementPlugin
       DataSourceManagementSetupDependencies
     > {
   private started = false;
-  private authMethodsRegistry = new AuthenticationMethodRegistery();
+  private authMethodsRegistry = new AuthenticationMethodRegistry();
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
     { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
   ) {
     const opensearchDashboardsSection = management.sections.section.opensearchDashboards;
+    const uiSettings = core.uiSettings;
 
     if (!opensearchDashboardsSection) {
       throw new Error('`opensearchDashboards` management section not found.');
@@ -102,16 +104,17 @@ export class DataSourceManagementPlugin
     return {
       registerAuthenticationMethod,
       ui: {
-        DataSourceSelector: createDataSourceSelector(),
-        DataSourceMenu: createDataSourceMenu(),
+        DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
+        getDataSourceMenu: <T>() => createDataSourceMenu<T>(uiSettings, dataSource),
       },
     };
   }
 
   public start(core: CoreStart) {
     this.started = true;
+    setApplication(core.application);
     return {
-      getAuthenticationMethodRegistery: () => this.authMethodsRegistry,
+      getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
     };
   }
 

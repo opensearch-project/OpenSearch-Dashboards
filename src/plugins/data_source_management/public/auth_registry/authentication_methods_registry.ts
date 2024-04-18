@@ -13,15 +13,15 @@ export interface AuthenticationMethod {
     state: { [key: string]: any },
     setState: React.Dispatch<React.SetStateAction<any>>
   ) => React.JSX.Element;
-  crendentialFormField?: { [key: string]: string };
+  credentialFormField?: { [key: string]: string };
 }
 
-export type IAuthenticationMethodRegistery = Omit<
-  AuthenticationMethodRegistery,
+export type IAuthenticationMethodRegistry = Omit<
+  AuthenticationMethodRegistry,
   'registerAuthenticationMethod'
 >;
 
-export class AuthenticationMethodRegistery {
+export class AuthenticationMethodRegistry {
   private readonly authMethods = new Map<string, AuthenticationMethod>();
   /**
    * Register a authMethods with function to return credentials inside the registry.

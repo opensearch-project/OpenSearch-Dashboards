@@ -28,29 +28,39 @@
  * under the License.
  */
 
+import React, { Fragment } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import React from 'react';
+import { EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
+import { getDocLinks } from '../services';
+import './_visualize_lab_disabled.scss';
 
 export function DisabledLabVisualization({ title }: { title: string }) {
+  const docLinks = getDocLinks();
+  const advancedSettingsLink = docLinks.links.opensearchDashboards.management.advancedSettings;
   return (
     <div className="visDisabledLabVisualization">
-      <div
-        className="kuiVerticalRhythm visDisabledLabVisualization__icon kuiIcon fa-flask"
-        aria-hidden="true"
+      <EuiEmptyPrompt
+        iconType="beaker"
+        titleSize="xs"
+        data-test-subj="visDisabledLabVisualization"
+        title={
+          <FormattedMessage
+            id="visualizations.disabledLabVisualizationTitle"
+            defaultMessage="{title} is an experimental visualization."
+            values={{ title: <em className="visDisabledLabVisualizationtitle">{title}</em> }}
+          />
+        }
+        body={
+          <Fragment>
+            <EuiText size="s" color="subdued">
+              <p>
+                Enable experimental visualizations within{' '}
+                <EuiLink href={advancedSettingsLink}>Advanced Settings</EuiLink>.
+              </p>
+            </EuiText>
+          </Fragment>
+        }
       />
-      <div className="kuiVerticalRhythm">
-        <FormattedMessage
-          id="visualizations.disabledLabVisualizationTitle"
-          defaultMessage="{title} is a lab visualization."
-          values={{ title: <em className="visDisabledLabVisualization__title">{title}</em> }}
-        />
-      </div>
-      <div className="kuiVerticalRhythm">
-        <FormattedMessage
-          id="visualizations.disabledLabVisualizationMessage"
-          defaultMessage="Please turn on lab-mode in the advanced settings to see lab visualizations."
-        />
-      </div>
     </div>
   );
 }
