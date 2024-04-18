@@ -203,15 +203,7 @@ export class DataSourceAggregatedView extends React.Component<
           anchorPosition="downLeft"
         >
           <EuiContextMenuPanel>
-            <EuiPanel
-              className={'dataSourceAggregatedViewOuiPanel'}
-              borderRadius="none"
-              hasBorder={false}
-              color="transparent"
-              paddingSize="s"
-            >
-              {titleComponent}
-            </EuiPanel>
+            {titleComponent}
             <EuiPanel
               className={'dataSourceAggregatedViewOuiPanel'}
               paddingSize="none"
