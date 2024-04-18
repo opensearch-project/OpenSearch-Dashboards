@@ -403,49 +403,9 @@ describe('DataSourceSelectable', () => {
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toHaveBeenCalled();
   });
-
-  it('should render opensearch cluster group label at the top of options, when there are options availiable', async () => {
+  it('should render no data source when no data source filtered out and hide local cluster', async () => {
     const onSelectedDataSource = jest.fn();
-    component = shallow(
-      <DataSourceSelectable
-        savedObjectsClient={client}
-        notifications={toasts}
-        onSelectedDataSources={onSelectedDataSource}
-        disabled={false}
-        hideLocalCluster={false}
-        fullWidth={false}
-      />
-    );
-
-    component.instance().componentDidMount!();
-    await nextTick();
-    const optionsProp = component.find(EuiSelectable).prop('options');
-    expect(optionsProp[0]).toEqual(dataSourceOptionGroupLabel.opensearchCluster);
-  });
-
-  it('should not render opensearch cluster group label, when there is no option availiable', async () => {
-    const onSelectedDataSource = jest.fn();
-    spyOn(utils, 'getDefaultDataSource').and.returnValue([]);
-    component = shallow(
-      <DataSourceSelectable
-        savedObjectsClient={client}
-        notifications={toasts}
-        onSelectedDataSources={onSelectedDataSource}
-        disabled={false}
-        hideLocalCluster={false}
-        fullWidth={false}
-      />
-    );
-
-    component.instance().componentDidMount!();
-    await nextTick();
-    const optionsProp = component.find(EuiSelectable).prop('options');
-    expect(optionsProp).toEqual([]);
-  });
-
-  it('should render group lablel normally after onChange', async () => {
-    const onSelectedDataSource = jest.fn();
-    component = shallow(
+    const container = render(
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -453,39 +413,12 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
-        selectedOption={[{ id: 'test1', label: 'test1' }]}
+        selectedOption={[{ id: 'test2' }]}
+        dataSourceFilter={(ds) => false}
       />
     );
-    const componentInstance = component.instance();
-
-    componentInstance.componentDidMount!();
     await nextTick();
-    const optionsPropBefore = component.find(EuiSelectable).prop('options');
-    expect(optionsPropBefore).toEqual([
-      dataSourceOptionGroupLabel.opensearchCluster,
-      {
-        id: 'test1',
-        label: 'test1',
-        checked: 'on',
-      },
-      {
-        id: 'test2',
-        label: 'test2',
-      },
-      {
-        id: 'test3',
-        label: 'test3',
-      },
-    ]);
-    componentInstance.onChange([
-      dataSourceOptionGroupLabel.opensearchCluster,
-      { id: 'test2', label: 'test2', checked: 'on' },
-    ]);
-    await nextTick();
-    const optionsPropAfter = component.find(EuiSelectable).prop('options');
-    expect(optionsPropAfter).toEqual([
-      dataSourceOptionGroupLabel.opensearchCluster,
-      { id: 'test2', label: 'test2', checked: 'on' },
-    ]);
+    const button = await container.findByTestId('dataSourceEmptyStateHeaderButton');
+    expect(button).toHaveTextContent('No data sources');
   });
 });

@@ -28,6 +28,7 @@ interface DataSourceListActiveExampleProps {
   notifications: CoreStart['notifications'];
   setActionMenu?: (menuMount: MountPoint | undefined) => void;
   dataSourceManagement: DataSourceManagementPluginSetup;
+  uiSettings: CoreStart['uiSettings'];
 }
 
 export const DataSourceListActiveExample = ({
@@ -36,6 +37,7 @@ export const DataSourceListActiveExample = ({
   notifications,
   setActionMenu,
   dataSourceManagement,
+  uiSettings,
 }: DataSourceListActiveExampleProps) => {
   const DataSourceMenu = dataSourceManagement.ui.getDataSourceMenu<
     DataSourceAggregatedViewConfig
@@ -106,7 +108,10 @@ export const DataSourceListActiveExample = ({
               fullWidth: false,
               savedObjects: savedObjects.client,
               notifications,
-              displayAllCompatibleDataSources: true,
+              displayAllCompatibleDataSources: false,
+              // To see selected options, obtain the datasource id and paste it here. Note that this needs to be defined when displayAllCompatibleDataSources is false
+              activeDataSourceIds: [],
+              uiSettings,
             }}
           />
         )}
