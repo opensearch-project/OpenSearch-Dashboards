@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceUiSettingsClientWrapper } from './workspace_ui_settings_client_wrapper';
 import { WORKSPACE_TYPE } from '../../../../core/server';

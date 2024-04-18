@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { getWorkspaceState } from '../../../../core/server/utils';
 import {
   SavedObject,

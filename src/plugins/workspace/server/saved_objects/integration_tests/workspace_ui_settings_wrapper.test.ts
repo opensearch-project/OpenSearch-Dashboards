@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { IUiSettingsClient, WorkspaceAttribute } from 'src/core/server';
 
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
