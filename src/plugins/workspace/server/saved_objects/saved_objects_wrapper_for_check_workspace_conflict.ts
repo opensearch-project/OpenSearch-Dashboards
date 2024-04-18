@@ -263,8 +263,6 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         saved_objects: [
           ...objectsConflictWithWorkspace,
           ...disallowedSavedObjects.map((item) => ({
-            references: [],
-            id: '',
             ...item,
             error: {
               ...SavedObjectsErrorHelpers.decorateBadRequestError(
