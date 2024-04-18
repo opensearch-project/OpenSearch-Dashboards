@@ -29,6 +29,7 @@
  */
 
 import { SavedObjectReference } from '../../../../core/types';
+import { SavedObjectWithMetadata } from '../../common';
 
 export interface ObjectField {
   type: FieldType;
@@ -52,3 +53,5 @@ export enum DuplicateMode {
   Selected = 'selected',
   All = 'all',
 }
+
+export type DuplicateObject = Pick<SavedObjectWithMetadata, 'id' | 'type' | 'meta' | 'workspaces'>;

@@ -95,7 +95,7 @@ import {
 } from '../../services';
 import { Header, Table, Flyout, Relationships, SavedObjectsDuplicateModal } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
-import { DuplicateMode } from '../types';
+import { DuplicateMode, DuplicateObject } from '../types';
 
 interface ExportAllOption {
   id: string;
@@ -131,7 +131,7 @@ export interface SavedObjectsTableState {
   savedObjectCounts: Record<string, number>;
   activeQuery: Query;
   selectedSavedObjects: SavedObjectWithMetadata[];
-  duplicateSelectedSavedObjects: SavedObjectWithMetadata[];
+  duplicateSelectedSavedObjects: DuplicateObject[];
   isShowingImportFlyout: boolean;
   duplicateMode: DuplicateMode;
   isShowingDuplicateModal: boolean;
@@ -621,38 +621,36 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   onDuplicateAll = async () => {
     const { notifications, http } = this.props;
-    let duplicateAllSavedObjects: SavedObjectWithMetadata[] = [];
     const findOptions = this.findOptions;
-    findOptions.sortField = 'updated_at';
+    findOptions.perPage = 9999;
     findOptions.page = 1;
 
-    while (duplicateAllSavedObjects.length < this.state.filteredItemCount) {
-      try {
-        const resp = await findObjects(http, findOptions);
-        const savedObjects = resp.savedObjects;
-        duplicateAllSavedObjects = duplicateAllSavedObjects.concat(savedObjects);
-      } catch (error) {
-        notifications.toasts.addDanger({
-          title: i18n.translate(
-            'savedObjectsManagement.objectsTable.unableFindSavedObjectsNotificationMessage',
-            { defaultMessage: 'Unable find saved objects' }
-          ),
-          text: `${error}`,
-        });
-        break;
-      }
-      findOptions.page++;
+    try {
+      const resp = await findObjects(http, findOptions);
+      const duplicateObjects = resp.savedObjects.map((obj) => ({
+        id: obj.id,
+        type: obj.type,
+        meta: obj.meta,
+        workspaces: obj.workspaces,
+      }));
+      this.setState({
+        duplicateSelectedSavedObjects: duplicateObjects,
+        isShowingDuplicateModal: true,
+        duplicateMode: DuplicateMode.All,
+      });
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate(
+          'savedObjectsManagement.objectsTable.unableFindSavedObjectsNotificationMessage',
+          { defaultMessage: 'Unable find saved objects' }
+        ),
+        text: `${error}`,
+      });
     }
-
-    this.setState({
-      duplicateSelectedSavedObjects: duplicateAllSavedObjects,
-      isShowingDuplicateModal: true,
-      duplicateMode: DuplicateMode.All,
-    });
   };
 
   onDuplicate = async (
-    savedObjects: SavedObjectWithMetadata[],
+    savedObjects: DuplicateObject[],
     includeReferencesDeep: boolean,
     targetWorkspace: string
   ) => {

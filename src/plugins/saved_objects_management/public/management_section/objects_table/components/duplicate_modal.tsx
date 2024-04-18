@@ -27,15 +27,14 @@ import {
 } from '@elastic/eui';
 import { HttpSetup, NotificationsStart, WorkspacesStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
-import { SavedObjectWithMetadata } from '../../../../common';
 import { getSavedObjectLabel } from '../../../../public';
 import { WorkspaceOption, getTargetWorkspacesOptions, workspaceToOption } from './utils';
-import { DuplicateMode } from '../../types';
+import { DuplicateMode, DuplicateObject } from '../../types';
 import RenderDuplicateObjectCategories from './duplicate_object_categories';
 
 export interface ShowDuplicateModalProps {
   onDuplicate: (
-    savedObjects: SavedObjectWithMetadata[],
+    savedObjects: DuplicateObject[],
     includeReferencesDeep: boolean,
     targetWorkspace: string
   ) => Promise<void>;
@@ -43,7 +42,7 @@ export interface ShowDuplicateModalProps {
   workspaces: WorkspacesStart;
   duplicateMode: DuplicateMode;
   notifications: NotificationsStart;
-  selectedSavedObjects: SavedObjectWithMetadata[];
+  selectedSavedObjects: DuplicateObject[];
 }
 
 interface Props extends ShowDuplicateModalProps {
@@ -51,7 +50,7 @@ interface Props extends ShowDuplicateModalProps {
 }
 
 interface State {
-  allSelectedObjects: SavedObjectWithMetadata[];
+  allSelectedObjects: DuplicateObject[];
   workspaceOptions: WorkspaceOption[];
   targetWorkspaceOption: WorkspaceOption[];
   isLoading: boolean;
@@ -98,7 +97,7 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
     this.isMounted = false;
   }
 
-  duplicateSavedObjects = async (savedObjects: SavedObjectWithMetadata[]) => {
+  duplicateSavedObjects = async (savedObjects: DuplicateObject[]) => {
     this.setState({
       isLoading: true,
     });
