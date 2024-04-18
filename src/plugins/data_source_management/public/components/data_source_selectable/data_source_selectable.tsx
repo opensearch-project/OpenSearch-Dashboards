@@ -21,7 +21,6 @@ import {
   ToastsStart,
 } from 'opensearch-dashboards/public';
 import {
-  dataSourceOptionGroupLabel,
   getDataSourcesWithFields,
   getDefaultDataSource,
   getFilteredDataSources,
@@ -30,13 +29,11 @@ import {
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
-import {
-  DataSourceBaseState,
-  DataSourceGroupLabelOption,
-  DataSourceOption,
-} from '../data_source_menu/types';
+import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
 import { DataSourceItem } from '../data_source_item';
+import { NoDataSource } from '../no_data_source';
+import './data_source_selectable.scss';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import '../button_title.scss';
 import './data_source_selectable.scss';
@@ -61,12 +58,6 @@ interface DataSourceSelectableState extends DataSourceBaseState {
   defaultDataSource: string | null;
 }
 
-export const opensearchClusterGroupLabel: DataSourceGroupLabelOption = {
-  id: 'opensearchClusterGroupLabel',
-  label: 'OpenSearch cluster',
-  isGroupLabel: true,
-};
-
 export class DataSourceSelectable extends React.Component<
   DataSourceSelectableProps,
   DataSourceSelectableState
@@ -81,6 +72,7 @@ export class DataSourceSelectable extends React.Component<
       isPopoverOpen: false,
       selectedOption: [],
       defaultDataSource: null,
+      showEmptyState: false,
       showError: false,
     };
 
@@ -186,6 +178,10 @@ export class DataSourceSelectable extends React.Component<
         this.props.dataSourceFilter
       );
 
+      if (dataSourceOptions.length === 0 && this.props.hideLocalCluster) {
+        this.setState({ showEmptyState: true });
+      }
+
       if (!this.props.hideLocalCluster) {
         dataSourceOptions.unshift(LocalCluster);
       }
@@ -214,16 +210,14 @@ export class DataSourceSelectable extends React.Component<
 
   onChange(options: DataSourceOption[]) {
     if (!this._isMounted) return;
-    const optionsWithoutGroupLabel = options.filter(
-      (option) => !option.hasOwnProperty('isGroupLabel')
-    );
     const selectedDataSource = options.find(({ checked }) => checked);
 
-    this.setState({ dataSourceOptions: optionsWithoutGroupLabel });
+    this.setState({ dataSourceOptions: options });
 
     if (selectedDataSource) {
       this.setState({
         selectedOption: [selectedDataSource],
+        isPopoverOpen: false,
       });
 
       this.props.onSelectedDataSources([
@@ -232,17 +226,15 @@ export class DataSourceSelectable extends React.Component<
     }
   }
 
-  getOptionsWithGroupLabel = (dataSourceOptions: DataSourceOption[]): DataSourceOption[] => {
-    let optionsWithGroupLabel: DataSourceOption[] = [];
-    if (dataSourceOptions.length === 0) {
-      optionsWithGroupLabel = [];
-    } else {
-      optionsWithGroupLabel = [dataSourceOptionGroupLabel.opensearchCluster, ...dataSourceOptions];
-    }
-    return optionsWithGroupLabel;
-  };
-
   render() {
+    if (this.state.showEmptyState) {
+      return (
+        <NoDataSource
+          totalDataSourceCount={this.state.dataSourceOptions.length}
+          application={this.props.application}
+        />
+      );
+    }
     if (this.state.showError) {
       return <DataSourceErrorMenu />;
     }
@@ -293,7 +285,7 @@ export class DataSourceSelectable extends React.Component<
                 placeholder: 'Search',
                 compressed: true,
               }}
-              options={this.getOptionsWithGroupLabel(this.state.dataSourceOptions)}
+              options={this.state.dataSourceOptions}
               onChange={(newOptions) => this.onChange(newOptions)}
               singleSelection={true}
               data-test-subj={'dataSourceSelectable'}

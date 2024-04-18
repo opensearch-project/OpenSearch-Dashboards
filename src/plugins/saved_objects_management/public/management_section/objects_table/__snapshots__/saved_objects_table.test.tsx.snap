@@ -135,6 +135,7 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
           "title": "MyIndexPattern*",
         },
         "type": "index-pattern",
+        "workspaces": undefined,
       },
       Object {
         "id": "2",
@@ -148,6 +149,7 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
           "title": "MySearch",
         },
         "type": "search",
+        "workspaces": undefined,
       },
       Object {
         "id": "3",
@@ -161,6 +163,7 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
           "title": "MyDashboard",
         },
         "type": "dashboard",
+        "workspaces": undefined,
       },
       Object {
         "id": "4",
@@ -174,6 +177,7 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
           "title": "MyViz",
         },
         "type": "visualization",
+        "workspaces": undefined,
       },
     ]
   }
@@ -812,7 +816,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
     onExportAll={[Function]}
     onImport={[Function]}
     onRefresh={[Function]}
-    showDuplicateAll={false}
   />
   <EuiSpacer
     size="xs"
@@ -838,9 +841,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
             "edit": false,
             "read": true,
           },
-          "workspaces": Object {
-            "enabled": false,
-          },
+          "workspaces": Object {},
         },
         "currentAppId$": Observable {
           "_isScalar": false,
@@ -995,7 +996,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "onSelectionChange": [Function],
         }
       }
-      showDuplicate={false}
       totalItemCount={4}
     />
   </RedirectAppLinks>
