@@ -282,7 +282,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   fetchCounts = async () => {
     const { allowedTypes, namespaceRegistry } = this.props;
-    const { queryText, visibleTypes, visibleWorkspaces } = parseQuery(this.state.activeQuery);
+    const { queryText, visibleTypes, visibleNamespaces, visibleWorkspaces } = parseQuery(
+      this.state.activeQuery
+    );
 
     const filteredTypes = filterQuery(allowedTypes, visibleTypes);
 
@@ -295,7 +297,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     });
 
     if (availableNamespaces.length) {
-      const filteredNamespaces = filterQuery(availableNamespaces);
+      const filteredNamespaces = filterQuery(availableNamespaces, visibleNamespaces);
       filteredCountOptions.namespacesToInclude = filteredNamespaces;
     }
     if (visibleWorkspaces?.length) {
