@@ -73,7 +73,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         // For 2.14, data source can only be created without workspace info
         // config can not be created inside a workspace
         throw SavedObjectsErrorHelpers.decorateBadRequestError(
-          new Error(`'${type}' is not allowed to create in workspace.`),
+          new Error(`'${type}' is not allowed to be created in workspace.`),
           'Unsupported type in workspace'
         );
       }
@@ -267,7 +267,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
             ...item,
             error: {
               ...SavedObjectsErrorHelpers.decorateBadRequestError(
-                new Error(`'${item.type}' is not allowed to import in workspace.`),
+                new Error(`'${item.type}' is not allowed to be imported in workspace.`),
                 'Unsupported type in workspace'
               ).output.payload,
               metadata: { isNotOverwritable: true },
