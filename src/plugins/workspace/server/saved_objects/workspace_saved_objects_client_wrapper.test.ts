@@ -560,6 +560,52 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           },
         });
       });
+      it('should call client.find with ACLSearchParams if no workspaces is provided', async () => {
+        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
+        // no workspaces
+        await wrapper.find({
+          type: 'dashboards',
+        });
+        expect(clientMock.find).toHaveBeenCalledWith({
+          type: 'dashboards',
+          ACLSearchParams: {
+            principals: {
+              users: ['user-1'],
+            },
+            permissionModes: ['read', 'write'],
+          },
+        });
+
+        // workspace is undefined
+        await wrapper.find({
+          type: 'dashboards',
+          workspaces: undefined,
+        });
+        expect(clientMock.find).toHaveBeenCalledWith({
+          type: 'dashboards',
+          ACLSearchParams: {
+            principals: {
+              users: ['user-1'],
+            },
+            permissionModes: ['read', 'write'],
+          },
+        });
+
+        // empty workspace array
+        await wrapper.find({
+          type: 'dashboards',
+          workspaces: [],
+        });
+        expect(clientMock.find).toHaveBeenCalledWith({
+          type: 'dashboards',
+          ACLSearchParams: {
+            principals: {
+              users: ['user-1'],
+            },
+            permissionModes: ['read', 'write'],
+          },
+        });
+      });
       it('should call client.find with only read permission if find workspace and permissionModes provided', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
         await wrapper.find({
