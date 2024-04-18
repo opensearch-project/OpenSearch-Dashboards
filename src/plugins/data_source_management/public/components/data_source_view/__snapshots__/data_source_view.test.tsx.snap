@@ -1,341 +1,491 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DataSourceView Should render successfully when provided datasource has not been filtered out 1`] = `
-<Fragment>
-  <EuiButtonEmpty
-    aria-label="dataSourceViewMenuButton"
-    className="euiHeaderLink"
-    data-test-subj="dataSourceViewContextMenuHeaderLink"
-    disabled={true}
-    iconSide="left"
-    iconType="database"
-    size="s"
-  />
-  <EuiPopover
-    anchorPosition="downLeft"
-    button={
-      <EuiButtonIcon
-        aria-label="Next"
-        display="empty"
-        iconType="iInCircle"
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <React.Fragment>
+      <EuiButtonEmpty
+        aria-label="dataSourceViewButton"
+        className="dataSourceComponentButtonTitle"
+        data-test-subj="dataSourceViewButton"
+        iconSide="left"
+        iconType="database"
         onClick={[Function]}
+        size="s"
       />
-    }
-    closePopover={[Function]}
-    display="inlineBlock"
-    hasArrow={true}
-    id="dataSourceViewContextMenuPopover"
-    isOpen={false}
-    ownFocus={true}
-    panelPaddingSize="none"
+    </React.Fragment>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <EuiContextMenuPanel
+    hasFocus={true}
+    items={Array []}
   >
-    <EuiContextMenu
-      initialPanelId={0}
-      panels={
-        Array [
-          Object {
-            "id": 0,
-            "items": Array [
-              Object {
-                "disabled": true,
-                "name": undefined,
-              },
-            ],
-            "title": "Selected data source",
-          },
-        ]
-      }
-      size="m"
-    />
-  </EuiPopover>
-</Fragment>
+    <EuiPanel
+      borderRadius="none"
+      className="dataSourceViewOuiPanel"
+      color="transparent"
+      paddingSize="s"
+    >
+      <DataSourceDropDownHeader
+        totalDataSourceCount={1}
+      />
+    </EuiPanel>
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="xs"
+    >
+      <EuiSelectable
+        compressed={true}
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={
+          Array [
+            Object {
+              "checked": "on",
+              "disabled": true,
+              "id": "test1",
+            },
+          ]
+        }
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
 `;
 
 exports[`DataSourceView Should return error when provided datasource has been filtered out 1`] = `
-<Fragment>
-  <EuiButtonEmpty
-    aria-label="dataSourceViewMenuButton"
-    className="euiHeaderLink"
-    data-test-subj="dataSourceViewContextMenuHeaderLink"
-    disabled={true}
-    iconSide="left"
-    iconType="database"
-    size="s"
-  />
-  <EuiPopover
-    anchorPosition="downLeft"
-    button={
-      <EuiButtonIcon
-        aria-label="Next"
-        display="empty"
-        iconType="iInCircle"
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <React.Fragment>
+      <EuiButtonEmpty
+        aria-label="dataSourceViewButton"
+        className="dataSourceComponentButtonTitle"
+        data-test-subj="dataSourceViewButton"
+        iconSide="left"
+        iconType="database"
         onClick={[Function]}
-      />
-    }
-    closePopover={[Function]}
-    display="inlineBlock"
-    hasArrow={true}
-    id="dataSourceViewContextMenuPopover"
-    isOpen={false}
-    ownFocus={true}
-    panelPaddingSize="none"
+        size="s"
+      >
+        
+      </EuiButtonEmpty>
+    </React.Fragment>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <EuiContextMenuPanel
+    hasFocus={true}
+    items={Array []}
   >
-    <EuiContextMenu
-      initialPanelId={0}
-      panels={
-        Array [
-          Object {
-            "id": 0,
-            "items": Array [],
-            "title": "Selected data source",
-          },
-        ]
-      }
-      size="m"
-    />
-  </EuiPopover>
-</Fragment>
+    <EuiPanel
+      borderRadius="none"
+      className="dataSourceViewOuiPanel"
+      color="transparent"
+      paddingSize="s"
+    >
+      <DataSourceDropDownHeader
+        totalDataSourceCount={1}
+      />
+    </EuiPanel>
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="xs"
+    >
+      <EuiSelectable
+        compressed={true}
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={Array []}
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
 `;
 
 exports[`DataSourceView When selected option is local cluster and hide local Cluster is true, should return error 1`] = `
-<Fragment>
-  <EuiButtonEmpty
-    aria-label="dataSourceViewMenuButton"
-    className="euiHeaderLink"
-    data-test-subj="dataSourceViewContextMenuHeaderLink"
-    disabled={true}
-    iconSide="left"
-    iconType="database"
-    size="s"
-  />
-  <EuiPopover
-    anchorPosition="downLeft"
-    button={
-      <EuiButtonIcon
-        aria-label="Next"
-        display="empty"
-        iconType="iInCircle"
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <React.Fragment>
+      <EuiButtonEmpty
+        aria-label="dataSourceViewButton"
+        className="dataSourceComponentButtonTitle"
+        data-test-subj="dataSourceViewButton"
+        iconSide="left"
+        iconType="database"
         onClick={[Function]}
-      />
-    }
-    closePopover={[Function]}
-    display="inlineBlock"
-    hasArrow={true}
-    id="dataSourceViewContextMenuPopover"
-    isOpen={false}
-    ownFocus={true}
-    panelPaddingSize="none"
+        size="s"
+      >
+        
+      </EuiButtonEmpty>
+    </React.Fragment>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <EuiContextMenuPanel
+    hasFocus={true}
+    items={Array []}
   >
-    <EuiContextMenu
-      initialPanelId={0}
-      panels={
-        Array [
-          Object {
-            "id": 0,
-            "items": Array [],
-            "title": "Selected data source",
-          },
-        ]
-      }
-      size="m"
-    />
-  </EuiPopover>
-</Fragment>
+    <EuiPanel
+      borderRadius="none"
+      className="dataSourceViewOuiPanel"
+      color="transparent"
+      paddingSize="s"
+    >
+      <DataSourceDropDownHeader
+        totalDataSourceCount={1}
+      />
+    </EuiPanel>
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="xs"
+    >
+      <EuiSelectable
+        compressed={true}
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={Array []}
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
 `;
 
 exports[`DataSourceView should call getDataSourceById when only pass id with no label 1`] = `
-<Fragment>
-  <EuiButtonEmpty
-    aria-label="dataSourceViewMenuButton"
-    className="euiHeaderLink"
-    data-test-subj="dataSourceViewContextMenuHeaderLink"
-    disabled={true}
-    iconSide="left"
-    iconType="database"
-    size="s"
-  />
-  <EuiPopover
-    anchorPosition="downLeft"
-    button={
-      <EuiButtonIcon
-        aria-label="Next"
-        display="empty"
-        iconType="iInCircle"
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <React.Fragment>
+      <EuiButtonEmpty
+        aria-label="dataSourceViewButton"
+        className="dataSourceComponentButtonTitle"
+        data-test-subj="dataSourceViewButton"
+        iconSide="left"
+        iconType="database"
         onClick={[Function]}
+        size="s"
       />
-    }
-    closePopover={[Function]}
-    display="inlineBlock"
-    hasArrow={true}
-    id="dataSourceViewContextMenuPopover"
-    isOpen={false}
-    ownFocus={true}
-    panelPaddingSize="none"
+    </React.Fragment>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <EuiContextMenuPanel
+    hasFocus={true}
+    items={Array []}
   >
-    <EuiContextMenu
-      initialPanelId={0}
-      panels={
-        Array [
-          Object {
-            "id": 0,
-            "items": Array [
-              Object {
-                "disabled": true,
-                "name": undefined,
-              },
-            ],
-            "title": "Selected data source",
-          },
-        ]
-      }
-      size="m"
-    />
-  </EuiPopover>
-</Fragment>
+    <EuiPanel
+      borderRadius="none"
+      className="dataSourceViewOuiPanel"
+      color="transparent"
+      paddingSize="s"
+    >
+      <DataSourceDropDownHeader
+        totalDataSourceCount={1}
+      />
+    </EuiPanel>
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="xs"
+    >
+      <EuiSelectable
+        compressed={true}
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={
+          Array [
+            Object {
+              "checked": "on",
+              "disabled": true,
+              "id": "test1",
+            },
+          ]
+        }
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
 `;
 
 exports[`DataSourceView should call notification warning when there is data source fetch error 1`] = `<DataSourceErrorMenu />`;
 
 exports[`DataSourceView should render normally with local cluster not hidden 1`] = `
-<Fragment>
-  <EuiButtonEmpty
-    aria-label="dataSourceViewMenuButton"
-    className="euiHeaderLink"
-    data-test-subj="dataSourceViewContextMenuHeaderLink"
-    disabled={true}
-    iconSide="left"
-    iconType="database"
-    size="s"
-  >
-    test1
-  </EuiButtonEmpty>
-  <EuiPopover
-    anchorPosition="downLeft"
-    button={
-      <EuiButtonIcon
-        aria-label="Next"
-        display="empty"
-        iconType="iInCircle"
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <React.Fragment>
+      <EuiButtonEmpty
+        aria-label="dataSourceViewButton"
+        className="dataSourceComponentButtonTitle"
+        data-test-subj="dataSourceViewButton"
+        iconSide="left"
+        iconType="database"
         onClick={[Function]}
-      />
-    }
-    closePopover={[Function]}
-    display="inlineBlock"
-    hasArrow={true}
-    id="dataSourceViewContextMenuPopover"
-    isOpen={false}
-    ownFocus={true}
-    panelPaddingSize="none"
+        size="s"
+      >
+        test1
+      </EuiButtonEmpty>
+    </React.Fragment>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <EuiContextMenuPanel
+    hasFocus={true}
+    items={Array []}
   >
-    <EuiContextMenu
-      initialPanelId={0}
-      panels={
-        Array [
-          Object {
-            "id": 0,
-            "items": Array [
-              Object {
-                "disabled": true,
-                "name": "test1",
-              },
-            ],
-            "title": "Selected data source",
-          },
-        ]
-      }
-      size="m"
-    />
-  </EuiPopover>
-</Fragment>
+    <EuiPanel
+      borderRadius="none"
+      className="dataSourceViewOuiPanel"
+      color="transparent"
+      paddingSize="s"
+    >
+      <DataSourceDropDownHeader
+        totalDataSourceCount={1}
+      />
+    </EuiPanel>
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="xs"
+    >
+      <EuiSelectable
+        compressed={true}
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={
+          Array [
+            Object {
+              "checked": "on",
+              "disabled": true,
+              "id": "test1",
+              "label": "test1",
+            },
+          ]
+        }
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
 `;
 
-exports[`DataSourceView should show popover when click on button 1`] = `
+exports[`DataSourceView should show popover when click on data source view button 1`] = `
 Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
-      <button
-        aria-label="dataSourceViewMenuButton"
-        class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty-isDisabled euiHeaderLink"
-        data-test-subj="dataSourceViewContextMenuHeaderLink"
-        disabled=""
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonContent__icon"
-            color="inherit"
-            data-euiicon-type="database"
-          />
-          <span
-            class="euiButtonEmpty__text"
-          />
-        </span>
-      </button>
       <div
         class="euiPopover euiPopover--anchorDownLeft"
-        id="dataSourceViewContextMenuPopover"
+        id="dataSourceViewPopover"
       >
         <div
           class="euiPopover__anchor"
         >
           <button
-            aria-label="Next"
-            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+            aria-label="dataSourceViewButton"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+            data-test-subj="dataSourceViewButton"
             type="button"
           >
             <span
-              aria-hidden="true"
-              class="euiButtonIcon__icon"
-              color="inherit"
-              data-euiicon-type="iInCircle"
-            />
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="database"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              />
+            </span>
           </button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div
+        data-eui="EuiFocusTrap"
+      >
+        <div
+          aria-describedby="generated-id"
+          aria-live="off"
+          aria-modal="true"
+          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--bottom"
+          role="dialog"
+          style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
+          tabindex="0"
+        >
+          <div
+            class="euiPopover__panelArrow euiPopover__panelArrow--bottom"
+            style="left: 10px; top: 0px;"
+          />
+          <p
+            class="euiScreenReaderOnly"
+            id="generated-id"
+          >
+            You are in a dialog. To close this dialog, hit escape.
+          </p>
+          <div>
+            <div
+              class="euiContextMenuPanel"
+              tabindex="-1"
+            >
+              <div>
+                <div>
+                  <div
+                    class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow dataSourceViewOuiPanel"
+                  >
+                    <div
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiTitle euiTitle--xxxsmall"
+                    >
+                      <div
+                        class="euiFlexItem"
+                      >
+                        DATA SOURCE
+                         (
+                        1
+                        )
+                      </div>
+                      <div
+                        class="dataSourceDropDownHeaderInvisibleFocusable"
+                        tabindex="0"
+                      />
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <button
+                          class="euiLink euiLink--primary"
+                          type="button"
+                        >
+                          Manage
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiPanel euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder"
+                  >
+                    <div
+                      class="euiSelectable"
+                      data-test-subj="dataSourceView"
+                    >
+                      <div
+                        class="euiSelectableList"
+                      >
+                        <div
+                          style="overflow: visible; width: 0px;"
+                        />
+                        <div
+                          class="resize-triggers"
+                        >
+                          <div
+                            class="expand-trigger"
+                          >
+                            <div
+                              style="width: 1px; height: 1px;"
+                            />
+                          </div>
+                          <div
+                            class="contract-trigger"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </body>,
   "container": <div>
-    <button
-      aria-label="dataSourceViewMenuButton"
-      class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty-isDisabled euiHeaderLink"
-      data-test-subj="dataSourceViewContextMenuHeaderLink"
-      disabled=""
-      type="button"
-    >
-      <span
-        class="euiButtonContent euiButtonEmpty__content"
-      >
-        <span
-          class="euiButtonContent__icon"
-          color="inherit"
-          data-euiicon-type="database"
-        />
-        <span
-          class="euiButtonEmpty__text"
-        />
-      </span>
-    </button>
     <div
       class="euiPopover euiPopover--anchorDownLeft"
-      id="dataSourceViewContextMenuPopover"
+      id="dataSourceViewPopover"
     >
       <div
         class="euiPopover__anchor"
       >
         <button
-          aria-label="Next"
-          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+          aria-label="dataSourceViewButton"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+          data-test-subj="dataSourceViewButton"
           type="button"
         >
           <span
-            aria-hidden="true"
-            class="euiButtonIcon__icon"
-            color="inherit"
-            data-euiicon-type="iInCircle"
-          />
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              class="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+            />
+            <span
+              class="euiButtonEmpty__text"
+            />
+          </span>
         </button>
       </div>
     </div>
