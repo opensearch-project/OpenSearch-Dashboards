@@ -38,3 +38,4 @@ export {
   getWorkspaceIdFromUrl,
   cleanWorkspaceId,
 } from '../../utils';
+export { debounce } from './debounce';

@@ -22,7 +22,7 @@ describe('Workspace plugin', () => {
     const setupMock = getSetupMock();
     const workspacePlugin = new WorkspacePlugin();
     await workspacePlugin.setup(setupMock);
-    expect(setupMock.application.register).toBeCalledTimes(2);
+    expect(setupMock.application.register).toBeCalledTimes(3);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
   });
 
@@ -34,7 +34,7 @@ describe('Workspace plugin', () => {
     workspacePlugin.start(coreStart);
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
-    expect(setupMock.application.register).toBeCalledTimes(2);
+    expect(setupMock.application.register).toBeCalledTimes(3);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
   });
@@ -69,7 +69,7 @@ describe('Workspace plugin', () => {
 
     const workspacePlugin = new WorkspacePlugin();
     await workspacePlugin.setup(setupMock);
-    expect(setupMock.application.register).toBeCalledTimes(2);
+    expect(setupMock.application.register).toBeCalledTimes(3);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
     expect(setupMock.getStartServices).toBeCalledTimes(1);
