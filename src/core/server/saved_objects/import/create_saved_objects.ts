@@ -106,6 +106,8 @@ export const createSavedObjects = async <T>({
         // Some visualization types will need special modifications, like Vega visualizations
         if (object.type === 'visualization') {
           const vegaSpec = extractVegaSpecFromSavedObject(object);
+          // @ts-expect-error
+          const visStateObject = JSON.parse(object.attributes?.visState);
 
           if (!!vegaSpec && !!dataSourceTitle) {
             const updatedVegaSpec = updateDataSourceNameInVegaSpec({
@@ -113,8 +115,6 @@ export const createSavedObjects = async <T>({
               newDataSourceName: dataSourceTitle,
             });
 
-            // @ts-expect-error
-            const visStateObject = JSON.parse(object.attributes?.visState);
             visStateObject.params.spec = updatedVegaSpec;
 
             // @ts-expect-error
@@ -124,6 +124,24 @@ export const createSavedObjects = async <T>({
               type: 'data-source',
               name: 'dataSource',
             });
+          }
+
+          if (visStateObject.type === 'metrics') {
+            const oldDataSourceId = visStateObject.params.data_source_id;
+            object.references = object.references.filter((reference) => {
+              return reference.id !== oldDataSourceId && reference.type === 'data-source';
+            });
+
+            visStateObject.params.data_source_id = dataSourceId;
+
+            object.references.push({
+              id: dataSourceId,
+              name: 'dataSource',
+              type: 'data-source',
+            });
+
+            // @ts-expect-error
+            object.attributes.visState = JSON.stringify(visStateObject);
           }
         }
 
