@@ -1,0 +1,19 @@
+.dataSourceAggregatedViewOuiPanel {
+  width: 300px;
+
+  .dataSourceAggregatedViewOuiFlexGroup {
+    .dataSourceAggregatedViewOuiFlexItem {
+      color: grey;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      display: inline-block;
+    }
+  }
+
+  .dataSourceAggregatedViewOuiSwitch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
