@@ -286,7 +286,7 @@ Object {
                     class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow dataSourceViewOuiPanel"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiTitle euiTitle--xxxsmall"
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiTitle euiTitle--xxxsmall"
                     >
                       <div
                         class="euiFlexItem"

@@ -28,7 +28,7 @@ export const DataSourceDropDownHeader: React.FC<DataSourceOptionItemProps> = ({
 
   return (
     <EuiTitle size="xxxs">
-      <EuiFlexGroup responsive={false}>
+      <EuiFlexGroup responsive={false} alignItems="center">
         <EuiFlexItem>
           {dataSourceCounterPrefix} ({dataSourceCounter})
         </EuiFlexItem>

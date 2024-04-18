@@ -5,6 +5,7 @@ exports[`DataSourceDropDownHeader should render correctly with the provided tota
   size="xxxs"
 >
   <EuiFlexGroup
+    alignItems="center"
     responsive={false}
   >
     <EuiFlexItem>
@@ -39,11 +40,12 @@ exports[`DataSourceDropDownHeader should render the activeDataSourceCount/totalD
     size="xxxs"
   >
     <EuiFlexGroup
+      alignItems="center"
       className="euiTitle euiTitle--xxxsmall"
       responsive={false}
     >
       <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiTitle euiTitle--xxxsmall"
+        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiTitle euiTitle--xxxsmall"
       >
         <EuiFlexItem>
           <div
