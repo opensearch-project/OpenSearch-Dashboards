@@ -52,7 +52,8 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
   }
   private formatFindParams(options: SavedObjectsFindOptions): SavedObjectsFindOptions {
     const isListingDataSource = this.isDataSourceType(options.type);
-    return isListingDataSource ? { ...options, workspaces: null } : options;
+    const { workspaces, ...otherOptions } = options;
+    return isListingDataSource ? otherOptions : options;
   }
 
   /**

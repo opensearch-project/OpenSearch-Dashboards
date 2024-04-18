@@ -176,7 +176,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
       expect(createDataSourceResult.body).toMatchInlineSnapshot(`
         Object {
           "error": "Bad Request",
-          "message": "Unsupported type in workspace: 'data-source' is not allowed to create in workspace.",
+          "message": "Unsupported type in workspace: 'data-source' is not allowed to be created in workspace.",
           "statusCode": 400,
         }
       `);
@@ -192,7 +192,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
       expect(createConfigResult.body).toMatchInlineSnapshot(`
         Object {
           "error": "Bad Request",
-          "message": "Unsupported type in workspace: 'config' is not allowed to create in workspace.",
+          "message": "Unsupported type in workspace: 'config' is not allowed to be created in workspace.",
           "statusCode": 400,
         }
       `);
@@ -327,13 +327,14 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
       expect(createResultFoo.body.saved_objects[0].error).toEqual(
         expect.objectContaining({
           message:
-            "Unsupported type in workspace: 'data-source' is not allowed to import in workspace.",
+            "Unsupported type in workspace: 'data-source' is not allowed to be imported in workspace.",
           statusCode: 400,
         })
       );
       expect(createResultFoo.body.saved_objects[1].error).toEqual(
         expect.objectContaining({
-          message: "Unsupported type in workspace: 'config' is not allowed to import in workspace.",
+          message:
+            "Unsupported type in workspace: 'config' is not allowed to be imported in workspace.",
           statusCode: 400,
         })
       );
