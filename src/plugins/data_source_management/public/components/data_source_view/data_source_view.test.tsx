@@ -118,7 +118,7 @@ describe('DataSourceView', () => {
     expect(utils.getDataSourceById).toBeCalledTimes(1);
   });
 
-  it('should show popover when click on button', async () => {
+  it('should show popover when click on data source view button', async () => {
     const onSelectedDataSource = jest.fn();
     spyOn(utils, 'getDataSourceById').and.returnValue([{ id: 'test1', label: 'test1' }]);
     spyOn(utils, 'handleDataSourceFetchError').and.returnValue('');
@@ -132,7 +132,7 @@ describe('DataSourceView', () => {
         fullWidth={false}
       />
     );
-    const button = await container.findByTestId('dataSourceViewContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceViewButton');
     button.click();
     expect(container).toMatchSnapshot();
   });
