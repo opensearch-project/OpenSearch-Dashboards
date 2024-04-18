@@ -286,29 +286,33 @@ Object {
                     class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--transparent euiPanel--noShadow dataSourceViewOuiPanel"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiTitle euiTitle--xxxsmall"
+                      class="euiPopoverTitle euiPopoverTitle--paddingSmall"
                     >
                       <div
-                        class="euiFlexItem"
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                       >
-                        DATA SOURCE
-                         (
-                        1
-                        )
-                      </div>
-                      <div
-                        class="dataSourceDropDownHeaderInvisibleFocusable"
-                        tabindex="0"
-                      />
-                      <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
-                      >
-                        <button
-                          class="euiLink euiLink--primary"
-                          type="button"
+                        <div
+                          class="euiFlexItem"
                         >
-                          Manage
-                        </button>
+                          DATA SOURCE
+                           (
+                          1
+                          )
+                        </div>
+                        <div
+                          class="dataSourceDropDownHeaderInvisibleFocusable"
+                          tabindex="0"
+                        />
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <button
+                            class="euiLink euiLink--primary"
+                            type="button"
+                          >
+                            Manage
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>

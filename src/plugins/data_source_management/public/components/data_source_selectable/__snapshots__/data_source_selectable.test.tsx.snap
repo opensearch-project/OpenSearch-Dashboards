@@ -293,29 +293,33 @@ Object {
                     class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow dataSourceSelectableOuiPanel"
                   >
                     <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiTitle euiTitle--xxxsmall"
+                      class="euiPopoverTitle euiPopoverTitle--paddingSmall"
                     >
                       <div
-                        class="euiFlexItem"
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
                       >
-                        DATA SOURCES
-                         (
-                        3
-                        )
-                      </div>
-                      <div
-                        class="dataSourceDropDownHeaderInvisibleFocusable"
-                        tabindex="0"
-                      />
-                      <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
-                      >
-                        <button
-                          class="euiLink euiLink--primary"
-                          type="button"
+                        <div
+                          class="euiFlexItem"
                         >
-                          Manage
-                        </button>
+                          DATA SOURCES
+                           (
+                          3
+                          )
+                        </div>
+                        <div
+                          class="dataSourceDropDownHeaderInvisibleFocusable"
+                          tabindex="0"
+                        />
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <button
+                            class="euiLink euiLink--primary"
+                            type="button"
+                          >
+                            Manage
+                          </button>
+                        </div>
                       </div>
                     </div>
                     <hr
