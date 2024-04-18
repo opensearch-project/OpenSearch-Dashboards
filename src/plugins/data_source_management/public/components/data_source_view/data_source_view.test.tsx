@@ -136,4 +136,21 @@ describe('DataSourceView', () => {
     button.click();
     expect(container).toMatchSnapshot();
   });
+
+  it('should render no data source when no data source filtered out and hide local cluster', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceView
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        hideLocalCluster={true}
+        fullWidth={false}
+        selectedOption={[{ id: '' }]}
+        dataSourceFilter={(ds) => false}
+      />
+    );
+    const button = await container.findByTestId('dataSourceEmptyStateHeaderButton');
+    expect(button).toHaveTextContent('No data sources');
+  });
 });
