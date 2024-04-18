@@ -15,7 +15,11 @@ import {
   SavedObjectsSerializer,
   SavedObjectsCheckConflictsObject,
   SavedObjectsCheckConflictsResponse,
+  SavedObjectsFindOptions,
 } from '../../../../core/server';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
+
+const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
 const errorContent = (error: Boom.Boom) => error.output.payload;
 
@@ -36,6 +40,21 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
     );
   }
 
+  private isDataSourceType(type: SavedObjectsFindOptions['type']): boolean {
+    if (Array.isArray(type)) {
+      return type.every((item) => item === DATA_SOURCE_SAVED_OBJECT_TYPE);
+    }
+
+    return type === DATA_SOURCE_SAVED_OBJECT_TYPE;
+  }
+  private isConfigType(type: SavedObject['type']): boolean {
+    return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
+  }
+  private formatFindParams(options: SavedObjectsFindOptions): SavedObjectsFindOptions {
+    const isListingDataSource = this.isDataSourceType(options.type);
+    return isListingDataSource ? { ...options, workspaces: null } : options;
+  }
+
   /**
    * Workspace is a concept to manage saved objects and the `workspaces` field of each object indicates workspaces the object belongs to.
    * When user tries to update an existing object's attribute, workspaces field should be preserved. Below are some cases that this conflict wrapper will take effect:
@@ -49,6 +68,16 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       options: SavedObjectsCreateOptions = {}
     ) => {
       const { workspaces, id, overwrite } = options;
+
+      if (workspaces?.length && (this.isDataSourceType(type) || this.isConfigType(type))) {
+        // For 2.14, data source can only be created without workspace info
+        // config can not be created inside a workspace
+        throw SavedObjectsErrorHelpers.decorateBadRequestError(
+          new Error(`'${type}' is not allowed to create in workspace.`),
+          'Unsupported type in workspace'
+        );
+      }
+
       let savedObjectWorkspaces = options?.workspaces;
 
       /**
@@ -89,12 +118,33 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
-      const { overwrite, namespace } = options;
+      const { overwrite, namespace, workspaces } = options;
+
+      const disallowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
+      const allowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
+      objects.forEach((item) => {
+        const isImportIntoWorkspace = workspaces?.length || item.workspaces?.length;
+        // config can not be created inside a workspace
+        if (this.isConfigType(item.type) && isImportIntoWorkspace) {
+          disallowedSavedObjects.push(item);
+          return;
+        }
+
+        // For 2.14, data source can only be created without workspace info
+        if (this.isDataSourceType(item.type) && isImportIntoWorkspace) {
+          disallowedSavedObjects.push(item);
+          return;
+        }
+
+        allowedSavedObjects.push(item);
+        return;
+      });
+
       /**
        * When overwrite, filter out all the objects that have ids
        */
       const bulkGetDocs = overwrite
-        ? objects
+        ? allowedSavedObjects
             .filter((object) => !!object.id)
             .map((object) => {
               /**
@@ -169,7 +219,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       /**
        * Get all the objects that do not conflict on workspaces
        */
-      const objectsNoWorkspaceConflictError = objects.filter(
+      const objectsNoWorkspaceConflictError = allowedSavedObjects.filter(
         (item) =>
           !objectsConflictWithWorkspace.find(
             (errorItems) =>
@@ -211,6 +261,18 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         ...realBulkCreateResult,
         saved_objects: [
           ...objectsConflictWithWorkspace,
+          ...disallowedSavedObjects.map((item) => ({
+            references: [],
+            id: '',
+            ...item,
+            error: {
+              ...SavedObjectsErrorHelpers.decorateBadRequestError(
+                new Error(`'${item.type}' is not allowed to import in workspace.`),
+                'Unsupported type in workspace'
+              ).output.payload,
+              metadata: { isNotOverwritable: true },
+            },
+          })),
           ...(realBulkCreateResult?.saved_objects || []),
         ],
       } as SavedObjectsBulkResponse<T>;
@@ -316,7 +378,10 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       bulkCreate: bulkCreateWithWorkspaceConflictCheck,
       checkConflicts: checkConflictWithWorkspaceConflictCheck,
       delete: wrapperOptions.client.delete,
-      find: wrapperOptions.client.find,
+      find: (options: SavedObjectsFindOptions) =>
+        // TODO: The `formatFindParams` is a workaround for 2.14 to always list global data sources,
+        //       should remove this workaround in the upcoming release once readonly share is available.
+        wrapperOptions.client.find(this.formatFindParams(options)),
       bulkGet: wrapperOptions.client.bulkGet,
       get: wrapperOptions.client.get,
       update: wrapperOptions.client.update,

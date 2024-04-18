@@ -7,6 +7,7 @@ import { SavedObject } from '../../../../core/public';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects_wrapper_for_check_workspace_conflict';
 import { SavedObjectsSerializer } from '../../../../core/server';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../plugins/data_source/common';
 
 describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
@@ -113,6 +114,38 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         expect.objectContaining({
           workspaces: ['bar'],
         })
+      );
+    });
+
+    it(`Should throw error when trying to create disallowed types in workspace`, async () => {
+      await expect(
+        wrapperClient.create(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          {
+            name: 'foo',
+          },
+
+          {
+            workspaces: ['foo'],
+          }
+        )
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unsupported type in workspace: 'data-source' is not allowed to create in workspace.]`
+      );
+
+      await expect(
+        wrapperClient.create(
+          'config',
+          {
+            name: 'foo',
+          },
+
+          {
+            workspaces: ['foo'],
+          }
+        )
+      ).rejects.toMatchInlineSnapshot(
+        `[Error: Unsupported type in workspace: 'config' is not allowed to create in workspace.]`
       );
     });
   });
@@ -291,6 +324,41 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         }
       `);
     });
+    it(`Should return error when trying to create disallowed types within a workspace`, async () => {
+      mockedClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+      const result = await wrapperClient.bulkCreate(
+        [
+          getSavedObject({
+            type: 'config',
+            id: 'foo',
+          }),
+          getSavedObject({
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+            id: 'foo',
+          }),
+        ],
+        {
+          workspaces: ['foo'],
+        }
+      );
+
+      expect(mockedClient.bulkCreate).toBeCalledWith([], {
+        workspaces: ['foo'],
+      });
+      expect(result.saved_objects[0].error).toEqual(
+        expect.objectContaining({
+          message: "Unsupported type in workspace: 'config' is not allowed to import in workspace.",
+          statusCode: 400,
+        })
+      );
+      expect(result.saved_objects[1].error).toEqual(
+        expect.objectContaining({
+          message:
+            "Unsupported type in workspace: 'data-source' is not allowed to import in workspace.",
+          statusCode: 400,
+        })
+      );
+    });
   });
 
   describe('checkConflictWithWorkspaceConflictCheck', () => {
@@ -391,6 +459,23 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
           ],
         }
       `);
+    });
+  });
+
+  describe('find', () => {
+    beforeEach(() => {
+      mockedClient.find.mockClear();
+    });
+
+    it(`workspaces parameters should be removed when finding data sources`, async () => {
+      await wrapperClient.find({
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        workspaces: ['foo'],
+      });
+      expect(mockedClient.find).toBeCalledWith({
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        workspaces: null,
+      });
     });
   });
 });
