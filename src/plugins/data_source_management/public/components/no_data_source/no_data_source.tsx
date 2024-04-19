@@ -24,7 +24,7 @@ interface NoDataSourceProps {
   application?: ApplicationStart;
 }
 
-export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({ application }) => {
+export const NoDataSource: React.FC<NoDataSourceProps> = ({ application }) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
   const label = ' No data sources';
   const button = (
