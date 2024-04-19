@@ -202,8 +202,8 @@ export class DataSourceAggregatedView extends React.Component<
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
+          {titleComponent}
           <EuiContextMenuPanel>
-            {titleComponent}
             <EuiPanel
               className={'dataSourceAggregatedViewOuiPanel'}
               paddingSize="none"
