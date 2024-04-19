@@ -39,7 +39,10 @@ jest.mock('../../utils', () => ({
 
 describe('RecentlyAccessed#start()', () => {
   const getStart = () => {
-    return new NavControlsService().start();
+    return new NavControlsService().start({
+      application: applicationServiceMock.createInternalStartContract(),
+      http: httpServiceMock.createStartContract(),
+    });
   };
 
   describe('left contorols', () => {
