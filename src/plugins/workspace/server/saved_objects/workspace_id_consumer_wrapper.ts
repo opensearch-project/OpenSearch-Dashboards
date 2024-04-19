@@ -97,6 +97,9 @@ export class WorkspaceIdConsumerWrapper {
             findOptions.workspaces.splice(index, 1);
           }
         }
+        if (findOptions.workspaces && findOptions.workspaces.length === 0) {
+          delete findOptions.workspaces;
+        }
         return wrapperOptions.client.find(findOptions);
       },
       bulkGet: wrapperOptions.client.bulkGet,
