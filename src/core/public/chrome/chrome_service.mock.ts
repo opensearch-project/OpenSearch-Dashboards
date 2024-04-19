@@ -69,6 +69,7 @@ const createStartContractMock = () => {
       getLeft$: jest.fn(),
       getCenter$: jest.fn(),
       getRight$: jest.fn(),
+      registerRightNavigation: jest.fn(),
     },
     setAppTitle: jest.fn(),
     setIsVisible: jest.fn(),

@@ -30,6 +30,12 @@
 
 import { NavControlsService } from './nav_controls_service';
 import { take } from 'rxjs/operators';
+import { applicationServiceMock, httpServiceMock } from '../../../../core/public/mocks';
+
+const mockMountReactNode = jest.fn().mockReturnValue('mock mount point');
+jest.mock('../../utils', () => ({
+  mountReactNode: () => mockMountReactNode(),
+}));
 
 describe('RecentlyAccessed#start()', () => {
   const getStart = () => {
@@ -73,6 +79,45 @@ describe('RecentlyAccessed#start()', () => {
       navControls.registerRight(nc2);
       navControls.registerRight(nc3);
       expect(await navControls.getRight$().pipe(take(1)).toPromise()).toEqual([nc2, nc1, nc3]);
+    });
+  });
+
+  describe('top right navigation', () => {
+    const mockProps = {
+      application: applicationServiceMock.createStartContract(),
+      http: httpServiceMock.createStartContract(),
+      appId: 'app_id',
+      iconType: 'icon',
+      title: 'title',
+      order: 1,
+    };
+    it('allows registration', async () => {
+      const navControls = getStart();
+      navControls.registerRightNavigation(mockProps);
+      expect(await navControls.getRight$().pipe(take(1)).toPromise()).toEqual([
+        {
+          mount: 'mock mount point',
+          order: 1,
+        },
+      ]);
+    });
+
+    it('sorts controls by order property', async () => {
+      const navControls = getStart();
+      const props1 = { ...mockProps, order: 10 };
+      const props2 = { ...mockProps, order: 0 };
+      navControls.registerRightNavigation(props1);
+      navControls.registerRightNavigation(props2);
+      expect(await navControls.getRight$().pipe(take(1)).toPromise()).toEqual([
+        {
+          mount: 'mock mount point',
+          order: 0,
+        },
+        {
+          mount: 'mock mount point',
+          order: 10,
+        },
+      ]);
     });
   });
 

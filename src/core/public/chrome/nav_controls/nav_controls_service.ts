@@ -28,15 +28,25 @@
  * under the License.
  */
 
+import React from 'react';
 import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { MountPoint } from '../../types';
+import {
+  RightNavigationButton,
+  RightNavigationButtonProps,
+} from '../ui/header/right_navigation_button';
+import { mountReactNode } from '../../utils';
 
 /** @public */
 export interface ChromeNavControl {
   order?: number;
   mount: MountPoint;
+}
+
+interface RightNavigationProps extends RightNavigationButtonProps {
+  order: number;
 }
 
 /**
@@ -62,6 +72,8 @@ export interface ChromeNavControls {
   registerRight(navControl: ChromeNavControl): void;
   /** Register a nav control to be presented on the top-center side of the chrome header. */
   registerCenter(navControl: ChromeNavControl): void;
+  /** Register a nav control to be presented on the top-right side of the chrome header. The component and style will be uniformly maintained in chrome */
+  registerRightNavigation(props: RightNavigationProps): void;
   /** @internal */
   getLeft$(): Observable<ChromeNavControl[]>;
   /** @internal */
@@ -104,7 +116,17 @@ export class NavControlsService {
         navControlsExpandedCenter$.next(
           new Set([...navControlsExpandedCenter$.value.values(), navControl])
         ),
-
+      registerRightNavigation: (props: RightNavigationProps) => {
+        const nav = {
+          order: props.order,
+          mount: mountReactNode(
+            React.createElement(RightNavigationButton, {
+              ...props,
+            })
+          ),
+        };
+        return navControlsRight$.next(new Set([...navControlsRight$.value.values(), nav]));
+      },
       getLeft$: () =>
         navControlsLeft$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),

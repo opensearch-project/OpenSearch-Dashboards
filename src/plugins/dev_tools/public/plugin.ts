@@ -29,7 +29,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
+import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'src/core/public';
 import { AppUpdater } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
@@ -75,12 +75,14 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     defaultMessage: 'Dev Tools',
   });
 
+  private id = 'dev_tools';
+
   public setup(coreSetup: CoreSetup, deps: DevToolsSetupDependencies) {
     const { application: applicationSetup, getStartServices } = coreSetup;
     const { urlForwarding, managementOverview } = deps;
 
     applicationSetup.register({
-      id: 'dev_tools',
+      id: this.id,
       title: this.title,
       updater$: this.appStateUpdater,
       icon: '/ui/logos/opensearch_mark.svg',
@@ -99,7 +101,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     });
 
     managementOverview?.register({
-      id: 'dev_tools',
+      id: this.id,
       title: this.title,
       description: i18n.translate('devTools.devToolsDescription', {
         defaultMessage:
@@ -125,10 +127,19 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     };
   }
 
-  public start() {
+  public start(core: CoreStart) {
     if (this.getSortedDevTools().length === 0) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     }
+    core.chrome.navControls.registerRightNavigation({
+      // order of dev tool should be after advance settings
+      order: 2,
+      appId: this.id,
+      http: core.http,
+      application: core.application,
+      iconType: 'consoleApp',
+      title: this.title,
+    });
   }
 
   public stop() {}
