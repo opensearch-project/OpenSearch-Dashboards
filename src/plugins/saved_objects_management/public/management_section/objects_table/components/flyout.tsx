@@ -54,8 +54,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { OverlayStart, HttpStart } from 'src/core/public';
-import { DataSourceSelector } from '../../../../../data_source_management/public';
+import {
+  OverlayStart,
+  HttpStart,
+  NotificationsStart,
+  SavedObjectsClientContract,
+} from 'src/core/public';
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import {
   IndexPatternsContract,
   IIndexPattern,
@@ -80,6 +85,7 @@ import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import
 import { OverwriteModal } from './overwrite_modal';
 import { ImportModeControl, ImportMode } from './import_mode_control';
 import { ImportSummary } from './import_summary';
+
 const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
@@ -94,9 +100,9 @@ export interface FlyoutProps {
   http: HttpStart;
   search: DataPublicPluginStart['search'];
   dataSourceEnabled: boolean;
-  hideLocalCluster: boolean;
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 export interface FlyoutState {
@@ -811,6 +817,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderImportControlForDataSource(importMode: ImportMode, isLegacyFile: boolean) {
+    const DataSourceSelector = this.props.dataSourceManagement!.ui.DataSourceSelector;
     return (
       <div className="savedObjectImportControlForDataSource">
         <EuiSpacer />
@@ -828,8 +835,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             notifications={this.props.notifications.toasts}
             onSelectedDataSource={this.onSelectedDataSourceChange}
             disabled={!this.props.dataSourceEnabled}
-            hideLocalCluster={this.props.hideLocalCluster}
             fullWidth={true}
+            isClearable={false}
           />
         </EuiFormFieldset>
         <EuiSpacer />
@@ -855,7 +862,8 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
     let confirmButton;
 
     let importButtonDisabled = false;
-    if (this.props.dataSourceEnabled && this.props.hideLocalCluster && !selectedDataSourceId) {
+    // If a data source is enabled, the import button should be disabled when there's no selected data source
+    if (this.props.dataSourceEnabled && selectedDataSourceId === undefined) {
       importButtonDisabled = true;
     }
 
