@@ -34,6 +34,7 @@ import { DataSourceOption } from '../data_source_menu/types';
 import { DataSourceItem } from '../data_source_item';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import './data_source_aggregated_view.scss';
+import { PopoverButton } from '../popover_button/popover_button';
 
 interface DataSourceAggregatedViewProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -155,19 +156,6 @@ export class DataSourceAggregatedView extends React.Component<
     if (this.state.showError) {
       return <DataSourceErrorMenu application={this.props.application} />;
     }
-    const button = (
-      <EuiButtonEmpty
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        aria-label={i18n.translate('dataSourceAggregatedView.dataSourceOptionsButtonAriaLabel', {
-          defaultMessage: 'dataSourceAggregatedViewMenuButton',
-        })}
-        iconType="database"
-        iconSide="left"
-        size="s"
-        onClick={this.onDataSourcesClick.bind(this)}
-      />
-    );
 
     let items: DataSourceOptionDisplay[] = [];
 
@@ -216,7 +204,12 @@ export class DataSourceAggregatedView extends React.Component<
       <>
         <EuiPopover
           id={'dataSourceSViewContextMenuPopover'}
-          button={button}
+          button={
+            <PopoverButton
+              className={'dataSourceAggregatedView'}
+              onClick={this.onDataSourcesClick.bind(this)}
+            />
+          }
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover.bind(this)}
           panelPaddingSize="none"
