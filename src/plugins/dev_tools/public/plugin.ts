@@ -35,7 +35,11 @@ import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
-import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import {
+  AppNavLinkStatus,
+  DEFAULT_APP_CATEGORIES,
+  RightNavigationOrder,
+} from '../../../core/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
@@ -132,11 +136,8 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     }
     core.chrome.navControls.registerRightNavigation({
-      // order of dev tool should be after advance settings
-      order: 2,
+      order: RightNavigationOrder.DevTool,
       appId: this.id,
-      http: core.http,
-      application: core.application,
       iconType: 'consoleApp',
       title: this.title,
     });

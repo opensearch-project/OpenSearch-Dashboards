@@ -49,3 +49,4 @@ export { ChromeNavLink, ChromeNavLinks, ChromeNavLinkUpdateableFields } from './
 export { ChromeRecentlyAccessed, ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
 export { ChromeNavControl, ChromeNavControls } from './nav_controls';
 export { ChromeDocTitle } from './doc_title';
+export { RightNavigationOrder } from './constants';

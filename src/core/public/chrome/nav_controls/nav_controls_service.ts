@@ -38,6 +38,8 @@ import {
   RightNavigationButtonProps,
 } from '../ui/header/right_navigation_button';
 import { mountReactNode } from '../../utils';
+import { InternalApplicationStart } from '../../application';
+import { HttpStart } from '../../http';
 
 /** @public */
 export interface ChromeNavControl {
@@ -45,7 +47,12 @@ export interface ChromeNavControl {
   mount: MountPoint;
 }
 
-interface RightNavigationProps extends RightNavigationButtonProps {
+interface StartDeps {
+  application: InternalApplicationStart;
+  http: HttpStart;
+}
+
+interface RightNavigationProps extends Omit<RightNavigationButtonProps, 'http' | 'application'> {
   order: number;
 }
 
@@ -86,7 +93,7 @@ export interface ChromeNavControls {
 export class NavControlsService {
   private readonly stop$ = new ReplaySubject(1);
 
-  public start() {
+  public start({ application, http }: StartDeps) {
     const navControlsLeft$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsRight$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsCenter$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
@@ -120,7 +127,11 @@ export class NavControlsService {
         const nav = {
           order: props.order,
           mount: mountReactNode(
-            React.createElement(RightNavigationButton, props)
+            React.createElement(RightNavigationButton, {
+              ...props,
+              http,
+              application,
+            })
           ),
         };
         return navControlsRight$.next(new Set([...navControlsRight$.value.values(), nav]));

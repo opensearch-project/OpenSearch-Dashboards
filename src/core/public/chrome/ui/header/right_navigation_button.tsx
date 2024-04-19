@@ -5,11 +5,12 @@
 
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { CoreStart } from 'src/core/public';
+import { InternalApplicationStart } from '../../../application';
+import { HttpStart } from '../../../http';
 
 export interface RightNavigationButtonProps {
-  application: CoreStart['application'];
-  http: CoreStart['http'];
+  application: InternalApplicationStart;
+  http: HttpStart;
   appId: string;
   iconType: string;
   title: string;

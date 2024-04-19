@@ -9,7 +9,7 @@ import { RightNavigationButton } from './right_navigation_button';
 import { applicationServiceMock, httpServiceMock } from '../../../../../core/public/mocks';
 
 const mockProps = {
-  application: applicationServiceMock.createStartContract(),
+  application: applicationServiceMock.createInternalStartContract(),
   http: httpServiceMock.createStartContract(),
   appId: 'app_id',
   iconType: 'mock_icon',
@@ -28,7 +28,7 @@ describe('Right navigation button', () => {
     const props = {
       ...mockProps,
       application: {
-        ...applicationServiceMock.createStartContract(),
+        ...applicationServiceMock.createInternalStartContract(),
         getUrlForApp,
         navigateToUrl,
       },

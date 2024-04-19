@@ -182,7 +182,7 @@ export class ChromeService {
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
     const sidecarConfig$ = overlays.sidecar.getSidecarConfig$();
 
-    const navControls = this.navControls.start();
+    const navControls = this.navControls.start({ application, http });
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
