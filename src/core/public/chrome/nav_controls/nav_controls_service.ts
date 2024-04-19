@@ -120,9 +120,7 @@ export class NavControlsService {
         const nav = {
           order: props.order,
           mount: mountReactNode(
-            React.createElement(RightNavigationButton, {
-              ...props,
-            })
+            React.createElement(RightNavigationButton, props)
           ),
         };
         return navControlsRight$.next(new Set([...navControlsRight$.value.values(), nav]));
