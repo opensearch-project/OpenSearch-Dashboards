@@ -8,12 +8,12 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiContextMenuPanel,
-  EuiHorizontalRule,
   EuiPanel,
   EuiPopover,
-  EuiSpacer,
   EuiText,
+  EuiPopoverFooter,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { FormattedMessage } from 'react-intl';
@@ -55,6 +55,7 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
       iconSide="right"
       data-test-subj="dataSourceEmptyStateManageDataSourceButton"
       fill={false}
+      size="s"
       onClick={() =>
         application?.navigateToApp('management', {
           path: `opensearch-dashboards/${DSM_APP_ID}`,
@@ -69,7 +70,7 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
   );
   const text = (
     <>
-      <EuiText>
+      <EuiText size="s" textAlign="center">
         {
           <FormattedMessage
             id="dataSourcesManagement.dataSourceMenu.noData"
@@ -78,7 +79,7 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
         }
       </EuiText>
 
-      <EuiText>
+      <EuiText size="s" textAlign="center">
         {
           <FormattedMessage
             id="dataSourcesManagement.dataSourceMenu.connect"
@@ -100,27 +101,32 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
       anchorPosition="downLeft"
       data-test-subj={'dataSourceEmptyStatePopover'}
     >
-      <EuiContextMenuPanel>
-        <EuiPanel className={'dataSourceSelectableOuiPanel'} color="transparent" paddingSize="s">
-          <DataSourceDropDownHeader
-            activeDataSourceCount={activeDataSourceCount}
-            totalDataSourceCount={totalDataSourceCount}
-            application={application}
-          />
-          <EuiHorizontalRule margin="none" />
-          <EuiSpacer size="s" />
-          <EuiPanel
-            hasBorder={false}
-            hasShadow={false}
-            className="dataSourceEmptyStatePanel"
-            data-test-subj="datasourceTableEmptyState"
-          >
-            {text}
-            <EuiSpacer />
-            {redirectButton}
-          </EuiPanel>
+      <DataSourceDropDownHeader
+        activeDataSourceCount={activeDataSourceCount}
+        totalDataSourceCount={totalDataSourceCount}
+        application={application}
+      />
+      <EuiPanel
+        className={'dataSourceSelectableOuiPanel'}
+        hasBorder={false}
+        color="transparent"
+        paddingSize="none"
+        borderRadius="none"
+      >
+        <EuiPanel
+          hasBorder={false}
+          hasShadow={false}
+          className="dataSourceEmptyStatePanel"
+          data-test-subj="datasourceTableEmptyState"
+        >
+          {text}
         </EuiPanel>
-      </EuiContextMenuPanel>
+      </EuiPanel>
+      <EuiPopoverFooter>
+        <EuiFlexGroup justifyContent="spaceAround">
+          <EuiFlexItem>{redirectButton}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverFooter>
     </EuiPopover>
   );
 };
