@@ -322,6 +322,10 @@ export {
   exportSavedObjectsToStream,
   importSavedObjectsFromStream,
   resolveSavedObjectsImportErrors,
+  ACL,
+  Principals,
+  PrincipalType,
+  Permissions,
   updateDataSourceNameInVegaSpec,
   extractVegaSpecFromSavedObject,
 } from './saved_objects';
