@@ -63,7 +63,6 @@ interface DataSourceAggregatedViewBaseConfig extends DataSourceBaseConfig {
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
-  uiSettings?: IUiSettingsClient;
 }
 
 export type DataSourceAggregatedViewConfig =

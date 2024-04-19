@@ -23,56 +23,48 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={1}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={3}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          activeDataSourceCount={1}
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={3}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -160,56 +152,48 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={2}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={4}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          activeDataSourceCount={2}
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={4}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -303,56 +287,48 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={1}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={2}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          activeDataSourceCount={1}
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={2}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -434,56 +410,48 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={2}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={3}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          activeDataSourceCount={2}
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={3}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -571,56 +539,48 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={3}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          activeDataSourceCount={0}
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={3}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -708,56 +668,48 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={4}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          activeDataSourceCount={0}
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={4}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -851,56 +803,48 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={2}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          activeDataSourceCount={0}
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={2}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -982,56 +926,48 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={3}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          activeDataSourceCount={0}
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={3}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -1119,55 +1055,47 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={0}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -1219,55 +1147,47 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={0}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -1319,55 +1239,47 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={0}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -1419,55 +1331,47 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={0}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -1519,55 +1423,47 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={0}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -1619,55 +1515,47 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={0}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -1719,55 +1607,47 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={0}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -1819,55 +1699,47 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={0}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -1919,55 +1791,47 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={0}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
@@ -2019,55 +1883,47 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
     ownFocus={true}
     panelPaddingSize="none"
   >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
     <EuiContextMenuPanel
       hasFocus={true}
       items={Array []}
     >
-      <EuiPanel
-        borderRadius="none"
-        className="dataSourceAggregatedViewOuiPanel"
-        color="transparent"
-        hasBorder={false}
-        paddingSize="s"
-      >
-        <DataSourceDropDownHeader
-          application={
-            Object {
-              "applications$": BehaviorSubject {
-                "_isScalar": false,
-                "_value": Map {},
-                "closed": false,
-                "hasError": false,
-                "isStopped": false,
-                "observers": Array [],
-                "thrownError": null,
-              },
-              "capabilities": Object {
-                "catalogue": Object {},
-                "management": Object {},
-                "navLinks": Object {},
-                "workspaces": Object {},
-              },
-              "currentAppId$": Observable {
-                "_isScalar": false,
-                "source": Subject {
-                  "_isScalar": false,
-                  "closed": false,
-                  "hasError": false,
-                  "isStopped": false,
-                  "observers": Array [],
-                  "thrownError": null,
-                },
-              },
-              "getUrlForApp": [MockFunction],
-              "navigateToApp": [MockFunction],
-              "navigateToUrl": [MockFunction],
-              "registerMountContext": [MockFunction],
-            }
-          }
-          totalDataSourceCount={0}
-        />
-      </EuiPanel>
       <EuiPanel
         borderRadius="none"
         className="dataSourceAggregatedViewOuiPanel"
