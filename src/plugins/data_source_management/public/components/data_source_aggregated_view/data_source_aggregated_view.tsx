@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
+  ApplicationStart,
   IUiSettingsClient,
   SavedObjectsClientContract,
   ToastsStart,
@@ -35,6 +36,7 @@ interface DataSourceAggregatedViewProps {
   hideLocalCluster: boolean;
   fullWidth: boolean;
   activeDataSourceIds?: string[];
+  application?: ApplicationStart;
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   displayAllCompatibleDataSources: boolean;
   uiSettings?: IUiSettingsClient;
@@ -130,7 +132,7 @@ export class DataSourceAggregatedView extends React.Component<
 
   render() {
     if (this.state.showEmptyState) {
-      return <NoDataSource />;
+      return <NoDataSource application={this.props.application} />;
     }
     if (this.state.showError) {
       return <DataSourceErrorMenu />;

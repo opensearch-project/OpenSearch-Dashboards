@@ -4,7 +4,11 @@
  */
 
 import React from 'react';
-import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
+import {
+  ApplicationStart,
+  SavedObjectsClientContract,
+  ToastsStart,
+} from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceFilterGroup, SelectedDataSourceOption } from './data_source_filter_group';
 import { NoDataSource } from '../no_data_source';
@@ -18,6 +22,7 @@ export interface DataSourceMultiSeletableProps {
   onSelectedDataSources: (dataSources: SelectedDataSourceOption[]) => void;
   hideLocalCluster: boolean;
   fullWidth: boolean;
+  application?: ApplicationStart;
   uiSettings?: IUiSettingsClient;
 }
 
@@ -111,7 +116,7 @@ export class DataSourceMultiSelectable extends React.Component<
 
   render() {
     if (this.state.showEmptyState) {
-      return <NoDataSource />;
+      return <NoDataSource application={this.props.application} />;
     }
     if (this.state.showError) {
       return <DataSourceErrorMenu />;

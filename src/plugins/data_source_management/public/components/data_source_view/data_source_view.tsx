@@ -146,12 +146,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
 
   render() {
     if (this.state.showEmptyState) {
-      return (
-        <NoDataSource
-          totalDataSourceCount={this.state.selectedOption.length}
-          application={this.props.application}
-        />
-      );
+      return <NoDataSource application={this.props.application} />;
     }
     if (this.state.showError) {
       return <DataSourceErrorMenu />;

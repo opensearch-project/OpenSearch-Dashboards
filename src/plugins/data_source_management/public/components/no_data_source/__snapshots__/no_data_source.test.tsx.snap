@@ -57,7 +57,7 @@ exports[`NoDataSource should render correctly with the provided totalDataSourceC
         textAlign="center"
       >
         <FormattedMessage
-          defaultMessage="Connect data source to get started"
+          defaultMessage="Connect data source to get started."
           id="dataSourcesManagement.dataSourceMenu.connect"
           values={Object {}}
         />
@@ -146,7 +146,7 @@ exports[`NoDataSource should render normally 1`] = `
         textAlign="center"
       >
         <FormattedMessage
-          defaultMessage="Connect data source to get started"
+          defaultMessage="Connect data source to get started."
           id="dataSourcesManagement.dataSourceMenu.connect"
           values={Object {}}
         />

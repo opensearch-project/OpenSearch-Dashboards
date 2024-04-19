@@ -61,17 +61,9 @@ exports[`DataSourceView Should render successfully when provided datasource has 
 </EuiPopover>
 `;
 
-exports[`DataSourceView Should return error when provided datasource has been filtered out 1`] = `
-<NoDataSource
-  totalDataSourceCount={0}
-/>
-`;
+exports[`DataSourceView Should return error when provided datasource has been filtered out 1`] = `<NoDataSource />`;
 
-exports[`DataSourceView When selected option is local cluster and hide local Cluster is true, should return error 1`] = `
-<NoDataSource
-  totalDataSourceCount={0}
-/>
-`;
+exports[`DataSourceView When selected option is local cluster and hide local Cluster is true, should return error 1`] = `<NoDataSource />`;
 
 exports[`DataSourceView should call getDataSourceById when only pass id with no label 1`] = `
 <EuiPopover

@@ -21,16 +21,10 @@ import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DSM_APP_ID } from '../../plugin';
 
 interface DataSourceDropDownHeaderProps {
-  totalDataSourceCount: number;
-  activeDataSourceCount?: number;
   application?: ApplicationStart;
 }
 
-export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
-  activeDataSourceCount,
-  totalDataSourceCount,
-  application,
-}) => {
+export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({ application }) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
   const label = ' No data sources';
   const button = (
@@ -83,7 +77,7 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
         {
           <FormattedMessage
             id="dataSourcesManagement.dataSourceMenu.connect"
-            defaultMessage="Connect data source to get started"
+            defaultMessage="Connect data source to get started."
           />
         }
       </EuiText>
@@ -101,11 +95,7 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
       anchorPosition="downLeft"
       data-test-subj={'dataSourceEmptyStatePopover'}
     >
-      <DataSourceDropDownHeader
-        activeDataSourceCount={activeDataSourceCount}
-        totalDataSourceCount={totalDataSourceCount}
-        application={application}
-      />
+      <DataSourceDropDownHeader totalDataSourceCount={0} application={application} />
       <EuiPanel
         className={'dataSourceSelectableOuiPanel'}
         hasBorder={false}
