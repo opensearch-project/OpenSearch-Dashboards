@@ -9,7 +9,7 @@ import {
   WorkspaceFeatureSelector,
   WorkspaceFeatureSelectorProps,
 } from './workspace_feature_selector';
-import { AppNavLinkStatus } from '../../../../../core/public';
+import { AppNavLinkStatus, AppStatus } from '../../../../../core/public';
 
 const setup = (options?: Partial<WorkspaceFeatureSelectorProps>) => {
   const onChangeMock = jest.fn();
@@ -19,28 +19,36 @@ const setup = (options?: Partial<WorkspaceFeatureSelectorProps>) => {
       title: 'App 1',
       category: { id: 'category-1', label: 'Category 1' },
       navLinkStatus: AppNavLinkStatus.visible,
+      status: AppStatus.accessible,
+      appRoute: '/app-1',
     },
     {
       id: 'app-2',
       title: 'App 2',
       category: { id: 'category-1', label: 'Category 1' },
       navLinkStatus: AppNavLinkStatus.visible,
+      status: AppStatus.accessible,
+      appRoute: '/app-2',
     },
     {
       id: 'app-3',
       title: 'App 3',
       category: { id: 'category-2', label: 'Category 2' },
       navLinkStatus: AppNavLinkStatus.visible,
+      status: AppStatus.accessible,
+      appRoute: '/app-3',
     },
     {
       id: 'app-4',
       title: 'App 4',
       navLinkStatus: AppNavLinkStatus.visible,
+      status: AppStatus.accessible,
+      appRoute: '/app-4',
     },
   ];
   const renderResult = render(
     <WorkspaceFeatureSelector
-      applications={applications}
+      workspaceConfigurableApps={applications}
       selectedFeatures={[]}
       onChange={onChangeMock}
       {...options}

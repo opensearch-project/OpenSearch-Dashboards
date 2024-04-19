@@ -118,7 +118,7 @@ describe('DataSourceView', () => {
     expect(utils.getDataSourceById).toBeCalledTimes(1);
   });
 
-  it('should show popover when click on button', async () => {
+  it('should show popover when click on data source view button', async () => {
     const onSelectedDataSource = jest.fn();
     spyOn(utils, 'getDataSourceById').and.returnValue([{ id: 'test1', label: 'test1' }]);
     spyOn(utils, 'handleDataSourceFetchError').and.returnValue('');
@@ -132,8 +132,25 @@ describe('DataSourceView', () => {
         fullWidth={false}
       />
     );
-    const button = await container.findByTestId('dataSourceViewContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceViewButton');
     button.click();
     expect(container).toMatchSnapshot();
+  });
+
+  it('should render no data source when no data source filtered out and hide local cluster', async () => {
+    const onSelectedDataSource = jest.fn();
+    const container = render(
+      <DataSourceView
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        hideLocalCluster={true}
+        fullWidth={false}
+        selectedOption={[{ id: '' }]}
+        dataSourceFilter={(ds) => false}
+      />
+    );
+    const button = await container.findByTestId('dataSourceEmptyStateHeaderButton');
+    expect(button).toHaveTextContent('No data sources');
   });
 });

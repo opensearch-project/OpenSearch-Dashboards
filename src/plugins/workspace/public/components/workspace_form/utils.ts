@@ -5,11 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 
-import {
-  AppNavLinkStatus,
-  DEFAULT_APP_CATEGORIES,
-  PublicAppInfo,
-} from '../../../../../core/public';
+import { PublicAppInfo } from '../../../../../core/public';
 import type { SavedObjectPermissions } from '../../../../../core/types';
 import { DEFAULT_SELECTED_FEATURES_IDS, WorkspacePermissionMode } from '../../../common/constants';
 import {
@@ -65,15 +61,6 @@ export const convertApplicationsToFeaturesOrGroups = (
 ) => {
   const UNDEFINED = 'undefined';
 
-  // Filter out all hidden applications and management applications and default selected features
-  const visibleApplications = applications.filter(
-    ({ navLinkStatus, chromeless, category, id }) =>
-      navLinkStatus !== AppNavLinkStatus.hidden &&
-      !chromeless &&
-      !DEFAULT_SELECTED_FEATURES_IDS.includes(id) &&
-      category?.id !== DEFAULT_APP_CATEGORIES.management.id
-  );
-
   /**
    *
    * Convert applications to features map, the map use category label as
@@ -81,7 +68,7 @@ export const convertApplicationsToFeaturesOrGroups = (
    * transfer application to feature.
    *
    **/
-  const categoryLabel2Features = visibleApplications.reduce<{
+  const categoryLabel2Features = applications.reduce<{
     [key: string]: WorkspaceFeature[];
   }>((previousValue, application) => {
     const label = application.category?.label || UNDEFINED;

@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { WorkspaceUpdater, WorkspaceUpdaterProps } from './workspace_updater';
+export { NoDataSource } from './no_data_source';
