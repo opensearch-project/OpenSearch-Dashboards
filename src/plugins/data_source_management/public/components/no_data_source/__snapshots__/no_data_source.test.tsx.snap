@@ -26,51 +26,56 @@ exports[`NoDataSource should render correctly with the provided totalDataSourceC
   ownFocus={true}
   panelPaddingSize="none"
 >
-  <EuiContextMenuPanel
-    hasFocus={true}
-    items={Array []}
+  <DataSourceDropDownHeader
+    totalDataSourceCount={0}
+  />
+  <EuiPanel
+    borderRadius="none"
+    className="dataSourceSelectableOuiPanel"
+    color="transparent"
+    hasBorder={false}
+    paddingSize="none"
   >
     <EuiPanel
-      className="dataSourceSelectableOuiPanel"
-      color="transparent"
-      paddingSize="s"
+      className="dataSourceEmptyStatePanel"
+      data-test-subj="datasourceTableEmptyState"
+      hasBorder={false}
+      hasShadow={false}
     >
-      <DataSourceDropDownHeader
-        totalDataSourceCount={0}
-      />
-      <EuiHorizontalRule
-        margin="none"
-      />
-      <EuiSpacer
+      <EuiText
         size="s"
-      />
-      <EuiPanel
-        className="dataSourceEmptyStatePanel"
-        data-test-subj="datasourceTableEmptyState"
-        hasBorder={false}
-        hasShadow={false}
+        textAlign="center"
       >
-        <EuiText>
-          <FormattedMessage
-            defaultMessage="There is no data sources to display."
-            id="dataSourcesManagement.dataSourceMenu.noData"
-            values={Object {}}
-          />
-        </EuiText>
-        <EuiText>
-          <FormattedMessage
-            defaultMessage="Connect data source to get started"
-            id="dataSourcesManagement.dataSourceMenu.connect"
-            values={Object {}}
-          />
-        </EuiText>
-        <EuiSpacer />
+        <FormattedMessage
+          defaultMessage="There is no data sources to display."
+          id="dataSourcesManagement.dataSourceMenu.noData"
+          values={Object {}}
+        />
+      </EuiText>
+      <EuiText
+        size="s"
+        textAlign="center"
+      >
+        <FormattedMessage
+          defaultMessage="Connect data source to get started"
+          id="dataSourcesManagement.dataSourceMenu.connect"
+          values={Object {}}
+        />
+      </EuiText>
+    </EuiPanel>
+  </EuiPanel>
+  <EuiPopoverFooter>
+    <EuiFlexGroup
+      justifyContent="spaceAround"
+    >
+      <EuiFlexItem>
         <EuiButton
           data-test-subj="dataSourceEmptyStateManageDataSourceButton"
           fill={false}
           iconSide="right"
           iconType="popout"
           onClick={[Function]}
+          size="s"
         >
           <FormattedMessage
             defaultMessage="Manage data sources"
@@ -78,9 +83,9 @@ exports[`NoDataSource should render correctly with the provided totalDataSourceC
             values={Object {}}
           />
         </EuiButton>
-      </EuiPanel>
-    </EuiPanel>
-  </EuiContextMenuPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPopoverFooter>
 </EuiPopover>
 `;
 
@@ -110,51 +115,56 @@ exports[`NoDataSource should render normally 1`] = `
   ownFocus={true}
   panelPaddingSize="none"
 >
-  <EuiContextMenuPanel
-    hasFocus={true}
-    items={Array []}
+  <DataSourceDropDownHeader
+    totalDataSourceCount={0}
+  />
+  <EuiPanel
+    borderRadius="none"
+    className="dataSourceSelectableOuiPanel"
+    color="transparent"
+    hasBorder={false}
+    paddingSize="none"
   >
     <EuiPanel
-      className="dataSourceSelectableOuiPanel"
-      color="transparent"
-      paddingSize="s"
+      className="dataSourceEmptyStatePanel"
+      data-test-subj="datasourceTableEmptyState"
+      hasBorder={false}
+      hasShadow={false}
     >
-      <DataSourceDropDownHeader
-        totalDataSourceCount={0}
-      />
-      <EuiHorizontalRule
-        margin="none"
-      />
-      <EuiSpacer
+      <EuiText
         size="s"
-      />
-      <EuiPanel
-        className="dataSourceEmptyStatePanel"
-        data-test-subj="datasourceTableEmptyState"
-        hasBorder={false}
-        hasShadow={false}
+        textAlign="center"
       >
-        <EuiText>
-          <FormattedMessage
-            defaultMessage="There is no data sources to display."
-            id="dataSourcesManagement.dataSourceMenu.noData"
-            values={Object {}}
-          />
-        </EuiText>
-        <EuiText>
-          <FormattedMessage
-            defaultMessage="Connect data source to get started"
-            id="dataSourcesManagement.dataSourceMenu.connect"
-            values={Object {}}
-          />
-        </EuiText>
-        <EuiSpacer />
+        <FormattedMessage
+          defaultMessage="There is no data sources to display."
+          id="dataSourcesManagement.dataSourceMenu.noData"
+          values={Object {}}
+        />
+      </EuiText>
+      <EuiText
+        size="s"
+        textAlign="center"
+      >
+        <FormattedMessage
+          defaultMessage="Connect data source to get started"
+          id="dataSourcesManagement.dataSourceMenu.connect"
+          values={Object {}}
+        />
+      </EuiText>
+    </EuiPanel>
+  </EuiPanel>
+  <EuiPopoverFooter>
+    <EuiFlexGroup
+      justifyContent="spaceAround"
+    >
+      <EuiFlexItem>
         <EuiButton
           data-test-subj="dataSourceEmptyStateManageDataSourceButton"
           fill={false}
           iconSide="right"
           iconType="popout"
           onClick={[Function]}
+          size="s"
         >
           <FormattedMessage
             defaultMessage="Manage data sources"
@@ -162,8 +172,8 @@ exports[`NoDataSource should render normally 1`] = `
             values={Object {}}
           />
         </EuiButton>
-      </EuiPanel>
-    </EuiPanel>
-  </EuiContextMenuPanel>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPopoverFooter>
 </EuiPopover>
 `;
