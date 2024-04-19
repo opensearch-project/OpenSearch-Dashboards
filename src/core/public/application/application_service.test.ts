@@ -808,7 +808,7 @@ describe('#start()', () => {
       `);
     });
 
-    it('navigate by using window.location.assign if navigate to a app not accessible within a workspace', async () => {
+    it('refresh the page if navigate to a app not accessible within a workspace', async () => {
       // Save the original assign method
       const originalLocation = window.location;
       delete (window as any).location;
