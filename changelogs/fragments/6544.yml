@@ -1,0 +1,2 @@
+refactor:
+- Refactor saved object management plugin to use datasourceManagement ui API to get DataSourceSelector ([#6544](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6544))
