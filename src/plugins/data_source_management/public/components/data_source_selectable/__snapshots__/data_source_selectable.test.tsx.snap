@@ -269,7 +269,7 @@ Object {
               class="euiPopoverTitle euiPopoverTitle--paddingSmall"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
               >
                 <div
                   class="euiFlexItem"
