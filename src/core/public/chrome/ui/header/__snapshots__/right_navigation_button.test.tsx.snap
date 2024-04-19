@@ -19,7 +19,7 @@ exports[`Right navigation button should render base element normally 1`] = `
             class="euiHeaderSectionItemButton__content"
           >
             <span
-              color="primary"
+              color="text"
               data-euiicon-type="mock_icon"
               title="title"
             />
