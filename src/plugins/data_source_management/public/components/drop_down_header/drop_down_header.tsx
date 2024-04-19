@@ -45,6 +45,6 @@ export const DataSourceDropDownHeader: React.FC<DataSourceOptionItemProps> = ({
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiTitle>
+    </EuiPopoverTitle>
   );
 };
