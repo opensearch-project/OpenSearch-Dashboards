@@ -29,6 +29,9 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
   ownFocus={true}
   panelPaddingSize="none"
 >
+  <DataSourceDropDownHeader
+    totalDataSourceCount={3}
+  />
   <EuiContextMenuPanel
     hasFocus={true}
     items={Array []}
@@ -36,17 +39,8 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
     <EuiPanel
       className="dataSourceSelectableOuiPanel"
       color="transparent"
-      paddingSize="s"
+      paddingSize="none"
     >
-      <DataSourceDropDownHeader
-        totalDataSourceCount={3}
-      />
-      <EuiHorizontalRule
-        margin="none"
-      />
-      <EuiSpacer
-        size="s"
-      />
       <EuiSelectable
         aria-label="Search"
         data-test-subj="dataSourceSelectable"
@@ -113,6 +107,9 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
   ownFocus={true}
   panelPaddingSize="none"
 >
+  <DataSourceDropDownHeader
+    totalDataSourceCount={0}
+  />
   <EuiContextMenuPanel
     hasFocus={true}
     items={Array []}
@@ -120,17 +117,8 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
     <EuiPanel
       className="dataSourceSelectableOuiPanel"
       color="transparent"
-      paddingSize="s"
+      paddingSize="none"
     >
-      <DataSourceDropDownHeader
-        totalDataSourceCount={0}
-      />
-      <EuiHorizontalRule
-        margin="none"
-      />
-      <EuiSpacer
-        size="s"
-      />
       <EuiSelectable
         aria-label="Search"
         data-test-subj="dataSourceSelectable"
@@ -181,6 +169,9 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
   ownFocus={true}
   panelPaddingSize="none"
 >
+  <DataSourceDropDownHeader
+    totalDataSourceCount={0}
+  />
   <EuiContextMenuPanel
     hasFocus={true}
     items={Array []}
@@ -188,17 +179,8 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
     <EuiPanel
       className="dataSourceSelectableOuiPanel"
       color="transparent"
-      paddingSize="s"
+      paddingSize="none"
     >
-      <DataSourceDropDownHeader
-        totalDataSourceCount={0}
-      />
-      <EuiHorizontalRule
-        margin="none"
-      />
-      <EuiSpacer
-        size="s"
-      />
       <EuiSelectable
         aria-label="Search"
         data-test-subj="dataSourceSelectable"
@@ -284,83 +266,85 @@ Object {
           </p>
           <div>
             <div
+              class="euiPopoverTitle euiPopoverTitle--paddingSmall"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
+              >
+                <div
+                  class="euiFlexItem"
+                >
+                  DATA SOURCES
+                   (
+                  3
+                  )
+                </div>
+                <div
+                  class="dataSourceDropDownHeaderInvisibleFocusable"
+                  tabindex="0"
+                />
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <button
+                    class="euiLink euiLink--primary"
+                    type="button"
+                  >
+                    Manage
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div
               class="euiContextMenuPanel"
               tabindex="-1"
             >
               <div>
                 <div>
                   <div
-                    class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow dataSourceSelectableOuiPanel"
+                    class="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow dataSourceSelectableOuiPanel"
                   >
-                    <div
-                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiTitle euiTitle--xxxsmall"
-                    >
-                      <div
-                        class="euiFlexItem"
-                      >
-                        DATA SOURCES
-                         (
-                        3
-                        )
-                      </div>
-                      <div
-                        class="dataSourceDropDownHeaderInvisibleFocusable"
-                        tabindex="0"
-                      />
-                      <div
-                        class="euiFlexItem euiFlexItem--flexGrowZero"
-                      >
-                        <button
-                          class="euiLink euiLink--primary"
-                          type="button"
-                        >
-                          Manage
-                        </button>
-                      </div>
-                    </div>
-                    <hr
-                      class="euiHorizontalRule euiHorizontalRule--full"
-                    />
-                    <div
-                      class="euiSpacer euiSpacer--s"
-                    />
                     <div
                       class="euiSelectable"
                       data-test-subj="dataSourceSelectable"
                     >
                       <div
-                        class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                        class="euiPopoverTitle euiPopoverTitle--paddingSmall"
                       >
                         <div
-                          class="euiFormControlLayout__childrenWrapper"
+                          class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                         >
-                          <input
-                            aria-activedescendant=""
-                            aria-autocomplete="list"
-                            aria-controls="generated-id_listbox"
-                            aria-expanded="true"
-                            aria-haspopup="listbox"
-                            aria-label="Search"
-                            aria-owns="generated-id_listbox"
-                            autocomplete="off"
-                            class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
-                            placeholder="Search"
-                            role="combobox"
-                            type="search"
-                            value=""
-                          />
                           <div
-                            class="euiFormControlLayoutIcons"
+                            class="euiFormControlLayout__childrenWrapper"
                           >
-                            <span
-                              class="euiFormControlLayoutCustomIcon"
+                            <input
+                              aria-activedescendant=""
+                              aria-autocomplete="list"
+                              aria-controls="generated-id_listbox"
+                              aria-expanded="true"
+                              aria-haspopup="listbox"
+                              aria-label="Search"
+                              aria-owns="generated-id_listbox"
+                              autocomplete="off"
+                              class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
+                              placeholder="Search"
+                              role="combobox"
+                              type="search"
+                              value=""
+                            />
+                            <div
+                              class="euiFormControlLayoutIcons"
                             >
                               <span
-                                aria-hidden="true"
-                                class="euiFormControlLayoutCustomIcon__icon"
-                                data-euiicon-type="search"
-                              />
-                            </span>
+                                class="euiFormControlLayoutCustomIcon"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiFormControlLayoutCustomIcon__icon"
+                                  data-euiicon-type="search"
+                                />
+                              </span>
+                            </div>
                           </div>
                         </div>
                       </div>

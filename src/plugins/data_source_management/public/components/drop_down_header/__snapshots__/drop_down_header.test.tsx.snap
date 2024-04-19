@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DataSourceDropDownHeader should render correctly with the provided totalDataSourceCount 1`] = `
-<EuiTitle
-  size="xxxs"
+<EuiPopoverTitle
+  paddingSize="s"
 >
   <EuiFlexGroup
     responsive={false}
@@ -27,7 +27,7 @@ exports[`DataSourceDropDownHeader should render correctly with the provided tota
       </EuiLink>
     </EuiFlexItem>
   </EuiFlexGroup>
-</EuiTitle>
+</EuiPopoverTitle>
 `;
 
 exports[`DataSourceDropDownHeader should render the activeDataSourceCount/totalDataSourceCount when both provided 1`] = `
@@ -35,52 +35,55 @@ exports[`DataSourceDropDownHeader should render the activeDataSourceCount/totalD
   activeDataSourceCount={2}
   totalDataSourceCount={5}
 >
-  <EuiTitle
-    size="xxxs"
+  <EuiPopoverTitle
+    paddingSize="s"
   >
-    <EuiFlexGroup
-      className="euiTitle euiTitle--xxxsmall"
-      responsive={false}
+    <div
+      className="euiPopoverTitle euiPopoverTitle--paddingSmall"
     >
-      <div
-        className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiTitle euiTitle--xxxsmall"
+      <EuiFlexGroup
+        responsive={false}
       >
-        <EuiFlexItem>
-          <div
-            className="euiFlexItem"
-          >
-            DATA SOURCES
-             (
-            2/5
-            )
-          </div>
-        </EuiFlexItem>
         <div
-          className="dataSourceDropDownHeaderInvisibleFocusable"
-          tabIndex={0}
-        />
-        <EuiFlexItem
-          grow={false}
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
         >
-          <div
-            className="euiFlexItem euiFlexItem--flexGrowZero"
-          >
-            <EuiLink
-              onClick={[Function]}
+          <EuiFlexItem>
+            <div
+              className="euiFlexItem"
             >
-              <button
-                className="euiLink euiLink--primary"
-                disabled={false}
+              DATA SOURCES
+               (
+              2/5
+              )
+            </div>
+          </EuiFlexItem>
+          <div
+            className="dataSourceDropDownHeaderInvisibleFocusable"
+            tabIndex={0}
+          />
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiLink
                 onClick={[Function]}
-                type="button"
               >
-                Manage
-              </button>
-            </EuiLink>
-          </div>
-        </EuiFlexItem>
-      </div>
-    </EuiFlexGroup>
-  </EuiTitle>
+                <button
+                  className="euiLink euiLink--primary"
+                  disabled={false}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  Manage
+                </button>
+              </EuiLink>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+    </div>
+  </EuiPopoverTitle>
 </DataSourceDropDownHeader>
 `;
