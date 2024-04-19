@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppCategory } from '../../../core/public';
+import { App, AppCategory, AppNavLinkStatus, WorkspaceObject } from '../../../core/public';
 
 /**
  * Checks if a given feature matches the provided feature configuration.
@@ -25,6 +25,11 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
 }) => {
   let matched = false;
 
+  /**
+   * Iterate through each feature configuration to determine if the given feature matches any of them.
+   * Note: The loop will not break prematurely because the order of featureConfigs array matters.
+   * Later configurations may override previous ones, so each configuration must be evaluated in sequence.
+   */
   for (const featureConfig of featureConfigs) {
     // '*' matches any feature
     if (featureConfig === '*') {
@@ -55,3 +60,42 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
 
   return matched;
 };
+
+/**
+ * Check if an app is accessible in a workspace based on the workspace configured features
+ */
+export function isAppAccessibleInWorkspace(app: App, workspace: WorkspaceObject) {
+  /**
+   * When workspace has no features configured, all apps are considered to be accessible
+   */
+  if (!workspace.features) {
+    return true;
+  }
+
+  /**
+   * The app is configured into a workspace, it is accessible after entering the workspace
+   */
+  const featureMatcher = featureMatchesConfig(workspace.features);
+  if (featureMatcher({ id: app.id, category: app.category })) {
+    return true;
+  }
+
+  /*
+   * An app with hidden nav link is not configurable by workspace, which means user won't be
+   * able to select/unselect it when configuring workspace features. Such apps are by default
+   * accessible when in a workspace.
+   */
+  if (app.navLinkStatus === AppNavLinkStatus.hidden) {
+    return true;
+  }
+
+  /**
+   * A chromeless app is not configurable by workspace, which means user won't be
+   * able to select/unselect it when configuring workspace features. Such apps are by default
+   * accessible when in a workspace.
+   */
+  if (app.chromeless) {
+    return true;
+  }
+  return false;
+}
