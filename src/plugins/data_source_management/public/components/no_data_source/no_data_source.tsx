@@ -20,7 +20,7 @@ import { FormattedMessage } from 'react-intl';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DSM_APP_ID } from '../../plugin';
 
-interface DataSourceDropDownHeaderProps {
+interface NoDataSourceProps {
   application?: ApplicationStart;
 }
 
