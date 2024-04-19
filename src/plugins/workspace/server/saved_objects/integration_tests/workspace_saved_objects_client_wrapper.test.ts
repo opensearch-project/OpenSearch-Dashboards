@@ -344,18 +344,6 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       await permittedSavedObjectedClient.delete('dashboard', objectId);
     });
 
-    it('should able to create saved objects into any workspaces after bulkCreate called when groups/users is dashboard damin', async () => {
-      const objectId = new Date().getTime().toString(16).toUpperCase();
-      const result = await dashboardAdminSavedObjectedClient.bulkCreate(
-        [{ type: 'dashboard', attributes: {}, id: objectId }],
-        {
-          workspaces: ['workspace-1'],
-        }
-      );
-      expect(result.saved_objects.length).toEqual(1);
-      await dashboardAdminSavedObjectedClient.delete('dashboard', objectId);
-    });
-
     it('should throw forbidden error when create with override', async () => {
       let error;
       try {
@@ -624,7 +612,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           .error
       ).toBeUndefined();
     });
-    it('should return consistent dashboard after bulkget called', async () => {
+    it('should return consistent dashboard after bulkGet called', async () => {
       expect(
         (
           await dashboardAdminSavedObjectedClient.bulkGet([
@@ -692,6 +680,17 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       );
 
       expect(createResult.saved_objects).toHaveLength(1);
+    });
+    it('should able to create saved objects into any workspaces after bulkCreate called', async () => {
+      const objectId = new Date().getTime().toString(16).toUpperCase();
+      const result = await dashboardAdminSavedObjectedClient.bulkCreate(
+        [{ type: 'dashboard', attributes: {}, id: objectId }],
+        {
+          workspaces: ['workspace-1'],
+        }
+      );
+      expect(result.saved_objects.length).toEqual(1);
+      await dashboardAdminSavedObjectedClient.delete('dashboard', objectId);
     });
     it('should update saved objects for any workspaces after update called', async () => {
       expect(
