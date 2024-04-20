@@ -286,9 +286,12 @@ export class DataSourceSelectable extends React.Component<
                 placeholder: 'Search',
                 compressed: true,
               }}
+              listProps={{
+                onFocusBadge: false,
+              }}
               options={this.state.dataSourceOptions}
               onChange={(newOptions) => this.onChange(newOptions)}
-              singleSelection={true}
+              singleSelection={'always'}
               data-test-subj={'dataSourceSelectable'}
               renderOption={(option) => (
                 <DataSourceItem
