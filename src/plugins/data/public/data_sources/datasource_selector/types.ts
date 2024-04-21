@@ -12,10 +12,14 @@ import { DataSource } from '../datasource/datasource';
 
 export interface DataSourceGroup {
   label: string;
+  id: string;
   options: DataSourceOption[];
+  typeGroup: string;
 }
 
 export interface DataSourceOption {
+  id: string;
+  name: string;
   label: string;
   value: string;
   type: string;

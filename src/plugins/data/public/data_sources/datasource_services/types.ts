@@ -34,3 +34,8 @@ export interface DataSourceStart {
   dataSourceService: DataSourceService;
   dataSourceFactory: DataSourceFactory;
 }
+
+export interface DataSourceFetcher {
+  type: string;
+  registerDataSources: () => void;
+}

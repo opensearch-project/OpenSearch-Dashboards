@@ -18,9 +18,9 @@ export interface IDataSourceGroup {
   name: string;
 }
 
-export interface SourceDataSet {
+export interface DataSourceDataSet<T = {}> {
   ds: DataSource;
-  data_sets: IndexPatternOption[];
+  list: T;
 }
 
 export interface IDataSetParams<T = {}> {
@@ -35,7 +35,7 @@ export interface IDataSourceQueryResult<T = {}> {
   data: T;
 }
 
-export interface ConnectionStatus {
+export interface DataSourceConnectionStatus {
   status: string;
   message: string;
   error?: Error;
@@ -54,13 +54,15 @@ export interface IDataSourceMetadata {
 
 export interface IDataSourceUISettings {
   label: string; // the display name of data source
+  typeGroup: string; // the group to which the data source belongs
   typeLabel: string; // the display name of data source type
+  displayOrder?: number; // the order in which the data source should be displayed in selector
   description?: string; // short description of your database
   icon?: string; // uri of the icon
 }
 
 export interface IDataSourceDataSet<T = {}> {
-  data_sets: T;
+  dataSets: T;
 }
 
 export interface IDataSourceQueryResponse<T = {}> {

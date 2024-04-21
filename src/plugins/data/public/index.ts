@@ -505,7 +505,7 @@ export {
   IDataSourceQueryParams,
   IDataSourceQueryResult,
   SourceDataSet,
-  ConnectionStatus,
+  DataSourceConnectionStatus,
   DataSourceFactory,
 } from './data_sources/datasource';
 export {

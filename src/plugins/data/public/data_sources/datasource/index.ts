@@ -6,11 +6,11 @@
 export { DataSource } from './datasource';
 export {
   IDataSourceMetadata,
-  SourceDataSet,
+  DataSourceDataSet,
   IDataSetParams,
   IDataSourceQueryParams,
   IDataSourceQueryResult,
-  ConnectionStatus,
+  DataSourceConnectionStatus,
   IndexPatternOption,
 } from './types';
 export { DataSourceFactory } from './factory';
