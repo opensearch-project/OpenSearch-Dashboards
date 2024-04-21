@@ -22,7 +22,7 @@ import { getApplication, getDataSourcesWithFields, handleDataSourceFetchError } 
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 import { NoDataSource } from '../no_data_source';
-import { DataSourceErrorMenu } from '../data_source_error_menu';
+import { DataSourceFetchErrorMenu } from '../data_source_error_menu';
 import { DataSourceBaseState } from '../data_source_menu/types';
 import { DataSourceOption } from '../data_source_menu/types';
 import { DataSourceItem } from '../data_source_item';
@@ -133,7 +133,7 @@ export class DataSourceAggregatedView extends React.Component<
       return <NoDataSource />;
     }
     if (this.state.showError) {
-      return <DataSourceErrorMenu />;
+      return <DataSourceFetchErrorMenu />;
     }
     const button = (
       <EuiButtonEmpty

@@ -19,7 +19,7 @@ import {
 } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
-import { DataSourceErrorMenu } from '../data_source_error_menu';
+import { DataSourceFetchErrorMenu } from '../data_source_error_menu';
 import {
   getDataSourceById,
   handleDataSourceFetchError,
@@ -154,7 +154,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       );
     }
     if (this.state.showError) {
-      return <DataSourceErrorMenu />;
+      return <DataSourceFetchErrorMenu />;
     }
     const label = this.state.selectedOption.length > 0 ? this.state.selectedOption[0].label : '';
     const options =

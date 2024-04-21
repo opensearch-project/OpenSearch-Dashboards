@@ -10,7 +10,7 @@ import { DataSourceFilterGroup, SelectedDataSourceOption } from './data_source_f
 import { NoDataSource } from '../no_data_source';
 import { getDataSourcesWithFields, handleDataSourceFetchError } from '../utils';
 import { DataSourceBaseState } from '../data_source_menu/types';
-import { DataSourceErrorMenu } from '../data_source_error_menu';
+import { DataSourceFetchErrorMenu } from '../data_source_error_menu';
 
 export interface DataSourceMultiSeletableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -114,7 +114,7 @@ export class DataSourceMultiSelectable extends React.Component<
       return <NoDataSource />;
     }
     if (this.state.showError) {
-      return <DataSourceErrorMenu />;
+      return <DataSourceFetchErrorMenu />;
     }
     return (
       <DataSourceFilterGroup
