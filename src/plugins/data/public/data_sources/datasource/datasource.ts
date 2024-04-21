@@ -14,7 +14,7 @@
  */
 
 import {
-  ConnectionStatus,
+  DataSourceConnectionStatus,
   IDataSetParams,
   IDataSourceDataSet,
   IDataSourceMetadata,
@@ -90,8 +90,8 @@ export abstract class DataSource<
    * the connection status, typically indicating success or failure.
    *
    * @experimental This API is experimental and might change in future releases.
-   * @returns {Promise<ConnectionStatus | boolean>} Status of the connection test.
+   * @returns {Promise<DataSourceConnectionStatus | boolean>} Status of the connection test.
    * @experimental
    */
-  abstract testConnection(): Promise<ConnectionStatus | boolean>;
+  abstract testConnection(): Promise<DataSourceConnectionStatus | boolean>;
 }
