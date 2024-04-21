@@ -5,33 +5,53 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
-      <span
-        color="danger"
-        data-euiicon-type="crossInCircleFilled"
-      />
       <div
-        class="euiText euiText--medium"
+        class="euiPopover euiPopover--anchorDownLeft"
+        data-test-subj="dataSourceErrrorPopover"
+        id="dataSourceErrrorPopover"
       >
         <div
-          class="euiTextColor euiTextColor--danger"
+          class="euiPopover__anchor"
         >
-          Error
+          <button
+            aria-label="dataSourceErrorMenuHeaderLink"
+            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiHeaderLink"
+            data-test-subj="dataSourceErrorMenuHeaderLink"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="iconType"
+            />
+          </button>
         </div>
       </div>
     </div>
   </body>,
   "container": <div>
-    <span
-      color="danger"
-      data-euiicon-type="crossInCircleFilled"
-    />
     <div
-      class="euiText euiText--medium"
+      class="euiPopover euiPopover--anchorDownLeft"
+      data-test-subj="dataSourceErrrorPopover"
+      id="dataSourceErrrorPopover"
     >
       <div
-        class="euiTextColor euiTextColor--danger"
+        class="euiPopover__anchor"
       >
-        Error
+        <button
+          aria-label="dataSourceErrorMenuHeaderLink"
+          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiHeaderLink"
+          data-test-subj="dataSourceErrorMenuHeaderLink"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="iconType"
+          />
+        </button>
       </div>
     </div>
   </div>,

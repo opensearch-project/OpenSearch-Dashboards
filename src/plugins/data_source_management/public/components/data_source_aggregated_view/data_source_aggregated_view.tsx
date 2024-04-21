@@ -14,6 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
+  ApplicationStart,
   IUiSettingsClient,
   SavedObjectsClientContract,
   ToastsStart,
@@ -22,7 +23,7 @@ import { getApplication, getDataSourcesWithFields, handleDataSourceFetchError } 
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 import { NoDataSource } from '../no_data_source';
-import { DataSourceFetchErrorMenu } from '../data_source_error_menu';
+import { DataSourceErrorMenu } from '../data_source_error_menu';
 import { DataSourceBaseState } from '../data_source_menu/types';
 import { DataSourceOption } from '../data_source_menu/types';
 import { DataSourceItem } from '../data_source_item';
@@ -38,6 +39,7 @@ interface DataSourceAggregatedViewProps {
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   displayAllCompatibleDataSources: boolean;
   uiSettings?: IUiSettingsClient;
+  application?: ApplicationStart;
 }
 
 interface DataSourceAggregatedViewState extends DataSourceBaseState {
@@ -133,7 +135,7 @@ export class DataSourceAggregatedView extends React.Component<
       return <NoDataSource />;
     }
     if (this.state.showError) {
-      return <DataSourceFetchErrorMenu />;
+      return <DataSourceErrorMenu application={this.props.application} />;
     }
     const button = (
       <EuiButtonEmpty

@@ -85,7 +85,7 @@ describe('create data source menu', () => {
       perPage: 10000,
       type: 'data-source',
     });
-    expect(notifications.toasts.addWarning).toBeCalledTimes(2);
+    expect(notifications.toasts.add).toBeCalledTimes(2);
   });
 });
 

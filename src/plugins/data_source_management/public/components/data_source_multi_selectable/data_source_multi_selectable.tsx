@@ -4,13 +4,17 @@
  */
 
 import React from 'react';
-import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
+import {
+  ApplicationStart,
+  SavedObjectsClientContract,
+  ToastsStart,
+} from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceFilterGroup, SelectedDataSourceOption } from './data_source_filter_group';
 import { NoDataSource } from '../no_data_source';
 import { getDataSourcesWithFields, handleDataSourceFetchError } from '../utils';
 import { DataSourceBaseState } from '../data_source_menu/types';
-import { DataSourceFetchErrorMenu } from '../data_source_error_menu';
+import { DataSourceErrorMenu } from '../data_source_error_menu';
 
 export interface DataSourceMultiSeletableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -19,6 +23,7 @@ export interface DataSourceMultiSeletableProps {
   hideLocalCluster: boolean;
   fullWidth: boolean;
   uiSettings?: IUiSettingsClient;
+  application?: ApplicationStart;
 }
 
 interface DataSourceMultiSeletableState extends DataSourceBaseState {
@@ -114,7 +119,7 @@ export class DataSourceMultiSelectable extends React.Component<
       return <NoDataSource />;
     }
     if (this.state.showError) {
-      return <DataSourceFetchErrorMenu />;
+      return <DataSourceErrorMenu application={this.props.application} />;
     }
     return (
       <DataSourceFilterGroup

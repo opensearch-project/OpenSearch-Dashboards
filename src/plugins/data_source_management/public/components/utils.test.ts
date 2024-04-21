@@ -79,7 +79,7 @@ describe('DataSourceManagement: Utils.ts', () => {
       const changeStateMock = jest.fn();
       handleDataSourceFetchError(changeStateMock, toasts);
       expect(changeStateMock).toBeCalledWith({ showError: true });
-      expect(toasts.addWarning).toHaveBeenCalledWith(`Failed to fetch data source`);
+      expect(toasts.add).toBeCalledTimes(1);
     });
   });
 

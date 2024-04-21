@@ -23,7 +23,7 @@ interface DataSourceErrorMenuProps {
   application?: ApplicationStart;
 }
 
-export const DataSourceFetchErrorMenu = ({ application }: DataSourceErrorMenuProps) => {
+export const DataSourceErrorMenu = ({ application }: DataSourceErrorMenuProps) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
 
   const refreshButton = (
