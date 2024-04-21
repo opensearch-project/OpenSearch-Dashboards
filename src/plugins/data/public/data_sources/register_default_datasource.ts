@@ -25,7 +25,8 @@ export const registerDefaultDatasource = (data: Omit<DataPublicPluginStart, 'ui'
       metadata: {
         ui: {
           label: 'Index patterns', // display name of your data source,
-          typeLabel: 'OpenSearch default', // display name of your data source type,
+          typeLabel: 'Index patterns', // display name of your data source type,
+          typeGroup: 'DEFAULT_INDEX_PATTERNS',
           selector: {
             displayDatasetsWithSource: true, // when true, selector UI will render data sets with source by calling getDataSets()
           },

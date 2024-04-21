@@ -41,7 +41,7 @@ export class DefaultDslDataSource extends DataSource<
     this.indexPatterns = indexPatterns;
   }
 
-  async getDataSet(): Promise<LocalDSDataSetResponse> {
+  async getDataSet() {
     await this.indexPatterns.ensureDefaultIndexPattern();
     const savedObjectLst = await this.indexPatterns.getCache();
 
@@ -50,7 +50,7 @@ export class DefaultDslDataSource extends DataSource<
     }
 
     return {
-      data_sets: savedObjectLst.map((savedObject: SavedObject<IndexPatternSavedObjectAttrs>) => {
+      dataSets: savedObjectLst.map((savedObject: SavedObject<IndexPatternSavedObjectAttrs>) => {
         return {
           id: savedObject.id,
           title: savedObject.attributes.title,

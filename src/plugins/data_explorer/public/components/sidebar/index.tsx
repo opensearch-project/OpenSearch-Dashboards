@@ -38,6 +38,8 @@ export const Sidebar: FC = ({ children }) => {
       }
     );
 
+    dataSources.dataSourceService.load();
+
     return () => {
       subscription.unsubscribe();
       isMounted = false;
