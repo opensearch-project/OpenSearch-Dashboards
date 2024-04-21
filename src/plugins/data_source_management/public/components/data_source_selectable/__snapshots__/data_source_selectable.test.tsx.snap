@@ -45,6 +45,11 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
         aria-label="Search"
         data-test-subj="dataSourceSelectable"
         isPreFiltered={false}
+        listProps={
+          Object {
+            "onFocusBadge": false,
+          }
+        }
         onChange={[Function]}
         options={
           Array [
@@ -71,7 +76,7 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
           }
         }
         searchable={true}
-        singleSelection={true}
+        singleSelection="always"
       >
         <Component />
       </EuiSelectable>
@@ -123,6 +128,11 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
         aria-label="Search"
         data-test-subj="dataSourceSelectable"
         isPreFiltered={false}
+        listProps={
+          Object {
+            "onFocusBadge": false,
+          }
+        }
         onChange={[Function]}
         options={Array []}
         renderOption={[Function]}
@@ -133,7 +143,7 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
           }
         }
         searchable={true}
-        singleSelection={true}
+        singleSelection="always"
       >
         <Component />
       </EuiSelectable>
@@ -185,6 +195,11 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
         aria-label="Search"
         data-test-subj="dataSourceSelectable"
         isPreFiltered={false}
+        listProps={
+          Object {
+            "onFocusBadge": false,
+          }
+        }
         onChange={[Function]}
         options={Array []}
         renderOption={[Function]}
@@ -195,7 +210,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
           }
         }
         searchable={true}
-        singleSelection={true}
+        singleSelection="always"
       >
         <Component />
       </EuiSelectable>
