@@ -5,17 +5,19 @@
 
 import { ShallowWrapper, shallow } from 'enzyme';
 import { SavedObjectsClientContract } from '../../../../../core/public';
-import { notificationServiceMock } from '../../../../../core/public/mocks';
+import { applicationServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
 import { DataSourceMenu } from './data_source_menu';
 import { render } from '@testing-library/react';
 import { DataSourceComponentType } from './types';
+import * as utils from '../utils';
 
 describe('DataSourceMenu', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
+  const application = applicationServiceMock.createStartContract();
 
   beforeEach(() => {
     client = {
@@ -29,7 +31,6 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceSelectable}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: false,
           onSelectedDataSources: jest.fn(),
           savedObjects: client,
           notifications,
@@ -43,9 +44,9 @@ describe('DataSourceMenu', () => {
     component = shallow(
       <DataSourceMenu
         componentType={DataSourceComponentType.DataSourceSelectable}
+        hideLocalCluster={true}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           onSelectedDataSources: jest.fn(),
           savedObjects: client,
           notifications,
@@ -61,7 +62,6 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceView}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           savedObjects: client,
           notifications,
         }}
@@ -76,7 +76,6 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceView}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           notifications,
         }}
       />
@@ -90,7 +89,6 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceView}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           savedObjects: client,
           notifications,
           activeOption: [{ id: 'test', label: 'test-label' }],
@@ -106,7 +104,6 @@ describe('DataSourceMenu', () => {
         componentType={DataSourceComponentType.DataSourceView}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           savedObjects: client,
           notifications,
           activeOption: [{ id: 'test' }],
@@ -117,12 +114,12 @@ describe('DataSourceMenu', () => {
   });
 
   it('should render data source aggregated view', () => {
+    jest.spyOn(utils, 'getApplication').mockReturnValue(application);
     const container = render(
       <DataSourceMenu
         componentType={DataSourceComponentType.DataSourceAggregatedView}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           savedObjects: client,
           notifications,
           displayAllCompatibleDataSources: true,
@@ -138,7 +135,6 @@ describe('DataSourceMenu', () => {
         componentType={''}
         componentConfig={{
           fullWidth: true,
-          hideLocalCluster: true,
           savedObjects: client,
           notifications,
         }}

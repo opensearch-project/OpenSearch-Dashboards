@@ -19,16 +19,28 @@ import {
 import { DataSourceSelectable } from '../data_source_selectable';
 
 export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement | null {
-  const { componentType, componentConfig, uiSettings } = props;
+  const { componentType, componentConfig, uiSettings, hideLocalCluster, application } = props;
 
   function renderDataSourceView(config: DataSourceViewConfig): ReactElement | null {
-    const { activeOption, fullWidth, savedObjects, notifications } = config;
+    const {
+      activeOption,
+      fullWidth,
+      savedObjects,
+      notifications,
+      dataSourceFilter,
+      onSelectedDataSources,
+    } = config;
     return (
       <DataSourceView
         fullWidth={fullWidth}
         selectedOption={activeOption}
         savedObjectsClient={savedObjects}
         notifications={notifications?.toasts}
+        hideLocalCluster={hideLocalCluster || false}
+        dataSourceFilter={dataSourceFilter}
+        onSelectedDataSources={onSelectedDataSources}
+        uiSettings={uiSettings}
+        application={application}
       />
     );
   }
@@ -36,13 +48,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
   function renderDataSourceMultiSelectable(
     config: DataSourceMultiSelectableConfig
   ): ReactElement | null {
-    const {
-      fullWidth,
-      hideLocalCluster,
-      savedObjects,
-      notifications,
-      onSelectedDataSources,
-    } = config;
+    const { fullWidth, savedObjects, notifications, onSelectedDataSources } = config;
     return (
       <DataSourceMultiSelectable
         fullWidth={fullWidth}
@@ -50,6 +56,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         savedObjectsClient={savedObjects!}
         notifications={notifications!.toasts}
         onSelectedDataSources={onSelectedDataSources!}
+        uiSettings={uiSettings}
       />
     );
   }
@@ -59,7 +66,6 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
       onSelectedDataSources,
       disabled,
       activeOption,
-      hideLocalCluster,
       fullWidth,
       savedObjects,
       notifications,
@@ -76,6 +82,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         hideLocalCluster={hideLocalCluster || false}
         fullWidth={fullWidth}
         uiSettings={uiSettings}
+        application={application}
       />
     );
   }
@@ -85,7 +92,6 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
   ): ReactElement | null {
     const {
       fullWidth,
-      hideLocalCluster,
       activeDataSourceIds,
       displayAllCompatibleDataSources,
       savedObjects,
@@ -100,7 +106,8 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         notifications={notifications!.toasts}
         activeDataSourceIds={activeDataSourceIds}
         dataSourceFilter={dataSourceFilter}
-        displayAllCompatibleDataSources={displayAllCompatibleDataSources || false}
+        displayAllCompatibleDataSources={displayAllCompatibleDataSources}
+        uiSettings={uiSettings}
       />
     );
   }

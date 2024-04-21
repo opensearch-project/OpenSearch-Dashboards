@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import LRUCache from 'lru-cache';
 import { IScopedClusterClient, Logger } from '../../../../src/core/server';
-
 import { ConfigurationClient } from './types';
 import { validate } from './string_utils';
 
@@ -12,32 +12,45 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
   private client: IScopedClusterClient;
   private configurationIndexName: string;
   private readonly logger: Logger;
+  private cache: LRUCache<string, string | undefined>;
 
   constructor(
     scopedClusterClient: IScopedClusterClient,
     configurationIndexName: string,
-    logger: Logger
+    logger: Logger,
+    cache: LRUCache<string, string | undefined>
   ) {
     this.client = scopedClusterClient;
     this.configurationIndexName = configurationIndexName;
     this.logger = logger;
+    this.cache = cache;
   }
 
   async getEntityConfig(entity: string) {
     const entityValidated = validate(entity, this.logger);
+
+    if (this.cache.has(entityValidated)) {
+      return this.cache.get(entityValidated);
+    }
+
+    this.logger.info(`Key ${entityValidated} is not found from cache.`);
 
     try {
       const data = await this.client.asInternalUser.get({
         index: this.configurationIndexName,
         id: entityValidated,
       });
+      const value = data?.body?._source?.value;
 
-      return data?.body?._source?.value || '';
+      this.cache.set(entityValidated, value);
+
+      return value;
     } catch (e) {
       const errorMessage = `Failed to get entity ${entityValidated} due to error ${e}`;
 
       this.logger.error(errorMessage);
 
+      this.cache.set(entityValidated, undefined);
       throw e;
     }
   }
@@ -54,6 +67,8 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
           value: newValueValidated,
         },
       });
+
+      this.cache.set(entityValidated, newValueValidated);
 
       return newValueValidated;
     } catch (e) {
@@ -74,15 +89,19 @@ export class OpenSearchConfigurationClient implements ConfigurationClient {
         id: entityValidated,
       });
 
+      this.cache.del(entityValidated);
+
       return entityValidated;
     } catch (e) {
       if (e?.body?.error?.type === 'index_not_found_exception') {
         this.logger.info('Attemp to delete a not found index.');
+        this.cache.del(entityValidated);
         return entityValidated;
       }
 
       if (e?.body?.result === 'not_found') {
         this.logger.info('Attemp to delete a not found document.');
+        this.cache.del(entityValidated);
         return entityValidated;
       }
 

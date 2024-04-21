@@ -172,9 +172,15 @@ export default class IndexPatternSelect extends Component<IndexPatternSelectProp
     // order than they were sent out. Only load results for the most recent search.
     if (searchValue === this.state.searchValue) {
       const dataSourcesToFetch: Array<{ type: string; id: string }> = [];
+      const dataSourceIdSet = new Set();
       savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
         const dataSourceReference = getDataSourceReference(indexPatternSavedObject.references);
-        if (dataSourceReference && !this.state.dataSourceIdToTitle.has(dataSourceReference.id)) {
+        if (
+          dataSourceReference &&
+          !this.state.dataSourceIdToTitle.has(dataSourceReference.id) &&
+          !dataSourceIdSet.has(dataSourceReference.id)
+        ) {
+          dataSourceIdSet.add(dataSourceReference.id);
           dataSourcesToFetch.push({ type: 'data-source', id: dataSourceReference.id });
         }
       });

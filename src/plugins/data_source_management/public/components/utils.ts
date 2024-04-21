@@ -2,13 +2,16 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import { i18n } from '@osd/i18n';
 import {
   HttpStart,
   SavedObjectsClientContract,
   SavedObject,
   IUiSettingsClient,
+  ToastsStart,
+  ApplicationStart,
 } from 'src/core/public';
+import { deepFreeze } from '@osd/std';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -17,6 +20,8 @@ import {
 } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
 import { DataSourceOption } from './data_source_menu/types';
+import { DataSourceGroupLabelOption } from './data_source_menu/types';
+import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -79,54 +84,54 @@ export async function setFirstDataSourceAsDefault(
   }
 }
 
+export function handleNoAvailableDataSourceError(notifications: ToastsStart) {
+  notifications.addWarning(
+    i18n.translate('dataSource.noAvailableDataSourceError', {
+      defaultMessage: `Data source is not available`,
+    })
+  );
+}
+
 export function getFilteredDataSources(
   dataSources: Array<SavedObject<DataSourceAttributes>>,
-  filter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean
-) {
-  return filter ? dataSources.filter((ds) => filter!(ds)) : dataSources;
+  filter = (ds: SavedObject<DataSourceAttributes>) => true
+): DataSourceOption[] {
+  return dataSources
+    .filter((ds) => filter!(ds))
+    .map((ds) => ({
+      id: ds.id,
+      label: ds.attributes?.title || '',
+    }))
+    .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
 }
 
 export function getDefaultDataSource(
-  dataSources: Array<SavedObject<DataSourceAttributes>>,
+  dataSourcesOptions: DataSourceOption[],
   LocalCluster: DataSourceOption,
-  uiSettings?: IUiSettingsClient,
-  hideLocalCluster?: boolean,
-  defaultOption?: DataSourceOption[]
+  defaultDataSourceId: string | null,
+  hideLocalCluster?: boolean
 ) {
-  const defaultOptionId = defaultOption?.[0]?.id;
-  const defaultOptionDataSource = dataSources.find(
-    (dataSource) => dataSource.id === defaultOptionId
-  );
-
-  const defaultDataSourceId = uiSettings?.get('defaultDataSource', null) ?? null;
-  const defaultDataSourceAfterCheck = dataSources.find(
+  const defaultDataSourceAfterCheck = dataSourcesOptions.find(
     (dataSource) => dataSource.id === defaultDataSourceId
   );
-
-  if (defaultOptionDataSource) {
-    return [
-      {
-        id: defaultOptionDataSource.id,
-        label: defaultOption?.[0]?.label || defaultOptionDataSource.attributes?.title,
-      },
-    ];
-  }
   if (defaultDataSourceAfterCheck) {
     return [
       {
         id: defaultDataSourceAfterCheck.id,
-        label: defaultDataSourceAfterCheck.attributes?.title || '',
+        label: defaultDataSourceAfterCheck.label,
       },
     ];
   }
+
   if (!hideLocalCluster) {
     return [LocalCluster];
   }
-  if (dataSources.length > 0) {
+
+  if (dataSourcesOptions.length > 0) {
     return [
       {
-        id: dataSources[0].id,
-        label: dataSources[0].attributes.title,
+        id: dataSourcesOptions[0].id,
+        label: dataSourcesOptions[0].label,
       },
     ];
   }
@@ -137,16 +142,20 @@ export async function getDataSourceById(
   id: string,
   savedObjectsClient: SavedObjectsClientContract
 ) {
-  return savedObjectsClient.get('data-source', id).then((response) => {
-    const attributes: any = response?.attributes || {};
-    return {
-      id: response.id,
-      title: attributes.title,
-      endpoint: attributes.endpoint,
-      description: attributes.description || '',
-      auth: attributes.auth,
-    };
-  });
+  const response = await savedObjectsClient.get('data-source', id);
+
+  if (!response || response.error) {
+    throw new Error('Unable to find data source');
+  }
+
+  const attributes: any = response?.attributes || {};
+  return {
+    id: response.id,
+    title: attributes.title,
+    endpoint: attributes.endpoint,
+    description: attributes.description || '',
+    auth: attributes.auth,
+  };
 }
 
 export async function createSingleDataSource(
@@ -265,3 +274,32 @@ export const extractRegisteredAuthTypeCredentials = (
 
   return registeredCredentials;
 };
+
+export const handleDataSourceFetchError = (
+  changeState: (state: { showError: boolean }) => void,
+  notifications: ToastsStart,
+  callback?: (ds: DataSourceOption[]) => void
+) => {
+  changeState({ showError: true });
+  if (callback) callback([]);
+  notifications.addWarning(
+    i18n.translate('dataSource.fetchDataSourceError', {
+      defaultMessage: 'Failed to fetch data source',
+    })
+  );
+};
+
+interface DataSourceOptionGroupLabel {
+  [key: string]: DataSourceGroupLabelOption;
+}
+
+export const dataSourceOptionGroupLabel = deepFreeze<Readonly<DataSourceOptionGroupLabel>>({
+  opensearchCluster: {
+    id: 'opensearchClusterGroupLabel',
+    label: 'OpenSearch cluster',
+    isGroupLabel: true,
+  },
+  // TODO: add other group labels if needed
+});
+
+export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');

@@ -15,7 +15,9 @@ import {
   EuiButtonGroup,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { DataSourceOption } from '../data_source_selector/data_source_selector';
+import { DataSourceOption } from '../data_source_menu/types';
+import { DataSourceItem } from '../data_source_item';
+import './data_source_filter_group.scss';
 
 export interface SelectedDataSourceOption extends DataSourceOption {
   label: string;
@@ -27,6 +29,7 @@ export interface SelectedDataSourceOption extends DataSourceOption {
 export interface DataSourceFilterGroupProps {
   selectedOptions: SelectedDataSourceOption[];
   setSelectedOptions: (options: SelectedDataSourceOption[]) => void;
+  defaultDataSource: string | null;
 }
 
 type SelectionToggleOptionIds = 'select_all' | 'deselect_all';
@@ -45,6 +48,7 @@ const selectionToggleButtons = [
 export const DataSourceFilterGroup: React.FC<DataSourceFilterGroupProps> = ({
   selectedOptions,
   setSelectedOptions,
+  defaultDataSource,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [selectionToggleSelectedId, setSelectionToggleSelectedId] = useState<
@@ -135,7 +139,7 @@ export const DataSourceFilterGroup: React.FC<DataSourceFilterGroupProps> = ({
           data-test-subj="dataSourceMultiSelectFieldSearch"
         />
       </EuiPopoverTitle>
-      <div className="ouiFilterSelect__items" style={{ maxHeight: 400, overflow: 'scroll' }}>
+      <div className="dataSourceFilterGroupItems">
         {selectedOptions.map((item, index) => {
           const itemStyle: any = {};
           itemStyle.display = !item.visible ? 'none' : itemStyle.display;
@@ -148,7 +152,11 @@ export const DataSourceFilterGroup: React.FC<DataSourceFilterGroupProps> = ({
               showIcons={true}
               style={itemStyle}
             >
-              {item.label}
+              <DataSourceItem
+                option={item}
+                defaultDataSource={defaultDataSource}
+                className={'dataSourceFilterGroup'}
+              />
             </EuiFilterSelectItem>
           );
         })}
