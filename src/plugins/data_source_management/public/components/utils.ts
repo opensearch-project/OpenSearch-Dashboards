@@ -22,6 +22,8 @@ import { AuthenticationMethodRegistry } from '../auth_registry';
 import { DataSourceOption } from './data_source_menu/types';
 import { DataSourceGroupLabelOption } from './data_source_menu/types';
 import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
+import { toMountPoint } from '../../../opensearch_dashboards_react/public';
+import { getReloadButton } from './toast_button';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -282,11 +284,13 @@ export const handleDataSourceFetchError = (
 ) => {
   changeState({ showError: true });
   if (callback) callback([]);
-  notifications.addWarning(
-    i18n.translate('dataSource.fetchDataSourceError', {
-      defaultMessage: 'Failed to fetch data source',
-    })
-  );
+  notifications.add({
+    title: i18n.translate('dataSource.fetchDataSourceError', {
+      defaultMessage: 'Failed to fetch data sources',
+    }),
+    text: toMountPoint(getReloadButton()),
+    color: 'danger',
+  });
 };
 
 interface DataSourceOptionGroupLabel {

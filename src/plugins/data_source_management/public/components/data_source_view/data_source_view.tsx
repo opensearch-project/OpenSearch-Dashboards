@@ -154,7 +154,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       );
     }
     if (this.state.showError) {
-      return <DataSourceErrorMenu />;
+      return <DataSourceErrorMenu application={this.props.application} />;
     }
     const label = this.state.selectedOption.length > 0 ? this.state.selectedOption[0].label : '';
     const options =
