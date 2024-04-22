@@ -1,0 +1,34 @@
+name: 'check-ts'
+on:
+  pull_request:
+jobs:
+  ts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get diff lines
+        id: diff
+        uses: Equip-Collaboration/diff-line-numbers@v1.0.0
+        with:
+          include: '["\\.ts$"]'
+      - name: Detecting files changed
+        id: files
+        uses: umani/changed-files@v4.0.0
+        with:
+          repo-token: ${{ github.token }}
+          pattern: '^.*\.ts$'
+      - name: List files changed (you can remove this step, for monitoring only)
+        run: |
+          echo 'Files modified: ${{steps.files.outputs.files_updated}}'
+          echo 'Files added: ${{steps.files.outputs.files_created}}'
+          echo 'Files removed: ${{steps.files.outputs.files_deleted}}'
+      - uses: Arhia/action-check-typescript@v1.0.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          use-check: true
+          check-fail-mode: errors_in_code
+          files-changed: ${{steps.files.outputs.files_updated}}
+          files-added: ${{steps.files.outputs.files_created}}
+          files-deleted: ${{steps.files.outputs.files_deleted}}
+          line-numbers: ${{steps.diff.outputs.lineNumbers}}
+          output-behaviour: both
