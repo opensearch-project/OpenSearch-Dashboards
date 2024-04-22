@@ -32,7 +32,7 @@ export const RightNavigationButton = ({
     return http.basePath.prepend(http.basePath.remove(appUrl), {
       withoutClientBasePath: true,
     });
-  }, [application.getUrlForApp, http.basePath]);
+  }, [application, http.basePath, appId]);
 
   const navigateToApp = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
