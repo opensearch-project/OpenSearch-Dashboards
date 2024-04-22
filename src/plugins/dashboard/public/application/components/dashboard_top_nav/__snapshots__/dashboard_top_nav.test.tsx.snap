@@ -206,6 +206,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
+                "registerRightNavigation": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -1177,6 +1178,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
+                "registerRightNavigation": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -2148,6 +2150,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
+                "registerRightNavigation": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3119,6 +3122,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
+                "registerRightNavigation": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -4090,6 +4094,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
+                "registerRightNavigation": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -5061,6 +5066,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
+                "registerRightNavigation": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
