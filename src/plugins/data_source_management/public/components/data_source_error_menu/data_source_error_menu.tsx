@@ -56,13 +56,13 @@ export const DataSourceErrorMenu = ({ application }: DataSourceErrorMenuProps) =
   return (
     <>
       <EuiPopover
-        id={'dataSourceErrrorPopover'}
+        id={'dataSourceErrorPopover'}
         button={iconButton}
         isOpen={showPopover}
         closePopover={() => setShowPopover(false)}
         panelPaddingSize="none"
         anchorPosition="downLeft"
-        data-test-subj={'dataSourceErrrorPopover'}
+        data-test-subj={'dataSourceErrorPopover'}
       >
         <DataSourceDropDownHeader totalDataSourceCount={0} application={application} />
         <EuiPanel
