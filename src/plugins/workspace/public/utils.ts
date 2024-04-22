@@ -12,7 +12,6 @@ import {
   WorkspaceObject,
 } from '../../../core/public';
 import { DEFAULT_SELECTED_FEATURES_IDS } from '../common/constants';
-import { MANAGEMENT_APP_ID } from '../../management/public';
 
 /**
  * Checks if a given feature matches the provided feature configuration.
@@ -119,7 +118,7 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
     // If the category is management, only retain Dashboards Management which contains saved objets and index patterns.
     // Saved objets can show all saved objects in the current workspace and index patterns is at workspace level.
     if (category?.id === DEFAULT_APP_CATEGORIES.management.id) {
-      return filterCondition && id === MANAGEMENT_APP_ID;
+      return filterCondition && id === 'management';
     }
     return filterCondition;
   });

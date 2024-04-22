@@ -5,9 +5,8 @@
   "ui": true,
   "requiredPlugins": [
     "savedObjects",
-    "opensearchDashboardsReact",
-    "management"
+    "opensearchDashboardsReact"
   ],
-  "optionalPlugins": ["savedObjectsManagement"],
+  "optionalPlugins": ["savedObjectsManagement", "management"],
   "requiredBundles": ["opensearchDashboardsReact"]
 }
