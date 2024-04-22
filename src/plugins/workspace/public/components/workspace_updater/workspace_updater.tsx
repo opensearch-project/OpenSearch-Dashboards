@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
@@ -120,8 +120,9 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
 
   return (
     <EuiPage paddingSize="none">
-      <EuiPageBody panelled>
+      <EuiPageBody>
         {!props.hideTitle ? <EuiPageHeader restrictWidth pageTitle="Update Workspace" /> : null}
+        <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"

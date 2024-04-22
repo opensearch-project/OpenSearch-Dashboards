@@ -30,6 +30,7 @@ export const WorkspaceOverviewContent = () => {
         <EuiFlexGroup>
           <EuiFlexItem grow={2}>
             <EuiCard
+              style={{ height: '200px' }}
               layout="horizontal"
               title="About"
               titleSize="xs"

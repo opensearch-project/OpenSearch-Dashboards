@@ -9,7 +9,6 @@ import {
   EuiPageBody,
   EuiPageHeader,
   EuiSpacer,
-  EuiPageContent,
   EuiFlexItem,
   EuiText,
   EuiTabbedContent,
@@ -81,7 +80,7 @@ export const WorkspaceOverview = (props: WorkspaceOverviewProps) => {
       name: i18n.translate('workspace.overview.library.tabTitle', {
         defaultMessage: 'Library',
       }),
-      content: null,
+      content: <></>,
     },
     {
       id: 'settings',
@@ -113,8 +112,8 @@ export const WorkspaceOverview = (props: WorkspaceOverviewProps) => {
   const rightSideItems: ReactNode[] = isGettingStartCardsCollapsed ? [collapseButton] : [];
 
   return (
-    <EuiPage>
-      <EuiPageBody>
+    <>
+      <EuiPanel paddingSize="l" borderRadius="none" hasShadow={false} hasBorder={false}>
         <EuiPageHeader
           pageTitle={pageTitle}
           rightSideItems={rightSideItems.length ? rightSideItems : undefined}
@@ -166,7 +165,9 @@ export const WorkspaceOverview = (props: WorkspaceOverviewProps) => {
             </>
           ) : null}
         </EuiPageHeader>
-        <EuiPageContent color="transparent" hasBorder={true}>
+      </EuiPanel>
+      <EuiPage paddingSize="l">
+        <EuiPageBody>
           <EuiTabbedContent
             data-test-subj="workspaceTabs"
             tabs={tabs}
@@ -180,19 +181,19 @@ export const WorkspaceOverview = (props: WorkspaceOverviewProps) => {
               }
             }}
           />
-        </EuiPageContent>
-        {isModalVisible ? (
-          <WorkspaceOverviewGettingStartModal
-            onCloseModal={() => {
-              setIsModalVisible(false);
-            }}
-            availableCards={availableCards}
-            workspaceId={currentWorkspace.id}
-            basePath={http.basePath}
-            application={application}
-          />
-        ) : null}
-      </EuiPageBody>
-    </EuiPage>
+          {isModalVisible ? (
+            <WorkspaceOverviewGettingStartModal
+              onCloseModal={() => {
+                setIsModalVisible(false);
+              }}
+              availableCards={availableCards}
+              workspaceId={currentWorkspace.id}
+              basePath={http.basePath}
+              application={application}
+            />
+          ) : null}
+        </EuiPageBody>
+      </EuiPage>
+    </>
   );
 };
