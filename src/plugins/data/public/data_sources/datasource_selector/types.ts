@@ -18,6 +18,7 @@ export interface DataSourceGroup {
 }
 
 export interface DataSourceOption {
+  key: string;
   id: string;
   name: string;
   label: string;
