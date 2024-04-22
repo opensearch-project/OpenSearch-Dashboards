@@ -234,9 +234,11 @@ export class DataSourceSelectable extends React.Component<
         />
       );
     }
+
     if (this.state.showError) {
-      return <DataSourceErrorMenu />;
+      return <DataSourceErrorMenu application={this.props.application} />;
     }
+
     const button = (
       <>
         <EuiButtonEmpty
