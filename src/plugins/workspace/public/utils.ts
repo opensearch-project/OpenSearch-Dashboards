@@ -116,7 +116,8 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
       navLinkStatus !== AppNavLinkStatus.hidden &&
       !chromeless &&
       !DEFAULT_SELECTED_FEATURES_IDS.includes(id);
-    // If the category is management, only retain dashboards management.
+    // If the category is management, only retain Dashboards Management which contains saved objets and index patterns.
+    // Saved objets can show all saved objects in the current workspace and index patterns is at workspace level.
     if (category?.id === DEFAULT_APP_CATEGORIES.management.id) {
       return filterCondition && id === MANAGEMENT_APP_ID;
     }
