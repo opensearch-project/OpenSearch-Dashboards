@@ -12,14 +12,10 @@ jobs:
         with:
           node-version-file: '.nvmrc'
           registry-url: 'https://registry.npmjs.org'
-
       - name: Setup Yarn
         run: |
           npm uninstall -g yarn
           npm i -g yarn@1.22.10
-
-      - name: Run bootstrap
-        run: yarn osd bootstrap
       - name: Get diff lines
         id: diff
         uses: Equip-Collaboration/diff-line-numbers@v1.0.0
