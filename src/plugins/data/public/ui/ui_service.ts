@@ -42,12 +42,6 @@ export class UiService implements Plugin<any, DataPublicPluginStartUi> {
         if (enhancements.query && enhancements.query.language) {
           this.queryEnhancements.set(enhancements.query.language, enhancements.query);
         }
-        // if (enhancements.dataSource && enhancements.dataSource.getName()) {
-        //   this.dataSourceEnhancements.set(
-        //     enhancements.dataSource.getName(),
-        //     enhancements.dataSource
-        //   );
-        // }
       },
     };
   }
