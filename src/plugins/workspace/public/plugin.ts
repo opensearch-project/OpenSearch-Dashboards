@@ -268,7 +268,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     /**
      * register workspace update page
      */
-    // workspace fatal error
     core.application.register({
       id: WORKSPACE_UPDATE_APP_ID,
       title: i18n.translate('workspace.settings.workspaceUpdate', {
