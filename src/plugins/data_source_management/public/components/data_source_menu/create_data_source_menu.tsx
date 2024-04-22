@@ -33,7 +33,7 @@ export function createDataSourceMenu<T>() {
       <DataSourceMenu
         {...props}
         uiSettings={uiSettings}
-        hideLocalCluster={hideLocalCluster.valueOf()}
+        hideLocalCluster={hideLocalCluster}
         application={application}
       />
     );
