@@ -22,6 +22,7 @@ import {
 import { AuthenticationMethodRegistry } from '../auth_registry';
 import { DataSourceOption } from './data_source_menu/types';
 import { DataSourceGroupLabelOption } from './data_source_menu/types';
+import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 import { getManageDataSourceButton, getReloadButton } from './toast_button';
 
