@@ -114,7 +114,7 @@ describe('DataSourceView', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(1);
+    expect(toasts.add).toBeCalledTimes(1);
     expect(utils.getDataSourceById).toBeCalledTimes(1);
   });
 
