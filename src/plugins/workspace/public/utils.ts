@@ -12,6 +12,7 @@ import {
   WorkspaceObject,
 } from '../../../core/public';
 import { DEFAULT_SELECTED_FEATURES_IDS } from '../common/constants';
+import { MANAGEMENT_APP_ID } from '../../management/public';
 
 /**
  * Checks if a given feature matches the provided feature configuration.
@@ -117,7 +118,7 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
       !DEFAULT_SELECTED_FEATURES_IDS.includes(id);
     // If the category is management, only retain dashboards management.
     if (category?.id === DEFAULT_APP_CATEGORIES.management.id) {
-      return filterCondition && id === 'management';
+      return filterCondition && id === 'MANAGEMENT_APP_ID';
     }
     return filterCondition;
   });
