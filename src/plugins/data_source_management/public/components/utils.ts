@@ -10,6 +10,7 @@ import {
   IUiSettingsClient,
   ToastsStart,
   ApplicationStart,
+  CoreStart,
 } from 'src/core/public';
 import { deepFreeze } from '@osd/std';
 import {
@@ -307,3 +308,14 @@ export const dataSourceOptionGroupLabel = deepFreeze<Readonly<DataSourceOptionGr
 });
 
 export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
+export const [getUiSettings, setUiSettings] = createGetterSetter<CoreStart['uiSettings']>(
+  'UiSettings'
+);
+
+export interface HideLocalCluster {
+  enabled: boolean;
+}
+
+export const [getHideLocalCluster, setHideLocalCluster] = createGetterSetter<HideLocalCluster>(
+  'HideLocalCluster'
+);
