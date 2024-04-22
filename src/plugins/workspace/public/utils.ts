@@ -118,7 +118,7 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
       !DEFAULT_SELECTED_FEATURES_IDS.includes(id);
     // If the category is management, only retain dashboards management.
     if (category?.id === DEFAULT_APP_CATEGORIES.management.id) {
-      return filterCondition && id === 'MANAGEMENT_APP_ID';
+      return filterCondition && id === MANAGEMENT_APP_ID;
     }
     return filterCondition;
   });
