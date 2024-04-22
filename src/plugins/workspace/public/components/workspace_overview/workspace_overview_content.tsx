@@ -4,13 +4,13 @@
  */
 
 import {
-  EuiTitle,
   EuiFlexItem,
   EuiCard,
   EuiFlexGroup,
   EuiPage,
-  EuiPanel,
   EuiPageContent,
+  EuiPageBody,
+  EuiSpacer,
 } from '@elastic/eui';
 import React from 'react';
 import { useObservable } from 'react-use';
@@ -25,27 +25,24 @@ export const WorkspaceOverviewContent = () => {
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
 
   return (
-    <EuiPage paddingSize="m">
-      <EuiPageContent hasShadow={false} borderRadius={'none'}>
-        <EuiFlexGroup>
-          <EuiFlexItem grow={2}>
-            <EuiCard
-              style={{ height: '200px' }}
-              layout="horizontal"
-              title="About"
-              titleSize="xs"
-              description={currentWorkspace?.description || ''}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={8}>
-            <EuiPanel>
-              <EuiTitle size="xs">
-                <span>Recent items</span>
-              </EuiTitle>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPageContent>
+    <EuiPage paddingSize="none">
+      <EuiPageBody>
+        <EuiSpacer />
+        <EuiPageContent color="subdued" hasShadow={false} paddingSize="none">
+          <EuiFlexGroup>
+            <EuiFlexItem grow={2}>
+              <EuiCard
+                style={{ height: '200px' }}
+                layout="horizontal"
+                title="About"
+                titleSize="xs"
+                description={currentWorkspace?.description || ''}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={8} />
+          </EuiFlexGroup>
+        </EuiPageContent>
+      </EuiPageBody>
     </EuiPage>
   );
 };

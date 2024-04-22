@@ -201,54 +201,51 @@ exports[`WorkspaceOverview render workspace overview page normally 1`] = `
           role="tabpanel"
         >
           <div
-            class="euiPage euiPage--paddingMedium euiPage--grow"
+            class="euiPage euiPage--grow"
           >
             <div
-              class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPageContent euiPageContent--borderRadiusNone"
-              role="main"
+              class="euiPageBody euiPageBody--borderRadiusNone"
             >
               <div
-                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                class="euiSpacer euiSpacer--l"
+              />
+              <div
+                class="euiPanel euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent"
+                role="main"
               >
                 <div
-                  class="euiFlexItem euiFlexItem--flexGrow2"
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                 >
                   <div
-                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned euiCard--horizontal"
-                    style="height: 200px;"
+                    class="euiFlexItem euiFlexItem--flexGrow2"
                   >
                     <div
-                      class="euiCard__content"
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned euiCard--horizontal"
+                      style="height: 200px;"
                     >
-                      <span
-                        class="euiTitle euiTitle--xsmall euiCard__title"
-                        id="generated-idTitle"
-                      >
-                        About
-                      </span>
                       <div
-                        class="euiText euiText--small euiCard__description"
-                        id="generated-idDescription"
+                        class="euiCard__content"
                       >
-                        <p>
-                          this is my foo workspace description
-                        </p>
+                        <span
+                          class="euiTitle euiTitle--xsmall euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          About
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            this is my foo workspace description
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                <div
-                  class="euiFlexItem euiFlexItem--flexGrow8"
-                >
                   <div
-                    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
-                  >
-                    <span
-                      class="euiTitle euiTitle--xsmall"
-                    >
-                      Recent items
-                    </span>
-                  </div>
+                    class="euiFlexItem euiFlexItem--flexGrow8"
+                  />
                 </div>
               </div>
             </div>
