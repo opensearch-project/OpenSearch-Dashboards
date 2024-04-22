@@ -18,7 +18,7 @@ export interface IDataSourceGroup {
   name: string;
 }
 
-export interface DataSourceDataSet<T = {}> {
+export interface DataSourceDataSet<T = []> {
   ds: DataSource;
   list: T;
 }
@@ -52,7 +52,12 @@ export interface IDataSourceMetadata {
   ui: IDataSourceUISettings;
 }
 
+export interface IDataSourceUISelector {
+  displayDatasetsAsSource: boolean;
+}
+
 export interface IDataSourceUISettings {
+  selector: IDataSourceUISelector;
   label: string; // the display name of data source
   typeGroup: string; // the group to which the data source belongs
   typeLabel: string; // the display name of data source type

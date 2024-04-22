@@ -8,177 +8,98 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSource, DataSourceDataSet, IndexPatternOption } from '../datasource';
 import { DataSourceGroup, DataSourceSelectableProps } from './types';
-import { IDataSourceDataSet } from '../datasource/types';
-
-type DataSourceTypeKey = 'DEFAULT_INDEX_PATTERNS' | 's3glue' | 'spark';
 
 // Get Index patterns for local cluster.
-const getDataSetFromDataSource = async (
+const getAndFormatDataSetFromDataSource = async (
   ds: DataSource
 ): Promise<DataSourceDataSet<IndexPatternOption[]>> => {
-  const dataSets = (await ds.getDataSet()).dataSets;
-  return {
-    ds,
-    list: dataSets,
-  } as DataSourceDataSet<IndexPatternOption[]>;
+  const { dataSets } = await ds.getDataSet();
+  return { ds, list: dataSets } as DataSourceDataSet<IndexPatternOption[]>;
 };
 
 // Map through all data sources and get their respective data sets.
-const getDataSets = (dataSources: DataSource[]) =>
-  dataSources.map((ds) => getDataSetFromDataSource(ds));
+const getAllDataSets = (dataSources: DataSource[]) =>
+  dataSources.map((ds) => getAndFormatDataSetFromDataSource(ds));
 
-export const isIndexPatterns = (dataSet: IndexPatternOption) => {
-  if (typeof dataSet === 'string') return false;
+export const isIndexPatterns = (dataSet: unknown) =>
+  typeof dataSet !== 'string' &&
+  'title' in (dataSet as any) &&
+  'id' in (dataSet as any) &&
+  !!(dataSet as any).title &&
+  !!(dataSet as any).id;
 
-  return !!(dataSet.title && dataSet.id);
-};
-
-// Get the option format for the combo box from the dataSource and dataSet.
-export const getSourceOptions = (dataSource: DataSource, dataSet: IDataSourceDataSet) => {
-  const optionContent = {
+// Mapping function for datasets to get the option format for the combo box from the dataSource and dataSet.
+const mapToOption = (
+  dataSource: DataSource,
+  dataSet: DataSourceDataSet | undefined = undefined
+) => {
+  const baseOption = {
     type: dataSource.getType(),
     name: dataSource.getName(),
     ds: dataSource,
   };
-  if (isIndexPatterns(dataSet)) {
+  if (dataSet && 'title' in dataSet && 'id' in dataSet && isIndexPatterns(dataSet)) {
     return {
-      ...optionContent,
+      ...baseOption,
       label: dataSet.title,
       value: dataSet.id,
       key: dataSet.id,
     };
   }
   return {
-    ...optionContent,
+    ...baseOption,
     label: dataSource.getName(),
     value: dataSource.getName(),
+    key: dataSource.getId(),
   };
 };
 
-const getGroupListFromDataSetDS = (
-  dsListWithDataSetAsDisplayedDataSources: DataSourceDataSet[],
-  groupList: DataSourceGroup[]
-) => {
-  const finalList = [] as DataSourceGroup[];
-  dsListWithDataSetAsDisplayedDataSources.forEach((curDataSet) => {
-    const typeKey = curDataSet.ds.getType() as DataSourceTypeKey; // ds type key
-    const dsMetadata = curDataSet.ds.getMetadata();
-    const groupType = dsMetadata.ui.typeGroup;
-    let groupName =
-      dsMetadata.ui.typeLabel ||
-      i18n.translate('dataExplorer.dataSourceSelector.defaultGroupTitle', {
-        defaultMessage: 'Default Group',
-      });
+// Function to add or update groups in a reduction process
+const addOrUpdateGroup = (acc: DataSourceGroup[], dataSource: DataSource, option) => {
+  const metadata = dataSource.getMetadata();
+  const groupType = metadata.ui.typeGroup;
+  let groupName =
+    metadata.ui.typeLabel ||
+    i18n.translate('dataExplorer.dataSourceSelector.defaultGroupTitle', {
+      defaultMessage: 'Default Group',
+    });
 
-    // add '- Opens in Log Explorer' to hint user that selecting these types of data sources
-    // will lead to redirection to log explorer
-    if (typeKey !== 'DEFAULT_INDEX_PATTERNS') {
-      groupName = `${groupName}${i18n.translate('dataExplorer.dataSourceSelector.redirectionHint', {
-        defaultMessage: ' - Opens in Log Explorer',
-      })}`;
+  if (dataSource.getType() !== 'DEFAULT_INDEX_PATTERNS') {
+    groupName += i18n.translate('dataExplorer.dataSourceSelector.redirectionHint', {
+      defaultMessage: ' - Opens in Log Explorer',
+    });
+  }
+
+  const group = acc.find((g: DataSourceGroup) => g.typeGroup === groupType);
+  if (group) {
+    if (!group.options.some((opt) => opt.key === option.key)) {
+      group.options.push(option);
     }
+  } else {
+    acc.push({
+      typeGroup: groupType,
+      label: groupName,
+      options: [option],
+      id: metadata.ui.typeGroup, // id for each group
+    });
+  }
+  return acc;
+};
 
-    const existingGroup = finalList.find((item) => item.typeGroup === groupType);
-    const mappedOptions = curDataSet.list.map((dataSet) =>
-      getSourceOptions(curDataSet.ds, dataSet)
-    );
-
-    // check if to add new data source group or add to existing one
-    if (existingGroup) {
-      // options deduplication
-      const existingOptionIds = new Set(existingGroup.options.map((opt) => opt.id));
-      const nonDuplicateOptions = mappedOptions.filter((opt) => !existingOptionIds.has(opt.label));
-
-      // 'existingGroup' directly references an item in the finalList
-      // pushing options to 'existingGroup' updates the corresponding item in finalList
-      existingGroup.options.push(...nonDuplicateOptions);
+const consolidateDataSourceGroups = (dataSets: DataSourceDataSet[], dataSources: DataSource[]) => {
+  return [...dataSets, ...dataSources].reduce((acc, item) => {
+    if ('list' in item && item.ds) {
+      // Confirm item is a DataSet
+      const options = item.list.map((dataset) => mapToOption(item.ds, dataset));
+      options.forEach((option) => addOrUpdateGroup(acc, item.ds, option));
     } else {
-      finalList.push({
-        typeGroup: dsMetadata.ui.typeGroup,
-        label: groupName,
-        options: mappedOptions,
-      });
+      // Handle DataSource directly
+      const option = mapToOption(item as InstanceType<typeof DataSource>);
+      addOrUpdateGroup(acc, item as InstanceType<typeof DataSource>, option);
     }
-  });
-
-  return [...finalList, ...groupList];
+    return acc;
+  }, []);
 };
-
-const getGroupListFromDS = (dataSources: DataSource[], groupList: DataSourceGroup[]) => {
-  const finalList = [] as DataSourceGroup[];
-  dataSources.forEach((ds) => {
-    const typeKey = ds.getType() as DataSourceTypeKey; // ds type key
-    const dsMetadata = ds.getMetadata();
-    const typeGroup = dsMetadata.ui.typeGroup;
-    let groupName =
-      dsMetadata.ui.typeLabel ||
-      i18n.translate('dataExplorer.dataSourceSelector.defaultGroupTitle', {
-        defaultMessage: 'Default Group',
-      });
-
-    // add '- Opens in Log Explorer' to hint user that selecting these types of data sources
-    // will lead to redirection to log explorer
-    if (typeKey !== 'DEFAULT_INDEX_PATTERNS') {
-      groupName = `${groupName}${i18n.translate('dataExplorer.dataSourceSelector.redirectionHint', {
-        defaultMessage: ' - Opens in Log Explorer',
-      })}`;
-    }
-
-    const existingGroup = finalList.find((item) => item.typeGroup === typeGroup);
-    const dsOption = {
-      type: ds.getType(),
-      name: ds.getName(),
-      ds,
-      label: dsMetadata.ui.label,
-      value: dsMetadata.ui.label,
-      key: ds.getId(),
-    };
-    // check if to add new data source group or add to existing one
-    if (existingGroup) {
-      // options deduplication
-      // const existingOptionIds = new Set(existingGroup.options.map((opt) => opt.id));
-      // const nonDuplicateOptions = mappedOptions.filter((opt) => !existingOptionIds.has(opt.label));
-
-      // 'existingGroup' directly references an item in the finalList
-      // pushing options to 'existingGroup' updates the corresponding item in finalList
-      existingGroup.options.push(dsOption);
-    } else {
-      finalList.push({
-        id: dsMetadata.ui.typeGroup,
-        typeGroup: dsMetadata.ui.typeGroup,
-        label: groupName,
-        options: [
-          {
-            ...dsOption,
-          },
-        ],
-      });
-    }
-  });
-
-  return [...groupList, ...finalList];
-};
-
-// Convert data sets into a structured format suitable for selector rendering.
-const getConsolidatedDataSourceGroups = (
-  dsListWithDataSetAsDisplayedDataSources: DataSourceDataSet[],
-  dsListWithThemselvesAsDisplayedDataSources: DataSource[]
-) => {
-  // const finalList = [] as DataSourceGroup[];
-  const dataSetFinalList = getGroupListFromDataSetDS(dsListWithDataSetAsDisplayedDataSources, []);
-  const finalList = getGroupListFromDS(
-    dsListWithThemselvesAsDisplayedDataSources,
-    dataSetFinalList
-  );
-
-  return finalList;
-};
-
-const getDataSourcesRequireDataSetFetching = (dataSources: DataSource[]): DataSource[] =>
-  dataSources.filter((ds) => ds.getMetadata()?.ui?.selector?.displayDatasetsWithSource);
-
-const getDataSourcesRequireNoDataSetFetching = (dataSources: DataSource[]): DataSource[] =>
-  dataSources.filter((ds) => !ds.getMetadata()?.ui?.selector?.displayDatasetsWithSource);
 
 /**
  * @experimental This component is experimental and might change in future releases.
@@ -195,13 +116,18 @@ export const DataSourceSelectable = ({
 }: DataSourceSelectableProps) => {
   // This effect gets data sets and prepares the datasource list for UI rendering.
   useEffect(() => {
-    Promise.all(getDataSets(getDataSourcesRequireDataSetFetching(dataSources)))
-      .then((results) => {
-        const groupList = getConsolidatedDataSourceGroups(
-          results,
-          getDataSourcesRequireNoDataSetFetching(dataSources)
+    Promise.all(
+      getAllDataSets(
+        dataSources.filter((ds) => ds.getMetadata().ui?.selector.displayDatasetsAsSource)
+      )
+    )
+      .then((dataSetResults) => {
+        setDataSourceOptionList(
+          consolidateDataSourceGroups(
+            dataSetResults as DataSourceDataSet[],
+            dataSources.filter((ds) => !ds.getMetadata().ui?.selector.displayDatasetsAsSource)
+          )
         );
-        setDataSourceOptionList(groupList);
       })
       .catch((e) => onGetDataSetError(e));
   }, [dataSources, setDataSourceOptionList, onGetDataSetError]);
