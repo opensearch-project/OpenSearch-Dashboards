@@ -92,8 +92,12 @@ export default function DiscoverPanel(props: ViewProps) {
       fieldCounts={fetchState.fieldCounts || {}}
       hits={fetchState.rows || []}
       onAddField={(fieldName, index) => {
-        if (indexPattern && capabilities.discover?.save) {
-          popularizeField(indexPattern, fieldName, indexPatterns);
+        const dataSet =
+          fetchState.title && fetchState.title !== indexPattern?.title
+            ? indexPatterns.getIndexPatternCache().get(fetchState.title!)
+            : indexPattern;
+        if (dataSet && capabilities.discover?.save) {
+          popularizeField(dataSet!, fieldName, indexPatterns);
         }
 
         dispatch(
@@ -104,8 +108,12 @@ export default function DiscoverPanel(props: ViewProps) {
         );
       }}
       onRemoveField={(fieldName) => {
-        if (indexPattern && capabilities.discover?.save) {
-          popularizeField(indexPattern, fieldName, indexPatterns);
+        const dataSet =
+          fetchState.title && fetchState.title !== indexPattern?.title
+            ? indexPatterns.getIndexPatternCache().get(fetchState.title!)
+            : indexPattern;
+        if (dataSet && capabilities.discover?.save) {
+          popularizeField(dataSet!, fieldName, indexPatterns);
         }
 
         dispatch(removeColumn(fieldName));
@@ -118,7 +126,11 @@ export default function DiscoverPanel(props: ViewProps) {
           })
         );
       }}
-      selectedIndexPattern={indexPattern}
+      selectedIndexPattern={
+        fetchState.title && fetchState.title !== indexPattern?.title
+          ? indexPatterns.getIndexPatternCache().get(fetchState.title!)
+          : indexPattern
+      }
       onAddFilter={onAddFilter}
     />
   );

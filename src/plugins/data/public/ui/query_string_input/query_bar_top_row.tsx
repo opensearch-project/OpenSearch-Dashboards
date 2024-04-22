@@ -56,12 +56,14 @@ import QueryStringInputUI from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
 import { PersistedLog, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
+import { QueryEnhancement } from '../types';
 
 const QueryStringInput = withOpenSearchDashboards(QueryStringInputUI);
 
 // @internal
 export interface QueryBarTopRowProps {
   query?: Query;
+  queryEnhancements?: Map<string, QueryEnhancement>;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
@@ -97,6 +99,11 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;
 
   const queryLanguage = props.query && props.query.language;
+  const queryUiEnhancement =
+    (queryLanguage &&
+      props.queryEnhancements &&
+      props.queryEnhancements.get(queryLanguage)?.searchBar) ||
+    null;
   const persistedLog: PersistedLog | undefined = React.useMemo(
     () =>
       queryLanguage && uiSettings && storage && appName
@@ -205,6 +212,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}
           query={props.query!}
+          queryEnhancements={props.queryEnhancements}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
           onChangeQueryInputFocus={onChangeQueryInputFocus}
@@ -233,10 +241,15 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   }
 
   function shouldRenderDatePicker(): boolean {
-    return Boolean(props.showDatePicker || props.showAutoRefreshOnly);
+    return Boolean(
+      (props.showDatePicker && (queryUiEnhancement?.showDatePicker ?? true)) ??
+        (props.showAutoRefreshOnly && (queryUiEnhancement?.showAutoRefreshOnly ?? true))
+    );
   }
 
   function shouldRenderQueryInput(): boolean {
+    // TODO: SQL probably can modify to not care about index patterns
+    // TODO: call queryUiEnhancement?.showQueryInput
     return Boolean(props.showQueryInput && props.indexPatterns && props.query && storage);
   }
 

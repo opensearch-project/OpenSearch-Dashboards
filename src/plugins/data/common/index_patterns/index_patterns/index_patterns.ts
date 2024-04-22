@@ -208,6 +208,10 @@ export class IndexPatternsService {
     return this.savedObjectsCache;
   };
 
+  getIndexPatternCache = () => {
+    return indexPatternCache;
+  };
+
   /**
    * Get default index pattern
    */

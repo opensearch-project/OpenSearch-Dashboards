@@ -434,6 +434,7 @@ export {
   IndexPatternSelectProps,
   QueryStringInput,
   QueryStringInputProps,
+  DataPublicPluginStartUi,
 } from './ui';
 
 /**
@@ -490,7 +491,6 @@ export {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   IDataPluginServices,
-  DataPublicPluginStartUi,
   DataPublicPluginStartActions,
 } from './types';
 

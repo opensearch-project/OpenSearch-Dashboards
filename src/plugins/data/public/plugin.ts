@@ -46,9 +46,9 @@ import {
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
+import { UiService } from './ui/ui_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
-import { createIndexPatternSelect } from './ui/index_pattern_select';
 import {
   IndexPatternsService,
   onRedirectNoIndexPattern,
@@ -63,9 +63,9 @@ import {
   setOverlays,
   setQueryService,
   setSearchService,
+  setUiService,
   setUiSettings,
 } from './services';
-import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { opensearchaggs } from './search/expressions';
 import {
   SELECT_RANGE_TRIGGER,
@@ -110,12 +110,14 @@ export class DataPublicPlugin
     > {
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
+  private readonly uiService: UiService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
+    this.uiService = new UiService(initializerContext);
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
@@ -159,13 +161,17 @@ export class DataPublicPlugin
       expressions,
     });
 
+    const uiService = this.uiService.setup(core, {});
+
     return {
+      // TODO: SQL
       autocomplete: this.autocomplete.setup(core),
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
       __enhance: (enhancements: DataPublicPluginEnhancements) => {
-        searchService.__enhance(enhancements.search);
+        if (enhancements.search) searchService.__enhance(enhancements.search);
+        if (enhancements.ui) uiService.__enhance(enhancements.ui);
       },
     };
   }
@@ -234,21 +240,14 @@ export class DataPublicPlugin
         dataSourceFactory,
       },
     };
-
     registerDefaultDatasource(dataServices);
 
-    const SearchBar = createSearchBar({
-      core,
-      data: dataServices,
-      storage: this.storage,
-    });
+    const uiService = this.uiService.start(core, { dataServices, storage: this.storage });
+    setUiService(uiService);
 
     return {
       ...dataServices,
-      ui: {
-        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
-        SearchBar,
-      },
+      ui: uiService,
     };
   }
 
@@ -256,5 +255,6 @@ export class DataPublicPlugin
     this.autocomplete.clearProviders();
     this.queryService.stop();
     this.searchService.stop();
+    this.uiService.stop();
   }
 }

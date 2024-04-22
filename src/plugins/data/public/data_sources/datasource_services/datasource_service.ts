@@ -14,6 +14,7 @@ import { DataSource } from '../datasource/datasource';
 
 export class DataSourceService {
   private static dataSourceService: DataSourceService;
+
   // A record to store all registered data sources, using the data source name as the key.
   private dataSources: Record<string, DataSource> = {};
   private dataSourcesSubject: BehaviorSubject<Record<string, DataSource>>;
