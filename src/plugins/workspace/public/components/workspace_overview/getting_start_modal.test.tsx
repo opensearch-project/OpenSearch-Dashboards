@@ -14,6 +14,11 @@ import {
 import { GetStartCard } from './types';
 import { waitFor } from '@testing-library/dom';
 
+// see https://github.com/elastic/eui/issues/5271 as workaround to render EuiSelectable correctly
+jest.mock('react-virtualized-auto-sizer', () => ({ children }: any) =>
+  children({ height: 600, width: 300 })
+);
+
 describe('WorkspaceOverviewGettingStartModal', () => {
   const mockCoreStart = coreMock.createStart();
   const closeModal = jest.fn();
@@ -27,20 +32,13 @@ describe('WorkspaceOverviewGettingStartModal', () => {
     };
     return <WorkspaceOverviewGettingStartModal {...props} />;
   };
-  // see https://github.com/elastic/eui/issues/5271 as workaround to render EuiSelectable correctly
-  // don't work for OUI, TODO find out a way to render EuiSelectable
-  beforeEach(() => {
-    jest.mock('react-virtualized-auto-sizer', () => ({ children }: any) =>
-      children({ height: 800, width: 1400 })
-    );
-  });
 
-  it.skip('render getting start card modal normally with empty cards', async () => {
+  it('render getting start card modal normally with empty cards', async () => {
     const { getByTestId } = render(renderWorkspaceCardModal([]));
     await waitFor(() => expect(getByTestId('category_single_selection')).toHaveTextContent('All'));
   });
 
-  it.skip('render getting start card modal normally', async () => {
+  it('render getting start card modal normally', async () => {
     const cards = [
       {
         appId: 'home',
@@ -57,18 +55,17 @@ describe('WorkspaceOverviewGettingStartModal', () => {
         category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
       },
     ];
-    const { container, getByTestId } = render(renderWorkspaceCardModal(cards));
-    expect(container).toMatchSnapshot();
+    const { queryByText, getByTestId } = render(renderWorkspaceCardModal(cards));
     expect(getByTestId('category_single_selection')).toHaveTextContent('All');
     expect(getByTestId('category_single_selection')).toHaveTextContent('Get started');
     expect(getByTestId('category_single_selection')).toHaveTextContent('Dashboard and report');
-    expect(container).toHaveTextContent(
-      'Gain clarity and visibility with dynamic data visualization tools.'
-    );
-    expect(container).toHaveTextContent('Discover pre-loaded datasets before adding your own.');
+    expect(
+      queryByText('Gain clarity and visibility with dynamic data visualization tools.')
+    ).not.toBeNull();
+    expect(queryByText('Discover pre-loaded datasets before adding your own.')).not.toBeNull();
   });
 
-  it.skip('click on category to filter cards', async () => {
+  it('click on category to filter cards', async () => {
     const cards = [
       {
         appId: 'home',
@@ -85,20 +82,20 @@ describe('WorkspaceOverviewGettingStartModal', () => {
         category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
       },
     ];
-    const { container, getByTitle } = render(renderWorkspaceCardModal(cards));
+    const { queryByText, getByTitle } = render(renderWorkspaceCardModal(cards));
     // click `Get started` category
     fireEvent.click(getByTitle('Get started'));
-    expect(container).not.toHaveTextContent(
-      'Gain clarity and visibility with dynamic data visualization tools.'
-    );
-    expect(container).toHaveTextContent('Discover pre-loaded datasets before adding your own.');
+    expect(
+      queryByText('Gain clarity and visibility with dynamic data visualization tools.')
+    ).toBeNull();
+    expect(queryByText('Discover pre-loaded datasets before adding your own.')).not.toBeNull();
 
     // click `Dashboard and report` category
     fireEvent.click(getByTitle('Dashboard and report'));
-    expect(container).toHaveTextContent(
-      'Gain clarity and visibility with dynamic data visualization tools.'
-    );
-    expect(container).not.toHaveTextContent('Discover pre-loaded datasets before adding your own.');
+    expect(
+      queryByText('Gain clarity and visibility with dynamic data visualization tools.')
+    ).not.toBeNull();
+    expect(queryByText('Discover pre-loaded datasets before adding your own.')).toBeNull();
   });
 
   it('click on close will close the modal', async () => {
