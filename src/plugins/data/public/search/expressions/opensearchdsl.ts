@@ -28,8 +28,6 @@
  * under the License.
  */
 
-// TODO: SQL this file seems important
-
 import { i18n } from '@osd/i18n';
 import {
   OpenSearchDashboardsContext,
