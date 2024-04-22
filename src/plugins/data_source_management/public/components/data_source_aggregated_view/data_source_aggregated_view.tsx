@@ -19,7 +19,12 @@ import {
   SavedObjectsClientContract,
   ToastsStart,
 } from 'opensearch-dashboards/public';
-import { getApplication, getDataSourcesWithFields, handleDataSourceFetchError } from '../utils';
+import {
+  getApplication,
+  getDataSourcesWithFields,
+  handleDataSourceFetchError,
+  handleNoAvailableDataSourceError,
+} from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 import { NoDataSource } from '../no_data_source';
@@ -114,6 +119,15 @@ export class DataSourceAggregatedView extends React.Component<
           allDataSourcesIdToTitleMap.set('', 'Local cluster');
         }
 
+        if (allDataSourcesIdToTitleMap.size === 0) {
+          handleNoAvailableDataSourceError(
+            this.onEmptyState.bind(this),
+            this.props.notifications,
+            this.props.application
+          );
+          return;
+        }
+
         this.setState({
           ...this.state,
           allDataSourcesIdToTitleMap,
@@ -126,13 +140,17 @@ export class DataSourceAggregatedView extends React.Component<
       });
   }
 
+  onEmptyState() {
+    this.setState({ showEmptyState: true });
+  }
+
   onError() {
     this.setState({ showError: true });
   }
 
   render() {
     if (this.state.showEmptyState) {
-      return <NoDataSource />;
+      return <NoDataSource application={this.props.application} />;
     }
     if (this.state.showError) {
       return <DataSourceErrorMenu application={this.props.application} />;

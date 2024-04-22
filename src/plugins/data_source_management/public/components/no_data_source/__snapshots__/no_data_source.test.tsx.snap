@@ -4,24 +4,20 @@ exports[`NoDataSource should render correctly with the provided totalDataSourceC
 <EuiPopover
   anchorPosition="downLeft"
   button={
-    <EuiButtonEmpty
+    <EuiButtonIcon
+      aria-label="dataSourceEmptyMenuHeaderLink"
       className="euiHeaderLink"
-      color="primary"
-      data-test-subj="dataSourceEmptyStateHeaderButton"
-      iconSide="left"
-      iconType="alert"
+      data-test-subj="dataSourceEmptyMenuHeaderLink"
+      iconType={[Function]}
       onClick={[Function]}
       size="s"
-    >
-       No data sources
-    </EuiButtonEmpty>
+    />
   }
   closePopover={[Function]}
   data-test-subj="dataSourceEmptyStatePopover"
   display="inlineBlock"
   hasArrow={true}
   id="dataSourceEmptyStatePopover"
-  initialFocus=".euiSelectableSearch"
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
@@ -30,50 +26,48 @@ exports[`NoDataSource should render correctly with the provided totalDataSourceC
     totalDataSourceCount={0}
   />
   <EuiPanel
-    borderRadius="none"
-    className="dataSourceSelectableOuiPanel"
-    color="transparent"
+    className="dataSourceEmptyStatePanel"
+    data-test-subj="dataSourceEmptyStatePanel"
     hasBorder={false}
-    paddingSize="none"
+    hasShadow={false}
   >
-    <EuiPanel
-      className="dataSourceEmptyStatePanel"
-      data-test-subj="datasourceTableEmptyState"
-      hasBorder={false}
-      hasShadow={false}
-    >
-      <EuiText
-        size="s"
-        textAlign="center"
-      >
-        <FormattedMessage
-          defaultMessage="There is no data sources to display."
-          id="dataSourcesManagement.dataSourceMenu.noData"
-          values={Object {}}
-        />
-      </EuiText>
-      <EuiText
-        size="s"
-        textAlign="center"
-      >
-        <FormattedMessage
-          defaultMessage="Connect data source to get started"
-          id="dataSourcesManagement.dataSourceMenu.connect"
-          values={Object {}}
-        />
-      </EuiText>
-    </EuiPanel>
-  </EuiPanel>
-  <EuiPopoverFooter>
     <EuiFlexGroup
-      justifyContent="spaceAround"
+      justifyContent="center"
     >
-      <EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiText
+          size="s"
+          textAlign="center"
+        >
+          <FormattedMessage
+            defaultMessage="No data sources connected yet."
+            id="dataSourcesManagement.dataSourceEmptyMenu.noData"
+            values={Object {}}
+          />
+        </EuiText>
+        <EuiText
+          size="s"
+          textAlign="center"
+        >
+          <FormattedMessage
+            defaultMessage="Connect your data sources to get started."
+            id="dataSourcesManagement.dataSourceEmptyMenu.connect"
+            values={Object {}}
+          />
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiFlexGroup
+      justifyContent="center"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
         <EuiButton
           data-test-subj="dataSourceEmptyStateManageDataSourceButton"
           fill={false}
-          iconSide="right"
-          iconType="popout"
           onClick={[Function]}
           size="s"
         >
@@ -85,7 +79,7 @@ exports[`NoDataSource should render correctly with the provided totalDataSourceC
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </EuiPopoverFooter>
+  </EuiPanel>
 </EuiPopover>
 `;
 
@@ -93,24 +87,20 @@ exports[`NoDataSource should render normally 1`] = `
 <EuiPopover
   anchorPosition="downLeft"
   button={
-    <EuiButtonEmpty
+    <EuiButtonIcon
+      aria-label="dataSourceEmptyMenuHeaderLink"
       className="euiHeaderLink"
-      color="primary"
-      data-test-subj="dataSourceEmptyStateHeaderButton"
-      iconSide="left"
-      iconType="alert"
+      data-test-subj="dataSourceEmptyMenuHeaderLink"
+      iconType={[Function]}
       onClick={[Function]}
       size="s"
-    >
-       No data sources
-    </EuiButtonEmpty>
+    />
   }
   closePopover={[Function]}
   data-test-subj="dataSourceEmptyStatePopover"
   display="inlineBlock"
   hasArrow={true}
   id="dataSourceEmptyStatePopover"
-  initialFocus=".euiSelectableSearch"
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
@@ -119,50 +109,48 @@ exports[`NoDataSource should render normally 1`] = `
     totalDataSourceCount={0}
   />
   <EuiPanel
-    borderRadius="none"
-    className="dataSourceSelectableOuiPanel"
-    color="transparent"
+    className="dataSourceEmptyStatePanel"
+    data-test-subj="dataSourceEmptyStatePanel"
     hasBorder={false}
-    paddingSize="none"
+    hasShadow={false}
   >
-    <EuiPanel
-      className="dataSourceEmptyStatePanel"
-      data-test-subj="datasourceTableEmptyState"
-      hasBorder={false}
-      hasShadow={false}
-    >
-      <EuiText
-        size="s"
-        textAlign="center"
-      >
-        <FormattedMessage
-          defaultMessage="There is no data sources to display."
-          id="dataSourcesManagement.dataSourceMenu.noData"
-          values={Object {}}
-        />
-      </EuiText>
-      <EuiText
-        size="s"
-        textAlign="center"
-      >
-        <FormattedMessage
-          defaultMessage="Connect data source to get started"
-          id="dataSourcesManagement.dataSourceMenu.connect"
-          values={Object {}}
-        />
-      </EuiText>
-    </EuiPanel>
-  </EuiPanel>
-  <EuiPopoverFooter>
     <EuiFlexGroup
-      justifyContent="spaceAround"
+      justifyContent="center"
     >
-      <EuiFlexItem>
+      <EuiFlexItem
+        grow={false}
+      >
+        <EuiText
+          size="s"
+          textAlign="center"
+        >
+          <FormattedMessage
+            defaultMessage="No data sources connected yet."
+            id="dataSourcesManagement.dataSourceEmptyMenu.noData"
+            values={Object {}}
+          />
+        </EuiText>
+        <EuiText
+          size="s"
+          textAlign="center"
+        >
+          <FormattedMessage
+            defaultMessage="Connect your data sources to get started."
+            id="dataSourcesManagement.dataSourceEmptyMenu.connect"
+            values={Object {}}
+          />
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+    <EuiFlexGroup
+      justifyContent="center"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
         <EuiButton
           data-test-subj="dataSourceEmptyStateManageDataSourceButton"
           fill={false}
-          iconSide="right"
-          iconType="popout"
           onClick={[Function]}
           size="s"
         >
@@ -174,6 +162,6 @@ exports[`NoDataSource should render normally 1`] = `
         </EuiButton>
       </EuiFlexItem>
     </EuiFlexGroup>
-  </EuiPopoverFooter>
+  </EuiPanel>
 </EuiPopover>
 `;

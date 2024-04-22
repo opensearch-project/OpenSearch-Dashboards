@@ -21,9 +21,8 @@ import {
 import { AuthenticationMethodRegistry } from '../auth_registry';
 import { DataSourceOption } from './data_source_menu/types';
 import { DataSourceGroupLabelOption } from './data_source_menu/types';
-import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
-import { getReloadButton } from './toast_button';
+import { getManageDataSourceButton, getReloadButton } from './toast_button';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -86,12 +85,21 @@ export async function setFirstDataSourceAsDefault(
   }
 }
 
-export function handleNoAvailableDataSourceError(notifications: ToastsStart) {
-  notifications.addWarning(
-    i18n.translate('dataSource.noAvailableDataSourceError', {
-      defaultMessage: `Data source is not available`,
-    })
-  );
+export function handleNoAvailableDataSourceError(
+  changeState: () => void,
+  notifications: ToastsStart,
+  application?: ApplicationStart,
+  callback?: (ds: DataSourceOption[]) => void
+) {
+  changeState();
+  if (callback) callback([]);
+  notifications.add({
+    title: i18n.translate('dataSource.noAvailableDataSourceError', {
+      defaultMessage: 'No data sources connected yet. Connect your data sources to get started.',
+    }),
+    text: toMountPoint(getManageDataSourceButton(application)),
+    color: 'warning',
+  });
 }
 
 export function getFilteredDataSources(
@@ -305,5 +313,3 @@ export const dataSourceOptionGroupLabel = deepFreeze<Readonly<DataSourceOptionGr
   },
   // TODO: add other group labels if needed
 });
-
-export const [getApplication, setApplication] = createGetterSetter<ApplicationStart>('Application');
