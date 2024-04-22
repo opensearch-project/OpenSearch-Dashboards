@@ -6,3 +6,7 @@
 export { WorkspaceForm } from './workspace_form';
 export { WorkspaceFormSubmitData } from './types';
 export { WorkspaceOperationType } from './constants';
+export {
+  convertPermissionsToPermissionSettings,
+  convertPermissionSettingsToPermissions,
+} from './utils';
