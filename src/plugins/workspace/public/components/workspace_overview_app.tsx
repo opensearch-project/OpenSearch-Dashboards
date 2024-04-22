@@ -31,7 +31,7 @@ export const WorkspaceOverviewApp = (props: WorkspaceOverviewProps) => {
       },
     ];
     if (currentWorkspace) {
-      breadCrumbs.concat({
+      breadCrumbs.push({
         text: currentWorkspace.name,
       });
     }
