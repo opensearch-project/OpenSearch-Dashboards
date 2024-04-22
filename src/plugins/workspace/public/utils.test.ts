@@ -3,8 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppNavLinkStatus } from '../../../core/public';
-import { featureMatchesConfig, isAppAccessibleInWorkspace } from './utils';
+import { AppNavLinkStatus, PublicAppInfo } from '../../../core/public';
+import {
+  featureMatchesConfig,
+  filterWorkspaceConfigurableApps,
+  isAppAccessibleInWorkspace,
+} from './utils';
 
 describe('workspace utils: featureMatchesConfig', () => {
   it('feature configured with `*` should match any features', () => {
@@ -147,5 +151,70 @@ describe('workspace utils: isAppAccessibleInWorkspace', () => {
         { id: 'workspace_id', name: 'workspace name', features: [] }
       )
     ).toBe(true);
+  });
+});
+
+describe('workspace utils: filterWorkspaceConfigurableApps', () => {
+  const defaultApplications = [
+    {
+      appRoute: '/app/dashboards',
+      id: 'dashboards',
+      title: 'Dashboards',
+      category: {
+        id: 'opensearchDashboards',
+        label: 'OpenSearch Dashboards',
+        euiIconType: 'inputOutput',
+        order: 1000,
+      },
+      status: 0,
+      navLinkStatus: 1,
+    },
+    {
+      appRoute: '/app/dev_tools',
+      id: 'dev_tools',
+      title: 'Dev Tools',
+      category: {
+        id: 'management',
+        label: 'Management',
+        order: 5000,
+        euiIconType: 'managementApp',
+      },
+      status: 0,
+      navLinkStatus: 1,
+    },
+    {
+      appRoute: '/app/opensearch_dashboards_overview',
+      id: 'opensearchDashboardsOverview',
+      title: 'Overview',
+      category: {
+        id: 'opensearchDashboards',
+        label: 'Library',
+        euiIconType: 'inputOutput',
+        order: 1000,
+      },
+      navLinkStatus: 1,
+      order: -2000,
+      status: 0,
+    },
+    {
+      appRoute: '/app/management',
+      id: 'management',
+      title: 'Dashboards Management',
+      category: {
+        id: 'management',
+        label: 'Management',
+        order: 5000,
+        euiIconType: 'managementApp',
+      },
+      status: 0,
+      navLinkStatus: 1,
+    },
+  ] as PublicAppInfo[];
+  it('should filters out apps that are not accessible in the workspace', () => {
+    const filteredApps = filterWorkspaceConfigurableApps(defaultApplications);
+    expect(filteredApps.length).toEqual(3);
+    expect(filteredApps[0].id).toEqual('dashboards');
+    expect(filteredApps[1].id).toEqual('opensearchDashboardsOverview');
+    expect(filteredApps[2].id).toEqual('management');
   });
 });
