@@ -102,15 +102,16 @@ export class NavControlsService {
       new Set()
     );
 
+    const registerRight = (navControl: ChromeNavControl) =>
+      navControlsRight$.next(new Set([...navControlsRight$.value.values(), navControl]));
+
     return {
       // In the future, registration should be moved to the setup phase. This
       // is not possible until the legacy nav controls are no longer supported.
       registerLeft: (navControl: ChromeNavControl) =>
         navControlsLeft$.next(new Set([...navControlsLeft$.value.values(), navControl])),
 
-      registerRight: (navControl: ChromeNavControl) =>
-        navControlsRight$.next(new Set([...navControlsRight$.value.values(), navControl])),
-
+      registerRight,
       registerCenter: (navControl: ChromeNavControl) =>
         navControlsCenter$.next(new Set([...navControlsCenter$.value.values(), navControl])),
 
@@ -134,7 +135,7 @@ export class NavControlsService {
             })
           ),
         };
-        return navControlsRight$.next(new Set([...navControlsRight$.value.values(), nav]));
+        return registerRight(nav);
       },
       getLeft$: () =>
         navControlsLeft$.pipe(

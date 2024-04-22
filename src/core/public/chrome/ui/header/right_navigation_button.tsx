@@ -4,10 +4,10 @@
  */
 
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { InternalApplicationStart } from '../../../application';
 import { HttpStart } from '../../../http';
-
+import { isModifiedOrPrevented } from './nav_link';
 export interface RightNavigationButtonProps {
   application: InternalApplicationStart;
   http: HttpStart;
@@ -23,16 +23,27 @@ export const RightNavigationButton = ({
   iconType,
   title,
 }: RightNavigationButtonProps) => {
-  const navigateToApp = () => {
+  const targetUrl = useMemo(() => {
     const appUrl = application.getUrlForApp(appId, {
       path: '/',
       absolute: false,
     });
     // Remove prefix in Url including workspace and other prefix
-    const targetUrl = http.basePath.prepend(http.basePath.remove(appUrl), {
+    return http.basePath.prepend(http.basePath.remove(appUrl), {
       withoutClientBasePath: true,
     });
-    application.navigateToUrl(targetUrl);
+  }, [application.getUrlForApp, http.basePath]);
+
+  const navigateToApp = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
+    if (
+      event.button === 0 && // ignore everything but left clicks
+      !isModifiedOrPrevented(event)
+    ) {
+      event.preventDefault();
+      application.navigateToUrl(targetUrl);
+    }
+    return;
   };
 
   return (
@@ -40,6 +51,7 @@ export const RightNavigationButton = ({
       data-test-subj="rightNavigationButton"
       aria-label={title}
       onClick={navigateToApp}
+      href={targetUrl}
     >
       <EuiIcon type={iconType} size="m" title={title} color="text" />
     </EuiHeaderSectionItemButton>
