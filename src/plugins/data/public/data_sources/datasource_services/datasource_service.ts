@@ -6,16 +6,18 @@
 import { BehaviorSubject } from 'rxjs';
 import {
   DataSourceRegistrationError,
-  GenericDataSource,
   IDataSourceFilter,
   IDataSourceRegistrationResult,
+  DataSourceFetcher,
 } from './types';
+import { DataSource } from '../datasource/datasource';
 
 export class DataSourceService {
   private static dataSourceService: DataSourceService;
   // A record to store all registered data sources, using the data source name as the key.
-  private dataSources: Record<string, GenericDataSource> = {};
-  private dataSourcesSubject: BehaviorSubject<Record<string, GenericDataSource>>;
+  private dataSources: Record<string, DataSource> = {};
+  private dataSourcesSubject: BehaviorSubject<Record<string, DataSource>>;
+  private dataSourceFetchers: Record<string, DataSourceFetcher['registerDataSources']> = {};
 
   private constructor() {
     this.dataSourcesSubject = new BehaviorSubject(this.dataSources);
@@ -36,7 +38,7 @@ export class DataSourceService {
    * @returns An array of registration results, one for each data source.
    */
   async registerMultipleDataSources(
-    datasources: GenericDataSource[]
+    datasources: DataSource[]
   ): Promise<IDataSourceRegistrationResult[]> {
     return Promise.all(datasources.map((ds) => this.registerDataSource(ds)));
   }
@@ -50,14 +52,14 @@ export class DataSourceService {
    * @returns A registration result indicating success or failure.
    * @throws {DataSourceRegistrationError} Throws an error if a data source with the same name already exists.
    */
-  async registerDataSource(ds: GenericDataSource): Promise<IDataSourceRegistrationResult> {
-    const dsName = ds.getName();
-    if (dsName in this.dataSources) {
+  async registerDataSource(ds: DataSource): Promise<IDataSourceRegistrationResult> {
+    const dsId = ds.getId();
+    if (dsId in this.dataSources) {
       throw new DataSourceRegistrationError(
-        `Unable to register datasource ${dsName}, error: datasource name exists.`
+        `Unable to register data source ${dsId}, error: data source name exists.`
       );
     } else {
-      this.dataSources[dsName] = ds;
+      this.dataSources[dsId] = ds;
       this.dataSourcesSubject.next(this.dataSources);
       return { success: true, info: '' } as IDataSourceRegistrationResult;
     }
@@ -74,15 +76,42 @@ export class DataSourceService {
    * @param filter - An optional object with filter criteria (e.g., names of data sources).
    * @returns A record of filtered data sources.
    */
-  getDataSources(filter?: IDataSourceFilter): Record<string, GenericDataSource> {
+  getDataSources(filter?: IDataSourceFilter): Record<string, DataSource> {
     if (!filter || !Array.isArray(filter.names) || filter.names.length === 0)
       return this.dataSources;
 
-    return filter.names.reduce<Record<string, GenericDataSource>>((filteredDataSources, dsName) => {
-      if (dsName in this.dataSources) {
-        filteredDataSources[dsName] = this.dataSources[dsName];
+    return filter.names.reduce<Record<string, DataSource>>((filteredDataSources, dsId) => {
+      if (dsId in this.dataSources) {
+        filteredDataSources[dsId] = this.dataSources[dsId];
       }
       return filteredDataSources;
-    }, {} as Record<string, GenericDataSource>);
+    }, {} as Record<string, DataSource>);
+  }
+
+  /**
+   * Registers functions responsible for fetching data for each data source type.
+   *
+   * @param fetchers - An array of fetcher configurations, each specifying how to fetch data for a specific data source type.
+   */
+  registerDataSourceFetchers(fetchers: DataSourceFetcher[]) {
+    fetchers.forEach((fetcher) => {
+      this.dataSourceFetchers[fetcher.type] = fetcher.registerDataSources;
+    });
+  }
+
+  /**
+   * Calls all registered data fetching functions to update data sources.
+   * Typically used to initialize or refresh the data source configurations.
+   */
+  load() {
+    Object.values(this.dataSourceFetchers).forEach((fetch) => fetch());
+  }
+
+  /**
+   * Reloads all data source configurations by re-invoking the load method.
+   * Useful for refreshing the system to reflect changes such as new data source registrations.
+   */
+  reload() {
+    this.load();
   }
 }
