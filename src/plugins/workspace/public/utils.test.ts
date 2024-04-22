@@ -167,6 +167,35 @@ describe('workspace utils: isAppAccessibleInWorkspace', () => {
       )
     ).toBe(false);
   });
+  
+  it('An app is accessible within a workspace if its workspaceAvailability is insideWorkspace', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'home',
+          title: 'Any app',
+          mount: jest.fn(),
+          workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: [] }
+      )
+    ).toBe(true);
+  });
+  
+  it('An app is accessible within a workspace if its workspaceAvailability is inside and outsideWorkspace', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'home',
+          title: 'Any app',
+          mount: jest.fn(),
+          // eslint-disable-next-line no-bitwise
+          workspaceAvailability: WorkspaceAvailability.insideWorkspace | WorkspaceAvailability.outsideWorkspace,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: [] }
+      )
+    ).toBe(true);
+  });
 });
 
 describe('workspace utils: filterWorkspaceConfigurableApps', () => {
