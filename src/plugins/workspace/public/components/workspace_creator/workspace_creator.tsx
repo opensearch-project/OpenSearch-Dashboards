@@ -11,17 +11,23 @@ import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
+import { convertPermissionSettingsToPermissions } from '../workspace_form';
 
 export const WorkspaceCreator = () => {
   const {
     services: { application, notifications, http, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
       let result;
       try {
-        result = await workspaceClient.create(data);
+        const { permissionSettings, ...attributes } = data;
+        result = await workspaceClient.create(
+          attributes,
+          convertPermissionSettingsToPermissions(permissionSettings)
+        );
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.create.success', {
@@ -80,6 +86,8 @@ export const WorkspaceCreator = () => {
               application={application}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
+              permissionEnabled={isPermissionEnabled}
+              permissionLastAdminItemDeletable
             />
           )}
         </EuiPageContent>
