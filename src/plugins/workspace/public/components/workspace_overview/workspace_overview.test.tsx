@@ -145,11 +145,33 @@ describe('WorkspaceOverview', () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
     const { getByTestId } = render(WorkspaceOverviewPage({ workspacesService: workspaceService }));
     expect(getByTestId('Collapse')).toBeVisible();
+  });
+
+  it('getting start section visible setting will saved to localStorage', async () => {
+    const workspaceObject = {
+      id: 'foo_id',
+      name: 'foo',
+      description: 'this is my foo workspace description',
+      features: ['alerting', 'home'],
+      color: '',
+      icon: '',
+      reserved: false,
+    };
+    const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
+    const { getByTestId } = render(WorkspaceOverviewPage({ workspacesService: workspaceService }));
+    expect(getByTestId('Collapse')).toBeVisible();
     fireEvent.click(getByTestId('Collapse'));
     expect(getByTestId('Expand')).toBeVisible();
     expect(localStorageMock.setItem).toHaveBeenCalledWith(
-      IS_WORKSPACE_OVERVIEW_COLLAPSED_KEY,
+      IS_WORKSPACE_OVERVIEW_COLLAPSED_KEY + '_foo_id',
       'true'
+    );
+    // click on Collapse
+    fireEvent.click(getByTestId('Expand'));
+    expect(getByTestId('Collapse')).toBeVisible();
+    expect(localStorageMock.setItem).toHaveBeenCalledWith(
+      IS_WORKSPACE_OVERVIEW_COLLAPSED_KEY + '_foo_id',
+      'false'
     );
   });
 

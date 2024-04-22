@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, ReactNode } from 'react';
+import React, { useState, useMemo, ReactNode, useEffect } from 'react';
 import {
   EuiPage,
   EuiPageBody,
@@ -41,12 +41,20 @@ export const WorkspaceOverview = (props: WorkspaceOverviewProps) => {
     services: { workspaces, application, http },
   } = useOpenSearchDashboards<CoreStart>();
 
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const [isGettingStartCardsCollapsed, setIsGettingStartCardsCollapsed] = useState(
-    localStorage.getItem(IS_WORKSPACE_OVERVIEW_COLLAPSED_KEY) === 'true'
-  );
-
   const currentWorkspace = useObservable(workspaces.currentWorkspace$);
+  const currentWorkspaceId = useObservable(workspaces.currentWorkspaceId$);
+
+  // workspace level setting
+  const workspaceOverviewCollapsedKey = `${IS_WORKSPACE_OVERVIEW_COLLAPSED_KEY}_${
+    currentWorkspaceId || ''
+  }`;
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isGettingStartCardsCollapsed, setIsGettingStartCardsCollapsed] = useState(false);
+
+  useEffect(() => {
+    setIsGettingStartCardsCollapsed(localStorage.getItem(workspaceOverviewCollapsedKey) === 'true');
+  }, [workspaceOverviewCollapsedKey]);
 
   /**
    * all available cards based on workspace selected features
@@ -102,7 +110,7 @@ export const WorkspaceOverview = (props: WorkspaceOverviewProps) => {
       onClick={() => {
         const newValue = !isGettingStartCardsCollapsed;
         setIsGettingStartCardsCollapsed(newValue);
-        localStorage.setItem(IS_WORKSPACE_OVERVIEW_COLLAPSED_KEY, newValue ? 'true' : 'false');
+        localStorage.setItem(workspaceOverviewCollapsedKey, newValue ? 'true' : 'false');
       }}
     >
       {isGettingStartCardsCollapsed ? 'Expand' : 'Collapse'}
