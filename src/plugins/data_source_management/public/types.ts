@@ -23,6 +23,8 @@ import { AuthenticationMethodRegistry } from './auth_registry';
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourceManagementPluginStart {}
 
+export const DATA_SOURCE_URL_KEY = 'dataSourceId';
+
 export interface DataSourceManagementContext {
   chrome: ChromeStart;
   application: ApplicationStart;

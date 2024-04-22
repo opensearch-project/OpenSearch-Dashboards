@@ -5,6 +5,7 @@
 import { coreMock } from '../../../core/public/mocks';
 import { DataSourceManagementPluginStart } from './plugin';
 import { testDataSourceManagementPlugin, createAuthenticationMethod } from './mocks';
+import { DATA_SOURCE_URL_KEY } from './types';
 
 describe('#dataSourceManagement', () => {
   let coreSetup: any;
@@ -24,6 +25,7 @@ describe('#dataSourceManagement', () => {
     expect(setup.ui).toEqual({
       DataSourceSelector: expect.any(Function),
       getDataSourceMenu: expect.any(Function),
+      dataSourceURLKey: DATA_SOURCE_URL_KEY,
     });
   });
 });

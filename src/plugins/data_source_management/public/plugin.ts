@@ -17,7 +17,12 @@ import {
   IAuthenticationMethodRegistry,
   AuthenticationMethodRegistry,
 } from './auth_registry';
-import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod } from './types';
+import {
+  DATA_SOURCE_URL_KEY,
+  noAuthCredentialAuthMethod,
+  sigV4AuthMethod,
+  usernamePasswordAuthMethod,
+} from './types';
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
 import { DataSourceMenuProps } from './components/data_source_menu';
@@ -42,6 +47,7 @@ export interface DataSourceManagementPluginSetup {
   ui: {
     DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
     getDataSourceMenu: <T>() => React.ComponentType<DataSourceMenuProps<T>>;
+    dataSourceURLKey: string;
   };
   dataSourceSelection: DataSourceSelectionService;
   getDefaultDataSourceId: typeof getDefaultDataSourceId;
@@ -126,6 +132,7 @@ export class DataSourceManagementPlugin
       ui: {
         DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
         getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
+        dataSourceURLKey: DATA_SOURCE_URL_KEY,
       },
       getDefaultDataSourceId,
       getDefaultDataSourceId$,
