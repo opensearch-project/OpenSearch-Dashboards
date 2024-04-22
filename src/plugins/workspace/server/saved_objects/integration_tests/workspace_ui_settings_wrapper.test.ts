@@ -6,7 +6,7 @@
 import { IUiSettingsClient, WorkspaceAttribute } from 'src/core/server';
 
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
-import { httpServerMock } from '../../../../../core/server/http/http_server.mocks';
+import { httpServerMock } from '../../../../../core/server/mocks';
 
 describe('workspace ui settings saved object client wrapper', () => {
   let opensearchServer: osdTestServer.TestOpenSearchUtils;
