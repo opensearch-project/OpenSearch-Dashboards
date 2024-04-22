@@ -21,7 +21,7 @@ import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
 import { DataSourceMenuProps } from './components/data_source_menu';
-import { setApplication } from './components/utils';
+import { setApplication, setHideLocalCluster, setUiSettings } from './components/utils';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
@@ -101,11 +101,14 @@ export class DataSourceManagementPlugin
       registerAuthenticationMethod(sigV4AuthMethod);
     }
 
+    setHideLocalCluster({ enabled: dataSource.hideLocalCluster });
+    setUiSettings(uiSettings);
+
     return {
       registerAuthenticationMethod,
       ui: {
         DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
-        getDataSourceMenu: <T>() => createDataSourceMenu<T>(uiSettings, dataSource),
+        getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
       },
     };
   }
