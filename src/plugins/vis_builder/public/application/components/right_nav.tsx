@@ -14,27 +14,29 @@ import {
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import { useVisualizationType } from '../utils/use';
-import './side_nav.scss';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { VisBuilderServices } from '../../types';
+import { VisBuilderViewServices } from '../../types';
 import {
   ActiveVisPayload,
   setActiveVisualization,
   useTypedDispatch,
   useTypedSelector,
+  getViewSliceFromSelector,
 } from '../utils/state_management';
 import { getPersistedAggParams } from '../utils/get_persisted_agg_params';
+
+import './side_nav.scss';
 
 export const RightNavUI = () => {
   const { ui, name: activeVisName } = useVisualizationType();
   const [confirmAggs, setConfirmAggs] = useState<ActiveVisPayload | undefined>();
   const {
     services: { types },
-  } = useOpenSearchDashboards<VisBuilderServices>();
+  } = useOpenSearchDashboards<VisBuilderViewServices>();
   const dispatch = useTypedDispatch();
   const StyleSection = ui.containerConfig.style.render;
 
-  const { activeVisualization } = useTypedSelector((state) => state.visualization);
+  const { activeVisualization } = useTypedSelector(getViewSliceFromSelector('visualization'));
   const aggConfigParams = useMemo(() => activeVisualization?.aggConfigParams ?? [], [
     activeVisualization,
   ]);

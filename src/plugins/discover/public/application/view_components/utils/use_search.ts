@@ -9,6 +9,7 @@ import { debounceTime } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { useEffect } from 'react';
 import { cloneDeep } from 'lodash';
+import { useLocation } from 'react-router-dom';
 import { RequestAdapter } from '../../../../../inspector/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { search } from '../../../../../data/public';
@@ -31,6 +32,7 @@ import {
   getResponseInspectorStats,
 } from '../../../opensearch_dashboards_services';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
+import { syncQueryStateWithUrl } from '../../../../../data/public';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -67,11 +69,19 @@ export type RefetchSubject = Subject<SearchRefetch>;
  * }, [data$]);
  */
 export const useSearch = (services: DiscoverViewServices) => {
+  const { pathname } = useLocation();
   const initalSearchComplete = useRef(false);
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
-  const { data, filterManager, getSavedSearchById, core, toastNotifications, chrome } = services;
   const indexPattern = useIndexPattern(services);
+  const {
+    data,
+    filterManager,
+    getSavedSearchById,
+    core,
+    toastNotifications,
+    osdUrlStateStorage,
+  } = services;
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;
@@ -300,6 +310,16 @@ export const useSearch = (services: DiscoverViewServices) => {
     // only called when the component is first mounted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getSavedSearchById, savedSearchId]);
+
+  useEffect(() => {
+    // syncs `_g` portion of url with query services
+    const { stop } = syncQueryStateWithUrl(data.query, osdUrlStateStorage);
+
+    return () => stop();
+
+    // this effect should re-run when pathname is changed to preserve querystring part,
+    // so the global state is always preserved
+  }, [data.query, osdUrlStateStorage, pathname]);
 
   return {
     data$,

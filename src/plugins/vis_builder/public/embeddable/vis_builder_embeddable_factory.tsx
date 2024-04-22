@@ -89,7 +89,7 @@ export class VisBuilderEmbeddableFactory
       const savedVis = getStateFromSavedObject(savedObject);
       const indexPatternService = this.deps.start().plugins.data.indexPatterns;
       const indexPattern = await indexPatternService.get(
-        savedVis.state.visualization.indexPattern || ''
+        savedVis.state.metadata.indexPattern || ''
       );
       const indexPatterns = indexPattern ? [indexPattern] : [];
 

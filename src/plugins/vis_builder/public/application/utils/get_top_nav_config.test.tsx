@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { VisBuilderServices } from '../../types';
+import { VisBuilderViewServices } from '../../types';
 import { getOnSave } from './get_top_nav_config';
 import { createVisBuilderServicesMock } from './mocks';
 
@@ -12,7 +12,7 @@ describe('getOnSave', () => {
   let originatingApp: string | undefined;
   let visualizationIdFromUrl: string;
   let dispatch: any;
-  let mockServices: jest.Mocked<VisBuilderServices>;
+  let mockServices: jest.Mocked<VisBuilderViewServices>;
   let onSaveProps: {
     newTitle: string;
     newCopyOnSave: boolean;
