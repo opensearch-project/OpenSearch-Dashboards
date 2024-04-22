@@ -36,7 +36,7 @@ jobs:
           echo 'Files modified: ${{steps.files.outputs.files_updated}}'
           echo 'Files added: ${{steps.files.outputs.files_created}}'
           echo 'Files removed: ${{steps.files.outputs.files_deleted}}'
-      - uses: Arhia/action-check-typescript@v1.0.0
+      - uses: ashwin-pc/action-check-typescript@main
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           use-check: true
