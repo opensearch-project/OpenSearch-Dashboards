@@ -34,15 +34,13 @@ export const WorkspaceOverviewCard = ({
       }
       description={''}
       footer={
-        <>
-          <EuiFlexGroup justifyContent="flexStart">
-            <EuiFlexItem grow={false}>
-              <EuiTextColor color="subdued">
-                <EuiText size="s">{'with ' + card.featureName}</EuiText>
-              </EuiTextColor>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </>
+        <EuiFlexGroup justifyContent="flexStart">
+          <EuiFlexItem grow={false}>
+            <EuiTextColor color="subdued">
+              <EuiText size="s">{'with ' + card.featureName}</EuiText>
+            </EuiTextColor>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
       onClick={() => {
         let url = card.link;
