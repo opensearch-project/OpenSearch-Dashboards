@@ -21,6 +21,7 @@ import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
 import { DataSourceMenuProps } from './components/data_source_menu';
+import { setApplication, setHideLocalCluster, setUiSettings } from './components/utils';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
@@ -40,7 +41,7 @@ export interface DataSourceManagementPluginStart {
   getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
 }
 
-const DSM_APP_ID = 'dataSources';
+export const DSM_APP_ID = 'dataSourceManagement';
 
 export class DataSourceManagementPlugin
   implements
@@ -100,17 +101,21 @@ export class DataSourceManagementPlugin
       registerAuthenticationMethod(sigV4AuthMethod);
     }
 
+    setHideLocalCluster({ enabled: dataSource.hideLocalCluster });
+    setUiSettings(uiSettings);
+
     return {
       registerAuthenticationMethod,
       ui: {
         DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
-        getDataSourceMenu: <T>() => createDataSourceMenu<T>(uiSettings, dataSource),
+        getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
       },
     };
   }
 
   public start(core: CoreStart) {
     this.started = true;
+    setApplication(core.application);
     return {
       getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
     };

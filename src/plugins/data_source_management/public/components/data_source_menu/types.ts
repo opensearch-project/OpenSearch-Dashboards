@@ -8,6 +8,7 @@ import {
   SavedObjectsClientContract,
   SavedObject,
   IUiSettingsClient,
+  ApplicationStart,
 } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 
@@ -27,11 +28,17 @@ export interface DataSourceBaseConfig {
   disabled?: boolean;
 }
 
+export interface DataSourceBaseState {
+  showEmptyState: boolean;
+  showError: boolean;
+}
+
 export interface DataSourceMenuProps<T = any> {
   componentType: DataSourceComponentType;
   componentConfig: T;
   hideLocalCluster?: boolean;
   uiSettings?: IUiSettingsClient;
+  application?: ApplicationStart;
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
 }
 
@@ -52,13 +59,21 @@ export interface DataSourceViewConfig extends DataSourceBaseConfig {
   onSelectedDataSources?: (dataSources: DataSourceOption[]) => void;
 }
 
-export interface DataSourceAggregatedViewConfig extends DataSourceBaseConfig {
+interface DataSourceAggregatedViewBaseConfig extends DataSourceBaseConfig {
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
-  activeDataSourceIds?: string[];
-  displayAllCompatibleDataSources?: boolean;
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
 }
+
+export type DataSourceAggregatedViewConfig =
+  | (DataSourceAggregatedViewBaseConfig & {
+      activeDataSourceIds: string[];
+      displayAllCompatibleDataSources: false;
+    })
+  | (DataSourceAggregatedViewBaseConfig & {
+      activeDataSourceIds?: string[];
+      displayAllCompatibleDataSources: true;
+    });
 
 export interface DataSourceSelectableConfig extends DataSourceBaseConfig {
   onSelectedDataSources: (dataSources: DataSourceOption[]) => void;

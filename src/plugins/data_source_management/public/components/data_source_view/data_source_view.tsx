@@ -5,22 +5,32 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiPopover, EuiButtonEmpty, EuiButtonIcon, EuiContextMenu } from '@elastic/eui';
-import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
-import { IUiSettingsClient } from 'src/core/public';
-import { DataSourceOption } from '../data_source_menu/types';
 import {
-  getDataSourceById,
-  handleDataSourceFetchError,
-  handleNoAvailableDataSourceError,
-} from '../utils';
-import { MenuPanelItem } from '../../types';
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiContextMenuPanel,
+  EuiPanel,
+  EuiSelectable,
+} from '@elastic/eui';
+import {
+  SavedObjectsClientContract,
+  ToastsStart,
+  ApplicationStart,
+} from 'opensearch-dashboards/public';
+import { IUiSettingsClient } from 'src/core/public';
+import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
+import { DataSourceErrorMenu } from '../data_source_error_menu';
+import { getDataSourceById, handleDataSourceFetchError } from '../utils';
+import { DataSourceDropDownHeader } from '../drop_down_header';
+import { DataSourceItem } from '../data_source_item';
 import { LocalCluster } from '../constants';
+import './data_source_view.scss';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
   selectedOption: DataSourceOption[];
   hideLocalCluster: boolean;
+  application?: ApplicationStart;
   savedObjectsClient?: SavedObjectsClientContract;
   notifications?: ToastsStart;
   uiSettings?: IUiSettingsClient;
@@ -28,9 +38,10 @@ interface DataSourceViewProps {
   onSelectedDataSources?: (dataSources: DataSourceOption[]) => void;
 }
 
-interface DataSourceViewState {
+interface DataSourceViewState extends DataSourceBaseState {
   selectedOption: DataSourceOption[];
   isPopoverOpen: boolean;
+  defaultDataSource: string | null;
 }
 
 export class DataSourceView extends React.Component<DataSourceViewProps, DataSourceViewState> {
@@ -42,6 +53,9 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this.state = {
       isPopoverOpen: false,
       selectedOption: this.props.selectedOption ? this.props.selectedOption : [],
+      showEmptyState: false,
+      showError: false,
+      defaultDataSource: null,
     };
   }
 
@@ -55,9 +69,11 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     const option = selectedOption[0];
     const optionId = option.id;
 
+    const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
     if (optionId === '' && !this.props.hideLocalCluster) {
       this.setState({
         selectedOption: [LocalCluster],
+        defaultDataSource,
       });
       if (this.props.onSelectedDataSources) {
         this.props.onSelectedDataSources([LocalCluster]);
@@ -76,7 +92,6 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       if (this.props.onSelectedDataSources) {
         this.props.onSelectedDataSources([]);
       }
-      handleNoAvailableDataSourceError(this.props.notifications!);
       return;
     }
 
@@ -89,22 +104,29 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
         if (!this._isMounted) return;
         this.setState({
           selectedOption: [{ id: optionId, label: selectedDataSource.title }],
+          defaultDataSource,
         });
         if (this.props.onSelectedDataSources) {
           this.props.onSelectedDataSources([{ id: optionId, label: selectedDataSource.title }]);
         }
       } catch (error) {
-        this.setState({
-          selectedOption: [],
-        });
-        if (this.props.onSelectedDataSources) {
-          this.props.onSelectedDataSources([]);
-        }
-        handleDataSourceFetchError(this.props.notifications!);
+        handleDataSourceFetchError(
+          this.onError.bind(this),
+          this.props.notifications!,
+          this.props.onSelectedDataSources
+        );
       }
     } else if (this.props.onSelectedDataSources) {
+      this.setState({
+        ...this.state,
+        defaultDataSource,
+      });
       this.props.onSelectedDataSources([option]);
     }
+  }
+
+  onError() {
+    this.setState({ showError: true });
   }
 
   onClick() {
@@ -115,67 +137,68 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this.setState({ ...this.state, isPopoverOpen: false });
   }
 
-  getPanels() {
-    let items: MenuPanelItem[] = [];
-    if (this.state.selectedOption) {
-      items = this.state.selectedOption.map((option) => {
-        return {
-          name: option.label,
-          disabled: true,
-        };
-      });
-    }
-
-    const panels = [
-      {
-        id: 0,
-        title: 'Selected data source',
-        items,
-      },
-    ];
-
-    return { panels };
-  }
-
   render() {
-    const { panels } = this.getPanels();
+    if (this.state.showError) {
+      return <DataSourceErrorMenu application={this.props.application} />;
+    }
+    const label = this.state.selectedOption.length > 0 ? this.state.selectedOption[0].label : '';
+    const options =
+      this.state.selectedOption.length > 0
+        ? this.state.selectedOption.map((option) => ({
+            ...option,
+            checked: 'on',
+            disabled: true,
+          }))
+        : [];
 
     const button = (
-      <EuiButtonIcon
-        iconType="iInCircle"
-        display="empty"
-        aria-label="Next"
-        onClick={this.onClick.bind(this)}
-      />
-    );
-    return (
       <>
         <EuiButtonEmpty
-          className="euiHeaderLink"
-          data-test-subj="dataSourceViewContextMenuHeaderLink"
-          aria-label={i18n.translate('dataSourceView.dataSourceOptionsButtonAriaLabel', {
-            defaultMessage: 'dataSourceViewMenuButton',
+          className="dataSourceComponentButtonTitle"
+          data-test-subj="dataSourceViewButton"
+          onClick={this.onClick.bind(this)}
+          aria-label={i18n.translate('dataSourceView.dataSourceOptionsViewAriaLabel', {
+            defaultMessage: 'dataSourceViewButton',
           })}
           iconType="database"
           iconSide="left"
           size="s"
-          disabled={true}
         >
-          {this.state.selectedOption && this.state.selectedOption.length > 0
-            ? this.state.selectedOption[0].label
-            : ''}
+          {label}
         </EuiButtonEmpty>
-        <EuiPopover
-          id={'dataSourceViewContextMenuPopover'}
-          button={button}
-          isOpen={this.state.isPopoverOpen}
-          closePopover={this.closePopover.bind(this)}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <EuiContextMenu initialPanelId={0} panels={panels} />
-        </EuiPopover>
       </>
+    );
+
+    return (
+      <EuiPopover
+        id={'dataSourceViewPopover'}
+        button={button}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this.closePopover.bind(this)}
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+      >
+        <DataSourceDropDownHeader totalDataSourceCount={1} application={this.props.application} />
+        <EuiContextMenuPanel className={'dataSourceViewOuiPanel'}>
+          <EuiPanel color="subdued" paddingSize="none" borderRadius="none">
+            <EuiSelectable
+              options={options}
+              singleSelection={true}
+              data-test-subj={'dataSourceView'}
+              compressed={true}
+              renderOption={(option) => (
+                <DataSourceItem
+                  option={option}
+                  defaultDataSource={this.state.defaultDataSource}
+                  className={'dataSourceView'}
+                />
+              )}
+            >
+              {(list) => list}
+            </EuiSelectable>
+          </EuiPanel>
+        </EuiContextMenuPanel>
+      </EuiPopover>
     );
   }
 }

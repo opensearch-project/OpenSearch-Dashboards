@@ -64,6 +64,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
             workspaces: schema.maybe(
               schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
             ),
+            dataSourceEnabled: schema.maybe(schema.boolean({ defaultValue: false })),
           },
           {
             validate: (object) => {
@@ -116,6 +117,8 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         workspaces = [workspaces];
       }
 
+      const dataSourceEnabled = req.query.dataSourceEnabled;
+
       const result = await importSavedObjectsFromStream({
         savedObjectsClient: context.core.savedObjects.client,
         typeRegistry: context.core.savedObjects.typeRegistry,
@@ -126,6 +129,7 @@ export const registerImportRoute = (router: IRouter, config: SavedObjectConfig) 
         dataSourceId,
         dataSourceTitle,
         workspaces,
+        dataSourceEnabled,
       });
 
       return res.ok({ body: result });

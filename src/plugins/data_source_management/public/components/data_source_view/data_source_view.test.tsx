@@ -39,17 +39,18 @@ describe('DataSourceView', () => {
     expect(toasts.addWarning).toBeCalledTimes(0);
   });
   it('When selected option is local cluster and hide local Cluster is true, should return error', () => {
+    const onSelectedDataSources = jest.fn();
     component = shallow(
       <DataSourceView
         fullWidth={false}
         selectedOption={[{ id: '' }]}
         hideLocalCluster={true}
         notifications={toasts}
-        onSelectedDataSources={jest.fn()}
+        onSelectedDataSources={onSelectedDataSources}
       />
     );
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(1);
+    expect(onSelectedDataSources).toBeCalledWith([]);
   });
   it('Should return error when provided datasource has been filtered out', async () => {
     component = shallow(
@@ -65,7 +66,6 @@ describe('DataSourceView', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(1);
   });
   it('Should render successfully when provided datasource has not been filtered out', async () => {
     spyOn(utils, 'getDataSourceById').and.returnValue([{ id: 'test1', label: 'test1' }]);
@@ -114,11 +114,11 @@ describe('DataSourceView', () => {
       />
     );
     expect(component).toMatchSnapshot();
-    expect(toasts.addWarning).toBeCalledTimes(1);
+    expect(toasts.add).toBeCalledTimes(1);
     expect(utils.getDataSourceById).toBeCalledTimes(1);
   });
 
-  it('should show popover when click on button', async () => {
+  it('should show popover when click on data source view button', async () => {
     const onSelectedDataSource = jest.fn();
     spyOn(utils, 'getDataSourceById').and.returnValue([{ id: 'test1', label: 'test1' }]);
     spyOn(utils, 'handleDataSourceFetchError').and.returnValue('');
@@ -132,8 +132,24 @@ describe('DataSourceView', () => {
         fullWidth={false}
       />
     );
-    const button = await container.findByTestId('dataSourceViewContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceViewButton');
     button.click();
     expect(container).toMatchSnapshot();
+  });
+
+  it('should render no data source when no data source filtered out and hide local cluster', async () => {
+    const onSelectedDataSource = jest.fn();
+    render(
+      <DataSourceView
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={onSelectedDataSource}
+        hideLocalCluster={true}
+        fullWidth={false}
+        selectedOption={[{ id: '' }]}
+        dataSourceFilter={(ds) => false}
+      />
+    );
+    expect(onSelectedDataSource).toBeCalledWith([]);
   });
 });
