@@ -20,13 +20,13 @@ import {
 
 import { useObservable } from 'react-use';
 import { i18n } from '@osd/i18n';
-import { CoreStart, PublicAppInfo } from 'opensearch-dashboards/public';
+import { App, CoreStart, PublicAppInfo } from 'opensearch-dashboards/public';
 import { BehaviorSubject } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceOverviewSettings } from './workspace_overview_settings';
 import { WorkspaceOverviewContent } from './workspace_overview_content';
 import { getStartCards } from './all_get_started_cards';
-import { featureMatchesConfig } from '../../utils';
+import { isAppAccessibleInWorkspace } from '../../utils';
 import { WorkspaceOverviewCard } from './getting_start_card';
 import { WorkspaceOverviewGettingStartModal } from './getting_start_modal';
 
@@ -60,9 +60,10 @@ export const WorkspaceOverview = (props: WorkspaceOverviewProps) => {
    * all available cards based on workspace selected features
    */
   const availableCards = useMemo(() => {
-    const features = currentWorkspace?.features || ['*'];
-    const featureFilter = featureMatchesConfig(features);
-    return getStartCards.filter((card) => !card.appId || featureFilter({ id: card.appId }));
+    if (!currentWorkspace) return [];
+    return getStartCards.filter(
+      (card) => !card.id || isAppAccessibleInWorkspace(card as App, currentWorkspace)
+    );
   }, [currentWorkspace]);
 
   if (!currentWorkspace) {

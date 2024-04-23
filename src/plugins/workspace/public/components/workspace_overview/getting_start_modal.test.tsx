@@ -41,14 +41,14 @@ describe('WorkspaceOverviewGettingStartModal', () => {
   it('render getting start card modal normally', async () => {
     const cards = [
       {
-        appId: 'home',
+        id: 'home',
         featureDescription: 'Discover pre-loaded datasets before adding your own.',
         featureName: 'Sample Datasets',
         link: '/app/home#/tutorial_directory',
         category: DEFAULT_APP_CATEGORIES.getStarted,
       },
       {
-        appId: 'dashboards',
+        id: 'dashboards',
         featureDescription: 'Gain clarity and visibility with dynamic data visualization tools.',
         featureName: 'Dashboards',
         link: '/app/dashboards',
@@ -68,14 +68,14 @@ describe('WorkspaceOverviewGettingStartModal', () => {
   it('click on category to filter cards', async () => {
     const cards = [
       {
-        appId: 'home',
+        id: 'home',
         featureDescription: 'Discover pre-loaded datasets before adding your own.',
         featureName: 'Sample Datasets',
         link: '/app/home#/tutorial_directory',
         category: DEFAULT_APP_CATEGORIES.getStarted,
       },
       {
-        appId: 'dashboards',
+        id: 'dashboards',
         featureDescription: 'Gain clarity and visibility with dynamic data visualization tools.',
         featureName: 'Dashboards',
         link: '/app/dashboards',

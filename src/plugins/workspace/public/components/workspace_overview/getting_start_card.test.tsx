@@ -14,7 +14,7 @@ describe('WorkspaceOverviewCard', () => {
   const featureName = 'Visualizations';
   const featureDescription = 'this is a description';
   const card = {
-    appId: 'visualize',
+    id: 'visualize',
     featureDescription,
     featureName,
     link: '/app/visualize',

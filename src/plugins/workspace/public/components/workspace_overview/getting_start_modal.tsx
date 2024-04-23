@@ -42,7 +42,7 @@ export const WorkspaceOverviewGettingStartModal = (
   const categories: string[] = [
     ...new Set(
       availableCards.map((card) => {
-        return card.category.label;
+        return card?.category?.label || ALL;
       })
     ),
   ];
@@ -85,7 +85,7 @@ export const WorkspaceOverviewGettingStartModal = (
     .filter((category) => category === selectedItemName || selectedItemName === ALL)
     .map((category) => {
       const cards = availableCards.filter((card) => {
-        return card.category.label === category;
+        return card.category?.label === category;
       });
 
       return (

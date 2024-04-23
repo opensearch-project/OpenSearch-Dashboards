@@ -44,8 +44,8 @@ export const WorkspaceOverviewCard = ({
       }
       onClick={() => {
         let url = card.link;
-        if (!url && card.appId) {
-          url = application.getUrlForApp(card.appId);
+        if (!url && card.id) {
+          url = application.getUrlForApp(card.id);
         }
 
         if (workspaceId && url) {
