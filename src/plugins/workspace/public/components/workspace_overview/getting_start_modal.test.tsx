@@ -6,13 +6,13 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { coreMock } from '../../../../../core/public/mocks';
-import { DEFAULT_APP_CATEGORIES } from '../../../../../core/public';
 import {
   WorkspaceOverviewGettingStartModal,
   WorkspaceOverviewGettingStartModalProps,
 } from './getting_start_modal';
 import { GetStartCard } from './types';
 import { waitFor } from '@testing-library/dom';
+import { WORKSPACE_APP_CATEGORIES } from '../../../common/constants';
 
 // see https://github.com/elastic/eui/issues/5271 as workaround to render EuiSelectable correctly
 jest.mock('react-virtualized-auto-sizer', () => ({ children }: any) =>
@@ -45,14 +45,14 @@ describe('WorkspaceOverviewGettingStartModal', () => {
         featureDescription: 'Discover pre-loaded datasets before adding your own.',
         featureName: 'Sample Datasets',
         link: '/app/home#/tutorial_directory',
-        category: DEFAULT_APP_CATEGORIES.getStarted,
+        category: WORKSPACE_APP_CATEGORIES.getStarted,
       },
       {
         id: 'dashboards',
         featureDescription: 'Gain clarity and visibility with dynamic data visualization tools.',
         featureName: 'Dashboards',
         link: '/app/dashboards',
-        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+        category: WORKSPACE_APP_CATEGORIES.dashboardAndReport,
       },
     ];
     const { queryByText, getByTestId } = render(renderWorkspaceCardModal(cards));
@@ -72,14 +72,14 @@ describe('WorkspaceOverviewGettingStartModal', () => {
         featureDescription: 'Discover pre-loaded datasets before adding your own.',
         featureName: 'Sample Datasets',
         link: '/app/home#/tutorial_directory',
-        category: DEFAULT_APP_CATEGORIES.getStarted,
+        category: WORKSPACE_APP_CATEGORIES.getStarted,
       },
       {
         id: 'dashboards',
         featureDescription: 'Gain clarity and visibility with dynamic data visualization tools.',
         featureName: 'Dashboards',
         link: '/app/dashboards',
-        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+        category: WORKSPACE_APP_CATEGORIES.dashboardAndReport,
       },
     ];
     const { queryByText, getByTitle } = render(renderWorkspaceCardModal(cards));

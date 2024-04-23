@@ -128,32 +128,32 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
    * @param core CoreStart
    * @private
    */
-  private addWorkspaceToBreadCrumb(core: CoreStart) {
+  private addWorkspaceToBreadcrumbs(core: CoreStart) {
     this.chromeSubscription = combineLatest([
       core.workspaces.currentWorkspace$,
       core.chrome.getBreadcrumbs$(),
-    ]).subscribe(([currentWorkspace, breadCrumbs]) => {
-      if (currentWorkspace && breadCrumbs && breadCrumbs.length > 0) {
+    ]).subscribe(([currentWorkspace, breadcrumbs]) => {
+      if (currentWorkspace && breadcrumbs && breadcrumbs.length > 0) {
         const workspaceNotInBreadcrumbs =
-          breadCrumbs.findIndex((breadcrumb: ChromeBreadcrumb) => {
+          breadcrumbs.findIndex((breadcrumb: ChromeBreadcrumb) => {
             return breadcrumb.text === currentWorkspace.name;
           }) === -1;
         if (workspaceNotInBreadcrumbs) {
-          const workspaceCrumb: ChromeBreadcrumb = {
+          const workspaceBreadcrumb: ChromeBreadcrumb = {
             text: currentWorkspace.name,
             onClick: () => {
               core.application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
             },
           };
-          const homeCrumb: ChromeBreadcrumb = {
+          const homeBreadcrumb: ChromeBreadcrumb = {
             text: 'Home',
             onClick: () => {
               core.application.navigateToApp('home');
             },
           };
-          breadCrumbs.splice(0, 0, homeCrumb, workspaceCrumb);
+          breadcrumbs.splice(0, 0, homeBreadcrumb, workspaceBreadcrumb);
 
-          Promise.resolve().then(() => core.chrome.setBreadcrumbs(breadCrumbs));
+          Promise.resolve().then(() => core.chrome.setBreadcrumbs(breadcrumbs));
         }
       }
     });
@@ -319,7 +319,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       this.filterNavLinks(core);
     });
 
-    this.addWorkspaceToBreadCrumb(core);
+    this.addWorkspaceToBreadcrumbs(core);
 
     return {};
   }

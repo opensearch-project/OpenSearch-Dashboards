@@ -22,7 +22,7 @@ export const WorkspaceOverviewApp = (props: WorkspaceOverviewProps) => {
    * set breadcrumbs to chrome
    */
   useEffect(() => {
-    const breadCrumbs: EuiBreadcrumb[] = [
+    const breadcrumbs: EuiBreadcrumb[] = [
       {
         text: 'Home',
         onClick: () => {
@@ -31,11 +31,11 @@ export const WorkspaceOverviewApp = (props: WorkspaceOverviewProps) => {
       },
     ];
     if (currentWorkspace) {
-      breadCrumbs.push({
+      breadcrumbs.push({
         text: currentWorkspace.name,
       });
     }
-    chrome?.setBreadcrumbs(breadCrumbs);
+    chrome?.setBreadcrumbs(breadcrumbs);
   }, [chrome, currentWorkspace, application]);
 
   return (

@@ -15,7 +15,7 @@ export interface GetStartCard extends Partial<App> {
    */
   featureDescription: string;
   /**
-   * redirect destination when the card been clicked
+   * destination when the card been clicked
    */
   link?: string;
 }

@@ -94,7 +94,9 @@ exports[`WorkspaceOverview render workspace overview page normally 1`] = `
                         <div
                           class="euiText euiText--small"
                         >
-                          with Alerts
+                          <span>
+                            with Alerts
+                          </span>
                         </div>
                       </span>
                     </div>
