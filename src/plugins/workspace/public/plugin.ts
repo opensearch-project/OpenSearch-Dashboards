@@ -16,6 +16,7 @@ import {
   AppUpdater,
   AppStatus,
   PublicAppInfo,
+  WorkspaceAvailability,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -113,7 +114,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.managementCurrentWorkspaceIdSubscription = currentWorkspaceId$.subscribe(
       (currentWorkspaceId) => {
         if (currentWorkspaceId) {
-          ['settings', 'dataSources'].forEach((appId) =>
+          ['settings', 'dataSourceManagement'].forEach((appId) =>
             management.sections.section.opensearchDashboards.getApp(appId)?.disable()
           );
         }
@@ -199,6 +200,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         const { renderCreatorApp } = await import('./application');
         return mountWorkspaceApp(params, renderCreatorApp);
       },
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
     // update
@@ -244,6 +246,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
       },
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
     /**
