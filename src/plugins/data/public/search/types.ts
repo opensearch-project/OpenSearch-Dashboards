@@ -78,6 +78,8 @@ export interface ISearchStart {
    * {@link ISearchStartSearchSource}
    */
   searchSource: ISearchStartSearchSource;
+  __enhance: (enhancements: SearchEnhancements) => void;
+  getDefaultSearchInterceptor: () => ISearchInterceptor;
 }
 
 export { SEARCH_EVENT_TYPE } from './collectors';

@@ -46,6 +46,7 @@ import {
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { Toast } from 'src/core/public';
+import { isEqual, compact } from 'lodash';
 import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
 import {
   useOpenSearchDashboards,
@@ -54,14 +55,17 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import QueryStringInputUI from './query_string_input';
 import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
-import { PersistedLog, getQueryLog } from '../../query';
+import { PersistedLog, fromUser, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
+import { QueryEnhancement, Settings } from '../types';
 
 const QueryStringInput = withOpenSearchDashboards(QueryStringInputUI);
 
 // @internal
 export interface QueryBarTopRowProps {
   query?: Query;
+  queryEnhancements?: Map<string, QueryEnhancement>;
+  settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
@@ -95,8 +99,21 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const { uiSettings, notifications, storage, appName, docLinks } = opensearchDashboards.services;
 
   const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;
+  const isDataSourceReadOnly = uiSettings.get('query:dataSourceReadOnly');
 
   const queryLanguage = props.query && props.query.language;
+  const queryUiEnhancement =
+    (queryLanguage &&
+      props.queryEnhancements &&
+      props.queryEnhancements.get(queryLanguage)?.searchBar) ||
+    null;
+  const parsedQuery = isValidQuery(props.query)
+    ? props.query!
+    : { query: getQueryStringInitialValue(queryLanguage!), language: queryLanguage! };
+  if (!isEqual(parsedQuery.query, props.query?.query)) {
+    onQueryChange(parsedQuery);
+    onSubmit({ query: parsedQuery, dateRange: getDateRange() });
+  }
   const persistedLog: PersistedLog | undefined = React.useMemo(
     () =>
       queryLanguage && uiSettings && storage && appName
@@ -116,15 +133,19 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   function getDateRange() {
     const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
     return {
-      from: props.dateRangeFrom || defaultTimeSetting.from,
-      to: props.dateRangeTo || defaultTimeSetting.to,
+      from:
+        props.dateRangeFrom ||
+        queryUiEnhancement?.dateRange?.initialFrom ||
+        defaultTimeSetting.from,
+      to: props.dateRangeTo || queryUiEnhancement?.dateRange?.initialTo || defaultTimeSetting.to,
     };
   }
 
-  function onQueryChange(query: Query) {
+  function onQueryChange(query: Query, dateRange?: TimeRange) {
+    if (!isValidQuery(query)) return;
     props.onChange({
       query,
-      dateRange: getDateRange(),
+      dateRange: dateRange ?? getDateRange(),
     });
   }
 
@@ -181,10 +202,10 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     props.onSubmit({ query, dateRange });
   }
 
-  function onInputSubmit(query: Query) {
+  function onInputSubmit(query: Query, dateRange?: TimeRange) {
     onSubmit({
       query,
-      dateRange: getDateRange(),
+      dateRange: dateRange ?? getDateRange(),
     });
   }
 
@@ -196,6 +217,38 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     return valueAsMoment.toISOString();
   }
 
+  function isValidQuery(query: Query | undefined) {
+    if (!query || !query.query) return false;
+    return (
+      !Array.isArray(props.indexPatterns!) ||
+      compact(props.indexPatterns!).length === 0 ||
+      !isDataSourceReadOnly ||
+      fromUser(query!.query).includes(
+        typeof props.indexPatterns[0] === 'string'
+          ? props.indexPatterns[0]
+          : props.indexPatterns[0].title
+      )
+    );
+  }
+
+  function getQueryStringInitialValue(language: string) {
+    const { indexPatterns, queryEnhancements } = props;
+    const input = queryEnhancements?.get(language)?.searchBar?.queryStringInput?.initialValue;
+
+    if (
+      !indexPatterns ||
+      (!Array.isArray(indexPatterns) && compact(indexPatterns).length > 0) ||
+      !input
+    )
+      return '';
+
+    const defaultDataSource = indexPatterns[0];
+    const dataSource =
+      typeof defaultDataSource === 'string' ? defaultDataSource : defaultDataSource.title;
+
+    return input.replace('<data_source>', dataSource);
+  }
+
   function renderQueryInput() {
     if (!shouldRenderQueryInput()) return;
     return (
@@ -204,11 +257,14 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}
-          query={props.query!}
+          query={parsedQuery}
+          queryEnhancements={props.queryEnhancements}
+          settings={props.settings}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
           onChangeQueryInputFocus={onChangeQueryInputFocus}
           onSubmit={onInputSubmit}
+          getQueryStringInitialValue={getQueryStringInitialValue}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
         />
@@ -233,10 +289,15 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   }
 
   function shouldRenderDatePicker(): boolean {
-    return Boolean(props.showDatePicker || props.showAutoRefreshOnly);
+    return Boolean(
+      (props.showDatePicker && (queryUiEnhancement?.showDatePicker ?? true)) ??
+        (props.showAutoRefreshOnly && (queryUiEnhancement?.showAutoRefreshOnly ?? true))
+    );
   }
 
   function shouldRenderQueryInput(): boolean {
+    // TODO: SQL probably can modify to not care about index patterns
+    // TODO: call queryUiEnhancement?.showQueryInput
     return Boolean(props.showQueryInput && props.indexPatterns && props.query && storage);
   }
 

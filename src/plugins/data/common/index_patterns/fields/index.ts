@@ -29,6 +29,6 @@
  */
 
 export * from './types';
-export { isFilterable, isNestedField } from './utils';
+export { isFilterable, isNestedField, setOverrides, getOverrides } from './utils';
 export * from './field_list';
 export * from './index_pattern_field';
