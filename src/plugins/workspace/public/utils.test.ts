@@ -188,7 +188,8 @@ describe('workspace utils: isAppAccessibleInWorkspace', () => {
           title: 'Any app',
           mount: jest.fn(),
           // eslint-disable-next-line no-bitwise
-          workspaceAvailability: WorkspaceAvailability.insideWorkspace | WorkspaceAvailability.outsideWorkspace,
+          workspaceAvailability:
+            WorkspaceAvailability.insideWorkspace | WorkspaceAvailability.outsideWorkspace,
         },
         { id: 'workspace_id', name: 'workspace name', features: [] }
       )
