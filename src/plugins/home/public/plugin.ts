@@ -47,6 +47,8 @@ import {
   FeatureCatalogueRegistrySetup,
   TutorialService,
   TutorialServiceSetup,
+  SectionTypeService,
+  SectionTypeServiceSetup,
 } from './services';
 import { ConfigSchema } from '../config';
 import { setServices } from './application/opensearch_dashboards_services';
@@ -54,9 +56,11 @@ import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
-import { AppNavLinkStatus } from '../../../core/public';
+import { AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { DataSourcePluginStart } from '../../data_source/public';
+import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
+import { learnBasicsSection } from './application/components/homepage/sections/learn_basics';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -81,6 +85,7 @@ export class HomePublicPlugin
   private readonly featuresCatalogueRegistry = new FeatureCatalogueRegistry();
   private readonly environmentService = new EnvironmentService();
   private readonly tutorialService = new TutorialService();
+  private readonly sectionTypeService = new SectionTypeService();
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
@@ -122,6 +127,7 @@ export class HomePublicPlugin
           featureCatalogue: this.featuresCatalogueRegistry,
           injectedMetadata: coreStart.injectedMetadata,
           dataSource,
+          sectionTypes: this.sectionTypeService,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
@@ -129,6 +135,7 @@ export class HomePublicPlugin
         const { renderApp } = await import('./application');
         return await renderApp(params.element, coreStart, params.history);
       },
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
     urlForwarding.forwardApp('home', 'home');
 
@@ -149,18 +156,27 @@ export class HomePublicPlugin
       order: 500,
     });
 
+    const sectionTypes = { ...this.sectionTypeService.setup() };
+
+    sectionTypes.registerSection(workWithDataSection);
+    sectionTypes.registerSection(learnBasicsSection);
+
     return {
       featureCatalogue,
       environment: { ...this.environmentService.setup() },
       tutorials: { ...this.tutorialService.setup() },
+      sectionTypes,
     };
   }
 
-  public start(
-    { application: { capabilities, currentAppId$ }, http }: CoreStart,
-    { urlForwarding }: HomePluginStartDependencies
-  ) {
+  public start(core: CoreStart, { data, urlForwarding }: HomePluginStartDependencies) {
+    const {
+      application: { capabilities, currentAppId$ },
+      http,
+    } = core;
+
     this.featuresCatalogueRegistry.start({ capabilities });
+    this.sectionTypeService.start({ core, data });
 
     // If the home app is the initial location when loading OpenSearch Dashboards...
     if (
@@ -177,7 +193,10 @@ export class HomePublicPlugin
       });
     }
 
-    return { featureCatalogue: this.featuresCatalogueRegistry };
+    return {
+      featureCatalogue: this.featuresCatalogueRegistry,
+      getSavedHomepageLoader: () => this.sectionTypeService.getSavedHomepageLoader(),
+    };
   }
 }
 
@@ -204,7 +223,9 @@ export interface HomePublicPluginSetup {
    */
 
   environment: EnvironmentSetup;
+  sectionTypes: SectionTypeServiceSetup;
 }
 export interface HomePublicPluginStart {
   featureCatalogue: FeatureCatalogueRegistry;
+  getSavedHomepageLoader: SectionTypeService['getSavedHomepageLoader'];
 }

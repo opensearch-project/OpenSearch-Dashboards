@@ -54,8 +54,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { OverlayStart, HttpStart } from 'src/core/public';
-import { ClusterSelector } from '../../../../../data_source_management/public';
+import {
+  OverlayStart,
+  HttpStart,
+  NotificationsStart,
+  SavedObjectsClientContract,
+} from 'src/core/public';
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import {
   IndexPatternsContract,
   IIndexPattern,
@@ -80,6 +85,7 @@ import { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import
 import { OverwriteModal } from './overwrite_modal';
 import { ImportModeControl, ImportMode } from './import_mode_control';
 import { ImportSummary } from './import_summary';
+
 const CREATE_NEW_COPIES_DEFAULT = true;
 const OVERWRITE_ALL_DEFAULT = true;
 
@@ -96,6 +102,7 @@ export interface FlyoutProps {
   dataSourceEnabled: boolean;
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 export interface FlyoutState {
@@ -188,13 +195,19 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    * Does the initial import of a file, resolveImportErrors then handles errors and retries
    */
   import = async () => {
-    const { http } = this.props;
+    const { http, dataSourceEnabled } = this.props;
     const { file, importMode, selectedDataSourceId } = this.state;
     this.setState({ status: 'loading', error: undefined });
 
     // Import the file
     try {
-      const response = await importFile(http, file!, importMode, selectedDataSourceId);
+      const response = await importFile(
+        http,
+        file!,
+        importMode,
+        selectedDataSourceId,
+        dataSourceEnabled
+      );
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
         // This will ask about overwriting each object, etc
@@ -804,6 +817,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderImportControlForDataSource(importMode: ImportMode, isLegacyFile: boolean) {
+    const DataSourceSelector = this.props.dataSourceManagement!.ui.DataSourceSelector;
     return (
       <div className="savedObjectImportControlForDataSource">
         <EuiSpacer />
@@ -816,12 +830,13 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             ),
           }}
         >
-          <ClusterSelector
+          <DataSourceSelector
             savedObjectsClient={this.props.savedObjects}
             notifications={this.props.notifications.toasts}
             onSelectedDataSource={this.onSelectedDataSourceChange}
             disabled={!this.props.dataSourceEnabled}
             fullWidth={true}
+            isClearable={false}
           />
         </EuiFormFieldset>
         <EuiSpacer />
@@ -841,10 +856,16 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
   }
 
   renderFooter() {
-    const { isLegacyFile, status } = this.state;
+    const { isLegacyFile, status, selectedDataSourceId } = this.state;
     const { done, close } = this.props;
 
     let confirmButton;
+
+    let importButtonDisabled = false;
+    // If a data source is enabled, the import button should be disabled when there's no selected data source
+    if (this.props.dataSourceEnabled && selectedDataSourceId === undefined) {
+      importButtonDisabled = true;
+    }
 
     if (status === 'success') {
       confirmButton = (
@@ -877,6 +898,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           size="s"
           fill
           isLoading={status === 'loading'}
+          disabled={importButtonDisabled}
           data-test-subj="importSavedObjectsImportBtn"
         >
           <FormattedMessage

@@ -38,6 +38,7 @@ import {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
+  SavedObjectsBaseOptions,
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
@@ -45,7 +46,11 @@ import { HttpFetchOptions, HttpSetup } from '../http';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
-  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap'
+  | 'sortOrder'
+  | 'rootSearchFields'
+  | 'typeToNamespacesMap'
+  | 'ACLSearchParams'
+  | 'workspacesSearchOperator'
 >;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
@@ -61,6 +66,7 @@ export interface SavedObjectsCreateOptions {
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
+  workspaces?: SavedObjectsBaseOptions['workspaces'];
 }
 
 /**
@@ -78,6 +84,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsC
 export interface SavedObjectsBulkCreateOptions {
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
   overwrite?: boolean;
+  workspaces?: SavedObjectsCreateOptions['workspaces'];
 }
 
 /** @public */
@@ -183,6 +190,35 @@ const getObjectsToFetch = (queue: BatchQueueEntry[]): ObjectTypeAndId[] => {
 export class SavedObjectsClient {
   private http: HttpSetup;
   private batchQueue: BatchQueueEntry[];
+  /**
+   * The currentWorkspaceId may be undefined when workspace plugin is not enabled.
+   */
+  private currentWorkspaceId: string | undefined;
+
+  /**
+   * Check if workspaces field present in given options, if so, overwrite the current workspace id.
+   * @param options
+   * @returns
+   */
+  private formatWorkspacesParams(options: {
+    workspaces?: SavedObjectsCreateOptions['workspaces'];
+  }): { workspaces: string[] } | {} {
+    const currentWorkspaceId = this.currentWorkspaceId;
+    let finalWorkspaces;
+    if (options.hasOwnProperty('workspaces')) {
+      finalWorkspaces = options.workspaces;
+    } else if (typeof currentWorkspaceId === 'string') {
+      finalWorkspaces = [currentWorkspaceId];
+    }
+
+    if (finalWorkspaces) {
+      return {
+        workspaces: finalWorkspaces,
+      };
+    }
+
+    return {};
+  }
 
   /**
    * Throttled processing of get requests into bulk requests at 100ms interval
@@ -227,6 +263,10 @@ export class SavedObjectsClient {
     this.batchQueue = [];
   }
 
+  public setCurrentWorkspace(workspaceId: string) {
+    this.currentWorkspaceId = workspaceId;
+  }
+
   /**
    * Persists an object
    *
@@ -256,6 +296,7 @@ export class SavedObjectsClient {
         attributes,
         migrationVersion: options.migrationVersion,
         references: options.references,
+        ...this.formatWorkspacesParams(options),
       }),
     });
 
@@ -275,11 +316,14 @@ export class SavedObjectsClient {
     options: SavedObjectsBulkCreateOptions = { overwrite: false }
   ) => {
     const path = this.getPath(['_bulk_create']);
-    const query = { overwrite: options.overwrite };
+    const query: HttpFetchOptions['query'] = { overwrite: options.overwrite };
 
     const request: ReturnType<SavedObjectsApi['bulkCreate']> = this.savedObjectsFetch(path, {
       method: 'POST',
-      query,
+      query: {
+        ...query,
+        ...this.formatWorkspacesParams(options),
+      },
       body: JSON.stringify(objects),
     });
     return request.then((resp) => {
@@ -345,9 +389,13 @@ export class SavedObjectsClient {
       filter: 'filter',
       namespaces: 'namespaces',
       preference: 'preference',
+      workspaces: 'workspaces',
     };
 
-    const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, options);
+    const renamedQuery = renameKeys<SavedObjectsFindOptions, any>(renameMap, {
+      ...options,
+      ...this.formatWorkspacesParams(options),
+    });
     const query = pick.apply(null, [renamedQuery, ...Object.values<string>(renameMap)]) as Partial<
       Record<string, any>
     >;

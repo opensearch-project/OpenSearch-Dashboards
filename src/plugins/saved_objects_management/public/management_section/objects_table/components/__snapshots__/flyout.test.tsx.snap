@@ -168,7 +168,9 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           },
           "basePath": BasePath {
             "basePath": "",
+            "clientBasePath": "",
             "get": [Function],
+            "getBasePath": [Function],
             "prepend": [Function],
             "remove": [Function],
             "serverBasePath": "",
@@ -526,7 +528,7 @@ Array [
 ]
 `;
 
-exports[`Flyout should render cluster selector and import options 1`] = `
+exports[`Flyout should render cluster selector and import options when datasource is enabled 1`] = `
 <EuiFlyout
   onClose={[MockFunction]}
   size="s"
@@ -595,9 +597,10 @@ exports[`Flyout should render cluster selector and import options 1`] = `
             }
           }
         >
-          <ClusterSelector
+          <DataSourceSelector
             disabled={false}
             fullWidth={true}
+            isClearable={false}
             notifications={
               Object {
                 "add": [MockFunction],
@@ -662,6 +665,7 @@ exports[`Flyout should render cluster selector and import options 1`] = `
       >
         <EuiButton
           data-test-subj="importSavedObjectsImportBtn"
+          disabled={true}
           fill={true}
           isLoading={false}
           onClick={[Function]}
@@ -778,6 +782,7 @@ exports[`Flyout should render import step 1`] = `
       >
         <EuiButton
           data-test-subj="importSavedObjectsImportBtn"
+          disabled={false}
           fill={true}
           isLoading={false}
           onClick={[Function]}

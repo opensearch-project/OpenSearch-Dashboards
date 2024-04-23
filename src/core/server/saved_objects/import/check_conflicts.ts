@@ -35,6 +35,7 @@ import {
   SavedObjectsImportError,
   SavedObjectError,
   SavedObjectsImportRetry,
+  SavedObjectsBaseOptions,
 } from '../types';
 
 interface CheckConflictsParams {
@@ -44,6 +45,7 @@ interface CheckConflictsParams {
   ignoreRegularConflicts?: boolean;
   retries?: SavedObjectsImportRetry[];
   createNewCopies?: boolean;
+  workspaces?: SavedObjectsBaseOptions['workspaces'];
 }
 
 const isUnresolvableConflict = (error: SavedObjectError) =>
@@ -56,6 +58,7 @@ export async function checkConflicts({
   ignoreRegularConflicts,
   retries = [],
   createNewCopies,
+  workspaces,
 }: CheckConflictsParams) {
   const filteredObjects: Array<SavedObject<{ title?: string }>> = [];
   const errors: SavedObjectsImportError[] = [];
@@ -77,6 +80,7 @@ export async function checkConflicts({
   });
   const checkConflictsResult = await savedObjectsClient.checkConflicts(objectsToCheck, {
     namespace,
+    ...(workspaces ? { workspaces } : {}),
   });
   const errorMap = checkConflictsResult.errors.reduce(
     (acc, { type, id, error }) => acc.set(`${type}:${id}`, error),

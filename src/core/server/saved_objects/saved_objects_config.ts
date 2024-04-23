@@ -49,6 +49,9 @@ export const savedObjectsConfig = {
   schema: schema.object({
     maxImportPayloadBytes: schema.byteSize({ defaultValue: 26214400 }),
     maxImportExportSize: schema.byteSize({ defaultValue: 10000 }),
+    permission: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
 };
 

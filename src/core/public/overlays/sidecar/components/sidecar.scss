@@ -1,0 +1,44 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.osdSidecarFlyout {
+  box-shadow: initial;
+  position: fixed;
+  z-index: 1000;
+  background: lightOrDarkTheme($euiColorGhost, $euiColorInk);
+  display: flex;
+
+  &.osdSidecarFlyout--dockedRight {
+    top: 0;
+    height: 100vh;
+    right: 0;
+    flex-direction: row;
+    padding-left: 8px;
+  }
+
+  &.osdSidecarFlyout--dockedLeft {
+    top: 0;
+    height: 100vh;
+    left: 0;
+    flex-direction: row-reverse;
+    padding-right: 8px;
+  }
+
+  &.osdSidecarFlyout--dockedTakeover {
+    width: 100vw !important;
+    bottom: 0;
+    flex-direction: column;
+    padding-top: 8px;
+  }
+
+  &.osdSidecarFlyout--hide {
+    display: none;
+  }
+
+  .osdSidecarMountWrapper {
+    width: 100%;
+    height: 100%;
+  }
+}

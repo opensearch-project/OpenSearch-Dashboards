@@ -55,6 +55,12 @@ const legacyMockFile = ({
   path: '/home/foo.json',
 } as unknown) as File;
 
+const dataSourceManagementMock = {
+  ui: {
+    DataSourceSelector: () => <div>Mock DataSourceSelector</div>,
+  },
+};
+
 describe('Flyout', () => {
   let defaultProps: FlyoutProps;
 
@@ -99,10 +105,11 @@ describe('Flyout', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render cluster selector and import options', async () => {
+  it('should render cluster selector and import options when datasource is enabled', async () => {
     const component = shallowRender({
       ...defaultProps,
       dataSourceEnabled: true,
+      dataSourceManagement: dataSourceManagementMock,
       notifications: notificationServiceMock.createStartContract(),
     });
 
@@ -214,6 +221,7 @@ describe('Flyout', () => {
           createNewCopies: true,
           overwrite: true,
         },
+        undefined,
         undefined
       );
       expect(component.state()).toMatchObject({

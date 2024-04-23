@@ -14,10 +14,11 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { SavedObjectAttributes } from 'src/core/types';
 import { i18n } from '@osd/i18n';
+import { AuthType } from '../../data_source/common/data_sources';
 import { SigV4ServiceName } from '../../data_source/common/data_sources';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
+import { AuthenticationMethodRegistry } from './auth_registry';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourceManagementPluginStart {}
@@ -32,6 +33,7 @@ export interface DataSourceManagementContext {
   http: HttpSetup;
   docLinks: DocLinksStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
+  authenticationMethodRegistry: AuthenticationMethodRegistry;
 }
 
 export interface DataSourceTableItem {
@@ -51,33 +53,47 @@ export type DataSourceManagementContextValue = OpenSearchDashboardsReactContextV
   DataSourceManagementContext
 >;
 
-/* Datasource types */
-export enum AuthType {
-  NoAuth = 'no_auth',
-  UsernamePasswordType = 'username_password',
-  SigV4 = 'sigv4',
-}
+export const defaultAuthType = AuthType.UsernamePasswordType;
 
-export const credentialSourceOptions = [
-  {
-    value: AuthType.NoAuth,
-    inputDisplay: i18n.translate('dataSourceManagement.credentialSourceOptions.NoAuthentication', {
-      defaultMessage: 'No authentication',
-    }),
-  },
-  {
-    value: AuthType.UsernamePasswordType,
-    inputDisplay: i18n.translate('dataSourceManagement.credentialSourceOptions.UsernamePassword', {
-      defaultMessage: 'Username & Password',
-    }),
-  },
-  {
-    value: AuthType.SigV4,
-    inputDisplay: i18n.translate('dataSourceManagement.credentialSourceOptions.AwsSigV4', {
-      defaultMessage: 'AWS SigV4',
-    }),
-  },
-];
+export const noAuthCredentialOption = {
+  value: AuthType.NoAuth,
+  inputDisplay: i18n.translate('dataSourceManagement.credentialSourceOptions.NoAuthentication', {
+    defaultMessage: 'No authentication',
+  }),
+};
+
+export const noAuthCredentialField = {};
+
+export const noAuthCredentialAuthMethod = {
+  name: AuthType.NoAuth,
+  credentialSourceOption: noAuthCredentialOption,
+  credentialFormField: noAuthCredentialField,
+};
+
+export const usernamePasswordCredentialOption = {
+  value: AuthType.UsernamePasswordType,
+  inputDisplay: i18n.translate('dataSourceManagement.credentialSourceOptions.UsernamePassword', {
+    defaultMessage: 'Username & Password',
+  }),
+};
+
+export const usernamePasswordCredentialField = {
+  username: '',
+  password: '',
+};
+
+export const usernamePasswordAuthMethod = {
+  name: AuthType.UsernamePasswordType,
+  credentialSourceOption: usernamePasswordCredentialOption,
+  credentialFormField: usernamePasswordCredentialField,
+};
+
+export const sigV4CredentialOption = {
+  value: AuthType.SigV4,
+  inputDisplay: i18n.translate('dataSourceManagement.credentialSourceOptions.AwsSigV4', {
+    defaultMessage: 'AWS SigV4',
+  }),
+};
 
 export const sigV4ServiceOptions = [
   {
@@ -94,24 +110,33 @@ export const sigV4ServiceOptions = [
   },
 ];
 
-export interface DataSourceAttributes extends SavedObjectAttributes {
-  title: string;
-  description?: string;
-  endpoint?: string;
-  auth: {
-    type: AuthType;
-    credentials: UsernamePasswordTypedContent | SigV4Content | undefined;
-  };
+export const sigV4CredentialField = {
+  region: '',
+  accessKey: '',
+  secretKey: '',
+  service: SigV4ServiceName.OpenSearch,
+};
+
+export const sigV4AuthMethod = {
+  name: AuthType.SigV4,
+  credentialSourceOption: sigV4CredentialOption,
+  credentialFormField: sigV4CredentialField,
+};
+
+export const credentialSourceOptions = [
+  noAuthCredentialOption,
+  usernamePasswordCredentialOption,
+  sigV4CredentialOption,
+];
+
+export interface MenuPanelItem {
+  name?: string;
+  disabled: boolean;
 }
 
-export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
-  username: string;
-  password?: string;
-}
-
-export interface SigV4Content extends SavedObjectAttributes {
-  accessKey: string;
-  secretKey: string;
-  region: string;
-  service?: SigV4ServiceName;
-}
+export {
+  AuthType,
+  UsernamePasswordTypedContent,
+  SigV4Content,
+  DataSourceAttributes,
+} from '../../data_source/common/data_sources';

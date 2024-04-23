@@ -44,11 +44,10 @@ import {
   ScopedHistory,
 } from 'src/core/public';
 
-import { ClusterSelector } from '../../data_source_management/public';
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { DevToolApp } from './dev_tool';
 import { DevToolsSetupDependencies } from './plugin';
 import { addHelpMenuToAppChrome } from './utils/util';
-
 interface DevToolsWrapperProps {
   devTools: readonly DevToolApp[];
   activeDevTool: DevToolApp;
@@ -56,6 +55,7 @@ interface DevToolsWrapperProps {
   savedObjects: SavedObjectsStart;
   notifications: NotificationsStart;
   dataSourceEnabled: boolean;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 interface MountedDevToolDescriptor {
@@ -71,8 +71,10 @@ function DevToolsWrapper({
   savedObjects,
   notifications: { toasts },
   dataSourceEnabled,
+  dataSourceManagement,
 }: DevToolsWrapperProps) {
   const mountedTool = useRef<MountedDevToolDescriptor | null>(null);
+  const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
   useEffect(
     () => () => {
@@ -109,6 +111,22 @@ function DevToolsWrapper({
       mountpoint: mountPoint,
       unmountHandler,
     };
+    setIsLoading(false);
+  };
+
+  const renderDataSourceSelector = () => {
+    const DataSourceSelector = dataSourceManagement!.ui.DataSourceSelector;
+    return (
+      <div className="devAppDataSourceSelector">
+        <DataSourceSelector
+          savedObjectsClient={savedObjects.client}
+          notifications={toasts}
+          onSelectedDataSource={onChange}
+          disabled={!dataSourceEnabled}
+          fullWidth={false}
+        />
+      </div>
+    );
   };
 
   return (
@@ -129,17 +147,7 @@ function DevToolsWrapper({
             </EuiTab>
           </EuiToolTip>
         ))}
-        {dataSourceEnabled ? (
-          <div className="devAppClusterSelector">
-            <ClusterSelector
-              savedObjectsClient={savedObjects.client}
-              notifications={toasts}
-              onSelectedDataSource={onChange}
-              disabled={!dataSourceEnabled}
-              fullWidth={false}
-            />
-          </div>
-        ) : null}
+        {dataSourceEnabled && !isLoading && dataSourceManagement && renderDataSourceSelector()}
       </EuiTabs>
 
       <div
@@ -153,7 +161,12 @@ function DevToolsWrapper({
               mountedTool.current.devTool !== activeDevTool ||
               mountedTool.current.mountpoint !== element)
           ) {
-            await remount(element);
+            let initialDataSourceId;
+            if (!dataSourceEnabled) {
+              initialDataSourceId = '';
+            }
+
+            await remount(element, initialDataSourceId);
           }
         }}
       />
@@ -209,7 +222,7 @@ export function renderApp(
   element: HTMLElement,
   history: ScopedHistory,
   devTools: readonly DevToolApp[],
-  { dataSource }: DevToolsSetupDependencies
+  { dataSourceManagement, dataSource }: DevToolsSetupDependencies
 ) {
   const dataSourceEnabled = !!dataSource;
   if (redirectOnMissingCapabilities(application)) {
@@ -241,6 +254,7 @@ export function renderApp(
                     savedObjects={savedObjects}
                     notifications={notifications}
                     dataSourceEnabled={dataSourceEnabled}
+                    dataSourceManagement={dataSourceManagement}
                   />
                 )}
               />

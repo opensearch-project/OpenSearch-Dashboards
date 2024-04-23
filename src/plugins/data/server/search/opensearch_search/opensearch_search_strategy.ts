@@ -29,7 +29,7 @@
  */
 
 import { first } from 'rxjs/operators';
-import { SharedGlobalConfig, Logger } from 'opensearch-dashboards/server';
+import { SharedGlobalConfig, Logger, OpenSearchServiceSetup } from 'opensearch-dashboards/server';
 import { SearchResponse } from 'elasticsearch';
 import { Observable } from 'rxjs';
 import { ApiResponse } from '@opensearch-project/opensearch';
@@ -50,6 +50,7 @@ export const opensearchSearchStrategyProvider = (
   logger: Logger,
   usage?: SearchUsage,
   dataSource?: DataSourcePluginSetup,
+  openSearchServiceSetup?: OpenSearchServiceSetup,
   withLongNumeralsSupport?: boolean
 ): ISearchStrategy => {
   return {
@@ -73,20 +74,14 @@ export const opensearchSearchStrategyProvider = (
       });
 
       try {
-        if (
-          dataSource?.dataSourceEnabled() &&
-          !dataSource?.defaultClusterEnabled() &&
-          !request.dataSourceId
-        ) {
+        const isOpenSearchHostsEmpty =
+          openSearchServiceSetup?.legacy?.client?.config?.hosts?.length === 0;
+
+        if (dataSource?.dataSourceEnabled() && isOpenSearchHostsEmpty && !request.dataSourceId) {
           throw new Error(`Data source id is required when no openseach hosts config provided`);
         }
 
-        const client = await decideClient(
-          context,
-          request,
-          dataSource?.dataSourceEnabled(),
-          withLongNumeralsSupport
-        );
+        const client = await decideClient(context, request, withLongNumeralsSupport);
         const promise = shimAbortSignal(client.search(params), options?.abortSignal);
 
         const { body: rawResponse } = (await promise) as ApiResponse<SearchResponse<any>>;

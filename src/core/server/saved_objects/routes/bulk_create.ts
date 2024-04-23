@@ -38,6 +38,9 @@ export const registerBulkCreateRoute = (router: IRouter) => {
       validate: {
         query: schema.object({
           overwrite: schema.boolean({ defaultValue: false }),
+          workspaces: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
         }),
         body: schema.arrayOf(
           schema.object({
@@ -62,7 +65,13 @@ export const registerBulkCreateRoute = (router: IRouter) => {
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { overwrite } = req.query;
-      const result = await context.core.savedObjects.client.bulkCreate(req.body, { overwrite });
+      const workspaces = req.query.workspaces
+        ? Array<string>().concat(req.query.workspaces)
+        : undefined;
+      const result = await context.core.savedObjects.client.bulkCreate(req.body, {
+        overwrite,
+        ...(workspaces ? { workspaces } : {}),
+      });
       return res.ok({ body: result });
     })
   );

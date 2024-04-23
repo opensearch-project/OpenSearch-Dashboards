@@ -1,0 +1,2 @@
+feat:
+- [Workspace] Allow making apps available in workspaces using `workspaceAvailability` ([#6427](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6427))

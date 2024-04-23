@@ -40,4 +40,5 @@ export interface OpenSearchDashboardsReactOverlays {
     node: React.ReactNode,
     options?: Parameters<CoreStart['overlays']['openModal']>['1']
   ) => ReturnType<CoreStart['overlays']['openModal']>;
+  sidecar: () => CoreStart['overlays']['sidecar'];
 }

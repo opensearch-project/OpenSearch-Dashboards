@@ -38,8 +38,16 @@ export const registerServices = async (
 ) => {
   const [
     ,
-    { dashboard, visualizations, visAugmenter, discover, visBuilder },
+    { home, dashboard, visualizations, visAugmenter, discover, visBuilder },
   ] = await getStartServices();
+
+  if (home) {
+    registry.register({
+      id: 'savedHomepage',
+      title: 'homepage',
+      service: home.getSavedHomepageLoader(),
+    });
+  }
 
   if (dashboard) {
     registry.register({

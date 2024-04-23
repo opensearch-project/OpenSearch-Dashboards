@@ -11,11 +11,18 @@ import {
   mockManagementPlugin,
   existingDatasourceNamesList,
   mockDataSourceAttributesWithNoAuth,
+  mockDataSourceAttributesWithRegisteredAuth,
 } from '../../../../mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../../opensearch_dashboards_react/public';
 import { EditDataSourceForm } from './edit_data_source_form';
 import { act } from 'react-dom/test-utils';
-import { AuthType } from '../../../../types';
+import {
+  AuthType,
+  noAuthCredentialAuthMethod,
+  sigV4AuthMethod,
+  usernamePasswordAuthMethod,
+} from '../../../../types';
+import { AuthenticationMethod, AuthenticationMethodRegistry } from '../../../../auth_registry';
 
 const titleFieldIdentifier = 'dataSourceTitle';
 const titleFormRowIdentifier = '[data-test-subj="editDataSourceTitleFormRow"]';
@@ -29,6 +36,14 @@ const passwordFieldIdentifier = '[data-test-subj="updateDataSourceFormPasswordFi
 const updatePasswordBtnIdentifier = '[data-test-subj="editDatasourceUpdatePasswordBtn"]';
 describe('Datasource Management: Edit Datasource Form', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(
+    noAuthCredentialAuthMethod
+  );
+  mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(
+    usernamePasswordAuthMethod
+  );
+  mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(sigV4AuthMethod);
+
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const mockFn = jest.fn();
 
@@ -61,8 +76,10 @@ describe('Datasource Management: Edit Datasource Form', () => {
           <EditDataSourceForm
             existingDataSource={mockDataSourceAttributesWithAuth}
             existingDatasourceNamesList={existingDatasourceNamesList}
+            isDefault={false}
             onDeleteDataSource={mockFn}
             handleSubmit={mockFn}
+            onSetDefaultDataSource={mockFn}
             handleTestConnection={mockFn}
             displayToastMessage={mockFn}
           />
@@ -230,7 +247,9 @@ describe('Datasource Management: Edit Datasource Form', () => {
           <EditDataSourceForm
             existingDataSource={mockDataSourceAttributesWithNoAuth}
             existingDatasourceNamesList={existingDatasourceNamesList}
+            isDefault={false}
             onDeleteDataSource={mockFn}
+            onSetDefaultDataSource={mockFn}
             handleSubmit={mockFn}
             handleTestConnection={mockFn}
             displayToastMessage={mockFn}
@@ -286,6 +305,12 @@ describe('Datasource Management: Edit Datasource Form', () => {
       expect(mockFn).toHaveBeenCalled();
     });
 
+    test('should set as the default datasource from header', () => {
+      // @ts-ignore
+      component.find('Header').prop('onClickSetDefault')();
+      expect(mockFn).toHaveBeenCalled();
+    });
+
     /* Save Changes */
     test('should update the form with NoAuth on click save changes', async () => {
       await new Promise((resolve) =>
@@ -325,5 +350,128 @@ describe('Datasource Management: Edit Datasource Form', () => {
       component.update();
       expect(mockFn).toHaveBeenCalled();
     });
+  });
+});
+
+describe('With Registered Authentication', () => {
+  let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
+  const updateInputFieldAndBlur = (
+    comp: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>,
+    fieldName: string,
+    updatedValue: string,
+    isTestSubj?: boolean
+  ) => {
+    const field = isTestSubj ? comp.find(fieldName) : comp.find({ name: fieldName });
+    act(() => {
+      field.last().simulate('change', { target: { value: updatedValue } });
+    });
+    comp.update();
+    act(() => {
+      field.last().simulate('focus').simulate('blur');
+    });
+    comp.update();
+  };
+
+  test('should call registered crendential form', () => {
+    const mockedCredentialForm = jest.fn();
+    const authTypeToBeTested = 'Some Auth Type';
+    const authMethodToBeTest = {
+      name: authTypeToBeTested,
+      credentialSourceOption: {
+        value: authTypeToBeTested,
+        inputDisplay: 'some input',
+      },
+      credentialForm: mockedCredentialForm,
+    } as AuthenticationMethod;
+
+    const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+    mockedContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
+    mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTest);
+
+    component = mount(
+      wrapWithIntl(
+        <EditDataSourceForm
+          existingDataSource={mockDataSourceAttributesWithNoAuth}
+          existingDatasourceNamesList={existingDatasourceNamesList}
+          isDefault={false}
+          onDeleteDataSource={jest.fn()}
+          handleSubmit={jest.fn()}
+          onSetDefaultDataSource={jest.fn()}
+          handleTestConnection={jest.fn()}
+          displayToastMessage={jest.fn()}
+        />
+      ),
+      {
+        wrappingComponent: OpenSearchDashboardsContextProvider,
+        wrappingComponentProps: {
+          services: mockedContext,
+        },
+      }
+    );
+
+    expect(mockedCredentialForm).toHaveBeenCalled();
+  });
+
+  test('should update the form with registered auth type on click save changes', async () => {
+    const mockedCredentialForm = jest.fn();
+    const mockedSubmitHandler = jest.fn();
+    const authMethodToBeTest = {
+      name: 'Some Auth Type',
+      credentialSourceOption: {
+        value: 'Some Auth Type',
+        inputDisplay: 'some input',
+      },
+      credentialForm: mockedCredentialForm,
+      credentialFormField: {},
+    } as AuthenticationMethod;
+
+    const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+    mockedContext.authenticationMethodRegistry = new AuthenticationMethodRegistry();
+    mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(authMethodToBeTest);
+
+    component = mount(
+      wrapWithIntl(
+        <EditDataSourceForm
+          existingDataSource={mockDataSourceAttributesWithRegisteredAuth}
+          existingDatasourceNamesList={existingDatasourceNamesList}
+          isDefault={false}
+          onDeleteDataSource={jest.fn()}
+          handleSubmit={mockedSubmitHandler}
+          onSetDefaultDataSource={jest.fn()}
+          handleTestConnection={jest.fn()}
+          displayToastMessage={jest.fn()}
+        />
+      ),
+      {
+        wrappingComponent: OpenSearchDashboardsContextProvider,
+        wrappingComponentProps: {
+          services: mockedContext,
+        },
+      }
+    );
+
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        updateInputFieldAndBlur(component, descriptionFieldIdentifier, '');
+        expect(
+          component.find(descriptionFormRowIdentifier).first().props().isInvalid
+        ).toBeUndefined();
+        resolve();
+      }, 100)
+    );
+    await new Promise((resolve) =>
+      setTimeout(() => {
+        /* Updated description*/
+        updateInputFieldAndBlur(component, descriptionFieldIdentifier, 'testDescription');
+        expect(
+          component.find(descriptionFormRowIdentifier).first().props().isInvalid
+        ).toBeUndefined();
+
+        expect(component.find('[data-test-subj="datasource-edit-saveButton"]').exists()).toBe(true);
+        component.find('[data-test-subj="datasource-edit-saveButton"]').first().simulate('click');
+        expect(mockedSubmitHandler).toHaveBeenCalled();
+        resolve();
+      }, 100)
+    );
   });
 });

@@ -41,15 +41,18 @@ import {
 } from '../../../data/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
+import { DataSourceMenuProps, createDataSourceMenu } from '../../../data_source_management/public';
 
 export type TopNavMenuProps = StatefulSearchBarProps &
   Omit<SearchBarProps, 'opensearchDashboards' | 'intl' | 'timeHistory'> & {
     config?: TopNavMenuData[];
+    dataSourceMenuConfig?: DataSourceMenuProps;
     showSearchBar?: boolean;
     showQueryBar?: boolean;
     showQueryInput?: boolean;
     showDatePicker?: boolean;
     showFilterBar?: boolean;
+    showDataSourceMenu?: boolean;
     data?: DataPublicPluginStart;
     className?: string;
     /**
@@ -83,9 +86,19 @@ export type TopNavMenuProps = StatefulSearchBarProps &
  **/
 
 export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
-  const { config, showSearchBar, ...searchBarProps } = props;
+  const {
+    config,
+    showSearchBar,
+    showDataSourceMenu,
+    dataSourceMenuConfig,
+    ...searchBarProps
+  } = props;
 
-  if ((!config || config.length === 0) && (!showSearchBar || !props.data)) {
+  if (
+    (!config || config.length === 0) &&
+    (!showSearchBar || !props.data) &&
+    (!showDataSourceMenu || !dataSourceMenuConfig)
+  ) {
     return null;
   }
 
@@ -97,16 +110,24 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   }
 
   function renderMenu(className: string): ReactElement | null {
-    if (!config || config.length === 0) return null;
+    if ((!config || config.length === 0) && (!showDataSourceMenu || !dataSourceMenuConfig))
+      return null;
     return (
       <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
         {renderItems()}
+        {renderDataSourceMenu()}
       </EuiHeaderLinks>
     );
   }
 
+  function renderDataSourceMenu(): ReactElement | null {
+    if (!showDataSourceMenu) return null;
+    const DataSourceMenu = createDataSourceMenu();
+    return <DataSourceMenu {...dataSourceMenuConfig!} />;
+  }
+
   function renderSearchBar(): ReactElement | null {
-    // Validate presense of all required fields
+    // Validate presence of all required fields
     if (!showSearchBar || !props.data) return null;
     const { SearchBar } = props.data.ui;
     return <SearchBar {...searchBarProps} />;
@@ -143,5 +164,6 @@ TopNavMenu.defaultProps = {
   showQueryInput: true,
   showDatePicker: true,
   showFilterBar: true,
+  showDataSourceMenu: false,
   screenTitle: '',
 };

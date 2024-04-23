@@ -13,7 +13,6 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Josh Romero               | [joshuarrrr](https://github.com/joshuarrrr)         | Amazon      |
 | Abby Hu                   | [abbyhu2000](https://github.com/abbyhu2000)         | Amazon      |
 | Yan Zeng                  | [zengyan-amazon](https://github.com/zengyan-amazon) | Amazon      |
-| Kristen Tian              | [kristenTian](https://github.com/kristenTian)       | Amazon      |
 | Zhongnan Su               | [zhongnansu](https://github.com/zhongnansu)         | Amazon      |
 | Manasvini B Suryanarayana | [manasvinibs](https://github.com/manasvinibs)       | Amazon      |
 | Tao Liu                   | [Flyingliuhub](https://github.com/Flyingliuhub)     | Amazon      |
@@ -22,6 +21,9 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Sirazh Gabdullin          | [curq](https://github.com/curq)                     | External contributor |
 | Bandini Bhopi             | [bandinib-amzn](https://github.com/bandinib-amzn)   | Amazon      |
 | Su Zhou                   | [SuZhou-Joe](https://github.com/SuZhou-Joe)         | Amazon      |
+| Yulong Ruan               | [ruanyl](https://github.com/ruanyl)                 | Amazon      |
+| Lu Yu                     | [BionIT](https://github.com/BionIT)                 | Amazon      |
+| Xinrui Bai                | [xinruiba](https://github.com/xinruiba)             | Amazon      |
 
 ## Emeritus
 
@@ -31,3 +33,4 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Mihir Soni    | [mihirsoni](https://github.com/mihirsoni)     | Amazon      |
 | Bishoy Boktor | [boktorbb](https://github.com/boktorbb)       | Amazon      |
 | Sean Neumann  | [seanneumann](https://github.com/seanneumann) | Contributor |
+| Kristen Tian  | [kristenTian](https://github.com/kristenTian) | Amazon      |

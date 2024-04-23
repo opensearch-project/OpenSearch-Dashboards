@@ -33,6 +33,7 @@ import {
   SavedObjectsImportError,
   SavedObjectsImportResponse,
   SavedObjectsImportOptions,
+  SavedObjectsImportUnsupportedTypeError,
 } from './types';
 import { validateReferences } from './validate_references';
 import { checkOriginConflicts } from './check_origin_conflicts';
@@ -40,6 +41,7 @@ import { createSavedObjects } from './create_saved_objects';
 import { checkConflicts } from './check_conflicts';
 import { regenerateIds } from './regenerate_ids';
 import { checkConflictsForDataSource } from './check_conflict_for_data_source';
+import { isSavedObjectWithDataSource } from './validate_object_id';
 
 /**
  * Import saved objects from given stream. See the {@link SavedObjectsImportOptions | options} for more
@@ -57,6 +59,8 @@ export async function importSavedObjectsFromStream({
   namespace,
   dataSourceId,
   dataSourceTitle,
+  workspaces,
+  dataSourceEnabled,
 }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportError[] = [];
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
@@ -68,6 +72,28 @@ export async function importSavedObjectsFromStream({
     supportedTypes,
     dataSourceId,
   });
+  // if not enable data_source, throw error early
+  if (!dataSourceEnabled) {
+    const notSupportedErrors: SavedObjectsImportError[] = collectSavedObjectsResult.collectedObjects.reduce(
+      (errors: SavedObjectsImportError[], obj) => {
+        if (obj.type === 'data-source' || isSavedObjectWithDataSource(obj.id)) {
+          const error: SavedObjectsImportUnsupportedTypeError = { type: 'unsupported_type' };
+          const { title } = obj.attributes;
+          errors.push({ error, type: obj.type, id: obj.id, title, meta: { title } });
+        }
+        return errors; // Return the accumulator in each iteration
+      },
+      []
+    );
+    if (notSupportedErrors?.length > 0) {
+      return {
+        successCount: 0,
+        success: false,
+        errors: notSupportedErrors,
+      };
+    }
+  }
+
   errorAccumulator = [...errorAccumulator, ...collectSavedObjectsResult.errors];
   /** Map of all IDs for objects that we are attempting to import; each value is empty by default */
   let importIdMap = collectSavedObjectsResult.importIdMap;
@@ -92,23 +118,8 @@ export async function importSavedObjectsFromStream({
       savedObjectsClient,
       namespace,
       ignoreRegularConflicts: overwrite,
+      workspaces,
     };
-
-    // resolve when data source exist, pass the filtered objects to next check conflict
-    if (dataSourceId) {
-      const checkConflictsForDataSourceResult = await checkConflictsForDataSource({
-        objects: collectSavedObjectsResult.collectedObjects,
-        ignoreRegularConflicts: overwrite,
-        dataSourceId,
-      });
-
-      checkConflictsParams.objects = checkConflictsForDataSourceResult.filteredObjects;
-
-      pendingOverwrites = new Set([
-        ...pendingOverwrites,
-        ...checkConflictsForDataSourceResult.pendingOverwrites,
-      ]);
-    }
 
     const checkConflictsResult = await checkConflicts(checkConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkConflictsResult.errors];
@@ -124,6 +135,20 @@ export async function importSavedObjectsFromStream({
       ignoreRegularConflicts: overwrite,
       importIdMap,
     };
+
+    /**
+     * If dataSourceId exist,
+     */
+    if (dataSourceId) {
+      const checkConflictsForDataSourceResult = await checkConflictsForDataSource({
+        objects: checkConflictsResult.filteredObjects,
+        ignoreRegularConflicts: overwrite,
+        dataSourceId,
+        savedObjectsClient,
+      });
+      checkOriginConflictsParams.objects = checkConflictsForDataSourceResult.filteredObjects;
+    }
+
     const checkOriginConflictsResult = await checkOriginConflicts(checkOriginConflictsParams);
     errorAccumulator = [...errorAccumulator, ...checkOriginConflictsResult.errors];
     importIdMap = new Map([...importIdMap, ...checkOriginConflictsResult.importIdMap]);
@@ -145,6 +170,7 @@ export async function importSavedObjectsFromStream({
     namespace,
     dataSourceId,
     dataSourceTitle,
+    ...(workspaces ? { workspaces } : {}),
   };
   const createSavedObjectsResult = await createSavedObjects(createSavedObjectsParams);
   errorAccumulator = [...errorAccumulator, ...createSavedObjectsResult.errors];

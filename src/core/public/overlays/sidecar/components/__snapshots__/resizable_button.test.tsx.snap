@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`is rendered 1`] = `
+<button
+  className="sidecar-resizableButton resizableButton--horizontal"
+  data-test-subj="resizableButton"
+  onClick={[Function]}
+  onMouseDown={[Function]}
+  onTouchStart={[Function]}
+  type="button"
+/>
+`;
+
+exports[`it should be horizontal when docked mode is right 1`] = `
+<button
+  className="sidecar-resizableButton resizableButton--horizontal"
+  data-test-subj="resizableButton"
+  onClick={[Function]}
+  onMouseDown={[Function]}
+  onTouchStart={[Function]}
+  type="button"
+/>
+`;
+
+exports[`it should be vertical when docked mode is takeover 1`] = `
+<button
+  className="sidecar-resizableButton resizableButton--vertical"
+  data-test-subj="resizableButton"
+  onClick={[Function]}
+  onMouseDown={[Function]}
+  onTouchStart={[Function]}
+  type="button"
+/>
+`;
+
+exports[`it should emit onResize with min size when drag if new size is below the minimum 1`] = `
+<button
+  className="sidecar-resizableButton resizableButton--horizontal"
+  data-test-subj="resizableButton"
+  onClick={[Function]}
+  onMouseDown={[Function]}
+  onTouchStart={[Function]}
+  type="button"
+/>
+`;
+
+exports[`it should emit onResize with new flyout size when docked left and drag and horizontal 1`] = `
+<button
+  className="sidecar-resizableButton resizableButton--horizontal"
+  data-test-subj="resizableButton"
+  onClick={[Function]}
+  onMouseDown={[Function]}
+  onTouchStart={[Function]}
+  type="button"
+/>
+`;
+
+exports[`it should emit onResize with new flyout size when docked right and drag and horizontal 1`] = `
+<button
+  className="sidecar-resizableButton resizableButton--horizontal"
+  data-test-subj="resizableButton"
+  onClick={[Function]}
+  onMouseDown={[Function]}
+  onTouchStart={[Function]}
+  type="button"
+/>
+`;
+
+exports[`it should emit onResize with new flyout size when drag and vertical 1`] = `
+<button
+  className="sidecar-resizableButton resizableButton--vertical"
+  data-test-subj="resizableButton"
+  onClick={[Function]}
+  onMouseDown={[Function]}
+  onTouchStart={[Function]}
+  type="button"
+/>
+`;
