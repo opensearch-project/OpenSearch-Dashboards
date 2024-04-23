@@ -154,7 +154,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       );
     }
     if (this.state.showError) {
-      return <DataSourceErrorMenu />;
+      return <DataSourceErrorMenu application={this.props.application} />;
     }
     const label = this.state.selectedOption.length > 0 ? this.state.selectedOption[0].label : '';
     const options =
@@ -193,21 +193,9 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel>
-          <EuiPanel
-            className={'dataSourceViewOuiPanel'}
-            borderRadius="none"
-            color="transparent"
-            paddingSize="s"
-          >
-            {
-              <DataSourceDropDownHeader
-                totalDataSourceCount={1}
-                application={this.props.application}
-              />
-            }
-          </EuiPanel>
-          <EuiPanel color="subdued" paddingSize="xs" borderRadius="none">
+        <DataSourceDropDownHeader totalDataSourceCount={1} application={this.props.application} />
+        <EuiContextMenuPanel className={'dataSourceViewOuiPanel'}>
+          <EuiPanel color="subdued" paddingSize="none" borderRadius="none">
             <EuiSelectable
               options={options}
               singleSelection={true}

@@ -89,6 +89,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Add default icon in multi-selectable picker ([#6357](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6357))
 - [Multiple Datasource] Add empty state component for no connected data source ([#6499](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6499))
 - [Multiple Datasource] Add popover for empty state and redirect to data source management page([#6514](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6514))
+- [Multiple Datasource] Update empty state font size and footer button size to small ([6549](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6549))
 - [Workspace] Add APIs to support plugin state in request ([#6303](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6303))
 - [Workspace] Filter left nav menu items according to the current workspace ([#6234](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6234))
 - [Multiple Datasource] Add multi data source support to Timeline ([#6385](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6385))
@@ -134,6 +135,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Dynamic Configurations] Fix dynamic config API calls to pass correct input ([#6474](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6474))
 - [BUG][Multiple Datasource] Modify the button of selectable component to fix the title overflow issue ([#6465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6465))
 - [BUG][Multiple Datasource] Validation succeed as long as status code in response is 200 ([#6399](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6399))
+- [BUG][Multiple Datasource] Fix on data source selectable and readonly component are not consistent ([#6545]https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6545)
 - [BUG][Multiple Datasource] Add validation for title length to be no longer than 32 characters [#6452](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6452))
 
 ### 🚞 Infrastructure
@@ -142,6 +144,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Re-enable CI workflows for feature branches ([#2908](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2908))
 - [Tests] Add Github workflow for Test Orchestrator in FT Repo to run cypress tests within Dashboards repo ([#5725](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5725))
 - Upgrade yarn version to be compatible with @opensearch-project/opensearch ([#3443](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3443))
+- Update link-checker and clean up ignore-list ([#6425](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6425))
 
 ### 📝 Documentation
 

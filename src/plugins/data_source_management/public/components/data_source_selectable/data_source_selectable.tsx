@@ -11,8 +11,7 @@ import {
   EuiPanel,
   EuiButtonEmpty,
   EuiSelectable,
-  EuiSpacer,
-  EuiHorizontalRule,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import {
   ApplicationStart,
@@ -235,9 +234,11 @@ export class DataSourceSelectable extends React.Component<
         />
       );
     }
+
     if (this.state.showError) {
-      return <DataSourceErrorMenu />;
+      return <DataSourceErrorMenu application={this.props.application} />;
     }
+
     const button = (
       <>
         <EuiButtonEmpty
@@ -270,14 +271,16 @@ export class DataSourceSelectable extends React.Component<
         anchorPosition="downLeft"
         data-test-subj={'dataSourceSelectableContextMenuPopover'}
       >
+        <DataSourceDropDownHeader
+          totalDataSourceCount={this.state.dataSourceOptions.length}
+          application={this.props.application}
+        />
         <EuiContextMenuPanel>
-          <EuiPanel className={'dataSourceSelectableOuiPanel'} color="transparent" paddingSize="s">
-            <DataSourceDropDownHeader
-              totalDataSourceCount={this.state.dataSourceOptions.length}
-              application={this.props.application}
-            />
-            <EuiHorizontalRule margin="none" />
-            <EuiSpacer size="s" />
+          <EuiPanel
+            className={'dataSourceSelectableOuiPanel'}
+            color="transparent"
+            paddingSize="none"
+          >
             <EuiSelectable
               aria-label="Search"
               searchable
@@ -285,9 +288,12 @@ export class DataSourceSelectable extends React.Component<
                 placeholder: 'Search',
                 compressed: true,
               }}
+              listProps={{
+                onFocusBadge: false,
+              }}
               options={this.state.dataSourceOptions}
               onChange={(newOptions) => this.onChange(newOptions)}
-              singleSelection={true}
+              singleSelection={'always'}
               data-test-subj={'dataSourceSelectable'}
               renderOption={(option) => (
                 <DataSourceItem
@@ -299,7 +305,7 @@ export class DataSourceSelectable extends React.Component<
             >
               {(list, search) => (
                 <>
-                  {search}
+                  <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
                   {list}
                 </>
               )}
