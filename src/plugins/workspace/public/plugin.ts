@@ -153,7 +153,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           };
           breadCrumbs.splice(0, 0, homeCrumb, workspaceCrumb);
 
-          core.chrome.setBreadcrumbs(breadCrumbs);
+          Promise.resolve().then(() => core.chrome.setBreadcrumbs(breadCrumbs));
         }
       }
     });

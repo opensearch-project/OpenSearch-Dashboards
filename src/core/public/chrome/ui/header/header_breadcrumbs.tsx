@@ -30,7 +30,7 @@
 
 import { EuiHeaderBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { ChromeBreadcrumb } from '../../chrome_service';
@@ -42,18 +42,7 @@ interface Props {
 
 export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
-  // const breadcrumbs = useObservable(breadcrumbs$, []);
-  const [breadcrumbs, setBreadcrumbs] = useState<ChromeBreadcrumb[]>([]);
-
-  useEffect(() => {
-    const subscription = breadcrumbs$.subscribe((newBreadcrumbs: ChromeBreadcrumb[]) => {
-      setBreadcrumbs(newBreadcrumbs);
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  });
-
+  const breadcrumbs = useObservable(breadcrumbs$, []);
   let crumbs = breadcrumbs;
 
   if (breadcrumbs.length === 0 && appTitle) {
