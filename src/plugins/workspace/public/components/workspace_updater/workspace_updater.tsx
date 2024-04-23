@@ -6,8 +6,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
@@ -20,6 +21,10 @@ import {
   convertPermissionsToPermissionSettings,
   convertPermissionSettingsToPermissions,
 } from '../workspace_form';
+
+export interface WorkspaceUpdaterProps {
+  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+}
 
 function getFormDataFromWorkspace(
   currentWorkspace: WorkspaceAttributeWithPermission | null | undefined
@@ -35,13 +40,16 @@ function getFormDataFromWorkspace(
   };
 }
 
-export const WorkspaceUpdater = () => {
+export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   const {
     services: { application, workspaces, notifications, http, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
+  const workspaceConfigurableApps = useObservable(
+    props.workspaceConfigurableApps$ ?? of(undefined)
+  );
   const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState(
     getFormDataFromWorkspace(currentWorkspace)
   );
@@ -126,6 +134,7 @@ export const WorkspaceUpdater = () => {
               defaultValues={currentWorkspaceFormData}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Update}
+              workspaceConfigurableApps={workspaceConfigurableApps}
               permissionEnabled={isPermissionEnabled}
               permissionLastAdminItemDeletable={false}
             />
