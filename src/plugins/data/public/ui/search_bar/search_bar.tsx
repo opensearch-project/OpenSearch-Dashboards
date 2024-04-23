@@ -47,6 +47,7 @@ import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
+import { QueryEnhancement, Settings } from '../types';
 
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
@@ -78,6 +79,8 @@ export interface SearchBarOwnProps {
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
+  queryEnhancements: Map<string, QueryEnhancement>;
+  settings: Settings;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
@@ -96,6 +99,7 @@ export interface SearchBarOwnProps {
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
 
+// TODO: SQL: include query enhancement in state in case make adding data sources at runtime?
 interface State {
   isFiltersVisible: boolean;
   showSaveQueryModal: boolean;
@@ -202,6 +206,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   private shouldRenderQueryBar() {
+    // TODO: SQL handle no index patterns?
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
     const showQueryInput =
       this.props.showQueryInput && this.props.indexPatterns && this.state.query;
@@ -209,11 +214,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   private shouldRenderFilterBar() {
+    // TODO: SQL handle no index patterns?
     return (
       this.props.showFilterBar &&
       this.props.filters &&
       this.props.indexPatterns &&
-      compact(this.props.indexPatterns).length > 0
+      compact(this.props.indexPatterns).length > 0 &&
+      (this.props.queryEnhancements.get(this.state.query?.language!)?.searchBar?.showFilterBar ??
+        true)
     );
   }
 
@@ -393,9 +401,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
     let queryBar;
     if (this.shouldRenderQueryBar()) {
+      // TODO: SQL make this default query bar top row but this.props.queryEnhancements.get(language) can pass a component
       queryBar = (
         <QueryBarTopRow
           timeHistory={this.props.timeHistory}
+          queryEnhancements={this.props.queryEnhancements}
+          settings={this.props.settings}
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}

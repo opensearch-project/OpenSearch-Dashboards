@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import React from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { ExpressionsSetup } from 'src/plugins/expressions/public';
@@ -39,12 +38,14 @@ import { createFiltersFromRangeSelectAction, createFiltersFromValueClickAction }
 import { ISearchSetup, ISearchStart, SearchEnhancements } from './search';
 import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
-import { IndexPatternSelectProps, StatefulSearchBarProps } from './ui';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataSourceStart } from './data_sources/datasource_services/types';
+import { UiEnhancements } from './ui';
+import { DataPublicPluginStartUi } from './ui/types';
 
 export interface DataPublicPluginEnhancements {
-  search: SearchEnhancements;
+  search?: SearchEnhancements;
+  ui?: UiEnhancements;
 }
 
 export interface DataSetupDependencies {
@@ -69,14 +70,6 @@ export interface DataPublicPluginSetup {
    * @internal
    */
   __enhance: (enhancements: DataPublicPluginEnhancements) => void;
-}
-
-/**
- * Data plugin prewired UI components
- */
-export interface DataPublicPluginStartUi {
-  IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
-  SearchBar: React.ComponentType<StatefulSearchBarProps>;
 }
 
 /**

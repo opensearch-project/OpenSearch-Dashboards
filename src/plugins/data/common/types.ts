@@ -28,9 +28,12 @@
  * under the License.
  */
 
+import { IDataFrame } from './data_frames';
+
 export * from './query/types';
 export * from './osd_field_types/types';
 export * from './index_patterns/types';
+export * from './data_frames/types';
 
 /**
  * If a service is being shared on both the client and the server, and
@@ -43,3 +46,5 @@ export * from './index_patterns/types';
  * not possible.
  */
 export type GetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
+export type GetDataFrameFn = () => IDataFrame | undefined;
+export type DestroyDataFrameFn = () => void;

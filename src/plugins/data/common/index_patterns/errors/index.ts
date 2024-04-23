@@ -29,3 +29,4 @@
  */
 
 export * from './duplicate_index_pattern';
+export * from './missing_index_pattern';
