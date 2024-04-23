@@ -11,7 +11,7 @@ import { CoreStart, AppMountParameters } from '../../../src/core/public';
 import { Home } from './components/home';
 
 export const renderApp = (
-  { notifications, http, savedObjects, application }: CoreStart,
+  { notifications, http, savedObjects, application, uiSettings }: CoreStart,
   dataSource: DataSourcePluginSetup,
   dataSourceManagement: DataSourceManagementPluginSetup,
   { appBasePath, element, setHeaderActionMenu }: AppMountParameters,
@@ -28,6 +28,7 @@ export const renderApp = (
       dataSourceManagement={dataSourceManagement}
       navigateToApp={application.navigateToApp}
       navigation={navigation}
+      uiSettings={uiSettings}
     />,
     element
   );

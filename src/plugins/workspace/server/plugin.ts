@@ -20,6 +20,8 @@ import {
   PRIORITY_FOR_WORKSPACE_CONFLICT_CONTROL_WRAPPER,
   PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
   PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
+  WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID,
+  PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER,
 } from '../common/constants';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -36,6 +38,7 @@ import {
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
+import { WorkspaceUiSettingsClientWrapper } from './saved_objects/workspace_ui_settings_client_wrapper';
 
 export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
   private readonly logger: Logger;
@@ -44,6 +47,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   private permissionControl?: SavedObjectsPermissionControlContract;
   private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private workspaceSavedObjectsClientWrapper?: WorkspaceSavedObjectsClientWrapper;
+  private workspaceUiSettingsClientWrapper?: WorkspaceUiSettingsClientWrapper;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -68,7 +72,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   }
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.logger = initializerContext.logger.get('plugins', 'workspace');
+    this.logger = initializerContext.logger.get();
     this.globalConfig$ = initializerContext.config.legacy.globalConfig$;
   }
 
@@ -90,10 +94,18 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     );
     this.proxyWorkspaceTrafficToRealHandler(core);
 
+    const workspaceUiSettingsClientWrapper = new WorkspaceUiSettingsClientWrapper();
+    this.workspaceUiSettingsClientWrapper = workspaceUiSettingsClientWrapper;
+    core.savedObjects.addClientWrapper(
+      PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER,
+      WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID,
+      workspaceUiSettingsClientWrapper.wrapperFactory
+    );
+
     core.savedObjects.addClientWrapper(
       PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
       WORKSPACE_ID_CONSUMER_WRAPPER_ID,
-      new WorkspaceIdConsumerWrapper().wrapperFactory
+      new WorkspaceIdConsumerWrapper(isPermissionControlEnabled).wrapperFactory
     );
 
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
@@ -139,6 +151,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     this.client?.setSavedObjects(core.savedObjects);
     this.workspaceConflictControl?.setSerializer(core.savedObjects.createSerializer());
     this.workspaceSavedObjectsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
+    this.workspaceUiSettingsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
 
     return {
       client: this.client as IWorkspaceClientImpl,

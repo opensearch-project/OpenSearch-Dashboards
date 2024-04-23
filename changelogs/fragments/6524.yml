@@ -1,0 +1,2 @@
+feat:
+- [Workspace] Handle data sources and advanced settings as global object. ([#6524](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6524))

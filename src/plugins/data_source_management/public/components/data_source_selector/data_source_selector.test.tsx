@@ -14,7 +14,6 @@ import {
   mockResponseForSavedObjectsCalls,
 } from '../../mocks';
 import { AuthType } from 'src/plugins/data_source/common/data_sources';
-import * as utils from '../utils';
 import { EuiComboBox } from '@elastic/eui';
 
 describe('DataSourceSelector', () => {

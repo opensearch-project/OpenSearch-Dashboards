@@ -5,17 +5,27 @@
 
 import { createDataSourceMenu } from './create_data_source_menu';
 import { MountPoint, SavedObjectsClientContract } from '../../../../../core/public';
-import { coreMock, notificationServiceMock } from '../../../../../core/public/mocks';
+import {
+  applicationServiceMock,
+  coreMock,
+  notificationServiceMock,
+} from '../../../../../core/public/mocks';
 import React from 'react';
-import { act, getByText, render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { DataSourceComponentType, DataSourceSelectableConfig } from './types';
 import { ReactWrapper } from 'enzyme';
-import { mockDataSourcePluginSetupWithShowLocalCluster } from '../../mocks';
+import * as utils from '../utils';
 
 describe('create data source menu', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const { uiSettings } = coreMock.createSetup();
+
+  beforeAll(() => {
+    jest
+      .spyOn(utils, 'getApplication')
+      .mockImplementation(() => applicationServiceMock.createStartContract());
+  });
 
   beforeEach(() => {
     client = {
@@ -33,10 +43,11 @@ describe('create data source menu', () => {
         notifications,
       },
     };
-    const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>(
-      uiSettings,
-      mockDataSourcePluginSetupWithShowLocalCluster
-    );
+
+    spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
+    spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
+    spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
+    const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
 
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
@@ -60,10 +71,10 @@ describe('create data source menu', () => {
         notifications,
       },
     };
-    const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>(
-      uiSettings,
-      mockDataSourcePluginSetupWithShowLocalCluster
-    );
+    spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
+    spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
+    spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
+    const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
     await act(async () => {
       component = render(<TestComponent {...props} />);
     });
@@ -74,7 +85,7 @@ describe('create data source menu', () => {
       perPage: 10000,
       type: 'data-source',
     });
-    expect(notifications.toasts.addWarning).toBeCalledTimes(2);
+    expect(notifications.toasts.add).toBeCalledTimes(2);
   });
 });
 
@@ -126,10 +137,12 @@ describe('when setMenuMountPoint is provided', () => {
         notifications,
       },
     };
-    const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>(
-      uiSettings,
-      mockDataSourcePluginSetupWithShowLocalCluster
-    );
+
+    spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
+    spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
+    spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
+
+    const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
     const component = render(<TestComponent {...props} />);
     act(() => {
       mountPoint(portalTarget);

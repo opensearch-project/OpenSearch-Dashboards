@@ -122,8 +122,9 @@ jobs:
 
       - name: Upload Code Coverage
         id: upload-code-coverage
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./target/opensearch-dashboards-coverage
           flags: ${{ matrix.name }}_${{ matrix.group }}
 

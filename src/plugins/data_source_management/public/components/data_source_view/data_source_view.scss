@@ -1,0 +1,13 @@
+.dataSourceViewOuiPanel {
+  width: 300px;
+}
+
+.dataSourceViewOuiFlexGroup {
+  .dataSourceViewOuiFlexItem {
+    color: grey;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+  }
+}

@@ -70,7 +70,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Returns instance of Actions API based on driver w3c flag
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#actions
+     * https://www.selenium.dev/documentation/webdriver/actions_api/
      */
     public getActions() {
       return driver.actions();
@@ -89,8 +89,8 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     }
 
     /**
-     * Retrieves the a rect describing the current top-level window's size and position.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Window.html
+     * Retrieves the rect describing the current top-level window's size and position.
+     * https://www.selenium.dev/documentation/webdriver/interactions/windows/#get-window-size
      *
      * @return {Promise<{height: number, width: number, x: number, y: number}>}
      */
@@ -100,7 +100,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Sets the dimensions of a window.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Window.html
+     * https://www.selenium.dev/documentation/webdriver/interactions/windows/#set-window-size
      *
      * @param {number} width
      * @param {number} height
@@ -166,7 +166,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Gets the URL that is loaded in the focused window/frame.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#getCurrentUrl
+     * https://www.selenium.dev/documentation/webdriver/interactions/#get-current-url
      *
      * @return {Promise<string>}
      */
@@ -182,7 +182,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Gets the page/document title of the focused window/frame.
-     * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#getTitle
+     * https://www.selenium.dev/documentation/webdriver/interactions/#get-title
      */
     public async getTitle() {
       return await driver.getTitle();
@@ -190,7 +190,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Navigates the focused window/frame to a new URL.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#get
+     * https://www.selenium.dev/documentation/webdriver/interactions/navigation/#navigate-to
      *
      * @param {string} url
      * @param {boolean} insertTimestamp Optional
@@ -211,7 +211,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Moves the remote environment’s mouse cursor to the specified point {x, y} which is
      * offset to browser page top left corner.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
+     * https://www.selenium.dev/documentation/webdriver/actions_api/mouse/#offset-from-viewport
      *
      * @param {x: number, y: number} point on browser page
      * @return {Promise<void>}
@@ -223,7 +223,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Does a drag-and-drop action from one point to another
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#dragAndDrop
+     * https://www.selenium.dev/documentation/webdriver/actions_api/mouse/#drag-and-drop-by-offset
      *
      * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} from
      * @param {{element: WebElementWrapper | {x: number, y: number}, offset: {x: number, y: number}}} to
@@ -251,7 +251,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Reloads the current browser window/frame.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#refresh
+     * https://www.selenium.dev/documentation/webdriver/interactions/navigation/#refresh
      *
      * @return {Promise<void>}
      */
@@ -261,7 +261,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Navigates the focused window/frame back one page using the browser’s navigation history.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#back
+     * https://www.selenium.dev/documentation/webdriver/interactions/navigation/#back
      *
      * @return {Promise<void>}
      */
@@ -271,7 +271,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Moves forwards in the browser history.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#forward
+     * https://www.selenium.dev/documentation/webdriver/interactions/navigation/#forward
      *
      * @return {Promise<void>}
      */
@@ -281,7 +281,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Navigates to a URL via the browser history.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_Navigation.html#to
+     * https://www.selenium.dev/documentation/webdriver/interactions/navigation/#navigate-to
      *
      * @return {Promise<void>}
      */
@@ -291,7 +291,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Sends a sequance of keyboard keys. For each key, this will record a pair of keyDown and keyUp actions
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#sendKeys
+     * https://www.selenium.dev/documentation/webdriver/actions_api/keyboard/#send-keys
      *
      * @param  {string|string[]} keys
      * @return {Promise<void>}
@@ -307,7 +307,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
      * Moves the remote environment’s mouse cursor to the specified point {x, y} which is
      * offset to browser page top left corner.
      * Then adds an action for left-click (down/up) with the mouse.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#click
+     * https://www.selenium.dev/documentation/webdriver/actions_api/mouse/#click-and-release
      *
      * @param {x: number, y: number} point on browser page
      * @return {Promise<void>}
@@ -323,7 +323,6 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Gets the HTML loaded in the focused window/frame. This markup is serialised by the remote
      * environment so may not exactly match the HTML provided by the Web server.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#getPageSource
      *
      * @return {Promise<string>}
      */
@@ -333,7 +332,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Gets a screenshot of the focused window and returns it as a base-64 encoded PNG
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#takeScreenshot
+     * https://www.selenium.dev/documentation/webdriver/interactions/windows/#takescreenshot
      *
      * @return {Promise<Buffer>}
      */
@@ -343,7 +342,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Inserts action for performing a double left-click with the mouse.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#doubleClick
+     * https://www.selenium.dev/documentation/webdriver/actions_api/mouse/#double-click
      * @param {WebElementWrapper} element
      * @return {Promise<void>}
      */
@@ -354,7 +353,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Changes the focus of all future commands to another window. Windows may be specified
      * by their window.name attributeor by its handle (as returned by WebDriver#getWindowHandles).
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_TargetLocator.html
+     * https://www.selenium.dev/documentation/webdriver/interactions/windows/#switching-windows-or-tabs
      *
      * @param {string} handle
      * @return {Promise<void>}
@@ -365,7 +364,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Gets a list of identifiers for all currently open windows.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#getAllWindowHandles
+     * https://www.selenium.dev/documentation/webdriver/interactions/windows/#switching-windows-or-tabs
      *
      * @return {Promise<string[]>}
      */
@@ -414,7 +413,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
     /**
      * Closes the currently focused window. In most environments, after the window has been
      * closed, it is necessary to explicitly switch to whatever window is now focused.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#close
+     * https://www.selenium.dev/documentation/webdriver/interactions/windows/#closing-a-window-or-tab
      *
      * @return {Promise<void>}
      */
@@ -424,7 +423,7 @@ export async function BrowserProvider({ getService }: FtrProviderContext) {
 
     /**
      * Executes JavaScript code within the focused window/frame. The code should return a value synchronously.
-     * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#executeScript
+     * https://www.selenium.dev/documentation/webdriver/interactions/windows/#execute-script
      *
      * @param  {string|function} fn
      * @param  {...any[]} args

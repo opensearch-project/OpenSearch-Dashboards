@@ -26,7 +26,7 @@ describe('Workspace server plugin', () => {
         },
       }
     `);
-    expect(setupMock.savedObjects.addClientWrapper).toBeCalledTimes(3);
+    expect(setupMock.savedObjects.addClientWrapper).toBeCalledTimes(4);
   });
 
   it('#proxyWorkspaceTrafficToRealHandler', async () => {

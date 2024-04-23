@@ -5,13 +5,12 @@
 
 import { useCallback, useState, FormEventHandler, useRef, useMemo, useEffect } from 'react';
 import { htmlIdGenerator, EuiFieldTextProps, EuiColorPickerProps } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
 import { useApplications } from '../../hooks';
 import { featureMatchesConfig } from '../../utils';
 
 import { WorkspaceFormTabs } from './constants';
-import { WorkspaceFormProps, WorkspaceFormErrors } from './types';
-import { appendDefaultFeatureIds, getNumberOfErrors, isValidFormTextInput } from './utils';
+import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
+import { appendDefaultFeatureIds, getNumberOfErrors, validateWorkspaceForm } from './utils';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
@@ -36,6 +35,13 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   const [selectedFeatureIds, setSelectedFeatureIds] = useState(
     appendDefaultFeatureIds(defaultFeatures)
   );
+  const [permissionSettings, setPermissionSettings] = useState<
+    Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
+  >(
+    defaultValues?.permissionSettings && defaultValues.permissionSettings.length > 0
+      ? defaultValues.permissionSettings
+      : []
+  );
 
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
   const numberOfErrors = useMemo(() => getNumberOfErrors(formErrors), [formErrors]);
@@ -45,6 +51,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     description,
     features: selectedFeatureIds,
     color,
+    permissionSettings,
   });
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
@@ -56,32 +63,8 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   const handleFormSubmit = useCallback<FormEventHandler>(
     (e) => {
       e.preventDefault();
-      let currentFormErrors: WorkspaceFormErrors = {};
       const formData = getFormDataRef.current();
-      if (!formData.name) {
-        currentFormErrors = {
-          ...currentFormErrors,
-          name: i18n.translate('workspace.form.detail.name.empty', {
-            defaultMessage: "Name can't be empty.",
-          }),
-        };
-      }
-      if (formData.name && !isValidFormTextInput(formData.name)) {
-        currentFormErrors = {
-          ...currentFormErrors,
-          name: i18n.translate('workspace.form.detail.name.invalid', {
-            defaultMessage: 'Invalid workspace name',
-          }),
-        };
-      }
-      if (formData.description && !isValidFormTextInput(formData.description)) {
-        currentFormErrors = {
-          ...currentFormErrors,
-          description: i18n.translate('workspace.form.detail.description.invalid', {
-            defaultMessage: 'Invalid workspace description',
-          }),
-        };
-      }
+      const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(formData);
       setFormErrors(currentFormErrors);
       if (getNumberOfErrors(currentFormErrors) > 0) {
         return;
@@ -101,7 +84,11 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
         formData.features = defaultValues?.features ?? [];
       }
 
-      onSubmit?.({ ...formData, name: formData.name! });
+      onSubmit?.({
+        ...formData,
+        name: formData.name!,
+        permissionSettings: formData.permissionSettings as WorkspacePermissionSetting[],
+      });
     },
     [defaultFeatures, onSubmit, defaultValues?.features]
   );
@@ -120,6 +107,10 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
 
   const handleTabFeatureClick = useCallback(() => {
     setSelectedTab(WorkspaceFormTabs.FeatureVisibility);
+  }, []);
+
+  const handleTabPermissionClick = useCallback(() => {
+    setSelectedTab(WorkspaceFormTabs.UsersAndPermissions);
   }, []);
 
   const handleFeaturesChange = useCallback((featureIds: string[]) => {
@@ -143,6 +134,8 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     handleFeaturesChange,
     handleNameInputChange,
     handleTabFeatureClick,
+    setPermissionSettings,
+    handleTabPermissionClick,
     handleDescriptionInputChange,
   };
 };

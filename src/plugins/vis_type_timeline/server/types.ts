@@ -29,3 +29,18 @@
  */
 
 export { TimelineFunctionInterface, TimelineFunctionConfig } from './lib/classes/timeline_function';
+
+export interface OpenSearchFunctionConfig {
+  q: string | null;
+  metric: string | null;
+  split: string | null;
+  index: string | null;
+  timefield: string | null;
+  kibana: boolean | null;
+  opensearchDashboards: boolean | null;
+  /**
+   * @deprecated This property should not be set in the Timeline expression. Users should use the interval picker React component instead
+   */
+  interval: string | null;
+  data_source_name?: string | null;
+}

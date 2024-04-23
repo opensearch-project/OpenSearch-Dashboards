@@ -55,6 +55,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 
 function newAnnotation() {
   return {
@@ -131,9 +132,13 @@ export class AnnotationsEditor extends Component {
                   label={
                     <FormattedMessage
                       id="visTypeTimeseries.annotationsEditor.indexPatternLabel"
-                      defaultMessage="Index pattern (required)"
+                      defaultMessage="Index name (required)"
                     />
                   }
+                  helpText={i18n.translate('visTypeTimeseries.indexPattern.searchByIndex', {
+                    defaultMessage:
+                      'Use an asterisk (*) to match multiple indices. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
+                  })}
                   fullWidth
                 >
                   <EuiFieldText

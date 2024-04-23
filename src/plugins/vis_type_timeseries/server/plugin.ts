@@ -40,6 +40,7 @@ import {
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 import { VisTypeTimeseriesConfig } from './config';
 import { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';
 import { ValidationTelemetryService } from './validation_telemetry';
@@ -57,6 +58,7 @@ export interface LegacySetup {
 
 interface VisTypeTimeseriesPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 interface VisTypeTimeseriesPluginStartDependencies {

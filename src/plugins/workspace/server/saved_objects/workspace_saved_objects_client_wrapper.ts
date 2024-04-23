@@ -466,7 +466,7 @@ export class WorkspaceSavedObjectsClientWrapper {
           })
         ).saved_objects.map((item) => item.id);
 
-        if (options.workspaces) {
+        if (options.workspaces && options.workspaces.length > 0) {
           const permittedWorkspaces = options.workspaces.filter((item) =>
             permittedWorkspaceIds.includes(item)
           );

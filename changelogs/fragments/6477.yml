@@ -1,0 +1,2 @@
+refactor:
+- Refactor dev tool to use dataSourceManagement.ui API to get DataSourceSelector ([#6477](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6477))

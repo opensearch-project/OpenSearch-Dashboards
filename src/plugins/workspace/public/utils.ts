@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { App, AppCategory, AppNavLinkStatus, WorkspaceObject } from '../../../core/public';
+import {
+  App,
+  AppCategory,
+  AppNavLinkStatus,
+  DEFAULT_APP_CATEGORIES,
+  PublicAppInfo,
+  WorkspaceObject,
+} from '../../../core/public';
+import { DEFAULT_SELECTED_FEATURES_IDS } from '../common/constants';
 
 /**
  * Checks if a given feature matches the provided feature configuration.
@@ -99,3 +107,21 @@ export function isAppAccessibleInWorkspace(app: App, workspace: WorkspaceObject)
   }
   return false;
 }
+
+// Get all apps that should be displayed in workspace when create/update a workspace.
+export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) => {
+  const visibleApplications = applications.filter(({ navLinkStatus, chromeless, category, id }) => {
+    const filterCondition =
+      navLinkStatus !== AppNavLinkStatus.hidden &&
+      !chromeless &&
+      !DEFAULT_SELECTED_FEATURES_IDS.includes(id);
+    // If the category is management, only retain Dashboards Management which contains saved objets and index patterns.
+    // Saved objets can show all saved objects in the current workspace and index patterns is at workspace level.
+    if (category?.id === DEFAULT_APP_CATEGORIES.management.id) {
+      return filterCondition && id === 'management';
+    }
+    return filterCondition;
+  });
+
+  return visibleApplications;
+};

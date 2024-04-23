@@ -129,10 +129,12 @@ export function getTimelineRequestHandler({
       });
     } catch (e) {
       if (e && e.body) {
+        const errorTitle =
+          e.body.attributes && e.body.attributes.title ? ` (${e.body.attributes.title})` : '';
         const err = new Error(
           `${i18n.translate('timeline.requestHandlerErrorTitle', {
             defaultMessage: 'Timeline request error',
-          })}: ${e.body.title} ${e.body.message}`
+          })}${errorTitle}: ${e.body.message}`
         );
         err.stack = e.stack;
         throw err;

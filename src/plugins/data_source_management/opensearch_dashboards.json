@@ -5,6 +5,6 @@
   "ui": true,
   "requiredPlugins": ["management", "dataSource", "indexPatternManagement"],
   "optionalPlugins": [],
-  "requiredBundles": ["opensearchDashboardsReact", "dataSource"],
+  "requiredBundles": ["opensearchDashboardsReact", "dataSource", "opensearchDashboardsUtils"],
   "extraPublicDirs": ["public/components/utils"]
 }

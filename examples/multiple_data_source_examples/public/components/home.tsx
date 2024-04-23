@@ -22,6 +22,7 @@ export interface HomeProps {
   notifications: CoreStart['notifications'];
   http: CoreStart['http'];
   savedObjects: CoreStart['savedObjects'];
+  uiSettings: CoreStart['uiSettings'];
   dataSourceEnabled: boolean;
   dataSourceManagement: DataSourceManagementPluginSetup;
   navigateToApp: CoreStart['application']['navigateToApp'];
@@ -65,6 +66,7 @@ export const Home = ({
   basename,
   notifications,
   savedObjects,
+  uiSettings,
   dataSourceEnabled,
   setActionMenu,
   dataSourceManagement,
@@ -133,6 +135,7 @@ export const Home = ({
           dataSourceEnabled={dataSourceEnabled}
           setActionMenu={setActionMenu}
           dataSourceManagement={dataSourceManagement}
+          uiSettings={uiSettings}
         />
       ),
     },
@@ -146,6 +149,7 @@ export const Home = ({
           dataSourceEnabled={dataSourceEnabled}
           setActionMenu={setActionMenu}
           dataSourceManagement={dataSourceManagement}
+          uiSettings={uiSettings}
         />
       ),
     },

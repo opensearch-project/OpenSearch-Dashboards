@@ -16,6 +16,7 @@ export const DEFAULT_SELECTED_FEATURES_IDS = [WORKSPACE_UPDATE_APP_ID, WORKSPACE
 export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
 export const WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID =
   'workspace_conflict_control';
+export const WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID = 'workspace_ui_settings';
 
 export enum WorkspacePermissionMode {
   Read = 'read',
@@ -28,10 +29,11 @@ export const WORKSPACE_ID_CONSUMER_WRAPPER_ID = 'workspace_id_consumer';
 
 /**
  * The priority for these wrappers matters:
- * 1. WORKSPACE_ID_CONSUMER should be placed before the other two wrappers(smaller than the other two wrappers) as it cost little
- *    and will append the essential workspaces field into the options, which will be honored by permission control wrapper and conflict wrapper.
+ * 1. WORKSPACE_ID_CONSUMER wrapper should be the first wrapper to execute, as it will add the `workspaces` field
+ * to `options` based on the request, which will be honored by permission control wrapper and conflict wrapper.
  * 2. The order of permission wrapper and conflict wrapper does not matter as no dependency between these two wrappers.
  */
-export const PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER = -2;
-export const PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER = 0;
+export const PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER = -3;
+export const PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER = -2;
 export const PRIORITY_FOR_WORKSPACE_CONFLICT_CONTROL_WRAPPER = -1;
+export const PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER = 0;

@@ -34,7 +34,7 @@ import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
 import { UI_SETTINGS } from '../../../../../data/server';
 
-export default function buildRequest(config, tlConfig, scriptedFields, timeout) {
+export default function buildRequest(config, tlConfig, scriptedFields, timeout, dataSourceId) {
   const bool = { must: [] };
 
   const timeFilter = {
@@ -105,6 +105,7 @@ export default function buildRequest(config, tlConfig, scriptedFields, timeout) 
   }
 
   return {
+    ...(!!dataSourceId && { dataSourceId }),
     params: request,
   };
 }

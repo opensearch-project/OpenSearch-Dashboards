@@ -65,7 +65,7 @@ describe('AbstractSearchStrategy', () => {
     });
   });
 
-  test('should return response', async () => {
+  test('should return response for local cluster queries', async () => {
     const searches = [{ body: 'body', index: 'index' }];
     const searchFn = jest.fn().mockReturnValue(Promise.resolve({}));
 
@@ -96,6 +96,52 @@ describe('AbstractSearchStrategy', () => {
     expect(searchFn).toHaveBeenCalledWith(
       {},
       {
+        params: {
+          body: 'body',
+          index: 'index',
+        },
+        indexType: undefined,
+      },
+      {
+        strategy: 'opensearch',
+      }
+    );
+  });
+
+  test('should return response for datasource query', async () => {
+    const searches = [{ body: 'body', index: 'index' }];
+    const searchFn = jest.fn().mockReturnValue(Promise.resolve({}));
+
+    const responses = await abstractSearchStrategy.search(
+      {
+        requestContext: {},
+        framework: {
+          core: {
+            getStartServices: jest.fn().mockReturnValue(
+              Promise.resolve([
+                {},
+                {
+                  data: {
+                    search: {
+                      search: searchFn,
+                    },
+                  },
+                },
+              ])
+            ),
+          },
+        },
+      },
+      searches,
+      {},
+      'some-data-source-id'
+    );
+
+    expect(responses).toEqual([{}]);
+    expect(searchFn).toHaveBeenCalledWith(
+      {},
+      {
+        dataSourceId: 'some-data-source-id',
         params: {
           body: 'body',
           index: 'index',

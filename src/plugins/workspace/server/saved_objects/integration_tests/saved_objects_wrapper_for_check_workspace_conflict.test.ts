@@ -5,10 +5,26 @@
 
 import { SavedObject } from 'src/core/types';
 import { isEqual } from 'lodash';
+import packageInfo from '../../../../../../package.json';
 import * as osdTestServer from '../../../../../core/test_helpers/osd_server';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../data_source/common';
 
 const dashboard: Omit<SavedObject, 'id'> = {
   type: 'dashboard',
+  attributes: {},
+  references: [],
+};
+
+const dataSource: Omit<SavedObject, 'id'> = {
+  type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+  attributes: {
+    title: 'test data source',
+  },
+  references: [],
+};
+
+const advancedSettings: Omit<SavedObject, 'id'> = {
+  type: 'config',
   attributes: {},
   references: [],
 };
@@ -32,6 +48,9 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
         osd: {
+          data_source: {
+            enabled: true,
+          },
           workspace: {
             enabled: true,
           },
@@ -145,6 +164,40 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
       });
     });
 
+    it('create disallowed types within workspace', async () => {
+      const createDataSourceResult = await osdTestServer.request
+        .post(root, `/api/saved_objects/${dataSource.type}`)
+        .send({
+          attributes: dataSource.attributes,
+          workspaces: [createdFooWorkspace.id],
+        })
+        .expect(400);
+
+      expect(createDataSourceResult.body).toMatchInlineSnapshot(`
+        Object {
+          "error": "Bad Request",
+          "message": "Unsupported type in workspace: 'data-source' is not allowed to be created in workspace.",
+          "statusCode": 400,
+        }
+      `);
+
+      const createConfigResult = await osdTestServer.request
+        .post(root, `/api/saved_objects/config`)
+        .send({
+          attributes: advancedSettings.attributes,
+          workspaces: [createdFooWorkspace.id],
+        })
+        .expect(400);
+
+      expect(createConfigResult.body).toMatchInlineSnapshot(`
+        Object {
+          "error": "Bad Request",
+          "message": "Unsupported type in workspace: 'config' is not allowed to be created in workspace.",
+          "statusCode": 400,
+        }
+      `);
+    });
+
     it('bulk create', async () => {
       await clearFooAndBar();
       const createResultFoo = await osdTestServer.request
@@ -252,6 +305,80 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
           })
         )
       );
+    });
+
+    it('bulk create with disallowed types in workspace', async () => {
+      await clearFooAndBar();
+
+      // import advanced settings and data sources should throw error
+      const createResultFoo = await osdTestServer.request
+        .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...dataSource,
+            id: 'foo',
+          },
+          {
+            ...advancedSettings,
+            id: packageInfo.version,
+          },
+        ])
+        .expect(200);
+      expect(createResultFoo.body.saved_objects[0].error).toEqual(
+        expect.objectContaining({
+          message:
+            "Unsupported type in workspace: 'data-source' is not allowed to be imported in workspace.",
+          statusCode: 400,
+        })
+      );
+      expect(createResultFoo.body.saved_objects[1].error).toEqual(
+        expect.objectContaining({
+          message:
+            "Unsupported type in workspace: 'config' is not allowed to be imported in workspace.",
+          statusCode: 400,
+        })
+      );
+
+      // Data source should not be created
+      await osdTestServer.request
+        .get(
+          root,
+          `/w/${createdFooWorkspace.id}/api/saved_objects/${DATA_SOURCE_SAVED_OBJECT_TYPE}/foo`
+        )
+        .expect(404);
+
+      // Advanced settings should not be created within workspace
+      const findAdvancedSettings = await osdTestServer.request
+        .get(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_find?type=config`)
+        .expect(200);
+      expect(findAdvancedSettings.body.total).toEqual(0);
+    });
+
+    it('bulk create with disallowed types out of workspace', async () => {
+      await clearFooAndBar();
+
+      // import advanced settings and data sources should throw error
+      const createResultFoo = await osdTestServer.request
+        .post(root, `/api/saved_objects/_bulk_create`)
+        .send([
+          {
+            ...advancedSettings,
+            id: packageInfo.version,
+          },
+        ])
+        .expect(200);
+      expect(createResultFoo.body).toEqual({
+        saved_objects: [
+          expect.objectContaining({
+            type: advancedSettings.type,
+          }),
+        ],
+      });
+
+      const findAdvancedSettings = await osdTestServer.request
+        .get(root, `/api/saved_objects/_find?type=${advancedSettings.type}`)
+        .expect(200);
+      expect(findAdvancedSettings.body.total).toEqual(1);
     });
 
     it('checkConflicts when importing ndjson', async () => {

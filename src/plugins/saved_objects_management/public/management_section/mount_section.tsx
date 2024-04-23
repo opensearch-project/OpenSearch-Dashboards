@@ -35,6 +35,7 @@ import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
@@ -45,7 +46,7 @@ interface MountParams {
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   mountParams: ManagementAppMountParams;
   dataSourceEnabled: boolean;
-  hideLocalCluster: boolean;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 let allowedObjectTypes: string[] | undefined;
@@ -61,7 +62,7 @@ export const mountManagementSection = async ({
   mountParams,
   serviceRegistry,
   dataSourceEnabled,
-  hideLocalCluster,
+  dataSourceManagement,
 }: MountParams) => {
   const [coreStart, { data, uiActions }, pluginStart] = await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
@@ -113,7 +114,7 @@ export const mountManagementSection = async ({
                   allowedTypes={allowedObjectTypes}
                   setBreadcrumbs={setBreadcrumbs}
                   dataSourceEnabled={dataSourceEnabled}
-                  hideLocalCluster={hideLocalCluster}
+                  dataSourceManagement={dataSourceManagement}
                 />
               </Suspense>
             </RedirectToHomeIfUnauthorized>

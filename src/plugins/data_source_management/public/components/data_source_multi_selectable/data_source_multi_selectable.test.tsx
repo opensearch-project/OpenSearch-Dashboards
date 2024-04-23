@@ -90,7 +90,7 @@ describe('DataSourceMultiSelectable', () => {
       />
     );
     await nextTick();
-    expect(toasts.addWarning).toBeCalledTimes(1);
+    expect(toasts.add).toBeCalledTimes(1);
   });
 
   it('should callback when onChange happens', async () => {

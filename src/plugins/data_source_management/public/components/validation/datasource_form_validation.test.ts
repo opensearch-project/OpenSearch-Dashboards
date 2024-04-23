@@ -40,6 +40,11 @@ describe('DataSourceManagement: Form Validation', () => {
       );
       expect(result).toBe(false);
     });
+    test('should fail validation when title is longer than 32 characters', () => {
+      form.title = 'test'.repeat(10);
+      const result = performDataSourceFormValidation(form, [], '', authenticationMethodRegistry);
+      expect(result).toBe(false);
+    });
     test('should fail validation when endpoint is not valid', () => {
       form.endpoint = mockDataSourceAttributesWithAuth.endpoint;
       const result = performDataSourceFormValidation(form, [], '', authenticationMethodRegistry);

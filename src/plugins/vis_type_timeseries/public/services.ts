@@ -28,7 +28,14 @@
  * under the License.
  */
 
-import { I18nStart, SavedObjectsStart, IUiSettingsClient, CoreStart } from 'src/core/public';
+import {
+  I18nStart,
+  SavedObjectsStart,
+  IUiSettingsClient,
+  CoreStart,
+  NotificationsStart,
+} from 'src/core/public';
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { ChartsPluginSetup } from '../../charts/public';
 import { DataPublicPluginStart } from '../../data/public';
@@ -51,4 +58,12 @@ export const [getI18n, setI18n] = createGetterSetter<I18nStart>('I18n');
 
 export const [getChartsSetup, setChartsSetup] = createGetterSetter<ChartsPluginSetup>(
   'ChartsPluginSetup'
+);
+
+export const [getDataSourceManagementSetup, setDataSourceManagementSetup] = createGetterSetter<{
+  dataSourceManagement: DataSourceManagementPluginSetup | undefined;
+}>('DataSourceManagementSetup');
+
+export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
+  'Notifications'
 );

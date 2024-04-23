@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceDropDownHeader should render correctly with the provided totalDataSourceCount 1`] = `
+<EuiPopoverTitle
+  paddingSize="s"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    responsive={false}
+  >
+    <EuiFlexItem>
+      DATA SOURCES
+       (
+      5
+      )
+    </EuiFlexItem>
+    <div
+      className="dataSourceDropDownHeaderInvisibleFocusable"
+      tabIndex={0}
+    />
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiLink
+        onClick={[Function]}
+      >
+        Manage
+      </EuiLink>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPopoverTitle>
+`;
+
+exports[`DataSourceDropDownHeader should render the activeDataSourceCount/totalDataSourceCount when both provided 1`] = `
+<DataSourceDropDownHeader
+  activeDataSourceCount={2}
+  totalDataSourceCount={5}
+>
+  <EuiPopoverTitle
+    paddingSize="s"
+  >
+    <div
+      className="euiPopoverTitle euiPopoverTitle--paddingSmall"
+    >
+      <EuiFlexGroup
+        alignItems="center"
+        responsive={false}
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+        >
+          <EuiFlexItem>
+            <div
+              className="euiFlexItem"
+            >
+              DATA SOURCES
+               (
+              2/5
+              )
+            </div>
+          </EuiFlexItem>
+          <div
+            className="dataSourceDropDownHeaderInvisibleFocusable"
+            tabIndex={0}
+          />
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiLink
+                onClick={[Function]}
+              >
+                <button
+                  className="euiLink euiLink--primary"
+                  disabled={false}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  Manage
+                </button>
+              </EuiLink>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+    </div>
+  </EuiPopoverTitle>
+</DataSourceDropDownHeader>
+`;

@@ -34,6 +34,7 @@ import { OPENSEARCH_SEARCH_STRATEGY } from '../../../../data/server';
 import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
+import { fetchDataSourceIdByName } from '../../lib/fetch_data_source_id';
 
 export default new Datasource('es', {
   args: [
@@ -112,6 +113,14 @@ export default new Datasource('es', {
         defaultMessage: `**DO NOT USE THIS**. It's fun for debugging fit functions, but you really should use the interval picker`,
       }),
     },
+    {
+      name: 'data_source_name',
+      types: ['string', 'null'], // If null, the query will proceed with local cluster
+      help: i18n.translate('timeline.help.functions.opensearch.args.dataSourceNameHelpText', {
+        defaultMessage:
+          'Specify a data source to query from. This will only work if multiple data sources is enabled',
+      }),
+    },
   ],
   help: i18n.translate('timeline.help.functions.opensearchHelpText', {
     defaultMessage: 'Pull data from an opensearch instance',
@@ -148,7 +157,15 @@ export default new Datasource('es', {
 
     const opensearchShardTimeout = tlConfig.opensearchShardTimeout;
 
-    const body = buildRequest(config, tlConfig, scriptedFields, opensearchShardTimeout);
+    const dataSourceId = await fetchDataSourceIdByName(config, tlConfig.savedObjectsClient);
+
+    const body = buildRequest(
+      config,
+      tlConfig,
+      scriptedFields,
+      opensearchShardTimeout,
+      dataSourceId
+    );
 
     const deps = (await tlConfig.getStartServices())[1];
 
