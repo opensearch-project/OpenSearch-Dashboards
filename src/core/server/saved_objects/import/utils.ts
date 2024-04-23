@@ -19,6 +19,43 @@ export interface UpdateDataSourceNameInVegaSpecProps {
   spacing?: number;
 }
 
+/**
+ * Given a visualization saved object and datasource id, return the updated visState and references if the visualization was a TSVB visualization
+ * @param {SavedObject} object
+ * @param {string} dataSourceId
+ * @returns {{visState: string, references: SavedObjectReference[]}} - the updated stringified visState and references
+ */
+export const getUpdatedTSVBVisState = (object: SavedObject, dataSourceId: string) => {
+  // @ts-expect-error
+  const visStateObject = JSON.parse(object.attributes?.visState);
+
+  if (visStateObject.type !== 'metrics') {
+    return {
+      // @ts-expect-error
+      visState: object.attributes?.visState,
+      references: object.references,
+    };
+  }
+
+  const oldDataSourceId = visStateObject.params.data_source_id;
+  const newReferences = object.references.filter((reference) => {
+    return reference.id !== oldDataSourceId && reference.type === 'data-source';
+  });
+
+  visStateObject.params.data_source_id = dataSourceId;
+
+  newReferences.push({
+    id: dataSourceId,
+    name: 'dataSource',
+    type: 'data-source',
+  });
+
+  return {
+    visState: JSON.stringify(visStateObject),
+    references: newReferences,
+  };
+};
+
 export const updateDataSourceNameInVegaSpec = (
   props: UpdateDataSourceNameInVegaSpecProps
 ): string => {

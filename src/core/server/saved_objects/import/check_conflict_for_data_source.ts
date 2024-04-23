@@ -12,6 +12,7 @@ import {
 import {
   extractVegaSpecFromSavedObject,
   getDataSourceTitleFromId,
+  getUpdatedTSVBVisState,
   updateDataSourceNameInVegaSpec,
 } from './utils';
 
@@ -96,8 +97,6 @@ export async function checkConflictsForDataSource({
         // Some visualization types will need special modifications, like Vega visualizations
         if (object.type === 'visualization') {
           const vegaSpec = extractVegaSpecFromSavedObject(object);
-          // @ts-expect-error
-          const visStateObject = JSON.parse(object.attributes?.visState);
 
           if (!!vegaSpec && !!dataSourceTitle) {
             const updatedVegaSpec = updateDataSourceNameInVegaSpec({
@@ -105,6 +104,8 @@ export async function checkConflictsForDataSource({
               newDataSourceName: dataSourceTitle,
             });
 
+            // @ts-expect-error
+            const visStateObject = JSON.parse(object.attributes?.visState);
             visStateObject.params.spec = updatedVegaSpec;
 
             // @ts-expect-error
@@ -118,23 +119,12 @@ export async function checkConflictsForDataSource({
             }
           }
 
-          if (visStateObject.type === 'metrics' && !!dataSourceId) {
-            const oldDataSourceId = visStateObject.params.data_source_id;
-            const newReferences = object.references.filter((reference) => {
-              return reference.id !== oldDataSourceId && reference.type === 'data-source';
-            });
-
-            visStateObject.params.data_source_id = dataSourceId;
-
-            newReferences.push({
-              id: dataSourceId,
-              name: 'dataSource',
-              type: 'data-source',
-            });
+          if (!!dataSourceId) {
+            const { visState, references } = getUpdatedTSVBVisState(object, dataSourceId);
 
             // @ts-expect-error
-            object.attributes.visState = JSON.stringify(visStateObject);
-            object.references = newReferences;
+            object.attributes.visState = visState;
+            object.references = references;
           }
         }
 

@@ -36,7 +36,11 @@ import {
 } from '../types';
 import { extractErrors } from './extract_errors';
 import { CreatedObject } from './types';
-import { extractVegaSpecFromSavedObject, updateDataSourceNameInVegaSpec } from './utils';
+import {
+  extractVegaSpecFromSavedObject,
+  getUpdatedTSVBVisState,
+  updateDataSourceNameInVegaSpec,
+} from './utils';
 
 interface CreateSavedObjectsParams<T> {
   objects: Array<SavedObject<T>>;
@@ -106,8 +110,6 @@ export const createSavedObjects = async <T>({
         // Some visualization types will need special modifications, like Vega visualizations
         if (object.type === 'visualization') {
           const vegaSpec = extractVegaSpecFromSavedObject(object);
-          // @ts-expect-error
-          const visStateObject = JSON.parse(object.attributes?.visState);
 
           if (!!vegaSpec && !!dataSourceTitle) {
             const updatedVegaSpec = updateDataSourceNameInVegaSpec({
@@ -115,6 +117,8 @@ export const createSavedObjects = async <T>({
               newDataSourceName: dataSourceTitle,
             });
 
+            // @ts-expect-error
+            const visStateObject = JSON.parse(object.attributes?.visState);
             visStateObject.params.spec = updatedVegaSpec;
 
             // @ts-expect-error
@@ -126,23 +130,11 @@ export const createSavedObjects = async <T>({
             });
           }
 
-          if (visStateObject.type === 'metrics') {
-            const oldDataSourceId = visStateObject.params.data_source_id;
-            object.references = object.references.filter((reference) => {
-              return reference.id !== oldDataSourceId && reference.type === 'data-source';
-            });
+          const { visState, references } = getUpdatedTSVBVisState(object, dataSourceId);
 
-            visStateObject.params.data_source_id = dataSourceId;
-
-            object.references.push({
-              id: dataSourceId,
-              name: 'dataSource',
-              type: 'data-source',
-            });
-
-            // @ts-expect-error
-            object.attributes.visState = JSON.stringify(visStateObject);
-          }
+          // @ts-expect-error
+          object.attributes.visState = visState;
+          object.references = references;
         }
 
         if (object.type === 'index-pattern') {
