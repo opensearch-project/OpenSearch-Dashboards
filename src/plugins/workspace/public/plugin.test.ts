@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Observable, Subscriber } from 'rxjs';
+import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
+import { ChromeBreadcrumb } from 'opensearch-dashboards/public';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
 import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
 import { WorkspacePlugin } from './plugin';
@@ -147,5 +148,45 @@ describe('Workspace plugin', () => {
       management: managementPluginMock.createSetupContract(),
     });
     expect(setupMock.chrome.registerCollapsibleNavHeader).toBeCalledTimes(1);
+  });
+
+  it('#start add workspace overview page to breadcrumbs when start', async () => {
+    const startMock = coreMock.createStart();
+    const workspaceObject = {
+      id: 'foo',
+      name: 'bar',
+    };
+    startMock.workspaces.currentWorkspace$.next(workspaceObject);
+    const breadcrumbs = new BehaviorSubject<ChromeBreadcrumb[]>([{ text: 'dashboards' }]);
+    startMock.chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs);
+    const workspacePlugin = new WorkspacePlugin();
+    workspacePlugin.start(startMock);
+    expect(startMock.chrome.setBreadcrumbs).toBeCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          text: 'bar',
+        }),
+        expect.objectContaining({
+          text: 'Home',
+        }),
+      ])
+    );
+  });
+
+  it('#start do not add workspace overview page to breadcrumbs when already exists', async () => {
+    const startMock = coreMock.createStart();
+    const workspaceObject = {
+      id: 'foo',
+      name: 'bar',
+    };
+    startMock.workspaces.currentWorkspace$.next(workspaceObject);
+    const breadcrumbs = new BehaviorSubject<ChromeBreadcrumb[]>([
+      { text: 'home' },
+      { text: 'bar' },
+    ]);
+    startMock.chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs);
+    const workspacePlugin = new WorkspacePlugin();
+    workspacePlugin.start(startMock);
+    expect(startMock.chrome.setBreadcrumbs).not.toHaveBeenCalled();
   });
 });

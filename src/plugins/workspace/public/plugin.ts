@@ -124,7 +124,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   }
 
   /**
-   * Add workspace overview page to breadCrumb
+   * Add workspace overview page to breadcrumbs
    * @param core CoreStart
    * @private
    */
@@ -134,10 +134,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       core.chrome.getBreadcrumbs$(),
     ]).subscribe(([currentWorkspace, breadcrumbs]) => {
       if (currentWorkspace && breadcrumbs && breadcrumbs.length > 0) {
-        const workspaceNotInBreadcrumbs = !breadcrumbs.some((breadcrumb: ChromeBreadcrumb) => {
-          return breadcrumb.text === currentWorkspace.name;
-        });
-        if (workspaceNotInBreadcrumbs) {
+        // workspace always be the second one
+        const workspaceInBreadcrumbs =
+          breadcrumbs.length > 1 && breadcrumbs[1]?.text === currentWorkspace.name;
+        if (!workspaceInBreadcrumbs) {
           const workspaceBreadcrumb: ChromeBreadcrumb = {
             text: currentWorkspace.name,
             onClick: () => {
@@ -152,7 +152,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           };
           breadcrumbs.splice(0, 0, homeBreadcrumb, workspaceBreadcrumb);
 
-          Promise.resolve().then(() => core.chrome.setBreadcrumbs(breadcrumbs));
+          core.chrome.setBreadcrumbs(breadcrumbs);
         }
       }
     });
