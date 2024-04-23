@@ -92,7 +92,7 @@ HTMLCollection [
                         <div
                           class="euiTextColor euiTextColor--subdued"
                         >
-                          Specify a workspace where the objects will be duplicated.
+                          Specify a workspace where the objects will be duplicated to.
                         </div>
                       </div>
                       <div
@@ -255,7 +255,7 @@ HTMLCollection [
                   />
                   <p>
                     <span>
-                      The following saved objects will be copied:
+                      The following saved objects will be duplicated:
                     </span>
                   </p>
                   <div

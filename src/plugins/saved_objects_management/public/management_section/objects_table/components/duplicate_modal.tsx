@@ -184,9 +184,9 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
       <EuiText>
         <EuiTextColor color="danger">{ignoredSelectedObjectsLength}</EuiTextColor> saved object
         {ignoredSelectedObjectsLength === 1 ? ' will' : 's will'}{' '}
-        <EuiTextColor color="danger">not</EuiTextColor> be copied, because{' '}
-        {ignoredSelectedObjectsLength === 1 ? 'it has' : 'they have'} already existed in the
-        selected workspace.
+        <EuiTextColor color="danger">not</EuiTextColor> be duplicated as{' '}
+        {ignoredSelectedObjectsLength === 1 ? 'it' : 'they'}{' '}
+        <EuiTextColor color="danger">already exist</EuiTextColor> in the selected workspace.
       </EuiText>
     );
 
@@ -237,7 +237,7 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
               <EuiText size="s" color="subdued">
                 {i18n.translate(
                   'savedObjectsManagement.objectsTable.duplicateModal.targetWorkspaceNotice',
-                  { defaultMessage: 'Specify a workspace where the objects will be duplicated.' }
+                  { defaultMessage: 'Specify a workspace where the objects will be duplicated to.' }
                 )}
               </EuiText>
               <EuiSpacer size="s" />
@@ -295,7 +295,7 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
           <p>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.duplicateModal.tableTitle"
-              defaultMessage="The following saved objects will be copied:"
+              defaultMessage="The following saved objects will be duplicated:"
             />
           </p>
           <EuiSpacer size="m" />
