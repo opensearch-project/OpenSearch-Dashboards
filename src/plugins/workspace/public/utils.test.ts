@@ -176,7 +176,7 @@ describe('workspace utils: isAppAccessibleInWorkspace', () => {
           mount: jest.fn(),
           workspaceAvailability: WorkspaceAvailability.insideWorkspace,
         },
-        { id: 'workspace_id', name: 'workspace name', features: [] }
+        { id: 'workspace_id', name: 'workspace name', features: ['home'] }
       )
     ).toBe(true);
   });
@@ -191,7 +191,7 @@ describe('workspace utils: isAppAccessibleInWorkspace', () => {
             // eslint-disable-next-line no-bitwise
             WorkspaceAvailability.insideWorkspace | WorkspaceAvailability.outsideWorkspace,
         },
-        { id: 'workspace_id', name: 'workspace name', features: [] }
+        { id: 'workspace_id', name: 'workspace name', features: ['home'] }
       )
     ).toBe(true);
   });
