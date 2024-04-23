@@ -24,6 +24,7 @@ import {
   getDefaultDataSource,
   getFilteredDataSources,
   handleDataSourceFetchError,
+  handleNoAvailableDataSourceError,
 } from '../utils';
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
@@ -185,6 +186,16 @@ export class DataSourceSelectable extends React.Component<
         dataSourceOptions.unshift(LocalCluster);
       }
 
+      if (dataSourceOptions.length === 0) {
+        handleNoAvailableDataSourceError(
+          this.onEmptyState.bind(this),
+          this.props.notifications,
+          this.props.application,
+          this.props.onSelectedDataSources
+        );
+        return;
+      }
+
       const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
 
       if (this.props.selectedOption?.length) {
@@ -201,6 +212,10 @@ export class DataSourceSelectable extends React.Component<
         this.props.onSelectedDataSources
       );
     }
+  }
+
+  onEmptyState() {
+    this.setState({ showEmptyState: true });
   }
 
   onError() {
@@ -227,12 +242,7 @@ export class DataSourceSelectable extends React.Component<
 
   render() {
     if (this.state.showEmptyState) {
-      return (
-        <NoDataSource
-          totalDataSourceCount={this.state.dataSourceOptions.length}
-          application={this.props.application}
-        />
-      );
+      return <NoDataSource application={this.props.application} />;
     }
 
     if (this.state.showError) {

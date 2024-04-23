@@ -405,7 +405,7 @@ describe('DataSourceSelectable', () => {
   });
   it('should render no data source when no data source filtered out and hide local cluster', async () => {
     const onSelectedDataSource = jest.fn();
-    const container = render(
+    render(
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
@@ -418,7 +418,7 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    const button = await container.findByTestId('dataSourceEmptyStateHeaderButton');
-    expect(button).toHaveTextContent('No data sources');
+    expect(toasts.add).toBeCalled();
+    expect(onSelectedDataSource).toBeCalledWith([]);
   });
 });
