@@ -9,6 +9,7 @@ import {
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
 } from './utils';
+import { WorkspaceAvailability } from '../../../core/public';
 
 describe('workspace utils: featureMatchesConfig', () => {
   it('feature configured with `*` should match any features', () => {
@@ -149,6 +150,48 @@ describe('workspace utils: isAppAccessibleInWorkspace', () => {
           chromeless: true,
         },
         { id: 'workspace_id', name: 'workspace name', features: [] }
+      )
+    ).toBe(true);
+  });
+
+  it('An app is not accessible within a workspace if its workspaceAvailability is outsideWorkspace', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'home',
+          title: 'Any app',
+          mount: jest.fn(),
+          workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: [] }
+      )
+    ).toBe(false);
+  });
+  it('An app is accessible within a workspace if its workspaceAvailability is insideWorkspace', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'home',
+          title: 'Any app',
+          mount: jest.fn(),
+          workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: ['home'] }
+      )
+    ).toBe(true);
+  });
+  it('An app is accessible within a workspace if its workspaceAvailability is inside and outsideWorkspace', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'home',
+          title: 'Any app',
+          mount: jest.fn(),
+          workspaceAvailability:
+            // eslint-disable-next-line no-bitwise
+            WorkspaceAvailability.insideWorkspace | WorkspaceAvailability.outsideWorkspace,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: ['home'] }
       )
     ).toBe(true);
   });
