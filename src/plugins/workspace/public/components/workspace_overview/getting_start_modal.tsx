@@ -109,7 +109,7 @@ export const WorkspaceOverviewGettingStartModal = (
     });
 
   return (
-    <EuiModal onClose={onCloseModal} maxWidth={false} className={'gettingStartModel'}>
+    <EuiModal onClose={onCloseModal} maxWidth={false} className="gettingStartModel">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h2>Define your path forward</h2>
