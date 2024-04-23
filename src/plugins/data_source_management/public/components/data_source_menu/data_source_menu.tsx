@@ -57,6 +57,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         notifications={notifications!.toasts}
         onSelectedDataSources={onSelectedDataSources!}
         uiSettings={uiSettings}
+        application={application}
       />
     );
   }
@@ -108,6 +109,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         dataSourceFilter={dataSourceFilter}
         displayAllCompatibleDataSources={displayAllCompatibleDataSources}
         uiSettings={uiSettings}
+        application={application}
       />
     );
   }

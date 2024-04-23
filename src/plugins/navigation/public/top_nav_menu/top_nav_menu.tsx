@@ -41,7 +41,7 @@ import {
 } from '../../../data/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { DataSourceMenu, DataSourceMenuProps } from '../../../data_source_management/public';
+import { DataSourceMenuProps, createDataSourceMenu } from '../../../data_source_management/public';
 
 export type TopNavMenuProps = StatefulSearchBarProps &
   Omit<SearchBarProps, 'opensearchDashboards' | 'intl' | 'timeHistory'> & {
@@ -115,9 +115,15 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
     return (
       <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
         {renderItems()}
-        {showDataSourceMenu && <DataSourceMenu {...dataSourceMenuConfig!} />}
+        {renderDataSourceMenu()}
       </EuiHeaderLinks>
     );
+  }
+
+  function renderDataSourceMenu(): ReactElement | null {
+    if (!showDataSourceMenu) return null;
+    const DataSourceMenu = createDataSourceMenu();
+    return <DataSourceMenu {...dataSourceMenuConfig!} />;
   }
 
   function renderSearchBar(): ReactElement | null {
