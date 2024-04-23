@@ -167,7 +167,6 @@ describe('workspace utils: isAppAccessibleInWorkspace', () => {
       )
     ).toBe(false);
   });
-  
   it('An app is accessible within a workspace if its workspaceAvailability is insideWorkspace', () => {
     expect(
       isAppAccessibleInWorkspace(
