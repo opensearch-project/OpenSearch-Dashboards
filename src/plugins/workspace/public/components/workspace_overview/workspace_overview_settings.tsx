@@ -13,7 +13,7 @@ export const WorkspaceOverviewSettings = ({
   return (
     <WorkspaceUpdater
       hideTitle={true}
-      maxWidth={'100%'}
+      maxWidth="100%"
       workspaceConfigurableApps$={workspaceConfigurableApps$}
     />
   );
