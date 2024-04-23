@@ -41,6 +41,19 @@ chrome.navControls.registerLeft({
   }
 })
 ```
+
+Register a top right navigation.
+
+```jsx
+chrome.navControls.registerRightNavigation({
+  order: '1',
+  appId: 'app_id',
+  iconType: 'consoleApp',
+  title: 'app_title,
+})
+```
+In this case, a circle icon navigation will be registered to top right header.It will navigate to app after clicked.
+
 ### NavLinksService : 
 - Interface :  ChromeNavLinks
 - **Signature** - `navLinks: ChromeNavLinks`
