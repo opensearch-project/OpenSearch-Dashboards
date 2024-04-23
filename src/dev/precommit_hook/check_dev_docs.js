@@ -10,7 +10,7 @@ export async function checkDevDocs(log, files) {
     const path = file.getRelativePath();
 
     if (path === SIDEBAR_PATH) {
-      throw Error(`Please stage the ${SIDEBAR_PATH} to update the developer docs`);
+      throw Error(`Please git add the ${SIDEBAR_PATH} before committing your changes to update the developer docs`);
     }
   });
 }
