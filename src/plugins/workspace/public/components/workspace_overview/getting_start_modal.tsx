@@ -123,7 +123,7 @@ export const WorkspaceOverviewGettingStartModal = (
             {categorySelection}
           </EuiFlexItem>
           <EuiFlexItem key="cards_content" grow={10} style={{ margin: '0px' }}>
-            <EuiPanel color="subdued" className={'gettingStartModel_body'} grow={false}>
+            <EuiPanel color="subdued" className="gettingStartModel_body" grow={false}>
               {cardList}
             </EuiPanel>
           </EuiFlexItem>
