@@ -6,6 +6,7 @@
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiTextColor } from '@elastic/eui';
 import React from 'react';
 import { ApplicationStart, IBasePath } from 'opensearch-dashboards/public';
+import { FormattedMessage } from '@osd/i18n/react';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { GetStartCard } from './types';
 
@@ -37,7 +38,15 @@ export const WorkspaceOverviewCard = ({
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiTextColor color="subdued">
-              <EuiText size="s">{'with ' + card.featureName}</EuiText>
+              <EuiText size="s">
+                <FormattedMessage
+                  id="workspace.overview.getStartCard.footer"
+                  defaultMessage="with {featureName}"
+                  values={{
+                    featureName: card.featureName,
+                  }}
+                />
+              </EuiText>
             </EuiTextColor>
           </EuiFlexItem>
         </EuiFlexGroup>
