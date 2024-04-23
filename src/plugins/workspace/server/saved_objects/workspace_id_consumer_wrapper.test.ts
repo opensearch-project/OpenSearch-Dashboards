@@ -176,5 +176,24 @@ describe('WorkspaceIdConsumerWrapper', () => {
         workspacesSearchOperator: 'AND',
       });
     });
+
+    it(`Should not pass a empty workspace array`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(true);
+      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+      updateWorkspaceState(mockRequest, {});
+      const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: mockRequest,
+      });
+      await mockedWrapperClient.find({
+        type: ['dashboard', 'visualization'],
+      });
+      // empty workspace array will get deleted
+      expect(mockedClient.find).toBeCalledWith({
+        type: ['dashboard', 'visualization'],
+        workspacesSearchOperator: 'OR',
+      });
+    });
   });
 });
