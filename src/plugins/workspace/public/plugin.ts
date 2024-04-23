@@ -48,7 +48,7 @@ interface WorkspacePluginSetupDeps {
 export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
-  private chromeSubscription?: Subscription;
+  private breadcrumbsSubscription?: Subscription;
   private currentWorkspaceIdSubscription?: Subscription;
   private managementCurrentWorkspaceIdSubscription?: Subscription;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
@@ -129,15 +129,14 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
    * @private
    */
   private addWorkspaceToBreadcrumbs(core: CoreStart) {
-    this.chromeSubscription = combineLatest([
+    this.breadcrumbsSubscription = combineLatest([
       core.workspaces.currentWorkspace$,
       core.chrome.getBreadcrumbs$(),
     ]).subscribe(([currentWorkspace, breadcrumbs]) => {
       if (currentWorkspace && breadcrumbs && breadcrumbs.length > 0) {
-        const workspaceNotInBreadcrumbs =
-          breadcrumbs.findIndex((breadcrumb: ChromeBreadcrumb) => {
-            return breadcrumb.text === currentWorkspace.name;
-          }) === -1;
+        const workspaceNotInBreadcrumbs = !breadcrumbs.some((breadcrumb: ChromeBreadcrumb) => {
+          return breadcrumb.text === currentWorkspace.name;
+        });
         if (workspaceNotInBreadcrumbs) {
           const workspaceBreadcrumb: ChromeBreadcrumb = {
             text: currentWorkspace.name,
@@ -328,6 +327,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.currentWorkspaceSubscription?.unsubscribe();
     this.currentWorkspaceIdSubscription?.unsubscribe();
     this.managementCurrentWorkspaceIdSubscription?.unsubscribe();
-    this.chromeSubscription?.unsubscribe();
+    this.breadcrumbsSubscription?.unsubscribe();
   }
 }
