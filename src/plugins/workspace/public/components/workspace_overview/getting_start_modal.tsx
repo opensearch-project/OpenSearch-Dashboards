@@ -118,7 +118,7 @@ export const WorkspaceOverviewGettingStartModal = (
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiFlexGroup gutterSize={'s'}>
+        <EuiFlexGroup gutterSize="s">
           <EuiFlexItem key="category_selection" grow={2}>
             {categorySelection}
           </EuiFlexItem>
