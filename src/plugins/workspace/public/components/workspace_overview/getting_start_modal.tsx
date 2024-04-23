@@ -130,7 +130,7 @@ export const WorkspaceOverviewGettingStartModal = (
         </EuiFlexGroup>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton data-test-subj={'close'} onClick={onCloseModal}>
+        <EuiButton data-test-subj="close" onClick={onCloseModal}>
           Close
         </EuiButton>
       </EuiModalFooter>
