@@ -4,7 +4,7 @@
  */
 
 import { parse, stringify } from 'hjson';
-import { SavedObject, SavedObjectsClientContract } from '../types';
+import { SavedObject, SavedObjectReference, SavedObjectsClientContract } from '../types';
 import { VisualizationObject } from './types';
 
 /**
