@@ -15,9 +15,9 @@ import {
   EuiSearchBarProps,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { i18n } from '@osd/i18n';
-import { debounce } from '../../../../../core/public';
+import { debounce, PublicAppInfo, WorkspaceObject } from '../../../../../core/public';
 import { WorkspaceAttribute } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { switchWorkspace, navigateToWorkspaceUpdatePage } from '../utils/workspace';
@@ -26,20 +26,30 @@ import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
 import { cleanWorkspaceId } from '../../../../../core/public';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
+import { getSelectedFeatureQuantities } from '../../utils';
 
-const WORKSPACE_LIST_PAGE_DESCRIPTIOIN = i18n.translate('workspace.list.description', {
+export interface WorkspaceListProps {
+  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+}
+
+const WORKSPACE_LIST_PAGE_DESCRIPTION = i18n.translate('workspace.list.description', {
   defaultMessage:
     'Workspace allow you to save and organize library items, such as index patterns, visualizations, dashboards, saved searches, and share them with other OpenSearch Dashboards users. You can control which features are visible in each workspace, and which users and groups have read and write access to the library items in the workspace.',
 });
 
-export const WorkspaceList = () => {
+const emptyWorkspaceList: WorkspaceObject[] = [];
+
+export const WorkspaceList = (props: WorkspaceListProps) => {
   const {
     services: { workspaces, application, http },
   } = useOpenSearchDashboards();
 
   const initialSortField = 'name';
   const initialSortDirection = 'asc';
-  const workspaceList = useObservable(workspaces?.workspaceList$ ?? of([]), []);
+  const workspaceList = useObservable(
+    workspaces?.workspaceList$ ?? of(emptyWorkspaceList),
+    emptyWorkspaceList
+  );
   const [queryInput, setQueryInput] = useState<string>('');
   const [pagination, setPagination] = useState({
     pageIndex: 0,
@@ -47,6 +57,7 @@ export const WorkspaceList = () => {
     pageSizeOptions: [5, 10, 20],
   });
   const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
+  const configurableApps = useObservable(props.workspaceConfigurableApps$ ?? of(undefined));
 
   const handleSwitchWorkspace = useCallback(
     (id: string) => {
@@ -106,6 +117,10 @@ export const WorkspaceList = () => {
       name: 'Features',
       isExpander: true,
       hasActions: true,
+      render: (features: string[]) => {
+        const { total, selected } = getSelectedFeatureQuantities(features, configurableApps || []);
+        return `${selected}/${total}`;
+      },
     },
     {
       name: 'Actions',
@@ -177,7 +192,7 @@ export const WorkspaceList = () => {
         <EuiPageHeader
           restrictWidth
           pageTitle="Workspaces"
-          description={WORKSPACE_LIST_PAGE_DESCRIPTIOIN}
+          description={WORKSPACE_LIST_PAGE_DESCRIPTION}
           style={{ paddingBottom: 0, borderBottom: 0 }}
         />
         <EuiPageContent

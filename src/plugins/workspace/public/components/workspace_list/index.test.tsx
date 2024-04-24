@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { WorkspaceList } from './index';
+import { WorkspaceList, WorkspaceListProps } from './index';
 import { coreMock } from '../../../../../core/public/mocks';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
@@ -24,11 +24,16 @@ jest.mock('../delete_workspace_modal', () => ({
   ),
 }));
 
+const defaultProps = ({
+  workspaceConfigurableApps$: of(undefined),
+} as unknown) as WorkspaceListProps;
+
 function getWrapWorkspaceListInContext(
   workspaceList = [
     { id: 'id1', name: 'name1' },
     { id: 'id2', name: 'name2' },
-  ]
+  ],
+  props = defaultProps
 ) {
   const coreStartMock = coreMock.createStart();
 
@@ -42,7 +47,7 @@ function getWrapWorkspaceListInContext(
   return (
     <I18nProvider>
       <OpenSearchDashboardsContextProvider services={services}>
-        <WorkspaceList />
+        <WorkspaceList {...props} />
       </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
@@ -122,5 +127,56 @@ describe('WorkspaceList', () => {
     fireEvent.click(paginationButton);
     expect(queryByText('name1')).not.toBeInTheDocument();
     expect(getByText('name6')).toBeInTheDocument();
+  });
+
+  it('should be able to display features selection quantity based on features and configurableApps', async () => {
+    const list = [{ id: 'id1', name: 'name1', features: ['*', '!@management'] }];
+    const props = ({
+      workspaceConfigurableApps$: of([
+        {
+          appRoute: '/app/dashboards',
+          id: 'dashboards',
+          title: 'Dashboards',
+          category: {
+            id: 'opensearchDashboards',
+            label: 'OpenSearch Dashboards',
+            euiIconType: 'inputOutput',
+            order: 1000,
+          },
+          status: 0,
+          navLinkStatus: 1,
+        },
+        {
+          appRoute: '/app/dev_tools',
+          id: 'dev_tools',
+          title: 'Dev Tools',
+          category: {
+            id: 'management',
+            label: 'Management',
+            order: 5000,
+            euiIconType: 'managementApp',
+          },
+          status: 0,
+          navLinkStatus: 1,
+        },
+        {
+          appRoute: '/app/management',
+          id: 'management',
+          title: 'Dashboards Management',
+          order: 9030,
+          icon: '/ui/logos/opensearch_mark.svg',
+          category: {
+            id: 'management',
+            label: 'Management',
+            order: 5000,
+            euiIconType: 'managementApp',
+          },
+          status: 0,
+          navLinkStatus: 1,
+        },
+      ]),
+    } as unknown) as WorkspaceListProps;
+    const { queryByText } = render(getWrapWorkspaceListInContext(list, props));
+    expect(queryByText('1/3')).toBeInTheDocument();
   });
 });
