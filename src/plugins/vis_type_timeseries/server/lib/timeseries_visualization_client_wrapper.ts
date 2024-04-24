@@ -13,6 +13,10 @@ import {
 import { getDataSourceEnabled } from './services';
 
 export const TIMESERIES_VISUALIZATION_CLIENT_WRAPPER_ID = 'timeseries-visualization-client-wrapper';
+/**
+ * A lower priority number means that a wrapper will be first to execute.
+ * In this case, since this wrapper does not have any conflicts with other wrappers, it is set to 11.
+ * */
 export const TIMESERIES_VISUALIZATION_CLIENT_WRAPPER_PRIORITY = 11;
 
 export const timeSeriesVisualizationClientWrapper: SavedObjectsClientWrapperFactory = (
@@ -27,8 +31,8 @@ export const timeSeriesVisualizationClientWrapper: SavedObjectsClientWrapperFact
       return await wrapperOptions.client.create(type, attributes, options);
     }
 
-    // @ts-expect-error
-    const visState = JSON.parse(attributes.visState);
+    const tsvbAttributes = attributes as T & { visState: string };
+    const visState = JSON.parse(tsvbAttributes.visState);
 
     if (visState.type !== 'metrics' || !visState.params) {
       return await wrapperOptions.client.create(type, attributes, options);
@@ -55,8 +59,7 @@ export const timeSeriesVisualizationClientWrapper: SavedObjectsClientWrapperFact
       }
     }
 
-    // @ts-expect-error
-    attributes.visState = JSON.stringify(visState);
+    tsvbAttributes.visState = JSON.stringify(visState);
 
     return await wrapperOptions.client.create(type, attributes, {
       ...options,

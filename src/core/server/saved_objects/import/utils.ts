@@ -5,6 +5,7 @@
 
 import { parse, stringify } from 'hjson';
 import { SavedObject, SavedObjectsClientContract } from '../types';
+import { VisualizationObject } from './types';
 
 /**
  * Given a Vega spec, the new datasource (by name), and spacing, update the Vega spec to add the new datasource name to each local cluster query
@@ -21,18 +22,19 @@ export interface UpdateDataSourceNameInVegaSpecProps {
 
 /**
  * Given a visualization saved object and datasource id, return the updated visState and references if the visualization was a TSVB visualization
- * @param {SavedObject} object
+ * @param {VisualizationObject} object
  * @param {string} dataSourceId
  * @returns {{visState: string, references: SavedObjectReference[]}} - the updated stringified visState and references
  */
-export const getUpdatedTSVBVisState = (object: SavedObject, dataSourceId: string) => {
-  // @ts-expect-error
-  const visStateObject = JSON.parse(object.attributes?.visState);
+export const getUpdatedTSVBVisState = (
+  object: VisualizationObject,
+  dataSourceId: string
+): { visState: string; references: SavedObjectReference[] } => {
+  const visStateObject = JSON.parse(object.attributes.visState);
 
   if (visStateObject.type !== 'metrics') {
     return {
-      // @ts-expect-error
-      visState: object.attributes?.visState,
+      visState: object.attributes.visState,
       references: object.references,
     };
   }

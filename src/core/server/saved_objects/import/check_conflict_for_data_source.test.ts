@@ -330,9 +330,9 @@ describe('#checkConflictsForDataSource', () => {
   ])('will update datasource reference + visState of TSVB visualization', async ({ id }) => {
     const tsvbSavedObject = createTSVBVisualizationObject(id);
     // @ts-expect-error
-    const newVisState = JSON.parse(tsvbSavedObject.attributes.visState);
-    newVisState.params.data_source_id = 'some-datasource-id';
-    const expectedVisState = JSON.stringify(newVisState);
+    const expectedVisState = JSON.parse(tsvbSavedObject.attributes.visState);
+    expectedVisState.params.data_source_id = 'some-datasource-id';
+    const newVisState = JSON.stringify(expectedVisState);
     const params = setupParams({
       objects: [tsvbSavedObject],
       ignoreRegularConflicts: true,
@@ -348,7 +348,7 @@ describe('#checkConflictsForDataSource', () => {
             ...tsvbSavedObject,
             attributes: {
               title: 'some-title',
-              visState: expectedVisState,
+              visState: newVisState,
             },
             id: 'some-datasource-id_some-object-id',
             references: [

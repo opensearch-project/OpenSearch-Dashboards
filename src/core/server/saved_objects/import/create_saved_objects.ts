@@ -35,7 +35,7 @@ import {
   SavedObjectsImportError,
 } from '../types';
 import { extractErrors } from './extract_errors';
-import { CreatedObject } from './types';
+import { CreatedObject, VisualizationObject } from './types';
 import {
   extractVegaSpecFromSavedObject,
   getUpdatedTSVBVisState,
@@ -130,10 +130,13 @@ export const createSavedObjects = async <T>({
             });
           }
 
-          const { visState, references } = getUpdatedTSVBVisState(object, dataSourceId);
+          const visualizationObject = object as VisualizationObject;
+          const { visState, references } = getUpdatedTSVBVisState(
+            visualizationObject,
+            dataSourceId
+          );
 
-          // @ts-expect-error
-          object.attributes.visState = visState;
+          visualizationObject.attributes.visState = visState;
           object.references = references;
         }
 

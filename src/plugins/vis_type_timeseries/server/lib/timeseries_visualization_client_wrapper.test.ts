@@ -4,7 +4,7 @@
  */
 import _ from 'lodash';
 
-import { SavedObjectsClientWrapperOptions } from '../../../../core/server';
+import { SavedObjectReference, SavedObjectsClientWrapperOptions } from '../../../../core/server';
 import testParams from './test_utils/test_params.json';
 import { timeSeriesVisualizationClientWrapper } from './timeseries_visualization_client_wrapper';
 import { savedObjectsClientMock } from '../../../../core/server/mocks';
@@ -51,16 +51,24 @@ describe('timeseriesVisualizationClientWrapper()', () => {
     client.create.mockClear();
   });
 
+  const testClientCreate = (
+    attributes: any,
+    references: SavedObjectReference[],
+    savedObjectType = 'visualization'
+  ) => {
+    expect(client.create).toBeCalledWith(
+      savedObjectType,
+      attributes,
+      expect.objectContaining({ references: expect.arrayContaining(references) })
+    );
+  };
+
   test('if MDS is disabled, do not update the datasource references', async () => {
     const attributes = getAttributesWithParams(testParams.withDataSourceFieldEmpty);
     const wrapper = timeSeriesVisualizationClientWrapper(mockedWrapperOptions);
     await wrapper.create('visualization', attributes, { references: [] });
 
-    expect(client.create).toBeCalledWith(
-      'visualization',
-      attributes,
-      expect.objectContaining({ references: [] })
-    );
+    testClientCreate(attributes, []);
   });
 
   test('non-visualization saved object should pass through', async () => {
@@ -70,11 +78,7 @@ describe('timeseriesVisualizationClientWrapper()', () => {
     const wrapper = timeSeriesVisualizationClientWrapper(mockedWrapperOptions);
     await wrapper.create('dashboard', attributes, { references: [] });
 
-    expect(client.create).toBeCalledWith(
-      'dashboard',
-      attributes,
-      expect.objectContaining({ references: [] })
-    );
+    testClientCreate(attributes, [], 'dashboard');
   });
 
   test('non-metrics saved object should pass through', async () => {
@@ -90,11 +94,7 @@ describe('timeseriesVisualizationClientWrapper()', () => {
     const wrapper = timeSeriesVisualizationClientWrapper(mockedWrapperOptions);
     await wrapper.create('visualization', attributes, { references: [] });
 
-    expect(client.create).toBeCalledWith(
-      'visualization',
-      attributes,
-      expect.objectContaining({ references: [] })
-    );
+    testClientCreate(attributes, []);
   });
 
   test('if a non-existent datasource id is in the params, remove all datasource references and the field name', async () => {
@@ -113,11 +113,7 @@ describe('timeseriesVisualizationClientWrapper()', () => {
     const wrapper = timeSeriesVisualizationClientWrapper(mockedWrapperOptions);
     await wrapper.create('visualization', attributes, { references });
 
-    expect(client.create).toBeCalledWith(
-      'visualization',
-      newAttributes,
-      expect.objectContaining({ references: [] })
-    );
+    testClientCreate(newAttributes, []);
   });
 
   test('if a datasource reference is empty and the data_source_id field is an empty string, do not change the object', async () => {
@@ -126,11 +122,7 @@ describe('timeseriesVisualizationClientWrapper()', () => {
     const wrapper = timeSeriesVisualizationClientWrapper(mockedWrapperOptions);
     await wrapper.create('visualization', attributes, { references: [] });
 
-    expect(client.create).toBeCalledWith(
-      'visualization',
-      attributes,
-      expect.objectContaining({ references: [] })
-    );
+    testClientCreate(attributes, []);
   });
 
   test('if a datasource reference is empty and the data_source_id field is not present, do not change the object', async () => {
@@ -139,11 +131,7 @@ describe('timeseriesVisualizationClientWrapper()', () => {
     const wrapper = timeSeriesVisualizationClientWrapper(mockedWrapperOptions);
     await wrapper.create('visualization', attributes, { references: [] });
 
-    expect(client.create).toBeCalledWith(
-      'visualization',
-      attributes,
-      expect.objectContaining({ references: [] })
-    );
+    testClientCreate(attributes, []);
   });
 
   test('if a datasource reference is outdated and the data_source_id field has an empty string, remove the datasource reference', async () => {
@@ -154,13 +142,8 @@ describe('timeseriesVisualizationClientWrapper()', () => {
       references: testParams.referenceWithOutdatedDataSource,
     });
 
-    expect(client.create).toBeCalledWith(
-      'visualization',
-      attributes,
-      expect.objectContaining({
-        references: [{ id: 'some-dashboard-id', name: 'some-dashboard', type: 'dashboard' }],
-      })
-    );
+    const newReferences = [{ id: 'some-dashboard-id', name: 'some-dashboard', type: 'dashboard' }];
+    testClientCreate(attributes, newReferences);
   });
 
   test('if a datasource reference is outdated and the data_source_id field is not present, remove the datasource reference', async () => {
@@ -171,13 +154,8 @@ describe('timeseriesVisualizationClientWrapper()', () => {
       references: testParams.referenceWithOutdatedDataSource,
     });
 
-    expect(client.create).toBeCalledWith(
-      'visualization',
-      attributes,
-      expect.objectContaining({
-        references: [{ id: 'some-dashboard-id', name: 'some-dashboard', type: 'dashboard' }],
-      })
-    );
+    const newReferences = [{ id: 'some-dashboard-id', name: 'some-dashboard', type: 'dashboard' }];
+    testClientCreate(attributes, newReferences);
   });
 
   test('if the datasource reference is empty and the data_source_id is present, add the datasource reference', async () => {
@@ -188,13 +166,7 @@ describe('timeseriesVisualizationClientWrapper()', () => {
       references: [{ id: 'some-dashboard-id', name: 'some-dashboard', type: 'dashboard' }],
     });
 
-    expect(client.create).toBeCalledWith(
-      'visualization',
-      attributes,
-      expect.objectContaining({
-        references: expect.arrayContaining(testParams.referenceWithValidDataSource),
-      })
-    );
+    testClientCreate(attributes, testParams.referenceWithValidDataSource);
   });
 
   test('if the datasource reference is different from the data_source_id, update the datasource reference', async () => {
@@ -205,13 +177,7 @@ describe('timeseriesVisualizationClientWrapper()', () => {
       references: testParams.referenceWithOutdatedDataSource,
     });
 
-    expect(client.create).toBeCalledWith(
-      'visualization',
-      attributes,
-      expect.objectContaining({
-        references: expect.arrayContaining(testParams.referenceWithValidDataSource),
-      })
-    );
+    testClientCreate(attributes, testParams.referenceWithValidDataSource);
   });
 
   test('if the datasource reference is identical to the data_source_id, do not change anything', async () => {
@@ -222,12 +188,6 @@ describe('timeseriesVisualizationClientWrapper()', () => {
       references: testParams.referenceWithValidDataSource,
     });
 
-    expect(client.create).toBeCalledWith(
-      'visualization',
-      attributes,
-      expect.objectContaining({
-        references: expect.arrayContaining(testParams.referenceWithValidDataSource),
-      })
-    );
+    testClientCreate(attributes, testParams.referenceWithValidDataSource);
   });
 });

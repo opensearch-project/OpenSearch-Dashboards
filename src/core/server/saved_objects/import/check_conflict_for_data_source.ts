@@ -9,6 +9,7 @@ import {
   SavedObjectsImportError,
   SavedObjectsImportRetry,
 } from '../types';
+import { VisualizationObject } from './types';
 import {
   extractVegaSpecFromSavedObject,
   getDataSourceTitleFromId,
@@ -120,10 +121,12 @@ export async function checkConflictsForDataSource({
           }
 
           if (!!dataSourceId) {
-            const { visState, references } = getUpdatedTSVBVisState(object, dataSourceId);
-
-            // @ts-expect-error
-            object.attributes.visState = visState;
+            const visualizationObject = object as VisualizationObject;
+            const { visState, references } = getUpdatedTSVBVisState(
+              visualizationObject,
+              dataSourceId
+            );
+            visualizationObject.attributes.visState = visState;
             object.references = references;
           }
         }
