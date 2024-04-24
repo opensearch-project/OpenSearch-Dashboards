@@ -11,6 +11,7 @@ import {
   checkConflictsForDataSource,
   ConflictsForDataSourceParams,
 } from './check_conflict_for_data_source';
+import { VisualizationObject } from './types';
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 
@@ -40,7 +41,7 @@ const createVegaVisualizationObject = (id: string): SavedObjectType => {
   } as SavedObjectType;
 };
 
-const createTSVBVisualizationObject = (id: string): SavedObjectType => {
+const createTSVBVisualizationObject = (id: string): VisualizationObject => {
   const idParse = id.split('_');
   const params = idParse.length > 1 ? { data_source_id: idParse[1] } : {};
   const visState = {
@@ -54,7 +55,7 @@ const createTSVBVisualizationObject = (id: string): SavedObjectType => {
     attributes: { title: 'some-title', visState: JSON.stringify(visState) },
     references:
       idParse.length > 1 ? [{ id: idParse[1], type: 'data-source', name: 'dataSource' }] : [],
-  } as SavedObjectType;
+  } as VisualizationObject;
 };
 
 const getSavedObjectClient = (): SavedObjectsClientContract => {
@@ -329,7 +330,6 @@ describe('#checkConflictsForDataSource', () => {
     },
   ])('will update datasource reference + visState of TSVB visualization', async ({ id }) => {
     const tsvbSavedObject = createTSVBVisualizationObject(id);
-    // @ts-expect-error
     const expectedVisState = JSON.parse(tsvbSavedObject.attributes.visState);
     expectedVisState.params.data_source_id = 'some-datasource-id';
     const newVisState = JSON.stringify(expectedVisState);
