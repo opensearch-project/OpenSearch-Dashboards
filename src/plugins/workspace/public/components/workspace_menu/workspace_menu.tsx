@@ -104,13 +104,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       }),
       key: WORKSPACE_CREATE_APP_ID,
       onClick: () => {
-        window.location.assign(
-          cleanWorkspaceId(
-            coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
-              absolute: false,
-            })
-          )
-        );
+        coreStart.application.navigateToApp(WORKSPACE_CREATE_APP_ID);
       },
     });
     workspaceListItems.push({
@@ -120,13 +114,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       }),
       key: WORKSPACE_LIST_APP_ID,
       onClick: () => {
-        window.location.assign(
-          cleanWorkspaceId(
-            coreStart.application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
-              absolute: false,
-            })
-          )
-        );
+        coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
       },
     });
     return workspaceListItems;

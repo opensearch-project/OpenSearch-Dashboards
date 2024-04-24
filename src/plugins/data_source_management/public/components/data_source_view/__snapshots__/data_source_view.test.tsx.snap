@@ -62,15 +62,113 @@ exports[`DataSourceView Should render successfully when provided datasource has 
 `;
 
 exports[`DataSourceView Should return error when provided datasource has been filtered out 1`] = `
-<NoDataSource
-  totalDataSourceCount={0}
-/>
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <React.Fragment>
+      <EuiButtonEmpty
+        aria-label="dataSourceViewButton"
+        className="dataSourceComponentButtonTitle"
+        data-test-subj="dataSourceViewButton"
+        iconSide="left"
+        iconType="database"
+        onClick={[Function]}
+        size="s"
+      >
+        
+      </EuiButtonEmpty>
+    </React.Fragment>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <DataSourceDropDownHeader
+    totalDataSourceCount={1}
+  />
+  <EuiContextMenuPanel
+    className="dataSourceViewOuiPanel"
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="none"
+    >
+      <EuiSelectable
+        compressed={true}
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={Array []}
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
 `;
 
 exports[`DataSourceView When selected option is local cluster and hide local Cluster is true, should return error 1`] = `
-<NoDataSource
-  totalDataSourceCount={0}
-/>
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <React.Fragment>
+      <EuiButtonEmpty
+        aria-label="dataSourceViewButton"
+        className="dataSourceComponentButtonTitle"
+        data-test-subj="dataSourceViewButton"
+        iconSide="left"
+        iconType="database"
+        onClick={[Function]}
+        size="s"
+      >
+        
+      </EuiButtonEmpty>
+    </React.Fragment>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <DataSourceDropDownHeader
+    totalDataSourceCount={1}
+  />
+  <EuiContextMenuPanel
+    className="dataSourceViewOuiPanel"
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="none"
+    >
+      <EuiSelectable
+        compressed={true}
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={Array []}
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
 `;
 
 exports[`DataSourceView should call getDataSourceById when only pass id with no label 1`] = `

@@ -240,14 +240,15 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       });
     }
 
-    async savedSearchRowCountFromLegacyTable(expectedCount: number) {
-      log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
+    async rowCountFromDefaultDiscoverTable(expectedCount: number) {
+      log.debug(`DashboardExpect.rowCountFromDefaultDiscoverTable(${expectedCount})`);
+      // Rows have no identifiers but we can count using the identifiers of the first cells in each data row
       await retry.try(async () => {
-        const savedSearchRows = await testSubjects.findAll(
-          'docTableExpandToggleColumn',
+        const firstCells = await find.allByCssSelector(
+          'td[data-test-subj="docTableExpandToggleColumn"]',
           findTimeout
         );
-        expect(savedSearchRows.length).to.be(expectedCount);
+        expect(firstCells.length).to.be(expectedCount);
       });
     }
 

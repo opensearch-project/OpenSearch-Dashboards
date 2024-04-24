@@ -17,6 +17,7 @@ import {
   AppStatus,
   PublicAppInfo,
   ChromeBreadcrumb,
+  WorkspaceAvailability,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -236,6 +237,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         const { renderCreatorApp } = await import('./application');
         return mountWorkspaceApp(params, renderCreatorApp);
       },
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
     // workspace fatal error
@@ -298,6 +300,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
       },
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
     /**
