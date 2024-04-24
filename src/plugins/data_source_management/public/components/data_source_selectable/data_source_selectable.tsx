@@ -9,7 +9,6 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiPanel,
-  EuiButtonEmpty,
   EuiSelectable,
   EuiPopoverTitle,
 } from '@elastic/eui';
@@ -37,7 +36,7 @@ import './data_source_selectable.scss';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import '../button_title.scss';
 import './data_source_selectable.scss';
-import { PopoverButton } from '../popover_button/popover_button';
+import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -261,7 +260,7 @@ export class DataSourceSelectable extends React.Component<
         initialFocus={'.euiSelectableSearch'}
         id={'dataSourceSelectableContextMenuPopover'}
         button={
-          <PopoverButton
+          <DataSourceMenuPopoverButton
             className={'dataSourceSelectable'}
             label={label}
             onClick={this.onClick.bind(this)}

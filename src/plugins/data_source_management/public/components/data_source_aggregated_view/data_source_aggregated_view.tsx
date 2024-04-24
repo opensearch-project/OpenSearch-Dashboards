@@ -4,15 +4,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuPanel,
-  EuiPanel,
-  EuiPopover,
-  EuiSelectable,
-  EuiSwitch,
-} from '@elastic/eui';
-import { i18n } from '@osd/i18n';
+import { EuiContextMenuPanel, EuiPanel, EuiPopover, EuiSelectable, EuiSwitch } from '@elastic/eui';
 import {
   ApplicationStart,
   IUiSettingsClient,
@@ -34,7 +26,7 @@ import { DataSourceOption } from '../data_source_menu/types';
 import { DataSourceItem } from '../data_source_item';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import './data_source_aggregated_view.scss';
-import { PopoverButton } from '../popover_button/popover_button';
+import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
 
 interface DataSourceAggregatedViewProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -205,7 +197,7 @@ export class DataSourceAggregatedView extends React.Component<
         <EuiPopover
           id={'dataSourceSViewContextMenuPopover'}
           button={
-            <PopoverButton
+            <DataSourceMenuPopoverButton
               className={'dataSourceAggregatedView'}
               onClick={this.onDataSourcesClick.bind(this)}
             />

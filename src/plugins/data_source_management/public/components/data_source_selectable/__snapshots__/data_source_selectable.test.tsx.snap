@@ -4,7 +4,7 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
 <EuiPopover
   anchorPosition="downLeft"
   button={
-    <PopoverButton
+    <DataSourceMenuPopoverButton
       className="dataSourceSelectable"
       label="Local cluster"
       onClick={[Function]}
@@ -80,7 +80,7 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
 <EuiPopover
   anchorPosition="downLeft"
   button={
-    <PopoverButton
+    <DataSourceMenuPopoverButton
       className="dataSourceSelectable"
       label=""
       onClick={[Function]}
@@ -140,7 +140,7 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
 <EuiPopover
   anchorPosition="downLeft"
   button={
-    <PopoverButton
+    <DataSourceMenuPopoverButton
       className="dataSourceSelectable"
       label=""
       onClick={[Function]}

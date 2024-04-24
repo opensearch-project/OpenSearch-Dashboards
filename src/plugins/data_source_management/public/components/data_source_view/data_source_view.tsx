@@ -25,7 +25,7 @@ import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DataSourceItem } from '../data_source_item';
 import { LocalCluster } from '../constants';
 import './data_source_view.scss';
-import { PopoverButton } from '../popover_button/popover_button';
+import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
@@ -159,7 +159,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       <EuiPopover
         id={'dataSourceViewPopover'}
         button={
-          <PopoverButton
+          <DataSourceMenuPopoverButton
             className={'dataSourceView'}
             label={label}
             onClick={this.onClick.bind(this)}
@@ -177,7 +177,6 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
               options={options}
               singleSelection={true}
               data-test-subj={'dataSourceView'}
-              compressed={true}
               renderOption={(option) => (
                 <DataSourceItem
                   option={option}

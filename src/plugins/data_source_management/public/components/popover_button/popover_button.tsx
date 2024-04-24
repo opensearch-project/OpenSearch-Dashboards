@@ -6,13 +6,17 @@ import React from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
-interface PopoverButtonProps {
+interface DataSourceMenuPopoverButtonProps {
   className: string;
   label?: string;
   onClick: () => void;
 }
 
-export const PopoverButton: React.FC<PopoverButtonProps> = ({ className, label, onClick }) => {
+export const DataSourceMenuPopoverButton: React.FC<DataSourceMenuPopoverButtonProps> = ({
+  className,
+  label,
+  onClick,
+}) => {
   return (
     <>
       <EuiButtonEmpty
