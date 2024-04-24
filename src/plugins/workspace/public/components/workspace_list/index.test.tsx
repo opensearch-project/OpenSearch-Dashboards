@@ -9,8 +9,9 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
 import { switchWorkspace, navigateToWorkspaceUpdatePage } from '../utils/workspace';
+import { PublicAppInfo } from '../../../../../core/public';
 
-import { of } from 'rxjs';
+import { of, BehaviorSubject } from 'rxjs';
 
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
 
@@ -24,9 +25,10 @@ jest.mock('../delete_workspace_modal', () => ({
   ),
 }));
 
-const defaultProps = ({
-  workspaceConfigurableApps$: of(undefined),
-} as unknown) as WorkspaceListProps;
+const workspaceConfigurableApps: PublicAppInfo[] = [];
+const defaultProps: WorkspaceListProps = {
+  workspaceConfigurableApps$: new BehaviorSubject(workspaceConfigurableApps),
+};
 
 function getWrapWorkspaceListInContext(
   workspaceList = [

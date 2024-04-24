@@ -57,7 +57,7 @@ export const WorkspaceList = (props: WorkspaceListProps) => {
     pageSizeOptions: [5, 10, 20],
   });
   const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
-  const configurableApps = useObservable(props.workspaceConfigurableApps$ ?? of(undefined));
+  const configurableApps = useObservable(props.workspaceConfigurableApps$ ?? of([]));
 
   const handleSwitchWorkspace = useCallback(
     (id: string) => {
