@@ -198,6 +198,7 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
           color="warning"
           iconType="help"
           aria-disabled={ignoredSelectedObjectsLength === 0}
+          data-test-subj="ignoreSomeObjectsCallOut"
         >
           {warningMessage}
         </EuiCallOut>
