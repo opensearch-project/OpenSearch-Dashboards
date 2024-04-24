@@ -39,6 +39,10 @@ export const workspace: SavedObjectsType = {
       reserved: {
         type: 'boolean',
       },
+      uiSettings: {
+        dynamic: false,
+        properties: {},
+      },
     },
   },
 };

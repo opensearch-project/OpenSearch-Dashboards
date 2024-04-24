@@ -134,6 +134,7 @@ export {
   AppUpdater,
   ScopedHistory,
   NavigateToAppOptions,
+  WorkspaceAvailability,
 } from './application';
 
 export {

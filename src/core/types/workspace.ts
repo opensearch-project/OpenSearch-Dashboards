@@ -13,6 +13,7 @@ export interface WorkspaceAttribute {
   color?: string;
   icon?: string;
   reserved?: boolean;
+  uiSettings?: Record<string, any>;
 }
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
