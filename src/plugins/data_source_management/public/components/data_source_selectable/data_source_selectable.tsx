@@ -11,8 +11,7 @@ import {
   EuiPanel,
   EuiButtonEmpty,
   EuiSelectable,
-  EuiSpacer,
-  EuiHorizontalRule,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import {
   ApplicationStart,
@@ -25,6 +24,7 @@ import {
   getDefaultDataSource,
   getFilteredDataSources,
   handleDataSourceFetchError,
+  handleNoAvailableDataSourceError,
 } from '../utils';
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
@@ -186,6 +186,16 @@ export class DataSourceSelectable extends React.Component<
         dataSourceOptions.unshift(LocalCluster);
       }
 
+      if (dataSourceOptions.length === 0) {
+        handleNoAvailableDataSourceError(
+          this.onEmptyState.bind(this),
+          this.props.notifications,
+          this.props.application,
+          this.props.onSelectedDataSources
+        );
+        return;
+      }
+
       const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
 
       if (this.props.selectedOption?.length) {
@@ -202,6 +212,10 @@ export class DataSourceSelectable extends React.Component<
         this.props.onSelectedDataSources
       );
     }
+  }
+
+  onEmptyState() {
+    this.setState({ showEmptyState: true });
   }
 
   onError() {
@@ -228,16 +242,13 @@ export class DataSourceSelectable extends React.Component<
 
   render() {
     if (this.state.showEmptyState) {
-      return (
-        <NoDataSource
-          totalDataSourceCount={this.state.dataSourceOptions.length}
-          application={this.props.application}
-        />
-      );
+      return <NoDataSource application={this.props.application} />;
     }
+
     if (this.state.showError) {
-      return <DataSourceErrorMenu />;
+      return <DataSourceErrorMenu application={this.props.application} />;
     }
+
     const button = (
       <>
         <EuiButtonEmpty
@@ -270,14 +281,16 @@ export class DataSourceSelectable extends React.Component<
         anchorPosition="downLeft"
         data-test-subj={'dataSourceSelectableContextMenuPopover'}
       >
+        <DataSourceDropDownHeader
+          totalDataSourceCount={this.state.dataSourceOptions.length}
+          application={this.props.application}
+        />
         <EuiContextMenuPanel>
-          <EuiPanel className={'dataSourceSelectableOuiPanel'} color="transparent" paddingSize="s">
-            <DataSourceDropDownHeader
-              totalDataSourceCount={this.state.dataSourceOptions.length}
-              application={this.props.application}
-            />
-            <EuiHorizontalRule margin="none" />
-            <EuiSpacer size="s" />
+          <EuiPanel
+            className={'dataSourceSelectableOuiPanel'}
+            color="transparent"
+            paddingSize="none"
+          >
             <EuiSelectable
               aria-label="Search"
               searchable
@@ -285,9 +298,12 @@ export class DataSourceSelectable extends React.Component<
                 placeholder: 'Search',
                 compressed: true,
               }}
+              listProps={{
+                onFocusBadge: false,
+              }}
               options={this.state.dataSourceOptions}
               onChange={(newOptions) => this.onChange(newOptions)}
-              singleSelection={true}
+              singleSelection={'always'}
               data-test-subj={'dataSourceSelectable'}
               renderOption={(option) => (
                 <DataSourceItem
@@ -299,7 +315,7 @@ export class DataSourceSelectable extends React.Component<
             >
               {(list, search) => (
                 <>
-                  {search}
+                  <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
                   {list}
                 </>
               )}

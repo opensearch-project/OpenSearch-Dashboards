@@ -14,11 +14,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
+  ApplicationStart,
   IUiSettingsClient,
   SavedObjectsClientContract,
   ToastsStart,
 } from 'opensearch-dashboards/public';
-import { getApplication, getDataSourcesWithFields, handleDataSourceFetchError } from '../utils';
+import {
+  getApplication,
+  getDataSourcesWithFields,
+  handleDataSourceFetchError,
+  handleNoAvailableDataSourceError,
+} from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 import { NoDataSource } from '../no_data_source';
@@ -38,6 +44,7 @@ interface DataSourceAggregatedViewProps {
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   displayAllCompatibleDataSources: boolean;
   uiSettings?: IUiSettingsClient;
+  application?: ApplicationStart;
 }
 
 interface DataSourceAggregatedViewState extends DataSourceBaseState {
@@ -112,6 +119,15 @@ export class DataSourceAggregatedView extends React.Component<
           allDataSourcesIdToTitleMap.set('', 'Local cluster');
         }
 
+        if (allDataSourcesIdToTitleMap.size === 0) {
+          handleNoAvailableDataSourceError(
+            this.onEmptyState.bind(this),
+            this.props.notifications,
+            this.props.application
+          );
+          return;
+        }
+
         this.setState({
           ...this.state,
           allDataSourcesIdToTitleMap,
@@ -124,16 +140,20 @@ export class DataSourceAggregatedView extends React.Component<
       });
   }
 
+  onEmptyState() {
+    this.setState({ showEmptyState: true });
+  }
+
   onError() {
     this.setState({ showError: true });
   }
 
   render() {
     if (this.state.showEmptyState) {
-      return <NoDataSource />;
+      return <NoDataSource application={this.props.application} />;
     }
     if (this.state.showError) {
-      return <DataSourceErrorMenu />;
+      return <DataSourceErrorMenu application={this.props.application} />;
     }
     const button = (
       <EuiButtonEmpty
@@ -202,16 +222,8 @@ export class DataSourceAggregatedView extends React.Component<
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
+          {titleComponent}
           <EuiContextMenuPanel>
-            <EuiPanel
-              className={'dataSourceAggregatedViewOuiPanel'}
-              borderRadius="none"
-              hasBorder={false}
-              color="transparent"
-              paddingSize="s"
-            >
-              {titleComponent}
-            </EuiPanel>
             <EuiPanel
               className={'dataSourceAggregatedViewOuiPanel'}
               paddingSize="none"

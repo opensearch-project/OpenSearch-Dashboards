@@ -110,8 +110,7 @@ export const DataSourceListActiveExample = ({
               notifications,
               displayAllCompatibleDataSources: false,
               // To see selected options, obtain the datasource id and paste it here. Note that this needs to be defined when displayAllCompatibleDataSources is false
-              activeDataSourceIds: [],
-              uiSettings,
+              activeDataSourceIds: [''],
             }}
           />
         )}

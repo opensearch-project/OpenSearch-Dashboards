@@ -58,6 +58,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindOptions,
@@ -121,7 +122,7 @@ export interface SavedObjectsTableProps {
   canGoInApp: (obj: SavedObjectWithMetadata) => boolean;
   dateFormat: string;
   dataSourceEnabled: boolean;
-  hideLocalCluster: boolean;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 export interface SavedObjectsTableState {
@@ -650,9 +651,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         overlays={this.props.overlays}
         search={this.props.search}
         dataSourceEnabled={this.props.dataSourceEnabled}
-        hideLocalCluster={this.props.hideLocalCluster}
         savedObjects={this.props.savedObjectsClient}
         notifications={this.props.notifications}
+        dataSourceManagement={this.props.dataSourceManagement}
       />
     );
   }

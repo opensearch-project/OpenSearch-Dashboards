@@ -28,7 +28,7 @@ describe('NoDataSource', () => {
 
     await nextTick();
 
-    const button = await container.findByTestId('dataSourceEmptyStateHeaderButton');
+    const button = await container.findByTestId('dataSourceEmptyMenuHeaderLink');
     button.click();
 
     expect(container.getByTestId('dataSourceEmptyStatePopover')).toBeVisible();
@@ -44,7 +44,7 @@ describe('NoDataSource', () => {
 
     await nextTick();
 
-    const button = await container.findByTestId('dataSourceEmptyStateHeaderButton');
+    const button = await container.findByTestId('dataSourceEmptyMenuHeaderLink');
     button.click();
     const redirectButton = await container.findByTestId(
       'dataSourceEmptyStateManageDataSourceButton'
