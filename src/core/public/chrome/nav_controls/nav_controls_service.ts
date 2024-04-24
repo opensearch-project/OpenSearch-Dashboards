@@ -28,32 +28,15 @@
  * under the License.
  */
 
-import React from 'react';
 import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject, Observable } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { MountPoint } from '../../types';
-import {
-  RightNavigationButton,
-  RightNavigationButtonProps,
-} from '../ui/header/right_navigation_button';
-import { mountReactNode } from '../../utils';
-import { InternalApplicationStart } from '../../application';
-import { HttpStart } from '../../http';
 
 /** @public */
 export interface ChromeNavControl {
   order?: number;
   mount: MountPoint;
-}
-
-interface StartDeps {
-  application: InternalApplicationStart;
-  http: HttpStart;
-}
-
-interface RightNavigationProps extends Omit<RightNavigationButtonProps, 'http' | 'application'> {
-  order: number;
 }
 
 /**
@@ -79,8 +62,6 @@ export interface ChromeNavControls {
   registerRight(navControl: ChromeNavControl): void;
   /** Register a nav control to be presented on the top-center side of the chrome header. */
   registerCenter(navControl: ChromeNavControl): void;
-  /** Register a nav control to be presented on the top-right side of the chrome header. The component and style will be uniformly maintained in chrome */
-  registerRightNavigation(props: RightNavigationProps): void;
   /** @internal */
   getLeft$(): Observable<ChromeNavControl[]>;
   /** @internal */
@@ -93,7 +74,7 @@ export interface ChromeNavControls {
 export class NavControlsService {
   private readonly stop$ = new ReplaySubject(1);
 
-  public start({ application, http }: StartDeps) {
+  public start() {
     const navControlsLeft$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsRight$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
     const navControlsCenter$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
@@ -102,16 +83,15 @@ export class NavControlsService {
       new Set()
     );
 
-    const registerRight = (navControl: ChromeNavControl) =>
-      navControlsRight$.next(new Set([...navControlsRight$.value.values(), navControl]));
-
     return {
       // In the future, registration should be moved to the setup phase. This
       // is not possible until the legacy nav controls are no longer supported.
       registerLeft: (navControl: ChromeNavControl) =>
         navControlsLeft$.next(new Set([...navControlsLeft$.value.values(), navControl])),
 
-      registerRight,
+      registerRight: (navControl: ChromeNavControl) =>
+        navControlsRight$.next(new Set([...navControlsRight$.value.values(), navControl])),
+
       registerCenter: (navControl: ChromeNavControl) =>
         navControlsCenter$.next(new Set([...navControlsCenter$.value.values(), navControl])),
 
@@ -124,19 +104,7 @@ export class NavControlsService {
         navControlsExpandedCenter$.next(
           new Set([...navControlsExpandedCenter$.value.values(), navControl])
         ),
-      registerRightNavigation: (props: RightNavigationProps) => {
-        const nav = {
-          order: props.order,
-          mount: mountReactNode(
-            React.createElement(RightNavigationButton, {
-              ...props,
-              http,
-              application,
-            })
-          ),
-        };
-        return registerRight(nav);
-      },
+
       getLeft$: () =>
         navControlsLeft$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),

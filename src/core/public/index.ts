@@ -69,6 +69,8 @@ import {
   ChromeRecentlyAccessedHistoryItem,
   NavType,
   RightNavigationOrder,
+  RightNavigationButton,
+  RightNavigationButtonProps,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -362,6 +364,8 @@ export {
   NavType,
   Branding,
   RightNavigationOrder,
+  RightNavigationButton,
+  RightNavigationButtonProps,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';

@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'src/core/public';
 import { AppUpdater } from 'opensearch-dashboards/public';
@@ -39,12 +40,14 @@ import {
   AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
   RightNavigationOrder,
+  RightNavigationButton,
 } from '../../../core/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
 import './index.scss';
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
 
 export interface DevToolsSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -135,11 +138,17 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     if (this.getSortedDevTools().length === 0) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     }
-    core.chrome.navControls.registerRightNavigation({
+    core.chrome.navControls.registerRight({
       order: RightNavigationOrder.DevTool,
-      appId: this.id,
-      iconType: 'consoleApp',
-      title: this.title,
+      mount: toMountPoint(
+        React.createElement(RightNavigationButton, {
+          appId: this.id,
+          iconType: 'consoleApp',
+          title: this.title,
+          application: core.application,
+          http: core.http,
+        })
+      ),
     });
   }
 
