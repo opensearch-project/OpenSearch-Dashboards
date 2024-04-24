@@ -10,7 +10,9 @@ export async function checkDevDocs(log, files) {
     const path = file.getRelativePath();
 
     if (path === SIDEBAR_PATH) {
-      throw Error(`The ${SIDEBAR_PATH} file of the developer docs has been modified but is not ready to be committed. This can be done by performing "git add ${SIDEBAR_PATH}" and committing the changes.`);
+      throw Error(
+        `The ${SIDEBAR_PATH} file of the developer docs has been modified but is not ready to be committed. This can be done by performing "git add ${SIDEBAR_PATH}" and committing the changes.`
+      );
     }
   });
 }
