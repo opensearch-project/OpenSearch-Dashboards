@@ -55,6 +55,7 @@ import { setDataSourceEnabled } from './lib/services';
 import {
   TIMESERIES_VISUALIZATION_CLIENT_WRAPPER_ID,
   timeSeriesVisualizationClientWrapper,
+  TIMESERIES_VISUALIZATION_CLIENT_WRAPPER_PRIORITY,
 } from './lib/timeseries_visualization_client_wrapper';
 
 export interface LegacySetup {
@@ -122,7 +123,7 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
 
     setDataSourceEnabled({ enabled: !!plugins.dataSource });
     core.savedObjects.addClientWrapper(
-      11,
+      TIMESERIES_VISUALIZATION_CLIENT_WRAPPER_PRIORITY,
       TIMESERIES_VISUALIZATION_CLIENT_WRAPPER_ID,
       timeSeriesVisualizationClientWrapper
     );

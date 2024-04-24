@@ -8,10 +8,12 @@ import {
   SavedObjectsClientWrapperFactory,
   SavedObjectsClientWrapperOptions,
   SavedObjectsCreateOptions,
+  SavedObjectsErrorHelpers,
 } from '../../../../core/server';
 import { getDataSourceEnabled } from './services';
 
 export const TIMESERIES_VISUALIZATION_CLIENT_WRAPPER_ID = 'timeseries-visualization-client-wrapper';
+export const TIMESERIES_VISUALIZATION_CLIENT_WRAPPER_PRIORITY = 11;
 
 export const timeSeriesVisualizationClientWrapper: SavedObjectsClientWrapperFactory = (
   wrapperOptions: SavedObjectsClientWrapperOptions
@@ -37,14 +39,19 @@ export const timeSeriesVisualizationClientWrapper: SavedObjectsClientWrapperFact
     );
 
     if (visState.params.data_source_id) {
-      if (await checkIfDataSourceExists(visState.params.data_source_id, wrapperOptions.client)) {
-        newReferences?.push({
-          id: visState.params.data_source_id,
-          name: 'dataSource',
-          type: 'data-source',
-        });
-      } else {
-        delete visState.params.data_source_id;
+      try {
+        if (await checkIfDataSourceExists(visState.params.data_source_id, wrapperOptions.client)) {
+          newReferences?.push({
+            id: visState.params.data_source_id,
+            name: 'dataSource',
+            type: 'data-source',
+          });
+        } else {
+          delete visState.params.data_source_id;
+        }
+      } catch (err) {
+        const errMsg = `Failed to fetch existing data source for dataSourceId [${visState.params.data_source_id}]`;
+        throw SavedObjectsErrorHelpers.decorateBadRequestError(err, errMsg);
       }
     }
 
