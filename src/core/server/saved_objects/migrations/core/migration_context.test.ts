@@ -119,9 +119,9 @@ describe('deleteTypeMappingsFields', () => {
       }
     });
 
-    deleteTypeMappingsFields(targetMappings, rawConfig);
+    const updatedMappings = deleteTypeMappingsFields(targetMappings, rawConfig);
 
-    expect(targetMappings.properties).toEqual({
+    expect(updatedMappings.properties).toEqual({
       type2: { type: 'keyword' },
     });
   });
@@ -145,9 +145,9 @@ describe('deleteTypeMappingsFields', () => {
       }
     });
 
-    deleteTypeMappingsFields(targetMappings, rawConfig);
+    const updatedMappings = deleteTypeMappingsFields(targetMappings, rawConfig);
 
-    expect(targetMappings.properties).toEqual({
+    expect(updatedMappings.properties).toEqual({
       type1: { type: 'text' },
       type2: { type: 'keyword' },
       type3: { type: 'boolean' },
@@ -173,9 +173,9 @@ describe('deleteTypeMappingsFields', () => {
       }
     });
 
-    deleteTypeMappingsFields(targetMappings, rawConfig);
+    const updatedMappings = deleteTypeMappingsFields(targetMappings, rawConfig);
 
-    expect(targetMappings.properties).toEqual({
+    expect(updatedMappings.properties).toEqual({
       type1: { type: 'text' },
       type2: { type: 'keyword' },
       type3: { type: 'boolean' },

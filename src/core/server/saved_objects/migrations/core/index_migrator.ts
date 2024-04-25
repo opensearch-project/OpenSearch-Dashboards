@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { DeleteByQueryRequest } from '@opensearch-project/opensearch/api/types';
 import { diffMappings } from './build_active_mappings';
 import * as Index from './opensearch_index';
 import { migrateRawDocs } from './migrate_raw_docs';
@@ -173,8 +174,8 @@ async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern 
 }
 
 /**
- * Delete saved objects by type. This is used to remove saved object types that
- * are not compatible with the current version of OpenSearch Dashboards.
+ * Delete saved objects by type. If migrations.delete.types is specified,
+ * any saved objects that matches that type will be deleted.
  */
 async function deleteSavedObjectsByType(context: Context) {
   const { client, source, log, typesToDelete } = context;
@@ -183,7 +184,7 @@ async function deleteSavedObjectsByType(context: Context) {
   }
 
   log.info(`Removing saved objects of types: ${typesToDelete.join(', ')}`);
-  return client.deleteByQuery({
+  const params = {
     index: source.indexName,
     body: {
       query: {
@@ -194,7 +195,9 @@ async function deleteSavedObjectsByType(context: Context) {
     },
     conflicts: 'proceed',
     refresh: true,
-  });
+  } as DeleteByQueryRequest;
+  log.debug(`Delete by query params: ${JSON.stringify(params)}`);
+  return client.deleteByQuery(params);
 }
 
 /**

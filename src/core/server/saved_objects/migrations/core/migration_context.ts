@@ -142,12 +142,13 @@ function createDestContext(
   typeMappingDefinitions: SavedObjectsTypeMappingDefinitions,
   opensearchDashboardsRawConfig?: Config
 ): Index.FullIndexInfo {
-  const targetMappings = disableUnknownTypeMappingFields(
-    buildActiveMappings(typeMappingDefinitions, opensearchDashboardsRawConfig),
-    source.mappings
+  const targetMappings = deleteTypeMappingsFields(
+    disableUnknownTypeMappingFields(
+      buildActiveMappings(typeMappingDefinitions, opensearchDashboardsRawConfig),
+      source.mappings
+    ),
+    opensearchDashboardsRawConfig
   );
-
-  deleteTypeMappingsFields(targetMappings, opensearchDashboardsRawConfig);
 
   return {
     aliases: {},
@@ -220,10 +221,9 @@ export function disableUnknownTypeMappingFields(
  * based on the application's configuration. This can be useful in scenarios where certain type
  * mappings are no longer needed and should be removed from the target mappings.
  *
- * Note: The function does not return a value. It directly modifies the targetMappings object passed to it.
- *
  * @param {Object} targetMappings - The target mappings object to be modified.
  * @param {Object} opensearchDashboardsRawConfig - The application's configuration object.
+ * @returns The mappings that should be applied to the target index.
  */
 export function deleteTypeMappingsFields(
   targetMappings: IndexMapping,
@@ -231,12 +231,19 @@ export function deleteTypeMappingsFields(
 ) {
   if (opensearchDashboardsRawConfig?.get('migrations.delete.enabled')) {
     const deleteTypes = new Set(opensearchDashboardsRawConfig.get('migrations.delete.types'));
-    targetMappings.properties = Object.keys(targetMappings.properties)
+    const newProperties = Object.keys(targetMappings.properties)
       .filter((key) => !deleteTypes.has(key))
       .reduce((obj, key) => {
         return { ...obj, [key]: targetMappings.properties[key] };
       }, {});
+
+    return {
+      ...targetMappings,
+      properties: newProperties,
+    };
   }
+
+  return targetMappings;
 }
 
 /**
@@ -246,6 +253,6 @@ export function deleteTypeMappingsFields(
  */
 function nextIndexName(indexName: string, alias: string) {
   const indexSuffix = (indexName.match(/[\d]+$/) || [])[0];
-  const indexNum = parseInt(indexSuffix, 10) || 0;
+  const indexNum = parseInt(indexSuffix!, 10) || 0;
   return `${alias}_${indexNum + 1}`;
 }
