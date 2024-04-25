@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { first } from 'rxjs/operators';
@@ -16,6 +16,7 @@ import {
   AppUpdater,
   AppStatus,
   PublicAppInfo,
+  ChromeBreadcrumb,
   WorkspaceAvailability,
 } from '../../../core/public';
 import {
@@ -48,6 +49,7 @@ interface WorkspacePluginSetupDeps {
 export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
+  private breadcrumbsSubscription?: Subscription;
   private currentWorkspaceIdSubscription?: Subscription;
   private managementCurrentWorkspaceIdSubscription?: Subscription;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
@@ -120,6 +122,41 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         }
       }
     );
+  }
+
+  /**
+   * Add workspace overview page to breadcrumbs
+   * @param core CoreStart
+   * @private
+   */
+  private addWorkspaceToBreadcrumbs(core: CoreStart) {
+    this.breadcrumbsSubscription = combineLatest([
+      core.workspaces.currentWorkspace$,
+      core.chrome.getBreadcrumbs$(),
+    ]).subscribe(([currentWorkspace, breadcrumbs]) => {
+      if (currentWorkspace && breadcrumbs && breadcrumbs.length > 0) {
+        // workspace always be the second one
+        const workspaceInBreadcrumbs =
+          breadcrumbs.length > 1 && breadcrumbs[1]?.text === currentWorkspace.name;
+        if (!workspaceInBreadcrumbs) {
+          const workspaceBreadcrumb: ChromeBreadcrumb = {
+            text: currentWorkspace.name,
+            onClick: () => {
+              core.application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+            },
+          };
+          const homeBreadcrumb: ChromeBreadcrumb = {
+            text: 'Home',
+            onClick: () => {
+              core.application.navigateToApp('home');
+            },
+          };
+          breadcrumbs.splice(0, 0, homeBreadcrumb, workspaceBreadcrumb);
+
+          core.chrome.setBreadcrumbs(breadcrumbs);
+        }
+      }
+    });
   }
 
   public async setup(
@@ -203,7 +240,35 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
-    // update
+    // workspace fatal error
+    core.application.register({
+      id: WORKSPACE_FATAL_ERROR_APP_ID,
+      title: '',
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderFatalErrorApp } = await import('./application');
+        return mountWorkspaceApp(params, renderFatalErrorApp);
+      },
+    });
+
+    /**
+     * register workspace overview page
+     */
+    core.application.register({
+      id: WORKSPACE_OVERVIEW_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceOverview', {
+        defaultMessage: 'Workspace Overview',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      async mount(params: AppMountParameters) {
+        const { renderOverviewApp } = await import('./application');
+        return mountWorkspaceApp(params, renderOverviewApp);
+      },
+    });
+
+    /**
+     * register workspace update page
+     */
     core.application.register({
       id: WORKSPACE_UPDATE_APP_ID,
       title: i18n.translate('workspace.settings.workspaceUpdate', {
@@ -213,17 +278,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       async mount(params: AppMountParameters) {
         const { renderUpdaterApp } = await import('./application');
         return mountWorkspaceApp(params, renderUpdaterApp);
-      },
-    });
-
-    // workspace fatal error
-    core.application.register({
-      id: WORKSPACE_FATAL_ERROR_APP_ID,
-      title: '',
-      navLinkStatus: AppNavLinkStatus.hidden,
-      async mount(params: AppMountParameters) {
-        const { renderFatalErrorApp } = await import('./application');
-        return mountWorkspaceApp(params, renderFatalErrorApp);
       },
     });
 
@@ -267,6 +321,8 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       this.filterNavLinks(core);
     });
 
+    this.addWorkspaceToBreadcrumbs(core);
+
     return {};
   }
 
@@ -274,5 +330,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.currentWorkspaceSubscription?.unsubscribe();
     this.currentWorkspaceIdSubscription?.unsubscribe();
     this.managementCurrentWorkspaceIdSubscription?.unsubscribe();
+    this.breadcrumbsSubscription?.unsubscribe();
   }
 }
