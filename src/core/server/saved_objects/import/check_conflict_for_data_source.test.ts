@@ -11,6 +11,7 @@ import {
   checkConflictsForDataSource,
   ConflictsForDataSourceParams,
 } from './check_conflict_for_data_source';
+import { VisualizationObject } from './types';
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 
@@ -38,6 +39,23 @@ const createVegaVisualizationObject = (id: string): SavedObjectType => {
         ? [{ id: id.split('_')[0], type: 'data-source', name: 'dataSource' }]
         : [],
   } as SavedObjectType;
+};
+
+const createTSVBVisualizationObject = (id: string): VisualizationObject => {
+  const idParse = id.split('_');
+  const params = idParse.length > 1 ? { data_source_id: idParse[1] } : {};
+  const visState = {
+    type: 'metrics',
+    params,
+  };
+
+  return {
+    type: 'visualization',
+    id,
+    attributes: { title: 'some-title', visState: JSON.stringify(visState) },
+    references:
+      idParse.length > 1 ? [{ id: idParse[1], type: 'data-source', name: 'dataSource' }] : [],
+  } as VisualizationObject;
 };
 
 const getSavedObjectClient = (): SavedObjectsClientContract => {
@@ -294,6 +312,59 @@ describe('#checkConflictsForDataSource', () => {
           [
             `visualization:some-object-id`,
             { id: 'nonexistent-datasource-title-id_some-object-id', omitOriginId: true },
+          ],
+        ]),
+      })
+    );
+  });
+
+  /**
+   * TSVB test cases
+   */
+  it.each([
+    {
+      id: 'some-object-id',
+    },
+    {
+      id: 'old-datasource-id_some-object-id',
+    },
+  ])('will update datasource reference + visState of TSVB visualization', async ({ id }) => {
+    const tsvbSavedObject = createTSVBVisualizationObject(id);
+    const expectedVisState = JSON.parse(tsvbSavedObject.attributes.visState);
+    expectedVisState.params.data_source_id = 'some-datasource-id';
+    const newVisState = JSON.stringify(expectedVisState);
+    const params = setupParams({
+      objects: [tsvbSavedObject],
+      ignoreRegularConflicts: true,
+      dataSourceId: 'some-datasource-id',
+      savedObjectsClient: getSavedObjectClient(),
+    });
+    const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
+
+    expect(checkConflictsForDataSourceResult).toEqual(
+      expect.objectContaining({
+        filteredObjects: [
+          {
+            ...tsvbSavedObject,
+            attributes: {
+              title: 'some-title',
+              visState: newVisState,
+            },
+            id: 'some-datasource-id_some-object-id',
+            references: [
+              {
+                id: 'some-datasource-id',
+                name: 'dataSource',
+                type: 'data-source',
+              },
+            ],
+          },
+        ],
+        errors: [],
+        importIdMap: new Map([
+          [
+            `visualization:some-object-id`,
+            { id: 'some-datasource-id_some-object-id', omitOriginId: true },
           ],
         ]),
       })
