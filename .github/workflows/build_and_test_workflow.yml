@@ -198,6 +198,28 @@ jobs:
           restore-keys: |
             yarn-
 
+      # Lock Chrome version until ChromeDriver's release pipeline is fixed
+      - name: Download Chrome
+        id: download-chrome
+        uses: abhi1693/setup-browser@v0.3.5
+        with:
+          browser: chrome
+          # v122
+          version: 1250586
+
+      - name: Setup Chrome (Linux)
+        if: matrix.os != 'windows-latest'
+        run: |
+          sudo rm -rf /usr/bin/google-chrome /opt/google/chrome
+          sudo ln -s ${{steps.download-chrome.outputs.path}}/${{steps.download-chrome.outputs.binary}} /usr/bin/google-chrome
+
+      - name: Setup Chrome (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          New-Item -Force -Type Directory "$Env:Programfiles/Google/Chrome/Application"
+          Remove-Item -Recurse -Force "$Env:Programfiles/Google/Chrome/Application/*"
+          Copy-Item -Force -Recurse "${{steps.download-chrome.outputs.path}}/*" "$Env:Programfiles/Google/Chrome/Application"
+
       - name: Setup chromedriver
         run: node scripts/upgrade_chromedriver.js
 
@@ -291,6 +313,28 @@ jobs:
           key: yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             yarn-
+
+      # Lock Chrome version until ChromeDriver's release pipeline is fixed
+      - name: Download Chrome
+        id: download-chrome
+        uses: abhi1693/setup-browser@v0.3.5
+        with:
+          browser: chrome
+          # v122
+          version: 1250586
+
+      - name: Setup Chrome (Linux)
+        if: matrix.os != 'windows-latest'
+        run: |
+          sudo rm -rf /usr/bin/google-chrome /opt/google/chrome
+          sudo ln -s ${{steps.download-chrome.outputs.path}}/${{steps.download-chrome.outputs.binary}} /usr/bin/google-chrome
+
+      - name: Setup Chrome (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          New-Item -Force -Type Directory "$Env:Programfiles/Google/Chrome/Application"
+          Remove-Item -Recurse -Force "$Env:Programfiles/Google/Chrome/Application/*"
+          Copy-Item -Force -Recurse "${{steps.download-chrome.outputs.path}}/*" "$Env:Programfiles/Google/Chrome/Application"
 
       - name: Setup chromedriver
         run: node scripts/upgrade_chromedriver.js
