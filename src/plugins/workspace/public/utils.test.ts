@@ -238,6 +238,7 @@ describe('workspace utils: filterWorkspaceConfigurableApps', () => {
       navLinkStatus: 1,
       order: -2000,
       status: 0,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     },
     {
       appRoute: '/app/management',
@@ -255,9 +256,8 @@ describe('workspace utils: filterWorkspaceConfigurableApps', () => {
   ] as PublicAppInfo[];
   it('should filters out apps that are not accessible in the workspace', () => {
     const filteredApps = filterWorkspaceConfigurableApps(defaultApplications);
-    expect(filteredApps.length).toEqual(3);
+    expect(filteredApps.length).toEqual(2);
     expect(filteredApps[0].id).toEqual('dashboards');
-    expect(filteredApps[1].id).toEqual('opensearchDashboardsOverview');
-    expect(filteredApps[2].id).toEqual('management');
+    expect(filteredApps[1].id).toEqual('management');
   });
 });

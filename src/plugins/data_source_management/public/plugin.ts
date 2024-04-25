@@ -41,7 +41,7 @@ export interface DataSourceManagementPluginStart {
   getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
 }
 
-export const DSM_APP_ID = 'dataSourceManagement';
+export const DSM_APP_ID = 'dataSources';
 
 export class DataSourceManagementPlugin
   implements
@@ -67,8 +67,8 @@ export class DataSourceManagementPlugin
     const savedObjectPromise = core
       .getStartServices()
       .then(([coreStart]) => coreStart.savedObjects);
-    const httpPromise = core.getStartServices().then(([coreStart]) => coreStart.http);
-    const column = new DataSourceColumn(savedObjectPromise, httpPromise);
+
+    const column = new DataSourceColumn(savedObjectPromise);
     indexPatternManagement.columns.register(column);
 
     opensearchDashboardsSection.registerApp({
