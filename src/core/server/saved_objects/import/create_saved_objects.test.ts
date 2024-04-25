@@ -76,6 +76,7 @@ const dataSourceObj1 = createObject(DATA_SOURCE, 'ds-id1'); // -> success
 const dataSourceObj2 = createObject(DATA_SOURCE, 'ds-id2'); // -> conflict
 const dashboardObjWithDataSource = createObject('dashboard', 'ds_dashboard-id1'); // -> success
 const visualizationObjWithDataSource = createObject('visualization', 'ds_visualization-id1'); // -> success
+visualizationObjWithDataSource.attributes = { visState: '{}' };
 const searchObjWithDataSource = createObject('search', 'ds_search-id1'); // -> success
 
 // objs without data source id, used to test can get saved object with data source id
@@ -100,6 +101,7 @@ const visualizationObj = {
   type: 'visualization',
   attributes: {
     title: 'visualization-title',
+    visState: '{}',
   },
   references: [],
   source: {
@@ -129,6 +131,27 @@ const getVegaVisualizationObj = (id: string) => ({
   version: 'some-version',
   updated_at: 'some-date',
 });
+
+const getTSVBVisualizationObj = (id: string, dataSourceId?: string) => {
+  const params = dataSourceId ? { data_source_id: dataSourceId } : {};
+  const references = dataSourceId
+    ? [{ id: dataSourceId, name: 'dataSource', type: 'data-source' }]
+    : [];
+  return {
+    type: 'visualization',
+    id,
+    attributes: {
+      title: 'some-title',
+      visState: JSON.stringify({
+        type: 'metrics',
+        params,
+      }),
+    },
+    references,
+    namespaces: ['default'],
+    updated_at: 'some-date',
+  };
+};
 
 const getVegaMDSVisualizationObj = (id: string, dataSourceId: string) => ({
   type: 'visualization',
@@ -500,6 +523,30 @@ describe('#createSavedObjects', () => {
     expect(results).toEqual(expectedResults);
   };
 
+  const testTSVBVisualizationsWithDataSources = async (params: {
+    objects: SavedObject[];
+    expectedFilteredObjects: SavedObject[];
+    dataSourceId?: string;
+    dataSourceTitle?: string;
+  }) => {
+    const savedObjectsCustomClient = savedObjectsClientMock.create();
+
+    const options = setupParams({
+      ...params,
+      savedObjectsCustomClient,
+    });
+
+    savedObjectsCustomClient.bulkCreate = jest.fn().mockImplementation((objectsToCreate, _) => {
+      return Promise.resolve({
+        saved_objects: objectsToCreate,
+      });
+    });
+
+    const results = await createSavedObjects(options);
+
+    expect(results.createdObjects).toMatchObject(params.expectedFilteredObjects);
+  };
+
   const testReturnValueWithDataSource = async (
     namespace?: string,
     dataSourceId?: string,
@@ -653,6 +700,46 @@ describe('#createSavedObjects', () => {
         },
       ];
       await testVegaVisualizationsWithDataSources({
+        objects,
+        expectedFilteredObjects,
+        dataSourceId: 'some-datasource-id',
+        dataSourceTitle: 'dataSourceName',
+      });
+    });
+  });
+
+  describe('with a data source for TSVB saved objects', () => {
+    test('can attach a TSVB datasource reference to a non-MDS ', async () => {
+      const objects = [getTSVBVisualizationObj('some-tsvb-id')];
+      const expectedObject = getTSVBVisualizationObj('some-tsvb-id', 'some-datasource-id');
+      const expectedFilteredObjects = [
+        {
+          ...expectedObject,
+          attributes: {
+            title: 'some-title_dataSourceName',
+          },
+        },
+      ];
+      await testTSVBVisualizationsWithDataSources({
+        objects,
+        expectedFilteredObjects,
+        dataSourceId: 'some-datasource-id',
+        dataSourceTitle: 'dataSourceName',
+      });
+    });
+
+    test('can update a TSVB datasource reference', async () => {
+      const objects = [getTSVBVisualizationObj('some-tsvb-id', 'old-datasource-id')];
+      const expectedObject = getTSVBVisualizationObj('some-tsvb-id', 'some-datasource-id');
+      const expectedFilteredObjects = [
+        {
+          ...expectedObject,
+          attributes: {
+            title: 'some-title_dataSourceName',
+          },
+        },
+      ];
+      await testTSVBVisualizationsWithDataSources({
         objects,
         expectedFilteredObjects,
         dataSourceId: 'some-datasource-id',

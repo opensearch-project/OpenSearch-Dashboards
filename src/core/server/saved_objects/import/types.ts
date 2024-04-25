@@ -189,7 +189,7 @@ export interface SavedObjectsImportOptions {
   createNewCopies: boolean;
   dataSourceId?: string;
   dataSourceTitle?: string;
-  /** if specified, will import in given workspaces */
+  dataSourceEnabled?: boolean;
   workspaces?: SavedObjectsBaseOptions['workspaces'];
 }
 
@@ -219,3 +219,5 @@ export interface SavedObjectsResolveImportErrorsOptions {
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
+
+export type VisualizationObject<T = any> = SavedObject<T> & { attributes: { visState: string } };

@@ -7,30 +7,24 @@ Object {
     <div>
       <div
         class="euiPopover euiPopover--anchorDownLeft"
-        data-test-subj="dataSourceSelectableContextMenuPopover"
-        id="dataSourceSelectableContextMenuPopover"
+        data-test-subj="dataSourceErrorPopover"
+        id="dataSourceErrorPopover"
       >
         <div
           class="euiPopover__anchor"
         >
           <button
-            aria-label="dataSourceMenuButton"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
-            data-test-subj="dataSourceSelectableContextMenuHeaderLink"
+            aria-label="dataSourceErrorMenuHeaderLink"
+            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiHeaderLink"
+            data-test-subj="dataSourceErrorMenuHeaderLink"
             type="button"
           >
             <span
-              class="euiButtonContent euiButtonEmpty__content"
-            >
-              <span
-                class="euiButtonContent__icon"
-                color="inherit"
-                data-euiicon-type="database"
-              />
-              <span
-                class="euiButtonEmpty__text"
-              />
-            </span>
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="iconType"
+            />
           </button>
         </div>
       </div>
@@ -39,30 +33,24 @@ Object {
   "container": <div>
     <div
       class="euiPopover euiPopover--anchorDownLeft"
-      data-test-subj="dataSourceSelectableContextMenuPopover"
-      id="dataSourceSelectableContextMenuPopover"
+      data-test-subj="dataSourceErrorPopover"
+      id="dataSourceErrorPopover"
     >
       <div
         class="euiPopover__anchor"
       >
         <button
-          aria-label="dataSourceMenuButton"
-          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
-          data-test-subj="dataSourceSelectableContextMenuHeaderLink"
+          aria-label="dataSourceErrorMenuHeaderLink"
+          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small euiHeaderLink"
+          data-test-subj="dataSourceErrorMenuHeaderLink"
           type="button"
         >
           <span
-            class="euiButtonContent euiButtonEmpty__content"
-          >
-            <span
-              class="euiButtonContent__icon"
-              color="inherit"
-              data-euiicon-type="database"
-            />
-            <span
-              class="euiButtonEmpty__text"
-            />
-          </span>
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="iconType"
+          />
         </button>
       </div>
     </div>
@@ -135,9 +123,9 @@ Object {
           class="euiPopover__anchor"
         >
           <button
-            aria-label="dataSourceMenuButton"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
-            data-test-subj="dataSourceSelectableContextMenuHeaderLink"
+            aria-label="dataSourceSelectableButton"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+            data-test-subj="dataSourceSelectableButton"
             type="button"
           >
             <span
@@ -167,9 +155,9 @@ Object {
         class="euiPopover__anchor"
       >
         <button
-          aria-label="dataSourceMenuButton"
-          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
-          data-test-subj="dataSourceSelectableContextMenuHeaderLink"
+          aria-label="dataSourceSelectableButton"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+          data-test-subj="dataSourceSelectableButton"
           type="button"
         >
           <span
@@ -264,9 +252,9 @@ Object {
               class="euiPopover__anchor"
             >
               <button
-                aria-label="dataSourceMenuButton"
-                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
-                data-test-subj="dataSourceSelectableContextMenuHeaderLink"
+                aria-label="dataSourceSelectableButton"
+                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+                data-test-subj="dataSourceSelectableButton"
                 type="button"
               >
                 <span

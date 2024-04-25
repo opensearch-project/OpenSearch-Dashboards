@@ -4,37 +4,57 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { WorkspaceAttribute } from 'opensearch-dashboards/public';
+import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
+import { WorkspaceAttributeWithPermission } from '../../../../../core/types';
 import { WorkspaceClient } from '../../workspace_client';
-import { WorkspaceFormData } from '../workspace_form/types';
+import {
+  WorkspaceForm,
+  WorkspaceFormSubmitData,
+  WorkspaceOperationType,
+  convertPermissionsToPermissionSettings,
+  convertPermissionSettingsToPermissions,
+} from '../workspace_form';
 
-function getFormDataFromWorkspace(
-  currentWorkspace: WorkspaceAttribute | null | undefined
-): WorkspaceFormData {
-  return (currentWorkspace || {}) as WorkspaceFormData;
+export interface WorkspaceUpdaterProps {
+  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+  hideTitle?: boolean;
+  maxWidth?: number | string;
 }
 
-export const WorkspaceUpdater = () => {
+function getFormDataFromWorkspace(
+  currentWorkspace: WorkspaceAttributeWithPermission | null | undefined
+) {
+  if (!currentWorkspace) {
+    return null;
+  }
+  return {
+    ...currentWorkspace,
+    permissionSettings: currentWorkspace.permissions
+      ? convertPermissionsToPermissionSettings(currentWorkspace.permissions)
+      : currentWorkspace.permissions,
+  };
+}
+
+export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   const {
     services: { application, workspaces, notifications, http, workspaceClient },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
-  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<WorkspaceFormData>(
+  const workspaceConfigurableApps = useObservable(
+    props.workspaceConfigurableApps$ ?? of(undefined)
+  );
+  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState(
     getFormDataFromWorkspace(currentWorkspace)
   );
-
-  useEffect(() => {
-    setCurrentWorkspaceFormData(getFormDataFromWorkspace(currentWorkspace));
-  }, [currentWorkspace]);
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
@@ -49,8 +69,12 @@ export const WorkspaceUpdater = () => {
       }
 
       try {
-        const { ...attributes } = data;
-        result = await workspaceClient.update(currentWorkspace.id, attributes);
+        const { permissionSettings, ...attributes } = data;
+        result = await workspaceClient.update(
+          currentWorkspace.id,
+          attributes,
+          convertPermissionSettingsToPermissions(permissionSettings)
+        );
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.update.success', {
@@ -86,21 +110,26 @@ export const WorkspaceUpdater = () => {
     [notifications?.toasts, currentWorkspace, http, application, workspaceClient]
   );
 
-  if (!currentWorkspaceFormData.name) {
+  useEffect(() => {
+    setCurrentWorkspaceFormData(getFormDataFromWorkspace(currentWorkspace));
+  }, [currentWorkspace]);
+
+  if (!currentWorkspaceFormData) {
     return null;
   }
 
   return (
     <EuiPage paddingSize="none">
-      <EuiPageBody panelled>
-        <EuiPageHeader restrictWidth pageTitle="Update Workspace" />
+      <EuiPageBody>
+        {!props.hideTitle ? <EuiPageHeader restrictWidth pageTitle="Update Workspace" /> : null}
+        <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}
-          style={{ width: '100%', maxWidth: 1000 }}
+          style={{ width: '100%', maxWidth: props.maxWidth ? props.maxWidth : 1000 }}
         >
           {application && (
             <WorkspaceForm
@@ -108,6 +137,9 @@ export const WorkspaceUpdater = () => {
               defaultValues={currentWorkspaceFormData}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Update}
+              workspaceConfigurableApps={workspaceConfigurableApps}
+              permissionEnabled={isPermissionEnabled}
+              permissionLastAdminItemDeletable={false}
             />
           )}
         </EuiPageContent>

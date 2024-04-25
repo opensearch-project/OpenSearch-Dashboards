@@ -7,12 +7,11 @@ import { ShallowWrapper, shallow, mount } from 'enzyme';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
-import { DataSourceSelectable, opensearchClusterGroupLabel } from './data_source_selectable';
+import { DataSourceSelectable } from './data_source_selectable';
 import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
 import { render } from '@testing-library/react';
 import * as utils from '../utils';
-import { EuiSelectable } from '@elastic/eui';
 
 describe('DataSourceSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -102,7 +101,7 @@ describe('DataSourceSelectable', () => {
 
     await nextTick();
 
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceSelectableButton');
     button.click();
 
     expect(container.getByTestId('dataSourceSelectableContextMenuPopover')).toBeVisible();
@@ -138,12 +137,14 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           id: 'test2',
           label: 'test2',
         },
       ],
+      showError: false,
     });
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
@@ -157,6 +158,7 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           checked: 'on',
@@ -164,6 +166,7 @@ describe('DataSourceSelectable', () => {
           label: 'test2',
         },
       ],
+      showError: false,
     });
 
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
@@ -187,7 +190,7 @@ describe('DataSourceSelectable', () => {
     );
 
     await nextTick();
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceSelectableButton');
     expect(button).toHaveTextContent('test2');
   });
 
@@ -206,7 +209,7 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceSelectableButton');
     expect(button).toHaveTextContent('test2');
   });
 
@@ -225,7 +228,7 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceSelectableButton');
     expect(button).toHaveTextContent('');
     expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
   });
@@ -245,7 +248,7 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceSelectableButton');
     expect(button).toHaveTextContent('');
     expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
   });
@@ -334,12 +337,14 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           id: 'test2',
           label: 'test2',
         },
       ],
+      showError: false,
     });
   });
 
@@ -361,12 +366,14 @@ describe('DataSourceSelectable', () => {
 
     const containerInstance = container.instance();
 
-    expect(onSelectedDataSource).toBeCalledTimes(0);
+    expect(onSelectedDataSource).toBeCalledWith([]);
     expect(containerInstance.state).toEqual({
       dataSourceOptions: [],
       defaultDataSource: null,
       isPopoverOpen: false,
       selectedOption: [],
+      showEmptyState: false,
+      showError: true,
     });
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
@@ -380,6 +387,7 @@ describe('DataSourceSelectable', () => {
       ],
       defaultDataSource: null,
       isPopoverOpen: false,
+      showEmptyState: false,
       selectedOption: [
         {
           checked: 'on',
@@ -387,48 +395,28 @@ describe('DataSourceSelectable', () => {
           label: 'test2',
         },
       ],
+      showError: true,
     });
 
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toHaveBeenCalled();
   });
-
-  it('should render opensearch cluster group label at the top of options, when there are options availiable', async () => {
+  it('should render no data source when no data source filtered out and hide local cluster', async () => {
     const onSelectedDataSource = jest.fn();
-    component = shallow(
+    render(
       <DataSourceSelectable
         savedObjectsClient={client}
         notifications={toasts}
         onSelectedDataSources={onSelectedDataSource}
         disabled={false}
-        hideLocalCluster={false}
+        hideLocalCluster={true}
         fullWidth={false}
+        selectedOption={[{ id: 'test2' }]}
+        dataSourceFilter={(ds) => false}
       />
     );
-
-    component.instance().componentDidMount!();
     await nextTick();
-    const optionsProp = component.find(EuiSelectable).prop('options');
-    expect(optionsProp[0]).toEqual(opensearchClusterGroupLabel);
-  });
-
-  it('should not render opensearch cluster group label, when there is no option availiable', async () => {
-    const onSelectedDataSource = jest.fn();
-    spyOn(utils, 'getDefaultDataSource').and.returnValue([]);
-    component = shallow(
-      <DataSourceSelectable
-        savedObjectsClient={client}
-        notifications={toasts}
-        onSelectedDataSources={onSelectedDataSource}
-        disabled={false}
-        hideLocalCluster={false}
-        fullWidth={false}
-      />
-    );
-
-    component.instance().componentDidMount!();
-    await nextTick();
-    const optionsProp = component.find(EuiSelectable).prop('options');
-    expect(optionsProp).toEqual([]);
+    expect(toasts.add).toBeCalled();
+    expect(onSelectedDataSource).toBeCalledWith([]);
   });
 });
