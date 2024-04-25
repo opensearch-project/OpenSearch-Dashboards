@@ -97,7 +97,7 @@
 
     .ace_storage,
     .ace_keyword {
-      color: $aceVarColor
+      color: $aceVarColor;
     }
 
     .ace_constant {
@@ -214,8 +214,12 @@
 
     &.ace_editor.ace_autocomplete {
       background-color: $euiColorLightestShade;
-      color: makeHighContrastColor($euiTextColor,
-        $aceBackground);
+      color:
+        makeHighContrastColor(
+          $euiTextColor,
+          $aceBackground
+        );
+
       .ace_completion-highlight {
         color: $aceUrlColor;
       }
@@ -233,6 +237,5 @@
       background-color: $aceBackground;
       color: $euiTextColor;
     }
-
   }
 }
