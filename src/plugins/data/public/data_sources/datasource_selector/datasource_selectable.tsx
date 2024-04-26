@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useCallback, useMemo } from 'react';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiButtonIcon, EuiComboBox, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSource, DataSourceDataSet, IndexPatternOption } from '../datasource';
 import { DataSourceGroup, DataSourceSelectableProps } from './types';
@@ -112,20 +112,21 @@ export const DataSourceSelectable = ({
   setDataSourceOptionList,
   onGetDataSetError, //   onGetDataSetError, Callback for handling get data set errors. Ensure it's memoized.
   singleSelection = { asPlainText: true },
+  onRefresh,
   ...comboBoxProps
 }: DataSourceSelectableProps) => {
   // This effect gets data sets and prepares the datasource list for UI rendering.
   useEffect(() => {
     Promise.all(
       getAllDataSets(
-        dataSources.filter((ds) => ds.getMetadata().ui?.selector.displayDatasetsAsSource)
+        dataSources.filter((ds) => ds.getMetadata().ui.selector.displayDatasetsAsSource)
       )
     )
       .then((dataSetResults) => {
         setDataSourceOptionList(
           consolidateDataSourceGroups(
             dataSetResults as DataSourceDataSet[],
-            dataSources.filter((ds) => !ds.getMetadata().ui?.selector.displayDatasetsAsSource)
+            dataSources.filter((ds) => !ds.getMetadata().ui.selector.displayDatasetsAsSource)
           )
         );
       })
@@ -160,6 +161,24 @@ export const DataSourceSelectable = ({
       onChange={handleSourceChange}
       singleSelection={singleSelection}
       isClearable={false}
+      prepend={
+        <EuiText size="s">
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('data.datasource.selector.refreshDataSources', {
+              defaultMessage: 'Refresh data source selector',
+            })}
+            display="block"
+          >
+            <EuiButtonIcon
+              size="s"
+              onClick={onRefresh}
+              iconType="refresh"
+              aria-label="sourceRefresh"
+            />
+          </EuiToolTip>
+        </EuiText>
+      }
     />
   );
 };
