@@ -1,0 +1,2 @@
+fix:
+- Fix datasource  test connect error ([#6648](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6648))
