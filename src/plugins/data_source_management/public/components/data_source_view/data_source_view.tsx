@@ -25,6 +25,7 @@ import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DataSourceItem } from '../data_source_item';
 import { LocalCluster } from '../constants';
 import './data_source_view.scss';
+import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
@@ -141,7 +142,10 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     if (this.state.showError) {
       return <DataSourceErrorMenu application={this.props.application} />;
     }
-    const label = this.state.selectedOption.length > 0 ? this.state.selectedOption[0].label : '';
+    const label =
+      this.state.selectedOption.length > 0 && this.state.selectedOption[0].label
+        ? this.state.selectedOption[0].label
+        : '';
     const options =
       this.state.selectedOption.length > 0
         ? this.state.selectedOption.map((option) => ({
@@ -151,28 +155,16 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
           }))
         : [];
 
-    const button = (
-      <>
-        <EuiButtonEmpty
-          className="dataSourceComponentButtonTitle"
-          data-test-subj="dataSourceViewButton"
-          onClick={this.onClick.bind(this)}
-          aria-label={i18n.translate('dataSourceView.dataSourceOptionsViewAriaLabel', {
-            defaultMessage: 'dataSourceViewButton',
-          })}
-          iconType="database"
-          iconSide="left"
-          size="s"
-        >
-          {label}
-        </EuiButtonEmpty>
-      </>
-    );
-
     return (
       <EuiPopover
         id={'dataSourceViewPopover'}
-        button={button}
+        button={
+          <DataSourceMenuPopoverButton
+            className={'dataSourceView'}
+            label={label}
+            onClick={this.onClick.bind(this)}
+          />
+        }
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}
         panelPaddingSize="none"
@@ -185,7 +177,6 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
               options={options}
               singleSelection={true}
               data-test-subj={'dataSourceView'}
-              compressed={true}
               renderOption={(option) => (
                 <DataSourceItem
                   option={option}
