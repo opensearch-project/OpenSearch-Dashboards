@@ -96,16 +96,6 @@ export function uiRenderMixin(osdServer, server, config) {
       );
       const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(soClient);
 
-      const configDarkMode =
-        !authEnabled || request.auth.isAuthenticated
-          ? await uiSettings.get('theme:darkMode')
-          : uiSettings.getOverrideOrDefault('theme:darkMode');
-
-      const configThemeVersion =
-        !authEnabled || request.auth.isAuthenticated
-          ? await uiSettings.get('theme:version')
-          : uiSettings.getOverrideOrDefault('theme:version');
-
       const buildHash = server.newPlatform.env.packageInfo.buildNum;
       const basePath = config.get('server.basePath');
 
@@ -151,8 +141,6 @@ export function uiRenderMixin(osdServer, server, config) {
         templateData: {
           jsDependencyPaths,
           publicPathMap,
-          configDarkMode,
-          configThemeVersion,
           basePath,
           regularBundlePath,
           UiSharedDeps,
@@ -182,6 +170,11 @@ export function uiRenderMixin(osdServer, server, config) {
         OpenSearchDashboardsRequest.from(request)
       );
       const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(soClient);
+
+      const configEnableUserControl =
+        !authEnabled || request.auth.isAuthenticated
+          ? await uiSettings.get('theme:enableUserControl')
+          : uiSettings.getOverrideOrDefault('theme:enableUserControl');
 
       const configDarkMode =
         !authEnabled || request.auth.isAuthenticated
@@ -233,6 +226,7 @@ export function uiRenderMixin(osdServer, server, config) {
       const startup = new AppBootstrap(
         {
           templateData: {
+            configEnableUserControl,
             configDarkMode,
             configThemeVersion,
             THEME_SOURCES,

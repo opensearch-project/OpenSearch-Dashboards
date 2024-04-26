@@ -4,7 +4,7 @@ var uiSettings = {};
 try {
   uiSettings = JSON.parse(uiSettingsJSON) || {};
 } catch (error) {
-  console.log(error);
+  window.console.log(error);
 }
 
 var useBrowserColorScheme = window.localStorage.getItem('useBrowserColorScheme') === 'true' || false;
@@ -14,20 +14,26 @@ var browserThemeVersion = uiSettings['theme:version'] || {};
 
 var rawDarkMode = typeof browserDarkMode.userValue !== 'boolean' ? {{configDarkMode}} : browserDarkMode.userValue;
 
-debugger;
-if (useBrowserColorScheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches !== rawDarkMode) {
-  uiSettings['theme:darkMode'] = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  window.localStorage.setItem('uiSettings', JSON.stringify(uiSettings));
-  rawDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-}
-
 var rawThemeVersion = browserThemeVersion.userValue || '{{configThemeVersion}}'
+
+if ({{configEnableUserControl}}) {
+  if (useBrowserColorScheme && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches !==
+  rawDarkMode) {
+    uiSettings['theme:darkMode'] = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    window.localStorage.setItem('uiSettings', JSON.stringify(uiSettings));
+    rawDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+} else {
+  uiSettings['theme:darkMode'] = {{configDarkMode}};
+  uiSettings['theme:version'] = '{{configThemeVersion}}'
+  window.localStorage.setItem('uiSettings', JSON.stringify(uiSettings));
+  rawDarkMode = {{configDarkMode}};
+  rawThemeVersion = '{{configThemeVersion}}';
+}
 
 // TODO: source of truth for mapping should be elsewhere
 var darkMode = rawDarkMode ? 'dark' : 'light';
 var themeVersion = rawThemeVersion === 'v7' ? 'v7' : 'v8';
-
-console.log(themeVersion, darkMode, window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 
 window.__osdThemeTag__ = themeVersion + darkMode;
 

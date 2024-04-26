@@ -133,20 +133,6 @@ export const HeaderUserThemeMenu = () => {
   // TODO: fix focus behavior
   const appearanceContent = (
     <div style={{ maxWidth: 300 }}>
-      <EuiCallOut color="warning">
-        These settings apply to only this user account. To change settings for the entire
-        application, {/* TODO: use navigateToApp instead? */}
-        <EuiLink
-          href={basePath.prepend('/app/management/opensearch-dashboards/settings#appearance')}
-        >
-          visit Advanced Settings
-        </EuiLink>{' '}
-        or contact your administrator. {/* TODO: update docs link, use link service */}
-        <EuiLink target="_blank" href="https://opensearch.org/docs/latest/dashboards/quickstart/">
-          Learn more
-        </EuiLink>
-      </EuiCallOut>
-      <EuiSpacer />
       <EuiFormRow label="Theme version" helpText={`Default: ${defaultTheme}`}>
         <EuiSelect options={themeOptions} value={theme} onChange={onThemeChange} />
       </EuiFormRow>

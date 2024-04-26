@@ -79,7 +79,10 @@ export class AdvancedSettingsPlugin
   }
 
   public start(core: CoreStart) {
-    setupTopNavThemeButton(core);
+    const enableUserControl = core.uiSettings.get('theme:enableUserControl');
+    if (enableUserControl) {
+      setupTopNavThemeButton(core);
+    }
 
     return {
       component: component.start,

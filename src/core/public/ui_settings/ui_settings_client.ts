@@ -56,12 +56,11 @@ export class UiSettingsClient implements IUiSettingsClient {
   constructor(params: UiSettingsClientParams) {
     this.api = params.api;
     this.defaults = cloneDeep(params.defaults);
-    this.cache = defaultsDeep(
-      {},
-      this.defaults,
-      cloneDeep(params.initialSettings),
-      this.getBrowserStoredSettings()
-    );
+    this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
+
+    if (this.cache['theme:enableUserControl']?.userValue) {
+      this.cache = defaultsDeep(this.cache, this.getBrowserStoredSettings());
+    }
 
     params.done$.subscribe({
       complete: () => {
@@ -225,10 +224,15 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     this.setLocally(key, newVal);
 
     try {
-      const { settings } = this.cache[key]?.preferBrowserSetting
-        ? this.setBrowserStoredSettings(key, newVal)
-        : (await this.api.batchSet(key, newVal)) || {};
-      this.cache = defaultsDeep({}, defaults, this.getBrowserStoredSettings(), settings);
+      if (this.cache['theme:enableUserControl']?.userValue) {
+        const { settings } = this.cache[key]?.preferBrowserSetting
+          ? this.setBrowserStoredSettings(key, newVal)
+          : (await this.api.batchSet(key, newVal)) || {};
+        this.cache = defaultsDeep({}, defaults, this.getBrowserStoredSettings(), settings);
+      } else {
+        const { settings } = (await this.api.batchSet(key, newVal)) || {};
+        this.cache = defaultsDeep({}, defaults, settings);
+      }
       this.saved$.next({ key, newValue: newVal, oldValue: initialVal });
       return true;
     } catch (error) {
