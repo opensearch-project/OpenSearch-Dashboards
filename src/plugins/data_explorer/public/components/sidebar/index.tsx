@@ -38,8 +38,6 @@ export const Sidebar: FC = ({ children }) => {
       }
     );
 
-    dataSources.dataSourceService.load();
-
     return () => {
       subscription.unsubscribe();
       isMounted = false;
@@ -100,6 +98,10 @@ export const Sidebar: FC = ({ children }) => {
     [toasts]
   );
 
+  const memorizedReload = useCallback(() => {
+    dataSources.dataSourceService.reload();
+  }, [dataSources.dataSourceService]);
+
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer
@@ -121,6 +123,7 @@ export const Sidebar: FC = ({ children }) => {
             onDataSourceSelect={handleSourceSelection}
             selectedSources={selectedSources}
             onGetDataSetError={handleGetDataSetError}
+            onRefresh={memorizedReload}
             fullWidth
           />
         </EuiSplitPanel.Inner>

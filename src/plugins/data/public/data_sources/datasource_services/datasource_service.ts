@@ -104,14 +104,23 @@ export class DataSourceService {
    * Typically used to initialize or refresh the data source configurations.
    */
   load() {
+    this.reset();
     Object.values(this.dataSourceFetchers).forEach((fetch) => fetch());
   }
 
   /**
    * Reloads all data source configurations by re-invoking the load method.
-   * Useful for refreshing the system to reflect changes such as new data source registrations.
+   * Used for refreshing the system to reflect changes such as new data source registrations.
    */
   reload() {
     this.load();
+  }
+
+  /**
+   * Resets all registered data sources.
+   */
+  reset() {
+    this.dataSources = {};
+    this.dataSourcesSubject.next(this.dataSources);
   }
 }

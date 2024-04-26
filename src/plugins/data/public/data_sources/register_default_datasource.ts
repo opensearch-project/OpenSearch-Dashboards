@@ -6,17 +6,15 @@
 import { i18n } from '@osd/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
 import { DataPublicPluginStart } from '../types';
-import { DefaultDslDataSource } from './default_datasource';
 
 export const DEFAULT_DATASOURCE_TYPE = 'DEFAULT_INDEX_PATTERNS';
 export const DEFAULT_DATASOURCE_NAME = i18n.translate('data.datasource.type.openSearchDefault', {
   defaultMessage: 'OpenSearch Default',
 });
 
-export const registerDefaultDatasource = (data: Omit<DataPublicPluginStart, 'ui'>) => {
+export const registerDefaultDataSource = (data: Omit<DataPublicPluginStart, 'ui'>) => {
   // Registrations of index patterns as default data source
   const { dataSourceService, dataSourceFactory } = data.dataSources;
-  dataSourceFactory.registerDataSourceType(DEFAULT_DATASOURCE_TYPE, DefaultDslDataSource);
   dataSourceService.registerDataSource(
     dataSourceFactory.getDataSourceInstance(DEFAULT_DATASOURCE_TYPE, {
       id: htmlIdGenerator('local-cluster')('indices'),
