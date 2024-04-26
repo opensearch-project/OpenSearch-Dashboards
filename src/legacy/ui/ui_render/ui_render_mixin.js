@@ -90,12 +90,7 @@ export function uiRenderMixin(osdServer, server, config) {
       tags: ['api'],
       auth: authEnabled ? { mode: 'try' } : false,
     },
-    async handler(request, h) {
-      const soClient = osdServer.newPlatform.start.core.savedObjects.getScopedClient(
-        OpenSearchDashboardsRequest.from(request)
-      );
-      const uiSettings = osdServer.newPlatform.start.core.uiSettings.asScopedToClient(soClient);
-
+    async handler(_request, h) {
       const buildHash = server.newPlatform.env.packageInfo.buildNum;
       const basePath = config.get('server.basePath');
 
