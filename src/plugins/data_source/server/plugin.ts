@@ -176,6 +176,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
   private createDataSourceRouteHandlerContext = (
     dataSourceService: DataSourceServiceSetup,
     cryptography: CryptographyServiceSetup,
+    logger: Logger,
     auditTrailPromise: Promise<AuditorFactory>,
     authRegistryPromise: Promise<IAuthenticationMethodRegistry>,
     customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>
