@@ -3,8 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppNavLinkStatus } from '../../../core/public';
-import { featureMatchesConfig, isAppAccessibleInWorkspace } from './utils';
+import { AppNavLinkStatus, PublicAppInfo } from '../../../core/public';
+import {
+  featureMatchesConfig,
+  filterWorkspaceConfigurableApps,
+  isAppAccessibleInWorkspace,
+} from './utils';
+import { WorkspaceAvailability } from '../../../core/public';
 
 describe('workspace utils: featureMatchesConfig', () => {
   it('feature configured with `*` should match any features', () => {
@@ -147,5 +152,112 @@ describe('workspace utils: isAppAccessibleInWorkspace', () => {
         { id: 'workspace_id', name: 'workspace name', features: [] }
       )
     ).toBe(true);
+  });
+
+  it('An app is not accessible within a workspace if its workspaceAvailability is outsideWorkspace', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'home',
+          title: 'Any app',
+          mount: jest.fn(),
+          workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: [] }
+      )
+    ).toBe(false);
+  });
+  it('An app is accessible within a workspace if its workspaceAvailability is insideWorkspace', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'home',
+          title: 'Any app',
+          mount: jest.fn(),
+          workspaceAvailability: WorkspaceAvailability.insideWorkspace,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: ['home'] }
+      )
+    ).toBe(true);
+  });
+  it('An app is accessible within a workspace if its workspaceAvailability is inside and outsideWorkspace', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        {
+          id: 'home',
+          title: 'Any app',
+          mount: jest.fn(),
+          workspaceAvailability:
+            // eslint-disable-next-line no-bitwise
+            WorkspaceAvailability.insideWorkspace | WorkspaceAvailability.outsideWorkspace,
+        },
+        { id: 'workspace_id', name: 'workspace name', features: ['home'] }
+      )
+    ).toBe(true);
+  });
+});
+
+describe('workspace utils: filterWorkspaceConfigurableApps', () => {
+  const defaultApplications = [
+    {
+      appRoute: '/app/dashboards',
+      id: 'dashboards',
+      title: 'Dashboards',
+      category: {
+        id: 'opensearchDashboards',
+        label: 'OpenSearch Dashboards',
+        euiIconType: 'inputOutput',
+        order: 1000,
+      },
+      status: 0,
+      navLinkStatus: 1,
+    },
+    {
+      appRoute: '/app/dev_tools',
+      id: 'dev_tools',
+      title: 'Dev Tools',
+      category: {
+        id: 'management',
+        label: 'Management',
+        order: 5000,
+        euiIconType: 'managementApp',
+      },
+      status: 0,
+      navLinkStatus: 1,
+    },
+    {
+      appRoute: '/app/opensearch_dashboards_overview',
+      id: 'opensearchDashboardsOverview',
+      title: 'Overview',
+      category: {
+        id: 'opensearchDashboards',
+        label: 'Library',
+        euiIconType: 'inputOutput',
+        order: 1000,
+      },
+      navLinkStatus: 1,
+      order: -2000,
+      status: 0,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+    },
+    {
+      appRoute: '/app/management',
+      id: 'management',
+      title: 'Dashboards Management',
+      category: {
+        id: 'management',
+        label: 'Management',
+        order: 5000,
+        euiIconType: 'managementApp',
+      },
+      status: 0,
+      navLinkStatus: 1,
+    },
+  ] as PublicAppInfo[];
+  it('should filters out apps that are not accessible in the workspace', () => {
+    const filteredApps = filterWorkspaceConfigurableApps(defaultApplications);
+    expect(filteredApps.length).toEqual(2);
+    expect(filteredApps[0].id).toEqual('dashboards');
+    expect(filteredApps[1].id).toEqual('management');
   });
 });

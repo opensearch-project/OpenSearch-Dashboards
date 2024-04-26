@@ -19,13 +19,13 @@ import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 export interface TableCellProps {
   columnId: string;
   isTimeField?: boolean;
-  onFilter: DocViewFilterFn;
+  onFilter?: DocViewFilterFn;
   filterable?: boolean;
   fieldMapping?: any;
   sanitizedCellValue: string;
 }
 
-export const TableCell = ({
+const TableCellUI = ({
   columnId,
   isTimeField,
   onFilter,
@@ -43,7 +43,7 @@ export const TableCell = ({
           })}
         >
           <EuiButtonIcon
-            onClick={() => onFilter(columnId, fieldMapping, '+')}
+            onClick={() => onFilter?.(columnId, fieldMapping, '+')}
             iconType="plusInCircle"
             aria-label={i18n.translate('discover.filterForValueLabel', {
               defaultMessage: 'Filter for value',
@@ -58,7 +58,7 @@ export const TableCell = ({
           })}
         >
           <EuiButtonIcon
-            onClick={() => onFilter(columnId, fieldMapping, '-')}
+            onClick={() => onFilter?.(columnId, fieldMapping, '-')}
             iconType="minusInCircle"
             aria-label={i18n.translate('discover.filterOutValueLabel', {
               defaultMessage: 'Filter out value',
@@ -84,3 +84,5 @@ export const TableCell = ({
     </td>
   );
 };
+
+export const TableCell = React.memo(TableCellUI);
