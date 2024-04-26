@@ -161,12 +161,12 @@ export const DataSourceSelectable = ({
       onChange={handleSourceChange}
       singleSelection={singleSelection}
       isClearable={false}
-      prepend={
+      append={
         <EuiText size="s">
           <EuiToolTip
-            position="top"
+            position="right"
             content={i18n.translate('data.datasource.selector.refreshDataSources', {
-              defaultMessage: 'Refresh data source selector',
+              defaultMessage: 'Refresh data selector',
             })}
             display="block"
           >
