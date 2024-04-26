@@ -93,7 +93,7 @@ describe('<WorkspaceMenu />', () => {
     render(<WorkspaceMenu coreStart={coreStartMock} />);
     fireEvent.click(screen.getByText(/select a workspace/i));
     fireEvent.click(screen.getByText(/create workspace/i));
-    expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('workspace_create');
+    expect(window.location.assign).toHaveBeenCalledWith('https://test.com/app/workspace_create');
 
     Object.defineProperty(window, 'location', {
       value: originalLocation,
@@ -111,7 +111,7 @@ describe('<WorkspaceMenu />', () => {
     render(<WorkspaceMenu coreStart={coreStartMock} />);
     fireEvent.click(screen.getByText(/select a workspace/i));
     fireEvent.click(screen.getByText(/all workspace/i));
-    expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('workspace_list');
+    expect(window.location.assign).toHaveBeenCalledWith('https://test.com/app/workspace_list');
 
     Object.defineProperty(window, 'location', {
       value: originalLocation,
