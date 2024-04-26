@@ -11,12 +11,18 @@
 
   .euiSelectableListItem__content {
     cursor: default;
-    padding-left: 0%;
+    padding-left: 0;
+    margin-right: 0;
 
 
   .euiSelectableListItem__text {
     max-height: 100%;
   }
+  .euiSelectableListItem__icon, .euiSelectableListItem__prepend {
+    margin-right: 0;
+  }
+
+
   }
 
   .dataSourceAggregatedViewOuiFlexGroup {
@@ -32,6 +38,7 @@
       overflow: hidden;
       white-space: nowrap;
       display: inline-block;
+      padding-left: 0%;
     }
   }
 

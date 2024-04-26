@@ -5,6 +5,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { DataSourceOption } from '../data_source_menu/types';
+import './data_source_item.scss';
 
 interface DataSourceItemProps {
   className: string;
