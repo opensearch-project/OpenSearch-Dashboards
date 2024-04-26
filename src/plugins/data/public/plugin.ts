@@ -90,7 +90,11 @@ import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
 import { DataSourceService } from './data_sources/datasource_services';
 import { DataSourceFactory } from './data_sources/datasource';
-import { registerDefaultDatasource } from './data_sources/register_default_datasource';
+import {
+  DEFAULT_DATASOURCE_TYPE,
+  registerDefaultDataSource,
+} from './data_sources/register_default_datasource';
+import { DefaultDslDataSource } from './data_sources/default_datasource';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -218,6 +222,13 @@ export class DataPublicPlugin
     // Create or fetch the singleton instance
     const dataSourceService = DataSourceService.getInstance();
     const dataSourceFactory = DataSourceFactory.getInstance();
+    dataSourceFactory.registerDataSourceType(DEFAULT_DATASOURCE_TYPE, DefaultDslDataSource);
+    dataSourceService.registerDataSourceFetchers([
+      {
+        type: DEFAULT_DATASOURCE_TYPE,
+        registerDataSources: () => registerDefaultDataSource(dataServices),
+      },
+    ]);
 
     const dataServices = {
       actions: {
@@ -235,7 +246,7 @@ export class DataPublicPlugin
       },
     };
 
-    registerDefaultDatasource(dataServices);
+    registerDefaultDataSource(dataServices);
 
     const SearchBar = createSearchBar({
       core,

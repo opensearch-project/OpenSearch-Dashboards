@@ -6,11 +6,11 @@
 import React from 'react';
 import { render, act, screen, fireEvent } from '@testing-library/react';
 import { DataSourceSelectable } from './datasource_selectable';
-import { DataSourceType, GenericDataSource } from '../datasource_services';
 import { DataSourceGroup, DataSourceOption } from './types';
+import { DataSource } from '../datasource/datasource';
 
 describe('DataSourceSelectable', () => {
-  let dataSourcesMock: GenericDataSource[];
+  let dataSourcesMock: DataSource[];
   let dataSourceOptionListMock: DataSourceGroup[];
   let selectedSourcesMock: DataSourceOption[];
   let setSelectedSourcesMock: (sources: DataSourceOption[]) => void = jest.fn();
@@ -23,7 +23,7 @@ describe('DataSourceSelectable', () => {
         getDataSet: jest.fn().mockResolvedValue([]),
         getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
         getName: jest.fn().mockReturnValue('SomeName'),
-      } as unknown) as DataSourceType,
+      } as unknown) as DataSource,
     ];
 
     dataSourceOptionListMock = [];
@@ -104,7 +104,7 @@ describe('DataSourceSelectable', () => {
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
             getName: jest.fn().mockReturnValue('Index patterns'),
-          } as unknown) as DataSourceType,
+          } as unknown) as DataSource,
         ]}
         dataSourceOptionList={mockDataSourceOptionList}
         selectedSources={selectedSourcesMock}
@@ -154,7 +154,7 @@ describe('DataSourceSelectable', () => {
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue('s3glue'),
             getName: jest.fn().mockReturnValue('Amazon S3'),
-          } as unknown) as DataSourceType,
+          } as unknown) as DataSource,
         ]}
         dataSourceOptionList={mockDataSourceOptionList}
         selectedSources={selectedSourcesMock}
@@ -204,7 +204,7 @@ describe('DataSourceSelectable', () => {
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
             getName: jest.fn().mockReturnValue('Index patterns'),
-          } as unknown) as DataSourceType,
+          } as unknown) as DataSource,
         ]}
         dataSourceOptionList={mockDataSourceOptionListWithDuplicates}
         selectedSources={selectedSourcesMock}
