@@ -71,7 +71,9 @@ export function QueryLanguageSwitcher(props: Props) {
   );
 
   const selectedLanguage = {
-    label: languageOptions.find((option) => option.value === props.language)?.label as string,
+    label: languageOptions.find(
+      (option) => (option.value as string).toLowerCase() === props.language.toLowerCase()
+    )?.label as string,
   };
 
   const setSearchEnhance = (queryLanguage: string) => {
