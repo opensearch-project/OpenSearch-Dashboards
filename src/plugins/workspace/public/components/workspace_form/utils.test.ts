@@ -14,35 +14,6 @@ import { WorkspacePermissionMode } from '../../../common/constants';
 import { WorkspacePermissionItemType } from './constants';
 
 describe('convertApplicationsToFeaturesOrGroups', () => {
-  it('should filter out invisible features', () => {
-    expect(
-      convertApplicationsToFeaturesOrGroups([
-        { id: 'foo1', title: 'Foo 1', navLinkStatus: AppNavLinkStatus.hidden },
-        { id: 'foo2', title: 'Foo 2', navLinkStatus: AppNavLinkStatus.visible, chromeless: true },
-        {
-          id: 'foo3',
-          title: 'Foo 3',
-          navLinkStatus: AppNavLinkStatus.visible,
-          category: DEFAULT_APP_CATEGORIES.management,
-        },
-        {
-          id: 'workspace_overview',
-          title: 'Workspace Overview',
-          navLinkStatus: AppNavLinkStatus.visible,
-        },
-        {
-          id: 'bar',
-          title: 'Bar',
-          navLinkStatus: AppNavLinkStatus.visible,
-        },
-      ])
-    ).toEqual([
-      {
-        id: 'bar',
-        name: 'Bar',
-      },
-    ]);
-  });
   it('should group same category applications in same feature group', () => {
     expect(
       convertApplicationsToFeaturesOrGroups([

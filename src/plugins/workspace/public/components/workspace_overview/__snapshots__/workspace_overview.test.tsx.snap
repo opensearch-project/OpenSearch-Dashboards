@@ -1,0 +1,260 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WorkspaceOverview render workspace overview page normally 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
+  >
+    <header
+      class="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
+    >
+      <div
+        class="euiPageHeaderContent"
+      >
+        <div
+          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsFlexStart euiFlexGroup--directionRow euiFlexGroup--responsive euiPageHeaderContent__top"
+        >
+          <div
+            class="euiFlexItem"
+          >
+            <h1
+              class="euiTitle euiTitle--large"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--alignItemsBaseline euiFlexGroup--directionRow euiFlexGroup--responsive"
+              >
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  foo
+                </div>
+              </div>
+            </h1>
+          </div>
+        </div>
+        <div
+          class="euiPageHeaderContent__bottom"
+        >
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <p
+            class="euiTitle euiTitle--small"
+          >
+            Start working
+          </p>
+          <div
+            class="euiSpacer euiSpacer--l"
+          />
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            data-test-subj="workspaceGetStartCards"
+          >
+            <div
+              class="euiFlexItem"
+            >
+              <div
+                class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+                data-test-subj="Alerts"
+              >
+                <div
+                  class="euiCard__content"
+                >
+                  <span
+                    class="euiTitle euiTitle--small euiCard__title"
+                    id="generated-idTitle"
+                  >
+                    <button
+                      aria-describedby=" "
+                      class="euiCard__titleButton"
+                    >
+                      <div
+                        class="euiText euiText--small"
+                      >
+                        <p>
+                          Proactively identify risks with customizable alter triggers.
+                        </p>
+                      </div>
+                    </button>
+                  </span>
+                  
+                </div>
+                <div
+                  class="euiCard__footer"
+                >
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <div
+                      class="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <span
+                        class="euiTextColor euiTextColor--subdued"
+                      >
+                        <div
+                          class="euiText euiText--small"
+                        >
+                          <span>
+                            with Alerts
+                          </span>
+                        </div>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          >
+            <div
+              class="euiFlexItem"
+            />
+            <div
+              class="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <button
+                aria-label="Collapse"
+                class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                data-test-subj="Collapse"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                >
+                  <span
+                    class="euiButtonContent__icon"
+                    color="inherit"
+                    data-euiicon-type="arrowUp"
+                  />
+                  <span
+                    class="euiButtonEmpty__text"
+                  >
+                    Collapse
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  </div>
+  <div
+    class="euiPage euiPage--paddingLarge euiPage--grow"
+  >
+    <div
+      class="euiPageBody euiPageBody--borderRadiusNone"
+    >
+      <div
+        data-test-subj="workspaceTabs"
+      >
+        <div
+          class="euiTabs"
+          role="tablist"
+        >
+          <button
+            aria-controls="generated-id"
+            aria-selected="true"
+            class="euiTab euiTab-isSelected"
+            id="overview"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Overview
+            </span>
+          </button>
+          <button
+            aria-controls="generated-id"
+            aria-selected="false"
+            class="euiTab"
+            id="library"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Library
+            </span>
+          </button>
+          <button
+            aria-controls="generated-id"
+            aria-selected="false"
+            class="euiTab"
+            id="settings"
+            role="tab"
+            type="button"
+          >
+            <span
+              class="euiTab__content"
+            >
+              Settings
+            </span>
+          </button>
+        </div>
+        <div
+          aria-labelledby="overview"
+          id="generated-id"
+          role="tabpanel"
+        >
+          <div
+            class="euiPage euiPage--grow"
+          >
+            <div
+              class="euiPageBody euiPageBody--borderRadiusNone"
+            >
+              <div
+                class="euiSpacer euiSpacer--l"
+              />
+              <div
+                class="euiPanel euiPanel--borderRadiusMedium euiPanel--subdued euiPanel--noShadow euiPanel--noBorder euiPageContent"
+                role="main"
+              >
+                <div
+                  class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrow2"
+                  >
+                    <div
+                      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--centerAligned euiCard--horizontal"
+                      style="height: 200px;"
+                    >
+                      <div
+                        class="euiCard__content"
+                      >
+                        <span
+                          class="euiTitle euiTitle--xsmall euiCard__title"
+                          id="generated-idTitle"
+                        >
+                          About
+                        </span>
+                        <div
+                          class="euiText euiText--small euiCard__description"
+                          id="generated-idDescription"
+                        >
+                          <p>
+                            this is my foo workspace description
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrow8"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

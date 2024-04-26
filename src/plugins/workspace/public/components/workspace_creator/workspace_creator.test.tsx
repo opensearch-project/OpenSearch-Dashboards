@@ -94,13 +94,21 @@ describe('WorkspaceCreator', () => {
   });
 
   it('should not create workspace when name is empty', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).not.toHaveBeenCalled();
   });
 
   it('should not create workspace with invalid name', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: '~' },
@@ -109,7 +117,11 @@ describe('WorkspaceCreator', () => {
   });
 
   it('should not create workspace with invalid description', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
@@ -122,7 +134,11 @@ describe('WorkspaceCreator', () => {
   });
 
   it('cancel create workspace', async () => {
-    const { findByText, getByTestId } = render(<WorkspaceCreator />);
+    const { findByText, getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     fireEvent.click(getByTestId('workspaceForm-bottomBar-cancelButton'));
     await findByText('Discard changes?');
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
@@ -130,7 +146,11 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with detailed information', async () => {
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
@@ -162,7 +182,11 @@ describe('WorkspaceCreator', () => {
 
   it('create workspace with customized features', async () => {
     setHrefSpy.mockReset();
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
@@ -189,7 +213,11 @@ describe('WorkspaceCreator', () => {
 
   it('should show danger toasts after create workspace failed', async () => {
     workspaceClientCreate.mockReturnValueOnce({ result: { id: 'failResult' }, success: false });
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
@@ -206,7 +234,11 @@ describe('WorkspaceCreator', () => {
     workspaceClientCreate.mockImplementationOnce(async () => {
       throw new Error();
     });
-    const { getByTestId } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(
+      <WorkspaceCreator
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+      />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
