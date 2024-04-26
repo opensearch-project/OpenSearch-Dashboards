@@ -24,9 +24,8 @@ if ({{configEnableUserControl}}) {
     rawDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
 } else {
-  uiSettings['theme:darkMode'] = {{configDarkMode}};
-  uiSettings['theme:version'] = '{{configThemeVersion}}'
-  window.localStorage.setItem('uiSettings', JSON.stringify(uiSettings));
+  window.localStorage.removeItem('uiSettings');
+  window.localStorage.removeItem('useBrowserColorScheme');
   rawDarkMode = {{configDarkMode}};
   rawThemeVersion = '{{configThemeVersion}}';
 }

@@ -58,7 +58,10 @@ export class UiSettingsClient implements IUiSettingsClient {
     this.defaults = cloneDeep(params.defaults);
     this.cache = defaultsDeep({}, this.defaults, cloneDeep(params.initialSettings));
 
-    if (this.cache['theme:enableUserControl']?.userValue) {
+    if (
+      this.cache['theme:enableUserControl']?.userValue ??
+      this.cache['theme:enableUserControl']?.value
+    ) {
       this.cache = defaultsDeep(this.cache, this.getBrowserStoredSettings());
     }
 
@@ -224,7 +227,10 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
     this.setLocally(key, newVal);
 
     try {
-      if (this.cache['theme:enableUserControl']?.userValue) {
+      if (
+        this.cache['theme:enableUserControl']?.userValue ??
+        this.cache['theme:enableUserControl']?.value
+      ) {
         const { settings } = this.cache[key]?.preferBrowserSetting
           ? this.setBrowserStoredSettings(key, newVal)
           : (await this.api.batchSet(key, newVal)) || {};
