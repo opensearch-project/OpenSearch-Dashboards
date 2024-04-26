@@ -107,9 +107,10 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
       props.queryEnhancements &&
       props.queryEnhancements.get(queryLanguage)?.searchBar) ||
     null;
-  const parsedQuery = isValidQuery(props.query)
-    ? props.query!
-    : { query: getQueryStringInitialValue(queryLanguage!), language: queryLanguage! };
+  const parsedQuery =
+    !queryUiEnhancement || isValidQuery(props.query)
+      ? props.query!
+      : { query: getQueryStringInitialValue(queryLanguage!), language: queryLanguage! };
   if (!isEqual(parsedQuery.query, props.query?.query)) {
     onQueryChange(parsedQuery);
     onSubmit({ query: parsedQuery, dateRange: getDateRange() });
@@ -142,7 +143,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   }
 
   function onQueryChange(query: Query, dateRange?: TimeRange) {
-    if (!isValidQuery(query)) return;
+    if (queryUiEnhancement && !isValidQuery(query)) return;
     props.onChange({
       query,
       dateRange: dateRange ?? getDateRange(),
