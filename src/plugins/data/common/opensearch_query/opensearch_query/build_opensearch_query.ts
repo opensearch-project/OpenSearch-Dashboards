@@ -66,6 +66,17 @@ export function buildOpenSearchQuery(
 
   const validQueries = queries.filter((query) => has(query, 'query'));
   const queriesByLanguage = groupBy(validQueries, 'language');
+  const unsupportedQueries = Object.keys(queriesByLanguage).filter(
+    (language) => language !== 'kuery' && language !== 'lucene'
+  );
+  if (unsupportedQueries.length > 0) {
+    return {
+      type: 'unsupported',
+      queries,
+      filters,
+    };
+  }
+
   const kueryQuery = buildQueryFromKuery(
     indexPattern,
     queriesByLanguage.kuery,

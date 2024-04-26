@@ -41,11 +41,14 @@ import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
 import { Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
+import { QueryEnhancement, Settings } from '../types';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: IStorageWrapper;
+  queryEnhancements: Map<string, QueryEnhancement>;
+  settings: Settings;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -130,11 +133,18 @@ const overrideDefaultBehaviors = (props: StatefulSearchBarProps) => {
   return props.useDefaultBehaviors ? {} : props;
 };
 
-export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) {
+export function createSearchBar({
+  core,
+  storage,
+  data,
+  queryEnhancements,
+  settings,
+}: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
   return (props: StatefulSearchBarProps) => {
     const { useDefaultBehaviors } = props;
+
     // Handle queries
     const onQuerySubmitRef = useRef(props.onQuerySubmit);
 
@@ -148,6 +158,7 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
       query: props.query,
       queryStringManager: data.query.queryString,
     });
+
     const { timeRange, refreshInterval } = useTimefilter({
       dateRangeFrom: props.dateRangeFrom,
       dateRangeTo: props.dateRangeTo,
@@ -201,6 +212,8 @@ export function createSearchBar({ core, storage, data }: StatefulSearchBarDeps) 
           isRefreshPaused={refreshInterval.pause}
           filters={filters}
           query={query}
+          queryEnhancements={queryEnhancements}
+          settings={settings}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}

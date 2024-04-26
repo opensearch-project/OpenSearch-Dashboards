@@ -47,7 +47,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
-import { IDataPluginServices, IIndexPattern, Query } from '../..';
+import { IDataPluginServices, IIndexPattern, Query, TimeRange } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
 import {
@@ -58,11 +58,14 @@ import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
-import { SuggestionsComponent } from '..';
+import { Settings, SuggestionsComponent } from '..';
+import { QueryEnhancement } from '../types';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
+  queryEnhancements?: Map<string, QueryEnhancement>;
+  settings?: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   prepend?: any;
@@ -71,9 +74,10 @@ export interface QueryStringInputProps {
   placeholder?: string;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onBlur?: () => void;
-  onChange?: (query: Query) => void;
+  onChange?: (query: Query, dateRange?: TimeRange) => void;
   onChangeQueryInputFocus?: (isFocused: boolean) => void;
-  onSubmit?: (query: Query) => void;
+  onSubmit?: (query: Query, dateRange?: TimeRange) => void;
+  getQueryStringInitialValue?: (language: string) => string;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
@@ -108,6 +112,7 @@ const KEY_CODES = {
 };
 
 // Needed for React.lazy
+// TODO: SQL export this and let people extended this
 // eslint-disable-next-line import/no-default-export
 export default class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
@@ -130,9 +135,13 @@ export default class QueryStringInputUI extends Component<Props, State> {
   private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
 
   private getQueryString = () => {
+    if (!this.props.query.query) {
+      return this.props.getQueryStringInitialValue?.(this.props.query.language) ?? '';
+    }
     return toUser(this.props.query.query);
   };
 
+  // TODO: SQL don't do this here? || Fetch data sources
   private fetchIndexPatterns = async () => {
     const stringPatterns = this.props.indexPatterns.filter(
       (indexPattern) => typeof indexPattern === 'string'
@@ -224,7 +233,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   }, 100);
 
-  private onSubmit = (query: Query) => {
+  private onSubmit = (query: Query, dateRange?: TimeRange) => {
     if (this.props.onSubmit) {
       if (this.persistedLog) {
         this.persistedLog.add(query.query);
@@ -234,11 +243,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private onChange = (query: Query) => {
+  private onChange = (query: Query, dateRange?: TimeRange) => {
     this.updateSuggestions();
 
     if (this.props.onChange) {
-      this.props.onChange({ query: fromUser(query.query), language: query.language });
+      this.props.onChange({ query: fromUser(query.query), language: query.language }, dateRange);
     }
   };
 
@@ -457,6 +466,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
+  // TODO: SQL consider moving language select language of setting search source here
   private onSelectLanguage = (language: string) => {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
@@ -465,11 +475,26 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    this.services.storage.set('opensearchDashboards.userQueryLanguage', language);
-
-    const newQuery = { query: '', language };
-    this.onChange(newQuery);
-    this.onSubmit(newQuery);
+    const newQuery = {
+      query: this.props.getQueryStringInitialValue?.(language) ?? '',
+      language,
+    };
+    this.props.settings?.updateSettings({
+      userQueryLanguage: newQuery.language,
+      userQueryString: newQuery.query,
+      uiOverrides: {
+        fields: this.props.queryEnhancements?.get(language)?.fields,
+      },
+    });
+    const dateRangeEnhancement = this.props.queryEnhancements?.get(language)?.searchBar?.dateRange;
+    const dateRange = dateRangeEnhancement
+      ? {
+          from: dateRangeEnhancement.initialFrom!,
+          to: dateRangeEnhancement.initialTo!,
+        }
+      : undefined;
+    this.onChange(newQuery, dateRange);
+    this.onSubmit(newQuery, dateRange);
   };
 
   private onOutsideClick = () => {

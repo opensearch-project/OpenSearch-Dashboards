@@ -30,4 +30,5 @@
 
 export { flightsSpecProvider } from './flights';
 export { logsSpecProvider } from './logs';
+export { logsEnhancedSpecProvider } from './logs_enhanced';
 export { ecommerceSpecProvider } from './ecommerce';

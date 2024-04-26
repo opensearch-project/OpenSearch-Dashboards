@@ -47,6 +47,8 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   createChild: jest.fn().mockReturnThis(),
   setParent: jest.fn(),
   getParent: jest.fn().mockReturnThis(),
+  setDataFrame: jest.fn(),
+  getDataFrame: jest.fn().mockReturnThis(),
   fetch: jest.fn().mockResolvedValue({}),
   onRequestStart: jest.fn(),
   getSearchRequestBody: jest.fn(),
@@ -54,6 +56,7 @@ export const searchSourceInstanceMock: MockedKeys<ISearchSource> = {
   history: [],
   getSerializedFields: jest.fn(),
   serialize: jest.fn(),
+  flatten: jest.fn().mockReturnThis(),
 };
 
 export const searchSourceCommonMock: jest.Mocked<ISearchStartSearchSource> = {
@@ -69,5 +72,10 @@ export const createSearchSourceMock = (fields?: SearchSourceFields) =>
     legacy: {
       callMsearch: jest.fn(),
       loadingCount$: new BehaviorSubject(0),
+    },
+    df: {
+      get: jest.fn().mockReturnValue({}),
+      set: jest.fn().mockReturnValue({}),
+      clear: jest.fn(),
     },
   });

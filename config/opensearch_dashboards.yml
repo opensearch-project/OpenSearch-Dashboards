@@ -313,3 +313,6 @@
 
 # Set the value to true to enable workspace feature
 # workspace.enabled: false
+
+# Set the value to true to enable enhancements for the data plugin
+# data.enhancements.enabled: false

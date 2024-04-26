@@ -34,6 +34,7 @@ import { OPENSEARCH_FIELD_TYPES, OSD_FIELD_TYPES } from './types';
 
 /** @private */
 const registeredOsdTypes = createOsdFieldTypes();
+let osdFieldOverrides = {};
 
 /**
  *  Get a type object by name
@@ -75,3 +76,11 @@ export const castOpenSearchToOsdFieldTypeName = (
  */
 export const getFilterableOsdTypeNames = (): string[] =>
   registeredOsdTypes.filter((type) => type.filterable).map((type) => type.name);
+
+export const setOsdFieldOverrides = (newOverrides: { [key: string]: any } | undefined) => {
+  osdFieldOverrides = newOverrides ? Object.assign({}, osdFieldOverrides, newOverrides) : {};
+};
+
+export const getOsdFieldOverrides = (): { [key: string]: any } => {
+  return osdFieldOverrides;
+};
