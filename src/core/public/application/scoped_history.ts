@@ -309,7 +309,10 @@ export class ScopedHistory<HistoryLocationState = unknown>
   private setupHistoryListener() {
     const unlisten = this.parentHistory.listen((location, action) => {
       // If the user navigates outside the scope of this basePath, tear it down.
-      if (!location.pathname.startsWith(this.basePath)) {
+      if (
+        !location.pathname.startsWith(this.basePath) &&
+        !this.isPathnameAcceptable(location.pathname)
+      ) {
         unlisten();
         this.isActive = false;
         return;
@@ -339,5 +342,10 @@ export class ScopedHistory<HistoryLocationState = unknown>
         listener(this.stripBasePath(location as Location<HistoryLocationState>), action);
       });
     });
+  }
+
+  private isPathnameAcceptable(pathname: string): boolean {
+    const normalizedPathname = pathname.replace('/data-explorer', '');
+    return normalizedPathname.startsWith(this.basePath);
   }
 }

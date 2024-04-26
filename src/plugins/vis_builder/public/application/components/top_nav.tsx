@@ -3,79 +3,74 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useUnmount } from 'react-use';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getTopNavConfig } from '../utils/get_top_nav_config';
-import { VisBuilderServices } from '../../types';
+import { VisBuilderViewServices } from '../../types';
 
 import './top_nav.scss';
-import { useIndexPatterns, useSavedVisBuilderVis } from '../utils/use';
-import { useTypedSelector, useTypedDispatch } from '../utils/state_management';
-import { setEditorState } from '../utils/state_management/metadata_slice';
+import { useTypedDispatch } from '../utils/state_management';
+import { setStatus } from '../utils/state_management/editor_slice';
 import { useCanSave } from '../utils/use/use_can_save';
 import { saveStateToSavedObject } from '../../saved_visualizations/transforms';
 import { TopNavMenuData } from '../../../../navigation/public';
 import { opensearchFilters, connectStorageToQueryState } from '../../../../data/public';
+import { AppMountParameters } from '../../../../../core/public';
+import { useVisBuilderContext } from '../view_components/context';
 
-export const TopNav = () => {
-  // id will only be set for the edit route
-  const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
-  const { services } = useOpenSearchDashboards<VisBuilderServices>();
+export const TopNav = ({
+  setHeaderActionMenu,
+}: {
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+}) => {
+  const { services } = useOpenSearchDashboards<VisBuilderViewServices>();
+
   const {
-    setHeaderActionMenu,
     navigation: {
       ui: { TopNavMenu },
     },
     appName,
   } = services;
-  const rootState = useTypedSelector((state) => state);
+  const { indexPattern, rootState, savedVisBuilderId, savedVisBuilderVis } = useVisBuilderContext();
   const dispatch = useTypedDispatch();
 
   const saveDisabledReason = useCanSave();
-  const savedVisBuilderVis = useSavedVisBuilderVis(visualizationIdFromUrl);
   connectStorageToQueryState(services.data.query, services.osdUrlStateStorage, {
     filters: opensearchFilters.FilterStateStore.APP_STATE,
     query: true,
   });
-  const { selected: indexPattern } = useIndexPatterns();
   const [config, setConfig] = useState<TopNavMenuData[] | undefined>();
-  const originatingApp = useTypedSelector((state) => {
-    return state.metadata.originatingApp;
-  });
 
   useEffect(() => {
     const getConfig = () => {
       if (!savedVisBuilderVis || !indexPattern) return;
-
-      return getTopNavConfig(
+      const topNavConfigs = getTopNavConfig(
         {
-          visualizationIdFromUrl,
+          visualizationIdFromUrl: savedVisBuilderId,
           savedVisBuilderVis: saveStateToSavedObject(savedVisBuilderVis, rootState, indexPattern),
           saveDisabledReason,
           dispatch,
-          originatingApp,
+          originatingApp: rootState.metadata.originatingApp,
         },
         services
       );
-    };
 
+      return topNavConfigs;
+    };
     setConfig(getConfig());
   }, [
-    rootState,
     savedVisBuilderVis,
-    services,
-    visualizationIdFromUrl,
+    rootState,
+    indexPattern,
     saveDisabledReason,
     dispatch,
-    indexPattern,
-    originatingApp,
+    services,
+    savedVisBuilderId,
   ]);
 
-  // reset validity before component destroyed
   useUnmount(() => {
-    dispatch(setEditorState({ state: 'loading' }));
+    dispatch(setStatus({ status: 'loading' }));
   });
 
   return (

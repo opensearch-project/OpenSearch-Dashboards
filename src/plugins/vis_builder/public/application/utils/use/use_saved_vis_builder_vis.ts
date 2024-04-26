@@ -19,27 +19,29 @@ import {
   setStyleState,
   setVisualizationState,
   setUIStateState,
+  setEditorState,
 } from '../state_management';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { setEditorState } from '../state_management/metadata_slice';
+import { setStatus } from '../state_management/editor_slice';
 import { getStateFromSavedObject } from '../../../saved_visualizations/transforms';
 
 // This function can be used when instantiating a saved vis or creating a new one
 // using url parameters, embedding and destroying it in DOM
-export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined) => {
-  const { services } = useOpenSearchDashboards<VisBuilderServices>();
+export const useSavedVisBuilderVis = (
+  services: VisBuilderServices,
+  visualizationIdFromUrl: string | undefined
+) => {
   const [savedVisState, setSavedVisState] = useState<SavedObject | undefined>(undefined);
   const dispatch = useTypedDispatch();
+  const {
+    application: { navigateToApp },
+    chrome,
+    http: { basePath },
+    toastNotifications,
+    savedVisBuilderLoader,
+    history,
+  } = services;
 
   useEffect(() => {
-    const {
-      application: { navigateToApp },
-      chrome,
-      history,
-      http: { basePath },
-      toastNotifications,
-      savedVisBuilderLoader,
-    } = services;
     const toastNotification = (message: string) => {
       toastNotifications.addDanger({
         title: i18n.translate('visualize.createVisualization.failedToLoadErrorMessage', {
@@ -51,7 +53,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
 
     const loadSavedVisBuilderVis = async () => {
       try {
-        dispatch(setEditorState({ state: 'loading' }));
+        dispatch(setStatus({ status: 'loading' }));
         const savedVisBuilderVis = await getSavedVisBuilderVis(
           savedVisBuilderLoader,
           visualizationIdFromUrl
@@ -65,13 +67,15 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
           dispatch(setUIStateState(state.ui));
           dispatch(setStyleState(state.style));
           dispatch(setVisualizationState(state.visualization));
-          dispatch(setEditorState({ state: 'loaded' }));
+          dispatch(setStatus({ status: 'loaded' }));
         } else {
           chrome.setBreadcrumbs(getCreateBreadcrumbs(navigateToApp));
         }
 
         setSavedVisState(savedVisBuilderVis);
-        dispatch(setEditorState({ state: 'clean' }));
+        dispatch(
+          setEditorState({ errors: {}, status: 'clean', savedVisBuilderId: savedVisBuilderVis.id })
+        );
       } catch (error) {
         const managementRedirectTarget = {
           [PLUGIN_ID]: {
@@ -102,12 +106,21 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
     };
 
     loadSavedVisBuilderVis();
-  }, [dispatch, services, visualizationIdFromUrl]);
+  }, [
+    dispatch,
+    basePath,
+    chrome,
+    history,
+    navigateToApp,
+    savedVisBuilderLoader,
+    toastNotifications,
+    visualizationIdFromUrl,
+  ]);
 
   return savedVisState;
 };
 
-async function getSavedVisBuilderVis(
+export async function getSavedVisBuilderVis(
   savedVisBuilderLoader: VisBuilderServices['savedVisBuilderLoader'],
   visBuilderVisId?: string
 ) {

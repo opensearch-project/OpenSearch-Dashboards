@@ -5,8 +5,9 @@
 
 import { findLast } from 'lodash';
 import { BUCKET_TYPES, IMetricAggType, search } from '../../../../../../data/public';
-import { VisBuilderServices } from '../../../../types';
-import { RootState, Store } from '../store';
+import { VisBuilderViewServices } from '../../../../types';
+import { Store } from '../../../../../../data_explorer/public';
+import { PrefixedVisBuilderRootState, getVisBuilderRootState } from '..';
 import { setAggParamValue } from '../visualization_slice';
 
 /**
@@ -15,12 +16,13 @@ import { setAggParamValue } from '../visualization_slice';
  */
 export const handlerParentAggs = async (
   store: Store,
-  state: RootState,
-  services: VisBuilderServices
+  state: PrefixedVisBuilderRootState,
+  previousState: PrefixedVisBuilderRootState,
+  services: VisBuilderViewServices
 ) => {
-  const {
-    visualization: { activeVisualization, indexPattern = '' },
-  } = state;
+  const rootState = getVisBuilderRootState(state);
+  const { activeVisualization } = rootState.visualization;
+  const { indexPattern = '' } = rootState.metadata;
 
   const {
     data: {
@@ -40,7 +42,7 @@ export const handlerParentAggs = async (
   const metricAggs = aggConfigs.aggs.filter((agg) => agg.schema === 'metric');
   const lastParentPipelineAgg = findLast(
     metricAggs,
-    ({ type }: { type: IMetricAggType }) => type.subtype === search.aggs.parentPipelineType
+    ({ type }: { type: IMetricAggType }) => type && type.subtype === search.aggs.parentPipelineType
   );
   const lastBucket = findLast(aggConfigs.aggs, (agg) => agg.type.type === 'buckets');
 

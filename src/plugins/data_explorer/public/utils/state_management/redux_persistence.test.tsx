@@ -4,7 +4,7 @@
  */
 
 import { DataExplorerServices } from '../../types';
-import { createDataExplorerServicesMock } from '../mocks';
+import { createDataExplorerStartServicesMock } from '../../mocks';
 import { loadReduxState, persistReduxState } from './redux_persistence';
 
 describe('test redux state persistence', () => {
@@ -12,7 +12,7 @@ describe('test redux state persistence', () => {
   let reduxStateParams: any;
 
   beforeEach(() => {
-    mockServices = createDataExplorerServicesMock();
+    mockServices = createDataExplorerStartServicesMock();
     reduxStateParams = {
       discover: 'visualization',
       metadata: 'metadata',

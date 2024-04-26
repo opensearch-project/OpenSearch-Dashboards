@@ -13,13 +13,14 @@ import { StyleState } from '../../application/utils/state_management';
 
 export const getAggExpressionFunctions = async (
   visualization: VisualizationState,
+  indexId: string,
   style?: StyleState
 ) => {
-  const { activeVisualization, indexPattern: indexId = '' } = visualization;
+  const { activeVisualization } = visualization;
   const { aggConfigParams } = activeVisualization || {};
-
   const indexPatternsService = getIndexPatterns();
   const indexPattern = await indexPatternsService.get(indexId);
+
   // aggConfigParams is the serealizeable aggConfigs that need to be reconstructed here using the agg servce
   const aggConfigs = getSearchService().aggs.createAggConfigs(
     indexPattern,
@@ -35,7 +36,7 @@ export const getAggExpressionFunctions = async (
   const opensearchaggs = buildExpressionFunction<OpenSearchaggsExpressionFunctionDefinition>(
     'opensearchaggs',
     {
-      index: indexId,
+      index: indexPattern.id ? indexPattern.id : '',
       metricsAtAllLevels: style?.showMetricsAtAllLevels || false,
       partialRows: style?.showPartialRows || false,
       aggConfigs: JSON.stringify(aggConfigs.aggs),
@@ -45,7 +46,6 @@ export const getAggExpressionFunctions = async (
 
   return {
     aggConfigs,
-    indexPattern,
     expressionFns: [opensearchDashboards, opensearchaggs],
   };
 };

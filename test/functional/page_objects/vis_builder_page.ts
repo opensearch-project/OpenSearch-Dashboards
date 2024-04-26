@@ -23,7 +23,7 @@ export function VisBuilderPageProvider({ getService, getPageObjects }: FtrProvid
     };
 
     public async navigateToCreateVisBuilder() {
-      await common.navigateToApp('vis-builder');
+      await common.navigateToApp('data-explorer/vis-builder');
       await header.waitUntilLoadingHasFinished();
     }
 
@@ -36,18 +36,10 @@ export function VisBuilderPageProvider({ getService, getPageObjects }: FtrProvid
       await fieldSearch.type(name);
     }
 
-    public async getDataSourceSelector() {
-      const dataSourceDropdown = await testSubjects.find('searchableDropdownValue');
-      return await dataSourceDropdown.getVisibleText();
-    }
-
-    public async selectDataSource(dataSource: string) {
-      await testSubjects.click('searchableDropdownValue');
-      await find.clickByCssSelector(
-        `[data-test-subj="searchableDropdownList"] [title="${dataSource}"]`
-      );
-      const dataSourceDropdown = await testSubjects.find('searchableDropdownValue');
-      return await dataSourceDropdown.getVisibleText();
+    public async selectDataSource(indexPatternTitle: string) {
+      const dataExplorerComboBoxElement = await testSubjects.find('dataExplorerDSSelect');
+      await comboBox.setElement(dataExplorerComboBoxElement, indexPatternTitle);
+      await header.waitUntilLoadingHasFinished();
     }
 
     public async selectVisType(type: string, confirm = true) {

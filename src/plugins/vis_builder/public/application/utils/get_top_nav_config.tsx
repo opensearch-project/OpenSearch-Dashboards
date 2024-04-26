@@ -27,7 +27,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
+import _ from 'lodash';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { TopNavMenuData } from '../../../../navigation/public';
@@ -36,13 +36,13 @@ import {
   SavedObjectSaveOpts,
   showSaveModal,
 } from '../../../../saved_objects/public';
-import { VisBuilderServices } from '../..';
-import { VisBuilderSavedObject } from '../../types';
-import { AppDispatch } from './state_management';
+import { VisBuilderViewServices, VisBuilderSavedObject } from '../../types';
 import { EDIT_PATH, VISBUILDER_SAVED_OBJECT } from '../../../common';
-import { setEditorState } from './state_management/metadata_slice';
+import { setState } from './state_management/editor_slice';
+import { AppDispatch } from './state_management';
+
 export interface TopNavConfigParams {
-  visualizationIdFromUrl: string;
+  visualizationIdFromUrl: string | undefined;
   savedVisBuilderVis: VisBuilderSavedObject;
   saveDisabledReason?: string;
   dispatch: AppDispatch;
@@ -57,7 +57,7 @@ export const getTopNavConfig = (
     dispatch,
     originatingApp,
   }: TopNavConfigParams,
-  services: VisBuilderServices
+  services: VisBuilderViewServices
 ) => {
   const {
     i18n: { Context: I18nContext },
@@ -220,12 +220,10 @@ export const getOnSave = (
 
         // Update URL
         if (id !== visualizationIdFromUrl) {
-          history.push({
-            ...history.location,
-            pathname: `${EDIT_PATH}/${id}`,
-          });
+          history.push(`${EDIT_PATH}/${id}`);
         }
-        dispatch(setEditorState({ state: 'clean' }));
+
+        dispatch(setState({ errors: {}, status: 'clean', savedVisBuilderId: id }));
       } else {
         // reset title if save not successful
         savedVisBuilderVis.title = currentTitle;

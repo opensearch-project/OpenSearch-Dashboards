@@ -96,8 +96,15 @@ export interface TableRootState extends RenderState {
   style: TableOptionsDefaults;
 }
 
-export const toExpression = async ({ style: styleState, visualization }: TableRootState) => {
-  const { aggConfigs, expressionFns } = await getAggExpressionFunctions(visualization, styleState);
+export const toExpression = async (
+  { style: styleState, visualization }: TableRootState,
+  indexId: string
+) => {
+  const { aggConfigs, expressionFns } = await getAggExpressionFunctions(
+    visualization,
+    indexId,
+    styleState
+  );
   const { showPartialRows, showMetricsAtAllLevels } = styleState;
 
   const schemas = getVisSchemas(aggConfigs, showMetricsAtAllLevels);
