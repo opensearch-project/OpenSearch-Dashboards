@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TopNavMenu mounts the data source menu as well as top nav menu 1`] = `
+<Fragment>
+  <EuiHeaderLinks
+    className="osdTopNavMenu"
+    data-test-subj="top-nav"
+    gutterSize="xs"
+  >
+    <TopNavMenuItem
+      disableButton={false}
+      id="test"
+      key="nav-menu-0"
+      label="test"
+      run={[MockFunction]}
+      tooltip=""
+    />
+    <TopNavMenuItem
+      disableButton={false}
+      id="test2"
+      key="nav-menu-1"
+      label="test2"
+      run={[MockFunction]}
+      tooltip=""
+    />
+    <TopNavMenuItem
+      disableButton={false}
+      id="test3"
+      key="nav-menu-2"
+      label="test3"
+      run={[MockFunction]}
+      tooltip=""
+    />
+    <Component
+      componentConfig={
+        Object {
+          "activeOption": Array [
+            Object {
+              "id": "1",
+              "label": "what",
+            },
+          ],
+          "fullWidth": true,
+          "hideLocalCluster": true,
+        }
+      }
+      componentType="DataSourceView"
+    />
+  </EuiHeaderLinks>
+</Fragment>
+`;
+
+exports[`TopNavMenu mounts the data source menu if showDataSourceMenu is true 1`] = `
+<Fragment>
+  <EuiHeaderLinks
+    className="osdTopNavMenu"
+    data-test-subj="top-nav"
+    gutterSize="xs"
+  >
+    <Component
+      componentConfig={
+        Object {
+          "activeOption": Array [
+            Object {
+              "id": "1",
+              "label": "what",
+            },
+          ],
+          "fullWidth": true,
+          "hideLocalCluster": true,
+        }
+      }
+      componentType="DataSourceView"
+    />
+  </EuiHeaderLinks>
+</Fragment>
+`;

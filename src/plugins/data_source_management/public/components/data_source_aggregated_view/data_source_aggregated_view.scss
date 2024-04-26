@@ -1,0 +1,42 @@
+.dataSourceAggregatedViewOuiPanel {
+  width: 300px;
+  border-left-width: 0;
+  border-right-width: 0;
+  border-top-width: 0;
+
+  /* stylelint-disable */
+  .euiSelectableListItem {
+    cursor: default;
+  }
+
+  .euiSelectableListItem__content {
+    cursor: default;
+
+
+  .euiSelectableListItem__text {
+    max-height: 100%; 
+  }
+  }
+
+  .dataSourceAggregatedViewOuiFlexGroup {
+    .euiFlexItem {
+      max-width: fit-content;
+    }
+
+      /* stylelint-enable */
+
+    .dataSourceAggregatedViewOuiFlexItem {
+      color: grey;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      display: inline-block;
+    }
+  }
+
+  .dataSourceAggregatedViewOuiSwitch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

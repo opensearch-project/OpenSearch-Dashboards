@@ -59,13 +59,21 @@ export interface DataSourceViewConfig extends DataSourceBaseConfig {
   onSelectedDataSources?: (dataSources: DataSourceOption[]) => void;
 }
 
-export interface DataSourceAggregatedViewConfig extends DataSourceBaseConfig {
+interface DataSourceAggregatedViewBaseConfig extends DataSourceBaseConfig {
   savedObjects: SavedObjectsClientContract;
   notifications: NotificationsStart;
-  activeDataSourceIds?: string[];
-  displayAllCompatibleDataSources?: boolean;
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
 }
+
+export type DataSourceAggregatedViewConfig =
+  | (DataSourceAggregatedViewBaseConfig & {
+      activeDataSourceIds: string[];
+      displayAllCompatibleDataSources: false;
+    })
+  | (DataSourceAggregatedViewBaseConfig & {
+      activeDataSourceIds?: string[];
+      displayAllCompatibleDataSources: true;
+    });
 
 export interface DataSourceSelectableConfig extends DataSourceBaseConfig {
   onSelectedDataSources: (dataSources: DataSourceOption[]) => void;

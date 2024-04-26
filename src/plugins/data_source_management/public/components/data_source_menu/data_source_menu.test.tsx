@@ -5,17 +5,19 @@
 
 import { ShallowWrapper, shallow } from 'enzyme';
 import { SavedObjectsClientContract } from '../../../../../core/public';
-import { notificationServiceMock } from '../../../../../core/public/mocks';
+import { applicationServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
 import { DataSourceMenu } from './data_source_menu';
 import { render } from '@testing-library/react';
 import { DataSourceComponentType } from './types';
+import * as utils from '../utils';
 
 describe('DataSourceMenu', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
+  const application = applicationServiceMock.createStartContract();
 
   beforeEach(() => {
     client = {
@@ -112,6 +114,7 @@ describe('DataSourceMenu', () => {
   });
 
   it('should render data source aggregated view', () => {
+    jest.spyOn(utils, 'getApplication').mockReturnValue(application);
     const container = render(
       <DataSourceMenu
         componentType={DataSourceComponentType.DataSourceAggregatedView}
