@@ -165,7 +165,7 @@ export class WebElementWrapper {
    *  - Elements with opacity: 0
    *  - Elements with no offsetWidth or offsetHeight
    *
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#isDisplayed
+   * https://www.selenium.dev/documentation/webdriver/elements/information/#is-displayed
    *
    * @return {Promise<boolean>}
    */
@@ -177,7 +177,7 @@ export class WebElementWrapper {
 
   /**
    * Tests whether this element is enabled, as dictated by the disabled attribute.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#isEnabled
+   * https://www.selenium.dev/documentation/webdriver/elements/information/#is-enabled
    *
    * @return {Promise<boolean>}
    */
@@ -189,7 +189,7 @@ export class WebElementWrapper {
 
   /**
    * Tests whether this element is selected.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#isSelected
+   * https://www.selenium.dev/documentation/webdriver/elements/information/#is-selected
    *
    * @return {Promise<boolean>}
    */
@@ -201,7 +201,7 @@ export class WebElementWrapper {
 
   /**
    * Clicks on this element.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#click
+   * https://www.selenium.dev/documentation/webdriver/elements/interactions/#click
    *
    * @return {Promise<void>}
    */
@@ -238,7 +238,7 @@ export class WebElementWrapper {
   /**
    * Clear the value of this element. This command has no effect if the underlying DOM element
    * is neither a text INPUT element nor a TEXTAREA element.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#clear
+   * https://www.selenium.dev/documentation/webdriver/elements/interactions/#clear
    *
    * @param {{ withJS: boolean }} options option to clear input with JS: `arguments[0].value=''`
    * @default { withJS: false }
@@ -292,7 +292,7 @@ export class WebElementWrapper {
    * The input.Key.NULL key is encountered in the sequence. When this key is encountered, all
    * modifier keys current in the down state are released (with accompanying keyup events). The NULL
    * key can be used to simulate common keyboard shortcuts.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#sendKeys
+   * https://www.selenium.dev/documentation/webdriver/elements/interactions/#send-keys
    *
    * @param {string|string[]} value
    * @param {charByChar: boolean} options
@@ -315,7 +315,7 @@ export class WebElementWrapper {
 
   /**
    * Sends keyboard event into the element.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#sendKeys
+   * https://www.selenium.dev/documentation/webdriver/elements/interactions/#send-keys
    *
    * @param  {string|string[]} keys
    * @return {Promise<void>}
@@ -340,7 +340,7 @@ export class WebElementWrapper {
    * case the value of the property with the same name is returned. If neither value is set, null
    * is returned (for example, the "value" property of a textarea element). The "style" attribute
    * is converted as best can be to a text representation with a trailing semi-colon.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getAttribute
+   * https://www.selenium.dev/documentation/webdriver/elements/information/#fetching-attributes-or-properties
    *
    * @param {string} name
    */
@@ -354,7 +354,7 @@ export class WebElementWrapper {
    * Retrieves the value of a computed style property for this instance. If the element inherits
    * the named style from its parent, the parent will be queried for its value. Where possible,
    * color values will be converted to their hex representation (e.g. #00ff00 instead of rgb(0, 255, 0)).
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getCssValue
+   * https://www.selenium.dev/documentation/webdriver/elements/information/#get-css-value
    *
    * @param {string} propertyName
    * @return {Promise<string>}
@@ -368,7 +368,7 @@ export class WebElementWrapper {
   /**
    * Get the visible (i.e. not hidden by CSS) innerText of this element, including sub-elements,
    * without any leading or trailing whitespace.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getText
+   * https://www.selenium.dev/documentation/webdriver/elements/information/#text-content
    *
    * @return {Promise<string>}
    */
@@ -380,7 +380,7 @@ export class WebElementWrapper {
 
   /**
    * Retrieves the element's tag name.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getTagName
+   * https://www.selenium.dev/documentation/webdriver/elements/information/#tag-name
    *
    * @return {Promise<string>}
    */
@@ -395,7 +395,7 @@ export class WebElementWrapper {
   /**
    * Returns an object describing an element's location, in pixels relative to the document element,
    * and the element's size in pixels.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getRect
+   * https://www.selenium.dev/documentation/webdriver/elements/information/#size-and-position
    *
    * @return {Promise<{height: number, width: number, x: number, y: number}>}
    */
@@ -408,7 +408,7 @@ export class WebElementWrapper {
   /**
    * Returns an object describing an element's location, in pixels relative to the document element,
    * and the element's size in pixels.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#getRect
+   * https://www.selenium.dev/documentation/webdriver/elements/information/#size-and-position
    *
    * @return {Promise<{height: number, width: number, x: number, y: number}>}
    */
@@ -420,7 +420,7 @@ export class WebElementWrapper {
 
   /**
    * Moves the remote environment’s mouse cursor to the current element with optional offset
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#move
+   * https://www.selenium.dev/documentation/webdriver/actions_api/mouse/#move-by-offset
    * @param { xOffset: 0, yOffset: 0 } options
    * @return {Promise<void>}
    */
@@ -438,7 +438,7 @@ export class WebElementWrapper {
   /**
    * Inserts an action for moving the mouse to element center, unless optional offset is provided.
    * Then adds an action for left-click (down/up) with the mouse.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#click
+   * https://www.selenium.dev/documentation/webdriver/actions_api/mouse/#click-and-release
    *
    * @param { xOffset: 0, yOffset: 0 } options Optional
    * @return {Promise<void>}
@@ -457,7 +457,7 @@ export class WebElementWrapper {
 
   /**
    * Inserts action for performing a double left-click with the mouse.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/input_exports_Actions.html#doubleClick
+   * https://www.selenium.dev/documentation/webdriver/actions_api/mouse/#double-click
    * @param {WebElementWrapper} element
    * @return {Promise<void>}
    */
@@ -470,7 +470,7 @@ export class WebElementWrapper {
 
   /**
    * Gets the first element inside this element matching the given CSS selector.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://www.selenium.dev/documentation/webdriver/elements/finders/#first-matching-element
    *
    * @param {string} selector
    * @return {Promise<WebElementWrapper>}
@@ -486,7 +486,7 @@ export class WebElementWrapper {
 
   /**
    * Gets all elements inside this element matching the given CSS selector.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://www.selenium.dev/documentation/webdriver/elements/finders/#all-matching-elements
    *
    * @param {string} selector
    * @param {number} timeout
@@ -539,7 +539,7 @@ export class WebElementWrapper {
 
   /**
    * Gets the first element inside this element matching the given CSS class name.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://www.selenium.dev/documentation/webdriver/elements/finders/#first-matching-element
    *
    * @param {string} className
    * @return {Promise<WebElementWrapper>}
@@ -555,7 +555,7 @@ export class WebElementWrapper {
 
   /**
    * Gets all elements inside this element matching the given CSS class name.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://www.selenium.dev/documentation/webdriver/elements/finders/#all-matching-elements
    *
    * @param {string} className
    * @param {number} timeout
@@ -574,7 +574,7 @@ export class WebElementWrapper {
 
   /**
    * Gets the first element inside this element matching the given tag name.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://www.selenium.dev/documentation/webdriver/elements/finders/#first-matching-element
    *
    * @param {string} tagName
    * @return {Promise<WebElementWrapper>}
@@ -594,7 +594,7 @@ export class WebElementWrapper {
 
   /**
    * Gets all elements inside this element matching the given tag name.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://www.selenium.dev/documentation/webdriver/elements/finders/#all-matching-elements
    *
    * @param {string} tagName
    * @param {number} timeout
@@ -621,7 +621,7 @@ export class WebElementWrapper {
 
   /**
    * Gets the first element inside this element matching the given XPath selector.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://www.selenium.dev/documentation/webdriver/elements/finders/#first-matching-element
    *
    * @param {string} selector
    * @return {Promise<WebElementWrapper>}
@@ -637,7 +637,7 @@ export class WebElementWrapper {
 
   /**
    * Gets all elements inside this element matching the given XPath selector.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://www.selenium.dev/documentation/webdriver/elements/finders/#all-matching-elements
    *
    * @param {string} selector
    * @param {number} timeout
@@ -656,7 +656,7 @@ export class WebElementWrapper {
 
   /**
    * Gets the first element inside this element matching the given partial link text.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://www.selenium.dev/documentation/webdriver/elements/finders/#first-matching-element
    *
    * @param {string} linkText
    * @return {Promise<WebElementWrapper[]>}
@@ -672,7 +672,7 @@ export class WebElementWrapper {
 
   /**
    * Gets all elements inside this element matching the given partial link text.
-   * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#findElement
+   * https://www.selenium.dev/documentation/webdriver/elements/finders/#all-matching-elements
    *
    * @param {string} linkText
    * @param {number} timeout
