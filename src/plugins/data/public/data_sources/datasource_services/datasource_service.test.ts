@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { waitFor } from '@testing-library/dom';
 import { DataSource } from '../datasource';
 import { IndexPatternsService } from '../../index_patterns';
 import { DataSourceService } from '../datasource_services';
@@ -16,7 +17,7 @@ import {
 import { DataSourceUIGroupType } from '../datasource/types';
 import { DEFAULT_DATA_SOURCE_DISPLAY_NAME } from '../register_default_datasource';
 
-export const defaultDataSourceMetadata = {
+const defaultDataSourceMetadata = {
   ui: {
     label: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
     typeLabel: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
@@ -133,9 +134,11 @@ describe('DataSourceService', () => {
     const ds2 = new MockDataSource(mockConfig2);
     service.registerMultipleDataSources([ds1, ds2]);
     const filter = { names: ['test_datasource1'] };
-    const retrievedDataSources = service.getDataSources(filter);
-    expect(retrievedDataSources).toHaveProperty('test_datasource1');
-    expect(retrievedDataSources).not.toHaveProperty('test_datasource2');
+    waitFor(() => {
+      const retrievedDataSources = service.getDataSources$(filter);
+      expect(retrievedDataSources).toHaveProperty('test_datasource1');
+      expect(retrievedDataSources).not.toHaveProperty('test_datasource2');
+    });
   });
 
   it('returns all data sources if no filters provided', () => {
@@ -143,8 +146,10 @@ describe('DataSourceService', () => {
     const ds1 = new MockDataSource(mockConfig1);
     const ds2 = new MockDataSource(mockConfig2);
     service.registerMultipleDataSources([ds1, ds2]);
-    const retrievedDataSources = service.getDataSources();
-    expect(retrievedDataSources).toHaveProperty('test_datasource1');
-    expect(retrievedDataSources).toHaveProperty('test_datasource2');
+    waitFor(() => {
+      const retrievedDataSources = service.getDataSources$();
+      expect(retrievedDataSources).toHaveProperty('test_datasource1');
+      expect(retrievedDataSources).toHaveProperty('test_datasource2');
+    });
   });
 });

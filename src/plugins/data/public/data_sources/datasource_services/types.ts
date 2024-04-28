@@ -12,7 +12,9 @@ import { DataSourceFactory } from '../datasource';
 import { DataSourceService } from './datasource_service';
 
 export interface IDataSourceFilter {
-  names: string[];
+  ids?: string[]; // Array of data source IDs to filter by
+  names?: string[]; // Array of data source names to filter by
+  types?: string[]; // Array of data source types to filter by
 }
 
 export interface IDataSourceRegistrationResult {

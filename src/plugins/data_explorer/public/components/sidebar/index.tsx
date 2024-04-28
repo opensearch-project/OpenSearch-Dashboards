@@ -30,13 +30,13 @@ export const Sidebar: FC = ({ children }) => {
 
   useEffect(() => {
     let isMounted = true;
-    const subscription = dataSources.dataSourceService.dataSources$.subscribe(
-      (currentDataSources) => {
+    const subscription = dataSources.dataSourceService
+      .getDataSources$()
+      .subscribe((currentDataSources) => {
         if (isMounted) {
           setActiveDataSources(Object.values(currentDataSources));
         }
-      }
-    );
+      });
 
     return () => {
       subscription.unsubscribe();
