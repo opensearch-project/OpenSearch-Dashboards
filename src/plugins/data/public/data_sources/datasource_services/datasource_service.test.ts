@@ -6,26 +6,54 @@
 import { DataSource } from '../datasource';
 import { IndexPatternsService } from '../../index_patterns';
 import { DataSourceService } from '../datasource_services';
+import {
+  LocalDSDataSetParams,
+  LocalDSDataSetResponse,
+  LocalDSMetadata,
+  LocalDSQueryParams,
+  LocalDSQueryResponse,
+} from '../default_datasource/default_datasource';
+import { DataSourceUIGroupType } from '../datasource/types';
+import { DEFAULT_DATA_SOURCE_DISPLAY_NAME } from '../register_default_datasource';
 
-class MockDataSource extends DataSource<any, any, any, any, any> {
+export const defaultDataSourceMetadata = {
+  ui: {
+    label: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
+    typeLabel: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
+    groupType: DataSourceUIGroupType.defaultOpenSearchDataSource,
+    selector: {
+      displayDatasetsAsSource: true,
+    },
+  },
+};
+
+class MockDataSource extends DataSource<
+  LocalDSMetadata,
+  LocalDSDataSetParams,
+  LocalDSDataSetResponse,
+  LocalDSQueryParams,
+  LocalDSQueryResponse
+> {
   private readonly indexPattern;
 
   constructor({
+    id,
     name,
     type,
     metadata,
     indexPattern,
   }: {
+    id: string;
     name: string;
     type: string;
     metadata: any;
     indexPattern: IndexPatternsService;
   }) {
-    super(name, type, metadata);
+    super({ id, name, type, metadata });
     this.indexPattern = indexPattern;
   }
 
-  async getDataSet(dataSetParams?: any) {
+  async getDataSet(dataSetParams?: LocalDSDataSetParams): Promise<LocalDSDataSetResponse> {
     await this.indexPattern.ensureDefaultIndexPattern();
     return await this.indexPattern.getCache();
   }
@@ -34,24 +62,28 @@ class MockDataSource extends DataSource<any, any, any, any, any> {
     return true;
   }
 
-  async runQuery(queryParams: any) {
-    return undefined;
+  async runQuery(queryParams: any): Promise<LocalDSQueryResponse> {
+    return {
+      data: {},
+    };
   }
 }
 
 const mockIndexPattern = {} as IndexPatternsService;
 
 const mockConfig1 = {
+  id: 'test_datasource1',
   name: 'test_datasource1',
   type: 'mock1',
-  metadata: null,
+  metadata: defaultDataSourceMetadata,
   indexPattern: mockIndexPattern,
 };
 
 const mockConfig2 = {
+  id: 'test_datasource2',
   name: 'test_datasource2',
   type: 'mock1',
-  metadata: null,
+  metadata: defaultDataSourceMetadata,
   indexPattern: mockIndexPattern,
 };
 
@@ -79,7 +111,7 @@ describe('DataSourceService', () => {
     const ds = new MockDataSource(mockConfig1);
     await service.registerDataSource(ds);
     await expect(service.registerDataSource(ds)).rejects.toThrow(
-      'Unable to register datasource test_datasource1, error: datasource name exists.'
+      'Unable to register data source test_datasource1, error: data source name exists.'
     );
   });
 

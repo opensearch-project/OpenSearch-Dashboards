@@ -8,7 +8,7 @@ import { DataSourceUIGroupType } from '../datasource/types';
 import { DEFAULT_DATA_SOURCE_DISPLAY_NAME } from '../register_default_datasource';
 import { DefaultDslDataSource } from './default_datasource';
 
-const defaultDataSourceMetadata = {
+export const defaultDataSourceMetadata = {
   ui: {
     label: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
     typeLabel: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
