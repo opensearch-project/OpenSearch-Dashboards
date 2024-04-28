@@ -128,8 +128,13 @@ describe('DataSourceView', () => {
         onSelectedDataSources={jest.fn()}
       />
     );
+    await nextTick();
     expect(component).toMatchSnapshot();
-    expect(toasts.add).toBeCalledTimes(1);
+    expect(toasts.add).toBeCalledWith({
+      color: 'danger',
+      text: '',
+      title: 'Data source test1 is not available ',
+    });
     expect(utils.getDataSourceById).toBeCalledTimes(1);
   });
 
@@ -165,6 +170,7 @@ describe('DataSourceView', () => {
         dataSourceFilter={(ds) => false}
       />
     );
+    await nextTick();
     expect(onSelectedDataSource).toBeCalledWith([]);
   });
 
@@ -182,7 +188,11 @@ describe('DataSourceView', () => {
     const button = await container.findByTestId('dataSourceViewErrorPopover');
     button.click();
     expect(component).toMatchSnapshot();
-    expect(toasts.add).toBeCalledTimes(1);
+    expect(toasts.add).toBeCalledWith({
+      color: 'danger',
+      text: '',
+      title: 'Data source any id is not available ',
+    });
     expect(utils.getDataSourceById).toBeCalledTimes(1);
     expect(container.getByTestId('dataSourceViewErrorHeaderLink')).toBeVisible();
   });
@@ -202,8 +212,12 @@ describe('DataSourceView', () => {
     const button = await container.findByTestId('dataSourceViewErrorPopover');
     button.click();
     expect(component).toMatchSnapshot();
-    expect(toasts.add).toBeCalledTimes(1);
     expect(utils.getDataSourceById).toBeCalledTimes(1);
+    expect(toasts.add).toBeCalledWith({
+      color: 'danger',
+      text: '',
+      title: 'Data source any id is not available ',
+    });
     expect(container.getByTestId('dataSourceViewErrorHeaderLink')).toBeVisible();
     const errorHeaderLink = await container.findByTestId('dataSourceViewErrorHeaderLink');
     errorHeaderLink.click();
@@ -237,6 +251,7 @@ describe('DataSourceView', () => {
       showEmptyState: false,
       showError: false,
       defaultDataSource: null,
+      defaultDataSourceOption: null,
     });
   });
 
@@ -264,10 +279,11 @@ describe('DataSourceView', () => {
       showEmptyState: false,
       showError: false,
       defaultDataSource: null,
+      defaultDataSourceOption: null,
     });
   });
 
-  it('should showError  when pass in invalid data source id ', async () => {
+  it('should showError when pass in invalid data source id ', async () => {
     spyOn(utils, 'getDataSourceById').and.throwError('Data source is not available');
     spyOn(uiSettings, 'get').and.returnValue('test2');
 
@@ -289,6 +305,7 @@ describe('DataSourceView', () => {
       showEmptyState: false,
       showError: true,
       defaultDataSource: null,
+      defaultDataSourceOption: null,
     });
   });
 
@@ -307,6 +324,7 @@ describe('DataSourceView', () => {
         }}
       />
     );
+    await nextTick();
     const instance = container.instance();
     await nextTick();
     expect(instance.state).toEqual({
@@ -315,6 +333,7 @@ describe('DataSourceView', () => {
       showEmptyState: false,
       showError: true,
       defaultDataSource: null,
+      defaultDataSourceOption: null,
     });
   });
 
