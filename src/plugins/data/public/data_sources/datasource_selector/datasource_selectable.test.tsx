@@ -8,6 +8,30 @@ import { render, act, screen, fireEvent } from '@testing-library/react';
 import { DataSourceSelectable } from './datasource_selectable';
 import { DataSourceGroup, DataSourceOption } from './types';
 import { DataSource } from '../datasource/datasource';
+import { DEFAULT_DATA_SOURCE_DISPLAY_NAME } from '../register_default_datasource';
+import { DataSourceUIGroupType } from '../datasource/types';
+
+const defaultDataSourceMetadata = {
+  ui: {
+    label: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
+    typeLabel: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
+    groupType: DataSourceUIGroupType.defaultOpenSearchDataSource,
+    selector: {
+      displayDatasetsAsSource: true,
+    },
+  },
+};
+
+const s3DataSourceMetadata = {
+  ui: {
+    label: 'Amazon S3',
+    typeLabel: 's3glue',
+    groupType: DataSourceUIGroupType.s3glue,
+    selector: {
+      displayDatasetsAsSource: false,
+    },
+  },
+};
 
 describe('DataSourceSelectable', () => {
   let dataSourcesMock: DataSource[];
@@ -16,6 +40,7 @@ describe('DataSourceSelectable', () => {
   let setSelectedSourcesMock: (sources: DataSourceOption[]) => void = jest.fn();
   let setDataSourceOptionListMock: (sources: DataSourceGroup[]) => void = jest.fn();
   let onFetchDataSetErrorMock: (error: Error) => void = jest.fn();
+  const onRefresh: () => void = jest.fn();
 
   beforeEach(() => {
     dataSourcesMock = [
@@ -23,6 +48,7 @@ describe('DataSourceSelectable', () => {
         getDataSet: jest.fn().mockResolvedValue([]),
         getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
         getName: jest.fn().mockReturnValue('SomeName'),
+        getMetadata: jest.fn().mockReturnValue(defaultDataSourceMetadata),
       } as unknown) as DataSource,
     ];
 
@@ -42,6 +68,7 @@ describe('DataSourceSelectable', () => {
         onDataSourceSelect={setSelectedSourcesMock}
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
+        onRefresh={onRefresh}
       />
     );
   });
@@ -56,6 +83,7 @@ describe('DataSourceSelectable', () => {
           onDataSourceSelect={setSelectedSourcesMock}
           setDataSourceOptionList={setDataSourceOptionListMock}
           onGetDataSetError={onFetchDataSetErrorMock}
+          onRefresh={onRefresh}
         />
       );
     });
@@ -75,6 +103,7 @@ describe('DataSourceSelectable', () => {
           onDataSourceSelect={setSelectedSourcesMock}
           setDataSourceOptionList={setDataSourceOptionListMock}
           onGetDataSetError={onFetchDataSetErrorMock}
+          onRefresh={onRefresh}
         />
       );
     });
@@ -104,6 +133,7 @@ describe('DataSourceSelectable', () => {
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
             getName: jest.fn().mockReturnValue('Index patterns'),
+            getMetadata: jest.fn().mockReturnValue(defaultDataSourceMetadata),
           } as unknown) as DataSource,
         ]}
         dataSourceOptionList={mockDataSourceOptionList}
@@ -111,6 +141,7 @@ describe('DataSourceSelectable', () => {
         onDataSourceSelect={setSelectedSourcesMock}
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
+        onRefresh={onRefresh}
       />
     );
 
@@ -154,6 +185,7 @@ describe('DataSourceSelectable', () => {
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue('s3glue'),
             getName: jest.fn().mockReturnValue('Amazon S3'),
+            getMetadata: jest.fn().mockReturnValue(s3DataSourceMetadata),
           } as unknown) as DataSource,
         ]}
         dataSourceOptionList={mockDataSourceOptionList}
@@ -161,6 +193,7 @@ describe('DataSourceSelectable', () => {
         onDataSourceSelect={setSelectedSourcesMock}
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
+        onRefresh={onRefresh}
       />
     );
 
@@ -204,6 +237,7 @@ describe('DataSourceSelectable', () => {
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
             getName: jest.fn().mockReturnValue('Index patterns'),
+            getMetadata: jest.fn().mockReturnValue(defaultDataSourceMetadata),
           } as unknown) as DataSource,
         ]}
         dataSourceOptionList={mockDataSourceOptionListWithDuplicates}
@@ -211,6 +245,7 @@ describe('DataSourceSelectable', () => {
         onDataSourceSelect={handleSelect}
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
+        onRefresh={onRefresh}
       />
     );
 
