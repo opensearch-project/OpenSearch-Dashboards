@@ -34,19 +34,19 @@ export class DefaultDslDataSource extends DataSource<
   LocalDSQueryParams,
   LocalDSQueryResponse
 > {
-  private readonly indexPatterns;
+  private readonly indexPatterns: IndexPatternsContract;
 
   constructor({ id, name, type, metadata, indexPatterns }: LocalDataSourceSettings) {
     super({ id, name, type, metadata });
     this.indexPatterns = indexPatterns;
   }
 
-  async getDataSet() {
+  async getDataSet(): Promise<LocalDSDataSetResponse> {
     await this.indexPatterns.ensureDefaultIndexPattern();
     const savedObjectLst = await this.indexPatterns.getCache();
 
     if (!Array.isArray(savedObjectLst)) {
-      return { data_sets: [] };
+      return { dataSets: [] };
     }
 
     return {

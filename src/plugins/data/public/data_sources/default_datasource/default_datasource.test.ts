@@ -4,7 +4,20 @@
  */
 
 import { IndexPatternsService } from '../../index_patterns';
+import { DataSourceUIGroupType } from '../datasource/types';
+import { DEFAULT_DATA_SOURCE_DISPLAY_NAME } from '../register_default_datasource';
 import { DefaultDslDataSource } from './default_datasource';
+
+const defaultDataSourceMetadata = {
+  ui: {
+    label: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
+    typeLabel: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
+    groupType: DataSourceUIGroupType.defaultOpenSearchDataSource,
+    selector: {
+      displayDatasetsAsSource: true,
+    },
+  },
+};
 
 describe('DefaultDslDataSource', () => {
   let indexPatternsMock: IndexPatternsService;
@@ -18,9 +31,10 @@ describe('DefaultDslDataSource', () => {
 
   it('should ensure default index pattern and get cache', async () => {
     const dataSource = new DefaultDslDataSource({
+      id: 'testId',
       name: 'testName',
       type: 'testType',
-      metadata: {},
+      metadata: defaultDataSourceMetadata,
       indexPatterns: indexPatternsMock,
     });
 
@@ -32,9 +46,10 @@ describe('DefaultDslDataSource', () => {
 
   it('should throw an error', async () => {
     const dataSource = new DefaultDslDataSource({
+      id: 'testId',
       name: 'testName',
       type: 'testType',
-      metadata: {},
+      metadata: defaultDataSourceMetadata,
       indexPatterns: indexPatternsMock,
     });
 
@@ -43,13 +58,16 @@ describe('DefaultDslDataSource', () => {
 
   it('should return null', async () => {
     const dataSource = new DefaultDslDataSource({
+      id: 'testId',
       name: 'testName',
       type: 'testType',
-      metadata: {},
+      metadata: defaultDataSourceMetadata,
       indexPatterns: indexPatternsMock,
     });
 
-    const result = await dataSource.runQuery({});
-    expect(result).toBeUndefined();
+    const result = await dataSource.runQuery();
+    expect(result).toStrictEqual({
+      data: {},
+    });
   });
 });

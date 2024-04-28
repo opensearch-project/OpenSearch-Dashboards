@@ -59,7 +59,7 @@ export interface IDataSourceUISelector {
 export interface IDataSourceUISettings {
   selector: IDataSourceUISelector;
   label: string; // the display name of data source
-  groupType: string; // the group to which the data source belongs
+  groupType: DataSourceUIGroupType; // the group to which the data source belongs
   typeLabel: string; // the display name of data source type
   displayOrder?: number; // the order in which the data source should be displayed in selector
   description?: string; // short description of your database
@@ -72,4 +72,8 @@ export interface IDataSourceDataSet<T = {}> {
 
 export interface IDataSourceQueryResponse<T = {}> {
   data: T;
+}
+
+export enum DataSourceUIGroupType {
+  defaultOpenSearchDataSource = 'DEFAULT_INDEX_PATTERNS',
 }

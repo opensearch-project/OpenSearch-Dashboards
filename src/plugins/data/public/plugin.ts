@@ -91,7 +91,7 @@ import { indexPatternLoad } from './index_patterns/expressions/load_index_patter
 import { DataSourceService } from './data_sources/datasource_services';
 import { DataSourceFactory } from './data_sources/datasource';
 import {
-  DEFAULT_DATASOURCE_TYPE,
+  DEFAULT_DATA_SOURCE_TYPE,
   registerDefaultDataSource,
 } from './data_sources/register_default_datasource';
 import { DefaultDslDataSource } from './data_sources/default_datasource';
@@ -222,10 +222,10 @@ export class DataPublicPlugin
     // Create or fetch the singleton instance
     const dataSourceService = DataSourceService.getInstance();
     const dataSourceFactory = DataSourceFactory.getInstance();
-    dataSourceFactory.registerDataSourceType(DEFAULT_DATASOURCE_TYPE, DefaultDslDataSource);
+    dataSourceFactory.registerDataSourceType(DEFAULT_DATA_SOURCE_TYPE, DefaultDslDataSource);
     dataSourceService.registerDataSourceFetchers([
       {
-        type: DEFAULT_DATASOURCE_TYPE,
+        type: DEFAULT_DATA_SOURCE_TYPE,
         registerDataSources: () => registerDefaultDataSource(dataServices),
       },
     ]);
