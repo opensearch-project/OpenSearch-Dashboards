@@ -34,7 +34,7 @@ export interface WorkspaceListProps {
 
 const WORKSPACE_LIST_PAGE_DESCRIPTION = i18n.translate('workspace.list.description', {
   defaultMessage:
-    'Workspace allow you to save and organize library items, such as index patterns, visualizations, dashboards, saved searches, and share them with other OpenSearch Dashboards users. You can control which features are visible in each workspace, and which users and groups have read and write access to the library items in the workspace.',
+    'Workspaces allow you to save and organize library items, such as index patterns, visualizations, dashboards, saved searches, and share them with other OpenSearch Dashboards users. You can control which features are visible in each workspace, and which users and groups have read and write access to the library items in the workspace.',
 });
 
 const emptyWorkspaceList: WorkspaceObject[] = [];
