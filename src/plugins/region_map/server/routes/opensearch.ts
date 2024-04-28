@@ -14,20 +14,28 @@ export function registerGeospatialRoutes(router: IRouter) {
         body: schema.object({
           index: schema.string(),
         }),
+        query: schema.maybe(schema.object({}, { unknowns: 'allow' })),
       },
     },
     async (context, req, res) => {
-      const client = context.core.opensearch.client.asCurrentUser;
       try {
-        const { index } = req.body;
-        const indices = await client.cat.indices({
-          index,
+        let client;
+        // @ts-ignore
+        if (!req.query.dataSourceId) {
+          client = context.core.opensearch.client.asCurrentUser;
+        } else {
+          // @ts-ignore
+          client = await context.dataSource.opensearch.getClient(req.query.dataSourceId);
+        }
+        const response = await client.cat.indices({
+          index: req.body.index,
           format: 'json',
         });
+        const indexNames = response.body.map((index: any) => index.index);
         return res.ok({
           body: {
             ok: true,
-            resp: indices.body,
+            resp: indexNames,
           },
         });
       } catch (err: any) {
@@ -59,10 +67,18 @@ export function registerGeospatialRoutes(router: IRouter) {
           index: schema.string(),
           size: schema.number(),
         }),
+        query: schema.maybe(schema.object({}, { unknowns: 'allow' })),
       },
     },
     async (context, req, res) => {
-      const client = context.core.opensearch.client.asCurrentUser;
+      let client;
+      // @ts-ignore
+      if (!req.query.dataSourceId) {
+        client = context.core.opensearch.client.asCurrentUser;
+      } else {
+        // @ts-ignore
+        client = await context.dataSource.opensearch.getClient(req.query.dataSourceId);
+      }
       try {
         const { index, size } = req.body;
         const params = { index, body: {}, size };
@@ -91,10 +107,18 @@ export function registerGeospatialRoutes(router: IRouter) {
         body: schema.object({
           index: schema.string(),
         }),
+        query: schema.maybe(schema.object({}, { unknowns: 'allow' })),
       },
     },
     async (context, req, res) => {
-      const client = context.core.opensearch.client.asCurrentUser;
+      let client;
+      // @ts-ignore
+      if (!req.query.dataSourceId) {
+        client = context.core.opensearch.client.asCurrentUser;
+      } else {
+        // @ts-ignore
+        client = await context.dataSource.opensearch.getClient(req.query.dataSourceId);
+      }
       try {
         const { index } = req.body;
         const mappings = await client.indices.getMapping({ index });

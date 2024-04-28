@@ -1,0 +1,2 @@
+feat:
+- Improve the perceived performance of Discover when using the default tabular renderer ([#6599](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6599))

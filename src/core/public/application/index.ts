@@ -54,4 +54,5 @@ export {
   // Internal types
   InternalApplicationSetup,
   InternalApplicationStart,
+  WorkspaceAvailability,
 } from './types';

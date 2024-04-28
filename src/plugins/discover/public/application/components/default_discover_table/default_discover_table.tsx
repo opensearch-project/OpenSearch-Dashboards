@@ -5,16 +5,22 @@
 
 import './_doc_table.scss';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { EuiButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TableHeader } from './table_header';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
-import { TableRow } from './table_rows';
-import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { TableRow } from './table_row';
+import { getServices, IndexPattern } from '../../../opensearch_dashboards_services';
 import { Pagination } from './pagination';
 import { getLegacyDisplayedColumns } from './helper';
 import { SortDirection, SortOrder } from '../../../saved_searches/types';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SAMPLE_SIZE_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '../../../../common';
+import { UI_SETTINGS } from '../../../../../data/common';
 
 export interface DefaultDiscoverTableProps {
   columns: string[];
@@ -27,16 +33,12 @@ export interface DefaultDiscoverTableProps {
   onMoveColumn: (colName: string, destination: number) => void;
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
-  onClose: () => void;
-  sampleSize: number;
-  isShortDots: boolean;
-  hideTimeColumn: boolean;
-  defaultSortOrder: SortDirection;
+  onClose?: () => void;
   showPagination?: boolean;
   scrollToTop?: () => void;
 }
 
-export const LegacyDiscoverTable = ({
+const DefaultDiscoverTableUI = ({
   columns,
   hits,
   rows,
@@ -48,13 +50,19 @@ export const LegacyDiscoverTable = ({
   onAddColumn,
   onFilter,
   onClose,
-  sampleSize,
-  isShortDots,
-  hideTimeColumn,
-  defaultSortOrder,
   showPagination,
   scrollToTop,
 }: DefaultDiscoverTableProps) => {
+  const services = getServices();
+  const [sampleSize, isShortDots, hideTimeColumn, defaultSortOrder] = useMemo(() => {
+    return [
+      services.uiSettings.get(SAMPLE_SIZE_SETTING),
+      services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE),
+      services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
+      services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc') as SortDirection,
+    ];
+  }, [services.uiSettings]);
+
   const displayedColumns = getLegacyDisplayedColumns(
     columns,
     indexPattern,
@@ -62,8 +70,8 @@ export const LegacyDiscoverTable = ({
     isShortDots
   );
   const displayedColumnNames = displayedColumns.map((column) => column.name);
-  const pageSize = 50;
-  const [renderedRowCount, setRenderedRowCount] = useState(50); // Start with 50 rows
+  const pageSize = 10;
+  const [renderedRowCount, setRenderedRowCount] = useState(pageSize); // Start with 10 rows
   const [displayedRows, setDisplayedRows] = useState(rows.slice(0, pageSize));
   const [currentRowCounts, setCurrentRowCounts] = useState({
     startRow: 0,
@@ -71,7 +79,7 @@ export const LegacyDiscoverTable = ({
   });
   const observerRef = useRef<IntersectionObserver | null>(null);
   const [sentinelEle, setSentinelEle] = useState<HTMLDivElement>();
-  // Need a callback ref since the element isnt set on the first render.
+  // Need a callback ref since the element isn't set on the first render.
   const sentinelRef = useCallback((node: HTMLDivElement | null) => {
     if (node !== null) {
       setSentinelEle(node);
@@ -83,7 +91,7 @@ export const LegacyDiscoverTable = ({
       observerRef.current = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting) {
-            setRenderedRowCount((prevRowCount) => prevRowCount + 50); // Load 50 more rows
+            setRenderedRowCount((prevRowCount) => prevRowCount + pageSize); // Load 50 more rows
           }
         },
         { threshold: 1.0 }
@@ -196,3 +204,5 @@ export const LegacyDiscoverTable = ({
     )
   );
 };
+
+export const DefaultDiscoverTable = React.memo(DefaultDiscoverTableUI);

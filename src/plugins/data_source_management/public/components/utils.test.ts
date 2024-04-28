@@ -87,8 +87,9 @@ describe('DataSourceManagement: Utils.ts', () => {
     const { toasts } = notificationServiceMock.createStartContract();
 
     test('should  send warning when data source is not available', () => {
-      handleNoAvailableDataSourceError(toasts);
-      expect(toasts.addWarning).toHaveBeenCalledWith(`Data source is not available`);
+      const changeState = jest.fn();
+      handleNoAvailableDataSourceError(changeState, toasts);
+      expect(toasts.add).toBeCalledTimes(1);
     });
   });
 

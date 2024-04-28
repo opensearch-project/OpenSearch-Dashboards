@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
@@ -24,6 +24,8 @@ import {
 
 export interface WorkspaceUpdaterProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+  hideTitle?: boolean;
+  maxWidth?: number | string;
 }
 
 function getFormDataFromWorkspace(
@@ -118,15 +120,16 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
 
   return (
     <EuiPage paddingSize="none">
-      <EuiPageBody panelled>
-        <EuiPageHeader restrictWidth pageTitle="Update Workspace" />
+      <EuiPageBody>
+        {!props.hideTitle ? <EuiPageHeader restrictWidth pageTitle="Update Workspace" /> : null}
+        <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}
-          style={{ width: '100%', maxWidth: 1000 }}
+          style={{ width: '100%', maxWidth: props.maxWidth ? props.maxWidth : 1000 }}
         >
           {application && (
             <WorkspaceForm
