@@ -9,7 +9,6 @@ import {
   EuiPopover,
   EuiContextMenuPanel,
   EuiPanel,
-  EuiButtonEmpty,
   EuiSelectable,
   EuiPopoverTitle,
 } from '@elastic/eui';
@@ -37,6 +36,7 @@ import './data_source_selectable.scss';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import '../button_title.scss';
 import './data_source_selectable.scss';
+import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -249,32 +249,23 @@ export class DataSourceSelectable extends React.Component<
       return <DataSourceErrorMenu application={this.props.application} />;
     }
 
-    const button = (
-      <>
-        <EuiButtonEmpty
-          className={'euiHeaderLink dataSourceComponentButtonTitle'}
-          onClick={this.onClick.bind(this)}
-          data-test-subj="dataSourceSelectableContextMenuHeaderLink"
-          aria-label={i18n.translate('dataSourceSelectable.dataSourceOptionsButtonAriaLabel', {
-            defaultMessage: 'dataSourceMenuButton',
-          })}
-          iconType="database"
-          iconSide="left"
-          size="s"
-          disabled={this.props.disabled || false}
-        >
-          {this.state.selectedOption &&
-            this.state.selectedOption.length > 0 &&
-            this.state.selectedOption[0]?.label}
-        </EuiButtonEmpty>
-      </>
-    );
+    const label =
+      (this.state.selectedOption &&
+        this.state.selectedOption.length > 0 &&
+        this.state.selectedOption[0]?.label) ||
+      '';
 
     return (
       <EuiPopover
         initialFocus={'.euiSelectableSearch'}
         id={'dataSourceSelectableContextMenuPopover'}
-        button={button}
+        button={
+          <DataSourceMenuPopoverButton
+            className={'dataSourceSelectable'}
+            label={label}
+            onClick={this.onClick.bind(this)}
+          />
+        }
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}
         panelPaddingSize="none"

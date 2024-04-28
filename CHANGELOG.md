@@ -105,7 +105,9 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Add permission tab to workspace create update page ([#6378](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6378))
 - [Workspace] Hide datasource and advanced settings menu in dashboard management when in workspace. ([#6455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6455))
 - [Multiple Datasource] Modify selectable picker to remove group label and close popover after selection ([#6515](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6515))
+- [Multiple Datasource] Extract the button component for datasource picker to avoid duplicate code ([#6559](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6559))
 - [Workspace] Add workspaces filter to saved objects page. ([#6458](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6458))
+- [Multiple Datasource] Support multi data source in Region map ([#6654](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6654))
 
 ### 🐛 Bug Fixes
 
@@ -137,6 +139,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Multiple Datasource] Validation succeed as long as status code in response is 200 ([#6399](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6399))
 - [BUG][Multiple Datasource] Fix on data source selectable and readonly component are not consistent ([#6545]https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6545)
 - [BUG][Multiple Datasource] Add validation for title length to be no longer than 32 characters [#6452](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6452))
+- [Dev Tool] Add additional themed styles to ace overrides ([#5327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5327))
 
 ### 🚞 Infrastructure
 

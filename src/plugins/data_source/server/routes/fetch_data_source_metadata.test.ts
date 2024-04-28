@@ -16,7 +16,6 @@ import { registerFetchDataSourceMetaDataRoute } from './fetch_data_source_metada
 import { AuthType } from '../../common/data_sources';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { opensearchClientMock } from '../../../../../src/core/server/opensearch/client/mocks';
-import { index } from 'mathjs';
 
 type SetupServerReturn = UnwrapPromise<ReturnType<typeof setupServer>>;
 
