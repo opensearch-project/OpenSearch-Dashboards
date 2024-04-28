@@ -7,8 +7,17 @@ import { ShallowWrapper, shallow } from 'enzyme';
 import React from 'react';
 import { DataSourceView } from './data_source_view';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { notificationServiceMock } from '../../../../../core/public/mocks';
-import { getSingleDataSourceResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
+import {
+  applicationServiceMock,
+  notificationServiceMock,
+  uiSettingsServiceMock,
+} from '../../../../../core/public/mocks';
+import {
+  getSingleDataSourceResponse,
+  mockManagementPlugin,
+  mockResponseForSavedObjectsCalls,
+  mockUiSettingsCalls,
+} from '../../mocks';
 import { render } from '@testing-library/react';
 import * as utils from '../utils';
 import { DataSourceSelectionService } from '../../service/data_source_selection_service';
@@ -18,6 +27,9 @@ describe('DataSourceView', () => {
   let client: SavedObjectsClientContract;
   const dataSourceSelection = new DataSourceSelectionService();
   const { toasts } = notificationServiceMock.createStartContract();
+  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  const uiSettings = mockedContext.uiSettings;
+  const nextTick = () => new Promise((res) => process.nextTick(res));
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -154,5 +166,172 @@ describe('DataSourceView', () => {
       />
     );
     expect(onSelectedDataSource).toBeCalledWith([]);
+  });
+
+  it('should render fetch error when pass in invalid data source id', async () => {
+    spyOn(utils, 'getDataSourceById').and.throwError('Data source is not available');
+    const container = render(
+      <DataSourceView
+        savedObjectsClient={client}
+        notifications={toasts}
+        selectedOption={[{ id: 'any id' }]}
+        hideLocalCluster={false}
+        fullWidth={false}
+      />
+    );
+    const button = await container.findByTestId('dataSourceViewErrorPopover');
+    button.click();
+    expect(component).toMatchSnapshot();
+    expect(toasts.add).toBeCalledTimes(1);
+    expect(utils.getDataSourceById).toBeCalledTimes(1);
+    expect(container.getByTestId('dataSourceViewErrorHeaderLink')).toBeVisible();
+  });
+
+  it('should render expected error message when pass in invalid data source id ', async () => {
+    spyOn(utils, 'getDataSourceById').and.throwError('Data source is not available');
+    spyOn(uiSettings, 'get').and.returnValue('test2');
+    const container = render(
+      <DataSourceView
+        savedObjectsClient={client}
+        notifications={toasts}
+        selectedOption={[{ id: 'any id' }]}
+        hideLocalCluster={false}
+        fullWidth={false}
+      />
+    );
+    const button = await container.findByTestId('dataSourceViewErrorPopover');
+    button.click();
+    expect(component).toMatchSnapshot();
+    expect(toasts.add).toBeCalledTimes(1);
+    expect(utils.getDataSourceById).toBeCalledTimes(1);
+    expect(container.getByTestId('dataSourceViewErrorHeaderLink')).toBeVisible();
+    const errorHeaderLink = await container.findByTestId('dataSourceViewErrorHeaderLink');
+    errorHeaderLink.click();
+    await nextTick();
+    expect(container.getByTestId('datasourceViewErrorPanel')).toBeVisible();
+  });
+
+  it('can handle switch default data source with non-null default data source', async () => {
+    spyOn(uiSettings, 'get').and.returnValue('test2');
+    spyOn(utils, 'getDataSourceById').and.returnValue({ id: 'test2', label: 'test2' });
+    const onSelectedDataSources = jest.fn();
+    const container = mount(
+      <DataSourceView
+        savedObjectsClient={client}
+        notifications={toasts}
+        selectedOption={[{ id: 'any id' }]}
+        hideLocalCluster={false}
+        fullWidth={false}
+        uiSettings={uiSettings}
+        onSelectedDataSources={onSelectedDataSources}
+      />
+    );
+    const instance = container.instance();
+    await nextTick();
+    instance.handleSwitchDefaultDatasource({ id: 'test2', label: 'test2' });
+    await nextTick();
+    const newState = instance.state;
+    expect(newState).toEqual({
+      isPopoverOpen: false,
+      selectedOption: [{ id: 'test2', label: 'test2' }],
+      showEmptyState: false,
+      showError: false,
+      defaultDataSource: null,
+    });
+  });
+
+  it('can handle switch default data source with non-null default data source and no onSelectedDataSources', async () => {
+    spyOn(uiSettings, 'get').and.returnValue('test2');
+    spyOn(utils, 'getDataSourceById').and.returnValue({ id: 'test2', label: 'test2' });
+    const container = mount(
+      <DataSourceView
+        savedObjectsClient={client}
+        notifications={toasts}
+        selectedOption={[{ id: 'any id' }]}
+        hideLocalCluster={false}
+        fullWidth={false}
+        uiSettings={uiSettings}
+      />
+    );
+    const instance = container.instance();
+    await nextTick();
+    instance.handleSwitchDefaultDatasource({ id: 'test2', label: 'test2' });
+    await nextTick();
+    const newState = instance.state;
+    expect(newState).toEqual({
+      isPopoverOpen: false,
+      selectedOption: [{ id: 'test2', label: 'test2' }],
+      showEmptyState: false,
+      showError: false,
+      defaultDataSource: null,
+    });
+  });
+
+  it('should showError  when pass in invalid data source id ', async () => {
+    spyOn(utils, 'getDataSourceById').and.throwError('Data source is not available');
+    spyOn(uiSettings, 'get').and.returnValue('test2');
+
+    const container = mount(
+      <DataSourceView
+        savedObjectsClient={client}
+        notifications={toasts}
+        selectedOption={[{ id: 'any id' }]}
+        hideLocalCluster={false}
+        fullWidth={false}
+        uiSettings={uiSettings}
+      />
+    );
+    const instance = container.instance();
+    await nextTick();
+    expect(instance.state).toEqual({
+      isPopoverOpen: false,
+      selectedOption: [{ id: 'any id' }],
+      showEmptyState: false,
+      showError: true,
+      defaultDataSource: null,
+    });
+  });
+
+  it('Should render nothing and call toast when provided datasource has been filtered out', async () => {
+    spyOn(utils, 'getDataSourceById').and.returnValue({ id: 'test1', label: 'test1' });
+    spyOn(uiSettings, 'get').and.returnValue('test1');
+    const container = mount(
+      <DataSourceView
+        fullWidth={false}
+        selectedOption={[{ id: 'test1' }]}
+        hideLocalCluster={true}
+        notifications={toasts}
+        onSelectedDataSources={jest.fn()}
+        dataSourceFilter={(ds) => {
+          return ds.id !== 'test1';
+        }}
+      />
+    );
+    const instance = container.instance();
+    await nextTick();
+    expect(instance.state).toEqual({
+      isPopoverOpen: false,
+      selectedOption: [{ id: 'test1' }], // keep the same as before but no label
+      showEmptyState: false,
+      showError: true,
+      defaultDataSource: null,
+    });
+  });
+
+  it('Should render selected option even when provided datasource has been filtered out', async () => {
+    const container = render(
+      <DataSourceView
+        fullWidth={false}
+        selectedOption={[{ id: 'test1', label: 'test1' }]}
+        hideLocalCluster={false}
+        notifications={toasts}
+        onSelectedDataSources={jest.fn()}
+        dataSourceFilter={(ds) => {
+          return ds.id !== 'test1';
+        }}
+      />
+    );
+    const button = await container.findByTestId('dataSourceViewButton');
+    expect(button).toHaveTextContent('test1');
   });
 });

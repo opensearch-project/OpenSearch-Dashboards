@@ -37,6 +37,7 @@ import {
   DataSourceSelectionService,
   defaultDataSourceSelection,
 } from '../service/data_source_selection_service';
+import { switchToDefaultButton } from './toast_button/switch_default_button';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -332,6 +333,46 @@ export const handleDataSourceFetchError = (
       defaultMessage: 'Failed to fetch data sources',
     }),
     text: toMountPoint(getReloadButton()),
+    color: 'danger',
+  });
+};
+
+export interface DataSourceViewErrorWithDefaultParams {
+  changeState: (state: { defaultDataSource: DataSourceOption | null }) => void;
+  notifications: ToastsStart;
+  failedDataSourceId: string;
+  defaultDataSourceOption: DataSourceOption | null;
+  handleSwitch: () => Promise<void>;
+  callback?: (ds: DataSourceOption[]) => void;
+}
+/**
+ *
+ * @param dataSourceViewErrorParams
+ * pass in state to control the display of toast warning notification
+ * pass in the notification props to display the current error ( switch to default data source if available)
+ * pass in failedDataSourceId to construct the error message
+ * pass in the defaultDataSource to control whether display the button to switch
+ * pass in a handleSwitch if click switchToDefault button
+ * pass in callback to have props onSelectOption
+ */
+export const handleDataSourceViewErrorWithSwitchToDefaultOption = (
+  dataSourceViewErrorWithDefaultParams: DataSourceViewErrorWithDefaultParams
+) => {
+  const {
+    changeState,
+    notifications,
+    failedDataSourceId,
+    defaultDataSourceOption,
+    handleSwitch,
+    callback,
+  } = dataSourceViewErrorWithDefaultParams;
+  changeState({ defaultDataSource: defaultDataSourceOption });
+  if (callback) callback([]);
+  notifications.add({
+    title: i18n.translate('dataSource.dataSourceUnavailableError', {
+      defaultMessage: `Data source ${failedDataSourceId} is not available `,
+    }),
+    text: defaultDataSourceOption ? toMountPoint(switchToDefaultButton(handleSwitch)) : '',
     color: 'danger',
   });
 };

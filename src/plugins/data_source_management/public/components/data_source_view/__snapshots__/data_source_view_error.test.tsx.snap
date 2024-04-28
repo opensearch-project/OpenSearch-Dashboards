@@ -1,0 +1,169 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceViewError component should call handleSwitchDefaultDatasource when switch button is clicked 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPopover euiPopover--anchorDownLeft"
+        data-test-subj="dataSourceViewErrorPopover"
+        id="dataSourceViewErrorPopover"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            aria-label="dataSourceViewErrorHeaderLink"
+            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small dataSourceViewErrorHeaderLink"
+            data-test-subj="dataSourceViewErrorHeaderLink"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="iconType"
+            />
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPopover euiPopover--anchorDownLeft"
+      data-test-subj="dataSourceViewErrorPopover"
+      id="dataSourceViewErrorPopover"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <button
+          aria-label="dataSourceViewErrorHeaderLink"
+          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--small dataSourceViewErrorHeaderLink"
+          data-test-subj="dataSourceViewErrorHeaderLink"
+          type="button"
+        >
+          <span
+            aria-hidden="true"
+            class="euiButtonIcon__icon"
+            color="inherit"
+            data-euiicon-type="iconType"
+          />
+        </button>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`DataSourceViewError component should render without crashing 1`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <EuiButtonIcon
+        aria-label="dataSourceViewErrorHeaderLink"
+        className="dataSourceViewErrorHeaderLink"
+        data-test-subj="dataSourceViewErrorHeaderLink"
+        iconType={[Function]}
+        onClick={[Function]}
+        size="s"
+      />
+    }
+    closePopover={[Function]}
+    data-test-subj="dataSourceViewErrorPopover"
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceViewErrorPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      totalDataSourceCount={0}
+    />
+    <EuiPanel
+      className="datasourceViewErrorPanel"
+      data-test-subj="datasourceViewErrorPanel"
+      hasBorder={false}
+      hasShadow={false}
+    >
+      <EuiText
+        size="s"
+        textAlign="center"
+      >
+        Data source testDataSourceId is not available
+      </EuiText>
+    </EuiPanel>
+    <EuiPopoverFooter>
+      <EuiFlexGroup
+        justifyContent="spaceAround"
+      >
+        <EuiFlexItem>
+          <EuiButton
+            data-test-subj="dataSourceViewErrorSwitchButton"
+            fill={false}
+            onClick={[MockFunction]}
+            size="s"
+          >
+            Switch to default data source
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPopoverFooter>
+  </EuiPopover>
+</Fragment>
+`;
