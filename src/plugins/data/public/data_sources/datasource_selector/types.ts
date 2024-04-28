@@ -14,12 +14,11 @@ export interface DataSourceGroup {
   label: string;
   id: string;
   options: DataSourceOption[];
-  typeGroup: string;
+  groupType: string;
 }
 
 export interface DataSourceOption {
   key: string;
-  id: string;
   name: string;
   label: string;
   value: string;

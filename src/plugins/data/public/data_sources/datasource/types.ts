@@ -18,7 +18,7 @@ export interface IDataSourceGroup {
   name: string;
 }
 
-export interface DataSourceDataSet<T = []> {
+export interface DataSetWithDataSource<T = []> {
   ds: DataSource;
   list: T;
 }
@@ -59,7 +59,7 @@ export interface IDataSourceUISelector {
 export interface IDataSourceUISettings {
   selector: IDataSourceUISelector;
   label: string; // the display name of data source
-  typeGroup: string; // the group to which the data source belongs
+  groupType: string; // the group to which the data source belongs
   typeLabel: string; // the display name of data source type
   displayOrder?: number; // the order in which the data source should be displayed in selector
   description?: string; // short description of your database

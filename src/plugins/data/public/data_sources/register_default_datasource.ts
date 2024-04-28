@@ -24,7 +24,7 @@ export const registerDefaultDataSource = (data: Omit<DataPublicPluginStart, 'ui'
         ui: {
           label: 'Index patterns', // display name of your data source,
           typeLabel: 'Index patterns', // display name of your data source type,
-          typeGroup: 'DEFAULT_INDEX_PATTERNS',
+          groupType: 'DEFAULT_INDEX_PATTERNS',
           selector: {
             displayDatasetsAsSource: true, // when true, selector UI will render data sets with source by calling getDataSets()
           },

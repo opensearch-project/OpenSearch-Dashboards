@@ -6,7 +6,7 @@
 export { DataSource } from './datasource';
 export {
   IDataSourceMetadata,
-  DataSourceDataSet,
+  DataSetWithDataSource,
   IDataSetParams,
   IDataSourceQueryParams,
   IDataSourceQueryResult,

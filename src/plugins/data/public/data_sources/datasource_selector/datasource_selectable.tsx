@@ -6,15 +6,15 @@
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { EuiButtonIcon, EuiComboBox, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DataSource, DataSourceDataSet, IndexPatternOption } from '../datasource';
-import { DataSourceGroup, DataSourceSelectableProps } from './types';
+import { DataSource, DataSetWithDataSource, IndexPatternOption } from '../datasource';
+import { DataSourceGroup, DataSourceOption, DataSourceSelectableProps } from './types';
 
-// Get Index patterns for local cluster.
+// Asynchronously retrieves and formats dataset from a given data source.
 const getAndFormatDataSetFromDataSource = async (
   ds: DataSource
-): Promise<DataSourceDataSet<IndexPatternOption[]>> => {
+): Promise<DataSetWithDataSource<IndexPatternOption[]>> => {
   const { dataSets } = await ds.getDataSet();
-  return { ds, list: dataSets } as DataSourceDataSet<IndexPatternOption[]>;
+  return { ds, list: dataSets } as DataSetWithDataSource<IndexPatternOption[]>;
 };
 
 // Map through all data sources and get their respective data sets.
@@ -28,11 +28,11 @@ export const isIndexPatterns = (dataSet: unknown) =>
   !!(dataSet as any).title &&
   !!(dataSet as any).id;
 
-// Mapping function for datasets to get the option format for the combo box from the dataSource and dataSet.
+// Mapping function to get the option format for the combo box from the dataSource and dataSet.
 const mapToOption = (
   dataSource: DataSource,
-  dataSet: DataSourceDataSet | undefined = undefined
-) => {
+  dataSet: DataSetWithDataSource | undefined = undefined
+): DataSourceOption => {
   const baseOption = {
     type: dataSource.getType(),
     name: dataSource.getName(),
@@ -41,9 +41,9 @@ const mapToOption = (
   if (dataSet && 'title' in dataSet && 'id' in dataSet && isIndexPatterns(dataSet)) {
     return {
       ...baseOption,
-      label: dataSet.title,
-      value: dataSet.id,
-      key: dataSet.id,
+      label: dataSet.title as string,
+      value: dataSet.id as string,
+      key: dataSet.id as string,
     };
   }
   return {
@@ -55,9 +55,13 @@ const mapToOption = (
 };
 
 // Function to add or update groups in a reduction process
-const addOrUpdateGroup = (acc: DataSourceGroup[], dataSource: DataSource, option) => {
+const addOrUpdateGroup = (
+  existingGroups: DataSourceGroup[],
+  dataSource: DataSource,
+  option: DataSourceOption
+) => {
   const metadata = dataSource.getMetadata();
-  const groupType = metadata.ui.typeGroup;
+  const groupType = metadata.ui.groupType;
   let groupName =
     metadata.ui.typeLabel ||
     i18n.translate('dataExplorer.dataSourceSelector.defaultGroupTitle', {
@@ -70,34 +74,34 @@ const addOrUpdateGroup = (acc: DataSourceGroup[], dataSource: DataSource, option
     });
   }
 
-  const group = acc.find((g: DataSourceGroup) => g.typeGroup === groupType);
-  if (group) {
-    if (!group.options.some((opt) => opt.key === option.key)) {
-      group.options.push(option);
-    }
+  const group = existingGroups.find((g: DataSourceGroup) => g.id === groupType);
+  if (group && !group.options.some((opt) => opt.key === option.key)) {
+    group.options.push(option);
   } else {
-    acc.push({
-      typeGroup: groupType,
+    existingGroups.push({
+      groupType,
       label: groupName,
       options: [option],
-      id: metadata.ui.typeGroup, // id for each group
+      id: metadata.ui.groupType, // id for each group
     });
   }
-  return acc;
 };
 
-const consolidateDataSourceGroups = (dataSets: DataSourceDataSet[], dataSources: DataSource[]) => {
-  return [...dataSets, ...dataSources].reduce((acc, item) => {
+const consolidateDataSourceGroups = (
+  dataSets: DataSetWithDataSource[],
+  dataSources: DataSource[]
+) => {
+  return [...dataSets, ...dataSources].reduce((dsGroup, item) => {
     if ('list' in item && item.ds) {
       // Confirm item is a DataSet
       const options = item.list.map((dataset) => mapToOption(item.ds, dataset));
-      options.forEach((option) => addOrUpdateGroup(acc, item.ds, option));
+      options.forEach((option) => addOrUpdateGroup(dsGroup, item.ds, option));
     } else {
       // Handle DataSource directly
       const option = mapToOption(item as InstanceType<typeof DataSource>);
-      addOrUpdateGroup(acc, item as InstanceType<typeof DataSource>, option);
+      addOrUpdateGroup(dsGroup, item as InstanceType<typeof DataSource>, option);
     }
-    return acc;
+    return dsGroup;
   }, []);
 };
 
@@ -125,7 +129,7 @@ export const DataSourceSelectable = ({
       .then((dataSetResults) => {
         setDataSourceOptionList(
           consolidateDataSourceGroups(
-            dataSetResults as DataSourceDataSet[],
+            dataSetResults as DataSetWithDataSource[],
             dataSources.filter((ds) => !ds.getMetadata().ui.selector.displayDatasetsAsSource)
           )
         );
