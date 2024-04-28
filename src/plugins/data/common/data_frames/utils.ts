@@ -11,6 +11,7 @@ import {
   IDataFrame,
   IDataFrameWithAggs,
   PartialDataFrame,
+  IDataFrameError,
 } from './types';
 import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
@@ -18,7 +19,7 @@ import { IOpenSearchDashboardsSearchRequest } from '../search';
 
 export interface IDataFrameResponse extends SearchResponse<any> {
   type: DATA_FRAME_TYPES;
-  body: IDataFrame | IDataFrameWithAggs;
+  body: IDataFrame | IDataFrameWithAggs | IDataFrameError;
   took: number;
 }
 

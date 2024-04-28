@@ -53,3 +53,7 @@ export interface PartialDataFrame extends Omit<IDataFrame, 'fields' | 'size'> {
 export interface IDataFrameWithAggs extends IDataFrame {
   aggs: DataFrameAgg[] | null;
 }
+
+export interface IDataFrameError {
+  error: Error;
+}
