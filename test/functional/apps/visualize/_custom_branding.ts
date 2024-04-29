@@ -127,7 +127,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('in default mode', async () => {
         it('with customized logo in header bar', async () => {
-          await globalNav.logoExistsOrFail(expectedFullLogo);
+          //  The expanded header shows up with a dark background irrespective of the color scheme and because of that, we will always have a dark logo there.
+          await globalNav.logoExistsOrFail(expectedFullLogoDarkMode);
         });
 
         it('with customized mark logo button in header bar', async () => {
