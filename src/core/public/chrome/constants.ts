@@ -34,6 +34,6 @@ export const GITHUB_CREATE_ISSUE_LINK =
 
 export enum RightNavigationOrder {
   // order of dev tool should be after advance settings
-  Settings = 1,
-  DevTool = 2,
+  Settings = 10,
+  DevTool = 20,
 }
