@@ -23,6 +23,12 @@ const dataSource: Omit<SavedObject, 'id'> = {
   references: [],
 };
 
+const indexPattern: Omit<SavedObject, 'id'> = {
+  type: 'index-pattern',
+  attributes: {},
+  references: [],
+};
+
 const advancedSettings: Omit<SavedObject, 'id'> = {
   type: 'config',
   attributes: {},
@@ -437,6 +443,95 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
 
       await Promise.all(
         [...createResultFoo.body.saved_objects, ...createResultBar.body.saved_objects].map((item) =>
+          deleteItem({
+            type: item.type,
+            id: item.id,
+          })
+        )
+      );
+    });
+
+    it('checkConflicts when importing disallowed types', async () => {
+      await clearFooAndBar();
+      // Create data source through OpenSearch API directly
+      // or the saved objects API will do connection validation on the data source
+      // which will not pass as it is a dummy data source without endpoint and credentials
+      await osdTestServer.request
+        .post(root, `/api/console/proxy?path=.kibana%2F_doc%2Fdata-source%3Afoo&method=PUT`)
+        .send({
+          type: dataSource.type,
+          [dataSource.type]: {},
+        })
+        .expect(201);
+
+      await osdTestServer.request
+        .post(root, `/api/saved_objects/${indexPattern.type}/foo`)
+        .send({
+          attributes: indexPattern.attributes,
+          references: [
+            {
+              id: 'foo',
+              type: dataSource.type,
+              name: 'dataSource',
+            },
+          ],
+        })
+        .expect(200);
+
+      const getResultFoo = await getItem({
+        type: dataSource.type,
+        id: 'foo',
+      });
+      const getResultBar = await getItem({
+        type: indexPattern.type,
+        id: 'foo',
+      });
+
+      /**
+       * import with workspaces when conflicts
+       */
+      const importWithWorkspacesResult = await osdTestServer.request
+        .post(
+          root,
+          `/api/saved_objects/_import?workspaces=${createdFooWorkspace.id}&overwrite=true&dataSourceEnabled=true`
+        )
+        .attach(
+          'file',
+          Buffer.from(
+            [JSON.stringify(getResultFoo.body), JSON.stringify(getResultBar.body)].join('\n'),
+            'utf-8'
+          ),
+          'tmp.ndjson'
+        )
+        .expect(200);
+
+      expect(importWithWorkspacesResult.body.success).toEqual(false);
+      expect(importWithWorkspacesResult.body.errors.length).toEqual(1);
+      expect(importWithWorkspacesResult.body.errors[0].id).toEqual('foo');
+      expect(importWithWorkspacesResult.body.errors[0].error.type).toEqual('unknown');
+      expect(importWithWorkspacesResult.body.successCount).toEqual(1);
+
+      const [indexPatternImportResult] = importWithWorkspacesResult.body.successResults;
+      const getImportIndexPattern = await getItem({
+        type: indexPatternImportResult.type,
+        id: indexPatternImportResult.destinationId,
+      });
+
+      // The references to disallowed types should be kept
+      expect(getImportIndexPattern.body.references).toEqual([
+        {
+          id: 'foo',
+          type: dataSource.type,
+          name: 'dataSource',
+        },
+      ]);
+
+      await Promise.all(
+        [
+          { id: 'foo', type: indexPattern.type },
+          { id: 'foo', type: dataSource.type },
+          { id: indexPatternImportResult.destinationId, type: indexPattern.type },
+        ].map((item) =>
           deleteItem({
             type: item.type,
             id: item.id,

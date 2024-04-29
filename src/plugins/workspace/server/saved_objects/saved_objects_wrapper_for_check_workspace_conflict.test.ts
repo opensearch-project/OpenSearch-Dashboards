@@ -461,6 +461,43 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
         }
       `);
     });
+
+    it(`Should return error when trying to check conflict on disallowed types within a workspace`, async () => {
+      mockedClient.bulkCreate.mockResolvedValueOnce({ saved_objects: [] });
+      const result = await wrapperClient.checkConflicts(
+        [
+          getSavedObject({
+            type: 'config',
+            id: 'foo',
+          }),
+          getSavedObject({
+            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+            id: 'foo',
+          }),
+        ],
+        {
+          workspaces: ['foo'],
+        }
+      );
+
+      expect(mockedClient.bulkCreate).toBeCalledWith([], {
+        workspaces: ['foo'],
+      });
+      expect(result.errors[0].error).toEqual(
+        expect.objectContaining({
+          message:
+            "Unsupported type in workspace: 'config' is not allowed to be imported in workspace.",
+          statusCode: 400,
+        })
+      );
+      expect(result.errors[1].error).toEqual(
+        expect.objectContaining({
+          message:
+            "Unsupported type in workspace: 'data-source' is not allowed to be imported in workspace.",
+          statusCode: 400,
+        })
+      );
+    });
   });
 
   describe('find', () => {
