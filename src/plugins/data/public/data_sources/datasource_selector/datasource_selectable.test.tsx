@@ -50,6 +50,12 @@ describe('DataSourceSelectable', () => {
         getName: jest.fn().mockReturnValue('SomeName'),
         getMetadata: jest.fn().mockReturnValue(defaultDataSourceMetadata),
       } as unknown) as DataSource,
+      ({
+        getDataSet: jest.fn().mockResolvedValue([]),
+        getType: jest.fn().mockReturnValue('s3glue'),
+        getName: jest.fn().mockReturnValue('Amazon S3'),
+        getMetadata: jest.fn().mockReturnValue(s3DataSourceMetadata),
+      } as unknown) as DataSource,
     ];
 
     dataSourceOptionListMock = [];
@@ -258,5 +264,22 @@ describe('DataSourceSelectable', () => {
     expect(handleSelect).toHaveBeenCalledWith(
       expect.objectContaining([{ key: 'unique-key-3', label: 'duplicate-index-pattern' }])
     );
+  });
+
+  it('should trigger onRefresh when the refresh button is clicked', () => {
+    const { getByLabelText } = render(
+      <DataSourceSelectable
+        dataSources={dataSourcesMock}
+        dataSourceOptionList={dataSourceOptionListMock}
+        selectedSources={selectedSourcesMock}
+        onDataSourceSelect={setSelectedSourcesMock}
+        setDataSourceOptionList={setDataSourceOptionListMock}
+        onGetDataSetError={onFetchDataSetErrorMock}
+        onRefresh={onRefresh}
+      />
+    );
+    const refreshButton = getByLabelText('sourceRefresh');
+    fireEvent.click(refreshButton);
+    expect(onRefresh).toHaveBeenCalled();
   });
 });

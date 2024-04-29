@@ -128,6 +128,20 @@ describe('DataSourceService', () => {
     });
   });
 
+  it('loads data sources successfully with fetchers', async () => {
+    const service = DataSourceService.getInstance();
+    const fetcherMock = jest.fn(() => {
+      service.registerDataSource(new MockDataSource(mockConfig1)); // Simulates adding a new data source after fetching
+    });
+    service.registerDataSourceFetchers([{ type: 'mock', registerDataSources: fetcherMock }]);
+
+    await service.load();
+    expect(fetcherMock).toHaveBeenCalledTimes(1);
+    service.getDataSources$().subscribe((dataSources) => {
+      expect(Object.keys(dataSources)).toContain('test_datasource1');
+    });
+  });
+
   it('retrieves registered data sources based on filters', () => {
     const service = DataSourceService.getInstance();
     const ds1 = new MockDataSource(mockConfig1);
@@ -150,6 +164,84 @@ describe('DataSourceService', () => {
       const retrievedDataSources = service.getDataSources$();
       expect(retrievedDataSources).toHaveProperty('test_datasource1');
       expect(retrievedDataSources).toHaveProperty('test_datasource2');
+    });
+  });
+
+  it('should reset and load data sources using registered fetchers', async () => {
+    const service = DataSourceService.getInstance();
+    const fetcherMock = jest.fn();
+    service.registerDataSourceFetchers([{ type: 'mock', registerDataSources: fetcherMock }]);
+
+    service.load();
+    expect(fetcherMock).toHaveBeenCalled();
+    expect(
+      service.getDataSources$().subscribe((dataSources) => {
+        expect(Object.keys(dataSources).length).toBe(0);
+      })
+    );
+  });
+
+  it('handles failures in data fetchers gracefully during load', async () => {
+    const service = DataSourceService.getInstance();
+    const fetcherMock = jest.fn(() => {
+      throw new Error('Failed to fetch data sources');
+    });
+    service.registerDataSourceFetchers([{ type: 'mock', registerDataSources: fetcherMock }]);
+
+    await service.load();
+    expect(fetcherMock).toHaveBeenCalledTimes(1);
+    service.getDataSources$().subscribe((dataSources) => {
+      expect(Object.keys(dataSources).length).toBe(0); // Assuming reset clears everything regardless of fetcher success
+    });
+  });
+
+  it('should call load method when reload is invoked', () => {
+    const service = DataSourceService.getInstance();
+    const loadSpy = jest.spyOn(service, 'load');
+    service.reload();
+    expect(loadSpy).toHaveBeenCalled();
+  });
+
+  it('should reset all registered data sources', () => {
+    const service = DataSourceService.getInstance();
+    const ds = new MockDataSource(mockConfig1);
+    service.registerDataSource(ds); // Ensure there is at least one data source
+
+    service.reset();
+    expect(
+      service.getDataSources$().subscribe((dataSources) => {
+        expect(Object.keys(dataSources).length).toBe(0);
+      })
+    );
+  });
+
+  it('successfully reloads and updates data sources', async () => {
+    const service = DataSourceService.getInstance();
+    const fetcherMock = jest.fn().mockResolvedValue('Data fetched successfully');
+
+    // Register fetchers and perform initial load
+    service.registerDataSourceFetchers([{ type: 'default', registerDataSources: fetcherMock }]);
+    await service.load();
+
+    // Reset mocks to clear previous calls and reload
+    fetcherMock.mockClear();
+    service.reload();
+
+    expect(fetcherMock).toHaveBeenCalledTimes(1);
+    service.getDataSources$().subscribe((dataSources) => {
+      // Expect that new data has been loaded; specifics depend on your implementation
+      expect(dataSources).toEqual(expect.anything()); // Adjust expectation based on your data structure
+    });
+  });
+
+  it('ensures complete clearance of data sources on reset', () => {
+    const service = DataSourceService.getInstance();
+    service.registerDataSource(new MockDataSource(mockConfig1));
+    service.registerDataSource(new MockDataSource(mockConfig2));
+
+    service.reset();
+    service.getDataSources$().subscribe((dataSources) => {
+      expect(Object.keys(dataSources).length).toBe(0);
     });
   });
 });

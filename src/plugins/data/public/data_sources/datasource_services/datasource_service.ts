@@ -18,6 +18,9 @@ export class DataSourceService {
   // A record to store all registered data sources, using the data source name as the key.
   private dataSources: Record<string, DataSource> = {};
   private dataSourcesSubject: BehaviorSubject<Record<string, DataSource>>;
+  // A record to store all data source fetchers, using the data source type as the key.
+  // Once application starts, all the different types of data source supported with have their fetchers registered here.
+  // And it becomes the single source of truth for reloading data sources.
   private dataSourceFetchers: Record<string, DataSourceFetcher['registerDataSources']> = {};
 
   private constructor() {
@@ -110,8 +113,9 @@ export class DataSourceService {
    * @param fetchers - An array of fetcher configurations, each specifying how to fetch data for a specific data source type.
    */
   registerDataSourceFetchers(fetchers: DataSourceFetcher[]) {
-    fetchers.forEach((fetcher) => {
-      this.dataSourceFetchers[fetcher.type] = fetcher.registerDataSources;
+    return fetchers.forEach((fetcher) => {
+      if (!this.dataSourceFetchers[fetcher.type])
+        this.dataSourceFetchers[fetcher.type] = fetcher.registerDataSources;
     });
   }
 
@@ -121,7 +125,14 @@ export class DataSourceService {
    */
   load() {
     this.reset();
-    Object.values(this.dataSourceFetchers).forEach((fetch) => fetch());
+    Object.values(this.dataSourceFetchers).forEach((fetch) => {
+      try {
+        fetch(); // Directly call the synchronous fetch function
+      } catch (error) {
+        // Handle fetch errors or take corrective actions here
+        // TO-DO: Add error handling, maybe collect errors and show them in UI
+      }
+    });
   }
 
   /**
