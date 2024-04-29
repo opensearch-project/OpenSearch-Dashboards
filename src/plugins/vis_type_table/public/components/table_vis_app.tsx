@@ -16,6 +16,7 @@ import { TableVisConfig } from '../types';
 import { TableVisComponent } from './table_vis_component';
 import { TableVisComponentGroup } from './table_vis_component_group';
 import { getTableUIState, TableUiState } from '../utils';
+import { VisualizationContainer } from '../../../visualizations/public';
 
 interface TableVisAppProps {
   services: CoreStart;
@@ -36,32 +37,35 @@ export const TableVisApp = ({
   }, [handlers]);
 
   const tableUiState: TableUiState = getTableUIState(handlers.uiState as PersistedState);
+  const showNoResult = table ? table.rows.length === 0 : tableGroups?.length === 0;
 
   return (
     <I18nProvider>
       <OpenSearchDashboardsContextProvider services={services}>
-        <EuiFlexGroup
-          className="visTable"
-          data-test-subj="visTable"
-          direction={direction === 'column' ? 'row' : 'column'}
-          alignItems={direction === 'column' ? 'flexStart' : 'stretch'}
-        >
-          {table ? (
-            <TableVisComponent
-              table={table}
-              visConfig={visConfig}
-              event={handlers.event}
-              uiState={tableUiState}
-            />
-          ) : (
-            <TableVisComponentGroup
-              tableGroups={tableGroups}
-              visConfig={visConfig}
-              event={handlers.event}
-              uiState={tableUiState}
-            />
-          )}
-        </EuiFlexGroup>
+        <VisualizationContainer className="tableVis" showNoResult={showNoResult}>
+          <EuiFlexGroup
+            className="visTable"
+            data-test-subj="visTable"
+            direction={direction === 'column' ? 'row' : 'column'}
+            alignItems={direction === 'column' ? 'flexStart' : 'stretch'}
+          >
+            {table ? (
+              <TableVisComponent
+                table={table}
+                visConfig={visConfig}
+                event={handlers.event}
+                uiState={tableUiState}
+              />
+            ) : (
+              <TableVisComponentGroup
+                tableGroups={tableGroups}
+                visConfig={visConfig}
+                event={handlers.event}
+                uiState={tableUiState}
+              />
+            )}
+          </EuiFlexGroup>
+        </VisualizationContainer>
       </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
