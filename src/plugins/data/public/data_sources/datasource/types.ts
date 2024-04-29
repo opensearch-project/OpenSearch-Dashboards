@@ -77,4 +77,5 @@ export interface IDataSourceQueryResponse<T = {}> {
 export enum DataSourceUIGroupType {
   defaultOpenSearchDataSource = 'DEFAULT_INDEX_PATTERNS',
   s3glue = 's3glue',
+  spark = 'spark',
 }

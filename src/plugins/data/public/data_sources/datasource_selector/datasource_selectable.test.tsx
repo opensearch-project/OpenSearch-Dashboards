@@ -8,30 +8,7 @@ import { render, act, screen, fireEvent } from '@testing-library/react';
 import { DataSourceSelectable } from './datasource_selectable';
 import { DataSourceGroup, DataSourceOption } from './types';
 import { DataSource } from '../datasource/datasource';
-import { DEFAULT_DATA_SOURCE_DISPLAY_NAME } from '../register_default_datasource';
-import { DataSourceUIGroupType } from '../datasource/types';
-
-const defaultDataSourceMetadata = {
-  ui: {
-    label: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
-    typeLabel: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
-    groupType: DataSourceUIGroupType.defaultOpenSearchDataSource,
-    selector: {
-      displayDatasetsAsSource: true,
-    },
-  },
-};
-
-const s3DataSourceMetadata = {
-  ui: {
-    label: 'Amazon S3',
-    typeLabel: 's3glue',
-    groupType: DataSourceUIGroupType.s3glue,
-    selector: {
-      displayDatasetsAsSource: false,
-    },
-  },
-};
+import { defaultDataSourceMetadata, s3DataSourceMetadata } from '../constants';
 
 describe('DataSourceSelectable', () => {
   let dataSourcesMock: DataSource[];
