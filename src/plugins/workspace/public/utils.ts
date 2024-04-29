@@ -71,6 +71,21 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
 };
 
 /**
+ * Calculate all features quantity and selected features quantity in a workspace
+ */
+export const getSelectedFeatureQuantities = (
+  featuresConfig: string[],
+  configurableApps: PublicAppInfo[]
+) => {
+  const featureFilter = featureMatchesConfig(featuresConfig);
+  const selectedApplications = configurableApps.filter((app) => featureFilter(app));
+  return {
+    total: configurableApps.length,
+    selected: selectedApplications.length,
+  };
+};
+
+/**
  * Check if an app is accessible in a workspace based on the workspace configured features
  */
 export function isAppAccessibleInWorkspace(app: App, workspace: WorkspaceObject) {

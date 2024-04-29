@@ -7,6 +7,7 @@ import { AppNavLinkStatus, PublicAppInfo } from '../../../core/public';
 import {
   featureMatchesConfig,
   filterWorkspaceConfigurableApps,
+  getSelectedFeatureQuantities,
   isAppAccessibleInWorkspace,
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
@@ -95,6 +96,54 @@ describe('workspace utils: featureMatchesConfig', () => {
     expect(match({ id: 'integrations', category: { id: 'management', label: 'Management' } })).toBe(
       true
     );
+  });
+});
+
+describe('workspace utils: getSelectedFeatureQuantities', () => {
+  const defaultConfigurableApplications = [
+    {
+      appRoute: '/app/dashboards',
+      id: 'dashboards',
+      title: 'Dashboards',
+      category: {
+        id: 'opensearchDashboards',
+        label: 'OpenSearch Dashboards',
+        euiIconType: 'inputOutput',
+        order: 1000,
+      },
+      status: 0,
+      navLinkStatus: 1,
+    },
+    {
+      appRoute: '/app/dev_tools',
+      id: 'dev_tools',
+      title: 'Dev Tools',
+      category: {
+        id: 'management',
+        label: 'Management',
+        order: 5000,
+        euiIconType: 'managementApp',
+      },
+      status: 0,
+      navLinkStatus: 1,
+    },
+  ] as PublicAppInfo[];
+  it('should support * rules', () => {
+    const { total, selected } = getSelectedFeatureQuantities(
+      ['*'],
+      defaultConfigurableApplications
+    );
+    expect(total).toBe(2);
+    expect(selected).toBe(2);
+  });
+
+  it('should get quantity of selected app', () => {
+    const { total, selected } = getSelectedFeatureQuantities(
+      ['dev_tools', '!@management'],
+      defaultConfigurableApplications
+    );
+    expect(total).toBe(2);
+    expect(selected).toBe(0);
   });
 });
 
