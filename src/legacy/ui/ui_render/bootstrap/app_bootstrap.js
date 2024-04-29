@@ -36,14 +36,15 @@ import { resolve } from 'path';
 import { osdBundlesLoaderSource } from './osd_bundles_loader_source';
 
 export class AppBootstrap {
-  constructor({ templateData }) {
+  constructor({ templateData }, templateName = 'bootstrap') {
     this.templateData = { ...templateData, osdBundlesLoaderSource };
     this._rawTemplate = undefined;
+    this.templateName = templateName;
   }
 
   async getJsFile() {
     if (!this._rawTemplate) {
-      this._rawTemplate = await loadRawTemplate();
+      this._rawTemplate = await loadRawTemplate(this.templateName);
     }
 
     const template = Handlebars.compile(this._rawTemplate, {
@@ -63,8 +64,8 @@ export class AppBootstrap {
   }
 }
 
-function loadRawTemplate() {
-  const templatePath = resolve(__dirname, 'template.js.hbs');
+function loadRawTemplate(templateName) {
+  const templatePath = resolve(__dirname, `${templateName}.js.hbs`);
   return readFileAsync(templatePath);
 }
 

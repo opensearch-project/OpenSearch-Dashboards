@@ -32,28 +32,11 @@
 
 import React, { FunctionComponent } from 'react';
 
-import { RenderingMetadata } from '../types';
-import { getThemeDefinition, ThemeColorSchemes } from './theme';
-
-interface Props {
-  darkMode: RenderingMetadata['darkMode'];
-  theme: RenderingMetadata['themeVersion'];
-}
-
-export const Styles: FunctionComponent<Props> = ({ theme, darkMode }) => {
-  const themeDefinition = getThemeDefinition(
-    theme,
-    darkMode ? ThemeColorSchemes.DARK : ThemeColorSchemes.LIGHT
-  );
-
+export const Styles: FunctionComponent = () => {
   return (
     <style
       dangerouslySetInnerHTML={{
         __html: `
-          :root {
-            color-scheme: ${darkMode ? 'dark' : 'light'};
-          }
-
           *, *:before, *:after {
             box-sizing: border-box;
           }
@@ -75,7 +58,6 @@ export const Styles: FunctionComponent<Props> = ({ theme, darkMode }) => {
           {/* used on loading page */}
           .osdWelcomeView {
             line-height: 1.5;
-            background-color: ${themeDefinition.ouiHeaderBackgroundColor};
             height: 100%;
             display: -webkit-box;
             display: -webkit-flex;
@@ -105,7 +87,6 @@ export const Styles: FunctionComponent<Props> = ({ theme, darkMode }) => {
           }
 
           .osdWelcomeTitle {
-            color: ${themeDefinition.ouiColorFullShade};
             font-size: 20px;
             margin: 16px 0;
             animation: fadeIn 1s ease-in-out;
@@ -119,7 +100,6 @@ export const Styles: FunctionComponent<Props> = ({ theme, darkMode }) => {
             font-size: 14px;
             line-height: 40px !important;
             height: 40px !important;
-            color: ${themeDefinition.euiColorDarkShade};
           }
 
           .osdLoaderWrap {
@@ -150,7 +130,6 @@ export const Styles: FunctionComponent<Props> = ({ theme, darkMode }) => {
             width: 32px;
             height: 4px;
             overflow: hidden;
-            background-color: ${themeDefinition.euiColorLightestShade};
             line-height: 1;
           }
 
@@ -164,7 +143,6 @@ export const Styles: FunctionComponent<Props> = ({ theme, darkMode }) => {
             left: 0;
             transform: scaleX(0) translateX(0%);
             animation: osdProgress 1s cubic-bezier(.694, .0482, .335, 1) infinite;
-            background-color: ${darkMode ? '#1BA9F5' : '#006DE4'};
           }
 
           .loadingLogoContainer {
@@ -175,6 +153,10 @@ export const Styles: FunctionComponent<Props> = ({ theme, darkMode }) => {
           .loadingLogo {
             height: 100%;
             max-width: 100%;
+          }
+
+          .darkOnly, .lightOnly {
+            display: none;
           }
 
           @keyframes osdProgress {
