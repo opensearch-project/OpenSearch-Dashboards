@@ -34,10 +34,14 @@ export const RightNavigationButton = ({
     });
   }, [application, http.basePath, appId]);
 
+  const isLeftClickEvent = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    return event.button === 0;
+  };
+
   const navigateToApp = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
     if (
-      event.button === 0 && // ignore everything but left clicks
+      isLeftClickEvent(event) && // ignore everything but left clicks
       !isModifiedOrPrevented(event)
     ) {
       event.preventDefault();
