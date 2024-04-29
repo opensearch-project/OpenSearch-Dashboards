@@ -70,7 +70,7 @@ export class WorkspaceUiSettingsClientWrapper {
             WorkspaceAttribute
           >(WORKSPACE_TYPE, requestWorkspaceId);
         } catch (e) {
-          this.logger.error(`Unable to get workspaceObject on id: ${requestWorkspaceId}`);
+          this.logger.error(`Unable to get workspaceObject with id: ${requestWorkspaceId}`);
         }
         
         configObject.attributes = {

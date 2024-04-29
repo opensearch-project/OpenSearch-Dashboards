@@ -172,7 +172,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
       type: 'config',
     });
     expect(logger.error).toBeCalledWith(
-      `Unable to get workspaceObject on id: ${invalidWorkspaceId}`
+      `Unable to get workspaceObject with id: ${invalidWorkspaceId}`
     );
   });
 });
