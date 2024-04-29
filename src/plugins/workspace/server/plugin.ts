@@ -94,7 +94,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     );
     this.proxyWorkspaceTrafficToRealHandler(core);
 
-    const workspaceUiSettingsClientWrapper = new WorkspaceUiSettingsClientWrapper();
+    const workspaceUiSettingsClientWrapper = new WorkspaceUiSettingsClientWrapper(this.logger);
     this.workspaceUiSettingsClientWrapper = workspaceUiSettingsClientWrapper;
     core.savedObjects.addClientWrapper(
       PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER,
