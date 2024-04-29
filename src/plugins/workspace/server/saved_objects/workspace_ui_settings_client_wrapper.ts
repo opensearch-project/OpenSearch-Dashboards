@@ -63,15 +63,7 @@ export class WorkspaceUiSettingsClientWrapper {
           options
         );
 
-        let workspaceObject: SavedObject<WorkspaceAttribute> = {
-          id: requestWorkspaceId,
-          type: 'workspace',
-          attributes: {
-            id: requestWorkspaceId,
-            name: '',
-          },
-          references: [],
-        };
+        let workspaceObject: SavedObject<WorkspaceAttribute> | null = null
 
         try {
           workspaceObject = await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).get<
@@ -80,6 +72,11 @@ export class WorkspaceUiSettingsClientWrapper {
         } catch (e) {
           this.logger.error(`Unable to get workspaceObject on id: ${requestWorkspaceId}`);
         }
+        
+        configObject.attributes = {
+          ...configObject.attributes,
+          ...(workspaceObject ? workspaceObject.attributes.uiSettings : {}),
+        };
 
         configObject.attributes = {
           ...configObject.attributes,
