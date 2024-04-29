@@ -17,12 +17,14 @@ import {
   SavedObjectsClientContract,
 } from '../../../../core/server';
 import { WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID } from '../../common/constants';
+import { Logger } from '../../../../core/server';
 
 /**
  * This saved object client wrapper offers methods to get and update UI settings considering
  * the context of the current workspace.
  */
 export class WorkspaceUiSettingsClientWrapper {
+  constructor(private readonly logger: Logger) {}
   private getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
 
   /**
@@ -61,9 +63,23 @@ export class WorkspaceUiSettingsClientWrapper {
           options
         );
 
-        const workspaceObject = await this.getWorkspaceTypeEnabledClient(
-          wrapperOptions.request
-        ).get<WorkspaceAttribute>(WORKSPACE_TYPE, requestWorkspaceId);
+        let workspaceObject: SavedObject<WorkspaceAttribute> = {
+          id: requestWorkspaceId,
+          type: 'workspace',
+          attributes: {
+            id: requestWorkspaceId,
+            name: '',
+          },
+          references: [],
+        };
+
+        try {
+          workspaceObject = await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).get<
+            WorkspaceAttribute
+          >(WORKSPACE_TYPE, requestWorkspaceId);
+        } catch (e) {
+          this.logger.error(`Unable to get workspaceObject on id: ${requestWorkspaceId}`);
+        }
 
         configObject.attributes = {
           ...configObject.attributes,
@@ -111,7 +127,9 @@ export class WorkspaceUiSettingsClientWrapper {
           options
         );
 
-        configObject.attributes = workspaceUpdateResult.attributes.uiSettings;
+        if (workspaceUpdateResult.attributes.uiSettings) {
+          configObject.attributes = workspaceUpdateResult.attributes.uiSettings;
+        }
 
         return configObject as SavedObjectsUpdateResponse<T>;
       }
