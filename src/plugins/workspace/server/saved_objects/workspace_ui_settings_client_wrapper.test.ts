@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { loggerMock } from '@osd/logging/target/mocks';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceUiSettingsClientWrapper } from './workspace_ui_settings_client_wrapper';
 import { WORKSPACE_TYPE } from '../../../../core/server';
@@ -17,6 +18,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
     const getClientMock = jest.fn().mockReturnValue(clientMock);
     const requestHandlerContext = coreMock.createRequestHandlerContext();
     const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
+    const logger = loggerMock.create();
 
     clientMock.get.mockImplementation(async (type, id) => {
       if (type === 'config') {
@@ -43,7 +45,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
       return Promise.reject();
     });
 
-    const wrapper = new WorkspaceUiSettingsClientWrapper();
+    const wrapper = new WorkspaceUiSettingsClientWrapper(logger);
     wrapper.setScopedClient(getClientMock);
 
     return {
@@ -53,6 +55,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
         typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
       }),
       clientMock,
+      logger,
     };
   };
 
@@ -134,6 +137,42 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
         defaultIndex: 'new-index-id',
       },
       {}
+    );
+  });
+
+  it('should not throw error if the workspace id is not valid', async () => {
+    const invalidWorkspaceId = 'invalid-workspace-id';
+    // Currently in a workspace
+    jest
+      .spyOn(utils, 'getWorkspaceState')
+      .mockReturnValue({ requestWorkspaceId: invalidWorkspaceId });
+
+    const { wrappedClient, clientMock, logger } = createWrappedClient();
+    clientMock.get.mockImplementation(async (type, id) => {
+      if (type === 'config') {
+        return Promise.resolve({
+          id,
+          references: [],
+          type: 'config',
+          attributes: {
+            defaultIndex: 'default-index-global',
+          },
+        });
+      }
+      return Promise.reject('not found');
+    });
+
+    const config = await wrappedClient.get('config', '3.0.0');
+    expect(config).toEqual({
+      attributes: {
+        defaultIndex: 'default-index-global',
+      },
+      id: '3.0.0',
+      references: [],
+      type: 'config',
+    });
+    expect(logger.error).toBeCalledWith(
+      `Unable to get workspaceObject with id: ${invalidWorkspaceId}`
     );
   });
 });
