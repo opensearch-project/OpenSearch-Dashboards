@@ -294,7 +294,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       const disallowedSavedObjects: SavedObjectsCheckConflictsObject[] = [];
       const allowedSavedObjects: SavedObjectsCheckConflictsObject[] = [];
       objects.forEach((item) => {
-        const isImportIntoWorkspace = workspaces?.length;
+        const isImportIntoWorkspace = !!workspaces?.length;
         // config can not be created inside a workspace
         if (this.isConfigType(item.type) && isImportIntoWorkspace) {
           disallowedSavedObjects.push(item);
