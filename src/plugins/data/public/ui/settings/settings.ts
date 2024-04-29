@@ -3,14 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IStorageWrapper } from '../../../opensearch_dashboards_utils/public';
-import { setOverrides as setFieldOverrides } from '../../common';
-import { QueryEnhancement } from './types';
+import { IStorageWrapper } from '../../../../opensearch_dashboards_utils/public';
+import { setOverrides as setFieldOverrides } from '../../../common';
+import { QueryEnhancement } from '../types';
 
 export interface DataSettings {
   userQueryLanguage: string;
   userQueryString: string;
-  uiOverrides: {
+  uiOverrides?: {
     fields?: {
       filterable?: boolean;
       visualizable?: boolean;
@@ -47,7 +47,12 @@ export class Settings {
     return this.storage.get('opensearchDashboards.uiOverrides') || {};
   }
 
-  setUiOverrides(overrides: { [key: string]: any }) {
+  setUiOverrides(overrides?: { [key: string]: any }) {
+    if (!overrides) {
+      this.storage.remove('opensearchDashboards.uiOverrides');
+      setFieldOverrides(undefined);
+      return true;
+    }
     this.storage.set('opensearchDashboards.uiOverrides', overrides);
     setFieldOverrides(overrides.fields);
     return true;

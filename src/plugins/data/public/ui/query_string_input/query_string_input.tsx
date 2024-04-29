@@ -56,14 +56,16 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
+import { LegacyQueryLanguageSwitcher } from './legacy_language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { Settings, SuggestionsComponent } from '..';
-import { QueryEnhancement } from '../types';
+import { DataSettings, QueryEnhancement } from '../types';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
+  isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
   settings?: Settings;
   disableAutoFocus?: boolean;
@@ -479,13 +481,15 @@ export default class QueryStringInputUI extends Component<Props, State> {
       query: this.props.getQueryStringInitialValue?.(language) ?? '',
       language,
     };
-    this.props.settings?.updateSettings({
+
+    const fields = this.props.queryEnhancements?.get(newQuery.language)?.fields;
+    const newSettings: DataSettings = {
       userQueryLanguage: newQuery.language,
       userQueryString: newQuery.query,
-      uiOverrides: {
-        fields: this.props.queryEnhancements?.get(language)?.fields,
-      },
-    });
+      ...(fields && { uiOverrides: { fields } }),
+    };
+    this.props.settings?.updateSettings(newSettings);
+
     const dateRangeEnhancement = this.props.queryEnhancements?.get(language)?.searchBar?.dateRange;
     const dateRange = dateRangeEnhancement
       ? {
@@ -721,12 +725,19 @@ export default class QueryStringInputUI extends Component<Props, State> {
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-
-        <QueryLanguageSwitcher
-          language={this.props.query.language}
-          anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-          onSelectLanguage={this.onSelectLanguage}
-        />
+        {!!this.props.isEnhancementsEnabled ? (
+          <QueryLanguageSwitcher
+            language={this.props.query.language}
+            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+            onSelectLanguage={this.onSelectLanguage}
+          />
+        ) : (
+          <LegacyQueryLanguageSwitcher
+            language={this.props.query.language}
+            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+            onSelectLanguage={this.onSelectLanguage}
+          />
+        )}
       </div>
     );
   }

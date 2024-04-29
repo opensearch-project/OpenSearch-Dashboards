@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import { IDataFrame } from './data_frames';
+import { DataFrameAggConfig, IDataFrame } from './data_frames';
+import { BucketAggType, MetricAggType } from './search';
 
 export * from './query/types';
 export * from './osd_field_types/types';
@@ -47,4 +48,17 @@ export * from './data_frames/types';
  */
 export type GetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
 export type GetDataFrameFn = () => IDataFrame | undefined;
+export type GetDataFrameAggQsFn = ({
+  qs,
+  aggConfig,
+  timeField,
+  timeFilter,
+}: {
+  qs: string;
+  aggConfig: DataFrameAggConfig;
+  timeField: any;
+  timeFilter: any;
+}) => any;
+
 export type DestroyDataFrameFn = () => void;
+export type GetAggTypeFn = (id: string) => BucketAggType<any> | MetricAggType<any>;

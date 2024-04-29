@@ -43,9 +43,18 @@ export interface UiEnhancements {
 }
 
 /**
+ * The setup contract exposed by the Search plugin exposes the search strategy extension
+ * point.
+ */
+export interface IUiSetup {
+  __enhance: (enhancements: UiEnhancements) => void;
+}
+
+/**
  * Data plugin prewired UI components
  */
-export interface DataPublicPluginStartUi {
+export interface IUiStart {
+  isEnhancementsEnabled: boolean;
   queryEnhancements: Map<string, QueryEnhancement>;
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;

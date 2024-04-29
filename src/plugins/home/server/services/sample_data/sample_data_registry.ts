@@ -39,12 +39,7 @@ import {
 } from './lib/sample_dataset_registry_types';
 import { sampleDataSchema } from './lib/sample_dataset_schema';
 
-import {
-  flightsSpecProvider,
-  logsSpecProvider,
-  ecommerceSpecProvider,
-  logsEnhancedSpecProvider,
-} from './data_sets';
+import { flightsSpecProvider, logsSpecProvider, ecommerceSpecProvider } from './data_sets';
 import { createListRoute, createInstallRoute } from './routes';
 import { UsageCollectionSetup } from '../../../../usage_collection/server';
 import { makeSampleDataUsageCollector, usage } from './usage';
@@ -52,7 +47,6 @@ import { createUninstallRoute } from './routes/uninstall';
 
 const flightsSampleDataset = flightsSpecProvider();
 const logsSampleDataset = logsSpecProvider();
-const logsEnhancedSampleDataset = logsEnhancedSpecProvider();
 const ecommerceSampleDataset = ecommerceSpecProvider();
 
 export class SampleDataRegistry {
@@ -60,7 +54,6 @@ export class SampleDataRegistry {
   private readonly sampleDatasets: SampleDatasetSchema[] = [
     flightsSampleDataset,
     logsSampleDataset,
-    logsEnhancedSampleDataset,
     ecommerceSampleDataset,
   ];
 

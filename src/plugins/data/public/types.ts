@@ -40,8 +40,7 @@ import { QuerySetup, QueryStart } from './query';
 import { IndexPatternsContract } from './index_patterns';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { DataSourceStart } from './data_sources/datasource_services/types';
-import { UiEnhancements } from './ui';
-import { DataPublicPluginStartUi } from './ui/types';
+import { IUiStart, UiEnhancements } from './ui';
 
 export interface DataPublicPluginEnhancements {
   search?: SearchEnhancements;
@@ -115,10 +114,10 @@ export interface DataPublicPluginStart {
    */
   query: QueryStart;
   /**
-   * prewired UI components
-   * {@link DataPublicPluginStartUi}
+   * UI components service
+   * {@link IUiStart}
    */
-  ui: DataPublicPluginStartUi;
+  ui: IUiStart;
   /**
    * multiple datasources
    * {@link DataSourceStart}

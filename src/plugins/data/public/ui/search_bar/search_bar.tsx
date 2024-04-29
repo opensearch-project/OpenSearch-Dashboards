@@ -79,8 +79,9 @@ export interface SearchBarOwnProps {
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
-  queryEnhancements: Map<string, QueryEnhancement>;
-  settings: Settings;
+  isEnhancementsEnabled?: boolean;
+  queryEnhancements?: Map<string, QueryEnhancement>;
+  settings?: Settings;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
@@ -220,7 +221,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.props.filters &&
       this.props.indexPatterns &&
       compact(this.props.indexPatterns).length > 0 &&
-      (this.props.queryEnhancements.get(this.state.query?.language!)?.searchBar?.showFilterBar ??
+      (this.props.queryEnhancements?.get(this.state.query?.language!)?.searchBar?.showFilterBar ??
         true)
     );
   }
@@ -405,6 +406,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       queryBar = (
         <QueryBarTopRow
           timeHistory={this.props.timeHistory}
+          isEnhancementsEnabled={this.props.isEnhancementsEnabled}
           queryEnhancements={this.props.queryEnhancements}
           settings={this.props.settings}
           query={this.state.query}

@@ -4,7 +4,7 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
-import { DataPublicPluginStartUi, QueryEnhancement, UiEnhancements } from './types';
+import { IUiStart, IUiSetup, QueryEnhancement, UiEnhancements } from './types';
 
 import { ConfigSchema } from '../../config';
 import { createIndexPatternSelect } from './index_pattern_select';
@@ -23,7 +23,7 @@ export interface UiServiceStartDependencies {
   storage: IStorageWrapper;
 }
 
-export class UiService implements Plugin<any, DataPublicPluginStartUi> {
+export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
   private queryEnhancements: Map<string, QueryEnhancement> = new Map();
 
@@ -33,7 +33,7 @@ export class UiService implements Plugin<any, DataPublicPluginStartUi> {
     this.enhancementsConfig = enhancements;
   }
 
-  public setup(core: CoreSetup, {}: UiServiceSetupDependencies) {
+  public setup(core: CoreSetup, {}: UiServiceSetupDependencies): IUiSetup {
     return {
       __enhance: (enhancements?: UiEnhancements) => {
         if (!enhancements) return;
@@ -45,18 +45,20 @@ export class UiService implements Plugin<any, DataPublicPluginStartUi> {
     };
   }
 
-  public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies) {
+  public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
     const Settings = createSettings({ storage, queryEnhancements: this.queryEnhancements });
 
     const SearchBar = createSearchBar({
       core,
       data: dataServices,
       storage,
+      isEnhancementsEnabled: this.enhancementsConfig?.enabled,
       queryEnhancements: this.queryEnhancements,
       settings: Settings,
     });
 
     return {
+      isEnhancementsEnabled: this.enhancementsConfig?.enabled,
       queryEnhancements: this.queryEnhancements,
       IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
       SearchBar,

@@ -49,7 +49,7 @@ const isDate = (d) => Object.prototype.toString.call(d) === '[object Date]';
 
 const isValidDate = (d) => isDate(d) && !isNaN(d.valueOf());
 
-const isDateTime = (d) => moment.isMoment(d);
+const isDateTime = (d, momentInstance = moment) => momentInstance.isMoment(d);
 /*
  * This is a simplified version of opensearch's date parser.
  * If you pass in a momentjs instance as the third parameter the calculation
@@ -58,7 +58,7 @@ const isDateTime = (d) => moment.isMoment(d);
  */
 function parse(text, { roundUp = false, momentInstance = moment, forceNow } = {}) {
   if (!text) return undefined;
-  if (isDateTime(text)) return text;
+  if (isDateTime(text, momentInstance)) return text;
   if (isDate(text)) return momentInstance(text);
   if (forceNow !== undefined && !isValidDate(forceNow)) {
     throw new Error('forceNow must be a valid Date');

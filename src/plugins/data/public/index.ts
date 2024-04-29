@@ -437,7 +437,8 @@ export {
   IndexPatternSelectProps,
   QueryStringInput,
   QueryStringInputProps,
-  DataPublicPluginStartUi,
+  // for BWC, keeping the old name
+  IUiStart as DataPublicPluginStartUi,
 } from './ui';
 
 /**
@@ -509,7 +510,7 @@ export {
   IDataSetParams,
   IDataSourceQueryParams,
   IDataSourceQueryResult,
-  SourceDataSet,
+  IDataSourceDataSet,
   DataSourceConnectionStatus,
   DataSourceFactory,
 } from './data_sources/datasource';

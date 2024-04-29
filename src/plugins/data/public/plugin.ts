@@ -249,12 +249,8 @@ export class DataPublicPlugin
         dataSourceFactory,
       },
     };
-<<<<<<< HEAD
 
     registerDefaultDataSource(dataServices);
-=======
-    registerDefaultDatasource(dataServices);
->>>>>>> [MQL] support enhancing language selector
 
     const uiService = this.uiService.start(core, { dataServices, storage: this.storage });
     setUiService(uiService);

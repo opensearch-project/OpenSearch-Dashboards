@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { SearchResponse } from 'elasticsearch';
 import { IFieldType } from './fields';
 
 export * from './_df_cache';
@@ -23,20 +24,43 @@ export interface IDataFrame {
   type?: DATA_FRAME_TYPES.DEFAULT;
   name?: string;
   schema?: Array<Partial<IFieldType>>;
+  meta?: Record<string, any>;
   fields: IFieldType[];
   size: number;
 }
 
 export interface DataFrameAgg {
-  key: string;
   value: number;
 }
+export interface DataFrameBucketAgg extends DataFrameAgg {
+  key: string;
+}
+
 export interface DataFrameAggConfig {
   id: string;
-  name: string;
-  type?: string;
-  field: string;
-  interval: string;
+  type: string;
+  field?: string;
+  order?: Record<string, string>;
+  size?: number;
+  date_histogram?: {
+    field: string;
+    fixed_interval?: string;
+    calendar_interval?: string;
+    time_zone: string;
+    min_doc_count: number;
+  };
+  avg?: {
+    field: string;
+  };
+  cardinality?: {
+    field: string;
+  };
+  terms?: {
+    field: string;
+    size: number;
+    order: Record<string, string>;
+  };
+  aggs?: Record<string, DataFrameAggConfig>;
 }
 
 export interface PartialDataFrame extends Omit<IDataFrame, 'fields' | 'size'> {
@@ -50,8 +74,15 @@ export interface PartialDataFrame extends Omit<IDataFrame, 'fields' | 'size'> {
  * In future, if the plugin doesn't intentionally set the value to null,
  * we can calculate the value based on the fields.
  */
+// TODO: handle composite
 export interface IDataFrameWithAggs extends IDataFrame {
-  aggs: DataFrameAgg[] | null;
+  aggs: Record<string, DataFrameAgg | DataFrameBucketAgg | DataFrameBucketAgg[]>;
+}
+
+export interface IDataFrameResponse extends SearchResponse<any> {
+  type: DATA_FRAME_TYPES;
+  body: IDataFrame | IDataFrameWithAggs | IDataFrameError;
+  took: number;
 }
 
 export interface IDataFrameError {

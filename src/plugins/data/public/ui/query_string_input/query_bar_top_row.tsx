@@ -64,6 +64,7 @@ const QueryStringInput = withOpenSearchDashboards(QueryStringInputUI);
 // @internal
 export interface QueryBarTopRowProps {
   query?: Query;
+  isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
   settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -111,7 +112,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     !queryUiEnhancement || isValidQuery(props.query)
       ? props.query!
       : { query: getQueryStringInitialValue(queryLanguage!), language: queryLanguage! };
-  if (!isEqual(parsedQuery.query, props.query?.query)) {
+  if (!isEqual(parsedQuery?.query, props.query?.query)) {
     onQueryChange(parsedQuery);
     onSubmit({ query: parsedQuery, dateRange: getDateRange() });
   }
@@ -259,6 +260,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}
           query={parsedQuery}
+          isEnhancementsEnabled={props.isEnhancementsEnabled}
           queryEnhancements={props.queryEnhancements}
           settings={props.settings}
           screenTitle={props.screenTitle}

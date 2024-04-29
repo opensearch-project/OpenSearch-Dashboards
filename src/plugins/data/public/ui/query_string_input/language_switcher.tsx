@@ -65,10 +65,15 @@ export function QueryLanguageSwitcher(props: Props) {
     },
   ];
 
-  const queryEnhancements = getUiService().queryEnhancements;
-  queryEnhancements.forEach((enhancement) =>
-    languageOptions.push(mapExternalLanguageToOptions(enhancement.language))
-  );
+  const uiService = getUiService();
+  const searchService = getSearchService();
+
+  const queryEnhancements = uiService.queryEnhancements;
+  if (uiService.isEnhancementsEnabled) {
+    queryEnhancements.forEach((enhancement) =>
+      languageOptions.push(mapExternalLanguageToOptions(enhancement.language))
+    );
+  }
 
   const selectedLanguage = {
     label: languageOptions.find(
@@ -77,10 +82,8 @@ export function QueryLanguageSwitcher(props: Props) {
   };
 
   const setSearchEnhance = (queryLanguage: string) => {
+    if (!uiService.isEnhancementsEnabled) return;
     const queryEnhancement = queryEnhancements.get(queryLanguage);
-    const searchService = getSearchService();
-    const uiService = getUiService();
-
     searchService.__enhance({
       searchInterceptor: queryEnhancement
         ? queryEnhancement.search
