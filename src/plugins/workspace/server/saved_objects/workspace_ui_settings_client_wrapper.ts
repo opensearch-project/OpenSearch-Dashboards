@@ -78,11 +78,6 @@ export class WorkspaceUiSettingsClientWrapper {
           ...(workspaceObject ? workspaceObject.attributes.uiSettings : {}),
         };
 
-        configObject.attributes = {
-          ...configObject.attributes,
-          ...workspaceObject?.attributes.uiSettings,
-        };
-
         return configObject as SavedObject<T>;
       }
 
