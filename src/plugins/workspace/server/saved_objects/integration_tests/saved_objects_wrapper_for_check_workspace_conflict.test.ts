@@ -453,8 +453,9 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
 
     it('checkConflicts when importing disallowed types', async () => {
       await clearFooAndBar();
-      // Create data source through saved objects client will do a connection validation
-      // Use OpenSearch API to create the saved objects directly
+      // Create data source through OpenSearch API directly
+      // or the saved objects API will do connection validation on the data source
+      // which will not pass as it is a dummy data source without endpoint and credentials
       await osdTestServer.request
         .post(root, `/api/console/proxy?path=.kibana%2F_doc%2Fdata-source%3Afoo&method=PUT`)
         .send({
