@@ -67,12 +67,10 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
           const query =
             savedVisBuilderVis.searchSourceFields.query || data.query.queryString.getDefaultQuery();
           const actualFilters = [];
-          if (filters !== undefined) {
-            const result = typeof filters === 'function' ? filters() : filters;
-            if (result !== undefined) {
-              actualFilters.push(...(Array.isArray(result) ? result : [result]));
-            }
-          }
+          const tempFilters = typeof filters === 'function' ? filters() : filters;
+          (Array.isArray(tempFilters) ? tempFilters : [tempFilters]).forEach((filter) => {
+            if (filter) actualFilters.push(filter);
+          });
           data.query.filterManager.setAppFilters(actualFilters);
           data.query.queryString.setQuery(query);
 
