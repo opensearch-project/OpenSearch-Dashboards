@@ -63,10 +63,14 @@ import {
   ChromeNavLinks,
   ChromeNavLinkUpdateableFields,
   ChromeDocTitle,
+  ChromeSetup,
   ChromeStart,
   ChromeRecentlyAccessed,
   ChromeRecentlyAccessedHistoryItem,
   NavType,
+  RightNavigationOrder,
+  RightNavigationButton,
+  RightNavigationButtonProps,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -93,7 +97,13 @@ export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
 /** @interal */
 export { CoreContext, CoreSystem } from './core_system';
-export { DEFAULT_APP_CATEGORIES } from '../utils';
+export {
+  DEFAULT_APP_CATEGORIES,
+  WORKSPACE_TYPE,
+  cleanWorkspaceId,
+  PUBLIC_WORKSPACE_ID,
+  PUBLIC_WORKSPACE_NAME,
+} from '../utils';
 export {
   AppCategory,
   UiSettingsParams,
@@ -127,6 +137,7 @@ export {
   AppUpdater,
   ScopedHistory,
   NavigateToAppOptions,
+  WorkspaceAvailability,
 } from './application';
 
 export {
@@ -227,6 +238,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
    * @deprecated
    */
   context: ContextSetup;
+  /** {@link ChromeSetup} */
+  chrome: ChromeSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -350,8 +363,13 @@ export {
   UiSettingsState,
   NavType,
   Branding,
+  RightNavigationOrder,
+  RightNavigationButton,
+  RightNavigationButtonProps,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
 
-export { WorkspacesStart, WorkspacesSetup } from './workspace';
+export { WorkspacesStart, WorkspacesSetup, WorkspacesService, WorkspaceObject } from './workspace';
+
+export { debounce } from './utils';

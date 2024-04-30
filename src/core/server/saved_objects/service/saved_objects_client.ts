@@ -39,6 +39,7 @@ import {
   SavedObjectsFindOptions,
 } from '../types';
 import { SavedObjectsErrorHelpers } from './lib/errors';
+import { Permissions } from '../permission_control';
 
 /**
  *
@@ -68,10 +69,8 @@ export interface SavedObjectsCreateOptions extends SavedObjectsBaseOptions {
    * Note: this can only be used for multi-namespace object types.
    */
   initialNamespaces?: string[];
-  /**
-   * workspaces the new created objects belong to
-   */
-  workspaces?: string[];
+  /** permission control describe by ACL object */
+  permissions?: Permissions;
 }
 
 /**
@@ -98,7 +97,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
   /**
    * workspaces the objects belong to, will only be used when overwrite is enabled.
    */
-  workspaces?: string[];
+  workspaces?: SavedObject['workspaces'];
 }
 
 /**
@@ -106,7 +105,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
  * @public
  */
 export interface SavedObjectsBulkUpdateObject<T = unknown>
-  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references'> {
+  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references' | 'permissions'> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -188,6 +187,8 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   references?: SavedObjectReference[];
   /** The OpenSearch Refresh setting for this operation */
   refresh?: MutatingOperationRefreshSetting;
+  /** permission control describe by ACL object */
+  permissions?: Permissions;
 }
 
 /**
@@ -283,6 +284,15 @@ export interface SavedObjectsUpdateResponse<T = unknown>
   extends Omit<SavedObject<T>, 'attributes' | 'references'> {
   attributes: Partial<T>;
   references: SavedObjectReference[] | undefined;
+}
+
+/**
+ *
+ * @public
+ */
+export interface SavedObjectsDeleteByWorkspaceOptions extends SavedObjectsBaseOptions {
+  /** The OpenSearch supports only boolean flag for this operation */
+  refresh?: boolean;
 }
 
 /**
@@ -440,6 +450,18 @@ export class SavedObjectsClient {
   ): Promise<SavedObjectsDeleteFromNamespacesResponse> {
     return await this._repository.deleteFromNamespaces(type, id, namespaces, options);
   }
+
+  /**
+   * delete saved objects by workspace id
+   * @param workspace
+   * @param options
+   */
+  deleteByWorkspace = async (
+    workspace: string,
+    options: SavedObjectsDeleteByWorkspaceOptions = {}
+  ): Promise<any> => {
+    return await this._repository.deleteByWorkspace(workspace, options);
+  };
 
   /**
    * Bulk Updates multiple SavedObject at once

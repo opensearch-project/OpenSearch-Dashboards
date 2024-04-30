@@ -32,11 +32,13 @@ import React, { useEffect } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@osd/i18n';
 import { CoreStart, ChromeBreadcrumb } from 'src/core/public';
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { DataPublicPluginStart } from '../../../data/public';
 import {
   ISavedObjectsManagementServiceRegistry,
   SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnServiceStart,
+  SavedObjectsManagementNamespaceServiceStart,
 } from '../services';
 import { SavedObjectsTable } from './objects_table';
 
@@ -50,7 +52,7 @@ const SavedObjectsTablePage = ({
   namespaceRegistry,
   setBreadcrumbs,
   dataSourceEnabled,
-  hideLocalCluster,
+  dataSourceManagement,
 }: {
   coreStart: CoreStart;
   dataStart: DataPublicPluginStart;
@@ -61,7 +63,7 @@ const SavedObjectsTablePage = ({
   namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   dataSourceEnabled: boolean;
-  hideLocalCluster: boolean;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }) => {
   const capabilities = coreStart.application.capabilities;
   const itemsPerPage = coreStart.uiSettings.get<number>('savedObjects:perPage', 50);
@@ -92,6 +94,7 @@ const SavedObjectsTablePage = ({
       overlays={coreStart.overlays}
       notifications={coreStart.notifications}
       applications={coreStart.application}
+      workspaces={coreStart.workspaces}
       perPageConfig={itemsPerPage}
       goInspectObject={(savedObject) => {
         const { editUrl } = savedObject.meta;
@@ -107,7 +110,7 @@ const SavedObjectsTablePage = ({
         return inAppUrl ? Boolean(get(capabilities, inAppUrl.uiCapabilitiesPath)) : false;
       }}
       dataSourceEnabled={dataSourceEnabled}
-      hideLocalCluster={hideLocalCluster}
+      dataSourceManagement={dataSourceManagement}
     />
   );
 };

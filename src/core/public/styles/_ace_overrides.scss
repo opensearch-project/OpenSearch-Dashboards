@@ -9,6 +9,10 @@
 .coreSystemRootDomElement {
   .ace-tm {
     $aceBackground: tintOrShade($euiColorLightShade, 50%, 0%);
+    $aceActiveLineBackground: transparentize($euiColorLightShade, 0.3);
+    $aceUrlColor: makeHighContrastColor(#00a69b, $aceBackground);
+    $aceVarColor: makeHighContrastColor(#0079a5, $aceBackground);
+    $aceStringColor: makeHighContrastColor(#009926, $aceBackground);
 
     background-color: $euiColorLightestShade;
     color: $euiTextColor;
@@ -21,7 +25,7 @@
 
     .ace_gutter-active-line,
     .ace_marker-layer .ace_active-line {
-      background-color: transparentize($euiColorLightShade, 0.3);
+      background-color: $aceActiveLineBackground;
     }
 
     .ace_snippet-marker {
@@ -60,11 +64,11 @@
     .ace_url,
     .ace_start_triple_quote,
     .ace_end_triple_quote {
-      color: makeHighContrastColor(#00a69b, $aceBackground);
+      color: $aceUrlColor;
     }
 
     .ace_multi_string {
-      color: makeHighContrastColor(#009926, $aceBackground);
+      color: $aceStringColor;
       font-style: italic;
     }
 
@@ -93,7 +97,7 @@
 
     .ace_storage,
     .ace_keyword {
-      color: makeHighContrastColor(#0079a5, $aceBackground);
+      color: $aceVarColor;
     }
 
     .ace_constant {
@@ -109,7 +113,7 @@
     }
 
     .ace_constant.ace_library {
-      color: makeHighContrastColor(#009926, $aceBackground);
+      color: $aceStringColor;
     }
 
     .ace_invalid {
@@ -122,7 +126,7 @@
     }
 
     .ace_support.ace_constant {
-      color: makeHighContrastColor(#009926, $aceBackground);
+      color: $aceStringColor;
     }
 
     .ace_support.ace_type,
@@ -135,7 +139,7 @@
     }
 
     .ace_string {
-      color: makeHighContrastColor(#009926, $aceBackground);
+      color: $aceStringColor;
     }
 
     .ace_comment {
@@ -143,7 +147,7 @@
     }
 
     .ace_comment.ace_doc {
-      color: makeHighContrastColor(#0079a5, $aceBackground);
+      color: $aceVarColor;
     }
 
     .ace_comment.ace_doc.ace_tag {
@@ -151,11 +155,11 @@
     }
 
     .ace_constant.ace_numeric {
-      color: makeHighContrastColor(#0079a5, $aceBackground);
+      color: $aceVarColor;
     }
 
     .ace_variable {
-      color: makeHighContrastColor(#0079a5, $aceBackground);
+      color: $aceVarColor;
     }
 
     .ace_xml-pe {
@@ -206,6 +210,32 @@
     .ace_marker-layer .ace_selected-word {
       background: $euiColorLightestShade;
       border: $euiBorderThin;
+    }
+
+    &.ace_editor.ace_autocomplete {
+      background-color: $euiColorLightestShade;
+      color:
+        makeHighContrastColor(
+          $euiTextColor,
+          $aceBackground
+        );
+
+      .ace_completion-highlight {
+        color: $aceUrlColor;
+      }
+
+      .ace_marker-layer .ace_active-line {
+        background-color: $aceActiveLineBackground;
+      }
+    }
+
+    .ace_rightAlignedText {
+      color: $aceVarColor;
+    }
+
+    .ace_tooltip {
+      background-color: $aceBackground;
+      color: $euiTextColor;
     }
   }
 }

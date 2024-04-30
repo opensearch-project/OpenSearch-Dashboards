@@ -859,7 +859,9 @@ exports[`dashboard listing hideWriteControls 1`] = `
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -2002,7 +2004,9 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -3206,7 +3210,9 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -4410,7 +4416,9 @@ exports[`dashboard listing renders table rows 1`] = `
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",
@@ -5614,7 +5622,9 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               },
               "basePath": BasePath {
                 "basePath": "",
+                "clientBasePath": "",
                 "get": [Function],
+                "getBasePath": [Function],
                 "prepend": [Function],
                 "remove": [Function],
                 "serverBasePath": "",

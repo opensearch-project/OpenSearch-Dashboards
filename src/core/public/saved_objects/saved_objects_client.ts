@@ -38,6 +38,7 @@ import {
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
+  SavedObjectsBaseOptions,
 } from '../../server';
 
 import { SimpleSavedObject } from './simple_saved_object';
@@ -45,7 +46,11 @@ import { HttpFetchOptions, HttpSetup } from '../http';
 
 type SavedObjectsFindOptions = Omit<
   SavedObjectFindOptionsServer,
-  'sortOrder' | 'rootSearchFields' | 'typeToNamespacesMap'
+  | 'sortOrder'
+  | 'rootSearchFields'
+  | 'typeToNamespacesMap'
+  | 'ACLSearchParams'
+  | 'workspacesSearchOperator'
 >;
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;
@@ -61,7 +66,7 @@ export interface SavedObjectsCreateOptions {
   /** {@inheritDoc SavedObjectsMigrationVersion} */
   migrationVersion?: SavedObjectsMigrationVersion;
   references?: SavedObjectReference[];
-  workspaces?: string[];
+  workspaces?: SavedObjectsBaseOptions['workspaces'];
 }
 
 /**
@@ -79,7 +84,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> extends SavedObjectsC
 export interface SavedObjectsBulkCreateOptions {
   /** If a document with the given `id` already exists, overwrite it's contents (default=false). */
   overwrite?: boolean;
-  workspaces?: string[];
+  workspaces?: SavedObjectsCreateOptions['workspaces'];
 }
 
 /** @public */

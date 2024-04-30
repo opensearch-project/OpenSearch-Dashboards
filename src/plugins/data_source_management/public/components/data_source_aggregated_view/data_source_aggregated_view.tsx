@@ -4,18 +4,29 @@
  */
 
 import React from 'react';
+import { EuiContextMenuPanel, EuiPanel, EuiPopover, EuiSelectable, EuiSwitch } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiNotificationBadge,
-  EuiPopover,
-} from '@elastic/eui';
-import { i18n } from '@osd/i18n';
-import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
-import { getDataSourcesWithFields } from '../utils';
+  ApplicationStart,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  ToastsStart,
+} from 'opensearch-dashboards/public';
+import {
+  getApplication,
+  getDataSourcesWithFields,
+  handleDataSourceFetchError,
+  handleNoAvailableDataSourceError,
+} from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
+import { NoDataSource } from '../no_data_source';
+import { DataSourceErrorMenu } from '../data_source_error_menu';
+import { DataSourceBaseState } from '../data_source_menu/types';
+import { DataSourceOption } from '../data_source_menu/types';
+import { DataSourceItem } from '../data_source_item';
+import { DataSourceDropDownHeader } from '../drop_down_header';
+import './data_source_aggregated_view.scss';
+import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
 
 interface DataSourceAggregatedViewProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -25,11 +36,20 @@ interface DataSourceAggregatedViewProps {
   activeDataSourceIds?: string[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   displayAllCompatibleDataSources: boolean;
+  uiSettings?: IUiSettingsClient;
+  application?: ApplicationStart;
 }
 
-interface DataSourceAggregatedViewState {
+interface DataSourceAggregatedViewState extends DataSourceBaseState {
   isPopoverOpen: boolean;
   allDataSourcesIdToTitleMap: Map<string, any>;
+  switchChecked: boolean;
+  defaultDataSource: string | null;
+}
+
+interface DataSourceOptionDisplay extends DataSourceOption {
+  disabled?: boolean;
+  checked?: string;
 }
 
 export class DataSourceAggregatedView extends React.Component<
@@ -44,6 +64,10 @@ export class DataSourceAggregatedView extends React.Component<
     this.state = {
       isPopoverOpen: false,
       allDataSourcesIdToTitleMap: new Map(),
+      showEmptyState: false,
+      showError: false,
+      switchChecked: false,
+      defaultDataSource: null,
     };
   }
 
@@ -51,8 +75,12 @@ export class DataSourceAggregatedView extends React.Component<
     this._isMounted = false;
   }
 
-  onClick() {
+  onDataSourcesClick() {
     this.setState({ ...this.state, isPopoverOpen: !this.state.isPopoverOpen });
+  }
+
+  onSwitchClick(e) {
+    this.setState({ ...this.state, switchChecked: e.target.checked });
   }
 
   closePopover() {
@@ -63,6 +91,8 @@ export class DataSourceAggregatedView extends React.Component<
     this._isMounted = true;
     getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
       .then((fetchedDataSources) => {
+        const allDataSourcesIdToTitleMap = new Map();
+
         if (fetchedDataSources?.length) {
           let filteredDataSources = fetchedDataSources;
           if (this.props.dataSourceFilter) {
@@ -71,102 +101,158 @@ export class DataSourceAggregatedView extends React.Component<
             );
           }
 
-          const allDataSourcesIdToTitleMap = new Map();
-
           filteredDataSources.forEach((ds) => {
             allDataSourcesIdToTitleMap.set(ds.id, ds.attributes!.title || '');
           });
 
-          if (!this.props.hideLocalCluster) {
-            allDataSourcesIdToTitleMap.set('', 'Local cluster');
-          }
-
           if (!this._isMounted) return;
-          this.setState({
-            ...this.state,
-            allDataSourcesIdToTitleMap,
-          });
         }
+
+        if (!this.props.hideLocalCluster) {
+          allDataSourcesIdToTitleMap.set('', 'Local cluster');
+        }
+
+        if (allDataSourcesIdToTitleMap.size === 0) {
+          handleNoAvailableDataSourceError(
+            this.onEmptyState.bind(this),
+            this.props.notifications,
+            this.props.application
+          );
+          return;
+        }
+
+        this.setState({
+          ...this.state,
+          allDataSourcesIdToTitleMap,
+          defaultDataSource: this.props.uiSettings?.get('defaultDataSource', null) ?? null,
+          showEmptyState: allDataSourcesIdToTitleMap.size === 0,
+        });
       })
       .catch(() => {
-        this.props.notifications.addWarning(
-          i18n.translate('dataSource.fetchDataSourceError', {
-            defaultMessage: 'Unable to fetch existing data sources',
-          })
-        );
+        handleDataSourceFetchError(this.onError.bind(this), this.props.notifications);
       });
   }
 
-  render() {
-    const button = (
-      <EuiButtonIcon
-        data-test-subj="dataSourceAggregatedViewInfoButton"
-        iconType="iInCircle"
-        display="empty"
-        aria-label="show data sources"
-        onClick={this.onClick.bind(this)}
-      />
-    );
+  onEmptyState() {
+    this.setState({ showEmptyState: true });
+  }
 
-    let items = [];
+  onError() {
+    this.setState({ showError: true });
+  }
+
+  render() {
+    if (this.state.showEmptyState) {
+      return <NoDataSource application={this.props.application} />;
+    }
+    if (this.state.showError) {
+      return <DataSourceErrorMenu application={this.props.application} />;
+    }
+
+    let items: DataSourceOptionDisplay[] = [];
 
     // only display active data sources
-    if (this.props.displayAllCompatibleDataSources) {
-      items = [...this.state.allDataSourcesIdToTitleMap.values()].map((title) => {
-        return {
-          name: title,
-          disabled: true,
-        };
-      });
+    if (!this.props.displayAllCompatibleDataSources && this.state.switchChecked) {
+      items = this.props
+        .activeDataSourceIds!.filter((id) => this.state.allDataSourcesIdToTitleMap.has(id))
+        .map((id) => {
+          return {
+            id,
+            label: this.state.allDataSourcesIdToTitleMap.get(id),
+            disabled: true,
+            checked: 'on',
+          };
+        });
     } else {
-      items = this.props.activeDataSourceIds!.map((id) => {
-        return {
-          name: this.state.allDataSourcesIdToTitleMap.get(id),
+      this.state.allDataSourcesIdToTitleMap.forEach((label, id) => {
+        items.push({
+          id,
+          label,
           disabled: true,
-        };
+          checked:
+            !this.props.displayAllCompatibleDataSources &&
+            this.props.activeDataSourceIds &&
+            this.props.activeDataSourceIds.length &&
+            this.props.activeDataSourceIds.includes(id)
+              ? 'on'
+              : undefined,
+        });
       });
     }
 
-    const title = this.props.displayAllCompatibleDataSources
-      ? `Data sources (${this.state.allDataSourcesIdToTitleMap.size})`
-      : 'Selected data sources';
+    const numSelectedItems = items.filter((item) => item.checked === 'on').length;
 
-    const panels = [
-      {
-        id: 0,
-        title,
-        items,
-      },
-    ];
+    const titleComponent = (
+      <DataSourceDropDownHeader
+        totalDataSourceCount={this.state.allDataSourcesIdToTitleMap.size}
+        activeDataSourceCount={
+          !this.props.displayAllCompatibleDataSources ? numSelectedItems : undefined
+        }
+        application={getApplication()}
+      />
+    );
 
     return (
       <>
-        <EuiButtonEmpty
-          className="euiHeaderLink"
-          data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-          aria-label={i18n.translate('dataSourceAggregatedView.dataSourceOptionsButtonAriaLabel', {
-            defaultMessage: 'dataSourceAggregatedViewMenuButton',
-          })}
-          iconType="database"
-          iconSide="left"
-          size="s"
-          disabled={true}
-        >
-          {'Data sources'}
-        </EuiButtonEmpty>
-        <EuiNotificationBadge color={'subdued'}>
-          {(this.props.displayAllCompatibleDataSources && 'All') ||
-            this.props.activeDataSourceIds!.length}
-        </EuiNotificationBadge>
         <EuiPopover
           id={'dataSourceSViewContextMenuPopover'}
-          button={button}
+          button={
+            <DataSourceMenuPopoverButton
+              className={'dataSourceAggregatedView'}
+              onClick={this.onDataSourcesClick.bind(this)}
+            />
+          }
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover.bind(this)}
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
-          <EuiContextMenu initialPanelId={0} panels={panels} />
+          {titleComponent}
+          <EuiContextMenuPanel>
+            <EuiPanel
+              className={'dataSourceAggregatedViewOuiPanel'}
+              paddingSize="none"
+              borderRadius="none"
+              hasShadow={false}
+            >
+              <EuiPanel
+                className={'dataSourceAggregatedViewOuiPanel'}
+                color="subdued"
+                paddingSize="s"
+                borderRadius="none"
+              >
+                <EuiSelectable
+                  options={items}
+                  renderOption={(option) => (
+                    <DataSourceItem
+                      className={'dataSourceAggregatedView'}
+                      option={option}
+                      defaultDataSource={this.state.defaultDataSource}
+                    />
+                  )}
+                >
+                  {(list) => list}
+                </EuiSelectable>
+              </EuiPanel>
+            </EuiPanel>
+            {!this.props.displayAllCompatibleDataSources && (
+              <EuiPanel
+                className={'dataSourceAggregatedViewOuiPanel'}
+                color="transparent"
+                hasBorder={false}
+                hasShadow={false}
+                borderRadius="m"
+              >
+                <EuiSwitch
+                  className="dataSourceAggregatedViewOuiSwitch"
+                  label={`Used on this page (${numSelectedItems})`}
+                  checked={this.state.switchChecked}
+                  onChange={(e) => this.onSwitchClick(e)}
+                  compressed={true}
+                />
+              </EuiPanel>
+            )}
+          </EuiContextMenuPanel>
         </EuiPopover>
       </>
     );

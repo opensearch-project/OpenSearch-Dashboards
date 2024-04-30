@@ -4,11 +4,21 @@
  */
 
 import React from 'react';
-import { SavedObjectsClientContract, ToastsStart } from 'opensearch-dashboards/public';
-import { i18n } from '@osd/i18n';
+import {
+  ApplicationStart,
+  SavedObjectsClientContract,
+  ToastsStart,
+} from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceFilterGroup, SelectedDataSourceOption } from './data_source_filter_group';
-import { getDataSourcesWithFields } from '../utils';
+import { NoDataSource } from '../no_data_source';
+import {
+  getDataSourcesWithFields,
+  handleDataSourceFetchError,
+  handleNoAvailableDataSourceError,
+} from '../utils';
+import { DataSourceBaseState } from '../data_source_menu/types';
+import { DataSourceErrorMenu } from '../data_source_error_menu';
 
 export interface DataSourceMultiSeletableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -17,9 +27,10 @@ export interface DataSourceMultiSeletableProps {
   hideLocalCluster: boolean;
   fullWidth: boolean;
   uiSettings?: IUiSettingsClient;
+  application?: ApplicationStart;
 }
 
-interface DataSourceMultiSeletableState {
+interface DataSourceMultiSeletableState extends DataSourceBaseState {
   dataSourceOptions: SelectedDataSourceOption[];
   selectedOptions: SelectedDataSourceOption[];
   defaultDataSource: string | null;
@@ -38,6 +49,8 @@ export class DataSourceMultiSelectable extends React.Component<
       dataSourceOptions: [],
       selectedOptions: [],
       defaultDataSource: null,
+      showEmptyState: false,
+      showError: false,
     };
   }
 
@@ -76,6 +89,16 @@ export class DataSourceMultiSelectable extends React.Component<
 
       if (!this._isMounted) return;
 
+      if (selectedOptions.length === 0) {
+        handleNoAvailableDataSourceError(
+          this.onEmptyState.bind(this),
+          this.props.notifications,
+          this.props.application,
+          this.props.onSelectedDataSources
+        );
+        return;
+      }
+
       this.setState({
         ...this.state,
         selectedOptions,
@@ -84,12 +107,20 @@ export class DataSourceMultiSelectable extends React.Component<
 
       this.props.onSelectedDataSources(selectedOptions);
     } catch (error) {
-      this.props.notifications.addWarning(
-        i18n.translate('dataSource.fetchDataSourceError', {
-          defaultMessage: 'Unable to fetch existing data sources',
-        })
+      handleDataSourceFetchError(
+        this.onError.bind(this),
+        this.props.notifications,
+        this.props.onSelectedDataSources
       );
     }
+  }
+
+  onEmptyState() {
+    this.setState({ showEmptyState: true });
+  }
+
+  onError() {
+    this.setState({ showError: true });
   }
 
   onChange(selectedOptions: SelectedDataSourceOption[]) {
@@ -101,6 +132,12 @@ export class DataSourceMultiSelectable extends React.Component<
   }
 
   render() {
+    if (this.state.showEmptyState) {
+      return <NoDataSource application={this.props.application} />;
+    }
+    if (this.state.showError) {
+      return <DataSourceErrorMenu application={this.props.application} />;
+    }
     return (
       <DataSourceFilterGroup
         selectedOptions={this.state.selectedOptions}

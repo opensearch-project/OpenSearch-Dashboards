@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import type {
+import {
   SavedObject,
   SavedObjectsClientContract,
   CoreSetup,
@@ -12,10 +12,19 @@ import type {
   SavedObjectsServiceStart,
 } from '../../../core/server';
 import { WORKSPACE_TYPE } from '../../../core/server';
-import { IWorkspaceClientImpl, WorkspaceFindOptions, IResponse, IRequestDetail } from './types';
+import {
+  IWorkspaceClientImpl,
+  WorkspaceFindOptions,
+  IResponse,
+  IRequestDetail,
+  WorkspaceAttributeWithPermission,
+} from './types';
 import { workspace } from './saved_objects';
 import { generateRandomId } from './utils';
-import { WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID } from '../common/constants';
+import {
+  WORKSPACE_ID_CONSUMER_WRAPPER_ID,
+  WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+} from '../common/constants';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -35,7 +44,15 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     requestDetail: IRequestDetail
   ): SavedObjectsClientContract | undefined {
     return this.savedObjects?.getScopedClient(requestDetail.request, {
-      excludedWrappers: [WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID],
+      excludedWrappers: [
+        WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+        /**
+         * workspace object does not have workspaces field
+         * so need to bypass workspace id consumer wrapper
+         * for any kind of operation to saved objects client.
+         */
+        WORKSPACE_ID_CONSUMER_WRAPPER_ID,
+      ],
       includedHiddenTypes: [WORKSPACE_TYPE],
     });
   }
@@ -44,15 +61,17 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     requestDetail: IRequestDetail
   ): SavedObjectsClientContract {
     return this.savedObjects?.getScopedClient(requestDetail.request, {
+      excludedWrappers: [WORKSPACE_ID_CONSUMER_WRAPPER_ID],
       includedHiddenTypes: [WORKSPACE_TYPE],
     }) as SavedObjectsClientContract;
   }
   private getFlattenedResultWithSavedObject(
     savedObject: SavedObject<WorkspaceAttribute>
-  ): WorkspaceAttribute {
+  ): WorkspaceAttributeWithPermission {
     return {
       ...savedObject.attributes,
       id: savedObject.id,
+      permissions: savedObject.permissions,
     };
   }
   private formatError(error: Error | any): string {
@@ -67,10 +86,10 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   public async create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
-      const attributes = payload;
+      const { permissions, ...attributes } = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const existingWorkspaceRes = await this.getScopedClientWithoutPermission(requestDetail)?.find(
@@ -88,6 +107,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         attributes,
         {
           id,
+          permissions,
         }
       );
       return {
@@ -153,9 +173,9 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   public async update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Omit<WorkspaceAttribute, 'id'>
+    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>>
   ): Promise<IResponse<boolean>> {
-    const attributes = payload;
+    const { permissions, ...attributes } = payload;
     try {
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
@@ -172,7 +192,16 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
         }
       }
-      await client.update<Omit<WorkspaceAttribute, 'id'>>(WORKSPACE_TYPE, id, attributes, {});
+      await client.create<Omit<WorkspaceAttribute, 'id'>>(
+        WORKSPACE_TYPE,
+        { ...workspaceInDB.attributes, ...attributes },
+        {
+          id,
+          permissions,
+          overwrite: true,
+          version: workspaceInDB.version,
+        }
+      );
       return {
         success: true,
         result: true,
@@ -186,7 +215,23 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   public async delete(requestDetail: IRequestDetail, id: string): Promise<IResponse<boolean>> {
     try {
-      await this.getSavedObjectClientsFromRequestDetail(requestDetail).delete(WORKSPACE_TYPE, id);
+      const savedObjectClient = this.getSavedObjectClientsFromRequestDetail(requestDetail);
+      const workspaceInDB: SavedObject<WorkspaceAttribute> = await savedObjectClient.get(
+        WORKSPACE_TYPE,
+        id
+      );
+      if (workspaceInDB.attributes.reserved) {
+        return {
+          success: false,
+          error: i18n.translate('workspace.deleteReservedWorkspace.errorMessage', {
+            defaultMessage: 'Reserved workspace {id} is not allowed to delete.',
+            values: { id: workspaceInDB.id },
+          }),
+        };
+      }
+      await savedObjectClient.deleteByWorkspace(id);
+      // delete workspace itself at last, deleteByWorkspace depends on the workspace to do permission check
+      await savedObjectClient.delete(WORKSPACE_TYPE, id);
       return {
         success: true,
         result: true,

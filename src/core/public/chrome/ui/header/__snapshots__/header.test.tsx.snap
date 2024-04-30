@@ -242,7 +242,9 @@ exports[`Header handles visibility and lock changes 1`] = `
   basePath={
     BasePath {
       "basePath": "/test",
+      "clientBasePath": "",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
@@ -5945,7 +5947,9 @@ exports[`Header handles visibility and lock changes 1`] = `
       basePath={
         BasePath {
           "basePath": "/test",
+          "clientBasePath": "",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "/test",
@@ -7006,7 +7010,9 @@ exports[`Header renders condensed header 1`] = `
   basePath={
     BasePath {
       "basePath": "/test",
+      "clientBasePath": "",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
@@ -11480,7 +11486,9 @@ exports[`Header renders condensed header 1`] = `
       basePath={
         BasePath {
           "basePath": "/test",
+          "clientBasePath": "",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "/test",

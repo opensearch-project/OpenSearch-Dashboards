@@ -3,6 +3,7 @@
 exports[`DataSourceMenu can render data source view when only pass id in the activeOption 1`] = `
 <DataSourceView
   fullWidth={true}
+  hideLocalCluster={false}
   notifications={
     Object {
       "add": [MockFunction],
@@ -33,6 +34,7 @@ exports[`DataSourceMenu can render data source view when only pass id in the act
 exports[`DataSourceMenu can render data source view when provide activeOption 1`] = `
 <DataSourceView
   fullWidth={true}
+  hideLocalCluster={false}
   notifications={
     Object {
       "add": [MockFunction],
@@ -66,33 +68,6 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
-      <button
-        aria-label="dataSourceAggregatedViewMenuButton"
-        class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty-isDisabled euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        disabled=""
-        type="button"
-      >
-        <span
-          class="euiButtonContent euiButtonEmpty__content"
-        >
-          <span
-            class="euiButtonContent__icon"
-            color="inherit"
-            data-euiicon-type="database"
-          />
-          <span
-            class="euiButtonEmpty__text"
-          >
-            Data sources
-          </span>
-        </span>
-      </button>
-      <span
-        class="euiNotificationBadge euiNotificationBadge--subdued"
-      >
-        All
-      </span>
       <div
         class="euiPopover euiPopover--anchorDownLeft"
         id="dataSourceSViewContextMenuPopover"
@@ -101,50 +76,29 @@ Object {
           class="euiPopover__anchor"
         >
           <button
-            aria-label="show data sources"
-            class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-            data-test-subj="dataSourceAggregatedViewInfoButton"
+            aria-label="dataSourceAggregatedViewButton"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+            data-test-subj="dataSourceAggregatedViewButton"
             type="button"
           >
             <span
-              aria-hidden="true"
-              class="euiButtonIcon__icon"
-              color="inherit"
-              data-euiicon-type="iInCircle"
-            />
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="database"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              />
+            </span>
           </button>
         </div>
       </div>
     </div>
   </body>,
   "container": <div>
-    <button
-      aria-label="dataSourceAggregatedViewMenuButton"
-      class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiButtonEmpty-isDisabled euiHeaderLink"
-      data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-      disabled=""
-      type="button"
-    >
-      <span
-        class="euiButtonContent euiButtonEmpty__content"
-      >
-        <span
-          class="euiButtonContent__icon"
-          color="inherit"
-          data-euiicon-type="database"
-        />
-        <span
-          class="euiButtonEmpty__text"
-        >
-          Data sources
-        </span>
-      </span>
-    </button>
-    <span
-      class="euiNotificationBadge euiNotificationBadge--subdued"
-    >
-      All
-    </span>
     <div
       class="euiPopover euiPopover--anchorDownLeft"
       id="dataSourceSViewContextMenuPopover"
@@ -153,17 +107,23 @@ Object {
         class="euiPopover__anchor"
       >
         <button
-          aria-label="show data sources"
-          class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-          data-test-subj="dataSourceAggregatedViewInfoButton"
+          aria-label="dataSourceAggregatedViewButton"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+          data-test-subj="dataSourceAggregatedViewButton"
           type="button"
         >
           <span
-            aria-hidden="true"
-            class="euiButtonIcon__icon"
-            color="inherit"
-            data-euiicon-type="iInCircle"
-          />
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              class="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+            />
+            <span
+              class="euiButtonEmpty__text"
+            />
+          </span>
         </button>
       </div>
     </div>
@@ -408,6 +368,7 @@ exports[`DataSourceMenu should render data source selectable only with local clu
 exports[`DataSourceMenu should render data source view if not pass saved object or notification 1`] = `
 <DataSourceView
   fullWidth={true}
+  hideLocalCluster={false}
   notifications={
     Object {
       "add": [MockFunction],
@@ -426,6 +387,7 @@ exports[`DataSourceMenu should render data source view if not pass saved object 
 exports[`DataSourceMenu should render data source view only 1`] = `
 <DataSourceView
   fullWidth={true}
+  hideLocalCluster={false}
   notifications={
     Object {
       "add": [MockFunction],

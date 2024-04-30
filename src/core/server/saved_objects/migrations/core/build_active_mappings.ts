@@ -37,6 +37,7 @@ import { cloneDeep, mapValues } from 'lodash';
 import { Config } from '@osd/config';
 import {
   IndexMapping,
+  SavedObjectsFieldMapping,
   SavedObjectsMappingProperties,
   SavedObjectsTypeMappingDefinitions,
 } from './../../mappings';
@@ -55,6 +56,29 @@ export function buildActiveMappings(
 
   let mergedProperties = validateAndMerge(mapping.properties, typeDefinitions);
   // if permission control for saved objects is enabled, the permissions field should be added to the mapping
+  if (opensearchDashboardsRawConfig?.get('savedObjects.permission.enabled')) {
+    const principals: SavedObjectsFieldMapping = {
+      properties: {
+        users: {
+          type: 'keyword',
+        },
+        groups: {
+          type: 'keyword',
+        },
+      },
+    };
+    mergedProperties = validateAndMerge(mapping.properties, {
+      permissions: {
+        properties: {
+          read: principals,
+          write: principals,
+          library_read: principals,
+          library_write: principals,
+        },
+      },
+    });
+  }
+
   if (opensearchDashboardsRawConfig?.get('workspace.enabled')) {
     mergedProperties = validateAndMerge(mapping.properties, {
       workspaces: {
