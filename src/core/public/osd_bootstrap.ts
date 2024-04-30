@@ -38,6 +38,11 @@ export async function __osdBootstrap__() {
     document.querySelector('osd-injected-metadata')!.getAttribute('data')!
   );
 
+  const globals: any = typeof window === 'undefined' ? {} : window;
+  const themeTag: string = globals.__osdThemeTag__ || '';
+
+  injectedMetadata.branding.darkMode = themeTag.endsWith('dark');
+
   let i18nError: Error | undefined;
   const apmSystem = new ApmSystem(injectedMetadata.vars.apmConfig, injectedMetadata.basePath);
 
