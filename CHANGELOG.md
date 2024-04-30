@@ -105,7 +105,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Hide datasource and advanced settings menu in dashboard management when in workspace. ([#6455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6455))
 - [Multiple Datasource] Modify selectable picker to remove group label and close popover after selection ([#6515](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6515))
 - [Workspace] Add workspaces filter to saved objects page. ([#6458](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6458))
-- [Workspace] Dashboard admin(groups/users) implementation. ([#6554](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6554))
 
 ### 🐛 Bug Fixes
 
