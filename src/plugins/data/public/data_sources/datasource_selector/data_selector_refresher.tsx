@@ -30,6 +30,7 @@ export const DataSelectorRefresher: React.FC<IDataSelectorRefresherProps> = Reac
             defaultMessage: tooltipText,
           })}
           display="block"
+          data-test-subj="sourceRefreshButtonToolTip"
           {...toolTipProps}
         >
           <EuiButtonIcon
