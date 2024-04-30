@@ -90,11 +90,9 @@ import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
 import { DataSourceService } from './data_sources/datasource_services';
 import { DataSourceFactory } from './data_sources/datasource';
-import {
-  DEFAULT_DATA_SOURCE_TYPE,
-  registerDefaultDataSource,
-} from './data_sources/register_default_datasource';
+import { registerDefaultDataSource } from './data_sources/register_default_datasource';
 import { DefaultDslDataSource } from './data_sources/default_datasource';
+import { DEFAULT_DATA_SOURCE_TYPE } from './data_sources/constants';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
