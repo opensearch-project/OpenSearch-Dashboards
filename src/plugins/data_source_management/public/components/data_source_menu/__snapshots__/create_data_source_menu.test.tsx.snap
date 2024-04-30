@@ -123,9 +123,9 @@ Object {
           class="euiPopover__anchor"
         >
           <button
-            aria-label="dataSourceMenuButton"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink dataSourceComponentButtonTitle"
-            data-test-subj="dataSourceSelectableContextMenuHeaderLink"
+            aria-label="dataSourceSelectableButton"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+            data-test-subj="dataSourceSelectableButton"
             type="button"
           >
             <span
@@ -155,9 +155,9 @@ Object {
         class="euiPopover__anchor"
       >
         <button
-          aria-label="dataSourceMenuButton"
-          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink dataSourceComponentButtonTitle"
-          data-test-subj="dataSourceSelectableContextMenuHeaderLink"
+          aria-label="dataSourceSelectableButton"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+          data-test-subj="dataSourceSelectableButton"
           type="button"
         >
           <span
@@ -252,9 +252,9 @@ Object {
               class="euiPopover__anchor"
             >
               <button
-                aria-label="dataSourceMenuButton"
-                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink dataSourceComponentButtonTitle"
-                data-test-subj="dataSourceSelectableContextMenuHeaderLink"
+                aria-label="dataSourceSelectableButton"
+                class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+                data-test-subj="dataSourceSelectableButton"
                 type="button"
               >
                 <span
