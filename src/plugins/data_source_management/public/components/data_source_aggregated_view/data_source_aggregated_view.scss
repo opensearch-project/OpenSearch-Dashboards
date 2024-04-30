@@ -11,10 +11,20 @@
 
   .euiSelectableListItem__content {
     cursor: default;
+
+
+  .euiSelectableListItem__text {
+    max-height: 100%; 
   }
-  /* stylelint-enable */
+  }
 
   .dataSourceAggregatedViewOuiFlexGroup {
+    .euiFlexItem {
+      max-width: fit-content;
+    }
+
+      /* stylelint-enable */
+
     .dataSourceAggregatedViewOuiFlexItem {
       color: grey;
       text-overflow: ellipsis;

@@ -21,7 +21,7 @@ import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
 import { DataSourceMenuProps } from './components/data_source_menu';
-import { setApplication } from './components/utils';
+import { setApplication, setHideLocalCluster, setUiSettings } from './components/utils';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
@@ -41,7 +41,7 @@ export interface DataSourceManagementPluginStart {
   getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
 }
 
-export const DSM_APP_ID = 'dataSourceManagement';
+export const DSM_APP_ID = 'dataSources';
 
 export class DataSourceManagementPlugin
   implements
@@ -67,8 +67,8 @@ export class DataSourceManagementPlugin
     const savedObjectPromise = core
       .getStartServices()
       .then(([coreStart]) => coreStart.savedObjects);
-    const httpPromise = core.getStartServices().then(([coreStart]) => coreStart.http);
-    const column = new DataSourceColumn(savedObjectPromise, httpPromise);
+
+    const column = new DataSourceColumn(savedObjectPromise);
     indexPatternManagement.columns.register(column);
 
     opensearchDashboardsSection.registerApp({
@@ -101,11 +101,14 @@ export class DataSourceManagementPlugin
       registerAuthenticationMethod(sigV4AuthMethod);
     }
 
+    setHideLocalCluster({ enabled: dataSource.hideLocalCluster });
+    setUiSettings(uiSettings);
+
     return {
       registerAuthenticationMethod,
       ui: {
         DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
-        getDataSourceMenu: <T>() => createDataSourceMenu<T>(uiSettings, dataSource),
+        getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
       },
     };
   }
