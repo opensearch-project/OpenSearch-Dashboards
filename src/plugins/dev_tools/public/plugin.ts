@@ -28,19 +28,26 @@
  * under the License.
  */
 
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { Plugin, CoreSetup, AppMountParameters } from 'src/core/public';
+import { Plugin, CoreSetup, AppMountParameters, CoreStart } from 'src/core/public';
 import { AppUpdater } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
-import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import {
+  AppNavLinkStatus,
+  DEFAULT_APP_CATEGORIES,
+  RightNavigationOrder,
+  RightNavigationButton,
+} from '../../../core/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 
 import './index.scss';
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
 
 export interface DevToolsSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -75,12 +82,14 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     defaultMessage: 'Dev Tools',
   });
 
+  private id = 'dev_tools';
+
   public setup(coreSetup: CoreSetup, deps: DevToolsSetupDependencies) {
     const { application: applicationSetup, getStartServices } = coreSetup;
     const { urlForwarding, managementOverview } = deps;
 
     applicationSetup.register({
-      id: 'dev_tools',
+      id: this.id,
       title: this.title,
       updater$: this.appStateUpdater,
       icon: '/ui/logos/opensearch_mark.svg',
@@ -99,7 +108,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     });
 
     managementOverview?.register({
-      id: 'dev_tools',
+      id: this.id,
       title: this.title,
       description: i18n.translate('devTools.devToolsDescription', {
         defaultMessage:
@@ -125,10 +134,22 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     };
   }
 
-  public start() {
+  public start(core: CoreStart) {
     if (this.getSortedDevTools().length === 0) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     }
+    core.chrome.navControls.registerRight({
+      order: RightNavigationOrder.DevTool,
+      mount: toMountPoint(
+        React.createElement(RightNavigationButton, {
+          appId: this.id,
+          iconType: 'consoleApp',
+          title: this.title,
+          application: core.application,
+          http: core.http,
+        })
+      ),
+    });
   }
 
   public stop() {}
