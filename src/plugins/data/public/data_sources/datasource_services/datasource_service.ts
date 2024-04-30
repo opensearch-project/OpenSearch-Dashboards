@@ -57,13 +57,13 @@ export class DataSourceService {
    * @throws {DataSourceRegistrationError} Throws an error if a data source with the same name already exists.
    */
   async registerDataSource(ds: DataSource): Promise<IDataSourceRegistrationResult> {
-    const dsId = ds.getId();
-    if (dsId in this.dataSources) {
+    const dataSourceId = ds.getId();
+    if (dataSourceId in this.dataSources) {
       throw new DataSourceRegistrationError(
-        `Unable to register data source ${dsId}, error: data source name exists.`
+        `Unable to register data source ${ds.getName()}, error: data source exists.`
       );
     } else {
-      this.dataSources[dsId] = ds;
+      this.dataSources[dataSourceId] = ds;
       this.dataSourcesSubject.next(this.dataSources);
       return { success: true, info: '' } as IDataSourceRegistrationResult;
     }
