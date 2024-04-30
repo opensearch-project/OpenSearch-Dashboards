@@ -112,7 +112,7 @@ describe('DataSourceService', () => {
     const ds = new MockDataSource(mockConfig1);
     await service.registerDataSource(ds);
     await expect(service.registerDataSource(ds)).rejects.toThrow(
-      'Unable to register data source test_datasource1, error: data source name exists.'
+      'Unable to register data source test_datasource1, error: data source exists.'
     );
   });
 
