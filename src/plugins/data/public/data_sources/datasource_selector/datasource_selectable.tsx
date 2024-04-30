@@ -6,110 +6,109 @@
 import React, { useEffect, useCallback, useMemo } from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { ISourceDataSet, IndexPatternOption } from '../datasource';
-import { DataSourceType, GenericDataSource } from '../datasource_services';
-import { DataSourceGroup, DataSourceSelectableProps } from './types';
+import { DataSource, DataSetWithDataSource, IndexPatternOption } from '../datasource';
+import { DataSourceGroup, DataSourceOption, DataSourceSelectableProps } from './types';
+import { DataSelectorRefresher } from './data_selector_refresher';
+import {
+  DATA_SELECTOR_DEFAULT_PLACEHOLDER,
+  DATA_SELECTOR_REFRESHER_POPOVER_TEXT,
+  DATA_SELECTOR_S3_DATA_SOURCE_GROUP_HINT_LABEL,
+} from '../constants';
 
-type DataSourceTypeKey = 'DEFAULT_INDEX_PATTERNS' | 's3glue' | 'spark';
-
-// Mapping between datasource type and its display name.
-// Temporary solution, will be removed along with refactoring of data source APIs
-const DATASOURCE_TYPE_DISPLAY_NAME_MAP: Record<DataSourceTypeKey, string> = {
-  DEFAULT_INDEX_PATTERNS: i18n.translate('dataExplorer.dataSourceSelector.indexPatternGroupTitle', {
-    defaultMessage: 'Index patterns',
-  }),
-  s3glue: i18n.translate('dataExplorer.dataSourceSelector.amazonS3GroupTitle', {
-    defaultMessage: 'Amazon S3',
-  }),
-  spark: i18n.translate('dataExplorer.dataSourceSelector.sparkGroupTitle', {
-    defaultMessage: 'Spark',
-  }),
-};
-
-type DataSetType = ISourceDataSet['data_sets'][number];
-
-// Get data sets for a given datasource and returns it along with the source.
-const getDataSetWithSource = async (ds: GenericDataSource): Promise<ISourceDataSet> => {
-  const dataSet = await ds.getDataSet();
-  return {
-    ds,
-    data_sets: dataSet,
-  };
+// Asynchronously retrieves and formats dataset from a given data source.
+const getAndFormatDataSetFromDataSource = async (
+  ds: DataSource
+): Promise<DataSetWithDataSource<IndexPatternOption[]>> => {
+  const { dataSets } = await ds.getDataSet();
+  return { ds, list: dataSets } as DataSetWithDataSource<IndexPatternOption[]>;
 };
 
 // Map through all data sources and get their respective data sets.
-const getDataSets = (dataSources: GenericDataSource[]) =>
-  dataSources.map((ds) => getDataSetWithSource(ds));
+const getAllDataSets = (dataSources: DataSource[]) =>
+  dataSources.map((ds) => getAndFormatDataSetFromDataSource(ds));
 
-export const isIndexPatterns = (dataSet: DataSetType): dataSet is IndexPatternOption => {
-  if (typeof dataSet === 'string') return false;
+export const isIndexPatterns = (dataSet: unknown) =>
+  typeof dataSet !== 'string' &&
+  'title' in (dataSet as any) &&
+  'id' in (dataSet as any) &&
+  !!(dataSet as any).title &&
+  !!(dataSet as any).id;
 
-  return !!(dataSet.title && dataSet.id);
-};
-
-// Get the option format for the combo box from the dataSource and dataSet.
-export const getSourceOptions = (dataSource: DataSourceType, dataSet: DataSetType) => {
-  const optionContent = {
+// Mapping function to get the option format for the combo box from the dataSource and dataSet.
+const mapToOption = (
+  dataSource: DataSource,
+  dataSet: DataSetWithDataSource | undefined = undefined
+): DataSourceOption => {
+  const baseOption = {
     type: dataSource.getType(),
     name: dataSource.getName(),
     ds: dataSource,
   };
-  if (isIndexPatterns(dataSet)) {
+  if (dataSet && 'title' in dataSet && 'id' in dataSet && isIndexPatterns(dataSet)) {
     return {
-      ...optionContent,
-      label: dataSet.title,
-      value: dataSet.id,
-      key: dataSet.id,
+      ...baseOption,
+      label: dataSet.title as string,
+      value: dataSet.id as string,
+      key: dataSet.id as string,
     };
   }
   return {
-    ...optionContent,
+    ...baseOption,
     label: dataSource.getName(),
     value: dataSource.getName(),
+    key: dataSource.getId(),
   };
 };
 
-// Convert data sets into a structured format suitable for selector rendering.
-const getSourceList = (allDataSets: ISourceDataSet[]) => {
-  const finalList = [] as DataSourceGroup[];
-  allDataSets.forEach((curDataSet) => {
-    const typeKey = curDataSet.ds.getType() as DataSourceTypeKey;
-    let groupName =
-      DATASOURCE_TYPE_DISPLAY_NAME_MAP[typeKey] ||
-      i18n.translate('dataExplorer.dataSourceSelector.defaultGroupTitle', {
-        defaultMessage: 'Default Group',
-      });
+// Function to add or update groups in a reduction process
+const addOrUpdateGroup = (
+  existingGroups: DataSourceGroup[],
+  dataSource: DataSource,
+  option: DataSourceOption
+) => {
+  const metadata = dataSource.getMetadata();
+  const groupType = metadata.ui.groupType;
+  let groupName =
+    metadata.ui.typeLabel ||
+    i18n.translate('dataExplorer.dataSourceSelector.defaultGroupTitle', {
+      defaultMessage: 'Default Group',
+    });
 
-    // add '- Opens in Log Explorer' to hint user that selecting these types of data sources
-    // will lead to redirection to log explorer
-    if (typeKey !== 'DEFAULT_INDEX_PATTERNS') {
-      groupName = `${groupName}${i18n.translate('dataExplorer.dataSourceSelector.redirectionHint', {
-        defaultMessage: ' - Opens in Log Explorer',
-      })}`;
-    }
+  if (dataSource.getType() !== 'DEFAULT_INDEX_PATTERNS') {
+    groupName += i18n.translate('dataExplorer.dataSourceSelector.redirectionHint', {
+      defaultMessage: DATA_SELECTOR_S3_DATA_SOURCE_GROUP_HINT_LABEL,
+    });
+  }
 
-    const existingGroup = finalList.find((item) => item.label === groupName);
-    const mappedOptions = curDataSet.data_sets.map((dataSet) =>
-      getSourceOptions(curDataSet.ds, dataSet)
-    );
+  const group = existingGroups.find((g: DataSourceGroup) => g.id === groupType);
+  if (group && !group.options.some((opt) => opt.key === option.key)) {
+    group.options.push(option);
+  } else {
+    existingGroups.push({
+      groupType,
+      label: groupName,
+      options: [option],
+      id: metadata.ui.groupType, // id for each group
+    });
+  }
+};
 
-    // check if add new datasource group or add to existing one
-    if (existingGroup) {
-      // options deduplication
-      const existingOptionIds = new Set(existingGroup.options.map((opt) => opt.label));
-      const nonDuplicateOptions = mappedOptions.filter((opt) => !existingOptionIds.has(opt.label));
-
-      // 'existingGroup' directly references an item in the finalList
-      // pushing options to 'existingGroup' updates the corresponding item in finalList
-      existingGroup.options.push(...nonDuplicateOptions);
+const consolidateDataSourceGroups = (
+  dataSets: DataSetWithDataSource[],
+  dataSources: DataSource[]
+) => {
+  return [...dataSets, ...dataSources].reduce((dsGroup, item) => {
+    if ('list' in item && item.ds) {
+      // Confirm item is a DataSet
+      const options = item.list.map((dataset) => mapToOption(item.ds, dataset));
+      options.forEach((option) => addOrUpdateGroup(dsGroup, item.ds, option));
     } else {
-      finalList.push({
-        label: groupName,
-        options: mappedOptions,
-      });
+      // Handle DataSource directly
+      const option = mapToOption(item as InstanceType<typeof DataSource>);
+      addOrUpdateGroup(dsGroup, item as InstanceType<typeof DataSource>, option);
     }
-  });
-  return finalList;
+    return dsGroup;
+  }, []);
 };
 
 /**
@@ -123,13 +122,23 @@ export const DataSourceSelectable = ({
   setDataSourceOptionList,
   onGetDataSetError, //   onGetDataSetError, Callback for handling get data set errors. Ensure it's memoized.
   singleSelection = { asPlainText: true },
+  onRefresh,
   ...comboBoxProps
 }: DataSourceSelectableProps) => {
   // This effect gets data sets and prepares the datasource list for UI rendering.
   useEffect(() => {
-    Promise.all(getDataSets(dataSources))
-      .then((results) => {
-        setDataSourceOptionList(getSourceList(results));
+    Promise.all(
+      getAllDataSets(
+        dataSources.filter((ds) => ds.getMetadata().ui.selector.displayDatasetsAsSource)
+      )
+    )
+      .then((dataSetResults) => {
+        setDataSourceOptionList(
+          consolidateDataSourceGroups(
+            dataSetResults as DataSetWithDataSource[],
+            dataSources.filter((ds) => !ds.getMetadata().ui.selector.displayDatasetsAsSource)
+          )
+        );
       })
       .catch((e) => onGetDataSetError(e));
   }, [dataSources, setDataSourceOptionList, onGetDataSetError]);
@@ -155,13 +164,19 @@ export const DataSourceSelectable = ({
       {...comboBoxProps}
       data-test-subj="dataExplorerDSSelect"
       placeholder={i18n.translate('data.datasource.selectADatasource', {
-        defaultMessage: 'Select a datasource',
+        defaultMessage: DATA_SELECTOR_DEFAULT_PLACEHOLDER,
       })}
       options={memorizedDataSourceOptionList as any}
       selectedOptions={selectedSources as any}
       onChange={handleSourceChange}
       singleSelection={singleSelection}
       isClearable={false}
+      append={
+        <DataSelectorRefresher
+          tooltipText={DATA_SELECTOR_REFRESHER_POPOVER_TEXT}
+          onRefresh={onRefresh}
+        />
+      }
     />
   );
 };
