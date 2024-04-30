@@ -29,10 +29,11 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { CoreSetup, Plugin } from 'opensearch-dashboards/public';
+import { CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
+import { setupTopNavThemeButton } from './register_nav_control';
 
 const component = new ComponentRegistry();
 
@@ -77,7 +78,12 @@ export class AdvancedSettingsPlugin
     };
   }
 
-  public start() {
+  public start(core: CoreStart) {
+    const enableUserControl = core.uiSettings.get('theme:enableUserControl');
+    if (enableUserControl) {
+      setupTopNavThemeButton(core);
+    }
+
     return {
       component: component.start,
     };
