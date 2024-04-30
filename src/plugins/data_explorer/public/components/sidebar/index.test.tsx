@@ -5,18 +5,26 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import { Sidebar } from './index'; // Adjust the import path as necessary
-import { Provider } from 'react-redux';
-import configureMockStore from 'redux-mock-store';
-import { MockS3DataSource } from '../../../../discover/public/__mock__/index.test.mock';
+import { of } from 'rxjs/';
 import { createMemoryHistory } from 'history';
 import { Router } from 'react-router-dom';
+import { Provider } from 'react-redux';
+import configureMockStore from 'redux-mock-store';
+import { Sidebar } from './index'; // Adjust the import path as necessary
+import { MockS3DataSource } from '../../../../discover/public/__mock__/index.test.mock';
+import { s3DataSourceMetadata } from 'src/plugins/data/public/data_sources/constants';
 
 const mockStore = configureMockStore();
 const initialState = {
   metadata: { indexPattern: 'some-index-pattern-id' },
 };
 const store = mockStore(initialState);
+
+export const createObservable = (data: any) => {
+  return of(data);
+};
+
+const getMetaData = () => ({ ...s3DataSourceMetadata });
 
 jest.mock('../../../../opensearch_dashboards_react/public', () => {
   return {
@@ -27,18 +35,16 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => {
           indexPatterns: {},
           dataSources: {
             dataSourceService: {
-              dataSources$: {
-                subscribe: jest.fn((callback) => {
-                  callback({
-                    's3-prod-mock': new MockS3DataSource({
-                      name: 's3-prod-mock',
-                      type: 's3glue',
-                      metadata: {},
-                    }),
-                  });
-                  return { unsubscribe: jest.fn() };
-                }),
-              },
+              getDataSources$: jest.fn().mockImplementation(() =>
+                createObservable({
+                  's3-prod-mock': new MockS3DataSource({
+                    id: 's3-prod-mock',
+                    name: 's3-prod-mock',
+                    type: 's3glue',
+                    metadata: getMetaData(),
+                  }),
+                })
+              ),
             },
           },
         },
