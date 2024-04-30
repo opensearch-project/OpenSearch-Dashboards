@@ -4,10 +4,16 @@
  */
 
 import React, { useEffect, useCallback, useMemo } from 'react';
-import { EuiButtonIcon, EuiComboBox, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSource, DataSetWithDataSource, IndexPatternOption } from '../datasource';
 import { DataSourceGroup, DataSourceOption, DataSourceSelectableProps } from './types';
+import { DataSelectorRefresher } from './data_selector_refresher';
+import {
+  DATA_SELECTOR_DEFAULT_PLACEHOLDER,
+  DATA_SELECTOR_REFRESHER_POPOVER_TEXT,
+  DATA_SELECTOR_S3_DATA_SOURCE_GROUP_HINT_LABEL,
+} from '../constants';
 
 // Asynchronously retrieves and formats dataset from a given data source.
 const getAndFormatDataSetFromDataSource = async (
@@ -70,7 +76,7 @@ const addOrUpdateGroup = (
 
   if (dataSource.getType() !== 'DEFAULT_INDEX_PATTERNS') {
     groupName += i18n.translate('dataExplorer.dataSourceSelector.redirectionHint', {
-      defaultMessage: ' - Opens in Log Explorer',
+      defaultMessage: DATA_SELECTOR_S3_DATA_SOURCE_GROUP_HINT_LABEL,
     });
   }
 
@@ -158,7 +164,7 @@ export const DataSourceSelectable = ({
       {...comboBoxProps}
       data-test-subj="dataExplorerDSSelect"
       placeholder={i18n.translate('data.datasource.selectADatasource', {
-        defaultMessage: 'Select a datasource',
+        defaultMessage: DATA_SELECTOR_DEFAULT_PLACEHOLDER,
       })}
       options={memorizedDataSourceOptionList as any}
       selectedOptions={selectedSources as any}
@@ -166,22 +172,10 @@ export const DataSourceSelectable = ({
       singleSelection={singleSelection}
       isClearable={false}
       append={
-        <EuiText size="s">
-          <EuiToolTip
-            position="right"
-            content={i18n.translate('data.datasource.selector.refreshDataSources', {
-              defaultMessage: 'Refresh data selector',
-            })}
-            display="block"
-          >
-            <EuiButtonIcon
-              size="s"
-              onClick={onRefresh}
-              iconType="refresh"
-              aria-label="sourceRefresh"
-            />
-          </EuiToolTip>
-        </EuiText>
+        <DataSelectorRefresher
+          tooltipText={DATA_SELECTOR_REFRESHER_POPOVER_TEXT}
+          onRefresh={onRefresh}
+        />
       }
     />
   );

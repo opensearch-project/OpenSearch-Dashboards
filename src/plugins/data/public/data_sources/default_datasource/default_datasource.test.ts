@@ -4,20 +4,8 @@
  */
 
 import { IndexPatternsService } from '../../index_patterns';
-import { DataSourceUIGroupType } from '../datasource/types';
-import { DEFAULT_DATA_SOURCE_DISPLAY_NAME } from '../register_default_datasource';
+import { defaultDataSourceMetadata } from '../constants';
 import { DefaultDslDataSource } from './default_datasource';
-
-export const defaultDataSourceMetadata = {
-  ui: {
-    label: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
-    typeLabel: DEFAULT_DATA_SOURCE_DISPLAY_NAME,
-    groupType: DataSourceUIGroupType.defaultOpenSearchDataSource,
-    selector: {
-      displayDatasetsAsSource: true,
-    },
-  },
-};
 
 describe('DefaultDslDataSource', () => {
   let indexPatternsMock: IndexPatternsService;

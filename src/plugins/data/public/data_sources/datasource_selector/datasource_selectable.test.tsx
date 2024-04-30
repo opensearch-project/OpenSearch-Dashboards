@@ -8,7 +8,13 @@ import { render, act, screen, fireEvent } from '@testing-library/react';
 import { DataSourceSelectable } from './datasource_selectable';
 import { DataSourceGroup, DataSourceOption } from './types';
 import { DataSource } from '../datasource/datasource';
-import { defaultDataSourceMetadata, s3DataSourceMetadata } from '../constants';
+import {
+  DEFAULT_DATA_SOURCE_DISPLAY_NAME,
+  S3_GLUE_DATA_SOURCE_DISPLAY_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+  defaultDataSourceMetadata,
+  s3DataSourceMetadata,
+} from '../constants';
 
 describe('DataSourceSelectable', () => {
   let dataSourcesMock: DataSource[];
@@ -167,7 +173,7 @@ describe('DataSourceSelectable', () => {
           ({
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue('s3glue'),
-            getName: jest.fn().mockReturnValue('Amazon S3'),
+            getName: jest.fn().mockReturnValue(S3_GLUE_DATA_SOURCE_DISPLAY_NAME),
             getMetadata: jest.fn().mockReturnValue(s3DataSourceMetadata),
           } as unknown) as DataSource,
         ]}
@@ -218,8 +224,8 @@ describe('DataSourceSelectable', () => {
         dataSources={[
           ({
             getDataSet: jest.fn().mockResolvedValue([]),
-            getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
-            getName: jest.fn().mockReturnValue('Index patterns'),
+            getType: jest.fn().mockReturnValue(DEFAULT_DATA_SOURCE_TYPE),
+            getName: jest.fn().mockReturnValue(DEFAULT_DATA_SOURCE_DISPLAY_NAME),
             getMetadata: jest.fn().mockReturnValue(defaultDataSourceMetadata),
           } as unknown) as DataSource,
         ]}

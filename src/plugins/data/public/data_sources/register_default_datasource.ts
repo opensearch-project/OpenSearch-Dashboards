@@ -3,21 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { i18n } from '@osd/i18n';
 import { htmlIdGenerator } from '@elastic/eui';
 import { DataPublicPluginStart } from '../types';
 import { DataSourceUIGroupType } from './datasource/types';
-
-export const DEFAULT_DATA_SOURCE_TYPE = 'DEFAULT_INDEX_PATTERNS';
-export const DEFAULT_DATA_SOURCE_NAME = i18n.translate('data.datasource.type.openSearchDefault', {
-  defaultMessage: 'OpenSearch Default',
-});
-export const DEFAULT_DATA_SOURCE_DISPLAY_NAME = i18n.translate(
-  'data.datasource.type.openSearchDefaultDisplayName',
-  {
-    defaultMessage: 'Index patterns',
-  }
-);
+import {
+  DEFAULT_DATA_SOURCE_DISPLAY_NAME,
+  DEFAULT_DATA_SOURCE_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+} from './constants';
 
 /**
  * Registers the default data source with the provided data excluding 'ui'.

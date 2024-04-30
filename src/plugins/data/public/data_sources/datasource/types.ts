@@ -18,9 +18,9 @@ export interface IDataSourceGroup {
   name: string;
 }
 
-export interface DataSetWithDataSource<T = []> {
+export interface DataSetWithDataSource<T = unknown> {
   ds: DataSource;
-  list: T;
+  list: T[];
 }
 
 export interface IDataSetParams<T = {}> {
@@ -35,8 +35,14 @@ export interface IDataSourceQueryResult<T = {}> {
   data: T;
 }
 
+export enum ConnectionStatus {
+  Connected = 'connected',
+  Disconnected = 'disconnected',
+  Error = 'error',
+}
+
 export interface DataSourceConnectionStatus {
-  status: string;
+  status: ConnectionStatus;
   message: string;
   error?: Error;
 }
@@ -56,14 +62,47 @@ export interface IDataSourceUISelector {
   displayDatasetsAsSource: boolean;
 }
 
+/**
+ * Represents the UI settings for a data source.
+ */
 export interface IDataSourceUISettings {
+  /**
+   * Controls UI elements related to data source selector.
+   */
   selector: IDataSourceUISelector;
-  label: string; // the display name of data source
-  groupType: DataSourceUIGroupType; // the group to which the data source belongs
-  typeLabel: string; // the display name of data source type
-  displayOrder?: number; // the order in which the data source should be displayed in selector
-  description?: string; // short description of your database
-  icon?: string; // uri of the icon
+
+  /**
+   * The display name of the data source.
+   */
+  label: string;
+
+  /**
+   * The group to which the data source belongs. This is used to group data sources in the selector.
+   */
+  groupType: DataSourceUIGroupType;
+
+  /**
+   * The display name of the data source type.
+   */
+  typeLabel: string;
+
+  /**
+   * The order in which the data source should be displayed in the selector.
+   * @optional
+   */
+  displayOrder?: number;
+
+  /**
+   * A short description of the data source.
+   * @optional
+   */
+  description?: string;
+
+  /**
+   * URI of the icon representing the data source.
+   * @optional
+   */
+  icon?: string;
 }
 
 export interface IDataSourceDataSet<T = {}> {
