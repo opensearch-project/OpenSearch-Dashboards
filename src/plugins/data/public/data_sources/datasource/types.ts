@@ -87,12 +87,6 @@ export interface IDataSourceUISettings {
   typeLabel: string;
 
   /**
-   * The order in which the data source should be displayed in the selector.
-   * @optional
-   */
-  displayOrder?: number;
-
-  /**
    * A short description of the data source.
    * @optional
    */
