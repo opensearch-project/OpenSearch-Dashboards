@@ -89,6 +89,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'timepicker:timeDefaults': { type: 'keyword' },
   'timepicker:refreshIntervalDefaults': { type: 'keyword' },
   'timepicker:quickRanges': { type: 'keyword' },
+  'theme:enableUserControl': { type: 'boolean' },
   'theme:version': { type: 'keyword' },
   'theme:darkMode': { type: 'boolean' },
   'state:storeInSessionStorage': { type: 'boolean' },
