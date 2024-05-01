@@ -30,7 +30,7 @@ export interface TableRowProps {
   isShortDots: boolean;
 }
 
-export const TableRow = ({
+const TableRowUI = ({
   row,
   columns,
   indexPattern,
@@ -185,3 +185,5 @@ export const TableRow = ({
     </>
   );
 };
+
+export const TableRow = React.memo(TableRowUI);
