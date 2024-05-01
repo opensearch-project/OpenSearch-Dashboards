@@ -28,15 +28,14 @@
  * under the License.
  */
 
-// import { schema } from '@osd/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter, ISavedObjectsRepository } from 'opensearch-dashboards/server';
-// import { storeReport, reportSchema } from '../report';
+import { storeReport, reportSchema } from '../report';
 
 export function registerUiMetricRoute(
   router: IRouter,
   getSavedObjects: () => ISavedObjectsRepository | undefined
 ) {
-  /*
   router.post(
     {
       path: '/api/ui_metric/report',
@@ -59,5 +58,5 @@ export function registerUiMetricRoute(
         return res.ok({ body: { status: 'fail' } });
       }
     }
-  );*/
+  );
 }
