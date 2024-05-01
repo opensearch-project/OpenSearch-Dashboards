@@ -1,4 +1,8 @@
-// From: https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5623
-.languageSwitcher {
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.languageSelect {
   max-width: 150px;
+  transform: translateY(-1px) translateX(-0.5px);
 }

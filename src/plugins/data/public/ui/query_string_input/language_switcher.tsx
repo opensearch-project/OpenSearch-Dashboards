@@ -37,6 +37,7 @@ interface Props {
   language: string;
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
+  appName?: string;
 }
 
 function mapExternalLanguageToOptions(language: string) {
@@ -70,15 +71,22 @@ export function QueryLanguageSwitcher(props: Props) {
 
   const queryEnhancements = uiService.queryEnhancements;
   if (uiService.isEnhancementsEnabled) {
-    queryEnhancements.forEach((enhancement) =>
-      languageOptions.push(mapExternalLanguageToOptions(enhancement.language))
-    );
+    queryEnhancements.forEach((enhancement) => {
+      if (
+        enhancement.supportedAppNames &&
+        props.appName &&
+        !enhancement.supportedAppNames.includes(props.appName)
+      )
+        return;
+      languageOptions.push(mapExternalLanguageToOptions(enhancement.language));
+    });
   }
 
   const selectedLanguage = {
-    label: languageOptions.find(
-      (option) => (option.value as string).toLowerCase() === props.language.toLowerCase()
-    )?.label as string,
+    label:
+      (languageOptions.find(
+        (option) => (option.value as string).toLowerCase() === props.language.toLowerCase()
+      )?.label as string) ?? languageOptions[0].label,
   };
 
   const setSearchEnhance = (queryLanguage: string) => {
@@ -106,7 +114,7 @@ export function QueryLanguageSwitcher(props: Props) {
 
   return (
     <EuiComboBox
-      className="languageSwitcher"
+      className="languageSelect"
       data-test-subj="languageSelect"
       options={languageOptions}
       selectedOptions={[selectedLanguage]}

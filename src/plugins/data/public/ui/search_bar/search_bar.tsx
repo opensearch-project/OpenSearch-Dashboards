@@ -100,7 +100,7 @@ export interface SearchBarOwnProps {
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;
 
-// TODO: SQL: include query enhancement in state in case make adding data sources at runtime?
+// TODO: MQL: include query enhancement in state in case make adding data sources at runtime?
 interface State {
   isFiltersVisible: boolean;
   showSaveQueryModal: boolean;
@@ -207,7 +207,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   };
 
   private shouldRenderQueryBar() {
-    // TODO: SQL handle no index patterns?
+    // TODO: MQL handle no index patterns?
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
     const showQueryInput =
       this.props.showQueryInput && this.props.indexPatterns && this.state.query;
@@ -215,7 +215,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   private shouldRenderFilterBar() {
-    // TODO: SQL handle no index patterns?
+    // TODO: MQL handle no index patterns?
     return (
       this.props.showFilterBar &&
       this.props.filters &&
@@ -402,7 +402,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
     let queryBar;
     if (this.shouldRenderQueryBar()) {
-      // TODO: SQL make this default query bar top row but this.props.queryEnhancements.get(language) can pass a component
+      // TODO: MQL make this default query bar top row but this.props.queryEnhancements.get(language) can pass a component
       queryBar = (
         <QueryBarTopRow
           timeHistory={this.props.timeHistory}

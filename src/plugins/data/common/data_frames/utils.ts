@@ -19,10 +19,23 @@ import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
 import { IOpenSearchDashboardsSearchRequest } from '../search';
 import { GetAggTypeFn, GetDataFrameAggQsFn } from '../types';
 
+/**
+ * Returns the raw data frame from the search request.
+ *
+ * @param searchRequest - search request object.
+ * @returns dataframe
+ */
 export const getRawDataFrame = (searchRequest: IOpenSearchDashboardsSearchRequest) => {
   return searchRequest.params?.body?.df;
 };
 
+/**
+ * Returns the raw query string from the search request.
+ * Gets current state query if exists, otherwise gets the initial query.
+ *
+ * @param searchRequest - search request object
+ * @returns query string
+ */
 export const getRawQueryString = (
   searchRequest: IOpenSearchDashboardsSearchRequest
 ): string | undefined => {
@@ -32,10 +45,24 @@ export const getRawQueryString = (
   );
 };
 
+/**
+ * Returns the raw aggregations from the search request.
+ *
+ * @param searchRequest - search request object
+ * @returns aggregations
+ */
 export const getRawAggs = (searchRequest: IOpenSearchDashboardsSearchRequest) => {
   return searchRequest.params?.body?.aggs;
 };
 
+/**
+ * Returns the unique values for raw aggregations. This is used
+ * with `other-filter` aggregation. To get the values that were not
+ * included in the aggregation response prior to this request.
+ *
+ * @param rawAggs - raw aggregations object
+ * @returns object containing the field and its unique values
+ */
 export const getUniqueValuesForRawAggs = (rawAggs: Record<string, any>) => {
   const filters = rawAggs.filters?.filters?.['']?.bool?.must_not;
   if (!filters || !Array.isArray(filters)) {
@@ -56,6 +83,14 @@ export const getUniqueValuesForRawAggs = (rawAggs: Record<string, any>) => {
   return { field, values };
 };
 
+/**
+ * Returns the aggregation configuration for raw aggregations.
+ * Aggregations are nested objects, so this function recursively
+ * builds an object that is easier to work with.
+ *
+ * @param rawAggs - raw aggregations object
+ * @returns aggregation configuration
+ */
 export const getAggConfigForRawAggs = (rawAggs: Record<string, any>): DataFrameAggConfig | null => {
   const aggConfig: DataFrameAggConfig = { id: '', type: '' };
 
@@ -80,6 +115,14 @@ export const getAggConfigForRawAggs = (rawAggs: Record<string, any>): DataFrameA
   return aggConfig;
 };
 
+/**
+ * Returns the aggregation configuration.
+ *
+ * @param searchRequest - search request object
+ * @param aggConfig - aggregation configuration object
+ * @param getAggTypeFn - function to get the aggregation type from the aggsService
+ * @returns aggregation configuration
+ */
 export const getAggConfig = (
   searchRequest: IOpenSearchDashboardsSearchRequest,
   aggConfig: Partial<DataFrameAggConfig> = {},
@@ -107,6 +150,14 @@ export const getAggConfig = (
   return aggConfig as DataFrameAggConfig;
 };
 
+/**
+ * Converts the data frame response to a search response.
+ * This function is used to convert the data frame response to a search response
+ * to be used by the rest of the application.
+ *
+ * @param response - data frame response object
+ * @returns converted search response
+ */
 export const convertResult = (response: IDataFrameResponse): SearchResponse<any> => {
   const body = response.body;
   if (body.hasOwnProperty('error')) {
@@ -143,7 +194,7 @@ export const convertResult = (response: IDataFrameResponse): SearchResponse<any>
   if (data.hasOwnProperty('aggs')) {
     const dataWithAggs = data as IDataFrameWithAggs;
     if (!dataWithAggs.aggs) {
-      // TODO: SQL best guess, get timestamp field and caculate it here
+      // TODO: MQL best guess, get timestamp field and caculate it here
       return searchResponse;
     }
     searchResponse.aggregations = Object.entries(dataWithAggs.aggs).reduce(
@@ -187,10 +238,25 @@ export const convertResult = (response: IDataFrameResponse): SearchResponse<any>
   return searchResponse;
 };
 
+/**
+ * Formats the field value.
+ *
+ * @param field - field object
+ * @param value - value to format
+ * @returns formatted value
+ */
 export const formatFieldValue = (field: IFieldType | Partial<IFieldType>, value: any): any => {
   return field.format && field.format.convert ? field.format.convert(value) : value;
 };
 
+/**
+ * Returns the field type. This function is used to determine the field type so that can
+ * be used by the rest of the application. The field type must map to a OsdFieldType
+ * to be used by the rest of the application.
+ *
+ * @param field - field object
+ * @returns field type
+ */
 export const getFieldType = (field: IFieldType | Partial<IFieldType>): string | undefined => {
   const fieldName = field.name?.toLowerCase();
   if (fieldName?.includes('date') || fieldName?.includes('timestamp')) {
@@ -206,6 +272,14 @@ export const getFieldType = (field: IFieldType | Partial<IFieldType>): string | 
   return field.type;
 };
 
+/**
+ * Returns the time field. If there is an aggConfig then we do not have to guess.
+ * If there is no aggConfig then we will try to guess the time field.
+ *
+ * @param data - data frame object.
+ * @param aggConfig - aggregation configuration object.
+ * @returns time field.
+ */
 export const getTimeField = (
   data: IDataFrame,
   aggConfig?: DataFrameAggConfig
@@ -216,6 +290,12 @@ export const getTimeField = (
     : fields.find((field) => field.type === 'date');
 };
 
+/**
+ * Checks if the value is a GeoPoint. Expects an object with lat and lon properties.
+ *
+ * @param value - value to check
+ * @returns True if the value is a GeoPoint, false otherwise
+ */
 export const isGeoPoint = (value: any): boolean => {
   return (
     typeof value === 'object' &&
@@ -227,6 +307,12 @@ export const isGeoPoint = (value: any): boolean => {
   );
 };
 
+/**
+ * Creates a data frame.
+ *
+ * @param partial - partial data frame object
+ * @returns data frame.
+ */
 export const createDataFrame = (partial: PartialDataFrame): IDataFrame | IDataFrameWithAggs => {
   let size = 0;
   const processField = (field: any) => {
@@ -250,6 +336,12 @@ export const createDataFrame = (partial: PartialDataFrame): IDataFrame | IDataFr
   };
 };
 
+/**
+ * Updates the data frame metadata. Metadata is used to store the aggregation configuration.
+ * It also stores the query string used to fetch the data frame aggregations.
+ *
+ * @param params - { dataFrame, qs, aggConfig, timeField, timeFilter, getAggQsFn }
+ */
 export const updateDataFrameMeta = ({
   dataFrame,
   qs,
@@ -291,6 +383,13 @@ export const updateDataFrameMeta = ({
   }
 };
 
+/**
+ * Converts a data frame to index pattern spec which can be used to create an index pattern.
+ *
+ * @param dataFrame - data frame object
+ * @param id - index pattern id if it exists
+ * @returns index pattern spec
+ */
 export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatternSpec => {
   const fields = (dataFrame.schema || dataFrame.fields) as IFieldType[];
 
@@ -350,6 +449,5 @@ export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatter
     timeFieldName: getTimeField(dataFrame)?.name,
     type: !id ? DATA_FRAME_TYPES.DEFAULT : undefined,
     fields: fields.reduce(flattenFields, {} as IndexPatternFieldMap),
-    // TODO: SQL dataSourceRef
   };
 };

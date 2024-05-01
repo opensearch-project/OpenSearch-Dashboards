@@ -114,7 +114,7 @@ const KEY_CODES = {
 };
 
 // Needed for React.lazy
-// TODO: SQL export this and let people extended this
+// TODO: MQL export this and let people extended this
 // eslint-disable-next-line import/no-default-export
 export default class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
@@ -143,7 +143,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     return toUser(this.props.query.query);
   };
 
-  // TODO: SQL don't do this here? || Fetch data sources
+  // TODO: MQL don't do this here? || Fetch data sources
   private fetchIndexPatterns = async () => {
     const stringPatterns = this.props.indexPatterns.filter(
       (indexPattern) => typeof indexPattern === 'string'
@@ -468,7 +468,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  // TODO: SQL consider moving language select language of setting search source here
+  // TODO: MQL consider moving language select language of setting search source here
   private onSelectLanguage = (language: string) => {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
@@ -648,6 +648,14 @@ export default class QueryStringInputUI extends Component<Props, State> {
     return (
       <div className={className}>
         {this.props.prepend}
+        {!!this.props.isEnhancementsEnabled && (
+          <QueryLanguageSwitcher
+            language={this.props.query.language}
+            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+            onSelectLanguage={this.onSelectLanguage}
+            appName={this.services.appName}
+          />
+        )}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
@@ -725,13 +733,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-        {!!this.props.isEnhancementsEnabled ? (
-          <QueryLanguageSwitcher
-            language={this.props.query.language}
-            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-            onSelectLanguage={this.onSelectLanguage}
-          />
-        ) : (
+        {!!!this.props.isEnhancementsEnabled && (
           <LegacyQueryLanguageSwitcher
             language={this.props.query.language}
             anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}

@@ -299,7 +299,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   }
 
   function shouldRenderQueryInput(): boolean {
-    // TODO: SQL probably can modify to not care about index patterns
+    // TODO: MQL probably can modify to not care about index patterns
     // TODO: call queryUiEnhancement?.showQueryInput
     return Boolean(props.showQueryInput && props.indexPatterns && props.query && storage);
   }

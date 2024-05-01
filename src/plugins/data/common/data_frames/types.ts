@@ -20,6 +20,9 @@ export interface DataFrameService {
   clear: () => void;
 }
 
+/**
+ * A data frame is a two-dimensional labeled data structure with columns of potentially different types.
+ */
 export interface IDataFrame {
   type?: DATA_FRAME_TYPES.DEFAULT;
   name?: string;
@@ -29,13 +32,23 @@ export interface IDataFrame {
   size: number;
 }
 
+/**
+ * An aggregation is a process where the values of multiple rows are grouped together to form a single summary value.
+ */
 export interface DataFrameAgg {
   value: number;
 }
+
+/**
+ * A bucket aggregation is a type of aggregation that creates buckets or sets of data.
+ */
 export interface DataFrameBucketAgg extends DataFrameAgg {
   key: string;
 }
 
+/**
+ * This configuration is used to define how the aggregation should be performed.
+ */
 export interface DataFrameAggConfig {
   id: string;
   type: string;
@@ -69,7 +82,7 @@ export interface PartialDataFrame extends Omit<IDataFrame, 'fields' | 'size'> {
 
 /**
  * To be utilize with aggregations and will map to buckets
- * Plugins can get the aggreted value by their own logic
+ * Plugins can get the aggregated value by their own logic
  * Setting to null will disable the aggregation if plugin wishes
  * In future, if the plugin doesn't intentionally set the value to null,
  * we can calculate the value based on the fields.

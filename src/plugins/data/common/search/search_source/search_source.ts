@@ -413,7 +413,7 @@ export class SearchSource {
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
         }
-        // TODO: SQL else if data_frame_polling then poll for the data frame updating the df fields only
+        // TODO: MQL else if data_frame_polling then poll for the data frame updating the df fields only
       }
       return onResponse(searchRequest, response.rawResponse);
     });

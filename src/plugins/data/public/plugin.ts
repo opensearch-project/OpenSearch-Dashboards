@@ -166,7 +166,7 @@ export class DataPublicPlugin
     const uiService = this.uiService.setup(core, {});
 
     return {
-      // TODO: SQL
+      // TODO: MQL
       autocomplete: this.autocomplete.setup(core),
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),

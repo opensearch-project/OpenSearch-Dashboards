@@ -11,7 +11,7 @@ import { Settings } from './settings';
 export * from './settings';
 
 export interface QueryEnhancement {
-  // TODO: SQL do want to default have supported all data_sources?
+  // TODO: MQL do want to default have supported all data_sources?
   // or should data connect have a record of query enhancements that are supported
   language: string;
   search: SearchInterceptor;
@@ -36,6 +36,9 @@ export interface QueryEnhancement {
     visualizable?: boolean;
   };
   showDocLinks?: boolean;
+  // List of supported app names that this enhancement should be enabled for,
+  // if not provided it will be enabled for all apps
+  supportedAppNames?: string[];
 }
 
 export interface UiEnhancements {

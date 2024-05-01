@@ -710,7 +710,6 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         defaultMessage: 'Data frame hydration strategy',
       }),
       value: 'perSource',
-      // TODO: SQL does PPL/SQL support this ? Where if the schema contains all fields but nulls out the values that are not present?
       options: ['perSource', 'perQuery'],
       optionLabels: dataFrameHydrationStrategyOptionLabels,
       type: 'select',
@@ -738,14 +737,13 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
     },
     [UI_SETTINGS.QUERY_DATA_SOURCE_READONLY]: {
       name: i18n.translate('data.advancedSettings.query.dataSourceReadOnlyTitle', {
-        defaultMessage: 'Data source is read-only in query',
+        defaultMessage: 'Read-only data source in query bar',
       }),
       value: true,
       description: i18n.translate('data.advancedSettings.query.dataSourceReadOnlyText', {
         defaultMessage:
-          'When set, modifying the data source is not allowed in a query clause. ' +
-          'This will throw an error on data source changed, and reset the data source on submit. ' +
-          '<br><strong>Experimental</strong>: Setting to false enables data source changes.',
+          'When enabled, the global search bar prevents modifying the data source in the query input. ' +
+          '<br><strong>Experimental</strong>: Setting to false enables modifying the data source.',
       }),
       schema: schema.boolean(),
     },
