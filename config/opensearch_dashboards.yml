@@ -313,3 +313,7 @@
 
 # Set the value to true to enable workspace feature
 # workspace.enabled: false
+
+# Set the value to true to enable Ui Metric Collectors in Usage Collector
+# This publishes the Application Usage and UI Metrics into the saved object, which can be accessed by /api/stats?extended=true&legacy=true&exclude_usage=false
+# usageCollection.uiMetric.enabled: false

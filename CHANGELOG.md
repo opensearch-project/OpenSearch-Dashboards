@@ -109,6 +109,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Add workspaces filter to saved objects page. ([#6458](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6458))
 - [Multiple Datasource] Support multi data source in Region map ([#6654](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6654))
 - Add `rightNavigationButton` component in chrome service for applications to register and add dev tool to top right navigation. ([#6553](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6553))
+- Enable UI Metric Collector to collect UI Metrics and Application Usage ([#6203](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6203))
 
 ### 🐛 Bug Fixes
 
@@ -141,6 +142,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Multiple Datasource] Fix on data source selectable and readonly component are not consistent ([#6545]https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6545)
 - [BUG][Multiple Datasource] Add validation for title length to be no longer than 32 characters [#6452](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6452))
 - [Dev Tool] Add additional themed styles to ace overrides ([#5327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5327))
+- [VisBuilder] Allow saving and loading filter and query in a saved VisBuilder  ([#6460](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6460))
 
 ### 🚞 Infrastructure
 

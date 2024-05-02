@@ -172,7 +172,7 @@ export const getOnSave = (
     returnToOrigin: boolean;
     newDescription?: string;
   }) => {
-    const { embeddable, toastNotifications, application, history } = services;
+    const { data, embeddable, toastNotifications, application, history } = services;
     const stateTransfer = embeddable.getStateTransfer();
 
     if (!savedVisBuilderVis) {
@@ -183,6 +183,9 @@ export const getOnSave = (
     savedVisBuilderVis.title = newTitle;
     savedVisBuilderVis.description = newDescription;
     savedVisBuilderVis.copyOnSave = newCopyOnSave;
+    const searchSourceInstance = savedVisBuilderVis.searchSourceFields;
+    searchSourceInstance.query = data.query.queryString.getQuery() || null;
+    searchSourceInstance.filter = data.query.filterManager.getFilters() || null;
     const newlyCreated = !savedVisBuilderVis.id || savedVisBuilderVis.copyOnSave;
 
     try {
