@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import { isEqual } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { useUnmount } from 'react-use';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -19,11 +20,21 @@ import { saveStateToSavedObject } from '../../saved_visualizations/transforms';
 import { TopNavMenuData } from '../../../../navigation/public';
 import { opensearchFilters, connectStorageToQueryState } from '../../../../data/public';
 
+function useDeepEffect(callback, dependencies) {
+  const currentDepsRef = useRef(dependencies);
+
+  if (!isEqual(currentDepsRef.current, dependencies)) {
+    callback();
+    currentDepsRef.current = dependencies;
+  }
+}
+
 export const TopNav = () => {
   // id will only be set for the edit route
   const { id: visualizationIdFromUrl } = useParams<{ id: string }>();
   const { services } = useOpenSearchDashboards<VisBuilderServices>();
   const {
+    data,
     setHeaderActionMenu,
     navigation: {
       ui: { TopNavMenu },
@@ -32,6 +43,10 @@ export const TopNav = () => {
   } = services;
   const rootState = useTypedSelector((state) => state);
   const dispatch = useTypedDispatch();
+
+  useDeepEffect(() => {
+    dispatch(setEditorState({ state: 'dirty' }));
+  }, [data.query.queryString.getQuery(), data.query.filterManager.getFilters()]);
 
   const saveDisabledReason = useCanSave();
   const savedVisBuilderVis = useSavedVisBuilderVis(visualizationIdFromUrl);

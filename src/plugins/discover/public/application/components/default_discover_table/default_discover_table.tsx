@@ -5,16 +5,22 @@
 
 import './_doc_table.scss';
 
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { EuiButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TableHeader } from './table_header';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
-import { TableRow } from './table_rows';
-import { IndexPattern } from '../../../opensearch_dashboards_services';
+import { TableRow } from './table_row';
+import { getServices, IndexPattern } from '../../../opensearch_dashboards_services';
 import { Pagination } from './pagination';
 import { getLegacyDisplayedColumns } from './helper';
 import { SortDirection, SortOrder } from '../../../saved_searches/types';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SAMPLE_SIZE_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+} from '../../../../common';
+import { UI_SETTINGS } from '../../../../../data/common';
 
 export interface DefaultDiscoverTableProps {
   columns: string[];
@@ -27,16 +33,16 @@ export interface DefaultDiscoverTableProps {
   onMoveColumn: (colName: string, destination: number) => void;
   onAddColumn: (column: string) => void;
   onFilter: DocViewFilterFn;
-  onClose: () => void;
-  sampleSize: number;
-  isShortDots: boolean;
-  hideTimeColumn: boolean;
-  defaultSortOrder: SortDirection;
+  onClose?: () => void;
   showPagination?: boolean;
   scrollToTop?: () => void;
 }
 
-export const LegacyDiscoverTable = ({
+// ToDo: These would need to be read from an upcoming config panel
+const PAGINATED_PAGE_SIZE = 50;
+const INFINITE_SCROLLED_PAGE_SIZE = 10;
+
+const DefaultDiscoverTableUI = ({
   columns,
   hits,
   rows,
@@ -48,13 +54,19 @@ export const LegacyDiscoverTable = ({
   onAddColumn,
   onFilter,
   onClose,
-  sampleSize,
-  isShortDots,
-  hideTimeColumn,
-  defaultSortOrder,
   showPagination,
   scrollToTop,
 }: DefaultDiscoverTableProps) => {
+  const services = getServices();
+  const [sampleSize, isShortDots, hideTimeColumn, defaultSortOrder] = useMemo(() => {
+    return [
+      services.uiSettings.get(SAMPLE_SIZE_SETTING),
+      services.uiSettings.get(UI_SETTINGS.SHORT_DOTS_ENABLE),
+      services.uiSettings.get(DOC_HIDE_TIME_COLUMN_SETTING),
+      services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING, 'desc') as SortDirection,
+    ];
+  }, [services.uiSettings]);
+
   const displayedColumns = getLegacyDisplayedColumns(
     columns,
     indexPattern,
@@ -62,52 +74,75 @@ export const LegacyDiscoverTable = ({
     isShortDots
   );
   const displayedColumnNames = displayedColumns.map((column) => column.name);
-  const pageSize = 50;
-  const [renderedRowCount, setRenderedRowCount] = useState(50); // Start with 50 rows
-  const [displayedRows, setDisplayedRows] = useState(rows.slice(0, pageSize));
+
+  /* INFINITE_SCROLLED_PAGE_SIZE:
+   * Infinitely scrolling, a page of 10 rows is shown and then 4 pages are lazy-loaded for a total of 5 pages.
+   *   * The lazy-loading is mindful of the performance by monitoring the fps of the browser.
+   *   *`renderedRowCount` and `desiredRowCount` are only used in this method.
+   *
+   * PAGINATED_PAGE_SIZE
+   * Paginated, the view is broken into pages of 50 rows.
+   *   * `displayedRows` and `currentRowCounts` are only used in this method.
+   */
+  const [renderedRowCount, setRenderedRowCount] = useState(INFINITE_SCROLLED_PAGE_SIZE);
+  const [desiredRowCount, setDesiredRowCount] = useState(
+    Math.min(rows.length, 5 * INFINITE_SCROLLED_PAGE_SIZE)
+  );
+  const [displayedRows, setDisplayedRows] = useState(rows.slice(0, PAGINATED_PAGE_SIZE));
   const [currentRowCounts, setCurrentRowCounts] = useState({
     startRow: 0,
-    endRow: rows.length < pageSize ? rows.length : pageSize,
+    endRow: rows.length < PAGINATED_PAGE_SIZE ? rows.length : PAGINATED_PAGE_SIZE,
   });
+
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const [sentinelEle, setSentinelEle] = useState<HTMLDivElement>();
-  // Need a callback ref since the element isnt set on the first render.
+  // `sentinelElement` is attached to the bottom of the table to observe when the table is scrolled all the way.
+  const [sentinelElement, setSentinelElement] = useState<HTMLDivElement>();
+  // `tableElement` is used for first auto-sizing and then fixing column widths
+  const [tableElement, setTableElement] = useState<HTMLTableElement>();
+  // Both need callback refs since the elements aren't set on the first render.
   const sentinelRef = useCallback((node: HTMLDivElement | null) => {
     if (node !== null) {
-      setSentinelEle(node);
+      setSentinelElement(node);
+    }
+  }, []);
+  const tableRef = useCallback((el: HTMLTableElement | null) => {
+    if (el !== null) {
+      setTableElement(el);
     }
   }, []);
 
   useEffect(() => {
-    if (sentinelEle) {
+    if (sentinelElement && !showPagination) {
       observerRef.current = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting) {
-            setRenderedRowCount((prevRowCount) => prevRowCount + 50); // Load 50 more rows
+            // Load another batch of rows, some immediately and some lazily
+            setRenderedRowCount((prevRowCount) => prevRowCount + INFINITE_SCROLLED_PAGE_SIZE);
+            setDesiredRowCount((prevRowCount) => prevRowCount + 5 * INFINITE_SCROLLED_PAGE_SIZE);
           }
         },
         { threshold: 1.0 }
       );
 
-      observerRef.current.observe(sentinelEle);
+      observerRef.current.observe(sentinelElement);
     }
 
     return () => {
-      if (observerRef.current && sentinelEle) {
-        observerRef.current.unobserve(sentinelEle);
+      if (observerRef.current && sentinelElement) {
+        observerRef.current.unobserve(sentinelElement);
       }
     };
-  }, [sentinelEle]);
+  }, [sentinelElement, showPagination]);
 
+  // Page management when using a paginated table
   const [activePage, setActivePage] = useState(0);
-  const pageCount = Math.ceil(rows.length / pageSize);
-
+  const pageCount = Math.ceil(rows.length / PAGINATED_PAGE_SIZE);
   const goToPage = (pageNumber: number) => {
-    const startRow = pageNumber * pageSize;
+    const startRow = pageNumber * PAGINATED_PAGE_SIZE;
     const endRow =
-      rows.length < pageNumber * pageSize + pageSize
+      rows.length < pageNumber * PAGINATED_PAGE_SIZE + PAGINATED_PAGE_SIZE
         ? rows.length
-        : pageNumber * pageSize + pageSize;
+        : pageNumber * PAGINATED_PAGE_SIZE + PAGINATED_PAGE_SIZE;
     setCurrentRowCounts({
       startRow,
       endRow,
@@ -115,6 +150,60 @@ export const LegacyDiscoverTable = ({
     setDisplayedRows(rows.slice(startRow, endRow));
     setActivePage(pageNumber);
   };
+
+  // Lazy-loader of rows
+  const lazyLoadRequestFrameRef = useRef<number>(0);
+  const lazyLoadLastTimeRef = useRef<number>(0);
+
+  React.useEffect(() => {
+    if (!showPagination) {
+      const loadMoreRows = (time: number) => {
+        if (renderedRowCount < desiredRowCount) {
+          // Load more rows only if fps > 30, when calls are less than 33ms apart
+          if (time - lazyLoadLastTimeRef.current < 33) {
+            setRenderedRowCount((prevRowCount) => prevRowCount + INFINITE_SCROLLED_PAGE_SIZE);
+          }
+          lazyLoadLastTimeRef.current = time;
+          lazyLoadRequestFrameRef.current = requestAnimationFrame(loadMoreRows);
+        }
+      };
+      lazyLoadRequestFrameRef.current = requestAnimationFrame(loadMoreRows);
+    }
+
+    return () => cancelAnimationFrame(lazyLoadRequestFrameRef.current);
+  }, [showPagination, renderedRowCount, desiredRowCount]);
+
+  // Allow auto column-sizing using the initially rendered rows and then convert to fixed
+  const tableLayoutRequestFrameRef = useRef<number>(0);
+
+  useEffect(() => {
+    if (tableElement) {
+      // Load the first batch of rows and adjust the columns to the contents
+      tableElement.style.tableLayout = 'auto';
+
+      tableLayoutRequestFrameRef.current = requestAnimationFrame(() => {
+        if (tableElement) {
+          /* Get the widths for each header cell which is the column's width automatically adjusted to the content of
+           * the column. Apply the width as a style and change the layout to fixed. This is to
+           *   1) prevent columns from changing size when more rows are added, and
+           *   2) speed of rendering time of subsequently added rows.
+           *
+           * First cell is skipped because it has a dimention set already, and the last cell is skipped to allow it to
+           * grow as much as the table needs.
+           */
+          tableElement
+            .querySelectorAll('thead > tr > th:not(:first-child):not(:last-child)')
+            .forEach((th) => {
+              (th as HTMLTableCellElement).style.width = th.getBoundingClientRect().width + 'px';
+            });
+
+          tableElement.style.tableLayout = 'fixed';
+        }
+      });
+    }
+
+    return () => cancelAnimationFrame(tableLayoutRequestFrameRef.current);
+  }, [columns, tableElement]);
 
   return (
     indexPattern && (
@@ -130,7 +219,7 @@ export const LegacyDiscoverTable = ({
             sampleSize={sampleSize}
           />
         ) : null}
-        <table data-test-subj="docTable" className="osd-table table">
+        <table data-test-subj="docTable" className="osd-table table" ref={tableRef}>
           <thead>
             <TableHeader
               displayedColumns={displayedColumns}
@@ -147,7 +236,7 @@ export const LegacyDiscoverTable = ({
               (row: OpenSearchSearchHit, index: number) => {
                 return (
                   <TableRow
-                    key={index}
+                    key={row._id}
                     row={row}
                     columns={displayedColumnNames}
                     indexPattern={indexPattern}
@@ -196,3 +285,5 @@ export const LegacyDiscoverTable = ({
     )
   );
 };
+
+export const DefaultDiscoverTable = React.memo(DefaultDiscoverTableUI);

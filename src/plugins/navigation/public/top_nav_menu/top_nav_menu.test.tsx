@@ -35,6 +35,7 @@ import { MountPoint } from 'opensearch-dashboards/public';
 import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
+import * as testUtils from '../../../data_source_management/public/components/utils';
 
 const dataShim = {
   ui: {
@@ -118,6 +119,9 @@ describe('TopNavMenu', () => {
   });
 
   it('mounts the data source menu if showDataSourceMenu is true', async () => {
+    spyOn(testUtils, 'getApplication').and.returnValue({ id: 'test2' });
+    spyOn(testUtils, 'getUiSettings').and.returnValue({ id: 'test2' });
+    spyOn(testUtils, 'getHideLocalCluster').and.returnValue(true);
     const component = shallowWithIntl(
       <TopNavMenu
         appName={'test'}
@@ -133,10 +137,14 @@ describe('TopNavMenu', () => {
       />
     );
 
-    expect(component.find('DataSourceMenu').length).toBe(1);
+    expect(component).toMatchSnapshot();
   });
 
   it('mounts the data source menu as well as top nav menu', async () => {
+    spyOn(testUtils, 'getApplication').and.returnValue({ id: 'test2' });
+    spyOn(testUtils, 'getUiSettings').and.returnValue({ id: 'test2' });
+    spyOn(testUtils, 'getHideLocalCluster').and.returnValue(true);
+
     const component = shallowWithIntl(
       <TopNavMenu
         appName={'test'}
@@ -153,7 +161,7 @@ describe('TopNavMenu', () => {
       />
     );
 
-    expect(component.find('DataSourceMenu').length).toBe(1);
+    expect(component).toMatchSnapshot();
     expect(component.find(TOP_NAV_ITEM_SELECTOR).length).toBe(menuItems.length);
   });
 

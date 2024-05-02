@@ -33,3 +33,4 @@ export { buildQueryFromFilters } from './from_filters';
 export { luceneStringToDsl } from './lucene_string_to_dsl';
 export { decorateQuery } from './decorate_query';
 export { getOpenSearchQueryConfig } from './get_opensearch_query_config';
+export { filterMatchesIndex } from './filter_matches_index';
