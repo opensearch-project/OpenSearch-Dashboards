@@ -123,9 +123,9 @@ export function getTimelineRequestHandler({
 
             // Index can be provided with or without "index=",
             // but only without "index=" as the 4th parameter to the function
-            if (pairs.length === 1 && idx === 3) {
+            if (pairs.length === 1 && idx === 3 && pairs[0]) {
               parsedIndexTitles.push(pairs[0]);
-            } else if (pairs.length === 2 && pairs[0] === 'index') {
+            } else if (pairs.length === 2 && pairs[0] === 'index' && pairs[1]) {
               parsedIndexTitles.push(pairs[1]);
             }
           });
