@@ -40,6 +40,7 @@ import {
 } from 'src/core/server';
 import { Observable } from 'rxjs';
 import { Server } from '@hapi/hapi';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 import { VisTypeTimeseriesConfig } from './config';
 import { getVisData, GetVisData, GetVisDataOptions } from './lib/get_vis_data';
 import { ValidationTelemetryService } from './validation_telemetry';
@@ -50,6 +51,12 @@ import { visDataRoutes } from './routes/vis';
 import { fieldsRoutes } from './routes/fields';
 import { SearchStrategyRegistry } from './lib/search_strategies';
 import { uiSettings } from './ui_settings';
+import { setDataSourceEnabled } from './lib/services';
+import {
+  TIMESERIES_VISUALIZATION_CLIENT_WRAPPER_ID,
+  timeSeriesVisualizationClientWrapper,
+  TIMESERIES_VISUALIZATION_CLIENT_WRAPPER_PRIORITY,
+} from './lib/timeseries_visualization_client_wrapper';
 
 export interface LegacySetup {
   server: Server;
@@ -57,6 +64,7 @@ export interface LegacySetup {
 
 interface VisTypeTimeseriesPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 interface VisTypeTimeseriesPluginStartDependencies {
@@ -112,6 +120,13 @@ export class VisTypeTimeseriesPlugin implements Plugin<VisTypeTimeseriesSetup> {
       router,
       searchStrategyRegistry,
     };
+
+    setDataSourceEnabled({ enabled: !!plugins.dataSource });
+    core.savedObjects.addClientWrapper(
+      TIMESERIES_VISUALIZATION_CLIENT_WRAPPER_PRIORITY,
+      TIMESERIES_VISUALIZATION_CLIENT_WRAPPER_ID,
+      timeSeriesVisualizationClientWrapper
+    );
 
     (async () => {
       const validationTelemetry = await this.validationTelementryService.setup(core, {

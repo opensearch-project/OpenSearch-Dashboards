@@ -14,11 +14,11 @@ import {
   HttpSetup,
 } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
-import { SavedObjectAttributes } from 'src/core/types';
 import { i18n } from '@osd/i18n';
+import { AuthType } from '../../data_source/common/data_sources';
 import { SigV4ServiceName } from '../../data_source/common/data_sources';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
-import { AuthenticationMethodRegistery } from './auth_registry';
+import { AuthenticationMethodRegistry } from './auth_registry';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DataSourceManagementPluginStart {}
@@ -33,7 +33,7 @@ export interface DataSourceManagementContext {
   http: HttpSetup;
   docLinks: DocLinksStart;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
-  authenticationMethodRegistery: AuthenticationMethodRegistery;
+  authenticationMethodRegistry: AuthenticationMethodRegistry;
 }
 
 export interface DataSourceTableItem {
@@ -52,13 +52,6 @@ export interface ToastMessageItem {
 export type DataSourceManagementContextValue = OpenSearchDashboardsReactContextValue<
   DataSourceManagementContext
 >;
-
-/* Datasource types */
-export enum AuthType {
-  NoAuth = 'no_auth',
-  UsernamePasswordType = 'username_password',
-  SigV4 = 'sigv4',
-}
 
 export const defaultAuthType = AuthType.UsernamePasswordType;
 
@@ -136,28 +129,14 @@ export const credentialSourceOptions = [
   sigV4CredentialOption,
 ];
 
-export interface DataSourceAttributes extends SavedObjectAttributes {
-  title: string;
-  description?: string;
-  endpoint?: string;
-  auth: {
-    type: AuthType | string;
-    credentials:
-      | UsernamePasswordTypedContent
-      | SigV4Content
-      | { [key: string]: string }
-      | undefined;
-  };
+export interface MenuPanelItem {
+  name?: string;
+  disabled: boolean;
 }
 
-export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
-  username: string;
-  password?: string;
-}
-
-export interface SigV4Content extends SavedObjectAttributes {
-  accessKey: string;
-  secretKey: string;
-  region: string;
-  service?: SigV4ServiceName;
-}
+export {
+  AuthType,
+  UsernamePasswordTypedContent,
+  SigV4Content,
+  DataSourceAttributes,
+} from '../../data_source/common/data_sources';

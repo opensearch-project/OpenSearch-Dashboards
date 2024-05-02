@@ -3,13 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObject, SavedObjectsImportError, SavedObjectsImportRetry } from '../types';
+import {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsImportError,
+  SavedObjectsImportRetry,
+} from '../types';
+import { VisualizationObject } from './types';
+import {
+  extractVegaSpecFromSavedObject,
+  getDataSourceTitleFromId,
+  getUpdatedTSVBVisState,
+  updateDataSourceNameInVegaSpec,
+} from './utils';
 
 export interface ConflictsForDataSourceParams {
   objects: Array<SavedObject<{ title?: string }>>;
   ignoreRegularConflicts?: boolean;
   retries?: SavedObjectsImportRetry[];
   dataSourceId?: string;
+  savedObjectsClient?: SavedObjectsClientContract;
 }
 
 interface ImportIdMapEntry {
@@ -31,6 +44,7 @@ export async function checkConflictsForDataSource({
   ignoreRegularConflicts,
   retries = [],
   dataSourceId,
+  savedObjectsClient,
 }: ConflictsForDataSourceParams) {
   const filteredObjects: Array<SavedObject<{ title?: string }>> = [];
   const errors: SavedObjectsImportError[] = [];
@@ -43,6 +57,12 @@ export async function checkConflictsForDataSource({
     (acc, cur) => acc.set(`${cur.type}:${cur.id}`, cur),
     new Map<string, SavedObjectsImportRetry>()
   );
+
+  const dataSourceTitle =
+    !!dataSourceId && !!savedObjectsClient
+      ? await getDataSourceTitleFromId(dataSourceId, savedObjectsClient)
+      : undefined;
+
   objects.forEach((object) => {
     const {
       type,
@@ -74,6 +94,43 @@ export async function checkConflictsForDataSource({
         /**
          * Only update importIdMap and filtered objects
          */
+
+        // Some visualization types will need special modifications, like Vega visualizations
+        if (object.type === 'visualization') {
+          const vegaSpec = extractVegaSpecFromSavedObject(object);
+
+          if (!!vegaSpec && !!dataSourceTitle) {
+            const updatedVegaSpec = updateDataSourceNameInVegaSpec({
+              spec: vegaSpec,
+              newDataSourceName: dataSourceTitle,
+            });
+
+            // @ts-expect-error
+            const visStateObject = JSON.parse(object.attributes?.visState);
+            visStateObject.params.spec = updatedVegaSpec;
+
+            // @ts-expect-error
+            object.attributes.visState = JSON.stringify(visStateObject);
+            if (!!dataSourceId) {
+              object.references.push({
+                id: dataSourceId,
+                name: 'dataSource',
+                type: 'data-source',
+              });
+            }
+          }
+
+          if (!!dataSourceId) {
+            const visualizationObject = object as VisualizationObject;
+            const { visState, references } = getUpdatedTSVBVisState(
+              visualizationObject,
+              dataSourceId
+            );
+            visualizationObject.attributes.visState = visState;
+            object.references = references;
+          }
+        }
+
         const omitOriginId = ignoreRegularConflicts;
         importIdMap.set(`${type}:${id}`, { id: `${dataSourceId}_${rawId}`, omitOriginId });
         filteredObjects.push({ ...object, id: `${dataSourceId}_${rawId}` });

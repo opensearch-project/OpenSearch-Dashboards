@@ -76,6 +76,7 @@ const dataSourceObj1 = createObject(DATA_SOURCE, 'ds-id1'); // -> success
 const dataSourceObj2 = createObject(DATA_SOURCE, 'ds-id2'); // -> conflict
 const dashboardObjWithDataSource = createObject('dashboard', 'ds_dashboard-id1'); // -> success
 const visualizationObjWithDataSource = createObject('visualization', 'ds_visualization-id1'); // -> success
+visualizationObjWithDataSource.attributes = { visState: '{}' };
 const searchObjWithDataSource = createObject('search', 'ds_search-id1'); // -> success
 
 // objs without data source id, used to test can get saved object with data source id
@@ -100,6 +101,7 @@ const visualizationObj = {
   type: 'visualization',
   attributes: {
     title: 'visualization-title',
+    visState: '{}',
   },
   references: [],
   source: {
@@ -115,6 +117,58 @@ const visualizationObj = {
     },
   },
 };
+
+const getVegaVisualizationObj = (id: string) => ({
+  type: 'visualization',
+  id,
+  attributes: {
+    title: 'some-title',
+    visState:
+      '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n    }\\n  }\\n}"}}',
+  },
+  references: [],
+  namespaces: ['default'],
+  version: 'some-version',
+  updated_at: 'some-date',
+});
+
+const getTSVBVisualizationObj = (id: string, dataSourceId?: string) => {
+  const params = dataSourceId ? { data_source_id: dataSourceId } : {};
+  const references = dataSourceId
+    ? [{ id: dataSourceId, name: 'dataSource', type: 'data-source' }]
+    : [];
+  return {
+    type: 'visualization',
+    id,
+    attributes: {
+      title: 'some-title',
+      visState: JSON.stringify({
+        type: 'metrics',
+        params,
+      }),
+    },
+    references,
+    namespaces: ['default'],
+    updated_at: 'some-date',
+  };
+};
+
+const getVegaMDSVisualizationObj = (id: string, dataSourceId: string) => ({
+  type: 'visualization',
+  id: dataSourceId ? `${dataSourceId}_${id}` : id,
+  attributes: {
+    title: 'some-other-title',
+    visState:
+      '{"title":"some-other-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: old-datasource-title\\n    }\\n  }\\n}"}}',
+  },
+  references: [
+    {
+      id: dataSourceId,
+      name: 'dataSource',
+      type: 'data-source',
+    },
+  ],
+});
 // non-multi-namespace types shouldn't have origin IDs, but we include test cases to ensure it's handled gracefully
 // non-multi-namespace types by definition cannot result in an unresolvable conflict, so we don't include test cases for those
 const importId3 = 'id-foo';
@@ -142,8 +196,11 @@ describe('#createSavedObjects', () => {
     overwrite?: boolean;
     dataSourceId?: string;
     dataSourceTitle?: string;
+    savedObjectsCustomClient?: jest.Mocked<SavedObjectsClientContract>;
   }): CreateSavedObjectsParams => {
-    savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient = !!partial.savedObjectsCustomClient
+      ? partial.savedObjectsCustomClient
+      : savedObjectsClientMock.create();
     bulkCreate = savedObjectsClient.bulkCreate;
     return { accumulatedErrors: [], ...partial, savedObjectsClient, importIdMap };
   };
@@ -466,6 +523,30 @@ describe('#createSavedObjects', () => {
     expect(results).toEqual(expectedResults);
   };
 
+  const testTSVBVisualizationsWithDataSources = async (params: {
+    objects: SavedObject[];
+    expectedFilteredObjects: SavedObject[];
+    dataSourceId?: string;
+    dataSourceTitle?: string;
+  }) => {
+    const savedObjectsCustomClient = savedObjectsClientMock.create();
+
+    const options = setupParams({
+      ...params,
+      savedObjectsCustomClient,
+    });
+
+    savedObjectsCustomClient.bulkCreate = jest.fn().mockImplementation((objectsToCreate, _) => {
+      return Promise.resolve({
+        saved_objects: objectsToCreate,
+      });
+    });
+
+    const results = await createSavedObjects(options);
+
+    expect(results.createdObjects).toMatchObject(params.expectedFilteredObjects);
+  };
+
   const testReturnValueWithDataSource = async (
     namespace?: string,
     dataSourceId?: string,
@@ -488,6 +569,29 @@ describe('#createSavedObjects', () => {
       dataSourceObjs
     );
     expect(results).toEqual(expectedResultsWithDataSource);
+  };
+
+  const testVegaVisualizationsWithDataSources = async (params: {
+    objects: SavedObject[];
+    expectedFilteredObjects: Array<Record<string, unknown>>;
+    dataSourceId?: string;
+    dataSourceTitle?: string;
+  }) => {
+    const savedObjectsCustomClient = savedObjectsClientMock.create();
+
+    const options = setupParams({
+      ...params,
+      savedObjectsCustomClient,
+    });
+    savedObjectsCustomClient.bulkCreate = jest.fn().mockResolvedValue({
+      saved_objects: params.objects.map((obj) => {
+        return getResultMock.success(obj, options);
+      }),
+    });
+
+    const results = await createSavedObjects(options);
+
+    expect(results.createdObjects).toMatchObject(params.expectedFilteredObjects);
   };
 
   describe('with an undefined namespace', () => {
@@ -544,6 +648,113 @@ describe('#createSavedObjects', () => {
         'some-datasource-id',
         'some-data-source-title'
       );
+    });
+  });
+
+  describe('with a data source for Vega saved objects', () => {
+    test('can attach a data source name to the Vega spec if there is a local query', async () => {
+      const objects = [getVegaVisualizationObj('some-vega-id')];
+      const expectedObject = getVegaVisualizationObj('some-vega-id');
+      const expectedFilteredObjects = [
+        {
+          ...expectedObject,
+          attributes: {
+            title: 'some-title_dataSourceName',
+            visState:
+              '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: dataSourceName\\n    }\\n  }\\n}"}}',
+          },
+          id: 'some-vega-id',
+          references: [
+            {
+              id: 'some-datasource-id',
+              type: 'data-source',
+              name: 'dataSource',
+            },
+          ],
+        },
+      ];
+      await testVegaVisualizationsWithDataSources({
+        objects,
+        expectedFilteredObjects,
+        dataSourceId: 'some-datasource-id',
+        dataSourceTitle: 'dataSourceName',
+      });
+    });
+
+    test('will not update the data source name in the Vega spec if no local cluster queries', async () => {
+      const objects = [getVegaMDSVisualizationObj('some-vega-id', 'old-datasource-id')];
+      const expectedObject = getVegaMDSVisualizationObj('some-vega-id', 'old-datasource-id');
+      expectedObject.references.push({
+        id: 'some-datasource-id',
+        name: 'dataSource',
+        type: 'data-source',
+      });
+      const expectedFilteredObjects = [
+        {
+          ...expectedObject,
+          attributes: {
+            title: 'some-other-title_dataSourceName',
+            visState:
+              '{"title":"some-other-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: old-datasource-title\\n    }\\n  }\\n}"}}',
+          },
+        },
+      ];
+      await testVegaVisualizationsWithDataSources({
+        objects,
+        expectedFilteredObjects,
+        dataSourceId: 'some-datasource-id',
+        dataSourceTitle: 'dataSourceName',
+      });
+    });
+  });
+
+  describe('with a data source for TSVB saved objects', () => {
+    test('can attach a TSVB datasource reference to a non-MDS ', async () => {
+      const objects = [getTSVBVisualizationObj('some-tsvb-id')];
+      const expectedObject = getTSVBVisualizationObj('some-tsvb-id', 'some-datasource-id');
+      const expectedFilteredObjects = [
+        {
+          ...expectedObject,
+          attributes: {
+            title: 'some-title_dataSourceName',
+          },
+        },
+      ];
+      await testTSVBVisualizationsWithDataSources({
+        objects,
+        expectedFilteredObjects,
+        dataSourceId: 'some-datasource-id',
+        dataSourceTitle: 'dataSourceName',
+      });
+    });
+
+    test('can update a TSVB datasource reference', async () => {
+      const objects = [getTSVBVisualizationObj('some-tsvb-id', 'old-datasource-id')];
+      const expectedObject = getTSVBVisualizationObj('some-tsvb-id', 'some-datasource-id');
+      const expectedFilteredObjects = [
+        {
+          ...expectedObject,
+          attributes: {
+            title: 'some-title_dataSourceName',
+          },
+        },
+      ];
+      await testTSVBVisualizationsWithDataSources({
+        objects,
+        expectedFilteredObjects,
+        dataSourceId: 'some-datasource-id',
+        dataSourceTitle: 'dataSourceName',
+      });
+    });
+  });
+
+  describe('with a undefined workspaces', () => {
+    test('calls bulkCreate once with input objects', async () => {
+      const options = setupParams({ objects: objs });
+      setupMockResults(options);
+
+      await createSavedObjects(options);
+      expect(bulkCreate.mock.calls[0][1]?.hasOwnProperty('workspaces')).toEqual(false);
     });
   });
 });

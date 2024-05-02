@@ -1,0 +1,701 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceFilterGroup should render normally 1`] = `
+<EuiPopover
+  anchorPosition="downCenter"
+  button={
+    <React.Fragment>
+      <EuiButtonEmpty
+        className="euiHeaderLink"
+        data-test-subj="dataSourceFilterGroupButton"
+        iconType="database"
+        onClick={[Function]}
+        size="s"
+      >
+        Data sources
+      </EuiButtonEmpty>
+      <EuiNotificationBadge
+        color="subdued"
+      >
+        1
+      </EuiNotificationBadge>
+    </React.Fragment>
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="popoverExampleMultiSelect"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <EuiPopoverTitle
+    paddingSize="s"
+  >
+    <EuiFieldSearch
+      compressed={true}
+      data-test-subj="dataSourceMultiSelectFieldSearch"
+      fullWidth={false}
+      incremental={false}
+      isClearable={true}
+      isLoading={false}
+      onSearch={[Function]}
+    />
+  </EuiPopoverTitle>
+  <div
+    className="dataSourceFilterGroupItems"
+  >
+    <EuiFilterSelectItem
+      checked="on"
+      key="0"
+      onClick={[Function]}
+      showIcons={true}
+      style={
+        Object {
+          "display": undefined,
+        }
+      }
+    >
+      <DataSourceItem
+        className="dataSourceFilterGroup"
+        defaultDataSource="1"
+        option={
+          Object {
+            "checked": "on",
+            "id": "1",
+            "label": "name1",
+            "visible": true,
+          }
+        }
+      />
+    </EuiFilterSelectItem>
+  </div>
+  <EuiPopoverFooter>
+    <EuiButtonGroup
+      idSelected="select_all"
+      legend="All options selection toggle group"
+      onChange={[Function]}
+      options={
+        Array [
+          Object {
+            "id": "select_all",
+            "label": "Select all",
+          },
+          Object {
+            "id": "deselect_all",
+            "label": "Deselect all",
+          },
+        ]
+      }
+    />
+  </EuiPopoverFooter>
+</EuiPopover>
+`;
+
+exports[`DataSourceFilterGroup should render popup when clicking on button 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+        id="popoverExampleMultiSelect"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+            data-test-subj="dataSourceFilterGroupButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="database"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Data sources
+              </span>
+            </span>
+          </button>
+          <span
+            class="euiNotificationBadge euiNotificationBadge--subdued"
+          >
+            1
+          </span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div
+        data-eui="EuiFocusTrap"
+      >
+        <div
+          aria-describedby="generated-id"
+          aria-live="off"
+          aria-modal="true"
+          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--bottom"
+          role="dialog"
+          style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
+          tabindex="0"
+        >
+          <div
+            class="euiPopover__panelArrow euiPopover__panelArrow--bottom"
+            style="left: 10px; top: 0px;"
+          />
+          <p
+            class="euiScreenReaderOnly"
+            id="generated-id"
+          >
+            You are in a dialog. To close this dialog, hit escape.
+          </p>
+          <div>
+            <div
+              class="euiPopoverTitle euiPopoverTitle--paddingSmall"
+            >
+              <div
+                class="euiFormControlLayout euiFormControlLayout--compressed"
+              >
+                <div
+                  class="euiFormControlLayout__childrenWrapper"
+                >
+                  <input
+                    class="euiFieldSearch euiFieldSearch--compressed"
+                    data-test-subj="dataSourceMultiSelectFieldSearch"
+                    type="search"
+                  />
+                  <div
+                    class="euiFormControlLayoutIcons"
+                  >
+                    <span
+                      class="euiFormControlLayoutCustomIcon"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="search"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="dataSourceFilterGroupItems"
+            >
+              <button
+                class="euiFilterSelectItem"
+                role="option"
+                type="button"
+              >
+                <span
+                  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <span
+                      color="text"
+                      data-euiicon-type="check"
+                    />
+                  </div>
+                  <span
+                    class="euiFlexItem euiFilterSelectItem__content"
+                  >
+                    <div
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive dataSourceFilterGroupOuiFlexGroup"
+                    >
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero dataSourceFilterGroupOuiFlexItem"
+                      >
+                        name1
+                      </div>
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <span
+                          class="euiBadge euiBadge--iconLeft"
+                          style="background-color: rgb(211, 218, 230); color: rgb(0, 0, 0);"
+                        >
+                          <span
+                            class="euiBadge__content"
+                          >
+                            <span
+                              class="euiBadge__text"
+                            >
+                              Default
+                            </span>
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </span>
+                </span>
+              </button>
+            </div>
+            <div
+              class="euiPopoverFooter"
+            >
+              <fieldset
+                class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+              >
+                <legend
+                  class="euiScreenReaderOnly"
+                >
+                  All options selection toggle group
+                </legend>
+                <div
+                  class="euiButtonGroup__buttons"
+                >
+                  <label
+                    class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                    for="generated-id"
+                  >
+                    <span
+                      class="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        class="euiButton__text euiButtonGroupButton__textShift"
+                      >
+                        <input
+                          checked=""
+                          class="euiScreenReaderOnly"
+                          data-test-subj="select_all"
+                          id="generated-id"
+                          name="generated-id"
+                          type="radio"
+                          value=""
+                        />
+                        Select all
+                      </span>
+                    </span>
+                  </label>
+                  <label
+                    class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                    for="generated-id"
+                  >
+                    <span
+                      class="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        class="euiButton__text euiButtonGroupButton__textShift"
+                      >
+                        <input
+                          class="euiScreenReaderOnly"
+                          data-test-subj="deselect_all"
+                          id="generated-id"
+                          name="generated-id"
+                          type="radio"
+                          value=""
+                        />
+                        Deselect all
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPopover euiPopover--anchorDownCenter"
+      id="popoverExampleMultiSelect"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <button
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+          data-test-subj="dataSourceFilterGroupButton"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              class="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+            />
+            <span
+              class="euiButtonEmpty__text"
+            >
+              Data sources
+            </span>
+          </span>
+        </button>
+        <span
+          class="euiNotificationBadge euiNotificationBadge--subdued"
+        >
+          1
+        </span>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`DataSourceFilterGroup should toggle all when clicking on button and should search 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+        id="popoverExampleMultiSelect"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+            data-test-subj="dataSourceFilterGroupButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="database"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Data sources
+              </span>
+            </span>
+          </button>
+          <span
+            class="euiNotificationBadge euiNotificationBadge--subdued"
+          >
+            1
+          </span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div
+        data-eui="EuiFocusTrap"
+      >
+        <div
+          aria-describedby="generated-id"
+          aria-live="off"
+          aria-modal="true"
+          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--bottom"
+          role="dialog"
+          style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
+          tabindex="0"
+        >
+          <div
+            class="euiPopover__panelArrow euiPopover__panelArrow--bottom"
+            style="left: 10px; top: 0px;"
+          />
+          <p
+            class="euiScreenReaderOnly"
+            id="generated-id"
+          >
+            You are in a dialog. To close this dialog, hit escape.
+          </p>
+          <div>
+            <div
+              class="euiPopoverTitle euiPopoverTitle--paddingSmall"
+            >
+              <div
+                class="euiFormControlLayout euiFormControlLayout--compressed"
+              >
+                <div
+                  class="euiFormControlLayout__childrenWrapper"
+                >
+                  <input
+                    class="euiFieldSearch euiFieldSearch--compressed euiFieldSearch-isClearable"
+                    data-test-subj="dataSourceMultiSelectFieldSearch"
+                    type="search"
+                  />
+                  <div
+                    class="euiFormControlLayoutIcons"
+                  >
+                    <span
+                      class="euiFormControlLayoutCustomIcon"
+                    >
+                      <span
+                        aria-hidden="true"
+                        class="euiFormControlLayoutCustomIcon__icon"
+                        data-euiicon-type="search"
+                      />
+                    </span>
+                  </div>
+                  <div
+                    class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                  >
+                    <button
+                      aria-label="Clear input"
+                      class="euiFormControlLayoutClearButton euiFormControlLayoutClearButton--small"
+                      type="button"
+                    >
+                      <span
+                        class="euiFormControlLayoutClearButton__icon"
+                        data-euiicon-type="cross"
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="dataSourceFilterGroupItems"
+            >
+              <button
+                class="euiFilterSelectItem"
+                role="option"
+                type="button"
+              >
+                <span
+                  class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                >
+                  <div
+                    class="euiFlexItem euiFlexItem--flexGrowZero"
+                  >
+                    <span
+                      color="text"
+                      data-euiicon-type="check"
+                    />
+                  </div>
+                  <span
+                    class="euiFlexItem euiFilterSelectItem__content"
+                  >
+                    <div
+                      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive dataSourceFilterGroupOuiFlexGroup"
+                    >
+                      <div
+                        class="euiFlexItem euiFlexItem--flexGrowZero dataSourceFilterGroupOuiFlexItem"
+                      >
+                        name1
+                      </div>
+                    </div>
+                  </span>
+                </span>
+              </button>
+            </div>
+            <div
+              class="euiPopoverFooter"
+            >
+              <fieldset
+                class="euiButtonGroup euiButtonGroup--small euiButtonGroup--text"
+              >
+                <legend
+                  class="euiScreenReaderOnly"
+                >
+                  All options selection toggle group
+                </legend>
+                <div
+                  class="euiButtonGroup__buttons"
+                >
+                  <label
+                    class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small euiButtonGroupButton--fill euiButtonGroupButton-isSelected"
+                    for="generated-id"
+                  >
+                    <span
+                      class="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        class="euiButton__text euiButtonGroupButton__textShift"
+                        data-text="Select all"
+                        title="Select all"
+                      >
+                        <input
+                          checked=""
+                          class="euiScreenReaderOnly"
+                          data-test-subj="select_all"
+                          id="generated-id"
+                          name="generated-id"
+                          type="radio"
+                          value=""
+                        />
+                        Select all
+                      </span>
+                    </span>
+                  </label>
+                  <label
+                    class="euiButtonGroupButton euiButtonGroupButton--text euiButtonGroupButton--small"
+                    for="generated-id"
+                  >
+                    <span
+                      class="euiButtonContent euiButton__content"
+                    >
+                      <span
+                        class="euiButton__text euiButtonGroupButton__textShift"
+                        data-text="Deselect all"
+                        title="Deselect all"
+                      >
+                        <input
+                          class="euiScreenReaderOnly"
+                          data-test-subj="deselect_all"
+                          id="generated-id"
+                          name="generated-id"
+                          type="radio"
+                          value=""
+                        />
+                        Deselect all
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPopover euiPopover--anchorDownCenter"
+      id="popoverExampleMultiSelect"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <button
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+          data-test-subj="dataSourceFilterGroupButton"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              class="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+            />
+            <span
+              class="euiButtonEmpty__text"
+            >
+              Data sources
+            </span>
+          </span>
+        </button>
+        <span
+          class="euiNotificationBadge euiNotificationBadge--subdued"
+        >
+          1
+        </span>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

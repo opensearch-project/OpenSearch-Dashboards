@@ -705,6 +705,9 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                     "tls": "https://opensearch.org/docs/mocked-test-branch/dashboards/install/tls/",
                   },
                   "introduction": "https://opensearch.org/docs/mocked-test-branch/dashboards/index/",
+                  "management": Object {
+                    "advancedSettings": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/advanced-settings/",
+                  },
                   "mapTiles": "https://opensearch.org/docs/mocked-test-branch/dashboards/maptiles",
                   "notebooks": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/notebooks",
@@ -952,6 +955,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
+            showDataSourceMenu={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -1672,6 +1676,9 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                     "tls": "https://opensearch.org/docs/mocked-test-branch/dashboards/install/tls/",
                   },
                   "introduction": "https://opensearch.org/docs/mocked-test-branch/dashboards/index/",
+                  "management": Object {
+                    "advancedSettings": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/advanced-settings/",
+                  },
                   "mapTiles": "https://opensearch.org/docs/mocked-test-branch/dashboards/maptiles",
                   "notebooks": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/notebooks",
@@ -1919,6 +1926,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
+            showDataSourceMenu={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -2639,6 +2647,9 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                     "tls": "https://opensearch.org/docs/mocked-test-branch/dashboards/install/tls/",
                   },
                   "introduction": "https://opensearch.org/docs/mocked-test-branch/dashboards/index/",
+                  "management": Object {
+                    "advancedSettings": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/advanced-settings/",
+                  },
                   "mapTiles": "https://opensearch.org/docs/mocked-test-branch/dashboards/maptiles",
                   "notebooks": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/notebooks",
@@ -2886,6 +2897,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
+            showDataSourceMenu={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -3606,6 +3618,9 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                     "tls": "https://opensearch.org/docs/mocked-test-branch/dashboards/install/tls/",
                   },
                   "introduction": "https://opensearch.org/docs/mocked-test-branch/dashboards/index/",
+                  "management": Object {
+                    "advancedSettings": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/advanced-settings/",
+                  },
                   "mapTiles": "https://opensearch.org/docs/mocked-test-branch/dashboards/maptiles",
                   "notebooks": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/notebooks",
@@ -3853,6 +3868,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
+            showDataSourceMenu={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -4573,6 +4589,9 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                     "tls": "https://opensearch.org/docs/mocked-test-branch/dashboards/install/tls/",
                   },
                   "introduction": "https://opensearch.org/docs/mocked-test-branch/dashboards/index/",
+                  "management": Object {
+                    "advancedSettings": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/advanced-settings/",
+                  },
                   "mapTiles": "https://opensearch.org/docs/mocked-test-branch/dashboards/maptiles",
                   "notebooks": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/notebooks",
@@ -4820,6 +4839,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
+            showDataSourceMenu={false}
             showDatePicker={false}
             showFilterBar={false}
             showQueryBar={false}
@@ -5540,6 +5560,9 @@ exports[`Dashboard top nav render with all components 1`] = `
                     "tls": "https://opensearch.org/docs/mocked-test-branch/dashboards/install/tls/",
                   },
                   "introduction": "https://opensearch.org/docs/mocked-test-branch/dashboards/index/",
+                  "management": Object {
+                    "advancedSettings": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/advanced-settings/",
+                  },
                   "mapTiles": "https://opensearch.org/docs/mocked-test-branch/dashboards/maptiles",
                   "notebooks": Object {
                     "base": "https://opensearch.org/docs/mocked-test-branch/dashboards/notebooks",
@@ -5786,6 +5809,7 @@ exports[`Dashboard top nav render with all components 1`] = `
             onQuerySubmit={[Function]}
             onSavedQueryIdChange={[Function]}
             screenTitle="Dashboard Test Title"
+            showDataSourceMenu={false}
             showDatePicker={false}
             showFilterBar={true}
             showQueryBar={false}

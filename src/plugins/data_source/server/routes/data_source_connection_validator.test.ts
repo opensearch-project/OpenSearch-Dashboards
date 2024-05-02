@@ -24,6 +24,55 @@ describe('DataSourceManagement: data_source_connection_validator.ts', () => {
       expect(validateDataSourcesResponse.statusCode).toBe(200);
     });
 
+    test('fetchDataSourceVersion - Success: opensearch client response code is 200 and response body have version number', async () => {
+      const opensearchClient = opensearchServiceMock.createOpenSearchClient();
+      opensearchClient.info.mockResolvedValue(
+        opensearchServiceMock.createApiResponse({
+          statusCode: 200,
+          body: {
+            version: {
+              number: '2.11.0',
+            },
+          },
+        })
+      );
+      const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {});
+      const fetchDataSourcesVersionResponse = await dataSourceValidator.fetchDataSourceVersion();
+      expect(fetchDataSourcesVersionResponse).toBe('2.11.0');
+    });
+
+    test('fetchInstalledPlugins - Success: opensearch client response code is 200 and response body have installed plugin list', async () => {
+      const opensearchClient = opensearchServiceMock.createOpenSearchClient();
+      opensearchClient.info.mockResolvedValue(
+        opensearchServiceMock.createApiResponse({
+          statusCode: 200,
+          body: [
+            {
+              name: 'b40f6833d895d3a95333e325e8bea79b',
+              component: ' analysis-icu',
+              version: '2.11.0',
+            },
+            {
+              name: 'b40f6833d895d3a95333e325e8bea79b',
+              component: 'analysis-ik',
+              version: '2.11.0',
+            },
+            {
+              name: 'b40f6833d895d3a95333e325e8bea79b',
+              component: 'analysis-seunjeon',
+              version: '2.11.0',
+            },
+          ],
+        })
+      );
+      const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {});
+      const fetchInstalledPluginsReponse = Array.from(
+        await dataSourceValidator.fetchInstalledPlugins()
+      );
+      const installedPlugins = ['analysis-icu', 'analysis-ik', 'analysis-seunjeon'];
+      fetchInstalledPluginsReponse.map((plugin) => expect(installedPlugins).toContain(plugin));
+    });
+
     test('failure: opensearch client response code is 200 but response body not have cluster name', async () => {
       try {
         const opensearchClient = opensearchServiceMock.createOpenSearchClient();
@@ -41,6 +90,22 @@ describe('DataSourceManagement: data_source_connection_validator.ts', () => {
         expect(e).toBeTruthy();
         expect(e.message).toContain('Response without cluster name.');
       }
+    });
+
+    // In case fetchDataSourceVersion call succeeded yet did not return version number, return an empty version instead of raising exceptions
+    test('fetchDataSourceVersion - Success:opensearch client response code is 200 but response body does not have version number', async () => {
+      const opensearchClient = opensearchServiceMock.createOpenSearchClient();
+      opensearchClient.info.mockResolvedValue(
+        opensearchServiceMock.createApiResponse({
+          statusCode: 200,
+          body: {
+            Message: 'Response without version number.',
+          },
+        })
+      );
+      const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {});
+      const fetchDataSourcesVersionResponse = await dataSourceValidator.fetchDataSourceVersion();
+      expect(fetchDataSourcesVersionResponse).toBe('');
     });
 
     test('failure: opensearch client response code is other than 200', async () => {
@@ -64,6 +129,25 @@ describe('DataSourceManagement: data_source_connection_validator.ts', () => {
         }
       });
     });
+
+    // In case fetchDataSourceVersion call failed, return an empty version instead of raising exceptions
+    test('fetchDataSourceVersion - Failure: opensearch client response code is other than 200', async () => {
+      const statusCodeList = [100, 202, 300, 400, 500];
+      statusCodeList.forEach(async function (code) {
+        const opensearchClient = opensearchServiceMock.createOpenSearchClient();
+        opensearchClient.info.mockResolvedValue(
+          opensearchServiceMock.createApiResponse({
+            statusCode: code,
+            body: {
+              Message: 'Your request is not correct.',
+            },
+          })
+        );
+        const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {});
+        const fetchDataSourcesVersionResponse = await dataSourceValidator.fetchDataSourceVersion();
+        expect(fetchDataSourcesVersionResponse).toBe('');
+      });
+    });
   });
 
   describe('Test datasource connection for SigV4 auth', () => {
@@ -81,24 +165,20 @@ describe('DataSourceManagement: data_source_connection_validator.ts', () => {
       expect(validateDataSourcesResponse.statusCode).toBe(200);
     });
 
-    test('failure: opensearch client response code is 200 and response body is empty', async () => {
-      try {
-        const opensearchClient = opensearchServiceMock.createOpenSearchClient();
-        opensearchClient.cat.indices.mockResolvedValue(opensearchServiceMock.createApiResponse());
-        const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {
-          auth: {
-            statusCode: 200,
-            body: '',
-            credentials: {
-              service: SigV4ServiceName.OpenSearchServerless,
-            },
+    test('Success: opensearch client response code is 200 and response body is empty', async () => {
+      const opensearchClient = opensearchServiceMock.createOpenSearchClient();
+      opensearchClient.cat.indices.mockResolvedValue(opensearchServiceMock.createApiResponse());
+      const dataSourceValidator = new DataSourceConnectionValidator(opensearchClient, {
+        auth: {
+          statusCode: 200,
+          body: '',
+          credentials: {
+            service: SigV4ServiceName.OpenSearchServerless,
           },
-        });
-        const validateDataSourcesResponse = await dataSourceValidator.validate();
-        expect(validateDataSourcesResponse.statusCode).toBe(200);
-      } catch (e) {
-        expect(e).toBeTruthy();
-      }
+        },
+      });
+      const validateDataSourcesResponse = await dataSourceValidator.validate();
+      expect(validateDataSourcesResponse.statusCode).toBe(200);
     });
 
     test('failure: opensearch client response code is other than 200', async () => {

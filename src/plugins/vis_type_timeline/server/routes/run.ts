@@ -124,7 +124,10 @@ export function runRoute(
         } else {
           return response.internalError({
             body: {
-              message: err.toString(),
+              attributes: {
+                title: err.name,
+              },
+              message: err.message,
             },
           });
         }

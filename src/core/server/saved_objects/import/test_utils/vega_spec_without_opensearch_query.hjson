@@ -1,0 +1,117 @@
+{
+  $schema: https://vega.github.io/schema/vega/v5.json
+  width: 400
+  height: 200
+  padding: 5
+  // Data contained entirely within the spec
+  data: [
+    {
+      name: table
+      values: [
+        {
+          category: A
+          count: 28
+        }
+        {
+          category: B
+          count: 55
+        }
+        {
+          category: C
+          count: 43
+        }
+        {
+          category: D
+          count: 91
+        }
+        {
+          category: E
+          count: 81
+        }
+        {
+          category: F
+          count: 53
+        }
+        {
+          category: G
+          count: 19
+        }
+        {
+          category: H
+          count: 87
+        }
+      ]
+    }
+  ]
+  scales: [
+    {
+      name: xscale
+      type: band
+      domain: {
+        data: table
+        field: category
+      }
+      range: width
+      padding: 0.05
+      round: true
+    }
+    {
+      name: yscale
+      type: linear
+      domain: {
+        data: table
+        field: count
+      }
+      range: height
+      nice: true
+    }
+  ]
+  axes: [
+    {
+      orient: bottom
+      scale: xscale
+    }
+    {
+      orient: left
+      scale: yscale
+    }
+  ]
+  marks: [
+    {
+      type: rect
+      from: {
+        data: table
+      }
+      encode: {
+        enter: {
+          x: {
+            scale: xscale
+            field: category
+          }
+          width: {
+            scale: xscale
+            band: 1
+          }
+          y: {
+            scale: yscale
+            field: count
+          }
+          y2: {
+            scale: yscale
+            value: 0
+          }
+        }
+        update: {
+          fill: {
+            value: steelblue
+          }
+        }
+        hover: {
+          fill: {
+            value: red
+          }
+        }
+      }
+    }
+  ]
+}

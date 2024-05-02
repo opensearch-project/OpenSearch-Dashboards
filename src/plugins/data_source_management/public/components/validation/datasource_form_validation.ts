@@ -8,7 +8,7 @@ import { extractRegisteredAuthTypeCredentials, isValidUrl } from '../utils';
 import { CreateDataSourceState } from '../create_data_source_wizard/components/create_form/create_data_source_form';
 import { EditDataSourceState } from '../edit_data_source/components/edit_form/edit_data_source_form';
 import { AuthType } from '../../types';
-import { AuthenticationMethodRegistery } from '../../auth_registry';
+import { AuthenticationMethodRegistry } from '../../auth_registry';
 
 export interface CreateEditDataSourceValidation {
   title: string[];
@@ -50,8 +50,14 @@ export const isTitleValid = (
     error: '',
   };
   /* Title validation */
-  if (!title?.trim?.().length) {
+  if (!title.trim().length) {
     isValid.valid = false;
+  } else if (title.length > 32) {
+    /* title length validation */
+    isValid.valid = false;
+    isValid.error = i18n.translate('dataSourcesManagement.validation.titleLength', {
+      defaultMessage: 'Title must be no longer than 32 characters',
+    });
   } else if (
     title.toLowerCase() !== existingTitle.toLowerCase() &&
     Array.isArray(existingDatasourceNamesList) &&
@@ -70,7 +76,7 @@ export const performDataSourceFormValidation = (
   formValues: CreateDataSourceState | EditDataSourceState,
   existingDatasourceNamesList: string[],
   existingTitle: string,
-  authenticationMethodRegistery: AuthenticationMethodRegistery
+  authenticationMethodRegistry: AuthenticationMethodRegistry
 ) => {
   /* Title validation */
   const titleValid = isTitleValid(formValues?.title, existingDatasourceNamesList, existingTitle);
@@ -122,7 +128,7 @@ export const performDataSourceFormValidation = (
     const registeredCredentials = extractRegisteredAuthTypeCredentials(
       (formValues?.auth?.credentials ?? {}) as { [key: string]: string },
       formValues?.auth?.type ?? '',
-      authenticationMethodRegistery
+      authenticationMethodRegistry
     );
 
     for (const credentialValue of Object.values(registeredCredentials)) {

@@ -1,0 +1,459 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceSelectable should filter options if configured 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <DataSourceMenuPopoverButton
+      className="dataSourceSelectable"
+      label="Local cluster"
+      onClick={[Function]}
+    />
+  }
+  closePopover={[Function]}
+  data-test-subj="dataSourceSelectableContextMenuPopover"
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceSelectableContextMenuPopover"
+  initialFocus=".euiSelectableSearch"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <DataSourceDropDownHeader
+    totalDataSourceCount={3}
+  />
+  <EuiContextMenuPanel
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      className="dataSourceSelectableOuiPanel"
+      color="transparent"
+      paddingSize="none"
+    >
+      <EuiSelectable
+        aria-label="Search"
+        data-test-subj="dataSourceSelectable"
+        isPreFiltered={false}
+        listProps={
+          Object {
+            "onFocusBadge": false,
+          }
+        }
+        onChange={[Function]}
+        options={
+          Array [
+            Object {
+              "checked": "on",
+              "id": "",
+              "label": "Local cluster",
+            },
+            Object {
+              "id": "test2",
+              "label": "test2",
+            },
+            Object {
+              "id": "test3",
+              "label": "test3",
+            },
+          ]
+        }
+        renderOption={[Function]}
+        searchProps={
+          Object {
+            "compressed": true,
+            "placeholder": "Search",
+          }
+        }
+        searchable={true}
+        singleSelection="always"
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
+`;
+
+exports[`DataSourceSelectable should render normally with local cluster is hidden 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <DataSourceMenuPopoverButton
+      className="dataSourceSelectable"
+      label=""
+      onClick={[Function]}
+    />
+  }
+  closePopover={[Function]}
+  data-test-subj="dataSourceSelectableContextMenuPopover"
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceSelectableContextMenuPopover"
+  initialFocus=".euiSelectableSearch"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <DataSourceDropDownHeader
+    totalDataSourceCount={0}
+  />
+  <EuiContextMenuPanel
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      className="dataSourceSelectableOuiPanel"
+      color="transparent"
+      paddingSize="none"
+    >
+      <EuiSelectable
+        aria-label="Search"
+        data-test-subj="dataSourceSelectable"
+        isPreFiltered={false}
+        listProps={
+          Object {
+            "onFocusBadge": false,
+          }
+        }
+        onChange={[Function]}
+        options={Array []}
+        renderOption={[Function]}
+        searchProps={
+          Object {
+            "compressed": true,
+            "placeholder": "Search",
+          }
+        }
+        searchable={true}
+        singleSelection="always"
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
+`;
+
+exports[`DataSourceSelectable should render normally with local cluster not hidden 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <DataSourceMenuPopoverButton
+      className="dataSourceSelectable"
+      label=""
+      onClick={[Function]}
+    />
+  }
+  closePopover={[Function]}
+  data-test-subj="dataSourceSelectableContextMenuPopover"
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceSelectableContextMenuPopover"
+  initialFocus=".euiSelectableSearch"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <DataSourceDropDownHeader
+    totalDataSourceCount={0}
+  />
+  <EuiContextMenuPanel
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      className="dataSourceSelectableOuiPanel"
+      color="transparent"
+      paddingSize="none"
+    >
+      <EuiSelectable
+        aria-label="Search"
+        data-test-subj="dataSourceSelectable"
+        isPreFiltered={false}
+        listProps={
+          Object {
+            "onFocusBadge": false,
+          }
+        }
+        onChange={[Function]}
+        options={Array []}
+        renderOption={[Function]}
+        searchProps={
+          Object {
+            "compressed": true,
+            "placeholder": "Search",
+          }
+        }
+        searchable={true}
+        singleSelection="always"
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
+`;
+
+exports[`DataSourceSelectable should show popover when click on button 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPopover euiPopover--anchorDownLeft"
+        data-test-subj="dataSourceSelectableContextMenuPopover"
+        id="dataSourceSelectableContextMenuPopover"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            aria-label="dataSourceSelectableButton"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+            data-test-subj="dataSourceSelectableButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="database"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Local cluster
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div
+        data-eui="EuiFocusTrap"
+      >
+        <div
+          aria-describedby="generated-id"
+          aria-live="off"
+          aria-modal="true"
+          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--bottom"
+          role="dialog"
+          style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
+          tabindex="0"
+        >
+          <div
+            class="euiPopover__panelArrow euiPopover__panelArrow--bottom"
+            style="left: 10px; top: 0px;"
+          />
+          <p
+            class="euiScreenReaderOnly"
+            id="generated-id"
+          >
+            You are in a dialog. To close this dialog, hit escape.
+          </p>
+          <div>
+            <div
+              class="euiPopoverTitle euiPopoverTitle--paddingSmall"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+              >
+                <div
+                  class="euiFlexItem"
+                >
+                  DATA SOURCES
+                   (
+                  3
+                  )
+                </div>
+                <div
+                  class="dataSourceDropDownHeaderInvisibleFocusable"
+                  tabindex="0"
+                />
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <button
+                    class="euiLink euiLink--primary"
+                    type="button"
+                  >
+                    Manage
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiContextMenuPanel"
+              tabindex="-1"
+            >
+              <div>
+                <div>
+                  <div
+                    class="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow dataSourceSelectableOuiPanel"
+                  >
+                    <div
+                      class="euiSelectable"
+                      data-test-subj="dataSourceSelectable"
+                    >
+                      <div
+                        class="euiPopoverTitle euiPopoverTitle--paddingSmall"
+                      >
+                        <div
+                          class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
+                        >
+                          <div
+                            class="euiFormControlLayout__childrenWrapper"
+                          >
+                            <input
+                              aria-activedescendant=""
+                              aria-autocomplete="list"
+                              aria-controls="generated-id_listbox"
+                              aria-expanded="true"
+                              aria-haspopup="listbox"
+                              aria-label="Search"
+                              aria-owns="generated-id_listbox"
+                              autocomplete="off"
+                              class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed euiSelectableSearch"
+                              placeholder="Search"
+                              role="combobox"
+                              type="search"
+                              value=""
+                            />
+                            <div
+                              class="euiFormControlLayoutIcons"
+                            >
+                              <span
+                                class="euiFormControlLayoutCustomIcon"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  class="euiFormControlLayoutCustomIcon__icon"
+                                  data-euiicon-type="search"
+                                />
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div
+                        class="euiSelectableList"
+                      >
+                        <div
+                          style="overflow: visible; width: 0px;"
+                        />
+                        <div
+                          class="resize-triggers"
+                        >
+                          <div
+                            class="expand-trigger"
+                          >
+                            <div
+                              style="width: 1px; height: 1px;"
+                            />
+                          </div>
+                          <div
+                            class="contract-trigger"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPopover euiPopover--anchorDownLeft"
+      data-test-subj="dataSourceSelectableContextMenuPopover"
+      id="dataSourceSelectableContextMenuPopover"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <button
+          aria-label="dataSourceSelectableButton"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+          data-test-subj="dataSourceSelectableButton"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              class="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+            />
+            <span
+              class="euiButtonEmpty__text"
+            >
+              Local cluster
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

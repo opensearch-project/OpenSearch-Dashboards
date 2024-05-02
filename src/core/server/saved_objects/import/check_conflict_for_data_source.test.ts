@@ -5,12 +5,13 @@
 
 import { mockUuidv4 } from './__mocks__';
 import { SavedObjectReference, SavedObjectsImportRetry } from 'opensearch-dashboards/public';
-import { SavedObject } from '../types';
+import { SavedObject, SavedObjectsClientContract } from '../types';
 import { SavedObjectsErrorHelpers } from '..';
 import {
   checkConflictsForDataSource,
   ConflictsForDataSourceParams,
 } from './check_conflict_for_data_source';
+import { VisualizationObject } from './types';
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 
@@ -23,6 +24,62 @@ const createObject = (type: string, id: string): SavedObjectType => ({
   attributes: { title: 'some-title' },
   references: (Symbol() as unknown) as SavedObjectReference[],
 });
+
+const createVegaVisualizationObject = (id: string): SavedObjectType => {
+  const visState =
+    id.split('_').length > 1
+      ? '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: old-datasource-title\\n    }\\n  }\\n}"}}'
+      : '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n    }\\n  }\\n}"}}';
+  return {
+    type: 'visualization',
+    id,
+    attributes: { title: 'some-title', visState },
+    references:
+      id.split('_').length > 1
+        ? [{ id: id.split('_')[0], type: 'data-source', name: 'dataSource' }]
+        : [],
+  } as SavedObjectType;
+};
+
+const createTSVBVisualizationObject = (id: string): VisualizationObject => {
+  const idParse = id.split('_');
+  const params = idParse.length > 1 ? { data_source_id: idParse[1] } : {};
+  const visState = {
+    type: 'metrics',
+    params,
+  };
+
+  return {
+    type: 'visualization',
+    id,
+    attributes: { title: 'some-title', visState: JSON.stringify(visState) },
+    references:
+      idParse.length > 1 ? [{ id: idParse[1], type: 'data-source', name: 'dataSource' }] : [],
+  } as VisualizationObject;
+};
+
+const getSavedObjectClient = (): SavedObjectsClientContract => {
+  const savedObject = {} as SavedObjectsClientContract;
+  savedObject.get = jest.fn().mockImplementation((type, id) => {
+    if (type === 'data-source' && id === 'old-datasource-id') {
+      return Promise.resolve({
+        attributes: {
+          title: 'old-datasource-title',
+        },
+      });
+    } else if (type === 'data-source') {
+      return Promise.resolve({
+        attributes: {
+          title: 'some-datasource-title',
+        },
+      });
+    }
+
+    return Promise.resolve(undefined);
+  });
+
+  return savedObject;
+};
 
 const getResultMock = {
   conflict: (type: string, id: string) => {
@@ -56,6 +113,7 @@ describe('#checkConflictsForDataSource', () => {
     retries?: SavedObjectsImportRetry[];
     createNewCopies?: boolean;
     dataSourceId?: string;
+    savedObjectsClient?: SavedObjectsClientContract;
   }): ConflictsForDataSourceParams => {
     return { ...partial };
   };
@@ -139,5 +197,177 @@ describe('#checkConflictsForDataSource', () => {
       ],
       importIdMap: new Map(),
     });
+  });
+
+  /*
+  Vega test cases
+  */
+  it('will attach datasource name to Vega spec when importing from local to datasource', async () => {
+    const vegaSavedObject = createVegaVisualizationObject('some-object-id');
+    const params = setupParams({
+      objects: [vegaSavedObject],
+      ignoreRegularConflicts: true,
+      dataSourceId: 'some-datasource-id',
+      savedObjectsClient: getSavedObjectClient(),
+    });
+    const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
+
+    expect(params.savedObjectsClient?.get).toHaveBeenCalledWith(
+      'data-source',
+      'some-datasource-id'
+    );
+    expect(checkConflictsForDataSourceResult).toEqual(
+      expect.objectContaining({
+        filteredObjects: [
+          {
+            ...vegaSavedObject,
+            attributes: {
+              title: 'some-title',
+              visState:
+                '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: some-datasource-title\\n    }\\n  }\\n}"}}',
+            },
+            id: 'some-datasource-id_some-object-id',
+            references: [
+              {
+                id: 'some-datasource-id',
+                type: 'data-source',
+                name: 'dataSource',
+              },
+            ],
+          },
+        ],
+        errors: [],
+        importIdMap: new Map([
+          [
+            `visualization:some-object-id`,
+            { id: 'some-datasource-id_some-object-id', omitOriginId: true },
+          ],
+        ]),
+      })
+    );
+  });
+
+  it('will not change Vega spec when importing from datasource to different datasource', async () => {
+    const vegaSavedObject = createVegaVisualizationObject('old-datasource-id_some-object-id');
+    const params = setupParams({
+      objects: [vegaSavedObject],
+      ignoreRegularConflicts: true,
+      dataSourceId: 'some-datasource-id',
+      savedObjectsClient: getSavedObjectClient(),
+    });
+    const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
+
+    expect(params.savedObjectsClient?.get).toHaveBeenCalledWith(
+      'data-source',
+      'some-datasource-id'
+    );
+    expect(checkConflictsForDataSourceResult).toEqual(
+      expect.objectContaining({
+        filteredObjects: [
+          {
+            ...vegaSavedObject,
+            attributes: {
+              title: 'some-title',
+              visState:
+                '{"title":"some-title","type":"vega","aggs":[],"params":{"spec":"{\\n  data: {\\n    url: {\\n      index: example_index\\n      data_source_name: old-datasource-title\\n    }\\n  }\\n}"}}',
+            },
+            id: 'some-datasource-id_some-object-id',
+          },
+        ],
+        errors: [],
+        importIdMap: new Map([
+          [
+            `visualization:some-object-id`,
+            { id: 'some-datasource-id_some-object-id', omitOriginId: true },
+          ],
+        ]),
+      })
+    );
+  });
+
+  it('will not change Vega spec when dataSourceTitle is undefined', async () => {
+    const vegaSavedObject = createVegaVisualizationObject('old-datasource-id_some-object-id');
+    const params = setupParams({
+      objects: [vegaSavedObject],
+      ignoreRegularConflicts: true,
+      dataSourceId: 'nonexistent-datasource-title-id',
+      savedObjectsClient: getSavedObjectClient(),
+    });
+    const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
+
+    expect(params.savedObjectsClient?.get).toHaveBeenCalledWith(
+      'data-source',
+      'nonexistent-datasource-title-id'
+    );
+    expect(checkConflictsForDataSourceResult).toEqual(
+      expect.objectContaining({
+        filteredObjects: [
+          {
+            ...vegaSavedObject,
+            id: 'nonexistent-datasource-title-id_some-object-id',
+          },
+        ],
+        errors: [],
+        importIdMap: new Map([
+          [
+            `visualization:some-object-id`,
+            { id: 'nonexistent-datasource-title-id_some-object-id', omitOriginId: true },
+          ],
+        ]),
+      })
+    );
+  });
+
+  /**
+   * TSVB test cases
+   */
+  it.each([
+    {
+      id: 'some-object-id',
+    },
+    {
+      id: 'old-datasource-id_some-object-id',
+    },
+  ])('will update datasource reference + visState of TSVB visualization', async ({ id }) => {
+    const tsvbSavedObject = createTSVBVisualizationObject(id);
+    const expectedVisState = JSON.parse(tsvbSavedObject.attributes.visState);
+    expectedVisState.params.data_source_id = 'some-datasource-id';
+    const newVisState = JSON.stringify(expectedVisState);
+    const params = setupParams({
+      objects: [tsvbSavedObject],
+      ignoreRegularConflicts: true,
+      dataSourceId: 'some-datasource-id',
+      savedObjectsClient: getSavedObjectClient(),
+    });
+    const checkConflictsForDataSourceResult = await checkConflictsForDataSource(params);
+
+    expect(checkConflictsForDataSourceResult).toEqual(
+      expect.objectContaining({
+        filteredObjects: [
+          {
+            ...tsvbSavedObject,
+            attributes: {
+              title: 'some-title',
+              visState: newVisState,
+            },
+            id: 'some-datasource-id_some-object-id',
+            references: [
+              {
+                id: 'some-datasource-id',
+                name: 'dataSource',
+                type: 'data-source',
+              },
+            ],
+          },
+        ],
+        errors: [],
+        importIdMap: new Map([
+          [
+            `visualization:some-object-id`,
+            { id: 'some-datasource-id_some-object-id', omitOriginId: true },
+          ],
+        ]),
+      })
+    );
   });
 });

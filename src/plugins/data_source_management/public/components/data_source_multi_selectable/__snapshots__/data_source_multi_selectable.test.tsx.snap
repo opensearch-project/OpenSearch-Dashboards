@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceMultiSelectable should render normally with local cluster hidden 1`] = `
+<DataSourceFilterGroup
+  defaultDataSource={null}
+  selectedOptions={Array []}
+  setSelectedOptions={[Function]}
+/>
+`;
+
+exports[`DataSourceMultiSelectable should render normally with local cluster not hidden 1`] = `
+<DataSourceFilterGroup
+  defaultDataSource={null}
+  selectedOptions={Array []}
+  setSelectedOptions={[Function]}
+/>
+`;

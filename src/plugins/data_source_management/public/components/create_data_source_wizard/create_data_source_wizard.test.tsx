@@ -5,6 +5,7 @@
 
 import React from 'react';
 import {
+  fetchDataSourceMetaData,
   getMappedDataSources,
   mockDataSourceAttributesWithAuth,
   mockManagementPlugin,
@@ -27,6 +28,9 @@ describe('Datasource Management: Create Datasource Wizard', () => {
   describe('case1: should load resources successfully', () => {
     beforeEach(async () => {
       spyOn(utils, 'getDataSources').and.returnValue(Promise.resolve(getMappedDataSources));
+      spyOn(utils, 'fetchDataSourceMetaData').and.returnValue(
+        Promise.resolve(fetchDataSourceMetaData)
+      );
       await act(async () => {
         component = mount(
           wrapWithIntl(
@@ -49,7 +53,7 @@ describe('Datasource Management: Create Datasource Wizard', () => {
 
     test('should create datasource successfully', async () => {
       spyOn(utils, 'createSingleDataSource').and.returnValue({});
-
+      spyOn(utils, 'handleSetDefaultDatasource').and.returnValue({});
       await act(async () => {
         // @ts-ignore
         await component.find(formIdentifier).first().prop('handleSubmit')(
@@ -58,6 +62,7 @@ describe('Datasource Management: Create Datasource Wizard', () => {
       });
       expect(utils.createSingleDataSource).toHaveBeenCalled();
       expect(history.push).toBeCalledWith('');
+      expect(utils.handleSetDefaultDatasource).toHaveBeenCalled();
     });
 
     test('should fail to create datasource', async () => {

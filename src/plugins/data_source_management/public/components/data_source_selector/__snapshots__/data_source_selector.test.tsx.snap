@@ -13,6 +13,7 @@ exports[`DataSourceSelector should render normally with local cluster is hidden 
   options={Array []}
   placeholder="Select a data source"
   prepend="Data source"
+  renderOption={[Function]}
   selectedOptions={Array []}
   singleSelection={
     Object {
@@ -43,6 +44,7 @@ exports[`DataSourceSelector should render normally with local cluster not hidden
   }
   placeholder="Select a data source"
   prepend="Data source"
+  renderOption={[Function]}
   selectedOptions={
     Array [
       Object {
@@ -82,7 +84,7 @@ exports[`DataSourceSelector: check dataSource options should always place local 
       },
       Object {
         "id": "test2",
-        "label": "test3",
+        "label": "test2",
       },
       Object {
         "id": "test3",
@@ -92,6 +94,7 @@ exports[`DataSourceSelector: check dataSource options should always place local 
   }
   placeholder="Select a data source"
   prepend="Data source"
+  renderOption={[Function]}
   selectedOptions={
     Array [
       Object {
@@ -127,7 +130,7 @@ exports[`DataSourceSelector: check dataSource options should filter options if c
       },
       Object {
         "id": "test2",
-        "label": "test3",
+        "label": "test2",
       },
       Object {
         "id": "test3",
@@ -137,11 +140,62 @@ exports[`DataSourceSelector: check dataSource options should filter options if c
   }
   placeholder="Select a data source"
   prepend="Data source"
+  renderOption={[Function]}
   selectedOptions={
     Array [
       Object {
         "id": "",
         "label": "Local cluster",
+      },
+    ]
+  }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
+exports[`DataSourceSelector: check dataSource options should get default datasource if uiSettings exists 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+      Object {
+        "id": "test1",
+        "label": "test1",
+      },
+      Object {
+        "id": "test2",
+        "label": "test2",
+      },
+      Object {
+        "id": "test3",
+        "label": "test3",
+      },
+    ]
+  }
+  placeholder="Select a data source"
+  prepend="Data source"
+  renderOption={[Function]}
+  selectedOptions={
+    Array [
+      Object {
+        "id": "test1",
+        "label": "test1",
       },
     ]
   }
@@ -176,7 +230,7 @@ exports[`DataSourceSelector: check dataSource options should hide prepend if rem
       },
       Object {
         "id": "test2",
-        "label": "test3",
+        "label": "test2",
       },
       Object {
         "id": "test3",
@@ -185,6 +239,45 @@ exports[`DataSourceSelector: check dataSource options should hide prepend if rem
     ]
   }
   placeholder="Select a data source"
+  renderOption={[Function]}
+  selectedOptions={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
+  singleSelection={
+    Object {
+      "asPlainText": true,
+    }
+  }
+  sortMatchesBy="none"
+/>
+`;
+
+exports[`DataSourceSelector: check dataSource options should not render options with default badge when id does not matches defaultDataSource 1`] = `
+<EuiComboBox
+  aria-label="Select a data source"
+  async={false}
+  compressed={false}
+  data-test-subj="dataSourceSelectorComboBox"
+  fullWidth={false}
+  isClearable={true}
+  isDisabled={false}
+  onChange={[Function]}
+  options={
+    Array [
+      Object {
+        "id": "",
+        "label": "Local cluster",
+      },
+    ]
+  }
+  placeholder="Select a data source"
+  prepend="Data source"
+  renderOption={[Function]}
   selectedOptions={
     Array [
       Object {
@@ -215,6 +308,7 @@ exports[`DataSourceSelector: check dataSource options should return empty option
   options={Array []}
   placeholder="Select a data source"
   prepend="Data source"
+  renderOption={[Function]}
   selectedOptions={Array []}
   singleSelection={
     Object {
@@ -247,7 +341,7 @@ exports[`DataSourceSelector: check dataSource options should show custom placeho
       },
       Object {
         "id": "test2",
-        "label": "test3",
+        "label": "test2",
       },
       Object {
         "id": "test3",
@@ -257,6 +351,7 @@ exports[`DataSourceSelector: check dataSource options should show custom placeho
   }
   placeholder="Make a selection"
   prepend="Data source"
+  renderOption={[Function]}
   selectedOptions={
     Array [
       Object {

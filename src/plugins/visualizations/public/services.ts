@@ -54,6 +54,7 @@ import { SavedVisualizationsLoader } from './saved_visualizations';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { EmbeddableStart } from '../../embeddable/public';
 import { SavedObjectLoaderAugmentVis } from '../../vis_augmenter/public';
+import { DocLinksStart } from '../../../core/public';
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 
@@ -116,3 +117,5 @@ export const [getNotifications, setNotifications] = createGetterSetter<Notificat
 export const [getSavedAugmentVisLoader, setSavedAugmentVisLoader] = createGetterSetter<
   SavedObjectLoaderAugmentVis
 >('savedAugmentVisLoader');
+
+export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('docLinks');
