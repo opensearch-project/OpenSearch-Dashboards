@@ -32,12 +32,14 @@ import { schema, TypeOf } from '@osd/config-schema';
 import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import { ConfigDeprecationProvider } from 'src/core/server';
+import { ClientOptions } from '@opensearch-project/opensearch';
 import { readPkcs12Keystore, readPkcs12Truststore } from '../utils';
 import { ServiceConfigDescriptor } from '../internal_types';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
 
 export const DEFAULT_API_VERSION = '7.x';
+export const DEFAULT_COMPRESSION = 'gzip';
 
 export type OpenSearchConfigType = TypeOf<typeof configSchema>;
 type SslConfigSchema = OpenSearchConfigType['ssl'];
@@ -131,7 +133,9 @@ export const configSchema = schema.object({
   healthCheck: schema.object({ delay: schema.duration({ defaultValue: 2500 }) }),
   ignoreVersionMismatch: schema.boolean({ defaultValue: false }),
   disablePrototypePoisoningProtection: schema.maybe(schema.boolean({ defaultValue: false })),
-  compression: schema.maybe(schema.boolean({ defaultValue: false })),
+  compression: schema.maybe(
+    schema.oneOf([schema.literal(DEFAULT_COMPRESSION), schema.boolean({ defaultValue: false })])
+  ),
 });
 
 const deprecations: ConfigDeprecationProvider = ({ renameFromRoot, renameFromRootWithoutMap }) => [
@@ -318,7 +322,7 @@ export class OpenSearchConfig {
    * Specifies whether the client should use compression to engine
    * or not.
    */
-  public readonly compression?: boolean;
+  public readonly compression?: ClientOptions['compression'];
 
   constructor(rawConfig: OpenSearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
@@ -341,7 +345,12 @@ export class OpenSearchConfig {
     this.password = rawConfig.password;
     this.customHeaders = rawConfig.customHeaders;
     this.disablePrototypePoisoningProtection = rawConfig.disablePrototypePoisoningProtection;
-    this.compression = rawConfig.compression;
+    this.compression =
+      typeof rawConfig.compression === 'boolean' && rawConfig.compression
+        ? DEFAULT_COMPRESSION
+        : typeof rawConfig.compression === 'string'
+        ? rawConfig.compression
+        : undefined;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

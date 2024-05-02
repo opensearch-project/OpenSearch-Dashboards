@@ -122,7 +122,7 @@ export function parseClientOptions(config: OpenSearchClientConfig, scoped: boole
   }
 
   if (config.compression) {
-    clientOptions.compression = 'gzip';
+    clientOptions.compression = config.compression;
   }
 
   return clientOptions;
