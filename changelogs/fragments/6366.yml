@@ -1,0 +1,2 @@
+feat:
+- Support compressing traffic with `opensearch.compression: true` or `opensearch.compress: 'gzip'` ([#6366](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6366))
