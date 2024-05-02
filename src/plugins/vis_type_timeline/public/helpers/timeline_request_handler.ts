@@ -74,7 +74,7 @@ export interface TimelineSuccessResponse {
   type: OPENSEARCH_DASHBOARDS_CONTEXT_NAME;
 }
 
-const indexRegEx = /index=['"]?([\sA-z0-9_\-\*]*?)[^\sA-z0-9_\-\*]/g;
+const osFunctionRegex = /\.(es|elasticsearch|os|opensearch)\((?<contents>.*)\)/g;
 
 export function getTimelineRequestHandler({
   uiSettings,
@@ -113,14 +113,23 @@ export function getTimelineRequestHandler({
     if (ignoreFilterIfFieldNotInIndex) {
       // Get a unique list of index titles used in the expression
       const parsedIndexTitles: string[] = [];
-      let match = indexRegEx.exec(expression);
-      while (match) {
-        const index = match[1].replace(/['"]/g, '').trim();
-        if (index && parsedIndexTitles.indexOf(index) < 0) {
-          parsedIndexTitles.push(index);
-        }
-        match = indexRegEx.exec(expression);
-      }
+      [...expression.matchAll(osFunctionRegex)].forEach((match) => {
+        match.groups?.contents
+          ?.split(',')
+          .map((p) => p.trim())
+          .forEach((param, idx) => {
+            // Parse param to key/value pair
+            const pairs = param.split('=').map((i) => i.trim());
+
+            // Index can be provided with or without "index=",
+            // but only without "index=" as the 4th parameter to the function
+            if (pairs.length === 1 && idx === 3) {
+              parsedIndexTitles.push(pairs[0]);
+            } else if (pairs.length === 2 && pairs[0] === 'index') {
+              parsedIndexTitles.push(pairs[1]);
+            }
+          });
+      });
 
       // Find index objects based on parsed titles
       const indexPatterns = getIndexPatterns();
@@ -131,7 +140,7 @@ export function getTimelineRequestHandler({
 
       // Determine which filters apply to which indexes
       filterByIndex = parsedIndexPatterns.reduce((acc, index) => {
-        if (index.title) {
+        if (index?.title) {
           return {
             [index.title]: opensearchQuery.buildOpenSearchQuery(
               index,
