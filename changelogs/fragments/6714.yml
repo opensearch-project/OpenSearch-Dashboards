@@ -1,0 +1,2 @@
+fix:
+- Add default and value check for theme user specific keys ([#6714](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6714))
