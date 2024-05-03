@@ -11,8 +11,13 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
     window.console.log("^ A single error about an inline script not firing due to content security policy is expected!");
   }
 
-  var isDarkMode = window.__osdThemeTag__.endsWith('dark');
-  var themeVersion = window.__osdThemeTag__.startsWith('v7') ? 'v7' : 'v8';
+  var isDarkMode = false;
+  var themeVersion = '';
+
+  if (window.__osdThemeTag__) {
+    isDarkMode = window.__osdThemeTag__.endsWith('dark');
+    themeVersion = window.__osdThemeTag__.startsWith('v7') ? 'v7' : 'v8';
+  }  
 
   var loadingMessage = document.getElementById('osd_loading_message');
   loadingMessage.style.display = 'flex';
