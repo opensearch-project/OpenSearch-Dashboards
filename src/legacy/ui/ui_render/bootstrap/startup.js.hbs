@@ -36,8 +36,6 @@ var themeVersion = rawThemeVersion === 'v7' ? 'v7' : 'v8';
 
 window.__osdThemeTag__ = themeVersion + darkMode;
 
-var themeSourceKey = themeVersion === 'v7' ? 'v7' : 'default';
-
 var themeSources = {{THEME_SOURCES}};
 
 var themeDefinition = themeSources[themeVersion][darkMode];
@@ -82,8 +80,8 @@ document.head.insertBefore(themedStylesDom, stylesheetTarget);
 var fontTexts = {{fontText}};
 var fontCodes = {{fontCode}};
 
-var fontText = fontTexts[themeSourceKey];
-var fontCode = fontCodes[themeSourceKey];
+var fontText = fontTexts[themeVersion];
+var fontCode = fontCodes[themeVersion];
 
 var fontTarget = document.querySelector('head meta[name="add-fonts-here"]');
 
