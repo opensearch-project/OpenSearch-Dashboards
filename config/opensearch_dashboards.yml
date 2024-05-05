@@ -314,6 +314,12 @@
 # Set the value to true to enable workspace feature
 # workspace.enabled: false
 
+# Optional settings to specify saved object types to be deleted during migration.
+# This feature can help address compatibility issues that may arise during the migration of saved objects, such as types defined by legacy applications.
+# Please note, using this feature carries a risk. Deleting saved objects during migration could potentially lead to unintended data loss. Use with caution.
+# migrations.delete.enabled: false
+# migrations.delete.types: []
+
 # Set the value to true to enable Ui Metric Collectors in Usage Collector
 # This publishes the Application Usage and UI Metrics into the saved object, which can be accessed by /api/stats?extended=true&legacy=true&exclude_usage=false
 # usageCollection.uiMetric.enabled: false
