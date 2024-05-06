@@ -98,13 +98,13 @@ export interface HandleNoAvailableDataSourceErrorProps {
   notifications: ToastsStart;
   application?: ApplicationStart;
   callback?: (ds: DataSourceOption[]) => void;
-  hasIncompatibleDatasources: boolean;
+  incompatibleDataSourcesExist: boolean;
 }
 
 export function handleNoAvailableDataSourceError(props: HandleNoAvailableDataSourceErrorProps) {
-  const { changeState, notifications, application, callback, hasIncompatibleDatasources } = props;
+  const { changeState, notifications, application, callback, incompatibleDataSourcesExist } = props;
 
-  const defaultMessage = hasIncompatibleDatasources
+  const defaultMessage = incompatibleDataSourcesExist
     ? `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`
     : `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
 

@@ -83,7 +83,7 @@ exports[`NoDataSource should render correctly with the provided totalDataSourceC
 </EuiPopover>
 `;
 
-exports[`NoDataSource should render normally when hasIncompatibleDatasources is %b 1`] = `
+exports[`NoDataSource should render normally when incompatibleDataSourcesExist is %b 1`] = `
 <EuiPopover
   anchorPosition="downLeft"
   button={
@@ -166,7 +166,7 @@ exports[`NoDataSource should render normally when hasIncompatibleDatasources is 
 </EuiPopover>
 `;
 
-exports[`NoDataSource should render normally when hasIncompatibleDatasources is %b 2`] = `
+exports[`NoDataSource should render normally when incompatibleDataSourcesExist is %b 2`] = `
 <EuiPopover
   anchorPosition="downLeft"
   button={

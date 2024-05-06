@@ -154,7 +154,7 @@ describe('DataSourceSelectable', () => {
         },
       ],
       showError: false,
-      hasIncompatibleDatasources: false,
+      incompatibleDataSourcesExist: false,
     });
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
@@ -177,7 +177,7 @@ describe('DataSourceSelectable', () => {
         },
       ],
       showError: false,
-      hasIncompatibleDatasources: false,
+      incompatibleDataSourcesExist: false,
     });
 
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
@@ -356,7 +356,7 @@ describe('DataSourceSelectable', () => {
         },
       ],
       showError: false,
-      hasIncompatibleDatasources: false,
+      incompatibleDataSourcesExist: false,
     });
   });
 
@@ -386,7 +386,7 @@ describe('DataSourceSelectable', () => {
       selectedOption: [],
       showEmptyState: false,
       showError: true,
-      hasIncompatibleDatasources: false,
+      incompatibleDataSourcesExist: false,
     });
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
@@ -409,7 +409,7 @@ describe('DataSourceSelectable', () => {
         },
       ],
       showError: true,
-      hasIncompatibleDatasources: false,
+      incompatibleDataSourcesExist: false,
     });
 
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);

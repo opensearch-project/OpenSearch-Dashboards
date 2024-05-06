@@ -101,21 +101,21 @@ describe('DataSourceManagement: Utils.ts', () => {
 
     test.each([
       {
-        hasIncompatibleDatasources: false,
+        incompatibleDataSourcesExist: false,
         defaultMessage: noDataSourcesConnectedMessage,
       },
       {
-        hasIncompatibleDatasources: true,
+        incompatibleDataSourcesExist: true,
         defaultMessage: noCompatibleDataSourcesMessage,
       },
     ])(
       'should send warning when data source is not available',
-      ({ hasIncompatibleDatasources, defaultMessage }) => {
+      ({ incompatibleDataSourcesExist, defaultMessage }) => {
         const changeState = jest.fn();
         handleNoAvailableDataSourceError({
           changeState,
           notifications: toasts,
-          hasIncompatibleDatasources,
+          incompatibleDataSourcesExist,
         });
         expect(toasts.add).toBeCalledTimes(1);
         expect(toasts.add).toBeCalledWith(

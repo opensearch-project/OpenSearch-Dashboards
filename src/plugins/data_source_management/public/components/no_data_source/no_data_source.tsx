@@ -29,12 +29,12 @@ import {
 
 interface DataSourceDropDownHeaderProps {
   application?: ApplicationStart;
-  hasIncompatibleDatasources: boolean;
+  incompatibleDataSourcesExist: boolean;
 }
 
 export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
   application,
-  hasIncompatibleDatasources,
+  incompatibleDataSourcesExist,
 }) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
   const button = (
@@ -74,7 +74,7 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
           <FormattedMessage
             id="dataSourcesManagement.dataSourceEmptyMenu.noData"
             defaultMessage={
-              hasIncompatibleDatasources
+              incompatibleDataSourcesExist
                 ? NO_COMPATIBLE_DATASOURCES_MESSAGE
                 : NO_DATASOURCES_CONNECTED_MESSAGE
             }
@@ -87,7 +87,7 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
           <FormattedMessage
             id="dataSourcesManagement.dataSourceEmptyMenu.connect"
             defaultMessage={
-              hasIncompatibleDatasources
+              incompatibleDataSourcesExist
                 ? ADD_COMPATIBLE_DATASOURCES_MESSAGE
                 : CONNECT_DATASOURCES_MESSAGE
             }

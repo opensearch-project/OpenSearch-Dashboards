@@ -56,7 +56,7 @@ interface DataSourceSelectableState extends DataSourceBaseState {
   isPopoverOpen: boolean;
   selectedOption?: DataSourceOption[];
   defaultDataSource: string | null;
-  hasIncompatibleDatasources: boolean;
+  incompatibleDataSourcesExist: boolean;
 }
 
 export class DataSourceSelectable extends React.Component<
@@ -75,7 +75,7 @@ export class DataSourceSelectable extends React.Component<
       defaultDataSource: null,
       showEmptyState: false,
       showError: false,
-      hasIncompatibleDatasources: false,
+      incompatibleDataSourcesExist: false,
     };
 
     this.onChange.bind(this);
@@ -194,7 +194,7 @@ export class DataSourceSelectable extends React.Component<
           notifications: this.props.notifications,
           application: this.props.application,
           callback: this.props.onSelectedDataSources,
-          hasIncompatibleDatasources: !!fetchedDataSources?.length,
+          incompatibleDataSourcesExist: !!fetchedDataSources?.length,
         });
         return;
       }
@@ -217,8 +217,8 @@ export class DataSourceSelectable extends React.Component<
     }
   }
 
-  onEmptyState(hasIncompatibleDatasources: boolean) {
-    this.setState({ showEmptyState: true, hasIncompatibleDatasources });
+  onEmptyState(incompatibleDataSourcesExist: boolean) {
+    this.setState({ showEmptyState: true, incompatibleDataSourcesExist });
   }
 
   onError() {
@@ -248,7 +248,7 @@ export class DataSourceSelectable extends React.Component<
       return (
         <NoDataSource
           application={this.props.application}
-          hasIncompatibleDatasources={this.state.hasIncompatibleDatasources}
+          incompatibleDataSourcesExist={this.state.incompatibleDataSourcesExist}
         />
       );
     }

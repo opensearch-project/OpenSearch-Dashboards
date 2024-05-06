@@ -66,12 +66,12 @@ describe('NoDataSource', () => {
   });
 
   it.each([false, true])(
-    'should render normally when hasIncompatibleDatasources is %b',
-    (hasIncompatibleDatasources) => {
+    'should render normally when incompatibleDataSourcesExist is %b',
+    (incompatibleDataSourcesExist) => {
       component = shallow(
         <NoDataSource
           totalDataSourceCount={0}
-          hasIncompatibleDatasource={hasIncompatibleDatasources}
+          hasIncompatibleDatasource={incompatibleDataSourcesExist}
         />
       );
       expect(component).toMatchSnapshot();
