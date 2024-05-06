@@ -11,8 +11,9 @@
     "home",
     "visBuilder",
     "visAugmenter",
-    "dataSource"
+    "dataSource",
+    "dataSourceManagement"
   ],
   "extraPublicDirs": ["public/lib"],
-  "requiredBundles": ["opensearchDashboardsReact", "home", "dataSourceManagement"]
+  "requiredBundles": ["opensearchDashboardsReact", "home"]
 }

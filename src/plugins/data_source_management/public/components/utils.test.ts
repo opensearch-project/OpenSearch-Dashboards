@@ -79,7 +79,7 @@ describe('DataSourceManagement: Utils.ts', () => {
       const changeStateMock = jest.fn();
       handleDataSourceFetchError(changeStateMock, toasts);
       expect(changeStateMock).toBeCalledWith({ showError: true });
-      expect(toasts.addWarning).toHaveBeenCalledWith(`Failed to fetch data source`);
+      expect(toasts.add).toBeCalledTimes(1);
     });
   });
 
@@ -87,8 +87,9 @@ describe('DataSourceManagement: Utils.ts', () => {
     const { toasts } = notificationServiceMock.createStartContract();
 
     test('should  send warning when data source is not available', () => {
-      handleNoAvailableDataSourceError(toasts);
-      expect(toasts.addWarning).toHaveBeenCalledWith(`Data source is not available`);
+      const changeState = jest.fn();
+      handleNoAvailableDataSourceError(changeState, toasts);
+      expect(toasts.add).toBeCalledTimes(1);
     });
   });
 

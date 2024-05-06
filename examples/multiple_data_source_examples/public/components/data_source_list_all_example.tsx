@@ -102,7 +102,6 @@ export const DataSourceListAllExample = ({
               savedObjects: savedObjects.client,
               notifications,
               displayAllCompatibleDataSources: true,
-              uiSettings,
             }}
           />
         )}

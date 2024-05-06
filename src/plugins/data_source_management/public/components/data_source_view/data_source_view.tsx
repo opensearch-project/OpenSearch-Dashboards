@@ -20,16 +20,12 @@ import {
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
-import {
-  getDataSourceById,
-  handleDataSourceFetchError,
-  handleNoAvailableDataSourceError,
-} from '../utils';
+import { getDataSourceById, handleDataSourceFetchError } from '../utils';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DataSourceItem } from '../data_source_item';
 import { LocalCluster } from '../constants';
-import { NoDataSource } from '../no_data_source';
 import './data_source_view.scss';
+import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
@@ -58,7 +54,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this.state = {
       isPopoverOpen: false,
       selectedOption: this.props.selectedOption ? this.props.selectedOption : [],
-      showEmptyState: !this.props.selectedOption?.length && this.props.hideLocalCluster,
+      showEmptyState: false,
       showError: false,
       defaultDataSource: null,
     };
@@ -93,12 +89,10 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     ) {
       this.setState({
         selectedOption: [],
-        showEmptyState: true,
       });
       if (this.props.onSelectedDataSources) {
         this.props.onSelectedDataSources([]);
       }
-      handleNoAvailableDataSourceError(this.props.notifications!);
       return;
     }
 
@@ -145,18 +139,13 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
   }
 
   render() {
-    if (this.state.showEmptyState) {
-      return (
-        <NoDataSource
-          totalDataSourceCount={this.state.selectedOption.length}
-          application={this.props.application}
-        />
-      );
-    }
     if (this.state.showError) {
-      return <DataSourceErrorMenu />;
+      return <DataSourceErrorMenu application={this.props.application} />;
     }
-    const label = this.state.selectedOption.length > 0 ? this.state.selectedOption[0].label : '';
+    const label =
+      this.state.selectedOption.length > 0 && this.state.selectedOption[0].label
+        ? this.state.selectedOption[0].label
+        : '';
     const options =
       this.state.selectedOption.length > 0
         ? this.state.selectedOption.map((option) => ({
@@ -166,53 +155,28 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
           }))
         : [];
 
-    const button = (
-      <>
-        <EuiButtonEmpty
-          className="dataSourceComponentButtonTitle"
-          data-test-subj="dataSourceViewButton"
-          onClick={this.onClick.bind(this)}
-          aria-label={i18n.translate('dataSourceView.dataSourceOptionsViewAriaLabel', {
-            defaultMessage: 'dataSourceViewButton',
-          })}
-          iconType="database"
-          iconSide="left"
-          size="s"
-        >
-          {label}
-        </EuiButtonEmpty>
-      </>
-    );
-
     return (
       <EuiPopover
         id={'dataSourceViewPopover'}
-        button={button}
+        button={
+          <DataSourceMenuPopoverButton
+            className={'dataSourceView'}
+            label={label}
+            onClick={this.onClick.bind(this)}
+          />
+        }
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}
         panelPaddingSize="none"
         anchorPosition="downLeft"
       >
-        <EuiContextMenuPanel>
-          <EuiPanel
-            className={'dataSourceViewOuiPanel'}
-            borderRadius="none"
-            color="transparent"
-            paddingSize="s"
-          >
-            {
-              <DataSourceDropDownHeader
-                totalDataSourceCount={1}
-                application={this.props.application}
-              />
-            }
-          </EuiPanel>
-          <EuiPanel color="subdued" paddingSize="xs" borderRadius="none">
+        <DataSourceDropDownHeader totalDataSourceCount={1} application={this.props.application} />
+        <EuiContextMenuPanel className={'dataSourceViewOuiPanel'}>
+          <EuiPanel color="subdued" paddingSize="none" borderRadius="none">
             <EuiSelectable
               options={options}
               singleSelection={true}
               data-test-subj={'dataSourceView'}
-              compressed={true}
               renderOption={(option) => (
                 <DataSourceItem
                   option={option}

@@ -1,0 +1,2 @@
+fix:
+- [BUG] Allow Save in Top Nav Menu to capture filter and query ([#6636](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6636))

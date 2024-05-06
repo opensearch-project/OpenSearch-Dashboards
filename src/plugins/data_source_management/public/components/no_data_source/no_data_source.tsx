@@ -4,57 +4,47 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@osd/i18n';
 
 import {
   EuiButton,
-  EuiButtonEmpty,
-  EuiContextMenuPanel,
-  EuiHorizontalRule,
   EuiPanel,
   EuiPopover,
-  EuiSpacer,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { FormattedMessage } from 'react-intl';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DSM_APP_ID } from '../../plugin';
+import { EmptyIcon } from '../custom_database_icon';
 
 interface DataSourceDropDownHeaderProps {
-  totalDataSourceCount: number;
-  activeDataSourceCount?: number;
   application?: ApplicationStart;
 }
 
-export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
-  activeDataSourceCount,
-  totalDataSourceCount,
-  application,
-}) => {
+export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({ application }) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
-  const label = ' No data sources';
   const button = (
-    <EuiButtonEmpty
+    <EuiButtonIcon
       className="euiHeaderLink"
-      data-test-subj="dataSourceEmptyStateHeaderButton"
-      iconType="alert"
-      iconSide="left"
+      data-test-subj="dataSourceEmptyMenuHeaderLink"
+      aria-label={i18n.translate('dataSourceEmpty.dataSourceEmptyMenuHeaderLink', {
+        defaultMessage: 'dataSourceEmptyMenuHeaderLink',
+      })}
+      iconType={() => <EmptyIcon />}
       size="s"
-      color="primary"
-      onClick={() => {
-        setShowPopover(!showPopover);
-      }}
-    >
-      {label}
-    </EuiButtonEmpty>
+      onClick={() => setShowPopover(!showPopover)}
+    />
   );
 
   const redirectButton = (
     <EuiButton
-      iconType="popout"
-      iconSide="right"
       data-test-subj="dataSourceEmptyStateManageDataSourceButton"
       fill={false}
+      size="s"
       onClick={() =>
         application?.navigateToApp('management', {
           path: `opensearch-dashboards/${DSM_APP_ID}`,
@@ -69,20 +59,20 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
   );
   const text = (
     <>
-      <EuiText>
+      <EuiText size="s" textAlign="center">
         {
           <FormattedMessage
-            id="dataSourcesManagement.dataSourceMenu.noData"
-            defaultMessage="There is no data sources to display."
+            id="dataSourcesManagement.dataSourceEmptyMenu.noData"
+            defaultMessage="No data sources connected yet."
           />
         }
       </EuiText>
 
-      <EuiText>
+      <EuiText size="s" textAlign="center">
         {
           <FormattedMessage
-            id="dataSourcesManagement.dataSourceMenu.connect"
-            defaultMessage="Connect data source to get started"
+            id="dataSourcesManagement.dataSourceEmptyMenu.connect"
+            defaultMessage="Connect your data sources to get started."
           />
         }
       </EuiText>
@@ -91,7 +81,6 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
 
   return (
     <EuiPopover
-      initialFocus={'.euiSelectableSearch'}
       id={'dataSourceEmptyStatePopover'}
       button={button}
       isOpen={showPopover}
@@ -100,27 +89,20 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
       anchorPosition="downLeft"
       data-test-subj={'dataSourceEmptyStatePopover'}
     >
-      <EuiContextMenuPanel>
-        <EuiPanel className={'dataSourceSelectableOuiPanel'} color="transparent" paddingSize="s">
-          <DataSourceDropDownHeader
-            activeDataSourceCount={activeDataSourceCount}
-            totalDataSourceCount={totalDataSourceCount}
-            application={application}
-          />
-          <EuiHorizontalRule margin="none" />
-          <EuiSpacer size="s" />
-          <EuiPanel
-            hasBorder={false}
-            hasShadow={false}
-            className="dataSourceEmptyStatePanel"
-            data-test-subj="datasourceTableEmptyState"
-          >
-            {text}
-            <EuiSpacer />
-            {redirectButton}
-          </EuiPanel>
-        </EuiPanel>
-      </EuiContextMenuPanel>
+      <DataSourceDropDownHeader totalDataSourceCount={0} application={application} />
+      <EuiPanel
+        hasBorder={false}
+        hasShadow={false}
+        className="dataSourceEmptyStatePanel"
+        data-test-subj="dataSourceEmptyStatePanel"
+      >
+        <EuiFlexGroup justifyContent={'center'}>
+          <EuiFlexItem grow={false}>{text}</EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup justifyContent={'center'}>
+          <EuiFlexItem grow={false}>{redirectButton}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     </EuiPopover>
   );
 };

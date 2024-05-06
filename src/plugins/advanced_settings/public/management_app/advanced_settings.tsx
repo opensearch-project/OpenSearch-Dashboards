@@ -161,6 +161,7 @@ export class AdvancedSettingsComponent extends Component<
 
   mapConfig(config: IUiSettingsClient) {
     const all = config.getAll();
+    const userSettingsEnabled = config.get('theme:enableUserControl');
     return Object.entries(all)
       .map((setting) => {
         return toEditableConfig({
@@ -169,6 +170,7 @@ export class AdvancedSettingsComponent extends Component<
           value: setting[1].userValue,
           isCustom: config.isCustom(setting[0]),
           isOverridden: config.isOverridden(setting[0]),
+          userSettingsEnabled,
         });
       })
       .filter((c) => !c.readonly)

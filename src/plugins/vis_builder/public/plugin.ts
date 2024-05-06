@@ -125,6 +125,10 @@ export class VisBuilderPlugin
 
         // make sure the index pattern list is up to date
         pluginsStart.data.indexPatterns.clearCache();
+        // make sure the filterManager is refreshed
+        const filters = pluginsStart.data.query.filterManager.getFilters();
+        const pinFilters = filters.filter(opensearchFilters.isFilterPinned);
+        pluginsStart.data.query.filterManager.setFilters(pinFilters ? pinFilters : []);
         // make sure a default index pattern exists
         // if not, the page will be redirected to management and visualize won't be rendered
         // TODO: Add the redirect

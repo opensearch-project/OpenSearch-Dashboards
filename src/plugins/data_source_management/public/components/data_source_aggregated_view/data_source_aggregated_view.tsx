@@ -4,21 +4,19 @@
  */
 
 import React from 'react';
+import { EuiContextMenuPanel, EuiPanel, EuiPopover, EuiSelectable, EuiSwitch } from '@elastic/eui';
 import {
-  EuiButtonEmpty,
-  EuiContextMenuPanel,
-  EuiPanel,
-  EuiPopover,
-  EuiSelectable,
-  EuiSwitch,
-} from '@elastic/eui';
-import { i18n } from '@osd/i18n';
-import {
+  ApplicationStart,
   IUiSettingsClient,
   SavedObjectsClientContract,
   ToastsStart,
 } from 'opensearch-dashboards/public';
-import { getApplication, getDataSourcesWithFields, handleDataSourceFetchError } from '../utils';
+import {
+  getApplication,
+  getDataSourcesWithFields,
+  handleDataSourceFetchError,
+  handleNoAvailableDataSourceError,
+} from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 import { NoDataSource } from '../no_data_source';
@@ -28,6 +26,7 @@ import { DataSourceOption } from '../data_source_menu/types';
 import { DataSourceItem } from '../data_source_item';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import './data_source_aggregated_view.scss';
+import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
 
 interface DataSourceAggregatedViewProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -38,6 +37,7 @@ interface DataSourceAggregatedViewProps {
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   displayAllCompatibleDataSources: boolean;
   uiSettings?: IUiSettingsClient;
+  application?: ApplicationStart;
 }
 
 interface DataSourceAggregatedViewState extends DataSourceBaseState {
@@ -112,6 +112,15 @@ export class DataSourceAggregatedView extends React.Component<
           allDataSourcesIdToTitleMap.set('', 'Local cluster');
         }
 
+        if (allDataSourcesIdToTitleMap.size === 0) {
+          handleNoAvailableDataSourceError(
+            this.onEmptyState.bind(this),
+            this.props.notifications,
+            this.props.application
+          );
+          return;
+        }
+
         this.setState({
           ...this.state,
           allDataSourcesIdToTitleMap,
@@ -124,30 +133,21 @@ export class DataSourceAggregatedView extends React.Component<
       });
   }
 
+  onEmptyState() {
+    this.setState({ showEmptyState: true });
+  }
+
   onError() {
     this.setState({ showError: true });
   }
 
   render() {
     if (this.state.showEmptyState) {
-      return <NoDataSource />;
+      return <NoDataSource application={this.props.application} />;
     }
     if (this.state.showError) {
-      return <DataSourceErrorMenu />;
+      return <DataSourceErrorMenu application={this.props.application} />;
     }
-    const button = (
-      <EuiButtonEmpty
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        aria-label={i18n.translate('dataSourceAggregatedView.dataSourceOptionsButtonAriaLabel', {
-          defaultMessage: 'dataSourceAggregatedViewMenuButton',
-        })}
-        iconType="database"
-        iconSide="left"
-        size="s"
-        onClick={this.onDataSourcesClick.bind(this)}
-      />
-    );
 
     let items: DataSourceOptionDisplay[] = [];
 
@@ -196,22 +196,19 @@ export class DataSourceAggregatedView extends React.Component<
       <>
         <EuiPopover
           id={'dataSourceSViewContextMenuPopover'}
-          button={button}
+          button={
+            <DataSourceMenuPopoverButton
+              className={'dataSourceAggregatedView'}
+              onClick={this.onDataSourcesClick.bind(this)}
+            />
+          }
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover.bind(this)}
           panelPaddingSize="none"
           anchorPosition="downLeft"
         >
+          {titleComponent}
           <EuiContextMenuPanel>
-            <EuiPanel
-              className={'dataSourceAggregatedViewOuiPanel'}
-              borderRadius="none"
-              hasBorder={false}
-              color="transparent"
-              paddingSize="s"
-            >
-              {titleComponent}
-            </EuiPanel>
             <EuiPanel
               className={'dataSourceAggregatedViewOuiPanel'}
               paddingSize="none"

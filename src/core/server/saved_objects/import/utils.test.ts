@@ -7,6 +7,7 @@ import { readFileSync } from 'fs';
 import {
   extractVegaSpecFromSavedObject,
   getDataSourceTitleFromId,
+  getUpdatedTSVBVisState,
   updateDataSourceNameInVegaSpec,
 } from './utils';
 import { parse } from 'hjson';
@@ -244,4 +245,67 @@ describe('getDataSourceTitleFromId()', () => {
   test('When a nonexistent id is passed, return nothing', async () => {
     expect(await getDataSourceTitleFromId('nonexistent-id', savedObjectsClient)).toBe(undefined);
   });
+});
+
+describe('getUpdatedTSVBVisState', () => {
+  const getTSVBSavedObject = (dataSourceId?: string) => {
+    const params = dataSourceId ? { data_source_id: dataSourceId } : {};
+    const references = dataSourceId
+      ? [{ id: dataSourceId, type: 'data-source', name: 'dataSource' }]
+      : [];
+
+    return {
+      type: 'visualization',
+      id: 'some-id',
+      attributes: {
+        title: 'Some Title',
+        visState: JSON.stringify({
+          type: 'metrics',
+          params,
+        }),
+      },
+      references,
+    };
+  };
+
+  test('non-TSVB object should return the old references and visState', () => {
+    const visState = {
+      type: 'area',
+      params: {},
+    };
+
+    const object = {
+      type: 'visualization',
+      id: 'some-id',
+      attributes: {
+        title: 'Some title',
+        visState: JSON.stringify(visState),
+      },
+      references: [],
+    };
+
+    expect(getUpdatedTSVBVisState(object, 'some-datasource-id')).toMatchObject({
+      visState: JSON.stringify(visState),
+      references: [],
+    });
+  });
+
+  test.each(['old-datasource-id', undefined])(
+    `non-MDS TSVB object should update the datasource when the old datasource is "%s"`,
+    (oldDataSourceId) => {
+      const object = getTSVBSavedObject(oldDataSourceId);
+      const dataSourceId = 'some-datasource-id';
+      const expectedVisState = JSON.stringify({
+        type: 'metrics',
+        params: {
+          data_source_id: dataSourceId,
+        },
+      });
+
+      expect(getUpdatedTSVBVisState(object, dataSourceId)).toMatchObject({
+        visState: expectedVisState,
+        references: [{ id: dataSourceId, name: 'dataSource', type: 'data-source' }],
+      });
+    }
+  );
 });

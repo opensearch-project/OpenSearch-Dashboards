@@ -59,7 +59,7 @@ import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
-import { AppNavLinkStatus } from '../../../core/public';
+import { AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH, IMPORT_SAMPLE_DATA_APP_ID } from '../common/constants';
 import { DataSourcePluginStart } from '../../data_source/public';
 import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
@@ -146,6 +146,7 @@ export class HomePublicPlugin
         const { renderApp } = await import('./application');
         return await renderApp(params.element, coreStart, params.history);
       },
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
     // Register import sample data as a standalone app so that it is available inside workspace.
