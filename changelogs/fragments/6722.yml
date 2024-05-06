@@ -1,0 +1,2 @@
+fix:
+- Test failures related to #6443 ([#6722](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6722))
