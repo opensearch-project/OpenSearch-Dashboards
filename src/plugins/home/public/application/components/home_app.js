@@ -51,6 +51,44 @@ const RedirectToDefaultApp = () => {
   return null;
 };
 
+const renderTutorialDirectory = (props) => {
+  const { addBasePath, environmentService } = getServices();
+  const environment = environmentService.getEnvironment();
+  const isCloudEnabled = environment.cloud;
+
+  return (
+    <TutorialDirectory
+      addBasePath={addBasePath}
+      openTab={props.match.params.tab}
+      isCloudEnabled={isCloudEnabled}
+      withoutHomeBreadCrumb={props.withoutHomeBreadCrumb}
+    />
+  );
+};
+
+export function ImportSampleDataApp() {
+  return (
+    <I18nProvider>
+      <Router>
+        <Switch>
+          <Route
+            path="*"
+            exact={true}
+            component={(props) =>
+              renderTutorialDirectory({
+                ...props,
+                // For standalone import sample data application
+                // home breadcrumb should not be appended as it is not a sub app of home
+                withoutHomeBreadCrumb: true,
+              })
+            }
+          />
+        </Switch>
+      </Router>
+    </I18nProvider>
+  );
+}
+
 export function HomeApp({ directories, solutions }) {
   const {
     savedObjectsClient,
@@ -62,16 +100,6 @@ export function HomeApp({ directories, solutions }) {
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
-
-  const renderTutorialDirectory = (props) => {
-    return (
-      <TutorialDirectory
-        addBasePath={addBasePath}
-        openTab={props.match.params.tab}
-        isCloudEnabled={isCloudEnabled}
-      />
-    );
-  };
 
   const renderTutorial = (props) => {
     return (

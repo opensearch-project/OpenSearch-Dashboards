@@ -34,7 +34,7 @@ import { i18n } from '@osd/i18n';
 import { ScopedHistory, CoreStart } from 'opensearch-dashboards/public';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 // @ts-ignore
-import { HomeApp } from './components/home_app';
+import { HomeApp, ImportSampleDataApp } from './components/home_app';
 import { getServices } from './opensearch_dashboards_services';
 
 import './index.scss';
@@ -68,6 +68,31 @@ export const renderApp = async (
   render(
     <OpenSearchDashboardsContextProvider services={{ ...coreStart }}>
       <HomeApp directories={directories} solutions={solutions} />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
+
+  return () => {
+    unmountComponentAtNode(element);
+    unlisten();
+  };
+};
+
+export const renderImportSampleDataApp = async (
+  element: HTMLElement,
+  coreStart: CoreStart,
+  history: ScopedHistory
+) => {
+  // dispatch synthetic hash change event to update hash history objects
+  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+  // This must be called before the app is mounted to avoid call this after the redirect to default app logic kicks in
+  const unlisten = history.listen((location) => {
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+
+  render(
+    <OpenSearchDashboardsContextProvider services={{ ...coreStart }}>
+      <ImportSampleDataApp />
     </OpenSearchDashboardsContextProvider>,
     element
   );
