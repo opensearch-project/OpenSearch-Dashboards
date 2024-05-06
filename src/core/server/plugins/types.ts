@@ -292,7 +292,7 @@ export const SharedGlobalConfigKeys = {
     'configIndex',
     'autocompleteTerminateAfter',
     'autocompleteTimeout',
-    'topRightNavigation',
+    'futureNavigation',
   ] as const,
   opensearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,

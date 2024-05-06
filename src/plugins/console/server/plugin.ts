@@ -59,7 +59,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       dev_tools: {
         show: true,
         save: true,
-        topRightNavigation: globalConfig.opensearchDashboards.topRightNavigation,
+        futureNavigation: globalConfig.opensearchDashboards.futureNavigation,
       },
     }));
 
