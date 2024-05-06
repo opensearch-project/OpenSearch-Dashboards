@@ -187,6 +187,9 @@ export class OpenSearchDashboardsMigrator {
           index === opensearchDashboardsIndexName
             ? 'opensearch_dashboards_index_template*'
             : undefined,
+        typesToDelete: this.savedObjectsConfig.delete.enabled
+          ? this.savedObjectsConfig.delete.types
+          : undefined,
         convertToAliasScript: indexMap[index].script,
         opensearchDashboardsRawConfig: this.opensearchDashboardsRawConfig,
       });

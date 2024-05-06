@@ -12,8 +12,6 @@ import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
 import { render } from '@testing-library/react';
 import * as utils from '../utils';
-import { EuiSelectable } from '@elastic/eui';
-import { dataSourceOptionGroupLabel } from '../utils';
 
 describe('DataSourceSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -103,7 +101,7 @@ describe('DataSourceSelectable', () => {
 
     await nextTick();
 
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceSelectableButton');
     button.click();
 
     expect(container.getByTestId('dataSourceSelectableContextMenuPopover')).toBeVisible();
@@ -192,7 +190,7 @@ describe('DataSourceSelectable', () => {
     );
 
     await nextTick();
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceSelectableButton');
     expect(button).toHaveTextContent('test2');
   });
 
@@ -211,7 +209,7 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceSelectableButton');
     expect(button).toHaveTextContent('test2');
   });
 
@@ -230,7 +228,7 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceSelectableButton');
     expect(button).toHaveTextContent('');
     expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
   });
@@ -250,7 +248,7 @@ describe('DataSourceSelectable', () => {
       />
     );
     await nextTick();
-    const button = await container.findByTestId('dataSourceSelectableContextMenuHeaderLink');
+    const button = await container.findByTestId('dataSourceSelectableButton');
     expect(button).toHaveTextContent('');
     expect(toasts.addWarning).toBeCalledWith('Data source with id: undefined is not available');
   });

@@ -104,7 +104,11 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Workspace] Add permission tab to workspace create update page ([#6378](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6378))
 - [Workspace] Hide datasource and advanced settings menu in dashboard management when in workspace. ([#6455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6455))
 - [Multiple Datasource] Modify selectable picker to remove group label and close popover after selection ([#6515](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6515))
+- [Multiple Datasource] Extract the button component for datasource picker to avoid duplicate code ([#6559](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6559))
 - [Workspace] Add workspaces filter to saved objects page. ([#6458](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6458))
+- [Multiple Datasource] Support multi data source in Region map ([#6654](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6654))
+- Add `rightNavigationButton` component in chrome service for applications to register and add dev tool to top right navigation. ([#6553](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6553))
+- Enable UI Metric Collector to collect UI Metrics and Application Usage ([#6203](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6203))
 
 ### 🐛 Bug Fixes
 
@@ -136,6 +140,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Multiple Datasource] Validation succeed as long as status code in response is 200 ([#6399](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6399))
 - [BUG][Multiple Datasource] Fix on data source selectable and readonly component are not consistent ([#6545]https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6545)
 - [BUG][Multiple Datasource] Add validation for title length to be no longer than 32 characters [#6452](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6452))
+- [Dev Tool] Add additional themed styles to ace overrides ([#5327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5327))
+- [VisBuilder] Allow saving and loading filter and query in a saved VisBuilder  ([#6460](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6460))
 
 ### 🚞 Infrastructure
 
@@ -204,6 +210,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Discover] Added customizable pagination options based on Discover UI settings [#5610](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5610)
 - [PM] Enhance single version requirements imposed during bootstrapping ([#5675](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5675))
 - [Custom Branding] Relative URL should be allowed for logos ([#5572](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5572))
+- [Theme] Make theme and dark mode settings user/device specific (in local storage), with opt-out ([#5652](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5652))
 - Revert to legacy discover table and add toggle to new discover table ([#5789](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5789))
 - [Discover] Add collapsible and resizeable sidebar ([#5789](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5789))
 - [Discover] Enhanced the data source selector with added sorting functionality ([#5719](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5719))

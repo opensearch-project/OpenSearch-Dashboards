@@ -5,14 +5,9 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -134,14 +129,9 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -269,14 +259,9 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -392,14 +377,9 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -521,14 +501,9 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -650,14 +625,9 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -785,14 +755,9 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -908,14 +873,9 @@ exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSou
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -1037,14 +997,9 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -1129,14 +1084,9 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -1221,14 +1171,9 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -1313,14 +1258,9 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -1405,14 +1345,9 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -1497,14 +1432,9 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -1589,14 +1519,9 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -1681,14 +1606,9 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -1773,14 +1693,9 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
@@ -1865,14 +1780,9 @@ exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSource
   <EuiPopover
     anchorPosition="downLeft"
     button={
-      <EuiButtonEmpty
-        aria-label="dataSourceAggregatedViewMenuButton"
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        iconSide="left"
-        iconType="database"
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
         onClick={[Function]}
-        size="s"
       />
     }
     closePopover={[Function]}
