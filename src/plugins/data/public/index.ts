@@ -500,19 +500,17 @@ export { DataPublicPlugin as Plugin };
 // Export datasources
 export {
   DataSource,
-  IDataSourceMetaData,
+  IDataSourceMetadata,
   IDataSetParams,
   IDataSourceQueryParams,
   IDataSourceQueryResult,
-  ISourceDataSet,
-  ConnectionStatus,
+  SourceDataSet,
+  DataSourceConnectionStatus,
   DataSourceFactory,
-  DataSourceConfig,
 } from './data_sources/datasource';
 export {
   DataSourceRegistrationError,
   DataSourceService,
-  DataSourceType,
   IDataSourceFilter,
   IDataSourceRegistrationResult,
 } from './data_sources/datasource_services';

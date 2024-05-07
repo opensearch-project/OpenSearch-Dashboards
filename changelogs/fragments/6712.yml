@@ -1,0 +1,2 @@
+feat:
+- Add `opensearchDashboards.futureNavigation` config to control dev tool top right nav button. ([#6712](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6712))

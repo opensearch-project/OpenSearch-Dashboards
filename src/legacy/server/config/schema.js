@@ -252,6 +252,7 @@ export default () =>
       survey: Joi.object({
         url: Joi.any().default('/'),
       }),
+      futureNavigation: Joi.boolean().default(false),
     }).default(),
 
     savedObjects: HANDLED_IN_NEW_PLATFORM,
