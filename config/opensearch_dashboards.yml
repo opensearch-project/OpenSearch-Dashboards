@@ -303,6 +303,9 @@
 # Set the value of this setting to false to hide the help menu link to the OpenSearch Dashboards user survey
 # opensearchDashboards.survey.url: "https://survey.opensearch.org"
 
+# @experimental Set the value of this setting to display navigation updates, including dev tool top right navigation
+# opensearchDashboards.futureNavigation: false
+
 # Set the value of this setting to true to enable plugin augmentation on Dashboard
 # vis_augmenter.pluginAugmentationEnabled: true
 
