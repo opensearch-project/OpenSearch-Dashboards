@@ -76,6 +76,8 @@ opensearch_dashboards_vars=(
     map.tilemap.options.minZoom
     map.tilemap.options.subdomains
     map.tilemap.url
+    migrations.delete.enabled
+    migrations.delete.types
     monitoring.cluster_alerts.email_notifications.email_address
     monitoring.enabled
     monitoring.opensearchDashboards.collection.enabled
