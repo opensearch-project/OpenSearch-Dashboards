@@ -93,7 +93,7 @@ describe('getLoggerStream', () => {
     expect(lines[0]).toMatch(/^log   \[[^\]]*\] \[foo\] test data$/);
   });
 
-  it('should log to custom file when the json config is set to true and streamErrorHandling', async () => {
+  it('should log to custom file when the json config is set to true and ignoreEnospcError', async () => {
     const dir = os.tmpdir();
     const logfile = `dest-${Date.now()}.log`;
     const dest = path.join(dir, logfile);
@@ -102,7 +102,7 @@ describe('getLoggerStream', () => {
       config: {
         json: true,
         dest,
-        streamErrorHandling: true,
+        ignoreEnospcError: true,
         filter: {},
       },
       events: { log: '*' },

@@ -59,7 +59,7 @@ export function getLoggerStream({ events, config }) {
       encoding: 'utf8',
     });
 
-    if (config.streamErrorHandling) {
+    if (config.ignoreEnospcError) {
       pipeline(logInterceptor, squeeze, format, dest, onFinished);
     } else {
       logInterceptor.on('end', () => {
