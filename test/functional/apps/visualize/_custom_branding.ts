@@ -47,7 +47,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('with customized logo for opensearch overview header in dark mode', async () => {
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
-        await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:enableUserControl');
         await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
         await PageObjects.common.navigateToApp('opensearch_dashboards_overview');
         await testSubjects.existOrFail('osdOverviewPageHeaderLogo');
@@ -102,7 +101,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('with customized logo in dark mode', async () => {
         await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
-        await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:enableUserControl');
         await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
         await PageObjects.common.navigateToApp('home');
         await testSubjects.existOrFail('welcomeCustomLogo');
@@ -127,8 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('in default mode', async () => {
         it('with customized logo in header bar', async () => {
-          //  The expanded header shows up with a dark background irrespective of the color scheme and because of that, we will always have a dark logo there.
-          await globalNav.logoExistsOrFail(expectedFullLogoDarkMode);
+          await globalNav.logoExistsOrFail(expectedFullLogo);
         });
 
         it('with customized mark logo button in header bar', async () => {
@@ -183,7 +180,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe('in dark mode', async () => {
         before(async function () {
           await PageObjects.common.navigateToApp('management/opensearch-dashboards/settings');
-          await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:enableUserControl');
           await PageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode');
           await PageObjects.common.navigateToApp('home');
         });
