@@ -91,7 +91,7 @@ export class UiSettingsClient implements IUiSettingsClient {
     return copiedDefaults;
   }
 
-  getOverrideOrDefault(key: string): unknown {
+  getOverrideOrDefault<T = unknown>(key: string): T {
     // Note: this.overrides is an object with simple values, whereas this.defaults contains UiSettingsParams as the value for each key.
     return this.isOverridden(key) ? this.overrides[key] : this.defaults[key]?.value;
   }
