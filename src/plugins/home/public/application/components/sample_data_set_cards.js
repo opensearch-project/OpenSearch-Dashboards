@@ -81,10 +81,7 @@ export class SampleDataSetCards extends React.Component {
   loadSampleDataSets = async (dataSourceId) => {
     let sampleDataSets;
     try {
-      sampleDataSets = await listSampleDataSets(
-        dataSourceId,
-        getServices().workspaces.currentWorkspaceId$.getValue()
-      );
+      sampleDataSets = await listSampleDataSets(dataSourceId);
     } catch (fetchError) {
       this.toastNotifications.addDanger({
         title: i18n.translate('home.sampleDataSet.unableToLoadListErrorMessage', {
@@ -117,12 +114,7 @@ export class SampleDataSetCards extends React.Component {
     }));
 
     try {
-      await installSampleDataSet(
-        id,
-        targetSampleDataSet.defaultIndex,
-        dataSourceId,
-        getServices().workspaces.currentWorkspaceId$.getValue()
-      );
+      await installSampleDataSet(id, targetSampleDataSet.defaultIndex, dataSourceId);
     } catch (fetchError) {
       if (this._isMounted) {
         this.setState((prevState) => ({
@@ -170,12 +162,7 @@ export class SampleDataSetCards extends React.Component {
     }));
 
     try {
-      await uninstallSampleDataSet(
-        id,
-        targetSampleDataSet.defaultIndex,
-        dataSourceId,
-        getServices().workspaces.currentWorkspaceId$.getValue()
-      );
+      await uninstallSampleDataSet(id, targetSampleDataSet.defaultIndex, dataSourceId);
     } catch (fetchError) {
       if (this._isMounted) {
         this.setState((prevState) => ({
