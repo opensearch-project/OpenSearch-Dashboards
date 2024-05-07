@@ -1,0 +1,367 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Work with data section renders with observability card named Set up pre-built dashboards 1`] = `
+<element>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  >
+    <div
+      class="euiFlexItem"
+    >
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+      >
+        <div
+          class="euiCard__top"
+        >
+          <div
+            class="euiCard__image"
+          >
+            <figure
+              class="euiImage euiImage--original"
+            >
+              <img
+                alt="Sample data image"
+                class="euiImage__img"
+                src="/plugins/home/assets/sample_data_resources/ecommerce/dashboard_new.png"
+              />
+            </figure>
+          </div>
+        </div>
+        <div
+          class="euiCard__content"
+        >
+          <span
+            class="euiTitle euiTitle--xsmall euiCard__title"
+            id="generated-idTitle"
+          >
+            <button
+              aria-describedby=" generated-idDescription"
+              class="euiCard__titleButton"
+            >
+              Start with a sample data set
+            </button>
+          </span>
+          <div
+            class="euiText euiText--small euiCard__description"
+            id="generated-idDescription"
+          >
+            <p>
+              with Sample Data Sets
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem"
+    >
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+      >
+        <div
+          class="euiCard__top"
+        >
+          <div
+            class="euiCard__image"
+          >
+            <figure
+              class="euiImage euiImage--original"
+            >
+              <img
+                alt="Injestion image"
+                class="euiImage__img"
+                src="/plugins/home/assets/ingestion.png"
+              />
+            </figure>
+          </div>
+        </div>
+        <div
+          class="euiCard__content"
+        >
+          <span
+            class="euiTitle euiTitle--xsmall euiCard__title"
+            id="generated-idTitle"
+          >
+            <button
+              aria-describedby=" generated-idDescription"
+              class="euiCard__titleButton"
+            >
+              <p>
+                Prepare and ingest data
+                <span
+                  class="popover-title-icon"
+                  data-euiicon-type="popout"
+                />
+              </p>
+            </button>
+          </span>
+          <div
+            class="euiText euiText--small euiCard__description"
+            id="generated-idDescription"
+          >
+            <p>
+              with Data Prepper
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem"
+    >
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+      >
+        <div
+          class="euiCard__top"
+        >
+          <div
+            class="euiCard__image"
+          >
+            <figure
+              class="euiImage euiImage--original"
+            >
+              <img
+                alt="Integration image"
+                class="euiImage__img"
+                src="/plugins/home/assets/integration.png"
+              />
+            </figure>
+          </div>
+        </div>
+        <div
+          class="euiCard__content"
+        >
+          <span
+            class="euiTitle euiTitle--xsmall euiCard__title"
+            id="generated-idTitle"
+          >
+            <button
+              aria-describedby=" generated-idDescription"
+              class="euiCard__titleButton"
+            >
+              Set up pre-built dashboards
+            </button>
+          </span>
+          <div
+            class="euiText euiText--small euiCard__description"
+            id="generated-idDescription"
+          >
+            <p>
+              with integrations
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem"
+    >
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+      >
+        <div
+          class="euiCard__top"
+        >
+          <div
+            class="euiCard__image"
+          >
+            <figure
+              class="euiImage euiImage--original"
+            >
+              <img
+                alt="Explore image"
+                class="euiImage__img"
+                src="/plugins/home/assets/discover_light.png"
+              />
+            </figure>
+          </div>
+        </div>
+        <div
+          class="euiCard__content"
+        >
+          <span
+            class="euiTitle euiTitle--xsmall euiCard__title"
+            id="generated-idTitle"
+          >
+            <button
+              aria-describedby=" generated-idDescription"
+              class="euiCard__titleButton"
+            >
+              Query and filter data for in-depth analysis
+            </button>
+          </span>
+          <div
+            class="euiText euiText--small euiCard__description"
+            id="generated-idDescription"
+          >
+            <p>
+              with Discover
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</element>
+`;
+
+exports[`Work with data section renders without observability card 1`] = `
+<element>
+  <div
+    class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  >
+    <div
+      class="euiFlexItem"
+    >
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+      >
+        <div
+          class="euiCard__top"
+        >
+          <div
+            class="euiCard__image"
+          >
+            <figure
+              class="euiImage euiImage--original"
+            >
+              <img
+                alt="Sample data image"
+                class="euiImage__img"
+                src="/plugins/home/assets/sample_data_resources/ecommerce/dashboard_new.png"
+              />
+            </figure>
+          </div>
+        </div>
+        <div
+          class="euiCard__content"
+        >
+          <span
+            class="euiTitle euiTitle--xsmall euiCard__title"
+            id="generated-idTitle"
+          >
+            <button
+              aria-describedby=" generated-idDescription"
+              class="euiCard__titleButton"
+            >
+              Start with a sample data set
+            </button>
+          </span>
+          <div
+            class="euiText euiText--small euiCard__description"
+            id="generated-idDescription"
+          >
+            <p>
+              with Sample Data Sets
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem"
+    >
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+      >
+        <div
+          class="euiCard__top"
+        >
+          <div
+            class="euiCard__image"
+          >
+            <figure
+              class="euiImage euiImage--original"
+            >
+              <img
+                alt="Injestion image"
+                class="euiImage__img"
+                src="/plugins/home/assets/ingestion.png"
+              />
+            </figure>
+          </div>
+        </div>
+        <div
+          class="euiCard__content"
+        >
+          <span
+            class="euiTitle euiTitle--xsmall euiCard__title"
+            id="generated-idTitle"
+          >
+            <button
+              aria-describedby=" generated-idDescription"
+              class="euiCard__titleButton"
+            >
+              <p>
+                Prepare and ingest data
+                <span
+                  class="popover-title-icon"
+                  data-euiicon-type="popout"
+                />
+              </p>
+            </button>
+          </span>
+          <div
+            class="euiText euiText--small euiCard__description"
+            id="generated-idDescription"
+          >
+            <p>
+              with Data Prepper
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexItem"
+    >
+      <div
+        class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--leftAligned euiCard--isClickable"
+      >
+        <div
+          class="euiCard__top"
+        >
+          <div
+            class="euiCard__image"
+          >
+            <figure
+              class="euiImage euiImage--original"
+            >
+              <img
+                alt="Explore image"
+                class="euiImage__img"
+                src="/plugins/home/assets/discover_light.png"
+              />
+            </figure>
+          </div>
+        </div>
+        <div
+          class="euiCard__content"
+        >
+          <span
+            class="euiTitle euiTitle--xsmall euiCard__title"
+            id="generated-idTitle"
+          >
+            <button
+              aria-describedby=" generated-idDescription"
+              class="euiCard__titleButton"
+            >
+              Query and filter data for in-depth analysis
+            </button>
+          </span>
+          <div
+            class="euiText euiText--small euiCard__description"
+            id="generated-idDescription"
+          >
+            <p>
+              with Discover
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</element>
+`;

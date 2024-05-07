@@ -3,16 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiCard,
-  EuiTitle,
-  EuiButtonIcon,
-  EuiLink,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiCard, EuiLink } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { Section } from '../../../../services/section_type/section_type';
 import { renderFn } from './utils';

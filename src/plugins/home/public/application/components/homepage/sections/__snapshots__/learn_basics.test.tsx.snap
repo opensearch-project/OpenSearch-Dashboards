@@ -1,0 +1,290 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Learn basics section is rendered 1`] = `
+<element>
+  <div>
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        class="euiFlexItem euiFlexItem--flexGrow1"
+      >
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon"
+        >
+          <div
+            class="euiCard__top"
+          >
+            <span
+              class="euiCard__icon"
+              data-euiicon-type="document"
+            />
+          </div>
+          <div
+            class="euiCard__content"
+          >
+            <span
+              class="euiTitle euiTitle--xsmall euiCard__title"
+              id="generated-idTitle"
+            >
+              <button
+                aria-describedby=" generated-idDescription"
+                class="euiCard__titleButton"
+              >
+                <p>
+                  Quickstart guide
+                  <span
+                    class="popover-title-icon"
+                    data-euiicon-type="popout"
+                  />
+                </p>
+              </button>
+            </span>
+            <div
+              class="euiText euiText--small euiCard__description"
+              id="generated-idDescription"
+            >
+              <p>
+                Get started in minutes with OpenSearch Dashboards.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrow1"
+      >
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon"
+        >
+          <div
+            class="euiCard__top"
+          >
+            <span
+              class="euiCard__icon"
+              data-euiicon-type="document"
+            />
+          </div>
+          <div
+            class="euiCard__content"
+          >
+            <span
+              class="euiTitle euiTitle--xsmall euiCard__title"
+              id="generated-idTitle"
+            >
+              <button
+                aria-describedby=" generated-idDescription"
+                class="euiCard__titleButton"
+              >
+                <p>
+                  Building data visualizations
+                  <span
+                    class="popover-title-icon"
+                    data-euiicon-type="popout"
+                  />
+                </p>
+              </button>
+            </span>
+            <div
+              class="euiText euiText--small euiCard__description"
+              id="generated-idDescription"
+            >
+              <p>
+                Design interactive charts and graphs to unlock insights from your data.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+    >
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon"
+        >
+          <div
+            class="euiCard__top"
+          >
+            <span
+              class="euiCard__icon"
+              data-euiicon-type="document"
+            />
+          </div>
+          <div
+            class="euiCard__content"
+          >
+            <span
+              class="euiTitle euiTitle--xsmall euiCard__title"
+              id="generated-idTitle"
+            >
+              <button
+                aria-describedby=" generated-idDescription"
+                class="euiCard__titleButton"
+              >
+                <p>
+                  Creating dashboards
+                  <span
+                    class="popover-title-icon"
+                    data-euiicon-type="popout"
+                  />
+                </p>
+              </button>
+            </span>
+            <div
+              class="euiText euiText--small euiCard__description"
+              id="generated-idDescription"
+            >
+              <p>
+                Build interactive dashboards to explore and analyze your data.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon"
+        >
+          <div
+            class="euiCard__top"
+          >
+            <span
+              class="euiCard__icon"
+              data-euiicon-type="document"
+            />
+          </div>
+          <div
+            class="euiCard__content"
+          >
+            <span
+              class="euiTitle euiTitle--xsmall euiCard__title"
+              id="generated-idTitle"
+            >
+              <button
+                aria-describedby=" generated-idDescription"
+                class="euiCard__titleButton"
+              >
+                <p>
+                  Get familiar with Discover
+                  <span
+                    class="popover-title-icon"
+                    data-euiicon-type="popout"
+                  />
+                </p>
+              </button>
+            </span>
+            <div
+              class="euiText euiText--small euiCard__description"
+              id="generated-idDescription"
+            >
+              <p>
+                Transform raw data into actionable insights.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+    >
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon"
+        >
+          <div
+            class="euiCard__top"
+          >
+            <span
+              class="euiCard__icon"
+              data-euiicon-type="document"
+            />
+          </div>
+          <div
+            class="euiCard__content"
+          >
+            <span
+              class="euiTitle euiTitle--xsmall euiCard__title"
+              id="generated-idTitle"
+            >
+              <button
+                aria-describedby=" generated-idDescription"
+                class="euiCard__titleButton"
+              >
+                <p>
+                  Running queries in Dev Tools console
+                  <span
+                    class="popover-title-icon"
+                    data-euiicon-type="popout"
+                  />
+                </p>
+              </button>
+            </span>
+            <div
+              class="euiText euiText--small euiCard__description"
+              id="generated-idDescription"
+            >
+              <p>
+                Execute queries and explore your code directly in OpenSearch Dashboards using Query DSL.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--horizontal euiCard--isClickable euiCard--hasIcon"
+        >
+          <div
+            class="euiCard__top"
+          >
+            <span
+              class="euiCard__icon"
+              data-euiicon-type="document"
+            />
+          </div>
+          <div
+            class="euiCard__content"
+          >
+            <span
+              class="euiTitle euiTitle--xsmall euiCard__title"
+              id="generated-idTitle"
+            >
+              <button
+                aria-describedby=" generated-idDescription"
+                class="euiCard__titleButton"
+              >
+                <p>
+                  Working with indexes
+                  <span
+                    class="popover-title-icon"
+                    data-euiicon-type="popout"
+                  />
+                </p>
+              </button>
+            </span>
+            <div
+              class="euiText euiText--small euiCard__description"
+              id="generated-idDescription"
+            >
+              <p>
+                Effortlessly build and manage indexes for faster, more efficient data access.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</element>
+`;

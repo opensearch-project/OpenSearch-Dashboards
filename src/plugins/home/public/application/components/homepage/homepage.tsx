@@ -170,6 +170,7 @@ const Content = () => {
               defaultMessage: 'Loading homepage',
             })}
             size="xl"
+            data-test-subj="loading"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -187,6 +188,7 @@ const Content = () => {
         telemetry={telemetry}
         branding={getBranding()}
         logos={logos}
+        data-test-subj="welcome"
       />
     );
   }
