@@ -96,9 +96,9 @@ export async function setFirstDataSourceAsDefault(
 export interface HandleNoAvailableDataSourceErrorProps {
   changeState: () => void;
   notifications: ToastsStart;
+  incompatibleDataSourcesExist: boolean;
   application?: ApplicationStart;
   callback?: (ds: DataSourceOption[]) => void;
-  incompatibleDataSourcesExist: boolean;
 }
 
 export function handleNoAvailableDataSourceError(props: HandleNoAvailableDataSourceErrorProps) {

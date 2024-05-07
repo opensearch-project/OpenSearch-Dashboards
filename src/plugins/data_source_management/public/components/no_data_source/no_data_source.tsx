@@ -28,8 +28,8 @@ import {
 } from '../constants';
 
 interface DataSourceDropDownHeaderProps {
-  application?: ApplicationStart;
   incompatibleDataSourcesExist: boolean;
+  application?: ApplicationStart;
 }
 
 export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({

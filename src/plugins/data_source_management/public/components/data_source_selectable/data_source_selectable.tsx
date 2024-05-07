@@ -54,9 +54,9 @@ interface DataSourceSelectableProps {
 interface DataSourceSelectableState extends DataSourceBaseState {
   dataSourceOptions: DataSourceOption[];
   isPopoverOpen: boolean;
-  selectedOption?: DataSourceOption[];
   defaultDataSource: string | null;
   incompatibleDataSourcesExist: boolean;
+  selectedOption?: DataSourceOption[];
 }
 
 export class DataSourceSelectable extends React.Component<
