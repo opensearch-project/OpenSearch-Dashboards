@@ -6,8 +6,12 @@
 import { EuiHeaderSectionItemButton, EuiIcon } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { CoreStart } from '../../..';
-
 import { isModifiedOrPrevented } from './nav_link';
+
+/**
+ * This component is used for application to render top right navigation button in header.
+ */
+
 export interface RightNavigationButtonProps {
   application: CoreStart['application'];
   http: CoreStart['http'];
@@ -16,6 +20,9 @@ export interface RightNavigationButtonProps {
   title: string;
 }
 
+/**
+ * @experimental this class is experimental and might change in future releases.
+ */
 export const RightNavigationButton = ({
   application,
   http,
