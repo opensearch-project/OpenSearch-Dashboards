@@ -4,6 +4,7 @@
  */
 
 import { CoreSetup, RequestHandlerContext } from 'src/core/server';
+import { updateWorkspaceState } from '../../../../../../core/server/utils';
 import { coreMock, httpServerMock } from '../../../../../../core/server/mocks';
 import { createListRoute } from './list';
 import { flightsSpecProvider } from '../data_sets';
@@ -148,11 +149,12 @@ describe('sample data list route', () => {
     };
 
     const mockBody = {};
-    const mockQuery = { workspace_id: mockWorkspaceId };
+    const mockQuery = {};
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
       body: mockBody,
       query: mockQuery,
     });
+    updateWorkspaceState(mockRequest, { requestWorkspaceId: mockWorkspaceId });
     const mockResponse = httpServerMock.createResponseFactory();
 
     createListRoute(mockCoreSetup.http.createRouter(), sampleDatasets);
@@ -204,11 +206,12 @@ describe('sample data list route', () => {
     };
 
     const mockBody = {};
-    const mockQuery = { workspace_id: mockWorkspaceId, data_source_id: mockDataSourceId };
+    const mockQuery = { data_source_id: mockDataSourceId };
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
       body: mockBody,
       query: mockQuery,
     });
+    updateWorkspaceState(mockRequest, { requestWorkspaceId: mockWorkspaceId });
     const mockResponse = httpServerMock.createResponseFactory();
 
     createListRoute(mockCoreSetup.http.createRouter(), sampleDatasets);

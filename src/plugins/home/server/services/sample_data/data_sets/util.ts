@@ -8,19 +8,16 @@ import {
   extractVegaSpecFromSavedObject,
   updateDataSourceNameInVegaSpec,
 } from '../../../../../../core/server';
+import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 
-const cloneDeep = <T extends unknown>(payload: T): T => JSON.parse(JSON.stringify(payload));
-
-const withPrefix = (...args: Array<string | undefined>) => (id: string) => {
-  const prefix = args.filter(Boolean).join('_');
-  if (prefix) {
-    return `${prefix}_${id}`;
-  }
-  return id;
-};
-
-export const addPrefixTo = (id: string) => (...args: Array<string | undefined>) => {
-  return withPrefix(...args)(id);
+export const appendDataSourceId = (id: string) => {
+  return (dataSourceId?: string, workspaceId?: string) => {
+    const idWithDataSource = dataSourceId ? `${dataSourceId}_` + id : id;
+    if (!workspaceId) {
+      return idWithDataSource;
+    }
+    return `${workspaceId}_${idWithDataSource}`;
+  };
 };
 
 const overrideSavedObjectId = (savedObject: SavedObject, idGenerator: (id: string) => string) => {
@@ -64,34 +61,23 @@ const overrideSavedObjectId = (savedObject: SavedObject, idGenerator: (id: strin
   }
 };
 
-export const getDataSourceIntegratedSavedObjects = (
-  savedObjectList: SavedObject[],
+export const getSavedObjectsWithDataSource = (
+  saveObjectList: SavedObject[],
   dataSourceId?: string,
   dataSourceTitle?: string
 ): SavedObject[] => {
-  savedObjectList = cloneDeep(savedObjectList);
   if (dataSourceId) {
-    return savedObjectList.map((savedObject) => {
-      overrideSavedObjectId(savedObject, withPrefix(dataSourceId));
-
-      // update reference
-      if (savedObject.type === 'index-pattern') {
-        savedObject.references = [
-          {
-            id: `${dataSourceId}`,
-            type: 'data-source',
-            name: 'dataSource',
-          },
-        ];
-      }
+    const idGenerator = (id: string) => `${dataSourceId}_${id}`;
+    return saveObjectList.map((saveObject) => {
+      overrideSavedObjectId(saveObject, idGenerator);
 
       if (dataSourceTitle) {
         if (
-          savedObject.type === 'dashboard' ||
-          savedObject.type === 'visualization' ||
-          savedObject.type === 'search'
+          saveObject.type === 'dashboard' ||
+          saveObject.type === 'visualization' ||
+          saveObject.type === 'search'
         ) {
-          savedObject.attributes.title = savedObject.attributes.title + `_${dataSourceTitle}`;
+          saveObject.attributes.title = saveObject.attributes.title + `_${dataSourceTitle}`;
         }
 
         if (saveObject.type === 'visualization') {
@@ -120,21 +106,47 @@ export const getDataSourceIntegratedSavedObjects = (
         }
       }
 
-      return savedObject;
+      return saveObject;
     });
   }
 
+  return saveObjectList;
+};
+
+export const overwriteSavedObjectsWithWorkspaceId = (
+  savedObjectList: SavedObject[],
+  workspaceId: string
+) => {
+  const idGenerator = (id: string) => `${workspaceId}_${id}`;
+  savedObjectList.forEach((savedObject) => {
+    overrideSavedObjectId(savedObject, idGenerator);
+  });
   return savedObjectList;
 };
 
-export const getWorkspaceIntegratedSavedObjects = (
-  savedObjectList: SavedObject[],
-  workspaceId?: string
-) => {
-  const savedObjectListCopy = cloneDeep(savedObjectList);
+export const getFinalSavedObjects = ({
+  dataset,
+  workspaceId,
+  dataSourceId,
+  dataSourceTitle,
+}: {
+  dataset: SampleDatasetSchema;
+  workspaceId?: string;
+  dataSourceId?: string;
+  dataSourceTitle?: string;
+}) => {
+  if (workspaceId && dataSourceId) {
+    return overwriteSavedObjectsWithWorkspaceId(
+      dataset.getDataSourceIntegratedSavedObjects(dataSourceId, dataSourceTitle),
+      workspaceId
+    );
+  }
+  if (workspaceId) {
+    return dataset.getWorkspaceIntegratedSavedObjects(workspaceId);
+  }
+  if (dataSourceId) {
+    return dataset.getDataSourceIntegratedSavedObjects(dataSourceId, dataSourceTitle);
+  }
 
-  savedObjectListCopy.forEach((savedObject) => {
-    overrideSavedObjectId(savedObject, withPrefix(workspaceId));
-  });
-  return savedObjectListCopy;
+  return dataset.savedObjects;
 };

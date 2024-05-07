@@ -30,6 +30,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, LegacyCallAPIOptions, Logger } from 'src/core/server';
+import { getWorkspaceState } from '../../../../../../core/server/utils';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import {
@@ -39,10 +40,7 @@ import {
 } from '../lib/translate_timestamp';
 import { loadData } from '../lib/load_data';
 import { SampleDataUsageTracker } from '../usage/usage';
-import {
-  getDataSourceIntegratedSavedObjects,
-  getWorkspaceIntegratedSavedObjects,
-} from '../data_sets/util';
+import { getFinalSavedObjects } from '../data_sets/util';
 
 const insertDataIntoIndex = (
   dataIndexConfig: any,
@@ -124,7 +122,8 @@ export function createInstallRoute(
     async (context, req, res) => {
       const { params, query } = req;
       const dataSourceId = query.data_source_id;
-      const workspaceId = query.workspace_id;
+      const workspaceState = getWorkspaceState(req);
+      const workspaceId = workspaceState?.requestWorkspaceId;
 
       const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
       if (!sampleDataset) {
@@ -204,17 +203,12 @@ export function createInstallRoute(
       }
 
       let createResults;
-      let savedObjectsList = sampleDataset.savedObjects;
-      if (workspaceId) {
-        savedObjectsList = getWorkspaceIntegratedSavedObjects(savedObjectsList, workspaceId);
-      }
-      if (dataSourceId) {
-        savedObjectsList = getDataSourceIntegratedSavedObjects(
-          savedObjectsList,
-          dataSourceId,
-          dataSourceTitle
-        );
-      }
+      const savedObjectsList = getFinalSavedObjects({
+        dataset: sampleDataset,
+        workspaceId,
+        dataSourceId,
+        dataSourceTitle,
+      });
 
       try {
         createResults = await context.core.savedObjects.client.bulkCreate(

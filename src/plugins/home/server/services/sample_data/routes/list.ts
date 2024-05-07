@@ -30,6 +30,7 @@
 
 import { IRouter } from 'src/core/server';
 import { schema } from '@osd/config-schema';
+import { getWorkspaceState } from '../../../../../../core/server/utils';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 
@@ -50,7 +51,8 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
     },
     async (context, req, res) => {
       const dataSourceId = req.query.data_source_id;
-      const workspaceId = req.query.workspace_id;
+      const workspaceState = getWorkspaceState(req);
+      const workspaceId = workspaceState?.requestWorkspaceId;
 
       const registeredSampleDatasets = sampleDatasets.map((sampleDataset) => {
         return {
@@ -60,9 +62,15 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
           previewImagePath: sampleDataset.previewImagePath,
           darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
           hasNewThemeImages: sampleDataset.hasNewThemeImages,
-          overviewDashboard: sampleDataset.getDashboardWithPrefix(dataSourceId, workspaceId),
+          overviewDashboard: sampleDataset.getDataSourceIntegratedDashboard(
+            dataSourceId,
+            workspaceId
+          ),
           appLinks: sampleDataset.appLinks,
-          defaultIndex: sampleDataset.getDataSourceIntegratedDefaultIndex(dataSourceId),
+          defaultIndex: sampleDataset.getDataSourceIntegratedDefaultIndex(
+            dataSourceId,
+            workspaceId
+          ),
           dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),
           status: sampleDataset.status,
           statusMsg: sampleDataset.statusMsg,
@@ -98,6 +106,7 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
             return;
           }
         }
+
         try {
           await context.core.savedObjects.client.get('dashboard', sampleDataset.overviewDashboard);
         } catch (err) {

@@ -31,13 +31,11 @@
 import { schema } from '@osd/config-schema';
 import _ from 'lodash';
 import { IRouter } from 'src/core/server';
+import { getWorkspaceState } from '../../../../../../core/server/utils';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import { SampleDataUsageTracker } from '../usage/usage';
-import {
-  getDataSourceIntegratedSavedObjects,
-  getWorkspaceIntegratedSavedObjects,
-} from '../data_sets/util';
+import { getFinalSavedObjects } from '../data_sets/util';
 
 export function createUninstallRoute(
   router: IRouter,
@@ -58,7 +56,8 @@ export function createUninstallRoute(
     async (context, request, response) => {
       const sampleDataset = sampleDatasets.find(({ id }) => id === request.params.id);
       const dataSourceId = request.query.data_source_id;
-      const workspaceId = request.query.workspace_id;
+      const workspaceState = getWorkspaceState(request);
+      const workspaceId = workspaceState?.requestWorkspaceId;
 
       if (!sampleDataset) {
         return response.notFound();
@@ -84,13 +83,11 @@ export function createUninstallRoute(
         }
       }
 
-      let savedObjectsList = sampleDataset.savedObjects;
-      if (workspaceId) {
-        savedObjectsList = getWorkspaceIntegratedSavedObjects(savedObjectsList, workspaceId);
-      }
-      if (dataSourceId) {
-        savedObjectsList = getDataSourceIntegratedSavedObjects(savedObjectsList, dataSourceId);
-      }
+      const savedObjectsList = getFinalSavedObjects({
+        dataset: sampleDataset,
+        workspaceId,
+        dataSourceId,
+      });
 
       const deletePromises = savedObjectsList.map(({ type, id }) =>
         context.core.savedObjects.client.delete(type, id)

@@ -5,6 +5,7 @@
 
 import { CoreSetup, RequestHandlerContext } from 'src/core/server';
 import { coreMock, httpServerMock } from '../../../../../../core/server/mocks';
+import { updateWorkspaceState } from '../../../../../../core/server/utils';
 import { flightsSpecProvider } from '../data_sets';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createUninstallRoute } from './uninstall';
@@ -112,11 +113,12 @@ describe('sample data uninstall route', () => {
       },
     };
     const mockBody = { id: 'flights' };
-    const mockQuery = { workspace_id: mockWorkspaceId };
+    const mockQuery = {};
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest({
       params: mockBody,
       query: mockQuery,
     });
+    updateWorkspaceState(mockRequest, { requestWorkspaceId: mockWorkspaceId });
     const mockResponse = httpServerMock.createResponseFactory();
 
     createUninstallRoute(mockCoreSetup.http.createRouter(), sampleDatasets, mockUsageTracker);
