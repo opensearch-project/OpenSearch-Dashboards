@@ -38,7 +38,6 @@ export interface FieldSetting {
   options?: string[];
   optionLabels?: Record<string, string>;
   requiresPageReload: boolean;
-  preferBrowserSetting?: boolean;
   type: UiSettingsType;
   category: string[];
   ariaName: string;
