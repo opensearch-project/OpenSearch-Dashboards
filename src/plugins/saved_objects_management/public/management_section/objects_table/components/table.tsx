@@ -330,7 +330,6 @@ export class Table extends PureComponent<TableProps, TableState> {
                   ),
                   type: 'icon',
                   icon: 'copyClipboard',
-                  // isPrimary: true,
                   onClick: (object: SavedObjectWithMetadata) => onDuplicateSingle(object),
                   available: (object: SavedObjectWithMetadata) => object.type !== 'config',
                   'data-test-subj': 'savedObjectsTableAction-duplicate',
