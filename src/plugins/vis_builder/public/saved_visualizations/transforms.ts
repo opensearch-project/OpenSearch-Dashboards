@@ -33,14 +33,17 @@ export const saveStateToSavedObject = (
 };
 
 export interface VisBuilderSavedVis
-  extends Pick<VisBuilderSavedObjectAttributes, 'id' | 'title' | 'description'> {
+  extends Pick<
+    VisBuilderSavedObjectAttributes,
+    'id' | 'title' | 'description' | 'searchSourceFields'
+  > {
   state: RenderState;
 }
 
 export const getStateFromSavedObject = (
   obj: VisBuilderSavedObjectAttributes
 ): VisBuilderSavedVis => {
-  const { id, title, description } = obj;
+  const { id, title, description, searchSourceFields } = obj;
   const styleState = JSON.parse(obj.styleState || '{}');
   const uiState = JSON.parse(obj.uiState || '{}');
   const vizStateWithoutIndex = JSON.parse(obj.visualizationState || '');
@@ -74,6 +77,7 @@ export const getStateFromSavedObject = (
     id,
     title,
     description,
+    searchSourceFields,
     state: {
       visualization: visualizationState,
       style: styleState,

@@ -8,7 +8,6 @@
  * It serves as a registry for different data source types and provides a way to instantiate them.
  */
 
-import { DataSourceType } from '../datasource_services';
 import { DataSource } from '../datasource';
 
 type DataSourceClass<
@@ -66,11 +65,11 @@ export class DataSourceFactory {
    *
    * @experimental This API is experimental and might change in future releases.
    * @param {string} type - The identifier for the data source type.
-   * @param {any} config - The configuration for the data source instance.
+   * @param {unknown} config - The configuration for the data source instance.
    * @returns {DataSourceType} An instance of the specified data source type.
    * @throws {Error} Throws an error if the data source type is not supported.
    */
-  getDataSourceInstance(type: string, config: any): DataSourceType {
+  getDataSourceInstance(type: string, config: unknown): DataSource {
     const DataSourceClass = this.dataSourceClasses[type];
     if (!DataSourceClass) {
       throw new Error('Unsupported data source type');
