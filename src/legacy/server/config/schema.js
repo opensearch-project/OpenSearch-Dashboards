@@ -109,6 +109,7 @@ export default () =>
         }),
         events: Joi.any().default({}),
         dest: Joi.string().default('stdout'),
+        ignoreEnospcError: Joi.boolean().default(false),
         filter: Joi.any().default({}),
         json: Joi.boolean().when('dest', {
           is: 'stdout',
