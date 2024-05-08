@@ -17,7 +17,7 @@ import {
 import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
 import { IOpenSearchDashboardsSearchRequest } from '../search';
-import { GetAggTypeFn, GetDataFrameAggQsFn } from '../types';
+import { GetAggTypeFn, GetDataFrameAggQsFn, TimeRange } from '../types';
 
 /**
  * Returns the raw data frame from the search request.
@@ -288,6 +288,26 @@ export const getTimeField = (
   return aggConfig && aggConfig.date_histogram && aggConfig.date_histogram.field
     ? fields.find((field) => field.name === aggConfig?.date_histogram?.field)
     : fields.find((field) => field.type === 'date');
+};
+
+/**
+ * Parses timepicker datetimes using datemath package. Will attempt to parse strings such as
+ * "now - 15m"
+ *
+ * @param dateRange - of type TimeRange
+ * @returns object with fromDate and toDate, both of which will be in utc time and formatted to
+ * 'YYYY-MM-DD HH:mm:ss.SSS'
+ */
+export const formatTimePickerDate = (dateRange: TimeRange) => {
+  const dateMathParse = (date: string) => {
+    const parsedDate = datemath.parse(date);
+    return parsedDate ? parsedDate.utc().format('YYYY-MM-DD HH:mm:ss.SSS') : '';
+  };
+
+  const fromDate = dateMathParse(dateRange.from);
+  const toDate = dateMathParse(dateRange.to);
+
+  return { fromDate, toDate };
 };
 
 /**
