@@ -16,6 +16,7 @@ import {
   getDataSourcesWithFieldsResponse,
   mockResponseForSavedObjectsCalls,
   mockUiSettingsCalls,
+  mockErrorResponseForSavedObjectsCalls,
 } from '../../mocks';
 import * as utils from '../utils';
 import { EuiSelectable, EuiSwitch } from '@elastic/eui';
@@ -266,6 +267,238 @@ describe('DataSourceAggregatedView: read active view (displayAllCompatibleDataSo
       expect(component.find(EuiSelectable).prop('options')).toEqual(
         expect.arrayContaining(expectedOptions)
       );
+    }
+  );
+});
+
+describe('DataSourceAggregatedView empty state test with local cluster hiding', () => {
+  let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
+  let client: SavedObjectsClientContract;
+  const { toasts } = notificationServiceMock.createStartContract();
+  const uiSettings = uiSettingsServiceMock.createStartContract();
+  const application = applicationServiceMock.createStartContract();
+  const nextTick = () => new Promise((res) => process.nextTick(res));
+
+  beforeEach(() => {
+    client = {
+      find: jest.fn().mockResolvedValue([]),
+    } as any;
+    mockResponseForSavedObjectsCalls(client, 'find', {});
+    mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    jest.spyOn(utils, 'getApplication').mockReturnValue(application);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks(); // Clear all mocks to reset call counts and mock implementations
+  });
+
+  it.each([
+    {
+      filter: (ds: SavedObject<DataSourceAttributes>) => {
+        return true;
+      },
+      activeDataSourceIds: undefined,
+      hideLocalCluster: true,
+      displayAllCompatibleDataSources: true,
+    },
+    {
+      filter: (ds: SavedObject<DataSourceAttributes>) => {
+        return false;
+      },
+      activeDataSourceIds: undefined,
+      hideLocalCluster: true,
+      displayAllCompatibleDataSources: true,
+    },
+    {
+      filter: (ds: SavedObject<DataSourceAttributes>) => {
+        return true;
+      },
+      activeDataSourceIds: undefined,
+      hideLocalCluster: true,
+      displayAllCompatibleDataSources: false,
+    },
+    {
+      filter: (ds: SavedObject<DataSourceAttributes>) => {
+        return false;
+      },
+      activeDataSourceIds: undefined,
+      hideLocalCluster: true,
+      displayAllCompatibleDataSources: false,
+    },
+  ])(
+    'should render warning when no data sources added',
+    async ({ filter, activeDataSourceIds, hideLocalCluster, displayAllCompatibleDataSources }) => {
+      component = shallow(
+        <DataSourceAggregatedView
+          fullWidth={false}
+          hideLocalCluster={hideLocalCluster}
+          savedObjectsClient={client}
+          notifications={toasts}
+          displayAllCompatibleDataSources={displayAllCompatibleDataSources}
+          uiSettings={uiSettings}
+          activeDataSourceIds={activeDataSourceIds}
+          dataSourceFilter={filter}
+        />
+      );
+
+      expect(component).toMatchSnapshot();
+      await nextTick();
+      expect(toasts.add).toHaveBeenCalledTimes(1);
+      expect(toasts.add.mock.calls[0][0]).toEqual({
+        color: 'warning',
+        text: expect.any(Function),
+        title: 'No data sources connected yet. Connect your data sources to get started.',
+      });
+      expect(component.state('showEmptyState')).toBe(true);
+      await nextTick();
+      expect(component.find('NoDataSource').exists()).toBe(true);
+    }
+  );
+});
+
+describe('DataSourceAggregatedView empty state test due to filter out with local cluster hiding', () => {
+  let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
+  let client: SavedObjectsClientContract;
+  const { toasts } = notificationServiceMock.createStartContract();
+  const uiSettings = uiSettingsServiceMock.createStartContract();
+  const application = applicationServiceMock.createStartContract();
+  const nextTick = () => new Promise((res) => process.nextTick(res));
+
+  beforeEach(() => {
+    client = {
+      find: jest.fn().mockResolvedValue([]),
+    } as any;
+    mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
+    mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    jest.spyOn(utils, 'getApplication').mockReturnValue(application);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks(); // Clear all mocks to reset call counts and mock implementations
+  });
+
+  it.each([
+    {
+      filter: (ds: SavedObject<DataSourceAttributes>) => {
+        return false;
+      },
+      activeDataSourceIds: undefined,
+      hideLocalCluster: true,
+      displayAllCompatibleDataSources: true,
+    },
+    {
+      filter: (ds: SavedObject<DataSourceAttributes>) => {
+        return false;
+      },
+      activeDataSourceIds: undefined,
+      hideLocalCluster: true,
+      displayAllCompatibleDataSources: false,
+    },
+  ])(
+    'should render warning when no data sources added',
+    async ({ filter, activeDataSourceIds, hideLocalCluster, displayAllCompatibleDataSources }) => {
+      component = shallow(
+        <DataSourceAggregatedView
+          fullWidth={false}
+          hideLocalCluster={hideLocalCluster}
+          savedObjectsClient={client}
+          notifications={toasts}
+          displayAllCompatibleDataSources={displayAllCompatibleDataSources}
+          uiSettings={uiSettings}
+          activeDataSourceIds={activeDataSourceIds}
+          dataSourceFilter={filter}
+        />
+      );
+
+      expect(component).toMatchSnapshot();
+      await nextTick();
+      expect(toasts.add).toHaveBeenCalledTimes(1);
+      expect(toasts.add.mock.calls[0][0]).toEqual({
+        color: 'warning',
+        text: expect.any(Function),
+        title: 'No data sources connected yet. Connect your data sources to get started.',
+      });
+      expect(component.state('showEmptyState')).toBe(true);
+      await nextTick();
+      expect(component.find('NoDataSource').exists()).toBe(true);
+    }
+  );
+});
+
+describe('DataSourceAggregatedView error state test no matter hide local cluster or not', () => {
+  let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
+  let client: SavedObjectsClientContract;
+  const { toasts } = notificationServiceMock.createStartContract();
+  const uiSettings = uiSettingsServiceMock.createStartContract();
+  const application = applicationServiceMock.createStartContract();
+  const nextTick = () => new Promise((res) => process.nextTick(res));
+
+  beforeEach(() => {
+    client = {
+      find: jest.fn().mockResolvedValue([]),
+    } as any;
+    mockErrorResponseForSavedObjectsCalls(client, 'find');
+    mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    jest.spyOn(utils, 'getApplication').mockReturnValue(application);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks(); // Clear all mocks to reset call counts and mock implementations
+  });
+
+  it.each([
+    {
+      filter: (ds: SavedObject<DataSourceAttributes>) => {
+        return true;
+      },
+      activeDataSourceIds: undefined,
+      hideLocalCluster: true,
+      displayAllCompatibleDataSources: true,
+    },
+    {
+      filter: (ds: SavedObject<DataSourceAttributes>) => {
+        return false;
+      },
+      activeDataSourceIds: undefined,
+      hideLocalCluster: true,
+      displayAllCompatibleDataSources: true,
+    },
+    {
+      filter: (ds: SavedObject<DataSourceAttributes>) => {
+        return true;
+      },
+      activeDataSourceIds: undefined,
+      hideLocalCluster: true,
+      displayAllCompatibleDataSources: false,
+    },
+    {
+      filter: (ds: SavedObject<DataSourceAttributes>) => {
+        return false;
+      },
+      activeDataSourceIds: undefined,
+      hideLocalCluster: true,
+      displayAllCompatibleDataSources: false,
+    },
+  ])(
+    'should render error state when catch error',
+    async ({ filter, activeDataSourceIds, hideLocalCluster, displayAllCompatibleDataSources }) => {
+      component = shallow(
+        <DataSourceAggregatedView
+          fullWidth={false}
+          hideLocalCluster={hideLocalCluster}
+          savedObjectsClient={client}
+          notifications={toasts}
+          displayAllCompatibleDataSources={displayAllCompatibleDataSources}
+          uiSettings={uiSettings}
+          activeDataSourceIds={activeDataSourceIds}
+          dataSourceFilter={filter}
+        />
+      );
+
+      expect(component).toMatchSnapshot();
+      await nextTick();
+      expect(toasts.add).toBeCalled();
+      expect(component.state('showError')).toBe(true);
     }
   );
 });
