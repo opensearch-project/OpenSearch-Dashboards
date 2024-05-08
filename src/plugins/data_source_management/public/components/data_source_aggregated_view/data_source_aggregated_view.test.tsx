@@ -5,8 +5,9 @@
 
 import { ShallowWrapper, shallow } from 'enzyme';
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import { DataSourceAggregatedView } from './data_source_aggregated_view';
-import { SavedObject, SavedObjectsClientContract } from '../../../../../core/public';
+import { IToasts, SavedObject, SavedObjectsClientContract } from '../../../../../core/public';
 import {
   applicationServiceMock,
   notificationServiceMock,
@@ -21,6 +22,12 @@ import {
 import * as utils from '../utils';
 import { EuiSelectable, EuiSwitch } from '@elastic/eui';
 import { DataSourceAttributes } from '../../types';
+import {
+  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
+  CONNECT_DATASOURCES_MESSAGE,
+  NO_COMPATIBLE_DATASOURCES_MESSAGE,
+  NO_DATASOURCES_CONNECTED_MESSAGE,
+} from '../constants';
 
 describe('DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true)', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -409,6 +416,7 @@ describe('DataSourceAggregatedView empty state test due to filter out with local
           dataSourceFilter={filter}
         />
       );
+      const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
 
       expect(component).toMatchSnapshot();
       await nextTick();
@@ -416,7 +424,7 @@ describe('DataSourceAggregatedView empty state test due to filter out with local
       expect(toasts.add.mock.calls[0][0]).toEqual({
         color: 'warning',
         text: expect.any(Function),
-        title: 'No data sources connected yet. Connect your data sources to get started.',
+        title: noCompatibleDataSourcesMessage,
       });
       expect(component.state('showEmptyState')).toBe(true);
       await nextTick();
@@ -499,6 +507,67 @@ describe('DataSourceAggregatedView error state test no matter hide local cluster
       await nextTick();
       expect(toasts.add).toBeCalled();
       expect(component.state('showError')).toBe(true);
+    }
+  );
+});
+
+describe('DataSourceAggregatedView warning messages', () => {
+  const client = {} as any;
+  const uiSettings = uiSettingsServiceMock.createStartContract();
+  const nextTick = () => new Promise((res) => process.nextTick(res));
+  let toasts: IToasts;
+  const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
+  const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
+
+  beforeEach(() => {
+    toasts = notificationServiceMock.createStartContract().toasts;
+    mockUiSettingsCalls(uiSettings, 'get', 'test1');
+  });
+
+  it.each([
+    {
+      findFunc: jest.fn().mockResolvedValue(getDataSourcesWithFieldsResponse),
+      defaultMessage: noCompatibleDataSourcesMessage,
+      activeDataSourceIds: ['test2'],
+    },
+    {
+      findFunc: jest.fn().mockResolvedValue({ savedObjects: [] }),
+      defaultMessage: noDataSourcesConnectedMessage,
+      activeDataSourceIds: ['test2'],
+    },
+    {
+      findFunc: jest.fn().mockResolvedValue(getDataSourcesWithFieldsResponse),
+      defaultMessage: noCompatibleDataSourcesMessage,
+      activeDataSourceIds: undefined,
+    },
+    {
+      findFunc: jest.fn().mockResolvedValue({ savedObjects: [] }),
+      defaultMessage: noDataSourcesConnectedMessage,
+      activeDataSourceIds: undefined,
+    },
+  ])(
+    'should display correct warning message when no datasource selections are available and local cluster is hidden',
+    async ({ findFunc, defaultMessage, activeDataSourceIds }) => {
+      client.find = findFunc;
+      shallow(
+        <DataSourceAggregatedView
+          fullWidth={false}
+          hideLocalCluster={true}
+          savedObjectsClient={client}
+          notifications={toasts}
+          displayAllCompatibleDataSources={!!!activeDataSourceIds}
+          activeDataSourceIds={activeDataSourceIds}
+          dataSourceFilter={(_) => false}
+          uiSettings={uiSettings}
+        />
+      );
+      await nextTick();
+
+      expect(toasts.add).toBeCalledWith(
+        expect.objectContaining({
+          title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
+        })
+      );
     }
   );
 });
