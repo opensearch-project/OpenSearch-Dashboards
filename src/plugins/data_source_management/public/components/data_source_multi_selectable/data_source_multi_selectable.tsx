@@ -34,6 +34,7 @@ interface DataSourceMultiSeletableState extends DataSourceBaseState {
   dataSourceOptions: SelectedDataSourceOption[];
   selectedOptions: SelectedDataSourceOption[];
   defaultDataSource: string | null;
+  hasIncompatibleDatasources: boolean;
 }
 
 export class DataSourceMultiSelectable extends React.Component<
@@ -51,6 +52,7 @@ export class DataSourceMultiSelectable extends React.Component<
       defaultDataSource: null,
       showEmptyState: false,
       showError: false,
+      hasIncompatibleDatasources: false,
     };
   }
 
@@ -90,12 +92,13 @@ export class DataSourceMultiSelectable extends React.Component<
       if (!this._isMounted) return;
 
       if (selectedOptions.length === 0) {
-        handleNoAvailableDataSourceError(
-          this.onEmptyState.bind(this),
-          this.props.notifications,
-          this.props.application,
-          this.props.onSelectedDataSources
-        );
+        handleNoAvailableDataSourceError({
+          changeState: this.onEmptyState.bind(this, !!fetchedDataSources?.length),
+          notifications: this.props.notifications,
+          application: this.props.application,
+          callback: this.props.onSelectedDataSources,
+          hasIncompatibleDatasources: !!fetchedDataSources?.length,
+        });
         return;
       }
 
@@ -115,8 +118,8 @@ export class DataSourceMultiSelectable extends React.Component<
     }
   }
 
-  onEmptyState() {
-    this.setState({ showEmptyState: true });
+  onEmptyState(hasIncompatibleDatasources: boolean) {
+    this.setState({ showEmptyState: true, hasIncompatibleDatasources });
   }
 
   onError() {

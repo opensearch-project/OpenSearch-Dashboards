@@ -45,6 +45,7 @@ interface DataSourceAggregatedViewState extends DataSourceBaseState {
   allDataSourcesIdToTitleMap: Map<string, any>;
   switchChecked: boolean;
   defaultDataSource: string | null;
+  hasIncompatibleDataSources: boolean;
 }
 
 interface DataSourceOptionDisplay extends DataSourceOption {
@@ -68,6 +69,7 @@ export class DataSourceAggregatedView extends React.Component<
       showError: false,
       switchChecked: false,
       defaultDataSource: null,
+      hasIncompatibleDataSources: false,
     };
   }
 
@@ -113,11 +115,12 @@ export class DataSourceAggregatedView extends React.Component<
         }
 
         if (allDataSourcesIdToTitleMap.size === 0) {
-          handleNoAvailableDataSourceError(
-            this.onEmptyState.bind(this),
-            this.props.notifications,
-            this.props.application
-          );
+          handleNoAvailableDataSourceError({
+            changeState: this.onEmptyState.bind(this, !!fetchedDataSources?.length),
+            notifications: this.props.notifications,
+            application: this.props.application,
+            hasIncompatibleDatasources: !!fetchedDataSources?.length,
+          });
           return;
         }
 
@@ -133,8 +136,8 @@ export class DataSourceAggregatedView extends React.Component<
       });
   }
 
-  onEmptyState() {
-    this.setState({ showEmptyState: true });
+  onEmptyState(hasIncompatibleDataSources: boolean) {
+    this.setState({ showEmptyState: true, hasIncompatibleDataSources });
   }
 
   onError() {
@@ -143,7 +146,12 @@ export class DataSourceAggregatedView extends React.Component<
 
   render() {
     if (this.state.showEmptyState) {
-      return <NoDataSource application={this.props.application} />;
+      return (
+        <NoDataSource
+          application={this.props.application}
+          hasIncompatibleDatasources={this.state.hasIncompatibleDataSources}
+        />
+      );
     }
     if (this.state.showError) {
       return <DataSourceErrorMenu application={this.props.application} />;
