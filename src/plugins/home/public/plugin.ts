@@ -128,7 +128,6 @@ export class HomePublicPlugin
         featureCatalogue: this.featuresCatalogueRegistry,
         injectedMetadata: coreStart.injectedMetadata,
         dataSource,
-        workspaces: coreStart.workspaces,
         sectionTypes: this.sectionTypeService,
         ...homeOpenSearchDashboardsServices,
       });

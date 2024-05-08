@@ -49,7 +49,6 @@ export function createUninstallRoute(
         params: schema.object({ id: schema.string() }),
         query: schema.object({
           data_source_id: schema.maybe(schema.string()),
-          workspace_id: schema.maybe(schema.string()),
         }),
       },
     },

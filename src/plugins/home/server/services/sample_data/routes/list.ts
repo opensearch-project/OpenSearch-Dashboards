@@ -45,7 +45,6 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
       validate: {
         query: schema.object({
           data_source_id: schema.maybe(schema.string()),
-          workspace_id: schema.maybe(schema.string()),
         }),
       },
     },
@@ -106,7 +105,6 @@ export const createListRoute = (router: IRouter, sampleDatasets: SampleDatasetSc
             return;
           }
         }
-
         try {
           await context.core.savedObjects.client.get('dashboard', sampleDataset.overviewDashboard);
         } catch (err) {

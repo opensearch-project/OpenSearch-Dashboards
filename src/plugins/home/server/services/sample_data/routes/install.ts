@@ -115,7 +115,6 @@ export function createInstallRoute(
         query: schema.object({
           now: schema.maybe(schema.string()),
           data_source_id: schema.maybe(schema.string()),
-          workspace_id: schema.maybe(schema.string()),
         }),
       },
     },
@@ -213,7 +212,7 @@ export function createInstallRoute(
       try {
         createResults = await context.core.savedObjects.client.bulkCreate(
           savedObjectsList.map(({ version, ...savedObject }) => savedObject),
-          { overwrite: true, workspaces: workspaceId ? [workspaceId] : undefined }
+          { overwrite: true }
         );
       } catch (err) {
         const errMsg = `bulkCreate failed, error: ${err.message}`;
