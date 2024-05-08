@@ -49,9 +49,4 @@ export interface SubmittedFormData {
   references: SavedObjectReference[];
 }
 
-export enum DuplicateMode {
-  Selected = 'selected',
-  All = 'all',
-}
-
 export type DuplicateObject = Pick<SavedObjectWithMetadata, 'id' | 'type' | 'meta' | 'workspaces'>;

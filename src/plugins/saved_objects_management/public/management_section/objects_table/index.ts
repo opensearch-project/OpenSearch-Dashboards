@@ -29,4 +29,4 @@
  */
 
 export { SavedObjectsTable } from './saved_objects_table';
-export { SavedObjectsDuplicateModal, DuplicateMode } from './components';
+export { SavedObjectsDuplicateModal } from './components';

@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { groupBy } from 'lodash';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -18,29 +17,22 @@ import {
   EuiComboBox,
   EuiFormRow,
   EuiCheckbox,
-  EuiInMemoryTable,
-  EuiToolTip,
-  EuiIcon,
-  EuiCallOut,
   EuiText,
-  EuiTextColor,
 } from '@elastic/eui';
 import { HttpSetup, NotificationsStart, WorkspacesStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
-import { getSavedObjectLabel } from '../../../../public';
 import { WorkspaceOption, getTargetWorkspacesOptions, workspaceToOption } from './utils';
-import { DuplicateMode, DuplicateObject } from '../../types';
-import RenderDuplicateObjectCategories from './duplicate_object_categories';
+import { DuplicateObject } from '../../types';
 
 export interface ShowDuplicateModalProps {
   onDuplicate: (
     savedObjects: DuplicateObject[],
     includeReferencesDeep: boolean,
-    targetWorkspace: string
+    targetWorkspace: string,
+    targetWorkspaceName: string
   ) => Promise<void>;
   http: HttpSetup;
   workspaces: WorkspacesStart;
-  duplicateMode: DuplicateMode;
   notifications: NotificationsStart;
   selectedSavedObjects: DuplicateObject[];
 }
@@ -55,7 +47,6 @@ interface State {
   targetWorkspaceOption: WorkspaceOption[];
   isLoading: boolean;
   isIncludeReferencesDeepChecked: boolean;
-  savedObjectTypeInfoMap: Map<string, [number, boolean]>;
 }
 
 export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
@@ -64,19 +55,10 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
 
-    const { workspaces, duplicateMode } = props;
+    const { workspaces } = props;
     const currentWorkspace = workspaces.currentWorkspace$.value;
     const currentWorkspaceId = currentWorkspace?.id;
     const targetWorkspacesOptions = getTargetWorkspacesOptions(workspaces, currentWorkspaceId);
-
-    // If user click 'Duplicate All' button, saved objects will be categoried by type.
-    const savedObjectTypeInfoMap = new Map<string, [number, boolean]>();
-    if (duplicateMode === DuplicateMode.All) {
-      const categorizedObjects = groupBy(props.selectedSavedObjects, (object) => object.type);
-      for (const [savedObjectType, savedObjects] of Object.entries(categorizedObjects)) {
-        savedObjectTypeInfoMap.set(savedObjectType, [savedObjects.length, true]);
-      }
-    }
 
     this.state = {
       allSelectedObjects: props.selectedSavedObjects,
@@ -88,7 +70,6 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
       targetWorkspaceOption: [],
       isLoading: false,
       isIncludeReferencesDeepChecked: true,
-      savedObjectTypeInfoMap,
     };
     this.isMounted = true;
   }
@@ -103,11 +84,13 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
     });
 
     const targetWorkspace = this.state.targetWorkspaceOption[0].key;
+    const targetWorkspaceName = this.state.targetWorkspaceOption[0].label;
 
     await this.props.onDuplicate(
       savedObjects,
       this.state.isIncludeReferencesDeepChecked,
-      targetWorkspace!
+      targetWorkspace!,
+      targetWorkspaceName
     );
 
     if (this.isMounted) {
@@ -129,37 +112,6 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
     }));
   };
 
-  // Choose whether to copy a certain type or not.
-  changeIncludeSavedObjectType = (savedObjectType: string) => {
-    const { savedObjectTypeInfoMap } = this.state;
-    const savedObjectTypeInfo = savedObjectTypeInfoMap.get(savedObjectType);
-    if (savedObjectTypeInfo) {
-      const [count, checked] = savedObjectTypeInfo;
-      savedObjectTypeInfoMap.set(savedObjectType, [count, !checked]);
-      this.setState({ savedObjectTypeInfoMap });
-    }
-  };
-
-  isSavedObjectTypeIncluded = (savedObjectType: string) => {
-    const { savedObjectTypeInfoMap } = this.state;
-    const savedObjectTypeInfo = savedObjectTypeInfoMap.get(savedObjectType);
-    return savedObjectTypeInfo && savedObjectTypeInfo[1];
-  };
-
-  getIncludeAndNotDuplicateObjects = (targetWorkspaceId: string | undefined) => {
-    let selectedObjects = this.state.allSelectedObjects;
-    if (this.props.duplicateMode === DuplicateMode.All) {
-      selectedObjects = selectedObjects.filter((item) => this.isSavedObjectTypeIncluded(item.type));
-    }
-    // If the target workspace is not selected, all saved objects will be retained.
-    // If the target workspace has been selected, filter out the saved objects that belongs to the workspace.
-    const includedSelectedObjects = selectedObjects.filter((item) =>
-      !!targetWorkspaceId && !!item.workspaces ? !item.workspaces.includes(targetWorkspaceId) : true
-    );
-    const ignoredSelectedObjectsLength = selectedObjects.length - includedSelectedObjects.length;
-    return { includedSelectedObjects, ignoredSelectedObjectsLength };
-  };
-
   render() {
     const {
       workspaceOptions,
@@ -167,44 +119,8 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
       isIncludeReferencesDeepChecked,
       allSelectedObjects,
     } = this.state;
-    const { duplicateMode, onClose } = this.props;
+    const { onClose } = this.props;
     const targetWorkspaceId = targetWorkspaceOption?.at(0)?.key;
-
-    const {
-      includedSelectedObjects,
-      ignoredSelectedObjectsLength,
-    } = this.getIncludeAndNotDuplicateObjects(targetWorkspaceId);
-
-    let confirmDuplicateButtonEnabled = false;
-    if (!!targetWorkspaceId && includedSelectedObjects.length > 0) {
-      confirmDuplicateButtonEnabled = true;
-    }
-
-    const warningMessage = (
-      <EuiText>
-        <EuiTextColor color="danger">{ignoredSelectedObjectsLength}</EuiTextColor> saved object
-        {ignoredSelectedObjectsLength === 1 ? ' will' : 's will'}{' '}
-        <EuiTextColor color="danger">not</EuiTextColor> be duplicated as{' '}
-        {ignoredSelectedObjectsLength === 1 ? 'it' : 'they'}{' '}
-        <EuiTextColor color="danger">already exist</EuiTextColor> in the selected workspace.
-      </EuiText>
-    );
-
-    // Show the number and reason why some saved objects cannot be duplicated.
-    const ignoreSomeObjectsChildren: React.ReactChild = (
-      <>
-        <EuiCallOut
-          title="Some saved objects will be ignored."
-          color="warning"
-          iconType="help"
-          aria-disabled={ignoredSelectedObjectsLength === 0}
-          data-test-subj="ignoreSomeObjectsCallOut"
-        >
-          {warningMessage}
-        </EuiCallOut>
-        <EuiSpacer />
-      </>
-    );
 
     return (
       <EuiModal
@@ -216,9 +132,8 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.duplicateModal.title"
-              defaultMessage="Duplicate {duplicateMode, select, all {all objects} other {{objectCount, plural, =1 {{objectName}} other {# objects}}}}?"
+              defaultMessage="Duplicate {objectCount, plural, =1 {{objectName}} other {# objects}} to?"
               values={{
-                duplicateMode,
                 objectName: allSelectedObjects[0].meta.title,
                 objectCount: allSelectedObjects.length,
               }}
@@ -231,14 +146,14 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
             fullWidth
             label={i18n.translate(
               'savedObjectsManagement.objectsTable.duplicateModal.targetWorkspacelabel',
-              { defaultMessage: 'Destination workspace' }
+              { defaultMessage: 'Workspace' }
             )}
           >
             <>
               <EuiText size="s" color="subdued">
                 {i18n.translate(
                   'savedObjectsManagement.objectsTable.duplicateModal.targetWorkspaceNotice',
-                  { defaultMessage: 'Specify a workspace where the objects will be duplicated to.' }
+                  { defaultMessage: 'Select a workspace to where the object(s) will be duplicated' }
                 )}
               </EuiText>
               <EuiSpacer size="s" />
@@ -248,24 +163,19 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
                 selectedOptions={targetWorkspaceOption}
                 singleSelection={{ asPlainText: true }}
                 isClearable={false}
-                isInvalid={!confirmDuplicateButtonEnabled}
+                isInvalid={!targetWorkspaceId}
+                placeholder="select a workspace"
               />
             </>
           </EuiFormRow>
 
-          <EuiSpacer size="m" />
-          {duplicateMode === DuplicateMode.All &&
-            RenderDuplicateObjectCategories(
-              this.state.savedObjectTypeInfoMap,
-              this.changeIncludeSavedObjectType
-            )}
-          {duplicateMode === DuplicateMode.All && <EuiSpacer size="m" />}
+          <EuiSpacer />
 
           <EuiFormRow
             fullWidth
             label={i18n.translate(
               'savedObjectsManagement.objectsTable.duplicateModal.relatedObjects',
-              { defaultMessage: 'Related Objects' }
+              { defaultMessage: 'Options' }
             )}
           >
             <>
@@ -274,7 +184,7 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
                   'savedObjectsManagement.objectsTable.duplicateModal.relatedObjectsNotice',
                   {
                     defaultMessage:
-                      'We recommended duplicating related objects to ensure your duplicated objects will continue to function.',
+                      'Include related saved objects to ensure object(s) work as expected',
                   }
                 )}
               </EuiText>
@@ -283,59 +193,13 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
                 id={'includeReferencesDeep'}
                 label={i18n.translate(
                   'savedObjectsManagement.objectsTable.duplicateModal.includeReferencesDeepLabel',
-                  { defaultMessage: 'Duplicate related objects' }
+                  { defaultMessage: 'Include related objects(recommended)' }
                 )}
                 checked={isIncludeReferencesDeepChecked}
                 onChange={this.changeIncludeReferencesDeep}
               />
             </>
           </EuiFormRow>
-
-          <EuiSpacer size="m" />
-          {ignoredSelectedObjectsLength === 0 ? null : ignoreSomeObjectsChildren}
-          <p>
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.duplicateModal.tableTitle"
-              defaultMessage="The following saved objects will be duplicated:"
-            />
-          </p>
-          <EuiSpacer size="m" />
-          <EuiInMemoryTable
-            items={includedSelectedObjects}
-            columns={[
-              {
-                field: 'type',
-                name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.duplicateModal.typeColumnName',
-                  { defaultMessage: 'Type' }
-                ),
-                width: '50px',
-                render: (type, object) => (
-                  <EuiToolTip position="top" content={getSavedObjectLabel(type)}>
-                    <EuiIcon type={object.meta?.icon || 'apps'} />
-                  </EuiToolTip>
-                ),
-              },
-              {
-                field: 'id',
-                name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.duplicateModal.idColumnName',
-                  {
-                    defaultMessage: 'Id',
-                  }
-                ),
-              },
-              {
-                field: 'meta.title',
-                name: i18n.translate(
-                  'savedObjectsManagement.objectsTable.duplicateModal.titleColumnName',
-                  { defaultMessage: 'Title' }
-                ),
-              },
-            ]}
-            pagination={true}
-            sorting={false}
-          />
         </EuiModalBody>
 
         <EuiModalFooter>
@@ -349,16 +213,15 @@ export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
           <EuiButton
             fill
             data-test-subj="duplicateConfirmButton"
-            onClick={() => this.duplicateSavedObjects(includedSelectedObjects)}
+            onClick={() => this.duplicateSavedObjects(allSelectedObjects)}
             isLoading={this.state.isLoading}
-            disabled={!confirmDuplicateButtonEnabled}
+            disabled={!targetWorkspaceId}
           >
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.duplicateModal.confirmButtonLabel"
-              defaultMessage="Duplicate{duplicateMode, select, all {({objectCount})} other {}}"
+              defaultMessage="Duplicate"
               values={{
-                duplicateMode,
-                objectCount: includedSelectedObjects.length,
+                objectCount: allSelectedObjects.length,
               }}
             />
           </EuiButton>

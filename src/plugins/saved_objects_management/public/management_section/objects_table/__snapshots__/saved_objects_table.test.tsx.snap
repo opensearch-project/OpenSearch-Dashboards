@@ -76,7 +76,6 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
 
 exports[`SavedObjectsTable duplicate should allow the user to choose on header when duplicating all 1`] = `
 <SavedObjectsDuplicateModal
-  duplicateMode="all"
   http={
     Object {
       "addLoadingCountSource": [MockFunction],
@@ -314,7 +313,6 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
 
 exports[`SavedObjectsTable duplicate should allow the user to choose on table when duplicating all 1`] = `
 <SavedObjectsDuplicateModal
-  duplicateMode="selected"
   http={
     Object {
       "addLoadingCountSource": [MockFunction],
@@ -493,7 +491,6 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
 
 exports[`SavedObjectsTable duplicate should allow the user to choose on table when duplicating single 1`] = `
 <SavedObjectsDuplicateModal
-  duplicateMode="selected"
   http={
     Object {
       "addLoadingCountSource": [MockFunction],

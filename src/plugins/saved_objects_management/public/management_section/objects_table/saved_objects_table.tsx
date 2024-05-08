@@ -97,7 +97,7 @@ import {
 } from '../../services';
 import { Header, Table, Flyout, Relationships, SavedObjectsDuplicateModal } from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
-import { DuplicateMode, DuplicateObject } from '../types';
+import { DuplicateObject } from '../types';
 import { formatWorkspaceIdParams } from '../../utils';
 
 interface ExportAllOption {
@@ -136,7 +136,6 @@ export interface SavedObjectsTableState {
   selectedSavedObjects: SavedObjectWithMetadata[];
   duplicateSelectedSavedObjects: DuplicateObject[];
   isShowingImportFlyout: boolean;
-  duplicateMode: DuplicateMode;
   isShowingDuplicateModal: boolean;
   isSearching: boolean;
   filteredItemCount: number;
@@ -176,7 +175,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       selectedSavedObjects: [],
       duplicateSelectedSavedObjects: [],
       isShowingImportFlyout: false,
-      duplicateMode: DuplicateMode.Selected,
       isShowingDuplicateModal: false,
       isSearching: false,
       filteredItemCount: 0,
@@ -697,7 +695,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       this.setState({
         duplicateSelectedSavedObjects: duplicateObjects,
         isShowingDuplicateModal: true,
-        duplicateMode: DuplicateMode.All,
       });
     } catch (error) {
       notifications.toasts.addDanger({
@@ -713,7 +710,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   onDuplicate = async (
     savedObjects: DuplicateObject[],
     includeReferencesDeep: boolean,
-    targetWorkspace: string
+    targetWorkspace: string,
+    targetWorkspaceName: string
   ) => {
     const { http, notifications } = this.props;
     const objectsToDuplicate = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
@@ -725,29 +723,49 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         includeReferencesDeep,
         targetWorkspace
       );
+      const successCount = result.success
+        ? savedObjects.length
+        : savedObjects.length - result.errors.length;
+      const sOMessage =
+        successCount === 1
+          ? savedObjects[0].meta.title
+          : successCount.toString() + ' saved objects';
+      const refMessage = includeReferencesDeep ? ' and the related objects' : '';
       if (result.success) {
         notifications.toasts.addSuccess({
           title: i18n.translate(
             'savedObjectsManagement.objectsTable.duplicate.successNotification',
             {
               defaultMessage:
-                'Duplicate ' + savedObjects.length.toString() + ' saved objects successfully',
+                'Success - ' +
+                sOMessage +
+                refMessage +
+                ' were duplicated to ' +
+                targetWorkspaceName,
             }
           ),
         });
       } else {
         const errorIdMessages = result.errors
-          ? ' These objects cannot be duplicated:' +
-            result.errors.map((item: { id: string }) => item.id).join(', ')
+          ? result.errors.map((item: { id: string }) => item.id).join(', ')
           : '';
         notifications.toasts.addDanger({
           title: i18n.translate(
             'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
             {
               defaultMessage:
+                'Warning - ' +
+                (successCount > 0
+                  ? successCount +
+                    ' saved object(s)' +
+                    refMessage +
+                    ' were duplicated to ' +
+                    targetWorkspaceName +
+                    '. '
+                  : '') +
                 'Unable to duplicate ' +
-                savedObjects.length.toString() +
-                ' saved objects.' +
+                result.errors.length.toString() +
+                ' saved object(s): ' +
                 errorIdMessages,
             }
           ),
@@ -757,7 +775,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
           defaultMessage:
-            'Unable to duplicate ' + savedObjects.length.toString() + ' saved objects',
+            'Error - Unable to duplicate ' + savedObjects.length.toString() + ' saved object(s)',
         }),
       });
     }
@@ -766,7 +784,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   renderDuplicateModal() {
-    const { isShowingDuplicateModal, duplicateSelectedSavedObjects, duplicateMode } = this.state;
+    const { isShowingDuplicateModal, duplicateSelectedSavedObjects } = this.state;
 
     if (!isShowingDuplicateModal) {
       return null;
@@ -778,7 +796,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         workspaces={this.props.workspaces}
         onDuplicate={this.onDuplicate}
         notifications={this.props.notifications}
-        duplicateMode={duplicateMode}
         onClose={this.hideDuplicateModal}
         selectedSavedObjects={duplicateSelectedSavedObjects}
       />
@@ -1143,7 +1160,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onDuplicateSelected={() =>
               this.setState({
                 isShowingDuplicateModal: true,
-                duplicateMode: DuplicateMode.Selected,
                 duplicateSelectedSavedObjects: selectedSavedObjects,
               })
             }
@@ -1151,7 +1167,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
               this.setState({
                 duplicateSelectedSavedObjects: [object],
                 isShowingDuplicateModal: true,
-                duplicateMode: DuplicateMode.Selected,
               })
             }
             onActionRefresh={this.refreshObject}

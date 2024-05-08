@@ -59,7 +59,7 @@ HTMLCollection [
                   class="euiModalHeader__title"
                 >
                   <span>
-                    Duplicate all objects?
+                    Duplicate 3 objects to?
                   </span>
                 </div>
               </div>
@@ -80,7 +80,7 @@ HTMLCollection [
                         class="euiFormLabel euiFormRow__label"
                         for="generated-id"
                       >
-                        Destination workspace
+                        Workspace
                       </label>
                     </div>
                     <div
@@ -92,7 +92,7 @@ HTMLCollection [
                         <div
                           class="euiTextColor euiTextColor--subdued"
                         >
-                          Specify a workspace where the objects will be duplicated to.
+                          Select a workspace to where the object(s) will be duplicated
                         </div>
                       </div>
                       <div
@@ -115,6 +115,11 @@ HTMLCollection [
                               data-test-subj="comboBoxInput"
                               tabindex="-1"
                             >
+                              <p
+                                class="euiComboBoxPlaceholder"
+                              >
+                                select a workspace
+                              </p>
                               <div
                                 class="euiComboBox__input"
                                 style="font-size: 14px; display: inline-block;"
@@ -153,52 +158,7 @@ HTMLCollection [
                     </div>
                   </div>
                   <div
-                    class="euiSpacer euiSpacer--m"
-                  />
-                  <div
-                    class="euiCheckbox"
-                  >
-                    <input
-                      checked=""
-                      class="euiCheckbox__input"
-                      id="includeSavedObjectType.dashboard"
-                      type="checkbox"
-                    />
-                    <div
-                      class="euiCheckbox__square"
-                    />
-                    <label
-                      class="euiCheckbox__label"
-                      for="includeSavedObjectType.dashboard"
-                    >
-                      <span>
-                        Dashboard (2)
-                      </span>
-                    </label>
-                  </div>
-                  <div
-                    class="euiCheckbox"
-                  >
-                    <input
-                      checked=""
-                      class="euiCheckbox__input"
-                      id="includeSavedObjectType.visualization"
-                      type="checkbox"
-                    />
-                    <div
-                      class="euiCheckbox__square"
-                    />
-                    <label
-                      class="euiCheckbox__label"
-                      for="includeSavedObjectType.visualization"
-                    >
-                      <span>
-                        Visualization (1)
-                      </span>
-                    </label>
-                  </div>
-                  <div
-                    class="euiSpacer euiSpacer--m"
+                    class="euiSpacer euiSpacer--l"
                   />
                   <div
                     class="euiFormRow euiFormRow--fullWidth"
@@ -211,7 +171,7 @@ HTMLCollection [
                         class="euiFormLabel euiFormRow__label"
                         for="generated-id"
                       >
-                        Related Objects
+                        Options
                       </label>
                     </div>
                     <div
@@ -223,7 +183,7 @@ HTMLCollection [
                         <div
                           class="euiTextColor euiTextColor--subdued"
                         >
-                          We recommended duplicating related objects to ensure your duplicated objects will continue to function.
+                          Include related saved objects to ensure object(s) work as expected
                         </div>
                       </div>
                       <div
@@ -245,395 +205,8 @@ HTMLCollection [
                           class="euiCheckbox__label"
                           for="includeReferencesDeep"
                         >
-                          Duplicate related objects
+                          Include related objects(recommended)
                         </label>
-                      </div>
-                    </div>
-                  </div>
-                  <div
-                    class="euiSpacer euiSpacer--m"
-                  />
-                  <p>
-                    <span>
-                      The following saved objects will be duplicated:
-                    </span>
-                  </p>
-                  <div
-                    class="euiSpacer euiSpacer--m"
-                  />
-                  <div
-                    class="euiBasicTable"
-                  >
-                    <div>
-                      <div
-                        class="euiTableHeaderMobile"
-                      >
-                        <div
-                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-                        >
-                          <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero"
-                          />
-                          <div
-                            class="euiFlexItem euiFlexItem--flexGrowZero"
-                          />
-                        </div>
-                      </div>
-                      <table
-                        class="euiTable euiTable--responsive"
-                        id="__table_generated-id"
-                        tabindex="-1"
-                      >
-                        <caption
-                          class="euiScreenReaderOnly euiTableCaption"
-                        />
-                        <thead>
-                          <tr>
-                            <th
-                              class="euiTableHeaderCell"
-                              data-test-subj="tableHeaderCell_type_0"
-                              role="columnheader"
-                              scope="col"
-                              style="width: 50px;"
-                            >
-                              <span
-                                class="euiTableCellContent"
-                              >
-                                <span
-                                  class="euiTableCellContent__text"
-                                  title="Type"
-                                >
-                                  Type
-                                </span>
-                              </span>
-                            </th>
-                            <th
-                              class="euiTableHeaderCell"
-                              data-test-subj="tableHeaderCell_id_1"
-                              role="columnheader"
-                              scope="col"
-                            >
-                              <span
-                                class="euiTableCellContent"
-                              >
-                                <span
-                                  class="euiTableCellContent__text"
-                                  title="Id"
-                                >
-                                  Id
-                                </span>
-                              </span>
-                            </th>
-                            <th
-                              class="euiTableHeaderCell"
-                              data-test-subj="tableHeaderCell_meta.title_2"
-                              role="columnheader"
-                              scope="col"
-                            >
-                              <span
-                                class="euiTableCellContent"
-                              >
-                                <span
-                                  class="euiTableCellContent__text"
-                                  title="Title"
-                                >
-                                  Title
-                                </span>
-                              </span>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr
-                            class="euiTableRow"
-                          >
-                            <td
-                              class="euiTableRowCell"
-                              style="width: 50px;"
-                            >
-                              <div
-                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                              >
-                                Type
-                              </div>
-                              <div
-                                class="euiTableCellContent euiTableCellContent--overflowingContent"
-                              >
-                                <span
-                                  class="euiToolTipAnchor"
-                                >
-                                  <span
-                                    data-euiicon-type="dashboardApp"
-                                  />
-                                </span>
-                              </div>
-                            </td>
-                            <td
-                              class="euiTableRowCell"
-                            >
-                              <div
-                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                              >
-                                Id
-                              </div>
-                              <div
-                                class="euiTableCellContent"
-                              >
-                                <span
-                                  class="euiTableCellContent__text"
-                                >
-                                  1
-                                </span>
-                              </div>
-                            </td>
-                            <td
-                              class="euiTableRowCell"
-                            >
-                              <div
-                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                              >
-                                Title
-                              </div>
-                              <div
-                                class="euiTableCellContent"
-                              >
-                                <span
-                                  class="euiTableCellContent__text"
-                                >
-                                  Dashboard_1
-                                </span>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr
-                            class="euiTableRow"
-                          >
-                            <td
-                              class="euiTableRowCell"
-                              style="width: 50px;"
-                            >
-                              <div
-                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                              >
-                                Type
-                              </div>
-                              <div
-                                class="euiTableCellContent euiTableCellContent--overflowingContent"
-                              >
-                                <span
-                                  class="euiToolTipAnchor"
-                                >
-                                  <span
-                                    data-euiicon-type="visualizationApp"
-                                  />
-                                </span>
-                              </div>
-                            </td>
-                            <td
-                              class="euiTableRowCell"
-                            >
-                              <div
-                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                              >
-                                Id
-                              </div>
-                              <div
-                                class="euiTableCellContent"
-                              >
-                                <span
-                                  class="euiTableCellContent__text"
-                                >
-                                  2
-                                </span>
-                              </div>
-                            </td>
-                            <td
-                              class="euiTableRowCell"
-                            >
-                              <div
-                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                              >
-                                Title
-                              </div>
-                              <div
-                                class="euiTableCellContent"
-                              >
-                                <span
-                                  class="euiTableCellContent__text"
-                                >
-                                  Visualization
-                                </span>
-                              </div>
-                            </td>
-                          </tr>
-                          <tr
-                            class="euiTableRow"
-                          >
-                            <td
-                              class="euiTableRowCell"
-                              style="width: 50px;"
-                            >
-                              <div
-                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                              >
-                                Type
-                              </div>
-                              <div
-                                class="euiTableCellContent euiTableCellContent--overflowingContent"
-                              >
-                                <span
-                                  class="euiToolTipAnchor"
-                                >
-                                  <span
-                                    data-euiicon-type="apps"
-                                  />
-                                </span>
-                              </div>
-                            </td>
-                            <td
-                              class="euiTableRowCell"
-                            >
-                              <div
-                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                              >
-                                Id
-                              </div>
-                              <div
-                                class="euiTableCellContent"
-                              >
-                                <span
-                                  class="euiTableCellContent__text"
-                                >
-                                  3
-                                </span>
-                              </div>
-                            </td>
-                            <td
-                              class="euiTableRowCell"
-                            >
-                              <div
-                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
-                              >
-                                Title
-                              </div>
-                              <div
-                                class="euiTableCellContent"
-                              >
-                                <span
-                                  class="euiTableCellContent__text"
-                                >
-                                  Dashboard_2
-                                </span>
-                              </div>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                    <div>
-                      <div
-                        class="euiSpacer euiSpacer--m"
-                      />
-                      <div
-                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-                      >
-                        <div
-                          class="euiFlexItem euiFlexItem--flexGrowZero"
-                        >
-                          <div
-                            class="euiPopover euiPopover--anchorUpRight"
-                          >
-                            <div
-                              class="euiPopover__anchor"
-                            >
-                              <button
-                                class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
-                                data-test-subj="tablePaginationPopoverButton"
-                                type="button"
-                              >
-                                <span
-                                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
-                                >
-                                  <span
-                                    class="euiButtonContent__icon"
-                                    color="inherit"
-                                    data-euiicon-type="arrowDown"
-                                  />
-                                  <span
-                                    class="euiButtonEmpty__text"
-                                  >
-                                    Rows per page
-                                    : 
-                                    10
-                                  </span>
-                                </span>
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                        <div
-                          class="euiFlexItem euiFlexItem--flexGrowZero"
-                        >
-                          <nav
-                            class="euiPagination"
-                          >
-                            <button
-                              aria-label="Previous page"
-                              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-                              data-test-subj="pagination-button-previous"
-                              disabled=""
-                              type="button"
-                            >
-                              <span
-                                aria-hidden="true"
-                                class="euiButtonIcon__icon"
-                                color="inherit"
-                                data-euiicon-type="arrowLeft"
-                              />
-                            </button>
-                            <ul
-                              class="euiPagination__list"
-                            >
-                              <li
-                                class="euiPagination__item"
-                              >
-                                <button
-                                  aria-controls="__table_generated-id"
-                                  aria-current="true"
-                                  aria-label="Page 1 of 1"
-                                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
-                                  data-test-subj="pagination-button-0"
-                                  disabled=""
-                                  type="button"
-                                >
-                                  <span
-                                    class="euiButtonContent euiButtonEmpty__content"
-                                  >
-                                    <span
-                                      class="euiButtonEmpty__text"
-                                    >
-                                      1
-                                    </span>
-                                  </span>
-                                </button>
-                              </li>
-                            </ul>
-                            <button
-                              aria-label="Next page"
-                              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
-                              data-test-subj="pagination-button-next"
-                              disabled=""
-                              type="button"
-                            >
-                              <span
-                                aria-hidden="true"
-                                class="euiButtonIcon__icon"
-                                color="inherit"
-                                data-euiicon-type="arrowRight"
-                              />
-                            </button>
-                          </nav>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -672,7 +245,7 @@ HTMLCollection [
                       class="euiButton__text"
                     >
                       <span>
-                        Duplicate(3)
+                        Duplicate
                       </span>
                     </span>
                   </span>

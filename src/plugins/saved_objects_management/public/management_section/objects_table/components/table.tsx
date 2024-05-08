@@ -330,8 +330,9 @@ export class Table extends PureComponent<TableProps, TableState> {
                   ),
                   type: 'icon',
                   icon: 'copyClipboard',
-                  isPrimary: true,
-                  onClick: (object: SavedObjectWithMetadata<unknown>) => onDuplicateSingle(object),
+                  // isPrimary: true,
+                  onClick: (object: SavedObjectWithMetadata) => onDuplicateSingle(object),
+                  available: (object: SavedObjectWithMetadata) => object.type !== 'config',
                   'data-test-subj': 'savedObjectsTableAction-duplicate',
                 },
               ]
@@ -392,77 +393,20 @@ export class Table extends PureComponent<TableProps, TableState> {
 
     const activeActionContents = this.state.activeAction?.render() ?? null;
 
-    const tools = [
-      <EuiButton
-        key="deleteSO"
-        iconType="trash"
-        color="danger"
-        onClick={onDelete}
-        isDisabled={selectedSavedObjects.length === 0 || !this.props.canDelete}
-        title={
-          this.props.canDelete
-            ? undefined
-            : i18n.translate('savedObjectsManagement.objectsTable.table.deleteButtonTitle', {
-                defaultMessage: 'Unable to delete saved objects',
-              })
-        }
-        data-test-subj="savedObjectsManagementDelete"
-      >
-        <FormattedMessage
-          id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
-          defaultMessage="Delete"
-        />
-      </EuiButton>,
-      <EuiPopover
-        key="exportSOOptions"
-        button={button}
-        isOpen={this.state.isExportPopoverOpen}
-        closePopover={this.closeExportPopover}
-      >
-        <EuiFormRow
-          label={
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
-              defaultMessage="Options"
-            />
-          }
-        >
-          <EuiSwitch
-            name="includeReferencesDeep"
-            label={
-              <FormattedMessage
-                id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
-                defaultMessage="Include related objects"
-              />
-            }
-            checked={this.state.isIncludeReferencesDeepChecked}
-            onChange={this.toggleIsIncludeReferencesDeepChecked}
-          />
-        </EuiFormRow>
-        <EuiFormRow>
-          <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
-            <FormattedMessage
-              id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
-              defaultMessage="Export"
-            />
-          </EuiButton>
-        </EuiFormRow>
-      </EuiPopover>,
-    ];
-
     const duplicateButton = (
-      <EuiButtonIcon
-        key="copySO"
+      <EuiButton
+        key="duplicateSO"
         iconType="copyClipboard"
         onClick={onDuplicateSelected}
         isDisabled={selectedSavedObjects.length === 0}
-        data-test-subj="savedObjectsManagementCopy"
-      />
+        data-test-subj="savedObjectsManagementDuplicate"
+      >
+        <FormattedMessage
+          id="savedObjectsManagement.objectsTable.table.duplicateSOButtonLabel"
+          defaultMessage="Duplicate"
+        />
+      </EuiButton>
     );
-
-    if (showDuplicate) {
-      tools.splice(1, 0, duplicateButton);
-    }
 
     return (
       <Fragment>
@@ -471,7 +415,64 @@ export class Table extends PureComponent<TableProps, TableState> {
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
           filters={filters as any}
           onChange={this.onChange}
-          toolsRight={tools}
+          toolsRight={[
+            <>{showDuplicate && duplicateButton}</>,
+            <EuiButton
+              key="deleteSO"
+              iconType="trash"
+              color="danger"
+              onClick={onDelete}
+              isDisabled={selectedSavedObjects.length === 0 || !this.props.canDelete}
+              title={
+                this.props.canDelete
+                  ? undefined
+                  : i18n.translate('savedObjectsManagement.objectsTable.table.deleteButtonTitle', {
+                      defaultMessage: 'Unable to delete saved objects',
+                    })
+              }
+              data-test-subj="savedObjectsManagementDelete"
+            >
+              <FormattedMessage
+                id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
+                defaultMessage="Delete"
+              />
+            </EuiButton>,
+            <EuiPopover
+              key="exportSOOptions"
+              button={button}
+              isOpen={this.state.isExportPopoverOpen}
+              closePopover={this.closeExportPopover}
+            >
+              <EuiFormRow
+                label={
+                  <FormattedMessage
+                    id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
+                    defaultMessage="Options"
+                  />
+                }
+              >
+                <EuiSwitch
+                  name="includeReferencesDeep"
+                  label={
+                    <FormattedMessage
+                      id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.includeReferencesDeepLabel"
+                      defaultMessage="Include related objects"
+                    />
+                  }
+                  checked={this.state.isIncludeReferencesDeepChecked}
+                  onChange={this.toggleIsIncludeReferencesDeepChecked}
+                />
+              </EuiFormRow>
+              <EuiFormRow>
+                <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
+                  <FormattedMessage
+                    id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
+                    defaultMessage="Export"
+                  />
+                </EuiButton>
+              </EuiFormRow>
+            </EuiPopover>,
+          ]}
         />
         {queryParseError}
         <EuiSpacer size="s" />

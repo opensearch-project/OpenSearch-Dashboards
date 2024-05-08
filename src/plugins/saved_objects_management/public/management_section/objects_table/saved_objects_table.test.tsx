@@ -849,8 +849,8 @@ describe('SavedObjectsTable', () => {
     ];
 
     const mockSelectedSavedObjects = [
-      { id: '1', type: 'dashboard', references: [], attributes: [], meta: {} },
-      { id: '2', type: 'dashboard', references: [], attributes: [], meta: {} },
+      { id: '1', type: 'dashboard', references: [], attributes: [], meta: { title: 'object-1' } },
+      { id: '2', type: 'dashboard', references: [], attributes: [], meta: { title: 'object-2' } },
     ] as SavedObjectWithMetadata[];
 
     beforeEach(() => {
@@ -859,7 +859,7 @@ describe('SavedObjectsTable', () => {
       workspaces.currentWorkspace$.next(workspaceList[0]);
     });
 
-    it('should duplicate selected object', async () => {
+    it('should duplicate selected objects', async () => {
       getDuplicateSavedObjectsMock.mockImplementation(() => ({ success: true }));
 
       const component = shallowRender({ applications, workspaces });
@@ -873,7 +873,7 @@ describe('SavedObjectsTable', () => {
       expect(component.state('isShowingDuplicateModal')).toEqual(true);
       expect(component.find('SavedObjectsDuplicateModal').length).toEqual(1);
 
-      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2');
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
 
       expect(getDuplicateSavedObjectsMock).toHaveBeenCalledWith(
         http,
@@ -887,12 +887,12 @@ describe('SavedObjectsTable', () => {
       component.update();
 
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Duplicate 2 saved objects successfully',
+        title: 'Success - 2 saved objects were duplicated to bar',
       });
     });
 
-    it('should show error when duplicating selected object is fail', async () => {
-      getDuplicateSavedObjectsMock.mockImplementationOnce(() => ({ success: false }));
+    it('should duplicate single object', async () => {
+      getDuplicateSavedObjectsMock.mockImplementation(() => ({ success: true }));
 
       const component = shallowRender({ applications, workspaces });
       component.setState({ isShowingDuplicateModal: true });
@@ -902,7 +902,33 @@ describe('SavedObjectsTable', () => {
       // Ensure the state changes are reflected
       component.update();
 
-      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2');
+      await component
+        .instance()
+        .onDuplicate([mockSelectedSavedObjects[0]], true, 'workspace2', 'bar');
+
+      expect(getDuplicateSavedObjectsMock).toHaveBeenCalledWith(
+        http,
+        [{ id: '1', type: 'dashboard' }],
+        true,
+        'workspace2'
+      );
+      component.update();
+
+      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
+        title: 'Success - object-1 and the related objects were duplicated to bar',
+      });
+    });
+
+    it('should show error when duplicating selected object is fail', async () => {
+      const component = shallowRender({ applications, workspaces });
+      component.setState({ isShowingDuplicateModal: true });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
 
       expect(getDuplicateSavedObjectsMock).toHaveBeenCalledWith(
         http,
@@ -915,18 +941,14 @@ describe('SavedObjectsTable', () => {
       );
       component.update();
 
-      expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Unable to duplicate 2 saved objects.',
-      });
-
       getDuplicateSavedObjectsMock.mockImplementationOnce(() => ({
         success: false,
         errors: [{ id: '1' }, { id: '2' }],
       }));
 
-      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2');
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
       expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Unable to duplicate 2 saved objects. These objects cannot be duplicated:1, 2',
+        title: 'Warning - Unable to duplicate 2 saved object(s): 1, 2',
       });
     });
 
@@ -941,7 +963,7 @@ describe('SavedObjectsTable', () => {
       // Ensure the state changes are reflected
       component.update();
 
-      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2');
+      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
 
       expect(getDuplicateSavedObjectsMock).toHaveBeenCalledWith(
         http,
@@ -955,7 +977,7 @@ describe('SavedObjectsTable', () => {
       component.update();
 
       expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Unable to duplicate 2 saved objects',
+        title: 'Error - Unable to duplicate 2 saved object(s)',
       });
     });
 
