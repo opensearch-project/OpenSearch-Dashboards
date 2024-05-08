@@ -180,7 +180,7 @@ describe('sample data list route', () => {
       saved_objects: [
         {
           type: 'dashboard',
-          id: `${mockDataSourceId}_${mockWorkspaceId}_7adfa750-4c81-11e8-b3d7-01146121b73d`,
+          id: `${mockWorkspaceId}_${mockDataSourceId}_7adfa750-4c81-11e8-b3d7-01146121b73d`,
           namespaces: ['default'],
           attributes: { title: 'dashboard' },
         },
@@ -224,7 +224,7 @@ describe('sample data list route', () => {
     expect(mockClient).toBeCalledTimes(2);
     expect(mockResponse.ok).toBeCalled();
     expect(mockSOClient.get.mock.calls[0][1]).toMatch(
-      `${mockDataSourceId}_${mockWorkspaceId}_7adfa750-4c81-11e8-b3d7-01146121b73d`
+      `${mockWorkspaceId}_${mockDataSourceId}_7adfa750-4c81-11e8-b3d7-01146121b73d`
     );
   });
 });
