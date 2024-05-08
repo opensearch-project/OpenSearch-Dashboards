@@ -21,8 +21,6 @@
   .euiSelectableListItem__icon, .euiSelectableListItem__prepend {
     margin-right: 0;
   }
-
-
   }
 
   .dataSourceAggregatedViewOuiFlexGroup {
@@ -38,7 +36,7 @@
       overflow: hidden;
       white-space: nowrap;
       display: inline-block;
-      padding-left: 0%;
+      padding-left: 0;
     }
   }
 
@@ -54,7 +52,7 @@
     overflow: hidden;
     white-space: nowrap;
     display: inline-block;
-    padding-left: 0%;
+    padding-left: 0;
   }
 
   .dataSourceListAllActiveOuiFlexItem {
