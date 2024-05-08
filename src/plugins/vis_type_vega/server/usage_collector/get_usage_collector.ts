@@ -151,7 +151,7 @@ export function getUsageCollector(
     type: VEGA_USAGE_TYPE,
     isReady: () => true,
     fetch: async (callCluster: LegacyAPICaller) => {
-      const { index } = (await config.pipe(first()).toPromise()).kibana;
+      const { index } = (await config.pipe(first()).toPromise()).opensearchDashboards;
 
       return await getStats(callCluster, index, dependencies);
     },

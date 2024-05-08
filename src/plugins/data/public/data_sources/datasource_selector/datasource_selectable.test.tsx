@@ -6,16 +6,24 @@
 import React from 'react';
 import { render, act, screen, fireEvent } from '@testing-library/react';
 import { DataSourceSelectable } from './datasource_selectable';
-import { DataSourceType, GenericDataSource } from '../datasource_services';
 import { DataSourceGroup, DataSourceOption } from './types';
+import { DataSource } from '../datasource/datasource';
+import {
+  DEFAULT_DATA_SOURCE_DISPLAY_NAME,
+  S3_GLUE_DATA_SOURCE_DISPLAY_NAME,
+  DEFAULT_DATA_SOURCE_TYPE,
+  defaultDataSourceMetadata,
+  s3DataSourceMetadata,
+} from '../constants';
 
 describe('DataSourceSelectable', () => {
-  let dataSourcesMock: GenericDataSource[];
+  let dataSourcesMock: DataSource[];
   let dataSourceOptionListMock: DataSourceGroup[];
   let selectedSourcesMock: DataSourceOption[];
   let setSelectedSourcesMock: (sources: DataSourceOption[]) => void = jest.fn();
   let setDataSourceOptionListMock: (sources: DataSourceGroup[]) => void = jest.fn();
   let onFetchDataSetErrorMock: (error: Error) => void = jest.fn();
+  const onRefresh: () => void = jest.fn();
 
   beforeEach(() => {
     dataSourcesMock = [
@@ -23,7 +31,14 @@ describe('DataSourceSelectable', () => {
         getDataSet: jest.fn().mockResolvedValue([]),
         getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
         getName: jest.fn().mockReturnValue('SomeName'),
-      } as unknown) as DataSourceType,
+        getMetadata: jest.fn().mockReturnValue(defaultDataSourceMetadata),
+      } as unknown) as DataSource,
+      ({
+        getDataSet: jest.fn().mockResolvedValue([]),
+        getType: jest.fn().mockReturnValue('s3glue'),
+        getName: jest.fn().mockReturnValue('Amazon S3'),
+        getMetadata: jest.fn().mockReturnValue(s3DataSourceMetadata),
+      } as unknown) as DataSource,
     ];
 
     dataSourceOptionListMock = [];
@@ -42,6 +57,7 @@ describe('DataSourceSelectable', () => {
         onDataSourceSelect={setSelectedSourcesMock}
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
+        onRefresh={onRefresh}
       />
     );
   });
@@ -56,6 +72,7 @@ describe('DataSourceSelectable', () => {
           onDataSourceSelect={setSelectedSourcesMock}
           setDataSourceOptionList={setDataSourceOptionListMock}
           onGetDataSetError={onFetchDataSetErrorMock}
+          onRefresh={onRefresh}
         />
       );
     });
@@ -75,6 +92,7 @@ describe('DataSourceSelectable', () => {
           onDataSourceSelect={setSelectedSourcesMock}
           setDataSourceOptionList={setDataSourceOptionListMock}
           onGetDataSetError={onFetchDataSetErrorMock}
+          onRefresh={onRefresh}
         />
       );
     });
@@ -104,13 +122,15 @@ describe('DataSourceSelectable', () => {
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
             getName: jest.fn().mockReturnValue('Index patterns'),
-          } as unknown) as DataSourceType,
+            getMetadata: jest.fn().mockReturnValue(defaultDataSourceMetadata),
+          } as unknown) as DataSource,
         ]}
         dataSourceOptionList={mockDataSourceOptionList}
         selectedSources={selectedSourcesMock}
         onDataSourceSelect={setSelectedSourcesMock}
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
+        onRefresh={onRefresh}
       />
     );
 
@@ -153,14 +173,16 @@ describe('DataSourceSelectable', () => {
           ({
             getDataSet: jest.fn().mockResolvedValue([]),
             getType: jest.fn().mockReturnValue('s3glue'),
-            getName: jest.fn().mockReturnValue('Amazon S3'),
-          } as unknown) as DataSourceType,
+            getName: jest.fn().mockReturnValue(S3_GLUE_DATA_SOURCE_DISPLAY_NAME),
+            getMetadata: jest.fn().mockReturnValue(s3DataSourceMetadata),
+          } as unknown) as DataSource,
         ]}
         dataSourceOptionList={mockDataSourceOptionList}
         selectedSources={selectedSourcesMock}
         onDataSourceSelect={setSelectedSourcesMock}
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
+        onRefresh={onRefresh}
       />
     );
 
@@ -202,15 +224,17 @@ describe('DataSourceSelectable', () => {
         dataSources={[
           ({
             getDataSet: jest.fn().mockResolvedValue([]),
-            getType: jest.fn().mockReturnValue('DEFAULT_INDEX_PATTERNS'),
-            getName: jest.fn().mockReturnValue('Index patterns'),
-          } as unknown) as DataSourceType,
+            getType: jest.fn().mockReturnValue(DEFAULT_DATA_SOURCE_TYPE),
+            getName: jest.fn().mockReturnValue(DEFAULT_DATA_SOURCE_DISPLAY_NAME),
+            getMetadata: jest.fn().mockReturnValue(defaultDataSourceMetadata),
+          } as unknown) as DataSource,
         ]}
         dataSourceOptionList={mockDataSourceOptionListWithDuplicates}
         selectedSources={selectedSourcesMock}
         onDataSourceSelect={handleSelect}
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
+        onRefresh={onRefresh}
       />
     );
 
@@ -223,5 +247,22 @@ describe('DataSourceSelectable', () => {
     expect(handleSelect).toHaveBeenCalledWith(
       expect.objectContaining([{ key: 'unique-key-3', label: 'duplicate-index-pattern' }])
     );
+  });
+
+  it('should trigger onRefresh when the refresh button is clicked', () => {
+    const { getByLabelText } = render(
+      <DataSourceSelectable
+        dataSources={dataSourcesMock}
+        dataSourceOptionList={dataSourceOptionListMock}
+        selectedSources={selectedSourcesMock}
+        onDataSourceSelect={setSelectedSourcesMock}
+        setDataSourceOptionList={setDataSourceOptionListMock}
+        onGetDataSetError={onFetchDataSetErrorMock}
+        onRefresh={onRefresh}
+      />
+    );
+    const refreshButton = getByLabelText('sourceRefresh');
+    fireEvent.click(refreshButton);
+    expect(onRefresh).toHaveBeenCalled();
   });
 });

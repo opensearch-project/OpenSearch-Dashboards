@@ -67,8 +67,8 @@ export default function ({ getService, getPageObjects }) {
         name: 'saved search',
         fields: ['bytes', 'agent'],
       });
-      // DefaultDiscoverTable loads 10 rows initially
-      await dashboardExpect.rowCountFromDefaultDiscoverTable(10);
+      // DefaultDiscoverTable loads 10 rows initially and 40 lazily for a total of 50
+      await dashboardExpect.rowCountFromDefaultDiscoverTable(50);
 
       // Set to time range with no data
       await PageObjects.timePicker.setAbsoluteRange(

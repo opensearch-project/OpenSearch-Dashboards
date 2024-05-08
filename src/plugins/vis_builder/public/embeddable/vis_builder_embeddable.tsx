@@ -35,7 +35,7 @@ import {
   getTypeService,
   getUIActions,
 } from '../plugin_services';
-import { PersistedState } from '../../../visualizations/public';
+import { PersistedState, prepareJson } from '../../../visualizations/public';
 import { VisBuilderSavedVis } from '../saved_visualizations/transforms';
 import { handleVisEvent } from '../application/utils/handle_vis_event';
 import { VisBuilderEmbeddableFactoryDeps } from './vis_builder_embeddable_factory';
@@ -246,6 +246,28 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
     this.autoRefreshFetchSubscription.unsubscribe();
   }
 
+  private async updateExpression() {
+    // Construct the initial part of the pipeline with context management.
+    let pipeline = `opensearchDashboards | opensearch_dashboards_context `;
+
+    // Access the query and filters from savedObject if available.
+    const query = this.savedVis?.searchSourceFields?.query;
+    const filters = this.savedVis?.searchSourceFields?.filter;
+
+    // Append query and filters to the pipeline string if they exist.
+    if (query) {
+      pipeline += prepareJson('query', query);
+    }
+    if (filters) {
+      pipeline += prepareJson('filters', filters);
+    }
+
+    const currentExpression = (await this.getExpression()) ?? '';
+
+    // Replace 'opensearchDashboards' with the constructed pipeline in the existing expression.
+    return currentExpression.replace('opensearchDashboards', pipeline);
+  }
+
   private async updateHandler() {
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
@@ -260,6 +282,8 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
     }
     this.abortController = new AbortController();
     const abortController = this.abortController;
+
+    this.expression = await this.updateExpression();
 
     if (this.handler && !abortController.signal.aborted) {
       this.handler.update(this.expression, expressionParams);
@@ -296,12 +320,8 @@ export class VisBuilderEmbeddable extends Embeddable<VisBuilderInput, VisBuilder
       dirty = true;
     }
 
-    if (dirty) {
-      this.expression = (await this.getExpression()) ?? '';
-
-      if (this.handler) {
-        this.updateHandler();
-      }
+    if (this.handler && dirty) {
+      this.updateHandler();
     }
   }
 
