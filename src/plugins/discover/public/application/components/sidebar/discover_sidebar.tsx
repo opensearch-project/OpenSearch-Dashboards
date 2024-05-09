@@ -43,6 +43,7 @@ import {
 import { I18nProvider } from '@osd/i18n/react';
 import { DiscoverField } from './discover_field';
 import { DiscoverFieldSearch } from './discover_field_search';
+import { DiscoverFieldDataFrame } from './discover_field_data_frame';
 import { FIELDS_LIMIT_SETTING } from '../../../../common';
 import { groupFields } from './lib/group_fields';
 import { IndexPatternField, IndexPattern, UI_SETTINGS } from '../../../../../data/public';
@@ -51,6 +52,7 @@ import { getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { getServices } from '../../../opensearch_dashboards_services';
 import { FieldDetails } from './types';
+import { displayIndexPatternCreation } from './lib/display_index_pattern_creation';
 
 export interface DiscoverSidebarProps {
   /**
@@ -83,13 +85,30 @@ export interface DiscoverSidebarProps {
    */
   onRemoveField: (fieldName: string) => void;
   /**
+   * Callback function to create an index pattern
+   */
+  onCreateIndexPattern: () => void;
+  /**
+   * Callback function to normalize the index pattern
+   */
+  onNormalize: () => void;
+  /**
    * Currently selected index pattern
    */
   selectedIndexPattern?: IndexPattern;
 }
 
 export function DiscoverSidebar(props: DiscoverSidebarProps) {
-  const { columns, fieldCounts, hits, onAddField, onReorderFields, selectedIndexPattern } = props;
+  const {
+    columns,
+    fieldCounts,
+    hits,
+    onAddField,
+    onReorderFields,
+    onNormalize,
+    onCreateIndexPattern,
+    selectedIndexPattern,
+  } = props;
   const [fields, setFields] = useState<IndexPatternField[] | null>(null);
   const [fieldFilterState, setFieldFilterState] = useState(getDefaultFieldFilter());
   const services = useMemo(() => getServices(), []);
@@ -98,6 +117,12 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
     const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
     setFields(newFields);
   }, [selectedIndexPattern, fieldCounts, hits, services]);
+
+  const onNormalizeIndexPattern = useCallback(async () => {
+    await onNormalize();
+    const newFields = getIndexPatternFieldList(selectedIndexPattern, fieldCounts);
+    setFields(newFields);
+  }, [fieldCounts, onNormalize, selectedIndexPattern]);
 
   const onChangeFieldSearch = useCallback(
     (field: string, value: string | boolean | undefined) => {
@@ -195,6 +220,14 @@ export function DiscoverSidebar(props: DiscoverSidebarProps) {
               types={fieldTypes}
             />
           </EuiSplitPanel.Inner>
+          {displayIndexPatternCreation(selectedIndexPattern) ? (
+            <EuiSplitPanel.Inner grow={false} paddingSize="s">
+              <DiscoverFieldDataFrame
+                onCreateIndexPattern={onCreateIndexPattern}
+                onNormalizeIndexPattern={onNormalizeIndexPattern}
+              />
+            </EuiSplitPanel.Inner>
+          ) : null}
           <EuiSplitPanel.Inner className="eui-yScroll" paddingSize="none">
             {fields.length > 0 && (
               <>
