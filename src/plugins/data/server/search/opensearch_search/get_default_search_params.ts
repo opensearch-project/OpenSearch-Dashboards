@@ -45,10 +45,14 @@ export async function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient
   const maxConcurrentShardRequests = await uiSettingsClient.get<number>(
     UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS
   );
+  const dataFrameHydrationStrategy = await uiSettingsClient.get<string>(
+    UI_SETTINGS.DATAFRAME_HYDRATION_STRATEGY
+  );
   return {
     maxConcurrentShardRequests:
       maxConcurrentShardRequests > 0 ? maxConcurrentShardRequests : undefined,
     ignoreThrottled,
+    dataFrameHydrationStrategy,
     ignoreUnavailable: true, // Don't fail if the index/indices don't exist
     trackTotalHits: true,
   };
