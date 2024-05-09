@@ -221,13 +221,14 @@ export {
   FieldFormatConfig,
   FieldFormatId,
   FieldFormat,
+  DATA_FRAME_TYPES,
 } from '../common';
 
 /*
  * Index patterns:
  */
 
-import { isNestedField, isFilterable } from '../common';
+import { isNestedField, isFilterable, setOverrides, getOverrides } from '../common';
 
 import {
   ILLEGAL_CHARACTERS_KEY,
@@ -251,6 +252,8 @@ export const indexPatterns = {
   ILLEGAL_CHARACTERS,
   isDefault,
   isFilterable,
+  setOverrides,
+  getOverrides,
   isNestedField,
   validate: validateIndexPattern,
   getFromSavedObject,
@@ -434,6 +437,8 @@ export {
   IndexPatternSelectProps,
   QueryStringInput,
   QueryStringInputProps,
+  // for BWC, keeping the old name
+  IUiStart as DataPublicPluginStartUi,
 } from './ui';
 
 /**
@@ -468,6 +473,8 @@ export {
   // osd field types
   castOpenSearchToOsdFieldTypeName,
   getOsdTypeNames,
+  getOsdFieldOverrides,
+  setOsdFieldOverrides,
 } from '../common';
 
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
@@ -490,7 +497,6 @@ export {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   IDataPluginServices,
-  DataPublicPluginStartUi,
   DataPublicPluginStartActions,
 } from './types';
 
@@ -504,7 +510,7 @@ export {
   IDataSetParams,
   IDataSourceQueryParams,
   IDataSourceQueryResult,
-  SourceDataSet,
+  IDataSourceDataSet,
   DataSourceConnectionStatus,
   DataSourceFactory,
 } from './data_sources/datasource';

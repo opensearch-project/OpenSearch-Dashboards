@@ -28,12 +28,25 @@
  * under the License.
  */
 
-import { getFilterableOsdTypeNames } from '../../osd_field_types';
+import {
+  getFilterableOsdTypeNames,
+  getOsdFieldOverrides,
+  setOsdFieldOverrides,
+} from '../../osd_field_types';
 import { IFieldType } from './types';
 
 const filterableTypes = getFilterableOsdTypeNames();
 
+export function setOverrides(overrides: Record<string, any> | undefined) {
+  setOsdFieldOverrides(overrides);
+}
+
+export function getOverrides(): Record<string, any> {
+  return getOsdFieldOverrides();
+}
+
 export function isFilterable(field: IFieldType): boolean {
+  if (getOverrides().filterable !== undefined) return !!getOverrides().filterable;
   return (
     field.name === '_id' ||
     field.scripted ||
