@@ -42,10 +42,17 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../types';
-import { HttpStart, SavedObject } from 'opensearch-dashboards/public';
+import { HttpStart, IToasts, SavedObject } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
 import { AuthenticationMethod, AuthenticationMethodRegistry } from '../auth_registry';
 import { deepEqual } from 'assert';
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
+import {
+  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
+  CONNECT_DATASOURCES_MESSAGE,
+  NO_COMPATIBLE_DATASOURCES_MESSAGE,
+  NO_DATASOURCES_CONNECTED_MESSAGE,
+} from './constants';
 
 const { savedObjects } = coreMock.createStart();
 const { uiSettings } = coreMock.createStart();
@@ -84,13 +91,40 @@ describe('DataSourceManagement: Utils.ts', () => {
   });
 
   describe('Handle no available data source error', () => {
-    const { toasts } = notificationServiceMock.createStartContract();
+    let toasts: IToasts;
+    const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
+    const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
 
-    test('should  send warning when data source is not available', () => {
-      const changeState = jest.fn();
-      handleNoAvailableDataSourceError(changeState, toasts);
-      expect(toasts.add).toBeCalledTimes(1);
+    beforeEach(() => {
+      toasts = notificationServiceMock.createStartContract().toasts;
     });
+
+    test.each([
+      {
+        incompatibleDataSourcesExist: false,
+        defaultMessage: noDataSourcesConnectedMessage,
+      },
+      {
+        incompatibleDataSourcesExist: true,
+        defaultMessage: noCompatibleDataSourcesMessage,
+      },
+    ])(
+      'should send warning when data source is not available',
+      ({ incompatibleDataSourcesExist, defaultMessage }) => {
+        const changeState = jest.fn();
+        handleNoAvailableDataSourceError({
+          changeState,
+          notifications: toasts,
+          incompatibleDataSourcesExist,
+        });
+        expect(toasts.add).toBeCalledTimes(1);
+        expect(toasts.add).toBeCalledWith(
+          expect.objectContaining({
+            title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
+          })
+        );
+      }
+    );
   });
 
   describe('Get data source by ID', () => {
