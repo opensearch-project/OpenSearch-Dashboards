@@ -4,7 +4,7 @@
  */
 
 import { render, fireEvent } from '@testing-library/react';
-import { getReloadButton } from './reload_button'; // Replace 'yourComponent' with the actual filename
+import { getReloadButton } from './reload_button';
 
 describe('getReloadButton', () => {
   it('renders button with correct label', () => {
