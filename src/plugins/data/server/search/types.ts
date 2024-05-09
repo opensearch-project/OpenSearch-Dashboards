@@ -38,6 +38,7 @@ import {
 import { AggsSetup, AggsStart } from './aggs';
 import { SearchUsage } from './collectors';
 import { IOpenSearchSearchRequest, IOpenSearchSearchResponse } from './opensearch_search';
+import { IDataFrameResponse } from '../../common';
 
 export interface SearchEnhancements {
   defaultStrategy: string;
@@ -51,7 +52,9 @@ export interface ISearchSetup {
    */
   registerSearchStrategy: <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends
+      | IOpenSearchDashboardsSearchResponse
+      | IDataFrameResponse = IOpenSearchSearchResponse
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
@@ -96,7 +99,9 @@ export interface ISearchStart<
  */
 export interface ISearchStrategy<
   SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-  SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+  SearchStrategyResponse extends
+    | IOpenSearchDashboardsSearchResponse
+    | IDataFrameResponse = IOpenSearchSearchResponse
 > {
   search: (
     context: RequestHandlerContext,
