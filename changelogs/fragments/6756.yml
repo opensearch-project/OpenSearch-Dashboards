@@ -1,0 +1,2 @@
+fix:
+- Show a error toast when workspace read only user delete saved objects ([#6756](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6756))
