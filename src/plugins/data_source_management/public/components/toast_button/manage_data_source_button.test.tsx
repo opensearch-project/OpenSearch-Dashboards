@@ -20,7 +20,7 @@ describe('ManageDataSourceButton', () => {
 
   it('renders a button with correct label', () => {
     const { getByTestId } = render(getManageDataSourceButton(applicationMock));
-    const container = getByTestId('dataSourceManageDataSourceButtonContainer');
+    const container = getByTestId('manageDataSourceButtonContainer');
     expect(container).toBeInTheDocument();
     expect(container).toHaveTextContent('Manage data sources');
   });
