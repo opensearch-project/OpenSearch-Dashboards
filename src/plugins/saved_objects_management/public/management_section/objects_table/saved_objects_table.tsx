@@ -589,7 +589,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   delete = async () => {
-    const { savedObjectsClient } = this.props;
+    const { savedObjectsClient, notifications } = this.props;
     const { selectedSavedObjects, isDeleting } = this.state;
 
     if (isDeleting) {
@@ -607,13 +607,21 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     const deletes = objects.savedObjects.map((object) =>
       savedObjectsClient.delete(object.type, object.id, { force: true })
     );
-    await Promise.all(deletes);
-
-    // Unset this
-    this.setState({
-      selectedSavedObjects: [],
-    });
-
+    try {
+      await Promise.all(deletes);
+      // Unset this
+      this.setState({
+        selectedSavedObjects: [],
+      });
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate(
+          'savedObjectsManagement.objectsTable.unableDeleteSavedObjectsNotificationMessage',
+          { defaultMessage: 'Unable delete saved objects' }
+        ),
+        text: `${error.body.message}`,
+      });
+    }
     // Fetching all data
     await this.fetchSavedObjects();
     await this.fetchCounts();
