@@ -25,6 +25,12 @@ import { DataSourceGroupLabelOption } from './data_source_menu/types';
 import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 import { getManageDataSourceButton, getReloadButton } from './toast_button';
+import {
+  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
+  CONNECT_DATASOURCES_MESSAGE,
+  NO_COMPATIBLE_DATASOURCES_MESSAGE,
+  NO_DATASOURCES_CONNECTED_MESSAGE,
+} from './constants';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -87,18 +93,25 @@ export async function setFirstDataSourceAsDefault(
   }
 }
 
-export function handleNoAvailableDataSourceError(
-  changeState: () => void,
-  notifications: ToastsStart,
-  application?: ApplicationStart,
-  callback?: (ds: DataSourceOption[]) => void
-) {
+export interface HandleNoAvailableDataSourceErrorProps {
+  changeState: () => void;
+  notifications: ToastsStart;
+  incompatibleDataSourcesExist: boolean;
+  application?: ApplicationStart;
+  callback?: (ds: DataSourceOption[]) => void;
+}
+
+export function handleNoAvailableDataSourceError(props: HandleNoAvailableDataSourceErrorProps) {
+  const { changeState, notifications, application, callback, incompatibleDataSourcesExist } = props;
+
+  const defaultMessage = incompatibleDataSourcesExist
+    ? `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`
+    : `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
+
   changeState();
   if (callback) callback([]);
   notifications.add({
-    title: i18n.translate('dataSource.noAvailableDataSourceError', {
-      defaultMessage: 'No data sources connected yet. Connect your data sources to get started.',
-    }),
+    title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
     text: toMountPoint(getManageDataSourceButton(application)),
     color: 'warning',
   });
