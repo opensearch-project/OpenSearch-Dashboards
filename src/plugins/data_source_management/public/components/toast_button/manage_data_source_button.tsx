@@ -12,7 +12,7 @@ export const getManageDataSourceButton = (application?: ApplicationStart) => {
   return (
     <>
       <EuiFlexGroup
-        data-test-subj="dataSourceManageDataSourceButtonContainer"
+        data-test-subj="manageDataSourceButtonContainer"
         justifyContent="flexEnd"
         gutterSize="s"
       >
