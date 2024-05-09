@@ -4,6 +4,7 @@
  */
 
 import { ShallowWrapper, shallow, mount } from 'enzyme';
+import { i18n } from '@osd/i18n';
 import { SavedObjectsClientContract } from '../../../../../core/public';
 import { notificationServiceMock } from '../../../../../core/public/mocks';
 import React from 'react';
@@ -12,6 +13,12 @@ import { AuthType } from '../../types';
 import { getDataSourcesWithFieldsResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
 import { render } from '@testing-library/react';
 import * as utils from '../utils';
+import {
+  NO_DATASOURCES_CONNECTED_MESSAGE,
+  CONNECT_DATASOURCES_MESSAGE,
+  NO_COMPATIBLE_DATASOURCES_MESSAGE,
+  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
+} from '../constants';
 
 describe('DataSourceSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -19,6 +26,8 @@ describe('DataSourceSelectable', () => {
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
   const nextTick = () => new Promise((res) => process.nextTick(res));
+  const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
+  const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
 
   beforeEach(() => {
     client = {
@@ -145,6 +154,7 @@ describe('DataSourceSelectable', () => {
         },
       ],
       showError: false,
+      incompatibleDataSourcesExist: false,
     });
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
@@ -167,6 +177,7 @@ describe('DataSourceSelectable', () => {
         },
       ],
       showError: false,
+      incompatibleDataSourcesExist: false,
     });
 
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
@@ -345,6 +356,7 @@ describe('DataSourceSelectable', () => {
         },
       ],
       showError: false,
+      incompatibleDataSourcesExist: false,
     });
   });
 
@@ -374,6 +386,7 @@ describe('DataSourceSelectable', () => {
       selectedOption: [],
       showEmptyState: false,
       showError: true,
+      incompatibleDataSourcesExist: false,
     });
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
@@ -396,27 +409,59 @@ describe('DataSourceSelectable', () => {
         },
       ],
       showError: true,
+      incompatibleDataSourcesExist: false,
     });
 
     expect(onSelectedDataSource).toBeCalledWith([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toHaveBeenCalled();
   });
-  it('should render no data source when no data source filtered out and hide local cluster', async () => {
-    const onSelectedDataSource = jest.fn();
-    render(
-      <DataSourceSelectable
-        savedObjectsClient={client}
-        notifications={toasts}
-        onSelectedDataSources={onSelectedDataSource}
-        disabled={false}
-        hideLocalCluster={true}
-        fullWidth={false}
-        selectedOption={[{ id: 'test2' }]}
-        dataSourceFilter={(ds) => false}
-      />
-    );
-    await nextTick();
-    expect(toasts.add).toBeCalled();
-    expect(onSelectedDataSource).toBeCalledWith([]);
-  });
+
+  it.each([
+    {
+      findFunc: jest.fn().mockResolvedValue({ savedObjects: [] }),
+      defaultMessage: noDataSourcesConnectedMessage,
+      selectedOption: undefined,
+    },
+    {
+      findFunc: jest.fn().mockResolvedValue({ savedObjects: [] }),
+      defaultMessage: noDataSourcesConnectedMessage,
+      selectedOption: [{ id: 'test2' }],
+    },
+    {
+      findFunc: jest.fn().mockResolvedValue(getDataSourcesWithFieldsResponse),
+      defaultMessage: noCompatibleDataSourcesMessage,
+      selectedOption: undefined,
+    },
+    {
+      findFunc: jest.fn().mockResolvedValue(getDataSourcesWithFieldsResponse),
+      defaultMessage: noCompatibleDataSourcesMessage,
+      selectedOption: [{ id: 'test2' }],
+    },
+  ])(
+    'should render correct message when there are no datasource options available and local cluster is hidden',
+    async ({ findFunc, selectedOption, defaultMessage }) => {
+      client.find = findFunc;
+      const onSelectedDataSource = jest.fn();
+      render(
+        <DataSourceSelectable
+          savedObjectsClient={client}
+          notifications={toasts}
+          onSelectedDataSources={onSelectedDataSource}
+          disabled={false}
+          hideLocalCluster={true}
+          fullWidth={false}
+          selectedOption={selectedOption}
+          dataSourceFilter={(ds) => false}
+        />
+      );
+      await nextTick();
+
+      expect(toasts.add).toBeCalledWith(
+        expect.objectContaining({
+          title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
+        })
+      );
+      expect(onSelectedDataSource).toBeCalledWith([]);
+    }
+  );
 });

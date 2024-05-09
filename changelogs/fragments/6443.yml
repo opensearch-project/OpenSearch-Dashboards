@@ -1,0 +1,2 @@
+feat:
+- Adds `migrations.delete` to delete saved objects by type during a migration ([#6443](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6443))
