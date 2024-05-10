@@ -4,9 +4,7 @@
  */
 
 import React from 'react';
-import { mount, shallow } from 'enzyme';
-import { ApplicationStart } from 'opensearch-dashboards/public';
-import { EuiButton, EuiButtonIcon, EuiPopover } from '@elastic/eui';
+import { shallow } from 'enzyme';
 import { DataSourceErrorMenu } from './data_source_error_menu';
 import { coreMock } from '../../../../../core/public/mocks';
 import { render } from '@testing-library/react';
@@ -23,5 +21,8 @@ describe('DataSourceErrorMenu', () => {
     const iconButton = container.getByTestId('dataSourceErrorMenuHeaderLink');
     iconButton.click();
     expect(container.getByTestId('dataSourceErrorPopover')).toBeVisible();
+    expect(container.getByTestId('datasourceTableEmptyState')).toHaveTextContent(
+      'Failed to fetch data sources'
+    );
   });
 });
