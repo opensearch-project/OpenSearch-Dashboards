@@ -43,4 +43,21 @@ describe('Test on ShowDataSourceOption', () => {
     expect(component.find(EuiFlexItem)).toHaveLength(2);
     expect(component.find(EuiBadge)).toHaveLength(1);
   });
+
+  it('should render the component with a default data source', () => {
+    const item: DataSourceOption = {
+      id: 'default data source',
+      label: 'DataSource 1',
+      visible: true,
+    };
+    const defaultDataSource = 'default data source';
+    const wrapper = shallow(
+      <DataSourceItem className="test" option={item} defaultDataSource={defaultDataSource} />
+    );
+
+    expect(wrapper.find(EuiFlexGroup).exists()).toBe(true);
+    expect(wrapper.find(EuiFlexItem).exists()).toBe(true);
+    expect(wrapper.find(EuiBadge).exists()).toBe(true);
+    expect(wrapper.find(EuiBadge).prop('children')).toBe('Default');
+  });
 });
