@@ -283,7 +283,6 @@ export const mockDataSourceAttributesWithSigV4Auth = {
   },
 };
 
-
 export const mockDataSourceAttributesWithNoAuth = {
   id: 'test123',
   title: 'create-test-ds123',
