@@ -283,20 +283,6 @@ export const mockDataSourceAttributesWithSigV4Auth = {
   },
 };
 
-export const mockDataSourceAttributesWithSigV4Auth = {
-  id: 'test',
-  title: 'create-test-ds',
-  description: 'jest testing',
-  endpoint: 'https://test.com',
-  auth: {
-    type: AuthType.SigV4,
-    credentials: {
-      accessKey: 'test123',
-      secretKey: 'test123',
-      region: 'us-east-1',
-    },
-  },
-};
 
 export const mockDataSourceAttributesWithNoAuth = {
   id: 'test123',
