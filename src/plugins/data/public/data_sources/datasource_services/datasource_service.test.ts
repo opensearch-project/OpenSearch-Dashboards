@@ -5,7 +5,11 @@
 
 import { waitFor } from '@testing-library/dom';
 import { DataSource } from '../datasource';
-import { IndexPatternsService } from '../../index_patterns';
+import { SavedObject } from '../../../../../core/public';
+import {
+  IndexPatternSavedObjectAttrs,
+  IndexPatternsService,
+} from '../../index_patterns/index_patterns';
 import { DataSourceService } from '../datasource_services';
 import {
   LocalDSDataSetParams,
@@ -55,8 +59,20 @@ class MockDataSource extends DataSource<
   }
 
   async getDataSet(dataSetParams?: LocalDSDataSetParams): Promise<LocalDSDataSetResponse> {
-    await this.indexPattern.ensureDefaultIndexPattern();
-    return await this.indexPattern.getCache();
+    const savedObjectLst = await this.indexPattern.getCache();
+
+    if (!Array.isArray(savedObjectLst)) {
+      return { dataSets: [] };
+    }
+
+    return {
+      dataSets: savedObjectLst.map((savedObject: SavedObject<IndexPatternSavedObjectAttrs>) => {
+        return {
+          id: savedObject.id,
+          title: savedObject.attributes.title,
+        };
+      }),
+    };
   }
 
   async testConnection(): Promise<boolean> {

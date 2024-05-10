@@ -80,8 +80,8 @@ export function computeVisibleColumns(
   const timeFieldName = idxPattern.timeFieldName;
   let visibleColumnNames = columnNames;
 
-  if (displayTimeColumn && !columnNames.includes(timeFieldName)) {
-    visibleColumnNames = [timeFieldName, ...columnNames];
+  if (displayTimeColumn && !columnNames.includes(timeFieldName!)) {
+    visibleColumnNames = [timeFieldName!, ...columnNames];
   }
 
   return visibleColumnNames;
