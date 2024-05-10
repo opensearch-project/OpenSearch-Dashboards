@@ -46,7 +46,6 @@ import {
   EuiText,
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
-  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -63,6 +62,7 @@ export interface TableProps {
   basePath: IBasePath;
   actionRegistry: SavedObjectsManagementActionServiceStart;
   columnRegistry: SavedObjectsManagementColumnServiceStart;
+  namespaceRegistry: SavedObjectsManagementNamespaceServiceStart;
   selectedSavedObjects: SavedObjectWithMetadata[];
   selectionConfig: {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
@@ -70,7 +70,7 @@ export interface TableProps {
   filters: any[];
   canDelete: boolean;
   onDelete: () => void;
-  onDuplicateSelected: () => void;
+  onDuplicate: () => void;
   onDuplicateSingle: (object: SavedObjectWithMetadata) => void;
   onActionRefresh: (object: SavedObjectWithMetadata) => void;
   onExport: (includeReferencesDeep: boolean) => void;
@@ -173,7 +173,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       filters,
       selectionConfig: selection,
       onDelete,
-      onDuplicateSelected,
+      onDuplicate,
       onDuplicateSingle,
       onActionRefresh,
       selectedSavedObjects,
@@ -183,6 +183,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       basePath,
       actionRegistry,
       columnRegistry,
+      namespaceRegistry,
       dateFormat,
       availableWorkspaces,
       currentWorkspaceId,
@@ -396,7 +397,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       <EuiButton
         key="duplicateSO"
         iconType="copyClipboard"
-        onClick={onDuplicateSelected}
+        onClick={onDuplicate}
         isDisabled={selectedSavedObjects.length === 0}
         data-test-subj="savedObjectsManagementDuplicate"
       >

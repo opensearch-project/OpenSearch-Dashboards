@@ -155,7 +155,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   private _isMounted = false;
   private currentWorkspaceIdSubscription?: Subscription;
   private workspacesSubscription?: Subscription;
-  private workspacesEnabledSubscription?: Subscription;
 
   constructor(props: SavedObjectsTableProps) {
     super(props);
@@ -274,9 +273,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this._isMounted = false;
     this.debouncedFetchObjects.cancel();
     this.unSubscribeWorkspace();
-    this.currentWorkspaceIdSubscription?.unsubscribe();
-    this.workspacesSubscription?.unsubscribe();
-    this.workspacesEnabledSubscription?.unsubscribe();
   }
 
   fetchCounts = async () => {
@@ -720,28 +716,25 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       result = await duplicateSavedObjects(
         http,
         objectsToDuplicate,
-        includeReferencesDeep,
-        targetWorkspace
+        targetWorkspace,
+        includeReferencesDeep
       );
       const successCount = result.success
         ? savedObjects.length
         : savedObjects.length - result.errors.length;
-      const sOMessage =
-        successCount === 1
-          ? savedObjects[0].meta.title
-          : successCount.toString() + ' saved objects';
-      const refMessage = includeReferencesDeep ? ' and the related objects' : '';
       if (result.success) {
         notifications.toasts.addSuccess({
           title: i18n.translate(
             'savedObjectsManagement.objectsTable.duplicate.successNotification',
             {
               defaultMessage:
-                'Success - ' +
-                sOMessage +
-                refMessage +
-                ' were duplicated to ' +
+                'Success - {successCount, plural, one {{objectTitle}} other {# saved objects}} {includeReferencesDeep, select, true {and the related objects were} false {{successCount, plural, one {was} other {were}}}} duplicated to {targetWorkspaceName}',
+              values: {
+                successCount,
+                objectTitle: savedObjects[0].meta.title,
+                includeReferencesDeep,
                 targetWorkspaceName,
+              },
             }
           ),
         });
@@ -754,19 +747,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
             {
               defaultMessage:
-                'Warning - ' +
-                (successCount > 0
-                  ? successCount +
-                    ' saved object(s)' +
-                    refMessage +
-                    ' were duplicated to ' +
-                    targetWorkspaceName +
-                    '. '
-                  : '') +
-                'Unable to duplicate ' +
-                result.errors.length.toString() +
-                ' saved object(s): ' +
+                'Warning - {successCount} saved object(s) {includeReferencesDeep, select, true {and the related objects were} false {were}} duplicated to {targetWorkspaceName}. Unable to duplicate {errorCount} saved object(s): {errorIdMessages}',
+              values: {
+                successCount,
+                includeReferencesDeep,
+                targetWorkspaceName,
+                errorCount: result.errors.length,
                 errorIdMessages,
+              },
             }
           ),
         });
@@ -774,8 +762,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
-          defaultMessage:
-            'Error - Unable to duplicate ' + savedObjects.length.toString() + ' saved object(s)',
+          defaultMessage: 'Error - Unable to duplicate {errorCount} saved object(s)',
+          values: { errorCount: savedObjects.length.toString() },
         }),
       });
     }
@@ -1157,7 +1145,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             onExport={this.onExport}
             canDelete={applications.capabilities.savedObjectsManagement.delete as boolean}
             onDelete={this.onDelete}
-            onDuplicateSelected={() =>
+            onDuplicate={() =>
               this.setState({
                 isShowingDuplicateModal: true,
                 duplicateSelectedSavedObjects: selectedSavedObjects,

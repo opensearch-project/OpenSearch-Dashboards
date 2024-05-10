@@ -881,8 +881,8 @@ describe('SavedObjectsTable', () => {
           { id: '1', type: 'dashboard' },
           { id: '2', type: 'dashboard' },
         ],
-        false,
-        'workspace2'
+        'workspace2',
+        false
       );
       component.update();
 
@@ -909,8 +909,8 @@ describe('SavedObjectsTable', () => {
       expect(getDuplicateSavedObjectsMock).toHaveBeenCalledWith(
         http,
         [{ id: '1', type: 'dashboard' }],
-        true,
-        'workspace2'
+        'workspace2',
+        true
       );
       component.update();
 
@@ -936,8 +936,8 @@ describe('SavedObjectsTable', () => {
           { id: '1', type: 'dashboard' },
           { id: '2', type: 'dashboard' },
         ],
-        false,
-        'workspace2'
+        'workspace2',
+        false
       );
       component.update();
 
@@ -948,7 +948,8 @@ describe('SavedObjectsTable', () => {
 
       await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
       expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Warning - Unable to duplicate 2 saved object(s): 1, 2',
+        title:
+          'Warning - 0 saved object(s) were duplicated to bar. Unable to duplicate 2 saved object(s): 1, 2',
       });
     });
 
@@ -971,8 +972,8 @@ describe('SavedObjectsTable', () => {
           { id: '1', type: 'dashboard' },
           { id: '2', type: 'dashboard' },
         ],
-        false,
-        'workspace2'
+        'workspace2',
+        false
       );
       component.update();
 
@@ -1009,7 +1010,7 @@ describe('SavedObjectsTable', () => {
       component.update();
 
       const table = component.find('Table') as any;
-      table.prop('onDuplicateSelected')();
+      table.prop('onDuplicate')();
       component.update();
 
       expect(component.state('isShowingDuplicateModal')).toEqual(true);

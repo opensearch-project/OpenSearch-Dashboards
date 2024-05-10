@@ -107,7 +107,7 @@ const defaultProps: TableProps = {
   isSearching: false,
   onShowRelationships: () => {},
   canDelete: true,
-  onDuplicateSelected: () => {},
+  onDuplicate: () => {},
   onDuplicateSingle: () => {},
   showDuplicate: false,
 };

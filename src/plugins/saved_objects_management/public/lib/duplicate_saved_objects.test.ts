@@ -7,15 +7,16 @@ import { httpServiceMock } from '../../../../core/public/mocks';
 import { duplicateSavedObjects } from './duplicate_saved_objects';
 
 describe('copy saved objects', () => {
-  it('make http call with body provided', async () => {
-    const httpClient = httpServiceMock.createStartContract();
-    const objects = [
-      { type: 'dashboard', id: '1' },
-      { type: 'visualization', id: '2' },
-    ];
+  const httpClient = httpServiceMock.createStartContract();
+  const objects = [
+    { type: 'dashboard', id: '1' },
+    { type: 'visualization', id: '2' },
+  ];
+  const targetWorkspace = '1';
+
+  it('make http call with all parameter provided', async () => {
     const includeReferencesDeep = true;
-    const targetWorkspace = '1';
-    await duplicateSavedObjects(httpClient, objects, includeReferencesDeep, targetWorkspace);
+    await duplicateSavedObjects(httpClient, objects, targetWorkspace, includeReferencesDeep);
     expect(httpClient.post).toMatchInlineSnapshot(`
       [MockFunction] {
         "calls": Array [
@@ -34,8 +35,10 @@ describe('copy saved objects', () => {
         ],
       }
     `);
+  });
 
-    await duplicateSavedObjects(httpClient, objects, undefined, targetWorkspace);
+  it('make http call without includeReferencesDeep parameter provided', async () => {
+    await duplicateSavedObjects(httpClient, objects, targetWorkspace);
     expect(httpClient.post).toMatchInlineSnapshot(`
       [MockFunction] {
         "calls": Array [

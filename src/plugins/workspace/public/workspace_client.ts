@@ -130,7 +130,7 @@ export class WorkspaceClient {
         );
         const workspaces = result.result.workspaces.map((workspace: WorkspaceAttribute) => ({
           ...workspace,
-          libraryReadonly: !workspaceIdsWithWritePermission.includes(workspace.id),
+          readonly: !workspaceIdsWithWritePermission.includes(workspace.id),
         }));
         this.workspaces.workspaceList$.next(workspaces);
       }

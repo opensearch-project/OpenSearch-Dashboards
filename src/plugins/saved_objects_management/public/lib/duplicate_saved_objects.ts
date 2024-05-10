@@ -8,8 +8,8 @@ import { HttpStart } from 'src/core/public';
 export async function duplicateSavedObjects(
   http: HttpStart,
   objects: any[],
-  includeReferencesDeep: boolean = true,
-  targetWorkspace: string
+  targetWorkspace: string,
+  includeReferencesDeep: boolean = true
 ) {
   return await http.post('/api/workspaces/_duplicate_saved_objects', {
     body: JSON.stringify({

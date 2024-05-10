@@ -32,7 +32,6 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WorkspacePermissionMode,
 } from '../../common/constants';
-import { WorkspaceFindOptions } from '../types';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -413,7 +412,7 @@ export class WorkspaceSavedObjectsClientWrapper {
     };
 
     const findWithWorkspacePermissionControl = async <T = unknown>(
-      options: SavedObjectsFindOptions & Pick<WorkspaceFindOptions, 'permissionModes'>
+      options: SavedObjectsFindOptions
     ) => {
       const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
       if (!options.ACLSearchParams) {

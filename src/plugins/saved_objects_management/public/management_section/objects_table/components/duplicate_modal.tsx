@@ -24,7 +24,7 @@ import { i18n } from '@osd/i18n';
 import { WorkspaceOption, getTargetWorkspacesOptions, workspaceToOption } from './utils';
 import { DuplicateObject } from '../../types';
 
-export interface ShowDuplicateModalProps {
+export interface Props {
   onDuplicate: (
     savedObjects: DuplicateObject[],
     includeReferencesDeep: boolean,
@@ -35,9 +35,6 @@ export interface ShowDuplicateModalProps {
   workspaces: WorkspacesStart;
   notifications: NotificationsStart;
   selectedSavedObjects: DuplicateObject[];
-}
-
-interface Props extends ShowDuplicateModalProps {
   onClose: () => void;
 }
 

@@ -31,7 +31,7 @@ export function getTargetWorkspacesOptions(
 ): WorkspaceOption[] {
   const workspaceList = workspaces.workspaceList$.value;
   const targetWorkspaces = workspaceList.filter(
-    (workspace) => workspace.id !== currentWorkspaceId && !workspace.libraryReadonly
+    (workspace) => workspace.id !== currentWorkspaceId && !workspace.readonly
   );
   return targetWorkspaces.map((workspace) => workspaceToOption(workspace, currentWorkspaceId));
 }
