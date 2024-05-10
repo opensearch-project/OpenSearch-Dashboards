@@ -27,7 +27,7 @@ describe('ManageDataSourceButton', () => {
 
   it('navigates to management app on button click', () => {
     const { getByTestId } = render(getManageDataSourceButton(applicationMock));
-    const button = getByTestId('dataSourceManageDataSourceButton');
+    const button = getByTestId('manageDataSourceButton');
     button.click();
     expect(applicationMock.navigateToApp).toHaveBeenCalledTimes(1);
 

@@ -18,7 +18,7 @@ export const getManageDataSourceButton = (application?: ApplicationStart) => {
       >
         <EuiFlexItem grow={false}>
           <EuiButton
-            data-test-subj="dataSourceManageDataSourceButton"
+            data-test-subj="manageDataSourceButton"
             size="s"
             onClick={() =>
               application?.navigateToApp('management', {
