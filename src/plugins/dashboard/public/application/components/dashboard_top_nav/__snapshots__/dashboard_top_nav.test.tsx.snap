@@ -260,6 +260,24 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -349,6 +367,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -357,6 +376,12 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -367,6 +392,9 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "isEnhancementsEnabled": false,
+                "queryEnhancements": Map {},
               },
             },
             "docLinks": Object {
@@ -1231,6 +1259,24 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -1320,6 +1366,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -1328,6 +1375,12 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -1338,6 +1391,9 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "isEnhancementsEnabled": false,
+                "queryEnhancements": Map {},
               },
             },
             "docLinks": Object {
@@ -2202,6 +2258,24 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -2291,6 +2365,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -2299,6 +2374,12 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -2309,6 +2390,9 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "isEnhancementsEnabled": false,
+                "queryEnhancements": Map {},
               },
             },
             "docLinks": Object {
@@ -3173,6 +3257,24 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -3262,6 +3364,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -3270,6 +3373,12 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -3280,6 +3389,9 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "isEnhancementsEnabled": false,
+                "queryEnhancements": Map {},
               },
             },
             "docLinks": Object {
@@ -4144,6 +4256,24 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -4233,6 +4363,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -4241,6 +4372,12 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -4251,6 +4388,9 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "isEnhancementsEnabled": false,
+                "queryEnhancements": Map {},
               },
             },
             "docLinks": Object {
@@ -5115,6 +5255,24 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -5204,6 +5362,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -5212,6 +5371,12 @@ exports[`Dashboard top nav render with all components 1`] = `
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -5222,6 +5387,9 @@ exports[`Dashboard top nav render with all components 1`] = `
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "isEnhancementsEnabled": false,
+                "queryEnhancements": Map {},
               },
             },
             "docLinks": Object {
