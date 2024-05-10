@@ -38,7 +38,3 @@ export function getTargetWorkspacesOptions(
   if (currentWorkspace && !currentWorkspace.readonly) targetWorkspaces.unshift(currentWorkspace);
   return targetWorkspaces.map((workspace) => workspaceToOption(workspace, currentWorkspaceId));
 }
-
-export function capitalizeFirstLetter(str: string): string {
-  return str.charAt(0).toUpperCase() + str.slice(1);
-}

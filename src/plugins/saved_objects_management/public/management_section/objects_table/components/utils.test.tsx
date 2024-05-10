@@ -4,12 +4,7 @@
  */
 
 import { WorkspaceAttribute, WorkspaceObject, WorkspacesStart } from 'opensearch-dashboards/public';
-import {
-  WorkspaceOption,
-  capitalizeFirstLetter,
-  getTargetWorkspacesOptions,
-  workspaceToOption,
-} from './utils';
+import { WorkspaceOption, getTargetWorkspacesOptions, workspaceToOption } from './utils';
 import { BehaviorSubject } from 'rxjs';
 
 describe('duplicate mode utils', () => {
@@ -83,11 +78,5 @@ describe('duplicate mode utils', () => {
     expect(workspaceOption[0].label).toBe('Workspace 1');
     expect(workspaceOption[1].key).toBe('2');
     expect(workspaceOption[1].label).toBe('Workspace 2');
-  });
-
-  it('should capitalize first letter', () => {
-    const workspaceName: string = 'workspace';
-    const capitalizedName: string = capitalizeFirstLetter(workspaceName);
-    expect(capitalizedName).toBe('Workspace');
   });
 });
