@@ -79,6 +79,7 @@ export const Header = ({
                 data-test-subj="duplicateObjects"
                 onClick={onDuplicate}
                 disabled={objectCount === 0}
+                iconType="copyClipboard"
               >
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"

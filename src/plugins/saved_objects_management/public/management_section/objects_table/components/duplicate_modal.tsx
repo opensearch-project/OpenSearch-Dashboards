@@ -21,10 +21,10 @@ import {
 } from '@elastic/eui';
 import { HttpSetup, NotificationsStart, WorkspacesStart } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
-import { WorkspaceOption, getTargetWorkspacesOptions, workspaceToOption } from './utils';
+import { WorkspaceOption, getTargetWorkspacesOptions } from './utils';
 import { DuplicateObject } from '../../types';
 
-export interface Props {
+export interface ShowDuplicateModalProps {
   onDuplicate: (
     savedObjects: DuplicateObject[],
     includeReferencesDeep: boolean,
@@ -46,24 +46,19 @@ interface State {
   isIncludeReferencesDeepChecked: boolean;
 }
 
-export class SavedObjectsDuplicateModal extends React.Component<Props, State> {
+export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateModalProps, State> {
   private isMounted = false;
 
-  constructor(props: Props) {
+  constructor(props: ShowDuplicateModalProps) {
     super(props);
 
     const { workspaces } = props;
     const currentWorkspace = workspaces.currentWorkspace$.value;
-    const currentWorkspaceId = currentWorkspace?.id;
-    const targetWorkspacesOptions = getTargetWorkspacesOptions(workspaces, currentWorkspaceId);
+    const targetWorkspacesOptions = getTargetWorkspacesOptions(workspaces, currentWorkspace!);
 
     this.state = {
       allSelectedObjects: props.selectedSavedObjects,
-      // current workspace is the first option
-      workspaceOptions: [
-        ...(currentWorkspace ? [workspaceToOption(currentWorkspace, currentWorkspaceId)] : []),
-        ...targetWorkspacesOptions,
-      ],
+      workspaceOptions: targetWorkspacesOptions,
       targetWorkspaceOption: [],
       isLoading: false,
       isIncludeReferencesDeepChecked: true,

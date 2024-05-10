@@ -4,13 +4,13 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { WorkspaceAttribute, WorkspacesStart } from 'opensearch-dashboards/public';
+import { WorkspaceObject, WorkspacesStart } from 'opensearch-dashboards/public';
 
-export type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceAttribute>;
+export type WorkspaceOption = EuiComboBoxOptionOption<WorkspaceObject>;
 
 // Convert workspace to option which can be displayed in the drop-down box.
 export function workspaceToOption(
-  workspace: WorkspaceAttribute,
+  workspace: WorkspaceObject,
   currentWorkspaceId?: string
 ): WorkspaceOption {
   // add (current) after current workspace name
@@ -27,12 +27,15 @@ export function workspaceToOption(
 
 export function getTargetWorkspacesOptions(
   workspaces: WorkspacesStart,
-  currentWorkspaceId?: string
+  currentWorkspace?: WorkspaceObject
 ): WorkspaceOption[] {
+  const currentWorkspaceId = currentWorkspace?.id;
   const workspaceList = workspaces.workspaceList$.value;
   const targetWorkspaces = workspaceList.filter(
     (workspace) => workspace.id !== currentWorkspaceId && !workspace.readonly
   );
+  // current workspace is the first option
+  if (currentWorkspace && !currentWorkspace.readonly) targetWorkspaces.unshift(currentWorkspace);
   return targetWorkspaces.map((workspace) => workspaceToOption(workspace, currentWorkspaceId));
 }
 
