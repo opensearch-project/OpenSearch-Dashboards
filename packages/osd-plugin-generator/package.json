@@ -11,7 +11,7 @@
   "dependencies": {
     "@osd/cross-platform": "1.0.0",
     "@osd/dev-utils": "1.0.0",
-    "ejs": "^3.1.7",
+    "ejs": "^3.1.10",
     "execa": "^4.0.2",
     "inquirer": "^7.3.3",
     "normalize-path": "^3.0.0",
