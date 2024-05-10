@@ -603,30 +603,29 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       await this.props.indexPatterns.clearCache();
     }
 
-    const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
-    const deletes = objects.savedObjects.map((object) =>
-      savedObjectsClient.delete(object.type, object.id, { force: true })
-    );
     try {
+      const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
+      const deletes = objects.savedObjects.map((object) =>
+        savedObjectsClient.delete(object.type, object.id, { force: true })
+      );
       await Promise.all(deletes);
       // Unset this
       this.setState({
         selectedSavedObjects: [],
       });
+      // Fetching all data
+      await this.fetchSavedObjects();
+      await this.fetchCounts();
     } catch (error) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'savedObjectsManagement.objectsTable.unableDeleteSavedObjectsNotificationMessage',
-          { defaultMessage: 'Unable delete saved objects' }
+          { defaultMessage: 'Unable to delete saved objects' }
         ),
-        text: `${error.body.message}`,
+        text: `${error}`,
       });
     }
-    // Fetching all data
-    await this.fetchSavedObjects();
-    await this.fetchCounts();
-
-    // Allow the user to interact with the table once the saved objects have been re-fetched.
+    // Allow the user to interact with the table once the saved objects have been re-fetched or failed to delete.
     this.setState({
       isShowingDeleteConfirmModal: false,
       isDeleting: false,

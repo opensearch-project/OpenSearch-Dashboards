@@ -613,6 +613,42 @@ describe('SavedObjectsTable', () => {
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
     });
+
+    it('should show error toast when failing to delete saved objects', async () => {
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+      ] as SavedObjectWithMetadata[];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
+        id: obj.id,
+        type: obj.type,
+        source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        })),
+        delete: jest.fn().mockImplementation(() => {
+          throw new Error('Unable to delete saved objects');
+        }),
+      };
+
+      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+
+      await component.instance().delete();
+
+      expect(notifications.toasts.addDanger).toHaveBeenCalled();
+    });
   });
 
   describe('workspace filter', () => {
