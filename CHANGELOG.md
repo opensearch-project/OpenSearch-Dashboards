@@ -10,11 +10,155 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛡 Security
 
-- Support dynamic CSP rules to mitigate Clickjacking https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5641
-- [CVE-2020-36604] Employ a patched version of hoek `6.1.3` ([#6148](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6148))
 - [CVE-2023-45857] Bump `axios` from `0.27.2` to `1.6.1` ([#5470](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5470))
-- Support dynamic CSP rules to mitigate Clickjacking https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5641
 - [WS-2021-0638] Bump mocha from `7.2.0` to `10.1.0` ([#2711](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2711))
+
+### 📈 Features/Enhancements
+
+- [Multiple Datasource] Add multi data source support to Timeline ([#6385](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6385))
+- [Multiple Datasource] Do not support import data source object to Local cluster when not enable data source ([#6395](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6395))
+
+### 🐛 Bug Fixes
+
+- [Chore] Update deprecated url methods (url.parse(), url.format()) ([#2910](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2910))
+- Cleanup unused url ([#3847](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3847))
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
+### 🛠 Maintenance
+
+### 🪛 Refactoring
+
+- Remove unused Sass in `tile_map` plugin ([#4110](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4110))
+- Remove KUI usage in `disabled_lab_visualization` ([#5462](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5462))
+
+### 🔩 Tests
+
+## [2.14.0-2024-05-02](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.14.0)
+
+### 📈 Features/Enhancements
+
+ - Add `opensearchDashboards.futureNavigation` config to control dev tool top right nav button. ([#6712](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6712))
+ - Adds `migrations.delete` to delete saved objects by type during a migration ([#6443](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6443))
+ - Parse query string filters to determine if fields match an index when `ignoreFilterIfFieldNotInIndex` is enabled ([#6126](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6126))
+ - [Workspace] Setup workspace skeleton and implement basic CRUD API ([#5075](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5075))
+ - [Workspace] Add ACL related functions ([#5084](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5084/))
+ - [Workspace] Optional workspaces params in repository ([#5949](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5949))
+ - [Workspace] Add delete saved objects by workspace functionality([#6013](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6013))
+ - [Workspace] Consume workspace id in saved object client ([#6014](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6014))
+ - [Workspace] Add permission control logic ([#6052](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6052))
+ - [Workspace] Add workspace id in basePath ([#6060](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6060))
+ - [Chrome] Introduce registerCollapsibleNavHeader to allow plugins to customize the rendering of nav menu header ([#5244](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5244))
+ - [Workspace] Allow making apps available in workspaces using `workspaceAvailability` ([#6427](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6427))
+ - [Workspace] Handle data sources and advanced settings as global object. ([#6524](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6524))
+ - [Workspace] Make dashboards management available ([#6575](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6575))
+ - [Workspace] Add workspace overview page ([#6584](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6584))
+ - Improve the perceived performance of Discover when using the default tabular renderer ([#6599](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6599))
+ - [Workspace] Hide dashboard overview ([#6625](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6625))
+ - Optimize scrolling behavior of Discover table ([#6683](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6683))
+ - [Discover] Add extension group title to non-index data source groups to indicate log explorer redirection in discover data source selector. ([#5815](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5815))
+ - [Multiple Datasource] Create data source menu component able to be mount to nav bar ([#6082](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6082))
+ - [Multiple Datasource] Expose filterfn in datasource menu component to allow filter data sources before rendering in navigation bar ([#6113](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6113))
+ - [Multiple Datasource] Add component to show single selected data source in read only mode ([#6113](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6125))
+ - [Multiple Datasource] Add data source aggregated view to show all compatible data sources or only show used data sources ([#6129](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6129))
+ - [Workspace] Register a workspace dropdown menu at the top of left nav bar ([#6150](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6150))
+ - [Workspace] Validate if workspace exists when setup inside a workspace ([#6154](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6154))
+ - [Multiple Datasource] Add TLS configuration for multiple data sources ([#6171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6171))
+ - [Multiple Datasource] Use data source filter function before rendering ([#6175](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6175))
+ - [Workspace] Add create workspace page ([#6179](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6179))
+ - [Workspace] Add workspace list page ([#6182](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6182))
+ - Enable UI Metric Collector to collect UI Metrics and Application Usage ([#6203](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6203))
+ - [Multiple Datasource] Add multi selectable data source component ([#6211](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6211))
+ - [Multiple Datasource] Add multi data source support to sample vega visualizations ([#6218](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6218))
+ - [Workspace] Add workspaces column to saved objects page ([#6225](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6225))
+ - [Multiple Datasource] Add icon in datasource table page to show the default datasource ([#6231](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6231))
+ - [Workspace] Filter left nav menu items according to the current workspace ([#6234](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6234))
+ - [Multiple Datasource] Make sure customer always have a default datasource ([#6237](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6237))
+ - [Multiple DataSource] Codebase maintenance involves updating typos and removing unused imported packages ([#6238](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6238))
+ - [Multiple Datasource] Refactor data source menu and interface to allow cleaner selection of component and related configurations ([#6256](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6256))
+ - [Multiple Datasource] Remove arrow down icon from data source selectable component ([#6257](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6257))
+ - [Multiple Datasource] Allow top nav menu to mount data source menu for use case when both menus are mounted ([#6268](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6268))
+ - [Workspace] Add update workspace page ([#6270](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6270))
+ - [Workspace] Add API to duplicate saved objects among workspaces ([#6288](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6288))
+ - [Multiple Datasource] Enhanced data source selector with default datasource shows as first choice ([#6293](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6293))
+ - [Mulitple Datasource] Add multi data source support to TSVB ([#6298](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6298))
+ - [Workspace] Add APIs to support plugin state in request ([#6303](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6303))
+ - [Multiple Datasource] Fetch data source title for DataSourceView when only id is provided ([#6315](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6315))
+ - [Multiple Datasource] Add default icon for selectable component and make sure the default datasource shows automatically ([#6327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6327))
+ - [Multiple Datasource] Pass selected data sources to plugin consumers when the multi-select component initially loads ([#6333](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6333))
+ - Allow the use of `ignoreVersionMismatch` in non-dev configuration ([#6347](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6347))
+ - [Multiple Datasource] Add installedPlugins list to data source saved object ([#6348](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6348))
+ - [Multiple Datasource] Add default icon in multi-selectable picker ([#6357](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6357))
+ - [Multiple Datasource] Get data source label when only id is provided in DataSourceSelectable ([#6358](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6358))
+ simplifying client fetch ([#6364](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6364))
+ - [Dynamic Configurations] Improve dynamic configurations by adding cache and simplifying client fetch ([#6364](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6364))
+ - [Workspace] Support workspace in saved objects client in server side. ([#6365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6365))
+ - [Multiple Datasource] Refactor data source selector component to include placeholder and add tests ([#6372](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6372))
+ - [Workspace] Add permission tab to workspace create update page ([#6378](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6378))
+ - [CSP Handler] Update CSP handler to only query and modify frame ancestors instead of all CSP directives ([#6398](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6398))
+ - Replace control characters before logging ([#6402](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6402))
+ - [MD] Add dropdown header to data source single selector ([#6431](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6431))
+ - [Multiple Datasource] Add error state to all data source menu components to show error component and consolidate all fetch errors ([#6440](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6440))
+ - [Workspace] Hide datasource and advanced settings menu in dashboard management when in workspace. ([#6455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6455))
+ - [Workspace] Add workspaces filter to saved objects page. ([#6458](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6458))
+ - [Multiple Datasource] UI change for datasource view picker to enable selectable([#6497](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6497))
+ - [Multiple Datasource] Add popover for empty state and redirect to data source management page([#6514](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6514))
+ - [Multiple Datasource] Modify selectable picker to remove group label and close popover after selection ([#6515](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6515))
+ - [Multiple Datasource] Update empty state font size and footer button size to small ([6549](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6549))
+ - Add `rightNavigationButton` component in chrome service for applications to register and add dev tool to top right navigation. ([#6553](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6553))
+ - [Multiple Datasource] Extract the button component for datasource picker to avoid duplicate code ([#6559](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6559))
+ - [Workspace] Add a workspace client in workspace plugin ([#6094](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6094))
+ - [Multiple Datasource] Support multi data source in Region map ([#6654](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6654))
+ - [Multiple Datasource] Add empty state component for no connected data source ([#6499](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6499))
+ - [MD] Add OpenSearch cluster group label to top of single selectable dropdown  ([#6400](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6400))
+
+### 🐛 Bug Fixes
+
+ - [Dev Tool] Add additional themed styles to ace overrides ([#5327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5327))
+ - [Workspace] Permission check failed with empty workspace for find method ([#6527](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6527))
+ - Allow Save in Top Nav Menu to capture filter and query ([#6636](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6636))
+ - Fix datasource  test connect error ([#6648](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6648))
+ - [Workspace] Keep disallowed types when importing with overwrite ([#6668](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6668))
+ - [Workspace] Optimization on handling invalid workspace id in workspace_ui_settings wrapper ([#6669](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6669))
+ - [Discover] Fix lazy loading of the legacy table from getting stuck ([#6041](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6041))
+ - [BUG][Multiple Datasource] Fix obsolete snapshots for test within data source management plugin ([#6185](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6185))
+ - [Workspace] Add base path when parse url in http service ([#6233](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6233))
+ - [BUG] Fix for checkForFunctionProperty so that order does not matter ([#6248](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6248))
+ - [Multiple Datasource] Fix sslConfig for multiple datasource to handle when certificateAuthorities is unset ([#6282](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6282))
+ - [BUG][Multiple Datasource]Fix bug in data source aggregated view to change it to depend on displayAllCompatibleDataSources property to show the badge value ([#6291](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6291))
+ - [BUG][Multiple Datasource]Read hideLocalCluster setting from yml and set in data source selector and data source menu ([#6361](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6361))
+ - [BUG][Multiple Datasource] Refactor read-only component to cover more edge cases ([#6416](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6416))
+ - [BUG][Multiple Datasource] Fix style of data source option inside popover for data source selector, selectable, multi select components ([#6438](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6438))
+ - [BUG][Multiple Datasource] Add validation for title length to be no longer than 32 characters [#6452](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6452)
+ - [VisBuilder] Allow saving and loading filter and query in a saved VisBuilder  ([#6460](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6460))
+ - [BUG][Multiple Datasource] Modify the button of selectable component to fix the title overflow issue ([#6465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6465))
+ - [Dynamic Configurations] Fix dynamic config API calls to pass correct input ([#6474](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6474))
+ - [BUG][Multiple Datasource] Fix on data source selectable and readonly component are not consistent ([#6545]https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6545)
+ 
+### 🚞 Infrastructure
+
+ - Update link-checker and clean up ignore-list ([#6425](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6425))
+
+### 🪛 Refactoring
+
+ - Refactor dev tool to use dataSourceManagement.ui API to get DataSourceSelector ([#6477](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6477))
+ - Refactor saved object management plugin to use datasourceManagement ui API to get DataSourceSelector ([#6544](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6544))
+ - discover data selector enhancement and refactoring ([#6571](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6571))
+ - [Multiple Datasource] Move data source selectable to its own folder, fix test and a few type errors for data source selectable component ([#6287](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6287))
+ - [Multiple Datasource] Remove duplicate data source attribute interface from `data_source_management` ([#6437](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6437))
+
+### 🔩 Tests
+
+ - Add functional test cypress workflow improvements and enable the workflow for in-house Dashboards tests ([#6061](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6061))
+
+## [2.13.0-2024-03-02](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.13.0)
+
+### 🛡 Security
+
+- [CVE-2020-36604] Employ a patched version of hoek `6.1.3` ([#6148](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6148))
+- Support dynamic CSP rules to mitigate Clickjacking https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5641
 - [CVE-2024-27088] Bump es5-ext from `0.10.59` to `0.10.64` ([#6021](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6021))
 - [CVE-2024-28849] Bump follow-redirect from `1.15.4` to `1.15.6` ([#6199](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/6199))
 
@@ -29,98 +173,30 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Multiple Datasource] Improved error handling for the search API when a null value is passed for the dataSourceId ([#5882](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5882))
 - [Multiple Datasource] Hide/Show authentication method in multi data source plugin based on configuration ([#5916](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5916))
 - [Dynamic Configurations] Add support for dynamic application configurations ([#5855](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5855))
-- [Workspace] Setup workspace skeleton and implement basic CRUD API ([#5075](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5075))
-- [Workspace] Add ACL related functions ([#5084](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5084/))
-- [Workspace] Optional workspaces params in repository ([#5949](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5949))
 - [Multiple Datasource] Refactoring create and edit form to use authentication registry ([#6002](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6002))
 - [Multiple Datasource] Handles auth methods from auth registry in DataSource SavedObjects Client Wrapper ([#6062](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6062))
 - [Multiple Datasource] Expose a few properties for customize the appearance of the data source selector component ([#6057](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6057))
-- [Multiple Datasource] Create data source menu component able to be mount to nav bar ([#6082](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6082))
 - [Multiple Datasource] Handle form values(request payload) if the selected type is available in the authentication registry ([#6049](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6049))
 - [Multiple Datasource] Adds a session token to AWS credentials ([#6103](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6103))
 - [Multiple Datasource] Add Vega support to MDS by specifying a data source name in the Vega spec ([#5975](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5975))
 - [Multiple Datasource] Test connection schema validation for registered auth types ([#6109](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6109))
 - [Multiple DataSource] DataSource creation and edition page improvement to better support registered auth types ([#6122](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6122))
-- [Multiple DataSource] Codebase maintenance involves updating typos and removing unused imported packages ([#6238](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6238))
-- [Workspace] Consume workspace id in saved object client ([#6014](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6014))
 - [Multiple Datasource] Export DataSourcePluginRequestContext at top level for plugins to use ([#6108](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6108))
-- [Multiple Datasource] Expose filterfn in datasource menu component to allow filter data sources before rendering in navigation bar ([#6113](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6113))
 - [Multiple Datasource] Improves connection pooling support for AWSSigV4 clients in data sources ([#6135](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6135))
-- [Workspace] Add delete saved objects by workspace functionality([#6013](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6013))
-- [Workspace] Add a workspace client in workspace plugin ([#6094](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6094))
-- [Multiple Datasource] Add component to show single selected data source in read only mode ([#6125](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6125))
-- [Multiple Datasource] Add data source aggregated view to show all compatible data sources or only show used data sources ([#6129](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6129))
 - [Multiple Datasource] Add datasource version number to newly created data source object([#6178](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6178))
-- [Workspace] Add workspace id in basePath ([#6060](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6060))
 - Implement new home page ([#6065](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6065))
 - Add sidecar service ([#5920](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5920))
-- Allow the use of `ignoreVersionMismatch` in non-dev configuration ([#6347](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6347))
-- [Multiple Datasource] Use data source filter function before rendering ([#6175](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6175))
-- [Chrome] Introduce registerCollapsibleNavHeader to allow plugins to customize the rendering of nav menu header ([#5244](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5244))
 - [Dynamic Configurations] Pass request headers when making application config calls ([#6164](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6164))
 - [Discover] Options button to configure legacy mode and remove the top navigation option ([#6170](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6170))
 - [Multiple Datasource] Add default functionality for customer to choose default datasource ([#6058](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/6058))
-- [Multiple Datasource] Remove arrow down icon from data source selectable component ([#6257](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6257))
 - [Multiple Datasource] Add import support for Vega when specifying a datasource ([#6123](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6123))
-- [Workspace] Validate if workspace exists when setup inside a workspace ([#6154](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6154))
-- [Workspace] Register a workspace dropdown menu at the top of left nav bar ([#6150](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6150))
-- [Multiple Datasource] Add icon in datasource table page to show the default datasource ([#6231](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6231))
-- [Multiple Datasource] Add TLS configuration for multiple data sources ([#6171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6171))
-- [Multiple Datasource] Add multi selectable data source component ([#6211](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6211))
-- [Multiple Datasource] Do not support import data source object to Local cluster when not enable data source ([#6395](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6395))
-- [Multiple Datasource] Refactor data source menu and interface to allow cleaner selection of component and related configurations ([#6256](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6256))
-- [Multiple Datasource] Allow top nav menu to mount data source menu for use case when both menus are mounted ([#6268](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6268))
-- [Workspace] Add create workspace page ([#6179](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6179))
-- [Workspace] Add update workspace page ([#6270](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6270))
-- [Multiple Datasource] Make sure customer always have a default datasource ([#6237](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6237))
-- [Workspace] Add workspace list page ([#6182](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6182))
-- [Workspace] Add API to duplicate saved objects among workspaces ([#6288](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6288))
-- [Workspace] Add workspaces column to saved objects page ([#6225](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6225))
-- [Multiple Datasource] Enhanced data source selector with default datasource shows as first choice ([#6293](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6293))
-- [Multiple Datasource] Add multi data source support to sample vega visualizations ([#6218](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6218))
-- [Multiple Datasource] Fetch data source title for DataSourceView when only id is provided ([#6315](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6315)
-- [Multiple Datasource] Get data source label when only id is provided in DataSourceSelectable ([#6358](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6358)
-- [Workspace] Add permission control logic ([#6052](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6052))
-- [Multiple Datasource] Add default icon for selectable component and make sure the default datasource shows automatically ([#6327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6327))
-- [Multiple Datasource] Pass selected data sources to plugin consumers when the multi-select component initially loads ([#6333](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6333))
-- [Mulitple Datasource] Add multi data source support to TSVB ([#6298](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6298))
-- [Multiple Datasource] Add installedPlugins list to data source saved object ([#6348](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6348))
-- [Multiple Datasource] Add default icon in multi-selectable picker ([#6357](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6357))
-- [Multiple Datasource] Add empty state component for no connected data source ([#6499](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6499))
-- [Multiple Datasource] Add popover for empty state and redirect to data source management page([#6514](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6514))
-- [Multiple Datasource] Update empty state font size and footer button size to small ([6549](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6549))
-- [Workspace] Add APIs to support plugin state in request ([#6303](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6303))
-- [Workspace] Filter left nav menu items according to the current workspace ([#6234](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6234))
-- [Multiple Datasource] Add multi data source support to Timeline ([#6385](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6385))
-- [Multiple Datasource] Refactor data source selector component to include placeholder and add tests ([#6372](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6372))
-- Replace control characters before logging ([#6402](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6402))
-- [Dynamic Configurations] Improve dynamic configurations by adding cache and simplifying client fetch ([#6364](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6364))
-- [CSP Handler] Update CSP handler to only query and modify frame ancestors instead of all CSP directives ([#6398](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6398))
-- [MD] Add OpenSearch cluster group label to top of single selectable dropdown  ([#6400](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6400))
-- [Multiple Datasource] Add error state to all data source menu components to show error component and consolidate all fetch errors ([#6440](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6440))
-- [Multiple Datasource] UI change for datasource view picker to enable selectable([#6497](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6497))
-- [Workspace] Support workspace in saved objects client in server side. ([#6365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6365))
-- [MD] Add dropdown header to data source single selector ([#6431](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6431))
-- [Workspace] Add permission tab to workspace create update page ([#6378](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6378))
-- [Workspace] Hide datasource and advanced settings menu in dashboard management when in workspace. ([#6455](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6455))
-- [Multiple Datasource] Modify selectable picker to remove group label and close popover after selection ([#6515](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6515))
-- [Multiple Datasource] Extract the button component for datasource picker to avoid duplicate code ([#6559](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6559))
-- [Workspace] Add workspaces filter to saved objects page. ([#6458](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6458))
-- [Multiple Datasource] Support multi data source in Region map ([#6654](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6654))
-- Add `rightNavigationButton` component in chrome service for applications to register and add dev tool to top right navigation. ([#6553](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6553))
-- Enable UI Metric Collector to collect UI Metrics and Application Usage ([#6203](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6203))
-- Add `opensearchDashboards.futureNavigation` config to control dev tool top right nav button. ([#6712](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6712))
 
 ### 🐛 Bug Fixes
 
-- [Chore] Update deprecated url methods (url.parse(), url.format()) ([#2910](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2910))
-- Cleanup unused url ([#3847](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3847))
-- [BUG][Discover] Allow saved sort from search embeddable to load in Dashboard ([#5934](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5934))
 - [BUG][Discover] Add key to index pattern options for support deplicate index pattern names([#5946](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5946))
 - [Discover] Fix table cell content overflowing in Safari ([#5948](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5948))
 - [BUG][MD]Fix schema for test connection to separate validation based on auth type ([#5997](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5997))
 - [Discover] Enable 'Back to Top' Feature in Discover for scrolling to top ([#6008](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6008))
-- [Discover] Fix lazy loading of the legacy table from getting stuck ([#6041](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6041))
 - [BUG][Discover] Allow saved sort from search embeddable to load in Dashboard ([#5934](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5934))
 - [osd/std] Add additional recovery from false-positives in handling of long numerals ([#5956](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5956), [#6245](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6245))
 - [osd/std] Add fallback mechanism when recovery from false-positives in handling of long numerals fails ([#6253](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6253))
@@ -128,21 +204,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [BUG][Multiple Datasource] Add a migration function for datasource to add migrationVersion field ([#6025](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6025))
 - [BUG][MD]Expose picker using function in data source management plugin setup([#6030](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6030))
 - [BUG][Multiple Datasource] Fix data source filter bug and add tests ([#6152](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6152))
-- [BUG][Multiple Datasource] Fix obsolete snapshots for test within data source management plugin ([#6185](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6185))
-- [Workspace] Add base path when parse url in http service ([#6233](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6233))
-- [Multiple Datasource] Fix sslConfig for multiple datasource to handle when certificateAuthorities is unset ([#6282](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6282))
-- [BUG][Multiple Datasource]Fix bug in data source aggregated view to change it to depend on displayAllCompatibleDataSources property to show the badge value ([#6291](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6291))
-- [BUG][Multiple Datasource] Fix style of data source option inside popover for data source selector, selectable, multi select components ([#6438](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6438))
-- [BUG][Multiple Datasource]Read hideLocalCluster setting from yml and set in data source selector and data source menu ([#6361](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6361))
-- [BUG][Multiple Datasource] Refactor read-only component to cover more edge cases ([#6416](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6416))
-- [BUG] Fix for checkForFunctionProperty so that order does not matter ([#6248](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6248))
-- [Dynamic Configurations] Fix dynamic config API calls to pass correct input ([#6474](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6474))
-- [BUG][Multiple Datasource] Modify the button of selectable component to fix the title overflow issue ([#6465](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6465))
 - [BUG][Multiple Datasource] Validation succeed as long as status code in response is 200 ([#6399](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6399))
-- [BUG][Multiple Datasource] Fix on data source selectable and readonly component are not consistent ([#6545]https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6545)
-- [BUG][Multiple Datasource] Add validation for title length to be no longer than 32 characters [#6452](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6452))
-- [Dev Tool] Add additional themed styles to ace overrides ([#5327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5327))
-- [VisBuilder] Allow saving and loading filter and query in a saved VisBuilder  ([#6460](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6460))
 
 ### 🚞 Infrastructure
 
@@ -150,7 +212,6 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Re-enable CI workflows for feature branches ([#2908](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2908))
 - [Tests] Add Github workflow for Test Orchestrator in FT Repo to run cypress tests within Dashboards repo ([#5725](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5725))
 - Upgrade yarn version to be compatible with @opensearch-project/opensearch ([#3443](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/3443))
-- Update link-checker and clean up ignore-list ([#6425](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6425))
 
 ### 📝 Documentation
 
@@ -172,16 +233,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Move @kristenTian to emeritus maintainer ([#6136](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6136))
 - Add @xinruiba as a maintainer ([#6217](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6217))
 
-### 🪛 Refactoring
-
-- Remove unused Sass in `tile_map` plugin ([#4110](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4110))
-- [Multiple Datasource] Move data source selectable to its own folder, fix test and a few type errors for data source selectable component ([#6287](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6287))
-- Remove KUI usage in `disabled_lab_visualization` ([#5462](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5462))
-- [Multiple Datasource] Remove duplicate data source attribute interface from `data_source_management` ([#6437](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6437))
-
 ### 🔩 Tests
 
-- Add functional test cypress workflow improvements and enable the workflow for in-house Dashboards tests ([#6061](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6061))
 - Rename cypress config file to its version supported convention ([#6137](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6137))
 
 ## [2.12.0 - 2024-02-20](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.12.0)
@@ -211,13 +264,11 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - [Discover] Added customizable pagination options based on Discover UI settings [#5610](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5610)
 - [PM] Enhance single version requirements imposed during bootstrapping ([#5675](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5675))
 - [Custom Branding] Relative URL should be allowed for logos ([#5572](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5572))
-- [Theme] Make theme and dark mode settings user/device specific (in local storage), with opt-out ([#5652](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5652))
 - Revert to legacy discover table and add toggle to new discover table ([#5789](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5789))
 - [Discover] Add collapsible and resizeable sidebar ([#5789](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5789))
 - [Discover] Enhanced the data source selector with added sorting functionality ([#5719](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5719))
 - [Multiple Datasource] Add datasource picker component and use it in devtools and tutorial page when multiple datasource is enabled ([#5756](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5756))
 - [Multiple Datasource] Add datasource picker to import saved object flyout when multiple data source is enabled ([#5781](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5781))
-- [Discover] Add extension group title to non-index data source groups to indicate log explorer redirection in discover data source selector. ([#5815](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5815))
 
 ### 🐛 Bug Fixes
 
