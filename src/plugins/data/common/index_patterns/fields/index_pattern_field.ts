@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { OsdFieldType, getOsdFieldType } from '../../osd_field_types';
+import { OsdFieldType, getOsdFieldOverrides, getOsdFieldType } from '../../osd_field_types';
 import { OSD_FIELD_TYPES } from '../../osd_field_types/types';
 import { IFieldType } from './types';
 import { FieldSpec, IndexPattern } from '../..';
@@ -133,6 +133,7 @@ export class IndexPatternField implements IFieldType {
   }
 
   public get filterable() {
+    if (getOsdFieldOverrides().filterable !== undefined) return !!getOsdFieldOverrides().filterable;
     return (
       this.name === '_id' ||
       this.scripted ||
@@ -141,6 +142,8 @@ export class IndexPatternField implements IFieldType {
   }
 
   public get visualizable() {
+    if (getOsdFieldOverrides().visualizable !== undefined)
+      return !!getOsdFieldOverrides().visualizable;
     const notVisualizableFieldTypes: string[] = [OSD_FIELD_TYPES.UNKNOWN, OSD_FIELD_TYPES.CONFLICT];
     return this.aggregatable && !notVisualizableFieldTypes.includes(this.spec.type);
   }
