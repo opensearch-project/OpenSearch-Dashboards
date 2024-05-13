@@ -133,7 +133,9 @@ export function migrateUrlState(oldPath: string, newPath = '/'): string {
           indexPattern: index,
         },
       };
+      const _g = getStateFromOsdUrl<any>('_g', oldPath);
 
+      path = setStateToOsdUrl('_g', _g, { useHash: false }, path);
       path = setStateToOsdUrl('_a', _a, { useHash: false }, path);
       path = setStateToOsdUrl('_q', _q, { useHash: false }, path);
 
