@@ -67,4 +67,6 @@ export interface AppCategory {
    * Defaults to initials if no icon is defined
    */
   euiIconType?: EuiIconType;
+
+  group?: AppCategory;
 }
