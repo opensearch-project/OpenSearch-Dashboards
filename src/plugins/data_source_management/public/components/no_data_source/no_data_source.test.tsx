@@ -16,14 +16,20 @@ describe('NoDataSource', () => {
   const nextTick = () => new Promise((res) => process.nextTick(res));
 
   it('should render correctly with the provided totalDataSourceCount', () => {
-    const wrapper = shallow(<NoDataSource totalDataSourceCount={totalDataSourceCount} />);
+    const wrapper = shallow(
+      <NoDataSource totalDataSourceCount={totalDataSourceCount} hasIncompatibleDatasource={false} />
+    );
     expect(wrapper).toMatchSnapshot();
   });
 
   it('should display popover when click "No data sources" button', async () => {
     const applicationMock = coreMock.createStart().application;
     const container = render(
-      <NoDataSource totalDataSourceCount={totalDataSourceCount} application={applicationMock} />
+      <NoDataSource
+        totalDataSourceCount={totalDataSourceCount}
+        application={applicationMock}
+        hasIncompatibleDatasource={false}
+      />
     );
 
     await nextTick();
@@ -39,7 +45,11 @@ describe('NoDataSource', () => {
     const navigateToAppMock = applicationMock.navigateToApp;
 
     const container = render(
-      <NoDataSource totalDataSourceCount={totalDataSourceCount} application={applicationMock} />
+      <NoDataSource
+        totalDataSourceCount={totalDataSourceCount}
+        application={applicationMock}
+        hasIncompatibleDatasource={false}
+      />
     );
 
     await nextTick();
@@ -55,8 +65,16 @@ describe('NoDataSource', () => {
     });
   });
 
-  it('should render normally', () => {
-    component = shallow(<NoDataSource totalDataSourceCount={0} />);
-    expect(component).toMatchSnapshot();
-  });
+  it.each([false, true])(
+    'should render normally when incompatibleDataSourcesExist is %b',
+    (incompatibleDataSourcesExist) => {
+      component = shallow(
+        <NoDataSource
+          totalDataSourceCount={0}
+          hasIncompatibleDatasource={incompatibleDataSourcesExist}
+        />
+      );
+      expect(component).toMatchSnapshot();
+    }
+  );
 });
