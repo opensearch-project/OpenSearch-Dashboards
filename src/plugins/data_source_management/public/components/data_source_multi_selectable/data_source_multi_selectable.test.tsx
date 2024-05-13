@@ -4,13 +4,13 @@
  */
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { notificationServiceMock } from '../../../../../core/public/mocks';
+import { fatalErrorsServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
 import {
   getDataSourcesWithFieldsResponse,
   mockResponseForSavedObjectsCalls,
   mockManagementPlugin,
 } from '../../mocks';
-import { ShallowWrapper, shallow } from 'enzyme';
+import { ShallowWrapper, mount, shallow } from 'enzyme';
 import { DataSourceMultiSelectable } from './data_source_multi_selectable';
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
@@ -91,6 +91,11 @@ describe('DataSourceMultiSelectable', () => {
     );
     await nextTick();
     expect(toasts.add).toBeCalledTimes(1);
+    expect(toasts.add).toBeCalledWith({
+      color: 'danger',
+      text: expect.any(Function),
+      title: 'Failed to fetch data sources',
+    });
   });
 
   it('should callback when onChange happens', async () => {
@@ -111,7 +116,7 @@ describe('DataSourceMultiSelectable', () => {
     expect(callbackMock).toBeCalledWith([]);
   });
 
-  it('should retrun correct state when ui Settings provided', async () => {
+  it('should return correct state when ui Settings provided', async () => {
     spyOn(uiSettings, 'get').and.returnValue('test1');
     component = shallow(
       <DataSourceMultiSelectable
@@ -129,7 +134,7 @@ describe('DataSourceMultiSelectable', () => {
     expect(component.state('selectedOptions')).toHaveLength(3);
   });
 
-  it('should retrun correct state when ui Settings provided and hide cluster is false', async () => {
+  it('should return correct state when ui Settings provided and hide cluster is false', async () => {
     spyOn(uiSettings, 'get').and.returnValue('test1');
     component = shallow(
       <DataSourceMultiSelectable
@@ -145,5 +150,39 @@ describe('DataSourceMultiSelectable', () => {
     expect(uiSettings.get).toBeCalledWith('defaultDataSource', null);
     expect(component.state('defaultDataSource')).toEqual('test1');
     expect(component.state('selectedOptions')).toHaveLength(4);
+  });
+
+  it('should handle no available data source error when selected option is empty and hide localcluster', async () => {
+    mockResponseForSavedObjectsCalls(client, 'find', {});
+    const wrapper = mount(
+      <DataSourceMultiSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={jest.fn()}
+        hideLocalCluster={true}
+        fullWidth={false}
+        uiSettings={uiSettings}
+      />
+    );
+    await wrapper.instance().componentDidMount!();
+    expect(wrapper.state('selectedOptions')).toHaveLength(0);
+    expect(wrapper.state('showEmptyState')).toBe(true);
+  });
+
+  it('should not handle no available data source error when selected option is empty and not hide localcluster', async () => {
+    mockResponseForSavedObjectsCalls(client, 'find', {});
+    const wrapper = mount(
+      <DataSourceMultiSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={jest.fn()}
+        hideLocalCluster={false}
+        fullWidth={false}
+        uiSettings={uiSettings}
+      />
+    );
+    await wrapper.instance().componentDidMount!();
+    expect(wrapper.state('selectedOptions')).toHaveLength(1);
+    expect(wrapper.state('showEmptyState')).toBe(false);
   });
 });
