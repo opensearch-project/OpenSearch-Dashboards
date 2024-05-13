@@ -4,3 +4,23 @@
   max-height: $euiSize * 10;
   margin-right: -$euiSizeS;
 }
+
+.context-nav-wrapper {
+  .full-width {
+    width: 100%;
+  }
+
+  .no-padding {
+    padding: 0;
+  }
+
+  .no-hover {
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .wrapper {
+    overflow-y: auto;
+  }
+}
