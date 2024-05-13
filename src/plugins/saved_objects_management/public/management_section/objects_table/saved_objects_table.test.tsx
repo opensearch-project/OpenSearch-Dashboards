@@ -612,6 +612,7 @@ describe('SavedObjectsTable', () => {
         { force: true }
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
+      expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
     });
 
     it('should show error toast when failing to delete saved objects', async () => {
@@ -644,10 +645,15 @@ describe('SavedObjectsTable', () => {
 
       // Set some as selected
       component.instance().onSelectionChanged(mockSelectedSavedObjects);
+      await component.instance().onDelete();
+      component.update();
+      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
 
       await component.instance().delete();
-
+      component.update();
       expect(notifications.toasts.addDanger).toHaveBeenCalled();
+      // If user fail to delete the saved objects, the delete modal will continue to display
+      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
     });
   });
 
