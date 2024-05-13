@@ -451,7 +451,11 @@ export class DashboardPlugin
       },
     };
 
-    core.application.register(app);
+    core.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
+      if (currentWorkspaceId) {
+        core.application.register(app);
+      }
+    });
     urlForwarding.forwardApp(
       DashboardConstants.DASHBOARDS_ID,
       DashboardConstants.DASHBOARDS_ID,

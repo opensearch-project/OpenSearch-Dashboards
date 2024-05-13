@@ -150,79 +150,83 @@ export class VisualizePlugin
     setUISettings(core.uiSettings);
     uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
 
-    core.application.register({
-      id: 'visualize',
-      title: 'Visualize',
-      order: 8000,
-      euiIconType: 'inputOutput',
-      defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      updater$: this.appStateUpdater.asObservable(),
-      // remove all references to visualize
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, pluginsStart] = await core.getStartServices();
-        this.currentHistory = params.history;
+    core.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
+      if (currentWorkspaceId) {
+        core.application.register({
+          id: 'visualize',
+          title: 'Visualize',
+          order: 8000,
+          euiIconType: 'inputOutput',
+          defaultPath: '#/',
+          category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+          updater$: this.appStateUpdater.asObservable(),
+          // remove all references to visualize
+          mount: async (params: AppMountParameters) => {
+            const [coreStart, pluginsStart] = await core.getStartServices();
+            this.currentHistory = params.history;
 
-        // make sure the index pattern list is up to date
-        pluginsStart.data.indexPatterns.clearCache();
-        // make sure a default index pattern exists
-        // if not, the page will be redirected to management and visualize won't be rendered
-        await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
+            // make sure the index pattern list is up to date
+            pluginsStart.data.indexPatterns.clearCache();
+            // make sure a default index pattern exists
+            // if not, the page will be redirected to management and visualize won't be rendered
+            await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
 
-        appMounted();
+            appMounted();
 
-        // dispatch synthetic hash change event to update hash history objects
-        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
-        const unlistenParentHistory = params.history.listen(() => {
-          window.dispatchEvent(new HashChangeEvent('hashchange'));
+            // dispatch synthetic hash change event to update hash history objects
+            // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+            const unlistenParentHistory = params.history.listen(() => {
+              window.dispatchEvent(new HashChangeEvent('hashchange'));
+            });
+            /**
+             * current implementation uses 2 history objects:
+             * 1. the hash history (used for the react hash router)
+             * 2. and the scoped history (used for url tracking)
+             * this should be replaced to use only scoped history after moving legacy apps to browser routing
+             */
+            const history = createHashHistory();
+            const services: VisualizeServices = {
+              ...coreStart,
+              history,
+              osdUrlStateStorage: createOsdUrlStateStorage({
+                history,
+                useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+                ...withNotifyOnErrors(coreStart.notifications.toasts),
+              }),
+              urlForwarding: pluginsStart.urlForwarding,
+              pluginInitializerContext: this.initializerContext,
+              chrome: coreStart.chrome,
+              data: pluginsStart.data,
+              localStorage: new Storage(localStorage),
+              navigation: pluginsStart.navigation,
+              savedVisualizations: pluginsStart.visualizations.savedVisualizationsLoader,
+              share: pluginsStart.share,
+              toastNotifications: coreStart.notifications.toasts,
+              visualizeCapabilities: coreStart.application.capabilities.visualize,
+              visualizations: pluginsStart.visualizations,
+              embeddable: pluginsStart.embeddable,
+              setActiveUrl,
+              createVisEmbeddableFromObject:
+                pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
+              savedObjectsPublic: pluginsStart.savedObjects,
+              scopedHistory: params.history,
+              restorePreviousUrl,
+              dashboard: pluginsStart.dashboard,
+              setHeaderActionMenu: params.setHeaderActionMenu,
+            };
+
+            params.element.classList.add('visAppWrapper');
+            const { renderApp } = await import('./application');
+            const unmount = renderApp(params, services);
+            return () => {
+              params.element.classList.remove('visAppWrapper');
+              unlistenParentHistory();
+              unmount();
+              appUnMounted();
+            };
+          },
         });
-        /**
-         * current implementation uses 2 history objects:
-         * 1. the hash history (used for the react hash router)
-         * 2. and the scoped history (used for url tracking)
-         * this should be replaced to use only scoped history after moving legacy apps to browser routing
-         */
-        const history = createHashHistory();
-        const services: VisualizeServices = {
-          ...coreStart,
-          history,
-          osdUrlStateStorage: createOsdUrlStateStorage({
-            history,
-            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
-            ...withNotifyOnErrors(coreStart.notifications.toasts),
-          }),
-          urlForwarding: pluginsStart.urlForwarding,
-          pluginInitializerContext: this.initializerContext,
-          chrome: coreStart.chrome,
-          data: pluginsStart.data,
-          localStorage: new Storage(localStorage),
-          navigation: pluginsStart.navigation,
-          savedVisualizations: pluginsStart.visualizations.savedVisualizationsLoader,
-          share: pluginsStart.share,
-          toastNotifications: coreStart.notifications.toasts,
-          visualizeCapabilities: coreStart.application.capabilities.visualize,
-          visualizations: pluginsStart.visualizations,
-          embeddable: pluginsStart.embeddable,
-          setActiveUrl,
-          createVisEmbeddableFromObject:
-            pluginsStart.visualizations.__LEGACY.createVisEmbeddableFromObject,
-          savedObjectsPublic: pluginsStart.savedObjects,
-          scopedHistory: params.history,
-          restorePreviousUrl,
-          dashboard: pluginsStart.dashboard,
-          setHeaderActionMenu: params.setHeaderActionMenu,
-        };
-
-        params.element.classList.add('visAppWrapper');
-        const { renderApp } = await import('./application');
-        const unmount = renderApp(params, services);
-        return () => {
-          params.element.classList.remove('visAppWrapper');
-          unlistenParentHistory();
-          unmount();
-          appUnMounted();
-        };
-      },
+      }
     });
 
     urlForwarding.forwardApp('visualize', 'visualize');

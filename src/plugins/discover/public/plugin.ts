@@ -250,45 +250,49 @@ export class DiscoverPlugin
       order: 2,
     });
 
-    core.application.register({
-      id: PLUGIN_ID,
-      title: 'Discover',
-      updater$: this.appStateUpdater.asObservable(),
-      order: 1000,
-      euiIconType: 'inputOutput',
-      defaultPath: '#/',
-      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      mount: async (params: AppMountParameters) => {
-        if (!this.initializeServices) {
-          throw Error('Discover plugin method initializeServices is undefined');
-        }
-        setScopedHistory(params.history);
-        setHeaderActionMenuMounter(params.setHeaderActionMenu);
-        syncHistoryLocations();
-        const {
-          core: {
-            application: { navigateToApp },
+    core.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
+      if (currentWorkspaceId) {
+        core.application.register({
+          id: PLUGIN_ID,
+          title: 'Discover',
+          updater$: this.appStateUpdater.asObservable(),
+          order: 1000,
+          euiIconType: 'inputOutput',
+          defaultPath: '#/',
+          category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+          mount: async (params: AppMountParameters) => {
+            if (!this.initializeServices) {
+              throw Error('Discover plugin method initializeServices is undefined');
+            }
+            setScopedHistory(params.history);
+            setHeaderActionMenuMounter(params.setHeaderActionMenu);
+            syncHistoryLocations();
+            const {
+              core: {
+                application: { navigateToApp },
+              },
+            } = await this.initializeServices();
+
+            // This is for instances where the user navigates to the app from the application nav menu
+            const path = window.location.hash;
+            const newPath = migrateUrlState(path);
+            if (newPath.startsWith('#/context') || newPath.startsWith('#/doc')) {
+              const { renderDocView } = await import('./application/components/doc_views');
+              const unmount = renderDocView(params.element);
+              return () => {
+                unmount();
+              };
+            } else {
+              navigateToApp('data-explorer', {
+                replace: true,
+                path: `/${PLUGIN_ID}${newPath}`,
+              });
+            }
+
+            return () => {};
           },
-        } = await this.initializeServices();
-
-        // This is for instances where the user navigates to the app from the application nav menu
-        const path = window.location.hash;
-        const newPath = migrateUrlState(path);
-        if (newPath.startsWith('#/context') || newPath.startsWith('#/doc')) {
-          const { renderDocView } = await import('./application/components/doc_views');
-          const unmount = renderDocView(params.element);
-          return () => {
-            unmount();
-          };
-        } else {
-          navigateToApp('data-explorer', {
-            replace: true,
-            path: `/${PLUGIN_ID}${newPath}`,
-          });
-        }
-
-        return () => {};
-      },
+        });
+      }
     });
 
     plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
