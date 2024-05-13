@@ -596,6 +596,9 @@ describe('SavedObjectsTable', () => {
 
       // Set some as selected
       component.instance().onSelectionChanged(mockSelectedSavedObjects);
+      await component.instance().onDelete();
+      component.update();
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
 
       await component.instance().delete();
 
@@ -613,6 +616,8 @@ describe('SavedObjectsTable', () => {
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
       expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
+      expect(component.state('isDeleting')).toBe(false);
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(false);
     });
 
     it('should show error toast when failing to delete saved objects', async () => {
@@ -647,13 +652,16 @@ describe('SavedObjectsTable', () => {
       component.instance().onSelectionChanged(mockSelectedSavedObjects);
       await component.instance().onDelete();
       component.update();
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
       expect(component.find('EuiConfirmModal')).toMatchSnapshot();
 
       await component.instance().delete();
       component.update();
       expect(notifications.toasts.addDanger).toHaveBeenCalled();
       // If user fail to delete the saved objects, the delete modal will continue to display
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
       expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.state('isDeleting')).toBe(false);
     });
   });
 
