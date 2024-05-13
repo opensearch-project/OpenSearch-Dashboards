@@ -599,11 +599,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this.setState({ isDeleting: true });
 
     const indexPatterns = selectedSavedObjects.filter((object) => object.type === 'index-pattern');
-    if (indexPatterns.length) {
-      await this.props.indexPatterns.clearCache();
-    }
 
     try {
+      if (indexPatterns.length) {
+        await this.props.indexPatterns.clearCache();
+      }
       const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
       const deletes = objects.savedObjects.map((object) =>
         savedObjectsClient.delete(object.type, object.id, { force: true })
@@ -616,6 +616,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       // Fetching all data
       await this.fetchSavedObjects();
       await this.fetchCounts();
+
+      // Allow the user to interact with the table once the saved objects have been re-fetched.
+      // If the user fails to delete the saved objects, the delete modal will continue to display.
+      this.setState({ isShowingDeleteConfirmModal: false });
     } catch (error) {
       notifications.toasts.addDanger({
         title: i18n.translate(
@@ -625,11 +629,8 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         text: `${error}`,
       });
     }
-    // Allow the user to interact with the table once the saved objects have been re-fetched or failed to delete.
-    this.setState({
-      isShowingDeleteConfirmModal: false,
-      isDeleting: false,
-    });
+
+    this.setState({ isDeleting: false });
   };
 
   getRelationships = async (type: string, id: string) => {
