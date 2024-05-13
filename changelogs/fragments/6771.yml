@@ -1,0 +1,2 @@
+fix:
+- Lint checker failure fix ([#6771](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6771))
