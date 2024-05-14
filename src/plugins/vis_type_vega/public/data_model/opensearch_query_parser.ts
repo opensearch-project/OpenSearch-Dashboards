@@ -207,7 +207,7 @@ export class OpenSearchQueryParser {
       if (context) {
         // Use dashboard context
         const newQuery = cloneDeep(this._filters);
-        if (timefield) {
+        if (timefield && newQuery.type !== 'unsupported') {
           newQuery.bool!.must!.push(body.query);
         }
         body.query = newQuery;

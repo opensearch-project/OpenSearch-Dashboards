@@ -50,6 +50,11 @@ describe('createSearchSource', () => {
         callMsearch: jest.fn(),
         loadingCount$: new BehaviorSubject(0),
       },
+      df: {
+        get: jest.fn().mockReturnValue({}),
+        set: jest.fn().mockReturnValue({}),
+        clear: jest.fn(),
+      },
     };
 
     indexPatternContractMock = ({
