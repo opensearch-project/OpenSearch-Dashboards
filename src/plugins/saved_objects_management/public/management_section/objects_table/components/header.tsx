@@ -79,11 +79,14 @@ export const Header = ({
                 data-test-subj="duplicateObjects"
                 onClick={onDuplicate}
                 disabled={objectCount === 0}
-                iconType="copyClipboard"
+                iconType="copy"
               >
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
-                  defaultMessage="Duplicate All"
+                  defaultMessage="Duplicate {filteredCount, plural, one{# object} other {# objects}}"
+                  values={{
+                    filteredCount,
+                  }}
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>

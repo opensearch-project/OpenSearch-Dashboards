@@ -124,7 +124,7 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.duplicateModal.title"
-              defaultMessage="Duplicate {objectCount, plural, =1 {{objectName}} other {# objects}} to?"
+              defaultMessage="Duplicate {objectCount, plural, =1 {{objectName}} other {# objects}}?"
               values={{
                 objectName: allSelectedObjects[0].meta.title,
                 objectCount: allSelectedObjects.length,
@@ -185,7 +185,7 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
                 id={'includeReferencesDeep'}
                 label={i18n.translate(
                   'savedObjectsManagement.objectsTable.duplicateModal.includeReferencesDeepLabel',
-                  { defaultMessage: 'Include related objects(recommended)' }
+                  { defaultMessage: 'Include related objects (recommended)' }
                 )}
                 checked={isIncludeReferencesDeepChecked}
                 onChange={this.changeIncludeReferencesDeep}

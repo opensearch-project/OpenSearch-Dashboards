@@ -46,6 +46,7 @@ import {
   EuiText,
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -67,7 +68,7 @@ export interface TableProps {
   selectionConfig: {
     onSelectionChange: (selection: SavedObjectWithMetadata[]) => void;
   };
-  filters: any[];
+  filters: EuiSearchBarProps['filters'];
   canDelete: boolean;
   onDelete: () => void;
   onDuplicate: () => void;
@@ -323,14 +324,14 @@ export class Table extends PureComponent<TableProps, TableState> {
                 {
                   name: i18n.translate(
                     'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionName',
-                    { defaultMessage: 'Duplicate' }
+                    { defaultMessage: 'Duplicate to...' }
                   ),
                   description: i18n.translate(
                     'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionDescription',
                     { defaultMessage: 'Duplicate this saved object' }
                   ),
                   type: 'icon',
-                  icon: 'copyClipboard',
+                  icon: 'copy',
                   onClick: (object: SavedObjectWithMetadata) => onDuplicateSingle(object),
                   available: (object: SavedObjectWithMetadata) => object.type !== 'config',
                   'data-test-subj': 'savedObjectsTableAction-duplicate',
@@ -396,14 +397,14 @@ export class Table extends PureComponent<TableProps, TableState> {
     const duplicateButton = (
       <EuiButton
         key="duplicateSO"
-        iconType="copyClipboard"
+        iconType="copy"
         onClick={onDuplicate}
         isDisabled={selectedSavedObjects.length === 0}
         data-test-subj="savedObjectsManagementDuplicate"
       >
         <FormattedMessage
           id="savedObjectsManagement.objectsTable.table.duplicateSOButtonLabel"
-          defaultMessage="Duplicate"
+          defaultMessage="Duplicate to"
         />
       </EuiButton>
     );
@@ -413,7 +414,7 @@ export class Table extends PureComponent<TableProps, TableState> {
         {activeActionContents}
         <EuiSearchBar
           box={{ 'data-test-subj': 'savedObjectSearchBar' }}
-          filters={filters as any}
+          filters={filters}
           onChange={this.onChange}
           toolsRight={[
             <>{showDuplicate && duplicateButton}</>,

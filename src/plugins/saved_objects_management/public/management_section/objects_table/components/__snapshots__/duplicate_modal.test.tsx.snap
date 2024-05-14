@@ -59,7 +59,7 @@ HTMLCollection [
                   class="euiModalHeader__title"
                 >
                   <span>
-                    Duplicate 3 objects to?
+                    Duplicate 3 objects?
                   </span>
                 </div>
               </div>
@@ -205,7 +205,7 @@ HTMLCollection [
                           class="euiCheckbox__label"
                           for="includeReferencesDeep"
                         >
-                          Include related objects(recommended)
+                          Include related objects (recommended)
                         </label>
                       </div>
                     </div>

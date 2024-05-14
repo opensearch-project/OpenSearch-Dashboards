@@ -256,12 +256,12 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
         <React.Fragment>
           <EuiButton
             data-test-subj="savedObjectsManagementDuplicate"
-            iconType="copyClipboard"
+            iconType="copy"
             isDisabled={false}
             onClick={[Function]}
           >
             <FormattedMessage
-              defaultMessage="Duplicate"
+              defaultMessage="Duplicate to"
               id="savedObjectsManagement.objectsTable.table.duplicateSOButtonLabel"
               values={Object {}}
             />
@@ -415,8 +415,8 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
                 "available": [Function],
                 "data-test-subj": "savedObjectsTableAction-duplicate",
                 "description": "Duplicate this saved object",
-                "icon": "copyClipboard",
-                "name": "Duplicate",
+                "icon": "copy",
+                "name": "Duplicate to...",
                 "onClick": [Function],
                 "type": "icon",
               },

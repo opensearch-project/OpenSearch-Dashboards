@@ -55,6 +55,7 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSearchBarProps,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -1041,7 +1042,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       view: `${type} (${typeCounts[type] || 0})`,
     }));
 
-    const filters = [
+    const filters: EuiSearchBarProps['filters'] = [
       {
         type: 'field_value_selection',
         field: 'type',
@@ -1050,6 +1051,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         }),
         multiSelect: 'or',
         options: filterOptions,
+        searchThreshold: 1,
       },
     ];
 
@@ -1111,6 +1113,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         }),
         multiSelect: 'or',
         options: wsFilterOptions,
+        searchThreshold: 1,
       });
     }
 

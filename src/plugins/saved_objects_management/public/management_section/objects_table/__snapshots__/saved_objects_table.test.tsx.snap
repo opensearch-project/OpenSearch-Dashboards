@@ -914,6 +914,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
                 "view": "search (0)",
               },
             ],
+            "searchThreshold": 1,
             "type": "field_value_selection",
           },
         ]
