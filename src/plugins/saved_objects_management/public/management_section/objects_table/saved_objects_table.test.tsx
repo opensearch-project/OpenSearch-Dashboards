@@ -596,6 +596,9 @@ describe('SavedObjectsTable', () => {
 
       // Set some as selected
       component.instance().onSelectionChanged(mockSelectedSavedObjects);
+      await component.instance().onDelete();
+      component.update();
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
 
       await component.instance().delete();
 
@@ -612,6 +615,53 @@ describe('SavedObjectsTable', () => {
         { force: true }
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
+      expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
+      expect(component.state('isDeleting')).toBe(false);
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(false);
+    });
+
+    it('should show error toast when failing to delete saved objects', async () => {
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+      ] as SavedObjectWithMetadata[];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
+        id: obj.id,
+        type: obj.type,
+        source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        })),
+        delete: jest.fn().mockImplementation(() => {
+          throw new Error('Unable to delete saved objects');
+        }),
+      };
+
+      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+      await component.instance().onDelete();
+      component.update();
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
+      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+
+      await component.instance().delete();
+      component.update();
+      expect(notifications.toasts.addDanger).toHaveBeenCalled();
+      // If user fail to delete the saved objects, the delete modal will continue to display
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
+      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.state('isDeleting')).toBe(false);
     });
   });
 
