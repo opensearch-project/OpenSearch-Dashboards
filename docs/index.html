@@ -10,7 +10,6 @@
   <link rel="stylesheet" title="dark" href="//cdn.jsdelivr.net/npm/docsify/themes/dark.css">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-dark-switch/dist/docsify-dark-switch.css">
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/sidebar-folder.min.css" />
-
 </head>
 <body>
   <div id="app"></div>
@@ -32,29 +31,9 @@
       },
     }
   </script>
-
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-dark-switch/dist/docsify-dark-switch.min.js"></script>
   <script src="//cdn.jsdelivr.net/npm/docsify-sidebar-collapse/dist/docsify-sidebar-collapse.min.js"></script>
-  <script src="http://unpkg.com/swagger-ui-dist@3/swagger-ui-bundle.js" devtools="false"></script>
-  <script>
-  
-    window.onload = function() {
-
-      const ui = SwaggerUIBundle({
-        url: "docs/saved_objects/saved_objects.yml",
-        dom_id: "#farmstall-docs",
-        deepLinking: true,
-        // presets: [
-        //             SwaggerUIBundle.presets.apis,
-        //             SwaggerUIBundle.SwaggerUIStandalonePreset
-        //         ],
-                layout: "BaseLayout",
-      })
-
-    }
-
-  </script>
 </body>
 </html>
