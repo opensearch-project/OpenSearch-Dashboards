@@ -17,7 +17,6 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Manasvini B Suryanarayana | [manasvinibs](https://github.com/manasvinibs)       | Amazon      |
 | Tao Liu                   | [Flyingliuhub](https://github.com/Flyingliuhub)     | Amazon      |
 | Zilong Xia                | [ZilongX](https://github.com/ZilongX)               | Amazon      |
-| Matt Provost              | [BSFishy](https://github.com/BSFishy)               | Amazon      |
 | Sirazh Gabdullin          | [curq](https://github.com/curq)                     | External contributor |
 | Bandini Bhopi             | [bandinib-amzn](https://github.com/bandinib-amzn)   | Amazon      |
 | Su Zhou                   | [SuZhou-Joe](https://github.com/SuZhou-Joe)         | Amazon      |
@@ -35,3 +34,4 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Bishoy Boktor | [boktorbb](https://github.com/boktorbb)       | Amazon      |
 | Sean Neumann  | [seanneumann](https://github.com/seanneumann) | Contributor |
 | Kristen Tian  | [kristenTian](https://github.com/kristenTian) | Amazon      |
+| Matt Provost  | [BSFishy](https://github.com/BSFishy)         | Amazon      |
