@@ -24,6 +24,7 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Lu Yu                     | [BionIT](https://github.com/BionIT)                 | Amazon      |
 | Xinrui Bai                | [xinruiba](https://github.com/xinruiba)             | Amazon      |
 | Ella Zhu                  | [zhyuanqi](https://github.com/zhyuanqi)             | Amazon      |
+| Eric Wei                  | [mengweieric](https://github.com/mengweieric)       | Amazon      |
 
 ## Emeritus
 
