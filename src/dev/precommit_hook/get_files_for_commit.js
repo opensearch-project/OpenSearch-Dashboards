@@ -34,20 +34,9 @@ import { fromNode as fcb } from 'bluebird';
 import { REPO_ROOT } from '@osd/utils';
 import { File } from '../file';
 
-/**
- * Get the files that are staged for commit (excluding deleted files)
- * as `File` objects that are aware of their commit status.
- *
- * @param  {String} repoPath
- * @return {Promise<Array<File>>}
- */
-export async function getFilesForCommit() {
-  const simpleGit = new SimpleGit(REPO_ROOT);
-
-  const output = await fcb((cb) => simpleGit.diff(['--name-status', '--cached'], cb));
-
+function getFileList(diffText) {
   return (
-    output
+    diffText
       .split('\n')
       // Ignore blank lines
       .filter((line) => line.trim().length > 0)
@@ -68,4 +57,31 @@ export async function getFilesForCommit() {
       })
       .filter(Boolean)
   );
+}
+
+/**
+ * Get the files that are staged for commit (excluding deleted files)
+ * as `File` objects that are aware of their commit status.
+ *
+ * @return {Promise<Array<File>>}
+ */
+export async function getFilesForCommit() {
+  const simpleGit = new SimpleGit(REPO_ROOT);
+
+  const staged = await fcb((cb) => simpleGit.diff(['--name-status', '--cached'], cb)); // staged
+
+  return getFileList(staged);
+}
+
+/**
+ * Get the unstaged files as `File` objects that are aware of their commit status.
+ *
+ * @return {Promise<Array<File>>}
+ */
+export async function getUnstagedFiles() {
+  const simpleGit = new SimpleGit(REPO_ROOT);
+
+  const unstaged = await fcb((cb) => simpleGit.diff(['--name-status'], cb));
+
+  return getFileList(unstaged);
 }
