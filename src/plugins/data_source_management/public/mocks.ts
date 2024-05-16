@@ -278,6 +278,7 @@ export const mockDataSourceAttributesWithSigV4Auth = {
       accessKey: 'test123',
       secretKey: 'test123',
       region: 'us-east-1',
+      service: 'es',
     },
   },
 };
