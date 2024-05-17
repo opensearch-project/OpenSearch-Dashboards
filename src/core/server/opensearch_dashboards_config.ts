@@ -99,6 +99,7 @@ export const config = {
         defaultValue: [],
       }),
     }),
+    futureNavigation: schema.boolean({ defaultValue: false }),
   }),
   deprecations,
 };

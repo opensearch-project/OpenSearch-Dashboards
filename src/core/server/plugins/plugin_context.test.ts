@@ -102,6 +102,7 @@ describe('createPluginInitializerContext', () => {
         autocompleteTerminateAfter: duration(100000),
         autocompleteTimeout: duration(1000),
         dashboardAdmin: { groups: [], users: [] },
+        futureNavigation: false,
       },
       opensearch: {
         shardTimeout: duration(30, 's'),

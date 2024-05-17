@@ -81,6 +81,7 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
       autocompleteTerminateAfter: duration(100000),
       autocompleteTimeout: duration(1000),
       dashboardAdmin: { groups: [], users: [] },
+      futureNavigation: false,
     },
     opensearch: {
       shardTimeout: duration('30s'),

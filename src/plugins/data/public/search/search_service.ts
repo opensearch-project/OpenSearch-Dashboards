@@ -57,6 +57,13 @@ import {
   getShardDelayBucketAgg,
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
+import {
+  DataFrameService,
+  IDataFrame,
+  IDataFrameResponse,
+  createDataFrameCache,
+  dataFrameToSpec,
+} from '../../common/data_frames';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -73,7 +80,9 @@ export interface SearchServiceStartDependencies {
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
+  private readonly dfCache = createDataFrameCache();
   private searchInterceptor!: ISearchInterceptor;
+  private defaultSearchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
 
   constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
@@ -95,6 +104,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       startServices: getStartServices(),
       usageCollector: this.usageCollector!,
     });
+    this.defaultSearchInterceptor = this.searchInterceptor;
 
     expressions.registerFunction(opensearchdsl);
     expressions.registerType(opensearchRawResponse);
@@ -129,11 +139,36 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
+    const dfService: DataFrameService = {
+      get: () => this.dfCache.get(),
+      set: async (dataFrame: IDataFrame) => {
+        if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
+          indexPatterns.clearCache(this.dfCache.get()!.name, false);
+        }
+        this.dfCache.set(dataFrame);
+        const existingIndexPattern = indexPatterns.getByTitle(dataFrame.name!, true);
+        const dataSet = await indexPatterns.create(
+          dataFrameToSpec(dataFrame, existingIndexPattern?.id),
+          !existingIndexPattern?.id
+        );
+        // save to cache by title because the id is not unique for temporary index pattern created
+        indexPatterns.saveToCache(dataSet.title, dataSet);
+      },
+      clear: () => {
+        if (this.dfCache.get() === undefined) return;
+        // name because the id is not unique for temporary index pattern created
+        indexPatterns.clearCache(this.dfCache.get()!.name, false);
+        this.dfCache.clear();
+      },
+    };
+
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
       search: <
         SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-        SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+        SearchStrategyResponse extends
+          | IOpenSearchDashboardsSearchResponse
+          | IDataFrameResponse = IOpenSearchSearchResponse
       >(
         request: SearchStrategyRequest,
         options: ISearchOptions
@@ -145,6 +180,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         callMsearch: getCallMsearch({ http }),
         loadingCount$,
       },
+      df: dfService,
     };
 
     return {
@@ -154,6 +190,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.searchInterceptor.showError(e);
       },
       searchSource: this.searchSourceService.start(indexPatterns, searchSourceDependencies),
+      __enhance: (enhancements: SearchEnhancements) => {
+        this.searchInterceptor = enhancements.searchInterceptor;
+      },
+      getDefaultSearchInterceptor: () => this.defaultSearchInterceptor,
+      df: dfService,
     };
   }
 

@@ -122,19 +122,19 @@ describe('dateMath', function () {
     });
 
     it('should return a moment if passed a date', function () {
-      expect(dateMath.parse(date).format(format)).to.eql(mmnt.format(format));
+      expect(dateMath.parse(date)!.format(format)).to.eql(mmnt.format(format));
     });
 
     it('should return a moment if passed an ISO8601 string', function () {
-      expect(dateMath.parse(string).format(format)).to.eql(mmnt.format(format));
+      expect(dateMath.parse(string)!.format(format)).to.eql(mmnt.format(format));
     });
 
     it('should return the current time when parsing now', function () {
-      expect(dateMath.parse('now').format(format)).to.eql(now.format(format));
+      expect(dateMath.parse('now')!.format(format)).to.eql(now.format(format));
     });
 
     it('should use the forceNow parameter when parsing now', function () {
-      expect(dateMath.parse('now', { forceNow: anchoredDate }).valueOf()).to.eql(unix);
+      expect(dateMath.parse('now', { forceNow: anchoredDate })!.valueOf()).to.eql(unix);
     });
   });
 
@@ -158,17 +158,17 @@ describe('dateMath', function () {
         const thenEx = `${anchor}||-${len}${span}`;
 
         it('should return ' + len + span + ' ago', function () {
-          const parsed = dateMath.parse(nowEx).format(format);
+          const parsed = dateMath.parse(nowEx)!.format(format);
           expect(parsed).to.eql(now.subtract(len, span).format(format));
         });
 
         it('should return ' + len + span + ' before ' + anchor, function () {
-          const parsed = dateMath.parse(thenEx).format(format);
+          const parsed = dateMath.parse(thenEx)!.format(format);
           expect(parsed).to.eql(anchored.subtract(len, span).format(format));
         });
 
         it('should return ' + len + span + ' before forceNow', function () {
-          const parsed = dateMath.parse(nowEx, { forceNow: anchoredDate }).valueOf();
+          const parsed = dateMath.parse(nowEx, { forceNow: anchoredDate })!.valueOf();
           expect(parsed).to.eql(anchored.subtract(len, span).valueOf());
         });
       });
@@ -195,17 +195,17 @@ describe('dateMath', function () {
         const thenEx = `${anchor}||+${len}${span}`;
 
         it('should return ' + len + span + ' from now', function () {
-          expect(dateMath.parse(nowEx).format(format)).to.eql(now.add(len, span).format(format));
+          expect(dateMath.parse(nowEx)!.format(format)).to.eql(now.add(len, span).format(format));
         });
 
         it('should return ' + len + span + ' after ' + anchor, function () {
-          expect(dateMath.parse(thenEx).format(format)).to.eql(
+          expect(dateMath.parse(thenEx)!.format(format)).to.eql(
             anchored.add(len, span).format(format)
           );
         });
 
         it('should return ' + len + span + ' after forceNow', function () {
-          expect(dateMath.parse(nowEx, { forceNow: anchoredDate }).valueOf()).to.eql(
+          expect(dateMath.parse(nowEx, { forceNow: anchoredDate })!.valueOf()).to.eql(
             anchored.add(len, span).valueOf()
           );
         });
@@ -229,26 +229,26 @@ describe('dateMath', function () {
 
     spans.forEach((span) => {
       it(`should round now to the beginning of the ${span}`, function () {
-        expect(dateMath.parse('now/' + span).format(format)).to.eql(
+        expect(dateMath.parse('now/' + span)!.format(format)).to.eql(
           now.startOf(span).format(format)
         );
       });
 
       it(`should round now to the beginning of forceNow's ${span}`, function () {
-        expect(dateMath.parse('now/' + span, { forceNow: anchoredDate }).valueOf()).to.eql(
+        expect(dateMath.parse('now/' + span, { forceNow: anchoredDate })!.valueOf()).to.eql(
           anchored.startOf(span).valueOf()
         );
       });
 
       it(`should round now to the end of the ${span}`, function () {
-        expect(dateMath.parse('now/' + span, { roundUp: true }).format(format)).to.eql(
+        expect(dateMath.parse('now/' + span, { roundUp: true })!.format(format)).to.eql(
           now.endOf(span).format(format)
         );
       });
 
       it(`should round now to the end of forceNow's ${span}`, function () {
         expect(
-          dateMath.parse('now/' + span, { roundUp: true, forceNow: anchoredDate }).valueOf()
+          dateMath.parse('now/' + span, { roundUp: true, forceNow: anchoredDate })!.valueOf()
         ).to.eql(anchored.endOf(span).valueOf());
       });
     });
@@ -269,28 +269,28 @@ describe('dateMath', function () {
     });
 
     it('should round to the nearest second with 0 value', function () {
-      const val = dateMath.parse('now-0s/s').format(format);
+      const val = dateMath.parse('now-0s/s')!.format(format);
       expect(val).to.eql(now.startOf('s').format(format));
     });
 
     it('should subtract 17s, rounded to the nearest second', function () {
-      const val = dateMath.parse('now-17s/s').format(format);
+      const val = dateMath.parse('now-17s/s')!.format(format);
       expect(val).to.eql(now.startOf('s').subtract(17, 's').format(format));
     });
 
     it('should add 555ms, rounded to the nearest millisecond', function () {
-      const val = dateMath.parse('now+555ms/ms').format(format);
+      const val = dateMath.parse('now+555ms/ms')!.format(format);
       expect(val).to.eql(now.add(555, 'ms').startOf('ms').format(format));
     });
 
     it('should subtract 555ms, rounded to the nearest second', function () {
-      const val = dateMath.parse('now-555ms/s').format(format);
+      const val = dateMath.parse('now-555ms/s')!.format(format);
       expect(val).to.eql(now.subtract(555, 'ms').startOf('s').format(format));
     });
 
     it('should round weeks to Sunday by default', function () {
       const val = dateMath.parse('now-1w/w');
-      expect(val.isoWeekday()).to.eql(7);
+      expect(val!.isoWeekday()).to.eql(7);
     });
 
     it('should round weeks based on the passed moment locale start of week setting', function () {
@@ -300,7 +300,7 @@ describe('dateMath', function () {
         week: { dow: 2 },
       });
       const val = dateMath.parse('now-1w/w', { momentInstance: m });
-      expect(val.isoWeekday()).to.eql(2);
+      expect(val!.isoWeekday()).to.eql(2);
     });
 
     it('should round up weeks based on the passed moment locale start of week setting', function () {
@@ -315,11 +315,11 @@ describe('dateMath', function () {
       });
       // The end of the range (rounding up) should be the last day of the week (so one day before)
       // our start of the week, that's why 3 - 1
-      expect(val.isoWeekday()).to.eql(3 - 1);
+      expect(val!.isoWeekday()).to.eql(3 - 1);
     });
 
     it('should round relative to forceNow', function () {
-      const val = dateMath.parse('now-0s/s', { forceNow: anchoredDate }).valueOf();
+      const val = dateMath.parse('now-0s/s', { forceNow: anchoredDate })!.valueOf();
       expect(val).to.eql(anchored.startOf('s').valueOf());
     });
 
