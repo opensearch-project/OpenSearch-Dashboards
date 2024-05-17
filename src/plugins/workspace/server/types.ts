@@ -130,7 +130,7 @@ export interface AuthInfo {
 }
 
 export interface AppPluginSetupDependencies {
-  applicationConfig: ApplicationConfigPluginSetup;
+  applicationConfig?: ApplicationConfigPluginSetup;
 }
 export interface WorkspacePluginSetup {
   client: IWorkspaceClientImpl;

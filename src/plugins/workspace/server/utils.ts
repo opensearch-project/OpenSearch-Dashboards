@@ -68,8 +68,8 @@ export const updateDashboardAdminStateForRequest = (
     });
     return;
   }
-  const groupMatchAny = groups.some((group) => configGroups.includes(group)) || false;
-  const userMatchAny = users.some((user) => configUsers.includes(user)) || false;
+  const groupMatchAny = groups.some((group) => configGroups.includes(group));
+  const userMatchAny = users.some((user) => configUsers.includes(user));
   updateWorkspaceState(request, {
     isDashboardAdmin: groupMatchAny || userMatchAny,
   });
@@ -88,17 +88,17 @@ export const stringToArray = (adminConfig: string | undefined) => {
   return adminConfigArray;
 };
 
-export const getApplicationOSDAdminConfig = async (
+export const getOSDAdminConfigFromApplicationConfig = async (
   { applicationConfig }: AppPluginSetupDependencies,
   request: OpenSearchDashboardsRequest
 ) => {
-  const applicationConfigClient = applicationConfig.getConfigurationClient(request);
+  const applicationConfigClient = applicationConfig?.getConfigurationClient(request);
 
   const [groupsResult, usersResult] = await Promise.all([
-    applicationConfigClient
+    applicationConfigClient!
       .getEntityConfig('opensearchDashboards.dashboardAdmin.groups')
       .catch(() => undefined),
-    applicationConfigClient
+    applicationConfigClient!
       .getEntityConfig('opensearchDashboards.dashboardAdmin.users')
       .catch(() => undefined),
   ]);
@@ -106,7 +106,9 @@ export const getApplicationOSDAdminConfig = async (
   return [stringToArray(groupsResult), stringToArray(usersResult)];
 };
 
-export const getOSDAdminConfig = async (globalConfig$: Observable<SharedGlobalConfig>) => {
+export const getOSDAdminConfigFromYMLConfig = async (
+  globalConfig$: Observable<SharedGlobalConfig>
+) => {
   const globalConfig = await globalConfig$.pipe(first()).toPromise();
   const groupsResult = (globalConfig.opensearchDashboards?.dashboardAdmin?.groups ||
     []) as string[];

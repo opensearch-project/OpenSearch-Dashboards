@@ -43,8 +43,8 @@ import {
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
 import {
-  getApplicationOSDAdminConfig,
-  getOSDAdminConfig,
+  getOSDAdminConfigFromApplicationConfig,
+  getOSDAdminConfigFromYMLConfig,
   updateDashboardAdminStateForRequest,
 } from './utils';
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
@@ -98,12 +98,12 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       }
 
       if (!!applicationConfig) {
-        [configGroups, configUsers] = await getApplicationOSDAdminConfig(
+        [configGroups, configUsers] = await getOSDAdminConfigFromApplicationConfig(
           { applicationConfig },
           request
         );
       } else {
-        [configGroups, configUsers] = await getOSDAdminConfig(this.globalConfig$);
+        [configGroups, configUsers] = await getOSDAdminConfigFromYMLConfig(this.globalConfig$);
       }
       updateDashboardAdminStateForRequest(request, groups, users, configGroups, configUsers);
       return toolkit.next();

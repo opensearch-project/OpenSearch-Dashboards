@@ -7,8 +7,8 @@ import { AuthStatus } from '../../../core/server';
 import { httpServerMock, httpServiceMock } from '../../../core/server/mocks';
 import {
   generateRandomId,
-  getApplicationOSDAdminConfig,
-  getOSDAdminConfig,
+  getOSDAdminConfigFromApplicationConfig,
+  getOSDAdminConfigFromYMLConfig,
   getPrincipalsFromRequest,
   stringToArray,
   updateDashboardAdminStateForRequest,
@@ -156,7 +156,10 @@ describe('workspace utils', () => {
       applicationConfig: applicationConfigMock,
     };
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
-    const [groups, users] = await getApplicationOSDAdminConfig(mockDependencies, mockRequest);
+    const [groups, users] = await getOSDAdminConfigFromApplicationConfig(
+      mockDependencies,
+      mockRequest
+    );
     expect(groups).toEqual(['group1', 'group2']);
     expect(users).toEqual(['user1', 'user2']);
   });
@@ -175,7 +178,10 @@ describe('workspace utils', () => {
       applicationConfig: applicationConfigMock,
     };
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
-    const [groups, users] = await getApplicationOSDAdminConfig(mockDependencies, mockRequest);
+    const [groups, users] = await getOSDAdminConfigFromApplicationConfig(
+      mockDependencies,
+      mockRequest
+    );
     expect(groups).toEqual([]);
     expect(users).toEqual([]);
   });
@@ -189,14 +195,14 @@ describe('workspace utils', () => {
         },
       },
     });
-    const [groups, users] = await getOSDAdminConfig(globalConfig$);
+    const [groups, users] = await getOSDAdminConfigFromYMLConfig(globalConfig$);
     expect(groups).toEqual(['group1', 'group2']);
     expect(users).toEqual(['user1', 'user2']);
   });
 
   it('should get [] when admin config is not enabled', async () => {
     const globalConfig$: Observable<any> = of({});
-    const [groups, users] = await getOSDAdminConfig(globalConfig$);
+    const [groups, users] = await getOSDAdminConfigFromYMLConfig(globalConfig$);
     expect(groups).toEqual([]);
     expect(users).toEqual([]);
   });
