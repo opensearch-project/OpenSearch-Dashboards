@@ -45,7 +45,7 @@ describe('renderImportSampleDataApp', () => {
       </div>
     `);
   });
-  it('should call unlisten history after destroy', async () => {
+  it('should clean up history listeners after unmount', async () => {
     const historyMock = scopedHistoryMock.create();
     const unlistenMock = jest.fn(() => null);
     historyMock.listen.mockImplementationOnce(() => unlistenMock);
