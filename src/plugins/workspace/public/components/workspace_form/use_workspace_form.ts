@@ -26,19 +26,13 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   const [description, setDescription] = useState(defaultValues?.description);
   const [color, setColor] = useState(defaultValues?.color);
 
-  const [selectedTab, setSelectedTab] = useState(WorkspaceFormTabs.FeatureVisibility);
-  // The matched feature id list based on original feature config,
-  // the feature category will be expanded to list of feature ids
-  const defaultFeatures = useMemo(() => {
-    // The original feature list, may contain feature id and category wildcard like @management, etc.
-    return defaultValues?.features ?? [];
-  }, [defaultValues?.features]);
-
-  const defaultFeaturesRef = useRef(defaultFeatures);
-  defaultFeaturesRef.current = defaultFeatures;
-
-  const [selectedFeatureIds, setSelectedFeatureIds] = useState(
-    appendDefaultFeatureIds(defaultFeatures)
+  const [selectedTab, setSelectedTab] = useState(WorkspaceFormTabs.UsersAndPermissions);
+  const [featureConfigs, setFeatureConfigs] = useState(
+    appendDefaultFeatureIds(defaultValues?.features ?? [])
+  );
+  const selectedUseCases = useMemo(
+    () => featureConfigs.map(getUseCaseFromFeatureConfig).filter(isNotNull),
+    [featureConfigs]
   );
   const [permissionSettings, setPermissionSettings] = useState<
     Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
@@ -54,7 +48,8 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   const getFormData = () => ({
     name,
     description,
-    features: selectedFeatureIds,
+    featureConfigs,
+    useCases: selectedUseCases,
     color,
     permissionSettings,
   });
@@ -64,21 +59,19 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();
   }
-  const selectedUseCases = useMemo(
-    () => selectedFeatureIds.map(getUseCaseFromFeatureConfig).filter(isNotNull),
-    [selectedFeatureIds]
-  );
 
   const handleUseCasesChange = useCallback(
     (newUseCases: string[]) => {
-      setSelectedFeatureIds((previousFeatureIds) => {
+      setFeatureConfigs((previousFeatureConfigs) => {
         return [
-          ...previousFeatureIds.filter((featureConfig) => !isUseCaseFeatureConfig(featureConfig)),
+          ...previousFeatureConfigs.filter(
+            (featureConfig) => !isUseCaseFeatureConfig(featureConfig)
+          ),
           ...newUseCases.map((useCaseItem) => getUseCaseFeatureConfig(useCaseItem)),
         ];
       });
     },
-    [setSelectedFeatureIds]
+    [setFeatureConfigs]
   );
 
   const handleFormSubmit = useCallback<FormEventHandler>(
@@ -91,27 +84,15 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
         return;
       }
 
-      const featureConfigChanged =
-        formData.features.length !== defaultFeatures.length ||
-        formData.features.some((feat) => !defaultFeatures.includes(feat));
-
-      if (!featureConfigChanged) {
-        // If feature config not changed, set workspace feature config to the original value.
-        // The reason why we do this is when a workspace feature is configured by wildcard,
-        // such as `['@management']` or `['*']`. The form value `formData.features` will be
-        // expanded to array of individual feature id, if the feature hasn't changed, we will
-        // set the feature config back to the original value so that category wildcard won't
-        // expanded to feature ids
-        formData.features = defaultValues?.features ?? [];
-      }
-
       onSubmit?.({
-        ...formData,
         name: formData.name!,
+        description: formData.description,
+        features: formData.featureConfigs,
+        color: formData.color,
         permissionSettings: formData.permissionSettings as WorkspacePermissionSetting[],
       });
     },
-    [defaultFeatures, onSubmit, defaultValues?.features]
+    [onSubmit]
   );
 
   const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
@@ -126,22 +107,9 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     setColor(text);
   }, []);
 
-  const handleTabFeatureClick = useCallback(() => {
-    setSelectedTab(WorkspaceFormTabs.FeatureVisibility);
-  }, []);
-
   const handleTabPermissionClick = useCallback(() => {
     setSelectedTab(WorkspaceFormTabs.UsersAndPermissions);
   }, []);
-
-  const handleFeaturesChange = useCallback((featureIds: string[]) => {
-    setSelectedFeatureIds(featureIds);
-  }, []);
-
-  useEffect(() => {
-    // When applications changed, reset form feature selection to original value
-    setSelectedFeatureIds(appendDefaultFeatureIds(defaultFeaturesRef.current));
-  }, [applications]);
 
   return {
     formId: formIdRef.current,
@@ -150,13 +118,10 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     selectedTab,
     applications,
     numberOfErrors,
-    selectedUseCases,
     handleFormSubmit,
     handleColorChange,
-    handleFeaturesChange,
     handleUseCasesChange,
     handleNameInputChange,
-    handleTabFeatureClick,
     setPermissionSettings,
     handleTabPermissionClick,
     handleDescriptionInputChange,

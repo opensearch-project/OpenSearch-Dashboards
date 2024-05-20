@@ -23,7 +23,6 @@ import { WorkspaceBottomBar } from './workspace_bottom_bar';
 import { WorkspaceFormProps } from './types';
 import { WorkspaceFormTabs } from './constants';
 import { useWorkspaceForm } from './use_workspace_form';
-import { WorkspaceFeatureSelector } from './workspace_feature_selector';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 import { WorkspaceUseCase } from './workspace_use_case';
 
@@ -42,22 +41,16 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     formErrors,
     selectedTab,
     numberOfErrors,
-    selectedUseCases,
     handleFormSubmit,
     handleColorChange,
-    handleFeaturesChange,
     handleUseCasesChange,
     handleNameInputChange,
-    handleTabFeatureClick,
     setPermissionSettings,
     handleTabPermissionClick,
     handleDescriptionInputChange,
   } = useWorkspaceForm(props);
   const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
     defaultMessage: 'Workspace Details',
-  });
-  const featureVisibilityTitle = i18n.translate('workspace.form.featureVisibility.title', {
-    defaultMessage: 'Feature Visibility',
   });
   const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
     defaultMessage: 'Users & Permissions',
@@ -132,51 +125,27 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         <EuiFormRow label={<>Workspace Use Case</>}>
           <WorkspaceUseCase
             configurableApps={workspaceConfigurableApps}
-            value={selectedUseCases}
+            value={formData.useCases}
             onChange={handleUseCasesChange}
           />
         </EuiFormRow>
       </EuiPanel>
       <EuiSpacer />
 
-      <EuiTabs>
-        <EuiTab
-          onClick={handleTabFeatureClick}
-          isSelected={selectedTab === WorkspaceFormTabs.FeatureVisibility}
-        >
-          <EuiText>{featureVisibilityTitle}</EuiText>
-        </EuiTab>
-        {permissionEnabled && (
+      {permissionEnabled && (
+        <EuiTabs>
           <EuiTab
             onClick={handleTabPermissionClick}
             isSelected={selectedTab === WorkspaceFormTabs.UsersAndPermissions}
           >
             <EuiText>{usersAndPermissionsTitle}</EuiText>
           </EuiTab>
-        )}
-      </EuiTabs>
-      {selectedTab === WorkspaceFormTabs.FeatureVisibility && (
-        <EuiPanel>
-          <EuiTitle size="s">
-            <h2>{featureVisibilityTitle}</h2>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-          <EuiSpacer size="s" />
-          <WorkspaceFeatureSelector
-            selectedFeatures={formData.features}
-            onChange={handleFeaturesChange}
-            workspaceConfigurableApps={props.workspaceConfigurableApps}
-          />
-        </EuiPanel>
+        </EuiTabs>
       )}
-      {selectedTab === WorkspaceFormTabs.UsersAndPermissions && (
+      {permissionEnabled && selectedTab === WorkspaceFormTabs.UsersAndPermissions && (
         <EuiPanel>
           <EuiTitle size="s">
-            <h2>
-              {i18n.translate('workspace.form.usersAndPermissions.title', {
-                defaultMessage: 'Users & Permissions',
-              })}
-            </h2>
+            <h2>{usersAndPermissionsTitle}</h2>
           </EuiTitle>
           <EuiHorizontalRule margin="xs" />
           <WorkspacePermissionSettingPanel

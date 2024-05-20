@@ -5,7 +5,6 @@
 
 import { i18n } from '@osd/i18n';
 
-import { PublicAppInfo } from '../../../../../core/public';
 import type { SavedObjectPermissions } from '../../../../../core/types';
 import { DEFAULT_SELECTED_FEATURES_IDS, WorkspacePermissionMode } from '../../../common/constants';
 import {
@@ -14,17 +13,7 @@ import {
   WorkspacePermissionItemType,
 } from './constants';
 
-import {
-  WorkspaceFeature,
-  WorkspaceFeatureGroup,
-  WorkspaceFormErrors,
-  WorkspaceFormSubmitData,
-  WorkspacePermissionSetting,
-} from './types';
-
-export const isWorkspaceFeatureGroup = (
-  featureOrGroup: WorkspaceFeature | WorkspaceFeatureGroup
-): featureOrGroup is WorkspaceFeatureGroup => 'features' in featureOrGroup;
+import { WorkspaceFormErrors, WorkspaceFormSubmitData, WorkspacePermissionSetting } from './types';
 
 export const appendDefaultFeatureIds = (ids: string[]) => {
   // concat default checked ids and unique the result
@@ -52,55 +41,6 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
     numberOfErrors += Object.keys(formErrors.permissionSettings).length;
   }
   return numberOfErrors;
-};
-
-export const convertApplicationsToFeaturesOrGroups = (
-  applications: Array<
-    Pick<PublicAppInfo, 'id' | 'title' | 'category' | 'navLinkStatus' | 'chromeless'>
-  >
-) => {
-  const UNDEFINED = 'undefined';
-
-  /**
-   *
-   * Convert applications to features map, the map use category label as
-   * map key and group all same category applications in one array after
-   * transfer application to feature.
-   *
-   **/
-  const categoryLabel2Features = applications.reduce<{
-    [key: string]: WorkspaceFeature[];
-  }>((previousValue, application) => {
-    const label = application.category?.label || UNDEFINED;
-
-    return {
-      ...previousValue,
-      [label]: [...(previousValue[label] || []), { id: application.id, name: application.title }],
-    };
-  }, {});
-
-  /**
-   *
-   * Iterate all keys of categoryLabel2Features map, convert map to features or groups array.
-   * Features with category label will be converted to feature groups. Features without "undefined"
-   * category label will be converted to single features. Then append them to the result array.
-   *
-   **/
-  return Object.keys(categoryLabel2Features).reduce<
-    Array<WorkspaceFeature | WorkspaceFeatureGroup>
-  >((previousValue, categoryLabel) => {
-    const features = categoryLabel2Features[categoryLabel];
-    if (categoryLabel === UNDEFINED) {
-      return [...previousValue, ...features];
-    }
-    return [
-      ...previousValue,
-      {
-        name: categoryLabel,
-        features,
-      },
-    ];
-  }, []);
 };
 
 export const isUserOrGroupPermissionSettingDuplicated = (
