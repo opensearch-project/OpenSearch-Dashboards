@@ -96,6 +96,12 @@ describe('workspace utils: featureMatchesConfig', () => {
       true
     );
   });
+
+  it('should match features inside use cases', () => {
+    const match = featureMatchesConfig(['use-case-observability']);
+    expect(match({ id: 'vis-builder' })).toBe(true);
+    expect(match({ id: 'not-in-use-case' })).toBe(false);
+  });
 });
 
 describe('workspace utils: isAppAccessibleInWorkspace', () => {

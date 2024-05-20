@@ -6,13 +6,19 @@
 import { useCallback, useState, FormEventHandler, useRef, useMemo, useEffect } from 'react';
 import { htmlIdGenerator, EuiFieldTextProps, EuiColorPickerProps } from '@elastic/eui';
 import { useApplications } from '../../hooks';
-import { featureMatchesConfig } from '../../utils';
+import {
+  getUseCaseFeatureConfig,
+  getUseCaseFromFeatureConfig,
+  isUseCaseFeatureConfig,
+} from '../../utils';
 
 import { WorkspaceFormTabs } from './constants';
 import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
 import { appendDefaultFeatureIds, getNumberOfErrors, validateWorkspaceForm } from './utils';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
+
+const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
 
 export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: WorkspaceFormProps) => {
   const applications = useApplications(application);
@@ -25,9 +31,8 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   // the feature category will be expanded to list of feature ids
   const defaultFeatures = useMemo(() => {
     // The original feature list, may contain feature id and category wildcard like @management, etc.
-    const defaultOriginalFeatures = defaultValues?.features ?? [];
-    return applications.filter(featureMatchesConfig(defaultOriginalFeatures)).map((app) => app.id);
-  }, [defaultValues?.features, applications]);
+    return defaultValues?.features ?? [];
+  }, [defaultValues?.features]);
 
   const defaultFeaturesRef = useRef(defaultFeatures);
   defaultFeaturesRef.current = defaultFeatures;
@@ -59,6 +64,22 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();
   }
+  const selectedUseCases = useMemo(
+    () => selectedFeatureIds.map(getUseCaseFromFeatureConfig).filter(isNotNull),
+    [selectedFeatureIds]
+  );
+
+  const handleUseCasesChange = useCallback(
+    (newUseCases: string[]) => {
+      setSelectedFeatureIds((previousFeatureIds) => {
+        return [
+          ...previousFeatureIds.filter((featureConfig) => !isUseCaseFeatureConfig(featureConfig)),
+          ...newUseCases.map((useCaseItem) => getUseCaseFeatureConfig(useCaseItem)),
+        ];
+      });
+    },
+    [setSelectedFeatureIds]
+  );
 
   const handleFormSubmit = useCallback<FormEventHandler>(
     (e) => {
@@ -129,9 +150,11 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     selectedTab,
     applications,
     numberOfErrors,
+    selectedUseCases,
     handleFormSubmit,
     handleColorChange,
     handleFeaturesChange,
+    handleUseCasesChange,
     handleNameInputChange,
     handleTabFeatureClick,
     setPermissionSettings,

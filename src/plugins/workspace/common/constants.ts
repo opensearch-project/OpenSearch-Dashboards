@@ -79,3 +79,67 @@ export const WORKSPACE_APP_CATEGORIES: Record<string, AppCategory> = Object.free
     order: 14000,
   },
 });
+
+export const WORKSPACE_USE_CASES = Object.freeze({
+  observability: {
+    id: 'observability',
+    title: i18n.translate('workspace.usecases.observability.title', {
+      defaultMessage: 'Observability',
+    }),
+    description: 'Description',
+    features: [
+      'data-explorer',
+      'dashboards',
+      'visualize',
+      'maps-dashboards',
+      'observability-notebooks',
+      'integrations',
+      'alerting',
+      'anomaly-detection-dashboards',
+      'observability-metrics',
+      'observability-traces',
+      'observability-applications',
+    ] as string[],
+  },
+  'security-analytics': {
+    id: 'security-analytics',
+    title: i18n.translate('workspace.usecases.security.analytics.title', {
+      defaultMessage: 'Security Analytics',
+    }),
+    description: 'Description',
+    features: [
+      'data-explorer',
+      'dashboards',
+      'visualize',
+      'maps-dashboards',
+      'observability-notebooks',
+      'integrations',
+      'opensearch_security_analytics_dashboards',
+    ] as string[],
+  },
+  analytics: {
+    id: 'analytics',
+    title: i18n.translate('workspace.usecases.analytics.title', {
+      defaultMessage: 'Analytics',
+    }),
+    description: 'Description',
+    features: [
+      'data-explorer',
+      'dashboards',
+      'visualize',
+      'maps-dashboards',
+      'observability-notebooks',
+      'integrations',
+      'alerting',
+      'anomaly-detection-dashboards',
+    ] as string[],
+  },
+  search: {
+    id: 'search',
+    title: i18n.translate('workspace.usecases.search.title', {
+      defaultMessage: 'Search',
+    }),
+    description: 'Description',
+    features: ['searchRelevance'] as string[],
+  },
+});

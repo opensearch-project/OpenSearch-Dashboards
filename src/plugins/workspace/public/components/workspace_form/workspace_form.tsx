@@ -25,6 +25,7 @@ import { WorkspaceFormTabs } from './constants';
 import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspaceFeatureSelector } from './workspace_feature_selector';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
+import { WorkspaceUseCase } from './workspace_use_case';
 
 export const WorkspaceForm = (props: WorkspaceFormProps) => {
   const {
@@ -32,6 +33,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     defaultValues,
     operationType,
     permissionEnabled,
+    workspaceConfigurableApps,
     permissionLastAdminItemDeletable,
   } = props;
   const {
@@ -40,9 +42,11 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     formErrors,
     selectedTab,
     numberOfErrors,
+    selectedUseCases,
     handleFormSubmit,
     handleColorChange,
     handleFeaturesChange,
+    handleUseCasesChange,
     handleNameInputChange,
     handleTabFeatureClick,
     setPermissionSettings,
@@ -124,6 +128,13 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
               data-test-subj="workspaceForm-workspaceDetails-colorPicker"
             />
           </div>
+        </EuiFormRow>
+        <EuiFormRow label={<>Workspace Use Case</>}>
+          <WorkspaceUseCase
+            configurableApps={workspaceConfigurableApps}
+            value={selectedUseCases}
+            onChange={handleUseCasesChange}
+          />
         </EuiFormRow>
       </EuiPanel>
       <EuiSpacer />
