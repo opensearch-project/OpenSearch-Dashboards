@@ -68,17 +68,11 @@ const addOrUpdateGroup = (
 ) => {
   const metadata = dataSource.getMetadata();
   const groupType = metadata.ui.groupType;
-  let groupName =
+  const groupName =
     metadata.ui.typeLabel ||
     i18n.translate('dataExplorer.dataSourceSelector.defaultGroupTitle', {
       defaultMessage: 'Default Group',
     });
-
-  if (dataSource.getType() !== 'DEFAULT_INDEX_PATTERNS') {
-    groupName += i18n.translate('dataExplorer.dataSourceSelector.redirectionHint', {
-      defaultMessage: DATA_SELECTOR_S3_DATA_SOURCE_GROUP_HINT_LABEL,
-    });
-  }
 
   const group = existingGroups.find((g: DataSourceGroup) => g.id === groupType);
   if (group && !group.options.some((opt) => opt.key === option.key)) {
