@@ -19,7 +19,14 @@ import {
 import { DataSourceSelectable } from '../data_source_selectable';
 
 export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement | null {
-  const { componentType, componentConfig, uiSettings, hideLocalCluster, application } = props;
+  const {
+    componentType,
+    componentConfig,
+    uiSettings,
+    hideLocalCluster,
+    application,
+    dataSourceSelection,
+  } = props;
 
   function renderDataSourceView(config: DataSourceViewConfig): ReactElement | null {
     const {
@@ -41,6 +48,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         onSelectedDataSources={onSelectedDataSources}
         uiSettings={uiSettings}
         application={application}
+        dataSourceSelection={dataSourceSelection}
       />
     );
   }
@@ -58,6 +66,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         onSelectedDataSources={onSelectedDataSources!}
         uiSettings={uiSettings}
         application={application}
+        dataSourceSelection={dataSourceSelection}
       />
     );
   }
@@ -84,6 +93,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         fullWidth={fullWidth}
         uiSettings={uiSettings}
         application={application}
+        dataSourceSelection={dataSourceSelection}
       />
     );
   }
@@ -110,6 +120,7 @@ export function DataSourceMenu<T>(props: DataSourceMenuProps<T>): ReactElement |
         displayAllCompatibleDataSources={displayAllCompatibleDataSources}
         uiSettings={uiSettings}
         application={application}
+        dataSourceSelection={dataSourceSelection}
       />
     );
   }

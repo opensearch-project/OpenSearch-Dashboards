@@ -13,6 +13,7 @@ import { DataSourceAttributes } from '../../types';
 import { DataSourceItem } from '../data_source_item';
 import './data_source_selector.scss';
 import { DataSourceOption } from '../data_source_menu/types';
+import { DataSourceSelection } from '../../service/data_source_selection_service';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSource.localCluster', {
@@ -35,6 +36,7 @@ export interface DataSourceSelectorProps {
   compressed?: boolean;
   uiSettings?: IUiSettingsClient;
   isClearable?: boolean;
+  dataSourceSelection: DataSourceSelection;
 }
 
 interface DataSourceSelectorState {
@@ -42,6 +44,7 @@ interface DataSourceSelectorState {
   allDataSources: Array<SavedObject<DataSourceAttributes>>;
   defaultDataSource: string | null;
   dataSourceOptions: DataSourceOption[];
+  componentId: string;
 }
 
 export class DataSourceSelector extends React.Component<
@@ -58,11 +61,18 @@ export class DataSourceSelector extends React.Component<
       defaultDataSource: '',
       selectedOption: this.props.hideLocalCluster ? [] : [LocalCluster],
       dataSourceOptions: [],
+      componentId: props.dataSourceSelection.generateComponentId(),
     };
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+    this.props.dataSourceSelection.remove(this.state.componentId);
+  }
+
+  onSelectedDataSource(dataSource: DataSourceOption[]) {
+    this.props.dataSourceSelection.selectDataSource(this.state.componentId, dataSource);
+    this.props.onSelectedDataSource(dataSource);
   }
 
   handleSelectedOption(
@@ -90,7 +100,7 @@ export class DataSourceSelector extends React.Component<
       defaultDataSource,
       allDataSources,
     });
-    this.props.onSelectedDataSource(selectedOption);
+    this.onSelectedDataSource(selectedOption);
   }
 
   handleDefaultDataSource(
@@ -108,7 +118,7 @@ export class DataSourceSelector extends React.Component<
     // No active option, did not find valid option
     if (selectedDataSource.length === 0) {
       this.props.notifications.addWarning('No connected data source available.');
-      this.props.onSelectedDataSource([]);
+      this.onSelectedDataSource([]);
       return;
     }
 
@@ -119,7 +129,7 @@ export class DataSourceSelector extends React.Component<
       defaultDataSource,
       allDataSources,
     });
-    this.props.onSelectedDataSource(selectedDataSource);
+    this.onSelectedDataSource(selectedDataSource);
   }
 
   async componentDidMount() {
@@ -146,7 +156,7 @@ export class DataSourceSelector extends React.Component<
       // 4. Error state if filter filters out everything
       if (!dataSourceOptions.length) {
         this.props.notifications.addWarning('No connected data source available.');
-        this.props.onSelectedDataSource([]);
+        this.onSelectedDataSource([]);
         return;
       }
 
@@ -185,7 +195,7 @@ export class DataSourceSelector extends React.Component<
     this.setState({
       selectedOption: e,
     });
-    this.props.onSelectedDataSource(e);
+    this.onSelectedDataSource(e);
   }
 
   render() {

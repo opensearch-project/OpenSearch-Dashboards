@@ -19,6 +19,7 @@ import {
 } from '../utils';
 import { DataSourceBaseState } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
+import { DataSourceSelection } from '../../service/data_source_selection_service';
 
 export interface DataSourceMultiSeletableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -28,6 +29,7 @@ export interface DataSourceMultiSeletableProps {
   fullWidth: boolean;
   uiSettings?: IUiSettingsClient;
   application?: ApplicationStart;
+  dataSourceSelection: DataSourceSelection;
 }
 
 interface DataSourceMultiSeletableState extends DataSourceBaseState {
@@ -35,6 +37,7 @@ interface DataSourceMultiSeletableState extends DataSourceBaseState {
   selectedOptions: SelectedDataSourceOption[];
   defaultDataSource: string | null;
   incompatibleDataSourcesExist: boolean;
+  componentId: string;
 }
 
 export class DataSourceMultiSelectable extends React.Component<
@@ -53,11 +56,21 @@ export class DataSourceMultiSelectable extends React.Component<
       showEmptyState: false,
       showError: false,
       incompatibleDataSourcesExist: false,
+      componentId: props.dataSourceSelection.generateComponentId(),
     };
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+    const { componentId } = this.state;
+    this.props.dataSourceSelection.remove(componentId);
+  }
+
+  onSelectedDataSources(dataSources: SelectedDataSourceOption[]) {
+    this.props.dataSourceSelection.selectDataSource(this.state.componentId, dataSources);
+    if (this.props.onSelectedDataSources) {
+      this.props.onSelectedDataSources(dataSources);
+    }
   }
 
   async componentDidMount() {
@@ -96,7 +109,7 @@ export class DataSourceMultiSelectable extends React.Component<
           changeState: this.onEmptyState.bind(this, !!fetchedDataSources?.length),
           notifications: this.props.notifications,
           application: this.props.application,
-          callback: this.props.onSelectedDataSources,
+          callback: this.onSelectedDataSources,
           incompatibleDataSourcesExist: !!fetchedDataSources?.length,
         });
         return;
@@ -108,12 +121,12 @@ export class DataSourceMultiSelectable extends React.Component<
         defaultDataSource,
       });
 
-      this.props.onSelectedDataSources(selectedOptions);
+      this.onSelectedDataSources(selectedOptions);
     } catch (error) {
       handleDataSourceFetchError(
         this.onError.bind(this),
         this.props.notifications,
-        this.props.onSelectedDataSources
+        this.onSelectedDataSources
       );
     }
   }
@@ -131,7 +144,7 @@ export class DataSourceMultiSelectable extends React.Component<
     this.setState({
       selectedOptions,
     });
-    this.props.onSelectedDataSources(selectedOptions.filter((option) => option.checked === 'on'));
+    this.onSelectedDataSources(selectedOptions.filter((option) => option.checked === 'on'));
   }
 
   render() {
