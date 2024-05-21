@@ -76,7 +76,10 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
 
     // matches any feature inside use cases
     if (getUseCaseFromFeatureConfig(featureConfig)) {
-      matched = isFeatureIdInsideUseCase(id, featureConfig);
+      const isInsideUseCase = isFeatureIdInsideUseCase(id, featureConfig);
+      if (isInsideUseCase) {
+        matched = true;
+      }
     }
 
     // The config starts with `@` matches a category

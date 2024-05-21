@@ -97,10 +97,12 @@ describe('workspace utils: featureMatchesConfig', () => {
     );
   });
 
-  it('should match features inside use cases', () => {
-    const match = featureMatchesConfig(['use-case-observability']);
-    expect(match({ id: 'vis-builder' })).toBe(true);
-    expect(match({ id: 'not-in-use-case' })).toBe(false);
+  it('should match features include by any use cases', () => {
+    const match = featureMatchesConfig(['use-case-observability', 'use-case-analytics']);
+    expect(match({ id: 'dashboards' })).toBe(true);
+    expect(match({ id: 'observability-traces' })).toBe(true);
+    expect(match({ id: 'alerting' })).toBe(true);
+    expect(match({ id: 'not-in-any-use-case' })).toBe(false);
   });
 });
 
