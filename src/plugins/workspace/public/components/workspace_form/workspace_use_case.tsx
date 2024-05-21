@@ -35,7 +35,7 @@ export const WorkspaceUseCase = ({ configurableApps, value, onChange }: Workspac
   }, [configurableApps]);
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup direction="column">
       {availableUseCases.map(({ id, title, description }) => (
         <EuiFlexItem key={id}>
           <EuiCheckableCard

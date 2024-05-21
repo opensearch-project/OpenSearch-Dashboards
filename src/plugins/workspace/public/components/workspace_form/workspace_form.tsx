@@ -122,7 +122,19 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
             />
           </div>
         </EuiFormRow>
-        <EuiFormRow label={<>Workspace Use Case</>}>
+      </EuiPanel>
+      <EuiSpacer />
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h2>
+            {i18n.translate('workspace.form.workspaceUseCases.title', {
+              defaultMessage: 'What are you using this for?',
+            })}
+          </h2>
+        </EuiTitle>
+        <EuiHorizontalRule margin="xs" />
+        <EuiSpacer size="s" />
+        <EuiFormRow>
           <WorkspaceUseCase
             configurableApps={workspaceConfigurableApps}
             value={formData.useCases}
