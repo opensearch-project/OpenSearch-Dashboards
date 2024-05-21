@@ -14,7 +14,7 @@ import {
   PrincipalType,
   SharedGlobalConfig,
 } from '../../../core/server';
-import { AppPluginSetupDependencies, AuthInfo } from './types';
+import { AuthInfo } from './types';
 import { updateWorkspaceState } from '../../../core/server/utils';
 
 /**
@@ -73,37 +73,6 @@ export const updateDashboardAdminStateForRequest = (
   updateWorkspaceState(request, {
     isDashboardAdmin: groupMatchAny || userMatchAny,
   });
-};
-
-export const stringToArray = (adminConfig: string | undefined) => {
-  if (!adminConfig) {
-    return [];
-  }
-  let adminConfigArray;
-  try {
-    adminConfigArray = JSON.parse(adminConfig);
-  } catch (e) {
-    return [];
-  }
-  return adminConfigArray;
-};
-
-export const getOSDAdminConfigFromApplicationConfig = async (
-  { applicationConfig }: AppPluginSetupDependencies,
-  request: OpenSearchDashboardsRequest
-) => {
-  const applicationConfigClient = applicationConfig?.getConfigurationClient(request);
-
-  const [groupsResult, usersResult] = await Promise.all([
-    applicationConfigClient!
-      .getEntityConfig('opensearchDashboards.dashboardAdmin.groups')
-      .catch(() => undefined),
-    applicationConfigClient!
-      .getEntityConfig('opensearchDashboards.dashboardAdmin.users')
-      .catch(() => undefined),
-  ]);
-
-  return [stringToArray(groupsResult), stringToArray(usersResult)];
 };
 
 export const getOSDAdminConfigFromYMLConfig = async (

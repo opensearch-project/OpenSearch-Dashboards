@@ -6,18 +6,10 @@
 import { OnPostAuthHandler, OnPreRoutingHandler } from 'src/core/server';
 import { coreMock, httpServerMock } from '../../../core/server/mocks';
 import { WorkspacePlugin } from './plugin';
-import { AppPluginSetupDependencies } from './types';
 import { getWorkspaceState } from '../../../core/server/utils';
 import * as utilsExports from './utils';
 
 describe('Workspace server plugin', () => {
-  const mockApplicationConfig = {
-    getConfigurationClient: jest.fn().mockResolvedValue({}),
-    registerConfigurationClient: jest.fn().mockResolvedValue({}),
-  };
-  const mockDependencies: AppPluginSetupDependencies = {
-    applicationConfig: mockApplicationConfig,
-  };
   it('#setup', async () => {
     let value;
     const setupMock = coreMock.createSetup();
@@ -26,7 +18,7 @@ describe('Workspace server plugin', () => {
     });
     setupMock.capabilities.registerProvider.mockImplementationOnce((fn) => (value = fn()));
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
-    await workspacePlugin.setup(setupMock, mockDependencies);
+    await workspacePlugin.setup(setupMock);
     expect(value).toMatchInlineSnapshot(`
       Object {
         "workspaces": Object {
@@ -52,7 +44,7 @@ describe('Workspace server plugin', () => {
       return fn;
     });
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
-    await workspacePlugin.setup(setupMock, mockDependencies);
+    await workspacePlugin.setup(setupMock);
     const toolKitMock = httpServerMock.createToolkit();
 
     const requestWithWorkspaceInUrl = httpServerMock.createOpenSearchDashboardsRequest({
@@ -95,7 +87,7 @@ describe('Workspace server plugin', () => {
     });
 
     it('catch error', async () => {
-      await workspacePlugin.setup(setupMock, mockDependencies);
+      await workspacePlugin.setup(setupMock);
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(
@@ -111,25 +103,8 @@ describe('Workspace server plugin', () => {
       jest
         .spyOn(utilsExports, 'getOSDAdminConfigFromYMLConfig')
         .mockResolvedValue([['group1'], ['user1']]);
-      const mockNoDependencies: AppPluginSetupDependencies = {};
 
-      await workspacePlugin.setup(setupMock, mockNoDependencies);
-      const toolKitMock = httpServerMock.createToolkit();
-
-      await registerOnPostAuthFn(
-        requestWithWorkspaceInUrl,
-        httpServerMock.createResponseFactory(),
-        toolKitMock
-      );
-      expect(toolKitMock.next).toBeCalledTimes(1);
-    });
-
-    it('with application config', async () => {
-      jest.spyOn(utilsExports, 'getPrincipalsFromRequest').mockImplementation(() => ({}));
-      jest
-        .spyOn(utilsExports, 'getOSDAdminConfigFromApplicationConfig')
-        .mockResolvedValue([['group1'], ['user1']]);
-      await workspacePlugin.setup(setupMock, mockDependencies);
+      await workspacePlugin.setup(setupMock);
       const toolKitMock = httpServerMock.createToolkit();
 
       await registerOnPostAuthFn(
@@ -152,7 +127,7 @@ describe('Workspace server plugin', () => {
     });
 
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
-    await workspacePlugin.setup(setupMock, mockDependencies);
+    await workspacePlugin.setup(setupMock);
     await workspacePlugin.start(startMock);
     expect(startMock.savedObjects.createSerializer).toBeCalledTimes(1);
   });
