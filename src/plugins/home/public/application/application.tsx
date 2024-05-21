@@ -78,18 +78,7 @@ export const renderApp = async (
   };
 };
 
-export const renderImportSampleDataApp = async (
-  element: HTMLElement,
-  coreStart: CoreStart,
-  history: ScopedHistory
-) => {
-  // dispatch synthetic hash change event to update hash history objects
-  // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
-  // This must be called before the app is mounted to avoid call this after the redirect to default app logic kicks in
-  const unlisten = history.listen((location) => {
-    window.dispatchEvent(new HashChangeEvent('hashchange'));
-  });
-
+export const renderImportSampleDataApp = async (element: HTMLElement, coreStart: CoreStart) => {
   render(
     <OpenSearchDashboardsContextProvider services={{ ...coreStart }}>
       <ImportSampleDataApp />
@@ -99,6 +88,5 @@ export const renderImportSampleDataApp = async (
 
   return () => {
     unmountComponentAtNode(element);
-    unlisten();
   };
 };

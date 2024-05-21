@@ -164,7 +164,7 @@ export class HomePublicPlugin
           })
         );
         const { renderImportSampleDataApp } = await import('./application');
-        return await renderImportSampleDataApp(params.element, coreStart, params.history);
+        return await renderImportSampleDataApp(params.element, coreStart);
       },
     });
     urlForwarding.forwardApp('home', 'home');

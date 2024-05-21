@@ -4,8 +4,8 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { render, waitFor } from '@testing-library/react';
-import { coreMock, scopedHistoryMock } from '../../../../core/public/mocks';
+import { render } from '@testing-library/react';
+import { coreMock } from '../../../../core/public/mocks';
 import { renderImportSampleDataApp } from './application';
 
 jest.mock('./components/home_app', () => ({
@@ -15,21 +15,16 @@ jest.mock('./components/home_app', () => ({
 
 const coreStartMocks = coreMock.createStart();
 
-const ComponentForRender = (props: {
-  renderFn: typeof renderImportSampleDataApp;
-  historyMock?: ReturnType<typeof scopedHistoryMock.create>;
-}) => {
+const ComponentForRender = (props: { renderFn: typeof renderImportSampleDataApp }) => {
   const container = useRef<HTMLDivElement>(null);
-  const historyMock = props.historyMock || scopedHistoryMock.create();
-  historyMock.listen.mockReturnValueOnce(() => () => null);
   useEffect(() => {
     if (container.current) {
-      const destroyFn = props.renderFn(container.current, coreStartMocks, historyMock);
+      const destroyFn = props.renderFn(container.current, coreStartMocks);
       return () => {
         destroyFn.then((res) => res());
       };
     }
-  }, [historyMock, props]);
+  }, [props]);
 
   return <div ref={container} />;
 };
@@ -44,17 +39,5 @@ describe('renderImportSampleDataApp', () => {
         </div>
       </div>
     `);
-  });
-  it('should clean up history listeners after unmount', async () => {
-    const historyMock = scopedHistoryMock.create();
-    const unlistenMock = jest.fn(() => null);
-    historyMock.listen.mockImplementationOnce(() => unlistenMock);
-    const { unmount } = render(
-      <ComponentForRender renderFn={renderImportSampleDataApp} historyMock={historyMock} />
-    );
-    unmount();
-    await waitFor(() => {
-      expect(unlistenMock).toHaveBeenCalled();
-    });
   });
 });
