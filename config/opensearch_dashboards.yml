@@ -135,6 +135,11 @@
 # Enables you to specify a file where OpenSearch Dashboards stores log output.
 #logging.dest: stdout
 
+# This configuration option controls the handling of error messages in the logging stream. It is disabled by default.
+# When set to true, the 'ENOSPC' error message will not cause the OpenSearch Dashboards process to crash. Otherwise,
+# the original behavior will be maintained.
+#logging.ignoreEnospcError: false
+
 # Set the value of this setting to true to suppress all logging output.
 #logging.silent: false
 
@@ -326,3 +331,6 @@
 # Set the value to true to enable Ui Metric Collectors in Usage Collector
 # This publishes the Application Usage and UI Metrics into the saved object, which can be accessed by /api/stats?extended=true&legacy=true&exclude_usage=false
 # usageCollection.uiMetric.enabled: false
+
+# Set the value to true to enable enhancements for the data plugin
+# data.enhancements.enabled: false

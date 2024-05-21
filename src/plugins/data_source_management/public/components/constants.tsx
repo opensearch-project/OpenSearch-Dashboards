@@ -12,3 +12,8 @@ export const LocalCluster: DataSourceOption = {
   }),
   id: '',
 };
+
+export const NO_DATASOURCES_CONNECTED_MESSAGE = 'No data sources connected yet.';
+export const CONNECT_DATASOURCES_MESSAGE = 'Connect your data sources to get started.';
+export const NO_COMPATIBLE_DATASOURCES_MESSAGE = 'No compatible data sources are available.';
+export const ADD_COMPATIBLE_DATASOURCES_MESSAGE = 'Add a compatible data source.';

@@ -39,3 +39,5 @@ export const registerDefaultDataSource = (data: Omit<DataPublicPluginStart, 'ui'
     })
   );
 };
+
+export { DEFAULT_DATA_SOURCE_DISPLAY_NAME };

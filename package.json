@@ -154,6 +154,7 @@
     "@hapi/vision": "^6.1.0",
     "@hapi/wreck": "^17.1.0",
     "@opensearch-project/opensearch": "^2.6.0",
+    "@opensearch/datemath": "5.0.3",
     "@osd/ace": "1.0.0",
     "@osd/analytics": "1.0.0",
     "@osd/apm-config-loader": "1.0.0",
