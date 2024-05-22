@@ -134,7 +134,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         </EuiTitle>
         <EuiHorizontalRule margin="xs" />
         <EuiSpacer size="s" />
-        <EuiFormRow>
+        <EuiFormRow isInvalid={!!formErrors.features} error={formErrors.features}>
           <WorkspaceUseCase
             configurableApps={workspaceConfigurableApps}
             value={formData.useCases}

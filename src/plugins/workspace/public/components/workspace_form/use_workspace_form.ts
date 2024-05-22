@@ -48,7 +48,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   const getFormData = () => ({
     name,
     description,
-    featureConfigs,
+    features: featureConfigs,
     useCases: selectedUseCases,
     color,
     permissionSettings,
@@ -87,7 +87,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
       onSubmit?.({
         name: formData.name!,
         description: formData.description,
-        features: formData.featureConfigs,
+        features: formData.features,
         color: formData.color,
         permissionSettings: formData.permissionSettings as WorkspacePermissionSetting[],
       });

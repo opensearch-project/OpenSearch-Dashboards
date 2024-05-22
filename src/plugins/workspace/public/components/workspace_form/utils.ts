@@ -7,6 +7,7 @@ import { i18n } from '@osd/i18n';
 
 import type { SavedObjectPermissions } from '../../../../../core/types';
 import { DEFAULT_SELECTED_FEATURES_IDS, WorkspacePermissionMode } from '../../../common/constants';
+import { isUseCaseFeatureConfig } from '../../utils';
 import {
   optionIdToWorkspacePermissionModesMap,
   PermissionModeId,
@@ -39,6 +40,9 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   }
   if (formErrors.permissionSettings) {
     numberOfErrors += Object.keys(formErrors.permissionSettings).length;
+  }
+  if (formErrors.features) {
+    numberOfErrors += 1;
   }
   return numberOfErrors;
 };
@@ -183,7 +187,7 @@ export const validateWorkspaceForm = (
   }
 ) => {
   const formErrors: WorkspaceFormErrors = {};
-  const { name, description, permissionSettings } = formData;
+  const { name, description, permissionSettings, features } = formData;
   if (name) {
     if (!isValidFormTextInput(name)) {
       formErrors.name = i18n.translate('workspace.form.detail.name.invalid', {
@@ -198,6 +202,11 @@ export const validateWorkspaceForm = (
   if (description && !isValidFormTextInput(description)) {
     formErrors.description = i18n.translate('workspace.form.detail.description.invalid', {
       defaultMessage: 'Invalid workspace description',
+    });
+  }
+  if (!features || !features.some((featureConfig) => isUseCaseFeatureConfig(featureConfig))) {
+    formErrors.features = i18n.translate('workspace.form.features.invalid', {
+      defaultMessage: 'Can not be empty',
     });
   }
   if (permissionSettings) {
