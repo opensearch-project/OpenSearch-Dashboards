@@ -69,22 +69,13 @@ const renderTutorialDirectory = (props) => {
 export function ImportSampleDataApp() {
   return (
     <I18nProvider>
-      <Router>
-        <Switch>
-          <Route
-            path="*"
-            exact={true}
-            component={(props) =>
-              renderTutorialDirectory({
-                ...props,
-                // For standalone import sample data application
-                // home breadcrumb should not be appended as it is not a sub app of home
-                withoutHomeBreadCrumb: true,
-              })
-            }
-          />
-        </Switch>
-      </Router>
+      {renderTutorialDirectory({
+        // Pass a fixed tab to avoid TutorialDirectory missing openTab property
+        match: {
+          params: { tab: 'sampleData' },
+        },
+        withoutHomeBreadCrumb: true,
+      })}
     </I18nProvider>
   );
 }
