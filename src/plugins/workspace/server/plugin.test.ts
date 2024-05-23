@@ -99,10 +99,26 @@ describe('Workspace server plugin', () => {
     });
 
     it('with yml config', async () => {
-      jest.spyOn(utilsExports, 'getPrincipalsFromRequest').mockImplementation(() => ({}));
+      jest
+        .spyOn(utilsExports, 'getPrincipalsFromRequest')
+        .mockImplementation(() => ({ users: [`user1`] }));
       jest
         .spyOn(utilsExports, 'getOSDAdminConfigFromYMLConfig')
         .mockResolvedValue([['group1'], ['user1']]);
+
+      await workspacePlugin.setup(setupMock);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(
+        requestWithWorkspaceInUrl,
+        httpServerMock.createResponseFactory(),
+        toolKitMock
+      );
+      expect(toolKitMock.next).toBeCalledTimes(1);
+    });
+
+    it('uninstall security plugin', async () => {
+      jest.spyOn(utilsExports, 'getPrincipalsFromRequest').mockImplementation(() => ({}));
 
       await workspacePlugin.setup(setupMock);
       const toolKitMock = httpServerMock.createToolkit();
