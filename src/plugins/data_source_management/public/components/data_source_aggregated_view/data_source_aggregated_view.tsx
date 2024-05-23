@@ -233,7 +233,11 @@ export class DataSourceAggregatedView extends React.Component<
                   options={items}
                   renderOption={(option) => (
                     <DataSourceItem
-                      className={'dataSourceAggregatedView'}
+                      className={
+                        this.props.displayAllCompatibleDataSources
+                          ? 'dataSourceAggregatedView'
+                          : 'dataSourceListAllActive'
+                      }
                       option={option}
                       defaultDataSource={this.state.defaultDataSource}
                     />
