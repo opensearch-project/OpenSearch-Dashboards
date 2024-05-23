@@ -59,8 +59,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
 
   componentWillUnmount() {
     this._isMounted = false;
-    const { componentId } = this.state;
-    this.props.dataSourceSelection.remove(componentId);
+    this.props.dataSourceSelection.remove(this.state.componentId);
   }
   async componentDidMount() {
     this._isMounted = true;
@@ -120,8 +119,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
   }
 
   onSelectedDataSources(dataSource: DataSourceOption[]) {
-    const { componentId } = this.state;
-    this.props.dataSourceSelection.selectDataSource(componentId, dataSource);
+    this.props.dataSourceSelection.selectDataSource(this.state.componentId, dataSource);
 
     if (this.props.onSelectedDataSources) {
       this.props.onSelectedDataSources(dataSource);

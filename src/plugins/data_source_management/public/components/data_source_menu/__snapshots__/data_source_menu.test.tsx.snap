@@ -2,6 +2,24 @@
 
 exports[`DataSourceMenu can render data source view when only pass id in the activeOption 1`] = `
 <DataSourceView
+  dataSourceSelection={
+    DataSourceSelection {
+      "generateComponentId": [Function],
+      "getSelection$": [Function],
+      "getSelectionValue": [Function],
+      "remove": [Function],
+      "selectDataSource": [Function],
+      "selectedDataSource$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Map {},
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
   fullWidth={true}
   hideLocalCluster={false}
   notifications={
@@ -33,6 +51,24 @@ exports[`DataSourceMenu can render data source view when only pass id in the act
 
 exports[`DataSourceMenu can render data source view when provide activeOption 1`] = `
 <DataSourceView
+  dataSourceSelection={
+    DataSourceSelection {
+      "generateComponentId": [Function],
+      "getSelection$": [Function],
+      "getSelectionValue": [Function],
+      "remove": [Function],
+      "selectDataSource": [Function],
+      "selectedDataSource$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Map {},
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
   fullWidth={true}
   hideLocalCluster={false}
   notifications={
@@ -315,6 +351,24 @@ Object {
 
 exports[`DataSourceMenu should render data source selectable only with local cluster is hidden 1`] = `
 <DataSourceSelectable
+  dataSourceSelection={
+    DataSourceSelection {
+      "generateComponentId": [Function],
+      "getSelection$": [Function],
+      "getSelectionValue": [Function],
+      "remove": [Function],
+      "selectDataSource": [Function],
+      "selectedDataSource$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Map {},
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
   disabled={false}
   fullWidth={true}
   hideLocalCluster={true}
@@ -341,6 +395,24 @@ exports[`DataSourceMenu should render data source selectable only with local clu
 
 exports[`DataSourceMenu should render data source selectable only with local cluster not hidden 1`] = `
 <DataSourceSelectable
+  dataSourceSelection={
+    DataSourceSelection {
+      "generateComponentId": [Function],
+      "getSelection$": [Function],
+      "getSelectionValue": [Function],
+      "remove": [Function],
+      "selectDataSource": [Function],
+      "selectedDataSource$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Map {},
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
   disabled={false}
   fullWidth={true}
   hideLocalCluster={false}
@@ -367,6 +439,24 @@ exports[`DataSourceMenu should render data source selectable only with local clu
 
 exports[`DataSourceMenu should render data source view if not pass saved object or notification 1`] = `
 <DataSourceView
+  dataSourceSelection={
+    DataSourceSelection {
+      "generateComponentId": [Function],
+      "getSelection$": [Function],
+      "getSelectionValue": [Function],
+      "remove": [Function],
+      "selectDataSource": [Function],
+      "selectedDataSource$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Map {},
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
   fullWidth={true}
   hideLocalCluster={false}
   notifications={
@@ -386,6 +476,24 @@ exports[`DataSourceMenu should render data source view if not pass saved object 
 
 exports[`DataSourceMenu should render data source view only 1`] = `
 <DataSourceView
+  dataSourceSelection={
+    DataSourceSelection {
+      "generateComponentId": [Function],
+      "getSelection$": [Function],
+      "getSelectionValue": [Function],
+      "remove": [Function],
+      "selectDataSource": [Function],
+      "selectedDataSource$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": Map {},
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+    }
+  }
   fullWidth={true}
   hideLocalCluster={false}
   notifications={

@@ -15,12 +15,14 @@ import {
 } from '../../mocks';
 import { AuthType } from 'src/plugins/data_source/common/data_sources';
 import { EuiComboBox } from '@elastic/eui';
+import { DataSourceSelection } from '../../service/data_source_selection_service';
 
 describe('DataSourceSelector', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
+  const dataSourceSelection = new DataSourceSelection();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,6 +40,7 @@ describe('DataSourceSelector', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -58,6 +61,7 @@ describe('DataSourceSelector', () => {
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -77,6 +81,7 @@ describe('DataSourceSelector: check dataSource options', () => {
   const nextTick = () => new Promise((res) => process.nextTick(res));
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   const uiSettings = mockedContext.uiSettings;
+  const dataSourceSelection = new DataSourceSelection();
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -96,6 +101,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        dataSourceSelection={dataSourceSelection}
       />
     );
 
@@ -115,6 +121,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         hideLocalCluster={false}
         fullWidth={false}
         removePrepend={true}
+        dataSourceSelection={dataSourceSelection}
       />
     );
 
@@ -134,6 +141,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         hideLocalCluster={false}
         fullWidth={false}
         placeholderText={'Make a selection'}
+        dataSourceSelection={dataSourceSelection}
       />
     );
 
@@ -153,6 +161,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         hideLocalCluster={false}
         fullWidth={false}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceSelection={dataSourceSelection}
       />
     );
 
@@ -172,6 +181,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         hideLocalCluster={true}
         fullWidth={false}
         dataSourceFilter={(ds) => ds.attributes.auth.type === 'random'}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     component.instance().componentDidMount!();
@@ -191,6 +201,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         hideLocalCluster={false}
         fullWidth={false}
         uiSettings={uiSettings}
+        dataSourceSelection={dataSourceSelection}
       />
     );
 
@@ -210,6 +221,7 @@ describe('DataSourceSelector: check dataSource options', () => {
         hideLocalCluster={false}
         fullWidth={false}
         uiSettings={uiSettings}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -229,6 +241,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
   const nextTick = () => new Promise((res) => process.nextTick(res));
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   const uiSettings = mockedContext.uiSettings;
+  const dataSourceSelection = new DataSourceSelection();
   const getMockedDataSourceOptions = () => {
     return getDataSourcesWithFieldsResponse.savedObjects.map((response) => {
       return { id: response.id, label: response.attributes.title };
@@ -255,6 +268,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         hideLocalCluster={false}
         fullWidth={false}
         uiSettings={uiSettings}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     component.instance().componentDidMount!();
@@ -281,6 +295,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         hideLocalCluster={false}
         fullWidth={false}
         uiSettings={uiSettings}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     component.instance().componentDidMount!();
@@ -303,6 +318,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         dataSourceFilter={(dataSource) => {
           return dataSource.id !== 'test1';
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     component.instance().componentDidMount!();
@@ -332,6 +348,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         dataSourceFilter={(_) => {
           return false;
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     component.instance().componentDidMount!();
@@ -354,6 +371,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         fullWidth={false}
         uiSettings={uiSettings}
         defaultOption={[]}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     component.instance().componentDidMount!();
@@ -377,6 +395,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         fullWidth={false}
         uiSettings={uiSettings}
         defaultOption={[]}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     component.instance().componentDidMount!();
@@ -454,6 +473,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
         dataSourceFilter={(dataSource) => {
           return dataSource.attributes.title !== id;
         }}
+        dataSourceSelection={dataSourceSelection}
         // @ts-expect-error
         defaultOption={[{ id }]}
       />
@@ -499,6 +519,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
           hideLocalCluster={false}
           fullWidth={false}
           uiSettings={uiSettings}
+          dataSourceSelection={dataSourceSelection}
           // @ts-expect-error
           defaultOption={[{ id }]}
         />

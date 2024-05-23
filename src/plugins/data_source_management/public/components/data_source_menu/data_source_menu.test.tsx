@@ -11,6 +11,7 @@ import { DataSourceMenu } from './data_source_menu';
 import { render } from '@testing-library/react';
 import { DataSourceComponentType } from './types';
 import * as utils from '../utils';
+import { DataSourceSelection } from '../../service/data_source_selection_service';
 
 describe('DataSourceMenu', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -18,6 +19,7 @@ describe('DataSourceMenu', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const application = applicationServiceMock.createStartContract();
+  const dataSourceSelection = new DataSourceSelection();
 
   beforeEach(() => {
     client = {
@@ -35,6 +37,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -51,6 +54,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -65,6 +69,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -78,6 +83,7 @@ describe('DataSourceMenu', () => {
           fullWidth: true,
           notifications,
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -93,6 +99,7 @@ describe('DataSourceMenu', () => {
           notifications,
           activeOption: [{ id: 'test', label: 'test-label' }],
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -108,6 +115,7 @@ describe('DataSourceMenu', () => {
           notifications,
           activeOption: [{ id: 'test' }],
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -124,6 +132,7 @@ describe('DataSourceMenu', () => {
           notifications,
           displayAllCompatibleDataSources: true,
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(container).toMatchSnapshot();
@@ -138,6 +147,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(container).toMatchSnapshot();
@@ -152,6 +162,7 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(container).toMatchSnapshot();

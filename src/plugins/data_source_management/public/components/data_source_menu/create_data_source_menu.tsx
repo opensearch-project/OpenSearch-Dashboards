@@ -20,7 +20,12 @@ export function createDataSourceMenu<T>() {
   const uiSettings = getUiSettings();
   const hideLocalCluster = getHideLocalCluster().enabled;
   const dataSourceSelection = getDataSourceSelection();
-  return (props: DataSourceMenuProps<T>) => {
+  return (
+    props: Omit<
+      DataSourceMenuProps<T>,
+      'uiSettings' | 'hideLocalCluster' | 'application' | 'dataSourceSelection'
+    >
+  ) => {
     if (props.setMenuMountPoint) {
       return (
         <MountPointPortal setMountPoint={props.setMenuMountPoint}>

@@ -15,7 +15,9 @@ export function createDataSourceSelector(
   dataSourceSelection: DataSourceSelection
 ) {
   const { hideLocalCluster } = dataSourcePluginSetup;
-  return (props: DataSourceSelectorProps) => (
+  return (
+    props: Omit<DataSourceSelectorProps, 'uiSettings' | 'hideLocalCluster' | 'dataSourceSelection'>
+  ) => (
     <DataSourceSelector
       {...props}
       uiSettings={uiSettings}

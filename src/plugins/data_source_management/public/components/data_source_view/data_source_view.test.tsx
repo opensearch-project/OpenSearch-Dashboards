@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { ShallowWrapper, shallow, mount } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 import React from 'react';
 import { DataSourceView } from './data_source_view';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
@@ -11,11 +11,13 @@ import { notificationServiceMock } from '../../../../../core/public/mocks';
 import { getSingleDataSourceResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
 import { render } from '@testing-library/react';
 import * as utils from '../utils';
+import { DataSourceSelection } from '../../service/data_source_selection_service';
 
 describe('DataSourceView', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
+  const dataSourceSelection = new DataSourceSelection();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -33,6 +35,7 @@ describe('DataSourceView', () => {
         selectedOption={[{ id: 'test1', label: 'test1' }]}
         hideLocalCluster={false}
         onSelectedDataSources={jest.fn()}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -47,6 +50,7 @@ describe('DataSourceView', () => {
         hideLocalCluster={true}
         notifications={toasts}
         onSelectedDataSources={onSelectedDataSources}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -63,6 +67,7 @@ describe('DataSourceView', () => {
         dataSourceFilter={(ds) => {
           return false;
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -79,6 +84,7 @@ describe('DataSourceView', () => {
         dataSourceFilter={(ds) => {
           return true;
         }}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -95,6 +101,7 @@ describe('DataSourceView', () => {
         notifications={toasts}
         hideLocalCluster={false}
         onSelectedDataSources={jest.fn()}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -111,6 +118,7 @@ describe('DataSourceView', () => {
         notifications={toasts}
         hideLocalCluster={false}
         onSelectedDataSources={jest.fn()}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -130,6 +138,7 @@ describe('DataSourceView', () => {
         onSelectedDataSources={onSelectedDataSource}
         hideLocalCluster={false}
         fullWidth={false}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     const button = await container.findByTestId('dataSourceViewButton');
@@ -148,6 +157,7 @@ describe('DataSourceView', () => {
         fullWidth={false}
         selectedOption={[{ id: '' }]}
         dataSourceFilter={(ds) => false}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(onSelectedDataSource).toBeCalledWith([]);
