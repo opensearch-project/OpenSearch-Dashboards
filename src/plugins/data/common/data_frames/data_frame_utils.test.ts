@@ -43,5 +43,14 @@ describe('Data Frame Utils', () => {
         toDate: '2024-05-04 12:30:00.000',
       });
     });
+
+    test('should indicate invalid when given bad dates', () => {
+      const range = { from: 'fake', to: 'date' } as TimeRange;
+      const formattedDate = formatTimePickerDate(range, 'YYYY-MM-DD HH:mm:ss.SSS');
+      expect(formattedDate).toStrictEqual({
+        fromDate: 'Invalid date',
+        toDate: 'Invalid date',
+      });
+    });
   });
 });
