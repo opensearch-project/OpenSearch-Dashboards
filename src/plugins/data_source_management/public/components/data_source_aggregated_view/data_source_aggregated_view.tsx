@@ -16,6 +16,7 @@ import {
   getDataSourcesWithFields,
   handleDataSourceFetchError,
   handleNoAvailableDataSourceError,
+  generateComponentId,
 } from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
@@ -73,7 +74,7 @@ export class DataSourceAggregatedView extends React.Component<
       switchChecked: false,
       defaultDataSource: null,
       incompatibleDataSourcesExist: false,
-      componentId: props.dataSourceSelection.generateComponentId(),
+      componentId: generateComponentId(),
     };
   }
 

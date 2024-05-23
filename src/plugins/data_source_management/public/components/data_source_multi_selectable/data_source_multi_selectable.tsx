@@ -16,6 +16,7 @@ import {
   getDataSourcesWithFields,
   handleDataSourceFetchError,
   handleNoAvailableDataSourceError,
+  generateComponentId,
 } from '../utils';
 import { DataSourceBaseState } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
@@ -56,7 +57,7 @@ export class DataSourceMultiSelectable extends React.Component<
       showEmptyState: false,
       showError: false,
       incompatibleDataSourcesExist: false,
-      componentId: props.dataSourceSelection.generateComponentId(),
+      componentId: generateComponentId(),
     };
   }
 

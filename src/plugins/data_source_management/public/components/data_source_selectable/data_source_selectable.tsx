@@ -24,6 +24,7 @@ import {
   getFilteredDataSources,
   handleDataSourceFetchError,
   handleNoAvailableDataSourceError,
+  generateComponentId,
 } from '../utils';
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
@@ -79,7 +80,7 @@ export class DataSourceSelectable extends React.Component<
       showEmptyState: false,
       showError: false,
       incompatibleDataSourcesExist: false,
-      componentId: props.dataSourceSelection.generateComponentId(),
+      componentId: generateComponentId(),
     };
 
     this.onChange.bind(this);

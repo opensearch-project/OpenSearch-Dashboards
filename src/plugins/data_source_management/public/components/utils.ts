@@ -13,6 +13,7 @@ import {
   CoreStart,
 } from 'src/core/public';
 import { deepFreeze } from '@osd/std';
+import uuid from 'uuid';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -347,3 +348,7 @@ export const [getHideLocalCluster, setHideLocalCluster] = createGetterSetter<Hid
 export const [getDataSourceSelection, setDataSourceSelection] = createGetterSetter<
   DataSourceSelection
 >('DataSourceSelection');
+
+export const generateComponentId = () => {
+  return uuid.v4();
+};

@@ -8,7 +8,12 @@ import { i18n } from '@osd/i18n';
 import { EuiComboBox } from '@elastic/eui';
 import { SavedObjectsClientContract, ToastsStart, SavedObject } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
-import { getDataSourcesWithFields, getDefaultDataSource, getFilteredDataSources } from '../utils';
+import {
+  getDataSourcesWithFields,
+  getDefaultDataSource,
+  getFilteredDataSources,
+  generateComponentId,
+} from '../utils';
 import { DataSourceAttributes } from '../../types';
 import { DataSourceItem } from '../data_source_item';
 import './data_source_selector.scss';
@@ -61,7 +66,7 @@ export class DataSourceSelector extends React.Component<
       defaultDataSource: '',
       selectedOption: this.props.hideLocalCluster ? [] : [LocalCluster],
       dataSourceOptions: [],
-      componentId: props.dataSourceSelection.generateComponentId(),
+      componentId: generateComponentId(),
     };
   }
 

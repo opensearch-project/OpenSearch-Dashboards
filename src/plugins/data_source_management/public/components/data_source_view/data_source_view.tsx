@@ -13,7 +13,7 @@ import {
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
-import { getDataSourceById, handleDataSourceFetchError } from '../utils';
+import { getDataSourceById, handleDataSourceFetchError, generateComponentId } from '../utils';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DataSourceItem } from '../data_source_item';
 import { LocalCluster } from '../constants';
@@ -53,7 +53,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       showEmptyState: false,
       showError: false,
       defaultDataSource: null,
-      componentId: props.dataSourceSelection.generateComponentId(),
+      componentId: generateComponentId(),
     };
   }
 
