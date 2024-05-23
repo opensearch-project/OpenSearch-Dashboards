@@ -295,13 +295,14 @@ export const getTimeField = (
  * "now - 15m"
  *
  * @param dateRange - of type TimeRange
- * @returns object with fromDate and toDate, both of which will be in utc time and formatted to
- * 'YYYY-MM-DD HH:mm:ss.SSS'
+ * @param dateFormat - formatting string (should work with Moment)
+ * @returns object with `fromDate` and `toDate` strings, both of which will be in utc time and formatted to
+ * the `dateFormat` parameter
  */
-export const formatTimePickerDate = (dateRange: TimeRange) => {
+export const formatTimePickerDate = (dateRange: TimeRange, dateFormat: string) => {
   const dateMathParse = (date: string) => {
     const parsedDate = datemath.parse(date);
-    return parsedDate ? parsedDate.utc().format('YYYY-MM-DD HH:mm:ss.SSS') : '';
+    return parsedDate ? parsedDate.utc().format(dateFormat) : '';
   };
 
   const fromDate = dateMathParse(dateRange.from);
