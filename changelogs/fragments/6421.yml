@@ -1,0 +1,2 @@
+fix:
+- Management section id not match the key defined in capabilities ([#6421](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6421))
