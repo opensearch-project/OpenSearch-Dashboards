@@ -205,8 +205,8 @@ export const validateWorkspaceForm = (
     });
   }
   if (!features || !features.some((featureConfig) => isUseCaseFeatureConfig(featureConfig))) {
-    formErrors.features = i18n.translate('workspace.form.features.invalid', {
-      defaultMessage: 'Can not be empty',
+    formErrors.features = i18n.translate('workspace.form.features.empty', {
+      defaultMessage: 'Use case is required. Select a use case.',
     });
   }
   if (permissionSettings) {
