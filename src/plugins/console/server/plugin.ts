@@ -51,10 +51,15 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
   }
 
   async setup({ http, capabilities, opensearch, security }: CoreSetup) {
+    const config = await this.ctx.config.create().pipe(first()).toPromise();
+    const globalConfig = await this.ctx.config.legacy.globalConfig$.pipe(first()).toPromise();
+    const proxyPathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
+
     capabilities.registerProvider(() => ({
       dev_tools: {
         show: true,
         save: true,
+        futureNavigation: globalConfig.opensearchDashboards.futureNavigation,
       },
     }));
 
@@ -65,10 +70,6 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
         },
       });
     });
-
-    const config = await this.ctx.config.create().pipe(first()).toPromise();
-    const globalConfig = await this.ctx.config.legacy.globalConfig$.pipe(first()).toPromise();
-    const proxyPathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
 
     this.opensearchLegacyConfigService.setup(opensearch.legacy.config$);
 

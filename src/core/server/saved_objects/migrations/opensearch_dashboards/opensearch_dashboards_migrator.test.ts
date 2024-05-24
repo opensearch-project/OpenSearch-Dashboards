@@ -89,6 +89,12 @@ describe('OpenSearchDashboardsMigrator', () => {
       const mappings = new OpenSearchDashboardsMigrator(options).getActiveMappings();
       expect(mappings).toHaveProperty('properties.workspaces');
     });
+
+    it('text field does not exist in the mappings when the feature is enabled', () => {
+      const options = mockOptions(false, false, { enabled: true, types: ['text'] });
+      const mappings = new OpenSearchDashboardsMigrator(options).getActiveMappings();
+      expect(mappings).not.toHaveProperty('properties.text');
+    });
   });
 
   describe('runMigrations', () => {
@@ -159,10 +165,14 @@ type MockedOptions = OpenSearchDashboardsMigratorOptions & {
   client: ReturnType<typeof opensearchClientMock.createOpenSearchClient>;
 };
 
-const mockOptions = (isWorkspaceEnabled?: boolean, isPermissionControlEnabled?: boolean) => {
+const mockOptions = (
+  isWorkspaceEnabled?: boolean,
+  isPermissionControlEnabled?: boolean,
+  deleteConfig?: { enabled: boolean; types: string[] }
+) => {
   const rawConfig = configMock.create();
   rawConfig.get.mockReturnValue(false);
-  if (isWorkspaceEnabled || isPermissionControlEnabled) {
+  if (isWorkspaceEnabled || isPermissionControlEnabled || deleteConfig?.enabled) {
     rawConfig.get.mockReturnValue(true);
   }
   rawConfig.get.mockImplementation((path) => {
@@ -177,6 +187,18 @@ const mockOptions = (isWorkspaceEnabled?: boolean, isPermissionControlEnabled?: 
         return true;
       } else {
         return false;
+      }
+    } else if (path === 'migrations.delete.enabled') {
+      if (deleteConfig?.enabled) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (path === 'migrations.delete.types') {
+      if (deleteConfig?.enabled) {
+        return deleteConfig?.types;
+      } else {
+        return [];
       }
     } else {
       return false;
@@ -209,6 +231,18 @@ const mockOptions = (isWorkspaceEnabled?: boolean, isPermissionControlEnabled?: 
         },
         migrations: {},
       },
+      {
+        name: 'testtype3',
+        hidden: false,
+        namespaceType: 'single',
+        indexPattern: 'other-index',
+        mappings: {
+          properties: {
+            name: { type: 'text' },
+          },
+        },
+        migrations: {},
+      },
     ]),
     opensearchDashboardsConfig: {
       enabled: true,
@@ -219,6 +253,10 @@ const mockOptions = (isWorkspaceEnabled?: boolean, isPermissionControlEnabled?: 
       pollInterval: 20000,
       scrollDuration: '10m',
       skip: false,
+      delete: {
+        enabled: rawConfig.get('migrations.delete.enabled'),
+        types: rawConfig.get('migrations.delete.types'),
+      },
     },
     client: opensearchClientMock.createOpenSearchClient(),
     opensearchDashboardsRawConfig: rawConfig,

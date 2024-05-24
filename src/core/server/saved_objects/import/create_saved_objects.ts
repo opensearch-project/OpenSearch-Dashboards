@@ -35,8 +35,12 @@ import {
   SavedObjectsImportError,
 } from '../types';
 import { extractErrors } from './extract_errors';
-import { CreatedObject } from './types';
-import { extractVegaSpecFromSavedObject, updateDataSourceNameInVegaSpec } from './utils';
+import { CreatedObject, VisualizationObject } from './types';
+import {
+  extractVegaSpecFromSavedObject,
+  getUpdatedTSVBVisState,
+  updateDataSourceNameInVegaSpec,
+} from './utils';
 
 interface CreateSavedObjectsParams<T> {
   objects: Array<SavedObject<T>>;
@@ -125,6 +129,15 @@ export const createSavedObjects = async <T>({
               name: 'dataSource',
             });
           }
+
+          const visualizationObject = object as VisualizationObject;
+          const { visState, references } = getUpdatedTSVBVisState(
+            visualizationObject,
+            dataSourceId
+          );
+
+          visualizationObject.attributes.visState = visState;
+          object.references = references;
         }
 
         if (object.type === 'index-pattern') {

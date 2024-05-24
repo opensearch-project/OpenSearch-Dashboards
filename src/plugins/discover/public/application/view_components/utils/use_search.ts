@@ -47,6 +47,7 @@ export interface SearchData {
   rows?: OpenSearchSearchHit[];
   bucketInterval?: TimechartHeaderBucketInterval | {};
   chartData?: Chart;
+  title?: string;
 }
 
 export type SearchRefetch = 'refetch' | undefined;
@@ -105,7 +106,8 @@ export const useSearch = (services: DiscoverViewServices) => {
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
-    if (!indexPattern) {
+    let dataSet = indexPattern;
+    if (!dataSet) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
       });
@@ -122,16 +124,18 @@ export const useSearch = (services: DiscoverViewServices) => {
     // Abort any in-progress requests before fetching again
     if (fetchStateRef.current.abortController) fetchStateRef.current.abortController.abort();
     fetchStateRef.current.abortController = new AbortController();
-    const histogramConfigs = indexPattern.timeFieldName
-      ? createHistogramConfigs(indexPattern, interval || 'auto', data)
+    const histogramConfigs = dataSet.timeFieldName
+      ? createHistogramConfigs(dataSet, interval || 'auto', data)
       : undefined;
     const searchSource = await updateSearchSource({
-      indexPattern,
+      indexPattern: dataSet,
       services,
       sort,
       searchSource: savedSearch?.searchSource,
       histogramConfigs,
     });
+
+    dataSet = searchSource.getField('index');
 
     try {
       // Only show loading indicator if we are fetching when the rows are empty
@@ -149,7 +153,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       });
       const inspectorRequest = inspectorAdapters.requests.start(title, { description });
       inspectorRequest.stats(getRequestInspectorStats(searchSource));
-      searchSource.getSearchRequestBody().then((body) => {
+      searchSource.getSearchRequestBody().then((body: object) => {
         inspectorRequest.json(body);
       });
 
@@ -167,7 +171,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       let bucketInterval = {};
       let chartData;
       for (const row of rows) {
-        const fields = Object.keys(indexPattern.flattenHit(row));
+        const fields = Object.keys(dataSet!.flattenHit(row));
         for (const fieldName of fields) {
           fetchStateRef.current.fieldCounts[fieldName] =
             (fetchStateRef.current.fieldCounts[fieldName] || 0) + 1;
@@ -196,6 +200,10 @@ export const useSearch = (services: DiscoverViewServices) => {
         rows,
         bucketInterval,
         chartData,
+        title:
+          indexPattern?.title !== searchSource.getDataFrame()?.name
+            ? searchSource.getDataFrame()?.name
+            : indexPattern?.title,
       });
     } catch (error) {
       // If the request was aborted then no need to surface this error in the UI

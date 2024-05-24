@@ -30,12 +30,19 @@
 
 import { schema, TypeOf } from '@osd/config-schema';
 import { PluginConfigDescriptor } from 'opensearch-dashboards/server';
-import { DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S } from '../common/constants';
+import {
+  DEFAULT_BATCHING_INTERVAL_FOR_UI_METRIC_IN_S,
+  DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S,
+} from '../common/constants';
 
 export const configSchema = schema.object({
   uiMetric: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
+    enabled: schema.boolean({ defaultValue: false }),
     debug: schema.boolean({ defaultValue: schema.contextRef('dev') }),
+    batchingIntervalInS: schema.number({
+      min: 0,
+      defaultValue: DEFAULT_BATCHING_INTERVAL_FOR_UI_METRIC_IN_S,
+    }),
   }),
   maximumWaitTimeForAllCollectorsInS: schema.number({
     defaultValue: DEFAULT_MAXIMUM_WAIT_TIME_FOR_ALL_COLLECTORS_IN_S,

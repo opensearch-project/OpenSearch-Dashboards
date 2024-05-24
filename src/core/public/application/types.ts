@@ -104,6 +104,22 @@ export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 
 /**
+ * Visibilities of the application based on if user is within a workspace
+ *
+ * @public
+ */
+export enum WorkspaceAvailability {
+  /**
+   * The application is not accessible when user is in a workspace.
+   */
+  outsideWorkspace = 2,
+  /**
+   * The application is only accessible when user is in a workspace.
+   */
+  insideWorkspace = 1,
+}
+
+/**
  * @public
  */
 export interface App<HistoryLocationState = unknown> {
@@ -245,6 +261,13 @@ export interface App<HistoryLocationState = unknown> {
    * ```
    */
   exactRoute?: boolean;
+
+  /**
+   * Declare if page is available when inside a workspace.
+   * Defaults to WorkspaceAvailability.outsideWorkspace | WorkspaceAvailability.insideWorkspace,
+   * indicating the application is available within or out of workspace.
+   */
+  workspaceAvailability?: WorkspaceAvailability;
 }
 
 /**

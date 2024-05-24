@@ -32,6 +32,7 @@ import { IndexPattern } from './index_pattern';
 
 export interface PatternCache {
   get: (id: string) => IndexPattern;
+  getByTitle: (title: string) => IndexPattern;
   set: (id: string, value: IndexPattern) => IndexPattern;
   clear: (id: string) => void;
   clearAll: () => void;
@@ -42,6 +43,9 @@ export function createIndexPatternCache(): PatternCache {
   const cache: PatternCache = {
     get: (id: string) => {
       return vals[id];
+    },
+    getByTitle: (title: string) => {
+      return Object.values(vals).find((pattern: IndexPattern) => pattern.title === title);
     },
     set: (id: string, prom: any) => {
       vals[id] = prom;

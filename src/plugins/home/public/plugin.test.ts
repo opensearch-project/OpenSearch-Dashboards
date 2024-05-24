@@ -96,5 +96,13 @@ describe('HomePublicPlugin', () => {
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('setVariable');
     });
+
+    test('wires up and register applications', async () => {
+      const coreMocks = coreMock.createSetup();
+      await new HomePublicPlugin(mockInitializerContext).setup(coreMocks, {
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+      });
+      expect(coreMocks.application.register).toBeCalledTimes(2);
+    });
   });
 });

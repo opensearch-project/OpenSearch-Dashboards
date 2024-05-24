@@ -54,6 +54,7 @@ my(other)?domain\.com
 
 
 # External urls
+adobe.com
 https://connectionurl.com/
 https://www.hostedgraphite.com/
 http://google.com/
@@ -87,3 +88,4 @@ https://unpkg.com/@elastic/
 https://codeload.github.com/
 https://www.quandl.com/api/v1/datasets/
 https://code.google.com/p/v8/wiki/JavaScriptStackTraceApi
+site.com

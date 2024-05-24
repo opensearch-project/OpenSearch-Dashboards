@@ -14,6 +14,10 @@ import { AuthType } from '../../common/data_sources';
 import { cryptographyServiceSetupMock } from '../cryptography_service.mocks';
 import { DataSourceSavedObjectsClientWrapper } from './data_source_saved_objects_client_wrapper';
 import { SavedObject } from 'opensearch-dashboards/public';
+import { dataSourceServiceSetupMock } from '../data_source_service.mock';
+import { CustomApiSchemaRegistry } from '../schema_registry';
+import { DataSourceConnectionValidator } from '../routes/data_source_connection_validator';
+import { DATA_SOURCE_TITLE_LENGTH_LIMIT } from '../util/constants';
 
 describe('DataSourceSavedObjectsClientWrapper', () => {
   const customAuthName = 'role_based_auth';
@@ -33,16 +37,23 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
   const cryptographyMock = cryptographyServiceSetupMock.create();
   const logger = loggingSystemMock.createLogger();
   const authRegistryPromise = Promise.resolve(authRegistry);
+  const customApiSchemaRegistry = new CustomApiSchemaRegistry();
+  const customApiSchemaRegistryPromise = Promise.resolve(customApiSchemaRegistry);
+  const dataSourceServiceSetup = dataSourceServiceSetupMock.create();
+  const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
   const wrapperInstance = new DataSourceSavedObjectsClientWrapper(
+    dataSourceServiceSetup,
     cryptographyMock,
     logger,
-    authRegistryPromise
+    authRegistryPromise,
+    customApiSchemaRegistryPromise
   );
+
   const mockedClient = savedObjectsClientMock.create();
   const wrapperClient = wrapperInstance.wrapperFactory({
     client: mockedClient,
     typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
-    request: httpServerMock.createOpenSearchDashboardsRequest(),
+    request: requestMock,
   });
 
   const getSavedObject = (savedObject: Partial<SavedObject>) => {
@@ -69,6 +80,9 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
   describe('createWithCredentialsEncryption', () => {
     beforeEach(() => {
       mockedClient.create.mockClear();
+      jest
+        .spyOn(DataSourceConnectionValidator.prototype, 'validate')
+        .mockResolvedValue(Promise.resolve() as Promise<any>);
     });
     it('should create data source when auth type is NO_AUTH', async () => {
       const mockDataSourceAttributesWithNoAuth = attributes({
@@ -76,6 +90,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
           type: AuthType.NoAuth,
         },
       });
+
       await wrapperClient.create(
         DATA_SOURCE_SAVED_OBJECT_TYPE,
         mockDataSourceAttributesWithNoAuth,
@@ -190,6 +205,23 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
       ).rejects.toThrowError(`Invalid auth type: 'not_in_registry': Bad Request`);
     });
 
+    it('endpoint validator datasource client should be created with request as param', async () => {
+      const mockDataSourceAttributesWithNoAuth = attributes({
+        auth: {
+          type: AuthType.NoAuth,
+        },
+      });
+
+      await wrapperClient.create(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        mockDataSourceAttributesWithNoAuth,
+        {}
+      );
+      expect(dataSourceServiceSetup.getDataSourceClient).toBeCalledWith(
+        expect.objectContaining({ request: requestMock })
+      );
+    });
+
     describe('createWithCredentialsEncryption: Error handling', () => {
       it('should throw error when title is empty', async () => {
         const mockDataSourceAttributes = attributes({
@@ -200,6 +232,17 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         ).rejects.toThrowError(`"title" attribute must be a non-empty string`);
       });
 
+      it(`should throw error when title is longer than ${DATA_SOURCE_TITLE_LENGTH_LIMIT} characters`, async () => {
+        const mockDataSourceAttributes = attributes({
+          title: 'a'.repeat(33),
+        });
+        await expect(
+          wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
+        ).rejects.toThrowError(
+          `"title" attribute is limited to ${DATA_SOURCE_TITLE_LENGTH_LIMIT} characters`
+        );
+      });
+
       it('should throw error when endpoint is not valid', async () => {
         const mockDataSourceAttributes = attributes({
           endpoint: 'asasasasas',
@@ -207,6 +250,23 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
         await expect(
           wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
         ).rejects.toThrowError(`"endpoint" attribute is not valid or allowed`);
+      });
+
+      it('should throw error when endpoint is not valid OpenSearch endpoint', async () => {
+        const mockDataSourceAttributes = attributes({
+          auth: {
+            type: AuthType.NoAuth,
+          },
+        });
+        jest
+          .spyOn(DataSourceConnectionValidator.prototype, 'validate')
+          .mockImplementationOnce(() => {
+            throw new Error();
+          });
+
+        await expect(
+          wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
+        ).rejects.toThrowError(`endpoint is not valid OpenSearch endpoint: Bad Request`);
       });
 
       it('should throw error when auth is not present', async () => {

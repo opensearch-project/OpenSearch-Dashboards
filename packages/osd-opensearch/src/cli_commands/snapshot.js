@@ -50,6 +50,7 @@ exports.help = (defaults = {}) => {
       --download-only   Download the snapshot but don't actually start it
       --ssl             Sets up SSL on OpenSearch
       --security        Installs and sets up the OpenSearch Security plugin on the cluster
+      --sql             Installs and sets up the required OpenSearch SQL/PPL plugins on the cluster
       --P               OpenSearch plugin artifact URL to install it on the cluster. We can use the flag multiple times
                         to install multiple plugins on the cluster snapshot. The argument value can be url to zip file, maven coordinates of the plugin 
                         or for local zip files, use file:<followed by the absolute or relative path to the plugin zip file>.
@@ -77,6 +78,8 @@ exports.run = async (defaults = {}) => {
 
     boolean: ['security'],
 
+    boolean: ['sql'],
+
     default: defaults,
   });
 
@@ -96,6 +99,10 @@ exports.run = async (defaults = {}) => {
 
     if (options.security) {
       await cluster.setupSecurity(installPath, options.version ?? defaults.version);
+    }
+
+    if (options.sql) {
+      await cluster.setupSql(installPath, options.version ?? defaults.version);
     }
 
     options.bundledJDK = true;

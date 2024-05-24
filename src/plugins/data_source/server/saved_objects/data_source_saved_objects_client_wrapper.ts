@@ -4,6 +4,8 @@
  */
 
 import {
+  OpenSearchClient,
+  OpenSearchDashboardsRequest,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
@@ -26,6 +28,10 @@ import {
 import { EncryptionContext, CryptographyServiceSetup } from '../cryptography_service';
 import { isValidURL } from '../util/endpoint_validator';
 import { IAuthenticationMethodRegistry } from '../auth_registry';
+import { DataSourceServiceSetup } from '../data_source_service';
+import { CustomApiSchemaRegistry } from '../schema_registry';
+import { DataSourceConnectionValidator } from '../routes/data_source_connection_validator';
+import { DATA_SOURCE_TITLE_LENGTH_LIMIT } from '../util/constants';
 
 /**
  * Describes the Credential Saved Objects Client Wrapper class,
@@ -46,7 +52,10 @@ export class DataSourceSavedObjectsClientWrapper {
         return await wrapperOptions.client.create(type, attributes, options);
       }
 
-      const encryptedAttributes = await this.validateAndEncryptAttributes(attributes);
+      const encryptedAttributes = await this.validateAndEncryptAttributes(
+        attributes,
+        wrapperOptions.request
+      );
 
       return await wrapperOptions.client.create(type, encryptedAttributes, options);
     };
@@ -65,7 +74,7 @@ export class DataSourceSavedObjectsClientWrapper {
 
           return {
             ...object,
-            attributes: await this.validateAndEncryptAttributes(attributes),
+            attributes: await this.validateAndEncryptAttributes(attributes, wrapperOptions.request),
           };
         })
       );
@@ -139,14 +148,19 @@ export class DataSourceSavedObjectsClientWrapper {
   };
 
   constructor(
+    private dataSourcesService: DataSourceServiceSetup,
     private cryptography: CryptographyServiceSetup,
     private logger: Logger,
     private authRegistryPromise: Promise<IAuthenticationMethodRegistry>,
+    private customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>,
     private endpointBlockedIps?: string[]
   ) {}
 
-  private async validateAndEncryptAttributes<T = unknown>(attributes: T) {
-    await this.validateAttributes(attributes);
+  private async validateAndEncryptAttributes<T = unknown>(
+    attributes: T,
+    request?: OpenSearchDashboardsRequest
+  ) {
+    await this.validateAttributes(attributes, request);
 
     const { endpoint, auth } = attributes;
 
@@ -250,28 +264,67 @@ export class DataSourceSavedObjectsClientWrapper {
     }
   }
 
-  private async validateAttributes<T = unknown>(attributes: T) {
+  private async validateAttributes<T = unknown>(
+    attributes: T,
+    request?: OpenSearchDashboardsRequest
+  ) {
     const { title, endpoint, auth } = attributes;
-    if (!title?.trim?.().length) {
+
+    this.validateTitle(title);
+    await this.validateEndpoint(endpoint, attributes as DataSourceAttributes, request);
+    await this.validateAuth(auth);
+  }
+
+  private validateTitle(title: string) {
+    if (!title.trim().length) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         '"title" attribute must be a non-empty string'
       );
     }
 
+    if (title.length > DATA_SOURCE_TITLE_LENGTH_LIMIT) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `"title" attribute is limited to ${DATA_SOURCE_TITLE_LENGTH_LIMIT} characters`
+      );
+    }
+  }
+
+  private async validateEndpoint(
+    endpoint: string,
+    attributes: DataSourceAttributes,
+    request?: OpenSearchDashboardsRequest
+  ) {
     if (!isValidURL(endpoint, this.endpointBlockedIps)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         '"endpoint" attribute is not valid or allowed'
       );
     }
+    try {
+      const dataSourceClient: OpenSearchClient = await this.dataSourcesService.getDataSourceClient({
+        savedObjects: {} as any,
+        cryptography: this.cryptography,
+        testClientDataSourceAttr: attributes as DataSourceAttributes,
+        request,
+        authRegistry: await this.authRegistryPromise,
+        customApiSchemaRegistryPromise: this.customApiSchemaRegistryPromise,
+      });
 
+      const dataSourceValidator = new DataSourceConnectionValidator(dataSourceClient, attributes);
+
+      await dataSourceValidator.validate();
+    } catch (err: any) {
+      this.logger.error(err);
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        `endpoint is not valid OpenSearch endpoint`
+      );
+    }
+  }
+
+  private async validateAuth<T = unknown>(auth: T) {
     if (!auth) {
       throw SavedObjectsErrorHelpers.createBadRequestError('"auth" attribute is required');
     }
 
-    await this.validateAuth(auth);
-  }
-
-  private async validateAuth<T = unknown>(auth: T) {
     const { type, credentials } = auth;
 
     if (!type) {

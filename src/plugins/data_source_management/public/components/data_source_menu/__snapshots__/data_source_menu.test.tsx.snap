@@ -76,9 +76,9 @@ Object {
           class="euiPopover__anchor"
         >
           <button
-            aria-label="dataSourceAggregatedViewMenuButton"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
-            data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+            aria-label="dataSourceAggregatedViewButton"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+            data-test-subj="dataSourceAggregatedViewButton"
             type="button"
           >
             <span
@@ -107,9 +107,9 @@ Object {
         class="euiPopover__anchor"
       >
         <button
-          aria-label="dataSourceAggregatedViewMenuButton"
-          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
-          data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
+          aria-label="dataSourceAggregatedViewButton"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+          data-test-subj="dataSourceAggregatedViewButton"
           type="button"
         >
           <span

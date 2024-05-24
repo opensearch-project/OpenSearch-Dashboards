@@ -882,6 +882,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             onChange={this.onChangeRegion}
             onBlur={this.validateRegion}
             data-test-subj="editDataSourceFormRegionField"
+            name="dataSourceRegion"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -923,6 +924,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             spellCheck={false}
             disabled={this.props.existingDataSource.auth.type === AuthType.SigV4}
             data-test-subj="editDataSourceFormAccessKeyField"
+            name="dataSourceAccessKey"
           />
         </EuiFormRow>
         <EuiFormRow
@@ -951,6 +953,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             spellCheck={false}
             disabled={this.props.existingDataSource.auth.type === AuthType.SigV4}
             data-test-subj="editDataSourceFormSecretKeyField"
+            name="dataSourceSecretKey"
           />
         </EuiFormRow>
         <EuiSpacer />

@@ -13,23 +13,41 @@
  * DataSourceQueryResult: Represents the result from querying the data source.
  */
 
-import { ConnectionStatus } from './types';
+import {
+  DataSourceConnectionStatus,
+  IDataSetParams,
+  IDataSourceDataSet,
+  IDataSourceMetadata,
+  IDataSourceQueryParams,
+  IDataSourceQueryResponse,
+  IDataSourceSettings,
+} from './types';
 
 /**
  * @experimental this class is experimental and might change in future releases.
  */
 export abstract class DataSource<
-  DataSourceMetaData,
-  DataSetParams,
-  SourceDataSet,
-  DataSourceQueryParams,
-  DataSourceQueryResult
+  TMetadata extends IDataSourceMetadata = IDataSourceMetadata,
+  TDataSetParams extends IDataSetParams = IDataSetParams,
+  TDataSet extends IDataSourceDataSet = IDataSourceDataSet,
+  TQueryParams extends IDataSourceQueryParams = IDataSourceQueryParams,
+  TQueryResult extends IDataSourceQueryResponse = IDataSourceQueryResponse
 > {
-  constructor(
-    private readonly name: string,
-    private readonly type: string,
-    private readonly metadata: DataSourceMetaData
-  ) {}
+  private readonly id: string;
+  private readonly name: string;
+  private readonly type: string;
+  private readonly metadata: TMetadata;
+
+  constructor(settings: IDataSourceSettings<TMetadata>) {
+    this.id = settings.id;
+    this.name = settings.name;
+    this.type = settings.type;
+    this.metadata = settings.metadata;
+  }
+
+  getId() {
+    return this.id;
+  }
 
   getName() {
     return this.name;
@@ -53,18 +71,18 @@ export abstract class DataSource<
    * patterns for OpenSearch data source
    *
    * @experimental This API is experimental and might change in future releases.
-   * @returns {SourceDataSet} Dataset associated with the data source.
+   * @returns {Promise<TDataSet>} Dataset associated with the data source.
    */
-  abstract getDataSet(dataSetParams?: DataSetParams): SourceDataSet;
+  abstract getDataSet(dataSetParams?: TDataSetParams): Promise<TDataSet>;
 
   /**
    * Abstract method to run a query against the data source.
    * Implementing classes need to provide the specific implementation.
    *
    * @experimental This API is experimental and might change in future releases.
-   * @returns {DataSourceQueryResult} Result from querying the data source.
+   * @returns {Promise<TQueryResult>} Result from querying the data source.
    */
-  abstract runQuery(queryParams: DataSourceQueryParams): DataSourceQueryResult;
+  abstract runQuery(queryParams?: TQueryParams): Promise<TQueryResult>;
 
   /**
    * Abstract method to test the connection to the data source.
@@ -72,8 +90,8 @@ export abstract class DataSource<
    * the connection status, typically indicating success or failure.
    *
    * @experimental This API is experimental and might change in future releases.
-   * @returns {ConnectionStatus | Promise<void>} Status of the connection test.
+   * @returns {Promise<DataSourceConnectionStatus | boolean>} Status of the connection test.
    * @experimental
    */
-  abstract testConnection(): ConnectionStatus | Promise<boolean>;
+  abstract testConnection(): Promise<DataSourceConnectionStatus | boolean>;
 }

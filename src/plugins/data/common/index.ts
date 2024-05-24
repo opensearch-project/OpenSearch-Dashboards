@@ -30,6 +30,7 @@
 
 export * from './constants';
 export * from './opensearch_query';
+export * from './data_frames';
 export * from './field_formats';
 export * from './field_mapping';
 export * from './index_patterns';

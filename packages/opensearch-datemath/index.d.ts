@@ -43,6 +43,8 @@ declare const datemath: {
   unitsAsc: Unit[];
   unitsDesc: Unit[];
 
+  isDateTime(input: any): boolean;
+
   /**
    * Parses a string into a moment object. The string can be something like "now - 15m".
    * @param options.forceNow If this optional parameter is supplied, "now" will be treated as this

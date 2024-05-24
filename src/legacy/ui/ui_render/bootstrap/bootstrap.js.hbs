@@ -1,6 +1,5 @@
 var osdCsp = JSON.parse(document.querySelector('osd-csp').getAttribute('data'));
 window.__osdStrictCsp__ = osdCsp.strictCsp;
-window.__osdThemeTag__ = "{{themeTag}}";
 window.__osdPublicPath__ = {{publicPathMap}};
 window.__osdBundles__ = {{osdBundlesLoaderSource}}
 
@@ -11,8 +10,36 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
   if (!window.__osdCspNotEnforced__ && window.console) {
     window.console.log("^ A single error about an inline script not firing due to content security policy is expected!");
   }
+
+  var isDarkMode = window.__osdThemeTag__.endsWith('dark');
+  var themeVersion = window.__osdThemeTag__.startsWith('v7') ? 'v7' : 'v8';
+
   var loadingMessage = document.getElementById('osd_loading_message');
   loadingMessage.style.display = 'flex';
+
+  var styleSheetPaths = [
+    '{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.baseCssDistFilename}}'
+  ];
+
+  if (isDarkMode) {
+    if (themeVersion === 'v7') {
+      styleSheetPaths.push('{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.darkCssDistFilename}}');
+      styleSheetPaths.push('{{basePath}}/node_modules/@osd/ui-framework/dist/kui_dark.css')
+    } else {
+      styleSheetPaths.push('{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.darkV8CssDistFilename}}');
+      styleSheetPaths.push('{{basePath}}/node_modules/@osd/ui-framework/dist/kui_next_dark.css')
+    }
+    styleSheetPaths.push('{{basePath}}/ui/legacy_dark_theme.css');
+  } else {
+    if (themeVersion === 'v7') {
+      styleSheetPaths.push('{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.lightCssDistFilename}}');
+      styleSheetPaths.push('{{basePath}}/node_modules/@osd/ui-framework/dist/kui_light.css')
+    } else {
+      styleSheetPaths.push('{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.lightV8CssDistFilename}}');
+      styleSheetPaths.push('{{basePath}}/node_modules/@osd/ui-framework/dist/kui_next_light.css')
+    }
+    styleSheetPaths.push('{{basePath}}/ui/legacy_light_theme.css');
+  }
 
   window.onload = function () {
     function failure() {
@@ -79,11 +106,7 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
     ], function () {
       __osdBundles__.get('entry/core/public').__osdBootstrap__();
 
-      load([
-        {{#each styleSheetPaths}}
-          '{{this}}',
-        {{/each}}
-      ]);
+      load(styleSheetPaths);
     });
   }
 }

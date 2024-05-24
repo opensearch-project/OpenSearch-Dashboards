@@ -30,6 +30,7 @@
 
 import { Squeeze } from '@hapi/good-squeeze';
 import { createWriteStream as writeStr } from 'fs';
+import { pipeline } from 'stream';
 
 import LogFormatJson from './log_format_json';
 import LogFormatString from './log_format_string';
@@ -51,18 +52,33 @@ export function getLoggerStream({ events, config }) {
   let dest;
   if (config.dest === 'stdout') {
     dest = process.stdout;
+    logInterceptor.pipe(squeeze).pipe(format).pipe(dest);
   } else {
     dest = writeStr(config.dest, {
       flags: 'a',
       encoding: 'utf8',
     });
 
-    logInterceptor.on('end', () => {
-      dest.end();
-    });
+    if (config.ignoreEnospcError) {
+      pipeline(logInterceptor, squeeze, format, dest, onFinished);
+    } else {
+      logInterceptor.on('end', () => {
+        dest.end();
+      });
+      logInterceptor.pipe(squeeze).pipe(format).pipe(dest);
+    }
   }
 
-  logInterceptor.pipe(squeeze).pipe(format).pipe(dest);
-
   return logInterceptor;
+}
+
+export function onFinished(error) {
+  if (error) {
+    if (error.code === 'ENOSPC') {
+      // eslint-disable-next-line no-console
+      console.error('Error in logging pipeline:', error.stack);
+    } else {
+      throw error;
+    }
+  }
 }

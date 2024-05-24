@@ -12,6 +12,7 @@ import {
   existingDatasourceNamesList,
   mockDataSourceAttributesWithNoAuth,
   mockDataSourceAttributesWithRegisteredAuth,
+  mockDataSourceAttributesWithSigV4Auth,
 } from '../../../../mocks';
 import { OpenSearchDashboardsContextProvider } from '../../../../../../opensearch_dashboards_react/public';
 import { EditDataSourceForm } from './edit_data_source_form';
@@ -34,6 +35,13 @@ const usernameFieldIdentifier = 'datasourceUsername';
 const usernameFormRowIdentifier = '[data-test-subj="editDatasourceUsernameFormRow"]';
 const passwordFieldIdentifier = '[data-test-subj="updateDataSourceFormPasswordField"]';
 const updatePasswordBtnIdentifier = '[data-test-subj="editDatasourceUpdatePasswordBtn"]';
+const updateAwsCredsBtnIdentifier = '[data-test-subj="editDatasourceUpdateAwsCredentialBtn"]';
+const regionFieldIdentifier = 'dataSourceRegion';
+const accessKeyFieldIdentifier = 'dataSourceAccessKey';
+const accessKeyFormRowIdentifier = '[data-test-subj="editDataSourceFormAccessKeyField"]';
+const secretKeyFieldIdentifier = 'dataSourceSecretKey';
+const secretKeyFormRowIdentifier = '[data-test-subj="editDataSourceFormSecretKeyField"]';
+
 describe('Datasource Management: Edit Datasource Form', () => {
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(
@@ -349,6 +357,192 @@ describe('Datasource Management: Edit Datasource Form', () => {
       component.find('Header').first().prop('onClickTestConnection')();
       component.update();
       expect(mockFn).toHaveBeenCalled();
+    });
+  });
+
+  describe('Case 3: With AWSsigv4', () => {
+    beforeEach(() => {
+      component = mount(
+        wrapWithIntl(
+          <EditDataSourceForm
+            existingDataSource={mockDataSourceAttributesWithSigV4Auth}
+            existingDatasourceNamesList={existingDatasourceNamesList}
+            isDefault={false}
+            onDeleteDataSource={mockFn}
+            handleSubmit={mockFn}
+            onSetDefaultDataSource={mockFn}
+            handleTestConnection={mockFn}
+            displayToastMessage={mockFn}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+      component.update();
+    });
+
+    test('should render normally', () => {
+      // @ts-ignore
+      expect(component.find({ name: titleFieldIdentifier }).first().props().value).toBe(
+        mockDataSourceAttributesWithSigV4Auth.title
+      );
+      expect(component.find(endpointFieldIdentifier).first().props().disabled).toBe(true);
+    });
+
+    /* Validation */
+    test('should validate title as required field & no duplicates allowed', () => {
+      /* Validate empty title - required */
+      updateInputFieldAndBlur(component, titleFieldIdentifier, '');
+      // @ts-ignore
+      expect(component.find(titleFormRowIdentifier).first().props().isInvalid).toBe(true);
+
+      /* Validate duplicate title */
+      updateInputFieldAndBlur(component, titleFieldIdentifier, 'DuP20');
+      // @ts-ignore
+      expect(component.find(titleFormRowIdentifier).first().props().isInvalid).toBe(true);
+
+      /* change to original title */
+      updateInputFieldAndBlur(
+        component,
+        titleFieldIdentifier,
+        mockDataSourceAttributesWithSigV4Auth.title
+      );
+      // @ts-ignore
+      expect(component.find(titleFormRowIdentifier).first().props().isInvalid).toBe(false);
+
+      /* change to valid updated title */
+      updateInputFieldAndBlur(component, titleFieldIdentifier, 'test007');
+      // @ts-ignore
+      expect(component.find(titleFormRowIdentifier).first().props().isInvalid).toBe(false);
+    });
+    test('should validate access key as required field', () => {
+      /* Validate empty accessKey - required */
+      updateInputFieldAndBlur(component, accessKeyFieldIdentifier, '');
+      // @ts-ignore
+      expect(component.find(accessKeyFormRowIdentifier).first().props().isInvalid).toBe(true);
+
+      /* change to original accessKey */
+      updateInputFieldAndBlur(
+        component,
+        accessKeyFieldIdentifier,
+        mockDataSourceAttributesWithSigV4Auth.auth.credentials.accessKey
+      );
+      // @ts-ignore
+      expect(component.find(accessKeyFormRowIdentifier).first().props().isInvalid).toBe(false);
+      /* change to valid updated accessKey */
+      updateInputFieldAndBlur(component, accessKeyFieldIdentifier, 'test123');
+      // @ts-ignore
+      expect(component.find(accessKeyFormRowIdentifier).first().props().isInvalid).toBe(false);
+    });
+    test('should validate secret key as required field', () => {
+      /* Validate empty secretKey - required */
+      updateInputFieldAndBlur(component, secretKeyFieldIdentifier, '');
+      // @ts-ignore
+      expect(component.find(secretKeyFormRowIdentifier).first().props().isInvalid).toBe(true);
+
+      /* change to original secretKey */
+      updateInputFieldAndBlur(
+        component,
+        secretKeyFieldIdentifier,
+        mockDataSourceAttributesWithSigV4Auth.auth.credentials.secretKey
+      );
+      // @ts-ignore
+      expect(component.find(secretKeyFormRowIdentifier).first().props().isInvalid).toBe(false);
+      /* change to valid updated secretKey */
+      updateInputFieldAndBlur(component, secretKeyFieldIdentifier, 'test123');
+      // @ts-ignore
+      expect(component.find(secretKeyFormRowIdentifier).first().props().isInvalid).toBe(false);
+    });
+    /* Functionality */
+    test('should display update aws credential modal on update button click and should update the credentials', () => {
+      act(() => {
+        component.find(updateAwsCredsBtnIdentifier).first().simulate('click');
+      });
+      component.update();
+      expect(component.find('UpdateAwsCredentialModal').exists()).toBe(true);
+
+      /* Update password */
+      act(() => {
+        // @ts-ignore
+        component.find('UpdateAwsCredentialModal').prop('handleUpdateAwsCredential')('test123');
+      });
+      component.update();
+      expect(mockFn).toHaveBeenCalled();
+      expect(component.find('UpdateAwsCredentialModal').exists()).toBe(false);
+    });
+    test("should hide username & password fields when 'AWS Sigv4' is selected as the credential type", () => {
+      setAuthTypeValue(authTypeSelectIdentifier, AuthType.SigV4);
+      component.update();
+      expect(component.find(usernameFormRowIdentifier).exists()).toBe(false);
+      expect(component.find(passwordFieldIdentifier).exists()).toBe(false);
+    });
+
+    /* Cancel Changes */
+    test('should reset form on click cancel changes', async () => {
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          updateInputFieldAndBlur(component, descriptionFieldIdentifier, '');
+          expect(
+            // @ts-ignore
+            component.find(descriptionFormRowIdentifier).first().props().isInvalid
+          ).toBeUndefined();
+          resolve();
+        }, 100)
+      );
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          /* Updated description*/
+          updateInputFieldAndBlur(component, descriptionFieldIdentifier, 'testDescription');
+          expect(
+            // @ts-ignore
+            component.find(descriptionFormRowIdentifier).first().props().isInvalid
+          ).toBeUndefined();
+
+          expect(component.find('[data-test-subj="datasource-edit-cancelButton"]').exists()).toBe(
+            true
+          );
+          component
+            .find('[data-test-subj="datasource-edit-cancelButton"]')
+            .first()
+            .simulate('click');
+          resolve();
+        }, 100)
+      );
+    });
+
+    /* Save Changes */
+    test('should update the form with Username&Password on click save changes', async () => {
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          updateInputFieldAndBlur(component, descriptionFieldIdentifier, '');
+          expect(
+            // @ts-ignore
+            component.find(descriptionFormRowIdentifier).first().props().isInvalid
+          ).toBeUndefined();
+          resolve();
+        }, 100)
+      );
+      await new Promise((resolve) =>
+        setTimeout(() => {
+          /* Updated description*/
+          updateInputFieldAndBlur(component, descriptionFieldIdentifier, 'testDescription');
+          expect(
+            // @ts-ignore
+            component.find(descriptionFormRowIdentifier).first().props().isInvalid
+          ).toBeUndefined();
+
+          expect(component.find('[data-test-subj="datasource-edit-saveButton"]').exists()).toBe(
+            true
+          );
+          component.find('[data-test-subj="datasource-edit-saveButton"]').first().simulate('click');
+          expect(mockFn).toHaveBeenCalled();
+          resolve();
+        }, 100)
+      );
     });
   });
 });

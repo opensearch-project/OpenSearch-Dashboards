@@ -59,3 +59,5 @@ export const [getQueryService, setQueryService] = createGetterSetter<
 export const [getSearchService, setSearchService] = createGetterSetter<
   DataPublicPluginStart['search']
 >('Search');
+
+export const [getUiService, setUiService] = createGetterSetter<DataPublicPluginStart['ui']>('Ui');

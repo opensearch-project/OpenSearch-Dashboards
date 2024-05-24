@@ -35,6 +35,7 @@ import { AggsSetup, AggsSetupDependencies, AggsStartDependencies, AggsStart } fr
 import { ISearchGeneric, ISearchStartSearchSource } from '../../common/search';
 import { IndexPatternsContract } from '../../common/index_patterns/index_patterns';
 import { UsageCollectionSetup } from '../../../usage_collection/public';
+import { DataFrameService } from '../../common/data_frames';
 
 export { ISearchStartSearchSource };
 
@@ -78,6 +79,9 @@ export interface ISearchStart {
    * {@link ISearchStartSearchSource}
    */
   searchSource: ISearchStartSearchSource;
+  __enhance: (enhancements: SearchEnhancements) => void;
+  getDefaultSearchInterceptor: () => ISearchInterceptor;
+  df: DataFrameService;
 }
 
 export { SEARCH_EVENT_TYPE } from './collectors';

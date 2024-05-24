@@ -39,7 +39,7 @@ export function TableHeader({
 }: Props) {
   return (
     <tr data-test-subj="docTableHeader" className="osdDocTableHeader">
-      <th style={{ width: '24px' }} />
+      <th style={{ width: '28px' }} />
       {displayedColumns.map((col) => {
         return (
           <TableHeaderColumn

@@ -35,4 +35,6 @@ export {
   getOsdFieldType,
   getOsdTypeNames,
   getFilterableOsdTypeNames,
+  getOsdFieldOverrides,
+  setOsdFieldOverrides,
 } from './osd_field_types';

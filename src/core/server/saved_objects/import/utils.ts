@@ -4,7 +4,8 @@
  */
 
 import { parse, stringify } from 'hjson';
-import { SavedObject, SavedObjectsClientContract } from '../types';
+import { SavedObject, SavedObjectReference, SavedObjectsClientContract } from '../types';
+import { VisualizationObject } from './types';
 
 /**
  * Given a Vega spec, the new datasource (by name), and spacing, update the Vega spec to add the new datasource name to each local cluster query
@@ -18,6 +19,44 @@ export interface UpdateDataSourceNameInVegaSpecProps {
   newDataSourceName: string;
   spacing?: number;
 }
+
+/**
+ * Given a visualization saved object and datasource id, return the updated visState and references if the visualization was a TSVB visualization
+ * @param {VisualizationObject} object
+ * @param {string} dataSourceId
+ * @returns {{visState: string, references: SavedObjectReference[]}} - the updated stringified visState and references
+ */
+export const getUpdatedTSVBVisState = (
+  object: VisualizationObject,
+  dataSourceId: string
+): { visState: string; references: SavedObjectReference[] } => {
+  const visStateObject = JSON.parse(object.attributes.visState);
+
+  if (visStateObject.type !== 'metrics') {
+    return {
+      visState: object.attributes.visState,
+      references: object.references,
+    };
+  }
+
+  const oldDataSourceId = visStateObject.params.data_source_id;
+  const newReferences = object.references.filter((reference) => {
+    return reference.id !== oldDataSourceId && reference.type === 'data-source';
+  });
+
+  visStateObject.params.data_source_id = dataSourceId;
+
+  newReferences.push({
+    id: dataSourceId,
+    name: 'dataSource',
+    type: 'data-source',
+  });
+
+  return {
+    visState: JSON.stringify(visStateObject),
+    references: newReferences,
+  };
+};
 
 export const updateDataSourceNameInVegaSpec = (
   props: UpdateDataSourceNameInVegaSpecProps

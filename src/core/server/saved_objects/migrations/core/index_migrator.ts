@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { DeleteByQueryRequest } from '@opensearch-project/opensearch/api/types';
 import { diffMappings } from './build_active_mappings';
 import * as Index from './opensearch_index';
 import { migrateRawDocs } from './migrate_raw_docs';
@@ -123,6 +124,7 @@ async function migrateIndex(context: Context): Promise<MigrationResult> {
   const { client, alias, source, dest, log } = context;
 
   await deleteIndexTemplates(context);
+  await deleteSavedObjectsByType(context);
 
   log.info(`Creating index ${dest.indexName}.`);
 
@@ -169,6 +171,33 @@ async function deleteIndexTemplates({ client, log, obsoleteIndexTemplatePattern 
   log.info(`Removing index templates: ${templateNames}`);
 
   return Promise.all(templateNames.map((name) => client.indices.deleteTemplate({ name: name! })));
+}
+
+/**
+ * Delete saved objects by type. If migrations.delete.types is specified,
+ * any saved objects that matches that type will be deleted.
+ */
+async function deleteSavedObjectsByType(context: Context) {
+  const { client, source, log, typesToDelete } = context;
+  if (!source.exists || !typesToDelete || typesToDelete.length === 0) {
+    return;
+  }
+
+  log.info(`Removing saved objects of types: ${typesToDelete.join(', ')}`);
+  const params = {
+    index: source.indexName,
+    body: {
+      query: {
+        bool: {
+          should: [...typesToDelete.map((type) => ({ term: { type } }))],
+        },
+      },
+    },
+    conflicts: 'proceed',
+    refresh: true,
+  } as DeleteByQueryRequest;
+  log.debug(`Delete by query params: ${JSON.stringify(params)}`);
+  return client.deleteByQuery(params);
 }
 
 /**

@@ -4,17 +4,11 @@ exports[`DataSourceView Should render successfully when provided datasource has 
 <EuiPopover
   anchorPosition="downLeft"
   button={
-    <React.Fragment>
-      <EuiButtonEmpty
-        aria-label="dataSourceViewButton"
-        className="dataSourceComponentButtonTitle"
-        data-test-subj="dataSourceViewButton"
-        iconSide="left"
-        iconType="database"
-        onClick={[Function]}
-        size="s"
-      />
-    </React.Fragment>
+    <DataSourceMenuPopoverButton
+      className="dataSourceView"
+      label=""
+      onClick={[Function]}
+    />
   }
   closePopover={[Function]}
   display="inlineBlock"
@@ -38,7 +32,6 @@ exports[`DataSourceView Should render successfully when provided datasource has 
       paddingSize="none"
     >
       <EuiSelectable
-        compressed={true}
         data-test-subj="dataSourceView"
         isPreFiltered={false}
         options={
@@ -62,32 +55,14 @@ exports[`DataSourceView Should render successfully when provided datasource has 
 `;
 
 exports[`DataSourceView Should return error when provided datasource has been filtered out 1`] = `
-<NoDataSource
-  totalDataSourceCount={0}
-/>
-`;
-
-exports[`DataSourceView When selected option is local cluster and hide local Cluster is true, should return error 1`] = `
-<NoDataSource
-  totalDataSourceCount={0}
-/>
-`;
-
-exports[`DataSourceView should call getDataSourceById when only pass id with no label 1`] = `
 <EuiPopover
   anchorPosition="downLeft"
   button={
-    <React.Fragment>
-      <EuiButtonEmpty
-        aria-label="dataSourceViewButton"
-        className="dataSourceComponentButtonTitle"
-        data-test-subj="dataSourceViewButton"
-        iconSide="left"
-        iconType="database"
-        onClick={[Function]}
-        size="s"
-      />
-    </React.Fragment>
+    <DataSourceMenuPopoverButton
+      className="dataSourceView"
+      label=""
+      onClick={[Function]}
+    />
   }
   closePopover={[Function]}
   display="inlineBlock"
@@ -111,7 +86,98 @@ exports[`DataSourceView should call getDataSourceById when only pass id with no 
       paddingSize="none"
     >
       <EuiSelectable
-        compressed={true}
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={Array []}
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
+`;
+
+exports[`DataSourceView When selected option is local cluster and hide local Cluster is true, should return error 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <DataSourceMenuPopoverButton
+      className="dataSourceView"
+      label=""
+      onClick={[Function]}
+    />
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <DataSourceDropDownHeader
+    totalDataSourceCount={1}
+  />
+  <EuiContextMenuPanel
+    className="dataSourceViewOuiPanel"
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="none"
+    >
+      <EuiSelectable
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={Array []}
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
+`;
+
+exports[`DataSourceView should call getDataSourceById when only pass id with no label 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <DataSourceMenuPopoverButton
+      className="dataSourceView"
+      label=""
+      onClick={[Function]}
+    />
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <DataSourceDropDownHeader
+    totalDataSourceCount={1}
+  />
+  <EuiContextMenuPanel
+    className="dataSourceViewOuiPanel"
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="none"
+    >
+      <EuiSelectable
         data-test-subj="dataSourceView"
         isPreFiltered={false}
         options={
@@ -140,19 +206,11 @@ exports[`DataSourceView should render normally with local cluster not hidden 1`]
 <EuiPopover
   anchorPosition="downLeft"
   button={
-    <React.Fragment>
-      <EuiButtonEmpty
-        aria-label="dataSourceViewButton"
-        className="dataSourceComponentButtonTitle"
-        data-test-subj="dataSourceViewButton"
-        iconSide="left"
-        iconType="database"
-        onClick={[Function]}
-        size="s"
-      >
-        test1
-      </EuiButtonEmpty>
-    </React.Fragment>
+    <DataSourceMenuPopoverButton
+      className="dataSourceView"
+      label="test1"
+      onClick={[Function]}
+    />
   }
   closePopover={[Function]}
   display="inlineBlock"
@@ -176,7 +234,6 @@ exports[`DataSourceView should render normally with local cluster not hidden 1`]
       paddingSize="none"
     >
       <EuiSelectable
-        compressed={true}
         data-test-subj="dataSourceView"
         isPreFiltered={false}
         options={

@@ -276,6 +276,24 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -457,6 +475,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -465,6 +484,12 @@ exports[`dashboard listing hideWriteControls 1`] = `
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -475,6 +500,9 @@ exports[`dashboard listing hideWriteControls 1`] = `
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "isEnhancementsEnabled": false,
+                "queryEnhancements": Map {},
               },
             },
             "docLinks": Object {
@@ -1421,6 +1449,24 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -1602,6 +1648,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -1610,6 +1657,12 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -1620,6 +1673,9 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "isEnhancementsEnabled": false,
+                "queryEnhancements": Map {},
               },
             },
             "docLinks": Object {
@@ -2627,6 +2683,24 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -2808,6 +2882,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -2816,6 +2891,12 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -2826,6 +2907,9 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "isEnhancementsEnabled": false,
+                "queryEnhancements": Map {},
               },
             },
             "docLinks": Object {
@@ -3833,6 +3917,24 @@ exports[`dashboard listing renders table rows 1`] = `
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -4014,6 +4116,7 @@ exports[`dashboard listing renders table rows 1`] = `
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -4022,6 +4125,12 @@ exports[`dashboard listing renders table rows 1`] = `
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -4032,6 +4141,9 @@ exports[`dashboard listing renders table rows 1`] = `
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "isEnhancementsEnabled": false,
+                "queryEnhancements": Map {},
               },
             },
             "docLinks": Object {
@@ -5039,6 +5151,24 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
               },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
+              },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
                 "getByFieldType": [MockFunction],
@@ -5220,6 +5350,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -5228,6 +5359,12 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -5238,6 +5375,9 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "isEnhancementsEnabled": false,
+                "queryEnhancements": Map {},
               },
             },
             "docLinks": Object {

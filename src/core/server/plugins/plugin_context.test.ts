@@ -101,6 +101,7 @@ describe('createPluginInitializerContext', () => {
         configIndex: '.opensearch_dashboards_config',
         autocompleteTerminateAfter: duration(100000),
         autocompleteTimeout: duration(1000),
+        futureNavigation: false,
       },
       opensearch: {
         shardTimeout: duration(30, 's'),

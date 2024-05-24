@@ -28,4 +28,4 @@
  * under the License.
  */
 
-export { renderApp } from './application';
+export { renderApp, renderImportSampleDataApp } from './application';

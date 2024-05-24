@@ -51,6 +51,35 @@ const RedirectToDefaultApp = () => {
   return null;
 };
 
+const renderTutorialDirectory = (props) => {
+  const { addBasePath, environmentService } = getServices();
+  const environment = environmentService.getEnvironment();
+  const isCloudEnabled = environment.cloud;
+
+  return (
+    <TutorialDirectory
+      addBasePath={addBasePath}
+      openTab={props.match.params.tab}
+      isCloudEnabled={isCloudEnabled}
+      withoutHomeBreadCrumb={props.withoutHomeBreadCrumb}
+    />
+  );
+};
+
+export function ImportSampleDataApp() {
+  return (
+    <I18nProvider>
+      {renderTutorialDirectory({
+        // Pass a fixed tab to avoid TutorialDirectory missing openTab property
+        match: {
+          params: { tab: 'sampleData' },
+        },
+        withoutHomeBreadCrumb: true,
+      })}
+    </I18nProvider>
+  );
+}
+
 export function HomeApp({ directories, solutions }) {
   const {
     savedObjectsClient,
@@ -62,16 +91,6 @@ export function HomeApp({ directories, solutions }) {
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
-
-  const renderTutorialDirectory = (props) => {
-    return (
-      <TutorialDirectory
-        addBasePath={addBasePath}
-        openTab={props.match.params.tab}
-        isCloudEnabled={isCloudEnabled}
-      />
-    );
-  };
 
   const renderTutorial = (props) => {
     return (

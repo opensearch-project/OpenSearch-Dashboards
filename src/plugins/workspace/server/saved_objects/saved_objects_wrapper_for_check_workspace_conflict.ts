@@ -289,11 +289,33 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         return { errors: [] };
       }
 
+      const { workspaces } = options;
+
+      const disallowedSavedObjects: SavedObjectsCheckConflictsObject[] = [];
+      const allowedSavedObjects: SavedObjectsCheckConflictsObject[] = [];
+      objects.forEach((item) => {
+        const isImportIntoWorkspace = !!workspaces?.length;
+        // config can not be created inside a workspace
+        if (this.isConfigType(item.type) && isImportIntoWorkspace) {
+          disallowedSavedObjects.push(item);
+          return;
+        }
+
+        // For 2.14, data source can only be created without workspace info
+        if (this.isDataSourceType(item.type) && isImportIntoWorkspace) {
+          disallowedSavedObjects.push(item);
+          return;
+        }
+
+        allowedSavedObjects.push(item);
+        return;
+      });
+
       /**
        * Workspace conflict only happens when target workspaces params present.
        */
       if (options.workspaces) {
-        const bulkGetDocs: any[] = objects.map((object) => {
+        const bulkGetDocs: any[] = allowedSavedObjects.map((object) => {
           const { type, id } = object;
 
           return {
@@ -335,7 +357,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         }
       }
 
-      const objectsNoWorkspaceConflictError = objects.filter(
+      const objectsNoWorkspaceConflictError = allowedSavedObjects.filter(
         (item) =>
           !objectsConflictWithWorkspace.find(
             (errorItems) =>
@@ -355,7 +377,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       /**
        * Bypass those objects that are not conflict on workspaces
        */
-      const realBulkCreateResult = await wrapperOptions.client.checkConflicts(
+      const realCheckConflictsResult = await wrapperOptions.client.checkConflicts(
         objectsNoWorkspaceConflictError,
         options
       );
@@ -364,8 +386,21 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
        * Merge results from two conflict check.
        */
       const result: SavedObjectsCheckConflictsResponse = {
-        ...realBulkCreateResult,
-        errors: [...objectsConflictWithWorkspace, ...realBulkCreateResult.errors],
+        ...realCheckConflictsResult,
+        errors: [
+          ...objectsConflictWithWorkspace,
+          ...disallowedSavedObjects.map((item) => ({
+            ...item,
+            error: {
+              ...SavedObjectsErrorHelpers.decorateBadRequestError(
+                new Error(`'${item.type}' is not allowed to be imported in workspace.`),
+                'Unsupported type in workspace'
+              ).output.payload,
+              metadata: { isNotOverwritable: true },
+            },
+          })),
+          ...(realCheckConflictsResult?.errors || []),
+        ],
       };
 
       return result;

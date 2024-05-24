@@ -4,20 +4,11 @@ exports[`DataSourceSelectable should filter options if configured 1`] = `
 <EuiPopover
   anchorPosition="downLeft"
   button={
-    <React.Fragment>
-      <EuiButtonEmpty
-        aria-label="dataSourceMenuButton"
-        className="euiHeaderLink dataSourceComponentButtonTitle"
-        data-test-subj="dataSourceSelectableContextMenuHeaderLink"
-        disabled={false}
-        iconSide="left"
-        iconType="database"
-        onClick={[Function]}
-        size="s"
-      >
-        Local cluster
-      </EuiButtonEmpty>
-    </React.Fragment>
+    <DataSourceMenuPopoverButton
+      className="dataSourceSelectable"
+      label="Local cluster"
+      onClick={[Function]}
+    />
   }
   closePopover={[Function]}
   data-test-subj="dataSourceSelectableContextMenuPopover"
@@ -89,18 +80,11 @@ exports[`DataSourceSelectable should render normally with local cluster is hidde
 <EuiPopover
   anchorPosition="downLeft"
   button={
-    <React.Fragment>
-      <EuiButtonEmpty
-        aria-label="dataSourceMenuButton"
-        className="euiHeaderLink dataSourceComponentButtonTitle"
-        data-test-subj="dataSourceSelectableContextMenuHeaderLink"
-        disabled={false}
-        iconSide="left"
-        iconType="database"
-        onClick={[Function]}
-        size="s"
-      />
-    </React.Fragment>
+    <DataSourceMenuPopoverButton
+      className="dataSourceSelectable"
+      label=""
+      onClick={[Function]}
+    />
   }
   closePopover={[Function]}
   data-test-subj="dataSourceSelectableContextMenuPopover"
@@ -156,18 +140,11 @@ exports[`DataSourceSelectable should render normally with local cluster not hidd
 <EuiPopover
   anchorPosition="downLeft"
   button={
-    <React.Fragment>
-      <EuiButtonEmpty
-        aria-label="dataSourceMenuButton"
-        className="euiHeaderLink dataSourceComponentButtonTitle"
-        data-test-subj="dataSourceSelectableContextMenuHeaderLink"
-        disabled={false}
-        iconSide="left"
-        iconType="database"
-        onClick={[Function]}
-        size="s"
-      />
-    </React.Fragment>
+    <DataSourceMenuPopoverButton
+      className="dataSourceSelectable"
+      label=""
+      onClick={[Function]}
+    />
   }
   closePopover={[Function]}
   data-test-subj="dataSourceSelectableContextMenuPopover"
@@ -233,9 +210,9 @@ Object {
           class="euiPopover__anchor"
         >
           <button
-            aria-label="dataSourceMenuButton"
-            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink dataSourceComponentButtonTitle"
-            data-test-subj="dataSourceSelectableContextMenuHeaderLink"
+            aria-label="dataSourceSelectableButton"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+            data-test-subj="dataSourceSelectableButton"
             type="button"
           >
             <span
@@ -404,9 +381,9 @@ Object {
         class="euiPopover__anchor"
       >
         <button
-          aria-label="dataSourceMenuButton"
-          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink dataSourceComponentButtonTitle"
-          data-test-subj="dataSourceSelectableContextMenuHeaderLink"
+          aria-label="dataSourceSelectableButton"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+          data-test-subj="dataSourceSelectableButton"
           type="button"
         >
           <span

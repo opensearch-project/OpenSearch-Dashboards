@@ -1,0 +1,130 @@
+openapi: 3.0.3
+info:
+  version: v1
+  title: OpenSearch Dashboards Saved Objects API
+  contact:
+    name: OpenSearch Dashboards Team
+  description: |-
+    OpenAPI schema for OpenSearch Dashboards Saved Objects API
+tags:
+  - name: saved objects
+    description: Manage Dashboards saved objects, including dashboards, visualizations, saved search, and more.
+paths:
+  /api/saved_objects/{type}/{id}:
+    get:
+      tags:
+        - saved objects
+      summary: Retrieve a single saved object by type and id.
+      parameters:
+      - $ref: '#/components/parameters/id'
+      - $ref: '#/components/parameters/type'
+      responses:
+        '200':
+          description: The saved object is successfully retrieved. 
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: The saved object does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      tags:
+        - saved objects
+      summary: Create a new saved object with type and id.
+      parameters:
+        - $ref: '#components/parameters/type'
+        - $ref: '#components/parameters/id'
+        - in: query
+          name: overwrite
+          description: If set to true, will overwrite the existing saved object with same type and id.
+          schema: 
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - attributes
+              properties:
+                attributes:
+                  type: object
+                  description: The metadata of the saved object to be created, and the object is not validated.
+                migrationVersion:
+                  type: object
+                  description: The information about the migrations that have been applied to this saved object to be created.
+                references:
+                  description: List of objects that describe other saved objects the created object references. 
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+                initialNamespaces:
+                  description: Namespaces that this saved object exists in. This attribute is only used for multi-namespace saved object types.
+                  type: array
+                  items:
+                    type: string
+                workspaces:
+                  type: array
+                  items:
+                    type: string
+                  description: Workspaces that this saved object exists in.
+      responses:
+        '200':
+          description: The creation request is successful
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+components:
+  parameters:
+    type:
+      name: type
+      in: path
+      description: The type of SavedObject to retrieve
+      required: true
+      schema:
+        type: string
+    id: 
+      name: id
+      in: path
+      description: Unique id of the saved object.
+      required: true
+      schema:
+        type: string
+  schemas:
+    400_bad_request:
+      title: Bad request
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+      properties:
+        error:
+          type: string
+          enum:
+            - Bad Request
+        message:
+          type: string
+        statusCode:
+          type: integer
+          enum:
+            - 400

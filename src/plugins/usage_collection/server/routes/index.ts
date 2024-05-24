@@ -56,11 +56,12 @@ export function setupRoutes({
       hostname: string;
       port: number;
     };
+    batchingInterval: number;
   };
   collectorSet: CollectorSet;
   metrics: MetricsServiceSetup;
   overallStatus$: Observable<ServiceStatus>;
 }) {
-  registerUiMetricRoute(router, getSavedObjects);
+  registerUiMetricRoute(router, getSavedObjects, rest.config.batchingInterval);
   registerStatsRoute({ router, ...rest });
 }

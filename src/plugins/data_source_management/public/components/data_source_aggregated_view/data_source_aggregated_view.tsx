@@ -4,22 +4,19 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuPanel,
-  EuiPanel,
-  EuiPopover,
-  EuiSelectable,
-  EuiSwitch,
-} from '@elastic/eui';
-import { i18n } from '@osd/i18n';
+import { EuiContextMenuPanel, EuiPanel, EuiPopover, EuiSelectable, EuiSwitch } from '@elastic/eui';
 import {
   ApplicationStart,
   IUiSettingsClient,
   SavedObjectsClientContract,
   ToastsStart,
 } from 'opensearch-dashboards/public';
-import { getApplication, getDataSourcesWithFields, handleDataSourceFetchError } from '../utils';
+import {
+  getApplication,
+  getDataSourcesWithFields,
+  handleDataSourceFetchError,
+  handleNoAvailableDataSourceError,
+} from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
 import { NoDataSource } from '../no_data_source';
@@ -29,6 +26,7 @@ import { DataSourceOption } from '../data_source_menu/types';
 import { DataSourceItem } from '../data_source_item';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import './data_source_aggregated_view.scss';
+import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
 
 interface DataSourceAggregatedViewProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -47,6 +45,7 @@ interface DataSourceAggregatedViewState extends DataSourceBaseState {
   allDataSourcesIdToTitleMap: Map<string, any>;
   switchChecked: boolean;
   defaultDataSource: string | null;
+  incompatibleDataSourcesExist: boolean;
 }
 
 interface DataSourceOptionDisplay extends DataSourceOption {
@@ -70,6 +69,7 @@ export class DataSourceAggregatedView extends React.Component<
       showError: false,
       switchChecked: false,
       defaultDataSource: null,
+      incompatibleDataSourcesExist: false,
     };
   }
 
@@ -114,6 +114,16 @@ export class DataSourceAggregatedView extends React.Component<
           allDataSourcesIdToTitleMap.set('', 'Local cluster');
         }
 
+        if (allDataSourcesIdToTitleMap.size === 0) {
+          handleNoAvailableDataSourceError({
+            changeState: this.onEmptyState.bind(this, !!fetchedDataSources?.length),
+            notifications: this.props.notifications,
+            application: this.props.application,
+            incompatibleDataSourcesExist: !!fetchedDataSources?.length,
+          });
+          return;
+        }
+
         this.setState({
           ...this.state,
           allDataSourcesIdToTitleMap,
@@ -126,30 +136,26 @@ export class DataSourceAggregatedView extends React.Component<
       });
   }
 
+  onEmptyState(incompatibleDataSourcesExist: boolean) {
+    this.setState({ showEmptyState: true, incompatibleDataSourcesExist });
+  }
+
   onError() {
     this.setState({ showError: true });
   }
 
   render() {
     if (this.state.showEmptyState) {
-      return <NoDataSource />;
+      return (
+        <NoDataSource
+          application={this.props.application}
+          incompatibleDataSourcesExist={this.state.incompatibleDataSourcesExist}
+        />
+      );
     }
     if (this.state.showError) {
       return <DataSourceErrorMenu application={this.props.application} />;
     }
-    const button = (
-      <EuiButtonEmpty
-        className="euiHeaderLink"
-        data-test-subj="dataSourceAggregatedViewContextMenuHeaderLink"
-        aria-label={i18n.translate('dataSourceAggregatedView.dataSourceOptionsButtonAriaLabel', {
-          defaultMessage: 'dataSourceAggregatedViewMenuButton',
-        })}
-        iconType="database"
-        iconSide="left"
-        size="s"
-        onClick={this.onDataSourcesClick.bind(this)}
-      />
-    );
 
     let items: DataSourceOptionDisplay[] = [];
 
@@ -198,7 +204,12 @@ export class DataSourceAggregatedView extends React.Component<
       <>
         <EuiPopover
           id={'dataSourceSViewContextMenuPopover'}
-          button={button}
+          button={
+            <DataSourceMenuPopoverButton
+              className={'dataSourceAggregatedView'}
+              onClick={this.onDataSourcesClick.bind(this)}
+            />
+          }
           isOpen={this.state.isPopoverOpen}
           closePopover={this.closePopover.bind(this)}
           panelPaddingSize="none"
@@ -222,7 +233,11 @@ export class DataSourceAggregatedView extends React.Component<
                   options={items}
                   renderOption={(option) => (
                     <DataSourceItem
-                      className={'dataSourceAggregatedView'}
+                      className={
+                        this.props.displayAllCompatibleDataSources
+                          ? 'dataSourceAggregatedView'
+                          : 'dataSourceListAllActive'
+                      }
                       option={option}
                       defaultDataSource={this.state.defaultDataSource}
                     />

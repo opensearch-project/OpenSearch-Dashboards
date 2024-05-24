@@ -50,12 +50,14 @@ export function toEditableConfig({
   value,
   isCustom,
   isOverridden,
+  userSettingsEnabled,
 }: {
   def: PublicUiSettingsParams & UserProvidedValues<any>;
   name: string;
   value: SavedObjectAttribute;
   isCustom: boolean;
   isOverridden: boolean;
+  userSettingsEnabled: boolean;
 }) {
   if (!def) {
     def = {};
@@ -86,6 +88,7 @@ export function toEditableConfig({
     options: def.options,
     optionLabels: def.optionLabels,
     requiresPageReload: !!def.requiresPageReload,
+    preferBrowserSetting: userSettingsEnabled && def.preferBrowserSetting,
   };
 
   return conf;

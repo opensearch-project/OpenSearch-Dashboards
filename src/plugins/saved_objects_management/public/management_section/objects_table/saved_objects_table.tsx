@@ -589,7 +589,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   };
 
   delete = async () => {
-    const { savedObjectsClient } = this.props;
+    const { savedObjectsClient, notifications } = this.props;
     const { selectedSavedObjects, isDeleting } = this.state;
 
     if (isDeleting) {
@@ -599,30 +599,38 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     this.setState({ isDeleting: true });
 
     const indexPatterns = selectedSavedObjects.filter((object) => object.type === 'index-pattern');
-    if (indexPatterns.length) {
-      await this.props.indexPatterns.clearCache();
+
+    try {
+      if (indexPatterns.length) {
+        await this.props.indexPatterns.clearCache();
+      }
+      const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
+      const deletes = objects.savedObjects.map((object) =>
+        savedObjectsClient.delete(object.type, object.id, { force: true })
+      );
+      await Promise.all(deletes);
+      // Unset this
+      this.setState({
+        selectedSavedObjects: [],
+      });
+      // Fetching all data
+      await this.fetchSavedObjects();
+      await this.fetchCounts();
+
+      // Allow the user to interact with the table once the saved objects have been re-fetched.
+      // If the user fails to delete the saved objects, the delete modal will continue to display.
+      this.setState({ isShowingDeleteConfirmModal: false });
+    } catch (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate(
+          'savedObjectsManagement.objectsTable.unableDeleteSavedObjectsNotificationMessage',
+          { defaultMessage: 'Unable to delete saved objects' }
+        ),
+        text: `${error}`,
+      });
     }
 
-    const objects = await savedObjectsClient.bulkGet(selectedSavedObjects);
-    const deletes = objects.savedObjects.map((object) =>
-      savedObjectsClient.delete(object.type, object.id, { force: true })
-    );
-    await Promise.all(deletes);
-
-    // Unset this
-    this.setState({
-      selectedSavedObjects: [],
-    });
-
-    // Fetching all data
-    await this.fetchSavedObjects();
-    await this.fetchCounts();
-
-    // Allow the user to interact with the table once the saved objects have been re-fetched.
-    this.setState({
-      isShowingDeleteConfirmModal: false,
-      isDeleting: false,
-    });
+    this.setState({ isDeleting: false });
   };
 
   getRelationships = async (type: string, id: string) => {

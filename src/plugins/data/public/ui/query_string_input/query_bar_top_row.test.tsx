@@ -70,6 +70,8 @@ startMock.uiSettings.get.mockImplementation((key: string) => {
         from: 'now-15m',
         to: 'now',
       };
+    case UI_SETTINGS.QUERY_DATA_SOURCE_READONLY:
+      return false;
     default:
       throw new Error(`Unexpected config key: ${key}`);
   }

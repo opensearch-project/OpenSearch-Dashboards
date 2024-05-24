@@ -8,6 +8,4 @@ export {
   IDataSourceFilter,
   IDataSourceRegistrationResult,
   DataSourceRegistrationError,
-  DataSourceType,
-  GenericDataSource,
 } from './types';

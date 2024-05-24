@@ -1,0 +1,2 @@
+doc:
+- Add OpenAPI specification for GET and CREATE saved object API ([#6799](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6799))

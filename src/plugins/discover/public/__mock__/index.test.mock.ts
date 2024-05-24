@@ -3,26 +3,29 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export class MockS3DataSource {
-  protected name: string;
-  protected type: string;
-  protected metadata: any;
+import { DataSource } from 'src/plugins/data/public';
 
-  constructor({ name, type, metadata }: { name: string; type: string; metadata: any }) {
-    this.name = name;
-    this.type = type;
-    this.metadata = metadata;
+interface DataSourceConfig {
+  name: string;
+  type: string;
+  metadata: any;
+  id: string;
+}
+
+export class MockS3DataSource extends DataSource {
+  constructor({ id, name, type, metadata }: DataSourceConfig) {
+    super({ id, name, type, metadata });
   }
 
   async getDataSet(dataSetParams?: any) {
-    return [this.name];
+    return { dataSets: [this.getName()] };
   }
 
-  getName() {
-    return this.name;
+  async testConnection(): Promise<boolean> {
+    return true;
   }
 
-  getType() {
-    return this.type;
+  async runQuery(queryParams: any) {
+    return { data: {} };
   }
 }

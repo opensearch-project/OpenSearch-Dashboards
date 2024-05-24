@@ -91,6 +91,7 @@ export const config = {
         defaultValue: 'https://survey.opensearch.org',
       }),
     }),
+    futureNavigation: schema.boolean({ defaultValue: false }),
   }),
   deprecations,
 };

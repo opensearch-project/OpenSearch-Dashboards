@@ -6,46 +6,53 @@
 import { CoreStart, HttpFetchError } from 'opensearch-dashboards/public';
 
 export interface Services {
-  getCustomIndices: () => Promise<undefined | HttpFetchError>;
-  getIndexData: (indexName: string, size: number) => Promise<undefined | HttpFetchError>;
-  getIndexMapping: (indexName: string) => Promise<undefined | HttpFetchError>;
+  getCustomIndices: (dataSourceRefId: string) => Promise<undefined | HttpFetchError>;
+  getIndexData: (
+    indexName: string,
+    size: number,
+    dataSourceRefId: string
+  ) => Promise<undefined | HttpFetchError>;
+  getIndexMapping: (
+    indexName: string,
+    dataSourceRefId: string
+  ) => Promise<undefined | HttpFetchError>;
 }
 
 export function getServices(http: CoreStart['http']): Services {
   return {
-    getCustomIndices: async () => {
+    getCustomIndices: async (dataSourceRefId: string) => {
       try {
-        const response = await http.post('../api/geospatial/_indices', {
+        return await http.post('../api/geospatial/_indices', {
           body: JSON.stringify({
             index: '*-map',
           }),
+          query: { dataSourceId: dataSourceRefId },
         });
-        return response;
       } catch (e) {
         return e;
       }
     },
-    getIndexData: async (indexName: string, size: number) => {
+    getIndexData: async (indexName: string, size: number, dataSourceRefId: string) => {
       try {
-        const response = await http.post('../api/geospatial/_search', {
+        return await http.post('../api/geospatial/_search', {
           body: JSON.stringify({
             index: indexName,
             size,
           }),
+          query: { dataSourceId: dataSourceRefId },
         });
-        return response;
       } catch (e) {
         return e;
       }
     },
-    getIndexMapping: async (indexName: string) => {
+    getIndexMapping: async (indexName: string, dataSourceRefId: string) => {
       try {
-        const response = await http.post('../api/geospatial/_mappings', {
+        return await http.post('../api/geospatial/_mappings', {
           body: JSON.stringify({
             index: indexName,
           }),
+          query: { dataSourceId: dataSourceRefId },
         });
-        return response;
       } catch (e) {
         return e;
       }

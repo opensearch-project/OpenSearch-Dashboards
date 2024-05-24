@@ -98,6 +98,8 @@ function getCompProps(): DiscoverSidebarProps {
     onAddFilter: jest.fn(),
     onAddField: jest.fn(),
     onRemoveField: jest.fn(),
+    onNormalize: jest.fn(),
+    onCreateIndexPattern: jest.fn(),
     selectedIndexPattern: indexPattern,
     onReorderFields: jest.fn(),
   };

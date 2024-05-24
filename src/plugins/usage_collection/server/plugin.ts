@@ -75,6 +75,7 @@ export class UsageCollectionPlugin implements Plugin<CollectorSet> {
         opensearchDashboardsVersion: this.initializerContext.env.packageInfo.version,
         server: core.http.getServerInfo(),
         uuid: this.initializerContext.env.instanceUuid,
+        batchingInterval: config.uiMetric.batchingIntervalInS,
       },
       metrics: core.metrics,
       overallStatus$: core.status.overall$,

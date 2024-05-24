@@ -64,8 +64,12 @@ export const opensearchSearchStrategyProvider = (
         throw new Error(`Unsupported index pattern type ${request.indexType}`);
       }
 
-      // ignoreThrottled is not supported in OSS
-      const { ignoreThrottled, ...defaultParams } = await getDefaultSearchParams(uiSettingsClient);
+      // ignoreThrottled & dataFrameHydrationStrategy is not supported by default
+      const {
+        ignoreThrottled,
+        dataFrameHydrationStrategy,
+        ...defaultParams
+      } = await getDefaultSearchParams(uiSettingsClient);
 
       const params = toSnakeCase({
         ...defaultParams,

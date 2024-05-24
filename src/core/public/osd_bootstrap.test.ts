@@ -34,6 +34,7 @@ import { __osdBootstrap__ } from './';
 describe('osd_bootstrap', () => {
   beforeAll(() => {
     const metadata = {
+      branding: { darkMode: 'true' },
       i18n: { translationsUrl: 'http://localhost' },
       vars: { apmConfig: null },
     };

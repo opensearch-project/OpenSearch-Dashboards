@@ -219,3 +219,5 @@ export interface SavedObjectsResolveImportErrorsOptions {
 }
 
 export type CreatedObject<T> = SavedObject<T> & { destinationId?: string };
+
+export type VisualizationObject<T = any> = SavedObject<T> & { attributes: { visState: string } };

@@ -95,7 +95,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       const existingWorkspaceRes = await this.getScopedClientWithoutPermission(requestDetail)?.find(
         {
           type: WORKSPACE_TYPE,
-          search: attributes.name,
+          search: `"${attributes.name}"`,
           searchFields: ['name'],
         }
       );
@@ -184,7 +184,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           requestDetail
         )?.find({
           type: WORKSPACE_TYPE,
-          search: attributes.name,
+          search: `"${attributes.name}"`,
           searchFields: ['name'],
           fields: ['_id'],
         });
