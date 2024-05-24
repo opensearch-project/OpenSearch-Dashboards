@@ -106,7 +106,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
         handleDataSourceFetchError(
           this.onError.bind(this),
           this.props.notifications!,
-          this.onSelectedDataSources
+          this.onSelectedDataSources.bind(this)
         );
       }
     } else {

@@ -19,11 +19,16 @@ import {
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
   ADD_COMPATIBLE_DATASOURCES_MESSAGE,
 } from '../constants';
+import { DataSourceSelection } from '../../service/data_source_selection_service';
+
+const mockGeneratedComponentId = 'component-id';
+jest.mock('uuid', () => ({ v4: () => mockGeneratedComponentId }));
 
 describe('DataSourceSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
   let client: SavedObjectsClientContract;
+  let dataSourceSelection: DataSourceSelection;
   const { toasts } = notificationServiceMock.createStartContract();
   const nextTick = () => new Promise((res) => process.nextTick(res));
   const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
@@ -34,6 +39,7 @@ describe('DataSourceSelectable', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
+    dataSourceSelection = new DataSourceSelection();
   });
 
   it('should render normally with local cluster not hidden', () => {
@@ -45,6 +51,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -65,6 +72,7 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -86,6 +94,7 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={false}
         fullWidth={false}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     component.instance().componentDidMount!();
@@ -105,6 +114,7 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={false}
         fullWidth={false}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceSelection={dataSourceSelection}
       />
     );
 
@@ -129,6 +139,7 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={false}
         fullWidth={false}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -138,6 +149,7 @@ describe('DataSourceSelectable', () => {
     containerInstance.onChange([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toBeCalledTimes(1);
     expect(containerInstance.state).toEqual({
+      componentId: mockGeneratedComponentId,
       dataSourceOptions: [
         {
           id: 'test2',
@@ -159,6 +171,7 @@ describe('DataSourceSelectable', () => {
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
     expect(containerInstance.state).toEqual({
+      componentId: mockGeneratedComponentId,
       dataSourceOptions: [
         {
           checked: 'on',
@@ -197,6 +210,7 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         selectedOption={[{ id: 'test2', label: 'test2' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceSelection={dataSourceSelection}
       />
     );
 
@@ -217,6 +231,7 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         selectedOption={[{ id: 'test2' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -236,6 +251,7 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         selectedOption={[{ id: undefined }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -256,6 +272,7 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         selectedOption={[{}]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -275,6 +292,7 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         selectedOption={[{ label: 'test-label' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -292,6 +310,7 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         selectedOption={[{ label: '' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -309,6 +328,7 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={true}
         fullWidth={false}
         selectedOption={[]}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -326,11 +346,13 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={true}
         fullWidth={false}
         selectedOption={[{ id: 'test2' }]}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
     const containerInstance = container.instance();
     expect(containerInstance.state).toEqual({
+      componentId: mockGeneratedComponentId,
       dataSourceOptions: [
         {
           id: 'test1',
@@ -372,6 +394,7 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={false}
         fullWidth={false}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -380,6 +403,7 @@ describe('DataSourceSelectable', () => {
 
     expect(onSelectedDataSource).toBeCalledWith([]);
     expect(containerInstance.state).toEqual({
+      componentId: mockGeneratedComponentId,
       dataSourceOptions: [],
       defaultDataSource: null,
       isPopoverOpen: false,
@@ -391,6 +415,7 @@ describe('DataSourceSelectable', () => {
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
     expect(containerInstance.state).toEqual({
+      componentId: mockGeneratedComponentId,
       dataSourceOptions: [
         {
           checked: 'on',
@@ -452,6 +477,7 @@ describe('DataSourceSelectable', () => {
           fullWidth={false}
           selectedOption={selectedOption}
           dataSourceFilter={(ds) => false}
+          dataSourceSelection={dataSourceSelection}
         />
       );
       await nextTick();

@@ -204,7 +204,7 @@ export class DataSourceSelectable extends React.Component<
           changeState: this.onEmptyState.bind(this, !!fetchedDataSources?.length),
           notifications: this.props.notifications,
           application: this.props.application,
-          callback: this.onSelectedDataSources,
+          callback: this.onSelectedDataSources.bind(this),
           incompatibleDataSourcesExist: !!fetchedDataSources?.length,
         });
         return;
@@ -223,7 +223,7 @@ export class DataSourceSelectable extends React.Component<
       handleDataSourceFetchError(
         this.onError.bind(this),
         this.props.notifications,
-        this.onSelectedDataSources
+        this.onSelectedDataSources.bind(this)
       );
     }
   }
