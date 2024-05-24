@@ -40,6 +40,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
   const customApiSchemaRegistry = new CustomApiSchemaRegistry();
   const customApiSchemaRegistryPromise = Promise.resolve(customApiSchemaRegistry);
   const dataSourceServiceSetup = dataSourceServiceSetupMock.create();
+  const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
   const wrapperInstance = new DataSourceSavedObjectsClientWrapper(
     dataSourceServiceSetup,
     cryptographyMock,
@@ -52,7 +53,7 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
   const wrapperClient = wrapperInstance.wrapperFactory({
     client: mockedClient,
     typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
-    request: httpServerMock.createOpenSearchDashboardsRequest(),
+    request: requestMock,
   });
 
   const getSavedObject = (savedObject: Partial<SavedObject>) => {
@@ -202,6 +203,23 @@ describe('DataSourceSavedObjectsClientWrapper', () => {
       await expect(
         wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, mockDataSourceAttributes, {})
       ).rejects.toThrowError(`Invalid auth type: 'not_in_registry': Bad Request`);
+    });
+
+    it('endpoint validator datasource client should be created with request as param', async () => {
+      const mockDataSourceAttributesWithNoAuth = attributes({
+        auth: {
+          type: AuthType.NoAuth,
+        },
+      });
+
+      await wrapperClient.create(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        mockDataSourceAttributesWithNoAuth,
+        {}
+      );
+      expect(dataSourceServiceSetup.getDataSourceClient).toBeCalledWith(
+        expect.objectContaining({ request: requestMock })
+      );
     });
 
     describe('createWithCredentialsEncryption: Error handling', () => {
