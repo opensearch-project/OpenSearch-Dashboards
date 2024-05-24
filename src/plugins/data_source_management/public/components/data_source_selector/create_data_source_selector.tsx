@@ -7,22 +7,15 @@ import React from 'react';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { DataSourceSelector, DataSourceSelectorProps } from './data_source_selector';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
 
 export function createDataSourceSelector(
   uiSettings: IUiSettingsClient,
-  dataSourcePluginSetup: DataSourcePluginSetup,
-  dataSourceSelection: DataSourceSelection
+  dataSourcePluginSetup: DataSourcePluginSetup
 ) {
   const { hideLocalCluster } = dataSourcePluginSetup;
   return (
     props: Omit<DataSourceSelectorProps, 'uiSettings' | 'hideLocalCluster' | 'dataSourceSelection'>
   ) => (
-    <DataSourceSelector
-      {...props}
-      uiSettings={uiSettings}
-      hideLocalCluster={hideLocalCluster}
-      dataSourceSelection={dataSourceSelection}
-    />
+    <DataSourceSelector {...props} uiSettings={uiSettings} hideLocalCluster={hideLocalCluster} />
   );
 }

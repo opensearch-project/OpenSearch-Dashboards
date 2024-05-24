@@ -13,12 +13,12 @@ import {
   getDefaultDataSource,
   getFilteredDataSources,
   generateComponentId,
+  getDataSourceSelection,
 } from '../utils';
 import { DataSourceAttributes } from '../../types';
 import { DataSourceItem } from '../data_source_item';
 import './data_source_selector.scss';
 import { DataSourceOption } from '../data_source_menu/types';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSource.localCluster', {
@@ -41,7 +41,6 @@ export interface DataSourceSelectorProps {
   compressed?: boolean;
   uiSettings?: IUiSettingsClient;
   isClearable?: boolean;
-  dataSourceSelection: DataSourceSelection;
 }
 
 interface DataSourceSelectorState {
@@ -72,11 +71,13 @@ export class DataSourceSelector extends React.Component<
 
   componentWillUnmount() {
     this._isMounted = false;
-    this.props.dataSourceSelection.remove(this.state.componentId);
+    getDataSourceSelection().remove(this.state.componentId);
   }
 
   onSelectedDataSource(dataSource: DataSourceOption[]) {
-    this.props.dataSourceSelection.selectDataSource(this.state.componentId, dataSource);
+    // Home plugin can't set DSM as dependency,so it couldn't render this component through ui.DataSourceSelector, it could only import this component directly and render.
+    // In order to get this unified dataSourceSelection instance, we have to get this in component instead of from props.
+    getDataSourceSelection().selectDataSource(this.state.componentId, dataSource);
     this.props.onSelectedDataSource(dataSource);
   }
 

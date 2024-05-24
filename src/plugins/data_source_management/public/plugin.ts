@@ -112,7 +112,6 @@ export class DataSourceManagementPlugin
 
     setHideLocalCluster({ enabled: dataSource.hideLocalCluster });
     setUiSettings(uiSettings);
-
     // This instance will be passed to data source selector component.
     setDataSourceSelection(this.dataSourceSelection);
 
@@ -121,11 +120,7 @@ export class DataSourceManagementPlugin
       // Other plugins can get this instance from setupDeps and use to get selected data sources.
       dataSourceSelection: this.dataSourceSelection,
       ui: {
-        DataSourceSelector: createDataSourceSelector(
-          uiSettings,
-          dataSource,
-          this.dataSourceSelection
-        ),
+        DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
         getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
       },
     };

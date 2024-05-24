@@ -4,7 +4,6 @@ exports[`DataSourceMenu can render data source view when only pass id in the act
 <DataSourceView
   dataSourceSelection={
     DataSourceSelection {
-      "generateComponentId": [Function],
       "getSelection$": [Function],
       "getSelectionValue": [Function],
       "remove": [Function],
@@ -53,7 +52,6 @@ exports[`DataSourceMenu can render data source view when provide activeOption 1`
 <DataSourceView
   dataSourceSelection={
     DataSourceSelection {
-      "generateComponentId": [Function],
       "getSelection$": [Function],
       "getSelectionValue": [Function],
       "remove": [Function],
@@ -353,7 +351,6 @@ exports[`DataSourceMenu should render data source selectable only with local clu
 <DataSourceSelectable
   dataSourceSelection={
     DataSourceSelection {
-      "generateComponentId": [Function],
       "getSelection$": [Function],
       "getSelectionValue": [Function],
       "remove": [Function],
@@ -397,7 +394,6 @@ exports[`DataSourceMenu should render data source selectable only with local clu
 <DataSourceSelectable
   dataSourceSelection={
     DataSourceSelection {
-      "generateComponentId": [Function],
       "getSelection$": [Function],
       "getSelectionValue": [Function],
       "remove": [Function],
@@ -441,7 +437,6 @@ exports[`DataSourceMenu should render data source view if not pass saved object 
 <DataSourceView
   dataSourceSelection={
     DataSourceSelection {
-      "generateComponentId": [Function],
       "getSelection$": [Function],
       "getSelectionValue": [Function],
       "remove": [Function],
@@ -478,7 +473,6 @@ exports[`DataSourceMenu should render data source view only 1`] = `
 <DataSourceView
   dataSourceSelection={
     DataSourceSelection {
-      "generateComponentId": [Function],
       "getSelection$": [Function],
       "getSelectionValue": [Function],
       "remove": [Function],

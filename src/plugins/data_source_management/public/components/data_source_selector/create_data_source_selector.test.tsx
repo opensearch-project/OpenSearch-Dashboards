@@ -13,6 +13,7 @@ import {
   mockDataSourcePluginSetupWithShowLocalCluster,
 } from '../../mocks';
 import { DataSourceSelection } from '../../service/data_source_selection_service';
+import * as utils from '../utils';
 
 describe('create data source selector', () => {
   let client: SavedObjectsClientContract;
@@ -34,10 +35,12 @@ describe('create data source selector', () => {
       hideLocalCluster: false,
       fullWidth: false,
     };
+    const dataSourceSelection = new DataSourceSelection();
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+
     const TestComponent = createDataSourceSelector(
       uiSettings,
-      mockDataSourcePluginSetupWithHideLocalCluster,
-      new DataSourceSelection()
+      mockDataSourcePluginSetupWithHideLocalCluster
     );
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
@@ -58,10 +61,12 @@ describe('create data source selector', () => {
       hideLocalCluster: true,
       fullWidth: false,
     };
+    const dataSourceSelection = new DataSourceSelection();
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+
     const TestComponent = createDataSourceSelector(
       uiSettings,
-      mockDataSourcePluginSetupWithShowLocalCluster,
-      new DataSourceSelection()
+      mockDataSourcePluginSetupWithShowLocalCluster
     );
     const component = render(<TestComponent {...props} />);
     expect(component).toMatchSnapshot();
