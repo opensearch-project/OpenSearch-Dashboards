@@ -17,6 +17,7 @@ import { AppMountParameters, CoreStart, ToastsStart, ScopedHistory } from '../..
 import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginSetup } from '../../data/public';
 import { UiActionsStart } from '../../ui_actions/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '../../usage_collection/public';
 
 export type VisBuilderSetup = TypeServiceSetup;
 export interface VisBuilderStart extends TypeServiceStart {
@@ -27,6 +28,7 @@ export interface VisBuilderPluginSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 export interface VisBuilderPluginStartDependencies {
   embeddable: EmbeddableStart;
@@ -36,6 +38,7 @@ export interface VisBuilderPluginStartDependencies {
   dashboard: DashboardStart;
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
+  usageCollection: UsageCollectionStart;
 }
 
 export interface VisBuilderServices extends CoreStart {
