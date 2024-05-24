@@ -4,7 +4,7 @@
  */
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { fatalErrorsServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
+import { notificationServiceMock } from '../../../../../core/public/mocks';
 import {
   getDataSourcesWithFieldsResponse,
   mockResponseForSavedObjectsCalls,

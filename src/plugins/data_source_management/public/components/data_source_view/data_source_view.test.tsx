@@ -16,8 +16,8 @@ import { DataSourceSelection } from '../../service/data_source_selection_service
 describe('DataSourceView', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   let client: SavedObjectsClientContract;
+  let dataSourceSelection: DataSourceSelection;
   const { toasts } = notificationServiceMock.createStartContract();
-  const dataSourceSelection = new DataSourceSelection();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -25,6 +25,7 @@ describe('DataSourceView', () => {
       get: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'get', getSingleDataSourceResponse);
+    dataSourceSelection = new DataSourceSelection();
   });
 
   it('should render normally with local cluster not hidden', () => {
