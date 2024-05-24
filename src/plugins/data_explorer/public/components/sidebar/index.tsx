@@ -12,6 +12,8 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
+import { DEFAULT_DATA_SOURCE_TYPE, S3_GLUE_DATA_SOURCE_TYPE } from '../../../../data/common';
+import { setDataSourceType } from '../../utils/state_management/metadata_slice';
 
 export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
@@ -83,10 +85,16 @@ export const Sidebar: FC = ({ children }) => {
         return;
       }
       setSelectedSources(selectedDataSources);
-      // if the datasource is default:
-      dispatch(setIndexPattern(selectedDataSources[0].value));
-      // if the datasource is s3:
-      // see what setting the index pattern does, maybe it also changes some thing we want to change, like selected "name" in query bar
+
+      switch (selectedDataSources[0].type) {
+        case DEFAULT_DATA_SOURCE_TYPE: // need to make sure we have a constant here - common with data source types
+          dispatch(setIndexPattern(selectedDataSources[0].value));
+          dispatch(setDataSourceType(DEFAULT_DATA_SOURCE_TYPE));
+          break;
+        case S3_GLUE_DATA_SOURCE_TYPE:
+          dispatch(setDataSourceType(S3_GLUE_DATA_SOURCE_TYPE));
+          break;
+      }
     },
     [dispatch, setSelectedSources]
   );

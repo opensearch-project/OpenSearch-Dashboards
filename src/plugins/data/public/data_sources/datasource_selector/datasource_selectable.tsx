@@ -12,7 +12,6 @@ import { DataSelectorRefresher } from './data_selector_refresher';
 import {
   DATA_SELECTOR_DEFAULT_PLACEHOLDER,
   DATA_SELECTOR_REFRESHER_POPOVER_TEXT,
-  DATA_SELECTOR_S3_DATA_SOURCE_GROUP_HINT_LABEL,
 } from '../constants';
 
 // Asynchronously retrieves and formats dataset from a given data source.

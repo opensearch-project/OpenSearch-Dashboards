@@ -8,6 +8,7 @@ import { DataExplorerServices } from '../../types';
 
 export interface MetadataState {
   indexPattern?: string;
+  dataSourceType?: string;
   originatingApp?: string;
   view?: string;
 }
@@ -40,6 +41,9 @@ export const slice = createSlice({
     setIndexPattern: (state, action: PayloadAction<string>) => {
       state.indexPattern = action.payload;
     },
+    setDataSourceType: (state, action: PayloadAction<string>) => {
+      state.dataSourceType = action.payload;
+    },
     setOriginatingApp: (state, action: PayloadAction<string | undefined>) => {
       state.originatingApp = action.payload;
     },
@@ -53,4 +57,10 @@ export const slice = createSlice({
 });
 
 export const { reducer } = slice;
-export const { setIndexPattern, setOriginatingApp, setView, setState } = slice.actions;
+export const {
+  setIndexPattern,
+  setDataSourceType,
+  setOriginatingApp,
+  setView,
+  setState,
+} = slice.actions;
