@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { getWorkspaceState } from '../../../core/server/utils';
 import {
   SavedObject,
   SavedObjectsClientContract,
@@ -32,12 +33,18 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
   defaultMessage: 'workspace name has already been used, try with a different name',
 });
 
+const INVALID_PERMISSION_ERROR = i18n.translate('workspace.invalid.permission.error', {
+  defaultMessage: 'No permission to perform this operation, please contact OSD admin',
+});
+
 export class WorkspaceClient implements IWorkspaceClientImpl {
   private setupDep: CoreSetup;
   private savedObjects?: SavedObjectsServiceStart;
+  private isPermissionControlEnabled: boolean;
 
-  constructor(core: CoreSetup) {
+  constructor(core: CoreSetup, isPermissionControlEnabled: boolean) {
     this.setupDep = core;
+    this.isPermissionControlEnabled = isPermissionControlEnabled;
   }
 
   private getScopedClientWithoutPermission(
@@ -77,6 +84,14 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   private formatError(error: Error | any): string {
     return error.message || error.error || 'Error';
   }
+  private hasOSDAdminPermission(requestDetail: IRequestDetail) {
+    if (
+      this.isPermissionControlEnabled &&
+      !getWorkspaceState(requestDetail.request).isDashboardAdmin
+    ) {
+      throw new Error(INVALID_PERMISSION_ERROR);
+    }
+  }
   public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
     this.setupDep.savedObjects.registerType(workspace);
     return {
@@ -89,6 +104,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     payload: Omit<WorkspaceAttributeWithPermission, 'id'>
   ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
+      this.hasOSDAdminPermission(requestDetail);
       const { permissions, ...attributes } = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
