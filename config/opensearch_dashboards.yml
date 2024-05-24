@@ -334,3 +334,8 @@
 
 # Set the value to true to enable enhancements for the data plugin
 # data.enhancements.enabled: false
+
+# Set the backend roles in groups or users, whoever has the backend roles or exactly match the user ids defined in this config will be regard as dashboard admin.
+# Dashboard admin will have the access to all the workspaces(workspace.enabled: true) and objects inside OpenSearch Dashboards.
+# opensearchDashboards.dashboardAdmin.groups: ["dashboard_admin"]
+# opensearchDashboards.dashboardAdmin.users: ["dashboard_admin"]
