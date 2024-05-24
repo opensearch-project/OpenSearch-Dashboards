@@ -12,10 +12,10 @@ import { WORKSPACE_APP_CATEGORIES } from '../../../common/constants';
 export const getStartCards: GetStartCard[] = [
   // getStarted
   {
-    id: 'home',
+    id: '', // set id as empty so that it will always show up
     featureDescription: 'Discover pre-loaded datasets before adding your own.',
     featureName: 'Sample Datasets',
-    link: '/app/home#/tutorial_directory',
+    link: '/app/import_sample_data',
     category: WORKSPACE_APP_CATEGORIES.getStarted,
   },
   {

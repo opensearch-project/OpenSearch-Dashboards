@@ -5,6 +5,7 @@
 
 import {
   OpenSearchClient,
+  OpenSearchDashboardsRequest,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
@@ -51,7 +52,10 @@ export class DataSourceSavedObjectsClientWrapper {
         return await wrapperOptions.client.create(type, attributes, options);
       }
 
-      const encryptedAttributes = await this.validateAndEncryptAttributes(attributes);
+      const encryptedAttributes = await this.validateAndEncryptAttributes(
+        attributes,
+        wrapperOptions.request
+      );
 
       return await wrapperOptions.client.create(type, encryptedAttributes, options);
     };
@@ -70,7 +74,7 @@ export class DataSourceSavedObjectsClientWrapper {
 
           return {
             ...object,
-            attributes: await this.validateAndEncryptAttributes(attributes),
+            attributes: await this.validateAndEncryptAttributes(attributes, wrapperOptions.request),
           };
         })
       );
@@ -152,8 +156,11 @@ export class DataSourceSavedObjectsClientWrapper {
     private endpointBlockedIps?: string[]
   ) {}
 
-  private async validateAndEncryptAttributes<T = unknown>(attributes: T) {
-    await this.validateAttributes(attributes);
+  private async validateAndEncryptAttributes<T = unknown>(
+    attributes: T,
+    request?: OpenSearchDashboardsRequest
+  ) {
+    await this.validateAttributes(attributes, request);
 
     const { endpoint, auth } = attributes;
 
@@ -257,11 +264,14 @@ export class DataSourceSavedObjectsClientWrapper {
     }
   }
 
-  private async validateAttributes<T = unknown>(attributes: T) {
+  private async validateAttributes<T = unknown>(
+    attributes: T,
+    request?: OpenSearchDashboardsRequest
+  ) {
     const { title, endpoint, auth } = attributes;
 
     this.validateTitle(title);
-    await this.validateEndpoint(endpoint, attributes as DataSourceAttributes);
+    await this.validateEndpoint(endpoint, attributes as DataSourceAttributes, request);
     await this.validateAuth(auth);
   }
 
@@ -279,7 +289,11 @@ export class DataSourceSavedObjectsClientWrapper {
     }
   }
 
-  private async validateEndpoint(endpoint: string, attributes: DataSourceAttributes) {
+  private async validateEndpoint(
+    endpoint: string,
+    attributes: DataSourceAttributes,
+    request?: OpenSearchDashboardsRequest
+  ) {
     if (!isValidURL(endpoint, this.endpointBlockedIps)) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         '"endpoint" attribute is not valid or allowed'
@@ -290,6 +304,7 @@ export class DataSourceSavedObjectsClientWrapper {
         savedObjects: {} as any,
         cryptography: this.cryptography,
         testClientDataSourceAttr: attributes as DataSourceAttributes,
+        request,
         authRegistry: await this.authRegistryPromise,
         customApiSchemaRegistryPromise: this.customApiSchemaRegistryPromise,
       });
@@ -298,6 +313,7 @@ export class DataSourceSavedObjectsClientWrapper {
 
       await dataSourceValidator.validate();
     } catch (err: any) {
+      this.logger.error(err);
       throw SavedObjectsErrorHelpers.createBadRequestError(
         `endpoint is not valid OpenSearch endpoint`
       );
