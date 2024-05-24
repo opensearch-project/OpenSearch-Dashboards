@@ -111,9 +111,19 @@ describe('workspace utils', () => {
     expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
   });
 
-  it('should be not dashboard admin when groups and users are []', () => {
+  it('should be dashboard admin when groups and users are []', () => {
     const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
     const groups: string[] = [];
+    const users: string[] = [];
+    const configGroups: string[] = [];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should be dashboard admin when configGroups and configUsers are []', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['user1'];
     const users: string[] = [];
     const configGroups: string[] = [];
     const configUsers: string[] = [];

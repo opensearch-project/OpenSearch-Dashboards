@@ -85,13 +85,6 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       } catch (e) {
         return toolkit.next();
       }
-      // If the security plugin is not installed, login defaults to OSD Admin
-      if (!groups.length && !users.length) {
-        updateWorkspaceState(request, {
-          isDashboardAdmin: true,
-        });
-        return toolkit.next();
-      }
 
       const [configGroups, configUsers] = await getOSDAdminConfigFromYMLConfig(this.globalConfig$);
       updateDashboardAdminStateForRequest(request, groups, users, configGroups, configUsers);

@@ -62,10 +62,14 @@ export const updateDashboardAdminStateForRequest = (
   configGroups: string[],
   configUsers: string[]
 ) => {
-  if (configGroups.length === 0 && configUsers.length === 0) {
-    updateWorkspaceState(request, {
-      isDashboardAdmin: false,
-    });
+  // If the security plugin is not installed, login defaults to OSD Admin
+  if (!groups.length && !users.length) {
+    updateWorkspaceState(request, { isDashboardAdmin: true });
+    return;
+  }
+
+  if (!configGroups.length && !configUsers.length) {
+    updateWorkspaceState(request, { isDashboardAdmin: false });
     return;
   }
   const groupMatchAny = groups.some((group) => configGroups.includes(group));
