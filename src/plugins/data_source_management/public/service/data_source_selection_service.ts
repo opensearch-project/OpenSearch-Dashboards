@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import uuid from 'uuid';
 import { BehaviorSubject } from 'rxjs';
 import { DataSourceOption } from '../components/data_source_menu/types';
 
@@ -29,9 +28,5 @@ export class DataSourceSelection {
   // Plugins can use returned subject to subscribe update.
   public getSelection$ = () => {
     return this.selectedDataSource$;
-  };
-
-  public generateComponentId = () => {
-    return uuid.v4();
   };
 }
