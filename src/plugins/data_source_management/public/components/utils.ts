@@ -73,8 +73,9 @@ export async function handleSetDefaultDatasource(
   savedObjectsClient: SavedObjectsClientContract,
   uiSettings: IUiSettingsClient
 ) {
-  if (uiSettings.get('defaultDataSource', null) === null) {
-    return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false);
+  const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
+  if (listOfDataSources.length === 1) {
+    await uiSettings.set('defaultDataSource', listOfDataSources[0].id);
   }
 }
 

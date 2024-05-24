@@ -250,10 +250,12 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
 
   const setDefaultDataSource = async () => {
     try {
-      for (const dataSource of selectedDataSources) {
-        if (uiSettings.get('defaultDataSource') === dataSource.id) {
-          await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
-        }
+      const restDataSourceIds = dataSources
+        .filter((dataSource) => !selectedDataSources.includes(dataSource))
+        .map((item) => item.id);
+      if (restDataSourceIds.length === 0) uiSettings.remove('defaultDataSource');
+      if (!restDataSourceIds.includes(uiSettings.get('defaultDataSource'))) {
+        uiSettings.set('defaultDataSource', restDataSourceIds[0]);
       }
     } catch (e) {
       handleDisplayToastMessage({

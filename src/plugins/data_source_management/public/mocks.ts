@@ -176,6 +176,21 @@ export const getDataSourcesResponse = {
   ],
 };
 
+export const getDataSourcesSingleResponse = {
+  savedObjects: [
+    {
+      id: 'test',
+      type: 'data-source',
+      description: 'test datasource',
+      title: 'test',
+      get(field: string) {
+        const me: any = this || {};
+        return me[field];
+      },
+    },
+  ],
+};
+
 export const getDataSourcesWithFieldsResponse = {
   savedObjects: [
     {

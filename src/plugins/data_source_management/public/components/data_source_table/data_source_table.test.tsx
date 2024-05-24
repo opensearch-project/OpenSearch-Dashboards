@@ -143,7 +143,6 @@ describe('DataSourceTable', () => {
       });
       component.update();
       expect(component.find(confirmModalIdentifier).exists()).toBe(false);
-      expect(utils.setFirstDataSourceAsDefault).toHaveBeenCalled();
     });
 
     it('should delete datasources & fail', async () => {

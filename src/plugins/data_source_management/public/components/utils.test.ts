@@ -26,6 +26,7 @@ import {
   getDataSourceByIdWithCredential,
   getDataSourceByIdWithoutCredential,
   getDataSourcesResponse,
+  getDataSourcesSingleResponse,
   getMappedDataSources,
   mockDataSourceAttributesWithAuth,
   mockErrorResponseForSavedObjectsCalls,
@@ -354,9 +355,9 @@ describe('DataSourceManagement: Utils.ts', () => {
     beforeEach(() => {
       jest.clearAllMocks(); // Reset all mock calls before each test
     });
-    test('should set default datasource when it does not have default datasource ', async () => {
+    test('should set default datasource when data source list only contain one item ', async () => {
       mockUiSettingsCalls(uiSettings, 'get', null);
-      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesSingleResponse);
       await handleSetDefaultDatasource(savedObjects.client, uiSettings);
       expect(uiSettings.set).toHaveBeenCalled();
     });
