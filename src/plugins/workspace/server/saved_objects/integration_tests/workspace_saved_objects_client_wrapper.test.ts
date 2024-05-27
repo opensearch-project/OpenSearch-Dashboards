@@ -316,6 +316,17 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
       expect(createResult.error).toBeUndefined();
     });
+
+    it('should throw forbidden error when user create a workspce and is not OSD admin', async () => {
+      let error;
+      try {
+        await notPermittedSavedObjectedClient.create('workspace', {}, {});
+      } catch (e) {
+        error = e;
+      }
+
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+    });
   });
 
   describe('bulkCreate', () => {
@@ -383,6 +394,17 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       );
 
       expect(createResult.saved_objects).toHaveLength(1);
+    });
+
+    it('should throw forbidden error when user bulkCreate workspace and is not OSD admin', async () => {
+      let error;
+      try {
+        await notPermittedSavedObjectedClient.bulkCreate([{ type: 'workspace', attributes: {} }]);
+      } catch (e) {
+        error = e;
+      }
+
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
     });
   });
 
