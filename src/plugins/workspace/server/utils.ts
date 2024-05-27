@@ -89,4 +89,3 @@ export const getOSDAdminConfigFromYMLConfig = async (
 
   return [groupsResult, usersResult];
 };
-
