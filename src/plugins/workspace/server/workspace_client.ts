@@ -77,7 +77,6 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   private formatError(error: Error | any): string {
     return error.message || error.error || 'Error';
   }
-
   public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
     this.setupDep.savedObjects.registerType(workspace);
     return {
