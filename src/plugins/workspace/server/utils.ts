@@ -4,14 +4,18 @@
  */
 
 import crypto from 'crypto';
+import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import {
   AuthStatus,
   HttpAuth,
   OpenSearchDashboardsRequest,
   Principals,
   PrincipalType,
+  SharedGlobalConfig,
 } from '../../../core/server';
 import { AuthInfo } from './types';
+import { updateWorkspaceState } from '../../../core/server/utils';
 
 /**
  * Generate URL friendly random ID
@@ -49,4 +53,39 @@ export const getPrincipalsFromRequest = (
   }
 
   throw new Error('UNEXPECTED_AUTHORIZATION_STATUS');
+};
+
+export const updateDashboardAdminStateForRequest = (
+  request: OpenSearchDashboardsRequest,
+  groups: string[],
+  users: string[],
+  configGroups: string[],
+  configUsers: string[]
+) => {
+  // If the security plugin is not installed, login defaults to OSD Admin
+  if (!groups.length && !users.length) {
+    updateWorkspaceState(request, { isDashboardAdmin: true });
+    return;
+  }
+
+  if (!configGroups.length && !configUsers.length) {
+    updateWorkspaceState(request, { isDashboardAdmin: false });
+    return;
+  }
+  const groupMatchAny = groups.some((group) => configGroups.includes(group));
+  const userMatchAny = users.some((user) => configUsers.includes(user));
+  updateWorkspaceState(request, {
+    isDashboardAdmin: groupMatchAny || userMatchAny,
+  });
+};
+
+export const getOSDAdminConfigFromYMLConfig = async (
+  globalConfig$: Observable<SharedGlobalConfig>
+) => {
+  const globalConfig = await globalConfig$.pipe(first()).toPromise();
+  const groupsResult = (globalConfig.opensearchDashboards?.dashboardAdmin?.groups ||
+    []) as string[];
+  const usersResult = (globalConfig.opensearchDashboards?.dashboardAdmin?.users || []) as string[];
+
+  return [groupsResult, usersResult];
 };

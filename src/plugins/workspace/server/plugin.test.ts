@@ -3,10 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { OnPreRoutingHandler } from 'src/core/server';
+import { OnPostAuthHandler, OnPreRoutingHandler } from 'src/core/server';
 import { coreMock, httpServerMock } from '../../../core/server/mocks';
 import { WorkspacePlugin } from './plugin';
 import { getWorkspaceState } from '../../../core/server/utils';
+import * as utilsExports from './utils';
 
 describe('Workspace server plugin', () => {
   it('#setup', async () => {
@@ -65,6 +66,70 @@ describe('Workspace server plugin', () => {
       toolKitMock
     );
     expect(toolKitMock.next).toBeCalledTimes(1);
+  });
+
+  describe('#setupPermission', () => {
+    const setupMock = coreMock.createSetup();
+    const initializerContextConfigMock = coreMock.createPluginInitializerContext({
+      enabled: true,
+      permission: {
+        enabled: true,
+      },
+    });
+    let registerOnPostAuthFn: OnPostAuthHandler = () => httpServerMock.createResponseFactory().ok();
+    setupMock.http.registerOnPostAuth.mockImplementation((fn) => {
+      registerOnPostAuthFn = fn;
+      return fn;
+    });
+    const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
+    const requestWithWorkspaceInUrl = httpServerMock.createOpenSearchDashboardsRequest({
+      path: '/w/foo/app',
+    });
+
+    it('catch error', async () => {
+      await workspacePlugin.setup(setupMock);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(
+        requestWithWorkspaceInUrl,
+        httpServerMock.createResponseFactory(),
+        toolKitMock
+      );
+      expect(toolKitMock.next).toBeCalledTimes(1);
+    });
+
+    it('with yml config', async () => {
+      jest
+        .spyOn(utilsExports, 'getPrincipalsFromRequest')
+        .mockImplementation(() => ({ users: [`user1`] }));
+      jest
+        .spyOn(utilsExports, 'getOSDAdminConfigFromYMLConfig')
+        .mockResolvedValue([['group1'], ['user1']]);
+
+      await workspacePlugin.setup(setupMock);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(
+        requestWithWorkspaceInUrl,
+        httpServerMock.createResponseFactory(),
+        toolKitMock
+      );
+      expect(toolKitMock.next).toBeCalledTimes(1);
+    });
+
+    it('uninstall security plugin', async () => {
+      jest.spyOn(utilsExports, 'getPrincipalsFromRequest').mockImplementation(() => ({}));
+
+      await workspacePlugin.setup(setupMock);
+      const toolKitMock = httpServerMock.createToolkit();
+
+      await registerOnPostAuthFn(
+        requestWithWorkspaceInUrl,
+        httpServerMock.createResponseFactory(),
+        toolKitMock
+      );
+      expect(toolKitMock.next).toBeCalledTimes(1);
+    });
   });
 
   it('#start', async () => {

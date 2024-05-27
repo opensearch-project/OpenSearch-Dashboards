@@ -674,7 +674,7 @@ The URL is an identifier only. OpenSearch Dashboards and your browser will never
           i18n.translate('visTypeVega.vegaParser.notSupportedUrlTypeErrorMessage', {
             defaultMessage: '{urlObject} is not supported',
             values: {
-              urlObject: 'url: {"%type%": "${type}"}',
+              urlObject: `url: {"%type%": "${type}"}`,
             },
           })
         );
