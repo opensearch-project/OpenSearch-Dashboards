@@ -352,6 +352,21 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           workspaces: ['workspace-1'],
         });
       });
+      it('should throw permission error when user bulkCreate workspace and is not dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+
+        const objectsToBulkCreate = [
+          { type: 'workspace', id: 'w1', attributes: { bar: 'baz' } },
+          { type: 'workspace', id: 'w2', attributes: { bar: 'foo' } },
+        ];
+        let errorCatched;
+        try {
+          await wrapper.bulkCreate(objectsToBulkCreate);
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+      });
     });
 
     describe('create', () => {
@@ -425,6 +440,16 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
             overwrite: true,
           }
         );
+      });
+      it('should throw permission error when user create a workspace and is not dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.create('workspace', { name: 'test' }, {});
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
       });
     });
     describe('get', () => {

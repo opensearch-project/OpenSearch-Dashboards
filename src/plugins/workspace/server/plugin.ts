@@ -112,7 +112,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
     const isPermissionControlEnabled = globalConfig.savedObjects.permission.enabled === true;
 
-    this.client = new WorkspaceClient(core, isPermissionControlEnabled);
+    this.client = new WorkspaceClient(core);
 
     await this.client.setup(core);
 

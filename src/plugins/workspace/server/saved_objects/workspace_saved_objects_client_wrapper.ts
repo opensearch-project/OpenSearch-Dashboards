@@ -33,6 +33,7 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WorkspacePermissionMode,
 } from '../../common/constants';
+import { isWorkspaceType } from '../utils';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -49,6 +50,15 @@ const generateSavedObjectsPermissionError = () =>
     new Error(
       i18n.translate('saved_objects.permission.invalidate', {
         defaultMessage: 'Invalid saved objects permission',
+      })
+    )
+  );
+
+const generateOSDAdminPermissionError = () =>
+  SavedObjectsErrorHelpers.decorateForbiddenError(
+    new Error(
+      i18n.translate('dashboard.admin.permission.invalidate', {
+        defaultMessage: 'Invalid permission, please contact OSD admin',
       })
     )
   );
@@ -272,6 +282,10 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
+      // Only OSD admin can bulkCreate workspace
+      if (this.isRelatedToWorkspace(objects.map((object) => object.type)))
+        throw generateOSDAdminPermissionError();
+
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
       if (
@@ -330,6 +344,9 @@ export class WorkspaceSavedObjectsClientWrapper {
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
+      // Only OSD admin can create workspace
+      if (this.isRelatedToWorkspace(type)) throw generateOSDAdminPermissionError();
+
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
       if (
