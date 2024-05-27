@@ -30,7 +30,6 @@
 
 import './collapsible_nav.scss';
 import {
-  EuiCollapsibleNav,
   EuiCollapsibleNavGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -150,7 +149,7 @@ export function CollapsibleNav({
       const findApp = navLinks.find((link) => link.id === appId);
       setFocusGroup(findApp?.category?.group?.id || '');
     }
-  }, [appId, navLinks]);
+  }, [appId]);
 
   let categoriesWithGroup: AppCategory[] = [];
 
@@ -309,7 +308,7 @@ export function CollapsibleNav({
               )}
 
               {/* Recently viewed */}
-              <EuiCollapsibleNavGroup
+              {/* <EuiCollapsibleNavGroup
                 key="recentlyViewed"
                 background="light"
                 title={i18n.translate('core.ui.recentlyViewed', {
@@ -365,7 +364,7 @@ export function CollapsibleNav({
                 )}
               </EuiCollapsibleNavGroup>
 
-              <EuiHorizontalRule margin="none" />
+              <EuiHorizontalRule margin="none" /> */}
 
               <EuiFlexItem className="eui-yScroll">
                 {/* OpenSearchDashboards, Observability, Security, and Management sections */}
