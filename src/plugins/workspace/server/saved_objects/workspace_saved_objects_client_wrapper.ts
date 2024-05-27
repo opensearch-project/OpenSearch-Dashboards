@@ -33,7 +33,7 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WorkspacePermissionMode,
 } from '../../common/constants';
-import { isWorkspaceType } from '../utils';
+import { isTypeContained, isWorkspaceType } from '../utils';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -283,7 +283,12 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
       // Only OSD admin can bulkCreate workspace
-      if (this.isRelatedToWorkspace(objects.map((object) => object.type)))
+      if (
+        isTypeContained(
+          WORKSPACE_TYPE,
+          objects.map((object) => object.type)
+        )
+      )
         throw generateOSDAdminPermissionError();
 
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
@@ -345,7 +350,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       options?: SavedObjectsCreateOptions
     ) => {
       // Only OSD admin can create workspace
-      if (this.isRelatedToWorkspace(type)) throw generateOSDAdminPermissionError();
+      if (isTypeContained(WORKSPACE_TYPE, type)) throw generateOSDAdminPermissionError();
 
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 

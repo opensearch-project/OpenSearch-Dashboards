@@ -9,6 +9,7 @@ import {
   generateRandomId,
   getOSDAdminConfigFromYMLConfig,
   getPrincipalsFromRequest,
+  isTypeContained,
   updateDashboardAdminStateForRequest,
 } from './utils';
 import { getWorkspaceState } from '../../../core/server/utils';
@@ -150,5 +151,23 @@ describe('workspace utils', () => {
     const [groups, users] = await getOSDAdminConfigFromYMLConfig(globalConfig$);
     expect(groups).toEqual([]);
     expect(users).toEqual([]);
+  });
+
+  it('should return true when source type contains target type', async () => {
+    let result;
+    result = isTypeContained('workspace', 'workspace');
+    expect(result).toBe(true);
+
+    result = isTypeContained('workspace', ['workspace', 'dashboard']);
+    expect(result).toBe(true);
+  });
+
+  it('should return false when source type does not contain target type', async () => {
+    let result;
+    result = isTypeContained('workspace', 'dashboard');
+    expect(result).toBe(false);
+
+    result = isTypeContained('workspace', ['config', 'dashboard']);
+    expect(result).toBe(false);
   });
 });

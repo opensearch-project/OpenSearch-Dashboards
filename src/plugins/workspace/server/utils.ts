@@ -89,3 +89,15 @@ export const getOSDAdminConfigFromYMLConfig = async (
 
   return [groupsResult, usersResult];
 };
+
+/**
+ * check if the source type include the tartget type
+ * @param targetType
+ * @param sourceType
+ * @returns If the target type is included in the source type, return true, otherwise return false.
+ */
+export const isTypeContained = (targetType: string, sourceType: string | string[]): boolean => {
+  return (
+    targetType === sourceType || (Array.isArray(sourceType) && sourceType.includes(targetType))
+  );
+};
