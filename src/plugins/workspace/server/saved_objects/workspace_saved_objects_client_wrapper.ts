@@ -282,7 +282,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
       // Only OSD admin can bulkCreate workspace
-      if (objects.some((obj) => obj.type === WORKSPACE_TYPE))
+      if (objects.some((obj) => obj.type === WORKSPACE_TYPE) && !options?.overwrite)
         throw generateOSDAdminPermissionError();
 
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
@@ -344,7 +344,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       options?: SavedObjectsCreateOptions
     ) => {
       // Only OSD admin can create workspace
-      if (type === WORKSPACE_TYPE) throw generateOSDAdminPermissionError();
+      if (type === WORKSPACE_TYPE && !options?.overwrite) throw generateOSDAdminPermissionError();
 
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
