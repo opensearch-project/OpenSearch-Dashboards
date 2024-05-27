@@ -320,7 +320,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
     it('should throw forbidden error when user create a workspce and is not OSD admin', async () => {
       let error;
       try {
-        await notPermittedSavedObjectedClient.create('workspace', {}, {});
+        await permittedSavedObjectedClient.create('workspace', {}, {});
       } catch (e) {
         error = e;
       }
@@ -399,7 +399,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
     it('should throw forbidden error when user bulkCreate workspace and is not OSD admin', async () => {
       let error;
       try {
-        await notPermittedSavedObjectedClient.bulkCreate([{ type: 'workspace', attributes: {} }]);
+        await permittedSavedObjectedClient.bulkCreate([{ type: 'workspace', attributes: {} }]);
       } catch (e) {
         error = e;
       }
