@@ -356,12 +356,12 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
 
         const objectsToBulkCreate = [
-          { type: 'workspace', id: 'w1', attributes: { bar: 'baz' } },
-          { type: 'workspace', id: 'w2', attributes: { bar: 'foo' } },
+          { type: 'workspace', id: 'w1', attributes: {} },
+          { type: 'workspace', id: 'w2', attributes: {} },
         ];
         let errorCatched;
         try {
-          await wrapper.bulkCreate(objectsToBulkCreate);
+          await wrapper.bulkCreate(objectsToBulkCreate, { overwrite: true });
         } catch (e) {
           errorCatched = e;
         }
