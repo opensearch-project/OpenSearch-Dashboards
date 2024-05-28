@@ -7,6 +7,7 @@ import { OpenSearchDashboardsRequest, ensureRawRequest } from '../http/router';
 
 export interface WorkspaceState {
   requestWorkspaceId?: string;
+  isDashboardAdmin?: boolean;
 }
 
 /**
@@ -29,8 +30,9 @@ export const updateWorkspaceState = (
 };
 
 export const getWorkspaceState = (request: OpenSearchDashboardsRequest): WorkspaceState => {
-  const { requestWorkspaceId } = ensureRawRequest(request).app as WorkspaceState;
+  const { requestWorkspaceId, isDashboardAdmin } = ensureRawRequest(request).app as WorkspaceState;
   return {
     requestWorkspaceId,
+    isDashboardAdmin,
   };
 };
