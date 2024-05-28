@@ -14,7 +14,7 @@ import { ShallowWrapper, mount, shallow } from 'enzyme';
 import { DataSourceMultiSelectable } from './data_source_multi_selectable';
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 describe('DataSourceMultiSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -24,7 +24,7 @@ describe('DataSourceMultiSelectable', () => {
   const nextTick = () => new Promise((res) => process.nextTick(res));
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   const uiSettings = mockedContext.uiSettings;
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
 
   beforeEach(() => {
     jest.clearAllMocks();

@@ -32,7 +32,7 @@ import {
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
   NO_DATASOURCES_CONNECTED_MESSAGE,
 } from './constants';
-import { DataSourceSelection } from '../service/data_source_selection_service';
+import { DataSourceSelectionService } from '../service/data_source_selection_service';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -346,8 +346,8 @@ export const [getHideLocalCluster, setHideLocalCluster] = createGetterSetter<Hid
 
 // This will maintain an unified data source selection instance among components and export it to other plugin.
 export const [getDataSourceSelection, setDataSourceSelection] = createGetterSetter<
-  DataSourceSelection
->('DataSourceSelection');
+  DataSourceSelectionService
+>('DataSourceSelectionService');
 
 export const generateComponentId = () => {
   return uuid.v4();

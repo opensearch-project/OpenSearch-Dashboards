@@ -11,12 +11,12 @@ import { notificationServiceMock } from '../../../../../core/public/mocks';
 import { getSingleDataSourceResponse, mockResponseForSavedObjectsCalls } from '../../mocks';
 import { render } from '@testing-library/react';
 import * as utils from '../utils';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 describe('DataSourceView', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   let client: SavedObjectsClientContract;
-  let dataSourceSelection: DataSourceSelection;
+  let dataSourceSelection: DataSourceSelectionService;
   const { toasts } = notificationServiceMock.createStartContract();
 
   beforeEach(() => {
@@ -25,7 +25,7 @@ describe('DataSourceView', () => {
       get: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'get', getSingleDataSourceResponse);
-    dataSourceSelection = new DataSourceSelection();
+    dataSourceSelection = new DataSourceSelectionService();
   });
 
   it('should render normally with local cluster not hidden', () => {

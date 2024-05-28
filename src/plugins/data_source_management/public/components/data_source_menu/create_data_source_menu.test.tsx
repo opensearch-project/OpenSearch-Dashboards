@@ -15,13 +15,13 @@ import { act, render } from '@testing-library/react';
 import { DataSourceComponentType, DataSourceSelectableConfig } from './types';
 import { ReactWrapper } from 'enzyme';
 import * as utils from '../utils';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 describe('create data source menu', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const { uiSettings } = coreMock.createSetup();
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
 
   beforeAll(() => {
     jest
@@ -103,7 +103,7 @@ describe('when setMenuMountPoint is provided', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const { uiSettings } = coreMock.createSetup();
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
 
   const refresh = () => {
     new Promise(async (resolve) => {

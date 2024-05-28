@@ -36,7 +36,7 @@ import { TopNavMenu } from './top_nav_menu';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { shallowWithIntl, mountWithIntl } from 'test_utils/enzyme_helpers';
 import * as testUtils from '../../../data_source_management/public/components/utils';
-import { DataSourceSelection } from '../../../data_source_management/public/service/data_source_selection_service';
+import { DataSourceSelectionService } from '../../../data_source_management/public/service/data_source_selection_service';
 
 const dataShim = {
   ui: {
@@ -64,7 +64,7 @@ describe('TopNavMenu', () => {
       run: jest.fn(),
     },
   ];
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
 
   it('Should render nothing when no config is provided', () => {
     const component = shallowWithIntl(<TopNavMenu appName={'test'} />);
@@ -162,7 +162,7 @@ describe('TopNavMenu', () => {
             fullWidth: true,
             activeOption: [{ label: 'what', id: '1' }],
           },
-          dataSourceSelection: new DataSourceSelection(),
+          dataSourceSelection: new DataSourceSelectionService(),
         }}
       />
     );

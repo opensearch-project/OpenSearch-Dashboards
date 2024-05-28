@@ -28,7 +28,7 @@ import {
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
   NO_DATASOURCES_CONNECTED_MESSAGE,
 } from '../constants';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 describe('DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true)', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -36,7 +36,7 @@ describe('DataSourceAggregatedView: read all view (displayAllCompatibleDataSourc
   const { toasts } = notificationServiceMock.createStartContract();
   const uiSettings = uiSettingsServiceMock.createStartContract();
   const application = applicationServiceMock.createStartContract();
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
   const nextTick = () => new Promise((res) => process.nextTick(res));
 
   beforeEach(() => {
@@ -166,7 +166,7 @@ describe('DataSourceAggregatedView: read active view (displayAllCompatibleDataSo
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
   const uiSettings = uiSettingsServiceMock.createStartContract();
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
   const nextTick = () => new Promise((res) => process.nextTick(res));
 
   beforeEach(() => {
@@ -289,7 +289,7 @@ describe('DataSourceAggregatedView empty state test with local cluster hiding', 
   const { toasts } = notificationServiceMock.createStartContract();
   const uiSettings = uiSettingsServiceMock.createStartContract();
   const application = applicationServiceMock.createStartContract();
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
   const nextTick = () => new Promise((res) => process.nextTick(res));
 
   beforeEach(() => {
@@ -376,7 +376,7 @@ describe('DataSourceAggregatedView empty state test due to filter out with local
   const { toasts } = notificationServiceMock.createStartContract();
   const uiSettings = uiSettingsServiceMock.createStartContract();
   const application = applicationServiceMock.createStartContract();
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
   const nextTick = () => new Promise((res) => process.nextTick(res));
 
   beforeEach(() => {
@@ -448,7 +448,7 @@ describe('DataSourceAggregatedView error state test no matter hide local cluster
   const { toasts } = notificationServiceMock.createStartContract();
   const uiSettings = uiSettingsServiceMock.createStartContract();
   const application = applicationServiceMock.createStartContract();
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
   const nextTick = () => new Promise((res) => process.nextTick(res));
 
   beforeEach(() => {
@@ -525,7 +525,7 @@ describe('DataSourceAggregatedView error state test no matter hide local cluster
 describe('DataSourceAggregatedView warning messages', () => {
   const client = {} as any;
   const uiSettings = uiSettingsServiceMock.createStartContract();
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
   const nextTick = () => new Promise((res) => process.nextTick(res));
   let toasts: IToasts;
   const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;

@@ -46,7 +46,7 @@ exports[`TopNavMenu mounts the data source menu as well as top nav menu 1`] = `
       }
       componentType="DataSourceView"
       dataSourceSelection={
-        DataSourceSelection {
+        DataSourceSelectionService {
           "getSelection$": [Function],
           "getSelectionValue": [Function],
           "remove": [Function],
@@ -89,7 +89,7 @@ exports[`TopNavMenu mounts the data source menu if showDataSourceMenu is true 1`
       }
       componentType="DataSourceView"
       dataSourceSelection={
-        DataSourceSelection {
+        DataSourceSelectionService {
           "getSelection$": [Function],
           "getSelectionValue": [Function],
           "remove": [Function],

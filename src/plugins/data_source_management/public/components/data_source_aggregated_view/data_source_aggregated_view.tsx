@@ -28,7 +28,7 @@ import { DataSourceItem } from '../data_source_item';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import './data_source_aggregated_view.scss';
 import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 interface DataSourceAggregatedViewProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -40,7 +40,7 @@ interface DataSourceAggregatedViewProps {
   displayAllCompatibleDataSources: boolean;
   uiSettings?: IUiSettingsClient;
   application?: ApplicationStart;
-  dataSourceSelection: DataSourceSelection;
+  dataSourceSelection: DataSourceSelectionService;
 }
 
 interface DataSourceAggregatedViewState extends DataSourceBaseState {

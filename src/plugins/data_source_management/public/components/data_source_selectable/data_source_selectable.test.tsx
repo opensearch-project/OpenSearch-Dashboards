@@ -19,7 +19,7 @@ import {
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
   ADD_COMPATIBLE_DATASOURCES_MESSAGE,
 } from '../constants';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 const mockGeneratedComponentId = 'component-id';
 jest.mock('uuid', () => ({ v4: () => mockGeneratedComponentId }));
@@ -28,7 +28,7 @@ describe('DataSourceSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
   let client: SavedObjectsClientContract;
-  let dataSourceSelection: DataSourceSelection;
+  let dataSourceSelection: DataSourceSelectionService;
   const { toasts } = notificationServiceMock.createStartContract();
   const nextTick = () => new Promise((res) => process.nextTick(res));
   const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
@@ -39,7 +39,7 @@ describe('DataSourceSelectable', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
-    dataSourceSelection = new DataSourceSelection();
+    dataSourceSelection = new DataSourceSelectionService();
   });
 
   it('should render normally with local cluster not hidden', () => {

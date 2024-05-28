@@ -10,7 +10,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { setServices } from '../opensearch_dashboards_services';
 import { getMockedServices } from '../opensearch_dashboards_services.mock';
 import * as utils from '../../../../../plugins/data_source_management/public/components/utils';
-import { DataSourceSelection } from '../../../../../plugins/data_source_management/public';
+import { DataSourceSelectionService } from '../../../../../plugins/data_source_management/public';
 
 const makeProps = () => {
   const coreMocks = coreMock.createStart();
@@ -30,7 +30,7 @@ describe('<TutorialDirectory />', () => {
   it('should render home breadcrumbs when withoutHomeBreadCrumb is undefined', async () => {
     const finalProps = makeProps();
     currentService.http.get.mockResolvedValueOnce([]);
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(new DataSourceSelection());
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(new DataSourceSelectionService());
 
     // @ts-ignore
     const { TutorialDirectory } = await import('./tutorial_directory');
@@ -53,7 +53,7 @@ describe('<TutorialDirectory />', () => {
   it('should not render home breadcrumbs when withoutHomeBreadCrumb is true', async () => {
     const finalProps = makeProps();
     currentService.http.get.mockResolvedValueOnce([]);
-    spyOn(utils, 'getDataSourceSelection').and.returnValue(new DataSourceSelection());
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(new DataSourceSelectionService());
 
     // @ts-ignore
     const { TutorialDirectory } = await import('./tutorial_directory');

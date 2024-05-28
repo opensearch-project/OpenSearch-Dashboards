@@ -2,12 +2,12 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-import { DataSourceSelection } from './data_source_selection_service';
+import { DataSourceSelectionService } from './data_source_selection_service';
 import { generateComponentId } from '../components/utils';
 
-describe('DataSourceSelection service', () => {
+describe('DataSourceSelectionService service', () => {
   it('basic set, get and remove', async () => {
-    const dataSourceSelection = new DataSourceSelection();
+    const dataSourceSelection = new DataSourceSelectionService();
     const id = generateComponentId();
     const dataSource = { id: 'id', label: 'label' };
     expect(dataSourceSelection.getSelectionValue().get(id)).toBe(undefined);
@@ -18,7 +18,7 @@ describe('DataSourceSelection service', () => {
   });
 
   it('multiple set and get', async () => {
-    const dataSourceSelection = new DataSourceSelection();
+    const dataSourceSelection = new DataSourceSelectionService();
     const id1 = generateComponentId();
     const id2 = generateComponentId();
 
@@ -35,7 +35,7 @@ describe('DataSourceSelection service', () => {
   });
 
   it('support subscribing selected observable', (done) => {
-    const dataSourceSelection = new DataSourceSelection();
+    const dataSourceSelection = new DataSourceSelectionService();
     const selectedDataSource$ = dataSourceSelection.getSelection$();
     const id = generateComponentId();
     const dataSource = { id: 'id', label: 'label' };

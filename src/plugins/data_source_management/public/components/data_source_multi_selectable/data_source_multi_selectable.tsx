@@ -20,7 +20,7 @@ import {
 } from '../utils';
 import { DataSourceBaseState } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 export interface DataSourceMultiSeletableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -30,7 +30,7 @@ export interface DataSourceMultiSeletableProps {
   fullWidth: boolean;
   uiSettings?: IUiSettingsClient;
   application?: ApplicationStart;
-  dataSourceSelection: DataSourceSelection;
+  dataSourceSelection: DataSourceSelectionService;
 }
 
 interface DataSourceMultiSeletableState extends DataSourceBaseState {

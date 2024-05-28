@@ -6,7 +6,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { DataSourceOption } from '../components/data_source_menu/types';
 
-export class DataSourceSelection {
+export class DataSourceSelectionService {
   private selectedDataSource$ = new BehaviorSubject(new Map<string, DataSourceOption[]>());
 
   public selectDataSource = (componentId: string, dataSource: DataSourceOption[]) => {

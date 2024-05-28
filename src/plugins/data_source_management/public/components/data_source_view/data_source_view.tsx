@@ -19,7 +19,7 @@ import { DataSourceItem } from '../data_source_item';
 import { LocalCluster } from '../constants';
 import './data_source_view.scss';
 import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
@@ -31,7 +31,7 @@ interface DataSourceViewProps {
   uiSettings?: IUiSettingsClient;
   dataSourceFilter?: (dataSource: any) => boolean;
   onSelectedDataSources?: (dataSources: DataSourceOption[]) => void;
-  dataSourceSelection: DataSourceSelection;
+  dataSourceSelection: DataSourceSelectionService;
 }
 
 interface DataSourceViewState extends DataSourceBaseState {

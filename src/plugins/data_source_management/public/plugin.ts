@@ -27,7 +27,7 @@ import {
   setUiSettings,
   setDataSourceSelection,
 } from './components/utils';
-import { DataSourceSelection } from './service/data_source_selection_service';
+import { DataSourceSelectionService } from './service/data_source_selection_service';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
@@ -41,7 +41,7 @@ export interface DataSourceManagementPluginSetup {
     DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
     getDataSourceMenu: <T>() => React.ComponentType<DataSourceMenuProps<T>>;
   };
-  dataSourceSelection: DataSourceSelection;
+  dataSourceSelection: DataSourceSelectionService;
 }
 
 export interface DataSourceManagementPluginStart {
@@ -60,7 +60,7 @@ export class DataSourceManagementPlugin
     > {
   private started = false;
   private authMethodsRegistry = new AuthenticationMethodRegistry();
-  private dataSourceSelection = new DataSourceSelection();
+  private dataSourceSelection = new DataSourceSelectionService();
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,

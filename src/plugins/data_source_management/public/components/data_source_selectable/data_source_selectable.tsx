@@ -38,7 +38,7 @@ import { DataSourceDropDownHeader } from '../drop_down_header';
 import '../button_title.scss';
 import './data_source_selectable.scss';
 import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -51,7 +51,7 @@ interface DataSourceSelectableProps {
   selectedOption?: DataSourceOption[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   uiSettings?: IUiSettingsClient;
-  dataSourceSelection: DataSourceSelection;
+  dataSourceSelection: DataSourceSelectionService;
 }
 
 interface DataSourceSelectableState extends DataSourceBaseState {

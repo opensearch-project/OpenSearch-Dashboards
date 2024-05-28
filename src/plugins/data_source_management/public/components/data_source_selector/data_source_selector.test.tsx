@@ -15,7 +15,7 @@ import {
 } from '../../mocks';
 import { AuthType } from 'src/plugins/data_source/common/data_sources';
 import { EuiComboBox } from '@elastic/eui';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 import * as utils from '../utils';
 
 describe('DataSourceSelector', () => {
@@ -23,7 +23,7 @@ describe('DataSourceSelector', () => {
 
   let client: SavedObjectsClientContract;
   const { toasts } = notificationServiceMock.createStartContract();
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -82,7 +82,7 @@ describe('DataSourceSelector: check dataSource options', () => {
   const nextTick = () => new Promise((res) => process.nextTick(res));
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   const uiSettings = mockedContext.uiSettings;
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -242,7 +242,7 @@ describe('DataSourceSelector: check defaultOption behavior', () => {
   const nextTick = () => new Promise((res) => process.nextTick(res));
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   const uiSettings = mockedContext.uiSettings;
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
   const getMockedDataSourceOptions = () => {
     return getDataSourcesWithFieldsResponse.savedObjects.map((response) => {
       return { id: response.id, label: response.attributes.title };

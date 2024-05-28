@@ -11,7 +11,7 @@ import { DataSourceMenu } from './data_source_menu';
 import { render } from '@testing-library/react';
 import { DataSourceComponentType } from './types';
 import * as utils from '../utils';
-import { DataSourceSelection } from '../../service/data_source_selection_service';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 describe('DataSourceMenu', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -19,7 +19,7 @@ describe('DataSourceMenu', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const application = applicationServiceMock.createStartContract();
-  const dataSourceSelection = new DataSourceSelection();
+  const dataSourceSelection = new DataSourceSelectionService();
 
   beforeEach(() => {
     client = {
