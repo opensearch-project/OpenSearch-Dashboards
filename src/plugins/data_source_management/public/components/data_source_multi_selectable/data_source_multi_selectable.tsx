@@ -18,6 +18,7 @@ import {
   handleNoAvailableDataSourceError,
   generateComponentId,
   getDataSourceSelection,
+  getDefaultDataSourceId,
 } from '../utils';
 import { DataSourceBaseState } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
@@ -76,7 +77,7 @@ export class DataSourceMultiSelectable extends React.Component<
   async componentDidMount() {
     this._isMounted = true;
     try {
-      const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
+      const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
       let selectedOptions: SelectedDataSourceOption[] = [];
       const fetchedDataSources = await getDataSourcesWithFields(this.props.savedObjectsClient, [
         'id',

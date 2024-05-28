@@ -26,6 +26,7 @@ import {
   handleNoAvailableDataSourceError,
   generateComponentId,
   getDataSourceSelection,
+  getDefaultDataSourceId,
 } from '../utils';
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
@@ -209,7 +210,7 @@ export class DataSourceSelectable extends React.Component<
         return;
       }
 
-      const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
+      const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
 
       if (this.props.selectedOption?.length) {
         this.handleSelectedOption(dataSourceOptions, defaultDataSource);
