@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import { disableUnknownTypeMappingFields } from './migration_context';
+import { disableUnknownTypeMappingFields, deleteTypeMappingsFields } from './migration_context';
+import { configMock } from '../../../config/mocks';
 
 describe('disableUnknownTypeMappingFields', () => {
   const sourceMappings = {
@@ -94,6 +95,90 @@ describe('disableUnknownTypeMappingFields', () => {
       migrationMappingPropertyHashes: {
         known_type: 'md5hash',
       },
+    });
+  });
+});
+
+describe('deleteTypeMappingsFields', () => {
+  it('should delete specified type mappings fields', () => {
+    const targetMappings = {
+      properties: {
+        type1: { type: 'text' },
+        type2: { type: 'keyword' },
+        type3: { type: 'boolean' },
+      },
+    } as const;
+
+    const rawConfig = configMock.create();
+    rawConfig.get.mockImplementation((path) => {
+      if (path === 'migrations.delete.enabled') {
+        return true;
+      }
+      if (path === 'migrations.delete.types') {
+        return ['type1', 'type3'];
+      }
+    });
+
+    const updatedMappings = deleteTypeMappingsFields(targetMappings, rawConfig);
+
+    expect(updatedMappings.properties).toEqual({
+      type2: { type: 'keyword' },
+    });
+  });
+
+  it('should not delete any type mappings fields if delete is not enabled', () => {
+    const targetMappings = {
+      properties: {
+        type1: { type: 'text' },
+        type2: { type: 'keyword' },
+        type3: { type: 'boolean' },
+      },
+    } as const;
+
+    const rawConfig = configMock.create();
+    rawConfig.get.mockImplementation((path) => {
+      if (path === 'migrations.delete.enabled') {
+        return false;
+      }
+      if (path === 'migrations.delete.types') {
+        return ['type1', 'type3'];
+      }
+    });
+
+    const updatedMappings = deleteTypeMappingsFields(targetMappings, rawConfig);
+
+    expect(updatedMappings.properties).toEqual({
+      type1: { type: 'text' },
+      type2: { type: 'keyword' },
+      type3: { type: 'boolean' },
+    });
+  });
+
+  it('should not delete any type mappings fields if delete types are not specified', () => {
+    const targetMappings = {
+      properties: {
+        type1: { type: 'text' },
+        type2: { type: 'keyword' },
+        type3: { type: 'boolean' },
+      },
+    } as const;
+
+    const rawConfig = configMock.create();
+    rawConfig.get.mockImplementation((path) => {
+      if (path === 'migrations.delete.enabled') {
+        return true;
+      }
+      if (path === 'migrations.delete.types') {
+        return [];
+      }
+    });
+
+    const updatedMappings = deleteTypeMappingsFields(targetMappings, rawConfig);
+
+    expect(updatedMappings.properties).toEqual({
+      type1: { type: 'text' },
+      type2: { type: 'keyword' },
+      type3: { type: 'boolean' },
     });
   });
 });
