@@ -25,6 +25,7 @@ describe('DataSourceMenu', () => {
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
   });
 
   it('should render data source selectable only with local cluster not hidden', () => {
@@ -37,7 +38,6 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -54,7 +54,6 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -69,7 +68,6 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -83,7 +81,6 @@ describe('DataSourceMenu', () => {
           fullWidth: true,
           notifications,
         }}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -99,7 +96,6 @@ describe('DataSourceMenu', () => {
           notifications,
           activeOption: [{ id: 'test', label: 'test-label' }],
         }}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -115,7 +111,6 @@ describe('DataSourceMenu', () => {
           notifications,
           activeOption: [{ id: 'test' }],
         }}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -132,7 +127,6 @@ describe('DataSourceMenu', () => {
           notifications,
           displayAllCompatibleDataSources: true,
         }}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(container).toMatchSnapshot();
@@ -147,7 +141,6 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(container).toMatchSnapshot();
@@ -162,7 +155,6 @@ describe('DataSourceMenu', () => {
           savedObjects: client,
           notifications,
         }}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(container).toMatchSnapshot();

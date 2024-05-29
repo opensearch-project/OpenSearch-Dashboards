@@ -112,7 +112,7 @@ export class DataSourceManagementPlugin
 
     setHideLocalCluster({ enabled: dataSource.hideLocalCluster });
     setUiSettings(uiSettings);
-    // This instance will be passed to data source selector component.
+    // This instance will be got in each data source selector component.
     setDataSourceSelection(this.dataSourceSelection);
 
     return {

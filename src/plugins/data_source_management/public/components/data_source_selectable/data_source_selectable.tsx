@@ -25,6 +25,7 @@ import {
   handleDataSourceFetchError,
   handleNoAvailableDataSourceError,
   generateComponentId,
+  getDataSourceSelection,
 } from '../utils';
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
@@ -38,7 +39,6 @@ import { DataSourceDropDownHeader } from '../drop_down_header';
 import '../button_title.scss';
 import './data_source_selectable.scss';
 import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
-import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 interface DataSourceSelectableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -51,7 +51,6 @@ interface DataSourceSelectableProps {
   selectedOption?: DataSourceOption[];
   dataSourceFilter?: (dataSource: SavedObject<DataSourceAttributes>) => boolean;
   uiSettings?: IUiSettingsClient;
-  dataSourceSelection: DataSourceSelectionService;
 }
 
 interface DataSourceSelectableState extends DataSourceBaseState {
@@ -88,7 +87,7 @@ export class DataSourceSelectable extends React.Component<
 
   componentWillUnmount() {
     this._isMounted = false;
-    this.props.dataSourceSelection.remove(this.state.componentId);
+    getDataSourceSelection().remove(this.state.componentId);
   }
 
   onClick() {
@@ -100,7 +99,7 @@ export class DataSourceSelectable extends React.Component<
   }
 
   onSelectedDataSources(dataSources: DataSourceOption[]) {
-    this.props.dataSourceSelection.selectDataSource(this.state.componentId, dataSources);
+    getDataSourceSelection().selectDataSource(this.state.componentId, dataSources);
     this.props.onSelectedDataSources(dataSources);
   }
 

@@ -17,6 +17,7 @@ import {
   handleDataSourceFetchError,
   handleNoAvailableDataSourceError,
   generateComponentId,
+  getDataSourceSelection,
 } from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
@@ -28,7 +29,6 @@ import { DataSourceItem } from '../data_source_item';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import './data_source_aggregated_view.scss';
 import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
-import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 interface DataSourceAggregatedViewProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -40,7 +40,6 @@ interface DataSourceAggregatedViewProps {
   displayAllCompatibleDataSources: boolean;
   uiSettings?: IUiSettingsClient;
   application?: ApplicationStart;
-  dataSourceSelection: DataSourceSelectionService;
 }
 
 interface DataSourceAggregatedViewState extends DataSourceBaseState {
@@ -80,7 +79,7 @@ export class DataSourceAggregatedView extends React.Component<
 
   componentWillUnmount() {
     this._isMounted = false;
-    this.props.dataSourceSelection.remove(this.state.componentId);
+    getDataSourceSelection().remove(this.state.componentId);
   }
 
   onDataSourcesClick() {
@@ -196,7 +195,7 @@ export class DataSourceAggregatedView extends React.Component<
 
     const selectedItems = items.filter((item) => item.checked === 'on');
     // For read-only cases, also need to set default selected result.
-    this.props.dataSourceSelection.selectDataSource(this.state.componentId, selectedItems);
+    getDataSourceSelection().selectDataSource(this.state.componentId, selectedItems);
 
     const numSelectedItems = selectedItems.length;
 

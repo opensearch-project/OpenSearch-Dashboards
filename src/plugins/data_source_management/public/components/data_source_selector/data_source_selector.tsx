@@ -75,8 +75,6 @@ export class DataSourceSelector extends React.Component<
   }
 
   onSelectedDataSource(dataSource: DataSourceOption[]) {
-    // Home plugin can't set DSM as dependency,so it couldn't render this component through ui.DataSourceSelector, it could only import this component directly and render.
-    // In order to get this unified dataSourceSelection instance, we have to get this in component instead of from props.
     getDataSourceSelection().selectDataSource(this.state.componentId, dataSource);
     this.props.onSelectedDataSource(dataSource);
   }

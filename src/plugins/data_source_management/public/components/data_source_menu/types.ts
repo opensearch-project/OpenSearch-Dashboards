@@ -10,7 +10,6 @@ import {
   IUiSettingsClient,
   ApplicationStart,
 } from '../../../../../core/public';
-import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 import { DataSourceAttributes } from '../../types';
 
 export interface DataSourceOption {
@@ -41,7 +40,6 @@ export interface DataSourceMenuProps<T = any> {
   uiSettings?: IUiSettingsClient;
   application?: ApplicationStart;
   setMenuMountPoint?: (menuMount: MountPoint | undefined) => void;
-  dataSourceSelection: DataSourceSelectionService;
 }
 
 export const DataSourceComponentType = {

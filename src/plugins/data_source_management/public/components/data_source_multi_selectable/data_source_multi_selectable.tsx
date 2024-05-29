@@ -17,10 +17,10 @@ import {
   handleDataSourceFetchError,
   handleNoAvailableDataSourceError,
   generateComponentId,
+  getDataSourceSelection,
 } from '../utils';
 import { DataSourceBaseState } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
-import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 export interface DataSourceMultiSeletableProps {
   savedObjectsClient: SavedObjectsClientContract;
@@ -30,7 +30,6 @@ export interface DataSourceMultiSeletableProps {
   fullWidth: boolean;
   uiSettings?: IUiSettingsClient;
   application?: ApplicationStart;
-  dataSourceSelection: DataSourceSelectionService;
 }
 
 interface DataSourceMultiSeletableState extends DataSourceBaseState {
@@ -64,11 +63,11 @@ export class DataSourceMultiSelectable extends React.Component<
   componentWillUnmount() {
     this._isMounted = false;
     const { componentId } = this.state;
-    this.props.dataSourceSelection.remove(componentId);
+    getDataSourceSelection().remove(componentId);
   }
 
   onSelectedDataSources(dataSources: SelectedDataSourceOption[]) {
-    this.props.dataSourceSelection.selectDataSource(this.state.componentId, dataSources);
+    getDataSourceSelection().selectDataSource(this.state.componentId, dataSources);
     if (this.props.onSelectedDataSources) {
       this.props.onSelectedDataSources(dataSources);
     }

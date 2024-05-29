@@ -13,13 +13,17 @@ import {
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
-import { getDataSourceById, handleDataSourceFetchError, generateComponentId } from '../utils';
+import {
+  getDataSourceById,
+  handleDataSourceFetchError,
+  generateComponentId,
+  getDataSourceSelection,
+} from '../utils';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DataSourceItem } from '../data_source_item';
 import { LocalCluster } from '../constants';
 import './data_source_view.scss';
 import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
-import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
@@ -31,7 +35,6 @@ interface DataSourceViewProps {
   uiSettings?: IUiSettingsClient;
   dataSourceFilter?: (dataSource: any) => boolean;
   onSelectedDataSources?: (dataSources: DataSourceOption[]) => void;
-  dataSourceSelection: DataSourceSelectionService;
 }
 
 interface DataSourceViewState extends DataSourceBaseState {
@@ -59,7 +62,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
 
   componentWillUnmount() {
     this._isMounted = false;
-    this.props.dataSourceSelection.remove(this.state.componentId);
+    getDataSourceSelection().remove(this.state.componentId);
   }
   async componentDidMount() {
     this._isMounted = true;
@@ -119,7 +122,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
   }
 
   onSelectedDataSources(dataSource: DataSourceOption[]) {
-    this.props.dataSourceSelection.selectDataSource(this.state.componentId, dataSource);
+    getDataSourceSelection().selectDataSource(this.state.componentId, dataSource);
 
     if (this.props.onSelectedDataSources) {
       this.props.onSelectedDataSources(dataSource);

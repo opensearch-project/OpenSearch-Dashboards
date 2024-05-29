@@ -28,18 +28,19 @@ describe('DataSourceSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
   let client: SavedObjectsClientContract;
-  let dataSourceSelection: DataSourceSelectionService;
+
   const { toasts } = notificationServiceMock.createStartContract();
   const nextTick = () => new Promise((res) => process.nextTick(res));
   const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
   const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
+  const dataSourceSelection = new DataSourceSelectionService();
 
   beforeEach(() => {
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
-    dataSourceSelection = new DataSourceSelectionService();
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
   });
 
   it('should render normally with local cluster not hidden', () => {
@@ -51,7 +52,6 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={false}
         fullWidth={false}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -72,7 +72,6 @@ describe('DataSourceSelectable', () => {
         disabled={false}
         hideLocalCluster={true}
         fullWidth={false}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -94,7 +93,6 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={false}
         fullWidth={false}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     component.instance().componentDidMount!();
@@ -114,7 +112,6 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={false}
         fullWidth={false}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-        dataSourceSelection={dataSourceSelection}
       />
     );
 
@@ -139,7 +136,6 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={false}
         fullWidth={false}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -210,7 +206,6 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         selectedOption={[{ id: 'test2', label: 'test2' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-        dataSourceSelection={dataSourceSelection}
       />
     );
 
@@ -231,7 +226,6 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         selectedOption={[{ id: 'test2' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -251,7 +245,6 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         selectedOption={[{ id: undefined }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -272,7 +265,6 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         selectedOption={[{}]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -292,7 +284,6 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         selectedOption={[{ label: 'test-label' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -310,7 +301,6 @@ describe('DataSourceSelectable', () => {
         fullWidth={false}
         selectedOption={[{ label: '' }]}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -328,7 +318,6 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={true}
         fullWidth={false}
         selectedOption={[]}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -346,7 +335,6 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={true}
         fullWidth={false}
         selectedOption={[{ id: 'test2' }]}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -394,7 +382,6 @@ describe('DataSourceSelectable', () => {
         hideLocalCluster={false}
         fullWidth={false}
         dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -477,7 +464,6 @@ describe('DataSourceSelectable', () => {
           fullWidth={false}
           selectedOption={selectedOption}
           dataSourceFilter={(ds) => false}
-          dataSourceSelection={dataSourceSelection}
         />
       );
       await nextTick();

@@ -46,6 +46,7 @@ describe('DataSourceAggregatedView: read all view (displayAllCompatibleDataSourc
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
     mockUiSettingsCalls(uiSettings, 'get', 'test1');
     jest.spyOn(utils, 'getApplication').mockReturnValue(application);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
   it.each([
@@ -120,7 +121,6 @@ describe('DataSourceAggregatedView: read all view (displayAllCompatibleDataSourc
           uiSettings={uiSettings}
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
-          dataSourceSelection={dataSourceSelection}
         />
       );
 
@@ -175,6 +175,7 @@ describe('DataSourceAggregatedView: read active view (displayAllCompatibleDataSo
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
     mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
   it.each([
@@ -239,7 +240,6 @@ describe('DataSourceAggregatedView: read active view (displayAllCompatibleDataSo
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
           uiSettings={uiSettings}
-          dataSourceSelection={dataSourceSelection}
         />
       );
       await nextTick();
@@ -299,6 +299,7 @@ describe('DataSourceAggregatedView empty state test with local cluster hiding', 
     mockResponseForSavedObjectsCalls(client, 'find', {});
     mockUiSettingsCalls(uiSettings, 'get', 'test1');
     jest.spyOn(utils, 'getApplication').mockReturnValue(application);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
   afterEach(() => {
@@ -351,7 +352,6 @@ describe('DataSourceAggregatedView empty state test with local cluster hiding', 
           uiSettings={uiSettings}
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
-          dataSourceSelection={dataSourceSelection}
         />
       );
 
@@ -386,6 +386,7 @@ describe('DataSourceAggregatedView empty state test due to filter out with local
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
     mockUiSettingsCalls(uiSettings, 'get', 'test1');
     jest.spyOn(utils, 'getApplication').mockReturnValue(application);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
   afterEach(() => {
@@ -422,7 +423,6 @@ describe('DataSourceAggregatedView empty state test due to filter out with local
           uiSettings={uiSettings}
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
-          dataSourceSelection={dataSourceSelection}
         />
       );
       const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
@@ -458,6 +458,7 @@ describe('DataSourceAggregatedView error state test no matter hide local cluster
     mockErrorResponseForSavedObjectsCalls(client, 'find');
     mockUiSettingsCalls(uiSettings, 'get', 'test1');
     jest.spyOn(utils, 'getApplication').mockReturnValue(application);
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
   afterEach(() => {
@@ -510,7 +511,6 @@ describe('DataSourceAggregatedView error state test no matter hide local cluster
           uiSettings={uiSettings}
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={filter}
-          dataSourceSelection={dataSourceSelection}
         />
       );
 
@@ -534,6 +534,7 @@ describe('DataSourceAggregatedView warning messages', () => {
   beforeEach(() => {
     toasts = notificationServiceMock.createStartContract().toasts;
     mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
   });
 
   it.each([
@@ -571,7 +572,6 @@ describe('DataSourceAggregatedView warning messages', () => {
           activeDataSourceIds={activeDataSourceIds}
           dataSourceFilter={(_) => false}
           uiSettings={uiSettings}
-          dataSourceSelection={dataSourceSelection}
         />
       );
       await nextTick();

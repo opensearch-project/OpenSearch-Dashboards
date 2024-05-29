@@ -15,6 +15,7 @@ import { DataSourceMultiSelectable } from './data_source_multi_selectable';
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { DataSourceSelectionService } from '../../service/data_source_selection_service';
+import * as utils from '../utils';
 
 describe('DataSourceMultiSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -33,6 +34,7 @@ describe('DataSourceMultiSelectable', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
   });
 
   it('should render normally with local cluster not hidden', () => {
@@ -43,7 +45,6 @@ describe('DataSourceMultiSelectable', () => {
         onSelectedDataSources={jest.fn()}
         hideLocalCluster={false}
         fullWidth={false}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -63,7 +64,6 @@ describe('DataSourceMultiSelectable', () => {
         onSelectedDataSources={jest.fn()}
         hideLocalCluster={true}
         fullWidth={false}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     expect(component).toMatchSnapshot();
@@ -91,7 +91,6 @@ describe('DataSourceMultiSelectable', () => {
         onSelectedDataSources={jest.fn()}
         hideLocalCluster={true}
         fullWidth={false}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await nextTick();
@@ -112,7 +111,6 @@ describe('DataSourceMultiSelectable', () => {
         onSelectedDataSources={callbackMock}
         hideLocalCluster={true}
         fullWidth={false}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     const button = await container.findByTestId('dataSourceFilterGroupButton');
@@ -132,7 +130,6 @@ describe('DataSourceMultiSelectable', () => {
         hideLocalCluster={true}
         fullWidth={false}
         uiSettings={uiSettings}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await component.instance().componentDidMount!();
@@ -151,7 +148,6 @@ describe('DataSourceMultiSelectable', () => {
         hideLocalCluster={false}
         fullWidth={false}
         uiSettings={uiSettings}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await component.instance().componentDidMount!();
@@ -170,7 +166,6 @@ describe('DataSourceMultiSelectable', () => {
         hideLocalCluster={true}
         fullWidth={false}
         uiSettings={uiSettings}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await wrapper.instance().componentDidMount!();
@@ -188,7 +183,6 @@ describe('DataSourceMultiSelectable', () => {
         hideLocalCluster={false}
         fullWidth={false}
         uiSettings={uiSettings}
-        dataSourceSelection={dataSourceSelection}
       />
     );
     await wrapper.instance().componentDidMount!();
