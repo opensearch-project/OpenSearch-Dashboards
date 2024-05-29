@@ -5,6 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import { DataSourceOption } from './data_source_menu/types';
+import { DatasourceType } from '../types';
 
 export const LocalCluster: DataSourceOption = {
   label: i18n.translate('dataSource.localCluster', {

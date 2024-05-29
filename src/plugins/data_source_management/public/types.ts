@@ -141,3 +141,6 @@ export {
   DataSourceAttributes,
   DataSourceError,
 } from '../../data_source/common/data_sources';
+
+// flint datasources types
+export type DatasourceType = 'S3GLUE' | 'PROMETHEUS';

@@ -14,9 +14,9 @@ import { ManagementAppMountParams } from '../../../management/public';
 
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
-import { DataSourceTableWithRouter } from '../components/data_source_table';
-import { DataSourceManagementContext } from '../types';
 import { EditDataSourceWithRouter } from '../components/edit_data_source';
+import { DataSourceHomePanel } from '../components/data_source_home_panel/data_source_home_panel';
+import { DataSourceManagementContext } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
 
 export interface DataSourceManagementStartDependencies {
@@ -57,7 +57,7 @@ export async function mountManagementSection(
               <EditDataSourceWithRouter />
             </Route>
             <Route path={['/']}>
-              <DataSourceTableWithRouter />
+              <DataSourceHomePanel {...params} /> {/* Use DataSourceHomePanel here */}
             </Route>
           </Switch>
         </Router>
