@@ -30,3 +30,11 @@ export class DataSourceSelectionService {
     return this.selectedDataSource$;
   };
 }
+
+// This is an empty instance of DataSourceSelection for fallback.
+export const defaultDataSourceSelection = {
+  selectDataSource: () => {},
+  remove: () => {},
+  getSelectionValue: () => {},
+  getSelection$: () => {},
+};

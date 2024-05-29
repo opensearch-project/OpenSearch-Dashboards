@@ -32,7 +32,10 @@ import {
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
   NO_DATASOURCES_CONNECTED_MESSAGE,
 } from './constants';
-import { DataSourceSelectionService } from '../service/data_source_selection_service';
+import {
+  DataSourceSelectionService,
+  defaultDataSourceSelection,
+} from '../service/data_source_selection_service';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -345,9 +348,21 @@ export const [getHideLocalCluster, setHideLocalCluster] = createGetterSetter<Hid
 );
 
 // This will maintain an unified data source selection instance among components and export it to other plugin.
-export const [getDataSourceSelection, setDataSourceSelection] = createGetterSetter<
+const [getDataSourceSelectionInstance, setDataSourceSelection] = createGetterSetter<
   DataSourceSelectionService
 >('DataSourceSelectionService');
+
+const getDataSourceSelection = () => {
+  try {
+    // Usually set will be executed in the setup of DSM.
+    return getDataSourceSelectionInstance();
+  } catch (e) {
+    // Since createGetterSetter doesn't support default value and will throw error if not found.
+    // As dataSourceSelection isn't main part of data selector, will use a default to fallback safely.
+    return defaultDataSourceSelection;
+  }
+};
+export { getDataSourceSelection, setDataSourceSelection };
 
 export const generateComponentId = () => {
   return uuid.v4();
