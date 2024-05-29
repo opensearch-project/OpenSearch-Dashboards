@@ -138,12 +138,12 @@ export function getFilteredDataSources(
 
 export function getDefaultDataSourceId(uiSettings?: IUiSettingsClient) {
   if (!uiSettings) return null;
-  return uiSettings.get(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, null);
+  return uiSettings.get<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, null);
 }
 
 export function getDefaultDataSourceId$(uiSettings?: IUiSettingsClient) {
   if (!uiSettings) return null;
-  return uiSettings.get$(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, null);
+  return uiSettings.get$<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, null);
 }
 
 export function getDefaultDataSource(

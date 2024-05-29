@@ -26,6 +26,8 @@ import {
   setHideLocalCluster,
   setUiSettings,
   setDataSourceSelection,
+  getDefaultDataSourceId,
+  getDefaultDataSourceId$,
 } from './components/utils';
 import { DataSourceSelectionService } from './service/data_source_selection_service';
 
@@ -40,6 +42,8 @@ export interface DataSourceManagementPluginSetup {
   ui: {
     DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
     getDataSourceMenu: <T>() => React.ComponentType<DataSourceMenuProps<T>>;
+    getDefaultDataSourceId: typeof getDefaultDataSourceId;
+    getDefaultDataSourceId$: typeof getDefaultDataSourceId$;
   };
   dataSourceSelection: DataSourceSelectionService;
 }
@@ -123,6 +127,8 @@ export class DataSourceManagementPlugin
         DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
         getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
       },
+      getDefaultDataSourceId,
+      getDefaultDataSourceId$,
     };
   }
 
