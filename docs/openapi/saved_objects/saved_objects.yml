@@ -137,12 +137,125 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_find:
+    get:
+      tags:
+        - saved objects
+      summary: Find saved objects through query.
+      parameters:
+        - in: query
+          name: type
+          description: The type of saved objects to find.
+          required: true
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+          example: dashboard
+        - in: query
+          name: per_page
+          description: The number of saved objects to return per page.
+          schema:
+            type: integer
+            minimum: 0
+            default: 20
+          example: 50
+        - in: query
+          name: page
+          description: The page of objects to return.
+          schema:
+            type: integer 
+            minimum: 0
+            default: 1
+          example: 1
+        - in: query
+          name: search
+          description: The search query that filters the saved objects.
+          schema:
+            type: string
+          example: "open*"
+        - in: query
+          name: default_search_operator
+          description: The default operator for the search query.
+          schema:
+            type: string
+            enum:
+              - AND
+              - OR
+            default: OR
+          example: OR
+        - in: query
+          name: search_fields
+          description: The fields to search on by the query.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+          example: title
+        - in: query
+          name: sort_field
+          description: Sorts the response by selected field.
+          schema:
+            type: string
+          example: _score
+        - in: query
+          name: has_reference
+          description: Filters the saved objects that have a reference with the type and ID combination.
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              id:
+                type: string
+          example: { "type": "visualization", "id": "37cc8650-b882-11e8-a6d9-e546fe2bba5f" }
+        - in: query
+          name: fields
+          description: The fields to return in the response.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+          example: title
+        - in: query
+          name: filter
+          description: A filter string that you can filter the saved object with attributes.
+          schema:
+            type: string
+          example: 'visualization.attributes.title:*'
+        - in: query
+          name: namespace
+          description: Namespaces that this saved object exists in. This attribute is only used for multi-namespace saved object types.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - in: query
+          name: workspace
+          description: Workspaces that this saved object exists in.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+      responses:
+        '200':
+          description: The saved objects are successfully found.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
 components:
   parameters:
     type:
       name: type
       in: path
-      description: The type of SavedObject to retrieve
+      description: The type of SavedObject to retrieve.
       required: true
       schema:
         type: string
