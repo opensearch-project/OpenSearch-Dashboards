@@ -55,7 +55,7 @@ export async function mountManagementSection(
               <EditDataSourceWithRouter />
             </Route>
             <Route path={['/']}>
-              <DataSourceHomePanel />
+              <DataSourceHomePanel history={params.history} />
             </Route>
           </Switch>
         </Router>

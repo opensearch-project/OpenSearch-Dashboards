@@ -11,17 +11,17 @@ import { DataSourceTableWithRouter } from '../data_source_table/data_source_tabl
 
 const tabs = [
   {
-    id: 'manage',
-    name: 'Manage data sources',
+    id: 'manageFlintDataSources',
+    name: 'Manage direct query data sources',
   },
   {
-    id: 'new',
-    name: 'New data source',
+    id: 'manageOpensearchDataSources',
+    name: 'Manage OpenSearch data sources',
   },
 ];
 
 export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
-  const [selectedTabId, setSelectedTabId] = useState('manage');
+  const [selectedTabId, setSelectedTabId] = useState('manageFlintDataSources');
 
   const onSelectedTabChanged = (id: string) => {
     setSelectedTabId(id);
@@ -39,15 +39,15 @@ export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
     ));
   };
 
-  const renderManageTab = () => {
+  const renderOpenSearchDSManageTab = () => {
     return <DataSourceTableWithRouter {...props} />;
   };
 
-  const renderNewTab = () => {
+  const renderFlintDSManageTab = () => {
     return (
       <div>
-        <h2>New Data Source</h2>
-        <p>This is the content for creating a new data source.</p>
+        <h2>Manage direct query data sources</h2>
+        <p>This is the content for managing direct query data sources.</p>
       </div>
     );
   };
@@ -58,8 +58,8 @@ export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
       <EuiSpacer size="l" />
       <EuiTabs>{renderTabs()}</EuiTabs>
       <EuiSpacer size="l" />
-      {selectedTabId === 'manage' && renderManageTab()}
-      {selectedTabId === 'new' && renderNewTab()}
+      {selectedTabId === 'manageOpensearchDataSources' && renderOpenSearchDSManageTab()}
+      {selectedTabId === 'manageFlintDataSources' && renderFlintDSManageTab()}
     </EuiPageTemplate>
   );
 };
