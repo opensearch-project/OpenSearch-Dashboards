@@ -8,6 +8,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageTemplate, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 import { DataSourceHeader } from './data_source_page_header';
 import { DataSourceTableWithRouter } from '../data_source_table/data_source_table';
+import { ManageFlintDataConnection } from '../flint_data_sources_components/flint_data_connection/manage_flint_data_connection';
 
 const tabs = [
   {
@@ -39,27 +40,14 @@ export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
     ));
   };
 
-  const renderOpenSearchDSManageTab = () => {
-    return <DataSourceTableWithRouter {...props} />;
-  };
-
-  const renderFlintDSManageTab = () => {
-    return (
-      <div>
-        <h2>Manage direct query data sources</h2>
-        <p>This is the content for managing direct query data sources.</p>
-      </div>
-    );
-  };
-
   return (
     <EuiPageTemplate>
       <DataSourceHeader history={props.history} />
       <EuiSpacer size="l" />
       <EuiTabs>{renderTabs()}</EuiTabs>
       <EuiSpacer size="l" />
-      {selectedTabId === 'manageOpensearchDataSources' && renderOpenSearchDSManageTab()}
-      {selectedTabId === 'manageFlintDataSources' && renderFlintDSManageTab()}
+      {selectedTabId === 'manageOpensearchDataSources' && <DataSourceTableWithRouter {...props} />}
+      {selectedTabId === 'manageFlintDataSources' && <ManageFlintDataConnection />}
     </EuiPageTemplate>
   );
 };
