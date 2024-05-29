@@ -30,7 +30,7 @@ export const DataSourceHeader: React.FC<DataSourceHeaderProps> = ({ history }) =
           <p>
             <FormattedMessage
               id="dataSourcesManagement.dataSourcesTable.description"
-              defaultMessage="Create and manage data source connections to help you retrieve data from multiple OpenSearch compatible sources."
+              defaultMessage="Create and manage data source connections."
             />
           </p>
         </EuiText>

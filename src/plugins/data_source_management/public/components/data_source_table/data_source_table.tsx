@@ -8,16 +8,11 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiConfirmModal,
-  EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiPageContent,
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
-  EuiTabs,
-  EuiTab,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
@@ -52,19 +47,6 @@ const sorting = {
   },
 };
 
-const tabs = [
-  {
-    id: 'manage',
-    name: 'Manage data sources',
-    disabled: false,
-  },
-  {
-    id: 'new',
-    name: 'New data source',
-    disabled: false,
-  },
-];
-
 export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const {
     chrome,
@@ -80,7 +62,6 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = React.useState(false);
-  const [selectedTabId, setSelectedTabId] = useState('manage');
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
@@ -299,25 +280,6 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     );
   };
 
-  const onSelectedTabChanged = (id: string) => {
-    setSelectedTabId(id);
-    window.location.hash = id;
-  };
-
-  const renderTabs = () => {
-    return tabs.map((tab, index) => (
-      <EuiTab
-        onClick={() => onSelectedTabChanged(tab.id)}
-        isSelected={tab.id === selectedTabId}
-        disabled={tab.disabled}
-        key={index}
-        data-test-subj={tab.id}
-      >
-        {tab.name}
-      </EuiTab>
-    ));
-  };
-
   const renderTableContent = () => {
     return (
       <>
@@ -370,50 +332,15 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     );
   };
 
-  const renderManageTab = () => {
-    return (
-      <>
-        {tableRenderDeleteModal()}
-        {!isLoading && (!dataSources || !dataSources.length)
-          ? renderEmptyState()
-          : renderTableContent()}
-      </>
-    );
-  };
-
-  const renderNewTab = () => {
-    return (
-      <div>
-        <EuiTitle>
-          <h2>New Data Source</h2>
-        </EuiTitle>
-        <EuiText>
-          <p>This is the content for creating a new data source.</p>
-        </EuiText>
-      </div>
-    );
-  };
-
-  const renderContent = () => {
-    return (
-      <>
-        <EuiPageContent
-          data-test-subj="dataSourceTable"
-          role="region"
-          aria-label={i18n.translate('dataSourcesManagement.createDataSourcesLiveRegionAriaLabel', {
-            defaultMessage: 'Data Sources',
-          })}
-        >
-          <EuiTabs>{renderTabs()}</EuiTabs>
-          {selectedTabId === 'manage' && renderManageTab()}
-          {selectedTabId === 'new' && renderNewTab()}
-        </EuiPageContent>
-        {isDeleting ? <LoadingMask /> : null}
-      </>
-    );
-  };
-
-  return renderContent();
+  return (
+    <>
+      {tableRenderDeleteModal()}
+      {!isLoading && (!dataSources || !dataSources.length)
+        ? renderEmptyState()
+        : renderTableContent()}
+      {isDeleting ? <LoadingMask /> : null}
+    </>
+  );
 };
 
 export const DataSourceTableWithRouter = withRouter(DataSourceTable);
