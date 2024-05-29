@@ -189,4 +189,39 @@ describe('DataSourceMultiSelectable', () => {
     expect(wrapper.state('selectedOptions')).toHaveLength(1);
     expect(wrapper.state('showEmptyState')).toBe(false);
   });
+
+  it('should call dataSourceSelection selectDataSource when selecting', async () => {
+    const dataSourceSelectionMock = new DataSourceSelectionService();
+    const componentId = 'component-id';
+    const selectedOptions = [
+      { checked: 'on', id: 'test1', label: 'test1', visible: true },
+      { checked: 'on', id: 'test2', label: 'test2', visible: true },
+      { checked: 'on', id: 'test3', label: 'test3', visible: true },
+    ];
+    dataSourceSelectionMock.selectDataSource = jest.fn();
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelectionMock);
+    jest.spyOn(utils, 'generateComponentId').mockReturnValue(componentId);
+
+    const container = render(
+      <DataSourceMultiSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={jest.fn()}
+        hideLocalCluster={true}
+        fullWidth={false}
+      />
+    );
+
+    await component.instance().componentDidMount!();
+    expect(dataSourceSelectionMock.selectDataSource).toHaveBeenCalledWith(
+      componentId,
+      selectedOptions
+    );
+
+    const button = await container.findByTestId('dataSourceFilterGroupButton');
+    button.click();
+    fireEvent.click(screen.getByText('Deselect all'));
+
+    expect(dataSourceSelectionMock.selectDataSource).toHaveBeenCalledWith(componentId, []);
+  });
 });

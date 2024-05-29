@@ -476,4 +476,30 @@ describe('DataSourceSelectable', () => {
       expect(onSelectedDataSource).toBeCalledWith([]);
     }
   );
+
+  it('should call dataSourceSelection selectDataSource when selecting', async () => {
+    spyOn(utils, 'getDefaultDataSource').and.returnValue([{ id: 'test2', label: 'test2' }]);
+    const dataSourceSelectionMock = new DataSourceSelectionService();
+    const componentId = 'component-id';
+    const selectedOptions = [{ id: 'test2', label: 'test2' }];
+    dataSourceSelectionMock.selectDataSource = jest.fn();
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelectionMock);
+    jest.spyOn(utils, 'generateComponentId').mockReturnValue(componentId);
+    mount(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={jest.fn()}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    expect(dataSourceSelectionMock.selectDataSource).toHaveBeenCalledWith(
+      componentId,
+      selectedOptions
+    );
+  });
 });

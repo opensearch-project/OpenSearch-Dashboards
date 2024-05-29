@@ -584,3 +584,47 @@ describe('DataSourceAggregatedView warning messages', () => {
     }
   );
 });
+
+describe('DataSourceAggregatedView: dataSourceSelection)', () => {
+  let client: SavedObjectsClientContract;
+  const { toasts } = notificationServiceMock.createStartContract();
+  const uiSettings = uiSettingsServiceMock.createStartContract();
+  const dataSourceSelection = new DataSourceSelectionService();
+  dataSourceSelection.selectDataSource = jest.fn();
+  const nextTick = () => new Promise((res) => process.nextTick(res));
+  const activeDataSourceIds = ['test1', 'test2'];
+  const selectedOptions = [
+    { checked: 'on', disabled: true, id: 'test1', label: 'test1' },
+    { checked: 'on', disabled: true, id: 'test2', label: 'test2' },
+  ];
+  const componentId = 'component-id';
+  beforeEach(() => {
+    client = {
+      find: jest.fn().mockResolvedValue([]),
+    } as any;
+    mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
+    mockUiSettingsCalls(uiSettings, 'get', 'test1');
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelection);
+    jest.spyOn(utils, 'generateComponentId').mockReturnValue(componentId);
+  });
+
+  it('should render normally and call selectDataSource', async () => {
+    const component = shallow(
+      <DataSourceAggregatedView
+        fullWidth={false}
+        hideLocalCluster={false}
+        savedObjectsClient={client}
+        notifications={toasts}
+        displayAllCompatibleDataSources={false}
+        activeDataSourceIds={activeDataSourceIds}
+        uiSettings={uiSettings}
+      />
+    );
+
+    // Should render normally
+    expect(component).toMatchSnapshot();
+    await nextTick();
+
+    expect(dataSourceSelection.selectDataSource).toHaveBeenCalledWith(componentId, selectedOptions);
+  });
+});
