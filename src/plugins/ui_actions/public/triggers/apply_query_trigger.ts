@@ -28,14 +28,16 @@
  * under the License.
  */
 
-export * from './trigger';
-export * from './trigger_contract';
-export * from './trigger_internal';
-export * from './select_range_trigger';
-export * from './value_click_trigger';
-export * from './apply_query_trigger';
-export * from './apply_filter_trigger';
-export * from './visualize_field_trigger';
-export * from './visualize_geo_field_trigger';
-export * from './external_action_trigger';
-export * from './default_trigger';
+import { i18n } from '@osd/i18n';
+import { Trigger } from '.';
+
+export const APPLY_QUERY_TRIGGER = 'QUERY_TRIGGER';
+export const applyQueryTrigger: Trigger<'QUERY_TRIGGER'> = {
+  id: APPLY_QUERY_TRIGGER,
+  title: i18n.translate('uiActions.triggers.changeQueryTitle', {
+    defaultMessage: 'Change query',
+  }),
+  description: i18n.translate('uiActions.triggers.changeQueryDescription', {
+    defaultMessage: 'When OpenSearch Dashboards query is changed.',
+  }),
+};

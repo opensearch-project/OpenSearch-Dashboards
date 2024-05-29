@@ -71,6 +71,7 @@ import {
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
   APPLY_FILTER_TRIGGER,
+  APPLY_QUERY_TRIGGER,
 } from '../../ui_actions/public';
 import {
   ACTION_GLOBAL_APPLY_FILTER,
@@ -84,6 +85,9 @@ import {
   ValueClickActionContext,
   createValueClickAction,
   createSelectRangeAction,
+  ACTION_GLOBAL_APPLY_QUERY,
+  ApplyGlobalQueryActionContext,
+  createQueryAction,
 } from './actions';
 
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
@@ -96,6 +100,7 @@ import { DEFAULT_DATA_SOURCE_TYPE } from './data_sources/constants';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
+    [ACTION_GLOBAL_APPLY_QUERY]: ApplyGlobalQueryActionContext;
     [ACTION_GLOBAL_APPLY_FILTER]: ApplyGlobalFilterActionContext;
     [ACTION_SELECT_RANGE]: SelectRangeActionContext;
     [ACTION_VALUE_CLICK]: ValueClickActionContext;
@@ -142,6 +147,11 @@ export class DataPublicPlugin
 
     uiActions.registerAction(
       createFilterAction(queryService.filterManager, queryService.timefilter.timefilter)
+    );
+
+    uiActions.addTriggerAction(
+      APPLY_QUERY_TRIGGER,
+      createQueryAction(queryService.queryString, queryService.timefilter.timefilter)
     );
 
     uiActions.addTriggerAction(

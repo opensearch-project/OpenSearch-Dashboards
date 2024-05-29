@@ -28,12 +28,13 @@
  * under the License.
  */
 
-import { CoreStart, CoreSetup, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
 import { UiActionsService } from './service';
 import {
+  applyFilterTrigger,
+  applyQueryTrigger,
   selectRangeTrigger,
   valueClickTrigger,
-  applyFilterTrigger,
   visualizeFieldTrigger,
   visualizeGeoFieldTrigger,
 } from './triggers';
@@ -58,6 +59,7 @@ export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
   public setup(core: CoreSetup): UiActionsSetup {
     this.service.registerTrigger(selectRangeTrigger);
     this.service.registerTrigger(valueClickTrigger);
+    this.service.registerTrigger(applyQueryTrigger);
     this.service.registerTrigger(applyFilterTrigger);
     this.service.registerTrigger(visualizeFieldTrigger);
     this.service.registerTrigger(visualizeGeoFieldTrigger);

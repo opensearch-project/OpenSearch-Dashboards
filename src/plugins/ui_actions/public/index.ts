@@ -55,6 +55,8 @@ export {
   selectRangeTrigger,
   VALUE_CLICK_TRIGGER,
   valueClickTrigger,
+  APPLY_QUERY_TRIGGER,
+  applyQueryTrigger,
   APPLY_FILTER_TRIGGER,
   applyFilterTrigger,
   VISUALIZE_FIELD_TRIGGER,
