@@ -8,7 +8,7 @@ import { RouteComponentProps } from 'react-router-dom';
 import { EuiPageTemplate, EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 import { DataSourceHeader } from './data_source_page_header';
 import { DataSourceTableWithRouter } from '../data_source_table/data_source_table';
-import { ManageFlintDataConnection } from '../flint_data_sources_components/flint_data_connection/manage_flint_data_connection';
+import { ManageFlintDataConnectionsTable } from '../flint_data_sources_components/flint_data_connection/manage_flint_data_connections_table';
 
 const tabs = [
   {
@@ -47,7 +47,7 @@ export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
       <EuiTabs>{renderTabs()}</EuiTabs>
       <EuiSpacer size="l" />
       {selectedTabId === 'manageOpensearchDataSources' && <DataSourceTableWithRouter {...props} />}
-      {selectedTabId === 'manageFlintDataSources' && <ManageFlintDataConnection />}
+      {selectedTabId === 'manageFlintDataSources' && <ManageFlintDataConnectionsTable />}
     </EuiPageTemplate>
   );
 };

@@ -16,7 +16,7 @@ import {
   EuiPageContent,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DatasourceStatus, DatasourceType } from '../../../types';
 import { DeleteModal } from './delete_modal';
 // import { DataConnectionsHeader } from '../data_connections_header';
@@ -36,10 +36,26 @@ const truncate = (text: string, length: number) => {
   return text.substring(0, length) + '...';
 };
 
-export const ManageFlintDataConnection = () => {
+export const ManageFlintDataConnectionsTable = () => {
   const [data, setData] = useState<DataConnection[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+
+  useEffect(() => {
+    // Populate with dummy data on mount
+    const dummyData: DataConnection[] = [
+      { name: 'myglue', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
+      { name: 'myglue_notrust', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
+      { name: 'mys3_dummy2', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
+      { name: 'prometheus-test', connectionType: 'PROMETHEUS', dsStatus: 'ACTIVE' },
+      { name: 'mys3_dummy3', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
+      { name: 'test-156', connectionType: 'PROMETHEUS', dsStatus: 'ACTIVE' },
+      { name: 'mys3_dummy5', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
+      { name: 'mys3_dummy4', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
+      { name: 'mys3', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
+    ];
+    setData(dummyData);
+  }, []);
 
   const deleteConnection = (connectionName: string) => {
     setData(
