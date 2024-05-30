@@ -49,6 +49,7 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
       disableOptimizer: true,
       cache: true,
       dist: false,
+      extraPlugins: false,
       runExamples: false,
       ...(options.cliArgs || {}),
     },

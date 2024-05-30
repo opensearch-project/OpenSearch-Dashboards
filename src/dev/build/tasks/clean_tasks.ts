@@ -71,7 +71,7 @@ export const CleanTypescript: Task = {
 };
 
 export const CleanExtraFilesFromModules: Task = {
-  description: 'Cleaning tests, examples, docs, etc. from node_modules',
+  description: 'Cleaning tests, extra-plugins, examples, docs, etc. from node_modules',
 
   async run(config, log, build) {
     const makeRegexps = (patterns: string[]) =>
@@ -99,6 +99,9 @@ export const CleanExtraFilesFromModules: Task = {
       '**/CHANGELOG.md',
       '**/Changelog.md',
       '**/changelog.md',
+
+      // extra
+      '**/plugins-extra',
 
       // examples
       '**/example',

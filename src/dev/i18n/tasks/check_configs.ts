@@ -35,8 +35,9 @@ import { checkConfigNamespacePrefix, arrayify } from '..';
 export function checkConfigs(additionalConfigPaths: string | string[] = []) {
   const root = join(__dirname, '../../../../');
   const opensearchDashboardsRC = resolve(root, I18N_RC);
+  const extraRC = resolve(root, 'plugins-extra', I18N_RC);
 
-  const configPaths = [opensearchDashboardsRC, ...arrayify(additionalConfigPaths)];
+  const configPaths = [opensearchDashboardsRC, extraRC, ...arrayify(additionalConfigPaths)];
 
   return configPaths.map((configPath) => ({
     task: async (context: ListrContext) => {
