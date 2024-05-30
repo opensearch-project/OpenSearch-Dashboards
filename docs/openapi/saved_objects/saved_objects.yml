@@ -170,7 +170,7 @@ paths:
           example: 1
         - in: query
           name: search
-          description: The search query that filters the saved objects.
+          description: The simple_query_string query that filters the objects in the response.
           schema:
             type: string
           example: "open*"
@@ -399,6 +399,38 @@ paths:
             application/json:
               schema:
                 type: object
+  /api/saved_objects/_bulk_get:
+    get:
+      tags:
+        - saved objects
+      summary: Bulk get saved objects
+      requestBody:
+        required: true
+        description: Array of criteria including id, type, fields used to retrieve matching saved objects
+        content: 
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    required: true
+                    description: Unique id of the saved object.
+                  type:
+                    type: string
+                    required: true
+                    description: The type of saved object.
+                  fields:
+                    type: array
+                    items:
+                      type: string
+                    description: The fields to return in the attributes key of the object response.
+              example:
+                - id: 67a9021c-c97e-4499-8150-9722ab44edd4
+                  type: visualization
+                  fields: ['title', 'fieldFormatMap']
 components:
   parameters:
     type:
