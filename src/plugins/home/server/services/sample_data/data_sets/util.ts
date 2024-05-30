@@ -71,6 +71,17 @@ export const getSavedObjectsWithDataSource = (
     return saveObjectList.map((saveObject) => {
       overrideSavedObjectId(saveObject, idGenerator);
 
+      // update reference
+      if (saveObject.type === 'index-pattern') {
+        saveObject.references = [
+          {
+            id: `${dataSourceId}`,
+            type: 'data-source',
+            name: 'dataSource',
+          },
+        ];
+      }
+
       if (dataSourceTitle) {
         if (
           saveObject.type === 'dashboard' ||
