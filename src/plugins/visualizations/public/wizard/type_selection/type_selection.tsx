@@ -39,19 +39,19 @@ import {
   EuiFlexItem,
   EuiKeyPadMenu,
   EuiKeyPadMenuItem,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
   EuiScreenReaderOnly,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import { memoizeLast } from '../../legacy/memoize';
 import { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
-import { NewVisHelp } from './new_vis_help';
 import { VisHelpText } from './vis_help_text';
 import { VisTypeIcon } from './vis_type_icon';
 import { VisType, TypesStart } from '../../vis_types';
+import { VisTypeHeader } from './vis_type_header';
 
 interface VisTypeListEntry {
   type: VisType | VisTypeAlias;
@@ -63,6 +63,7 @@ interface TypeSelectionProps {
   onVisTypeSelected: (visType: VisType | VisTypeAlias) => void;
   visTypesRegistry: TypesStart;
   showExperimental: boolean;
+  application: ApplicationStart;
 }
 
 interface HighlightedType {
@@ -94,23 +95,17 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
     const visTypes = this.getFilteredVisTypes(this.props.visTypesRegistry, query);
     return (
       <React.Fragment>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="visualizations.newVisWizard.title"
-              defaultMessage="New Visualization"
-            />
-          </EuiModalHeaderTitle>
-        </EuiModalHeader>
+        <VisTypeHeader
+          promotedVisTypes={visTypes
+            .map((t) => t.type)
+            .filter((t): t is VisTypeAlias => isVisTypeAlias(t) && Boolean(t.promotion))}
+          onVisTypeSelected={this.props.onVisTypeSelected}
+        />
+
         <div className="visNewVisDialog__body">
           <EuiFlexGroup gutterSize="xl">
-            <EuiFlexItem>
-              <EuiFlexGroup
-                className="visNewVisDialog__list"
-                direction="column"
-                gutterSize="none"
-                responsive={false}
-              >
+            <EuiFlexItem className="visNewVisDialog__list">
+              <EuiFlexGroup direction="column" gutterSize="none" responsive={false}>
                 <EuiFlexItem grow={false} className="visNewVisDialog__searchWrapper">
                   <EuiFieldSearch
                     placeholder="Filter"
@@ -166,12 +161,14 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                     </h2>
                   </EuiTitle>
                   <EuiSpacer size="m" />
-                  <NewVisHelp
-                    promotedTypes={visTypes
-                      .map((t) => t.type)
-                      .filter((t): t is VisTypeAlias => isVisTypeAlias(t) && Boolean(t.promotion))}
-                    onPromotionClicked={this.props.onVisTypeSelected}
-                  />
+                  <EuiText>
+                    <p>
+                      <FormattedMessage
+                        id="visualizations.newVisWizard.helpText"
+                        defaultMessage="Start creating your visualization by selecting a type for that visualization."
+                      />
+                    </p>
+                  </EuiText>
                 </React.Fragment>
               )}
             </EuiFlexItem>

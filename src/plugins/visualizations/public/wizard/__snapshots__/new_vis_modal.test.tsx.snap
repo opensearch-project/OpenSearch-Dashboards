@@ -173,9 +173,61 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                     class="euiModalHeader"
                   >
                     <div
-                      class="euiModalHeader__title"
+                      class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
                     >
-                      New Visualization
+                      <div
+                        class="euiFlexItem"
+                      >
+                        <div
+                          class="euiModalHeader__title"
+                        >
+                          New Visualization
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem"
+                      >
+                        <div
+                          class="euiCallOut euiCallOut--primary"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextColor euiTextColor--default"
+                            >
+                              <div
+                                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+                              >
+                                <div
+                                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  promotion description
+                                </div>
+                                <div
+                                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  <button
+                                    class="euiButton euiButton--primary euiButton--small"
+                                    data-test-subj="visualize.promotion.visAliasWithPromotion.button"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButton__content"
+                                    >
+                                      <span
+                                        class="euiButton__text"
+                                      >
+                                        another app
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div
@@ -185,10 +237,10 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                       class="euiFlexGroup euiFlexGroup--gutterExtraLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        class="euiFlexItem"
+                        class="euiFlexItem visNewVisDialog__list"
                       >
                         <div
-                          class="euiFlexGroup euiFlexGroup--directionColumn visNewVisDialog__list"
+                          class="euiFlexGroup euiFlexGroup--directionColumn"
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero visNewVisDialog__searchWrapper"
@@ -396,30 +448,6 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                           <p>
                             Start creating your visualization by selecting a type for that visualization.
                           </p>
-                          <p>
-                            <strong>
-                              promotion description
-                            </strong>
-                          </p>
-                          <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill"
-                            type="button"
-                          >
-                            <span
-                              class="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                            >
-                              <span
-                                class="euiButtonContent__icon"
-                                color="inherit"
-                                data-euiicon-type="popout"
-                              />
-                              <span
-                                class="euiButton__text"
-                              >
-                                another app
-                              </span>
-                            </span>
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -481,6 +509,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
               >
                 <TypeSelection
                   addBasePath={[Function]}
+                  application={Object {}}
                   onVisTypeSelected={[Function]}
                   visTypesRegistry={
                     Object {
@@ -490,25 +519,172 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                     }
                   }
                 >
-                  <EuiModalHeader>
-                    <div
-                      className="euiModalHeader"
-                    >
-                      <EuiModalHeaderTitle>
-                        <div
-                          className="euiModalHeader__title"
+                  <VisTypeHeader
+                    onVisTypeSelected={[Function]}
+                    promotedVisTypes={
+                      Array [
+                        Object {
+                          "aliasApp": "anotherApp",
+                          "aliasPath": "#/anotherUrl",
+                          "name": "visAliasWithPromotion",
+                          "promotion": Object {
+                            "buttonText": "another app",
+                            "description": "promotion description",
+                          },
+                          "stage": "production",
+                          "title": "Vis alias with promotion",
+                        },
+                      ]
+                    }
+                  >
+                    <EuiModalHeader>
+                      <div
+                        className="euiModalHeader"
+                      >
+                        <EuiFlexGroup
+                          direction="column"
+                          gutterSize="m"
                         >
-                          <FormattedMessage
-                            defaultMessage="New Visualization"
-                            id="visualizations.newVisWizard.title"
-                            values={Object {}}
+                          <div
+                            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
                           >
-                            New Visualization
-                          </FormattedMessage>
-                        </div>
-                      </EuiModalHeaderTitle>
-                    </div>
-                  </EuiModalHeader>
+                            <EuiFlexItem>
+                              <div
+                                className="euiFlexItem"
+                              >
+                                <EuiModalHeaderTitle>
+                                  <div
+                                    className="euiModalHeader__title"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="New Visualization"
+                                      id="visualizations.newVisWizard.title"
+                                      values={Object {}}
+                                    >
+                                      New Visualization
+                                    </FormattedMessage>
+                                  </div>
+                                </EuiModalHeaderTitle>
+                              </div>
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <div
+                                className="euiFlexItem"
+                              >
+                                <EuiCallOut
+                                  heading="h2"
+                                >
+                                  <div
+                                    className="euiCallOut euiCallOut--primary"
+                                  >
+                                    <EuiText
+                                      color="default"
+                                      size="s"
+                                    >
+                                      <div
+                                        className="euiText euiText--small"
+                                      >
+                                        <EuiTextColor
+                                          color="default"
+                                          component="div"
+                                        >
+                                          <div
+                                            className="euiTextColor euiTextColor--default"
+                                          >
+                                            <EuiFlexGroup
+                                              justifyContent="spaceBetween"
+                                              wrap={true}
+                                            >
+                                              <div
+                                                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+                                              >
+                                                <EuiFlexItem
+                                                  grow={false}
+                                                >
+                                                  <div
+                                                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                  >
+                                                    <FormattedMessage
+                                                      defaultMessage="promotion description"
+                                                      id="visualize.promotion.visAliasWithPromotion.description"
+                                                      values={Object {}}
+                                                    >
+                                                      promotion description
+                                                    </FormattedMessage>
+                                                  </div>
+                                                </EuiFlexItem>
+                                                <EuiFlexItem
+                                                  grow={false}
+                                                >
+                                                  <div
+                                                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                  >
+                                                    <EuiButton
+                                                      data-test-subj="visualize.promotion.visAliasWithPromotion.button"
+                                                      onClick={[Function]}
+                                                      size="s"
+                                                    >
+                                                      <EuiButtonDisplay
+                                                        baseClassName="euiButton"
+                                                        data-test-subj="visualize.promotion.visAliasWithPromotion.button"
+                                                        disabled={false}
+                                                        element="button"
+                                                        isDisabled={false}
+                                                        onClick={[Function]}
+                                                        size="s"
+                                                        type="button"
+                                                      >
+                                                        <button
+                                                          className="euiButton euiButton--primary euiButton--small"
+                                                          data-test-subj="visualize.promotion.visAliasWithPromotion.button"
+                                                          disabled={false}
+                                                          onClick={[Function]}
+                                                          style={
+                                                            Object {
+                                                              "minWidth": undefined,
+                                                            }
+                                                          }
+                                                          type="button"
+                                                        >
+                                                          <EuiButtonContent
+                                                            className="euiButton__content"
+                                                            iconSide="left"
+                                                            textProps={
+                                                              Object {
+                                                                "className": "euiButton__text",
+                                                              }
+                                                            }
+                                                          >
+                                                            <span
+                                                              className="euiButtonContent euiButton__content"
+                                                            >
+                                                              <span
+                                                                className="euiButton__text"
+                                                              >
+                                                                another app
+                                                              </span>
+                                                            </span>
+                                                          </EuiButtonContent>
+                                                        </button>
+                                                      </EuiButtonDisplay>
+                                                    </EuiButton>
+                                                  </div>
+                                                </EuiFlexItem>
+                                              </div>
+                                            </EuiFlexGroup>
+                                          </div>
+                                        </EuiTextColor>
+                                      </div>
+                                    </EuiText>
+                                  </div>
+                                </EuiCallOut>
+                              </div>
+                            </EuiFlexItem>
+                          </div>
+                        </EuiFlexGroup>
+                      </div>
+                    </EuiModalHeader>
+                  </VisTypeHeader>
                   <div
                     className="visNewVisDialog__body"
                   >
@@ -518,18 +694,19 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                       <div
                         className="euiFlexGroup euiFlexGroup--gutterExtraLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
-                        <EuiFlexItem>
+                        <EuiFlexItem
+                          className="visNewVisDialog__list"
+                        >
                           <div
-                            className="euiFlexItem"
+                            className="euiFlexItem visNewVisDialog__list"
                           >
                             <EuiFlexGroup
-                              className="visNewVisDialog__list"
                               direction="column"
                               gutterSize="none"
                               responsive={false}
                             >
                               <div
-                                className="euiFlexGroup euiFlexGroup--directionColumn visNewVisDialog__list"
+                                className="euiFlexGroup euiFlexGroup--directionColumn"
                               >
                                 <EuiFlexItem
                                   className="visNewVisDialog__searchWrapper"
@@ -998,111 +1175,21 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 className="euiSpacer euiSpacer--m"
                               />
                             </EuiSpacer>
-                            <NewVisHelp
-                              onPromotionClicked={[Function]}
-                              promotedTypes={
-                                Array [
-                                  Object {
-                                    "aliasApp": "anotherApp",
-                                    "aliasPath": "#/anotherUrl",
-                                    "name": "visAliasWithPromotion",
-                                    "promotion": Object {
-                                      "buttonText": "another app",
-                                      "description": "promotion description",
-                                    },
-                                    "stage": "production",
-                                    "title": "Vis alias with promotion",
-                                  },
-                                ]
-                              }
-                            >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
-                                >
-                                  <p>
-                                    <FormattedMessage
-                                      defaultMessage="Start creating your visualization by selecting a type for that visualization."
-                                      id="visualizations.newVisWizard.helpText"
-                                      values={Object {}}
-                                    >
-                                      Start creating your visualization by selecting a type for that visualization.
-                                    </FormattedMessage>
-                                  </p>
-                                  <p>
-                                    <strong>
-                                      promotion description
-                                    </strong>
-                                  </p>
-                                  <EuiButton
-                                    fill={true}
-                                    iconSide="right"
-                                    iconType="popout"
-                                    onClick={[Function]}
-                                    size="s"
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                <p>
+                                  <FormattedMessage
+                                    defaultMessage="Start creating your visualization by selecting a type for that visualization."
+                                    id="visualizations.newVisWizard.helpText"
+                                    values={Object {}}
                                   >
-                                    <EuiButtonDisplay
-                                      baseClassName="euiButton"
-                                      disabled={false}
-                                      element="button"
-                                      fill={true}
-                                      iconSide="right"
-                                      iconType="popout"
-                                      isDisabled={false}
-                                      onClick={[Function]}
-                                      size="s"
-                                      type="button"
-                                    >
-                                      <button
-                                        className="euiButton euiButton--primary euiButton--small euiButton--fill"
-                                        disabled={false}
-                                        onClick={[Function]}
-                                        style={
-                                          Object {
-                                            "minWidth": undefined,
-                                          }
-                                        }
-                                        type="button"
-                                      >
-                                        <EuiButtonContent
-                                          className="euiButton__content"
-                                          iconSide="right"
-                                          iconType="popout"
-                                          textProps={
-                                            Object {
-                                              "className": "euiButton__text",
-                                            }
-                                          }
-                                        >
-                                          <span
-                                            className="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                                          >
-                                            <EuiIcon
-                                              className="euiButtonContent__icon"
-                                              color="inherit"
-                                              size="m"
-                                              type="popout"
-                                            >
-                                              <span
-                                                className="euiButtonContent__icon"
-                                                color="inherit"
-                                                data-euiicon-type="popout"
-                                                size="m"
-                                              />
-                                            </EuiIcon>
-                                            <span
-                                              className="euiButton__text"
-                                            >
-                                              another app
-                                            </span>
-                                          </span>
-                                        </EuiButtonContent>
-                                      </button>
-                                    </EuiButtonDisplay>
-                                  </EuiButton>
-                                </div>
-                              </EuiText>
-                            </NewVisHelp>
+                                    Start creating your visualization by selecting a type for that visualization.
+                                  </FormattedMessage>
+                                </p>
+                              </div>
+                            </EuiText>
                           </div>
                         </EuiFlexItem>
                       </div>
@@ -1292,9 +1379,61 @@ exports[`NewVisModal should render as expected 1`] = `
                     class="euiModalHeader"
                   >
                     <div
-                      class="euiModalHeader__title"
+                      class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
                     >
-                      New Visualization
+                      <div
+                        class="euiFlexItem"
+                      >
+                        <div
+                          class="euiModalHeader__title"
+                        >
+                          New Visualization
+                        </div>
+                      </div>
+                      <div
+                        class="euiFlexItem"
+                      >
+                        <div
+                          class="euiCallOut euiCallOut--primary"
+                        >
+                          <div
+                            class="euiText euiText--small"
+                          >
+                            <div
+                              class="euiTextColor euiTextColor--default"
+                            >
+                              <div
+                                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+                              >
+                                <div
+                                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  promotion description
+                                </div>
+                                <div
+                                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                                >
+                                  <button
+                                    class="euiButton euiButton--primary euiButton--small"
+                                    data-test-subj="visualize.promotion.visAliasWithPromotion.button"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButton__content"
+                                    >
+                                      <span
+                                        class="euiButton__text"
+                                      >
+                                        another app
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div
@@ -1304,10 +1443,10 @@ exports[`NewVisModal should render as expected 1`] = `
                       class="euiFlexGroup euiFlexGroup--gutterExtraLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                     >
                       <div
-                        class="euiFlexItem"
+                        class="euiFlexItem visNewVisDialog__list"
                       >
                         <div
-                          class="euiFlexGroup euiFlexGroup--directionColumn visNewVisDialog__list"
+                          class="euiFlexGroup euiFlexGroup--directionColumn"
                         >
                           <div
                             class="euiFlexItem euiFlexItem--flexGrowZero visNewVisDialog__searchWrapper"
@@ -1498,30 +1637,6 @@ exports[`NewVisModal should render as expected 1`] = `
                           <p>
                             Start creating your visualization by selecting a type for that visualization.
                           </p>
-                          <p>
-                            <strong>
-                              promotion description
-                            </strong>
-                          </p>
-                          <button
-                            class="euiButton euiButton--primary euiButton--small euiButton--fill"
-                            type="button"
-                          >
-                            <span
-                              class="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                            >
-                              <span
-                                class="euiButtonContent__icon"
-                                color="inherit"
-                                data-euiicon-type="popout"
-                              />
-                              <span
-                                class="euiButton__text"
-                              >
-                                another app
-                              </span>
-                            </span>
-                          </button>
                         </div>
                       </div>
                     </div>
@@ -1583,6 +1698,7 @@ exports[`NewVisModal should render as expected 1`] = `
               >
                 <TypeSelection
                   addBasePath={[Function]}
+                  application={Object {}}
                   onVisTypeSelected={[Function]}
                   visTypesRegistry={
                     Object {
@@ -1592,25 +1708,172 @@ exports[`NewVisModal should render as expected 1`] = `
                     }
                   }
                 >
-                  <EuiModalHeader>
-                    <div
-                      className="euiModalHeader"
-                    >
-                      <EuiModalHeaderTitle>
-                        <div
-                          className="euiModalHeader__title"
+                  <VisTypeHeader
+                    onVisTypeSelected={[Function]}
+                    promotedVisTypes={
+                      Array [
+                        Object {
+                          "aliasApp": "anotherApp",
+                          "aliasPath": "#/anotherUrl",
+                          "name": "visAliasWithPromotion",
+                          "promotion": Object {
+                            "buttonText": "another app",
+                            "description": "promotion description",
+                          },
+                          "stage": "production",
+                          "title": "Vis alias with promotion",
+                        },
+                      ]
+                    }
+                  >
+                    <EuiModalHeader>
+                      <div
+                        className="euiModalHeader"
+                      >
+                        <EuiFlexGroup
+                          direction="column"
+                          gutterSize="m"
                         >
-                          <FormattedMessage
-                            defaultMessage="New Visualization"
-                            id="visualizations.newVisWizard.title"
-                            values={Object {}}
+                          <div
+                            className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--directionColumn euiFlexGroup--responsive"
                           >
-                            New Visualization
-                          </FormattedMessage>
-                        </div>
-                      </EuiModalHeaderTitle>
-                    </div>
-                  </EuiModalHeader>
+                            <EuiFlexItem>
+                              <div
+                                className="euiFlexItem"
+                              >
+                                <EuiModalHeaderTitle>
+                                  <div
+                                    className="euiModalHeader__title"
+                                  >
+                                    <FormattedMessage
+                                      defaultMessage="New Visualization"
+                                      id="visualizations.newVisWizard.title"
+                                      values={Object {}}
+                                    >
+                                      New Visualization
+                                    </FormattedMessage>
+                                  </div>
+                                </EuiModalHeaderTitle>
+                              </div>
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <div
+                                className="euiFlexItem"
+                              >
+                                <EuiCallOut
+                                  heading="h2"
+                                >
+                                  <div
+                                    className="euiCallOut euiCallOut--primary"
+                                  >
+                                    <EuiText
+                                      color="default"
+                                      size="s"
+                                    >
+                                      <div
+                                        className="euiText euiText--small"
+                                      >
+                                        <EuiTextColor
+                                          color="default"
+                                          component="div"
+                                        >
+                                          <div
+                                            className="euiTextColor euiTextColor--default"
+                                          >
+                                            <EuiFlexGroup
+                                              justifyContent="spaceBetween"
+                                              wrap={true}
+                                            >
+                                              <div
+                                                className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+                                              >
+                                                <EuiFlexItem
+                                                  grow={false}
+                                                >
+                                                  <div
+                                                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                  >
+                                                    <FormattedMessage
+                                                      defaultMessage="promotion description"
+                                                      id="visualize.promotion.visAliasWithPromotion.description"
+                                                      values={Object {}}
+                                                    >
+                                                      promotion description
+                                                    </FormattedMessage>
+                                                  </div>
+                                                </EuiFlexItem>
+                                                <EuiFlexItem
+                                                  grow={false}
+                                                >
+                                                  <div
+                                                    className="euiFlexItem euiFlexItem--flexGrowZero"
+                                                  >
+                                                    <EuiButton
+                                                      data-test-subj="visualize.promotion.visAliasWithPromotion.button"
+                                                      onClick={[Function]}
+                                                      size="s"
+                                                    >
+                                                      <EuiButtonDisplay
+                                                        baseClassName="euiButton"
+                                                        data-test-subj="visualize.promotion.visAliasWithPromotion.button"
+                                                        disabled={false}
+                                                        element="button"
+                                                        isDisabled={false}
+                                                        onClick={[Function]}
+                                                        size="s"
+                                                        type="button"
+                                                      >
+                                                        <button
+                                                          className="euiButton euiButton--primary euiButton--small"
+                                                          data-test-subj="visualize.promotion.visAliasWithPromotion.button"
+                                                          disabled={false}
+                                                          onClick={[Function]}
+                                                          style={
+                                                            Object {
+                                                              "minWidth": undefined,
+                                                            }
+                                                          }
+                                                          type="button"
+                                                        >
+                                                          <EuiButtonContent
+                                                            className="euiButton__content"
+                                                            iconSide="left"
+                                                            textProps={
+                                                              Object {
+                                                                "className": "euiButton__text",
+                                                              }
+                                                            }
+                                                          >
+                                                            <span
+                                                              className="euiButtonContent euiButton__content"
+                                                            >
+                                                              <span
+                                                                className="euiButton__text"
+                                                              >
+                                                                another app
+                                                              </span>
+                                                            </span>
+                                                          </EuiButtonContent>
+                                                        </button>
+                                                      </EuiButtonDisplay>
+                                                    </EuiButton>
+                                                  </div>
+                                                </EuiFlexItem>
+                                              </div>
+                                            </EuiFlexGroup>
+                                          </div>
+                                        </EuiTextColor>
+                                      </div>
+                                    </EuiText>
+                                  </div>
+                                </EuiCallOut>
+                              </div>
+                            </EuiFlexItem>
+                          </div>
+                        </EuiFlexGroup>
+                      </div>
+                    </EuiModalHeader>
+                  </VisTypeHeader>
                   <div
                     className="visNewVisDialog__body"
                   >
@@ -1620,18 +1883,19 @@ exports[`NewVisModal should render as expected 1`] = `
                       <div
                         className="euiFlexGroup euiFlexGroup--gutterExtraLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
                       >
-                        <EuiFlexItem>
+                        <EuiFlexItem
+                          className="visNewVisDialog__list"
+                        >
                           <div
-                            className="euiFlexItem"
+                            className="euiFlexItem visNewVisDialog__list"
                           >
                             <EuiFlexGroup
-                              className="visNewVisDialog__list"
                               direction="column"
                               gutterSize="none"
                               responsive={false}
                             >
                               <div
-                                className="euiFlexGroup euiFlexGroup--directionColumn visNewVisDialog__list"
+                                className="euiFlexGroup euiFlexGroup--directionColumn"
                               >
                                 <EuiFlexItem
                                   className="visNewVisDialog__searchWrapper"
@@ -2048,111 +2312,21 @@ exports[`NewVisModal should render as expected 1`] = `
                                 className="euiSpacer euiSpacer--m"
                               />
                             </EuiSpacer>
-                            <NewVisHelp
-                              onPromotionClicked={[Function]}
-                              promotedTypes={
-                                Array [
-                                  Object {
-                                    "aliasApp": "anotherApp",
-                                    "aliasPath": "#/anotherUrl",
-                                    "name": "visAliasWithPromotion",
-                                    "promotion": Object {
-                                      "buttonText": "another app",
-                                      "description": "promotion description",
-                                    },
-                                    "stage": "production",
-                                    "title": "Vis alias with promotion",
-                                  },
-                                ]
-                              }
-                            >
-                              <EuiText>
-                                <div
-                                  className="euiText euiText--medium"
-                                >
-                                  <p>
-                                    <FormattedMessage
-                                      defaultMessage="Start creating your visualization by selecting a type for that visualization."
-                                      id="visualizations.newVisWizard.helpText"
-                                      values={Object {}}
-                                    >
-                                      Start creating your visualization by selecting a type for that visualization.
-                                    </FormattedMessage>
-                                  </p>
-                                  <p>
-                                    <strong>
-                                      promotion description
-                                    </strong>
-                                  </p>
-                                  <EuiButton
-                                    fill={true}
-                                    iconSide="right"
-                                    iconType="popout"
-                                    onClick={[Function]}
-                                    size="s"
+                            <EuiText>
+                              <div
+                                className="euiText euiText--medium"
+                              >
+                                <p>
+                                  <FormattedMessage
+                                    defaultMessage="Start creating your visualization by selecting a type for that visualization."
+                                    id="visualizations.newVisWizard.helpText"
+                                    values={Object {}}
                                   >
-                                    <EuiButtonDisplay
-                                      baseClassName="euiButton"
-                                      disabled={false}
-                                      element="button"
-                                      fill={true}
-                                      iconSide="right"
-                                      iconType="popout"
-                                      isDisabled={false}
-                                      onClick={[Function]}
-                                      size="s"
-                                      type="button"
-                                    >
-                                      <button
-                                        className="euiButton euiButton--primary euiButton--small euiButton--fill"
-                                        disabled={false}
-                                        onClick={[Function]}
-                                        style={
-                                          Object {
-                                            "minWidth": undefined,
-                                          }
-                                        }
-                                        type="button"
-                                      >
-                                        <EuiButtonContent
-                                          className="euiButton__content"
-                                          iconSide="right"
-                                          iconType="popout"
-                                          textProps={
-                                            Object {
-                                              "className": "euiButton__text",
-                                            }
-                                          }
-                                        >
-                                          <span
-                                            className="euiButtonContent euiButtonContent--iconRight euiButton__content"
-                                          >
-                                            <EuiIcon
-                                              className="euiButtonContent__icon"
-                                              color="inherit"
-                                              size="m"
-                                              type="popout"
-                                            >
-                                              <span
-                                                className="euiButtonContent__icon"
-                                                color="inherit"
-                                                data-euiicon-type="popout"
-                                                size="m"
-                                              />
-                                            </EuiIcon>
-                                            <span
-                                              className="euiButton__text"
-                                            >
-                                              another app
-                                            </span>
-                                          </span>
-                                        </EuiButtonContent>
-                                      </button>
-                                    </EuiButtonDisplay>
-                                  </EuiButton>
-                                </div>
-                              </EuiText>
-                            </NewVisHelp>
+                                    Start creating your visualization by selecting a type for that visualization.
+                                  </FormattedMessage>
+                                </p>
+                              </div>
+                            </EuiText>
                           </div>
                         </EuiFlexItem>
                       </div>
