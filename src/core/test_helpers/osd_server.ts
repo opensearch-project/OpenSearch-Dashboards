@@ -85,6 +85,7 @@ export function createRootWithSettings(
       watch: false,
       repl: false,
       basePath: false,
+      extraPlugins: false,
       runExamples: false,
       disableOptimizer: true,
       cache: true,

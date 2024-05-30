@@ -231,6 +231,7 @@ export default function (program) {
       []
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
+    .option('--extra-plugins', 'Adds extra plugins not available by default')
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (CAN_REPL) {
@@ -286,6 +287,7 @@ export default function (program) {
         silent: !!opts.silent,
         watch: !!opts.watch,
         repl: !!opts.repl,
+        extraPlugins: !!opts.extraPlugins,
         runExamples: !!opts.runExamples,
         // We want to run without base path when the `--run-examples` flag is given so that we can use local
         // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".

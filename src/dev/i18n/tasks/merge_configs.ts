@@ -34,8 +34,9 @@ import { assignConfigFromPath, arrayify } from '..';
 export function mergeConfigs(additionalConfigPaths: string | string[] = []) {
   const root = join(__dirname, '../../../../');
   const opensearchDashboardsRC = resolve(root, '.i18nrc.json');
+  const extraRC = resolve(root, 'plugins-extra', '.i18nrc.json');
 
-  const configPaths = [opensearchDashboardsRC, ...arrayify(additionalConfigPaths)];
+  const configPaths = [opensearchDashboardsRC, extraRC, ...arrayify(additionalConfigPaths)];
 
   return configPaths.map((configPath) => ({
     task: async (context: ListrContext) => {

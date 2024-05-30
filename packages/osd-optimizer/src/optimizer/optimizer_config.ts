@@ -96,6 +96,8 @@ interface Options {
   /** set to true to inspecting workers when the parent process is being inspected */
   inspectWorkers?: boolean;
 
+  /** include extra plugins in default scan dirs */
+  extraPlugins?: boolean;
   /** include examples in default scan dirs */
   examples?: boolean;
   /** absolute paths to specific plugins that should be built */
@@ -153,6 +155,7 @@ export class OptimizerConfig {
   static parseOptions(options: Options): ParsedOptions {
     const watch = !!options.watch;
     const dist = !!options.dist;
+    const extraPlugins = !!options.extraPlugins;
     const examples = !!options.examples;
     const profileWebpack = !!options.profileWebpack;
     const inspectWorkers = !!options.inspectWorkers;
@@ -178,6 +181,7 @@ export class OptimizerConfig {
     const pluginScanDirs = options.pluginScanDirs || [
       Path.resolve(repoRoot, 'src/plugins'),
       Path.resolve(repoRoot, 'plugins'),
+      ...(extraPlugins ? [Path.resolve('plugins-extra')] : []),
       ...(examples ? [Path.resolve('examples')] : []),
       Path.resolve(repoRoot, 'opensearch-dashboards-extra'),
     ];

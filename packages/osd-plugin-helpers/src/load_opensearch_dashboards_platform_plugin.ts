@@ -43,10 +43,11 @@ export function loadOpenSearchDashboardsPlatformPlugin(pluginDir: string) {
   const parentDir = Path.resolve(pluginDir, '..');
 
   const isFixture = pluginDir.includes('__fixtures__');
+  const isExtra = Path.basename(parentDir) === 'plugins-extra';
   const isExample = Path.basename(parentDir) === 'examples';
   const isRootPlugin = parentDir === Path.resolve(REPO_ROOT, 'plugins');
 
-  if (isFixture || isExample || isRootPlugin) {
+  if (isFixture || isExtra || isExample || isRootPlugin) {
     return parseOpenSearchDashboardsPlatformPlugin(
       Path.resolve(pluginDir, 'opensearch_dashboards.json')
     );

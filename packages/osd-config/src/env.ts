@@ -52,6 +52,7 @@ export interface CliArgs {
   basePath: boolean;
   /** @deprecated use disableOptimizer to know if the @osd/optimizer is disabled in development */
   optimize?: boolean;
+  extraPlugins: boolean;
   runExamples: boolean;
   disableOptimizer: boolean;
   cache: boolean;
@@ -133,6 +134,7 @@ export class Env {
     this.pluginSearchPaths = [
       resolve(this.homeDir, 'src', 'plugins'),
       resolve(this.homeDir, 'plugins'),
+      ...(options.cliArgs.extraPlugins ? [resolve(this.homeDir, 'plugins-extra')] : []),
       ...(options.cliArgs.runExamples ? [resolve(this.homeDir, 'examples')] : []),
       resolve(this.homeDir, '..', 'opensearch-dashboards-extra'),
     ];

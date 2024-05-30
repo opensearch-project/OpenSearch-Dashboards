@@ -291,6 +291,7 @@ module.exports = {
                   'src/legacy/**/*',
                   '(src)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
+                  'plugins-extra/**/*',
                 ],
                 from: [
                   'src/core/public/**/*',
@@ -322,6 +323,7 @@ module.exports = {
                   'src/legacy/**/*',
                   '(src)/plugins/**/(public|server)/**/*',
                   'examples/**/*',
+                  'plugins-extra/**/*',
                   '!(src)/**/*.test.*',
                 ],
                 from: [
@@ -338,13 +340,16 @@ module.exports = {
                   '!(src)/plugins/**/server/**/*',
 
                   'examples/**/*',
+                  'plugins-extra/**/*',
                   '!examples/**/server/**/*',
+                  '!plugins-extra/**/server/**/*',
                 ],
                 from: [
                   'src/core/server',
                   'src/core/server/**/*',
                   '(src)/plugins/*/server/**/*',
                   'examples/**/server/**/*',
+                  'plugins-extra/**/server/*',
                 ],
                 errorMessage:
                   'Server modules cannot be imported into client modules or shared modules.',

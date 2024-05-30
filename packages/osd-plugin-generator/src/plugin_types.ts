@@ -43,6 +43,10 @@ export const PLUGIN_TYPE_OPTIONS: Array<{ name: string; value: PluginType }> = [
     value: { thirdParty: true, installDir: Path.resolve(REPO_ROOT, 'plugins') },
   },
   {
+    name: 'OpenSearch Dashboards Extra',
+    value: { thirdParty: false, installDir: Path.resolve(REPO_ROOT, 'plugins-extra') },
+  },
+  {
     name: 'OpenSearch Dashboards Example',
     value: { thirdParty: false, installDir: Path.resolve(REPO_ROOT, 'examples') },
   },

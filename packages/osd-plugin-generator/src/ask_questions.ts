@@ -43,6 +43,10 @@ export interface Answers {
 
 export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> = [
   {
+    name: 'OpenSearch Dashboards Extra',
+    value: Path.resolve(REPO_ROOT, 'plugins-extra'),
+  },
+  {
     name: 'OpenSearch Dashboards Example',
     value: Path.resolve(REPO_ROOT, 'examples'),
   },
