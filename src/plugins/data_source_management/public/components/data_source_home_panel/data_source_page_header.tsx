@@ -15,7 +15,7 @@ export const DataSourceHeader: React.FC<DataSourceHeaderProps> = ({ history }) =
   const createButton = <CreateButton history={history} dataTestSubj="createDataSourceButton" />;
 
   return (
-    <EuiFlexGroup justifyContent="spaceBetween">
+    <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle>
           <h2>
