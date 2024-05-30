@@ -406,7 +406,7 @@ paths:
       summary: Bulk get saved objects
       requestBody:
         required: true
-        description: Array of saved objects to update
+        description: Array of criteria including id, type, fields used to retrieve matching saved objects
         content: 
           application/json:
             schema:
