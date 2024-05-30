@@ -326,6 +326,22 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       }
 
       expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+
+      try {
+        await permittedSavedObjectedClient.create('workspace', {}, { id: 'workspace-1' });
+      } catch (e) {
+        error = e;
+      }
+
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+
+      try {
+        await permittedSavedObjectedClient.create('workspace', {}, { overwrite: true });
+      } catch (e) {
+        error = e;
+      }
+
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
     });
   });
 
@@ -399,9 +415,27 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
     it('should throw forbidden error when user bulkCreate workspace and is not OSD admin', async () => {
       let error;
       try {
+        await permittedSavedObjectedClient.bulkCreate([{ type: 'workspace', attributes: {} }]);
+      } catch (e) {
+        error = e;
+      }
+
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+
+      try {
         await permittedSavedObjectedClient.bulkCreate([{ type: 'workspace', attributes: {} }], {
           overwrite: true,
         });
+      } catch (e) {
+        error = e;
+      }
+
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+
+      try {
+        await permittedSavedObjectedClient.bulkCreate([
+          { type: 'workspace', id: 'test', attributes: {} },
+        ]);
       } catch (e) {
         error = e;
       }
