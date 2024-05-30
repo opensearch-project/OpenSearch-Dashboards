@@ -13,13 +13,12 @@ import {
   EuiOverlayMask,
   EuiPage,
   EuiPageBody,
-  EuiPageContent,
+  EuiSpacer,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { DatasourceStatus, DatasourceType } from '../../../types';
 import { DeleteModal } from './delete_modal';
-// import { DataConnectionsHeader } from '../data_connections_header';
 import { DataConnectionsDescription } from './manage_flint_data_connections_description';
 import PrometheusLogo from '../icons/prometheus_logo.svg';
 import S3Logo from '../icons/s3_logo.svg';
@@ -188,11 +187,10 @@ export const ManageFlintDataConnectionsTable = () => {
   });
 
   return (
-    <EuiPage>
-      <EuiPageBody component="div">
-        {/* <DataConnectionsHeader /> */}
-        <EuiPageContent data-test-subj="manageDataConnectionsarea">
-          <DataConnectionsDescription refresh={() => {}} />
+    <EuiPageBody component="div">
+      <EuiSpacer size="s" />
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false} style={{ width: '100%' }}>
           <EuiInMemoryTable
             items={entries}
             itemId="id"
@@ -206,9 +204,9 @@ export const ManageFlintDataConnectionsTable = () => {
             allowNeutralSort={false}
             isSelectable={true}
           />
-        </EuiPageContent>
-        {isModalVisible && modalLayout}
-      </EuiPageBody>
-    </EuiPage>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      {isModalVisible && modalLayout}
+    </EuiPageBody>
   );
 };
