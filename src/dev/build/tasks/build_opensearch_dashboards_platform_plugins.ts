@@ -46,6 +46,7 @@ export const BuildOpenSearchDashboardsPlatformPlugins: Task = {
       repoRoot: REPO_ROOT,
       outputRoot: build.resolvePath(),
       cache: false,
+      extraPlugins: false,
       examples: false,
       watch: false,
       dist: true,

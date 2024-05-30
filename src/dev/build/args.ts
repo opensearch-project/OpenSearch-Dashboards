@@ -37,6 +37,7 @@ export function readCliArgs(argv: string[]) {
   const unknownFlags: string[] = [];
   const flags = getopts(argv, {
     boolean: [
+      'extra-plugins',
       'skip-archives',
       'skip-os-packages',
       'rpm',

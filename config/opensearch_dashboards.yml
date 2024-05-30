@@ -334,3 +334,25 @@
 
 # Set the value to true to enable enhancements for the data plugin
 # data.enhancements.enabled: false
+# Set the value to true to enable enhancements for the data plugin
+data.enhancements.enabled: true
+# # uiSettings:
+# #   overrides:o
+# #     "timepicker:quickRanges": []
+opensearch_alerting.enabled: false
+opensearch_security.enabled: false
+# ql_dashboards.enabled: false
+
+# opensearch.hosts: [https://localhost:9200]fea
+# opensearch.ssl.verificationMode: none
+# opensearch.username: kibanaserver
+# opensearch.password: kibanaserver
+# opensearch.requestHeadersWhitelist: [authorization, securitytenant]
+
+# opensearch_security.multitenancy.enabled: true
+# opensearch_security.multitenancy.tenants.preferred: [Private, Global]
+# opensearch_security.readonly_mode.roles: [kibana_read_only]
+# # Use this setting if you are running opensearch-dashboards without https
+# opensearch_security.cookie.secure: false
+
+

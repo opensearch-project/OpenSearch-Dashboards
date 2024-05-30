@@ -55,6 +55,7 @@ if (showHelp) {
       build the OpenSearch Dashboards distributable
 
       options:
+        --extra-plugins         {dim Include extra plugins in the distributable}
         --skip-archives         {dim Don't produce tar/zip archives}
         --skip-os-packages      {dim Don't produce rpm/deb/docker packages}
         --all-platforms         {dim Produce archives for all platforms, not just this one}

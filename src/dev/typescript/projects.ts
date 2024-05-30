@@ -49,6 +49,9 @@ export const PROJECTS = [
     .sync('src/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
     .map((path) => new Project(resolve(REPO_ROOT, path))),
   ...glob
+    .sync('plugins-extra/*/tsconfig.json', { cwd: REPO_ROOT })
+    .map((path) => new Project(resolve(REPO_ROOT, path))),
+  ...glob
     .sync('examples/*/tsconfig.json', { cwd: REPO_ROOT })
     .map((path) => new Project(resolve(REPO_ROOT, path))),
   ...glob

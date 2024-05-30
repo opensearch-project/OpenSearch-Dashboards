@@ -121,6 +121,7 @@
     "packages": [
       "packages/*",
       "examples/*",
+      "plugins-extra/*",
       "test/plugin_functional/plugins/*",
       "test/interpreter_functional/plugins/*"
     ],

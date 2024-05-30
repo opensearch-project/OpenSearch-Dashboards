@@ -62,7 +62,7 @@ export function DeploymentProvider({ getService }: FtrProviderContext) {
       const baseUrl = this.getOpenSearchHostPort();
       const username = config.get('servers.opensearch.username');
       const password = config.get('servers.opensearch.password');
-      const response = await fetch(baseUrl + '/_xpack', {
+      const response = await fetch(baseUrl + '/_pluginsextra', {
         method: 'get',
         headers: {
           'Content-Type': 'application/json',

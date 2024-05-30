@@ -88,7 +88,7 @@ run(
       );
     }
 
-    const srcPaths = Array().concat(path || ['./src', './packages']);
+    const srcPaths = Array().concat(path || ['./src', './packages', './plugins-extra']);
 
     const list = new Listr<ListrContext>([
       {
