@@ -137,6 +137,95 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_bad_request'
+    put:
+      tags:
+        - saved objects
+      summary: Update existing saved object
+      parameters:
+        - $ref: '#components/parameters/type'
+        - $ref: '#components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - attributes
+              properties:
+                attributes:
+                  type: object
+                  description: The metadata of the saved object to be updated, and the object is not validated.
+                version:
+                  type: string
+                references:
+                  description: List of objects that describe other saved objects the created object references. 
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+      responses:
+        '200': 
+          description: The update request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: The saved object does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      tags:
+        - saved objects
+      summary: Delete a saved object
+      parameters:
+        - $ref: '#components/parameters/type'
+        - $ref: '#components/parameters/id'
+        - in: query
+          name: force
+          description: If set to true, will force deletion of an object that exists in multiple namespaces.
+          schema: 
+            type: boolean
+      responses:
+        '200': 
+          description: The deletion request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: The saved object does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_migrate:
+    post:
+      tags:
+        - saved objects
+      summary: Migrate existing saved objects
+      responses:
+        '200':
+          description: The migration is executed.
+          content:
+            application/json:
+              schema:
+                type: object
   /api/saved_objects/_find:
     get:
       tags:
