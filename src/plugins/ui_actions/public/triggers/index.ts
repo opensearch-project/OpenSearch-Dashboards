@@ -33,7 +33,6 @@ export * from './trigger_contract';
 export * from './trigger_internal';
 export * from './select_range_trigger';
 export * from './value_click_trigger';
-export * from './apply_query_trigger';
 export * from './apply_filter_trigger';
 export * from './visualize_field_trigger';
 export * from './visualize_geo_field_trigger';

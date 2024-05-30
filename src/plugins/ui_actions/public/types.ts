@@ -37,13 +37,9 @@ import {
   VISUALIZE_FIELD_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
   DEFAULT_TRIGGER,
-  APPLY_QUERY_TRIGGER,
 } from './triggers';
 import type { RangeSelectContext, ValueClickContext } from '../../embeddable/public';
-import type {
-  ApplyGlobalQueryActionContext,
-  ApplyGlobalFilterActionContext,
-} from '../../data/public';
+import type { ApplyGlobalFilterActionContext } from '../../data/public';
 
 export type TriggerRegistry = Map<TriggerId, TriggerInternal<any>>;
 export type ActionRegistry = Map<string, ActionInternal>;
@@ -64,7 +60,6 @@ export interface TriggerContextMapping {
   [DEFAULT_TRIGGER]: TriggerContext;
   [SELECT_RANGE_TRIGGER]: RangeSelectContext;
   [VALUE_CLICK_TRIGGER]: ValueClickContext;
-  [APPLY_QUERY_TRIGGER]: ApplyGlobalQueryActionContext;
   [APPLY_FILTER_TRIGGER]: ApplyGlobalFilterActionContext;
   [VISUALIZE_FIELD_TRIGGER]: VisualizeFieldContext;
   [VISUALIZE_GEO_FIELD_TRIGGER]: VisualizeFieldContext;
