@@ -146,3 +146,5 @@ export {
 export type DatasourceType = 'S3GLUE' | 'PROMETHEUS';
 
 export type DatasourceStatus = 'ACTIVE' | 'DISABLED';
+
+export type AuthMethod = 'noauth' | 'basicauth' | 'awssigv4';
