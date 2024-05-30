@@ -80,6 +80,50 @@ paths:
                   items:
                     type: string
                   description: Workspaces that this saved object exists in.
+            examples:
+              indexPattern:
+                summary: Example of creating an index pattern saved object
+                value:
+                  attributes:
+                    title: 'my-index-pattern'
+                    fields: '[{"count":"1","name":"@timestamp","searchable":"true"}]'
+                  references:
+                    - id: '51339560-1d7c-11ef-b757-55fac6c80d9a'
+                      name: 'dataSource'
+                      type: 'data-source'
+              vegaVisualization:
+                summary: Example of creating a Vega visualization saved object
+                value:
+                  attributes:
+                    title: 'my-vega-visualization'
+                    visState: '{"title":"vegaVisualization","type":"vega","aggs":[]}}'
+                    uiStateJSON: '{}'
+                    description: ''
+                    version: 1
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}'
+                    }
+                  references:
+                    - id: '51339560-1d7c-11ef-b757-55fac6c80d9a'
+                      name: 'dataSource'
+                      type: 'data-source'
+              dashboards:
+                summary: Example of creating a dashboard saved object
+                value:
+                  attributes:
+                    title: 'Revenue Dashboard'
+                    description: 'Revenue dashboard'
+                    panelsJSON: '[{"version":"2.9.0","gridData":{"x":0,"y":0,"w":24,"h":15,"i":"5db1d75d-f680-4869-a0e8-0f2b8b05b99c"},"panelIndex":"5db1d75d-f680-4869-a0e8-0f2b8b05b99c","embeddableConfig":{},"panelRefName":"panel_0"}]'
+                    optionsJSON: '{"hidePanelTitles":false,"useMargins":true}'
+                    version: 1
+                    timeRestore: true
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}'
+                    }
+                  references:
+                    - id: '37cc8650-b882-11e8-a6d9-e546fe2bba5f'
+                      name: 'panel_0'
+                      type: 'visualization'  
       responses:
         '200':
           description: The creation request is successful
