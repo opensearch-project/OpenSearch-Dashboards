@@ -52,6 +52,7 @@ const CLI_ARGS: SomeCliArgs = {
   disableOptimizer: true,
   quiet: false,
   repl: false,
+  extraPlugins: false,
   runExamples: false,
   silent: false,
   watch: false,

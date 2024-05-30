@@ -64,6 +64,11 @@ run(
       throw createFlagError('expected --dist to have no value');
     }
 
+    const extraPlugins = flags.extraPlugins ?? false;
+    if (typeof extraPlugins !== 'boolean') {
+      throw createFlagError('expected --extraPlugins to have no value');
+    }
+
     const examples = flags.examples ?? false;
     if (typeof examples !== 'boolean') {
       throw createFlagError('expected --no-examples to have no value');
@@ -117,6 +122,7 @@ run(
       maxWorkerCount,
       dist: dist || updateLimits,
       cache,
+      extraPlugins: extraPlugins && !(validateLimits || updateLimits),
       examples: examples && !(validateLimits || updateLimits),
       profileWebpack,
       extraPluginScanDirs,
@@ -153,6 +159,7 @@ run(
       boolean: [
         'core',
         'watch',
+        'extraPlugins',
         'examples',
         'dist',
         'cache',
@@ -165,6 +172,7 @@ run(
       string: ['workers', 'scan-dir', 'filter'],
       default: {
         core: true,
+        extraPlugins: false,
         examples: true,
         cache: true,
         'inspect-workers': true,
@@ -177,6 +185,7 @@ run(
         --no-core          disable generating the core bundle
         --no-cache         disable the cache
         --filter           comma-separated list of bundle id filters, results from multiple flags are merged, * and ! are supported
+        --extra-plugins    build the extra plugins
         --no-examples      don't build the example plugins
         --dist             create bundles that are suitable for inclusion in the OpenSearch Dashboards distributable, enabled when running with --update-limits
         --scan-dir         add a directory to the list of directories scanned for plugins (specify as many times as necessary)

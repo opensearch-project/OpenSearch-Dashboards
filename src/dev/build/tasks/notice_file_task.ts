@@ -78,3 +78,21 @@ export const CreateNoticeFile: Task = {
     await write(build.resolvePath('NOTICE.txt'), notice);
   },
 };
+
+export const CreateExtraNoticeFile: Task = {
+  description: 'Generating extra NOTICE.txt file',
+
+  async run(config, log, build) {
+    log.info('Generating notice from source');
+    log.indent(4);
+    const noticeFromSource = await generateNoticeFromSource({
+      productName: 'OpenSearch Dashboards Extra Plugins',
+      directory: build.resolvePath('plugins-extra'),
+      log,
+    });
+    log.indent(-4);
+
+    log.info('Writing notice to plugins-extra/NOTICE.txt');
+    await write(build.resolvePath('plugins-extra/NOTICE.txt'), noticeFromSource);
+  },
+};

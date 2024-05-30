@@ -28902,6 +28902,7 @@ function getProjectPaths({
   projectPaths.push((0, _path.resolve)(rootPath, 'test/interpreter_functional/plugins/*'));
   projectPaths.push((0, _path.resolve)(rootPath, 'examples/*'));
   if (!skipOpenSearchDashboardsPlugins) {
+    projectPaths.push((0, _path.resolve)(rootPath, 'plugins-extra/*'));
     projectPaths.push((0, _path.resolve)(rootPath, '../opensearch-dashboards-extra/*'));
     projectPaths.push((0, _path.resolve)(rootPath, '../opensearch-dashboards-extra/*/packages/*'));
     projectPaths.push((0, _path.resolve)(rootPath, '../opensearch-dashboards-extra/*/plugins/*'));
