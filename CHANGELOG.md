@@ -1,7 +1,7 @@
 # CHANGELOG
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
-## [Unreleased](https://github.com/opensearch-project/OpenSearch-Dashboards/compare/1.3.16...1.3)
+## [1.3.17 - 2024-06-06](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/1.3.17)
 
 ### 💥 Breaking Changes
 
@@ -10,6 +10,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🛡  Security
 
 ### 📈 Features/Enhancements
+
+- Replace control characters before logging ([#6590](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6590))
 
 ### 🐛 Bug Fixes
 
