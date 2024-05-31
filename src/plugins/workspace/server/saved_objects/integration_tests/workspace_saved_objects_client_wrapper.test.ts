@@ -97,6 +97,20 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         id: 'workspace-1',
         permissions: {
           library_read: { users: ['foo'] },
+          write: { users: ['foo'] },
+          library_write: { users: ['foo'] },
+        },
+      }
+    );
+
+    await repositoryKit.create(
+      internalSavedObjectsRepository,
+      'workspace',
+      {},
+      {
+        id: 'workspace-2',
+        permissions: {
+          write: { users: ['foo'] },
           library_write: { users: ['foo'] },
         },
       }
@@ -132,7 +146,9 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       return { users: ['foo'] };
     });
 
-    permittedSavedObjectedClient = osd.coreStart.savedObjects.getScopedClient(permittedRequest);
+    permittedSavedObjectedClient = osd.coreStart.savedObjects.getScopedClient(permittedRequest, {
+      includedHiddenTypes: ['workspace'],
+    });
     notPermittedSavedObjectedClient = osd.coreStart.savedObjects.getScopedClient(
       notPermittedRequest
     );
@@ -317,6 +333,23 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       expect(createResult.error).toBeUndefined();
     });
 
+    it('should able to create workspace with override', async () => {
+      const createResult = await permittedSavedObjectedClient.create(
+        'workspace',
+        {},
+        {
+          id: 'workspace-2',
+          overwrite: true,
+          permissions: {
+            library_write: { users: ['foo'] },
+            write: { users: ['foo'] },
+          },
+        }
+      );
+
+      expect(createResult.error).toBeUndefined();
+    });
+
     it('should throw forbidden error when user create a workspce and is not OSD admin', async () => {
       let error;
       try {
@@ -424,7 +457,24 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       expect(createResult.saved_objects).toHaveLength(1);
     });
 
-    it('should throw forbidden error when user bulkCreate workspace and is not OSD admin', async () => {
+    it('should able to bulk create workspace with override', async () => {
+      const createResult = await permittedSavedObjectedClient.bulkCreate(
+        [
+          {
+            id: 'workspace-2',
+            type: 'workspace',
+            attributes: {},
+          },
+        ],
+        {
+          overwrite: true,
+        }
+      );
+
+      expect(createResult.saved_objects).toHaveLength(1);
+    });
+
+    it('should throw forbidden error when user bulk create workspace and is not OSD admin', async () => {
       let error;
       try {
         await permittedSavedObjectedClient.bulkCreate([{ type: 'workspace', attributes: {} }]);
