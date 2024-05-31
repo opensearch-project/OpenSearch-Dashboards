@@ -11,7 +11,6 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiOverlayMask,
-  EuiPage,
   EuiPageBody,
   EuiSpacer,
   EuiTableFieldDataColumnType,
@@ -19,7 +18,6 @@ import {
 import React, { useEffect, useState } from 'react';
 import { DatasourceStatus, DatasourceType } from '../../../types';
 import { DeleteModal } from './delete_modal';
-import { DataConnectionsDescription } from './manage_flint_data_connections_description';
 import PrometheusLogo from '../icons/prometheus_logo.svg';
 import S3Logo from '../icons/s3_logo.svg';
 

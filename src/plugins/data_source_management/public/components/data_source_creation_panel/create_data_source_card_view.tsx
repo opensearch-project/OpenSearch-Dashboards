@@ -5,6 +5,7 @@
 
 import { EuiPanel, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiIcon } from '@elastic/eui';
 import React from 'react';
+import { History } from 'history';
 import s3Svg from '../flint_data_sources_components/icons/s3_logo.svg';
 import prometheusSvg from '../flint_data_sources_components/icons/prometheus_logo.svg';
 import opensearchLogSvg from '../flint_data_sources_components/icons/opensearch_logo.svg'; // Import OpenSearch logo
@@ -19,28 +20,32 @@ export interface DatasourceCard {
   onClick: () => void;
 }
 
-export function CreateDataSourceCardView() {
+interface CreateDataSourceCardViewProps {
+  history: History;
+}
+
+export function CreateDataSourceCardView({ history }: CreateDataSourceCardViewProps) {
   const Datasources: DatasourceCard[] = [
     {
       name: 'S3GLUE',
       displayName: 'Amazon S3',
       description: 'Connect to Amazon S3 via AWS Glue Data Catalog',
       displayIcon: <EuiIcon type={s3Svg} size="xl" />,
-      onClick: () => (window.location.hash = `#/configure/${AMAZON_S3_URL}`),
+      onClick: () => history.push(`/configure/${AMAZON_S3_URL}`),
     },
     {
       name: 'PROMETHEUS',
       displayName: 'Prometheus',
       description: 'Connect to Prometheus',
       displayIcon: <EuiIcon type={prometheusSvg} size="xl" />,
-      onClick: () => (window.location.hash = `#/configure/${PROMETHEUS_URL}`),
+      onClick: () => history.push(`/configure/${PROMETHEUS_URL}`),
     },
     {
       name: 'OPENSEARCH',
       displayName: 'OpenSearch',
       description: 'Connect to OpenSearch',
       displayIcon: <EuiIcon type={opensearchLogSvg} size="xl" />,
-      onClick: () => (window.location.hash = `#/configure/${OPENSEARCH_URL}`),
+      onClick: () => history.push(`/configure/${OPENSEARCH_URL}`),
     },
   ];
 

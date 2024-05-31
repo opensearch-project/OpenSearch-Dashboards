@@ -52,6 +52,9 @@ export async function mountManagementSection(
             <Route path={['/create']}>
               <CreateDataSourcePanel {...params} />
             </Route>
+            <Route path={['/configure/OpenSearch']}>
+              <CreateDataSourceWizardWithRouter />
+            </Route>
             <Route path={['/:id']}>
               <EditDataSourceWithRouter />
             </Route>

@@ -25,7 +25,7 @@ export const CreateDataSourcePanel: React.FC<RouteComponentProps> = (props) => {
           </EuiPageHeader>
         </EuiFlexItem>
         <EuiFlexItem>
-          <CreateDataSourceCardView />
+          <CreateDataSourceCardView history={history} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
