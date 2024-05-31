@@ -42,10 +42,10 @@ export interface DataSourceManagementPluginSetup {
   ui: {
     DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
     getDataSourceMenu: <T>() => React.ComponentType<DataSourceMenuProps<T>>;
-    getDefaultDataSourceId: typeof getDefaultDataSourceId;
-    getDefaultDataSourceId$: typeof getDefaultDataSourceId$;
   };
   dataSourceSelection: DataSourceSelectionService;
+  getDefaultDataSourceId: typeof getDefaultDataSourceId;
+  getDefaultDataSourceId$: typeof getDefaultDataSourceId$;
 }
 
 export interface DataSourceManagementPluginStart {
