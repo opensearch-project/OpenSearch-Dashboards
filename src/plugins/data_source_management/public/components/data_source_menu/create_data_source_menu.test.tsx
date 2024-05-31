@@ -15,11 +15,13 @@ import { act, render } from '@testing-library/react';
 import { DataSourceComponentType, DataSourceSelectableConfig } from './types';
 import { ReactWrapper } from 'enzyme';
 import * as utils from '../utils';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 describe('create data source menu', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const { uiSettings } = coreMock.createSetup();
+  const dataSourceSelection = new DataSourceSelectionService();
 
   beforeAll(() => {
     jest
@@ -47,6 +49,8 @@ describe('create data source menu', () => {
     spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
     spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
     spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
+
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
 
     const component = render(<TestComponent {...props} />);
@@ -74,6 +78,7 @@ describe('create data source menu', () => {
     spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
     spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
     spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
     await act(async () => {
       component = render(<TestComponent {...props} />);
@@ -98,6 +103,7 @@ describe('when setMenuMountPoint is provided', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const { uiSettings } = coreMock.createSetup();
+  const dataSourceSelection = new DataSourceSelectionService();
 
   const refresh = () => {
     new Promise(async (resolve) => {
@@ -141,6 +147,7 @@ describe('when setMenuMountPoint is provided', () => {
     spyOn(utils, 'getApplication').and.returnValue({ id: 'test2' });
     spyOn(utils, 'getUiSettings').and.returnValue(uiSettings);
     spyOn(utils, 'getHideLocalCluster').and.returnValue({ enabled: true });
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
 
     const TestComponent = createDataSourceMenu<DataSourceSelectableConfig>();
     const component = render(<TestComponent {...props} />);
