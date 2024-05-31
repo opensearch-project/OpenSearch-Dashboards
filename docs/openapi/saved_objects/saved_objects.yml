@@ -520,6 +520,191 @@ paths:
                 - id: 67a9021c-c97e-4499-8150-9722ab44edd4
                   type: visualization
                   fields: ['title', 'fieldFormatMap']
+      responses:
+        '200':
+          description: The bulk get request is successful.
+          content:
+            application/json:
+              schema:
+                type: object  
+  /api/saved_objects/_import:
+    post:
+      tags:
+        - saved objects
+      summary: Create sets of saved objects from a file created through the export API
+      parameters: 
+        - in: query
+          name: overwrite
+          description: Overwrites saved objects when they already exist. This option cannot be used with the `createNewCopies` option.
+          schema: 
+            type: boolean
+            default: false
+        - in: query
+          name: createNewCopies
+          description: Creates copies of saved objects, regenerates each object ID, and resets the origin. This option cannot be used with the `overwrite` option.
+          schema: 
+            type: boolean
+            default: false
+        - in: query
+          name: dataSourceId
+          description: The ID of the data source to use for the import.
+          schema: 
+            type: string
+        - in: query
+          name: workspace
+          description: Workspaces that the saved objects exist in.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - in: query
+          name: dataSourceEnabled
+          description: If set to true, will enable the multiple data source.
+          schema: 
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        description: The ndjson file containing the saved objects to import
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                 description: |
+                    A file exported using the export API. NOTE: The `savedObjects.maxImportExportSize` and `savedObjects.maxImportPayloadBytes` settings in the config file determine the maximum size of the file that can be imported.
+            example:
+              importObjectRequest:
+                summary: Example of importing saved objects
+                value:
+                  $ref: '../examples/import.ndjson'
+      responses:
+        '200':
+          description: The import request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates if the import was successful.
+                  successCount:
+                    type: integer
+                    description: The number of successful imports.
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      description:  Indicates the import was unsuccessful and specifies the objects that failed to import.
+                  successResults: 
+                    type: array
+                    items:
+                      type: object
+                      description: Indicates the objects that are successfully imported, with any metadata if applicable.
+              examples:
+                importObjectSuccessResponse:
+                  summary: Example of successful import
+                  value:
+                    success: true
+                    successCount: 1
+                    successResults:
+                      - type: index-pattern
+                        id: 4b3a6220-1e02-11ef-891d-992edd5ce25b
+                        meta:
+                          title: 'opensearch_dashboards_sample_data_ecommerce'
+                          icon: indexPatternApp
+                        overwrite: true
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_export:
+    post:
+      tags:
+        - saved objects
+      summary: Export set of saved objects into ndjson file
+      requestBody:
+        required: true
+        description: Can use type, objects and search to filter the objects to export
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                  description:  The saved object types to include in the export. Use * to export all the types.
+                objects:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        required: true
+                        description: Unique id of the saved object.
+                      type:
+                        type: string
+                        required: true
+                        description: The type of saved object.
+                  description: The list of saved objects to export.
+                search:
+                  type: string
+                  description: The simple_query_string query that filters the objects.
+                includeReferencesDeep:
+                  type: boolean
+                  default: false
+                  description: If set to true, will include references of the saved objects.
+                excludeExportDetails:
+                  type: boolean
+                  default: false
+                  description: If set to true, will exclude export details at the end of the stream.  
+                workspace:
+                  type: array
+                  items:
+                    type: string
+                  description: Workspaces that the saved objects exist in.
+            examples:
+              exportDashboards:
+                summary: Example of exporting dashboards
+                value:
+                  objects:
+                    - id: 67a9021c-c97e-4499-8150-9722ab44edd4
+                      type: dashboard
+                  includeReferencesDeep: true
+                  excludeExportDetails: false
+              exportIndexPatterns:
+                summary: Example of exporting index patterns
+                value:
+                  objects:
+                    - id: 4b3a6220-1e02-11ef-891d-992edd5ce25b
+                      type: index-pattern
+                  includeReferencesDeep: false
+                  excludeExportDetails: true
+      responses:
+        '200':
+          description: The export request is successful.
+          content:
+            application/x-ndjson:
+              schema:
+                type: object
+              examples:
+                exportSavedObjectsResponse:
+                  $ref: '../examples/export_objects_response.yaml'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
 components:
   parameters:
     type:
