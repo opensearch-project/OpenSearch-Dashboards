@@ -342,6 +342,18 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       }
 
       expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+
+      try {
+        await permittedSavedObjectedClient.create(
+          'workspace',
+          {},
+          { id: 'no-exist', overwrite: true }
+        );
+      } catch (e) {
+        error = e;
+      }
+
+      expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(true);
     });
   });
 

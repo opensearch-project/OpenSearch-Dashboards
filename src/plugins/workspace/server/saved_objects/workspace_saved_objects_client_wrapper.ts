@@ -281,11 +281,11 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
-      // Only OSD admin can bulkCreate workspace
-      if (
-        objects.some((obj) => obj.type === WORKSPACE_TYPE) &&
-        !(objects.some((obj) => obj.id && obj.type === WORKSPACE_TYPE) && options.overwrite)
-      )
+      // If objects contain workspace id and options.overwrite is true, it is a bulkCreate action.
+      const isUpdateWorkspaceMode =
+        objects.some((obj) => obj.id && obj.type === WORKSPACE_TYPE) && options.overwrite;
+      // Only OSD admin can bulkCreate workspace.
+      if (objects.some((obj) => obj.type === WORKSPACE_TYPE) && !isUpdateWorkspaceMode)
         throw generateOSDAdminPermissionError();
 
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
@@ -346,11 +346,10 @@ export class WorkspaceSavedObjectsClientWrapper {
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
-      // Only OSD admin can create workspace.
       // If options contains id and overwrite, it is an update action.
-      if (type === WORKSPACE_TYPE && !(options?.id && options?.overwrite)) {
-        throw generateOSDAdminPermissionError();
-      }
+      const isUpdateMode = options?.id && options?.overwrite;
+      // Only OSD admin can create workspace.
+      if (type === WORKSPACE_TYPE && !isUpdateMode) throw generateOSDAdminPermissionError();
 
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
