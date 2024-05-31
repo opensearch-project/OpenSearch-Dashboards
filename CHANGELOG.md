@@ -12,6 +12,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 - [CVE-2023-45857] Bump `axios` from `0.27.2` to `1.6.1` ([#5470](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/5470))
 - [WS-2021-0638] Bump mocha from `7.2.0` to `10.1.0` ([#2711](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/2711))
+- [CVE-2024-28863] Bump node-tar from 6.1.11 to 6.2.1 ([#6876](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6876))
 
 ### 📈 Features/Enhancements
 
