@@ -18,7 +18,6 @@ import { CoreStart, MountPoint } from 'opensearch-dashboards/public';
 import {
   DataSourceManagementPluginSetup,
   DataSourceViewConfig,
-  DataSourceSelectionService,
 } from 'src/plugins/data_source_management/public';
 import { ComponentProp } from './types';
 import { COLUMNS } from './constants';
@@ -89,7 +88,6 @@ export const DataSourceViewExample = ({
             setSelectedDataSources(ds);
           },
         }}
-        dataSourceSelection={new DataSourceSelectionService()}
       />
     );
   }, [setActionMenu, notifications, savedObjects]);
