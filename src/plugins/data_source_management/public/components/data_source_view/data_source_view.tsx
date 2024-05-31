@@ -4,14 +4,7 @@
  */
 
 import React from 'react';
-import { i18n } from '@osd/i18n';
-import {
-  EuiPopover,
-  EuiButtonEmpty,
-  EuiContextMenuPanel,
-  EuiPanel,
-  EuiSelectable,
-} from '@elastic/eui';
+import { EuiPopover, EuiContextMenuPanel, EuiPanel, EuiSelectable } from '@elastic/eui';
 import {
   SavedObjectsClientContract,
   ToastsStart,
@@ -20,7 +13,12 @@ import {
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
-import { getDataSourceById, handleDataSourceFetchError } from '../utils';
+import {
+  getDataSourceById,
+  handleDataSourceFetchError,
+  generateComponentId,
+  getDataSourceSelection,
+} from '../utils';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DataSourceItem } from '../data_source_item';
 import { LocalCluster } from '../constants';
@@ -43,6 +41,7 @@ interface DataSourceViewState extends DataSourceBaseState {
   selectedOption: DataSourceOption[];
   isPopoverOpen: boolean;
   defaultDataSource: string | null;
+  componentId: string;
 }
 
 export class DataSourceView extends React.Component<DataSourceViewProps, DataSourceViewState> {
@@ -57,11 +56,13 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       showEmptyState: false,
       showError: false,
       defaultDataSource: null,
+      componentId: generateComponentId(),
     };
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+    getDataSourceSelection().remove(this.state.componentId);
   }
   async componentDidMount() {
     this._isMounted = true;
@@ -76,9 +77,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
         selectedOption: [LocalCluster],
         defaultDataSource,
       });
-      if (this.props.onSelectedDataSources) {
-        this.props.onSelectedDataSources([LocalCluster]);
-      }
+      this.onSelectedDataSources([LocalCluster]);
       return;
     }
 
@@ -90,9 +89,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       this.setState({
         selectedOption: [],
       });
-      if (this.props.onSelectedDataSources) {
-        this.props.onSelectedDataSources([]);
-      }
+      this.onSelectedDataSources([]);
       return;
     }
 
@@ -107,22 +104,28 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
           selectedOption: [{ id: optionId, label: selectedDataSource.title }],
           defaultDataSource,
         });
-        if (this.props.onSelectedDataSources) {
-          this.props.onSelectedDataSources([{ id: optionId, label: selectedDataSource.title }]);
-        }
+        this.onSelectedDataSources([{ id: optionId, label: selectedDataSource.title }]);
       } catch (error) {
         handleDataSourceFetchError(
           this.onError.bind(this),
           this.props.notifications!,
-          this.props.onSelectedDataSources
+          this.onSelectedDataSources.bind(this)
         );
       }
-    } else if (this.props.onSelectedDataSources) {
+    } else {
       this.setState({
         ...this.state,
         defaultDataSource,
       });
-      this.props.onSelectedDataSources([option]);
+      this.onSelectedDataSources([option]);
+    }
+  }
+
+  onSelectedDataSources(dataSource: DataSourceOption[]) {
+    getDataSourceSelection().selectDataSource(this.state.componentId, dataSource);
+
+    if (this.props.onSelectedDataSources) {
+      this.props.onSelectedDataSources(dataSource);
     }
   }
 

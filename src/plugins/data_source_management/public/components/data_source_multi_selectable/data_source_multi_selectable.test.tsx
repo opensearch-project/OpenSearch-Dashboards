@@ -4,7 +4,7 @@
  */
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { fatalErrorsServiceMock, notificationServiceMock } from '../../../../../core/public/mocks';
+import { notificationServiceMock } from '../../../../../core/public/mocks';
 import {
   getDataSourcesWithFieldsResponse,
   mockResponseForSavedObjectsCalls,
@@ -14,6 +14,8 @@ import { ShallowWrapper, mount, shallow } from 'enzyme';
 import { DataSourceMultiSelectable } from './data_source_multi_selectable';
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
+import * as utils from '../utils';
 
 describe('DataSourceMultiSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -23,6 +25,7 @@ describe('DataSourceMultiSelectable', () => {
   const nextTick = () => new Promise((res) => process.nextTick(res));
   const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   const uiSettings = mockedContext.uiSettings;
+  const dataSourceSelection = new DataSourceSelectionService();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -31,6 +34,7 @@ describe('DataSourceMultiSelectable', () => {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
   });
 
   it('should render normally with local cluster not hidden', () => {
@@ -184,5 +188,40 @@ describe('DataSourceMultiSelectable', () => {
     await wrapper.instance().componentDidMount!();
     expect(wrapper.state('selectedOptions')).toHaveLength(1);
     expect(wrapper.state('showEmptyState')).toBe(false);
+  });
+
+  it('should call dataSourceSelection selectDataSource when selecting', async () => {
+    const dataSourceSelectionMock = new DataSourceSelectionService();
+    const componentId = 'component-id';
+    const selectedOptions = [
+      { checked: 'on', id: 'test1', label: 'test1', visible: true },
+      { checked: 'on', id: 'test2', label: 'test2', visible: true },
+      { checked: 'on', id: 'test3', label: 'test3', visible: true },
+    ];
+    dataSourceSelectionMock.selectDataSource = jest.fn();
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelectionMock);
+    jest.spyOn(utils, 'generateComponentId').mockReturnValue(componentId);
+
+    const container = render(
+      <DataSourceMultiSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={jest.fn()}
+        hideLocalCluster={true}
+        fullWidth={false}
+      />
+    );
+
+    await component.instance().componentDidMount!();
+    expect(dataSourceSelectionMock.selectDataSource).toHaveBeenCalledWith(
+      componentId,
+      selectedOptions
+    );
+
+    const button = await container.findByTestId('dataSourceFilterGroupButton');
+    button.click();
+    fireEvent.click(screen.getByText('Deselect all'));
+
+    expect(dataSourceSelectionMock.selectDataSource).toHaveBeenCalledWith(componentId, []);
   });
 });

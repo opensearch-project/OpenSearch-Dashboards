@@ -11,6 +11,7 @@ import { DataSourceMenu } from './data_source_menu';
 import { render } from '@testing-library/react';
 import { DataSourceComponentType } from './types';
 import * as utils from '../utils';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
 
 describe('DataSourceMenu', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
@@ -18,11 +19,13 @@ describe('DataSourceMenu', () => {
   let client: SavedObjectsClientContract;
   const notifications = notificationServiceMock.createStartContract();
   const application = applicationServiceMock.createStartContract();
+  const dataSourceSelection = new DataSourceSelectionService();
 
   beforeEach(() => {
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
   });
 
   it('should render data source selectable only with local cluster not hidden', () => {
