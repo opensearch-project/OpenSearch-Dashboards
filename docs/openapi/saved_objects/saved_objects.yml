@@ -137,6 +137,95 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_bad_request'
+    put:
+      tags:
+        - saved objects
+      summary: Update existing saved object
+      parameters:
+        - $ref: '#components/parameters/type'
+        - $ref: '#components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - attributes
+              properties:
+                attributes:
+                  type: object
+                  description: The metadata of the saved object to be updated, and the object is not validated.
+                version:
+                  type: string
+                references:
+                  description: List of objects that describe other saved objects the created object references. 
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+      responses:
+        '200': 
+          description: The update request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: The saved object does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      tags:
+        - saved objects
+      summary: Delete a saved object
+      parameters:
+        - $ref: '#components/parameters/type'
+        - $ref: '#components/parameters/id'
+        - in: query
+          name: force
+          description: If set to true, will force deletion of an object that exists in multiple namespaces.
+          schema: 
+            type: boolean
+      responses:
+        '200': 
+          description: The deletion request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: The saved object does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_migrate:
+    post:
+      tags:
+        - saved objects
+      summary: Migrate existing saved objects
+      responses:
+        '200':
+          description: The migration is executed.
+          content:
+            application/json:
+              schema:
+                type: object
   /api/saved_objects/_find:
     get:
       tags:
@@ -170,7 +259,7 @@ paths:
           example: 1
         - in: query
           name: search
-          description: The search query that filters the saved objects.
+          description: The simple_query_string query that filters the objects in the response.
           schema:
             type: string
           example: "open*"
@@ -250,6 +339,187 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_bulk_create:
+    post:
+      tags:
+        - saved objects
+      summary: Bulk create saved objects
+      parameters:
+      - name: overwrite
+        in: query
+        schema:
+          type: boolean
+          description: If set to true, will overwrite the existing saved object with same type and id.
+      - name: workspaces
+        in: query
+        schema: 
+          type: array
+          items:
+            type: string
+          description: Workspaces that the saved objects exist in.
+      requestBody:
+        required: true
+        description: Array of saved objects to create
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Unique id of the saved object.
+                  type:
+                    type: string
+                    required: true
+                    description: The type of saved object.
+                  attributes:
+                    type: object
+                    required: true
+                    description: The metadata of the saved object to be created, and the object is not validated.
+                  version:
+                    type: string
+                  migrationVersion:
+                    type: object
+                    description: The information about the migrations that have been applied to this saved object to be created.
+                  references:
+                    description: List of objects that describe other saved objects the created object references. 
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          type: string
+                        name:
+                          type: string
+                  initialNamespaces:
+                    description: Namespaces that this saved object exists in. This attribute is only used for multi-namespace saved object types.
+                    type: array
+                    items:
+                      type: string
+              example:
+                - id: 67a9021c-c97e-4499-8150-9722ab44edd4
+                  type: visualization
+                  attributes:
+                    title: 'vega-visualization'
+                    fieldFormatMap: '{"hour_of_day":{}}'
+                    fields: '[{"name":"@timestamp","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true}]'
+                  version: '1'
+                  migrationVersion: {}
+                  references:
+                    - id: ef71d6c1-8e6b-418d-9f7c-e5d9bbde9cf7
+                      type: data-source
+                      name: dataSource
+                  initialNamespaces: 
+                    - default
+      responses:
+        '200':
+          description: The bulk creation request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/saved_objects/_bulk_update:
+    post:
+      tags:
+        - saved objects
+      summary: Bulk update saved objects
+      requestBody:
+        required: true
+        description: Array of saved objects to update
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Unique id of the saved object.
+                  type:
+                    type: string
+                    required: true
+                    description: The type of saved object.
+                  attributes:
+                    type: object
+                    required: true
+                    description: The metadata of the saved object to be created, and the object is not validated.
+                  version:
+                    type: string
+                  references:
+                    description: List of objects that describe other saved objects the created object references. 
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          type: string
+                        name:
+                          type: string
+                  namespaces:
+                    description: Namespaces that this saved object exists in. This attribute is only used for multi-namespace saved object types.
+                    type: array
+                    items:
+                      type: string
+              example:
+                - id: 67a9021c-c97e-4499-8150-9722ab44edd4
+                  type: visualization
+                  attributes:
+                    title: vega-visualization
+                    fieldFormatMap: '{"hour_of_day":{}}'
+                    fields: '[{"name":"@timestamp","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true}]'
+                  version: '1'
+                  migrationVersion: {}
+                  references:
+                    - id: ef71d6c1-8e6b-418d-9f7c-e5d9bbde9cf7
+                      type: data-source
+                      name: dataSource
+                  namespace: default
+      responses:
+        '200':
+          description: The bulk update request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/saved_objects/_bulk_get:
+    get:
+      tags:
+        - saved objects
+      summary: Bulk get saved objects
+      requestBody:
+        required: true
+        description: Array of criteria including id, type, fields used to retrieve matching saved objects
+        content: 
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    required: true
+                    description: Unique id of the saved object.
+                  type:
+                    type: string
+                    required: true
+                    description: The type of saved object.
+                  fields:
+                    type: array
+                    items:
+                      type: string
+                    description: The fields to return in the attributes key of the object response.
+              example:
+                - id: 67a9021c-c97e-4499-8150-9722ab44edd4
+                  type: visualization
+                  fields: ['title', 'fieldFormatMap']
 components:
   parameters:
     type:
