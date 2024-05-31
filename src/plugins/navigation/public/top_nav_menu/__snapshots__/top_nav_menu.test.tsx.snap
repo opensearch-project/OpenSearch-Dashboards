@@ -45,6 +45,23 @@ exports[`TopNavMenu mounts the data source menu as well as top nav menu 1`] = `
         }
       }
       componentType="DataSourceView"
+      dataSourceSelection={
+        DataSourceSelectionService {
+          "getSelection$": [Function],
+          "getSelectionValue": [Function],
+          "remove": [Function],
+          "selectDataSource": [Function],
+          "selectedDataSource$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        }
+      }
     />
   </EuiHeaderLinks>
 </Fragment>
@@ -71,6 +88,23 @@ exports[`TopNavMenu mounts the data source menu if showDataSourceMenu is true 1`
         }
       }
       componentType="DataSourceView"
+      dataSourceSelection={
+        DataSourceSelectionService {
+          "getSelection$": [Function],
+          "getSelectionValue": [Function],
+          "remove": [Function],
+          "selectDataSource": [Function],
+          "selectedDataSource$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+        }
+      }
     />
   </EuiHeaderLinks>
 </Fragment>

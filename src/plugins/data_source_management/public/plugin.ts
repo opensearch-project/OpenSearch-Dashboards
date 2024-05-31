@@ -21,7 +21,13 @@ import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
 import { DataSourceMenuProps } from './components/data_source_menu';
-import { setApplication, setHideLocalCluster, setUiSettings } from './components/utils';
+import {
+  setApplication,
+  setHideLocalCluster,
+  setUiSettings,
+  setDataSourceSelection,
+} from './components/utils';
+import { DataSourceSelectionService } from './service/data_source_selection_service';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
@@ -35,6 +41,7 @@ export interface DataSourceManagementPluginSetup {
     DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
     getDataSourceMenu: <T>() => React.ComponentType<DataSourceMenuProps<T>>;
   };
+  dataSourceSelection: DataSourceSelectionService;
 }
 
 export interface DataSourceManagementPluginStart {
@@ -53,6 +60,7 @@ export class DataSourceManagementPlugin
     > {
   private started = false;
   private authMethodsRegistry = new AuthenticationMethodRegistry();
+  private dataSourceSelection = new DataSourceSelectionService();
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
@@ -104,9 +112,13 @@ export class DataSourceManagementPlugin
 
     setHideLocalCluster({ enabled: dataSource.hideLocalCluster });
     setUiSettings(uiSettings);
+    // This instance will be got in each data source selector component.
+    setDataSourceSelection(this.dataSourceSelection);
 
     return {
       registerAuthenticationMethod,
+      // Other plugins can get this instance from setupDeps and use to get selected data sources.
+      dataSourceSelection: this.dataSourceSelection,
       ui: {
         DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
         getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
