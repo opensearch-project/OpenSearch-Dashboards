@@ -6,22 +6,16 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { RouteComponentProps } from 'react-router-dom';
-import { CreateButton } from '../create_button';
 
-type DataSourceHeaderProps = RouteComponentProps;
-
-export const CreateDataSourcePanelHeader: React.FC<DataSourceHeaderProps> = ({ history }) => {
-  const createButton = <CreateButton history={history} dataTestSubj="createDataSourceButton" />;
-
+export const CreateDataSourcePanelHeader: React.FC = () => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiTitle>
           <h2>
             <FormattedMessage
-              id="dataSourcesManagement.dataSourcesTable.title"
-              defaultMessage="Data Sources"
+              id="dataSourcesManagement.createDataSourcePanel.title"
+              defaultMessage="Create Data Source"
             />
           </h2>
         </EuiTitle>
@@ -29,13 +23,12 @@ export const CreateDataSourcePanelHeader: React.FC<DataSourceHeaderProps> = ({ h
         <EuiText>
           <p>
             <FormattedMessage
-              id="dataSourcesManagement.dataSourcesTable.description"
-              defaultMessage="Create and manage data source connections."
+              id="dataSourcesManagement.createDataSourcePanel.description"
+              defaultMessage="Select a data source type to get started."
             />
           </p>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

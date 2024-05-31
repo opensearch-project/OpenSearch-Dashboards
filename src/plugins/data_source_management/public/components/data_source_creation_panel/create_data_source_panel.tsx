@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiPage, EuiPageBody } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPageHeader, EuiPanel } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { CreateDataSourcePanelHeader } from './create_data_source_panel_header';
@@ -13,15 +13,21 @@ export const CreateDataSourcePanel: React.FC<RouteComponentProps> = (props) => {
   const { history } = props;
 
   useEffect(() => {
-    history.push('/create');
+    // Add breadcrumb setup or any other setup logic here if needed
   }, [history]);
 
   return (
-    <EuiPage>
-      <EuiPageBody component="div">
-        <CreateDataSourcePanelHeader history={history} />
-        <CreateDataSourceCardView />
-      </EuiPageBody>
-    </EuiPage>
+    <EuiPanel>
+      <EuiFlexGroup direction="column">
+        <EuiFlexItem>
+          <EuiPageHeader>
+            <CreateDataSourcePanelHeader />
+          </EuiPageHeader>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <CreateDataSourceCardView />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };

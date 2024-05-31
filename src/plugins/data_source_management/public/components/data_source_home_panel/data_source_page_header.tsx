@@ -7,13 +7,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elasti
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { RouteComponentProps } from 'react-router-dom';
-import { CreateButton } from '../create_button';
 
 type DataSourceHeaderProps = RouteComponentProps;
 
-export const DataSourceHeader: React.FC<DataSourceHeaderProps> = ({ history }) => {
-  const createButton = <CreateButton history={history} dataTestSubj="createDataSourceButton" />;
-
+export const DataSourceHeader: React.FC<DataSourceHeaderProps> = () => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -35,7 +32,6 @@ export const DataSourceHeader: React.FC<DataSourceHeaderProps> = ({ history }) =
           </p>
         </EuiText>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{createButton}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

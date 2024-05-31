@@ -21,10 +21,11 @@ export const DatasourceTypeToDisplayName: { [key in DatasourceType]: string } = 
   S3GLUE: 'Amazon S3',
 };
 
-export const PrometheusURL = 'Prometheus';
-export const AmazonS3URL = 'AmazonS3AWSGlue';
+export const PROMETHEUS_URL = 'Prometheus';
+export const AMAZON_S3_URL = 'AmazonS3AWSGlue';
+export const OPENSEARCH_URL = 'OpenSearch';
 
 export const UrlToDatasourceType: { [key: string]: DatasourceType } = {
-  [PrometheusURL]: 'PROMETHEUS',
-  [AmazonS3URL]: 'S3GLUE',
+  [PROMETHEUS_URL]: 'PROMETHEUS',
+  [AMAZON_S3_URL]: 'S3GLUE',
 };

@@ -5,14 +5,14 @@
 
 import { EuiPanel, EuiCard, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { NewDatasourceDescription } from './create_data_source_description';
 import s3Svg from '../flint_data_sources_components/icons/s3_logo.svg';
 import prometheusSvg from '../flint_data_sources_components/icons/prometheus_logo.svg';
+import opensearchLogSvg from '../flint_data_sources_components/icons/opensearch_logo.svg'; // Import OpenSearch logo
 import { DatasourceType } from '../../types';
-import { AmazonS3URL, PrometheusURL } from '../../constants';
+import { AMAZON_S3_URL, PROMETHEUS_URL, OPENSEARCH_URL } from '../../constants'; // Add OpenSearchURL
 
 export interface DatasourceCard {
-  name: DatasourceType;
+  name: string;
   displayName: string;
   description: string;
   displayIcon: JSX.Element;
@@ -26,14 +26,21 @@ export function CreateDataSourceCardView() {
       displayName: 'Amazon S3',
       description: 'Connect to Amazon S3 via AWS Glue Data Catalog',
       displayIcon: <EuiIcon type={s3Svg} size="xl" />,
-      onClick: () => (window.location.hash = `#/configure/${AmazonS3URL}`),
+      onClick: () => (window.location.hash = `#/configure/${AMAZON_S3_URL}`),
     },
     {
       name: 'PROMETHEUS',
       displayName: 'Prometheus',
       description: 'Connect to Prometheus',
       displayIcon: <EuiIcon type={prometheusSvg} size="xl" />,
-      onClick: () => (window.location.hash = `#/configure/${PrometheusURL}`),
+      onClick: () => (window.location.hash = `#/configure/${PROMETHEUS_URL}`),
+    },
+    {
+      name: 'OPENSEARCH',
+      displayName: 'OpenSearch',
+      description: 'Connect to OpenSearch',
+      displayIcon: <EuiIcon type={opensearchLogSvg} size="xl" />,
+      onClick: () => (window.location.hash = `#/configure/${OPENSEARCH_URL}`),
     },
   ];
 
@@ -59,10 +66,5 @@ export function CreateDataSourceCardView() {
     );
   };
 
-  return (
-    <EuiPanel>
-      <NewDatasourceDescription />
-      {renderRows(Datasources)}
-    </EuiPanel>
-  );
+  return <EuiPanel>{renderRows(Datasources)}</EuiPanel>;
 }

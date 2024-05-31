@@ -17,6 +17,7 @@ import {
 import { DataSourceHeader } from './data_source_page_header';
 import { DataSourceTableWithRouter } from '../data_source_table/data_source_table';
 import { ManageFlintDataConnectionsTable } from '../flint_data_sources_components/flint_data_connection/manage_flint_data_connections_table';
+import { CreateButton } from '../create_button';
 
 const tabs = [
   {
@@ -53,7 +54,14 @@ export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
           <EuiPageHeader>
-            <DataSourceHeader history={props.history} />
+            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+              <EuiFlexItem grow={false}>
+                <DataSourceHeader history={props.history} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <CreateButton history={props.history} dataTestSubj="createDataSourceButton" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiPageHeader>
         </EuiFlexItem>
         <EuiFlexItem>
