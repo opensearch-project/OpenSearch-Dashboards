@@ -16,6 +16,9 @@ import {
   getDataSourcesWithFields,
   handleDataSourceFetchError,
   handleNoAvailableDataSourceError,
+  generateComponentId,
+  getDataSourceSelection,
+  getDefaultDataSourceId,
 } from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
@@ -46,6 +49,7 @@ interface DataSourceAggregatedViewState extends DataSourceBaseState {
   switchChecked: boolean;
   defaultDataSource: string | null;
   incompatibleDataSourcesExist: boolean;
+  componentId: string;
 }
 
 interface DataSourceOptionDisplay extends DataSourceOption {
@@ -70,11 +74,13 @@ export class DataSourceAggregatedView extends React.Component<
       switchChecked: false,
       defaultDataSource: null,
       incompatibleDataSourcesExist: false,
+      componentId: generateComponentId(),
     };
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+    getDataSourceSelection().remove(this.state.componentId);
   }
 
   onDataSourcesClick() {
@@ -127,7 +133,7 @@ export class DataSourceAggregatedView extends React.Component<
         this.setState({
           ...this.state,
           allDataSourcesIdToTitleMap,
-          defaultDataSource: this.props.uiSettings?.get('defaultDataSource', null) ?? null,
+          defaultDataSource: getDefaultDataSourceId(this.props.uiSettings) ?? null,
           showEmptyState: allDataSourcesIdToTitleMap.size === 0,
         });
       })
@@ -188,7 +194,11 @@ export class DataSourceAggregatedView extends React.Component<
       });
     }
 
-    const numSelectedItems = items.filter((item) => item.checked === 'on').length;
+    const selectedItems = items.filter((item) => item.checked === 'on');
+    // For read-only cases, also need to set default selected result.
+    getDataSourceSelection().selectDataSource(this.state.componentId, selectedItems);
+
+    const numSelectedItems = selectedItems.length;
 
     const titleComponent = (
       <DataSourceDropDownHeader
