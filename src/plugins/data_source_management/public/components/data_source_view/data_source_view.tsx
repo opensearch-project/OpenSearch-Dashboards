@@ -18,6 +18,7 @@ import {
   handleDataSourceFetchError,
   generateComponentId,
   getDataSourceSelection,
+  getDefaultDataSourceId,
 } from '../utils';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DataSourceItem } from '../data_source_item';
@@ -71,7 +72,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     const option = selectedOption[0];
     const optionId = option.id;
 
-    const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
+    const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
     if (optionId === '' && !this.props.hideLocalCluster) {
       this.setState({
         selectedOption: [LocalCluster],
