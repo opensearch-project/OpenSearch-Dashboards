@@ -1,0 +1,2 @@
+security:
+- [CVE-2024-28863] Bump node-tar from 6.1.11 to 6.2.1 ([#6876](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6876))
