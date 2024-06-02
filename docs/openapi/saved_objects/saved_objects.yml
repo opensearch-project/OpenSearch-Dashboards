@@ -595,14 +595,14 @@ paths:
                     description: The number of successful imports.
                   errors:
                     type: array
+                    description:  Indicates the import was unsuccessful and specifies the objects that failed to import.
                     items:
                       type: object
-                      description:  Indicates the import was unsuccessful and specifies the objects that failed to import.
                   successResults: 
                     type: array
+                    description: Indicates the objects that are successfully imported, with any metadata if applicable.
                     items:
                       type: object
-                      description: Indicates the objects that are successfully imported, with any metadata if applicable.
               examples:
                 importObjectSuccessResponse:
                   summary: Example of successful import
@@ -699,6 +699,131 @@ paths:
               examples:
                 exportSavedObjectsResponse:
                   $ref: '../examples/export_objects_response.yaml'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_resolve_import_errors:
+    post:
+      tags:
+        - saved objects
+      summary: Resolve import errors from import objects API
+      parameters:
+        - in: query
+          name: createNewCopies
+          description: Creates copies of saved objects, regenerates each object ID, and resets the origin.
+          schema: 
+            type: boolean
+            default: false
+        - in: query
+          name: dataSourceId
+          description: The ID of the data source to use for the import.
+          schema: 
+            type: string
+        - in: query
+          name: workspace
+          description: Workspaces that the saved objects exist in.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+      requestBody:
+        required: true
+        description: The request body must include the multipart/form-data type.
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: The same file given to the import API.
+                  type: string
+                  format: binary
+                retries:
+                  description: The retry operations, which can specify how to resolve different types of errors.
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        description: The type of error to resolve.
+                      id:
+                        type: string
+                        description: The ID of the saved object.
+                      overwrite:
+                        type: boolean
+                        default: false
+                        description: If set to true, will overwrite the existing saved object with the same type and ID.
+                      destinationId:
+                        type: string
+                        description: Specifies the destination ID that the imported object should have, if different from the current ID.
+                      replaceReferences:
+                        description: A list of `type`, `from`, and `to` used to change the object references.
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                            from:
+                              type: string
+                            to:
+                              type: string
+                      createNewCopy:
+                        type: boolean
+                        description: If set to true, will create a copy of the saved objects, regenerates each object ID, and resets the origin.
+                      ignoreMissingReferences:
+                        type: boolean
+                        description: If set to true, will ignore missing references. When set to `false`, does nothing.
+            examples:
+              resolveImportErrorsRequest:
+                summary: Example of resolving import errors
+                value:
+                  file: 'import.ndjson'
+                  retries:
+                    - type: index-pattern
+                      id: 4b3a6220-1e02-11ef-891d-992edd5ce25b
+                      overwrite: true
+      responses:
+        '200':
+          description: The resolve import errors request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates if the import was successful.
+                  successCount:
+                    type: integer
+                    description: The number of successful imports.
+                  errors:
+                    type: array
+                    description:  Indicates the import was unsuccessful and specifies the objects that failed to import.
+                    items:
+                      type: object
+                  successResults: 
+                    type: array
+                    description: Indicates the objects that are successfully imported, with any metadata if applicable.
+                    items:
+                      type: object 
+              examples:
+                resolveImportErrorSuccessResponse:
+                  summary: Example of successful import
+                  value:
+                    success: true
+                    successCount: 1
+                    successResults:
+                      - type: index-pattern
+                        id: 4b3a6220-1e02-11ef-891d-992edd5ce25b
+                        meta:
+                          title: 'opensearch_dashboards_sample_data_ecommerce'
+                          icon: indexPatternApp
+                        overwrite: true  
         '400':
           description: Bad request
           content:
