@@ -34,11 +34,12 @@ import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { Settings } from '..';
 import { DataSettings, QueryEnhancement } from '../types';
 
-export interface QueryStringInputProps {
+export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
   isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
+  containerRef?: React.RefObject<HTMLDivElement>;
   settings?: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -58,7 +59,7 @@ export interface QueryStringInputProps {
   isInvalid?: boolean;
 }
 
-interface Props extends QueryStringInputProps {
+interface Props extends QueryEditorProps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
 }
 
@@ -88,7 +89,7 @@ const KEY_CODES = {
 // Needed for React.lazy
 // TODO: MQL export this and let people extended this
 // eslint-disable-next-line import/no-default-export
-export default class QueryStringInputUI extends Component<Props, State> {
+export default class QueryEditorUI extends Component<Props, State> {
   public state: State = {
     isSuggestionsVisible: false,
     index: null,
@@ -497,20 +498,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
         {!!this.props.isEnhancementsEnabled && (
           <EuiFlexGroup gutterSize="xs" direction="column">
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem>{this.props.prepend}</EuiFlexItem>
-                {/* <EuiFlexItem>
-                  <DataSourceSelectable
-                    dataSources={activeDataSources}
-                    dataSourceOptionList={dataSourceOptionList}
-                    setDataSourceOptionList={setDataSourceOptionList}
-                    onDataSourceSelect={handleSourceSelection}
-                    selectedSources={selectedSources}
-                    onGetDataSetError={handleGetDataSetError}
-                    onRefresh={memorizedReload}
-                    fullWidth
-                  />
-                </EuiFlexItem> */}
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={false}>{this.props.prepend}</EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <div />
+                </EuiFlexItem>
                 <EuiFlexItem>
                   <QueryLanguageSwitcher
                     language={this.props.query.language}
@@ -524,13 +516,14 @@ export default class QueryStringInputUI extends Component<Props, State> {
             <EuiFlexItem grow={true}>
               <CodeEditor
                 height={70}
-                languageId="json"
+                languageId="markdown"
                 value={this.getQueryString()}
                 onChange={() => {}}
                 options={{
-                  readOnly: true,
                   lineNumbers: 'on',
+                  lineHeight: 20,
                   fontSize: 12,
+                  fontFamily: 'Roboto Mono',
                   minimap: {
                     enabled: false,
                   },

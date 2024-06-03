@@ -53,7 +53,7 @@ export function QueryLanguageSwitcher(props: Props) {
         !enhancement.supportedAppNames.includes(props.appName)
       )
         return;
-      languageOptions.push(mapExternalLanguageToOptions(enhancement.language));
+      languageOptions.unshift(mapExternalLanguageToOptions(enhancement.language));
     });
   }
 

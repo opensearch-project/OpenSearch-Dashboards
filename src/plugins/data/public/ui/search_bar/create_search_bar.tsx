@@ -216,7 +216,6 @@ export function createSearchBar({
           query={query}
           isEnhancementsEnabled={isEnhancementsEnabled}
           queryEnhancements={queryEnhancements}
-          settings={settings}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
