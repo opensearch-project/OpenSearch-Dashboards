@@ -6,5 +6,5 @@
   "ui": true,
   "requiredPlugins": ["data"],
   "optionalPlugins": ["home"],
-  "requiredBundles": []
+  "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact"]
 }

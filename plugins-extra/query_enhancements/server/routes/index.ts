@@ -5,11 +5,12 @@ import {
   Logger,
   ResponseError,
 } from '../../../../src/core/server';
-import { ISearchStrategy } from '../../../../src/plugins/data/server';
 import {
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
 } from '../../../../src/plugins/data/common';
+import { ISearchStrategy } from '../../../../src/plugins/data/server';
+import { registerPplQueryAssistRoute } from './query_assist';
 
 export function defineRoutes(
   logger: Logger,
@@ -19,6 +20,7 @@ export function defineRoutes(
     ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse>
   >
 ) {
+  registerPplQueryAssistRoute(logger, router);
   router.post(
     {
       path: `/api/pplql/search`,
