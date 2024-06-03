@@ -4,8 +4,8 @@ import {
   PersistedLog,
   QuerySuggestionTypes,
   SuggestionsComponent,
-} from '../../../../src/plugins/data/public';
-import assistantLogo from '../assets/query_assist_logo.svg';
+} from '../../../../../src/plugins/data/public';
+import assistantLogo from '../../assets/query_assist_logo.svg';
 
 interface QueryAssistInputProps {
   inputRef: React.RefObject<HTMLInputElement>;

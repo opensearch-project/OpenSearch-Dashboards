@@ -1,1 +1,1 @@
-export { createQueryAssistExtension } from './create_extension';
+export { createQueryAssistExtension } from './utils';

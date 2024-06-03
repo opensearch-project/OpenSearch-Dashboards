@@ -1,32 +1,29 @@
-import { useRef, useState } from 'react';
-import { PersistedLog } from '../../../../../src/plugins/data/public';
+import { useEffect, useRef, useState } from 'react';
+import { IDataPluginServices } from '../../../../../src/plugins/data/public';
+import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { QueryAssistParameters, QueryAssistResponse } from '../../../common/query_assist';
-import { getCore, getData } from '../../services';
-import { formatError } from '../errors';
+import { formatError } from '../utils';
 
-interface SubmitOptions {
-  persistedLog: PersistedLog;
-}
-
-export const useGenerateQuery = ({ persistedLog }: SubmitOptions) => {
+export const useGenerateQuery = () => {
   const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef<AbortController>();
-  const core = getCore();
-  const data = getData();
+  const { services } = useOpenSearchDashboards<IDataPluginServices>();
+
+  useEffect(() => () => abortControllerRef.current?.abort(), []);
 
   const generateQuery = async (
     params: QueryAssistParameters
   ): Promise<{ response?: QueryAssistResponse; error?: Error }> => {
     abortControllerRef.current = new AbortController();
-    persistedLog.add(params.question);
     setLoading(true);
     try {
-      const response = await core.http.post<QueryAssistResponse>('/api/ql/query_assist/generate', {
-        body: JSON.stringify(params),
-        signal: abortControllerRef.current?.signal,
-      });
-      data.query.queryString.setQuery({ query: response.query, language: params.language });
-      if (response.timeRange) data.query.timefilter.timefilter.setTime(response.timeRange);
+      const response = await services.http.post<QueryAssistResponse>(
+        '/api/ql/query_assist/generate',
+        {
+          body: JSON.stringify(params),
+          signal: abortControllerRef.current?.signal,
+        }
+      );
       return { response };
     } catch (error) {
       return { error: formatError(error) };

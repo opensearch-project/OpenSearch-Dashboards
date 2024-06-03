@@ -1,7 +1,7 @@
 import React from 'react';
 import { HttpSetup } from 'opensearch-dashboards/public';
-import { QueryAssistBar } from './query_assist_bar';
-import { SearchBarExtensionConfig } from '../../../../src/plugins/data/public/ui/search_bar_extensions';
+import { QueryAssistBar } from '../components';
+import { SearchBarExtensionConfig } from '../../../../../src/plugins/data/public/ui/search_bar_extensions';
 
 export const createQueryAssistExtension = (http: HttpSetup): SearchBarExtensionConfig => {
   return {
