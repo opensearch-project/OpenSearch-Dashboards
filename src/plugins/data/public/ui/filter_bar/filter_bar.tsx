@@ -112,6 +112,7 @@ function FilterBarUI(props: Props) {
         size="xs"
         onClick={() => setIsAddFilterPopoverOpen(true)}
         data-test-subj="addFilter"
+        aria-label="addFilter"
         className="globalFilterBar__addButton"
       >
         +{' '}

@@ -58,6 +58,7 @@ export const getTopNavLinks = (
       });
     },
     testId: 'discoverNewButton',
+    ariaLabel: 'discoverNewButton',
   };
 
   const saveSearch: TopNavMenuData = {
@@ -69,6 +70,7 @@ export const getTopNavLinks = (
       defaultMessage: 'Save Search',
     }),
     testId: 'discoverSaveButton',
+    ariaLabel: 'discoverSaveButton',
     run: async () => {
       const onSave = async ({
         newTitle,
@@ -165,6 +167,7 @@ export const getTopNavLinks = (
       defaultMessage: 'Open Saved Search',
     }),
     testId: 'discoverOpenButton',
+    ariaLabel: 'discoverOpenButton',
     run: () => {
       const flyoutSession = services.overlays.openFlyout(
         toMountPoint(
@@ -192,6 +195,7 @@ export const getTopNavLinks = (
       defaultMessage: 'Share Search',
     }),
     testId: 'shareTopNavButton',
+    ariaLabel: 'shareTopNavButton',
     run: async (anchorElement) => {
       const state: DiscoverState = store!.getState().discover; // store is defined before the view is loaded
       const sharingData = await getSharingData({
@@ -224,6 +228,7 @@ export const getTopNavLinks = (
       defaultMessage: 'Open Inspector for search',
     }),
     testId: 'openInspectorButton',
+    ariaLabel: 'openInspectorButton',
     run() {
       inspector.open(inspectorAdapters, {
         title: savedSearch?.title,

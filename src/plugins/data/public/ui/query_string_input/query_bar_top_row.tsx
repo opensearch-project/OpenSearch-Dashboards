@@ -314,6 +314,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         isLoading={props.isLoading}
         onClick={onClickSubmitButton}
         data-test-subj="querySubmitButton"
+        aria-label="querySubmitButton"
       />
     );
 

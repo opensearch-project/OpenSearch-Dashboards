@@ -305,6 +305,7 @@ const FieldList = ({
         onClick={() => setExpanded(!expanded)}
         size="xs"
         className="dscSideBar_fieldGroup"
+        aria-label={title}
       >
         {title}
       </EuiButtonEmpty>

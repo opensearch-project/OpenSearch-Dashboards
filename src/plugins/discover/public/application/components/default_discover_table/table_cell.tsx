@@ -72,12 +72,17 @@ const TableCellUI = ({
   );
 
   return isTimeField ? (
-    <td data-test-subj="docTableField" className="osdDocTableCell eui-textNoWrap">
+    <td
+      data-test-subj="docTableField"
+      aria-label="docTableField"
+      className="osdDocTableCell eui-textNoWrap"
+    >
       {content}
     </td>
   ) : (
     <td
       data-test-subj="docTableField"
+      aria-label="docTableField"
       className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
     >
       <div className="osdDocTable__limitedHeight">{content}</div>

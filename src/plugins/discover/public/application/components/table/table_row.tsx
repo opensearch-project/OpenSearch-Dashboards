@@ -78,7 +78,11 @@ export function DocViewTableRow({
   });
 
   return (
-    <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
+    <tr
+      key={field}
+      data-test-subj={`tableDocViewRow-${field}`}
+      aria-label={`tableDocViewRow-${field}`}
+    >
       {typeof onFilter === 'function' && (
         <td className="osdDocViewer__buttons">
           <DocViewTableRowBtnFilterAdd

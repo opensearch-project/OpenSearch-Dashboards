@@ -48,6 +48,7 @@ export function LegacyQueryLanguageSwitcher(props: Props) {
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       className="euiFormControlLayout__append dqlQueryBar__languageSwitcherButton"
       data-test-subj={'switchQueryLanguageButton'}
+      aria-label="switchQueryLanguageButton"
     >
       {props.language === 'lucene' ? luceneLabel : dqlLabel}
     </EuiButtonEmpty>

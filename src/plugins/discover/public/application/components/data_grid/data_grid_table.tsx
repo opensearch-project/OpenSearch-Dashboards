@@ -124,6 +124,7 @@ export const DataGridTable = ({
         data-title={title}
         data-description={description}
         data-test-subj="discoverTable"
+        aria-label="discoverTable"
         className="eui-xScrollWithShadows"
       >
         <EuiPanel hasBorder={false} hasShadow={false} {...tablePanelProps}>

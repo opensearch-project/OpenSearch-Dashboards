@@ -104,6 +104,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       button={
         <EuiButtonIcon
           data-test-subj="discoverOptionsButton"
+          aria-label="discoverOptionsButton"
           size="s"
           iconType="gear"
           onClick={() => setOptionsOpen(!isOptionsOpen)}

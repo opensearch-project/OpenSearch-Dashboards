@@ -169,7 +169,7 @@ export function TableHeaderColumn({
 
   return (
     <th data-test-subj="docTableHeaderField" className="docTableHeaderField">
-      <span data-test-subj={`docTableHeader-${name}`}>
+      <span data-test-subj={`docTableHeader-${name}`} aria-label={`docTableHeader-${name}`}>
         {displayName}
         {buttons
           .filter((button) => button.active)

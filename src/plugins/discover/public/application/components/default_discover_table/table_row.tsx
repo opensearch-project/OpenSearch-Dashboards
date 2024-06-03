@@ -53,7 +53,7 @@ const TableRowUI = ({
           color="text"
           onClick={handleExpanding}
           iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-          aria-label="Next"
+          aria-label="docTableExpandToggleColumn"
           data-test-subj="docTableExpandToggleColumn"
         />
       </td>
@@ -142,6 +142,7 @@ const TableRowUI = ({
           <EuiFlexItem>
             <h4
               data-test-subj="docTableRowDetailsTitle"
+              aria-label="docTableRowDetailsTitle"
               className="euiTitle euiTitle--xsmall"
               i18n-id="discover.docTable.tableRow.detailHeading"
               i18n-default-message="Expanded document"
