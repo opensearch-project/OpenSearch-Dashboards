@@ -33,6 +33,7 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WorkspacePermissionMode,
 } from '../../common/constants';
+import { isDataSourceType } from '../utils';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -114,6 +115,10 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
     const workspaces = workspacesIds.map((id) => ({ id, type: WORKSPACE_TYPE }));
     return await this.validateObjectsPermissions(workspaces, request, permissionModes);
+  };
+
+  private valitdateDataSourcePermissions = (type: string) => {
+    if (isDataSourceType(type)) throw generateOSDAdminPermissionError();
   };
 
   private validateAtLeastOnePermittedWorkspaces = async (
@@ -216,6 +221,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       id: string,
       options: SavedObjectsDeleteOptions = {}
     ) => {
+      this.valitdateDataSourcePermissions(type);
       const objectToDeleted = await wrapperOptions.client.get(type, id, options);
       if (
         !(await this.validateWorkspacesAndSavedObjectsPermissions(
@@ -253,6 +259,8 @@ export class WorkspaceSavedObjectsClientWrapper {
       attributes: Partial<T>,
       options: SavedObjectsUpdateOptions = {}
     ): Promise<SavedObjectsUpdateResponse<T>> => {
+      this.valitdateDataSourcePermissions(type);
+
       const objectToUpdate = await wrapperOptions.client.get<T>(type, id, options);
       const permitted = await validateUpdateWithWorkspacePermission(objectToUpdate);
       if (!permitted) {
@@ -265,7 +273,20 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkUpdateObject<T>>,
       options?: SavedObjectsBulkUpdateOptions
     ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
-      const objectsToUpdate = await wrapperOptions.client.bulkGet<T>(objects, options);
+      const disallowedSavedObjects: Array<SavedObjectsBulkUpdateObject<T>> = [];
+      const allowedSavedObjects: Array<SavedObjectsBulkUpdateObject<T>> = [];
+
+      objects.forEach((item) => {
+        if (isDataSourceType(item.type)) {
+          disallowedSavedObjects.push(item);
+          return;
+        }
+
+        allowedSavedObjects.push(item);
+        return;
+      });
+
+      const objectsToUpdate = await wrapperOptions.client.bulkGet<T>(allowedSavedObjects, options);
 
       for (const object of objectsToUpdate.saved_objects) {
         const permitted = await validateUpdateWithWorkspacePermission(object);
@@ -274,7 +295,20 @@ export class WorkspaceSavedObjectsClientWrapper {
         }
       }
 
-      return await wrapperOptions.client.bulkUpdate(objects, options);
+      const bulkUpdateResult = await wrapperOptions.client.bulkUpdate(allowedSavedObjects, options);
+
+      return {
+        saved_objects: [
+          ...(bulkUpdateResult?.saved_objects || []),
+          ...disallowedSavedObjects.map((item) => ({
+            ...item,
+            error: {
+              ...generateOSDAdminPermissionError().output.payload,
+              metadata: { isNotOverwritable: true },
+            },
+          })),
+        ],
+      } as SavedObjectsBulkUpdateResponse<T>;
     };
 
     const bulkCreateWithWorkspacePermissionControl = async <T = unknown>(
@@ -288,6 +322,18 @@ export class WorkspaceSavedObjectsClientWrapper {
         throw generateOSDAdminPermissionError();
       }
 
+      const disallowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
+      const allowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
+
+      objects.forEach((item) => {
+        if (isDataSourceType(item.type)) {
+          disallowedSavedObjects.push(item);
+          return;
+        }
+
+        allowedSavedObjects.push(item);
+        return;
+      });
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
       if (
@@ -309,7 +355,7 @@ export class WorkspaceSavedObjectsClientWrapper {
        *
        */
       if (!hasTargetWorkspaces && options.overwrite) {
-        for (const object of objects) {
+        for (const object of allowedSavedObjects) {
           const { type, id } = object;
           if (id) {
             let rawObject;
@@ -338,7 +384,20 @@ export class WorkspaceSavedObjectsClientWrapper {
         }
       }
 
-      return await wrapperOptions.client.bulkCreate(objects, options);
+      const bulkCreateResult = await wrapperOptions.client.bulkCreate(allowedSavedObjects, options);
+
+      return {
+        saved_objects: [
+          ...(bulkCreateResult?.saved_objects || []),
+          ...disallowedSavedObjects.map((item) => ({
+            ...item,
+            error: {
+              ...generateOSDAdminPermissionError().output.payload,
+              metadata: { isNotOverwritable: true },
+            },
+          })),
+        ],
+      } as SavedObjectsBulkResponse<T>;
     };
 
     const createWithWorkspacePermissionControl = async <T = unknown>(
@@ -346,6 +405,8 @@ export class WorkspaceSavedObjectsClientWrapper {
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
+      this.valitdateDataSourcePermissions(type);
+
       // If options contains id and overwrite, it is an update action.
       const isUpdateMode = options?.id && options?.overwrite;
       // Only OSD admin can create workspace.

@@ -17,7 +17,7 @@ import {
   SavedObjectsCheckConflictsResponse,
   SavedObjectsFindOptions,
 } from '../../../../core/server';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
+import { isDataSourceType } from '../utils';
 
 const UI_SETTINGS_SAVED_OBJECTS_TYPE = 'config';
 
@@ -40,18 +40,11 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
     );
   }
 
-  private isDataSourceType(type: SavedObjectsFindOptions['type']): boolean {
-    if (Array.isArray(type)) {
-      return type.every((item) => item === DATA_SOURCE_SAVED_OBJECT_TYPE);
-    }
-
-    return type === DATA_SOURCE_SAVED_OBJECT_TYPE;
-  }
   private isConfigType(type: SavedObject['type']): boolean {
     return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
   }
   private formatFindParams(options: SavedObjectsFindOptions): SavedObjectsFindOptions {
-    const isListingDataSource = this.isDataSourceType(options.type);
+    const isListingDataSource = isDataSourceType(options.type);
     const { workspaces, ...otherOptions } = options;
     return isListingDataSource ? otherOptions : options;
   }
@@ -70,7 +63,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
     ) => {
       const { workspaces, id, overwrite } = options;
 
-      if (workspaces?.length && (this.isDataSourceType(type) || this.isConfigType(type))) {
+      if (workspaces?.length && (isDataSourceType(type) || this.isConfigType(type))) {
         // For 2.14, data source can only be created without workspace info
         // config can not be created inside a workspace
         throw SavedObjectsErrorHelpers.decorateBadRequestError(
@@ -132,7 +125,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         }
 
         // For 2.14, data source can only be created without workspace info
-        if (this.isDataSourceType(item.type) && isImportIntoWorkspace) {
+        if (isDataSourceType(item.type) && isImportIntoWorkspace) {
           disallowedSavedObjects.push(item);
           return;
         }
@@ -302,7 +295,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
         }
 
         // For 2.14, data source can only be created without workspace info
-        if (this.isDataSourceType(item.type) && isImportIntoWorkspace) {
+        if (isDataSourceType(item.type) && isImportIntoWorkspace) {
           disallowedSavedObjects.push(item);
           return;
         }

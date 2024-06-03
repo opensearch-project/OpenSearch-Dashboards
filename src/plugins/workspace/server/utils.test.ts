@@ -9,6 +9,7 @@ import {
   generateRandomId,
   getOSDAdminConfigFromYMLConfig,
   getPrincipalsFromRequest,
+  isDataSourceType,
   updateDashboardAdminStateForRequest,
 } from './utils';
 import { getWorkspaceState } from '../../../core/server/utils';
@@ -150,5 +151,23 @@ describe('workspace utils', () => {
     const [groups, users] = await getOSDAdminConfigFromYMLConfig(globalConfig$);
     expect(groups).toEqual([]);
     expect(users).toEqual([]);
+  });
+
+  it('should return true when type is data-source', async () => {
+    let result;
+    result = isDataSourceType('data-source');
+    expect(result).toBe(true);
+
+    result = isDataSourceType(['data-source', 'data-source']);
+    expect(result).toBe(true);
+  });
+
+  it('should return false when type is not data-source', async () => {
+    let result;
+    result = isDataSourceType('dashboard');
+    expect(result).toBe(false);
+
+    result = isDataSourceType(['data-source', 'dashboard']);
+    expect(result).toBe(false);
   });
 });

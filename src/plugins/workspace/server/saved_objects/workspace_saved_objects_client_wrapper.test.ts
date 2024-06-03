@@ -161,6 +161,16 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         await wrapper.delete(...deleteArgs);
         expect(clientMock.delete).toHaveBeenCalledWith(...deleteArgs);
       });
+      it('should throw permission error when user delete a data source and is not dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.delete('data-source', 'ds', { force: true });
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+      });
     });
 
     describe('update', () => {
@@ -215,6 +225,16 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         await wrapper.update(...updateArgs);
         expect(clientMock.update).toHaveBeenCalledWith(...updateArgs);
       });
+      it('should throw permission error when user update a data source and is not dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.update('data-source', 'ds', {});
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+      });
     });
 
     describe('bulk update', () => {
@@ -249,6 +269,15 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         const objectsToUpdate = [{ type: 'dashboard', id: 'foo', attributes: { bar: 'baz' } }];
         await wrapper.bulkUpdate(objectsToUpdate, {});
         expect(clientMock.bulkUpdate).toHaveBeenCalledWith(objectsToUpdate, {});
+      });
+      it('should throw permission error when user bulkUpdate data source and is not dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        const result = await wrapper.bulkUpdate([
+          { type: 'data-source', id: 'ds', attributes: {} },
+        ]);
+        expect(result.saved_objects[0].error?.message).toEqual(
+          'Invalid permission, please contact OSD admin'
+        );
       });
     });
 
@@ -376,6 +405,13 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         }
         expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
       });
+      it('should throw permission error when user bulkCreate data source and is not dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        const result = await wrapper.bulkCreate([{ type: 'data-source', attributes: {} }]);
+        expect(result.saved_objects[0].error?.message).toEqual(
+          'Invalid permission, please contact OSD admin'
+        );
+      });
     });
 
     describe('create', () => {
@@ -469,6 +505,16 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
         try {
           await wrapper.create('workspace', { name: 'test' }, {});
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+      });
+      it('should throw permission error when user create a data source and is not dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.create('data-source', { name: 'ds' }, {});
         } catch (e) {
           errorCatched = e;
         }

@@ -388,6 +388,17 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
       expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(true);
     });
+
+    it('should throw forbidden error when user create a data source and is not OSD admin', async () => {
+      let error;
+      try {
+        await permittedSavedObjectedClient.create('data-source', {}, {});
+      } catch (e) {
+        error = e;
+      }
+
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+    });
   });
 
   describe('bulkCreate', () => {
@@ -504,6 +515,14 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
       expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
     });
+
+    it('should throw forbidden error when user bulkCreate data source and is not OSD admin', async () => {
+      const createResult = await permittedSavedObjectedClient.bulkCreate([
+        { type: 'data-source', attributes: {} },
+      ]);
+
+      expect(createResult.saved_objects[0].error).toBeDefined();
+    });
   });
 
   describe('update', () => {
@@ -540,6 +559,17 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         (await permittedSavedObjectedClient.update('dashboard', 'acl-controlled-dashboard-2', {}))
           .error
       ).toBeUndefined();
+    });
+
+    it('should throw forbidden error when user update a data source and is not OSD admin', async () => {
+      let error;
+      try {
+        await permittedSavedObjectedClient.update('data-source', 'ds', {});
+      } catch (e) {
+        error = e;
+      }
+
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
     });
   });
 
@@ -585,6 +615,14 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           ])
         ).saved_objects.length
       ).toEqual(1);
+    });
+
+    it('should throw forbidden error when user bulk update data source and is not OSD admin', async () => {
+      const updateResult = await permittedSavedObjectedClient.bulkUpdate([
+        { type: 'data-source', id: 'ds', attributes: {} },
+      ]);
+
+      expect(updateResult.saved_objects[0].error).toBeDefined();
     });
   });
 
@@ -652,6 +690,17 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         error = e;
       }
       expect(SavedObjectsErrorHelpers.isNotFoundError(error)).toBe(true);
+    });
+
+    it('should throw forbidden error when user delete a data source and is not OSD admin', async () => {
+      let error;
+      try {
+        await permittedSavedObjectedClient.delete('data-source', 'ds');
+      } catch (e) {
+        error = e;
+      }
+
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
     });
   });
 

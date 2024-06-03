@@ -12,10 +12,12 @@ import {
   OpenSearchDashboardsRequest,
   Principals,
   PrincipalType,
+  SavedObjectsFindOptions,
   SharedGlobalConfig,
 } from '../../../core/server';
 import { AuthInfo } from './types';
 import { updateWorkspaceState } from '../../../core/server/utils';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../data_source/common';
 
 /**
  * Generate URL friendly random ID
@@ -88,4 +90,12 @@ export const getOSDAdminConfigFromYMLConfig = async (
   const usersResult = (globalConfig.opensearchDashboards?.dashboardAdmin?.users || []) as string[];
 
   return [groupsResult, usersResult];
+};
+
+export const isDataSourceType = (type: SavedObjectsFindOptions['type']): boolean => {
+  if (Array.isArray(type)) {
+    return type.every((item) => item === DATA_SOURCE_SAVED_OBJECT_TYPE);
+  }
+
+  return type === DATA_SOURCE_SAVED_OBJECT_TYPE;
 };
