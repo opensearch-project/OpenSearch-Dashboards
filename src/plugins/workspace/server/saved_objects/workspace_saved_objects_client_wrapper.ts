@@ -284,8 +284,9 @@ export class WorkspaceSavedObjectsClientWrapper {
       // Objects with id in overwrite mode will be regarded as update
       const objectsToCreate = options.overwrite ? objects.filter((obj) => !obj.id) : objects;
       // Only OSD admin can bulkCreate workspace.
-      if (objectsToCreate.some((obj) => obj.type === WORKSPACE_TYPE))
+      if (objectsToCreate.some((obj) => obj.type === WORKSPACE_TYPE)) {
         throw generateOSDAdminPermissionError();
+      }
 
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
@@ -348,7 +349,9 @@ export class WorkspaceSavedObjectsClientWrapper {
       // If options contains id and overwrite, it is an update action.
       const isUpdateMode = options?.id && options?.overwrite;
       // Only OSD admin can create workspace.
-      if (type === WORKSPACE_TYPE && !isUpdateMode) throw generateOSDAdminPermissionError();
+      if (type === WORKSPACE_TYPE && !isUpdateMode) {
+        throw generateOSDAdminPermissionError();
+      }
 
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
