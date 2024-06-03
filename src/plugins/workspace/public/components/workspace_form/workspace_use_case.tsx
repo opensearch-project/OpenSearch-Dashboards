@@ -52,6 +52,7 @@ export const WorkspaceUseCase = ({ configurableApps, value, onChange }: Workspac
               }
               onChange(value.filter((item) => item !== id));
             }}
+            data-test-subj={`workspaceUseCase-${id}`}
           >
             {description}
           </EuiCheckableCard>
