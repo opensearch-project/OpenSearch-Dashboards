@@ -252,6 +252,10 @@ export default () =>
       survey: Joi.object({
         url: Joi.any().default('/'),
       }),
+      dashboardAdmin: Joi.object({
+        groups: Joi.array().items(Joi.string()).default([]),
+        users: Joi.array().items(Joi.string()).default([]),
+      }),
       futureNavigation: Joi.boolean().default(false),
     }).default(),
 

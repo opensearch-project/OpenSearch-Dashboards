@@ -24,3 +24,5 @@ export {
   DataSourceMultiSelectableConfig,
   createDataSourceMenu,
 } from './components/data_source_menu';
+export { DataSourceSelectionService } from './service/data_source_selection_service';
+export { getDefaultDataSourceId, getDefaultDataSourceId$ } from './components/utils';
