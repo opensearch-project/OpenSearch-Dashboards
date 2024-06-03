@@ -18,6 +18,7 @@ import {
   handleNoAvailableDataSourceError,
   generateComponentId,
   getDataSourceSelection,
+  getDefaultDataSourceId,
 } from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
@@ -132,7 +133,7 @@ export class DataSourceAggregatedView extends React.Component<
         this.setState({
           ...this.state,
           allDataSourcesIdToTitleMap,
-          defaultDataSource: this.props.uiSettings?.get('defaultDataSource', null) ?? null,
+          defaultDataSource: getDefaultDataSourceId(this.props.uiSettings) ?? null,
           showEmptyState: allDataSourcesIdToTitleMap.size === 0,
         });
       })
