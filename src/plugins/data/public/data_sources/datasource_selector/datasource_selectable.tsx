@@ -114,7 +114,7 @@ const consolidateDataSourceGroups = (
 /**
  * @experimental This component is experimental and might change in future releases.
  */
-export const DataSourceSelectable = ({
+export const DataSourceSelectable: React.FC<DataSourceSelectableProps> = ({
   dataSources, // list of all available datasource connections.
   dataSourceOptionList, // combo box renderable option list derived from dataSources
   selectedSources, // current selected datasource in the form of [{ label: xxx, value: xxx }]

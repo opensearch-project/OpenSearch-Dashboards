@@ -22,7 +22,7 @@ export const Sidebar: FC = ({ children }) => {
 
   const {
     services: {
-      data: { indexPatterns, dataSources },
+      data: { indexPatterns, dataSources, ui },
       notifications: { toasts },
       application,
     },
@@ -102,6 +102,21 @@ export const Sidebar: FC = ({ children }) => {
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
 
+  const dataSourceSelectorRef = React.createRef();
+
+  const dataSourceSelector = (
+    <DataSourceSelectable
+      dataSources={activeDataSources}
+      dataSourceOptionList={dataSourceOptionList}
+      setDataSourceOptionList={setDataSourceOptionList}
+      onDataSourceSelect={handleSourceSelection}
+      selectedSources={selectedSources}
+      onGetDataSetError={handleGetDataSetError}
+      onRefresh={memorizedReload}
+      fullWidth
+    />
+  );
+
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer
@@ -116,16 +131,7 @@ export const Sidebar: FC = ({ children }) => {
           color="transparent"
           className="deSidebar_dataSource"
         >
-          <DataSourceSelectable
-            dataSources={activeDataSources}
-            dataSourceOptionList={dataSourceOptionList}
-            setDataSourceOptionList={setDataSourceOptionList}
-            onDataSourceSelect={handleSourceSelection}
-            selectedSources={selectedSources}
-            onGetDataSetError={handleGetDataSetError}
-            onRefresh={memorizedReload}
-            fullWidth
-          />
+          {!!ui.isEnhancementsEnabled && dataSourceSelector}
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}

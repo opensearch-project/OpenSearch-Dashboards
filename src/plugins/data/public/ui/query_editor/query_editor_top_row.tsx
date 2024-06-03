@@ -21,19 +21,20 @@ import {
   useOpenSearchDashboards,
   withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-import QueryStringInputUI from './query_editor';
+import QueryEditortUI from './query_editor';
 import { UI_SETTINGS } from '../../../common';
 import { PersistedLog, fromUser, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import { QueryEnhancement, Settings } from '../types';
 
-const QueryStringInput = withOpenSearchDashboards(QueryStringInputUI);
+const QueryEditor = withOpenSearchDashboards(QueryEditortUI);
 
 // @internal
 export interface QueryEditorTopRowProps {
   query?: Query;
   isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
+  containerRef?: React.RefObject<HTMLDivElement>;
   settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -53,6 +54,7 @@ export interface QueryEditorTopRowProps {
   showAutoRefreshOnly?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
+  filterBar?: any;
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
@@ -220,13 +222,14 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     if (!shouldRenderQueryEditor()) return;
     return (
       <EuiFlexItem>
-        <QueryStringInput
+        <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}
           query={parsedQuery}
           isEnhancementsEnabled={props.isEnhancementsEnabled}
           queryEnhancements={props.queryEnhancements}
+          containerRef={props.containerRef}
           settings={props.settings}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
@@ -358,11 +361,17 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       className={classes}
       responsive={!!props.showDatePicker}
       gutterSize="s"
+      direction="column"
       justifyContent="flexEnd"
     >
       {renderQueryEditor()}
-      {renderSharingMetaFields()}
-      <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup responsive={false} gutterSize="none">
+          <EuiFlexItem grow={false}>{props.filterBar}</EuiFlexItem>
+          <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }

@@ -84,6 +84,7 @@ export interface SearchBarOwnProps {
   isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
   settings?: Settings;
+  containerRef?: React.RefObject<HTMLDivElement>;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
@@ -447,41 +448,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       );
     }
 
-    let queryEditor;
-    if (this.shouldRenderQueryEditor()) {
-      // TODO: MQL make this default query bar top row but this.props.queryEnhancements.get(language) can pass a component
-      queryEditor = (
-        <QueryEditorTopRow
-          timeHistory={this.props.timeHistory}
-          isEnhancementsEnabled={this.props.isEnhancementsEnabled}
-          queryEnhancements={this.props.queryEnhancements}
-          settings={this.props.settings}
-          query={this.state.query}
-          screenTitle={this.props.screenTitle}
-          onSubmit={this.onQueryBarSubmit}
-          indexPatterns={this.props.indexPatterns}
-          isLoading={this.props.isLoading}
-          prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
-          showDatePicker={this.props.showDatePicker}
-          dateRangeFrom={this.state.dateRangeFrom}
-          dateRangeTo={this.state.dateRangeTo}
-          isRefreshPaused={this.props.isRefreshPaused}
-          refreshInterval={this.props.refreshInterval}
-          showAutoRefreshOnly={this.props.showAutoRefreshOnly}
-          showQueryEditor={this.props.showQueryEditor}
-          onRefresh={this.props.onRefresh}
-          onRefreshChange={this.props.onRefreshChange}
-          onChange={this.onQueryBarChange}
-          isDirty={this.isDirty()}
-          customSubmitButton={
-            this.props.customSubmitButton ? this.props.customSubmitButton : undefined
-          }
-          dataTestSubj={this.props.dataTestSubj}
-          indicateNoData={this.props.indicateNoData}
-        />
-      );
-    }
-
     let filterBar;
     if (this.shouldRenderFilterBar()) {
       const filterGroupClasses = classNames('globalFilterGroup__wrapper', {
@@ -512,11 +478,48 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       );
     }
 
+    let queryEditor;
+    if (this.shouldRenderQueryEditor()) {
+      // TODO: MQL make this default query bar top row but this.props.queryEnhancements.get(language) can pass a component
+      queryEditor = (
+        <QueryEditorTopRow
+          timeHistory={this.props.timeHistory}
+          isEnhancementsEnabled={this.props.isEnhancementsEnabled}
+          queryEnhancements={this.props.queryEnhancements}
+          containerRef={this.props.containerRef}
+          settings={this.props.settings}
+          query={this.state.query}
+          screenTitle={this.props.screenTitle}
+          onSubmit={this.onQueryBarSubmit}
+          indexPatterns={this.props.indexPatterns}
+          isLoading={this.props.isLoading}
+          prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
+          showDatePicker={this.props.showDatePicker}
+          dateRangeFrom={this.state.dateRangeFrom}
+          dateRangeTo={this.state.dateRangeTo}
+          isRefreshPaused={this.props.isRefreshPaused}
+          refreshInterval={this.props.refreshInterval}
+          showAutoRefreshOnly={this.props.showAutoRefreshOnly}
+          showQueryEditor={this.props.showQueryEditor}
+          onRefresh={this.props.onRefresh}
+          onRefreshChange={this.props.onRefreshChange}
+          onChange={this.onQueryBarChange}
+          isDirty={this.isDirty()}
+          customSubmitButton={
+            this.props.customSubmitButton ? this.props.customSubmitButton : undefined
+          }
+          filterBar={filterBar}
+          dataTestSubj={this.props.dataTestSubj}
+          indicateNoData={this.props.indicateNoData}
+        />
+      );
+    }
+
     return (
       <div className="globalQueryBar" data-test-subj="globalQueryBar">
         {queryBar}
         {queryEditor}
-        {filterBar}
+        {!!!this.props.isEnhancementsEnabled && filterBar}
 
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
