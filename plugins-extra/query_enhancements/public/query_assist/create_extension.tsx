@@ -5,14 +5,14 @@ import { SearchBarExtensionConfig } from '../../../../src/plugins/data/public/ui
 
 export const createQueryAssistExtension = (http: HttpSetup): SearchBarExtensionConfig => {
   return {
-    id: 'query-assist',
+    id: 'query-assist-ppl',
     order: 1000,
     isEnabled: (() => {
       let agentConfigured: boolean;
       return async () => {
         if (agentConfigured === undefined) {
           agentConfigured = await http
-            .get<{ configured: boolean }>('/api/ql/query_assist/configured/ppl')
+            .get<{ configured: boolean }>('/api/ql/query_assist/configured/PPL')
             .then((response) => response.configured)
             .catch(() => false);
         }

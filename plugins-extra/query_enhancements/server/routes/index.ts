@@ -10,7 +10,7 @@ import {
   IOpenSearchDashboardsSearchRequest,
 } from '../../../../src/plugins/data/common';
 import { ISearchStrategy } from '../../../../src/plugins/data/server';
-import { registerPplQueryAssistRoute } from './query_assist';
+import { registerQueryAssistRoutes } from './query_assist';
 
 export function defineRoutes(
   logger: Logger,
@@ -20,7 +20,7 @@ export function defineRoutes(
     ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse>
   >
 ) {
-  registerPplQueryAssistRoute(logger, router);
+  registerQueryAssistRoutes(logger, router);
   router.post(
     {
       path: `/api/pplql/search`,

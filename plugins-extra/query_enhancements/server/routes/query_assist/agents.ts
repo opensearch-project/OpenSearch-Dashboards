@@ -15,7 +15,7 @@ const AGENT_REQUEST_OPTIONS = {
   maxRetries: 0,
 };
 
-type AgentResponse = ApiResponse<{
+export type AgentResponse = ApiResponse<{
   inference_results: Array<{
     output: Array<{ name: string; result?: string }>;
   }>;
