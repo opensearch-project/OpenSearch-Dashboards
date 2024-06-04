@@ -3,36 +3,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { Component, RefObject, createRef } from 'react';
-import { i18n } from '@osd/i18n';
-
-import classNames from 'classnames';
 import {
-  PopoverAnchorPosition,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
   EuiLink,
   htmlIdGenerator,
+  PopoverAnchorPosition,
 } from '@elastic/eui';
-
+import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
+import classNames from 'classnames';
 import { isEqual, isFunction } from 'lodash';
+import React, { Component, createRef, RefObject } from 'react';
 import { Toast } from 'src/core/public';
+import { Settings } from '..';
 import { IDataPluginServices, IIndexPattern, Query, TimeRange } from '../..';
-import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
-
 import {
   CodeEditor,
   OpenSearchDashboardsReactContextValue,
   toMountPoint,
 } from '../../../../opensearch_dashboards_react/public';
+import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
+import { fromUser, getQueryLog, matchPairs, PersistedLog, toUser } from '../../query';
+import { SuggestionsListSize } from '../typeahead/suggestions_component';
+import { DataSettings, QueryEnhancement } from '../types';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
-import { SuggestionsListSize } from '../typeahead/suggestions_component';
-import { Settings } from '..';
-import { DataSettings, QueryEnhancement } from '../types';
 
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -57,6 +54,7 @@ export interface QueryEditorProps {
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
+  queryEditorRef: React.RefObject<HTMLDivElement>;
 }
 
 interface Props extends QueryEditorProps {
@@ -521,6 +519,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem onClick={this.onClickInput} grow={true}>
+              <div ref={this.props.queryEditorRef} />
               <CodeEditor
                 height={70}
                 languageId="xjson"
