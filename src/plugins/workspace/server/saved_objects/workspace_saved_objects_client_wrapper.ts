@@ -53,6 +53,15 @@ const generateSavedObjectsPermissionError = () =>
     )
   );
 
+const generateOSDAdminPermissionError = () =>
+  SavedObjectsErrorHelpers.decorateForbiddenError(
+    new Error(
+      i18n.translate('dashboard.admin.permission.invalidate', {
+        defaultMessage: 'Invalid permission, please contact OSD admin',
+      })
+    )
+  );
+
 const intersection = <T extends string>(...args: T[][]) => {
   const occursCountMap: { [key: string]: number } = {};
   for (let i = 0; i < args.length; i++) {
@@ -272,6 +281,13 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
+      // Objects with id in overwrite mode will be regarded as update
+      const objectsToCreate = options.overwrite ? objects.filter((obj) => !obj.id) : objects;
+      // Only OSD admin can bulkCreate workspace.
+      if (objectsToCreate.some((obj) => obj.type === WORKSPACE_TYPE)) {
+        throw generateOSDAdminPermissionError();
+      }
+
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
       if (
@@ -330,6 +346,13 @@ export class WorkspaceSavedObjectsClientWrapper {
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
+      // If options contains id and overwrite, it is an update action.
+      const isUpdateMode = options?.id && options?.overwrite;
+      // Only OSD admin can create workspace.
+      if (type === WORKSPACE_TYPE && !isUpdateMode) {
+        throw generateOSDAdminPermissionError();
+      }
+
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
       if (
