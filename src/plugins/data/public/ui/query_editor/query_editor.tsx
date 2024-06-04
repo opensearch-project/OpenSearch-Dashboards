@@ -34,11 +34,12 @@ import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { Settings } from '..';
 import { DataSettings, QueryEnhancement } from '../types';
 
-export interface QueryStringInputProps {
+export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
   isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
+  containerRef?: React.RefCallback<HTMLDivElement>;
   settings?: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -58,7 +59,7 @@ export interface QueryStringInputProps {
   isInvalid?: boolean;
 }
 
-interface Props extends QueryStringInputProps {
+interface Props extends QueryEditorProps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
 }
 
@@ -88,7 +89,7 @@ const KEY_CODES = {
 // Needed for React.lazy
 // TODO: MQL export this and let people extended this
 // eslint-disable-next-line import/no-default-export
-export default class QueryStringInputUI extends Component<Props, State> {
+export default class QueryEditorUI extends Component<Props, State> {
   public state: State = {
     isSuggestionsVisible: false,
     index: null,
@@ -161,8 +162,8 @@ export default class QueryStringInputUI extends Component<Props, State> {
     this.onChange({ query: value, language: this.props.query.language });
   };
 
-  private onInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    this.onQueryStringChange(event.target.value);
+  private onInputChange = (value: string) => {
+    this.onQueryStringChange(value);
   };
 
   private onClickInput = (event: React.MouseEvent<HTMLTextAreaElement>) => {
@@ -453,6 +454,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
       if (this.inputRef != null) {
         this.inputRef.setSelectionRange(this.state.selectionStart, this.state.selectionEnd);
       }
+
       this.setState({
         selectionStart: null,
         selectionEnd: null,
@@ -492,45 +494,43 @@ export default class QueryStringInputUI extends Component<Props, State> {
     // );
     const className = classNames(this.props.className);
 
+    const queryLanguageSwitcher = (
+      <QueryLanguageSwitcher
+        language={this.props.query.language}
+        anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+        onSelectLanguage={this.onSelectLanguage}
+        appName={this.services.appName}
+      />
+    );
+
     return (
       <div className={className}>
         {!!this.props.isEnhancementsEnabled && (
           <EuiFlexGroup gutterSize="xs" direction="column">
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup>
-                <EuiFlexItem>{this.props.prepend}</EuiFlexItem>
-                {/* <EuiFlexItem>
-                  <DataSourceSelectable
-                    dataSources={activeDataSources}
-                    dataSourceOptionList={dataSourceOptionList}
-                    setDataSourceOptionList={setDataSourceOptionList}
-                    onDataSourceSelect={handleSourceSelection}
-                    selectedSources={selectedSources}
-                    onGetDataSetError={handleGetDataSetError}
-                    onRefresh={memorizedReload}
-                    fullWidth
-                  />
-                </EuiFlexItem> */}
+              <EuiFlexGroup gutterSize="xs">
+                <EuiFlexItem grow={false}>{this.props.prepend}</EuiFlexItem>
                 <EuiFlexItem>
-                  <QueryLanguageSwitcher
-                    language={this.props.query.language}
-                    anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-                    onSelectLanguage={this.onSelectLanguage}
-                    appName={this.services.appName}
-                  />
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <div ref={this.props.containerRef} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={true}>{queryLanguageSwitcher}</EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem onClick={this.onClickInput} grow={true}>
               <CodeEditor
                 height={70}
-                languageId="json"
+                languageId="xjson"
                 value={this.getQueryString()}
-                onChange={() => {}}
+                onChange={this.onInputChange}
                 options={{
-                  readOnly: true,
                   lineNumbers: 'on',
-                  fontSize: 12,
+                  lineHeight: 24,
+                  fontSize: 14,
+                  fontFamily: 'Roboto Mono',
                   minimap: {
                     enabled: false,
                   },

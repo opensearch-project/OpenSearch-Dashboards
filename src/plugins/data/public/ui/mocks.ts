@@ -37,6 +37,7 @@ function createStartContract(isEnhancementsEnabled: boolean = false): jest.Mocke
     IndexPatternSelect: jest.fn(),
     SearchBar: jest.fn(),
     Settings: new SettingsMock(createMockStorage(), queryEnhancements),
+    setDataSourceSelectMountPoint: jest.fn(),
   };
 }
 

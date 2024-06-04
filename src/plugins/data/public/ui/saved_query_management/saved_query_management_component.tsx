@@ -51,6 +51,7 @@ import { SavedQueryListItem } from './saved_query_list_item';
 
 const perPage = 50;
 interface Props {
+  isEnhancementsEnabled?: boolean;
   showSaveQuery?: boolean;
   loadedSavedQuery?: SavedQuery;
   savedQueryService: SavedQueryService;
@@ -61,6 +62,7 @@ interface Props {
 }
 
 export function SavedQueryManagementComponent({
+  isEnhancementsEnabled,
   showSaveQuery,
   loadedSavedQuery,
   onSave,
@@ -170,7 +172,7 @@ export function SavedQueryManagementComponent({
     setActivePage(pageNumber);
   };
 
-  const savedQueryPopoverButton = (
+  const savedQueryPopoverButton = !isEnhancementsEnabled ? (
     <EuiButtonEmpty
       onClick={handleTogglePopover}
       aria-label={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
@@ -183,6 +185,20 @@ export function SavedQueryManagementComponent({
     >
       <EuiIcon type="save" className="euiQuickSelectPopover__buttonText" />
       <EuiIcon type="arrowDown" />
+    </EuiButtonEmpty>
+  ) : (
+    <EuiButtonEmpty
+      onClick={handleTogglePopover}
+      aria-label={i18n.translate('data.search.searchBar.enhancedSavedQueryPopoverButtonText', {
+        defaultMessage: 'See saved queries',
+      })}
+      title={i18n.translate('data.search.searchBar.enhancedSavedQueryPopoverButtonText', {
+        defaultMessage: 'See saved queries',
+      })}
+      data-test-subj="enhanced-saved-query-management-popover-button"
+    >
+      <EuiIcon type="arrowDown" className="euiQuickSelectPopover__buttonText" />
+      <EuiIcon type="save" />
     </EuiButtonEmpty>
   );
 

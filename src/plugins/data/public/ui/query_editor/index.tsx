@@ -6,7 +6,7 @@
 import React from 'react';
 import { withOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import type { QueryEditorTopRowProps } from './query_editor_top_row';
-import type { QueryStringInputProps } from './query_editor';
+import type { QueryEditorProps } from './query_editor';
 
 const Fallback = () => <div />;
 
@@ -17,10 +17,10 @@ export const QueryEditorTopRow = (props: QueryEditorTopRowProps) => (
   </React.Suspense>
 );
 
-const LazyQueryStringInputUI = withOpenSearchDashboards(React.lazy(() => import('./query_editor')));
-export const QueryStringInput = (props: QueryStringInputProps) => (
+const LazyQueryEditorUI = withOpenSearchDashboards(React.lazy(() => import('./query_editor')));
+export const QueryEditor = (props: QueryEditorProps) => (
   <React.Suspense fallback={<Fallback />}>
-    <LazyQueryStringInputUI {...props} />
+    <LazyQueryEditorUI {...props} />
   </React.Suspense>
 );
-export type { QueryStringInputProps };
+export type { QueryEditorProps };

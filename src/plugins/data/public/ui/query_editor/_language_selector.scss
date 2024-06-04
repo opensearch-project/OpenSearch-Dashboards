@@ -1,0 +1,14 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+.languageSelector {
+  max-width: 140px;
+  height: 100%;
+
+  &:first-child {
+    div:first-child {
+      height: 100%;
+    }
+  }
+}
