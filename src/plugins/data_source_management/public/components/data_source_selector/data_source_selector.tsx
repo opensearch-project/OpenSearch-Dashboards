@@ -14,6 +14,7 @@ import {
   getFilteredDataSources,
   generateComponentId,
   getDataSourceSelection,
+  getDefaultDataSourceId,
 } from '../utils';
 import { DataSourceAttributes } from '../../types';
 import { DataSourceItem } from '../data_source_item';
@@ -164,7 +165,7 @@ export class DataSourceSelector extends React.Component<
         return;
       }
 
-      const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
+      const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
       // 5.1 Empty default option, [], just want to show placeholder
       if (this.props.defaultOption?.length === 0) {
         this.setState({
