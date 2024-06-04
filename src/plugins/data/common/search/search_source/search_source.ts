@@ -87,8 +87,19 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/common';
 import { IIndexPattern } from '../../index_patterns';
-import { DATA_FRAME_TYPES, IDataFrame, IDataFrameResponse, convertResult } from '../../data_frames';
-import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
+import {
+  DATA_FRAME_TYPES,
+  IDataFrame,
+  IDataFrameResponse,
+  convertResult,
+  UsePolling,
+} from '../../data_frames';
+import {
+  IOpenSearchSearchRequest,
+  IOpenSearchSearchResponse,
+  ISearchOptions,
+  ISearchRequestParams,
+} from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
 import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
 import {
@@ -141,6 +152,11 @@ export interface SearchSourceDependencies extends FetchHandlers {
   df: {
     get: () => IDataFrame | undefined;
     set: (dataFrame: IDataFrame) => Promise<void>;
+    clear: () => void;
+  };
+  session: {
+    get: (datasource: string) => string | undefined;
+    set: (datasource: string, session: string) => void;
     clear: () => void;
   };
 }
@@ -313,6 +329,30 @@ export class SearchSource {
   }
 
   /**
+   * Get the session ID of requested datasource
+   * @return {undefined|string}
+   */
+  getSession(datasource: string) {
+    return this.dependencies.session.get(datasource);
+  }
+
+  /**
+   * Sets the sessionID of datasource
+   * @async
+   * @return {void}
+   */
+  setSession(datasource: string, session: string) {
+    return this.dependencies.session.set(datasource, session);
+  }
+
+  /**
+   * Clear the session cache of this SearchSource
+   */
+  clearSessionCache() {
+    this.dependencies.session.clear();
+  }
+
+  /**
    * Fetch this source and reject the returned Promise on error
    *
    * @async
@@ -400,10 +440,13 @@ export class SearchSource {
    */
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
+    // TODO: MQL need to update this so it's dependent on what the datasource selected is
+    const sessionId = this.getSession('mys3');
 
     const params = getExternalSearchParamsFromRequest(searchRequest, {
       getConfig,
       getDataFrame: this.getDataFrame.bind(this),
+      session: sessionId,
     });
 
     return search({ params }, options).then(async (response: any) => {
@@ -412,6 +455,50 @@ export class SearchSource {
           const dataFrameResponse = response as IDataFrameResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+        } else if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
+          const dataFrameResponse = response as IDataFrameResponse;
+          const responseQueryId = (dataFrameResponse.body as IDataFrame).meta?.queryId;
+          const responseSessionId = (dataFrameResponse.body as IDataFrame).meta?.sessionId;
+          // if there wasn't a session before, set current datasource as session
+          // TODO: MQL update with selected datasource
+          if (!sessionId || (sessionId && sessionId !== responseSessionId)) {
+            this.setSession('mys3', responseSessionId);
+          }
+          const queryIdRequest: ISearchRequestParams = {
+            body: {
+              query: {
+                type: 'unsupported',
+                queries: [{ query: '', language: 'SQL Async', queryId: responseQueryId }],
+              },
+            },
+          };
+          let asyncResponse: IDataFrameResponse = response;
+          const handleDirectQuerySuccess = (pollingResult, configurations) => {
+            if (pollingResult && pollingResult.body.meta.status === 'SUCCESS') {
+              asyncResponse = pollingResult;
+              return true;
+            }
+            return false;
+          };
+          const handleDirectQueryError = (error: Error) => {
+            // eslint-disable-next-line no-console
+            console.error(error);
+            return true;
+          };
+          const polling = new UsePolling<any, any>(
+            () => {
+              return search({ params: queryIdRequest }, options);
+            },
+            5000,
+            handleDirectQuerySuccess,
+            handleDirectQueryError
+          );
+          polling.startPolling(responseQueryId);
+          await polling.waitForPolling();
+          return await onResponse(
+            searchRequest,
+            convertResult(asyncResponse as IDataFrameResponse)
+          );
         }
         // TODO: MQL else if data_frame_polling then poll for the data frame updating the df fields only
       }
