@@ -26,7 +26,6 @@ export interface UiServiceStartDependencies {
 
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
-  siblingRef: HTMLInputElement | null = null;
   containerRef: HTMLDivElement | null = null;
   private container$ = new BehaviorSubject<HTMLDivElement | null>(null);
   private queryEnhancements: Map<string, QueryEnhancement> = new Map();
@@ -52,10 +51,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
   public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
     const Settings = createSettings({ storage, queryEnhancements: this.queryEnhancements });
 
-    const setSiblingRef = (ref: HTMLInputElement | null) => {
-      this.siblingRef = ref;
-    };
-
     const setContainerRef = (ref: HTMLDivElement | null) => {
       this.containerRef = ref;
       this.container$.next(ref);
@@ -68,7 +63,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       isEnhancementsEnabled: this.enhancementsConfig?.enabled,
       queryEnhancements: this.queryEnhancements,
       settings: Settings,
-      setSiblingRef,
       setContainerRef,
     });
 

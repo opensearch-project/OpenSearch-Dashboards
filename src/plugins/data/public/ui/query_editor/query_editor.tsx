@@ -40,7 +40,6 @@ export interface QueryEditorProps {
   isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
-  setSiblingRef?: (ref: HTMLInputElement | null) => void;
   settings?: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -497,7 +496,6 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     const queryLanguageSwitcher = (
       <QueryLanguageSwitcher
-        setSiblingRef={this.props.setSiblingRef!}
         language={this.props.query.language}
         anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
         onSelectLanguage={this.onSelectLanguage}
@@ -510,17 +508,22 @@ export default class QueryEditorUI extends Component<Props, State> {
         {!!this.props.isEnhancementsEnabled && (
           <EuiFlexGroup gutterSize="xs" direction="column">
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup gutterSize="s">
+              <EuiFlexGroup gutterSize="xs">
                 <EuiFlexItem grow={false}>{this.props.prepend}</EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <div ref={this.props.containerRef}>{queryLanguageSwitcher}</div>
+                <EuiFlexItem>
+                  <EuiFlexGroup gutterSize="xs">
+                    <EuiFlexItem grow={false}>
+                      <div ref={this.props.containerRef} />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={true}>{queryLanguageSwitcher}</EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
               <CodeEditor
                 height={70}
-                languageId="markdown"
+                languageId="xjson"
                 value={this.getQueryString()}
                 onChange={() => {}}
                 options={{

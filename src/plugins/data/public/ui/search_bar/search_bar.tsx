@@ -84,7 +84,6 @@ export interface SearchBarOwnProps {
   isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
   settings?: Settings;
-  setSiblingRef: (ref: HTMLInputElement | null) => void;
   containerRef?: React.RefCallback<HTMLDivElement>;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
@@ -404,6 +403,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   public render() {
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
       <SavedQueryManagementComponent
+        isEnhancementsEnabled={this.props.isEnhancementsEnabled}
         showSaveQuery={this.props.showSaveQuery}
         loadedSavedQuery={this.props.savedQuery}
         onSave={this.onInitiateSave}
@@ -487,7 +487,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           timeHistory={this.props.timeHistory}
           isEnhancementsEnabled={this.props.isEnhancementsEnabled}
           queryEnhancements={this.props.queryEnhancements}
-          setSiblingRef={this.props.setSiblingRef}
           containerRef={this.props.containerRef}
           settings={this.props.settings}
           query={this.state.query}
@@ -517,8 +516,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       );
     }
 
+    const className = !!this.props.isEnhancementsEnabled ? 'globalQueryEditor' : 'globalQueryBar';
+
     return (
-      <div className="globalQueryBar" data-test-subj="globalQueryBar">
+      <div className={className} data-test-subj="globalQueryBar">
         {queryBar}
         {queryEditor}
         {!!!this.props.isEnhancementsEnabled && filterBar}

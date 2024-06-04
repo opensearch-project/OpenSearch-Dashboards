@@ -141,23 +141,25 @@ export const Sidebar: FC = ({ children }) => {
         borderRadius="none"
         color="transparent"
       >
-        <EuiSplitPanel.Inner
-          paddingSize="s"
-          grow={false}
-          color="transparent"
-          className="deSidebar_dataSource"
-        >
-          {!!!ui.isEnhancementsEnabled && dataSourceSelector}
-          {!!ui.isEnhancementsEnabled && (
-            <EuiPortal
-              portalRef={(node) => {
-                containerRef.current = node;
-              }}
-            >
-              {dataSourceSelector}
-            </EuiPortal>
-          )}
-        </EuiSplitPanel.Inner>
+        {!!ui.isEnhancementsEnabled && (
+          <EuiPortal
+            portalRef={(node) => {
+              containerRef.current = node;
+            }}
+          >
+            {dataSourceSelector}
+          </EuiPortal>
+        )}
+        {!!!ui.isEnhancementsEnabled && (
+          <EuiSplitPanel.Inner
+            paddingSize="s"
+            grow={false}
+            color="transparent"
+            className="deSidebar_dataSource"
+          >
+            {dataSourceSelector}
+          </EuiSplitPanel.Inner>
+        )}
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}
         </EuiSplitPanel.Inner>

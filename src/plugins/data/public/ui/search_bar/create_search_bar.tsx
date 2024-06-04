@@ -50,7 +50,6 @@ interface StatefulSearchBarDeps {
   isEnhancementsEnabled: boolean;
   queryEnhancements: Map<string, QueryEnhancement>;
   settings: Settings;
-  setSiblingRef: (ref: HTMLInputElement | null) => void;
   setContainerRef: (ref: HTMLDivElement | null) => void;
 }
 
@@ -143,7 +142,6 @@ export function createSearchBar({
   isEnhancementsEnabled,
   queryEnhancements,
   settings,
-  setSiblingRef,
   setContainerRef,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
@@ -226,7 +224,6 @@ export function createSearchBar({
           query={query}
           isEnhancementsEnabled={isEnhancementsEnabled}
           queryEnhancements={queryEnhancements}
-          setSiblingRef={setSiblingRef}
           containerRef={containerRef}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}

@@ -35,7 +35,6 @@ export interface QueryEditorTopRowProps {
   isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
-  setSiblingRef: (ref: HTMLInputElement | null) => void;
   settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -231,7 +230,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           isEnhancementsEnabled={props.isEnhancementsEnabled}
           queryEnhancements={props.queryEnhancements}
           containerRef={props.containerRef}
-          setSiblingRef={props.setSiblingRef}
           settings={props.settings}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
@@ -362,7 +360,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     <EuiFlexGroup
       className={classes}
       responsive={!!props.showDatePicker}
-      gutterSize="s"
+      gutterSize="xs"
       direction="column"
       justifyContent="flexEnd"
     >
