@@ -22,7 +22,7 @@ function mapExternalLanguageToOptions(language: string) {
   };
 }
 
-export function QueryLanguageSwitcher(props: Props) {
+export const QueryLanguageSwitcher = (props: Props) => {
   const dqlLabel = i18n.translate('data.query.queryBar.dqlLanguageName', {
     defaultMessage: 'DQL',
   });
@@ -53,7 +53,7 @@ export function QueryLanguageSwitcher(props: Props) {
         !enhancement.supportedAppNames.includes(props.appName)
       )
         return;
-      languageOptions.push(mapExternalLanguageToOptions(enhancement.language));
+      languageOptions.unshift(mapExternalLanguageToOptions(enhancement.language));
     });
   }
 
@@ -89,8 +89,8 @@ export function QueryLanguageSwitcher(props: Props) {
 
   return (
     <EuiComboBox
-      className="languageSelect"
-      data-test-subj="languageSelect"
+      className="languageSelector"
+      data-test-subj="languageSelector"
       options={languageOptions}
       selectedOptions={[selectedLanguage]}
       onChange={handleLanguageChange}
@@ -99,4 +99,4 @@ export function QueryLanguageSwitcher(props: Props) {
       async
     />
   );
-}
+};

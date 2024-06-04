@@ -8,46 +8,6 @@
   width: 500px;
 }
 
-// Uses the append style, but no bordering
-.dqlQueryEditor__languageSwitcherButton {
-  border-right: none !important;
-}
-
-.osdQueryEditor__textareaWrap {
-  overflow: visible !important; // Override EUI form control
-  display: flex;
-  flex: 1 1 100%;
-  position: relative;
-}
-
-.osdQueryEditor__textarea {
-  // z-index: $euiZContentMenu;
-  // resize: none !important; // When in the group, it will autosize
-  height: $euiFormControlHeight + 200px;
-
-  // Unlike most inputs within layout control groups, the text area still needs a border.
-  // These adjusts help it sit above the control groups shadow to line up correctly.
-  padding: ($euiSizeS + 2px) $euiSizeS $euiSizeS;
-  transform: translateY(-2px) translateX(-1px);
-
-  // &:not(:focus):not(:invalid) {
-  //   @include euiYScrollWithShadows;
-  // }
-
-  // &:not(:focus) {
-  //   white-space: nowrap;
-  //   overflow-y: hidden;
-  //   overflow-x: hidden;
-  // }
-
-  // // When focused, let it scroll
-  // &:focus {
-  //   overflow-x: auto;
-  //   overflow-y: auto;
-  //   white-space: normal;
-  // }
-}
-
 @include euiBreakpoint("xs", "s") {
   .osdQueryEditor--withDatePicker {
     > :first-child {

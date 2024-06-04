@@ -439,6 +439,7 @@ export {
   QueryStringInputProps,
   // for BWC, keeping the old name
   IUiStart as DataPublicPluginStartUi,
+  IUiSetup as DataPublicPluginSetupUi,
 } from './ui';
 
 /**

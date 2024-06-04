@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { SearchInterceptor } from '../search';
 import { IndexPatternSelectProps } from './index_pattern_select';
 import { StatefulSearchBarProps } from './search_bar';
@@ -62,4 +63,6 @@ export interface IUiStart {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
   Settings: Settings;
+  containerRef: HTMLDivElement | null;
+  container$: BehaviorSubject<HTMLDivElement | null>;
 }
