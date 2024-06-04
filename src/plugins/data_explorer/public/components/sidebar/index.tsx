@@ -13,7 +13,7 @@ import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
 import { DEFAULT_DATA_SOURCE_TYPE, S3_GLUE_DATA_SOURCE_TYPE } from '../../../../data/common';
-import { setDataSourceType } from '../../utils/state_management/metadata_slice';
+import { setDataSource } from '../../utils/state_management/metadata_slice';
 
 export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
@@ -80,19 +80,18 @@ export const Sidebar: FC = ({ children }) => {
 
   const handleSourceSelection = useCallback(
     (selectedDataSources: DataSourceOption[]) => {
+      setSelectedSources(selectedDataSources);
       if (selectedDataSources.length === 0) {
-        setSelectedSources(selectedDataSources);
         return;
       }
-      setSelectedSources(selectedDataSources);
 
-      switch (selectedDataSources[0].type) {
-        case DEFAULT_DATA_SOURCE_TYPE: // need to make sure we have a constant here - common with data source types
+      switch (selectedDataSources[0].connectionType) {
+        case 'os': // need to make sure we have a constant here - common with data source types
           dispatch(setIndexPattern(selectedDataSources[0].value));
-          dispatch(setDataSourceType(DEFAULT_DATA_SOURCE_TYPE));
+          dispatch(setDataSource(selectedDataSources[0].ds));
           break;
-        case S3_GLUE_DATA_SOURCE_TYPE:
-          dispatch(setDataSourceType(S3_GLUE_DATA_SOURCE_TYPE));
+        case 'flint':
+          dispatch(setDataSource(selectedDataSources[0].ds));
           break;
       }
     },

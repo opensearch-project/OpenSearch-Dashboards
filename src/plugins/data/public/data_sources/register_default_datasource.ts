@@ -25,6 +25,7 @@ export const registerDefaultDataSource = (data: Omit<DataPublicPluginStart, 'ui'
       id: htmlIdGenerator(DEFAULT_DATA_SOURCE_NAME)(DEFAULT_DATA_SOURCE_TYPE),
       name: DEFAULT_DATA_SOURCE_NAME,
       type: DEFAULT_DATA_SOURCE_TYPE,
+      connectionType: 'os',
       metadata: {
         ui: {
           label: DEFAULT_DATA_SOURCE_DISPLAY_NAME, // display name of your data source,

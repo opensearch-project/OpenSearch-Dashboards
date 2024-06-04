@@ -29,6 +29,7 @@
  */
 
 import { NameList } from 'elasticsearch';
+import { DataSource } from 'src/plugins/data/public';
 import { Filter, IDataFrame, IndexPattern, Query } from '../..';
 import { SearchSource } from './search_source';
 
@@ -104,6 +105,7 @@ export interface SearchSourceFields {
   timeout?: string;
   terminate_after?: number;
   df?: IDataFrame;
+  dataSource: DataSource;
 }
 
 export interface SearchSourceOptions {

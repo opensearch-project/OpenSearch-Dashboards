@@ -23,6 +23,7 @@ export interface DataSourceOption {
   label: string;
   value: string;
   type: string;
+  connectionType: 'os' | 'flint';
   ds: DataSource;
 }
 

@@ -8,6 +8,7 @@ import {
   ISearchSource,
   indexPatterns as indexPatternUtils,
   AggConfigs,
+  DataSource,
 } from '../../../../../data/public';
 import { DiscoverServices } from '../../../build_services';
 import { SortOrder } from '../../../saved_searches/types';
@@ -15,6 +16,7 @@ import { getSortForSearchSource } from './get_sort_for_search_source';
 import { SORT_DEFAULT_ORDER_SETTING, SAMPLE_SIZE_SETTING } from '../../../../common';
 
 interface Props {
+  dataSource: DataSource | undefined;
   indexPattern: IndexPattern;
   services: DiscoverServices;
   sort: SortOrder[] | undefined;
@@ -23,6 +25,7 @@ interface Props {
 }
 
 export const updateSearchSource = async ({
+  dataSource,
   indexPattern,
   services,
   searchSource,
@@ -67,6 +70,7 @@ export const updateSearchSource = async ({
   searchSourceInstance.setParent(timeRangeSearchSource);
 
   searchSourceInstance.setFields({
+    dataSource,
     index: dataSet,
     sort: sortForSearchSource,
     size,

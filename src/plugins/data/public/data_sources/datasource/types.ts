@@ -51,6 +51,7 @@ export interface IDataSourceSettings<T extends IDataSourceMetadata = IDataSource
   id: string;
   type: string;
   name: string;
+  connectionType: 'os' | 'flint';
   metadata: T;
 }
 

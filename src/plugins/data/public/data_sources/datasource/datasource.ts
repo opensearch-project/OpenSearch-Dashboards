@@ -36,12 +36,14 @@ export abstract class DataSource<
   private readonly id: string;
   private readonly name: string;
   private readonly type: string;
+  private readonly connectionType: 'os' | 'flint';
   private readonly metadata: TMetadata;
 
   constructor(settings: IDataSourceSettings<TMetadata>) {
     this.id = settings.id;
     this.name = settings.name;
     this.type = settings.type;
+    this.connectionType = settings.connectionType;
     this.metadata = settings.metadata;
   }
 
@@ -59,6 +61,10 @@ export abstract class DataSource<
 
   getMetadata() {
     return this.metadata;
+  }
+
+  getConnectionType() {
+    return this.connectionType;
   }
 
   /**

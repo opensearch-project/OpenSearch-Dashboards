@@ -506,6 +506,7 @@ export class SearchSource {
         const fields = uniq((data[key] || []).concat(val));
         return addToRoot(key, fields);
       case 'index':
+      case 'dataSource':
       case 'type':
       case 'highlightAll':
         return key && data[key] == null && addToRoot(key, val);
@@ -551,7 +552,6 @@ export class SearchSource {
 
   flatten() {
     const searchRequest = this.mergeProps();
-
     searchRequest.body = searchRequest.body || {};
     const { body, index, fields, query, filters, highlightAll } = searchRequest;
     searchRequest.indexType = this.getIndexType(index);

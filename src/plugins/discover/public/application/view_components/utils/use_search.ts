@@ -31,7 +31,6 @@ import {
   getResponseInspectorStats,
 } from '../../../opensearch_dashboards_services';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
-import { dataSourceFetchingStrategy } from '../../helpers/get_data_source_fetch_strategy';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -73,7 +72,7 @@ export const useSearch = (services: DiscoverViewServices) => {
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
   const { data, filterManager, getSavedSearchById, core, toastNotifications, chrome } = services;
-  const { indexPattern, dataSourceType } = useIndexPattern(services);
+  const { indexPattern, dataSource } = useIndexPattern(services);
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;
@@ -129,6 +128,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       ? createHistogramConfigs(dataSet, interval || 'auto', data)
       : undefined;
     const searchSource = await updateSearchSource({
+      dataSource,
       indexPattern: dataSet,
       services,
       sort,
@@ -162,7 +162,6 @@ export const useSearch = (services: DiscoverViewServices) => {
       const fetchResp = await searchSource.fetch({
         abortSignal: fetchStateRef.current.abortController.signal,
         withLongNumeralsSupport: true,
-        strategy: dataSourceFetchingStrategy(dataSourceType ?? ''),
       });
 
       inspectorRequest
@@ -222,7 +221,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     }
   }, [
     indexPattern,
-    dataSourceType,
+    dataSource,
     interval,
     timefilter,
     toastNotifications,
