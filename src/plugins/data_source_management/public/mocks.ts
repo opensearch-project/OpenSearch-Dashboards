@@ -331,12 +331,22 @@ export const getDataSourceByIdWithoutCredential = {
   references: [],
 };
 
-export const getDataSourceByIdWithError = {
+export const getDataSourceByIdWithNotFoundError = {
   attributes: {
     ...getDataSourceByIdWithCredential.attributes,
     Error: {
       statusCode: 404,
       errorMessage: 'Unable to find data source',
+    },
+  },
+  references: [],
+};
+export const getDataSourceByIdWithNetworkError = {
+  attributes: {
+    ...getDataSourceByIdWithCredential.attributes,
+    Error: {
+      statusCode: 500,
+      errorMessage: 'Internal server error',
     },
   },
   references: [],
