@@ -4,36 +4,35 @@
  */
 
 import dateMath from '@elastic/datemath';
-import classNames from 'classnames';
-import React, { useRef, useState } from 'react';
-
 import {
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
-  EuiFieldText,
+  EuiSuperUpdateButton,
+  OnRefreshProps,
   prettyDuration,
 } from '@elastic/eui';
-// @ts-ignore
-import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
-import { isEqual, compact } from 'lodash';
+import classNames from 'classnames';
+import { compact, isEqual } from 'lodash';
+import React, { useRef, useState } from 'react';
 import {
+  DataSource,
   IDataPluginServices,
   IIndexPattern,
-  TimeRange,
-  TimeHistoryContract,
   Query,
-  DataSource,
+  TimeHistoryContract,
+  TimeRange,
 } from '../..';
 import {
   useOpenSearchDashboards,
   withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-import QueryEditorUI from './query_editor';
 import { UI_SETTINGS } from '../../../common';
-import { PersistedLog, fromUser, getQueryLog } from '../../query';
-import { NoDataPopover } from './no_data_popover';
+import { fromUser, getQueryLog, PersistedLog } from '../../query';
 import { Settings } from '../types';
+import { NoDataPopover } from './no_data_popover';
+import QueryEditorUI from './query_editor';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
@@ -65,6 +64,7 @@ export interface QueryEditorTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
+  queryEditorRef: React.RefObject<HTMLDivElement>;
 }
 
 // Needed for React.lazy

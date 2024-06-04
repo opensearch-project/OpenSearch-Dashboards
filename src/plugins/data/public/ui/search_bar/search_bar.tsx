@@ -28,27 +28,32 @@
  * under the License.
  */
 
-import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
+import { compact, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { get, isEqual } from 'lodash';
-
 import {
-  withOpenSearchDashboards,
   OpenSearchDashboardsReactContextValue,
+  withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
 
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { TimeRange, Query, Filter, IIndexPattern, UI_SETTINGS } from '../../../common';
+import { Filter, IIndexPattern, Query, TimeRange } from '../../../common';
+import { SavedQuery, SavedQueryAttributes, TimeHistoryContract } from '../../query';
+import { IDataPluginServices } from '../../types';
 import { FilterBar } from '../filter_bar/filter_bar';
+import QueryEditorTopRow from '../query_editor/query_editor_top_row';
+import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
 import { Settings } from '../types';
 import { QueryEditorTopRow } from '../query_editor';
+import { SearchBarExtensions } from '../search_bar_extensions';
+import { QueryEnhancement, Settings } from '../types';
 
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
@@ -122,6 +127,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   private services = this.props.opensearchDashboards.services;
   private savedQueryService = this.services.data.query.savedQueries;
+  /**
+   * queryEditorRef can't be bound to the actual editor
+   * https://github.com/react-monaco-editor/react-monaco-editor/blob/v0.27.0/src/editor.js#L113,
+   * currently it is an element above.
+   */
+  public queryEditorRef = React.createRef<HTMLDivElement>();
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
 
@@ -239,6 +250,15 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       (this.props.settings?.getQueryEnhancements(this.state.query?.language!)?.searchBar
         ?.showFilterBar ??
         true)
+    );
+  }
+
+  private shouldRenderExtensions() {
+    return (
+      this.props.isEnhancementsEnabled &&
+      (!!this.props.queryEnhancements?.get(this.state.query?.language!)?.searchBar?.extensions
+        ?.length ??
+        false)
     );
   }
 
@@ -516,6 +536,20 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           filterBar={filterBar}
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
+          queryEditorRef={this.queryEditorRef}
+        />
+      );
+    }
+
+    let searchBarExtensions;
+    if (this.shouldRenderExtensions() && this.queryEditorRef.current) {
+      searchBarExtensions = (
+        <SearchBarExtensions
+          configs={
+            this.props.queryEnhancements?.get(this.state.query?.language!)?.searchBar?.extensions
+          }
+          dependencies={{ indexPatterns: this.props.indexPatterns }}
+          portalInsert={{ sibling: this.queryEditorRef.current, position: 'before' }}
         />
       );
     }
@@ -525,6 +559,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return (
       <div className={className} data-test-subj={className}>
         {queryBar}
+        {searchBarExtensions}
         {queryEditor}
         {!isEnhancementsEnabledOverride && filterBar}
 
