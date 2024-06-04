@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
-import { EuiPageSideBar, EuiSplitPanel } from '@elastic/eui';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import { EuiPageSideBar, EuiPortal, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSource, DataSourceGroup, DataSourceSelectable } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
@@ -19,6 +19,7 @@ export const Sidebar: FC = ({ children }) => {
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   const {
     services: {
@@ -27,6 +28,23 @@ export const Sidebar: FC = ({ children }) => {
       application,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
+
+  const setContainerRef = useCallback((uiContainerRef) => {
+    uiContainerRef.appendChild(containerRef.current);
+  }, []);
+
+  useEffect(() => {
+    const subscriptions = ui.container$.subscribe((container) => {
+      if (container === null) return;
+      if (containerRef.current) {
+        setContainerRef(container);
+      }
+    });
+
+    return () => {
+      subscriptions.unsubscribe();
+    };
+  }, [ui.container$, containerRef, setContainerRef, ui.containerRef]);
 
   useEffect(() => {
     let isMounted = true;
@@ -102,8 +120,6 @@ export const Sidebar: FC = ({ children }) => {
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
 
-  const dataSourceSelectorRef = React.createRef();
-
   const dataSourceSelector = (
     <DataSourceSelectable
       dataSources={activeDataSources}
@@ -131,7 +147,16 @@ export const Sidebar: FC = ({ children }) => {
           color="transparent"
           className="deSidebar_dataSource"
         >
-          {!!ui.isEnhancementsEnabled && dataSourceSelector}
+          {!!!ui.isEnhancementsEnabled && dataSourceSelector}
+          {!!ui.isEnhancementsEnabled && (
+            <EuiPortal
+              portalRef={(node) => {
+                containerRef.current = node;
+              }}
+            >
+              {dataSourceSelector}
+            </EuiPortal>
+          )}
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
           {children}

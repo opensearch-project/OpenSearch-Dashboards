@@ -84,7 +84,8 @@ export interface SearchBarOwnProps {
   isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
   settings?: Settings;
-  containerRef?: React.RefObject<HTMLDivElement>;
+  setSiblingRef: (ref: HTMLInputElement | null) => void;
+  containerRef?: React.RefCallback<HTMLDivElement>;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
@@ -486,6 +487,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           timeHistory={this.props.timeHistory}
           isEnhancementsEnabled={this.props.isEnhancementsEnabled}
           queryEnhancements={this.props.queryEnhancements}
+          setSiblingRef={this.props.setSiblingRef}
           containerRef={this.props.containerRef}
           settings={this.props.settings}
           query={this.state.query}

@@ -13,6 +13,7 @@ interface Props {
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
   appName?: string;
+  setSiblingRef: (ref: HTMLInputElement | null) => void;
 }
 
 function mapExternalLanguageToOptions(language: string) {
@@ -22,7 +23,7 @@ function mapExternalLanguageToOptions(language: string) {
   };
 }
 
-export function QueryLanguageSwitcher(props: Props) {
+export const QueryLanguageSwitcher = (props: Props) => {
   const dqlLabel = i18n.translate('data.query.queryBar.dqlLanguageName', {
     defaultMessage: 'DQL',
   });
@@ -89,6 +90,7 @@ export function QueryLanguageSwitcher(props: Props) {
 
   return (
     <EuiComboBox
+      inputRef={props.setSiblingRef}
       className="languageSelect"
       data-test-subj="languageSelect"
       options={languageOptions}
@@ -99,4 +101,4 @@ export function QueryLanguageSwitcher(props: Props) {
       async
     />
   );
-}
+};

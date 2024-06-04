@@ -34,7 +34,8 @@ export interface QueryEditorTopRowProps {
   query?: Query;
   isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
-  containerRef?: React.RefObject<HTMLDivElement>;
+  containerRef?: React.RefCallback<HTMLDivElement>;
+  setSiblingRef: (ref: HTMLInputElement | null) => void;
   settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -230,6 +231,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           isEnhancementsEnabled={props.isEnhancementsEnabled}
           queryEnhancements={props.queryEnhancements}
           containerRef={props.containerRef}
+          setSiblingRef={props.setSiblingRef}
           settings={props.settings}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}

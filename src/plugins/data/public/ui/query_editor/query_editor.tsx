@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { Component, RefObject, createRef } from 'react';
+import React, { Component, LegacyRef, RefObject, createRef } from 'react';
 import { i18n } from '@osd/i18n';
 
 import classNames from 'classnames';
@@ -39,7 +39,8 @@ export interface QueryEditorProps {
   query: Query;
   isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
-  containerRef?: React.RefObject<HTMLDivElement>;
+  containerRef?: React.RefCallback<HTMLDivElement>;
+  setSiblingRef?: (ref: HTMLInputElement | null) => void;
   settings?: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -454,6 +455,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       if (this.inputRef != null) {
         this.inputRef.setSelectionRange(this.state.selectionStart, this.state.selectionEnd);
       }
+
       this.setState({
         selectionStart: null,
         selectionEnd: null,
@@ -493,6 +495,16 @@ export default class QueryEditorUI extends Component<Props, State> {
     // );
     const className = classNames(this.props.className);
 
+    const queryLanguageSwitcher = (
+      <QueryLanguageSwitcher
+        setSiblingRef={this.props.setSiblingRef!}
+        language={this.props.query.language}
+        anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+        onSelectLanguage={this.onSelectLanguage}
+        appName={this.services.appName}
+      />
+    );
+
     return (
       <div className={className}>
         {!!this.props.isEnhancementsEnabled && (
@@ -501,15 +513,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false}>{this.props.prepend}</EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <div />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <QueryLanguageSwitcher
-                    language={this.props.query.language}
-                    anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-                    onSelectLanguage={this.onSelectLanguage}
-                    appName={this.services.appName}
-                  />
+                  <div ref={this.props.containerRef}>{queryLanguageSwitcher}</div>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

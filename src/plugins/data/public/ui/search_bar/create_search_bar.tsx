@@ -29,7 +29,7 @@
  */
 
 import _ from 'lodash';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
@@ -50,6 +50,8 @@ interface StatefulSearchBarDeps {
   isEnhancementsEnabled: boolean;
   queryEnhancements: Map<string, QueryEnhancement>;
   settings: Settings;
+  setSiblingRef: (ref: HTMLInputElement | null) => void;
+  setContainerRef: (ref: HTMLDivElement | null) => void;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -141,6 +143,8 @@ export function createSearchBar({
   isEnhancementsEnabled,
   queryEnhancements,
   settings,
+  setSiblingRef,
+  setContainerRef,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -175,6 +179,12 @@ export function createSearchBar({
       savedQueryId: props.savedQueryId,
       notifications: core.notifications,
     });
+
+    const containerRef = useCallback((node) => {
+      if (node) {
+        setContainerRef(node);
+      }
+    }, []);
 
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
@@ -216,6 +226,8 @@ export function createSearchBar({
           query={query}
           isEnhancementsEnabled={isEnhancementsEnabled}
           queryEnhancements={queryEnhancements}
+          setSiblingRef={setSiblingRef}
+          containerRef={containerRef}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
