@@ -1,0 +1,2 @@
+feat:
+- [Workspace] Only OSD admin can create/update/delete data source ([#6901](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6901))
