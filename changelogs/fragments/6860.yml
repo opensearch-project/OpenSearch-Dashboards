@@ -1,0 +1,2 @@
+doc:
+- Add OpenAPI specification for bulk_get saved object APIs ([#6860](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6860))

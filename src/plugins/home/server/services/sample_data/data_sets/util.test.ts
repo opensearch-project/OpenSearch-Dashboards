@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { getSavedObjectsWithDataSource, getFinalSavedObjects, appendDataSourceId } from './util';
+import { getSavedObjectsWithDataSource, getFinalSavedObjects } from './util';
 import { SavedObject, updateDataSourceNameInVegaSpec } from '../../../../../../core/server';
 import visualizationObjects from './test_utils/visualization_objects.json';
 
@@ -61,6 +61,39 @@ describe('getSavedObjectsWithDataSource()', () => {
     });
 
     expect(updatedVegaVisualizationsFields).toEqual(expect.arrayContaining(expectedUpdatedFields));
+  });
+
+  it('should update index-pattern id and references with given data source', () => {
+    const dataSourceId = 'some-datasource-id';
+    const dataSourceName = 'Data Source Name';
+
+    expect(
+      getSavedObjectsWithDataSource(
+        [
+          {
+            id: 'saved-object-1',
+            type: 'index-pattern',
+            attributes: {},
+            references: [],
+          },
+        ],
+        dataSourceId,
+        dataSourceName
+      )
+    ).toEqual([
+      {
+        id: 'some-datasource-id_saved-object-1',
+        type: 'index-pattern',
+        attributes: {},
+        references: [
+          {
+            id: `${dataSourceId}`,
+            type: 'data-source',
+            name: 'dataSource',
+          },
+        ],
+      },
+    ]);
   });
 });
 

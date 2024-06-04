@@ -13,6 +13,7 @@ import {
   CoreStart,
 } from 'src/core/public';
 import { deepFreeze } from '@osd/std';
+import uuid from 'uuid';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -30,7 +31,12 @@ import {
   CONNECT_DATASOURCES_MESSAGE,
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
   NO_DATASOURCES_CONNECTED_MESSAGE,
+  DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
 } from './constants';
+import {
+  DataSourceSelectionService,
+  defaultDataSourceSelection,
+} from '../service/data_source_selection_service';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -73,7 +79,7 @@ export async function handleSetDefaultDatasource(
   savedObjectsClient: SavedObjectsClientContract,
   uiSettings: IUiSettingsClient
 ) {
-  if (uiSettings.get('defaultDataSource', null) === null) {
+  if (getDefaultDataSourceId(uiSettings) === null) {
     return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false);
   }
 }
@@ -84,12 +90,12 @@ export async function setFirstDataSourceAsDefault(
   exists: boolean
 ) {
   if (exists) {
-    uiSettings.remove('defaultDataSource');
+    uiSettings.remove(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID);
   }
   const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
   if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
     const datasourceId = listOfDataSources[0].id;
-    return await uiSettings.set('defaultDataSource', datasourceId);
+    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, datasourceId);
   }
 }
 
@@ -128,6 +134,16 @@ export function getFilteredDataSources(
       label: ds.attributes?.title || '',
     }))
     .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
+}
+
+export function getDefaultDataSourceId(uiSettings?: IUiSettingsClient) {
+  if (!uiSettings) return null;
+  return uiSettings.get<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, null);
+}
+
+export function getDefaultDataSourceId$(uiSettings?: IUiSettingsClient) {
+  if (!uiSettings) return null;
+  return uiSettings.get$<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, null);
 }
 
 export function getDefaultDataSource(
@@ -341,3 +357,24 @@ export interface HideLocalCluster {
 export const [getHideLocalCluster, setHideLocalCluster] = createGetterSetter<HideLocalCluster>(
   'HideLocalCluster'
 );
+
+// This will maintain an unified data source selection instance among components and export it to other plugin.
+const [getDataSourceSelectionInstance, setDataSourceSelection] = createGetterSetter<
+  DataSourceSelectionService
+>('DataSourceSelectionService');
+
+const getDataSourceSelection = () => {
+  try {
+    // Usually set will be executed in the setup of DSM.
+    return getDataSourceSelectionInstance();
+  } catch (e) {
+    // Since createGetterSetter doesn't support default value and will throw error if not found.
+    // As dataSourceSelection isn't main part of data selector, will use a default to fallback safely.
+    return defaultDataSourceSelection;
+  }
+};
+export { getDataSourceSelection, setDataSourceSelection };
+
+export const generateComponentId = () => {
+  return uuid.v4();
+};

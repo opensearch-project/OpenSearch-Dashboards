@@ -1,0 +1,2 @@
+doc:
+- Add openAPI doc for saved_object find api ([#6856](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6856))
