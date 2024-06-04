@@ -30,10 +30,6 @@
 
 export const DEFAULT_QUERY_LANGUAGE = 'kuery';
 
-// to resolve: copies constants from src/plugins/data/public/data_sources/constants.tsx, should it be removed from there?
-export const S3_GLUE_DATA_SOURCE_TYPE = 's3glue';
-export const DEFAULT_DATA_SOURCE_TYPE = 'DEFAULT_INDEX_PATTERNS';
-
 export const UI_SETTINGS = {
   META_FIELDS: 'metaFields',
   DOC_HIGHLIGHT: 'doc_table:highlight',

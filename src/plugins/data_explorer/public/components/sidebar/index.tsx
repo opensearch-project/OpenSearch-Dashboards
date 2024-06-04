@@ -12,7 +12,6 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
-import { DEFAULT_DATA_SOURCE_TYPE, S3_GLUE_DATA_SOURCE_TYPE } from '../../../../data/common';
 import { setDataSource } from '../../utils/state_management/metadata_slice';
 
 export const Sidebar: FC = ({ children }) => {
