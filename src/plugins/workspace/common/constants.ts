@@ -88,7 +88,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     }),
     description: 'Description',
     features: [
-      'data-explorer',
+      'discover',
       'dashboards',
       'visualize',
       'maps-dashboards',
@@ -111,7 +111,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     }),
     description: 'Description',
     features: [
-      'data-explorer',
+      'discover',
       'dashboards',
       'visualize',
       'maps-dashboards',
@@ -130,7 +130,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     }),
     description: 'Description',
     features: [
-      'data-explorer',
+      'discover',
       'dashboards',
       'visualize',
       'maps-dashboards',
@@ -150,7 +150,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     }),
     description: 'Description',
     features: [
-      'data-explorer',
+      'discover',
       'dashboards',
       'visualize',
       'maps-dashboards',
