@@ -32,6 +32,7 @@ import {
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
   NO_DATASOURCES_CONNECTED_MESSAGE,
   DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+  NOT_EXIST_ERROR_CODE,
 } from './constants';
 import {
   DataSourceSelectionService,
@@ -338,6 +339,7 @@ export const handleDataSourceFetchError = (
 };
 
 export interface DataSourceViewErrorWithDefaultParams {
+  errorCode: number;
   changeState: (state: { defaultDataSource: DataSourceOption | null }) => void;
   notifications: ToastsStart;
   failedDataSourceId: string;
@@ -355,10 +357,11 @@ export interface DataSourceViewErrorWithDefaultParams {
  * pass in a handleSwitch if click switchToDefault button
  * pass in callback to have props onSelectOption
  */
-export const handleDataSourceViewErrorWithSwitchToDefaultOption = (
+export const handleDataSourceViewError = (
   dataSourceViewErrorWithDefaultParams: DataSourceViewErrorWithDefaultParams
 ) => {
   const {
+    errorCode,
     changeState,
     notifications,
     failedDataSourceId,
@@ -366,15 +369,20 @@ export const handleDataSourceViewErrorWithSwitchToDefaultOption = (
     handleSwitch,
     callback,
   } = dataSourceViewErrorWithDefaultParams;
-  changeState({ defaultDataSource: defaultDataSourceOption });
-  if (callback) callback([]);
-  notifications.add({
-    title: i18n.translate('dataSource.dataSourceUnavailableError', {
-      defaultMessage: `Data source ${failedDataSourceId} is not available `,
-    }),
-    text: defaultDataSourceOption ? toMountPoint(switchToDefaultButton(handleSwitch)) : '',
-    color: 'danger',
-  });
+  // handle not found error, provide the switch to default data source option
+  if (errorCode === NOT_EXIST_ERROR_CODE) {
+    changeState({ defaultDataSource: defaultDataSourceOption });
+    if (callback) callback([]);
+    notifications.add({
+      title: i18n.translate('dataSource.dataSourceUnavailableError', {
+        defaultMessage: `Data source ${failedDataSourceId} is not available `,
+      }),
+      text: defaultDataSourceOption ? toMountPoint(switchToDefaultButton(handleSwitch)) : '',
+      color: 'danger',
+    });
+    return;
+  }
+  handleDataSourceFetchError(changeState, notification, callback);
 };
 
 interface DataSourceOptionGroupLabel {

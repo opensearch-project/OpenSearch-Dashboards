@@ -12,21 +12,15 @@ import {
 } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
-<<<<<<< HEAD
 import { DataSourceErrorMenu } from '../data_source_error_menu';
 import {
-  getDataSourceById,
   handleDataSourceFetchError,
   generateComponentId,
   getDataSourceSelection,
   getDefaultDataSourceId,
-=======
-import {
   DataSourceViewErrorWithDefaultParams,
   getDataSourceById,
-  handleDataSourceFetchError,
-  handleDataSourceViewErrorWithSwitchToDefaultOption,
->>>>>>> add invalid id handling for DataSourceView
+  handleDataSourceViewError,
 } from '../utils';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DataSourceItem } from '../data_source_item';
@@ -84,7 +78,6 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this.props.onSelectedDataSources?.([dataSourceOption]);
   }
 
-
   clearSelectedOptionState() {
     this.setState({ selectedOption: [] });
     this.props.onSelectedDataSources?.([]);
@@ -97,35 +90,50 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
         : null;
       const filteredDefaultDataSourceOption = this.getFilteredDataSource(defaultDataSourceObj);
       this.setState({ defaultDataSourceOption: filteredDefaultDataSourceOption });
-    } catch (error) {
-      this.handleInvalidDataSourceError(dataSourceId);
+    } catch (error: DataSourceError) {
+      return error;
+      // this.handleDataSourceError(dataSourceId);
     }
   }
 
   async getSelectedDataSource(dataSourceId: string, defaultDataSource: string | null) {
     try {
       return await getDataSourceById(dataSourceId, this.props.savedObjectsClient!);
-    } catch (error) {
-      await this.getAndSetDefaultDataSourceOption(dataSourceId, defaultDataSource);
-      this.handleInvalidDataSourceError(dataSourceId);
+    } catch (error: DataSourceError) {
+      return error;
     }
   }
 
-  handleInvalidDataSourceError(dataSourceId: string) {
+  handleDataSourceError(errorCode: number, dataSourceId: string) {
     const handleDataSourceViewErrorParams = this.getDataSourceViewErrorParams(
+      errorCode,
       dataSourceId,
       this.state.defaultDataSourceOption
     );
-    handleDataSourceViewErrorWithSwitchToDefaultOption(handleDataSourceViewErrorParams);
+    handleDataSourceViewError(handleDataSourceViewErrorParams);
   }
 
-  async handleDataSourceLabelOrBackupWithDefaultOption(
-    dataSourceId: string,
-    defaultDataSource: string | null
-  ) {
-    const selectedDataSource = await this.getSelectedDataSource(dataSourceId, defaultDataSource);
-    if (!this._isMounted) return;
-    const filteredSelectedDataSourceOption = this.getFilteredDataSource(selectedDataSource);
+  async handleDataSourceLabel(dataSourceId: string, defaultDataSource: string | null) {
+    const selectedDataSourceResponse = await this.getSelectedDataSource(
+      dataSourceId,
+      defaultDataSource
+    );
+
+    // handle fetch data source error if exist
+    if (selectedDataSourceResponse instanceof DataSourceError) {
+      const error = selectedDataSourceResponse;
+      if (error.statusCode === NOT_EXIST_ERROR_CODE) {
+        return await this.handleDefaultDataSourceWithError(
+          NOT_EXIST_ERROR_CODE,
+          dataSourceId,
+          defaultDataSource
+        );
+      }
+      // other error
+      this.handleDataSourceError(error.errorCode, dataSourceId); // pass the error status code, whatever it is, treat it as internal server error and refresh
+      return;
+    }
+    const filteredSelectedDataSourceOption = this.getFilteredDataSource(selectedDataSourceResponse);
     // if the selectedOption has been filtered out, treat it as invalid id error and early return
     if (filteredSelectedDataSourceOption) {
       this.setState({
@@ -134,16 +142,38 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       });
       return;
     }
+    return await this.handleDefaultDataSourceWithError(
+      NOT_EXIST_ERROR_CODE,
+      dataSourceId,
+      defaultDataSource
+    ); // when default data get filtered out, treat it as not found error
+  }
 
-    await this.getAndSetDefaultDataSourceOption(dataSourceId, defaultDataSource);
-    this.handleInvalidDataSourceError(dataSourceId);
+  async handleDefaultDataSourceWithError(
+    errorCode: number,
+    dataSourceId: string,
+    defaultDataSource: string | null
+  ) {
+    const getAndSetDefaultDataSourceOptionResult = await this.getAndSetDefaultDataSourceOption(
+      dataSourceId,
+      defaultDataSource
+    ); // either return error not set default data source option successful
+    if (getAndSetDefaultDataSourceOptionResult instanceof DataSourceError) {
+      // if cannot fetch default data source, treat it as internal server error and early return
+      this.handleDataSourceError(500, dataSourceId);
+      return;
+    }
+    // if fetch default data source success, pass the not found error code, below should take care of 404 only
+    this.handleDataSourceError(error.errorCode, dataSourceId);
   }
 
   getDataSourceViewErrorParams(
+    errorCode: number,
     dataSourceId: string,
     filteredDefaultDataSourceOption: DataSourceOption | null
   ) {
     return {
+      errorCode,
       changeState: this.onError.bind(this, filteredDefaultDataSourceOption),
       notifications: this.props.notifications!,
       failedDataSourceId: dataSourceId,
@@ -175,7 +205,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       return;
     }
     // 3. only label exit
-    this.handleDataSourceLabelOrBackupWithDefaultOption(optionId, defaultDataSource);
+    this.handleDataSourceLabel(optionId, defaultDataSource);
   }
 
   isCompletDataSourceOption(option: DataSourceOption): boolean {
