@@ -108,6 +108,9 @@ export const WorkspaceList = () => {
       isExpander: true,
       hasActions: true,
       render: (features: string[]) => {
+        if (!features || features.length === 0) {
+          return '';
+        }
         const results: string[] = [];
         features.forEach((featureConfig) => {
           const useCaseId = getUseCaseFromFeatureConfig(featureConfig);

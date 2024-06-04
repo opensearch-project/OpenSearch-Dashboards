@@ -26,8 +26,9 @@ jest.mock('../delete_workspace_modal', () => ({
 
 function getWrapWorkspaceListInContext(
   workspaceList = [
-    { id: 'id1', name: 'name1' },
+    { id: 'id1', name: 'name1', features: [] },
     { id: 'id2', name: 'name2' },
+    { id: 'id3', name: 'name3', features: ['use-case-observability'] },
   ]
 ) {
   const coreStartMock = coreMock.createStart();

@@ -246,9 +246,9 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                       >
                         <span
                           class="euiTableCellContent__text"
-                          title="Features"
+                          title="Use Cases"
                         >
-                          Features
+                          Use Cases
                         </span>
                       </span>
                     </th>

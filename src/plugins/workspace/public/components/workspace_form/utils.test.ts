@@ -163,6 +163,9 @@ describe('validateWorkspaceForm', () => {
       'Invalid workspace description'
     );
   });
+  it('should return error if use case is empty', () => {
+    expect(validateWorkspaceForm({}).features).toEqual('Use case is required. Select a use case.');
+  });
   it('should return error if permission setting type is invalid', () => {
     expect(
       validateWorkspaceForm({
@@ -263,6 +266,7 @@ describe('validateWorkspaceForm', () => {
             group: 'foo',
           },
         ],
+        features: ['use-case-observability'],
       })
     ).toEqual({});
   });
