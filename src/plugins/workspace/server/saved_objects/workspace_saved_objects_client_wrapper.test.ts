@@ -352,6 +352,30 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           workspaces: ['workspace-1'],
         });
       });
+      it('should throw permission error when user bulkCreate workspace and is not dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.bulkCreate([{ type: 'workspace', attributes: {} }]);
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+
+        try {
+          await wrapper.bulkCreate([{ type: 'workspace', id: 'test', attributes: {} }]);
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+
+        try {
+          await wrapper.bulkCreate([{ type: 'workspace', attributes: {} }], { overwrite: true });
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+      });
     });
 
     describe('create', () => {
@@ -425,6 +449,30 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
             overwrite: true,
           }
         );
+      });
+      it('should throw permission error when user create a workspace and is not dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.create('workspace', { name: 'test' }, { overwrite: true });
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+
+        try {
+          await wrapper.create('workspace', { name: 'test' }, { id: 'test' });
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+
+        try {
+          await wrapper.create('workspace', { name: 'test' }, {});
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
       });
     });
     describe('get', () => {
