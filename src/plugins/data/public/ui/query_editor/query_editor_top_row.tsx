@@ -58,6 +58,7 @@ export interface QueryEditorTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
+  queryEditorRef: React.RefObject<HTMLDivElement>;
 }
 
 // Needed for React.lazy
@@ -238,6 +239,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           getQueryStringInitialValue={getQueryStringInitialValue}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
+          queryEditorRef={props.queryEditorRef}
         />
       </EuiFlexItem>
     );
