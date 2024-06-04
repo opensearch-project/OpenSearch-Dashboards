@@ -118,6 +118,8 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'observability-notebooks',
       'reports-dashboards',
       'integrations',
+      'alerting',
+      'anomaly-detection-dashboards',
       'opensearch_security_analytics_dashboards',
       // Add management avoid index patterns application not found for dashboards or visualize
       'management',
