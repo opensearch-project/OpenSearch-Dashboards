@@ -528,5 +528,4 @@ export {
   DataSourceOption,
 } from './data_sources/datasource_selector';
 
-export { SuggestionsComponent } from './ui';
 export { PersistedLog } from './query';

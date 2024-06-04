@@ -4,11 +4,12 @@ import { IStorageWrapper, Storage } from '../../../src/plugins/opensearch_dashbo
 import { createQueryAssistExtension } from './query_assist';
 import { PPLQlSearchInterceptor } from './search/ppl_search_interceptor';
 import { SQLQlSearchInterceptor } from './search/sql_search_interceptor';
-import { setStorage } from './services';
+import { setData, setStorage } from './services';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
   QueryEnhancementsPluginStart,
+  QueryEnhancementsPluginStartDependencies,
 } from './types';
 
 export class QueryEnhancementsPlugin
@@ -23,8 +24,6 @@ export class QueryEnhancementsPlugin
     core: CoreSetup,
     { data }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
-    setStorage(this.storage);
-
     const pplSearchInterceptor = new PPLQlSearchInterceptor({
       toasts: core.notifications.toasts,
       http: core.http,
@@ -86,7 +85,12 @@ export class QueryEnhancementsPlugin
     return {};
   }
 
-  public start(core: CoreStart): QueryEnhancementsPluginStart {
+  public start(
+    core: CoreStart,
+    deps: QueryEnhancementsPluginStartDependencies
+  ): QueryEnhancementsPluginStart {
+    setStorage(this.storage);
+    setData(deps.data);
     return {};
   }
 

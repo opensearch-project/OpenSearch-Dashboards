@@ -45,7 +45,6 @@ import QueryEditorTopRow from '../query_editor/query_editor_top_row';
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
-import { SearchBarExtensions } from '../search_bar_extensions';
 import { QueryEnhancement, Settings } from '../types';
 
 interface SearchBarInjectedDeps {
@@ -123,12 +122,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
 
   private services = this.props.opensearchDashboards.services;
   private savedQueryService = this.services.data.query.savedQueries;
-  /**
-   * queryEditorRef can't be bound to the actual editor
-   * https://github.com/react-monaco-editor/react-monaco-editor/blob/v0.27.0/src/editor.js#L113,
-   * currently it is an element above.
-   */
-  public queryEditorRef = React.createRef<HTMLDivElement>();
   public filterBarRef: Element | null = null;
   public filterBarWrapperRef: Element | null = null;
 
@@ -240,15 +233,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       compact(this.props.indexPatterns).length > 0 &&
       (this.props.queryEnhancements?.get(this.state.query?.language!)?.searchBar?.showFilterBar ??
         true)
-    );
-  }
-
-  private shouldRenderExtensions() {
-    return (
-      this.props.isEnhancementsEnabled &&
-      (!!this.props.queryEnhancements?.get(this.state.query?.language!)?.searchBar?.extensions
-        ?.length ??
-        false)
     );
   }
 
@@ -525,20 +509,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           filterBar={filterBar}
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
-          queryEditorRef={this.queryEditorRef}
-        />
-      );
-    }
-
-    let searchBarExtensions;
-    if (this.shouldRenderExtensions() && this.queryEditorRef.current) {
-      searchBarExtensions = (
-        <SearchBarExtensions
-          configs={
-            this.props.queryEnhancements?.get(this.state.query?.language!)?.searchBar?.extensions
-          }
-          dependencies={{ indexPatterns: this.props.indexPatterns }}
-          portalInsert={{ sibling: this.queryEditorRef.current, position: 'before' }}
         />
       );
     }
@@ -548,7 +518,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     return (
       <div className={className} data-test-subj="globalQueryBar">
         {queryBar}
-        {searchBarExtensions}
         {queryEditor}
         {!!!this.props.isEnhancementsEnabled && filterBar}
 

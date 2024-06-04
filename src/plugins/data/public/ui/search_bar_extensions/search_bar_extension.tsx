@@ -18,7 +18,7 @@ export interface SearchBarExtensionDependencies {
   /**
    * Currently selected index patterns.
    */
-  indexPatterns?: IIndexPattern[];
+  indexPatterns?: Array<IIndexPattern | string>;
 }
 
 export interface SearchBarExtensionConfig {

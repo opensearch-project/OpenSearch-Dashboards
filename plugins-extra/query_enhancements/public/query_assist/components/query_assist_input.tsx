@@ -1,11 +1,8 @@
 import { EuiFieldText, EuiIcon, EuiOutsideClickDetector, EuiPortal } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import {
-  PersistedLog,
-  QuerySuggestionTypes,
-  SuggestionsComponent,
-} from '../../../../../src/plugins/data/public';
+import { PersistedLog, QuerySuggestionTypes } from '../../../../../src/plugins/data/public';
 import assistantLogo from '../../assets/query_assist_logo.svg';
+import { getData } from '../../services';
 
 interface QueryAssistInputProps {
   inputRef: React.RefObject<HTMLInputElement>;
@@ -16,6 +13,9 @@ interface QueryAssistInputProps {
 }
 
 export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
+  const {
+    ui: { SuggestionsComponent },
+  } = getData();
   const [isSuggestionsVisible, setIsSuggestionsVisible] = useState(false);
   const [suggestionIndex, setSuggestionIndex] = useState<number | null>(null);
   const [value, setValue] = useState(props.initialValue ?? '');
