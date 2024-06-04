@@ -29,7 +29,7 @@
  */
 
 import { UI_SETTINGS } from '../../../constants';
-import { GetConfigFn, GetDataFrameFn, DestroyDataFrameFn } from '../../../types';
+import { GetConfigFn, GetDataFrameFn, DestroyDataFrameFn, GetSessionFn } from '../../../types';
 import { ISearchRequestParams } from '../../index';
 import { SearchRequest } from './types';
 
@@ -54,17 +54,25 @@ export function getExternalSearchParamsFromRequest(
   dependencies: {
     getConfig: GetConfigFn;
     getDataFrame: GetDataFrameFn;
+    session: string | undefined;
   }
 ): ISearchRequestParams {
-  const { getConfig, getDataFrame } = dependencies;
+  const { getConfig, getDataFrame, session } = dependencies;
   const searchParams = getSearchParams(getConfig);
   const dataFrame = getDataFrame();
   const indexTitle = searchRequest.index.title || searchRequest.index;
+  let request = searchRequest;
+  // Add session ID to search request if exists
+  if (session) {
+    const query = { ...searchRequest.body.query.queries[0], sessionId: session };
+    const queryObject = { ...searchRequest.body.query, queries: [query] };
+    request = { ...searchRequest, body: { ...searchRequest.body, query: queryObject }, query };
+  }
 
   return {
     index: indexTitle,
     body: {
-      ...searchRequest.body,
+      ...request.body,
       ...(dataFrame && dataFrame?.name === indexTitle ? { df: dataFrame } : {}),
     },
     ...searchParams,

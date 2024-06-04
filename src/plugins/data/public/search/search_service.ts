@@ -62,7 +62,9 @@ import {
   IDataFrame,
   IDataFrameResponse,
   createDataFrameCache,
+  createSessionCache,
   dataFrameToSpec,
+  SessionService,
 } from '../../common/data_frames';
 
 /** @internal */
@@ -81,6 +83,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
   private readonly dfCache = createDataFrameCache();
+  private readonly sessionCache = createSessionCache();
   private searchInterceptor!: ISearchInterceptor;
   private defaultSearchInterceptor!: ISearchInterceptor;
   private usageCollector?: SearchUsageCollector;
@@ -162,6 +165,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
     };
 
+    const sessionService: SessionService = {
+      get: (datasource: string) => this.sessionCache.get(datasource),
+      set: async (datasource: string, session: string) =>
+        this.sessionCache.set(datasource, session),
+      clear: () => this.sessionCache.clear(),
+    };
+
     const searchSourceDependencies: SearchSourceDependencies = {
       getConfig: uiSettings.get.bind(uiSettings),
       search: <
@@ -181,6 +191,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         loadingCount$,
       },
       df: dfService,
+      session: sessionService,
     };
 
     return {
@@ -195,6 +206,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       getDefaultSearchInterceptor: () => this.defaultSearchInterceptor,
       df: dfService,
+      session: sessionService,
     };
   }
 

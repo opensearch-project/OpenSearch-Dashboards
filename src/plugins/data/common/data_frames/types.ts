@@ -8,6 +8,8 @@ import { IFieldType } from './fields';
 
 export * from './_df_cache';
 
+export * from './_session_cache';
+
 /** @public **/
 export enum DATA_FRAME_TYPES {
   DEFAULT = 'data_frame',
@@ -17,6 +19,12 @@ export enum DATA_FRAME_TYPES {
 export interface DataFrameService {
   get: () => IDataFrame | undefined;
   set: (dataFrame: IDataFrame) => Promise<void>;
+  clear: () => void;
+}
+
+export interface SessionService {
+  get: (datasource: string) => string | undefined;
+  set: (datasource: string, session: string) => void;
   clear: () => void;
 }
 
