@@ -250,11 +250,6 @@ describe('validateWorkspaceForm', () => {
   it('should return error if name is invalid', () => {
     expect(validateWorkspaceForm({ name: '~' }).name).toEqual('Invalid workspace name');
   });
-  it('should return error if description is invalid', () => {
-    expect(validateWorkspaceForm({ description: '~' }).description).toEqual(
-      'Invalid workspace description'
-    );
-  });
   it('should return error if permission setting type is invalid', () => {
     expect(
       validateWorkspaceForm({

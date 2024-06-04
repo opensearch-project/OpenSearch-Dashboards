@@ -40,22 +40,6 @@ describe('useWorkspaceForm', () => {
     });
     expect(onSubmitMock).not.toHaveBeenCalled();
   });
-  it('should return "Invalid workspace description" and not call onSubmit when invalid description', async () => {
-    const { renderResult, onSubmitMock } = setup({
-      id: 'foo',
-      name: 'test-workspace-name',
-      description: '~',
-    });
-    expect(renderResult.result.current.formErrors).toEqual({});
-
-    act(() => {
-      renderResult.result.current.handleFormSubmit({ preventDefault: jest.fn() });
-    });
-    expect(renderResult.result.current.formErrors).toEqual({
-      description: 'Invalid workspace description',
-    });
-    expect(onSubmitMock).not.toHaveBeenCalled();
-  });
   it('should call onSubmit with workspace name and features', async () => {
     const { renderResult, onSubmitMock } = setup({
       id: 'foo',
