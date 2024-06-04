@@ -117,8 +117,11 @@ export class WorkspaceSavedObjectsClientWrapper {
     return await this.validateObjectsPermissions(workspaces, request, permissionModes);
   };
 
+  // Only OSD admin has permission to operate data source.
   private valitdateDataSourcePermissions = (type: string) => {
-    if (isDataSourceType(type)) throw generateOSDAdminPermissionError();
+    if (isDataSourceType(type)) {
+      throw generateOSDAdminPermissionError();
+    }
   };
 
   private validateAtLeastOnePermittedWorkspaces = async (
@@ -297,6 +300,7 @@ export class WorkspaceSavedObjectsClientWrapper {
 
       const bulkUpdateResult = await wrapperOptions.client.bulkUpdate(allowedSavedObjects, options);
 
+      // Merge the data source saved objects and real client bulkUpdate result.
       return {
         saved_objects: [
           ...(bulkUpdateResult?.saved_objects || []),
@@ -386,6 +390,7 @@ export class WorkspaceSavedObjectsClientWrapper {
 
       const bulkCreateResult = await wrapperOptions.client.bulkCreate(allowedSavedObjects, options);
 
+      // Merge the data source saved objects and real client bulkCreate result.
       return {
         saved_objects: [
           ...(bulkCreateResult?.saved_objects || []),
