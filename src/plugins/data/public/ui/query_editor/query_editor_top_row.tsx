@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
 import dateMath from '@elastic/datemath';
 import {
   EuiFieldText,
@@ -30,6 +29,7 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { UI_SETTINGS } from '../../../common';
 import { fromUser, getQueryLog, PersistedLog } from '../../query';
+import { SearchBarExtensions } from '../search_bar_extensions';
 import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
@@ -64,7 +64,6 @@ export interface QueryEditorTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
-  queryEditorRef: React.RefObject<HTMLDivElement>;
 }
 
 // Needed for React.lazy
@@ -251,6 +250,17 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     );
   }
 
+  function renderSearchBarExtensions() {
+    if (!shouldRenderSearchBarExtensions() || !queryEditorHeaderRef.current) return;
+    return (
+      <SearchBarExtensions
+        configs={props.queryEnhancements?.get(queryLanguage!)?.searchBar?.extensions}
+        dependencies={{ indexPatterns: props.indexPatterns }}
+        portalInsert={{ sibling: queryEditorHeaderRef.current, position: 'before' }}
+      />
+    );
+  }
+
   function renderSharingMetaFields() {
     const { from, to } = getDateRange();
     const dateRangePretty = prettyDuration(
@@ -279,6 +289,12 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     // TODO: call queryUiEnhancement?.showQueryEditor
     return Boolean(
       props.showQueryEditor && props.settings && props.indexPatterns && props.query && storage
+    );
+  }
+
+  function shouldRenderSearchBarExtensions(): boolean {
+    return Boolean(
+      queryLanguage && props.queryEnhancements?.get(queryLanguage)?.searchBar?.extensions?.length
     );
   }
 
@@ -374,6 +390,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       direction="column"
       justifyContent="flexEnd"
     >
+      {renderSearchBarExtensions()}
       {renderQueryEditor()}
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="none">

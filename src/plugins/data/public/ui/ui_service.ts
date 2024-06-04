@@ -13,6 +13,7 @@ import { createSearchBar } from './search_bar/create_search_bar';
 import { createSettings } from './settings';
 import { DataPublicPluginStart } from '../types';
 import { IStorageWrapper } from '../../../opensearch_dashboards_utils/public';
+import { SuggestionsComponent } from './typeahead';
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -70,6 +71,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
     return {
       IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
       SearchBar,
+      SuggestionsComponent,
       Settings,
       container$: this.container$,
     };
