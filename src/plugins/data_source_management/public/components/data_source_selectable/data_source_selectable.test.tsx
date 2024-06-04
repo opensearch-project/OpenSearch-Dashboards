@@ -19,21 +19,28 @@ import {
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
   ADD_COMPATIBLE_DATASOURCES_MESSAGE,
 } from '../constants';
+import { DataSourceSelectionService } from '../../service/data_source_selection_service';
+
+const mockGeneratedComponentId = 'component-id';
+jest.mock('uuid', () => ({ v4: () => mockGeneratedComponentId }));
 
 describe('DataSourceSelectable', () => {
   let component: ShallowWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
 
   let client: SavedObjectsClientContract;
+
   const { toasts } = notificationServiceMock.createStartContract();
   const nextTick = () => new Promise((res) => process.nextTick(res));
   const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
   const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
+  const dataSourceSelection = new DataSourceSelectionService();
 
   beforeEach(() => {
     client = {
       find: jest.fn().mockResolvedValue([]),
     } as any;
     mockResponseForSavedObjectsCalls(client, 'find', getDataSourcesWithFieldsResponse);
+    spyOn(utils, 'getDataSourceSelection').and.returnValue(dataSourceSelection);
   });
 
   it('should render normally with local cluster not hidden', () => {
@@ -138,6 +145,7 @@ describe('DataSourceSelectable', () => {
     containerInstance.onChange([{ id: 'test2', label: 'test2' }]);
     expect(onSelectedDataSource).toBeCalledTimes(1);
     expect(containerInstance.state).toEqual({
+      componentId: mockGeneratedComponentId,
       dataSourceOptions: [
         {
           id: 'test2',
@@ -159,6 +167,7 @@ describe('DataSourceSelectable', () => {
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
     expect(containerInstance.state).toEqual({
+      componentId: mockGeneratedComponentId,
       dataSourceOptions: [
         {
           checked: 'on',
@@ -331,6 +340,7 @@ describe('DataSourceSelectable', () => {
     await nextTick();
     const containerInstance = container.instance();
     expect(containerInstance.state).toEqual({
+      componentId: mockGeneratedComponentId,
       dataSourceOptions: [
         {
           id: 'test1',
@@ -380,6 +390,7 @@ describe('DataSourceSelectable', () => {
 
     expect(onSelectedDataSource).toBeCalledWith([]);
     expect(containerInstance.state).toEqual({
+      componentId: mockGeneratedComponentId,
       dataSourceOptions: [],
       defaultDataSource: null,
       isPopoverOpen: false,
@@ -391,6 +402,7 @@ describe('DataSourceSelectable', () => {
 
     containerInstance.onChange([{ id: 'test2', label: 'test2', checked: 'on' }]);
     expect(containerInstance.state).toEqual({
+      componentId: mockGeneratedComponentId,
       dataSourceOptions: [
         {
           checked: 'on',
@@ -464,4 +476,30 @@ describe('DataSourceSelectable', () => {
       expect(onSelectedDataSource).toBeCalledWith([]);
     }
   );
+
+  it('should call dataSourceSelection selectDataSource when selecting', async () => {
+    spyOn(utils, 'getDefaultDataSource').and.returnValue([{ id: 'test2', label: 'test2' }]);
+    const dataSourceSelectionMock = new DataSourceSelectionService();
+    const componentId = 'component-id';
+    const selectedOptions = [{ id: 'test2', label: 'test2' }];
+    dataSourceSelectionMock.selectDataSource = jest.fn();
+    jest.spyOn(utils, 'getDataSourceSelection').mockReturnValue(dataSourceSelectionMock);
+    jest.spyOn(utils, 'generateComponentId').mockReturnValue(componentId);
+    mount(
+      <DataSourceSelectable
+        savedObjectsClient={client}
+        notifications={toasts}
+        onSelectedDataSources={jest.fn()}
+        disabled={false}
+        hideLocalCluster={false}
+        fullWidth={false}
+        dataSourceFilter={(ds) => ds.attributes.auth.type !== AuthType.NoAuth}
+      />
+    );
+    await nextTick();
+    expect(dataSourceSelectionMock.selectDataSource).toHaveBeenCalledWith(
+      componentId,
+      selectedOptions
+    );
+  });
 });

@@ -20,6 +20,10 @@ import {
   getDefaultDataSource,
   handleDataSourceFetchError,
   handleNoAvailableDataSourceError,
+  getDataSourceSelection,
+  setDataSourceSelection,
+  getDefaultDataSourceId,
+  getDefaultDataSourceId$,
 } from './utils';
 import { coreMock, notificationServiceMock } from '../../../../core/public/mocks';
 import {
@@ -53,6 +57,11 @@ import {
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
   NO_DATASOURCES_CONNECTED_MESSAGE,
 } from './constants';
+import {
+  DataSourceSelectionService,
+  defaultDataSourceSelection,
+} from '../service/data_source_selection_service';
+import { Observable, of } from 'rxjs';
 
 const { savedObjects } = coreMock.createStart();
 const { uiSettings } = coreMock.createStart();
@@ -636,6 +645,49 @@ describe('DataSourceManagement: Utils.ts', () => {
       mockUiSettingsCalls(uiSettings, 'get', null);
       const result = getDefaultDataSource(getDataSourceOptions, LocalCluster, uiSettings, true);
       expect(result).toEqual([{ id: '1', label: 'DataSource 1' }]);
+    });
+  });
+
+  describe('getDataSourceSelection and setDataSourceSelection', () => {
+    it('should not throw error and return default fallback dataSourceSelection  if value is not set', () => {
+      const result = getDataSourceSelection();
+      expect(result).toEqual(defaultDataSourceSelection);
+    });
+
+    it('should return value normally if value is set', () => {
+      const dataSourceSelection = new DataSourceSelectionService();
+      setDataSourceSelection(dataSourceSelection);
+      const result = getDataSourceSelection();
+      expect(result).toEqual(dataSourceSelection);
+    });
+  });
+  describe('getDefaultDataSourceId', () => {
+    it('should return null if uiSettings is not passed', () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'id-1');
+      const result = getDefaultDataSourceId();
+      expect(result).toEqual(null);
+    });
+
+    it('should return string value normally', () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'id-1');
+      const result = getDefaultDataSourceId(uiSettings);
+      expect(result).toEqual('id-1');
+    });
+  });
+
+  describe('getDefaultDataSourceId$', () => {
+    it('should return null if uiSettings is not passed', () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'id-1');
+      const result = getDefaultDataSourceId$();
+      expect(result).toEqual(null);
+    });
+
+    it('should return observable value normally', () => {
+      const id$ = of('id-1');
+      mockUiSettingsCalls(uiSettings, 'get$', id$);
+      const result$ = getDefaultDataSourceId$(uiSettings);
+      expect(result$).toBeInstanceOf(Observable);
+      expect(result$).toEqual(id$);
     });
   });
 });
