@@ -54,7 +54,7 @@ export interface QueryEditorProps {
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
-  queryEditorRef: React.RefObject<HTMLDivElement>;
+  queryEditorHeaderRef: React.RefObject<HTMLDivElement>;
 }
 
 interface Props extends QueryEditorProps {
@@ -519,7 +519,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem onClick={this.onClickInput} grow={true}>
-              <div ref={this.props.queryEditorRef} />
+              <div ref={this.props.queryEditorHeaderRef} />
               <CodeEditor
                 height={70}
                 languageId="xjson"

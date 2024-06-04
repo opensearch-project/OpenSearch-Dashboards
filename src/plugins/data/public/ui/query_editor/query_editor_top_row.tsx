@@ -4,7 +4,7 @@
  */
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 import {
   EuiFlexGroup,
@@ -26,6 +26,7 @@ import { UI_SETTINGS } from '../../../common';
 import { PersistedLog, fromUser, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
 import { QueryEnhancement, Settings } from '../types';
+import { SearchBarExtensions } from '../search_bar_extensions';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditortUI);
 
@@ -58,7 +59,6 @@ export interface QueryEditorTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
-  queryEditorRef: React.RefObject<HTMLDivElement>;
 }
 
 // Needed for React.lazy
@@ -66,6 +66,7 @@ export interface QueryEditorTopRowProps {
 export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
+  const queryEditorHeaderRef = useRef<HTMLDivElement | null>(null);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName } = opensearchDashboards.services;
@@ -239,9 +240,20 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           getQueryStringInitialValue={getQueryStringInitialValue}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
-          queryEditorRef={props.queryEditorRef}
+          queryEditorHeaderRef={queryEditorHeaderRef}
         />
       </EuiFlexItem>
+    );
+  }
+
+  function renderSearchBarExtensions() {
+    if (!shouldRenderSearchBarExtensions() || !queryEditorHeaderRef.current) return;
+    return (
+      <SearchBarExtensions
+        configs={props.queryEnhancements?.get(queryLanguage!)?.searchBar?.extensions}
+        dependencies={{ indexPatterns: props.indexPatterns }}
+        portalInsert={{ sibling: queryEditorHeaderRef.current, position: 'before' }}
+      />
     );
   }
 
@@ -272,6 +284,12 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     // TODO: MQL probably can modify to not care about index patterns
     // TODO: call queryUiEnhancement?.showQueryEditor
     return Boolean(props.showQueryEditor && props.indexPatterns && props.query && storage);
+  }
+
+  function shouldRenderSearchBarExtensions(): boolean {
+    return Boolean(
+      queryLanguage && props.queryEnhancements?.get(queryLanguage)?.searchBar?.extensions?.length
+    );
   }
 
   function renderUpdateButton() {
@@ -366,6 +384,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       direction="column"
       justifyContent="flexEnd"
     >
+      {renderSearchBarExtensions()}
       {renderQueryEditor()}
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="none">

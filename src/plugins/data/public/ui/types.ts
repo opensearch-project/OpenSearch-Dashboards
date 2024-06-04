@@ -8,7 +8,8 @@ import { SearchInterceptor } from '../search';
 import { IndexPatternSelectProps } from './index_pattern_select';
 import { StatefulSearchBarProps } from './search_bar';
 import { Settings } from './settings';
-import { SearchBarExtensionConfig } from './search_bar_extensions/search_bar_extension';
+import { SearchBarExtensionConfig } from './search_bar_extensions';
+import { SuggestionsComponentProps } from './typeahead/suggestions_component';
 
 export * from './settings';
 
@@ -64,6 +65,7 @@ export interface IUiStart {
   queryEnhancements: Map<string, QueryEnhancement>;
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
+  SuggestionsComponent: React.ComponentType<SuggestionsComponentProps>;
   Settings: Settings;
   containerRef: HTMLDivElement | null;
   container$: BehaviorSubject<HTMLDivElement | null>;

@@ -1,20 +1,29 @@
 import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
-import {
-  QueryEnhancementsPluginSetup,
-  QueryEnhancementsPluginStart,
-  QueryEnhancementsPluginSetupDependencies,
-} from './types';
+import { IStorageWrapper, Storage } from '../../../src/plugins/opensearch_dashboards_utils/public';
+import { createQueryAssistExtension } from './query_assist';
 import { PPLQlSearchInterceptor } from './search/ppl_search_interceptor';
 import { SQLQlSearchInterceptor } from './search/sql_search_interceptor';
+import { setData, setStorage } from './services';
+import {
+  QueryEnhancementsPluginSetup,
+  QueryEnhancementsPluginSetupDependencies,
+  QueryEnhancementsPluginStart,
+  QueryEnhancementsPluginStartDependencies,
+} from './types';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
+  private readonly storage: IStorageWrapper;
+
+  constructor() {
+    this.storage = new Storage(window.localStorage);
+  }
+
   public setup(
     core: CoreSetup,
     { data }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
-
     const pplSearchInterceptor = new PPLQlSearchInterceptor({
       toasts: core.notifications.toasts,
       http: core.http,
@@ -43,6 +52,7 @@ export class QueryEnhancementsPlugin
               initialTo: moment().add(2, 'days').toISOString(),
             },
             showFilterBar: false,
+            extensions: [createQueryAssistExtension(core.http)],
           },
           fields: {
             visualizable: false,
@@ -75,7 +85,12 @@ export class QueryEnhancementsPlugin
     return {};
   }
 
-  public start(core: CoreStart): QueryEnhancementsPluginStart {
+  public start(
+    core: CoreStart,
+    deps: QueryEnhancementsPluginStartDependencies
+  ): QueryEnhancementsPluginStart {
+    setStorage(this.storage);
+    setData(deps.data);
     return {};
   }
 
