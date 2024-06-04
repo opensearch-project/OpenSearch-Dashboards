@@ -15,7 +15,8 @@ import {
   IOpenSearchDashboardsSearchRequest,
 } from '../../../../src/plugins/data/common';
 import { ISearchStrategy } from '../../../../src/plugins/data/server';
-import { SEARCH_STRATEGY, API } from '../../common';
+import { API, SEARCH_STRATEGY } from '../../common';
+import { registerQueryAssistRoutes } from './query_assist';
 
 function defineRoute(
   logger: Logger,
@@ -69,4 +70,5 @@ export function defineRoutes(
 ) {
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.PPL);
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQL);
+  registerQueryAssistRoutes(logger, router);
 }

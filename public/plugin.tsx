@@ -6,6 +6,7 @@
 import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
 import { IStorageWrapper, Storage } from '../../../src/plugins/opensearch_dashboards_utils/public';
+import { createQueryAssistExtension } from './query_assist';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
 import { setData, setStorage } from './services';
 import {
@@ -54,6 +55,7 @@ export class QueryEnhancementsPlugin
               initialTo: moment().add(2, 'days').toISOString(),
             },
             showFilterBar: false,
+            extensions: [createQueryAssistExtension(core.http)],
           },
           fields: {
             filterable: false,
