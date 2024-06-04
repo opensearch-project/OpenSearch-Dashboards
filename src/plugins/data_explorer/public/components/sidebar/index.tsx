@@ -84,14 +84,11 @@ export const Sidebar: FC = ({ children }) => {
         return;
       }
 
-      switch (selectedDataSources[0].connectionType) {
-        case 'os': // need to make sure we have a constant here - common with data source types
-          dispatch(setIndexPattern(selectedDataSources[0].value));
-          dispatch(setDataSource(selectedDataSources[0].ds));
-          break;
-        case 'flint':
-          dispatch(setDataSource(selectedDataSources[0].ds));
-          break;
+      if (selectedDataSources[0].type === 'default') {
+        dispatch(setIndexPattern(selectedDataSources[0].value));
+        dispatch(setDataSource(selectedDataSources[0].ds));
+      } else {
+        dispatch(setDataSource(selectedDataSources[0].ds));
       }
     },
     [dispatch, setSelectedSources]

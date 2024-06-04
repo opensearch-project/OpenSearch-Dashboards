@@ -36,15 +36,8 @@ export class DefaultDslDataSource extends DataSource<
 > {
   private readonly indexPatterns: IndexPatternsContract;
 
-  constructor({
-    id,
-    name,
-    type,
-    connectionType,
-    metadata,
-    indexPatterns,
-  }: LocalDataSourceSettings) {
-    super({ id, name, type, connectionType, metadata });
+  constructor({ id, name, type, metadata, indexPatterns }: LocalDataSourceSettings) {
+    super({ id, name, type, metadata });
     this.indexPatterns = indexPatterns;
   }
 

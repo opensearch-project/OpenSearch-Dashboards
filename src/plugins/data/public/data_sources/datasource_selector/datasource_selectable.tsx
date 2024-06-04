@@ -40,7 +40,6 @@ const mapToOption = (
 ): DataSourceOption => {
   const baseOption = {
     type: dataSource.getType(),
-    connectionType: dataSource.getConnectionType(),
     name: dataSource.getName(),
     ds: dataSource,
   };
