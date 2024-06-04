@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { Component, LegacyRef, RefObject, createRef } from 'react';
+import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@osd/i18n';
 
 import classNames from 'classnames';
@@ -162,8 +162,8 @@ export default class QueryEditorUI extends Component<Props, State> {
     this.onChange({ query: value, language: this.props.query.language });
   };
 
-  private onInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    this.onQueryStringChange(event.target.value);
+  private onInputChange = (value: string) => {
+    this.onQueryStringChange(value);
   };
 
   private onClickInput = (event: React.MouseEvent<HTMLTextAreaElement>) => {
@@ -520,16 +520,16 @@ export default class QueryEditorUI extends Component<Props, State> {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={true}>
+            <EuiFlexItem onClick={this.onClickInput} grow={true}>
               <CodeEditor
                 height={70}
                 languageId="xjson"
                 value={this.getQueryString()}
-                onChange={() => {}}
+                onChange={this.onInputChange}
                 options={{
                   lineNumbers: 'on',
-                  lineHeight: 20,
-                  fontSize: 12,
+                  lineHeight: 24,
+                  fontSize: 14,
                   fontFamily: 'Roboto Mono',
                   minimap: {
                     enabled: false,
