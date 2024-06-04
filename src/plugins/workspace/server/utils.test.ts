@@ -5,7 +5,14 @@
 
 import { AuthStatus } from '../../../core/server';
 import { httpServerMock, httpServiceMock } from '../../../core/server/mocks';
-import { generateRandomId, getPrincipalsFromRequest } from './utils';
+import {
+  generateRandomId,
+  getOSDAdminConfigFromYMLConfig,
+  getPrincipalsFromRequest,
+  updateDashboardAdminStateForRequest,
+} from './utils';
+import { getWorkspaceState } from '../../../core/server/utils';
+import { Observable, of } from 'rxjs';
 
 describe('workspace utils', () => {
   const mockAuth = httpServiceMock.createAuth();
@@ -72,5 +79,76 @@ describe('workspace utils', () => {
     expect(() => getPrincipalsFromRequest(mockRequest, mockAuth)).toThrow(
       'UNEXPECTED_AUTHORIZATION_STATUS'
     );
+  });
+
+  it('should be dashboard admin when users match configUsers', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['dashboard_admin'];
+    const users: string[] = [];
+    const configGroups: string[] = ['dashboard_admin'];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should be dashboard admin when groups match configGroups', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = ['dashboard_admin'];
+    const configGroups: string[] = [];
+    const configUsers: string[] = ['dashboard_admin'];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should be not dashboard admin when groups do not match configGroups', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['dashboard_admin'];
+    const users: string[] = [];
+    const configGroups: string[] = [];
+    const configUsers: string[] = ['dashboard_admin'];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
+  });
+
+  it('should be dashboard admin when groups and users are []', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = [];
+    const users: string[] = [];
+    const configGroups: string[] = [];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
+  });
+
+  it('should be dashboard admin when configGroups and configUsers are []', () => {
+    const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
+    const groups: string[] = ['user1'];
+    const users: string[] = [];
+    const configGroups: string[] = [];
+    const configUsers: string[] = [];
+    updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
+  });
+
+  it('should get correct admin config when admin config is enabled ', async () => {
+    const globalConfig$: Observable<any> = of({
+      opensearchDashboards: {
+        dashboardAdmin: {
+          groups: ['group1', 'group2'],
+          users: ['user1', 'user2'],
+        },
+      },
+    });
+    const [groups, users] = await getOSDAdminConfigFromYMLConfig(globalConfig$);
+    expect(groups).toEqual(['group1', 'group2']);
+    expect(users).toEqual(['user1', 'user2']);
+  });
+
+  it('should get [] when admin config is not enabled', async () => {
+    const globalConfig$: Observable<any> = of({});
+    const [groups, users] = await getOSDAdminConfigFromYMLConfig(globalConfig$);
+    expect(groups).toEqual([]);
+    expect(users).toEqual([]);
   });
 });

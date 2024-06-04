@@ -278,6 +278,7 @@ export const mockDataSourceAttributesWithSigV4Auth = {
       accessKey: 'test123',
       secretKey: 'test123',
       region: 'us-east-1',
+      service: 'es',
     },
   },
 };
@@ -360,7 +361,7 @@ export const mockErrorResponseForSavedObjectsCalls = (
 
 export const mockUiSettingsCalls = (
   uiSettings: IUiSettingsClient,
-  uiSettingsMethodName: 'get' | 'set',
+  uiSettingsMethodName: 'get' | 'set' | 'get$',
   response: any
 ) => {
   (uiSettings[uiSettingsMethodName] as jest.Mock).mockReturnValue(response);

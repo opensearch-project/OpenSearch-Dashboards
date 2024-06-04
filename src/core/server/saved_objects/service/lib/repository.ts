@@ -1542,12 +1542,13 @@ export class SavedObjectsRepository {
   }
 
   /**
-   * Increases a counter field by one. Creates the document if one doesn't exist for the given id.
+   * Increases a counter field by incrementValue which by default is 1. Creates the document if one doesn't exist for the given id.
    *
    * @param {string} type
    * @param {string} id
    * @param {string} counterFieldName
    * @param {object} [options={}]
+   * @param {number} [incrementValue=1]
    * @property {object} [options.migrationVersion=undefined]
    * @returns {promise}
    */
@@ -1555,7 +1556,8 @@ export class SavedObjectsRepository {
     type: string,
     id: string,
     counterFieldName: string,
-    options: SavedObjectsIncrementCounterOptions = {}
+    options: SavedObjectsIncrementCounterOptions = {},
+    incrementValue: number = 1
   ): Promise<SavedObject> {
     if (typeof type !== 'string') {
       throw new Error('"type" argument must be a string');
@@ -1579,19 +1581,17 @@ export class SavedObjectsRepository {
     } else if (this._registry.isMultiNamespace(type)) {
       savedObjectNamespaces = await this.preflightGetNamespaces(type, id, namespace);
     }
-
     const migrated = this._migrator.migrateDocument({
       id,
       type,
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
-      attributes: { [counterFieldName]: 1 },
+      attributes: { [counterFieldName]: incrementValue },
       migrationVersion,
       updated_at: time,
     });
 
     const raw = this._serializer.savedObjectToRaw(migrated as SavedObjectSanitizedDoc);
-
     const { body } = await this.client.update<SavedObjectsRawDocSource>({
       id: raw._id,
       index: this.getIndexForType(type),
@@ -1610,7 +1610,7 @@ export class SavedObjectsRepository {
             `,
           lang: 'painless',
           params: {
-            count: 1,
+            count: incrementValue,
             time,
             type,
             counterFieldName,
@@ -1619,7 +1619,6 @@ export class SavedObjectsRepository {
         upsert: raw._source,
       },
     });
-
     const { originId } = body.get?._source ?? {};
     return {
       id,

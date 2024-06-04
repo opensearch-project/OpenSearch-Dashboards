@@ -33,7 +33,11 @@ import { i18n } from '@osd/i18n';
 import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import { SampleDatasetSchema, AppLinkSchema } from '../../lib/sample_dataset_registry_types';
-import { getSavedObjectsWithDataSource, appendDataSourceId } from '../util';
+import {
+  appendDataSourceId,
+  getSavedObjectsWithDataSource,
+  overwriteSavedObjectsWithWorkspaceId,
+} from '../util';
 
 const flightsName = i18n.translate('home.sampleData.flightsSpecTitle', {
   defaultMessage: 'Sample flight data',
@@ -62,6 +66,8 @@ export const flightsSpecProvider = function (): SampleDatasetSchema {
     savedObjects: getSavedObjects(),
     getDataSourceIntegratedSavedObjects: (dataSourceId?: string, dataSourceTitle?: string) =>
       getSavedObjectsWithDataSource(getSavedObjects(), dataSourceId, dataSourceTitle),
+    getWorkspaceIntegratedSavedObjects: (workspaceId) =>
+      overwriteSavedObjectsWithWorkspaceId(getSavedObjects(), workspaceId),
     dataIndices: [
       {
         id: 'flights',
