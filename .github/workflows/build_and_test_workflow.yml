@@ -10,6 +10,8 @@ on:
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
+      - '.lycheeignore'
+      - 'changelogs/fragments/**'
   pull_request:
     branches: ['**']
     paths-ignore:
