@@ -1,4 +1,5 @@
 import { EuiCallOut, EuiCallOutProps } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import React from 'react';
 
 interface QueryAssistCallOutProps extends Required<Pick<EuiCallOutProps, 'onDismiss'>> {
@@ -17,7 +18,9 @@ export type QueryAssistCallOutType =
 const EmptyIndexCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
     data-test-subj="query-assist-empty-index-callout"
-    title="Select a data source or index to ask a question."
+    title={i18n.translate('queryAssist.callOut.emptyIndex.title', {
+      defaultMessage: 'Select a data source or index to ask a question.',
+    })}
     size="s"
     color="warning"
     iconType="iInCircle"
@@ -29,7 +32,9 @@ const EmptyIndexCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
 const ProhibitedQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
     data-test-subj="query-assist-guard-callout"
-    title="I am unable to respond to this query. Try another question."
+    title={i18n.translate('queryAssist.callOut.prohibitedQuery.title', {
+      defaultMessage: 'I am unable to respond to this query. Try another question.',
+    })}
     size="s"
     color="danger"
     iconType="alert"
@@ -41,7 +46,10 @@ const ProhibitedQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
 const EmptyQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
     data-test-subj="query-assist-empty-query-callout"
-    title="Enter a natural language question to automatically generate a query to view results."
+    title={i18n.translate('queryAssist.callOut.emptyQuery.title', {
+      defaultMessage:
+        'Enter a natural language question to automatically generate a query to view results.',
+    })}
     size="s"
     color="warning"
     iconType="iInCircle"
@@ -53,7 +61,9 @@ const EmptyQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
 const QueryGeneratedCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
     data-test-subj="query-assist-query-generated-callout"
-    title={`${props.language} query generated`}
+    title={`${props.language} ${i18n.translate('queryAssist.callOut.queryGenerated.title', {
+      defaultMessage: `query generated. If there are any issues with the response, try adding more context to the question or a new question to submit.`,
+    })}`}
     size="s"
     color="success"
     iconType="check"
