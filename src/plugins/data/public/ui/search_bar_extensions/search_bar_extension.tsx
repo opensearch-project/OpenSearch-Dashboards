@@ -34,7 +34,7 @@ export interface SearchBarExtensionConfig {
    * A function that determines if the search bar extension is enabled and should be rendered on UI.
    * @returns whether the extension is enabled.
    */
-  isEnabled: () => Promise<boolean>;
+  isEnabled: (dependencies: SearchBarExtensionDependencies) => Promise<boolean>;
   /**
    * A function that returns the mount point for the search bar extension.
    * @param dependencies - The dependencies required for the extension.
@@ -52,7 +52,7 @@ export const SearchBarExtension: React.FC<SearchBarExtensionProps> = (props) => 
   ]);
 
   useEffect(() => {
-    props.config.isEnabled().then(setIsEnabled);
+    props.config.isEnabled(props.dependencies).then(setIsEnabled);
   }, [props.dependencies, props.config]);
 
   if (!isEnabled) return null;
