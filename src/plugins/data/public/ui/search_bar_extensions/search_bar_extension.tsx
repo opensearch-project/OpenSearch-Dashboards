@@ -4,7 +4,7 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { IIndexPattern } from '../../../common';
 
@@ -45,6 +45,7 @@ export interface SearchBarExtensionConfig {
 
 export const SearchBarExtension: React.FC<SearchBarExtensionProps> = (props) => {
   const [isEnabled, setIsEnabled] = useState(false);
+  const isMounted = useRef(true);
 
   const component = useMemo(() => props.config.getComponent(props.dependencies), [
     props.config,
@@ -52,7 +53,16 @@ export const SearchBarExtension: React.FC<SearchBarExtensionProps> = (props) => 
   ]);
 
   useEffect(() => {
-    props.config.isEnabled(props.dependencies).then(setIsEnabled);
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    props.config.isEnabled(props.dependencies).then((enabled) => {
+      if (isMounted.current) setIsEnabled(enabled);
+    });
   }, [props.dependencies, props.config]);
 
   if (!isEnabled) return null;
