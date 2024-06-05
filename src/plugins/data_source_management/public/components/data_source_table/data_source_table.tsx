@@ -29,7 +29,12 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext, DataSourceTableItem, ToastMessageItem } from '../../types';
 import { CreateButton } from '../create_button';
-import { deleteMultipleDataSources, getDataSources, setFirstDataSourceAsDefault } from '../utils';
+import {
+  deleteMultipleDataSources,
+  getDataSources,
+  setFirstDataSourceAsDefault,
+  getDefaultDataSourceId,
+} from '../utils';
 import { LoadingMask } from '../loading_mask';
 
 /* Table config */
@@ -149,7 +154,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
           <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)}>
             {name}
           </EuiButtonEmpty>
-          {index.id === uiSettings.get('defaultDataSource', null) ? (
+          {index.id === getDefaultDataSourceId(uiSettings) ? (
             <EuiBadge iconType="starFilled" iconSide="left">
               Default
             </EuiBadge>
@@ -251,7 +256,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const setDefaultDataSource = async () => {
     try {
       for (const dataSource of selectedDataSources) {
-        if (uiSettings.get('defaultDataSource') === dataSource.id) {
+        if (getDefaultDataSourceId(uiSettings) === dataSource.id) {
           await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
         }
       }

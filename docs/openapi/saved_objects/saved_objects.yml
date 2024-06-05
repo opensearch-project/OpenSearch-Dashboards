@@ -1,0 +1,867 @@
+openapi: 3.0.3
+info:
+  version: v1
+  title: OpenSearch Dashboards Saved Objects API
+  contact:
+    name: OpenSearch Dashboards Team
+  description: |-
+    OpenAPI schema for OpenSearch Dashboards Saved Objects API
+tags:
+  - name: saved objects
+    description: Manage Dashboards saved objects, including dashboards, visualizations, saved search, and more.
+paths:
+  /api/saved_objects/{type}/{id}:
+    get:
+      tags:
+        - saved objects
+      summary: Retrieve a single saved object by type and id.
+      parameters:
+      - $ref: '#/components/parameters/id'
+      - $ref: '#/components/parameters/type'
+      responses:
+        '200':
+          description: The saved object is successfully retrieved. 
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: The saved object does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      tags:
+        - saved objects
+      summary: Create a new saved object with type and id.
+      parameters:
+        - $ref: '#components/parameters/type'
+        - $ref: '#components/parameters/id'
+        - in: query
+          name: overwrite
+          description: If set to true, will overwrite the existing saved object with same type and id.
+          schema: 
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - attributes
+              properties:
+                attributes:
+                  type: object
+                  description: The metadata of the saved object to be created, and the object is not validated.
+                migrationVersion:
+                  type: object
+                  description: The information about the migrations that have been applied to this saved object to be created.
+                references:
+                  description: List of objects that describe other saved objects the created object references. 
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+                initialNamespaces:
+                  description: Namespaces that this saved object exists in. This attribute is only used for multi-namespace saved object types.
+                  type: array
+                  items:
+                    type: string
+                workspaces:
+                  type: array
+                  items:
+                    type: string
+                  description: Workspaces that this saved object exists in.
+            examples:
+              indexPattern:
+                summary: Example of creating an index pattern saved object
+                value:
+                  attributes:
+                    title: 'my-index-pattern'
+                    fields: '[{"count":"1","name":"@timestamp","searchable":"true"}]'
+                  references:
+                    - id: '51339560-1d7c-11ef-b757-55fac6c80d9a'
+                      name: 'dataSource'
+                      type: 'data-source'
+              vegaVisualization:
+                summary: Example of creating a Vega visualization saved object
+                value:
+                  attributes:
+                    title: 'my-vega-visualization'
+                    visState: '{"title":"vegaVisualization","type":"vega","aggs":[]}}'
+                    uiStateJSON: '{}'
+                    description: ''
+                    version: 1
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}'
+                    }
+                  references:
+                    - id: '51339560-1d7c-11ef-b757-55fac6c80d9a'
+                      name: 'dataSource'
+                      type: 'data-source'
+              dashboards:
+                summary: Example of creating a dashboard saved object
+                value:
+                  attributes:
+                    title: 'Revenue Dashboard'
+                    description: 'Revenue dashboard'
+                    panelsJSON: '[{"version":"2.9.0","gridData":{"x":0,"y":0,"w":24,"h":15,"i":"5db1d75d-f680-4869-a0e8-0f2b8b05b99c"},"panelIndex":"5db1d75d-f680-4869-a0e8-0f2b8b05b99c","embeddableConfig":{},"panelRefName":"panel_0"}]'
+                    optionsJSON: '{"hidePanelTitles":false,"useMargins":true}'
+                    version: 1
+                    timeRestore: true
+                    kibanaSavedObjectMeta: {
+                      searchSourceJSON: '{"query":{"language":"kuery","query":""},"filter":[]}'
+                    }
+                  references:
+                    - id: '37cc8650-b882-11e8-a6d9-e546fe2bba5f'
+                      name: 'panel_0'
+                      type: 'visualization'  
+      responses:
+        '200':
+          description: The creation request is successful
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+    put:
+      tags:
+        - saved objects
+      summary: Update existing saved object
+      parameters:
+        - $ref: '#components/parameters/type'
+        - $ref: '#components/parameters/id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - attributes
+              properties:
+                attributes:
+                  type: object
+                  description: The metadata of the saved object to be updated, and the object is not validated.
+                version:
+                  type: string
+                references:
+                  description: List of objects that describe other saved objects the created object references. 
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      name:
+                        type: string
+                      type:
+                        type: string
+      responses:
+        '200': 
+          description: The update request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: The saved object does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      tags:
+        - saved objects
+      summary: Delete a saved object
+      parameters:
+        - $ref: '#components/parameters/type'
+        - $ref: '#components/parameters/id'
+        - in: query
+          name: force
+          description: If set to true, will force deletion of an object that exists in multiple namespaces.
+          schema: 
+            type: boolean
+      responses:
+        '200': 
+          description: The deletion request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: The saved object does not exist.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_migrate:
+    post:
+      tags:
+        - saved objects
+      summary: Migrate existing saved objects
+      responses:
+        '200':
+          description: The migration is executed.
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/saved_objects/_find:
+    get:
+      tags:
+        - saved objects
+      summary: Find saved objects through query.
+      parameters:
+        - in: query
+          name: type
+          description: The type of saved objects to find.
+          required: true
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+          example: dashboard
+        - in: query
+          name: per_page
+          description: The number of saved objects to return per page.
+          schema:
+            type: integer
+            minimum: 0
+            default: 20
+          example: 50
+        - in: query
+          name: page
+          description: The page of objects to return.
+          schema:
+            type: integer 
+            minimum: 0
+            default: 1
+          example: 1
+        - in: query
+          name: search
+          description: The simple_query_string query that filters the objects in the response.
+          schema:
+            type: string
+          example: "open*"
+        - in: query
+          name: default_search_operator
+          description: The default operator for the search query.
+          schema:
+            type: string
+            enum:
+              - AND
+              - OR
+            default: OR
+          example: OR
+        - in: query
+          name: search_fields
+          description: The fields to search on by the query.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+          example: title
+        - in: query
+          name: sort_field
+          description: Sorts the response by selected field.
+          schema:
+            type: string
+          example: _score
+        - in: query
+          name: has_reference
+          description: Filters the saved objects that have a reference with the type and ID combination.
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+              id:
+                type: string
+          example: { "type": "visualization", "id": "37cc8650-b882-11e8-a6d9-e546fe2bba5f" }
+        - in: query
+          name: fields
+          description: The fields to return in the response.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+          example: title
+        - in: query
+          name: filter
+          description: A filter string that you can filter the saved object with attributes.
+          schema:
+            type: string
+          example: 'visualization.attributes.title:*'
+        - in: query
+          name: namespace
+          description: Namespaces that this saved object exists in. This attribute is only used for multi-namespace saved object types.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - in: query
+          name: workspace
+          description: Workspaces that this saved object exists in.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+      responses:
+        '200':
+          description: The saved objects are successfully found.
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_bulk_create:
+    post:
+      tags:
+        - saved objects
+      summary: Bulk create saved objects
+      parameters:
+      - name: overwrite
+        in: query
+        schema:
+          type: boolean
+          description: If set to true, will overwrite the existing saved object with same type and id.
+      - name: workspaces
+        in: query
+        schema: 
+          type: array
+          items:
+            type: string
+          description: Workspaces that the saved objects exist in.
+      requestBody:
+        required: true
+        description: Array of saved objects to create
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Unique id of the saved object.
+                  type:
+                    type: string
+                    required: true
+                    description: The type of saved object.
+                  attributes:
+                    type: object
+                    required: true
+                    description: The metadata of the saved object to be created, and the object is not validated.
+                  version:
+                    type: string
+                  migrationVersion:
+                    type: object
+                    description: The information about the migrations that have been applied to this saved object to be created.
+                  references:
+                    description: List of objects that describe other saved objects the created object references. 
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          type: string
+                        name:
+                          type: string
+                  initialNamespaces:
+                    description: Namespaces that this saved object exists in. This attribute is only used for multi-namespace saved object types.
+                    type: array
+                    items:
+                      type: string
+              example:
+                - id: 67a9021c-c97e-4499-8150-9722ab44edd4
+                  type: visualization
+                  attributes:
+                    title: 'vega-visualization'
+                    fieldFormatMap: '{"hour_of_day":{}}'
+                    fields: '[{"name":"@timestamp","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true}]'
+                  version: '1'
+                  migrationVersion: {}
+                  references:
+                    - id: ef71d6c1-8e6b-418d-9f7c-e5d9bbde9cf7
+                      type: data-source
+                      name: dataSource
+                  initialNamespaces: 
+                    - default
+      responses:
+        '200':
+          description: The bulk creation request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/saved_objects/_bulk_update:
+    post:
+      tags:
+        - saved objects
+      summary: Bulk update saved objects
+      requestBody:
+        required: true
+        description: Array of saved objects to update
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    description: Unique id of the saved object.
+                  type:
+                    type: string
+                    required: true
+                    description: The type of saved object.
+                  attributes:
+                    type: object
+                    required: true
+                    description: The metadata of the saved object to be created, and the object is not validated.
+                  version:
+                    type: string
+                  references:
+                    description: List of objects that describe other saved objects the created object references. 
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          type: string
+                        name:
+                          type: string
+                  namespaces:
+                    description: Namespaces that this saved object exists in. This attribute is only used for multi-namespace saved object types.
+                    type: array
+                    items:
+                      type: string
+              example:
+                - id: 67a9021c-c97e-4499-8150-9722ab44edd4
+                  type: visualization
+                  attributes:
+                    title: vega-visualization
+                    fieldFormatMap: '{"hour_of_day":{}}'
+                    fields: '[{"name":"@timestamp","type":"date","esTypes":["date"],"count":0,"scripted":false,"searchable":true,"aggregatable":true,"readFromDocValues":true}]'
+                  version: '1'
+                  migrationVersion: {}
+                  references:
+                    - id: ef71d6c1-8e6b-418d-9f7c-e5d9bbde9cf7
+                      type: data-source
+                      name: dataSource
+                  namespace: default
+      responses:
+        '200':
+          description: The bulk update request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+  /api/saved_objects/_bulk_get:
+    get:
+      tags:
+        - saved objects
+      summary: Bulk get saved objects
+      requestBody:
+        required: true
+        description: Array of criteria including id, type, fields used to retrieve matching saved objects
+        content: 
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    required: true
+                    description: Unique id of the saved object.
+                  type:
+                    type: string
+                    required: true
+                    description: The type of saved object.
+                  fields:
+                    type: array
+                    items:
+                      type: string
+                    description: The fields to return in the attributes key of the object response.
+              example:
+                - id: 67a9021c-c97e-4499-8150-9722ab44edd4
+                  type: visualization
+                  fields: ['title', 'fieldFormatMap']
+      responses:
+        '200':
+          description: The bulk get request is successful.
+          content:
+            application/json:
+              schema:
+                type: object  
+  /api/saved_objects/_import:
+    post:
+      tags:
+        - saved objects
+      summary: Create sets of saved objects from a file created through the export API
+      parameters: 
+        - in: query
+          name: overwrite
+          description: Overwrites saved objects when they already exist. This option cannot be used with the `createNewCopies` option.
+          schema: 
+            type: boolean
+            default: false
+        - in: query
+          name: createNewCopies
+          description: Creates copies of saved objects, regenerates each object ID, and resets the origin. This option cannot be used with the `overwrite` option.
+          schema: 
+            type: boolean
+            default: false
+        - in: query
+          name: dataSourceId
+          description: The ID of the data source to use for the import.
+          schema: 
+            type: string
+        - in: query
+          name: workspace
+          description: Workspaces that the saved objects exist in.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+        - in: query
+          name: dataSourceEnabled
+          description: If set to true, will enable the multiple data source.
+          schema: 
+            type: boolean
+            default: false
+      requestBody:
+        required: true
+        description: The ndjson file containing the saved objects to import
+        content: 
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                 description: |
+                    A file exported using the export API. NOTE: The `savedObjects.maxImportExportSize` and `savedObjects.maxImportPayloadBytes` settings in the config file determine the maximum size of the file that can be imported.
+            example:
+              importObjectRequest:
+                summary: Example of importing saved objects
+                value:
+                  $ref: '../examples/import.ndjson'
+      responses:
+        '200':
+          description: The import request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates if the import was successful.
+                  successCount:
+                    type: integer
+                    description: The number of successful imports.
+                  errors:
+                    type: array
+                    description:  Indicates the import was unsuccessful and specifies the objects that failed to import.
+                    items:
+                      type: object
+                  successResults: 
+                    type: array
+                    description: Indicates the objects that are successfully imported, with any metadata if applicable.
+                    items:
+                      type: object
+              examples:
+                importObjectSuccessResponse:
+                  summary: Example of successful import
+                  value:
+                    success: true
+                    successCount: 1
+                    successResults:
+                      - type: index-pattern
+                        id: 4b3a6220-1e02-11ef-891d-992edd5ce25b
+                        meta:
+                          title: 'opensearch_dashboards_sample_data_ecommerce'
+                          icon: indexPatternApp
+                        overwrite: true
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_export:
+    post:
+      tags:
+        - saved objects
+      summary: Export set of saved objects into ndjson file
+      requestBody:
+        required: true
+        description: Can use type, objects and search to filter the objects to export
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: string
+                  description:  The saved object types to include in the export. Use * to export all the types.
+                objects:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        required: true
+                        description: Unique id of the saved object.
+                      type:
+                        type: string
+                        required: true
+                        description: The type of saved object.
+                  description: The list of saved objects to export.
+                search:
+                  type: string
+                  description: The simple_query_string query that filters the objects.
+                includeReferencesDeep:
+                  type: boolean
+                  default: false
+                  description: If set to true, will include references of the saved objects.
+                excludeExportDetails:
+                  type: boolean
+                  default: false
+                  description: If set to true, will exclude export details at the end of the stream.  
+                workspace:
+                  type: array
+                  items:
+                    type: string
+                  description: Workspaces that the saved objects exist in.
+            examples:
+              exportDashboards:
+                summary: Example of exporting dashboards
+                value:
+                  objects:
+                    - id: 67a9021c-c97e-4499-8150-9722ab44edd4
+                      type: dashboard
+                  includeReferencesDeep: true
+                  excludeExportDetails: false
+              exportIndexPatterns:
+                summary: Example of exporting index patterns
+                value:
+                  objects:
+                    - id: 4b3a6220-1e02-11ef-891d-992edd5ce25b
+                      type: index-pattern
+                  includeReferencesDeep: false
+                  excludeExportDetails: true
+      responses:
+        '200':
+          description: The export request is successful.
+          content:
+            application/x-ndjson:
+              schema:
+                type: object
+              examples:
+                exportSavedObjectsResponse:
+                  $ref: '../examples/export_objects_response.yaml'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+  /api/saved_objects/_resolve_import_errors:
+    post:
+      tags:
+        - saved objects
+      summary: Resolve import errors from import objects API
+      parameters:
+        - in: query
+          name: createNewCopies
+          description: Creates copies of saved objects, regenerates each object ID, and resets the origin.
+          schema: 
+            type: boolean
+            default: false
+        - in: query
+          name: dataSourceId
+          description: The ID of the data source to use for the import.
+          schema: 
+            type: string
+        - in: query
+          name: workspace
+          description: Workspaces that the saved objects exist in.
+          schema:
+            oneOf:
+              - type: string
+              - type: array
+      requestBody:
+        required: true
+        description: The request body must include the multipart/form-data type.
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: The same file given to the import API.
+                  type: string
+                  format: binary
+                retries:
+                  description: The retry operations, which can specify how to resolve different types of errors.
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                        description: The type of error to resolve.
+                      id:
+                        type: string
+                        description: The ID of the saved object.
+                      overwrite:
+                        type: boolean
+                        default: false
+                        description: If set to true, will overwrite the existing saved object with the same type and ID.
+                      destinationId:
+                        type: string
+                        description: Specifies the destination ID that the imported object should have, if different from the current ID.
+                      replaceReferences:
+                        description: A list of `type`, `from`, and `to` used to change the object references.
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                            from:
+                              type: string
+                            to:
+                              type: string
+                      createNewCopy:
+                        type: boolean
+                        description: If set to true, will create a copy of the saved objects, regenerates each object ID, and resets the origin.
+                      ignoreMissingReferences:
+                        type: boolean
+                        description: If set to true, will ignore missing references. When set to `false`, does nothing.
+            examples:
+              resolveImportErrorsRequest:
+                summary: Example of resolving import errors
+                value:
+                  file: 'import.ndjson'
+                  retries:
+                    - type: index-pattern
+                      id: 4b3a6220-1e02-11ef-891d-992edd5ce25b
+                      overwrite: true
+      responses:
+        '200':
+          description: The resolve import errors request is successful.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    description: Indicates if the import was successful.
+                  successCount:
+                    type: integer
+                    description: The number of successful imports.
+                  errors:
+                    type: array
+                    description:  Indicates the import was unsuccessful and specifies the objects that failed to import.
+                    items:
+                      type: object
+                  successResults: 
+                    type: array
+                    description: Indicates the objects that are successfully imported, with any metadata if applicable.
+                    items:
+                      type: object 
+              examples:
+                resolveImportErrorSuccessResponse:
+                  summary: Example of successful import
+                  value:
+                    success: true
+                    successCount: 1
+                    successResults:
+                      - type: index-pattern
+                        id: 4b3a6220-1e02-11ef-891d-992edd5ce25b
+                        meta:
+                          title: 'opensearch_dashboards_sample_data_ecommerce'
+                          icon: indexPatternApp
+                        overwrite: true  
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/400_bad_request'
+components:
+  parameters:
+    type:
+      name: type
+      in: path
+      description: The type of SavedObject to retrieve.
+      required: true
+      schema:
+        type: string
+    id: 
+      name: id
+      in: path
+      description: Unique id of the saved object.
+      required: true
+      schema:
+        type: string
+  schemas:
+    400_bad_request:
+      title: Bad request
+      type: object
+      required:
+        - error
+        - message
+        - statusCode
+      properties:
+        error:
+          type: string
+          enum:
+            - Bad Request
+        message:
+          type: string
+        statusCode:
+          type: integer
+          enum:
+            - 400

@@ -5,6 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 
+import { getWorkspaceState } from '../../../../core/server/utils';
 import {
   OpenSearchDashboardsRequest,
   SavedObject,
@@ -48,6 +49,15 @@ const generateSavedObjectsPermissionError = () =>
     new Error(
       i18n.translate('saved_objects.permission.invalidate', {
         defaultMessage: 'Invalid saved objects permission',
+      })
+    )
+  );
+
+const generateOSDAdminPermissionError = () =>
+  SavedObjectsErrorHelpers.decorateForbiddenError(
+    new Error(
+      i18n.translate('dashboard.admin.permission.invalidate', {
+        defaultMessage: 'Invalid permission, please contact OSD admin',
       })
     )
   );
@@ -271,6 +281,13 @@ export class WorkspaceSavedObjectsClientWrapper {
       objects: Array<SavedObjectsBulkCreateObject<T>>,
       options: SavedObjectsCreateOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
+      // Objects with id in overwrite mode will be regarded as update
+      const objectsToCreate = options.overwrite ? objects.filter((obj) => !obj.id) : objects;
+      // Only OSD admin can bulkCreate workspace.
+      if (objectsToCreate.some((obj) => obj.type === WORKSPACE_TYPE)) {
+        throw generateOSDAdminPermissionError();
+      }
+
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
       if (
@@ -329,6 +346,13 @@ export class WorkspaceSavedObjectsClientWrapper {
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
+      // If options contains id and overwrite, it is an update action.
+      const isUpdateMode = options?.id && options?.overwrite;
+      // Only OSD admin can create workspace.
+      if (type === WORKSPACE_TYPE && !isUpdateMode) {
+        throw generateOSDAdminPermissionError();
+      }
+
       const hasTargetWorkspaces = options?.workspaces && options.workspaces.length > 0;
 
       if (
@@ -518,6 +542,11 @@ export class WorkspaceSavedObjectsClientWrapper {
 
       return await wrapperOptions.client.deleteByWorkspace(workspace, options);
     };
+
+    const isDashboardAdmin = getWorkspaceState(wrapperOptions.request)?.isDashboardAdmin;
+    if (isDashboardAdmin) {
+      return wrapperOptions.client;
+    }
 
     return {
       ...wrapperOptions.client,
