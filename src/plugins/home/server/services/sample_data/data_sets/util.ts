@@ -6,7 +6,9 @@
 import { SavedObject } from 'opensearch-dashboards/server';
 import {
   extractVegaSpecFromSavedObject,
+  extractTimelineExpression,
   updateDataSourceNameInVegaSpec,
+  updateDataSourceNameInTimeline,
 } from '../../../../../../core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 
@@ -113,6 +115,21 @@ export const getSavedObjectsWithDataSource = (
               type: 'data-source',
               name: 'dataSource',
             });
+          }
+
+          const timelineExpression = extractTimelineExpression(saveObject);
+          if (!!timelineExpression) {
+            // Get the timeline expression with the updated data source name
+            const modifiedExpression = updateDataSourceNameInTimeline(
+              timelineExpression,
+              dataSourceTitle
+            );
+
+            // @ts-expect-error
+            const timelineStateObject = JSON.parse(saveObject.attributes?.visState);
+            timelineStateObject.params.expression = modifiedExpression;
+            // @ts-expect-error
+            saveObject.attributes.visState = JSON.stringify(timelineStateObject);
           }
         }
       }
