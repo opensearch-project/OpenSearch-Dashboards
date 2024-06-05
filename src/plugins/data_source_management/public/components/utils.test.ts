@@ -188,7 +188,6 @@ describe('DataSourceManagement: Utils.ts', () => {
         );
         await getDataSourceById('alpha-test', savedObjects.client);
       } catch (e) {
-        // expect(e).toBeTruthy();
         expect(e.statusCode).toBe(500);
       }
     });
