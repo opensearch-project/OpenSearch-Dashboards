@@ -18,4 +18,6 @@ export const OPENSEARCH_DATACONNECTIONS_API = {
 
 export const JOBS_ENDPOINT_BASE = '/_plugins/_async_query';
 
+export const BASE_ML_COMMONS_URI = '/_plugins/_ml';
+
 export * from './utils';
