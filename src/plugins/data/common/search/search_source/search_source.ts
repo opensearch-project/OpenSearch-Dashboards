@@ -92,7 +92,7 @@ import {
   IDataFrame,
   IDataFrameResponse,
   convertResult,
-  UsePolling,
+  Polling,
 } from '../../data_frames';
 import {
   IOpenSearchSearchRequest,
@@ -135,6 +135,7 @@ export const searchSourceRequiredUiSettings = [
   UI_SETTINGS.SEARCH_INCLUDE_FROZEN,
   UI_SETTINGS.SORT_OPTIONS,
   UI_SETTINGS.DATAFRAME_HYDRATION_STRATEGY,
+  UI_SETTINGS.POLLING_INTERVAL,
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
@@ -435,6 +436,60 @@ export class SearchSource {
   }
 
   /**
+   * Helper function for fetchExternalSearch()
+   * @returns Result from polling
+   */
+
+  private async handlePolling(
+    options: ISearchOptions,
+    response: any,
+    sessionId: string | undefined
+  ) {
+    const dataFrameResponse = response as IDataFrameResponse;
+    await this.setDataFrame(dataFrameResponse.body as IDataFrame);
+    const responseQueryId = (dataFrameResponse.body as IDataFrame).meta?.queryId;
+    const responseSessionId = (dataFrameResponse.body as IDataFrame).meta?.sessionId;
+    // if there wasn't a session before, set current datasource as session
+    // TODO: MQL update with selected datasource
+    if (!sessionId || (sessionId && sessionId !== responseSessionId)) {
+      this.setSession('mys3', responseSessionId);
+    }
+    const pollingSearchRequest: ISearchRequestParams = {
+      body: {
+        df: dataFrameResponse.body,
+      },
+    };
+    let asyncResponse = response;
+    const handleDirectQuerySuccess = (pollingResult) => {
+      if (pollingResult && pollingResult.body.meta.status === 'SUCCESS') {
+        asyncResponse = pollingResult;
+        return true;
+      }
+      if (pollingResult.body.meta.status === 'FAILED') {
+        // add catch for fail here
+        throw new Error();
+      }
+      return false;
+    };
+    const handleDirectQueryError = (error: Error) => {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      return true;
+    };
+    const polling = new Polling<any, any>(
+      () => {
+        return this.dependencies.search({ params: pollingSearchRequest }, options);
+      },
+      this.dependencies.getConfig(UI_SETTINGS.POLLING_INTERVAL),
+      handleDirectQuerySuccess,
+      handleDirectQueryError
+    );
+    polling.startPolling(responseQueryId);
+    await polling.waitForPolling();
+    return asyncResponse;
+  }
+
+  /**
    * Run a non-native search using the search service
    * @return {Promise<SearchResponse<unknown>>}
    */
@@ -456,45 +511,7 @@ export class SearchSource {
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
         } else if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
-          const dataFrameResponse = response as IDataFrameResponse;
-          const responseQueryId = (dataFrameResponse.body as IDataFrame).meta?.queryId;
-          const responseSessionId = (dataFrameResponse.body as IDataFrame).meta?.sessionId;
-          // if there wasn't a session before, set current datasource as session
-          // TODO: MQL update with selected datasource
-          if (!sessionId || (sessionId && sessionId !== responseSessionId)) {
-            this.setSession('mys3', responseSessionId);
-          }
-          const queryIdRequest: ISearchRequestParams = {
-            body: {
-              query: {
-                type: 'unsupported',
-                queries: [{ query: '', language: 'SQL Async', queryId: responseQueryId }],
-              },
-            },
-          };
-          let asyncResponse: IDataFrameResponse = response;
-          const handleDirectQuerySuccess = (pollingResult, configurations) => {
-            if (pollingResult && pollingResult.body.meta.status === 'SUCCESS') {
-              asyncResponse = pollingResult;
-              return true;
-            }
-            return false;
-          };
-          const handleDirectQueryError = (error: Error) => {
-            // eslint-disable-next-line no-console
-            console.error(error);
-            return true;
-          };
-          const polling = new UsePolling<any, any>(
-            () => {
-              return search({ params: queryIdRequest }, options);
-            },
-            5000,
-            handleDirectQuerySuccess,
-            handleDirectQueryError
-          );
-          polling.startPolling(responseQueryId);
-          await polling.waitForPolling();
+          const asyncResponse = await this.handlePolling(options, response, sessionId);
           return await onResponse(
             searchRequest,
             convertResult(asyncResponse as IDataFrameResponse)

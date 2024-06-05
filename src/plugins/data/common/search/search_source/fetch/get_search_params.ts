@@ -68,14 +68,16 @@ export function getExternalSearchParamsFromRequest(
     const query = { ...searchRequest.body.query.queries[0], sessionId: session };
     const queryObject = { ...searchRequest.body.query, queries: [query] };
     request = { ...searchRequest, body: { ...searchRequest.body, query: queryObject }, query };
+  if (session && dataFrame) {
+    dataFrame.meta = { sessionId: session };
   }
 
   return {
     index: indexTitle,
     dataSource,
     body: {
-      ...request.body,
-      ...(dataFrame && dataFrame?.name === indexTitle ? { df: dataFrame } : {}),
+      ...searchRequest.body,
+      ...(dataFrame ? { df: dataFrame } : {}),
     },
     ...searchParams,
   };

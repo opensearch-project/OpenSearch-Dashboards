@@ -10,7 +10,12 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../../src/plugins/data/public';
-import { SQL_SEARCH_STRATEGY } from '../../common';
+import {
+  getRawDataFrame,
+  getRawQueryId,
+  getRawQueryString,
+} from '../../../../src/plugins/data/common';
+import { SQL_ASYNC_SEARCH_STRATEGY } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
 export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
@@ -34,11 +39,10 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
     const { id, ...searchRequest } = request;
     const path = trimEnd('/api/sqlasyncql/jobs');
 
-    const fetchDataFrame = (queryString: string, df = null, session = undefined) => {
+    const fetchDataFrame = (queryString: string | undefined, df = null) => {
       const body = stringify({
         query: { qs: queryString, format: 'jdbc' },
         df,
-        sessionId: session,
       });
       return from(
         this.deps.http.fetch({
@@ -60,14 +64,12 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
     };
 
     let dataFrame;
-    if (searchRequest.params.body.query.queries[0]?.queryId) {
-      dataFrame = fetchJobStatusDataFrame(searchRequest.params.body.query.queries[0]?.queryId);
+    const rawQueryId = getRawQueryId(searchRequest);
+    const rawDataFrame = getRawDataFrame(searchRequest);
+    if (rawQueryId) {
+      dataFrame = fetchJobStatusDataFrame(rawQueryId);
     } else {
-      dataFrame = fetchDataFrame(
-        searchRequest.params.body.query.queries[0].query,
-        searchRequest.params.body.df,
-        searchRequest.params.body.query.queries[0].sessionId
-      );
+      dataFrame = fetchDataFrame(getRawQueryString(searchRequest), rawDataFrame);
     }
 
     // subscribe to dataFrame to see if an error is returned, display a toast message if so
@@ -86,6 +88,6 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    return this.runSearch(request, options.abortSignal, SQL_SEARCH_STRATEGY);
+    return this.runSearch(request, options.abortSignal, SQL_ASYNC_SEARCH_STRATEGY);
   }
 }

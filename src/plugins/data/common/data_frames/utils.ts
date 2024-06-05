@@ -13,6 +13,7 @@ import {
   IDataFrameWithAggs,
   IDataFrameResponse,
   PartialDataFrame,
+  FetchFunction,
 } from './types';
 import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
@@ -27,6 +28,10 @@ import { GetAggTypeFn, GetDataFrameAggQsFn, TimeRange } from '../types';
  */
 export const getRawDataFrame = (searchRequest: IOpenSearchDashboardsSearchRequest) => {
   return searchRequest.params?.body?.df;
+};
+
+export const getRawQueryId = (searchRequest: IOpenSearchDashboardsSearchRequest) => {
+  return searchRequest.params?.body?.df?.meta?.queryId;
 };
 
 /**
@@ -473,13 +478,7 @@ export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatter
   };
 };
 
-type FetchFunction<T, P = void> = (params?: P) => Promise<T>;
-
-export interface PollingConfigurations {
-  tabId: string;
-}
-
-export class UsePolling<T, P = void> {
+export class Polling<T, P = void> {
   public data: T | null = null;
   public error: Error | null = null;
   public loading: boolean = true;
@@ -489,9 +488,8 @@ export class UsePolling<T, P = void> {
   constructor(
     private fetchFunction: FetchFunction<T, P>,
     private interval: number = 5000,
-    private onPollingSuccess?: (data: T, configurations: PollingConfigurations) => boolean,
-    private onPollingError?: (error: Error) => boolean,
-    private configurations?: PollingConfigurations
+    private onPollingSuccess?: (data: T) => boolean,
+    private onPollingError?: (error: Error) => boolean
   ) {}
 
   async fetchData(params?: P) {
@@ -501,7 +499,7 @@ export class UsePolling<T, P = void> {
       this.data = result;
       this.loading = false;
 
-      if (this.onPollingSuccess && this.onPollingSuccess(result, this.configurations!)) {
+      if (this.onPollingSuccess && this.onPollingSuccess(result)) {
         this.stopPolling();
       }
     } catch (err) {

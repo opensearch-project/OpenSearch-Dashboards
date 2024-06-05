@@ -105,7 +105,6 @@ export function defineRoutes(
             format: schema.string(),
           }),
           df: schema.any(),
-          sessionId: schema.maybe(schema.string()),
         }),
       },
     },
