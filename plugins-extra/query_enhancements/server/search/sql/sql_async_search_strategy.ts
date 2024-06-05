@@ -6,6 +6,7 @@ import {
   IOpenSearchDashboardsSearchRequest,
   PartialDataFrame,
   createDataFrame,
+  getRawDataFrame,
 } from '../../../../../src/plugins/data/common';
 import { SQLAsyncFacet } from '../async/sql_async_facet';
 import { SQLAsyncJobsFacet } from '../async/sql_async_jobs_facet';
@@ -22,8 +23,9 @@ export const sqlAsyncSearchStrategyProvider = (
   return {
     search: async (context, request: any, options) => {
       try {
+        const df = getRawDataFrame(request);
         let rawResponse: any;
-        if (request.params?.queryId) {
+        if (request.params.queryId) {
           rawResponse = await sqlAsyncJobsFacet.describeQuery(request);
         } else {
           request.body.query = request.body.query.qs;
@@ -31,7 +33,7 @@ export const sqlAsyncSearchStrategyProvider = (
         }
         if (!rawResponse.success) {
           return {
-            type: 'data_frame',
+            type: 'data_frame_polling',
             body: { error: rawResponse.data },
             took: rawResponse.took,
           };
@@ -48,13 +50,19 @@ export const sqlAsyncSearchStrategyProvider = (
 
         dataFrame.size = rawResponse.data.datarows?.length || 0;
 
+        if (request.body?.query) {
+          dataFrame.meta = { query: request.body.query };
+        }
+
         if (rawResponse.data?.queryId && rawResponse.data?.sessionId) {
           dataFrame.meta = {
+            ...dataFrame.meta,
             queryId: rawResponse.data.queryId,
             sessionId: rawResponse.data.sessionId,
           };
         } else if (rawResponse.data?.status) {
           dataFrame.meta = {
+            ...dataFrame.meta,
             status: rawResponse.data.status,
           };
         }

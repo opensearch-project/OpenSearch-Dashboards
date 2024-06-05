@@ -62,4 +62,5 @@ export const UI_SETTINGS = {
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
   DATAFRAME_HYDRATION_STRATEGY: 'dataframe:hydrationStrategy',
+  POLLING_INTERVAL: 'search:pollingInterval',
 } as const;

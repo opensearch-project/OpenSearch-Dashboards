@@ -14,12 +14,13 @@ export class SQLAsyncFacet {
       data: {},
     };
     try {
+      const df = request.body?.df;
       const params = {
         body: {
           query: request.body.query,
           datasource: 'mys3',
           lang: 'sql',
-          sessionId: request.body.sessionId,
+          sessionId: df?.meta?.sessionId,
         },
       };
       if (request.body.format !== 'jdbc') {
