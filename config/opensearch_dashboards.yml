@@ -320,6 +320,7 @@
 # savedObjects.permission.enabled: true
 
 # Set the value to true to enable workspace feature
+# Please note, workspace will not work with multi-tenancy. To enable workspace feature, you need to disable multi-tenancy first with `opensearch_security.multitenancy.enabled: false`
 # workspace.enabled: false
 
 # Optional settings to specify saved object types to be deleted during migration.
