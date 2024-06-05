@@ -6,6 +6,8 @@ on:
     branches: [ '**', '!feature/**' ]
     paths-ignore:
       - '**/*.md'
+      - '.lycheeignore'
+      - 'changelogs/fragments/**'
   workflow_dispatch:
     inputs:
       test_repo:
