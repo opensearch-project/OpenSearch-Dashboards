@@ -19,7 +19,6 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useEffectOnce } from 'react-use';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { getListBreadcrumbs } from '../breadcrumbs';
 import {
   reactRouterNavigate,
   useOpenSearchDashboards,
@@ -50,7 +49,6 @@ const sorting = {
 export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const {
     chrome,
-    setBreadcrumbs,
     savedObjects,
     notifications: { toasts },
     uiSettings,
@@ -65,9 +63,6 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
-    /* Update breadcrumb*/
-    setBreadcrumbs(getListBreadcrumbs());
-
     /* Browser - Page Title */
     chrome.docTitle.change(
       i18n.translate('dataSourcesManagement.dataSourcesTable.dataSourcesTitle', {

@@ -8,13 +8,22 @@ import React, { useEffect } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { CreateDataSourcePanelHeader } from './create_data_source_panel_header';
 import { CreateDataSourceCardView } from './create_data_source_card_view';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { getCreateBreadcrumbs } from '../breadcrumbs';
+import { DataSourceManagementContext } from '../../types';
 
 export const CreateDataSourcePanel: React.FC<RouteComponentProps> = (props) => {
-  const { history } = props;
+  const {
+    chrome,
+    setBreadcrumbs,
+    savedObjects,
+    notifications: { toasts },
+    uiSettings,
+  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   useEffect(() => {
-    // Add breadcrumb setup or any other setup logic here if needed
-  }, [history]);
+    setBreadcrumbs(getCreateBreadcrumbs());
+  }, [setBreadcrumbs]);
 
   return (
     <EuiPanel>
@@ -25,7 +34,7 @@ export const CreateDataSourcePanel: React.FC<RouteComponentProps> = (props) => {
           </EuiPageHeader>
         </EuiFlexItem>
         <EuiFlexItem>
-          <CreateDataSourceCardView history={history} />
+          <CreateDataSourceCardView history={props.history} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

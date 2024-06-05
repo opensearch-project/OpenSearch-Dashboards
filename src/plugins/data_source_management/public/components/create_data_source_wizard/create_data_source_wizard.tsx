@@ -14,7 +14,6 @@ import {
   DataSourceTableItem,
   ToastMessageItem,
 } from '../../types';
-import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { CreateDataSourceForm } from './components/create_form';
 import {
   createSingleDataSource,
@@ -33,7 +32,6 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
   /* Initialization */
   const {
     savedObjects,
-    setBreadcrumbs,
     http,
     notifications: { toasts },
     uiSettings,
@@ -43,9 +41,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
   const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  /* Set breadcrumb */
   useEffectOnce(() => {
-    setBreadcrumbs(getCreateBreadcrumbs());
     getExistingDataSourceNames();
   });
 

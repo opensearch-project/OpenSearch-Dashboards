@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import {
   EuiFlexGroup,
@@ -18,6 +18,9 @@ import { DataSourceHeader } from './data_source_page_header';
 import { DataSourceTableWithRouter } from '../data_source_table/data_source_table';
 import { ManageFlintDataConnectionsTable } from '../flint_data_sources_components/flint_data_connection/manage_flint_data_connections_table';
 import { CreateButton } from '../create_button';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { getListBreadcrumbs } from '../breadcrumbs';
+import { DataSourceManagementContext } from '../../types';
 
 const tabs = [
   {
@@ -31,7 +34,19 @@ const tabs = [
 ];
 
 export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
+  const {
+    chrome,
+    setBreadcrumbs,
+    savedObjects,
+    notifications: { toasts },
+    uiSettings,
+  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
+
   const [selectedTabId, setSelectedTabId] = useState('manageFlintDataSources');
+
+  useEffect(() => {
+    setBreadcrumbs(getListBreadcrumbs());
+  }, [setBreadcrumbs]);
 
   const onSelectedTabChanged = (id: string) => {
     setSelectedTabId(id);
