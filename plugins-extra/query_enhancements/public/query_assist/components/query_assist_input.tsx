@@ -20,18 +20,49 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
   const [suggestionIndex, setSuggestionIndex] = useState<number | null>(null);
   const [value, setValue] = useState(props.initialValue ?? '');
 
-  const recentSearchSuggestions = useMemo(() => {
+  const sampleDataSuggestions = useMemo(() => {
+    switch (props.selectedIndex) {
+      case 'opensearch_dashboards_sample_data_ecommerce':
+        return [
+          'How many unique customers placed orders this week?',
+          'Count the number of orders grouped by manufacturer and category',
+          'find customers with first names like Eddie',
+        ];
+
+      case 'opensearch_dashboards_sample_data_logs':
+        return [
+          'Are there any errors in my logs?',
+          'How many requests were there grouped by response code last week?',
+          "What's the average request size by week?",
+        ];
+
+      case 'opensearch_dashboards_sample_data_flights':
+        return [
+          'how many flights were there this week grouped by destination country?',
+          'what were the longest flight delays this week?',
+          'what carriers have the furthest flights?',
+        ];
+
+      default:
+        return [];
+    }
+  }, [props.selectedIndex]);
+
+  const suggestions = useMemo(() => {
     if (!props.persistedLog) return [];
     return props.persistedLog
       .get()
-      .filter((recentSearch) => recentSearch.includes(value))
-      .map((recentSearch) => ({
+      .concat(sampleDataSuggestions)
+      .filter(
+        (suggestion, i, array) => array.indexOf(suggestion) === i && suggestion.includes(value)
+      )
+      .map((suggestion) => ({
         type: QuerySuggestionTypes.RecentSearch,
-        text: recentSearch,
+        text: suggestion,
         start: 0,
         end: value.length,
       }));
-  }, [props.persistedLog, value]);
+  }, [props.persistedLog, value, sampleDataSuggestions]);
 
   return (
     <EuiOutsideClickDetector onOutsideClick={() => setIsSuggestionsVisible(false)}>
@@ -54,7 +85,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
         <EuiPortal>
           <SuggestionsComponent
             show={isSuggestionsVisible}
-            suggestions={recentSearchSuggestions}
+            suggestions={suggestions}
             index={suggestionIndex}
             onClick={(suggestion) => {
               if (!props.inputRef.current) return;
