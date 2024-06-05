@@ -369,6 +369,12 @@ describe('DataSourceManagement: Utils.ts', () => {
       await handleSetDefaultDatasource(savedObjects.client, uiSettings);
       expect(uiSettings.set).toHaveBeenCalled();
     });
+    test('should set default datasource when returned default datasource id is empty string', async () => {
+      mockUiSettingsCalls(uiSettings, 'get', '');
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
     test('should not set default datasource when it has default datasouce', async () => {
       mockUiSettingsCalls(uiSettings, 'get', 'test');
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
