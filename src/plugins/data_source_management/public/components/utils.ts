@@ -37,6 +37,7 @@ import {
   DataSourceSelectionService,
   defaultDataSourceSelection,
 } from '../service/data_source_selection_service';
+import { DataSourceError } from '../types';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient

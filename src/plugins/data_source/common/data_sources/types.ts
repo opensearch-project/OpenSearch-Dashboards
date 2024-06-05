@@ -50,3 +50,5 @@ export enum SigV4ServiceName {
   OpenSearch = 'es',
   OpenSearchServerless = 'aoss',
 }
+
+export { DataSourceError } from './error';

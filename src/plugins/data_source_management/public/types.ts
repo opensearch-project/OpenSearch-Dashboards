@@ -139,4 +139,5 @@ export {
   UsernamePasswordTypedContent,
   SigV4Content,
   DataSourceAttributes,
+  DataSourceError,
 } from '../../data_source/common/data_sources';
