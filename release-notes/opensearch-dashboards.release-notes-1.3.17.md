@@ -4,9 +4,9 @@
 
 ### 📈 Features/Enhancements
 
-- Replace control characters before logging ([#6590](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6590))
-
 ### 🐛 Bug Fixes
+
+- Replace control characters before logging ([#6590](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6590))
 
 ### 🚞 Infrastructure
 
