@@ -36,5 +36,5 @@ export const useDataSource = (services: DiscoverViewServices) => {
     };
   }, [dataSourceId, data.dataSources]);
 
-  return { dataSource };
+  return dataSource;
 };

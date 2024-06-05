@@ -73,5 +73,5 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     };
   }, [indexPatternIdFromState, data.indexPatterns, toastNotifications, config, store]);
 
-  return { indexPattern };
+  return indexPattern;
 };
