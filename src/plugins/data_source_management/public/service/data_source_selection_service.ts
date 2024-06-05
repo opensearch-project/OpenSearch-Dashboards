@@ -8,8 +8,8 @@ import { DataSourceOption } from '../components/data_source_menu/types';
 
 export class DataSourceSelectionService {
   private selectedDataSource$ = new BehaviorSubject(new Map<string, DataSourceOption[]>());
-  // Some components may call onSelect function in promise then, which could be executed later than componentWillUnmount.
-  // Use this array to record unmounted component ID to fallback.
+  // Some components may call onSelect function in promise.then, which could be executed later than componentWillUnmount.
+  // Use this array to record unmounted component IDs to fallback.
   private removedComponentIds: string[] = [];
 
   public selectDataSource = (componentId: string, dataSource: DataSourceOption[]) => {
