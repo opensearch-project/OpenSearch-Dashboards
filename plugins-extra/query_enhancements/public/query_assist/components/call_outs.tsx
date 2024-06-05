@@ -1,8 +1,8 @@
 import { EuiCallOut, EuiCallOutProps } from '@elastic/eui';
 import React from 'react';
 
-type CalloutDismiss = Required<Pick<EuiCallOutProps, 'onDismiss'>>;
-interface QueryAssistCallOutProps extends CalloutDismiss {
+interface QueryAssistCallOutProps extends Required<Pick<EuiCallOutProps, 'onDismiss'>> {
+  language: string;
   type: QueryAssistCallOutType;
 }
 
@@ -14,7 +14,7 @@ export type QueryAssistCallOutType =
   | 'empty_index'
   | 'query_generated';
 
-const EmptyIndexCallOut: React.FC<CalloutDismiss> = (props) => (
+const EmptyIndexCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
     data-test-subj="query-assist-empty-index-callout"
     title="Select a data source or index to ask a question."
@@ -26,7 +26,7 @@ const EmptyIndexCallOut: React.FC<CalloutDismiss> = (props) => (
   />
 );
 
-const ProhibitedQueryCallOut: React.FC<CalloutDismiss> = (props) => (
+const ProhibitedQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
     data-test-subj="query-assist-guard-callout"
     title="I am unable to respond to this query. Try another question."
@@ -38,7 +38,7 @@ const ProhibitedQueryCallOut: React.FC<CalloutDismiss> = (props) => (
   />
 );
 
-const EmptyQueryCallOut: React.FC<CalloutDismiss> = (props) => (
+const EmptyQueryCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
     data-test-subj="query-assist-empty-query-callout"
     title="Enter a natural language question to automatically generate a query to view results."
@@ -50,10 +50,10 @@ const EmptyQueryCallOut: React.FC<CalloutDismiss> = (props) => (
   />
 );
 
-const PPLGeneratedCallOut: React.FC<CalloutDismiss> = (props) => (
+const QueryGeneratedCallOut: React.FC<QueryAssistCallOutProps> = (props) => (
   <EuiCallOut
-    data-test-subj="query-assist-ppl-callout"
-    title="PPL query generated"
+    data-test-subj="query-assist-query-generated-callout"
+    title={`${props.language} query generated`}
     size="s"
     color="success"
     iconType="check"
@@ -65,13 +65,13 @@ const PPLGeneratedCallOut: React.FC<CalloutDismiss> = (props) => (
 export const QueryAssistCallOut: React.FC<QueryAssistCallOutProps> = (props) => {
   switch (props.type) {
     case 'empty_query':
-      return <EmptyQueryCallOut onDismiss={props.onDismiss} />;
+      return <EmptyQueryCallOut {...props} />;
     case 'empty_index':
-      return <EmptyIndexCallOut onDismiss={props.onDismiss} />;
+      return <EmptyIndexCallOut {...props} />;
     case 'invalid_query':
-      return <ProhibitedQueryCallOut onDismiss={props.onDismiss} />;
+      return <ProhibitedQueryCallOut {...props} />;
     case 'query_generated':
-      return <PPLGeneratedCallOut onDismiss={props.onDismiss} />;
+      return <QueryGeneratedCallOut {...props} />;
     default:
       break;
   }

@@ -52,7 +52,7 @@ export class QueryEnhancementsPlugin
               initialTo: moment().add(2, 'days').toISOString(),
             },
             showFilterBar: false,
-            extensions: [createQueryAssistExtension(core.http)],
+            extensions: [createQueryAssistExtension(core.http, 'PPL')],
           },
           fields: {
             visualizable: false,
