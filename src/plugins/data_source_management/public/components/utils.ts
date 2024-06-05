@@ -79,7 +79,7 @@ export async function handleSetDefaultDatasource(
   savedObjectsClient: SavedObjectsClientContract,
   uiSettings: IUiSettingsClient
 ) {
-  if (getDefaultDataSourceId(uiSettings) === null) {
+  if (!getDefaultDataSourceId(uiSettings)) {
     return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false);
   }
 }
