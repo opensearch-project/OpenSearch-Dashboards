@@ -31,6 +31,7 @@ import {
   getResponseInspectorStats,
 } from '../../../opensearch_dashboards_services';
 import { SEARCH_ON_PAGE_LOAD_SETTING } from '../../../../common';
+import { useDataSource } from './use_datasource';
 
 export enum ResultStatus {
   UNINITIALIZED = 'uninitialized',
@@ -72,7 +73,8 @@ export const useSearch = (services: DiscoverViewServices) => {
   const [savedSearch, setSavedSearch] = useState<SavedSearch | undefined>(undefined);
   const { savedSearch: savedSearchId, sort, interval } = useSelector((state) => state.discover);
   const { data, filterManager, getSavedSearchById, core, toastNotifications, chrome } = services;
-  const { indexPattern, dataSource } = useIndexPattern(services);
+  const { indexPattern } = useIndexPattern(services);
+  const { dataSource } = useDataSource(services);
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
     abortController: AbortController | undefined;

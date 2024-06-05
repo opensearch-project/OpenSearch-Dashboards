@@ -4,12 +4,11 @@
  */
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DataSource } from 'src/plugins/data/public';
 import { DataExplorerServices } from '../../types';
 
 export interface MetadataState {
   indexPattern?: string;
-  dataSource?: DataSource;
+  dataSource?: string;
   originatingApp?: string;
   view?: string;
 }
@@ -42,7 +41,7 @@ export const slice = createSlice({
     setIndexPattern: (state, action: PayloadAction<string>) => {
       state.indexPattern = action.payload;
     },
-    setDataSource: (state, action: PayloadAction<DataSource>) => {
+    setDataSource: (state, action: PayloadAction<string>) => {
       state.dataSource = action.payload;
     },
     setOriginatingApp: (state, action: PayloadAction<string | undefined>) => {

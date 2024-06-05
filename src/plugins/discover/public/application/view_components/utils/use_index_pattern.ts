@@ -28,7 +28,6 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const { data, toastNotifications, uiSettings: config, store } = services;
-  const dataSource = useSelector((state) => state.metadata.dataSource);
 
   useEffect(() => {
     let isMounted = true;
@@ -74,5 +73,5 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     };
   }, [indexPatternIdFromState, data.indexPatterns, toastNotifications, config, store]);
 
-  return { indexPattern, dataSource };
+  return { indexPattern };
 };

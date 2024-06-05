@@ -86,10 +86,8 @@ export const Sidebar: FC = ({ children }) => {
 
       if (selectedDataSources[0].type === 'default') {
         dispatch(setIndexPattern(selectedDataSources[0].value));
-        dispatch(setDataSource(selectedDataSources[0].ds));
-      } else {
-        dispatch(setDataSource(selectedDataSources[0].ds));
       }
+      dispatch(setDataSource(selectedDataSources[0].ds.getId()));
     },
     [dispatch, setSelectedSources]
   );

@@ -31,7 +31,7 @@ export const registerDefaultDataSource = (data: Omit<DataPublicPluginStart, 'ui'
           typeLabel: DEFAULT_DATA_SOURCE_DISPLAY_NAME, // display name of your data source type,
           groupType: DataSourceUIGroupType.defaultOpenSearchDataSource,
           selector: {
-            displayDatasetsAsSource: false, // when true, selector UI will render data sets with source by calling getDataSets()
+            displayDatasetsAsSource: true, // when true, selector UI will render data sets with source by calling getDataSets()
           },
         },
       },
