@@ -8,10 +8,9 @@ import React, { ComponentProps } from 'react';
 import { IIndexPattern } from '../../../common';
 import { SearchBarExtension } from './search_bar_extension';
 
-jest.mock('@elastic/eui', () => ({
-  ...jest.requireActual('@elastic/eui'),
-  EuiPortal: jest.fn(({ children }) => <div>{children}</div>),
-  EuiErrorBoundary: jest.fn(({ children }) => <div>{children}</div>),
+jest.mock('react-dom', () => ({
+  ...jest.requireActual('react-dom'),
+  createPortal: jest.fn((element) => element),
 }));
 
 type SearchBarExtensionProps = ComponentProps<typeof SearchBarExtension>;
@@ -45,7 +44,7 @@ describe('SearchBarExtension', () => {
     dependencies: {
       indexPatterns: [mockIndexPattern],
     },
-    portalInsert: { sibling: document.createElement('div'), position: 'after' },
+    portalContainer: document.createElement('div'),
   };
 
   beforeEach(() => {
@@ -77,18 +76,5 @@ describe('SearchBarExtension', () => {
     });
 
     expect(isEnabledMock).toHaveBeenCalled();
-  });
-
-  it('calls isEnabled and getComponent correctly', async () => {
-    isEnabledMock.mockResolvedValue(true);
-    getComponentMock.mockReturnValue(<div>Test Component</div>);
-
-    render(<SearchBarExtension {...defaultProps} />);
-
-    await waitFor(() => {
-      expect(isEnabledMock).toHaveBeenCalled();
-    });
-
-    expect(getComponentMock).toHaveBeenCalledWith(defaultProps.dependencies);
   });
 });

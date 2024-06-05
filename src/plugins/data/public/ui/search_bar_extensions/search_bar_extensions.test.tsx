@@ -6,7 +6,7 @@
 import { render, waitFor } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 import { SearchBarExtension } from './search_bar_extension';
-import { SearchBarExtensions } from './search_bar_extensions';
+import SearchBarExtensions from './search_bar_extensions';
 
 type SearchBarExtensionProps = ComponentProps<typeof SearchBarExtension>;
 type SearchBarExtensionsProps = ComponentProps<typeof SearchBarExtensions>;
@@ -15,32 +15,30 @@ jest.mock('./search_bar_extension', () => ({
   SearchBarExtension: jest.fn(({ config, dependencies }: SearchBarExtensionProps) => (
     <div>
       Mocked SearchBarExtension {config.id} with{' '}
-      {dependencies.indexPatterns?.map((i) => i.title).join(', ')}
+      {dependencies.indexPatterns?.map((i) => (typeof i === 'string' ? i : i.title)).join(', ')}
     </div>
   )),
 }));
 
 describe('SearchBarExtensions', () => {
   const defaultProps: SearchBarExtensionsProps = {
-    dependencies: {
-      indexPatterns: [
-        {
-          id: '1234',
-          title: 'logstash-*',
-          fields: [
-            {
-              name: 'response',
-              type: 'number',
-              esTypes: ['integer'],
-              aggregatable: true,
-              filterable: true,
-              searchable: true,
-            },
-          ],
-        },
-      ],
-    },
-    portalInsert: { sibling: document.createElement('div'), position: 'after' },
+    indexPatterns: [
+      {
+        id: '1234',
+        title: 'logstash-*',
+        fields: [
+          {
+            name: 'response',
+            type: 'number',
+            esTypes: ['integer'],
+            aggregatable: true,
+            filterable: true,
+            searchable: true,
+          },
+        ],
+      },
+    ],
+    portalContainer: document.createElement('div'),
   };
 
   beforeEach(() => {
@@ -89,7 +87,7 @@ describe('SearchBarExtensions', () => {
 
     expect(SearchBarExtension).toHaveBeenCalledWith(
       expect.objectContaining({
-        dependencies: defaultProps.dependencies,
+        dependencies: { indexPatterns: defaultProps.indexPatterns },
       }),
       expect.anything()
     );
