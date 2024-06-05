@@ -8,6 +8,13 @@
   width: 500px;
 }
 
+.osdQueryEditorHeader {
+  max-height: 400px;
+
+  // TODO fix styling: with "overflow: auto" the scroll bar appears although the content is below max-height
+  // overflow: auto;
+}
+
 @include euiBreakpoint("xs", "s") {
   .osdQueryEditor--withDatePicker {
     > :first-child {

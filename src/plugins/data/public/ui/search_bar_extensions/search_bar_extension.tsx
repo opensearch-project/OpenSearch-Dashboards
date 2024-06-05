@@ -3,15 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
-import { EuiPortalProps } from '@opensearch-project/oui';
+import { EuiErrorBoundary } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { IIndexPattern } from '../../../common';
 
 interface SearchBarExtensionProps {
   config: SearchBarExtensionConfig;
   dependencies: SearchBarExtensionDependencies;
-  portalInsert: EuiPortalProps['insert'];
+  portalContainer: Element;
 }
 
 export interface SearchBarExtensionDependencies {
@@ -57,9 +57,8 @@ export const SearchBarExtension: React.FC<SearchBarExtensionProps> = (props) => 
 
   if (!isEnabled) return null;
 
-  return (
-    <EuiPortal insert={props.portalInsert}>
-      <EuiErrorBoundary>{component}</EuiErrorBoundary>
-    </EuiPortal>
+  return ReactDOM.createPortal(
+    <EuiErrorBoundary>{component}</EuiErrorBoundary>,
+    props.portalContainer
   );
 };

@@ -12,11 +12,11 @@ import {
 
 interface SearchBarExtensionsProps extends SearchBarExtensionDependencies {
   configs?: SearchBarExtensionConfig[];
-  portalSibling: NonNullable<EuiPortalProps['insert']>['sibling'];
+  portalContainer: Element;
 }
 
 const SearchBarExtensions: React.FC<SearchBarExtensionsProps> = React.memo((props) => {
-  const { configs, portalSibling, ...dependencies } = props;
+  const { configs, portalContainer, ...dependencies } = props;
 
   const sortedConfigs = useMemo(() => {
     if (!configs) return [];
@@ -39,7 +39,7 @@ const SearchBarExtensions: React.FC<SearchBarExtensionsProps> = React.memo((prop
           key={config.id}
           config={config}
           dependencies={dependencies}
-          portalInsert={{ sibling: portalSibling, position: 'before' }}
+          portalContainer={portalContainer}
         />
       ))}
     </>

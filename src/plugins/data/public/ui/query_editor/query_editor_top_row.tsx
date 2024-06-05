@@ -251,7 +251,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     return (
       <SearchBarExtensions
         configs={props.queryEnhancements?.get(queryLanguage!)?.searchBar?.extensions}
-        portalSibling={queryEditorHeaderRef.current}
+        portalContainer={queryEditorHeaderRef.current}
         indexPatterns={props.indexPatterns}
       />
     );
