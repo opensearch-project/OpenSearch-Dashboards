@@ -42,7 +42,6 @@ export abstract class DataSource<
     this.id = settings.id;
     this.name = settings.name;
     this.type = settings.type;
-    this.connectionType = settings.connectionType;
     this.metadata = settings.metadata;
   }
 
