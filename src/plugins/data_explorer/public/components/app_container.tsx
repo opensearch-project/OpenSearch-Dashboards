@@ -10,6 +10,7 @@ import { AppMountParameters } from '../../../../core/public';
 import { Sidebar } from './sidebar';
 import { NoView } from './no_view';
 import { View } from '../services/view_service/view';
+import { shallowEqual } from '../utils/use/shallow_equal';
 import './app_container.scss';
 
 export const AppContainer = React.memo(
@@ -66,21 +67,3 @@ export const AppContainer = React.memo(
     );
   }
 );
-
-// A simple shallow equal function that can ignore specified keys
-function shallowEqual(object1: any, object2: any, ignoreKeys: any) {
-  const keys1 = Object.keys(object1).filter((key) => !ignoreKeys.includes(key));
-  const keys2 = Object.keys(object2).filter((key) => !ignoreKeys.includes(key));
-
-  if (keys1.length !== keys2.length) {
-    return false;
-  }
-
-  for (const key of keys1) {
-    if (object1[key] !== object2[key]) {
-      return false;
-    }
-  }
-
-  return true;
-}
