@@ -11,9 +11,9 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 📈 Features/Enhancements
 
-- Replace control characters before logging ([#6590](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6590))
-
 ### 🐛 Bug Fixes
+
+- Replace control characters before logging ([#6590](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6590))
 
 ### 🚞 Infrastructure
 
