@@ -34,6 +34,8 @@ import { SavedObjectsClientContract, SavedObject, SavedObjectsBaseOptions } from
 import { fetchNestedDependencies } from './inject_nested_depdendencies';
 import { sortObjects } from './sort_objects';
 
+export const DATA_SOURCE_CREDENTIALS_PLACEHOLDER = 'pleaseUpdateCredentials';
+
 /**
  * Options controlling the export operation.
  * @public
@@ -185,10 +187,40 @@ export async function exportSavedObjectsToStream({
     ({ namespaces, ...object }) => object
   );
 
+  // update the credential fields from "data-source" saved object to use placeholder to avoid exporting sensitive information
+  const redactedObjectsWithoutCredentials = redactedObjects.map<SavedObject<unknown>>((object) => {
+    if (object.type === 'data-source') {
+      const { auth, ...rest } = object.attributes as {
+        auth: { type: string; credentials?: any };
+      };
+      const hasCredentials = auth && auth.credentials;
+      const updatedCredentials = hasCredentials
+        ? Object.keys(auth.credentials).reduce((acc, key) => {
+            acc[key] = DATA_SOURCE_CREDENTIALS_PLACEHOLDER;
+            return acc;
+          }, {} as { [key: string]: any })
+        : undefined;
+      return {
+        ...object,
+        attributes: {
+          ...rest,
+          auth: {
+            type: auth.type,
+            ...(hasCredentials && { credentials: updatedCredentials }),
+          },
+        },
+      };
+    }
+    return object;
+  });
+
   const exportDetails: SavedObjectsExportResultDetails = {
     exportedCount: exportedObjects.length,
     missingRefCount: missingReferences.length,
     missingReferences,
   };
-  return createListStream([...redactedObjects, ...(excludeExportDetails ? [] : [exportDetails])]);
+  return createListStream([
+    ...redactedObjectsWithoutCredentials,
+    ...(excludeExportDetails ? [] : [exportDetails]),
+  ]);
 }
