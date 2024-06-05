@@ -16,37 +16,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 📈 Features/Enhancements
 
 - [Multiple Datasource] Add TLS configuration for multiple data sources ([#6171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6171))
-<<<<<<< HEAD
-=======
-- [Multiple Datasource] Add multi selectable data source component ([#6211](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6211))
-- [Multiple Datasource] Do not support import data source object to Local cluster when not enable data source ([#6395](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6395))
-- [Multiple Datasource] Refactor data source menu and interface to allow cleaner selection of component and related configurations ([#6256](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6256))
-- [Multiple Datasource] Allow top nav menu to mount data source menu for use case when both menus are mounted ([#6268](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6268))
-- [Workspace] Add create workspace page ([#6179](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6179))
-- [Workspace] Add update workspace page ([#6270](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6270))
-- [Multiple Datasource] Make sure customer always have a default datasource ([#6237](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6237))
-- [Workspace] Add workspace list page ([#6182](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6182))
-- [Workspace] Add API to duplicate saved objects among workspaces ([#6288](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6288))
-- [Workspace] Add workspaces column to saved objects page ([#6225](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6225))
-- [Multiple Datasource] Enhanced data source selector with default datasource shows as first choice ([#6293](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6293))
-- [Multiple Datasource] Add multi data source support to sample vega visualizations ([#6218](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6218))
-- [Multiple Datasource] Fetch data source title for DataSourceView when only id is provided ([#6315](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6315)
-- [Multiple Datasource] Get data source label when only id is provided in DataSourceSelectable ([#6358](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6358)
-- [Workspace] Add permission control logic ([#6052](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6052))
-- [Multiple Datasource] Add default icon for selectable component and make sure the default datasource shows automatically ([#6327](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6327))
-- [Multiple Datasource] Pass selected data sources to plugin consumers when the multi-select component initially loads ([#6333](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6333))
-- [Multiple Datasource] Add installedPlugins list to data source saved object ([#6348](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6348))
-- [Multiple Datasource] Add default icon in multi-selectable picker ([#6357](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6357))
-- [Workspace] Add APIs to support plugin state in request ([#6303](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6303))
-- [Workspace] Filter left nav menu items according to the current workspace ([#6234](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6234))
-- [Multiple Datasource] Refactor data source selector component to include placeholder and add tests ([#6372](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6372))
-- Replace control characters before logging ([#6402](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6402))
-- [Dynamic Configurations] Improve dynamic configurations by adding cache and simplifying client fetch ([#6364](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6364))
-- [CSP Handler] Update CSP handler to only query and modify frame ancestors instead of all CSP directives ([#6398](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6398))
-- [MD] Add OpenSearch cluster group label to top of single selectable dropdown  ([#6400](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6400))
-- [Workspace] Support workspace in saved objects client in server side. ([#6365](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6365))
-- [MD] Add dropdown header to data source single selector ([#6431](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6431))
->>>>>>> 97355995c8... [Multiple DataSource] Do not support import data source object to Local cluster when not enable data source (#6395)
+- [Multiple DataSource] Do not support import data source object to Local cluster when not enable data source ([#6395](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6395))
 
 ### 🐛 Bug Fixes
 
