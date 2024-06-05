@@ -94,7 +94,7 @@ export class Watcher {
         take(1)
       ),
 
-      // call watchpack.watch after listerners are setup
+      // call watchpack.watch after listeners are set up
       Rx.defer(() => {
         const watchPaths: string[] = [];
 
@@ -104,7 +104,11 @@ export class Watcher {
           }
         }
 
-        this.watchpack.watch(watchPaths, [], startTime);
+        this.watchpack.watch({
+          files: watchPaths,
+          startTime,
+        });
+
         return Rx.EMPTY;
       })
     );

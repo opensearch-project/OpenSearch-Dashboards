@@ -8,6 +8,7 @@
   "private": true,
   "sideEffects": false,
   "dependencies": {
+    "json11": "^1.1.2",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
