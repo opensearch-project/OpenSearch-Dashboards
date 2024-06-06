@@ -15,6 +15,8 @@ import {
   getDataSourceTitleFromId,
   getUpdatedTSVBVisState,
   updateDataSourceNameInVegaSpec,
+  extractTimelineExpression,
+  updateDataSourceNameInTimeline,
 } from './utils';
 
 export interface ConflictsForDataSourceParams {
@@ -118,6 +120,22 @@ export async function checkConflictsForDataSource({
                 type: 'data-source',
               });
             }
+          }
+
+          // For timeline visualizations, update the data source name in the timeline expression
+          const timelineExpression = extractTimelineExpression(object);
+          if (!!timelineExpression && !!dataSourceTitle) {
+            // Get the timeline expression with the updated data source name
+            const modifiedExpression = updateDataSourceNameInTimeline(
+              timelineExpression,
+              dataSourceTitle
+            );
+
+            // @ts-expect-error
+            const timelineStateObject = JSON.parse(object.attributes?.visState);
+            timelineStateObject.params.expression = modifiedExpression;
+            // @ts-expect-error
+            object.attributes.visState = JSON.stringify(timelineStateObject);
           }
 
           if (!!dataSourceId) {
