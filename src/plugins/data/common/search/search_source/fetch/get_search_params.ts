@@ -70,6 +70,7 @@ export async function getExternalSearchParamsFromRequest(
   const { getConfig, getDataFrame, getDataFrameBySource, setDataFrame, session } = dependencies;
   const datasource = 'mys3';
   const searchParams = getSearchParams(getConfig);
+  // TODO: MQL SEAN MAKE THE INDEX TITLE CONDITIONAL BASED ON IF IT'S EXTERNAL DATASOURCE OR NOT
   const indexTitle = searchRequest.index.title || searchRequest.index;
   const dataSource = searchRequest.dataSource;
   let request = searchRequest;
@@ -83,6 +84,7 @@ export async function getExternalSearchParamsFromRequest(
   //   dataFrame.meta = { sessionId: session };
   // }
   console.log('MQL: SETTING UP DATAFRAME WITH DATASOURCE NAME:', indexTitle);
+  console.log('pauls datasource', searchRequest.dataSource);
   // TODO: MQL SEAN might need to verify this logic after we fix it
   const dataFrame =
     getDataFrame() ?? // get data frame cache (name: mys3) - if exists - will get session id from session cache if exists for datasource (name: mys3)
@@ -92,7 +94,7 @@ export async function getExternalSearchParamsFromRequest(
   console.log('MQL: DATAFRAME:', dataFrame);
   return {
     index: indexTitle,
-    dataSource,
+    // dataSource,
     body: {
       ...searchRequest.body,
       ...(dataFrame ? { df: dataFrame } : {}),
