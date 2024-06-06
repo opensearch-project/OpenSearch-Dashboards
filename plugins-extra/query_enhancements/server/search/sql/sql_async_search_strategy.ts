@@ -23,11 +23,13 @@ export const sqlAsyncSearchStrategyProvider = (
   return {
     search: async (context, request: any, options) => {
       try {
-        const df = getRawDataFrame(request);
+        console.log('request in strategy:', request);
         let rawResponse: any;
+        // MQL: this is polling the job
         if (request.params.queryId) {
           rawResponse = await sqlAsyncJobsFacet.describeQuery(request);
         } else {
+          // MQL: this create the job
           request.body.query = request.body.query.qs;
           rawResponse = await sqlAsyncFacet.describeQuery(request);
         }
@@ -51,7 +53,7 @@ export const sqlAsyncSearchStrategyProvider = (
         dataFrame.size = rawResponse.data.datarows?.length || 0;
 
         if (request.body?.query) {
-          dataFrame.meta = { query: request.body.query };
+          dataFrame.meta = { query: request.body.query, datasource: request.body.df?.datasource };
         }
 
         if (rawResponse.data?.queryId && rawResponse.data?.sessionId) {

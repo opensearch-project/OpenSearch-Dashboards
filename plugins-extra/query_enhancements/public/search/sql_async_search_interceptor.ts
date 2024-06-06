@@ -21,6 +21,8 @@ import { QueryEnhancementsPluginStartDependencies } from '../types';
 export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
+  // TODO: MQL backup option to access session cache 
+  protected sessionService!: DataPublicPluginStart['search']['session'];
 
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
@@ -28,6 +30,7 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
     deps.startServices.then(([coreStart, depsStart]) => {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
       this.aggsService = (depsStart as QueryEnhancementsPluginStartDependencies).data.search.aggs;
+      this.sessionService = (depsStart as QueryEnhancementsPluginStartDependencies).data.search.session;
     });
   }
 

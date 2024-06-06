@@ -58,10 +58,12 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import {
+  DataFramesService,
   DataFrameService,
   IDataFrame,
   IDataFrameResponse,
   createDataFrameCache,
+  createDataFramesCache,
   createSessionCache,
   dataFrameToSpec,
   SessionService,
@@ -83,6 +85,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
   private readonly dfCache = createDataFrameCache();
+  private readonly dfsCache = createDataFramesCache();
   private readonly sessionCache = createSessionCache();
   private searchInterceptor!: ISearchInterceptor;
   private defaultSearchInterceptor!: ISearchInterceptor;
@@ -142,13 +145,33 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
+    const sessionService: SessionService = {
+      get: (datasource: string) => this.sessionCache.get(datasource),
+      set: async (datasource: string, session: string) =>
+        this.sessionCache.set(datasource, session),
+      clear: () => this.sessionCache.clear(),
+    };
+
     const dfService: DataFrameService = {
-      get: () => this.dfCache.get(),
+      get: () => {
+        const df = this.dfCache.get();
+        if (df) {
+          const sessionId = this.sessionCache.get(df?.name);
+          if (sessionId) {
+            df.meta = { ...df.meta, sessionId };
+          }
+        }
+        return df;
+      },
       set: async (dataFrame: IDataFrame) => {
         if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
           indexPatterns.clearCache(this.dfCache.get()!.name, false);
         }
         this.dfCache.set(dataFrame);
+        // TODO: MQL
+        if (dataFrame?.name && dataFrame?.meta?.sessionId) {
+          this.sessionCache.set(dataFrame.name, dataFrame.meta.sessionId);
+        }
         const existingIndexPattern = indexPatterns.getByTitle(dataFrame.name!, true);
         const dataSet = await indexPatterns.create(
           dataFrameToSpec(dataFrame, existingIndexPattern?.id),
@@ -165,11 +188,41 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
     };
 
-    const sessionService: SessionService = {
-      get: (datasource: string) => this.sessionCache.get(datasource),
-      set: async (datasource: string, session: string) =>
-        this.sessionCache.set(datasource, session),
-      clear: () => this.sessionCache.clear(),
+    const dfsService: DataFramesService = {
+      get: (name: string) => {
+        const df = this.dfsCache.get(name);
+        if (df) {
+          const sessionId = this.sessionCache.get(df?.name);
+          if (sessionId) {
+            df.meta = { ...df.meta, sessionId };
+          }
+        }
+        return df;
+      },
+      set: async (dataFrame: IDataFrame) => {
+        // if (this.dfsCache.get() && this.dfsCache.get()?.name !== dataFrame.name) {
+        //   indexPatterns.clearCache(this.dfCache.get()!.name, false);
+        // }
+        // TODO: MQL this should have already have a name set check later
+        this.dfsCache.set(dataFrame.name!, dataFrame);
+        if (dataFrame?.name && dataFrame?.meta?.sessionId) {
+          this.sessionCache.set(dataFrame.name, dataFrame.meta.sessionId);
+        }
+        const existingIndexPattern = indexPatterns.getByTitle(dataFrame.name!, true);
+        const dataSet = await indexPatterns.create(
+          dataFrameToSpec(dataFrame, existingIndexPattern?.id),
+          !existingIndexPattern?.id
+        );
+        // save to cache by title because the id is not unique for temporary index pattern created
+        indexPatterns.saveToCache(dataSet.title, dataSet);
+      },
+      clear: (name: string) => {
+        if (this.dfsCache.get(name) === undefined) return;
+        // name because the id is not unique for temporary index pattern created
+        indexPatterns.clearCache(this.dfsCache.get(name)!.name, false);
+        this.dfsCache.clear(name);
+        // TODO: MQL might need a clear by id for session cache
+      },
     };
 
     const searchSourceDependencies: SearchSourceDependencies = {
@@ -191,6 +244,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         loadingCount$,
       },
       df: dfService,
+      // TODO: MQL better name or if it works perfectly just update the existing df to new logic
+      dfs: dfsService,
       session: sessionService,
     };
 
@@ -206,6 +261,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       getDefaultSearchInterceptor: () => this.defaultSearchInterceptor,
       df: dfService,
+      dfs: dfsService,
       session: sessionService,
     };
   }

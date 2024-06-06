@@ -29,7 +29,15 @@
  */
 
 import { UI_SETTINGS } from '../../../constants';
-import { GetConfigFn, GetDataFrameFn, DestroyDataFrameFn, GetSessionFn } from '../../../types';
+import { createDataFrame } from '../../../data_frames/utils';
+import {
+  GetConfigFn,
+  GetDataFrameFn,
+  GetDataFrameBySourceFn,
+  SetDataFrameFn,
+  DestroyDataFrameFn,
+  // GetSessionFn,
+} from '../../../types';
 import { ISearchRequestParams } from '../../index';
 import { SearchRequest } from './types';
 
@@ -49,29 +57,39 @@ export function getPreference(getConfig: GetConfigFn) {
     : undefined;
 }
 
-export function getExternalSearchParamsFromRequest(
+export async function getExternalSearchParamsFromRequest(
   searchRequest: SearchRequest,
   dependencies: {
     getConfig: GetConfigFn;
     getDataFrame: GetDataFrameFn;
+    getDataFrameBySource: GetDataFrameBySourceFn,
+    setDataFrame: SetDataFrameFn,
     session: string | undefined;
   }
-): ISearchRequestParams {
-  const { getConfig, getDataFrame, session } = dependencies;
+): Promise<ISearchRequestParams> {
+  const { getConfig, getDataFrame, getDataFrameBySource, setDataFrame, session } = dependencies;
+  const datasource = 'mys3';
   const searchParams = getSearchParams(getConfig);
-  const dataFrame = getDataFrame();
   const indexTitle = searchRequest.index.title || searchRequest.index;
   const dataSource = searchRequest.dataSource;
   let request = searchRequest;
-  // Add session ID to search request if exists
-  if (session) {
-    const query = { ...searchRequest.body.query.queries[0], sessionId: session };
-    const queryObject = { ...searchRequest.body.query, queries: [query] };
-    request = { ...searchRequest, body: { ...searchRequest.body, query: queryObject }, query };
-  if (session && dataFrame) {
-    dataFrame.meta = { sessionId: session };
-  }
+  // // Add session ID to search request if exists
+  // if (session) {
+  //   const query = { ...searchRequest.body.query.queries[0], sessionId: session };
+  //   const queryObject = { ...searchRequest.body.query, queries: [query] };
+  //   request = { ...searchRequest, body: { ...searchRequest.body, query: queryObject }, query };
+  // }
+  // if (session && dataFrame) {
+  //   dataFrame.meta = { sessionId: session };
+  // }
+  console.log('MQL: SETTING UP DATAFRAME WITH DATASOURCE NAME:', indexTitle);
+  // TODO: MQL SEAN might need to verify this logic after we fix it
+  const dataFrame =
+    getDataFrame() ?? // get data frame cache (name: mys3) - if exists - will get session id from session cache if exists for datasource (name: mys3)
+    getDataFrameBySource(indexTitle) ??
+    (await setDataFrame(createDataFrame({ name: indexTitle, fields: [] })));
 
+  console.log('MQL: DATAFRAME:', dataFrame);
   return {
     index: indexTitle,
     dataSource,

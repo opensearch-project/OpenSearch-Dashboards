@@ -4,7 +4,7 @@
  */
 
 export interface SessionCache {
-  get: (datasource: string) => string | undefined;
+  get: (datasource: string | undefined) => string | undefined;
   set: (datasource: string, session: string) => void;
   clear: () => void;
 }
@@ -13,7 +13,10 @@ export function createSessionCache(): SessionCache {
   let sessionCache: { [key: string]: string } = {};
 
   const cache: SessionCache = {
-    get: (datasource: string) => {
+    get: (datasource: string | undefined) => {
+      if (!datasource) {
+        return undefined;
+      }
       if (datasource in sessionCache) {
         return sessionCache[datasource];
       }
