@@ -1,8 +1,8 @@
 import { ApiResponse } from '@opensearch-project/opensearch';
 import { RequestBody, TransportRequestPromise } from '@opensearch-project/opensearch/lib/Transport';
 import { RequestHandlerContext } from 'src/core/server';
+import { URI } from '../../../common';
 
-const ML_COMMONS_API_PREFIX = '/_plugins/_ml';
 const AGENT_REQUEST_OPTIONS = {
   /**
    * It is time-consuming for LLM to generate final answer
@@ -30,7 +30,7 @@ export const getAgentIdByConfig = async (
   try {
     const response = (await client.transport.request({
       method: 'GET',
-      path: `${ML_COMMONS_API_PREFIX}/config/${configName}`,
+      path: `${URI.ML}/config/${configName}`,
     })) as ApiResponse<{ type: string; configuration: { agent_id?: string } }>;
 
     if (!response || response.body.configuration.agent_id === undefined) {
@@ -54,7 +54,7 @@ export const requestAgentByConfig = async (options: {
   return client.transport.request(
     {
       method: 'POST',
-      path: `${ML_COMMONS_API_PREFIX}/agents/${agentId}/_execute`,
+      path: `${URI.ML}/agents/${agentId}/_execute`,
       body,
     },
     AGENT_REQUEST_OPTIONS

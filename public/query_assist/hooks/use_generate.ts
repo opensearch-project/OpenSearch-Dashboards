@@ -5,15 +5,26 @@ import { QueryAssistParameters, QueryAssistResponse } from '../../../common/quer
 import { formatError } from '../utils';
 
 export const useGenerateQuery = () => {
+  const mounted = useRef(false);
   const [loading, setLoading] = useState(false);
   const abortControllerRef = useRef<AbortController>();
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
 
-  useEffect(() => () => abortControllerRef.current?.abort(), []);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = undefined;
+      }
+    };
+  }, []);
 
   const generateQuery = async (
     params: QueryAssistParameters
   ): Promise<{ response?: QueryAssistResponse; error?: Error }> => {
+    abortControllerRef.current?.abort();
     abortControllerRef.current = new AbortController();
     setLoading(true);
     try {
@@ -24,12 +35,13 @@ export const useGenerateQuery = () => {
           signal: abortControllerRef.current?.signal,
         }
       );
-      return { response };
+      if (mounted.current) return { response };
     } catch (error) {
-      return { error: formatError(error) };
+      if (mounted.current) return { error: formatError(error) };
     } finally {
-      setLoading(false);
+      if (mounted.current) setLoading(false);
     }
+    return {};
   };
 
   return { generateQuery, loading, abortControllerRef };

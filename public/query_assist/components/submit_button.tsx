@@ -13,7 +13,7 @@ export const QueryAssistSubmitButton: React.FC<SubmitButtonProps> = (props) => {
       isDisabled={props.isDisabled}
       size="s"
       type="submit"
-      aria-label="submit-question"
+      aria-label="Submit question to query assistant"
     />
   );
 };
