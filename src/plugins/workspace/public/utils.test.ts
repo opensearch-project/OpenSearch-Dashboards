@@ -8,6 +8,7 @@ import {
   featureMatchesConfig,
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
+  isFeatureIdInsideUseCase,
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
 
@@ -267,5 +268,11 @@ describe('workspace utils: filterWorkspaceConfigurableApps', () => {
     expect(filteredApps.length).toEqual(2);
     expect(filteredApps[0].id).toEqual('dashboards');
     expect(filteredApps[1].id).toEqual('management');
+  });
+});
+
+describe('workspace utils: isFeatureIdInsideUseCase', () => {
+  it('should return false for invalid use case', () => {
+    expect(isFeatureIdInsideUseCase('discover', 'use-case-invalid')).toBe(false);
   });
 });

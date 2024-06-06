@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -16,6 +16,40 @@ const ALL_USE_CASES = [
   WORKSPACE_USE_CASES['security-analytics'],
   WORKSPACE_USE_CASES.search,
 ];
+
+interface WorkspaceUseCaseCardProps {
+  id: string;
+  title: string;
+  checked: boolean;
+  description: string;
+  onChange: (id: string) => void;
+}
+
+const WorkspaceUseCaseCard = ({
+  id,
+  title,
+  description,
+  checked,
+  onChange,
+}: WorkspaceUseCaseCardProps) => {
+  const handleChange = useCallback(() => {
+    onChange(id);
+  }, [id, onChange]);
+  return (
+    <EuiCheckableCard
+      id={id}
+      checkableType="checkbox"
+      style={{ height: '100%' }}
+      label={title}
+      checked={checked}
+      className="workspace-use-case-item"
+      onChange={handleChange}
+      data-test-subj={`workspaceUseCase-${id}`}
+    >
+      {description}
+    </EuiCheckableCard>
+  );
+};
 
 export interface WorkspaceUseCaseProps {
   configurableApps?: PublicAppInfo[];
@@ -34,28 +68,28 @@ export const WorkspaceUseCase = ({ configurableApps, value, onChange }: Workspac
     });
   }, [configurableApps]);
 
+  const handleCardChange = useCallback(
+    (id: string) => {
+      if (!value.includes(id)) {
+        onChange([...value, id]);
+        return;
+      }
+      onChange(value.filter((item) => item !== id));
+    },
+    [value, onChange]
+  );
+
   return (
     <EuiFlexGroup>
       {availableUseCases.map(({ id, title, description }) => (
         <EuiFlexItem key={id}>
-          <EuiCheckableCard
+          <WorkspaceUseCaseCard
             id={id}
-            checkableType="checkbox"
-            style={{ height: '100%' }}
-            label={title}
+            title={title}
+            description={description}
             checked={value.includes(id)}
-            className="workspace-use-case-item"
-            onChange={() => {
-              if (!value.includes(id)) {
-                onChange([...value, id]);
-                return;
-              }
-              onChange(value.filter((item) => item !== id));
-            }}
-            data-test-subj={`workspaceUseCase-${id}`}
-          >
-            {description}
-          </EuiCheckableCard>
+            onChange={handleCardChange}
+          />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

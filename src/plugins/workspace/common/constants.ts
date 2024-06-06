@@ -86,7 +86,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     title: i18n.translate('workspace.usecases.observability.title', {
       defaultMessage: 'Observability',
     }),
-    description: 'Description',
+    description: i18n.translate('workspace.usecases.observability.description', {
+      defaultMessage: 'Description',
+    }),
     features: [
       'discover',
       'dashboards',
@@ -109,7 +111,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     title: i18n.translate('workspace.usecases.security.analytics.title', {
       defaultMessage: 'Security Analytics',
     }),
-    description: 'Description',
+    description: i18n.translate('workspace.usecases.analytics.description', {
+      defaultMessage: 'Description',
+    }),
     features: [
       'discover',
       'dashboards',
@@ -130,7 +134,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     title: i18n.translate('workspace.usecases.analytics.title', {
       defaultMessage: 'Analytics',
     }),
-    description: 'Description',
+    description: i18n.translate('workspace.usecases.analytics.description', {
+      defaultMessage: 'Description',
+    }),
     features: [
       'discover',
       'dashboards',
@@ -150,7 +156,9 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     title: i18n.translate('workspace.usecases.search.title', {
       defaultMessage: 'Search',
     }),
-    description: 'Description',
+    description: i18n.translate('workspace.usecases.search.description', {
+      defaultMessage: 'Description',
+    }),
     features: [
       'discover',
       'dashboards',
