@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiPortalProps } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import {
   SearchBarExtension,
@@ -11,37 +10,42 @@ import {
   SearchBarExtensionDependencies,
 } from './search_bar_extension';
 
-interface SearchBarExtensionsProps {
+interface SearchBarExtensionsProps extends SearchBarExtensionDependencies {
   configs?: SearchBarExtensionConfig[];
-  dependencies: SearchBarExtensionDependencies;
-  portalInsert: EuiPortalProps['insert'];
+  portalContainer: Element;
 }
 
-export const SearchBarExtensions: React.FC<SearchBarExtensionsProps> = (props) => {
-  const configs = useMemo(() => {
-    if (!props.configs) return [];
+const SearchBarExtensions: React.FC<SearchBarExtensionsProps> = React.memo((props) => {
+  const { configs, portalContainer, ...dependencies } = props;
+
+  const sortedConfigs = useMemo(() => {
+    if (!configs) return [];
 
     const seenIds = new Set();
-    props.configs.forEach((config) => {
+    configs.forEach((config) => {
       if (seenIds.has(config.id)) {
         throw new Error(`Duplicate search bar extension id '${config.id}' found.`);
       }
       seenIds.add(config.id);
     });
 
-    return [...props.configs].sort((a, b) => a.order - b.order);
-  }, [props.configs]);
+    return [...configs].sort((a, b) => a.order - b.order);
+  }, [configs]);
 
   return (
     <>
-      {configs.map((config) => (
+      {sortedConfigs.map((config) => (
         <SearchBarExtension
           key={config.id}
           config={config}
-          dependencies={props.dependencies}
-          portalInsert={props.portalInsert}
+          dependencies={dependencies}
+          portalContainer={portalContainer}
         />
       ))}
     </>
   );
-};
+});
+
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default SearchBarExtensions;

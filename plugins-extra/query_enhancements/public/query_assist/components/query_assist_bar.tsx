@@ -1,5 +1,5 @@
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
-import React, { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
+import React, { SyntheticEvent, useMemo, useRef, useState } from 'react';
 import { IDataPluginServices, PersistedLog } from '../../../../../src/plugins/data/public';
 import { SearchBarExtensionDependencies } from '../../../../../src/plugins/data/public/ui/search_bar_extensions/search_bar_extension';
 import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
@@ -11,6 +11,7 @@ import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
 
 interface QueryAssistInputProps {
+  language: string;
   dependencies: SearchBarExtensionDependencies;
 }
 
@@ -25,16 +26,11 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { generateQuery, loading } = useGenerateQuery();
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
-  const mounted = useRef(false);
-  const selectedIndex = props.dependencies.indexPatterns?.at(0)?.title;
+  const selectedIndexPattern = props.dependencies.indexPatterns?.at(0);
+  const selectedIndex =
+    selectedIndexPattern &&
+    (typeof selectedIndexPattern === 'string' ? selectedIndexPattern : selectedIndexPattern.title);
   const previousQuestionRef = useRef<string>();
-
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
 
   const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -52,10 +48,9 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     const params = {
       question: inputRef.current.value,
       index: selectedIndex,
-      language: 'PPL',
+      language: props.language,
     };
     const { response, error } = await generateQuery(params);
-    if (!mounted.current) return;
     if (error) {
       if (error instanceof ProhibitedQueryError) {
         setCallOutType('invalid_query');
@@ -89,7 +84,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      <QueryAssistCallOut type={callOutType} onDismiss={dismissCallout} />
+      <QueryAssistCallOut language={props.language} type={callOutType} onDismiss={dismissCallout} />
     </EuiForm>
   );
 };

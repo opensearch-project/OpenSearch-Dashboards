@@ -55,6 +55,7 @@ export interface QueryEditorProps {
   className?: string;
   isInvalid?: boolean;
   queryEditorHeaderRef: React.RefObject<HTMLDivElement>;
+  queryEditorHeaderClassName?: string;
 }
 
 interface Props extends QueryEditorProps {
@@ -492,6 +493,11 @@ export default class QueryEditorUI extends Component<Props, State> {
     // );
     const className = classNames(this.props.className);
 
+    const queryEditorHeaderClassName = classNames(
+      'osdQueryEditorHeader',
+      this.props.queryEditorHeaderClassName
+    );
+
     const queryLanguageSwitcher = (
       <QueryLanguageSwitcher
         language={this.props.query.language}
@@ -519,7 +525,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem onClick={this.onClickInput} grow={true}>
-              <div ref={this.props.queryEditorHeaderRef} />
+              <div ref={this.props.queryEditorHeaderRef} className={queryEditorHeaderClassName} />
               <CodeEditor
                 height={70}
                 languageId="xjson"

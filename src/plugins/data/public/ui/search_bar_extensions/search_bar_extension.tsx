@@ -3,15 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
-import { EuiPortalProps } from '@opensearch-project/oui';
-import React, { useEffect, useMemo, useState } from 'react';
+import { EuiErrorBoundary } from '@elastic/eui';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
 import { IIndexPattern } from '../../../common';
 
 interface SearchBarExtensionProps {
   config: SearchBarExtensionConfig;
   dependencies: SearchBarExtensionDependencies;
-  portalInsert: EuiPortalProps['insert'];
+  portalContainer: Element;
 }
 
 export interface SearchBarExtensionDependencies {
@@ -34,7 +34,7 @@ export interface SearchBarExtensionConfig {
    * A function that determines if the search bar extension is enabled and should be rendered on UI.
    * @returns whether the extension is enabled.
    */
-  isEnabled: () => Promise<boolean>;
+  isEnabled: (dependencies: SearchBarExtensionDependencies) => Promise<boolean>;
   /**
    * A function that returns the mount point for the search bar extension.
    * @param dependencies - The dependencies required for the extension.
@@ -45,6 +45,7 @@ export interface SearchBarExtensionConfig {
 
 export const SearchBarExtension: React.FC<SearchBarExtensionProps> = (props) => {
   const [isEnabled, setIsEnabled] = useState(false);
+  const isMounted = useRef(true);
 
   const component = useMemo(() => props.config.getComponent(props.dependencies), [
     props.config,
@@ -52,14 +53,22 @@ export const SearchBarExtension: React.FC<SearchBarExtensionProps> = (props) => 
   ]);
 
   useEffect(() => {
-    props.config.isEnabled().then(setIsEnabled);
+    isMounted.current = true;
+    return () => {
+      isMounted.current = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    props.config.isEnabled(props.dependencies).then((enabled) => {
+      if (isMounted.current) setIsEnabled(enabled);
+    });
   }, [props.dependencies, props.config]);
 
   if (!isEnabled) return null;
 
-  return (
-    <EuiPortal insert={props.portalInsert}>
-      <EuiErrorBoundary>{component}</EuiErrorBoundary>
-    </EuiPortal>
+  return ReactDOM.createPortal(
+    <EuiErrorBoundary>{component}</EuiErrorBoundary>,
+    props.portalContainer
   );
 };
