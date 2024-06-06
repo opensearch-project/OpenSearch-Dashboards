@@ -202,20 +202,21 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     );
   }
 
-  function getQueryStringDataSource(language: string) {
-    const { indexPatterns, queryEnhancements } = props;
-    const input = queryEnhancements?.get(language)?.searchBar?.queryStringInput?.initialValue;
+  // TODO: MQL datasources: we should consider this
+  // function getQueryStringDataSource(language: string) {
+  //   const { indexPatterns, queryEnhancements } = props;
+  //   const input = queryEnhancements?.get(language)?.searchBar?.queryStringInput?.initialValue;
 
-    if (
-      !indexPatterns ||
-      (!Array.isArray(indexPatterns) && compact(indexPatterns).length > 0) ||
-      !input
-    )
-      return '';
+  //   if (
+  //     !indexPatterns ||
+  //     (!Array.isArray(indexPatterns) && compact(indexPatterns).length > 0) ||
+  //     !input
+  //   )
+  //     return '';
 
-    const defaultDataSource = indexPatterns[0];
-    return typeof defaultDataSource === 'string' ? defaultDataSource : defaultDataSource.title;
-  }
+  //   const defaultDataSource = indexPatterns[0];
+  //   return typeof defaultDataSource === 'string' ? defaultDataSource : defaultDataSource.title;
+  // }
 
   function getQueryStringInitialValue(language: string) {
     const { indexPatterns, queryEnhancements } = props;
@@ -253,7 +254,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           onChangeQueryEditorFocus={onChangeQueryEditorFocus}
           onSubmit={onInputSubmit}
           getQueryStringInitialValue={getQueryStringInitialValue}
-          getQueryStringDataSource={getQueryStringDataSource}
+          // getQueryStringDataSource={getQueryStringDataSource}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
           queryEditorHeaderRef={queryEditorHeaderRef}
