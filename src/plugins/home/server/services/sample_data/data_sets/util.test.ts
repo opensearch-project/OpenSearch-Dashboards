@@ -13,6 +13,19 @@ describe('getSavedObjectsWithDataSource()', () => {
     return visualizationObjects.saved_objects;
   };
 
+  const TSVBVisualizationSavedObject = {
+    type: 'visualization',
+    id: 'some-id',
+    attributes: {
+      title: 'some-title',
+      visState: JSON.stringify({
+        type: 'metrics',
+        params: {},
+      }),
+    },
+    references: [],
+  };
+
   test('when processing Vega Visualization saved objects, it should attach data_source_name to each OpenSearch query', () => {
     const dataSourceId = 'some-datasource-id';
     const dataSourceName = 'Data Source Name';
@@ -126,6 +139,35 @@ describe('getSavedObjectsWithDataSource()', () => {
         ],
       },
     ]);
+  });
+
+  test('when processing TSVB Visualization saved objects, it should attach data_source_id to the visState and add datasource reference', () => {
+    const dataSourceId = 'some-datasource-id';
+    const dataSourceTitle = 'Data Source Name';
+    const expectedTSVBVisualizationSavedObject = {
+      ...TSVBVisualizationSavedObject,
+      id: `${dataSourceId}_some-id`,
+      attributes: {
+        title: `some-title_${dataSourceTitle}`,
+        visState: JSON.stringify({
+          type: 'metrics',
+          params: {
+            data_source_id: dataSourceId,
+          },
+        }),
+      },
+      references: [
+        {
+          id: dataSourceId,
+          type: 'data-source',
+          name: 'dataSource',
+        },
+      ],
+    };
+
+    expect(
+      getSavedObjectsWithDataSource([TSVBVisualizationSavedObject], dataSourceId, dataSourceTitle)
+    ).toMatchObject([expectedTSVBVisualizationSavedObject]);
   });
 });
 
