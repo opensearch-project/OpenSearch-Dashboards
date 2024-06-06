@@ -93,4 +93,41 @@ export function defineRoutes(
       }
     }
   );
+
+  // sql async jobs
+  router.post(
+    {
+      path: `/api/sqlasyncql/jobs`,
+      validate: {
+        body: schema.object({
+          query: schema.object({
+            qs: schema.string(),
+            format: schema.string(),
+          }),
+          df: schema.any(),
+        }),
+      },
+    },
+    async (context, req, res): Promise<any> => {
+      try {
+        const queryRes: IDataFrameResponse = await searchStrategies.sqlasync.search(
+          context,
+          req as any,
+          {}
+        );
+        const result: any = {
+          body: {
+            ...queryRes,
+          },
+        };
+        return res.ok(result);
+      } catch (err) {
+        logger.error(err);
+        return res.custom({
+          statusCode: 500,
+          body: err,
+        });
+      }
+    }
+  );
 }

@@ -29,7 +29,15 @@
  */
 
 import { UI_SETTINGS } from '../../../constants';
-import { GetConfigFn, GetDataFrameFn, DestroyDataFrameFn } from '../../../types';
+import { createDataFrame } from '../../../data_frames/utils';
+import {
+  GetConfigFn,
+  GetDataFrameFn,
+  GetDataFrameBySourceFn,
+  SetDataFrameFn,
+  DestroyDataFrameFn,
+  // GetSessionFn,
+} from '../../../types';
 import { ISearchRequestParams } from '../../index';
 import { SearchRequest } from './types';
 
@@ -49,25 +57,33 @@ export function getPreference(getConfig: GetConfigFn) {
     : undefined;
 }
 
-export function getExternalSearchParamsFromRequest(
+export async function getExternalSearchParamsFromRequest(
   searchRequest: SearchRequest,
   dependencies: {
     getConfig: GetConfigFn;
     getDataFrame: GetDataFrameFn;
+    getDataFrameBySource: GetDataFrameBySourceFn;
+    setDataFrame: SetDataFrameFn;
   }
-): ISearchRequestParams {
-  const { getConfig, getDataFrame } = dependencies;
+): Promise<ISearchRequestParams> {
+  const { getConfig, getDataFrame, getDataFrameBySource, setDataFrame } = dependencies;
   const searchParams = getSearchParams(getConfig);
-  const dataFrame = getDataFrame();
+  // TODO: MQL Datasources: We should probably setting the data source in the search source index.
   const indexTitle = searchRequest.index.title || searchRequest.index;
   const dataSource = searchRequest.dataSource;
+  // TODO: MQL Async: Verify
+  // Checks if df exists if not then checks if it exists in dataframes cache. If not then creates a new one.
+  // However, TODO: need to fix the df creation to not get mappings for fields for index when creating the temp index pattern if not 'default'
+  const dataFrame =
+    getDataFrame() ??
+    getDataFrameBySource(dataSource.name) ??
+    (await setDataFrame(createDataFrame({ name: dataSource.name, fields: [] })));
 
   return {
     index: indexTitle,
-    dataSource,
     body: {
       ...searchRequest.body,
-      ...(dataFrame && dataFrame?.name === indexTitle ? { df: dataFrame } : {}),
+      ...(dataFrame ? { df: dataFrame } : {}),
     },
     ...searchParams,
   };

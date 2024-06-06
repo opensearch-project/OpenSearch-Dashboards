@@ -16,12 +16,10 @@ import {
 import { defineRoutes } from './routes';
 import { PPLPlugin } from './search/ppl/ppl_plugin';
 import { EnginePlugin } from './search/engine_plugin';
-import { PPL_SEARCH_STRATEGY, SQL_SEARCH_STRATEGY } from '../common';
+import { PPL_SEARCH_STRATEGY, SQL_SEARCH_STRATEGY, SQL_ASYNC_SEARCH_STRATEGY } from '../common';
 import { pplSearchStrategyProvider } from './search/ppl/ppl_search_strategy';
 import { sqlSearchStrategyProvider } from './search/sql/sql_search_strategy';
-//import { logsPPLSpecProvider } from './sample_data/ppl';
-
-//const pplSampleDateSet = logsPPLSpecProvider();
+import { sqlAsyncSearchStrategyProvider } from './search/sql/sql_async_search_strategy';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -42,19 +40,21 @@ export class QueryEnhancementsPlugin
 
     const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
     const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
+    const sqlAsyncSearchStrategy = sqlAsyncSearchStrategyProvider(
+      this.config$,
+      this.logger,
+      client
+    );
 
     data.search.registerSearchStrategy(PPL_SEARCH_STRATEGY, pplSearchStrategy);
     data.search.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategy);
+    data.search.registerSearchStrategy(SQL_ASYNC_SEARCH_STRATEGY, sqlAsyncSearchStrategy);
 
-    // if (home) {
-    //   home.sampleData.registerSampleDataset(() => pplSampleDateSet);
-    //   home.sampleData.addAppLinksToSampleDataset(pplSampleDateSet.id, pplSampleDateSet.appLinks);
-    //   home.sampleData.addSavedObjectsToSampleDataset(
-    //     pplSampleDateSet.id,
-    //     pplSampleDateSet.savedObjects
-    //   );
-    // }
-    defineRoutes(this.logger, router, { ppl: pplSearchStrategy, sql: sqlSearchStrategy });
+    defineRoutes(this.logger, router, {
+      ppl: pplSearchStrategy,
+      sql: sqlSearchStrategy,
+      sqlasync: sqlAsyncSearchStrategy,
+    });
 
     this.logger.info('queryEnhancements: Setup complete');
     return {};

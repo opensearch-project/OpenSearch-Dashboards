@@ -50,6 +50,8 @@ export interface QueryEditorProps {
   onChangeQueryEditorFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query, dateRange?: TimeRange) => void;
   getQueryStringInitialValue?: (language: string) => string;
+  // TODO: MQL datasources: we should consider this
+  // getQueryStringDataSource?: (language: string) => string;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
@@ -373,12 +375,14 @@ export default class QueryEditorUI extends Component<Props, State> {
     const newQuery = {
       query: this.props.getQueryStringInitialValue?.(language) ?? '',
       language,
+      // dataSource: this.props.getQueryStringDataSource?.(language) ?? 'default',
     };
 
     const fields = this.props.queryEnhancements?.get(newQuery.language)?.fields;
     const newSettings: DataSettings = {
       userQueryLanguage: newQuery.language,
       userQueryString: newQuery.query,
+      // userQueryDataSource: newQuery.dataSource,
       ...(fields && { uiOverrides: { fields } }),
     };
     this.props.settings?.updateSettings(newSettings);

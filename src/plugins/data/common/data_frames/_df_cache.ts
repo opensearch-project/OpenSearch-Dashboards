@@ -27,3 +27,26 @@ export function createDataFrameCache(): DfCache {
   };
   return cache;
 }
+
+export interface DfsCache {
+  get: (name: string) => IDataFrame | undefined;
+  set: (name: string, prom: IDataFrame) => IDataFrame;
+  clear: (name: string) => void;
+}
+
+export function createDataFramesCache(): DfsCache {
+  const dfs: Record<string, IDataFrame> = {};
+  const cache: DfsCache = {
+    get: (name: string) => {
+      return dfs[name];
+    },
+    set: (name: string, prom: IDataFrame) => {
+      dfs[name] = prom;
+      return prom;
+    },
+    clear: (name: string) => {
+      delete dfs[name];
+    },
+  };
+  return cache;
+}

@@ -3,6 +3,7 @@ export const PLUGIN_NAME = 'queryEnhancements';
 
 export const PPL_SEARCH_STRATEGY = 'ppl';
 export const SQL_SEARCH_STRATEGY = 'sql';
+export const SQL_ASYNC_SEARCH_STRATEGY = 'sqlasync';
 
 export const PPL_ENDPOINT = '/_plugins/_ppl';
 export const SQL_ENDPOINT = '/_plugins/_sql';

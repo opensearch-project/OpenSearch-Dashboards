@@ -74,11 +74,15 @@ import {
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
 import {
+  DataFramesService,
   DataFrameService,
   IDataFrame,
   IDataFrameResponse,
   createDataFrameCache,
+  createDataFramesCache,
+  createSessionCache,
   dataFrameToSpec,
+  SessionService,
 } from '../../common';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
@@ -106,6 +110,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
   private readonly dfCache = createDataFrameCache();
+  private readonly dfsCache = createDataFramesCache();
+  private readonly sessionCache = createSessionCache();
   private defaultSearchStrategyName: string = OPENSEARCH_SEARCH_STRATEGY;
   private searchStrategies: StrategyMap = {};
 
@@ -224,6 +230,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                 dataFrameToSpec(dataFrame, existingIndexPattern?.id),
                 !existingIndexPattern?.id
               );
+
               // save to cache by title because the id is not unique for temporary index pattern created
               scopedIndexPatterns.saveToCache(dataSet.title, dataSet);
             },
@@ -233,6 +240,37 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               scopedIndexPatterns.clearCache(this.dfCache.get()!.name, false);
               this.dfCache.clear();
             },
+          };
+
+          const dfsService: DataFramesService = {
+            get: () => this.dfCache.get(),
+            set: async (dataFrame: IDataFrame) => {
+              if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
+                scopedIndexPatterns.clearCache(this.dfCache.get()!.name, false);
+              }
+              this.dfCache.set(dataFrame);
+              const existingIndexPattern = scopedIndexPatterns.getByTitle(dataFrame.name!, true);
+              const dataSet = await scopedIndexPatterns.create(
+                dataFrameToSpec(dataFrame, existingIndexPattern?.id),
+                !existingIndexPattern?.id
+              );
+              
+              // save to cache by title because the id is not unique for temporary index pattern created
+              scopedIndexPatterns.saveToCache(dataSet.title, dataSet);
+            },
+            clear: () => {
+              if (this.dfCache.get() === undefined) return;
+              // name because the id is not unique for temporary index pattern created
+              scopedIndexPatterns.clearCache(this.dfCache.get()!.name, false);
+              this.dfCache.clear();
+            },
+          };
+
+          const sessionService: SessionService = {
+            get: (datasource: string) => this.sessionCache.get(datasource),
+            set: async (datasource: string, session: string) =>
+              this.sessionCache.set(datasource, session),
+            clear: () => this.sessionCache.clear(),
           };
 
           const searchSourceDependencies: SearchSourceDependencies = {
@@ -270,6 +308,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               loadingCount$: new BehaviorSubject(0),
             },
             df: dfService,
+            session: sessionService,
           };
 
           return this.searchSourceService.start(scopedIndexPatterns, searchSourceDependencies);

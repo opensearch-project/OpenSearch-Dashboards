@@ -48,6 +48,8 @@ export * from './data_frames/types';
  */
 export type GetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
 export type GetDataFrameFn = () => IDataFrame | undefined;
+export type GetDataFrameBySourceFn = (name: string) =>  IDataFrame | undefined;
+export type SetDataFrameFn = (dataFrame: IDataFrame) => Promise<IDataFrame | undefined>;
 export type GetDataFrameAggQsFn = ({
   qs,
   aggConfig,

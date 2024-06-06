@@ -747,5 +747,15 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       schema: schema.boolean(),
     },
+    [UI_SETTINGS.POLLING_INTERVAL]: {
+      name: i18n.translate('data.advancedSettings.query.pollingIntervalTitle', {
+        defaultMessage: 'Polling interval for queries to external datasources',
+      }),
+      value: 5000,
+      description: i18n.translate('data.advancedSettings.query.pollingIntervalText', {
+        defaultMessage: 'Allows you to set the interval in between polls to an async query job',
+      }),
+      schema: schema.number(),
+    },
   };
 }

@@ -44,6 +44,11 @@ export class QueryStringManager {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
   }
 
+  // TODO: MQL perhaps we can consider making this data source per different type of data source
+  private getDefaultQueryDataSource() {
+    return this.storage.get('opensearchDashboards.userQueryDataSource') || 'default';
+  }
+
   private getDefaultQueryString() {
     return this.storage.get('opensearchDashboards.userQueryString') || '';
   }
@@ -59,6 +64,9 @@ export class QueryStringManager {
     return {
       query: this.getDefaultQueryString(),
       language: this.getDefaultLanguage(),
+      // TODO: MQL conditional pass this based on enhancements enabled
+      // TODO: BWC
+      // dataSource: this.getDefaultQueryDataSource(),
     };
   }
 
@@ -69,6 +77,7 @@ export class QueryStringManager {
       return {
         query,
         language: this.getDefaultLanguage(),
+        dataSource: this.getDefaultQueryDataSource(),
       };
     } else {
       return query;
@@ -89,6 +98,7 @@ export class QueryStringManager {
    */
   public setQuery = (query: Query) => {
     const curQuery = this.query$.getValue();
+    // TODO: MQL datasource: We should set a default data source per query
     if (query?.language !== curQuery.language || query?.query !== curQuery.query) {
       this.query$.next(query);
     }

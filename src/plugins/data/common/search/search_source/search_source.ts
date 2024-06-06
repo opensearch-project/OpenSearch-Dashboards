@@ -87,8 +87,19 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/common';
 import { IIndexPattern } from '../../index_patterns';
-import { DATA_FRAME_TYPES, IDataFrame, IDataFrameResponse, convertResult } from '../../data_frames';
-import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
+import {
+  DATA_FRAME_TYPES,
+  IDataFrame,
+  IDataFrameResponse,
+  convertResult,
+  Polling,
+} from '../../data_frames';
+import {
+  IOpenSearchSearchRequest,
+  IOpenSearchSearchResponse,
+  ISearchOptions,
+  ISearchRequestParams,
+} from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
 import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
 import {
@@ -124,6 +135,7 @@ export const searchSourceRequiredUiSettings = [
   UI_SETTINGS.SEARCH_INCLUDE_FROZEN,
   UI_SETTINGS.SORT_OPTIONS,
   UI_SETTINGS.DATAFRAME_HYDRATION_STRATEGY,
+  UI_SETTINGS.POLLING_INTERVAL,
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
@@ -141,6 +153,16 @@ export interface SearchSourceDependencies extends FetchHandlers {
   df: {
     get: () => IDataFrame | undefined;
     set: (dataFrame: IDataFrame) => Promise<void>;
+    clear: () => void;
+  };
+  dfs: {
+    get: (name: string) => IDataFrame | undefined;
+    set: (dataFrame: IDataFrame) => Promise<void>;
+    clear: (name: string) => void;
+  };
+  session: {
+    get: (datasource: string) => string | undefined;
+    set: (datasource: string, session: string) => void;
     clear: () => void;
   };
 }
@@ -287,7 +309,14 @@ export class SearchSource {
    * @return {undefined|IDataFrame}
    */
   getDataFrame() {
+    // // TODO: MQL Async: Likely don't need to two caches just consolidate
     return this.dependencies.df.get();
+  }
+
+  getDataFrameBySource(name: string | undefined) {
+    // // TODO: MQL Async: Likely don't need to two caches just consolidate
+    if (!name) return;
+    return this.dependencies.dfs.get(name);
   }
 
   /**
@@ -298,18 +327,47 @@ export class SearchSource {
    */
   async setDataFrame(dataFrame: IDataFrame | undefined) {
     if (dataFrame) {
+      // TODO: MQL Async: Likely don't need to two caches just consolidate
       await this.dependencies.df.set(dataFrame);
+      await this.dependencies.dfs.set(dataFrame);
     } else {
+      // TODO: MQL Async: When did we want to clean up the data frames cachea?
       this.destroyDataFrame();
     }
     return this.getDataFrame();
   }
 
+  // TODO: MQL Async: When should we clear the data frames cache?
+  // Potentially Advanced Settings? Or when the session Id expires?
   /**
    * Clear the data frame of this SearchSource
    */
   destroyDataFrame() {
     this.dependencies.df.clear();
+  }
+
+  /**
+   * Get the session ID of requested datasource
+   * @return {undefined|string}
+   */
+  getSession(datasource: string) {
+    return this.dependencies.session.get(datasource);
+  }
+
+  /**
+   * Sets the sessionID of datasource
+   * @async
+   * @return {void}
+   */
+  setSession(datasource: string, session: string) {
+    return this.dependencies.session.set(datasource, session);
+  }
+
+  /**
+   * Clear the session cache of this SearchSource
+   */
+  clearSessionCache() {
+    this.dependencies.session.clear();
   }
 
   /**
@@ -401,14 +459,20 @@ export class SearchSource {
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
-    const params = getExternalSearchParamsFromRequest(searchRequest, {
+    const params = await getExternalSearchParamsFromRequest(searchRequest, {
       getConfig,
       getDataFrame: this.getDataFrame.bind(this),
+      getDataFrameBySource: this.getDataFrameBySource.bind(this),
+      setDataFrame: this.setDataFrame.bind(this),
     });
 
     return search({ params }, options).then(async (response: any) => {
       if (response.hasOwnProperty('type')) {
         if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.DEFAULT) {
+          const dataFrameResponse = response as IDataFrameResponse;
+          await this.setDataFrame(dataFrameResponse.body as IDataFrame);
+          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+        } else if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
           const dataFrameResponse = response as IDataFrameResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
