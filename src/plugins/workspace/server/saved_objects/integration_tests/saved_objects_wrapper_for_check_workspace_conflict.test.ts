@@ -493,7 +493,7 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
       const importWithWorkspacesResult = await osdTestServer.request
         .post(
           root,
-          `/api/saved_objects/_import?workspaces=${createdFooWorkspace.id}&overwrite=true`
+          `/api/saved_objects/_import?workspaces=${createdFooWorkspace.id}&overwrite=true&dataSourceEnabled=true`
         )
         .attach(
           'file',
