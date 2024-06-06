@@ -13,6 +13,19 @@ describe('getSavedObjectsWithDataSource()', () => {
     return visualizationObjects.saved_objects;
   };
 
+  const TSVBVisualizationSavedObject = {
+    type: 'visualization',
+    id: 'some-id',
+    attributes: {
+      title: 'some-title',
+      visState: JSON.stringify({
+        type: 'metrics',
+        params: {},
+      }),
+    },
+    references: [],
+  };
+
   test('when processing Vega Visualization saved objects, it should attach data_source_name to each OpenSearch query', () => {
     const dataSourceId = 'some-datasource-id';
     const dataSourceName = 'Data Source Name';
@@ -63,6 +76,38 @@ describe('getSavedObjectsWithDataSource()', () => {
     expect(updatedVegaVisualizationsFields).toEqual(expect.arrayContaining(expectedUpdatedFields));
   });
 
+  it('should processing timeline saved object and add datasource name in the end', () => {
+    const dataSourceId = 'some-datasource-id';
+    const dataSourceName = 'dataSourceName';
+    const savedObjects = [
+      {
+        id: 'saved-object-1',
+        type: 'visualization',
+        title: 'example',
+        attributes: {
+          title: 'example',
+          visState:
+            '{"title":"(Timeline) Avg bytes over time","type":"timelion","aggs":[],"params":{"expression":".opensearch(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp).lines(show=true).points(show=true).yaxis(label=\\"Average bytes\\")","interval":"auto"}}',
+        },
+        references: [],
+      },
+    ];
+
+    expect(getSavedObjectsWithDataSource(savedObjects, dataSourceId, dataSourceName)).toEqual([
+      {
+        id: 'some-datasource-id_saved-object-1',
+        type: 'visualization',
+        title: 'example',
+        attributes: {
+          title: 'example_dataSourceName',
+          visState:
+            '{"title":"(Timeline) Avg bytes over time","type":"timelion","aggs":[],"params":{"expression":".opensearch(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp, data_source_name=\\"dataSourceName\\").lines(show=true).points(show=true).yaxis(label=\\"Average bytes\\")","interval":"auto"}}',
+        },
+        references: [],
+      },
+    ]);
+  });
+
   it('should update index-pattern id and references with given data source', () => {
     const dataSourceId = 'some-datasource-id';
     const dataSourceName = 'Data Source Name';
@@ -94,6 +139,35 @@ describe('getSavedObjectsWithDataSource()', () => {
         ],
       },
     ]);
+  });
+
+  test('when processing TSVB Visualization saved objects, it should attach data_source_id to the visState and add datasource reference', () => {
+    const dataSourceId = 'some-datasource-id';
+    const dataSourceTitle = 'Data Source Name';
+    const expectedTSVBVisualizationSavedObject = {
+      ...TSVBVisualizationSavedObject,
+      id: `${dataSourceId}_some-id`,
+      attributes: {
+        title: `some-title_${dataSourceTitle}`,
+        visState: JSON.stringify({
+          type: 'metrics',
+          params: {
+            data_source_id: dataSourceId,
+          },
+        }),
+      },
+      references: [
+        {
+          id: dataSourceId,
+          type: 'data-source',
+          name: 'dataSource',
+        },
+      ],
+    };
+
+    expect(
+      getSavedObjectsWithDataSource([TSVBVisualizationSavedObject], dataSourceId, dataSourceTitle)
+    ).toMatchObject([expectedTSVBVisualizationSavedObject]);
   });
 });
 
