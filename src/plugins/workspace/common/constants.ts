@@ -79,7 +79,14 @@ export const WORKSPACE_APP_CATEGORIES: Record<string, AppCategory> = Object.free
     order: 14000,
   },
 });
-
+/**
+ *
+ * This is a temp solution to store relationships between use cases  and features.
+ * The relationship should be provided by plugin itself. The workspace plugin should
+ * provide some method to register single feature to the use case map instead of
+ * store a static map in workspace.
+ *
+ */
 export const WORKSPACE_USE_CASES = Object.freeze({
   observability: {
     id: 'observability',
@@ -166,6 +173,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'maps-dashboards',
       'reports-dashboards',
       'searchRelevance',
+      // Add management avoid index patterns application not found for dashboards or visualize
       'management',
     ] as string[],
   },
