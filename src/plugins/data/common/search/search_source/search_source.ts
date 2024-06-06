@@ -453,91 +453,17 @@ export class SearchSource {
   }
 
   /**
-   * Helper function for fetchExternalSearch()
-   * @returns Result from polling
-   */
-  // TODO: MQL SEAN: I would put this in the dataframe utils file
-  // My suggestion tho is:
-  // 1. Move this code into the interceptor or the strategy (w/e you think makes sense, my guess interceptor i only glanced at it)
-  //       while moving make sure we keep the meta information in the dataframe.meta. like query id (if you still need to do it after moving it) and session id
-  //       We likely will need to modify the search interceptors to not check if the dataframe is null but if the df.schema was null.
-  //       if you are stuck on trying to get that lemme know. I'm going to try to get the toggles in a better state. and then i was gunna work on that part as soon as possible but if it's blocking you. give it a shot after handling the rest
-  // 2. Then we don't need to track the meta.status in the data frame, in w/e you move this to you can poll in there and wait for a response.success or if fails throw a dataframe error
-  // 3. Then once the polling is done then return the populated data frame so that fetchExternalSearch will update the cached dataframe and make sure it's updated in the dataframeScache,
-  //      i know it's redudant for now just keep it duplicated and we can clean it up once done
-  // 4. Then we can raise it as a PR and merge
-  // 5. Fast follows can be to clean it up and put it in the utils file
-  // 6. I see the datasource passed in is having some issues i might have rebased wrong or something, if it's not causing issues and you are able to get datasource fine
-  //      then just leave it and i will fix it. If it's causing issues let me know and i will fix it
-  private async handlePolling(
-    options: ISearchOptions,
-    response: any,
-    sessionId: string | undefined
-  ) {
-    const dataFrameResponse = response as IDataFrameResponse;
-    await this.setDataFrame(dataFrameResponse.body as IDataFrame);
-    const responseQueryId = (dataFrameResponse.body as IDataFrame).meta?.queryId;
-    const responseSessionId = (dataFrameResponse.body as IDataFrame).meta?.sessionId;
-    // if there wasn't a session before, set current datasource as session
-    // TODO: MQL update with selected datasource
-    // TODO: MQL SEAN: I'm pretty sure we can remove the new 3 lines as the dataframe will keep the session info
-    // if (!sessionId || (sessionId && sessionId !== responseSessionId)) {
-    //   this.setSession('mys3', responseSessionId);
-    // }
-    const pollingSearchRequest: ISearchRequestParams = {
-      body: {
-        df: dataFrameResponse.body,
-      },
-    };
-    let asyncResponse = response;
-    const handleDirectQuerySuccess = (pollingResult) => {
-      if (pollingResult && pollingResult.body.meta.status === 'SUCCESS') {
-        asyncResponse = pollingResult;
-        return true;
-      }
-      if (pollingResult.body.meta.status === 'FAILED') {
-        // add catch for fail here
-        throw new Error();
-      }
-      return false;
-    };
-    const handleDirectQueryError = (error: Error) => {
-      // eslint-disable-next-line no-console
-      console.error(error);
-      return true;
-    };
-    const polling = new Polling<any, any>(
-      () => {
-        return this.dependencies.search({ params: pollingSearchRequest }, options);
-      },
-      this.dependencies.getConfig(UI_SETTINGS.POLLING_INTERVAL),
-      handleDirectQuerySuccess,
-      handleDirectQueryError
-    );
-    polling.startPolling(responseQueryId);
-    await polling.waitForPolling();
-    return asyncResponse;
-  }
-
-  /**
    * Run a non-native search using the search service
    * @return {Promise<SearchResponse<unknown>>}
    */
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
-    console.log('search request in search source', searchRequest);
-    // TODO: MQL need to update this so it's dependent on what the datasource selected is
-    const datasource = 'mys3';
-    const sessionId = this.getSession('mys3');
-
-    // TODO: MQL Sean this could be cleaned up probably to search params
 
     const params = await getExternalSearchParamsFromRequest(searchRequest, {
       getConfig,
       getDataFrame: this.getDataFrame.bind(this),
       getDataFrameBySource: this.getDataFrameBySource.bind(this),
       setDataFrame: this.setDataFrame.bind(this),
-      session: sessionId, // TODO: MQL SEAN WE MIGHT NOT NEED THIS
     });
 
     return search({ params }, options).then(async (response: any) => {
@@ -547,8 +473,9 @@ export class SearchSource {
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
         } else if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
-          const asyncResponse = await this.handlePolling(options, response, sessionId);
-          return onResponse(searchRequest, convertResult(asyncResponse as IDataFrameResponse));
+          const dataFrameResponse = response as IDataFrameResponse;
+          await this.setDataFrame(dataFrameResponse.body as IDataFrame);
+          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
         }
         // TODO: MQL else if data_frame_polling then poll for the data frame updating the df fields only
       }

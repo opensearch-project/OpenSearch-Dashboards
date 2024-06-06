@@ -57,26 +57,14 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
       );
     };
 
-    const fetchJobStatusDataFrame = (queryId: string) => {
-      return from(
-        this.deps.http.fetch({
-          method: 'GET',
-          path: `${path}/${queryId}`,
-        })
-      );
-    };
-
-    let dataFrame;
-    const rawQueryId = getRawQueryId(searchRequest);
     const rawDataFrame = getRawDataFrame(searchRequest);
-    if (rawQueryId) {
-      dataFrame = fetchJobStatusDataFrame(rawQueryId);
-    } else {
-      dataFrame = fetchDataFrame(getRawQueryString(searchRequest), rawDataFrame);
-    }
+    const dataFrame = fetchDataFrame(getRawQueryString(searchRequest), rawDataFrame);
 
     // subscribe to dataFrame to see if an error is returned, display a toast message if so
     dataFrame.subscribe((df) => {
+      if (!df.body.error) {
+        console.log('SEARCH INTERCEPTOR:', df);
+      }
       if (!df.body.error) return;
       const jsError = new Error(df.body.error.response);
       this.deps.toasts.addError(jsError, {

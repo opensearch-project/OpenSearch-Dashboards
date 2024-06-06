@@ -15,10 +15,9 @@ export class SQLAsyncFacet {
     };
     try {
       const df = request.body?.df;
-      console.log('df in facet:', df);
       const params = {
         body: {
-          query: request.body.query,
+          query: request.body.query.qs,
           datasource: df?.name,
           lang: 'sql',
           sessionId: df?.meta?.sessionId,

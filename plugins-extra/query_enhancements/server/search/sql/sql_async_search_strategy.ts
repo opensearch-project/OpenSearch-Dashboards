@@ -5,6 +5,7 @@ import {
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
   PartialDataFrame,
+  Polling,
   createDataFrame,
   getRawDataFrame,
 } from '../../../../../src/plugins/data/common';
@@ -23,16 +24,9 @@ export const sqlAsyncSearchStrategyProvider = (
   return {
     search: async (context, request: any, options) => {
       try {
-        console.log('request in strategy:', request);
-        let rawResponse: any;
-        // MQL: this is polling the job
-        if (request.params.queryId) {
-          rawResponse = await sqlAsyncJobsFacet.describeQuery(request);
-        } else {
-          // MQL: this create the job
-          request.body.query = request.body.query.qs;
-          rawResponse = await sqlAsyncFacet.describeQuery(request);
-        }
+        // Create job: this should return a queryId and sessionId
+        const rawResponse = await sqlAsyncFacet.describeQuery(request);
+        // handles failure
         if (!rawResponse.success) {
           return {
             type: 'data_frame_polling',
@@ -40,35 +34,66 @@ export const sqlAsyncSearchStrategyProvider = (
             took: rawResponse.took,
           };
         }
+        const queryId = rawResponse.data?.queryId;
+        const sessionId = rawResponse.data?.sessionId;
+
+        // start polling logic
+        let asyncResponse = {};
+        const handleDirectQuerySuccess = (pollingResult: any) => {
+          if (pollingResult && pollingResult.data.status === 'SUCCESS') {
+            asyncResponse = pollingResult;
+            return true;
+          }
+          if (pollingResult.data.status === 'FAILED') {
+            console.error(pollingResult.data);
+            asyncResponse = {
+              type: 'data_frame_polling',
+              body: { error: pollingResult.data.error },
+              took: pollingResult.took,
+            };
+            throw new Error();
+          }
+          return false;
+        };
+        const handleDirectQueryError = (error: Error) => {
+          // eslint-disable-next-line no-console
+          console.error(error);
+          return true;
+        };
+        const polling = new Polling<any, any>(
+          () => {
+            return sqlAsyncJobsFacet.describeQuery({ ...request, params: { queryId } });
+          },
+          5000,
+          handleDirectQuerySuccess,
+          handleDirectQueryError
+        );
+        polling.startPolling();
+        await polling.waitForPolling();
+
+        if (asyncResponse?.body?.error) {
+          return asyncResponse;
+        }
 
         const partial: PartialDataFrame = {
           name: '',
-          fields: rawResponse.data?.schema || [],
+          fields: asyncResponse?.data?.schema || [],
         };
         const dataFrame = createDataFrame(partial);
         dataFrame.fields.forEach((field, index) => {
-          field.values = rawResponse.data.datarows.map((row: any) => row[index]);
+          field.values = asyncResponse?.data.datarows.map((row: any) => row[index]);
         });
 
-        dataFrame.size = rawResponse.data.datarows?.length || 0;
+        dataFrame.size = asyncResponse?.data?.datarows?.length || 0;
 
-        if (request.body?.query) {
-          dataFrame.meta = { query: request.body.query, datasource: request.body.df?.datasource };
-        }
+        dataFrame.meta = {
+          query: request.body.query,
+          queryId,
+          sessionId,
+        };
+        dataFrame.name = request.body?.df.name;
 
-        if (rawResponse.data?.queryId && rawResponse.data?.sessionId) {
-          dataFrame.meta = {
-            ...dataFrame.meta,
-            queryId: rawResponse.data.queryId,
-            sessionId: rawResponse.data.sessionId,
-          };
-        } else if (rawResponse.data?.status) {
-          dataFrame.meta = {
-            ...dataFrame.meta,
-            status: rawResponse.data.status,
-          };
-        }
-
+        // TODO: MQL should this be the time for polling or the time for job creation?
         if (usage) usage.trackSuccess(rawResponse.took);
 
         return {
@@ -77,7 +102,7 @@ export const sqlAsyncSearchStrategyProvider = (
           took: rawResponse.took,
         };
       } catch (e) {
-        logger.error(`sqlSearchStrategy: ${e.message}`);
+        logger.error(`sqlAsyncSearchStrategy: ${e.message}`);
         if (usage) usage.trackError();
         throw e;
       }
