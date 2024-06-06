@@ -14,17 +14,20 @@ import { IUiSettingsClient } from 'src/core/public';
 import { DataSourceBaseState, DataSourceOption } from '../data_source_menu/types';
 import { DataSourceErrorMenu } from '../data_source_error_menu';
 import {
-  getDataSourceById,
   handleDataSourceFetchError,
   generateComponentId,
   getDataSourceSelection,
   getDefaultDataSourceId,
+  DataSourceViewErrorWithDefaultParams,
+  getDataSourceById,
+  handleDataSourceViewError,
 } from '../utils';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DataSourceItem } from '../data_source_item';
 import { LocalCluster } from '../constants';
 import './data_source_view.scss';
 import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
+import { DataSourceViewError } from './data_source_view_error';
 
 interface DataSourceViewProps {
   fullWidth: boolean;
@@ -43,6 +46,7 @@ interface DataSourceViewState extends DataSourceBaseState {
   isPopoverOpen: boolean;
   defaultDataSource: string | null;
   componentId: string;
+  defaultDataSourceOption: DataSourceOption | null;
 }
 
 export class DataSourceView extends React.Component<DataSourceViewProps, DataSourceViewState> {
@@ -58,6 +62,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
       showError: false,
       defaultDataSource: null,
       componentId: generateComponentId(),
+      defaultDataSourceOption: null,
     };
   }
 
@@ -65,73 +70,169 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     this._isMounted = false;
     getDataSourceSelection().remove(this.state.componentId);
   }
+  updateSelectedOptionState(defaultDataSource: string | null, dataSourceOption: DataSourceOption) {
+    this.setState({
+      selectedOption: [dataSourceOption],
+      defaultDataSource,
+    });
+    this.props.onSelectedDataSources?.([dataSourceOption]);
+  }
+
+  clearSelectedOptionState() {
+    this.setState({ selectedOption: [] });
+    this.props.onSelectedDataSources?.([]);
+  }
+
+  async getAndSetDefaultDataSourceOption(dataSourceId: string, defaultDataSource: string | null) {
+    try {
+      const defaultDataSourceObj = defaultDataSource
+        ? await this.getDefaultDataSourceObj(defaultDataSource)
+        : null;
+      const filteredDefaultDataSourceOption = this.getFilteredDataSource(defaultDataSourceObj);
+      this.setState({ defaultDataSourceOption: filteredDefaultDataSourceOption });
+    } catch (error: DataSourceError) {
+      return error;
+      // this.handleDataSourceError(dataSourceId);
+    }
+  }
+
+  async getSelectedDataSource(dataSourceId: string, defaultDataSource: string | null) {
+    try {
+      return await getDataSourceById(dataSourceId, this.props.savedObjectsClient!);
+    } catch (error: DataSourceError) {
+      return error;
+    }
+  }
+
+  handleDataSourceError(errorCode: number, dataSourceId: string) {
+    const handleDataSourceViewErrorParams = this.getDataSourceViewErrorParams(
+      errorCode,
+      dataSourceId,
+      this.state.defaultDataSourceOption
+    );
+    handleDataSourceViewError(handleDataSourceViewErrorParams);
+  }
+
+  async handleDataSourceLabel(dataSourceId: string, defaultDataSource: string | null) {
+    const selectedDataSourceResponse = await this.getSelectedDataSource(
+      dataSourceId,
+      defaultDataSource
+    );
+
+    // handle fetch data source error if exist
+    if (selectedDataSourceResponse instanceof DataSourceError) {
+      const error = selectedDataSourceResponse;
+      if (error.statusCode === NOT_EXIST_ERROR_CODE) {
+        return await this.handleDefaultDataSourceWithError(
+          NOT_EXIST_ERROR_CODE,
+          dataSourceId,
+          defaultDataSource
+        );
+      }
+      // other error
+      this.handleDataSourceError(error.errorCode, dataSourceId); // pass the error status code, whatever it is, treat it as internal server error and refresh
+      return;
+    }
+    const filteredSelectedDataSourceOption = this.getFilteredDataSource(selectedDataSourceResponse);
+    // if the selectedOption has been filtered out, treat it as invalid id error and early return
+    if (filteredSelectedDataSourceOption) {
+      this.setState({
+        selectedOption: [filteredSelectedDataSourceOption],
+        defaultDataSource,
+      });
+      return;
+    }
+    return await this.handleDefaultDataSourceWithError(
+      NOT_EXIST_ERROR_CODE,
+      dataSourceId,
+      defaultDataSource
+    ); // when default data get filtered out, treat it as not found error
+  }
+
+  async handleDefaultDataSourceWithError(
+    errorCode: number,
+    dataSourceId: string,
+    defaultDataSource: string | null
+  ) {
+    const getAndSetDefaultDataSourceOptionResult = await this.getAndSetDefaultDataSourceOption(
+      dataSourceId,
+      defaultDataSource
+    ); // either return error not set default data source option successful
+    if (getAndSetDefaultDataSourceOptionResult instanceof DataSourceError) {
+      // if cannot fetch default data source, treat it as internal server error and early return
+      this.handleDataSourceError(500, dataSourceId);
+      return;
+    }
+    // if fetch default data source success, pass the not found error code, below should take care of 404 only
+    this.handleDataSourceError(error.errorCode, dataSourceId);
+  }
+
+  getDataSourceViewErrorParams(
+    errorCode: number,
+    dataSourceId: string,
+    filteredDefaultDataSourceOption: DataSourceOption | null
+  ) {
+    return {
+      errorCode,
+      changeState: this.onError.bind(this, filteredDefaultDataSourceOption),
+      notifications: this.props.notifications!,
+      failedDataSourceId: dataSourceId,
+      defaultDataSourceOption: filteredDefaultDataSourceOption,
+      handleSwitch: this.handleSwitchDefaultDatasource.bind(this, filteredDefaultDataSourceOption),
+      callback: this.props.onSelectedDataSources,
+    } as DataSourceViewErrorWithDefaultParams;
+  }
   async componentDidMount() {
     this._isMounted = true;
 
     const selectedOption = this.props.selectedOption;
     const option = selectedOption[0];
     const optionId = option.id;
-
-    const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
-    if (optionId === '' && !this.props.hideLocalCluster) {
-      this.setState({
-        selectedOption: [LocalCluster],
-        defaultDataSource,
-      });
-      this.onSelectedDataSources([LocalCluster]);
+    const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
+    // 1. id and label both exist, set defaultDataSource directly and early return
+    if (this.isCompletDataSourceOption(option)) {
+      this.updateSelectedOptionState(defaultDataSource, option);
       return;
     }
-
-    if (
-      (optionId === '' && this.props.hideLocalCluster) ||
-      (this.props.dataSourceFilter &&
-        this.props.selectedOption.filter(this.props.dataSourceFilter).length === 0)
-    ) {
-      this.setState({
-        selectedOption: [],
-      });
-      this.onSelectedDataSources([]);
-      return;
-    }
-
-    if (!option.label) {
-      try {
-        const selectedDataSource = await getDataSourceById(
-          optionId,
-          this.props.savedObjectsClient!
-        );
-        if (!this._isMounted) return;
-        this.setState({
-          selectedOption: [{ id: optionId, label: selectedDataSource.title }],
-          defaultDataSource,
-        });
-        this.onSelectedDataSources([{ id: optionId, label: selectedDataSource.title }]);
-      } catch (error) {
-        handleDataSourceFetchError(
-          this.onError.bind(this),
-          this.props.notifications!,
-          this.onSelectedDataSources.bind(this)
-        );
+    // 2. handle local cluster
+    if (option && optionId === '') {
+      // 2.1 handle legit
+      if (!this.props.hideLocalCluster) {
+        this.updateSelectedOptionState(defaultDataSource, LocalCluster);
+        return;
       }
-    } else {
-      this.setState({
-        ...this.state,
-        defaultDataSource,
-      });
-      this.onSelectedDataSources([option]);
+      this.clearSelectedOptionState();
+      return;
+    }
+    // 3. only label exit
+    this.handleDataSourceLabel(optionId, defaultDataSource);
+  }
+
+  isCompletDataSourceOption(option: DataSourceOption): boolean {
+    return !!(option && option.id && option.label);
+  }
+
+  /**
+   * when defaultDataSourceId exist, get the complete defaultDataSource obj by calling getDataSourceById
+   * @param defaultDataSourceId non-null string
+   */
+  async getDefaultDataSourceObj(defaultDataSourceId: string) {
+    try {
+      return await getDataSourceById(defaultDataSourceId!, this.props.savedObjectsClient!);
+    } catch (error) {
+      // when need to call getDataSourceById, user has to provide the notification and saveObjectClient
+      // pass null as defaultDataSourceOption since failed to get it
+      handleDataSourceFetchError(this.onError.bind(this, null), this.props.notifications!);
+      return null;
     }
   }
 
-  onSelectedDataSources(dataSource: DataSourceOption[]) {
-    getDataSourceSelection().selectDataSource(this.state.componentId, dataSource);
-
-    if (this.props.onSelectedDataSources) {
-      this.props.onSelectedDataSources(dataSource);
-    }
-  }
-
-  onError() {
-    this.setState({ showError: true });
+  /**
+   * set the showError state and also default data source option when handle the error at get data source
+   * @param defaultDataSourceOption provided as required since switch to default option happened with the error
+   */
+  onError(defaultDataSourceOption: DataSourceOption | null) {
+    this.setState({ showError: true, defaultDataSourceOption });
   }
 
   onClick() {
@@ -141,10 +242,41 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
   closePopover() {
     this.setState({ ...this.state, isPopoverOpen: false });
   }
+  getFilteredDataSource(dataSourceObj: any): DataSourceOption | null {
+    if (!dataSourceObj) return null;
+    const { dataSourceFilter } = this.props;
+    // check if the defaultDataSouce can be filtered out
+    const canFilteredDataSource: boolean = dataSourceFilter
+      ? dataSourceFilter(dataSourceObj)
+      : false;
+    return canFilteredDataSource ? { id: dataSourceObj.id, label: dataSourceObj.title } : null;
+  }
+  /**
+   * when call handleSwitchDefaultDatasource, the default data source must exist,
+   * since the button only display when defaultDataSource exist
+   */
+  async handleSwitchDefaultDatasource(defaultDataSourceOption: DataSourceOption | null) {
+    // reset the state to close popover and error, selectedOption will be replaced by default option
+    if (!defaultDataSourceOption) return;
+    this.setState({
+      selectedOption: [defaultDataSourceOption],
+      showError: false,
+      isPopoverOpen: false,
+    });
+  }
 
   render() {
     if (this.state.showError) {
-      return <DataSourceErrorMenu application={this.props.application} />;
+      return (
+        <DataSourceViewError
+          application={this.props.application}
+          dataSourceId={this.props.selectedOption[0].id}
+          showSwitchButton={!!this.state.defaultDataSource}
+          handleSwitchDefaultDatasource={() =>
+            this.handleSwitchDefaultDatasource(this.state.defaultDataSourceOption)
+          }
+        />
+      );
     }
     const label =
       this.state.selectedOption.length > 0 && this.state.selectedOption[0].label

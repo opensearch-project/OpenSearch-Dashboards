@@ -24,7 +24,7 @@ exports[`DataSourceDropDownHeader should render correctly with the provided tota
       <EuiLink
         onClick={[Function]}
       >
-        Manage
+        Manage data sources
       </EuiLink>
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -78,7 +78,7 @@ exports[`DataSourceDropDownHeader should render the activeDataSourceCount/totalD
                   onClick={[Function]}
                   type="button"
                 >
-                  Manage
+                  Manage data sources
                 </button>
               </EuiLink>
             </div>

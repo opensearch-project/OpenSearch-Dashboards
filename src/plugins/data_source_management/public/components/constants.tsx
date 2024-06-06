@@ -19,3 +19,6 @@ export const NO_COMPATIBLE_DATASOURCES_MESSAGE = 'No compatible data sources are
 export const ADD_COMPATIBLE_DATASOURCES_MESSAGE = 'Add a compatible data source.';
 
 export const DEFAULT_DATA_SOURCE_UI_SETTINGS_ID = 'defaultDataSource';
+
+export const NOT_EXIST_ERROR_CODE = 404;
+export const INTERNAL_SERVER_ERROR_CODE = 500;

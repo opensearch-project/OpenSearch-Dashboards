@@ -41,7 +41,7 @@ export const DataSourceDropDownHeader: React.FC<DataSourceOptionItemProps> = ({
               })
             }
           >
-            Manage
+            Manage data sources
           </EuiLink>
         </EuiFlexItem>
       </EuiFlexGroup>

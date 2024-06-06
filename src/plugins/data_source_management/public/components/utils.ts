@@ -32,11 +32,13 @@ import {
   NO_COMPATIBLE_DATASOURCES_MESSAGE,
   NO_DATASOURCES_CONNECTED_MESSAGE,
   DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+  NOT_EXIST_ERROR_CODE,
 } from './constants';
 import {
   DataSourceSelectionService,
   defaultDataSourceSelection,
 } from '../service/data_source_selection_service';
+import { switchToDefaultButton } from './toast_button/switch_default_button';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -186,7 +188,11 @@ export async function getDataSourceById(
   const response = await savedObjectsClient.get('data-source', id);
 
   if (!response || response.error) {
-    throw new Error('Unable to find data source');
+    const statusCode = response.error?.statusCode;
+    if (statusCode === 404) {
+      throw new DataSourceError({ statusCode, body: 'Unable to find data source' });
+    }
+    throw new DataSourceError({ statusCode, body: response.error?.message });
   }
 
   const attributes: any = response?.attributes || {};
@@ -330,6 +336,53 @@ export const handleDataSourceFetchError = (
     text: toMountPoint(getReloadButton()),
     color: 'danger',
   });
+};
+
+export interface DataSourceViewErrorWithDefaultParams {
+  errorCode: number;
+  changeState: (state: { defaultDataSource: DataSourceOption | null }) => void;
+  notifications: ToastsStart;
+  failedDataSourceId: string;
+  defaultDataSourceOption: DataSourceOption | null;
+  handleSwitch: () => Promise<void>;
+  callback?: (ds: DataSourceOption[]) => void;
+}
+/**
+ *
+ * @param dataSourceViewErrorParams
+ * pass in state to control the display of toast warning notification
+ * pass in the notification props to display the current error ( switch to default data source if available)
+ * pass in failedDataSourceId to construct the error message
+ * pass in the defaultDataSource to control whether display the button to switch
+ * pass in a handleSwitch if click switchToDefault button
+ * pass in callback to have props onSelectOption
+ */
+export const handleDataSourceViewError = (
+  dataSourceViewErrorWithDefaultParams: DataSourceViewErrorWithDefaultParams
+) => {
+  const {
+    errorCode,
+    changeState,
+    notifications,
+    failedDataSourceId,
+    defaultDataSourceOption,
+    handleSwitch,
+    callback,
+  } = dataSourceViewErrorWithDefaultParams;
+  // handle not found error, provide the switch to default data source option
+  if (errorCode === NOT_EXIST_ERROR_CODE) {
+    changeState({ defaultDataSource: defaultDataSourceOption });
+    if (callback) callback([]);
+    notifications.add({
+      title: i18n.translate('dataSource.dataSourceUnavailableError', {
+        defaultMessage: `Data source ${failedDataSourceId} is not available `,
+      }),
+      text: defaultDataSourceOption ? toMountPoint(switchToDefaultButton(handleSwitch)) : '',
+      color: 'danger',
+    });
+    return;
+  }
+  handleDataSourceFetchError(changeState, notification, callback);
 };
 
 interface DataSourceOptionGroupLabel {
