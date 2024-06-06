@@ -96,6 +96,11 @@ export const getSavedObjectsWithDataSource = (
         if (saveObject.type === 'visualization') {
           const vegaSpec = extractVegaSpecFromSavedObject(saveObject);
 
+          const visualizationSavedObject = saveObject as SavedObject & {
+            attributes: { visState: string };
+          };
+          const visStateObject = JSON.parse(visualizationSavedObject.attributes.visState);
+
           if (!!vegaSpec) {
             const updatedVegaSpec = updateDataSourceNameInVegaSpec({
               spec: vegaSpec,
@@ -104,8 +109,6 @@ export const getSavedObjectsWithDataSource = (
               spacing: 1,
             });
 
-            // @ts-expect-error
-            const visStateObject = JSON.parse(saveObject.attributes?.visState);
             visStateObject.params.spec = updatedVegaSpec;
 
             // @ts-expect-error
@@ -130,6 +133,17 @@ export const getSavedObjectsWithDataSource = (
             timelineStateObject.params.expression = modifiedExpression;
             // @ts-expect-error
             saveObject.attributes.visState = JSON.stringify(timelineStateObject);
+          }
+
+          if (visStateObject.type === 'metrics') {
+            visStateObject.params.data_source_id = dataSourceId;
+
+            visualizationSavedObject.attributes.visState = JSON.stringify(visStateObject);
+            visualizationSavedObject.references.push({
+              id: `${dataSourceId}`,
+              type: 'data-source',
+              name: 'dataSource',
+            });
           }
         }
       }
