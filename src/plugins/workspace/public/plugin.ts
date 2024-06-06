@@ -18,6 +18,7 @@ import {
   PublicAppInfo,
   ChromeBreadcrumb,
   WorkspaceAvailability,
+  DEFAULT_APP_CATEGORIES,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -294,8 +295,8 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     // workspace list
     core.application.register({
       id: WORKSPACE_LIST_APP_ID,
-      title: '',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      title: 'Workspaces',
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);

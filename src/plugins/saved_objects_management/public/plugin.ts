@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
@@ -61,6 +61,7 @@ import {
 } from './services';
 import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
+import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -141,6 +142,28 @@ export class SavedObjectsManagementPlugin
       order: 1,
       mount: async (mountParams) => {
         const { mountManagementSection } = await import('./management_section');
+        return mountManagementSection({
+          core,
+          serviceRegistry: this.serviceRegistry,
+          mountParams,
+          dataSourceEnabled: !!dataSource,
+          dataSourceManagement,
+        });
+      },
+    });
+
+    core.application.register({
+      id: 'library',
+      title: 'Library',
+      category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      mount: async (appMountParams: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
+        const { mountManagementSection } = await import('./management_section');
+        const mountParams = {
+          ...appMountParams,
+          basePath: core.http.basePath.getBasePath(),
+          setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+        };
         return mountManagementSection({
           core,
           serviceRegistry: this.serviceRegistry,
