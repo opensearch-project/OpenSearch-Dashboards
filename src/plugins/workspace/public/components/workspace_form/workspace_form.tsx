@@ -95,12 +95,26 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           isInvalid={!!formErrors.description}
           error={formErrors.description}
         >
-          <EuiTextArea
-            value={formData.description}
-            onChange={handleDescriptionChange}
-            data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
-            rows={4}
-          />
+          <>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('workspace.form.workspaceDetails.description.introduction', {
+                defaultMessage:
+                  'Help others understand the purpose of this workspace by providing an overview of the workspace you’re creating.',
+              })}
+            </EuiText>
+            <EuiTextArea
+              value={formData.description}
+              onChange={handleDescriptionChange}
+              data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
+              rows={4}
+              placeholder={i18n.translate(
+                'workspace.form.workspaceDetails.description.placeholder',
+                {
+                  defaultMessage: 'Describe the workspace',
+                }
+              )}
+            />
+          </>
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('workspace.form.workspaceDetails.color.label', {
