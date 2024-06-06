@@ -61,6 +61,7 @@ export const UI_SETTINGS = {
   INDEXPATTERN_PLACEHOLDER: 'indexPattern:placeholder',
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
+  QUERY_ENHANCEMENTS_ENABLED: 'queryEnhancements:enable',
   DATAFRAME_HYDRATION_STRATEGY: 'dataframe:hydrationStrategy',
   POLLING_INTERVAL: 'search:pollingInterval',
 } as const;

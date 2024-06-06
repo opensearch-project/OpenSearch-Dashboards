@@ -10,6 +10,7 @@ import { QueryEnhancement } from '../types';
 export interface DataSettings {
   // TODO: MQL datasource: we should consider this
   // userQueryDataSource: string;
+  userQueryEnhancementsEnabled: boolean;
   userQueryLanguage: string;
   userQueryString: string;
   uiOverrides?: {
@@ -35,6 +36,15 @@ export class Settings {
   //   this.storage.set('opensearchDashboards.userQueryDataSource', dataSource);
   //   return true;
   // }
+
+  getUserQueryEnhancementsEnabled() {
+    return this.storage.get('opensearchDashboards.userQueryEnhancementsEnabled') || true;
+  }
+
+  setUserQueryEnhancementsEnabled(enabled: boolean) {
+    this.storage.set('opensearchDashboards.userQueryEnhancementsEnabled', enabled);
+    return true;
+  }
 
   getUserQueryLanguage() {
     return this.storage.get('opensearchDashboards.userQueryLanguage') || 'kuery';
@@ -82,14 +92,21 @@ export class Settings {
   toJSON(): DataSettings {
     return {
       // userQueryDataSource: this.getUserQueryDataSource(),
+      userQueryEnhancementsEnabled: this.getUserQueryEnhancementsEnabled(),
       userQueryLanguage: this.getUserQueryLanguage(),
       userQueryString: this.getUserQueryString(),
       uiOverrides: this.getUiOverrides(),
     };
   }
 
-  updateSettings({ userQueryLanguage, userQueryString, uiOverrides }: DataSettings) {
+  updateSettings({
+    userQueryEnhancementsEnabled,
+    userQueryLanguage,
+    userQueryString,
+    uiOverrides,
+  }: DataSettings) {
     // this.setUserQueryDataSource(userQueryDataSource);
+    this.setUserQueryEnhancementsEnabled(userQueryEnhancementsEnabled);
     this.setUserQueryLanguage(userQueryLanguage);
     this.setUserQueryString(userQueryString);
     this.setUiOverrides(uiOverrides);

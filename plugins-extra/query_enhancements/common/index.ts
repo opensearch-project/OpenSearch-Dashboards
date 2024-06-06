@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export const PLUGIN_ID = 'queryEnhancements';
 export const PLUGIN_NAME = 'queryEnhancements';
 
@@ -20,5 +25,8 @@ export const OPENSEARCH_DATACONNECTIONS_API = {
 export const JOBS_ENDPOINT_BASE = '/_plugins/_async_query';
 
 export const BASE_ML_COMMONS_URI = '/_plugins/_ml';
+
+// Advanced Settings
+export const QUERY_ENABLE_ENHANCEMENTS_SETTING = 'query:enableEnhancements';
 
 export * from './utils';

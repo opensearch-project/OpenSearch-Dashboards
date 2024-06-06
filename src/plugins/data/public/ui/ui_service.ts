@@ -50,7 +50,10 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
   }
 
   public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
-    const Settings = createSettings({ storage, queryEnhancements: this.queryEnhancements });
+    const Settings = createSettings({
+      storage,
+      queryEnhancements: this.queryEnhancements,
+    });
 
     const setContainerRef = (ref: HTMLDivElement | null) => {
       this.containerRef = ref;
