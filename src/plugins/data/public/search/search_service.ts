@@ -168,7 +168,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           indexPatterns.clearCache(this.dfCache.get()!.name, false);
         }
         this.dfCache.set(dataFrame);
-        // TODO: MQL
+        // TODO: MQL async: make sure to update the server search service
+        // We should likely consolidate the d cache and caches
         if (dataFrame?.name && dataFrame?.meta?.sessionId) {
           this.sessionCache.set(dataFrame.name, dataFrame.meta.sessionId);
         }
@@ -203,7 +204,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         // if (this.dfsCache.get() && this.dfsCache.get()?.name !== dataFrame.name) {
         //   indexPatterns.clearCache(this.dfCache.get()!.name, false);
         // }
-        // TODO: MQL this should have already have a name set check later
         this.dfsCache.set(dataFrame.name!, dataFrame);
         if (dataFrame?.name && dataFrame?.meta?.sessionId) {
           this.sessionCache.set(dataFrame.name, dataFrame.meta.sessionId);
@@ -221,7 +221,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         // name because the id is not unique for temporary index pattern created
         indexPatterns.clearCache(this.dfsCache.get(name)!.name, false);
         this.dfsCache.clear(name);
-        // TODO: MQL might need a clear by id for session cache
+        // TODO: MQL async might need a clear by id for session cache
       },
     };
 

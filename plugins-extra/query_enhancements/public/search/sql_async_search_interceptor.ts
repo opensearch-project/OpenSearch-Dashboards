@@ -10,18 +10,13 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../../src/plugins/data/public';
-import {
-  getRawDataFrame,
-  getRawQueryId,
-  getRawQueryString,
-} from '../../../../src/plugins/data/common';
+import { getRawDataFrame, getRawQueryString } from '../../../../src/plugins/data/common';
 import { SQL_ASYNC_SEARCH_STRATEGY } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
 export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
-  // TODO: MQL backup option to access session cache 
   protected sessionService!: DataPublicPluginStart['search']['session'];
 
   constructor(deps: SearchInterceptorDeps) {
@@ -62,13 +57,14 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
 
     // subscribe to dataFrame to see if an error is returned, display a toast message if so
     dataFrame.subscribe((df) => {
-      if (!df.body.error) {
-        console.log('SEARCH INTERCEPTOR:', df);
-      }
+      // TODO: MQL Async: clean later
+      // if (!df.body.error) {
+      //   console.log('SEARCH INTERCEPTOR:', df);
+      // }
       if (!df.body.error) return;
       const jsError = new Error(df.body.error.response);
       this.deps.toasts.addError(jsError, {
-        title: i18n.translate('dqlPlugin.sqlQueryError', {
+        title: i18n.translate('queryEnhancements.sqlQueryError', {
           defaultMessage: 'Could not complete the SQL async query',
         }),
         toastMessage: df.body.error.msg,

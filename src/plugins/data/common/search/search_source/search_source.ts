@@ -309,12 +309,12 @@ export class SearchSource {
    * @return {undefined|IDataFrame}
    */
   getDataFrame() {
-    // TODO: MQL SEAN FLIP THIS BACK LATER
+    // // TODO: MQL Async: Likely don't need to two caches just consolidate
     return this.dependencies.df.get();
   }
 
   getDataFrameBySource(name: string | undefined) {
-    // TODO: MQL SEAN FLIP THIS BACK LATER
+    // // TODO: MQL Async: Likely don't need to two caches just consolidate
     if (!name) return;
     return this.dependencies.dfs.get(name);
   }
@@ -327,18 +327,18 @@ export class SearchSource {
    */
   async setDataFrame(dataFrame: IDataFrame | undefined) {
     if (dataFrame) {
+      // TODO: MQL Async: Likely don't need to two caches just consolidate
       await this.dependencies.df.set(dataFrame);
-      // TODO: MQL SEAN LIKELY WE CAN GET THE DATA FRAME WITH THE INDEX PATTERNS AND SET IN IN THE DFS WITHOUT ASYNC NEEDED
       await this.dependencies.dfs.set(dataFrame);
     } else {
+      // TODO: MQL Async: When did we want to clean up the data frames cachea?
       this.destroyDataFrame();
     }
     return this.getDataFrame();
   }
 
-  // TODO: MQL SEAN FIGURE OUT A TIME TO INVALIDATE THE CACHE
-  // SHOULD IT BE ON APP LOAD
-  // ADVANCED SETTINGS?
+  // TODO: MQL Async: When should we clear the data frames cache?
+  // Potentially Advanced Settings? Or when the session Id expires?
   /**
    * Clear the data frame of this SearchSource
    */

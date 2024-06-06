@@ -65,8 +65,8 @@ export class QueryStringManager {
       query: this.getDefaultQueryString(),
       language: this.getDefaultLanguage(),
       // TODO: MQL conditional pass this based on enhancements enabled
-      // TODO:  BWC
-      dataSource: this.getDefaultQueryDataSource(),
+      // TODO: BWC
+      // dataSource: this.getDefaultQueryDataSource(),
     };
   }
 
@@ -98,7 +98,8 @@ export class QueryStringManager {
    */
   public setQuery = (query: Query) => {
     const curQuery = this.query$.getValue();
-    if (query?.language !== curQuery.language || query?.query !== curQuery.query || query?.dataSource !== curQuery.dataSource) {
+    // TODO: MQL datasource: We should set a default data source per query
+    if (query?.language !== curQuery.language || query?.query !== curQuery.query) {
       this.query$.next(query);
     }
   };

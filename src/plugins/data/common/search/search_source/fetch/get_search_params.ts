@@ -68,16 +68,17 @@ export async function getExternalSearchParamsFromRequest(
 ): Promise<ISearchRequestParams> {
   const { getConfig, getDataFrame, getDataFrameBySource, setDataFrame } = dependencies;
   const searchParams = getSearchParams(getConfig);
-  // TODO: MQL SEAN MAKE THE INDEX TITLE CONDITIONAL BASED ON IF IT'S EXTERNAL DATASOURCE OR NOT
+  // TODO: MQL Datasources: We should probably setting the data source in the search source index.
   const indexTitle = searchRequest.index.title || searchRequest.index;
   const dataSource = searchRequest.dataSource;
-  // TODO: MQL SEAN might need to verify this logic after we fix it
+  // TODO: MQL Async: Verify
+  // Checks if df exists if not then checks if it exists in dataframes cache. If not then creates a new one.
+  // However, TODO: need to fix the df creation to not get mappings for fields for index when creating the temp index pattern if not 'default'
   const dataFrame =
-    getDataFrame() ?? // get data frame cache (name: mys3) - if exists - will get session id from session cache if exists for datasource (name: mys3)
+    getDataFrame() ??
     getDataFrameBySource(dataSource.name) ??
     (await setDataFrame(createDataFrame({ name: dataSource.name, fields: [] })));
 
-  console.log('MQL: DATAFRAME:', dataFrame);
   return {
     index: indexTitle,
     body: {
