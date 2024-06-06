@@ -10,7 +10,8 @@ import {
   ResponseError,
 } from '@opensearch-project/opensearch/lib/errors';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { createDataSourceError, DataSourceError } from './error';
+import { createDataSourceError } from './error';
+import { DataSourceError } from '../../common/data_sources';
 import { errors as LegacyErrors } from 'elasticsearch';
 
 const createApiResponseError = ({

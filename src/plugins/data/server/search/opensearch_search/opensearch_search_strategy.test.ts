@@ -34,7 +34,7 @@ import {
   pluginInitializerContextConfigMock,
 } from '../../../../../core/server/mocks';
 import { opensearchSearchStrategyProvider } from './opensearch_search_strategy';
-import { DataSourceError } from '../../../../data_source/server/lib/error';
+import { DataSourceError } from '../../../../data_source/common/data_sources';
 import { DataSourcePluginSetup } from '../../../../data_source/server';
 import { SearchUsage } from '../collectors';
 
