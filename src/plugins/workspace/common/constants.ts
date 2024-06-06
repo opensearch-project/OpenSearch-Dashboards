@@ -90,11 +90,12 @@ export const WORKSPACE_APP_CATEGORIES: Record<string, AppCategory> = Object.free
 export const WORKSPACE_USE_CASES = Object.freeze({
   observability: {
     id: 'observability',
-    title: i18n.translate('workspace.usecases.observability.title', {
+    title: i18n.translate('workspace.usecase.observability.title', {
       defaultMessage: 'Observability',
     }),
-    description: i18n.translate('workspace.usecases.observability.description', {
-      defaultMessage: 'Description',
+    description: i18n.translate('workspace.usecase.observability.description', {
+      defaultMessage:
+        'Gain visibility into system health, performance, and reliability through monitoring and analysis of logs, metrics, and traces.',
     }),
     features: [
       'discover',
@@ -115,11 +116,12 @@ export const WORKSPACE_USE_CASES = Object.freeze({
   },
   'security-analytics': {
     id: 'security-analytics',
-    title: i18n.translate('workspace.usecases.security.analytics.title', {
+    title: i18n.translate('workspace.usecase.security.analytics.title', {
       defaultMessage: 'Security Analytics',
     }),
-    description: i18n.translate('workspace.usecases.analytics.description', {
-      defaultMessage: 'Description',
+    description: i18n.translate('workspace.usecase.analytics.description', {
+      defaultMessage:
+        'Detect and investigate potential security threats and vulnerabilities across your systems and data.',
     }),
     features: [
       'discover',
@@ -138,11 +140,12 @@ export const WORKSPACE_USE_CASES = Object.freeze({
   },
   analytics: {
     id: 'analytics',
-    title: i18n.translate('workspace.usecases.analytics.title', {
+    title: i18n.translate('workspace.usecase.analytics.title', {
       defaultMessage: 'Analytics',
     }),
-    description: i18n.translate('workspace.usecases.analytics.description', {
-      defaultMessage: 'Description',
+    description: i18n.translate('workspace.usecase.analytics.description', {
+      defaultMessage:
+        'Analyze data to derive insights, identify patterns and trends, and make data-driven decisions.',
     }),
     features: [
       'discover',
@@ -160,11 +163,12 @@ export const WORKSPACE_USE_CASES = Object.freeze({
   },
   search: {
     id: 'search',
-    title: i18n.translate('workspace.usecases.search.title', {
+    title: i18n.translate('workspace.usecase.search.title', {
       defaultMessage: 'Search',
     }),
-    description: i18n.translate('workspace.usecases.search.description', {
-      defaultMessage: 'Description',
+    description: i18n.translate('workspace.usecase.search.description', {
+      defaultMessage:
+        "Quickly find and explore relevant information across your organization's data sources.",
     }),
     features: [
       'discover',

@@ -5,15 +5,15 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { PublicAppInfo } from 'opensearch-dashboards/public';
-import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 import { WORKSPACE_USE_CASES } from '../../../common/constants';
 import './workspace_use_case.scss';
 
 const ALL_USE_CASES = [
   WORKSPACE_USE_CASES.observability,
-  WORKSPACE_USE_CASES.analytics,
   WORKSPACE_USE_CASES['security-analytics'],
+  WORKSPACE_USE_CASES.analytics,
   WORKSPACE_USE_CASES.search,
 ];
 
@@ -46,7 +46,9 @@ const WorkspaceUseCaseCard = ({
       onChange={handleChange}
       data-test-subj={`workspaceUseCase-${id}`}
     >
-      {description}
+      <EuiText color="subdued" size="xs">
+        {description}
+      </EuiText>
     </EuiCheckableCard>
   );
 };

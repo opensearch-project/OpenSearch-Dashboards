@@ -104,7 +104,7 @@ export const WorkspaceList = () => {
     },
     {
       field: 'features',
-      name: 'Use Cases',
+      name: 'Use case',
       isExpander: true,
       hasActions: true,
       render: (features: string[]) => {

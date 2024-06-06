@@ -50,7 +50,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     handleDescriptionInputChange,
   } = useWorkspaceForm(props);
   const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
-    defaultMessage: 'Workspace Details',
+    defaultMessage: 'Enter Details',
   });
   const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
     defaultMessage: 'Users & Permissions',
@@ -62,7 +62,6 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         <EuiTitle size="s">
           <h2>{workspaceDetailsTitle}</h2>
         </EuiTitle>
-        <EuiHorizontalRule margin="xs" />
         <EuiSpacer size="s" />
         <EuiFormRow
           label={i18n.translate('workspace.form.workspaceDetails.name.label', {
@@ -80,6 +79,9 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
             onChange={handleNameInputChange}
             readOnly={!!defaultValues?.reserved}
             data-test-subj="workspaceForm-workspaceDetails-nameInputText"
+            placeholder={i18n.translate('workspace.form.workspaceDetails.name.placeholder', {
+              defaultMessage: 'Enter a name',
+            })}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -127,32 +129,25 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
       <EuiPanel>
         <EuiTitle size="s">
           <h2>
-            {i18n.translate('workspace.form.workspaceUseCases.title', {
-              defaultMessage: 'Select the team’s focus',
+            {i18n.translate('workspace.form.workspaceUseCase.title', {
+              defaultMessage: 'Choose one or more focus areas',
             })}
           </h2>
         </EuiTitle>
-        <EuiHorizontalRule margin="xs" />
         <EuiSpacer size="s" />
         <EuiFormRow
-          label={i18n.translate('workspace.form.workspaceUseCases.name.label', {
+          label={i18n.translate('workspace.form.workspaceUseCase.name.label', {
             defaultMessage: 'Use case',
           })}
           isInvalid={!!formErrors.features}
           error={formErrors.features}
           fullWidth
         >
-          <>
-            <EuiText size="xs" color="subdued">
-              Select one or more use cases.
-            </EuiText>
-            <EuiSpacer size="s" />
-            <WorkspaceUseCase
-              configurableApps={workspaceConfigurableApps}
-              value={formData.useCases}
-              onChange={handleUseCasesChange}
-            />
-          </>
+          <WorkspaceUseCase
+            configurableApps={workspaceConfigurableApps}
+            value={formData.useCases}
+            onChange={handleUseCasesChange}
+          />
         </EuiFormRow>
       </EuiPanel>
       <EuiSpacer />
