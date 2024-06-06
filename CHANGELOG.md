@@ -16,6 +16,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 📈 Features/Enhancements
 
 - [Multiple Datasource] Add TLS configuration for multiple data sources ([#6171](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6171))
+- [Multiple DataSource] Do not support import data source object to Local cluster when not enable data source ([#6395](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6395))
 
 ### 🐛 Bug Fixes
 
