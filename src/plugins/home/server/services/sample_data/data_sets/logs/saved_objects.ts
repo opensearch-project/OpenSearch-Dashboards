@@ -398,7 +398,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Line) Avg bytes over time',
       uiStateJSON: '{}',
@@ -408,13 +408,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: '39b5bd70-eb7b-11ed-8e00-17d7d50cd7b2',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzE2LDFd',
@@ -525,7 +519,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Area) Stacked extensions over time',
       uiStateJSON: '{}',
@@ -535,13 +529,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: 'c0ba29f0-eb8f-11ed-8e00-17d7d50cd7b2',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzIyLDFd',
@@ -652,7 +640,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Vertical Bar) Stacked responses over time',
       uiStateJSON: '{}',
@@ -662,13 +650,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: '23a5de70-eb99-11ed-8e00-17d7d50cd7b2',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzI4LDFd',
@@ -780,7 +762,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Horizontal Bar) Top destination count',
       uiStateJSON: '{}',
@@ -790,13 +772,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: '08741f50-2275-11ee-b88b-47a93b5c527c',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzM0LDFd',
@@ -889,7 +865,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Heatmap) Source vs OS',
       uiStateJSON: '{}',
@@ -899,13 +875,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: '3d034700-227f-11ee-b88b-47a93b5c527c',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzM5LDFd',
@@ -953,7 +923,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Table) Bytes by request stats summary',
       uiStateJSON: '{"vis":{"sortColumn":{"colIndex":0,"direction":"asc"}}}',
@@ -963,13 +933,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: 'f8df8de0-22a6-11ee-b88b-47a93b5c527c',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzQyLDFd',
@@ -1061,7 +1025,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Metric) Unique visitors',
       uiStateJSON: '{}',
@@ -1071,13 +1035,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: '104396f0-22a4-11ee-b88b-47a93b5c527c',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzQ3LDFd',
@@ -1170,7 +1128,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Pie) Visitors by OS',
       uiStateJSON: '{}',
@@ -1180,13 +1138,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: '7fd12620-2a44-11ee-92de-ad1b6a4928e5',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzUyLDFd',
@@ -1234,7 +1186,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Gauge) Average bytes by extension',
       uiStateJSON: '{}',
@@ -1244,13 +1196,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: 'f772de50-2281-11ee-b88b-47a93b5c527c',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzU1LDFd',
@@ -1298,7 +1244,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Goal) Average machine RAM',
       uiStateJSON: '{}',
@@ -1308,13 +1254,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: '9b0ae760-2282-11ee-b88b-47a93b5c527c',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzU4LDFd',
@@ -1362,7 +1302,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Coordinate Map) Geohash coordinates',
       uiStateJSON: '{"mapZoom":3,"mapCenter":[35.0659731379842,-107.80640422373408]}',
@@ -1372,13 +1312,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: 'fe07f770-227f-11ee-b88b-47a93b5c527c',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzYxLDFd',
@@ -1388,7 +1322,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Region Map) Destination count',
       uiStateJSON: '{}',
@@ -1398,13 +1332,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: 'eb268650-2a43-11ee-92de-ad1b6a4928e5',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzYyLDFd',
@@ -1490,7 +1418,7 @@ export const getSavedObjects = (): SavedObject[] => [
       description: '',
       kibanaSavedObjectMeta: {
         searchSourceJSON:
-          '{"query":{"query":"","language":"kuery"},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+          '{"index":"90943e30-9a47-11e8-b64d-95841ca0b247","query":{"query":"","language":"kuery"},"filter":[]}',
       },
       title: '(Tag Cloud) Requests',
       uiStateJSON: '{}',
@@ -1500,13 +1428,7 @@ export const getSavedObjects = (): SavedObject[] => [
     },
     id: '81017350-2a45-11ee-92de-ad1b6a4928e5',
     migrationVersion: { visualization: '7.10.0' },
-    references: [
-      {
-        id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-        type: 'index-pattern',
-      },
-    ],
+    references: [],
     type: 'visualization',
     updated_at: '2023-07-25T17:00:34.843Z',
     version: 'WzY3LDFd',
