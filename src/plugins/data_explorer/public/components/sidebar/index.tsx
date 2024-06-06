@@ -94,14 +94,14 @@ export const Sidebar: FC = ({ children }) => {
       }
       // Temporary redirection solution for 2.11, where clicking non-index-pattern data sources
       // will prompt users with modal explaining they are being redirected to Observability log explorer
-      if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
-        redirectToLogExplorer(selectedDataSources[0].label, selectedDataSources[0].type);
-        return;
-      }
+      // if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
+      //   redirectToLogExplorer(selectedDataSources[0].label, selectedDataSources[0].type);
+      //   return;
+      // }
       setSelectedSources(selectedDataSources);
       dispatch(setIndexPattern(selectedDataSources[0].value));
     },
-    [dispatch, redirectToLogExplorer, setSelectedSources]
+    [dispatch, setSelectedSources]
   );
 
   const handleGetDataSetError = useCallback(

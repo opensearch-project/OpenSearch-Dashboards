@@ -8,6 +8,7 @@ import { setOverrides as setFieldOverrides } from '../../../common';
 import { QueryEnhancement } from '../types';
 
 export interface DataSettings {
+  userQueryDataSource: string;
   userQueryLanguage: string;
   userQueryString: string;
   uiOverrides?: {
@@ -24,6 +25,15 @@ export class Settings {
     private readonly storage: IStorageWrapper,
     private readonly queryEnhancements: Map<string, QueryEnhancement>
   ) {}
+
+  getUserQueryDataSource() {
+    return this.storage.get('opensearchDashboards.userQueryDataSource') || 'default';
+  }
+
+  setUserQueryDataSource(dataSource: string) {
+    this.storage.set('opensearchDashboards.userQueryDataSource', dataSource);
+    return true;
+  }
 
   getUserQueryLanguage() {
     return this.storage.get('opensearchDashboards.userQueryLanguage') || 'kuery';
@@ -70,13 +80,15 @@ export class Settings {
 
   toJSON(): DataSettings {
     return {
+      userQueryDataSource: this.getUserQueryDataSource(),
       userQueryLanguage: this.getUserQueryLanguage(),
       userQueryString: this.getUserQueryString(),
       uiOverrides: this.getUiOverrides(),
     };
   }
 
-  updateSettings({ userQueryLanguage, userQueryString, uiOverrides }: DataSettings) {
+  updateSettings({ userQueryDataSource, userQueryString, uiOverrides }: DataSettings) {
+    this.setUserQueryDataSource(userQueryDataSource);
     this.setUserQueryLanguage(userQueryLanguage);
     this.setUserQueryString(userQueryString);
     this.setUiOverrides(uiOverrides);

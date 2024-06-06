@@ -155,6 +155,11 @@ export interface SearchSourceDependencies extends FetchHandlers {
     set: (dataFrame: IDataFrame) => Promise<void>;
     clear: () => void;
   };
+  dfs: {
+    get: (name: string) => IDataFrame | undefined;
+    set: (dataFrame: IDataFrame) => Promise<void>;
+    clear: (name: string) => void;
+  };
   session: {
     get: (datasource: string) => string | undefined;
     set: (datasource: string, session: string) => void;
@@ -304,7 +309,14 @@ export class SearchSource {
    * @return {undefined|IDataFrame}
    */
   getDataFrame() {
+    // TODO: MQL SEAN FLIP THIS BACK LATER
     return this.dependencies.df.get();
+  }
+
+  getDataFrameBySource(name: string | undefined) {
+    // TODO: MQL SEAN FLIP THIS BACK LATER
+    if (!name) return;
+    return this.dependencies.dfs.get(name);
   }
 
   /**
@@ -316,12 +328,17 @@ export class SearchSource {
   async setDataFrame(dataFrame: IDataFrame | undefined) {
     if (dataFrame) {
       await this.dependencies.df.set(dataFrame);
+      // TODO: MQL SEAN LIKELY WE CAN GET THE DATA FRAME WITH THE INDEX PATTERNS AND SET IN IN THE DFS WITHOUT ASYNC NEEDED
+      await this.dependencies.dfs.set(dataFrame);
     } else {
       this.destroyDataFrame();
     }
     return this.getDataFrame();
   }
 
+  // TODO: MQL SEAN FIGURE OUT A TIME TO INVALIDATE THE CACHE
+  // SHOULD IT BE ON APP LOAD
+  // ADVANCED SETTINGS?
   /**
    * Clear the data frame of this SearchSource
    */
@@ -495,13 +512,19 @@ export class SearchSource {
    */
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
+    console.log('search request in search source', searchRequest);
     // TODO: MQL need to update this so it's dependent on what the datasource selected is
+    const datasource = 'mys3';
     const sessionId = this.getSession('mys3');
 
-    const params = getExternalSearchParamsFromRequest(searchRequest, {
+    // TODO: MQL Sean this could be cleaned up probably to search params
+
+    const params = await getExternalSearchParamsFromRequest(searchRequest, {
       getConfig,
       getDataFrame: this.getDataFrame.bind(this),
-      session: sessionId,
+      getDataFrameBySource: this.getDataFrameBySource.bind(this),
+      setDataFrame: this.setDataFrame.bind(this),
+      session: sessionId, // TODO: MQL SEAN WE MIGHT NOT NEED THIS
     });
 
     return search({ params }, options).then(async (response: any) => {
@@ -512,10 +535,7 @@ export class SearchSource {
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
         } else if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
           const asyncResponse = await this.handlePolling(options, response, sessionId);
-          return await onResponse(
-            searchRequest,
-            convertResult(asyncResponse as IDataFrameResponse)
-          );
+          return onResponse(searchRequest, convertResult(asyncResponse as IDataFrameResponse));
         }
         // TODO: MQL else if data_frame_polling then poll for the data frame updating the df fields only
       }

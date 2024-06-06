@@ -22,6 +22,12 @@ export interface DataFrameService {
   clear: () => void;
 }
 
+export interface DataFramesService {
+  get: (name: string) => IDataFrame | undefined;
+  set: (dataFrame: IDataFrame) => Promise<void>;
+  clear: (name: string) => void;
+}
+
 export interface SessionService {
   get: (datasource: string) => string | undefined;
   set: (datasource: string, session: string) => void;
