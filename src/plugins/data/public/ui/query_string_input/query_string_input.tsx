@@ -487,6 +487,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     const newSettings: DataSettings = {
       userQueryLanguage: newQuery.language,
       userQueryString: newQuery.query,
+      userQueryEnhancementsEnabled: !!this.props.isEnhancementsEnabled,
       // userQueryDataSource: newQuery.dataSource,
       ...(fields && { uiOverrides: { fields } }),
     };

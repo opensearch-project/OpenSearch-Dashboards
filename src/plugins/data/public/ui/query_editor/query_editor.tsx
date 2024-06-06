@@ -380,6 +380,7 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     const fields = this.props.queryEnhancements?.get(newQuery.language)?.fields;
     const newSettings: DataSettings = {
+      userQueryEnhancementsEnabled: !!this.props.isEnhancementsEnabled,
       userQueryLanguage: newQuery.language,
       userQueryString: newQuery.query,
       // userQueryDataSource: newQuery.dataSource,

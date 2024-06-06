@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { IStorageWrapper } from '../../../../opensearch_dashboards_utils/public';
 import { setOverrides as setFieldOverrides } from '../../../common';
 import { QueryEnhancement } from '../types';
@@ -23,10 +24,15 @@ export interface DataSettings {
 }
 
 export class Settings {
+  private enabledQueryEnhancementsUpdated$ = new BehaviorSubject<boolean>(false);
+
   constructor(
+    private readonly isQueryEnhancementsEnabled: boolean,
     private readonly storage: IStorageWrapper,
     private readonly queryEnhancements: Map<string, QueryEnhancement>
-  ) {}
+  ) {
+    this.enabledQueryEnhancementsUpdated$.next(this.isQueryEnhancementsEnabled);
+  }
 
   // getUserQueryDataSource() {
   //   return this.storage.get('opensearchDashboards.userQueryDataSource') || 'default';
@@ -37,12 +43,21 @@ export class Settings {
   //   return true;
   // }
 
+  getEnabledQueryEnhancementsUpdated$ = () => {
+    return this.enabledQueryEnhancementsUpdated$.asObservable();
+  };
+
   getUserQueryEnhancementsEnabled() {
-    return this.storage.get('opensearchDashboards.userQueryEnhancementsEnabled') || true;
+    return (
+      this.storage.get('opensearchDashboards.userQueryEnhancementsEnabled') ||
+      this.isQueryEnhancementsEnabled
+    );
   }
 
   setUserQueryEnhancementsEnabled(enabled: boolean) {
+    if (!this.isQueryEnhancementsEnabled) return;
     this.storage.set('opensearchDashboards.userQueryEnhancementsEnabled', enabled);
+    this.enabledQueryEnhancementsUpdated$.next(enabled);
     return true;
   }
 
@@ -114,10 +129,11 @@ export class Settings {
 }
 
 interface Deps {
+  isQueryEnhancementsEnabled: boolean;
   storage: IStorageWrapper;
   queryEnhancements: Map<string, QueryEnhancement>;
 }
 
-export function createSettings({ storage, queryEnhancements }: Deps) {
-  return new Settings(storage, queryEnhancements);
+export function createSettings({ isQueryEnhancementsEnabled, storage, queryEnhancements }: Deps) {
+  return new Settings(isQueryEnhancementsEnabled, storage, queryEnhancements);
 }

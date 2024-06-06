@@ -51,6 +51,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
 
   public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
     const Settings = createSettings({
+      isQueryEnhancementsEnabled: this.enhancementsConfig?.enabled,
       storage,
       queryEnhancements: this.queryEnhancements,
     });

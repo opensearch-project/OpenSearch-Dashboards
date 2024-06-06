@@ -20,14 +20,38 @@ export const Sidebar: FC = ({ children }) => {
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
+  const [isEnhancementsEnabled, setIsEnhancementsEnabled] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const {
     services: {
       data: { indexPatterns, dataSources, ui },
       notifications: { toasts },
+      application,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
+
+  useEffect(() => {
+    const subscriptions = ui.Settings.getEnabledQueryEnhancementsUpdated$().subscribe(
+      (enabledQueryEnhancements) => {
+        setIsEnhancementsEnabled(enabledQueryEnhancements);
+      }
+    );
+
+    return () => {
+      subscriptions.unsubscribe();
+    };
+  }, [ui.Settings]);
+
+  // TODO: MQL: to be removed once MQL is not experimental
+  const redirectToLogExplorer = useCallback(
+    (dsName: string, dsType: string) => {
+      return application.navigateToUrl(
+        `../observability-logs#/explorer?datasourceName=${dsName}&datasourceType=${dsType}`
+      );
+    },
+    [application]
+  );
 
   const setContainerRef = useCallback((uiContainerRef) => {
     uiContainerRef.appendChild(containerRef.current);
@@ -129,7 +153,7 @@ export const Sidebar: FC = ({ children }) => {
         borderRadius="none"
         color="transparent"
       >
-        {ui.Settings.getUserQueryEnhancementsEnabled() && (
+        {isEnhancementsEnabled && (
           <EuiPortal
             portalRef={(node) => {
               containerRef.current = node;
@@ -138,7 +162,7 @@ export const Sidebar: FC = ({ children }) => {
             {dataSourceSelector}
           </EuiPortal>
         )}
-        {!ui.Settings.getUserQueryEnhancementsEnabled() && (
+        {!isEnhancementsEnabled && (
           <EuiSplitPanel.Inner
             paddingSize="s"
             grow={false}
