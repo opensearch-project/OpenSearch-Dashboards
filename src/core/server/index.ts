@@ -328,6 +328,8 @@ export {
   Permissions,
   updateDataSourceNameInVegaSpec,
   extractVegaSpecFromSavedObject,
+  extractTimelineExpression,
+  updateDataSourceNameInTimeline,
 } from './saved_objects';
 
 export {
