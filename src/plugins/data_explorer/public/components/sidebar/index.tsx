@@ -129,7 +129,7 @@ export const Sidebar: FC = ({ children }) => {
         borderRadius="none"
         color="transparent"
       >
-        {!!ui.isEnhancementsEnabled && (
+        {ui.Settings.getUserQueryEnhancementsEnabled() && (
           <EuiPortal
             portalRef={(node) => {
               containerRef.current = node;
@@ -138,7 +138,7 @@ export const Sidebar: FC = ({ children }) => {
             {dataSourceSelector}
           </EuiPortal>
         )}
-        {!!!ui.isEnhancementsEnabled && (
+        {!ui.Settings.getUserQueryEnhancementsEnabled() && (
           <EuiSplitPanel.Inner
             paddingSize="s"
             grow={false}

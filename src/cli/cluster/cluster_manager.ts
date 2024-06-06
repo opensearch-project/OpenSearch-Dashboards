@@ -48,7 +48,15 @@ process.env.osdWorkerType = 'managr';
 
 export type SomeCliArgs = Pick<
   CliArgs,
-  'quiet' | 'silent' | 'repl' | 'disableOptimizer' | 'watch' | 'extraPlugins' | 'runExamples' | 'cache' | 'dist'
+  | 'quiet'
+  | 'silent'
+  | 'repl'
+  | 'disableOptimizer'
+  | 'watch'
+  | 'extraPlugins'
+  | 'runExamples'
+  | 'cache'
+  | 'dist'
 >;
 
 const firstAllTrue = (...sources: Array<Rx.Observable<boolean>>) =>

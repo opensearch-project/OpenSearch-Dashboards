@@ -21,6 +21,9 @@ import { pplSearchStrategyProvider } from './search/ppl/ppl_search_strategy';
 import { sqlSearchStrategyProvider } from './search/sql/sql_search_strategy';
 import { sqlAsyncSearchStrategyProvider } from './search/sql/sql_async_search_strategy';
 
+// import { logsPPLSpecProvider } from './sample_data/ppl';
+// const pplSampleDateSet = logsPPLSpecProvider();
+
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
   private readonly logger: Logger;

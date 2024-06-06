@@ -102,6 +102,8 @@ export const IGNORE_DIRECTORY_GLOBS = [
   'test/functional/fixtures/opensearch_archiver/visualize_source-filters',
   'packages/osd-pm/src/utils/__fixtures__/*',
   'src/dev/build/tasks/__fixtures__/*',
+  'release-notes',
+  'plugins-extra',
 ];
 
 /**

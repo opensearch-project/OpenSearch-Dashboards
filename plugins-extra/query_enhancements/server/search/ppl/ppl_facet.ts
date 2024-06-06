@@ -30,6 +30,7 @@ export class PPLFacet {
       res.success = true;
       res.data = pplDataSource.getDataSource();
     } catch (err: any) {
+      // eslint-disable-next-line no-console
       console.error('PPL query fetch err: ', err);
       res.data = err;
     }

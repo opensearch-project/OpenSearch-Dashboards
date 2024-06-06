@@ -37,7 +37,7 @@ import {
   OpenSearchDashboardsReactContextValue,
   withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-import { Filter, IIndexPattern, Query, TimeRange } from '../../../common';
+import { Filter, IIndexPattern, Query, TimeRange, UI_SETTINGS } from '../../../common';
 import { SavedQuery, SavedQueryAttributes, TimeHistoryContract } from '../../query';
 import { IDataPluginServices } from '../../types';
 import { FilterBar } from '../filter_bar/filter_bar';
@@ -206,18 +206,18 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   };
 
-  private shouldRenderQueryEditor() {
+  private shouldRenderQueryEditor(isEnhancementsEnabledOverride: boolean) {
     // TODO: MQL handle no index patterns?
-    if (!!!this.props.isEnhancementsEnabled) return false;
+    if (!isEnhancementsEnabledOverride) return false;
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
     const showQueryEditor =
       this.props.showQueryEditor && this.props.indexPatterns && this.state.query;
     return this.props.showQueryBar && (showDatePicker || showQueryEditor);
   }
 
-  private shouldRenderQueryBar() {
+  private shouldRenderQueryBar(isEnhancementsEnabledOverride: boolean) {
     // TODO: MQL handle no index patterns?
-    if (!!this.props.isEnhancementsEnabled) return false;
+    if (isEnhancementsEnabledOverride) return false;
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
     const showQueryInput =
       this.props.showQueryInput && this.props.indexPatterns && this.state.query;
@@ -411,8 +411,15 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       />
     );
 
+    const isEnhancementsEnabledOverride = this.services.uiSettings.get(
+      UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED
+    );
+    if (!!this.props.isEnhancementsEnabled) {
+      this.props.settings?.setUserQueryEnhancementsEnabled(isEnhancementsEnabledOverride);
+    }
+
     let queryBar;
-    if (this.shouldRenderQueryBar()) {
+    if (this.shouldRenderQueryBar(isEnhancementsEnabledOverride)) {
       // TODO: MQL make this default query bar top row but this.props.queryEnhancements.get(language) can pass a component
       queryBar = (
         <QueryBarTopRow
@@ -477,7 +484,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     }
 
     let queryEditor;
-    if (this.shouldRenderQueryEditor()) {
+    if (this.shouldRenderQueryEditor(isEnhancementsEnabledOverride)) {
       // TODO: MQL make this default query bar top row but this.props.queryEnhancements.get(language) can pass a component
       queryEditor = (
         <QueryEditorTopRow

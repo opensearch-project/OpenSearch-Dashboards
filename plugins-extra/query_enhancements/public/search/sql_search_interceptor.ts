@@ -1,6 +1,7 @@
 import { trimEnd } from 'lodash';
 import { Observable, from } from 'rxjs';
 import { stringify } from '@osd/std';
+import { i18n } from '@osd/i18n';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -11,7 +12,6 @@ import {
 } from '../../../../src/plugins/data/public';
 import { SQL_SEARCH_STRATEGY } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
-import { i18n } from '@osd/i18n';
 
 export class SQLQlSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
