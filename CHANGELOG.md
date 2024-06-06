@@ -29,6 +29,8 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### 🛠 Maintenance
 
+- Update json5 dependency ([#6937](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6937))
+
 ### 🪛 Refactoring
 
 - Remove unused Sass in `tile_map` plugin ([#4110](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/4110))
