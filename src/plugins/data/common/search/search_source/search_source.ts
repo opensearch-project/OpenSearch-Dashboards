@@ -506,6 +506,7 @@ export class SearchSource {
         const fields = uniq((data[key] || []).concat(val));
         return addToRoot(key, fields);
       case 'index':
+      case 'dataSource':
       case 'type':
       case 'highlightAll':
         return key && data[key] == null && addToRoot(key, val);

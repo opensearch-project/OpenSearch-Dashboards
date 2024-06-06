@@ -12,6 +12,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { DataExplorerServices } from '../../types';
 import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
+import { setDataSource } from '../../utils/state_management/metadata_slice';
 
 export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
@@ -25,7 +26,6 @@ export const Sidebar: FC = ({ children }) => {
     services: {
       data: { indexPatterns, dataSources, ui },
       notifications: { toasts },
-      application,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
@@ -77,31 +77,19 @@ export const Sidebar: FC = ({ children }) => {
     }
   }, [indexPatternId, activeDataSources, dataSourceOptionList]);
 
-  const redirectToLogExplorer = useCallback(
-    (dsName: string, dsType: string) => {
-      return application.navigateToUrl(
-        `../observability-logs#/explorer?datasourceName=${dsName}&datasourceType=${dsType}`
-      );
-    },
-    [application]
-  );
-
   const handleSourceSelection = useCallback(
     (selectedDataSources: DataSourceOption[]) => {
-      if (selectedDataSources.length === 0) {
-        setSelectedSources(selectedDataSources);
-        return;
-      }
-      // Temporary redirection solution for 2.11, where clicking non-index-pattern data sources
-      // will prompt users with modal explaining they are being redirected to Observability log explorer
-      if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
-        redirectToLogExplorer(selectedDataSources[0].label, selectedDataSources[0].type);
-        return;
-      }
       setSelectedSources(selectedDataSources);
-      dispatch(setIndexPattern(selectedDataSources[0].value));
+      if (selectedDataSources.length === 0) {
+        return;
+      }
+
+      if (selectedDataSources[0].type === 'default') {
+        dispatch(setIndexPattern(selectedDataSources[0].value));
+      }
+      dispatch(setDataSource(selectedDataSources[0].ds.getId()));
     },
-    [dispatch, redirectToLogExplorer, setSelectedSources]
+    [dispatch, setSelectedSources]
   );
 
   const handleGetDataSetError = useCallback(
