@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useState, FormEventHandler, useRef, useMemo, useEffect } from 'react';
+import { useCallback, useState, FormEventHandler, useRef, useMemo } from 'react';
 import { htmlIdGenerator, EuiFieldTextProps, EuiColorPickerProps } from '@elastic/eui';
+
 import { useApplications } from '../../hooks';
 import {
   getUseCaseFeatureConfig,
@@ -12,7 +13,6 @@ import {
   isUseCaseFeatureConfig,
 } from '../../utils';
 
-import { WorkspaceFormTabs } from './constants';
 import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
 import { appendDefaultFeatureIds, getNumberOfErrors, validateWorkspaceForm } from './utils';
 
@@ -26,7 +26,6 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   const [description, setDescription] = useState(defaultValues?.description);
   const [color, setColor] = useState(defaultValues?.color);
 
-  const [selectedTab, setSelectedTab] = useState(WorkspaceFormTabs.UsersAndPermissions);
   const [featureConfigs, setFeatureConfigs] = useState(
     appendDefaultFeatureIds(defaultValues?.features ?? [])
   );
@@ -107,15 +106,10 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     setColor(text);
   }, []);
 
-  const handleTabPermissionClick = useCallback(() => {
-    setSelectedTab(WorkspaceFormTabs.UsersAndPermissions);
-  }, []);
-
   return {
     formId: formIdRef.current,
     formData: getFormData(),
     formErrors,
-    selectedTab,
     applications,
     numberOfErrors,
     handleFormSubmit,
@@ -123,7 +117,6 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     handleUseCasesChange,
     handleNameInputChange,
     setPermissionSettings,
-    handleTabPermissionClick,
     handleDescriptionInputChange,
   };
 };

@@ -14,8 +14,6 @@ import {
   EuiText,
   EuiColorPicker,
   EuiHorizontalRule,
-  EuiTab,
-  EuiTabs,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -39,21 +37,16 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     formId,
     formData,
     formErrors,
-    selectedTab,
     numberOfErrors,
     handleFormSubmit,
     handleColorChange,
     handleUseCasesChange,
     handleNameInputChange,
     setPermissionSettings,
-    handleTabPermissionClick,
     handleDescriptionInputChange,
   } = useWorkspaceForm(props);
   const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
     defaultMessage: 'Enter Details',
-  });
-  const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
-    defaultMessage: 'Users & Permissions',
   });
 
   return (
@@ -151,23 +144,15 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         </EuiFormRow>
       </EuiPanel>
       <EuiSpacer />
-
       {permissionEnabled && (
-        <EuiTabs>
-          <EuiTab
-            onClick={handleTabPermissionClick}
-            isSelected={selectedTab === WorkspaceFormTabs.UsersAndPermissions}
-          >
-            <EuiText>{usersAndPermissionsTitle}</EuiText>
-          </EuiTab>
-        </EuiTabs>
-      )}
-      {permissionEnabled && selectedTab === WorkspaceFormTabs.UsersAndPermissions && (
         <EuiPanel>
           <EuiTitle size="s">
-            <h2>{usersAndPermissionsTitle}</h2>
+            <h2>
+              {i18n.translate('workspace.form.usersAndPermissions.title', {
+                defaultMessage: 'Manage access and permissions',
+              })}
+            </h2>
           </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
           <WorkspacePermissionSettingPanel
             errors={formErrors.permissionSettings}
             onChange={setPermissionSettings}
