@@ -37,6 +37,7 @@ import {
   DataSourceSelectionService,
   defaultDataSourceSelection,
 } from '../service/data_source_selection_service';
+import { DataSourceError } from '../types';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
@@ -186,7 +187,11 @@ export async function getDataSourceById(
   const response = await savedObjectsClient.get('data-source', id);
 
   if (!response || response.error) {
-    throw new Error('Unable to find data source');
+    const statusCode = response.error?.statusCode;
+    if (statusCode === 404) {
+      throw new DataSourceError({ statusCode, body: 'Unable to find data source' });
+    }
+    throw new DataSourceError({ statusCode, body: response.error?.message });
   }
 
   const attributes: any = response?.attributes || {};
