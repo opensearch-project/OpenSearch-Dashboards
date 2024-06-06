@@ -411,12 +411,11 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       />
     );
 
-    const isEnhancementsEnabledOverride = this.services.uiSettings.get(
-      UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED
-    );
-    if (!!this.props.isEnhancementsEnabled) {
-      this.props.settings?.setUserQueryEnhancementsEnabled(isEnhancementsEnabledOverride);
-    }
+    const isEnhancementsEnabledOverride =
+      !!this.props.isEnhancementsEnabled &&
+      this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+
+    this.props.settings?.setUserQueryEnhancementsEnabled(isEnhancementsEnabledOverride);
 
     let queryBar;
     if (this.shouldRenderQueryBar(isEnhancementsEnabledOverride)) {
