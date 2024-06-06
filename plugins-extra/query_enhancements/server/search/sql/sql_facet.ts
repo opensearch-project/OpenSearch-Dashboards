@@ -26,6 +26,7 @@ export class SQLFacet {
       res.success = true;
       res.data = queryRes;
     } catch (err: any) {
+      // eslint-disable-next-line no-console
       console.error('SQL query fetch err: ', err);
       res.data = err;
     }
