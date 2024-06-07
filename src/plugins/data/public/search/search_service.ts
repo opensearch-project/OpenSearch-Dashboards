@@ -173,8 +173,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         if (dataFrame?.name && dataFrame?.meta?.sessionId) {
           this.sessionCache.set(dataFrame.name, dataFrame.meta.sessionId);
         }
-        const existingIndexPattern = indexPatterns.getByTitle(dataFrame.name!, true);
-        if (existingIndexPattern) {
+        if (dataFrame?.schema) {
+          const existingIndexPattern = indexPatterns.getByTitle(dataFrame.name!, true);
           const dataSet = await indexPatterns.create(
             dataFrameToSpec(dataFrame, existingIndexPattern?.id),
             !existingIndexPattern?.id
@@ -210,13 +210,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         if (dataFrame?.name && dataFrame?.meta?.sessionId) {
           this.sessionCache.set(dataFrame.name, dataFrame.meta.sessionId);
         }
-        const existingIndexPattern = indexPatterns.getByTitle(dataFrame.name!, true);
-        const dataSet = await indexPatterns.create(
-          dataFrameToSpec(dataFrame, existingIndexPattern?.id),
-          !existingIndexPattern?.id
-        );
-        // save to cache by title because the id is not unique for temporary index pattern created
-        indexPatterns.saveToCache(dataSet.title, dataSet);
+        if (dataFrame?.schema) {
+          const existingIndexPattern = indexPatterns.getByTitle(dataFrame.name!, true);
+          const dataSet = await indexPatterns.create(
+            dataFrameToSpec(dataFrame, existingIndexPattern?.id),
+            !existingIndexPattern?.id
+          );
+          // save to cache by title because the id is not unique for temporary index pattern created
+          indexPatterns.saveToCache(dataSet.title, dataSet);
+        }
       },
       clear: (name: string) => {
         if (this.dfsCache.get(name) === undefined) return;

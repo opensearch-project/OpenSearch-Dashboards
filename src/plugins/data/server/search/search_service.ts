@@ -243,26 +243,41 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           };
 
           const dfsService: DataFramesService = {
-            get: () => this.dfCache.get(),
-            set: async (dataFrame: IDataFrame) => {
-              if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
-                scopedIndexPatterns.clearCache(this.dfCache.get()!.name, false);
+            get: (name: string) => {
+              const df = this.dfsCache.get(name);
+              if (df) {
+                const sessionId = this.sessionCache.get(df?.name);
+                if (sessionId) {
+                  df.meta = { ...df.meta, sessionId };
+                }
               }
-              this.dfCache.set(dataFrame);
-              const existingIndexPattern = scopedIndexPatterns.getByTitle(dataFrame.name!, true);
-              const dataSet = await scopedIndexPatterns.create(
-                dataFrameToSpec(dataFrame, existingIndexPattern?.id),
-                !existingIndexPattern?.id
-              );
-              
-              // save to cache by title because the id is not unique for temporary index pattern created
-              scopedIndexPatterns.saveToCache(dataSet.title, dataSet);
+              return df;
             },
-            clear: () => {
-              if (this.dfCache.get() === undefined) return;
+            set: async (dataFrame: IDataFrame) => {
+              // this.dfsCache.get(dataFrame.name!, dataFrame);
+              this.dfsCache.set(dataFrame.name!, dataFrame);
+              // if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
+              //   scopedIndexPatterns.clearCache(this.dfCache.get()!.name, false);
+              // }
+              // this.dfCache.set(dataFrame);
+              if (dataFrame?.name && dataFrame?.meta?.sessionId) {
+                this.sessionCache.set(dataFrame.name, dataFrame.meta.sessionId);
+              }
+              if (dataFrame?.schema) {
+                const existingIndexPattern = scopedIndexPatterns.getByTitle(dataFrame.name!, true);
+                const dataSet = await scopedIndexPatterns.create(
+                  dataFrameToSpec(dataFrame, existingIndexPattern?.id),
+                  !existingIndexPattern?.id
+                );
+                // save to cache by title because the id is not unique for temporary index pattern created
+                scopedIndexPatterns.saveToCache(dataSet.title, dataSet);
+              }
+            },
+            clear: (name: string) => {
+              if (this.dfsCache.get(name) === undefined) return;
               // name because the id is not unique for temporary index pattern created
-              scopedIndexPatterns.clearCache(this.dfCache.get()!.name, false);
-              this.dfCache.clear();
+              scopedIndexPatterns.clearCache(this.dfsCache.get(name)!.name, false);
+              this.dfsCache.clear(name);
             },
           };
 
@@ -308,6 +323,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               loadingCount$: new BehaviorSubject(0),
             },
             df: dfService,
+            dfs: dfsService,
             session: sessionService,
           };
 
