@@ -18,7 +18,7 @@ export class SQLAsyncFacet {
       const params = {
         body: {
           query: request.body.query.qs,
-          datasource: df?.name,
+          datasource: request.body.dataSource,
           lang: 'sql',
           sessionId: df?.meta?.sessionId,
         },

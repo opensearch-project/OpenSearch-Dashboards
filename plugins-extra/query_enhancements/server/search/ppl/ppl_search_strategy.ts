@@ -76,6 +76,13 @@ export const pplSearchStrategyProvider = (
             ? `source=${source} | head`
             : requestParams.search;
         const rawResponse: any = await pplFacet.describeQuery(request);
+        if (!rawResponse.success) {
+          return {
+            type: 'data_frame',
+            body: { error: rawResponse.data },
+            took: rawResponse.took,
+          };
+        }
 
         const dataFrame = createDataFrame({
           name: source,

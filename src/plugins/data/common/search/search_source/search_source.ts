@@ -474,7 +474,9 @@ export class SearchSource {
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
         } else if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
           const dataFrameResponse = response as IDataFrameResponse;
-          await this.setDataFrame(dataFrameResponse.body as IDataFrame);
+          if (!response.body?.error) {
+            await this.setDataFrame(dataFrameResponse.body as IDataFrame);
+          }
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
         }
         // TODO: MQL else if data_frame_polling then poll for the data frame updating the df fields only

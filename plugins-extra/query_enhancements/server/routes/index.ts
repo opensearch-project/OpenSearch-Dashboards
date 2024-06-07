@@ -106,6 +106,7 @@ export function defineRoutes(
             format: schema.string(),
           }),
           df: schema.any(),
+          dataSource: schema.string(),
         }),
       },
     },
