@@ -72,7 +72,8 @@ export async function importSavedObjectsFromStream({
     supportedTypes,
     dataSourceId,
   });
-  // if not enable data_source, throw error early
+  // if dataSource is not enabled, but object type is data-source, or saved object id contains datasource id
+  // return unsupported type error
   if (!dataSourceEnabled) {
     const notSupportedErrors: SavedObjectsImportError[] = collectSavedObjectsResult.collectedObjects.reduce(
       (errors: SavedObjectsImportError[], obj) => {
