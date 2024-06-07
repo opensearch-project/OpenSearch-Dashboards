@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiSwitch } from '@elastic/eui';
 import { TopNav } from './top_nav';
@@ -104,7 +105,9 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       button={
         <EuiButtonIcon
           data-test-subj="discoverOptionsButton"
-          aria-label="discoverOptionsButton"
+          aria-label={i18n.translate('discover.canvas.discoverOptionsButtonLabel', {
+            defaultMessage: 'Options for discover',
+          })}
           size="s"
           iconType="gear"
           onClick={() => setOptionsOpen(!isOptionsOpen)}

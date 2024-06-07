@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import {
   EuiButtonEmpty,
   EuiForm,
@@ -48,7 +49,9 @@ export function LegacyQueryLanguageSwitcher(props: Props) {
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       className="euiFormControlLayout__append dqlQueryBar__languageSwitcherButton"
       data-test-subj={'switchQueryLanguageButton'}
-      aria-label="switchQueryLanguageButton"
+      aria-label={i18n.translate('data.query.queryBar.switchQueryLanguageButtonLabel', {
+        defaultMessage: 'Query language switch button',
+      })}
     >
       {props.language === 'lucene' ? luceneLabel : dqlLabel}
     </EuiButtonEmpty>

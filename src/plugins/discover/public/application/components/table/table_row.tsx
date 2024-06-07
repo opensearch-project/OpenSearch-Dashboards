@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { i18n } from '@osd/i18n';
 import classNames from 'classnames';
 import React, { ReactNode } from 'react';
 import { FieldMapping, DocViewFilterFn } from '../../doc_views/doc_views_types';
@@ -81,7 +82,9 @@ export function DocViewTableRow({
     <tr
       key={field}
       data-test-subj={`tableDocViewRow-${field}`}
-      aria-label={`tableDocViewRow-${field}`}
+      aria-label={i18n.translate('discover.tble.tableDocViewRowLabel', {
+        defaultMessage: `Discover table field: ${field}`,
+      })}
     >
       {typeof onFilter === 'function' && (
         <td className="osdDocViewer__buttons">

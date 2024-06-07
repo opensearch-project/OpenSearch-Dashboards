@@ -28,10 +28,10 @@
  * under the License.
  */
 
+import { i18n } from '@osd/i18n';
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
 import React, { useState } from 'react';
-import { i18n } from '@osd/i18n';
 
 import {
   EuiButton,
@@ -314,7 +314,9 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         isLoading={props.isLoading}
         onClick={onClickSubmitButton}
         data-test-subj="querySubmitButton"
-        aria-label="querySubmitButton"
+        aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
+          defaultMessage: 'Submit query button',
+        })}
       />
     );
 

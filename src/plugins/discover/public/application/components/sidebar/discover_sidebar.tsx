@@ -305,7 +305,9 @@ const FieldList = ({
         onClick={() => setExpanded(!expanded)}
         size="xs"
         className="dscSideBar_fieldGroup"
-        aria-label={title}
+        aria-label={i18n.translate('discover.fieldChooser.fieldGroupLabel', {
+          defaultMessage: title,
+        })}
       >
         {title}
       </EuiButtonEmpty>

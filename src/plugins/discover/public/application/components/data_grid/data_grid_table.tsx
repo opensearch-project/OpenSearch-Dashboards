@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { IndexPattern, getServices } from '../../../opensearch_dashboards_services';
@@ -124,7 +125,9 @@ export const DataGridTable = ({
         data-title={title}
         data-description={description}
         data-test-subj="discoverTable"
-        aria-label="discoverTable"
+        aria-label={i18n.translate('discover.dataGrid.discoverTableLabel', {
+          defaultMessage: 'Discover table',
+        })}
         className="eui-xScrollWithShadows"
       >
         <EuiPanel hasBorder={false} hasShadow={false} {...tablePanelProps}>

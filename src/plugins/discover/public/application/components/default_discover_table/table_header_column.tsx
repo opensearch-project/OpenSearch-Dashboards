@@ -11,8 +11,8 @@
 
 import './_table_header.scss';
 
-import React, { ReactNode } from 'react';
 import { i18n } from '@osd/i18n';
+import React, { ReactNode } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { SortOrder } from '../../../saved_searches/types';
 
@@ -169,7 +169,12 @@ export function TableHeaderColumn({
 
   return (
     <th data-test-subj="docTableHeaderField" className="docTableHeaderField">
-      <span data-test-subj={`docTableHeader-${name}`} aria-label={`docTableHeader-${name}`}>
+      <span
+        data-test-subj={`docTableHeader-${name}`}
+        aria-label={i18n.translate('discover.defaultTable.docTableHeaderLabel', {
+          defaultMessage: `Discover table column: ${name}`,
+        })}
+      >
         {displayName}
         {buttons
           .filter((button) => button.active)
