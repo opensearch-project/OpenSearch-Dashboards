@@ -47,9 +47,13 @@ export const requestAgentByConfig = async (options: {
   context: RequestHandlerContext;
   configName: string;
   body: RequestBody;
+  dataSourceId?: string;
 }): Promise<AgentResponse> => {
-  const { context, configName, body } = options;
-  const client = context.core.opensearch.client.asCurrentUser;
+  const { context, configName, body, dataSourceId } = options;
+  const client =
+    context.query_assist.dataSourceEnabled && dataSourceId
+      ? await context.dataSource.opensearch.getClient(dataSourceId)
+      : context.core.opensearch.client.asCurrentUser;
   const agentId = await getAgentIdByConfig(client, configName);
   return client.transport.request(
     {

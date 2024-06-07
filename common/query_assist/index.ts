@@ -11,4 +11,6 @@ export interface QueryAssistParameters {
   question: string;
   index: string;
   language: string;
+  // for MDS
+  dataSourceId?: string;
 }

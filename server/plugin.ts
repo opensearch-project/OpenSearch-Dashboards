@@ -20,7 +20,7 @@ import {
   QueryEnhancementsPluginSetupDependencies,
   QueryEnhancementsPluginStart,
 } from './types';
-import { OpenSearchPPLPlugin, OpenSearchObservabilityPlugin } from './utils';
+import { OpenSearchObservabilityPlugin, OpenSearchPPLPlugin } from './utils';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -44,6 +44,11 @@ export class QueryEnhancementsPlugin
 
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL, pplSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL, sqlSearchStrategy);
+
+    core.http.registerRouteHandlerContext('query_assist', () => ({
+      logger: this.logger,
+      dataSourceEnabled: !!dataSource,
+    }));
 
     defineRoutes(this.logger, router, {
       ppl: pplSearchStrategy,

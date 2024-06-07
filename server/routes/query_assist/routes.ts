@@ -1,12 +1,12 @@
 import { schema, Type } from '@osd/config-schema';
-import { IRouter, Logger } from 'opensearch-dashboards/server';
+import { IRouter } from 'opensearch-dashboards/server';
 import { isResponseError } from '../../../../../src/core/server/opensearch/client/errors';
 import { ERROR_DETAILS } from '../../../common/query_assist';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
 import { AGENT_CONFIG_NAME_MAP } from './index';
 import { createPPLResponseBody } from './ppl/create_response';
 
-export function registerQueryAssistRoutes(logger: Logger, router: IRouter) {
+export function registerQueryAssistRoutes(router: IRouter) {
   const languageSchema = schema.oneOf(
     Object.keys(AGENT_CONFIG_NAME_MAP).map(schema.literal) as [Type<'PPL'>]
   );
@@ -18,10 +18,16 @@ export function registerQueryAssistRoutes(logger: Logger, router: IRouter) {
         params: schema.object({
           language: languageSchema,
         }),
+        query: schema.object({
+          dataSourceId: schema.maybe(schema.string()),
+        }),
       },
     },
     async (context, request, response) => {
-      const client = context.core.opensearch.client.asCurrentUser;
+      const client =
+        context.query_assist.dataSourceEnabled && request.query.dataSourceId
+          ? await context.dataSource.opensearch.getClient(request.query.dataSourceId)
+          : context.core.opensearch.client.asCurrentUser;
       try {
         // if the call does not throw any error, then the agent is properly configured
         await getAgentIdByConfig(client, AGENT_CONFIG_NAME_MAP[request.params.language]);
@@ -40,6 +46,7 @@ export function registerQueryAssistRoutes(logger: Logger, router: IRouter) {
           index: schema.string(),
           question: schema.string(),
           language: languageSchema,
+          dataSourceId: schema.maybe(schema.string()),
         }),
       },
     },
@@ -56,6 +63,7 @@ export function registerQueryAssistRoutes(logger: Logger, router: IRouter) {
               question: request.body.question,
             },
           },
+          dataSourceId: request.body.dataSourceId,
         });
         const responseBody = createPPLResponseBody(agentResponse);
         return response.ok({ body: responseBody });

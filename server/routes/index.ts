@@ -70,5 +70,5 @@ export function defineRoutes(
 ) {
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.PPL);
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQL);
-  registerQueryAssistRoutes(logger, router);
+  registerQueryAssistRoutes(router);
 }
