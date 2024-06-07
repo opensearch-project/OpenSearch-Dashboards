@@ -75,6 +75,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
             <QueryAssistInput
               inputRef={inputRef}
               persistedLog={persistedLog}
+              isDisabled={loading}
               selectedIndex={selectedIndex}
               previousQuestion={previousQuestionRef.current}
             />
