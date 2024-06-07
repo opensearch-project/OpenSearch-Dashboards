@@ -5,6 +5,6 @@
   "server": true,
   "ui": true,
   "requiredPlugins": ["data"],
-  "optionalPlugins": [],
+  "optionalPlugins": ["dataSource", "dataSourceManagement"],
   "requiredBundles": ["opensearchDashboardsUtils", "opensearchDashboardsReact"]
 }
