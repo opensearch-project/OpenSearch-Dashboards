@@ -7,6 +7,7 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { IIndexPattern } from '../../../common';
+import { DataSource } from '../../data_sources/datasource';
 
 interface SearchBarExtensionProps {
   config: SearchBarExtensionConfig;
@@ -19,6 +20,10 @@ export interface SearchBarExtensionDependencies {
    * Currently selected index patterns.
    */
   indexPatterns?: Array<IIndexPattern | string>;
+  /**
+   * Currently selected data source.
+   */
+  dataSource?: DataSource;
 }
 
 export interface SearchBarExtensionConfig {

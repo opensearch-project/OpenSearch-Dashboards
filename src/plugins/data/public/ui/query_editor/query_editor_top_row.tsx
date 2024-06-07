@@ -254,9 +254,10 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     if (!shouldRenderSearchBarExtensions() || !queryEditorHeaderRef.current) return;
     return (
       <SearchBarExtensions
-        configs={props.queryEnhancements?.get(queryLanguage!)?.searchBar?.extensions}
+        configs={queryUiEnhancement?.extensions}
         portalContainer={queryEditorHeaderRef.current}
         indexPatterns={props.indexPatterns}
+        dataSource={props.dataSource}
       />
     );
   }
@@ -293,9 +294,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderSearchBarExtensions(): boolean {
-    return Boolean(
-      queryLanguage && props.queryEnhancements?.get(queryLanguage)?.searchBar?.extensions?.length
-    );
+    return Boolean(queryUiEnhancement?.extensions?.length);
   }
 
   function renderUpdateButton() {
