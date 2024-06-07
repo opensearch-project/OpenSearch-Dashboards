@@ -51,7 +51,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
 
   public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
     const Settings = createSettings({
-      isQueryEnhancementsEnabled: this.enhancementsConfig?.enabled,
+      config: this.enhancementsConfig,
       storage,
       queryEnhancements: this.queryEnhancements,
     });
@@ -65,14 +65,12 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       core,
       data: dataServices,
       storage,
-      isEnhancementsEnabled: this.enhancementsConfig?.enabled,
       queryEnhancements: this.queryEnhancements,
       settings: Settings,
       setContainerRef,
     });
 
     return {
-      isEnhancementsEnabled: this.enhancementsConfig?.enabled,
       queryEnhancements: this.queryEnhancements,
       IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
       SearchBar,

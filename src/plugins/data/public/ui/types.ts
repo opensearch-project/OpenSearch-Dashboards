@@ -61,7 +61,6 @@ export interface IUiSetup {
  * Data plugin prewired UI components
  */
 export interface IUiStart {
-  isEnhancementsEnabled: boolean;
   queryEnhancements: Map<string, QueryEnhancement>;
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
