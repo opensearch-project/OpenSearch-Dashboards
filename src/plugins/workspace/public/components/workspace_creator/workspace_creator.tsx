@@ -78,7 +78,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   return (
     <EuiPage paddingSize="none">
       <EuiPageBody>
-        <EuiPageHeader restrictWidth pageTitle="Create Workspace" />
+        <EuiPageHeader restrictWidth pageTitle="Create a workspace" />
         <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"

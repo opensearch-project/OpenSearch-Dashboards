@@ -34,16 +34,6 @@ export interface WorkspaceFormData extends WorkspaceFormSubmitData {
   reserved?: boolean;
 }
 
-export interface WorkspaceFeature {
-  id: string;
-  name: string;
-}
-
-export interface WorkspaceFeatureGroup {
-  name: string;
-  features: WorkspaceFeature[];
-}
-
 export type WorkspaceFormErrors = {
   [key in keyof Omit<WorkspaceFormData, 'permissionSettings'>]?: string;
 } & {
