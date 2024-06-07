@@ -5,26 +5,16 @@
 
 import { i18n } from '@osd/i18n';
 
-import { PublicAppInfo } from '../../../../../core/public';
 import type { SavedObjectPermissions } from '../../../../../core/types';
 import { DEFAULT_SELECTED_FEATURES_IDS, WorkspacePermissionMode } from '../../../common/constants';
+import { isUseCaseFeatureConfig } from '../../utils';
 import {
   optionIdToWorkspacePermissionModesMap,
   PermissionModeId,
   WorkspacePermissionItemType,
 } from './constants';
 
-import {
-  WorkspaceFeature,
-  WorkspaceFeatureGroup,
-  WorkspaceFormErrors,
-  WorkspaceFormSubmitData,
-  WorkspacePermissionSetting,
-} from './types';
-
-export const isWorkspaceFeatureGroup = (
-  featureOrGroup: WorkspaceFeature | WorkspaceFeatureGroup
-): featureOrGroup is WorkspaceFeatureGroup => 'features' in featureOrGroup;
+import { WorkspaceFormErrors, WorkspaceFormSubmitData, WorkspacePermissionSetting } from './types';
 
 export const appendDefaultFeatureIds = (ids: string[]) => {
   // concat default checked ids and unique the result
@@ -51,56 +41,10 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   if (formErrors.permissionSettings) {
     numberOfErrors += Object.keys(formErrors.permissionSettings).length;
   }
+  if (formErrors.features) {
+    numberOfErrors += 1;
+  }
   return numberOfErrors;
-};
-
-export const convertApplicationsToFeaturesOrGroups = (
-  applications: Array<
-    Pick<PublicAppInfo, 'id' | 'title' | 'category' | 'navLinkStatus' | 'chromeless'>
-  >
-) => {
-  const UNDEFINED = 'undefined';
-
-  /**
-   *
-   * Convert applications to features map, the map use category label as
-   * map key and group all same category applications in one array after
-   * transfer application to feature.
-   *
-   **/
-  const categoryLabel2Features = applications.reduce<{
-    [key: string]: WorkspaceFeature[];
-  }>((previousValue, application) => {
-    const label = application.category?.label || UNDEFINED;
-
-    return {
-      ...previousValue,
-      [label]: [...(previousValue[label] || []), { id: application.id, name: application.title }],
-    };
-  }, {});
-
-  /**
-   *
-   * Iterate all keys of categoryLabel2Features map, convert map to features or groups array.
-   * Features with category label will be converted to feature groups. Features without "undefined"
-   * category label will be converted to single features. Then append them to the result array.
-   *
-   **/
-  return Object.keys(categoryLabel2Features).reduce<
-    Array<WorkspaceFeature | WorkspaceFeatureGroup>
-  >((previousValue, categoryLabel) => {
-    const features = categoryLabel2Features[categoryLabel];
-    if (categoryLabel === UNDEFINED) {
-      return [...previousValue, ...features];
-    }
-    return [
-      ...previousValue,
-      {
-        name: categoryLabel,
-        features,
-      },
-    ];
-  }, []);
 };
 
 export const isUserOrGroupPermissionSettingDuplicated = (
@@ -243,7 +187,7 @@ export const validateWorkspaceForm = (
   }
 ) => {
   const formErrors: WorkspaceFormErrors = {};
-  const { name, description, permissionSettings } = formData;
+  const { name, permissionSettings, features } = formData;
   if (name) {
     if (!isValidFormTextInput(name)) {
       formErrors.name = i18n.translate('workspace.form.detail.name.invalid', {
@@ -253,6 +197,11 @@ export const validateWorkspaceForm = (
   } else {
     formErrors.name = i18n.translate('workspace.form.detail.name.empty', {
       defaultMessage: "Name can't be empty.",
+    });
+  }
+  if (!features || !features.some((featureConfig) => isUseCaseFeatureConfig(featureConfig))) {
+    formErrors.features = i18n.translate('workspace.form.features.empty', {
+      defaultMessage: 'Use case is required. Select a use case.',
     });
   }
   if (permissionSettings) {

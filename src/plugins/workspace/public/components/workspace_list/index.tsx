@@ -22,10 +22,11 @@ import { WorkspaceAttribute } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { switchWorkspace, navigateToWorkspaceUpdatePage } from '../utils/workspace';
 
-import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
+import { WORKSPACE_CREATE_APP_ID, WORKSPACE_USE_CASES } from '../../../common/constants';
 
 import { cleanWorkspaceId } from '../../../../../core/public';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
+import { getUseCaseFromFeatureConfig, isUseCaseFeatureConfig } from '../../utils';
 
 const WORKSPACE_LIST_PAGE_DESCRIPTIOIN = i18n.translate('workspace.list.description', {
   defaultMessage:
@@ -103,9 +104,22 @@ export const WorkspaceList = () => {
     },
     {
       field: 'features',
-      name: 'Features',
+      name: 'Use case',
       isExpander: true,
       hasActions: true,
+      render: (features: string[]) => {
+        if (!features || features.length === 0) {
+          return '';
+        }
+        const results: string[] = [];
+        features.forEach((featureConfig) => {
+          const useCaseId = getUseCaseFromFeatureConfig(featureConfig);
+          if (useCaseId) {
+            results.push(WORKSPACE_USE_CASES[useCaseId].title);
+          }
+        });
+        return results.join(', ');
+      },
     },
     {
       name: 'Actions',
