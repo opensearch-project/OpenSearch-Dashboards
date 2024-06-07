@@ -19,7 +19,7 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       defaultMessage: `Allows users to query data using enhancements where available. If disabled,
         only querying and querying languages that are considered production-ready are available to the user.`,
     }),
-    category: ['query'],
+    category: ['search'],
     schema: schema.boolean(),
   },
 };

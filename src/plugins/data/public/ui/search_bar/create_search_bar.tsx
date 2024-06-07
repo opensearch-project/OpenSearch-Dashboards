@@ -47,7 +47,6 @@ interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: IStorageWrapper;
-  isEnhancementsEnabled: boolean;
   queryEnhancements: Map<string, QueryEnhancement>;
   settings: Settings;
   setContainerRef: (ref: HTMLDivElement | null) => void;
@@ -139,7 +138,6 @@ export function createSearchBar({
   core,
   storage,
   data,
-  isEnhancementsEnabled,
   queryEnhancements,
   settings,
   setContainerRef,
@@ -222,7 +220,6 @@ export function createSearchBar({
           isRefreshPaused={refreshInterval.pause}
           filters={filters}
           query={query}
-          isEnhancementsEnabled={isEnhancementsEnabled}
           queryEnhancements={queryEnhancements}
           settings={settings}
           containerRef={containerRef}

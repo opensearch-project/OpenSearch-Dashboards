@@ -5,6 +5,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { IStorageWrapper } from '../../../../opensearch_dashboards_utils/public';
+import { ConfigSchema } from '../../../config';
 import { setOverrides as setFieldOverrides } from '../../../common';
 import { QueryEnhancement } from '../types';
 
@@ -25,13 +26,15 @@ export interface DataSettings {
 
 export class Settings {
   private enabledQueryEnhancementsUpdated$ = new BehaviorSubject<boolean>(false);
+  private enhancedAppNames: string[] = [];
 
   constructor(
-    private readonly isQueryEnhancementsEnabled: boolean,
+    private readonly config: ConfigSchema['enhancements'],
     private readonly storage: IStorageWrapper,
     private readonly queryEnhancements: Map<string, QueryEnhancement>
   ) {
-    this.enabledQueryEnhancementsUpdated$.next(this.isQueryEnhancementsEnabled);
+    this.enabledQueryEnhancementsUpdated$.next(this.config.enabled);
+    this.enhancedAppNames = this.config.enabled ? this.config.supportedAppNames : [];
   }
 
   // getUserQueryDataSource() {
@@ -43,19 +46,22 @@ export class Settings {
   //   return true;
   // }
 
+  supportsEnhancementsEnabled(appName: string) {
+    return this.enhancedAppNames.includes(appName);
+  }
+
   getEnabledQueryEnhancementsUpdated$ = () => {
     return this.enabledQueryEnhancementsUpdated$.asObservable();
   };
 
   getUserQueryEnhancementsEnabled() {
     return (
-      this.storage.get('opensearchDashboards.userQueryEnhancementsEnabled') ||
-      this.isQueryEnhancementsEnabled
+      this.storage.get('opensearchDashboards.userQueryEnhancementsEnabled') || this.config.enabled
     );
   }
 
   setUserQueryEnhancementsEnabled(enabled: boolean) {
-    if (!this.isQueryEnhancementsEnabled) return;
+    if (!this.config.enabled) return;
     this.storage.set('opensearchDashboards.userQueryEnhancementsEnabled', enabled);
     this.enabledQueryEnhancementsUpdated$.next(enabled);
     return true;
@@ -129,11 +135,11 @@ export class Settings {
 }
 
 interface Deps {
-  isQueryEnhancementsEnabled: boolean;
+  config: ConfigSchema['enhancements'];
   storage: IStorageWrapper;
   queryEnhancements: Map<string, QueryEnhancement>;
 }
 
-export function createSettings({ isQueryEnhancementsEnabled, storage, queryEnhancements }: Deps) {
-  return new Settings(isQueryEnhancementsEnabled, storage, queryEnhancements);
+export function createSettings({ config, storage, queryEnhancements }: Deps) {
+  return new Settings(config, storage, queryEnhancements);
 }

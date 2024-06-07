@@ -714,7 +714,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
         defaultMessage: `Allows users to query data using enhancements where available. If disabled,
           only querying and querying languages that are considered production-ready are available to the user.`,
       }),
-      category: ['query'],
+      category: ['search'],
       schema: schema.boolean(),
     },
     [UI_SETTINGS.DATAFRAME_HYDRATION_STRATEGY]: {
@@ -744,7 +744,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           advanced: dataFrameHydrationStrategyOptionLabels.advanced,
         },
       }),
-      category: ['query'],
+      category: ['search'],
       schema: schema.string(),
     },
     [UI_SETTINGS.QUERY_DATA_SOURCE_READONLY]: {
@@ -757,7 +757,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'When enabled, the global search bar prevents modifying the data source in the query input. ' +
           '<br><strong>Experimental</strong>: Setting to false enables modifying the data source.',
       }),
-      category: ['query'],
+      category: ['search'],
       schema: schema.boolean(),
     },
     [UI_SETTINGS.POLLING_INTERVAL]: {
@@ -768,7 +768,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       description: i18n.translate('data.advancedSettings.query.pollingIntervalText', {
         defaultMessage: 'Allows you to set the interval in between polls to an async query job',
       }),
-      category: ['query'],
+      category: ['search'],
       schema: schema.number(),
     },
   };

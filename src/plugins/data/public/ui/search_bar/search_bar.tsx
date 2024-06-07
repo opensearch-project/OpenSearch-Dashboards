@@ -78,7 +78,6 @@ export interface SearchBarOwnProps {
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
-  isEnhancementsEnabled?: boolean;
   queryEnhancements?: Map<string, QueryEnhancement>;
   settings?: Settings;
   containerRef?: React.RefCallback<HTMLDivElement>;
@@ -205,6 +204,10 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.state.dateRangeTo !== this.props.dateRangeTo
     );
   };
+
+  private supportsEnhancements() {
+    return this.props.settings?.supportsEnhancementsEnabled(this.services.appName);
+  }
 
   private shouldRenderQueryEditor(isEnhancementsEnabledOverride: boolean) {
     // TODO: MQL handle no index patterns?
@@ -398,9 +401,14 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
+    const isEnhancementsEnabledOverride =
+      this.supportsEnhancements() &&
+      this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+
+    this.props.settings?.setUserQueryEnhancementsEnabled(isEnhancementsEnabledOverride);
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
       <SavedQueryManagementComponent
-        isEnhancementsEnabled={this.props.isEnhancementsEnabled}
+        isEnhancementsEnabled={isEnhancementsEnabledOverride}
         showSaveQuery={this.props.showSaveQuery}
         loadedSavedQuery={this.props.savedQuery}
         onSave={this.onInitiateSave}
@@ -411,19 +419,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       />
     );
 
-    const isEnhancementsEnabledOverride =
-      !!this.props.isEnhancementsEnabled &&
-      this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
-
-    this.props.settings?.setUserQueryEnhancementsEnabled(isEnhancementsEnabledOverride);
-
     let queryBar;
     if (this.shouldRenderQueryBar(isEnhancementsEnabledOverride)) {
       // TODO: MQL make this default query bar top row but this.props.queryEnhancements.get(language) can pass a component
       queryBar = (
         <QueryBarTopRow
           timeHistory={this.props.timeHistory}
-          isEnhancementsEnabled={this.props.isEnhancementsEnabled}
+          isEnhancementsEnabled={isEnhancementsEnabledOverride}
           queryEnhancements={this.props.queryEnhancements}
           settings={this.props.settings}
           query={this.state.query}
@@ -488,7 +490,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       queryEditor = (
         <QueryEditorTopRow
           timeHistory={this.props.timeHistory}
-          isEnhancementsEnabled={this.props.isEnhancementsEnabled}
+          isEnhancementsEnabled={isEnhancementsEnabledOverride}
           queryEnhancements={this.props.queryEnhancements}
           containerRef={this.props.containerRef}
           settings={this.props.settings}
@@ -519,13 +521,13 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       );
     }
 
-    const className = !!this.props.isEnhancementsEnabled ? 'globalQueryEditor' : 'globalQueryBar';
+    const className = isEnhancementsEnabledOverride ? 'globalQueryEditor' : 'globalQueryBar';
 
     return (
       <div className={className} data-test-subj="globalQueryBar">
         {queryBar}
         {queryEditor}
-        {!!!this.props.isEnhancementsEnabled && filterBar}
+        {!isEnhancementsEnabledOverride && filterBar}
 
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm

@@ -23,10 +23,10 @@ function mapExternalLanguageToOptions(language: string) {
 }
 
 export const QueryLanguageSwitcher = (props: Props) => {
-  const dqlLabel = i18n.translate('data.query.queryBar.dqlLanguageName', {
+  const dqlLabel = i18n.translate('data.query.queryEditor.dqlLanguageName', {
     defaultMessage: 'DQL',
   });
-  const luceneLabel = i18n.translate('data.query.queryBar.luceneLanguageName', {
+  const luceneLabel = i18n.translate('data.query.queryEditor.luceneLanguageName', {
     defaultMessage: 'Lucene',
   });
 

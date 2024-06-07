@@ -42,7 +42,7 @@ import { render } from '@testing-library/react';
 
 import { EuiTextArea } from '@elastic/eui';
 
-import { LegacyQueryLanguageSwitcher } from './legacy_language_switcher';
+import { LegacyQueryLanguageSwitcher } from './language_switcher';
 import { QueryStringInput } from './';
 import type QueryStringInputUI from './query_string_input';
 
