@@ -72,21 +72,12 @@ const TableCellUI = ({
   );
 
   return isTimeField ? (
-    <td
-      data-test-subj="docTableField"
-      aria-label={i18n.translate('discover.defaultTable.docTableFieldLabel', {
-        defaultMessage: 'Discover table field',
-      })}
-      className="osdDocTableCell eui-textNoWrap"
-    >
+    <td data-test-subj="docTableField" className="osdDocTableCell eui-textNoWrap">
       {content}
     </td>
   ) : (
     <td
       data-test-subj="docTableField"
-      aria-label={i18n.translate('discover.defaultTable.docTableFieldLabel', {
-        defaultMessage: 'Discover table field',
-      })}
       className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
     >
       <div className="osdDocTable__limitedHeight">{content}</div>

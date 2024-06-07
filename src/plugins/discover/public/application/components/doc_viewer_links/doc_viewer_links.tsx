@@ -19,9 +19,6 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
         'data-test-subj': `docTableRowAction`,
         ...props,
         href: generateCb ? generateCb(renderProps).url : href,
-        'aria-label': i18n.translate('discover.docViewerLinks.docTableRowActionLabel', {
-          defaultMessage: 'Discover table row action',
-        }),
       };
 
       return listItem;
@@ -36,7 +33,6 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
             target="_blank"
             style={{ fontWeight: 'normal' }}
             data-test-subj={`${item['data-test-subj']}-${index}`}
-            aria-label={item['aria-label']}
           >
             {item.label}
           </EuiLink>

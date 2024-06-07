@@ -315,7 +315,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         onClick={onClickSubmitButton}
         data-test-subj="querySubmitButton"
         aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
-          defaultMessage: 'Submit query button',
+          defaultMessage: 'Submit query',
         })}
       />
     );

@@ -125,9 +125,6 @@ export const DataGridTable = ({
         data-title={title}
         data-description={description}
         data-test-subj="discoverTable"
-        aria-label={i18n.translate('discover.dataGrid.discoverTableLabel', {
-          defaultMessage: 'Discover table',
-        })}
         className="eui-xScrollWithShadows"
       >
         <EuiPanel hasBorder={false} hasShadow={false} {...tablePanelProps}>

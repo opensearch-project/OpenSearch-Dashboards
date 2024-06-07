@@ -50,7 +50,7 @@ export function LegacyQueryLanguageSwitcher(props: Props) {
       className="euiFormControlLayout__append dqlQueryBar__languageSwitcherButton"
       data-test-subj={'switchQueryLanguageButton'}
       aria-label={i18n.translate('data.query.queryBar.switchQueryLanguageButtonLabel', {
-        defaultMessage: 'Query language switch button',
+        defaultMessage: 'Change query language',
       })}
     >
       {props.language === 'lucene' ? luceneLabel : dqlLabel}

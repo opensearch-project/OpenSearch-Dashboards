@@ -55,7 +55,7 @@ const TableRowUI = ({
           onClick={handleExpanding}
           iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
           aria-label={i18n.translate('discover.defaultTable.docTableExpandToggleColumnLabel', {
-            defaultMessage: `Toggle for expanding row details`,
+            defaultMessage: `Toggle row details`,
           })}
           data-test-subj="docTableExpandToggleColumn"
         />
@@ -144,10 +144,6 @@ const TableRowUI = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <h4
-              data-test-subj="docTableRowDetailsTitle"
-              aria-label={i18n.translate('discover.defaultTable.docTableRowDetailsTitleLabel', {
-                defaultMessage: 'Discover table row details',
-              })}
               className="euiTitle euiTitle--xsmall"
               i18n-id="discover.docTable.tableRow.detailHeading"
               i18n-default-message="Expanded document"

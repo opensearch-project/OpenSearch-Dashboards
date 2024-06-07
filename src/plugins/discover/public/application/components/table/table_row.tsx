@@ -79,13 +79,7 @@ export function DocViewTableRow({
   });
 
   return (
-    <tr
-      key={field}
-      data-test-subj={`tableDocViewRow-${field}`}
-      aria-label={i18n.translate('discover.tble.tableDocViewRowLabel', {
-        defaultMessage: `Discover table field: ${field}`,
-      })}
-    >
+    <tr key={field} data-test-subj={`tableDocViewRow-${field}`}>
       {typeof onFilter === 'function' && (
         <td className="osdDocViewer__buttons">
           <DocViewTableRowBtnFilterAdd

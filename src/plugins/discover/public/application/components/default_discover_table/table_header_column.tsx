@@ -168,13 +168,15 @@ export function TableHeaderColumn({
   ];
 
   return (
-    <th data-test-subj="docTableHeaderField" className="docTableHeaderField">
-      <span
-        data-test-subj={`docTableHeader-${name}`}
-        aria-label={i18n.translate('discover.defaultTable.docTableHeaderLabel', {
-          defaultMessage: `Discover table column: ${name}`,
-        })}
-      >
+    <th
+      data-test-subj="docTableHeaderField"
+      className="docTableHeaderField"
+      role="columnheader"
+      aria-label={i18n.translate('discover.defaultTable.docTableHeaderLabel', {
+        defaultMessage: `Discover table column: ${name}`,
+      })}
+    >
+      <span data-test-subj={`docTableHeader-${name}`}>
         {displayName}
         {buttons
           .filter((button) => button.active)
