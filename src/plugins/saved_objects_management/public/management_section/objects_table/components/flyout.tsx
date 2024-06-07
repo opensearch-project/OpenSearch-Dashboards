@@ -195,19 +195,13 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
    * Does the initial import of a file, resolveImportErrors then handles errors and retries
    */
   import = async () => {
-    const { http, dataSourceEnabled } = this.props;
+    const { http } = this.props;
     const { file, importMode, selectedDataSourceId } = this.state;
     this.setState({ status: 'loading', error: undefined });
 
     // Import the file
     try {
-      const response = await importFile(
-        http,
-        file!,
-        importMode,
-        selectedDataSourceId,
-        dataSourceEnabled
-      );
+      const response = await importFile(http, file!, importMode, selectedDataSourceId);
       this.setState(processImportResponse(response), () => {
         // Resolve import errors right away if there's no index patterns to match
         // This will ask about overwriting each object, etc

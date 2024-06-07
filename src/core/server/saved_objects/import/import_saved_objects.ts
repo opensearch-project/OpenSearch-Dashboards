@@ -60,10 +60,11 @@ export async function importSavedObjectsFromStream({
   dataSourceId,
   dataSourceTitle,
   workspaces,
-  dataSourceEnabled,
 }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse> {
   let errorAccumulator: SavedObjectsImportError[] = [];
   const supportedTypes = typeRegistry.getImportableAndExportableTypes().map((type) => type.name);
+
+  const dataSourceEnabled = supportedTypes.includes('data-source');
 
   // Get the objects to import
   const collectSavedObjectsResult = await collectSavedObjects({

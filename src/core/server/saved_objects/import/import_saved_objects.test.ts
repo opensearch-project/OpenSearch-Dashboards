@@ -100,8 +100,7 @@ describe('#importSavedObjectsFromStream', () => {
 
   const setupOptions = (
     createNewCopies: boolean = false,
-    dataSourceId: string | undefined = undefined,
-    dataSourceEnabled: boolean | undefined = false
+    dataSourceId: string | undefined = undefined
   ): SavedObjectsImportOptions => {
     readStream = new Readable();
     savedObjectsClient = savedObjectsClientMock.create();
@@ -603,7 +602,7 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     test('early return if import data source objects to non-MDS cluster', async () => {
-      const options = setupOptions(false, testDataSourceId, false);
+      const options = setupOptions(false, testDataSourceId);
       const dsObj = createDataSourceObject();
       const dsExportedObj = createObject(testDataSourceId);
       const collectedObjects = [dsObj, dsExportedObj];
@@ -635,7 +634,7 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     test('early return if import mixed non/data source objects to non-MDS cluster', async () => {
-      const options = setupOptions(false, testDataSourceId, false);
+      const options = setupOptions(false, testDataSourceId);
       const dsObj = createDataSourceObject();
       const dsExportedObj = createObject(testDataSourceId);
       const nonDsExportedObj = createObject();
@@ -668,7 +667,7 @@ describe('#importSavedObjectsFromStream', () => {
     });
 
     test('early return if import single data source objects to non-MDS cluster', async () => {
-      const options = setupOptions(false, testDataSourceId, false);
+      const options = setupOptions(false, testDataSourceId);
       const dsObj = createDataSourceObject();
       const collectedObjects = [dsObj];
 
