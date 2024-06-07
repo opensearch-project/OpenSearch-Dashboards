@@ -16,6 +16,7 @@ import {
   EuiHorizontalRule,
   EuiTab,
   EuiTabs,
+  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -47,7 +48,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     handleTabFeatureClick,
     setPermissionSettings,
     handleTabPermissionClick,
-    handleDescriptionInputChange,
+    handleDescriptionChange,
   } = useWorkspaceForm(props);
   const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
     defaultMessage: 'Workspace Details',
@@ -91,18 +92,29 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
               Description - <i>optional</i>
             </>
           }
-          helpText={i18n.translate('workspace.form.workspaceDetails.description.helpText', {
-            defaultMessage:
-              'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
-          })}
           isInvalid={!!formErrors.description}
           error={formErrors.description}
         >
-          <EuiFieldText
-            value={formData.description}
-            onChange={handleDescriptionInputChange}
-            data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
-          />
+          <>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('workspace.form.workspaceDetails.description.introduction', {
+                defaultMessage:
+                  'Help others understand the purpose of this workspace by providing an overview of the workspace you’re creating.',
+              })}
+            </EuiText>
+            <EuiTextArea
+              value={formData.description}
+              onChange={handleDescriptionChange}
+              data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
+              rows={4}
+              placeholder={i18n.translate(
+                'workspace.form.workspaceDetails.description.placeholder',
+                {
+                  defaultMessage: 'Describe the workspace',
+                }
+              )}
+            />
+          </>
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('workspace.form.workspaceDetails.color.label', {

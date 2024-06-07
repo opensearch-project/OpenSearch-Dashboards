@@ -116,23 +116,6 @@ describe('WorkspaceCreator', () => {
     expect(workspaceClientCreate).not.toHaveBeenCalled();
   });
 
-  it('should not create workspace with invalid description', async () => {
-    const { getByTestId } = render(
-      <WorkspaceCreator
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-      />
-    );
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    const descriptionInput = getByTestId('workspaceForm-workspaceDetails-descriptionInputText');
-    fireEvent.input(descriptionInput, {
-      target: { value: '~' },
-    });
-    expect(workspaceClientCreate).not.toHaveBeenCalled();
-  });
-
   it('cancel create workspace', async () => {
     const { findByText, getByTestId } = render(
       <WorkspaceCreator
