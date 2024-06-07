@@ -406,6 +406,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
 
     this.props.settings?.setUserQueryEnhancementsEnabled(isEnhancementsEnabledOverride);
+    this.props.settings?.setUserQueryLanguageBlocklist(
+      this.services.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE_BLOCKLIST)
+    );
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
       <SavedQueryManagementComponent
         isEnhancementsEnabled={isEnhancementsEnabledOverride}

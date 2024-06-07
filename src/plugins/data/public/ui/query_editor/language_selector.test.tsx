@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { QueryLanguageSwitcher } from './language_switcher';
+import { QueryLanguageSelector } from './language_selector';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
@@ -64,7 +64,7 @@ describe('LanguageSwitcher', () => {
 
     return (
       <OpenSearchDashboardsContextProvider services={services}>
-        <QueryLanguageSwitcher {...testProps} />
+        <QueryLanguageSelector {...testProps} />
       </OpenSearchDashboardsContextProvider>
     );
   }

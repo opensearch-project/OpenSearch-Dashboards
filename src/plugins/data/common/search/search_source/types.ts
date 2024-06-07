@@ -105,7 +105,7 @@ export interface SearchSourceFields {
   timeout?: string;
   terminate_after?: number;
   df?: IDataFrame;
-  dataSource: DataSource;
+  dataSource?: DataSource;
 }
 
 export interface SearchSourceOptions {

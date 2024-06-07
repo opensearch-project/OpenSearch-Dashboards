@@ -71,7 +71,10 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName } = opensearchDashboards.services;
 
-  const isDataSourceReadOnly = uiSettings.get('query:dataSourceReadOnly');
+  const isDataSourceReadOnly = uiSettings.get(UI_SETTINGS.QUERY_DATA_SOURCE_READONLY);
+  const isSearchBarExtensionsEnabled = uiSettings.get(
+    UI_SETTINGS.QUERY_SEARCH_BAR_EXTENSIONS_ENABLED
+  );
 
   const queryLanguage = props.query && props.query.language;
   const queryUiEnhancement =
@@ -304,6 +307,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderSearchBarExtensions(): boolean {
+    if (!isSearchBarExtensionsEnabled) return false;
     return Boolean(
       queryLanguage && props.queryEnhancements?.get(queryLanguage)?.searchBar?.extensions?.length
     );
