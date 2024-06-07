@@ -255,11 +255,6 @@ export const validateWorkspaceForm = (
       defaultMessage: "Name can't be empty.",
     });
   }
-  if (description && !isValidFormTextInput(description)) {
-    formErrors.description = i18n.translate('workspace.form.detail.description.invalid', {
-      defaultMessage: 'Invalid workspace description',
-    });
-  }
   if (permissionSettings) {
     const permissionSettingsErrors: { [key: number]: string } = {};
     for (let i = 0; i < permissionSettings.length; i++) {
