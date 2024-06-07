@@ -12,7 +12,11 @@ export const createQueryAssistExtension = (
     order: 1000,
     isEnabled: (() => {
       let agentConfigured: boolean;
-      return async () => {
+      return async (dependencies) => {
+        // currently query assist tool relies on opensearch API to get index
+        // mappings, other data sources are not supported
+        if (dependencies.dataSource && dependencies.dataSource?.getType() !== 'default')
+          return false;
         if (agentConfigured === undefined) {
           agentConfigured = await http
             .get<{ configured: boolean }>(`/api/ql/query_assist/configured/${language}`)
