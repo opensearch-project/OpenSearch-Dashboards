@@ -56,7 +56,6 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { LegacyQueryLanguageSwitcher } from './legacy_language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { Settings, SuggestionsComponent } from '..';
@@ -651,14 +650,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
     return (
       <div className={className}>
         {this.props.prepend}
-        {!!this.props.isEnhancementsEnabled && (
-          <QueryLanguageSwitcher
-            language={this.props.query.language}
-            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-            onSelectLanguage={this.onSelectLanguage}
-            appName={this.services.appName}
-          />
-        )}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
@@ -736,13 +727,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-        {!!!this.props.isEnhancementsEnabled && (
-          <LegacyQueryLanguageSwitcher
-            language={this.props.query.language}
-            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-            onSelectLanguage={this.onSelectLanguage}
-          />
-        )}
+        <QueryLanguageSwitcher
+          language={this.props.query.language}
+          anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+          onSelectLanguage={this.onSelectLanguage}
+        />
       </div>
     );
   }
