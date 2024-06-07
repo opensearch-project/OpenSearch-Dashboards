@@ -77,9 +77,9 @@ export async function getExternalSearchParamsFromRequest(
   const dataFrame =
     getDataFrame() ??
     (dataSource?.name ? getDataFrameBySource(dataSource.name) : null) ??
-    (await setDataFrame(createDataFrame({ name: dataSource?.name ?? '', fields: [] })));
+    (await setDataFrame(createDataFrame({ name: dataSource?.name ?? indexTitle, fields: [] })));
   return {
-    index: indexTitle,
+    index: dataSource ? dataSource.name : indexTitle,
     body: {
       ...searchRequest.body,
       df: dataFrame,

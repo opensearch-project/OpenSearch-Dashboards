@@ -37,9 +37,10 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
     const { id, ...searchRequest } = request;
     const path = trimEnd('/api/sqlasyncql/jobs');
 
-    const fetchDataFrame = (queryString: string | undefined, df = null) => {
+    const fetchDataFrame = (queryString: string | undefined, dataSource: string, df = null) => {
       const body = stringify({
         query: { qs: queryString, format: 'jdbc' },
+        dataSource,
         df,
       });
       return from(
@@ -53,14 +54,15 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
     };
 
     const rawDataFrame = getRawDataFrame(searchRequest);
-    const dataFrame = fetchDataFrame(getRawQueryString(searchRequest), rawDataFrame);
+    const dataFrame = fetchDataFrame(
+      getRawQueryString(searchRequest),
+      searchRequest.params.index,
+      rawDataFrame
+    );
 
     // subscribe to dataFrame to see if an error is returned, display a toast message if so
     dataFrame.subscribe((df) => {
       // TODO: MQL Async: clean later
-      // if (!df.body.error) {
-      //   console.log('SEARCH INTERCEPTOR:', df);
-      // }
       if (!df.body.error) return;
       const jsError = new Error(df.body.error.response);
       this.deps.toasts.addError(jsError, {
