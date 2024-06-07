@@ -1,0 +1,2 @@
+fix:
+- Remove the dataSourceEnabled from request ([#6961](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6961))
