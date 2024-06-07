@@ -370,7 +370,7 @@ ruleTester.run('@osd/eslint/no-restricted-paths', rule, {
     },
 
     {
-      // Does not allow to import deeply within Core, using "src/core/..." Webpack alias.
+      // Does not allow to require deeply within Core, using "src/core/..." Webpack alias.
       code: 'const d = require("src/core/server/saved_objects")',
       filename: path.join(__dirname, './testfiles/no_restricted_paths/client/a.js'),
       options: [
@@ -389,6 +389,32 @@ ruleTester.run('@osd/eslint/no-restricted-paths', rule, {
           message: 'Unexpected path "src/core/server/saved_objects" imported in restricted zone.',
           line: 1,
           column: 19,
+        },
+      ],
+    },
+
+    {
+      // Does not allow to import deeply within Core, using "src/core/...".
+      code: `
+      import { X as XX } from 'src/core/public';
+      import { X as XY } from 'src/core/server';`,
+      filename: path.join(__dirname, './testfiles/no_restricted_paths/client/a.js'),
+      options: [
+        {
+          basePath: __dirname,
+          zones: [
+            {
+              target: ['**/testfiles/**/*', '!**/testfiles/**/server/**/*'],
+              from: ['src/core/server', 'src/core/server/**/*'],
+            },
+          ],
+        },
+      ],
+      errors: [
+        {
+          message: 'Unexpected path "src/core/server" imported in restricted zone.',
+          line: 3,
+          column: 31,
         },
       ],
     },
