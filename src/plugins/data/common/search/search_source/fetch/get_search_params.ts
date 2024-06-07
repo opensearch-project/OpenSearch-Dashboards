@@ -76,8 +76,8 @@ export async function getExternalSearchParamsFromRequest(
   // However, TODO: need to fix the df creation to not get mappings for fields for index when creating the temp index pattern if not 'default'
   const dataFrame =
     getDataFrame() ??
-    getDataFrameBySource(dataSource.name) ??
-    (await setDataFrame(createDataFrame({ name: dataSource.name, fields: [] })));
+    (dataSource?.name ? getDataFrameBySource(dataSource.name) : null) ??
+    (await setDataFrame(createDataFrame({ name: dataSource?.name ?? '', fields: [] })));
 
   return {
     index: indexTitle,
