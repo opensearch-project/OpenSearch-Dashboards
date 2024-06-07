@@ -12,7 +12,34 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { DEFAULT_SELECTED_FEATURES_IDS } from '../common/constants';
+import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_USE_CASES } from '../common/constants';
+
+const USE_CASE_PREFIX = 'use-case-';
+
+export const getUseCaseFeatureConfig = (useCaseId: string) => `${USE_CASE_PREFIX}${useCaseId}`;
+
+export const isUseCaseFeatureConfig = (featureConfig: string) =>
+  featureConfig.startsWith(USE_CASE_PREFIX);
+
+type WorkspaceUseCaseId = keyof typeof WORKSPACE_USE_CASES;
+
+export const getUseCaseFromFeatureConfig = (featureConfig: string) => {
+  if (isUseCaseFeatureConfig(featureConfig)) {
+    const useCaseId = featureConfig.substring(USE_CASE_PREFIX.length);
+    if (Object.keys(WORKSPACE_USE_CASES).includes(useCaseId)) {
+      return useCaseId as WorkspaceUseCaseId;
+    }
+  }
+  return null;
+};
+
+export const isFeatureIdInsideUseCase = (featureId: string, featureConfig: string) => {
+  const useCase = getUseCaseFromFeatureConfig(featureConfig);
+  if (useCase && useCase in WORKSPACE_USE_CASES) {
+    return WORKSPACE_USE_CASES[useCase].features.includes(featureId);
+  }
+  return false;
+};
 
 /**
  * Checks if a given feature matches the provided feature configuration.
@@ -24,6 +51,8 @@ import { DEFAULT_SELECTED_FEATURES_IDS } from '../common/constants';
  * 4. To exclude a feature or category, prepend with `!`, e.g., `!discover` or `!@management`.
  * 5. The order of featureConfig array matters. From left to right, later configs override the previous ones.
  *    For example, ['!@management', '*'] matches any feature because '*' overrides the previous setting: '!@management'.
+ * 6. For feature id start with use case prefix, it will read use case's features and match every passed apps.
+ *    For example, ['user-case-observability'] matches all features under observability use case.
  */
 export const featureMatchesConfig = (featureConfigs: string[]) => ({
   id,
@@ -43,6 +72,14 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
     // '*' matches any feature
     if (featureConfig === '*') {
       matched = true;
+    }
+
+    // matches any feature inside use cases
+    if (getUseCaseFromFeatureConfig(featureConfig)) {
+      const isInsideUseCase = isFeatureIdInsideUseCase(id, featureConfig);
+      if (isInsideUseCase) {
+        matched = true;
+      }
     }
 
     // The config starts with `@` matches a category

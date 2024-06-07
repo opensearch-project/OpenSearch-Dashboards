@@ -11,12 +11,6 @@ export enum WorkspaceOperationType {
   Update = 'update',
 }
 
-export enum WorkspaceFormTabs {
-  NotSelected,
-  FeatureVisibility,
-  UsersAndPermissions,
-}
-
 export enum WorkspacePermissionItemType {
   User = 'user',
   Group = 'group',
