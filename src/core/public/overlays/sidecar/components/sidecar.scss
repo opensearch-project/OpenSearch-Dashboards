@@ -6,7 +6,9 @@
 .osdSidecarFlyout {
   box-shadow: initial;
   position: fixed;
-  z-index: 1000;
+
+  // Sidecar z-index should more than mask. Actually will be 1001.
+  z-index: $euiZMaskBelowHeader + 1;
   background: lightOrDarkTheme($euiColorGhost, $euiColorInk);
   display: flex;
 
