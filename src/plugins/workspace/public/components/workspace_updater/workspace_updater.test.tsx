@@ -135,23 +135,6 @@ describe('WorkspaceUpdater', () => {
     expect(workspaceClientUpdate).not.toHaveBeenCalled();
   });
 
-  it('cannot update workspace with invalid description', async () => {
-    const { getByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-      />
-    );
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    const descriptionInput = getByTestId('workspaceForm-workspaceDetails-descriptionInputText');
-    fireEvent.input(descriptionInput, {
-      target: { value: '~' },
-    });
-    expect(workspaceClientUpdate).not.toHaveBeenCalled();
-  });
-
   it('cancel update workspace', async () => {
     const { findByText, getByTestId } = render(
       <WorkspaceUpdater

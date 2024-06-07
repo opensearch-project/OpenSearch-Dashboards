@@ -4,7 +4,12 @@
  */
 
 import { useCallback, useState, FormEventHandler, useRef, useMemo } from 'react';
-import { htmlIdGenerator, EuiFieldTextProps, EuiColorPickerProps } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFieldTextProps,
+  EuiColorPickerProps,
+  EuiTextAreaProps,
+} from '@elastic/eui';
 
 import { useApplications } from '../../hooks';
 import {
@@ -98,7 +103,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     setName(e.target.value);
   }, []);
 
-  const handleDescriptionInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
+  const handleDescriptionChange = useCallback<Required<EuiTextAreaProps>['onChange']>((e) => {
     setDescription(e.target.value);
   }, []);
 
@@ -117,6 +122,6 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     handleUseCasesChange,
     handleNameInputChange,
     setPermissionSettings,
-    handleDescriptionInputChange,
+    handleDescriptionChange,
   };
 };

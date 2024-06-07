@@ -25,7 +25,7 @@ export const appendDataSourceId = (id: string) => {
 const overrideSavedObjectId = (savedObject: SavedObject, idGenerator: (id: string) => string) => {
   savedObject.id = idGenerator(savedObject.id);
   // update reference
-  if (savedObject.type === 'dashboard') {
+  if (savedObject.type === 'dashboard' || savedObject.type === 'visualization-visbuilder') {
     savedObject.references.map((reference) => {
       if (reference.id) {
         reference.id = idGenerator(reference.id);
@@ -88,7 +88,8 @@ export const getSavedObjectsWithDataSource = (
         if (
           saveObject.type === 'dashboard' ||
           saveObject.type === 'visualization' ||
-          saveObject.type === 'search'
+          saveObject.type === 'search' ||
+          saveObject.type === 'visualization-visbuilder'
         ) {
           saveObject.attributes.title = saveObject.attributes.title + `_${dataSourceTitle}`;
         }

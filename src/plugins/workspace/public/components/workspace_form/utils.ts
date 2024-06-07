@@ -187,7 +187,7 @@ export const validateWorkspaceForm = (
   }
 ) => {
   const formErrors: WorkspaceFormErrors = {};
-  const { name, description, permissionSettings, features } = formData;
+  const { name, permissionSettings, features } = formData;
   if (name) {
     if (!isValidFormTextInput(name)) {
       formErrors.name = i18n.translate('workspace.form.detail.name.invalid', {
@@ -197,11 +197,6 @@ export const validateWorkspaceForm = (
   } else {
     formErrors.name = i18n.translate('workspace.form.detail.name.empty', {
       defaultMessage: "Name can't be empty.",
-    });
-  }
-  if (description && !isValidFormTextInput(description)) {
-    formErrors.description = i18n.translate('workspace.form.detail.description.invalid', {
-      defaultMessage: 'Invalid workspace description',
     });
   }
   if (!features || !features.some((featureConfig) => isUseCaseFeatureConfig(featureConfig))) {
