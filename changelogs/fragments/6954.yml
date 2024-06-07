@@ -1,0 +1,2 @@
+fix:
+- Modify the import for timeline visualization to includes data source name in MDS scenario. ([#6954](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6954))
