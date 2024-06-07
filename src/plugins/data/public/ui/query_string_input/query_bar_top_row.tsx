@@ -100,7 +100,6 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   const { uiSettings, notifications, storage, appName, docLinks } = opensearchDashboards.services;
 
   const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;
-  const isDataSourceReadOnly = uiSettings.get('query:dataSourceReadOnly');
 
   const queryLanguage = props.query && props.query.language;
   const queryUiEnhancement =
@@ -224,7 +223,6 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     return (
       !Array.isArray(props.indexPatterns!) ||
       compact(props.indexPatterns!).length === 0 ||
-      !isDataSourceReadOnly ||
       fromUser(query!.query).includes(
         typeof props.indexPatterns[0] === 'string'
           ? props.indexPatterns[0]

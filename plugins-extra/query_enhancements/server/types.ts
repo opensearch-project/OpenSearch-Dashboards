@@ -4,7 +4,6 @@
  */
 
 import { DataPluginSetup } from 'src/plugins/data/server/plugin';
-import { HomeServerPluginSetup } from 'src/plugins/home/server/plugin';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryEnhancementsPluginSetup {}
@@ -12,7 +11,6 @@ export interface QueryEnhancementsPluginSetup {}
 export interface QueryEnhancementsPluginStart {}
 export interface QueryEnhancementsPluginSetupDependencies {
   data: DataPluginSetup;
-  home?: HomeServerPluginSetup;
 }
 
 export interface ISchema {

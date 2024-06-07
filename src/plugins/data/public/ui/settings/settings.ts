@@ -13,6 +13,7 @@ export interface DataSettings {
   // TODO: MQL datasource: we should consider this
   // userQueryDataSource: string;
   userQueryEnhancementsEnabled: boolean;
+  userQueryLanguagesBlocklist?: string[];
   userQueryLanguage: string;
   userQueryString: string;
   uiOverrides?: {
@@ -67,6 +68,19 @@ export class Settings {
     return true;
   }
 
+  getUserQueryLanguageBlocklist() {
+    return this.storage.get('opensearchDashboards.userQueryLanguageBlocklist') || [];
+  }
+
+  setUserQueryLanguageBlocklist(languages: string[]) {
+    if (!this.config.enabled) return;
+    this.storage.set(
+      'opensearchDashboards.userQueryLanguageBlocklist',
+      languages.map((language) => language.toLowerCase())
+    );
+    return true;
+  }
+
   getUserQueryLanguage() {
     return this.storage.get('opensearchDashboards.userQueryLanguage') || 'kuery';
   }
@@ -113,6 +127,7 @@ export class Settings {
   toJSON(): DataSettings {
     return {
       // userQueryDataSource: this.getUserQueryDataSource(),
+      userQueryLanguagesBlocklist: this.getUserQueryLanguageBlocklist(),
       userQueryEnhancementsEnabled: this.getUserQueryEnhancementsEnabled(),
       userQueryLanguage: this.getUserQueryLanguage(),
       userQueryString: this.getUserQueryString(),

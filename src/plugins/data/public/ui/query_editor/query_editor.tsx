@@ -29,7 +29,7 @@ import { fromUser, getQueryLog, matchPairs, PersistedLog, toUser } from '../../q
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { DataSettings, QueryEnhancement } from '../types';
 import { fetchIndexPatterns } from './fetch_index_patterns';
-import { QueryLanguageSwitcher } from './language_switcher';
+import { QueryLanguageSelector } from './language_selector';
 
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -504,7 +504,8 @@ export default class QueryEditorUI extends Component<Props, State> {
     );
 
     const queryLanguageSwitcher = (
-      <QueryLanguageSwitcher
+      <QueryLanguageSelector
+        isEnhancementsEnabled={this.props.isEnhancementsEnabled}
         language={this.props.query.language}
         anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
         onSelectLanguage={this.onSelectLanguage}

@@ -13,6 +13,7 @@ interface Props {
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
   appName?: string;
+  isEnhancementsEnabled?: boolean;
 }
 
 function mapExternalLanguageToOptions(language: string) {
@@ -22,7 +23,7 @@ function mapExternalLanguageToOptions(language: string) {
   };
 }
 
-export const QueryLanguageSwitcher = (props: Props) => {
+export const QueryLanguageSelector = (props: Props) => {
   const dqlLabel = i18n.translate('data.query.queryEditor.dqlLanguageName', {
     defaultMessage: 'DQL',
   });
@@ -45,12 +46,15 @@ export const QueryLanguageSwitcher = (props: Props) => {
   const searchService = getSearchService();
 
   const queryEnhancements = uiService.queryEnhancements;
-  if (uiService.isEnhancementsEnabled) {
+  if (props.isEnhancementsEnabled) {
     queryEnhancements.forEach((enhancement) => {
       if (
-        enhancement.supportedAppNames &&
-        props.appName &&
-        !enhancement.supportedAppNames.includes(props.appName)
+        (enhancement.supportedAppNames &&
+          props.appName &&
+          !enhancement.supportedAppNames.includes(props.appName)) ||
+        uiService.Settings.getUserQueryLanguageBlocklist().includes(
+          enhancement.language.toLowerCase()
+        )
       )
         return;
       languageOptions.unshift(mapExternalLanguageToOptions(enhancement.language));
@@ -65,7 +69,7 @@ export const QueryLanguageSwitcher = (props: Props) => {
   };
 
   const setSearchEnhance = (queryLanguage: string) => {
-    if (!uiService.isEnhancementsEnabled) return;
+    if (!props.isEnhancementsEnabled) return;
     const queryEnhancement = queryEnhancements.get(queryLanguage);
     searchService.__enhance({
       searchInterceptor: queryEnhancement

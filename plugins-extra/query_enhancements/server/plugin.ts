@@ -20,9 +20,7 @@ import { PPL_SEARCH_STRATEGY, SQL_SEARCH_STRATEGY, SQL_ASYNC_SEARCH_STRATEGY } f
 import { pplSearchStrategyProvider } from './search/ppl/ppl_search_strategy';
 import { sqlSearchStrategyProvider } from './search/sql/sql_search_strategy';
 import { sqlAsyncSearchStrategyProvider } from './search/sql/sql_async_search_strategy';
-
-// import { logsPPLSpecProvider } from './sample_data/ppl';
-// const pplSampleDateSet = logsPPLSpecProvider();
+import { uiSettings } from './ui_settings';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -33,13 +31,15 @@ export class QueryEnhancementsPlugin
     this.config$ = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup, { data, home }: QueryEnhancementsPluginSetupDependencies) {
+  public setup(core: CoreSetup, { data }: QueryEnhancementsPluginSetupDependencies) {
     this.logger.debug('queryEnhancements: Setup');
     const router = core.http.createRouter();
     // Register server side APIs
     const client = core.opensearch.legacy.createClient('opensearch_observability', {
       plugins: [PPLPlugin, EnginePlugin],
     });
+
+    core.uiSettings.register(uiSettings);
 
     const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
     const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
