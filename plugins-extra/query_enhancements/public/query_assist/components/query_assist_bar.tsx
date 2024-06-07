@@ -3,9 +3,10 @@ import React, { SyntheticEvent, useMemo, useRef, useState } from 'react';
 import { IDataPluginServices, PersistedLog } from '../../../../../src/plugins/data/public';
 import { SearchBarExtensionDependencies } from '../../../../../src/plugins/data/public/ui/search_bar_extensions/search_bar_extension';
 import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
+import { QueryAssistParameters } from '../../../common/query_assist';
 import { getStorage } from '../../services';
 import { useGenerateQuery } from '../hooks';
-import { getPersistedLog, ProhibitedQueryError } from '../utils';
+import { getMdsDataSourceId, getPersistedLog, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
@@ -45,10 +46,15 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     dismissCallout();
     previousQuestionRef.current = inputRef.current.value;
     persistedLog.add(inputRef.current.value);
-    const params = {
+    const dataSourceId = await getMdsDataSourceId(
+      services.data.indexPatterns,
+      selectedIndexPattern
+    );
+    const params: QueryAssistParameters = {
       question: inputRef.current.value,
       index: selectedIndex,
       language: props.language,
+      dataSourceId,
     };
     const { response, error } = await generateQuery(params);
     if (error) {
@@ -75,6 +81,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
             <QueryAssistInput
               inputRef={inputRef}
               persistedLog={persistedLog}
+              isDisabled={loading}
               selectedIndex={selectedIndex}
               previousQuestion={previousQuestionRef.current}
             />

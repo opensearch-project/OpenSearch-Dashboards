@@ -16,7 +16,14 @@ import {
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
 import { isEqual, compact } from 'lodash';
-import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
+import {
+  IDataPluginServices,
+  IIndexPattern,
+  TimeRange,
+  TimeHistoryContract,
+  Query,
+  DataSource,
+} from '../..';
 import {
   useOpenSearchDashboards,
   withOpenSearchDashboards,
@@ -44,6 +51,7 @@ export interface QueryEditorTopRowProps {
   disableAutoFocus?: boolean;
   screenTitle?: string;
   indexPatterns?: Array<IIndexPattern | string>;
+  dataSource?: DataSource;
   isLoading?: boolean;
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   showQueryEditor?: boolean;
@@ -270,9 +278,10 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     if (!shouldRenderSearchBarExtensions() || !queryEditorHeaderRef.current) return;
     return (
       <SearchBarExtensions
-        configs={props.queryEnhancements?.get(queryLanguage!)?.searchBar?.extensions}
+        configs={queryUiEnhancement?.extensions}
         portalContainer={queryEditorHeaderRef.current}
         indexPatterns={props.indexPatterns}
+        dataSource={props.dataSource}
       />
     );
   }

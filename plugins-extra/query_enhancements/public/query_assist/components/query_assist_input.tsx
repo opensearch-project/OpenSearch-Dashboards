@@ -7,6 +7,7 @@ import { getData } from '../../services';
 interface QueryAssistInputProps {
   inputRef: React.RefObject<HTMLInputElement>;
   persistedLog: PersistedLog;
+  isDisabled: boolean;
   initialValue?: string;
   selectedIndex?: string;
   previousQuestion?: string;
@@ -70,6 +71,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
         <EuiFieldText
           inputRef={props.inputRef}
           value={value}
+          disabled={props.isDisabled}
           onClick={() => setIsSuggestionsVisible(true)}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={() => setIsSuggestionsVisible(true)}

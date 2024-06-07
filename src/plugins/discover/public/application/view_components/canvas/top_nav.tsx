@@ -14,6 +14,7 @@ import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { useDiscoverContext } from '../context';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { opensearchFilters, connectStorageToQueryState } from '../../../../../data/public';
+import { useDataSource } from '../utils/use_datasource';
 
 export interface TopNavProps {
   opts: {
@@ -24,6 +25,7 @@ export interface TopNavProps {
 
 export const TopNav = ({ opts }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
+  const dataSource = useDataSource(services);
   const { inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
 
@@ -89,6 +91,7 @@ export const TopNav = ({ opts }: TopNavProps) => {
       useDefaultBehaviors
       setMenuMountPoint={opts.setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
+      dataSource={dataSource}
       onQuerySubmit={opts.onQuerySubmit}
     />
   );

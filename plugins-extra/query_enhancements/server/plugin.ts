@@ -1,25 +1,24 @@
 import { Observable } from 'rxjs';
 import {
-  PluginInitializerContext,
   CoreSetup,
   CoreStart,
-  Plugin,
   Logger,
+  Plugin,
+  PluginInitializerContext,
   SharedGlobalConfig,
 } from '../../../src/core/server';
-
+import { PPL_SEARCH_STRATEGY, SQL_ASYNC_SEARCH_STRATEGY, SQL_SEARCH_STRATEGY } from '../common';
+import { defineRoutes } from './routes';
+import { EnginePlugin } from './search/engine_plugin';
+import { PPLPlugin } from './search/ppl/ppl_plugin';
+import { pplSearchStrategyProvider } from './search/ppl/ppl_search_strategy';
+import { sqlAsyncSearchStrategyProvider } from './search/sql/sql_async_search_strategy';
+import { sqlSearchStrategyProvider } from './search/sql/sql_search_strategy';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
   QueryEnhancementsPluginStart,
 } from './types';
-import { defineRoutes } from './routes';
-import { PPLPlugin } from './search/ppl/ppl_plugin';
-import { EnginePlugin } from './search/engine_plugin';
-import { PPL_SEARCH_STRATEGY, SQL_SEARCH_STRATEGY, SQL_ASYNC_SEARCH_STRATEGY } from '../common';
-import { pplSearchStrategyProvider } from './search/ppl/ppl_search_strategy';
-import { sqlSearchStrategyProvider } from './search/sql/sql_search_strategy';
-import { sqlAsyncSearchStrategyProvider } from './search/sql/sql_async_search_strategy';
 import { uiSettings } from './ui_settings';
 
 export class QueryEnhancementsPlugin
@@ -31,7 +30,7 @@ export class QueryEnhancementsPlugin
     this.config$ = initializerContext.config.legacy.globalConfig$;
   }
 
-  public setup(core: CoreSetup, { data }: QueryEnhancementsPluginSetupDependencies) {
+  public setup(core: CoreSetup, { data, dataSource }: QueryEnhancementsPluginSetupDependencies) {
     this.logger.debug('queryEnhancements: Setup');
     const router = core.http.createRouter();
     // Register server side APIs
@@ -52,6 +51,11 @@ export class QueryEnhancementsPlugin
     data.search.registerSearchStrategy(PPL_SEARCH_STRATEGY, pplSearchStrategy);
     data.search.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategy);
     data.search.registerSearchStrategy(SQL_ASYNC_SEARCH_STRATEGY, sqlAsyncSearchStrategy);
+
+    core.http.registerRouteHandlerContext('query_assist', () => ({
+      logger: this.logger,
+      dataSourceEnabled: !!dataSource,
+    }));
 
     defineRoutes(this.logger, router, {
       ppl: pplSearchStrategy,

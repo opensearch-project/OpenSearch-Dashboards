@@ -33,6 +33,7 @@ import classNames from 'classnames';
 import { compact, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
+import { DataSource } from '../..';
 import {
   OpenSearchDashboardsReactContextValue,
   withOpenSearchDashboards,
@@ -59,6 +60,7 @@ interface SearchBarInjectedDeps {
 
 export interface SearchBarOwnProps {
   indexPatterns?: IIndexPattern[];
+  dataSource?: DataSource;
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
@@ -501,6 +503,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
+          dataSource={this.props.dataSource}
           isLoading={this.props.isLoading}
           prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
           showDatePicker={this.props.showDatePicker}

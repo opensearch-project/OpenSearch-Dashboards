@@ -20,7 +20,8 @@ export function defineRoutes(
     ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse>
   >
 ) {
-  registerQueryAssistRoutes(logger, router);
+  registerQueryAssistRoutes(router);
+
   router.post(
     {
       path: `/api/pplql/search`,
