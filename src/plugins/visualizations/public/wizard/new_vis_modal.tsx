@@ -125,6 +125,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
             onVisTypeSelected={this.onVisTypeSelected}
             visTypesRegistry={this.props.visTypesRegistry}
             addBasePath={this.props.addBasePath}
+            application={this.props.application}
           />
         </EuiModal>
       );

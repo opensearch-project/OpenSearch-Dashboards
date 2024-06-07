@@ -20,6 +20,8 @@
 
 .visNewVisDialog__list {
   min-height: 0;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .visNewVisDialog__searchWrapper {
@@ -32,7 +34,8 @@
   max-width: $euiSizeXXL * 10;
   min-height: 0;
   margin-top: 2px; // Account for search field dropshadow
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
 }
 
 .visNewVisDialog__types {

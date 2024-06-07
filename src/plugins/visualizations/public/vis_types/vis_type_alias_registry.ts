@@ -58,6 +58,7 @@ export interface VisualizationsAppExtension {
 }
 
 export interface VisTypeAliasPromotion {
+  title: string;
   description: string;
   buttonText: string;
 }
