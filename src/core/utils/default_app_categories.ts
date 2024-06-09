@@ -74,3 +74,48 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     euiIconType: 'managementApp',
   },
 });
+
+export const DEFAULT_GROUPS: Record<string, AppCategory> = Object.freeze({
+  observability: {
+    id: 'observability',
+    label: i18n.translate('workspace.usecase.observability.title', {
+      defaultMessage: 'Observability',
+    }),
+  },
+  'security-analytics': {
+    id: 'security-analytics',
+    label: i18n.translate('workspace.usecase.security.analytics.title', {
+      defaultMessage: 'Security Analytics',
+    }),
+  },
+  analytics: {
+    id: 'analytics',
+    label: i18n.translate('workspace.usecase.analytics.title', {
+      defaultMessage: 'Analytics',
+    }),
+  },
+  search: {
+    id: 'search',
+    label: i18n.translate('workspace.usecase.search.title', {
+      defaultMessage: 'Search',
+    }),
+  },
+  settings: {
+    id: 'settings',
+    label: i18n.translate('nav.group.settings.label', {
+      defaultMessage: 'settings and setup',
+    }),
+  },
+  dataAdministration: {
+    id: 'dataAdministration',
+    label: i18n.translate('nav.group.dataAdministration.label', {
+      defaultMessage: 'data administration',
+    }),
+  },
+  devTools: {
+    id: 'devTools',
+    label: i18n.translate('nav.group.devTools.label', {
+      defaultMessage: 'developer tools',
+    }),
+  },
+});

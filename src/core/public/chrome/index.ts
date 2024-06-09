@@ -36,6 +36,7 @@ export {
   ChromeStart,
   InternalChromeStart,
   ChromeHelpExtension,
+  CollapsibleNavHeaderRenderProps,
 } from './chrome_service';
 export {
   ChromeHelpExtensionMenuLink,

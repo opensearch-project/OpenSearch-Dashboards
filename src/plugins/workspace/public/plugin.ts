@@ -285,11 +285,11 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     /**
      * Register workspace dropdown selector on the top of left navigation menu
      */
-    core.chrome.registerCollapsibleNavHeader(() => {
+    core.chrome.registerCollapsibleNavHeader((props) => {
       if (!this.coreStart) {
         return null;
       }
-      return React.createElement(WorkspaceMenu, { coreStart: this.coreStart });
+      return React.createElement(WorkspaceMenu, { coreStart: this.coreStart, ...props });
     });
 
     // workspace list
@@ -317,10 +317,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
 
-    this.setWorkspaceConfigurableApps(core).then(() => {
-      // filter the nav links based on the current workspace
-      this.filterNavLinks(core);
-    });
+    // this.setWorkspaceConfigurableApps(core).then(() => {
+    //   // filter the nav links based on the current workspace
+    //   this.filterNavLinks(core);
+    // });
 
     this.addWorkspaceToBreadcrumbs(core);
 

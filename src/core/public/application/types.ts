@@ -268,6 +268,8 @@ export interface App<HistoryLocationState = unknown> {
    * indicating the application is available within or out of workspace.
    */
   workspaceAvailability?: WorkspaceAvailability;
+
+  group?: AppCategory;
 }
 
 /**

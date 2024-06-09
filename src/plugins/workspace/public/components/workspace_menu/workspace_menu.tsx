@@ -8,6 +8,7 @@ import React, { useState } from 'react';
 import { useObservable } from 'react-use';
 import {
   EuiButtonIcon,
+  EuiCollapsibleNavGroup,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,15 +20,18 @@ import {
 } from '@elastic/eui';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 
+import { CollapsibleNavHeaderRenderProps } from 'src/core/public';
 import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_USE_CASES,
 } from '../../../common/constants';
 import { cleanWorkspaceId, formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
+import { getUseCaseFromFeatureConfig } from '../../utils';
 
-interface Props {
+interface Props extends CollapsibleNavHeaderRenderProps {
   coreStart: CoreStart;
 }
 
@@ -45,10 +49,14 @@ function getFilteredWorkspaceList(
   ].slice(0, 5);
 }
 
-export const WorkspaceMenu = ({ coreStart }: Props) => {
+export const WorkspaceMenu = ({ coreStart, setFocusGroup }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const workspaceList = useObservable(coreStart.workspaces.workspaceList$, []);
+  const selectedUseCase =
+    currentWorkspace?.features
+      ?.map((item) => getUseCaseFromFeatureConfig(item))
+      .filter((item) => item) || [];
 
   const defaultHeaderName = i18n.translate(
     'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
@@ -133,23 +141,18 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   };
 
   const currentWorkspaceButton = (
-    <>
-      <EuiListGroup style={{ width: 318 }} maxWidth={false}>
-        <EuiListGroupItem
-          iconType="spacesApp"
-          label={currentWorkspaceName}
-          onClick={openPopover}
-          extraAction={{
-            color: 'subdued',
-            onClick: openPopover,
-            iconType: isPopoverOpen ? 'arrowDown' : 'arrowRight',
-            iconSize: 's',
-            'aria-label': 'Show workspace dropdown selector',
-            alwaysShow: true,
-          }}
-        />
-      </EuiListGroup>
-    </>
+    <EuiListGroupItem
+      iconType="spacesApp"
+      label={currentWorkspaceName}
+      onClick={openPopover}
+      extraAction={{
+        color: 'subdued',
+        onClick: openPopover,
+        iconType: 'arrowDown',
+        iconSize: 's',
+        'aria-label': 'Show workspace dropdown selector',
+      }}
+    />
   );
 
   const currentWorkspaceTitle = (
@@ -176,16 +179,33 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   ];
 
   return (
-    <EuiPopover
-      id="workspaceDropdownMenu"
-      display="block"
-      button={currentWorkspaceButton}
-      isOpen={isPopoverOpen}
-      closePopover={closePopover}
-      panelPaddingSize="none"
-      anchorPosition="downCenter"
-    >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
-    </EuiPopover>
+    <EuiListGroup>
+      <EuiPopover
+        id="workspaceDropdownMenu"
+        display="block"
+        button={currentWorkspaceButton}
+        isOpen={isPopoverOpen}
+        closePopover={closePopover}
+        panelPaddingSize="none"
+        anchorPosition="downCenter"
+      >
+        <EuiContextMenu initialPanelId={0} panels={panels} />
+      </EuiPopover>
+      {selectedUseCase.map((useCase) => {
+        const useCaseDescription = WORKSPACE_USE_CASES[useCase];
+        return (
+          <EuiListGroupItem
+            color="text"
+            size="s"
+            key={useCase}
+            title={useCaseDescription.title}
+            label={useCaseDescription.title}
+            onClick={() => {
+              setFocusGroup(useCase);
+            }}
+          />
+        );
+      })}
+    </EuiListGroup>
   );
 };

@@ -48,7 +48,7 @@ import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
-import { Branding } from '../';
+import { AppCategory, Branding } from '../';
 import { getLogos } from '../../common';
 import type { Logos } from '../../common/types';
 import { OverlayStart } from '../overlays';
@@ -100,7 +100,13 @@ export interface StartDeps {
   overlays: OverlayStart;
 }
 
-type CollapsibleNavHeaderRender = () => JSX.Element | null;
+export interface CollapsibleNavHeaderRenderProps {
+  setFocusGroup: React.Dispatch<React.SetStateAction<AppCategory | undefined>>;
+}
+
+export type CollapsibleNavHeaderRender = (
+  props: CollapsibleNavHeaderRenderProps
+) => JSX.Element | null;
 
 /** @internal */
 export class ChromeService {

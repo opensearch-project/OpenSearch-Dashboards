@@ -102,6 +102,11 @@ export interface ChromeNavLink {
    * Hides a link from the navigation.
    */
   readonly hidden?: boolean;
+
+  /**
+   * The category the app lives in
+   */
+  readonly group?: AppCategory;
 }
 
 /** @public */

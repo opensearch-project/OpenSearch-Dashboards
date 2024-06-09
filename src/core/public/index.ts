@@ -71,6 +71,7 @@ import {
   RightNavigationOrder,
   RightNavigationButton,
   RightNavigationButtonProps,
+  CollapsibleNavHeaderRenderProps,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -103,6 +104,7 @@ export {
   cleanWorkspaceId,
   PUBLIC_WORKSPACE_ID,
   PUBLIC_WORKSPACE_NAME,
+  DEFAULT_GROUPS,
 } from '../utils';
 export {
   AppCategory,
@@ -373,3 +375,5 @@ export { __osdBootstrap__ } from './osd_bootstrap';
 export { WorkspacesStart, WorkspacesSetup, WorkspacesService, WorkspaceObject } from './workspace';
 
 export { debounce } from './utils';
+
+export { CollapsibleNavHeaderRenderProps };

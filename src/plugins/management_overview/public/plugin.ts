@@ -57,23 +57,23 @@ export class ManagementOverViewPlugin
       });
     }
 
-    application.register({
-      id: MANAGEMENT_OVERVIEW_PLUGIN_ID,
-      title: i18n.translate('management.overview.overviewTitle', {
-        defaultMessage: 'Overview',
-      }),
-      icon: '/ui/logos/opensearch_mark.svg',
-      order: 9000,
-      category: DEFAULT_APP_CATEGORIES.management,
-      mount: async (params: AppMountParameters) => {
-        const { element } = params;
-        const [core] = await getStartServices();
-        const overviewApps = this.getSortedOverviewApps();
+    // application.register({
+    //   id: MANAGEMENT_OVERVIEW_PLUGIN_ID,
+    //   title: i18n.translate('management.overview.overviewTitle', {
+    //     defaultMessage: 'Overview',
+    //   }),
+    //   icon: '/ui/logos/opensearch_mark.svg',
+    //   order: 9000,
+    //   category: DEFAULT_APP_CATEGORIES.management,
+    //   mount: async (params: AppMountParameters) => {
+    //     const { element } = params;
+    //     const [core] = await getStartServices();
+    //     const overviewApps = this.getSortedOverviewApps();
 
-        const { renderApp } = await import('./application');
-        return renderApp(core, overviewApps, element);
-      },
-    });
+    //     const { renderApp } = await import('./application');
+    //     return renderApp(core, overviewApps, element);
+    //   },
+    // });
 
     return {
       register: (app: OverviewApp) => {

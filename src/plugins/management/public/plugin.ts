@@ -42,6 +42,7 @@ import {
   AppUpdater,
   AppStatus,
   AppNavLinkStatus,
+  DEFAULT_GROUPS,
 } from '../../../core/public';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -78,6 +79,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       order: 9030,
       icon: '/ui/logos/opensearch_mark.svg',
       category: DEFAULT_APP_CATEGORIES.management,
+      group: DEFAULT_GROUPS.dataAdministration,
       updater$: this.appUpdater,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');

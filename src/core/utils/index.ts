@@ -36,7 +36,7 @@ export {
   IContextContainer,
   IContextProvider,
 } from './context';
-export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
+export { DEFAULT_APP_CATEGORIES, DEFAULT_GROUPS } from './default_app_categories';
 export {
   WORKSPACE_PATH_PREFIX,
   WORKSPACE_TYPE,
