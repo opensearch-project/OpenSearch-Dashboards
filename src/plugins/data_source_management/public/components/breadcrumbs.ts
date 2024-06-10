@@ -29,6 +29,21 @@ export function getCreateBreadcrumbs() {
   ];
 }
 
+export function getCreateOpenSearchDataSourceBreadcrumbs() {
+  return [
+    ...getCreateBreadcrumbs(),
+    {
+      text: i18n.translate(
+        'dataSourcesManagement.dataSources.createOpenSearchDataSourceBreadcrumbs',
+        {
+          defaultMessage: 'Open Search',
+        }
+      ),
+      href: `/configure/OpenSearch`,
+    },
+  ];
+}
+
 export function getEditBreadcrumbs(dataSource: DataSourceAttributes) {
   return [
     ...getListBreadcrumbs(),
