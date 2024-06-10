@@ -36,6 +36,7 @@ import { RenderingMetadata } from '../types';
 
 interface Props {
   url: RenderingMetadata['uiPublicUrl'];
+  theme: RenderingMetadata['themeVersion'];
 }
 
 interface FontFace {
@@ -49,7 +50,7 @@ interface FontFace {
   }>;
 }
 
-export const Fonts: FunctionComponent<Props> = ({ url }) => {
+export const Fonts: FunctionComponent<Props> = ({ url, theme }) => {
   // For next theme
   const sourceSans3: FontFace = {
     family: 'Source Sans 3',
@@ -531,7 +532,9 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
       url('${url}/fonts/inter_ui/Inter-UI-italic.var.woff2') format('woff2');
   }
   */
-  const fontsDefinitionRules = [interUi, sourceSans3, roboto, sourceCodePro]
+  const fontText = theme === 'v7' ? interUi : sourceSans3;
+  const fontCode = theme === 'v7' ? roboto : sourceCodePro;
+  const fontsDefinitionRules = [fontText, fontCode]
     .flatMap(({ family, variants }) =>
       variants.map(({ style, weight, format, sources, unicodeRange }) => {
         const src = sources
@@ -554,11 +557,36 @@ export const Fonts: FunctionComponent<Props> = ({ url }) => {
     )
     .join('\n');
 
+  /*
+   * The default fonts are added as CSS variables, overriding OUI's, and then
+   * the CSS variables are consumed.
+   */
+  const fontRules = `
+    :root {
+      --font-text: "${fontText.family}", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+                   sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+
+      --font-code: "${fontCode.family}", Consolas, Menlo, Courier, monospace;
+
+      --oui-font-family: var(--font-text);
+      --oui-code-font-family: var(--font-code);
+    }
+
+    code, pre, kbd, samp {
+      font-family: var(--font-code);
+    }
+    html, input, textarea, select, button {
+      font-family: var(--font-text);
+    }
+
+  `;
+
   return (
     <style
       dangerouslySetInnerHTML={{
         __html: `
         ${fontsDefinitionRules}
+        ${fontRules}
       `,
       }}
     />

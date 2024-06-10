@@ -20,7 +20,6 @@ function mockProps() {
     themeVersion: 'v7',
     i18n: () => '',
     bootstrapScriptUrl: `${http.basePath}/bootstrap.js`,
-    startupScriptUrl: `${http.basePath}/startup.js`,
     strictCsp: true,
     injectedMetadata: {
       version: injectedMetadata.getOpenSearchDashboardsVersion(),

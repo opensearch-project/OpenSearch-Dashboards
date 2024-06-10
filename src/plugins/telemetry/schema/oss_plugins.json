@@ -1481,9 +1481,6 @@
         "timepicker:quickRanges": {
           "type": "keyword"
         },
-        "theme:enableUserControl": {
-          "type": "boolean"
-        },
         "theme:version": {
           "type": "keyword"
         },
