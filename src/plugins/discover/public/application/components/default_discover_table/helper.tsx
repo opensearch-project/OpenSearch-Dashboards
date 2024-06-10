@@ -94,7 +94,9 @@ export function getLegacyDisplayedColumns(
       colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
     };
   });
-  return !hideTimeField && indexPattern.timeFieldName
+  return !hideTimeField &&
+    indexPattern.timeFieldName &&
+    !columns.includes(indexPattern.timeFieldName)
     ? [getTimeColumn(indexPattern.timeFieldName), ...columnProps]
     : columnProps;
 }
