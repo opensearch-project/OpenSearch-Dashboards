@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { DataSourceHeader } from './data_source_page_header';
 import { DataSourceTableWithRouter } from '../data_source_table/data_source_table';
-import { ManageFlintDataConnectionsTable } from '../flint_data_sources_components/flint_data_connection/manage_flint_data_connections_table';
+import { ManageDirectQueryDataConnectionsTable } from '../direct_query_data_sources_components/direct_query_data_connection/manage_direct_query_data_connections_table';
 import { CreateButton } from '../create_button';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { getListBreadcrumbs } from '../breadcrumbs';
@@ -24,12 +24,12 @@ import { DataSourceManagementContext } from '../../types';
 
 const tabs = [
   {
-    id: 'manageFlintDataSources',
-    name: 'Manage direct query data sources',
+    id: 'manageDirectQueryDataSources',
+    name: 'Direct query connections',
   },
   {
     id: 'manageOpensearchDataSources',
-    name: 'Manage OpenSearch data sources',
+    name: 'OpenSearch connections',
   },
 ];
 
@@ -42,7 +42,7 @@ export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
     uiSettings,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
-  const [selectedTabId, setSelectedTabId] = useState('manageFlintDataSources');
+  const [selectedTabId, setSelectedTabId] = useState('manageDirectQueryDataSources');
 
   useEffect(() => {
     setBreadcrumbs(getListBreadcrumbs());
@@ -88,7 +88,9 @@ export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
           {selectedTabId === 'manageOpensearchDataSources' && (
             <DataSourceTableWithRouter {...props} />
           )}
-          {selectedTabId === 'manageFlintDataSources' && <ManageFlintDataConnectionsTable />}
+          {selectedTabId === 'manageDirectQueryDataSources' && (
+            <ManageDirectQueryDataConnectionsTable />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

@@ -33,7 +33,7 @@ const truncate = (text: string, length: number) => {
   return text.substring(0, length) + '...';
 };
 
-export const ManageFlintDataConnectionsTable = () => {
+export const ManageDirectQueryDataConnectionsTable = () => {
   const [data, setData] = useState<DataConnection[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);

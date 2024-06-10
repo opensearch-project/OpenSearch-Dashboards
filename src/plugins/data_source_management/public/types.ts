@@ -142,7 +142,7 @@ export {
   DataSourceError,
 } from '../../data_source/common/data_sources';
 
-// flint datasources types
+// Direct Query datasources types
 export type DatasourceType = 'S3GLUE' | 'PROMETHEUS';
 
 export type DatasourceStatus = 'ACTIVE' | 'DISABLED';
