@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { i18n } from '@osd/i18n';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -112,6 +113,9 @@ function FilterBarUI(props: Props) {
         size="xs"
         onClick={() => setIsAddFilterPopoverOpen(true)}
         data-test-subj="addFilter"
+        aria-label={i18n.translate('data.filter.filterBar.addFilterButtonLabel', {
+          defaultMessage: 'Add filter',
+        })}
         className="globalFilterBar__addButton"
       >
         +{' '}
