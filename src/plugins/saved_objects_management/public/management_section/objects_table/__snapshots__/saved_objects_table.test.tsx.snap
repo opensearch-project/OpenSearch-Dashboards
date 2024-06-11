@@ -947,7 +947,6 @@ exports[`SavedObjectsTable should render normally 1`] = `
   horizontalPosition="center"
 >
   <Header
-    filteredCount={4}
     objectCount={4}
     onDuplicate={[Function]}
     onExportAll={[Function]}

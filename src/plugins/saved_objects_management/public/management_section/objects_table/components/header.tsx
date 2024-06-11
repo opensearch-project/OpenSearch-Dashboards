@@ -45,7 +45,6 @@ export const Header = ({
   onImport,
   onDuplicate,
   onRefresh,
-  filteredCount,
   objectCount,
   showDuplicateAll = false,
 }: {
@@ -53,7 +52,6 @@ export const Header = ({
   onImport: () => void;
   onDuplicate: () => void;
   onRefresh: () => void;
-  filteredCount: number;
   objectCount: number;
   showDuplicateAll: boolean;
 }) => (
@@ -83,10 +81,7 @@ export const Header = ({
               >
                 <FormattedMessage
                   id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
-                  defaultMessage="Duplicate {filteredCount, plural, one{# object} other {# objects}}"
-                  values={{
-                    filteredCount,
-                  }}
+                  defaultMessage="Copy all objects to..."
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -100,10 +95,7 @@ export const Header = ({
             >
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-                defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
-                values={{
-                  filteredCount,
-                }}
+                defaultMessage="Export all objects"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

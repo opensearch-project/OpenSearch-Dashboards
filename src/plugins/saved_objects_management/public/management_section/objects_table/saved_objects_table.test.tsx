@@ -937,7 +937,7 @@ describe('SavedObjectsTable', () => {
       component.update();
 
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Success - 2 saved objects were duplicated to bar',
+        title: 'Successfully copied 2 saved objects to bar.',
       });
     });
 
@@ -965,7 +965,7 @@ describe('SavedObjectsTable', () => {
       component.update();
 
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Success - object-1 and the related objects were duplicated to bar',
+        title: 'Successfully copied object-1 and the related objects to bar.',
       });
     });
 
@@ -997,10 +997,10 @@ describe('SavedObjectsTable', () => {
       }));
 
       await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
-      expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title:
-          'Warning - 0 saved object(s) were duplicated to bar. Unable to duplicate 2 saved object(s): 1, 2',
-      });
+      expect(notifications.toasts.addDanger).toHaveBeenCalled();
+      expect((notifications.toasts.addDanger as jest.Mock).mock.calls[0][0].title).toMatch(
+        'Successfully copied 0 saved object to bar.'
+      );
     });
 
     it('should catch error when duplicating selected object is fail', async () => {
@@ -1028,7 +1028,7 @@ describe('SavedObjectsTable', () => {
       component.update();
 
       expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
-        title: 'Error - Unable to duplicate 2 saved object(s)',
+        title: 'Unable to copy 2 saved objects.',
       });
     });
 

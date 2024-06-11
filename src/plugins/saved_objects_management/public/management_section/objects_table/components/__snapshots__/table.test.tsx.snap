@@ -261,7 +261,7 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
             onClick={[Function]}
           >
             <FormattedMessage
-              defaultMessage="Duplicate to"
+              defaultMessage="Copy to..."
               id="savedObjectsManagement.objectsTable.table.duplicateSOButtonLabel"
               values={Object {}}
             />
@@ -414,9 +414,9 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
               Object {
                 "available": [Function],
                 "data-test-subj": "savedObjectsTableAction-duplicate",
-                "description": "Duplicate this saved object",
+                "description": "Copy this saved object",
                 "icon": "copy",
-                "name": "Duplicate to...",
+                "name": "Copy to...",
                 "onClick": [Function],
                 "type": "icon",
               },

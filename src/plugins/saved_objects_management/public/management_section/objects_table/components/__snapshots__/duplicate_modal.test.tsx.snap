@@ -59,7 +59,7 @@ HTMLCollection [
                   class="euiModalHeader__title"
                 >
                   <span>
-                    Duplicate 3 objects?
+                    Copy 3 objects to another workspace?
                   </span>
                 </div>
               </div>
@@ -92,7 +92,7 @@ HTMLCollection [
                         <div
                           class="euiTextColor euiTextColor--subdued"
                         >
-                          Select a workspace to where the object(s) will be duplicated
+                          Move copied saved  objects to the selected workspace.
                         </div>
                       </div>
                       <div
@@ -118,7 +118,7 @@ HTMLCollection [
                               <p
                                 class="euiComboBoxPlaceholder"
                               >
-                                select a workspace
+                                Select a workspace
                               </p>
                               <div
                                 class="euiComboBox__input"
@@ -171,21 +171,12 @@ HTMLCollection [
                         class="euiFormLabel euiFormRow__label"
                         for="generated-id"
                       >
-                        Options
+                        Copy related objects
                       </label>
                     </div>
                     <div
                       class="euiFormRow__fieldWrapper"
                     >
-                      <div
-                        class="euiText euiText--small"
-                      >
-                        <div
-                          class="euiTextColor euiTextColor--subdued"
-                        >
-                          Include related saved objects to ensure object(s) work as expected
-                        </div>
-                      </div>
                       <div
                         class="euiSpacer euiSpacer--s"
                       />
@@ -205,7 +196,7 @@ HTMLCollection [
                           class="euiCheckbox__label"
                           for="includeReferencesDeep"
                         >
-                          Include related objects (recommended)
+                          Copy the selected object and any related objects (recommended).
                         </label>
                       </div>
                     </div>
@@ -245,7 +236,7 @@ HTMLCollection [
                       class="euiButton__text"
                     >
                       <span>
-                        Duplicate
+                        Copy
                       </span>
                     </span>
                   </span>

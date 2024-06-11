@@ -324,11 +324,11 @@ export class Table extends PureComponent<TableProps, TableState> {
                 {
                   name: i18n.translate(
                     'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionName',
-                    { defaultMessage: 'Duplicate to...' }
+                    { defaultMessage: 'Copy to...' }
                   ),
                   description: i18n.translate(
                     'savedObjectsManagement.objectsTable.table.columnActions.duplicateActionDescription',
-                    { defaultMessage: 'Duplicate this saved object' }
+                    { defaultMessage: 'Copy this saved object' }
                   ),
                   type: 'icon',
                   icon: 'copy',
@@ -404,7 +404,7 @@ export class Table extends PureComponent<TableProps, TableState> {
       >
         <FormattedMessage
           id="savedObjectsManagement.objectsTable.table.duplicateSOButtonLabel"
-          defaultMessage="Duplicate to"
+          defaultMessage="Copy to..."
         />
       </EuiButton>
     );

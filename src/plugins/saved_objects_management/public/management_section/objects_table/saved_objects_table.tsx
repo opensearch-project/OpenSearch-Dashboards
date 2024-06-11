@@ -72,7 +72,7 @@ import {
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
 import { PUBLIC_WORKSPACE_ID, PUBLIC_WORKSPACE_NAME } from '../../../../../core/public';
-import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
+import { RedirectAppLinks, toMountPoint } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
   parseQuery,
@@ -737,7 +737,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             'savedObjectsManagement.objectsTable.duplicate.successNotification',
             {
               defaultMessage:
-                'Success - {successCount, plural, one {{objectTitle}} other {# saved objects}} {includeReferencesDeep, select, true {and the related objects were} false {{successCount, plural, one {was} other {were}}}} duplicated to {targetWorkspaceName}',
+                'Successfully copied {successCount, plural, one {{objectTitle}} other {# saved objects}} {includeReferencesDeep, select, true {and the related objects } false { }}to {targetWorkspaceName}.',
               values: {
                 successCount,
                 objectTitle: savedObjects[0].meta.title,
@@ -748,31 +748,47 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           ),
         });
       } else {
-        const errorIdMessages = result.errors
-          ? result.errors.map((item: { id: string }) => item.id).join(', ')
-          : '';
+        const errorIds = result.errors ? result.errors.map((item: { id: string }) => item.id) : [];
+        const errorTitleMessages = savedObjects
+          .filter((obj) => errorIds.includes(obj.id))
+          .map((obj) => <li>{obj.meta.title}</li>);
+        const errorText = i18n.translate(
+          'savedObjectsManagement.objectsTable.duplicate.dangerNotificationText',
+          {
+            defaultMessage:
+              'Unable to copy {errorCount, plural, one {# saved object} other {# saved objects}}:',
+            values: {
+              errorCount: result.errors.length,
+            },
+          }
+        );
         notifications.toasts.addDanger({
           title: i18n.translate(
             'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
             {
               defaultMessage:
-                'Warning - {successCount} saved object(s) {includeReferencesDeep, select, true {and the related objects were} false {were}} duplicated to {targetWorkspaceName}. Unable to duplicate {errorCount} saved object(s): {errorIdMessages}',
+                'Successfully copied {successCount, plural,=0 {# saved object} one {# saved object} other {# saved objects}} {includeReferencesDeep, select, true {and the related objects } false { }}to {targetWorkspaceName}.',
               values: {
                 successCount,
                 includeReferencesDeep,
                 targetWorkspaceName,
-                errorCount: result.errors.length,
-                errorIdMessages,
               },
             }
+          ),
+          text: toMountPoint(
+            <div>
+              <> {errorText} </>
+              <> {errorTitleMessages} </>
+            </div>
           ),
         });
       }
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
-          defaultMessage: 'Error - Unable to duplicate {errorCount} saved object(s)',
-          values: { errorCount: savedObjects.length.toString() },
+          defaultMessage:
+            'Unable to copy {errorCount, plural, one {# saved object} other {# saved objects}}.',
+          values: { errorCount: savedObjects.length },
         }),
       });
     }
@@ -1117,7 +1133,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         type: 'field_value_selection',
         field: 'workspaces',
         name: i18n.translate('savedObjectsManagement.objectsTable.table.workspaceFilterName', {
-          defaultMessage: 'Workspaces',
+          defaultMessage: 'Workspace',
         }),
         multiSelect: 'or',
         options: wsFilterOptions,
@@ -1138,7 +1154,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           showDuplicateAll={this.state.workspaceEnabled}
           onDuplicate={this.onDuplicateAll}
           onRefresh={this.refreshObjects}
-          filteredCount={filteredItemCount}
           objectCount={savedObjects.length}
         />
         <EuiSpacer size="xs" />

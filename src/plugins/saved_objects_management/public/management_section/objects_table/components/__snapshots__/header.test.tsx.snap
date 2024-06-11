@@ -37,13 +37,9 @@ exports[`Header should render normally 1`] = `
             size="s"
           >
             <FormattedMessage
-              defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
+              defaultMessage="Export all objects"
               id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-              values={
-                Object {
-                  "filteredCount": 2,
-                }
-              }
+              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -142,13 +138,9 @@ exports[`Header should render normally when showDuplicateAll is undefined 1`] = 
             size="s"
           >
             <FormattedMessage
-              defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
+              defaultMessage="Export all objects"
               id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-              values={
-                Object {
-                  "filteredCount": 2,
-                }
-              }
+              values={Object {}}
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

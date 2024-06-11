@@ -124,7 +124,7 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
           <EuiModalHeaderTitle>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.duplicateModal.title"
-              defaultMessage="Duplicate {objectCount, plural, =1 {{objectName}} other {# objects}}?"
+              defaultMessage="Copy {objectCount, plural, =1 {{objectName}} other {# objects}} to another workspace?"
               values={{
                 objectName: allSelectedObjects[0].meta.title,
                 objectCount: allSelectedObjects.length,
@@ -145,7 +145,11 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
               <EuiText size="s" color="subdued">
                 {i18n.translate(
                   'savedObjectsManagement.objectsTable.duplicateModal.targetWorkspaceNotice',
-                  { defaultMessage: 'Select a workspace to where the object(s) will be duplicated' }
+                  {
+                    defaultMessage: `Move copied saved  object${
+                      allSelectedObjects.length > 1 ? `s` : ``
+                    } to the selected workspace.`,
+                  }
                 )}
               </EuiText>
               <EuiSpacer size="s" />
@@ -156,7 +160,7 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
                 singleSelection={{ asPlainText: true }}
                 isClearable={false}
                 isInvalid={!targetWorkspaceId}
-                placeholder="select a workspace"
+                placeholder="Select a workspace"
               />
             </>
           </EuiFormRow>
@@ -167,25 +171,19 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
             fullWidth
             label={i18n.translate(
               'savedObjectsManagement.objectsTable.duplicateModal.relatedObjects',
-              { defaultMessage: 'Options' }
+              { defaultMessage: 'Copy related objects' }
             )}
           >
             <>
-              <EuiText size="s" color="subdued">
-                {i18n.translate(
-                  'savedObjectsManagement.objectsTable.duplicateModal.relatedObjectsNotice',
-                  {
-                    defaultMessage:
-                      'Include related saved objects to ensure object(s) work as expected',
-                  }
-                )}
-              </EuiText>
               <EuiSpacer size="s" />
               <EuiCheckbox
                 id={'includeReferencesDeep'}
                 label={i18n.translate(
                   'savedObjectsManagement.objectsTable.duplicateModal.includeReferencesDeepLabel',
-                  { defaultMessage: 'Include related objects (recommended)' }
+                  {
+                    defaultMessage:
+                      'Copy the selected object and any related objects (recommended).',
+                  }
                 )}
                 checked={isIncludeReferencesDeepChecked}
                 onChange={this.changeIncludeReferencesDeep}
@@ -211,7 +209,7 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
           >
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.duplicateModal.confirmButtonLabel"
-              defaultMessage="Duplicate"
+              defaultMessage="Copy"
               values={{
                 objectCount: allSelectedObjects.length,
               }}
