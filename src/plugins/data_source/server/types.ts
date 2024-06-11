@@ -17,7 +17,7 @@ import {
 } from '../common/data_sources';
 
 import { CryptographyServiceSetup } from './cryptography_service';
-import { DataSourceError } from './lib/error';
+import { DataSourceError } from '../common/data_sources';
 import { IAuthenticationMethodRegistry } from './auth_registry';
 import { CustomApiSchemaRegistry } from './schema_registry';
 

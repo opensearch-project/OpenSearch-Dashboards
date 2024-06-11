@@ -130,7 +130,6 @@ async function copyToBuild(project: Project, opensearchDashboardsRoot: string, b
   await copy(['**/*', '!node_modules/**'], buildProjectPath, {
     cwd: project.getIntermediateBuildDirectory(),
     dot: true,
-    nodir: true,
     parents: true,
   });
 

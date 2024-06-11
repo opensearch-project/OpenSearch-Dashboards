@@ -38,7 +38,8 @@ import {
   getSingleDataSourceResponse,
   getDataSource,
   getDataSourceOptions,
-  getDataSourceByIdWithError,
+  getDataSourceByIdWithNotFoundError,
+  getDataSourceByIdWithNetworkError,
 } from '../mocks';
 import {
   AuthType,
@@ -166,12 +167,28 @@ describe('DataSourceManagement: Utils.ts', () => {
         expect(e).toBeTruthy();
       }
     });
-    test('failure: gets error when response contains error', async () => {
+    test('failure: gets error when response contains not found error', async () => {
       try {
-        mockResponseForSavedObjectsCalls(savedObjects.client, 'get', getDataSourceByIdWithError);
+        mockResponseForSavedObjectsCalls(
+          savedObjects.client,
+          'get',
+          getDataSourceByIdWithNotFoundError
+        );
         await getDataSourceById('alpha-test', savedObjects.client);
       } catch (e) {
-        expect(e).toBeTruthy();
+        expect(e.statusCode).toBe(404);
+      }
+    });
+    test('failure: gets error when response contains other error', async () => {
+      try {
+        mockResponseForSavedObjectsCalls(
+          savedObjects.client,
+          'get',
+          getDataSourceByIdWithNetworkError
+        );
+        await getDataSourceById('alpha-test', savedObjects.client);
+      } catch (e) {
+        expect(e.statusCode).toBe(500);
       }
     });
   });
@@ -365,6 +382,12 @@ describe('DataSourceManagement: Utils.ts', () => {
     });
     test('should set default datasource when it does not have default datasource ', async () => {
       mockUiSettingsCalls(uiSettings, 'get', null);
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should set default datasource when returned default datasource id is empty string', async () => {
+      mockUiSettingsCalls(uiSettings, 'get', '');
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
       await handleSetDefaultDatasource(savedObjects.client, uiSettings);
       expect(uiSettings.set).toHaveBeenCalled();

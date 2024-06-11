@@ -230,7 +230,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     core.application.register({
       id: WORKSPACE_CREATE_APP_ID,
       title: i18n.translate('workspace.settings.workspaceCreate', {
-        defaultMessage: 'Create Workspace',
+        defaultMessage: 'Create a workspace',
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {

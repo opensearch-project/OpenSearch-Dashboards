@@ -6,7 +6,9 @@
 import { SavedObject } from 'opensearch-dashboards/server';
 import {
   extractVegaSpecFromSavedObject,
+  extractTimelineExpression,
   updateDataSourceNameInVegaSpec,
+  updateDataSourceNameInTimeline,
 } from '../../../../../../core/server';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 
@@ -23,7 +25,7 @@ export const appendDataSourceId = (id: string) => {
 const overrideSavedObjectId = (savedObject: SavedObject, idGenerator: (id: string) => string) => {
   savedObject.id = idGenerator(savedObject.id);
   // update reference
-  if (savedObject.type === 'dashboard') {
+  if (savedObject.type === 'dashboard' || savedObject.type === 'visualization-visbuilder') {
     savedObject.references.map((reference) => {
       if (reference.id) {
         reference.id = idGenerator(reference.id);
@@ -86,13 +88,19 @@ export const getSavedObjectsWithDataSource = (
         if (
           saveObject.type === 'dashboard' ||
           saveObject.type === 'visualization' ||
-          saveObject.type === 'search'
+          saveObject.type === 'search' ||
+          saveObject.type === 'visualization-visbuilder'
         ) {
           saveObject.attributes.title = saveObject.attributes.title + `_${dataSourceTitle}`;
         }
 
         if (saveObject.type === 'visualization') {
           const vegaSpec = extractVegaSpecFromSavedObject(saveObject);
+
+          const visualizationSavedObject = saveObject as SavedObject & {
+            attributes: { visState: string };
+          };
+          const visStateObject = JSON.parse(visualizationSavedObject.attributes.visState);
 
           if (!!vegaSpec) {
             const updatedVegaSpec = updateDataSourceNameInVegaSpec({
@@ -102,13 +110,37 @@ export const getSavedObjectsWithDataSource = (
               spacing: 1,
             });
 
-            // @ts-expect-error
-            const visStateObject = JSON.parse(saveObject.attributes?.visState);
             visStateObject.params.spec = updatedVegaSpec;
 
             // @ts-expect-error
             saveObject.attributes.visState = JSON.stringify(visStateObject);
             saveObject.references.push({
+              id: `${dataSourceId}`,
+              type: 'data-source',
+              name: 'dataSource',
+            });
+          }
+
+          const timelineExpression = extractTimelineExpression(saveObject);
+          if (!!timelineExpression) {
+            // Get the timeline expression with the updated data source name
+            const modifiedExpression = updateDataSourceNameInTimeline(
+              timelineExpression,
+              dataSourceTitle
+            );
+
+            // @ts-expect-error
+            const timelineStateObject = JSON.parse(saveObject.attributes?.visState);
+            timelineStateObject.params.expression = modifiedExpression;
+            // @ts-expect-error
+            saveObject.attributes.visState = JSON.stringify(timelineStateObject);
+          }
+
+          if (visStateObject.type === 'metrics') {
+            visStateObject.params.data_source_id = dataSourceId;
+
+            visualizationSavedObject.attributes.visState = JSON.stringify(visStateObject);
+            visualizationSavedObject.references.push({
               id: `${dataSourceId}`,
               type: 'data-source',
               name: 'dataSource',

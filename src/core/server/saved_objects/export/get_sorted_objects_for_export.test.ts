@@ -28,7 +28,10 @@
  * under the License.
  */
 
-import { exportSavedObjectsToStream } from './get_sorted_objects_for_export';
+import {
+  DATA_SOURCE_CREDENTIALS_PLACEHOLDER,
+  exportSavedObjectsToStream,
+} from './get_sorted_objects_for_export';
 import { savedObjectsClientMock } from '../service/saved_objects_client.mock';
 import { Readable } from 'stream';
 import { createPromiseFromStreams, createConcatStream } from '../../utils/streams';
@@ -703,6 +706,50 @@ describe('getSortedObjectsForExport()', () => {
       createSavedObject({ type: 'multi', id: '2' }),
       createSavedObject({ type: 'other', id: '3' }),
       expect.objectContaining({ exportedCount: 3 }),
+    ]);
+  });
+
+  test('modifies return results to update `credentials` of data-source to use placeholder', async () => {
+    const createDataSourceSavedObject = (id: string, auth: any) => ({
+      id,
+      type: 'data-source',
+      attributes: { auth },
+      references: [],
+    });
+
+    const dataSourceNoAuthInfo = { type: 'no_auth' };
+    const dataSourceBasicAuthInfo = {
+      type: 'username_password',
+      credentials: { username: 'foo', password: 'bar' },
+    };
+
+    const redactedDataSourceBasicAuthInfo = {
+      type: 'username_password',
+      credentials: {
+        username: DATA_SOURCE_CREDENTIALS_PLACEHOLDER,
+        password: DATA_SOURCE_CREDENTIALS_PLACEHOLDER,
+      },
+    };
+
+    savedObjectsClient.bulkGet.mockResolvedValueOnce({
+      saved_objects: [
+        createDataSourceSavedObject('1', dataSourceNoAuthInfo),
+        createDataSourceSavedObject('2', dataSourceBasicAuthInfo),
+      ],
+    });
+    const exportStream = await exportSavedObjectsToStream({
+      exportSizeLimit: 10000,
+      savedObjectsClient,
+      objects: [
+        { type: 'data-source', id: '1' },
+        { type: 'data-source', id: '2' },
+      ],
+    });
+    const response = await readStreamToCompletion(exportStream);
+    expect(response).toEqual([
+      createDataSourceSavedObject('1', dataSourceNoAuthInfo),
+      createDataSourceSavedObject('2', redactedDataSourceBasicAuthInfo),
+      expect.objectContaining({ exportedCount: 2 }),
     ]);
   });
 
