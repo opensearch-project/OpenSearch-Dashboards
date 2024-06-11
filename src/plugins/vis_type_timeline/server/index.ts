@@ -32,13 +32,8 @@ import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/
 import { configSchema, ConfigSchema } from '../config';
 import { Plugin } from './plugin';
 
-export { PluginSetupContract } from './plugin';
-
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
-  exposeToBrowser: {
-    ui: true,
-  },
   deprecations: ({ renameFromRoot, renameFromRootWithoutMap }) => [
     // timelion.enabled and timelion_vis.enabled deprecation
     renameFromRoot('timelion.enabled', 'vis_type_timeline.enabled'),

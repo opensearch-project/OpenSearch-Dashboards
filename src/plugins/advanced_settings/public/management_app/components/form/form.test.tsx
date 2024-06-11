@@ -29,14 +29,20 @@
  */
 
 import React from 'react';
+import ReactDOM from 'react-dom';
 import { shallowWithI18nProvider, mountWithI18nProvider } from 'test_utils/enzyme_helpers';
 import { UiSettingsType } from '../../../../../../core/public';
 
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from 'test_utils/helpers';
 
 import { notificationServiceMock } from '../../../../../../core/public/mocks';
 import { SettingsChanges } from '../../types';
 import { Form } from './form';
+
+jest.mock('react-dom', () => ({
+  ...jest.requireActual('react-dom'),
+  createPortal: jest.fn((element) => element),
+}));
 
 jest.mock('../field', () => ({
   Field: () => {
@@ -45,6 +51,8 @@ jest.mock('../field', () => ({
 }));
 
 beforeAll(() => {
+  ReactDOM.createPortal = jest.fn((children: any) => children);
+
   const localStorage: Record<string, any> = {
     'core.chrome.isLocked': true,
   };
@@ -60,6 +68,7 @@ beforeAll(() => {
 });
 
 afterAll(() => {
+  (ReactDOM.createPortal as jest.Mock).mockClear();
   delete (window as any).localStorage;
 });
 

@@ -20,6 +20,6 @@
       "_mapping",
       "{indices}/_mapping"
     ],
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-get-mapping.html"
+    "documentation": "https://opensearch.org/docs/latest/field-types/mappings/#get-a-mapping"
   }
 }

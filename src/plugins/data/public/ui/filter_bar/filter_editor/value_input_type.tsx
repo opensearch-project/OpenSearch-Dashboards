@@ -68,7 +68,13 @@ class ValueInputTypeUI extends Component<Props> {
           <EuiFieldNumber
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
-            value={typeof value === 'string' ? parseFloat(value) : value}
+            value={
+              typeof value === 'string'
+                ? parseFloat(value)
+                : typeof value === 'bigint'
+                ? (value as BigInt).toString()
+                : value
+            }
             onChange={this.onChange}
             controlOnly={this.props.controlOnly}
             className={this.props.className}

@@ -50,6 +50,7 @@ import { createVislibVisController } from './vis_controller';
 import { VisTypeVislibDependencies } from './plugin';
 import { Rotates } from '../../charts/public';
 import { VIS_EVENT_TO_TRIGGER } from '../../visualizations/public';
+import { toExpressionAst } from './line_to_expression';
 
 export const createLineVisTypeDefinition = (deps: VisTypeVislibDependencies) => ({
   name: 'line',
@@ -58,6 +59,7 @@ export const createLineVisTypeDefinition = (deps: VisTypeVislibDependencies) => 
   description: i18n.translate('visTypeVislib.line.lineDescription', {
     defaultMessage: 'Emphasize trends',
   }),
+  toExpressionAst,
   visualization: createVislibVisController(deps),
   getSupportedTriggers: () => {
     return [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush];

@@ -28,8 +28,10 @@
  * under the License.
  */
 
-import { Subject, Observable } from 'rxjs';
-import { first, filter, take, switchMap } from 'rxjs/operators';
+import { Subject, Observable, BehaviorSubject } from 'rxjs';
+import { first, filter, take, switchMap, map, distinctUntilChanged } from 'rxjs/operators';
+import { isDeepStrictEqual } from 'util';
+
 import { CoreService } from '../../types';
 import {
   SavedObjectsClient,
@@ -56,14 +58,16 @@ import { ISavedObjectsRepository, SavedObjectsRepository } from './service/lib/r
 import {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClientWrapperFactory,
+  SavedObjectRepositoryFactoryProvider,
 } from './service/lib/scoped_client_provider';
 import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
 import { registerRoutes } from './routes';
-import { ServiceStatus } from '../status';
+import { ServiceStatus, ServiceStatusLevels } from '../status';
 import { calculateStatus$ } from './status';
 import { createMigrationOpenSearchClient } from './migrations/core/';
+import { Config } from '../config';
 /**
  * Saved Objects is OpenSearchDashboards's data persistence mechanism allowing plugins to
  * use OpenSearch for storing and querying state. The SavedObjectsServiceSetup API exposes methods
@@ -166,6 +170,20 @@ export interface SavedObjectsServiceSetup {
    * Returns the maximum number of objects allowed for import or export operations.
    */
   getImportExportObjectLimit: () => number;
+
+  /**
+   * Set the default {@link SavedObjectRepositoryFactoryProvider | factory provider} for creating Saved Objects repository.
+   * Only one repository can be set, subsequent calls to this method will fail.
+   */
+  setRepositoryFactoryProvider: (
+    respositoryFactoryProvider: SavedObjectRepositoryFactoryProvider
+  ) => void;
+
+  /**
+   * Allows a plugin to specify a custom status dependent on its own criteria.
+   * Completely overrides the default status.
+   */
+  setStatus(status$: Observable<ServiceStatus<SavedObjectStatusMeta>>): void;
 }
 
 /**
@@ -291,6 +309,15 @@ export class SavedObjectsService
   private typeRegistry = new SavedObjectTypeRegistry();
   private started = false;
 
+  private respositoryFactoryProvider?: SavedObjectRepositoryFactoryProvider;
+  private savedObjectServiceCustomStatus$?: Observable<ServiceStatus<SavedObjectStatusMeta>>;
+  private savedObjectServiceStatus$ = new BehaviorSubject<ServiceStatus<SavedObjectStatusMeta>>({
+    level: ServiceStatusLevels.unavailable,
+    summary: `waiting`,
+  });
+
+  private opensearchDashboardsRawConfig?: Config;
+
   constructor(private readonly coreContext: CoreContext) {
     this.logger = coreContext.logger.get('savedobjects-service');
   }
@@ -308,6 +335,10 @@ export class SavedObjectsService
       .atPath<SavedObjectsMigrationConfigType>('migrations')
       .pipe(first())
       .toPromise();
+    this.opensearchDashboardsRawConfig = await this.coreContext.configService
+      .getConfig$()
+      .pipe(first())
+      .toPromise();
     this.config = new SavedObjectConfig(savedObjectsConfig, savedObjectsMigrationConfig);
 
     registerRoutes({
@@ -318,10 +349,7 @@ export class SavedObjectsService
     });
 
     return {
-      status$: calculateStatus$(
-        this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
-        setupDeps.opensearch.status$
-      ),
+      status$: this.savedObjectServiceStatus$.asObservable(),
       setClientFactoryProvider: (provider) => {
         if (this.started) {
           throw new Error('cannot call `setClientFactoryProvider` after service startup.');
@@ -348,6 +376,26 @@ export class SavedObjectsService
         this.typeRegistry.registerType(type);
       },
       getImportExportObjectLimit: () => this.config!.maxImportExportSize,
+      setRepositoryFactoryProvider: (repositoryProvider) => {
+        if (this.started) {
+          throw new Error('cannot call `setRepositoryFactoryProvider` after service startup.');
+        }
+        if (this.respositoryFactoryProvider) {
+          throw new Error('custom repository factory is already set, and can only be set once');
+        }
+        this.respositoryFactoryProvider = repositoryProvider;
+      },
+      setStatus: (status$) => {
+        if (this.started) {
+          throw new Error('cannot call `setStatus` after service startup.');
+        }
+        if (this.savedObjectServiceCustomStatus$) {
+          throw new Error(
+            'custom saved object service status is already set, and can only be set once'
+          );
+        }
+        this.savedObjectServiceCustomStatus$ = status$;
+      },
     };
   }
 
@@ -360,6 +408,29 @@ export class SavedObjectsService
     }
 
     this.logger.debug('Starting SavedObjects service');
+
+    if (this.savedObjectServiceCustomStatus$) {
+      this.savedObjectServiceCustomStatus$
+        .pipe(
+          map((savedObjectServiceCustomStatus) => {
+            return savedObjectServiceCustomStatus;
+          }),
+          distinctUntilChanged<ServiceStatus<SavedObjectStatusMeta>>(isDeepStrictEqual)
+        )
+        .subscribe((value) => this.savedObjectServiceStatus$.next(value));
+    } else {
+      calculateStatus$(
+        this.migrator$.pipe(switchMap((migrator) => migrator.getStatus$())),
+        this.setupDeps.opensearch.status$
+      )
+        .pipe(
+          map((defaultstatus) => {
+            return defaultstatus;
+          }),
+          distinctUntilChanged<ServiceStatus<SavedObjectStatusMeta>>(isDeepStrictEqual)
+        )
+        .subscribe((value) => this.savedObjectServiceStatus$.next(value));
+    }
 
     const opensearchDashboardsConfig = await this.coreContext.configService
       .atPath<OpenSearchDashboardsConfigType>('opensearchDashboards')
@@ -422,13 +493,21 @@ export class SavedObjectsService
       opensearchClient: OpenSearchClient,
       includedHiddenTypes: string[] = []
     ) => {
-      return SavedObjectsRepository.createRepository(
-        migrator,
-        this.typeRegistry,
-        opensearchDashboardsConfig.index,
-        opensearchClient,
-        includedHiddenTypes
-      );
+      if (this.respositoryFactoryProvider) {
+        return this.respositoryFactoryProvider({
+          migrator,
+          typeRegistry: this.typeRegistry,
+          includedHiddenTypes,
+        });
+      } else {
+        return SavedObjectsRepository.createRepository(
+          migrator,
+          this.typeRegistry,
+          opensearchDashboardsConfig.index,
+          opensearchClient,
+          includedHiddenTypes
+        );
+      }
     };
 
     const repositoryFactory: SavedObjectsRepositoryFactory = {
@@ -464,7 +543,9 @@ export class SavedObjectsService
     };
   }
 
-  public async stop() {}
+  public async stop() {
+    this.savedObjectServiceStatus$.unsubscribe();
+  }
 
   private createMigrator(
     opensearchDashboardsConfig: OpenSearchDashboardsConfigType,
@@ -483,6 +564,7 @@ export class SavedObjectsService
         this.logger,
         migrationsRetryDelay
       ),
+      opensearchDashboardsRawConfig: this.opensearchDashboardsRawConfig as Config,
     });
   }
 }

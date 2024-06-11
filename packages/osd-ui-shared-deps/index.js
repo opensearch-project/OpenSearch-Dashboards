@@ -40,9 +40,7 @@ exports.darkCssDistFilename = 'osd-ui-shared-deps.v7.dark.css';
 exports.darkV8CssDistFilename = 'osd-ui-shared-deps.v8.dark.css';
 exports.externals = {
   // stateful deps
-  angular: '__osdSharedDeps__.Angular',
   '@osd/i18n': '__osdSharedDeps__.OsdI18n',
-  '@osd/i18n/angular': '__osdSharedDeps__.OsdI18nAngular',
   '@osd/i18n/react': '__osdSharedDeps__.OsdI18nReact',
   jquery: '__osdSharedDeps__.Jquery',
   moment: '__osdSharedDeps__.Moment',

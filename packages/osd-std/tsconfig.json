@@ -2,8 +2,9 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "declaration": true,
-    "declarationDir": "./target",
+    "declarationDir": "./target/types",
     "outDir": "./target",
+    "emitDeclarationOnly": true,
     "stripInternal": true,
     "declarationMap": true,
     "types": ["jest", "node"]

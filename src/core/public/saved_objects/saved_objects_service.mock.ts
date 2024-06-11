@@ -41,6 +41,7 @@ const createStartContractMock = () => {
       find: jest.fn(),
       get: jest.fn(),
       update: jest.fn(),
+      setCurrentWorkspace: jest.fn(),
     },
   };
   return mock;

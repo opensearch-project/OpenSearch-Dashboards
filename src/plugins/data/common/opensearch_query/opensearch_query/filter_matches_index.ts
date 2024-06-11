@@ -28,17 +28,61 @@
  * under the License.
  */
 
+import { uniq } from 'lodash';
+import { parse, AST } from 'lucene';
 import { IIndexPattern, IFieldType } from '../../index_patterns';
-import { Filter } from '../filters';
+import { Filter, QueryStringFilter } from '../filters';
 
-/*
- * TODO: We should base this on something better than `filter.meta.key`. We should probably modify
- * this to check if `filter.meta.index` matches `indexPattern.id` instead, but that's a breaking
- * change.
- */
+const implicitLuceneField = '<implicit>';
+
+function getLuceneFields(ast: AST): string[] {
+  const fields: string[] = [];
+
+  // Parse left side of AST (if it exists)
+  if ('left' in ast && ast.left) {
+    if ('field' in ast.left) {
+      if (ast.left.field && ast.left.field !== implicitLuceneField) {
+        fields.push(ast.left.field);
+      }
+    } else {
+      fields.push(...getLuceneFields(ast.left));
+    }
+  }
+
+  // Parse right side of AST (if it exists)
+  if ('right' in ast && ast.right) {
+    if ('field' in ast.right) {
+      if (ast.right.field && ast.right.field !== implicitLuceneField) {
+        fields.push(ast.right.field);
+      }
+    } else {
+      fields.push(...getLuceneFields(ast.right));
+    }
+  }
+  return fields;
+}
+
 export function filterMatchesIndex(filter: Filter, indexPattern?: IIndexPattern | null) {
   if (!filter.meta?.key || !indexPattern) {
     return true;
   }
+
+  if (filter.meta?.type === 'query_string') {
+    const qsFilter = filter as QueryStringFilter;
+    try {
+      const ast = parse(qsFilter.query.query_string.query);
+      const filterFields = uniq(getLuceneFields(ast));
+      return filterFields.every((filterField) =>
+        indexPattern.fields.some((field: IFieldType) => field.name === filterField)
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  if (filter.meta?.type === 'custom') {
+    return filter.meta.index === indexPattern.id;
+  }
+
   return indexPattern.fields.some((field: IFieldType) => field.name === filter.meta.key);
 }

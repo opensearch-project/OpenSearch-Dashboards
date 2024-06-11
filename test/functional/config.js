@@ -40,13 +40,11 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/console'),
       require.resolve('./apps/context'),
       require.resolve('./apps/dashboard'),
-      require.resolve('./apps/discover'),
       require.resolve('./apps/getting_started'),
       require.resolve('./apps/home'),
       require.resolve('./apps/management'),
       require.resolve('./apps/saved_objects_management'),
       require.resolve('./apps/status_page'),
-      require.resolve('./apps/timeline'),
       require.resolve('./apps/visualize'),
       require.resolve('./apps/vis_builder'),
     ],
@@ -81,7 +79,7 @@ export default async function ({ readConfigFile }) {
         pathname: '/status',
       },
       discover: {
-        pathname: '/app/discover',
+        pathname: '/app/data-explorer/discover',
         hash: '/',
       },
       context: {
@@ -106,9 +104,6 @@ export default async function ({ readConfigFile }) {
       /** @obsolete "management" should be instead of "settings" **/
       settings: {
         pathname: '/app/management',
-      },
-      timeline: {
-        pathname: '/app/timeline',
       },
       console: {
         pathname: '/app/dev_tools',

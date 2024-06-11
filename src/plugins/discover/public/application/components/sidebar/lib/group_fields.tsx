@@ -83,5 +83,12 @@ export function groupFields(
     }
   }
 
+  // sort the selected fields by the column order
+  result.selected.sort((a, b) => {
+    const aIndex = columns.indexOf(a.name);
+    const bIndex = columns.indexOf(b.name);
+    return aIndex - bIndex;
+  });
+
   return result;
 }

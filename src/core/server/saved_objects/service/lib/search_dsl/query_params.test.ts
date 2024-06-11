@@ -625,6 +625,152 @@ describe('#getQueryParams', () => {
         ]);
       });
     });
+
+    describe('when using workspace search', () => {
+      it('using normal workspaces', () => {
+        const result: Result = getQueryParams({
+          registry,
+          workspaces: ['foo'],
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                bool: {
+                  must: [{ term: { workspaces: 'foo' } }],
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      });
+    });
+
+    describe('when using ACLSearchParams search', () => {
+      it('no ACLSearchParams provided', () => {
+        const result: Result = getQueryParams({
+          registry,
+          ACLSearchParams: {},
+        });
+        expect(result.query.bool.filter[1]).toEqual(undefined);
+      });
+
+      it('workspacesSearchOperator prvided as "OR"', () => {
+        const result: Result = getQueryParams({
+          registry,
+          workspaces: ['foo'],
+          workspacesSearchOperator: 'OR',
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                bool: {
+                  must_not: [
+                    {
+                      exists: {
+                        field: 'workspaces',
+                      },
+                    },
+                    {
+                      exists: {
+                        field: 'permissions',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      bool: {
+                        must: [
+                          {
+                            term: {
+                              workspaces: 'foo',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        });
+      });
+
+      it('principals and permissionModes provided in ACLSearchParams', () => {
+        const result: Result = getQueryParams({
+          registry,
+          ACLSearchParams: {
+            principals: {
+              users: ['user-foo'],
+              groups: ['group-foo'],
+            },
+            permissionModes: ['read'],
+          },
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                bool: {
+                  must_not: [
+                    {
+                      exists: {
+                        field: 'workspaces',
+                      },
+                    },
+                    {
+                      exists: {
+                        field: 'permissions',
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            terms: {
+                              'permissions.read.users': ['user-foo'],
+                            },
+                          },
+                          {
+                            term: {
+                              'permissions.read.users': '*',
+                            },
+                          },
+                          {
+                            terms: {
+                              'permissions.read.groups': ['group-foo'],
+                            },
+                          },
+                          {
+                            term: {
+                              'permissions.read.groups': '*',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        });
+      });
+    });
   });
 
   describe('namespaces property', () => {

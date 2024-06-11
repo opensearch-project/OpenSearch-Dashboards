@@ -30,8 +30,8 @@
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { i18n } from '@osd/i18n';
-import { IEmbeddable } from '../../embeddable_plugin';
-import { ActionByType, IncompatibleActionError } from '../../ui_actions_plugin';
+import { IEmbeddable } from '../../../../embeddable/public';
+import { ActionByType, IncompatibleActionError } from '../../../../ui_actions/public';
 import { DASHBOARD_CONTAINER_TYPE, DashboardContainer } from '../embeddable';
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';

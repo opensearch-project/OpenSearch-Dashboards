@@ -9,10 +9,30 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   title: string;
   description?: string;
   endpoint: string;
+  dataSourceVersion?: string;
+  installedPlugins?: string[];
   auth: {
-    type: AuthType;
-    credentials: UsernamePasswordTypedContent | undefined;
+    type: AuthType | string;
+    credentials: UsernamePasswordTypedContent | SigV4Content | undefined | AuthTypeContent;
   };
+  lastUpdatedTime?: string;
+}
+
+export interface AuthTypeContent {
+  [key: string]: string;
+}
+
+/**
+ * Multiple datasource supports authenticating as IAM user, it doesn't support IAM role.
+ * Because IAM role session requires temporary security credentials through assuming role,
+ * which makes no sense to store the credentials.
+ */
+export interface SigV4Content extends SavedObjectAttributes {
+  accessKey: string;
+  secretKey: string;
+  region: string;
+  service?: SigV4ServiceName;
+  sessionToken?: string;
 }
 
 export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
@@ -23,4 +43,12 @@ export interface UsernamePasswordTypedContent extends SavedObjectAttributes {
 export enum AuthType {
   NoAuth = 'no_auth',
   UsernamePasswordType = 'username_password',
+  SigV4 = 'sigv4',
 }
+
+export enum SigV4ServiceName {
+  OpenSearch = 'es',
+  OpenSearchServerless = 'aoss',
+}
+
+export { DataSourceError } from './error';

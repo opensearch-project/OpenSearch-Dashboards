@@ -54,6 +54,7 @@ import { ContextService } from './context';
 import { IntegrationsService } from './integrations';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
+import { WorkspacesService } from './workspace';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -110,6 +111,7 @@ export class CoreSystem {
 
   private readonly rootDomElement: HTMLElement;
   private readonly coreContext: CoreContext;
+  private readonly workspaces: WorkspacesService;
   private fatalErrorsSetup: FatalErrorsSetup | null = null;
 
   constructor(params: Params) {
@@ -138,6 +140,7 @@ export class CoreSystem {
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
+    this.workspaces = new WorkspacesService();
 
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
 
@@ -160,6 +163,7 @@ export class CoreSystem {
       const http = this.http.setup({ injectedMetadata, fatalErrors: this.fatalErrorsSetup });
       const uiSettings = this.uiSettings.setup({ http, injectedMetadata });
       const notifications = this.notifications.setup({ uiSettings });
+      const workspaces = this.workspaces.setup();
 
       const pluginDependencies = this.plugins.getOpaqueIds();
       const context = this.context.setup({
@@ -167,15 +171,18 @@ export class CoreSystem {
       });
       const application = this.application.setup({ context, http });
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
+      const chrome = this.chrome.setup();
 
       const core: InternalCoreSetup = {
         application,
         context,
+        chrome,
         fatalErrors: this.fatalErrorsSetup,
         http,
         injectedMetadata,
         notifications,
         uiSettings,
+        workspaces,
       };
 
       // Services that do not expose contracts at setup
@@ -219,7 +226,8 @@ export class CoreSystem {
         overlays,
         targetDomElement: notificationsTargetDomElement,
       });
-      const application = await this.application.start({ http, overlays });
+      const workspaces = this.workspaces.start();
+      const application = await this.application.start({ http, overlays, workspaces });
       const chrome = await this.chrome.start({
         application,
         docLinks,
@@ -227,6 +235,7 @@ export class CoreSystem {
         injectedMetadata,
         notifications,
         uiSettings,
+        overlays,
       });
 
       this.coreApp.start({ application, http, notifications, uiSettings });
@@ -242,6 +251,7 @@ export class CoreSystem {
         overlays,
         savedObjects,
         uiSettings,
+        workspaces,
       }));
 
       const core: InternalCoreStart = {
@@ -256,6 +266,7 @@ export class CoreSystem {
         overlays,
         uiSettings,
         fatalErrors,
+        workspaces,
       };
 
       await this.plugins.start(core);
@@ -303,6 +314,7 @@ export class CoreSystem {
     this.chrome.stop();
     this.i18n.stop();
     this.application.stop();
+    this.workspaces.stop();
     this.rootDomElement.textContent = '';
   }
 }

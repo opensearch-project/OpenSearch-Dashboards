@@ -32,6 +32,8 @@ import { getKeystore } from './get_keystore';
 import { Logger } from '../cli_plugin/lib/logger';
 import fs from 'fs';
 import sinon from 'sinon';
+import { getConfigDirectory, getDataPath } from '@osd/utils';
+import { join } from 'path';
 
 describe('get_keystore', () => {
   const sandbox = sinon.createSandbox();
@@ -45,15 +47,19 @@ describe('get_keystore', () => {
   });
 
   it('uses the config directory if there is no pre-existing keystore', () => {
+    const configKeystore = join(getConfigDirectory(), 'opensearch_dashboards.keystore');
+    const dataKeystore = join(getDataPath(), 'opensearch_dashboards.keystore');
     sandbox.stub(fs, 'existsSync').returns(false);
-    expect(getKeystore()).toContain('config');
-    expect(getKeystore()).not.toContain('data');
+    expect(getKeystore()).toContain(configKeystore);
+    expect(getKeystore()).not.toContain(dataKeystore);
   });
 
   it('uses the data directory if there is a pre-existing keystore in the data directory', () => {
+    const configKeystore = join(getConfigDirectory(), 'opensearch_dashboards.keystore');
+    const dataKeystore = join(getDataPath(), 'opensearch_dashboards.keystore');
     sandbox.stub(fs, 'existsSync').returns(true);
-    expect(getKeystore()).toContain('data');
-    expect(getKeystore()).not.toContain('config');
+    expect(getKeystore()).toContain(dataKeystore);
+    expect(getKeystore()).not.toContain(configKeystore);
   });
 
   it('logs a deprecation warning if the data directory is used', () => {

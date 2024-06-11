@@ -41,7 +41,7 @@ const readOpenSearchDashboardsPkgJson = (dir: string) => {
       return json;
     }
   } catch (error) {
-    if (error && error.code === 'ENOENT') {
+    if (error?.code === 'ENOENT') {
       return;
     }
 

@@ -36,13 +36,12 @@ import {
   EuiPageContent,
   EuiCard,
   EuiPageContentHeader,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFieldSearch,
   EuiListGroup,
   EuiHighlight,
   EuiLink,
   EuiButtonIcon,
+  EuiPage,
 } from '@elastic/eui';
 import { AppMountParameters } from '../../../src/core/public';
 import { ExampleDefinition } from './types';
@@ -66,12 +65,14 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
       });
 
   return (
-    <EuiPageContent>
-      <EuiPageContentHeader>
-        <EuiText>
-          <h1>Developer examples</h1>
-          <p>
-            The following examples showcase services and APIs that are available to developers.
+    <EuiPage restrictWidth="1500px">
+      <EuiPageContent>
+        <EuiPageContentHeader>
+          <EuiText>
+            <h1>Developer examples</h1>
+            <p>
+              The following examples showcase services and APIs that are available to developers.
+            </p>
             <EuiFieldSearch
               placeholder="Search"
               value={search}
@@ -79,13 +80,18 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
               isClearable={true}
               aria-label="Search developer examples"
             />
-          </p>
-        </EuiText>
-      </EuiPageContentHeader>
-      <EuiFlexGroup wrap>
-        {filteredExamples.map((def) => (
-          <EuiFlexItem style={{ minWidth: 300, maxWidth: 500 }} key={def.appId}>
+          </EuiText>
+        </EuiPageContentHeader>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+            gap: 16, // $euiSize
+          }}
+        >
+          {filteredExamples.map((def) => (
             <EuiCard
+              key={def.appId}
               description={
                 <EuiHighlight search={search} highlightAll={true}>
                   {def.description}
@@ -114,11 +120,13 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
               }
               image={def.image}
               footer={def.links ? <EuiListGroup size={'s'} listItems={def.links} /> : undefined}
+              titleSize="xs"
+              textAlign="left"
             />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    </EuiPageContent>
+          ))}
+        </div>
+      </EuiPageContent>
+    </EuiPage>
   );
 }
 

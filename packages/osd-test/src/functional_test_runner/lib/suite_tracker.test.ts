@@ -31,7 +31,19 @@
 import fs from 'fs';
 import { join, resolve } from 'path';
 
-jest.mock('fs');
+jest.mock('fs', () => {
+  const mockedFs: object = jest.createMockFromModule('fs');
+  const realFs = jest.requireActual('fs');
+
+  return {
+    __esModules: true,
+    ...mockedFs,
+    // Both needed by @osd/cross-platform
+    realpathSync: realFs.realpathSync,
+    readFileSync: realFs.readFileSync,
+  };
+});
+
 jest.mock('@osd/utils', () => {
   return { REPO_ROOT: '/dev/null/root' };
 });

@@ -44,14 +44,14 @@ export function DeploymentProvider({ getService }: FtrProviderContext) {
      * Returns OpenSearch Dashboards host URL
      */
     getHostPort() {
-      return getUrl.baseUrl(config.get('servers.opensearchDashboards'));
+      return getUrl.baseUrl(config.get('servers.opensearchDashboards.fullURL'));
     },
 
     /**
      * Returns OpenSearch host URL
      */
     getOpenSearchHostPort() {
-      return getUrl.baseUrl(config.get('servers.opensearch'));
+      return getUrl.baseUrl(config.get('servers.opensearch.fullURL'));
     },
 
     /**

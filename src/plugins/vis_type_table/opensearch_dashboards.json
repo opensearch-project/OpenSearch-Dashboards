@@ -6,11 +6,11 @@
   "requiredPlugins": [
     "expressions",
     "visualizations",
-    "data",
-    "opensearchDashboardsLegacy"
+    "data"
   ],
   "requiredBundles": [
     "opensearchDashboardsUtils",
+    "opensearchDashboardsReact",
     "share",
     "charts",
     "visDefaultEditor"

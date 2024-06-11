@@ -36,6 +36,7 @@ import { PanelViewWithSharingLong } from './panel_view_with_sharing_long';
 import { PanelEdit } from './panel_edit';
 import { PanelEditWithDrilldowns } from './panel_edit_with_drilldowns';
 import { PanelEditWithDrilldownsAndContextActions } from './panel_edit_with_drilldowns_and_context_actions';
+import { PanelGroupOptionsAndContextActions } from './panel_group_options_and_context_actions';
 
 export const ContextMenuExamples: React.FC = () => {
   return (
@@ -44,6 +45,8 @@ export const ContextMenuExamples: React.FC = () => {
       <p>
         Below examples show how context menu panels look with varying number of actions and how the
         actions can be grouped into different panels using <EuiCode>grouping</EuiCode> field.
+        Grouping can only be one layer deep. A group needs to have at least two items for grouping
+        to work. A separator is automatically added between groups.
       </p>
 
       <EuiFlexGroup>
@@ -57,7 +60,6 @@ export const ContextMenuExamples: React.FC = () => {
           <PanelViewWithSharingLong />
         </EuiFlexItem>
       </EuiFlexGroup>
-
       <EuiFlexGroup>
         <EuiFlexItem>
           <PanelEdit />
@@ -67,6 +69,11 @@ export const ContextMenuExamples: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem>
           <PanelEditWithDrilldownsAndContextActions />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <PanelGroupOptionsAndContextActions />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiText>

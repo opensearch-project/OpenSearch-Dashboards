@@ -72,9 +72,12 @@ describe('LogRotator', () => {
     writeFileSync(testFilePath, '');
   });
 
-  afterEach(() => {
+  afterEach((done) => {
     del.sync(dirname(testFilePath), { force: true });
     mockOn.mockClear();
+
+    // Tests occasionally fail complaining that `testFilePath` doesn't exist; this tries to help
+    setTimeout(done, 500);
   });
 
   it('rotates log file when bigger than set limit on start', async () => {

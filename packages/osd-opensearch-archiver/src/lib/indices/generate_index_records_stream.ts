@@ -29,7 +29,7 @@
  */
 
 import { Transform } from 'stream';
-import { Client } from 'elasticsearch';
+import { Client } from '@opensearch-project/opensearch';
 import { Stats } from '../stats';
 
 export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
@@ -40,7 +40,7 @@ export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
       try {
         const resp = (await client.indices.get({
           index: indexOrAlias,
-          filterPath: [
+          filter_path: [
             '*.settings',
             '*.mappings',
             // remove settings that aren't really settings
@@ -56,9 +56,10 @@ export function createGenerateIndexRecordsStream(client: Client, stats: Stats) {
         })) as Record<string, any>;
 
         for (const [index, { settings, mappings }] of Object.entries(resp)) {
+          const { body, statusCode } = await client.indices.getAlias({ index });
           const {
             [index]: { aliases },
-          } = await client.indices.getAlias({ index });
+          } = statusCode === 404 ? {} : body;
 
           stats.archivedIndex(index, { settings, mappings });
           this.push({

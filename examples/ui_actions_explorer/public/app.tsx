@@ -28,114 +28,96 @@
  * under the License.
  */
 
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import ReactDOM from 'react-dom';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 
-import { EuiPage } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiTitle,
+  EuiPageBody,
+  EuiPageContent,
+  EuiPageContentBody,
+  EuiPageHeader,
+  EuiTabbedContent,
+} from '@elastic/eui';
+import { AppMountParameters, CoreStart } from '../../../src/core/public';
+import { UiActionsExplorerServices, UiActionsExplorerStartDependencies } from './types';
+import { OpenSearchDashboardsContextProvider } from '../../../src/plugins/opensearch_dashboards_react/public';
 
-import { EuiButton } from '@elastic/eui';
-import { EuiPageBody } from '@elastic/eui';
-import { EuiPageContent } from '@elastic/eui';
-import { EuiPageContentBody } from '@elastic/eui';
-import { EuiSpacer } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { EuiFieldText } from '@elastic/eui';
-import { EuiCallOut } from '@elastic/eui';
-import { EuiPageHeader } from '@elastic/eui';
-import { EuiModalBody } from '@elastic/eui';
-import { toMountPoint } from '../../../src/plugins/opensearch_dashboards_react/public';
-import { UiActionsStart, createAction } from '../../../src/plugins/ui_actions/public';
-import { AppMountParameters, OverlayStart } from '../../../src/core/public';
-import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '../../ui_action_examples/public';
-import { TriggerContextExample } from './trigger_context_example';
-import { ContextMenuExamples } from './context_menu_examples';
+import { BasicTab } from './basic_tab';
+import { ExplorerTab } from './explorer_tab';
 
-interface Props {
-  uiActionsApi: UiActionsStart;
-  openModal: OverlayStart['openModal'];
-}
+const ActionsExplorer = () => {
+  const tabs = useMemo(
+    () => [
+      {
+        id: 'demo-basic',
+        name: (
+          <FormattedMessage
+            id="uiActionsExplorer.demoBasic.TabTitle"
+            defaultMessage="{name}"
+            values={{ name: 'Basic' }}
+          />
+        ),
+        content: <BasicTab />,
+      },
+      {
+        id: 'demo-explorer',
+        name: (
+          <FormattedMessage
+            id="uiActionsExplorer.demoExplorer.TabTitle"
+            defaultMessage="{name}"
+            values={{ name: 'Explorer' }}
+          />
+        ),
+        content: <ExplorerTab />,
+      },
+    ],
+    []
+  );
 
-const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
-  const [name, setName] = useState('Waldo');
-  const [confirmationText, setConfirmationText] = useState('');
   return (
-    <EuiPage>
-      <EuiPageBody component="main">
-        <EuiPageHeader>Ui Actions Explorer</EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
-            <EuiText>
-              <p>
-                By default there is a single action attached to the `HELLO_WORLD_TRIGGER`. Clicking
-                this button will cause it to be executed immediately.
-              </p>
-            </EuiText>
-            <EuiButton
-              data-test-subj="emitHelloWorldTrigger"
-              onClick={() => uiActionsApi.executeTriggerActions(HELLO_WORLD_TRIGGER_ID, {})}
-            >
-              Say hello world!
-            </EuiButton>
-
-            <EuiText>
-              <p>
-                Lets dynamically add new actions to this trigger. After you click this button, click
-                the above button again. This time it should offer you multiple options to choose
-                from. Using the UI Action and Trigger API makes your plugin extensible by other
-                plugins. Any actions attached to the `HELLO_WORLD_TRIGGER_ID` will show up here!
-              </p>
-              <EuiFieldText prepend="Name" value={name} onChange={(e) => setName(e.target.value)} />
-              <EuiButton
-                data-test-subj="addDynamicAction"
-                onClick={() => {
-                  const dynamicAction = createAction<typeof ACTION_HELLO_WORLD>({
-                    id: `${ACTION_HELLO_WORLD}-${name}`,
-                    type: ACTION_HELLO_WORLD,
-                    getDisplayName: () => `Say hello to ${name}`,
-                    execute: async () => {
-                      const overlay = openModal(
-                        toMountPoint(
-                          <EuiModalBody>
-                            <EuiText data-test-subj="dynamicHelloWorldActionText">
-                              {`Hello ${name}`}
-                            </EuiText>{' '}
-                            <EuiButton data-test-subj="closeModal" onClick={() => overlay.close()}>
-                              Close
-                            </EuiButton>
-                          </EuiModalBody>
-                        )
-                      );
-                    },
-                  });
-                  uiActionsApi.addTriggerAction(HELLO_WORLD_TRIGGER_ID, dynamicAction);
-                  setConfirmationText(
-                    `You've successfully added a new action: ${dynamicAction.getDisplayName({
-                      trigger: uiActionsApi.getTrigger(HELLO_WORLD_TRIGGER_ID),
-                    })}. Refresh the page to reset state.  It's up to the user of the system to persist state like this.`
-                  );
-                }}
-              >
-                Say hello to me!
-              </EuiButton>
-              {confirmationText !== '' ? <EuiCallOut>{confirmationText}</EuiCallOut> : undefined}
-            </EuiText>
-
-            <EuiSpacer />
-
-            <TriggerContextExample uiActionsApi={uiActionsApi} />
-
-            <EuiSpacer />
-
-            <ContextMenuExamples />
-          </EuiPageContentBody>
-        </EuiPageContent>
-      </EuiPageBody>
-    </EuiPage>
+    <I18nProvider>
+      <EuiPage restrictWidth="1500px">
+        <EuiPageBody component="main">
+          <EuiPageHeader>
+            <EuiTitle size="l">
+              <h1>
+                <FormattedMessage
+                  id="uiAsctionsExample.appTitle"
+                  defaultMessage="{name}"
+                  values={{ name: 'UI Actions' }}
+                />
+              </h1>
+            </EuiTitle>
+          </EuiPageHeader>
+          <EuiPageContent>
+            <EuiPageContentBody>
+              <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+            </EuiPageContentBody>
+          </EuiPageContent>
+        </EuiPageBody>
+      </EuiPage>
+    </I18nProvider>
   );
 };
 
-export const renderApp = (props: Props, { element }: AppMountParameters) => {
-  ReactDOM.render(<ActionsExplorer {...props} />, element);
+export const renderApp = (
+  coreStart: CoreStart,
+  { uiActions }: UiActionsExplorerStartDependencies,
+  { element }: AppMountParameters
+) => {
+  const services: UiActionsExplorerServices = {
+    ...coreStart,
+    uiActions,
+  };
+  ReactDOM.render(
+    <OpenSearchDashboardsContextProvider services={services}>
+      <ActionsExplorer />
+    </OpenSearchDashboardsContextProvider>,
+    element
+  );
 
   return () => ReactDOM.unmountComponentAtNode(element);
 };

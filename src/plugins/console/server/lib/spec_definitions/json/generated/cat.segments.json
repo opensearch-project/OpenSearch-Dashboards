@@ -28,6 +28,6 @@
       "_cat/segments",
       "_cat/segments/{indices}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-segments/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cat/cat-segments/"
   }
 }

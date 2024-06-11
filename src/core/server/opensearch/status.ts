@@ -77,7 +77,7 @@ export const calculateStatus$ = (
 
           return {
             level: ServiceStatusLevels.available,
-            summary: `OpenSearch is available`,
+            summary: (message ?? `OpenSearch is available`) || `Unknown`,
             meta: {
               warningNodes: [],
               incompatibleNodes: [],

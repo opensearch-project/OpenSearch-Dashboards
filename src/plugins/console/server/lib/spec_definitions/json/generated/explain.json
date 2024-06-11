@@ -24,6 +24,6 @@
     "patterns": [
       "{indices}/_explain/{id}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/explain/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/explain/"
   }
 }

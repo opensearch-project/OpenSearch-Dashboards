@@ -29,7 +29,6 @@
  */
 
 import Http from 'http';
-import Url from 'url';
 import { FtrProviderContext } from '../../services/types';
 
 // @ts-ignore
@@ -47,9 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
       const agent = new Http.Agent({
         keepAlive: true,
       });
-      const { protocol, hostname, port } = Url.parse(
-        getUrl.baseUrl(config.get('servers.opensearchDashboards'))
-      );
+      const { protocol, hostname, port } = config.get('servers.opensearchDashboards.fullURL');
 
       function performRequest() {
         return new Promise((resolve, reject) => {
@@ -57,7 +54,7 @@ export default function ({ getService }: FtrProviderContext) {
             {
               protocol,
               hostname,
-              port,
+              port: parseInt(port, 10),
               path: '/',
               method: 'GET',
               agent,

@@ -36,6 +36,15 @@ import { searchSavedObjectType } from './saved_objects';
 export class DiscoverServerPlugin implements Plugin<object, object> {
   public setup(core: CoreSetup) {
     core.capabilities.registerProvider(capabilitiesProvider);
+    core.capabilities.registerSwitcher(async (request, capabilites) => {
+      return await core.security.readonlyService().hideForReadonly(request, capabilites, {
+        discover: {
+          createShortUrl: false,
+          save: false,
+          saveQuery: false,
+        },
+      });
+    });
     core.uiSettings.register(uiSettings);
     core.savedObjects.registerType(searchSavedObjectType);
 

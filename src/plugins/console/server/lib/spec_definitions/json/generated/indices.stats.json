@@ -51,6 +51,6 @@
       ],
       "indices": null
     },
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-stats.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/index/"
   }
 }

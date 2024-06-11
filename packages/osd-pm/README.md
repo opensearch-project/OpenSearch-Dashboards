@@ -141,6 +141,40 @@ yarn osd
 Bootstrapping also calls the `osd:bootstrap` script for every included project.
 This is intended for packages that need to be built/transpiled to be usable.
 
+#### Single-version validation
+
+Bootstrapping, by default, applies a `strict` single-version validation where it requires all the dependencies defined
+more than once to have the same version-range in the `package.json` files of Dashboards, packages, and plugins. If a
+violation is identified, bootstrapping terminates with an error. This behavior can be controlled using the 
+`--single-version` switch. Using any switch other than the default can result in the installation of versions of the
+dependencies that were never tested and this could lead to unexpected results.
+
+```
+yarn osd bootstrap --single-version=loose
+```
+In `loose` mode, bootstrapping reconciles the various versions installed as a result of having multiple ranges for a 
+dependency, by choosing one that satisfies all said ranges. Even though installing the chosen version updates the 
+`yarn.lock` files, no `package.json` changes would be needed.
+
+```
+yarn osd bootstrap --single-version=force
+```
+In `force` mode, bootstrapping acts like `loose` for each dependency. If despite that, a suitable version was not found,
+it switches to behave like the `brute-force` mode (see below).
+
+```
+yarn osd bootstrap --single-version=brute-force
+```
+In `brute-force` mode, bootstrapping chooses the newest of the various versions installed, irrespective of whether it 
+satisfies any of the ranges. Installing the chosen version, bootstrapping updates the `yarn.lock` files and applies a 
+range, in the form of `^<version>`, to all `package.json` files that declared the dependency.
+
+```
+yarn osd bootstrap --single-version=ignore
+```
+In `ignore` mode, bootstrapping behaves very similar to the `strict` mode by showing errors when different ranges of a 
+package are marked as dependencies, but without terminating.
+
 ### Running scripts
 
 Some times you want to run the same script across multiple packages and plugins,
@@ -182,6 +216,27 @@ yarn osd watch --include @osd/pm --include opensearch-dashboards
 The production build process relies on both the Grunt setup at the root of the
 OpenSearch Dashboards project and code in `@osd/pm`. The full process is described in
 `tasks/build/packages.js`.
+
+## Targeted builds
+
+Packages that are only compiled to CommonJS for consumption by server code, simply use a `tsconfig.json`
+that extends the `tsconfig.base.json` found at the root of the project. Similarly, packages that need to be
+compiled into ES modules, to be consumed in the browser and benefit from tree-shaking, use a`tsconfig.json`
+that extends the `tsconfig.browser.json` available at the root of the project. However, some packages need 
+to be compiled for consumption by both server code and the browser. This can be achieved by retaining the 
+`tsconfig.json` and adding the following block to the `package.json` of the package:
+```json
+"@osd/pm": {
+  "node": true,
+  "web": true
+}
+```
+With that, the relevant presets from `@osd/babel-preset` are applied to the code to produce bootstrap and 
+production build artifacts for the selected targets. It is acceptable to have only one target and that is
+the same as setting the appropriate `extends` in the `tsconfig.json`.
+
+Targeted builds call `babel` on the `src` folder and place artifacts into `target/node` and `target/web`
+folders after calling `tsc` in the package root to generate type definitions.
 
 ## Development
 

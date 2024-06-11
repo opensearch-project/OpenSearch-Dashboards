@@ -45,6 +45,7 @@ export {
 } from './import/types';
 
 import { SavedObject } from '../../types';
+import { Principals } from './permission_control/acl';
 
 type KueryNode = any;
 
@@ -84,7 +85,7 @@ export interface SavedObjectsFindOptions {
   /**
    * An array of fields to include in the results
    * @example
-   * SavedObjects.find({type: 'dashboard', fields: ['attributes.name', 'attributes.location']})
+   * SavedObjects.find({type: 'dashboard', fields: ['name', 'location']})
    */
   fields?: string[];
   /** Search documents using the OpenSearch Simple Query String syntax. See OpenSearch Simple Query String `query` argument for more information */
@@ -110,6 +111,17 @@ export interface SavedObjectsFindOptions {
   typeToNamespacesMap?: Map<string, string[] | undefined>;
   /** An optional OpenSearch preference value to be used for the query **/
   preference?: string;
+  /** If specified, will only retrieve objects that are in the workspaces */
+  workspaces?: SavedObjectsBaseOptions['workspaces'];
+  /** By default the operator will be 'AND' */
+  workspacesSearchOperator?: 'AND' | 'OR';
+  /**
+   * The params here will be combined with bool clause and is used for filtering with ACL structure.
+   */
+  ACLSearchParams?: {
+    principals?: Principals;
+    permissionModes?: string[];
+  };
 }
 
 /**
@@ -119,6 +131,8 @@ export interface SavedObjectsFindOptions {
 export interface SavedObjectsBaseOptions {
   /** Specify the namespace for this operation */
   namespace?: string;
+  /** Specify the workspaces for this operation */
+  workspaces?: SavedObject['workspaces'] | null;
 }
 
 /**

@@ -126,6 +126,10 @@ export class Config {
       if (typeof v === 'function') {
         return v;
       }
+
+      if (v instanceof URL) {
+        return new URL(v.toString());
+      }
     });
   }
 
@@ -133,6 +137,10 @@ export class Config {
     return cloneDeepWith(this[$values], (v) => {
       if (typeof v === 'function') {
         return v;
+      }
+
+      if (v instanceof URL) {
+        return new URL(v.toString());
       }
     });
   }

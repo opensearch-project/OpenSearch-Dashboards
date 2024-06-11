@@ -28,6 +28,7 @@ describe('VisBuilderPlugin', () => {
       const setupDeps = {
         visualizations: visualizationsPluginMock.createSetupContract(),
         embeddable: embeddablePluginMock.createSetupContract(),
+        data: dataPluginMock.createSetupContract(),
       };
 
       const setup = plugin.setup(coreSetup, setupDeps);
@@ -38,7 +39,6 @@ describe('VisBuilderPlugin', () => {
           title: PLUGIN_NAME,
           aliasPath: '#/',
           aliasApp: PLUGIN_ID,
-          stage: 'experimental',
         })
       );
     });

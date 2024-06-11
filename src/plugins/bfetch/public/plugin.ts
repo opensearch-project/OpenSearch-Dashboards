@@ -95,6 +95,7 @@ export class BfetchPublicPlugin
       url: `${basePath}/${removeLeadingSlash(params.url)}`,
       headers: {
         'Content-Type': 'application/json',
+        'osd-xsrf': 'osd-bfetch',
         'osd-version': version,
         ...(params.headers || {}),
       },

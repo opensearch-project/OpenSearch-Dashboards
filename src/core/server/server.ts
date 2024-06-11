@@ -41,12 +41,19 @@ import { RenderingService } from './rendering';
 import { LegacyService, ensureValidConfiguration } from './legacy';
 import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
-import { PluginsService, config as pluginsConfig } from './plugins';
+import {
+  CompatibleEnginePluginVersions,
+  PluginName,
+  PluginsService,
+  config as pluginsConfig,
+} from './plugins';
 import { SavedObjectsService } from '../server/saved_objects';
 import { MetricsService, opsConfig } from './metrics';
 import { CapabilitiesService } from './capabilities';
 import { EnvironmentService, config as pidConfig } from './environment';
 import { StatusService } from './status/status_service';
+import { SecurityService } from './security/security_service';
+import { CrossCompatibilityService } from './cross_compatibility';
 
 import { config as cspConfig } from './csp';
 import { config as opensearchConfig } from './opensearch';
@@ -86,10 +93,14 @@ export class Server {
   private readonly coreApp: CoreApp;
   private readonly auditTrail: AuditTrailService;
   private readonly coreUsageData: CoreUsageDataService;
+  private readonly security: SecurityService;
+  private readonly crossCompatibility: CrossCompatibilityService;
 
   #pluginsInitialized?: boolean;
   private coreStart?: InternalCoreStart;
   private readonly logger: LoggerFactory;
+
+  private openSearchPluginDeps: Map<PluginName, CompatibleEnginePluginVersions> = new Map();
 
   constructor(
     rawConfigProvider: RawConfigurationProvider,
@@ -118,6 +129,8 @@ export class Server {
     this.auditTrail = new AuditTrailService(core);
     this.logging = new LoggingService(core);
     this.coreUsageData = new CoreUsageDataService(core);
+    this.security = new SecurityService(core);
+    this.crossCompatibility = new CrossCompatibilityService(core);
   }
 
   public async setup() {
@@ -127,9 +140,10 @@ export class Server {
     const environmentSetup = await this.environment.setup();
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
-    const { pluginTree, uiPlugins } = await this.plugins.discover({
+    const { pluginTree, uiPlugins, requiredEnginePlugins } = await this.plugins.discover({
       environment: environmentSetup,
     });
+    this.openSearchPluginDeps = requiredEnginePlugins;
     const legacyConfigSetup = await this.legacy.setupLegacyConfig();
 
     // Immediately terminate in case of invalid configuration
@@ -196,6 +210,8 @@ export class Server {
       loggingSystem: this.loggingSystem,
     });
 
+    const securitySetup = this.security.setup();
+
     this.coreUsageData.setup({ metrics: metricsSetup });
 
     const coreSetup: InternalCoreSetup = {
@@ -212,6 +228,7 @@ export class Server {
       auditTrail: auditTrailSetup,
       logging: loggingSetup,
       metrics: metricsSetup,
+      security: securitySetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
@@ -254,6 +271,11 @@ export class Server {
       savedObjects: savedObjectsStart,
     });
 
+    const crossCompatibilityServiceStart = this.crossCompatibility.start({
+      opensearch: opensearchStart,
+      plugins: this.openSearchPluginDeps,
+    });
+
     this.coreStart = {
       capabilities: capabilitiesStart,
       opensearch: opensearchStart,
@@ -263,6 +285,7 @@ export class Server {
       uiSettings: uiSettingsStart,
       auditTrail: auditTrailStart,
       coreUsageData: coreUsageDataStart,
+      crossCompatibility: crossCompatibilityServiceStart,
     };
 
     const pluginsStart = await this.plugins.start(this.coreStart);
@@ -276,6 +299,8 @@ export class Server {
     });
 
     await this.http.start();
+
+    await this.security.start();
 
     startTransaction?.end();
     return this.coreStart;
@@ -295,6 +320,7 @@ export class Server {
     await this.status.stop();
     await this.logging.stop();
     await this.auditTrail.stop();
+    await this.security.stop();
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {

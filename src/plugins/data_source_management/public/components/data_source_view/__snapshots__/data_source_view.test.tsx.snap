@@ -1,0 +1,474 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceView Should render successfully when provided datasource has not been filtered out 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <DataSourceMenuPopoverButton
+      className="dataSourceView"
+      label=""
+      onClick={[Function]}
+    />
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <DataSourceDropDownHeader
+    totalDataSourceCount={1}
+  />
+  <EuiContextMenuPanel
+    className="dataSourceViewOuiPanel"
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="none"
+    >
+      <EuiSelectable
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={
+          Array [
+            Object {
+              "checked": "on",
+              "disabled": true,
+              "id": "test1",
+            },
+          ]
+        }
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
+`;
+
+exports[`DataSourceView Should return error when provided datasource has been filtered out 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <DataSourceMenuPopoverButton
+      className="dataSourceView"
+      label=""
+      onClick={[Function]}
+    />
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <DataSourceDropDownHeader
+    totalDataSourceCount={1}
+  />
+  <EuiContextMenuPanel
+    className="dataSourceViewOuiPanel"
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="none"
+    >
+      <EuiSelectable
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={Array []}
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
+`;
+
+exports[`DataSourceView When selected option is local cluster and hide local Cluster is true, should return error 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <DataSourceMenuPopoverButton
+      className="dataSourceView"
+      label=""
+      onClick={[Function]}
+    />
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <DataSourceDropDownHeader
+    totalDataSourceCount={1}
+  />
+  <EuiContextMenuPanel
+    className="dataSourceViewOuiPanel"
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="none"
+    >
+      <EuiSelectable
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={Array []}
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
+`;
+
+exports[`DataSourceView should call getDataSourceById when only pass id with no label 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <DataSourceMenuPopoverButton
+      className="dataSourceView"
+      label=""
+      onClick={[Function]}
+    />
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <DataSourceDropDownHeader
+    totalDataSourceCount={1}
+  />
+  <EuiContextMenuPanel
+    className="dataSourceViewOuiPanel"
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="none"
+    >
+      <EuiSelectable
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={
+          Array [
+            Object {
+              "checked": "on",
+              "disabled": true,
+              "id": "test1",
+            },
+          ]
+        }
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
+`;
+
+exports[`DataSourceView should call notification warning when there is data source fetch error 1`] = `<DataSourceErrorMenu />`;
+
+exports[`DataSourceView should render normally with local cluster not hidden 1`] = `
+<EuiPopover
+  anchorPosition="downLeft"
+  button={
+    <DataSourceMenuPopoverButton
+      className="dataSourceView"
+      label="test1"
+      onClick={[Function]}
+    />
+  }
+  closePopover={[Function]}
+  display="inlineBlock"
+  hasArrow={true}
+  id="dataSourceViewPopover"
+  isOpen={false}
+  ownFocus={true}
+  panelPaddingSize="none"
+>
+  <DataSourceDropDownHeader
+    totalDataSourceCount={1}
+  />
+  <EuiContextMenuPanel
+    className="dataSourceViewOuiPanel"
+    hasFocus={true}
+    items={Array []}
+  >
+    <EuiPanel
+      borderRadius="none"
+      color="subdued"
+      paddingSize="none"
+    >
+      <EuiSelectable
+        data-test-subj="dataSourceView"
+        isPreFiltered={false}
+        options={
+          Array [
+            Object {
+              "checked": "on",
+              "disabled": true,
+              "id": "test1",
+              "label": "test1",
+            },
+          ]
+        }
+        renderOption={[Function]}
+        searchable={false}
+        singleSelection={true}
+      >
+        <Component />
+      </EuiSelectable>
+    </EuiPanel>
+  </EuiContextMenuPanel>
+</EuiPopover>
+`;
+
+exports[`DataSourceView should show popover when click on data source view button 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPopover euiPopover--anchorDownLeft"
+        id="dataSourceViewPopover"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            aria-label="dataSourceViewButton"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+            data-test-subj="dataSourceViewButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="database"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              />
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div
+        data-eui="EuiFocusTrap"
+      >
+        <div
+          aria-describedby="generated-id"
+          aria-live="off"
+          aria-modal="true"
+          class="euiPanel euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPopover__panel euiPopover__panel--bottom"
+          role="dialog"
+          style="top: 16px; left: -22px; will-change: transform, opacity; z-index: 2000;"
+          tabindex="0"
+        >
+          <div
+            class="euiPopover__panelArrow euiPopover__panelArrow--bottom"
+            style="left: 10px; top: 0px;"
+          />
+          <p
+            class="euiScreenReaderOnly"
+            id="generated-id"
+          >
+            You are in a dialog. To close this dialog, hit escape.
+          </p>
+          <div>
+            <div
+              class="euiPopoverTitle euiPopoverTitle--paddingSmall"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+              >
+                <div
+                  class="euiFlexItem"
+                >
+                  DATA SOURCE
+                   (
+                  1
+                  )
+                </div>
+                <div
+                  class="dataSourceDropDownHeaderInvisibleFocusable"
+                  tabindex="0"
+                />
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                >
+                  <button
+                    class="euiLink euiLink--primary"
+                    type="button"
+                  >
+                    Manage
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiContextMenuPanel dataSourceViewOuiPanel"
+              tabindex="-1"
+            >
+              <div>
+                <div>
+                  <div
+                    class="euiPanel euiPanel--borderRadiusNone euiPanel--subdued euiPanel--noShadow euiPanel--noBorder"
+                  >
+                    <div
+                      class="euiSelectable"
+                      data-test-subj="dataSourceView"
+                    >
+                      <div
+                        class="euiSelectableList"
+                      >
+                        <div
+                          style="overflow: visible; width: 0px;"
+                        />
+                        <div
+                          class="resize-triggers"
+                        >
+                          <div
+                            class="expand-trigger"
+                          >
+                            <div
+                              style="width: 1px; height: 1px;"
+                            />
+                          </div>
+                          <div
+                            class="contract-trigger"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPopover euiPopover--anchorDownLeft"
+      id="dataSourceViewPopover"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <button
+          aria-label="dataSourceViewButton"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+          data-test-subj="dataSourceViewButton"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              class="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+            />
+            <span
+              class="euiButtonEmpty__text"
+            />
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

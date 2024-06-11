@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`downloads node builds for each platform 2`] = `
+Array [
+   warn There are no fallback Node.js versions released for darwin-arm64.,
+]
+`;
+
+exports[`rejects if any download fails 2`] = `
+Array [
+   warn There are no fallback Node.js versions released for darwin-arm64.,
+]
+`;

@@ -37,8 +37,6 @@ import {
 } from 'opensearch-dashboards/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { VisualizationsSetup } from '../../visualizations/public';
-// TODO: Determine why visualizations don't populate without this
-import 'angular-sanitize';
 
 // @ts-ignore
 import { createTileMapFn } from './tile_map_fn';

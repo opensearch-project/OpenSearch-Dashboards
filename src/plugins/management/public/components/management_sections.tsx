@@ -64,7 +64,7 @@ const sectionTip = i18n.translate('management.sections.section.tip', {
 });
 
 const opensearchDashboardsTitle = i18n.translate('management.sections.opensearchDashboardsTitle', {
-  defaultMessage: 'OpenSearch Dashboards',
+  defaultMessage: 'Dashboards Management',
 });
 
 const opensearchDashboardsTip = i18n.translate('management.sections.opensearchDashboardsTip', {

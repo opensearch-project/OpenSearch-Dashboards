@@ -13,6 +13,8 @@ import {
   EuiToolTip,
   EuiButtonIcon,
   EuiConfirmModal,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -21,20 +23,53 @@ import { DataSourceManagementContext } from '../../../../types';
 
 export const Header = ({
   showDeleteIcon,
+  isFormValid,
   onClickDeleteIcon,
+  onClickTestConnection,
+  onClickSetDefault,
   dataSourceName,
+  isDefault,
 }: {
   showDeleteIcon: boolean;
+  isFormValid: boolean;
   onClickDeleteIcon: () => void;
+  onClickTestConnection: () => void;
+  onClickSetDefault: () => void;
   dataSourceName: string;
+  isDefault: boolean;
 }) => {
   /* State Variables */
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isDefaultDataSourceState, setIsDefaultDataSourceState] = useState(isDefault);
 
   const changeTitle = useOpenSearchDashboards<DataSourceManagementContext>().services.chrome
     .docTitle.change;
 
   changeTitle(dataSourceName);
+
+  const setDefaultAriaLabel = i18n.translate(
+    'dataSourcesManagement.editDataSource.setDefaultDataSource',
+    {
+      defaultMessage: 'Set as a default Data Source.',
+    }
+  );
+
+  const renderDefaultIcon = () => {
+    return (
+      <EuiButtonEmpty
+        onClick={() => {
+          onClickSetDefault();
+          setIsDefaultDataSourceState(!isDefaultDataSourceState);
+        }}
+        disabled={isDefaultDataSourceState}
+        iconType={isDefaultDataSourceState ? 'starFilled' : 'starEmpty'}
+        aria-label={setDefaultAriaLabel}
+        data-test-subj="editSetDefaultDataSource"
+      >
+        {isDefaultDataSourceState ? 'Default' : 'Set as default'}
+      </EuiButtonEmpty>
+    );
+  };
 
   const renderDeleteButton = () => {
     return (
@@ -105,9 +140,28 @@ export const Header = ({
       </>
     );
   };
+  const renderTestConnectionButton = () => {
+    return (
+      <EuiButton
+        type="submit"
+        fill={false}
+        disabled={!isFormValid}
+        onClick={() => {
+          onClickTestConnection();
+        }}
+        data-test-subj="datasource-edit-testConnectionButton"
+      >
+        <FormattedMessage
+          id="dataSourcesManagement.createDataSource.testConnectionButton"
+          defaultMessage="Test connection"
+        />
+      </EuiButton>
+    );
+  };
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
+      {/* Title */}
       <EuiFlexItem grow={false}>
         <div>
           <EuiTitle data-test-subj="editDataSourceTitle">
@@ -116,7 +170,18 @@ export const Header = ({
           <EuiSpacer size="s" />
         </div>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>{showDeleteIcon ? renderDeleteButton() : null}</EuiFlexItem>
+
+      {/* Right side buttons */}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
+          {/* Test default button */}
+          <EuiFlexItem grow={false}>{renderDefaultIcon()}</EuiFlexItem>
+          {/* Test connection button */}
+          <EuiFlexItem grow={false}>{renderTestConnectionButton()}</EuiFlexItem>
+          {/* Delete icon button */}
+          <EuiFlexItem grow={false}>{showDeleteIcon ? renderDeleteButton() : null}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

@@ -49,6 +49,17 @@ export class VisualizeServerPlugin implements Plugin<object, object> {
 
     core.capabilities.registerProvider(capabilitiesProvider);
 
+    core.capabilities.registerSwitcher(async (request, capabilites) => {
+      return await core.security.readonlyService().hideForReadonly(request, capabilites, {
+        visualize: {
+          createShortUrl: false,
+          delete: false,
+          save: false,
+          saveQuery: false,
+        },
+      });
+    });
+
     return {};
   }
 

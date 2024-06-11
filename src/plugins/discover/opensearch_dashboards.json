@@ -6,6 +6,7 @@
   "requiredPlugins": [
     "charts",
     "data",
+    "dataExplorer",
     "embeddable",
     "inspector",
     "opensearchDashboardsLegacy",
@@ -16,8 +17,8 @@
   ],
   "optionalPlugins": ["home", "share"],
   "requiredBundles": [
-    "opensearchDashboardsUtils",
     "home",
+    "opensearchDashboardsUtils",
     "savedObjects",
     "opensearchDashboardsReact"
   ]

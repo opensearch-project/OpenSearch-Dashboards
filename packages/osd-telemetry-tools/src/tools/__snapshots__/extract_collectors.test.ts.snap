@@ -9,7 +9,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 146,
+            "kind": 149,
             "type": "StringKeyword",
           },
         },
@@ -31,7 +31,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 146,
+            "kind": 149,
             "type": "StringKeyword",
           },
         },
@@ -53,7 +53,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 146,
+            "kind": 149,
             "type": "StringKeyword",
           },
         },
@@ -75,7 +75,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 146,
+            "kind": 149,
             "type": "StringKeyword",
           },
         },
@@ -98,11 +98,11 @@ Array [
         "typeDescriptor": Object {
           "@@INDEX@@": Object {
             "count_1": Object {
-              "kind": 143,
+              "kind": 146,
               "type": "NumberKeyword",
             },
             "count_2": Object {
-              "kind": 143,
+              "kind": 146,
               "type": "NumberKeyword",
             },
           },
@@ -127,7 +127,7 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "locale": Object {
-            "kind": 146,
+            "kind": 149,
             "type": "StringKeyword",
           },
         },
@@ -149,21 +149,21 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "flat": Object {
-            "kind": 146,
+            "kind": 149,
             "type": "StringKeyword",
           },
           "my_objects": Object {
             "total": Object {
-              "kind": 143,
+              "kind": 146,
               "type": "NumberKeyword",
             },
             "type": Object {
-              "kind": 131,
+              "kind": 133,
               "type": "BooleanKeyword",
             },
           },
           "my_str": Object {
-            "kind": 146,
+            "kind": 149,
             "type": "StringKeyword",
           },
         },
@@ -196,44 +196,44 @@ Array [
       "fetch": Object {
         "typeDescriptor": Object {
           "flat": Object {
-            "kind": 146,
+            "kind": 149,
             "type": "StringKeyword",
           },
           "my_array": Object {
             "items": Object {
               "total": Object {
-                "kind": 143,
+                "kind": 146,
                 "type": "NumberKeyword",
               },
               "type": Object {
-                "kind": 131,
+                "kind": 133,
                 "type": "BooleanKeyword",
               },
             },
           },
           "my_index_signature_prop": Object {
             "@@INDEX@@": Object {
-              "kind": 143,
+              "kind": 146,
               "type": "NumberKeyword",
             },
           },
           "my_objects": Object {
             "total": Object {
-              "kind": 143,
+              "kind": 146,
               "type": "NumberKeyword",
             },
             "type": Object {
-              "kind": 131,
+              "kind": 133,
               "type": "BooleanKeyword",
             },
           },
           "my_str": Object {
-            "kind": 146,
+            "kind": 149,
             "type": "StringKeyword",
           },
           "my_str_array": Object {
             "items": Object {
-              "kind": 146,
+              "kind": 149,
               "type": "StringKeyword",
             },
           },

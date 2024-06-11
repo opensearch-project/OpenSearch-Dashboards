@@ -55,18 +55,18 @@ export function createRegionMapTypeDefinition(dependencies) {
     return arr1.concat(arr2).filter((item) => !arr1.includes(item) || !arr2.includes(item));
   };
 
-  const getCustomIndices = async () => {
+  const getCustomIndices = async (dataSourceRefId) => {
     try {
-      const result = await services.getCustomIndices();
+      const result = await services.getCustomIndices(dataSourceRefId);
       return result.resp;
     } catch (e) {
       return false;
     }
   };
 
-  const getJoinFields = async (indexName) => {
+  const getJoinFields = async (indexName, dataSourceRefId) => {
     try {
-      const result = await services.getIndexMapping(indexName);
+      const result = await services.getIndexMapping(indexName, dataSourceRefId);
       const properties = diffArray(Object.keys(result.resp[indexName].mappings.properties), [
         'location',
       ]);
@@ -82,17 +82,17 @@ export function createRegionMapTypeDefinition(dependencies) {
     }
   };
 
-  const addSchemaToCustomLayer = async (customlayer) => {
-    const joinFields = await getJoinFields(customlayer.index);
+  const addSchemaToCustomLayer = async (customlayer, dataSourceRefId) => {
+    const joinFields = await getJoinFields(customlayer, dataSourceRefId);
     const customLayerWithSchema = {
       attribution:
         '<a rel="noreferrer noopener" href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a>',
       created_at: '2017-04-26T17:12:15.978370',
       format: 'geojson',
       fields: joinFields,
-      id: customlayer.index,
+      id: customlayer,
       meta: undefined,
-      name: customlayer.index,
+      name: customlayer,
       origin: 'user-upload',
     };
 
@@ -147,6 +147,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
         vectorLayers: [],
         customVectorLayers: [],
         tmsLayers: [],
+        dataSourceRefId: '',
       },
       schemas: new Schemas([
         {
@@ -199,7 +200,12 @@ provided base maps, or add your own. Darker colors represent higher values.',
       const customVectorLayers = regionmapsConfig.layers.map(
         mapToLayerWithId.bind(null, ORIGIN.OPENSEARCH_DASHBOARDS_YML)
       );
-      const customIndices = await getCustomIndices();
+
+      // Read the data source reference id from index pattern if available, empty string means for local clusters
+      const dataSourceRefId = vis.data.indexPattern?.dataSourceRef?.id || '';
+      vis.type.editorConfig.collections.dataSourceRefId = dataSourceRefId;
+
+      const customIndices = await getCustomIndices(dataSourceRefId);
 
       let selectedLayer = vectorLayers[0];
       let selectedJoinField = selectedLayer ? selectedLayer.fields[0] : null;
@@ -214,7 +220,7 @@ provided base maps, or add your own. Darker colors represent higher values.',
           .filter(
             (layer) => !vectorLayers.some((vectorLayer) => vectorLayer.layerId === layer.layerId)
           );
-        const promises = customIndices.map(addSchemaToCustomLayer);
+        const promises = customIndices.map((idx) => addSchemaToCustomLayer(idx, dataSourceRefId));
         const newCustomLayers = await Promise.all(promises);
 
         // backfill v1 manifest for now

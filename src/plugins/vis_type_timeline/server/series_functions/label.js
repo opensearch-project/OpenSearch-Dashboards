@@ -62,10 +62,8 @@ export default new Chainable('label', {
     const config = args.byName;
     return alter(args, function (eachSeries) {
       if (config.regex) {
-        // not using a standard `import` so that if there's an issue with the re2 native module
-        // that it doesn't prevent OpenSearch Dashboards from starting up and we only have an issue using Timeline labels
-        const RE2 = require('re2');
-        eachSeries.label = eachSeries.label.replace(new RE2(config.regex), config.label);
+        const regex = new RegExp(config.regex);
+        eachSeries.label = eachSeries.label.replace(regex, config.label);
       } else {
         eachSeries.label = config.label;
       }

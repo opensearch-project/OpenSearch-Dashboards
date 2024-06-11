@@ -37,6 +37,7 @@ import {
   Plugin,
   ApplicationStart,
   SavedObjectsClientContract,
+  NotificationsStart,
 } from '../../../core/public';
 import { TypesService, TypesSetup, TypesStart } from './vis_types';
 import {
@@ -54,12 +55,15 @@ import {
   setExpressions,
   setUiActions,
   setSavedVisualizationsLoader,
+  setSavedAugmentVisLoader,
   setTimeFilter,
   setAggs,
   setChrome,
   setOverlays,
   setSavedSearchLoader,
   setEmbeddable,
+  setNotifications,
+  setDocLinks,
 } from './services';
 import {
   VISUALIZE_EMBEDDABLE_TYPE,
@@ -92,6 +96,8 @@ import {
 } from './saved_visualizations/_saved_vis';
 import { createSavedSearchesLoader } from '../../discover/public';
 import { DashboardStart } from '../../dashboard/public';
+import { createSavedAugmentVisLoader } from '../../vis_augmenter/public';
+import { DocLinksStart } from '../../../core/public';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -128,6 +134,8 @@ export interface VisualizationsStartDeps {
   dashboard: DashboardStart;
   getAttributeService: DashboardStart['getAttributeService'];
   savedObjectsClient: SavedObjectsClientContract;
+  notifications: NotificationsStart;
+  docLinks: DocLinksStart;
 }
 
 /**
@@ -177,6 +185,14 @@ export class VisualizationsPlugin
     { data, expressions, uiActions, embeddable, dashboard }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
+    const savedAugmentVisLoader = createSavedAugmentVisLoader({
+      savedObjectsClient: core.savedObjects.client,
+      indexPatterns: data.indexPatterns,
+      search: data.search,
+      chrome: core.chrome,
+      overlays: core.overlays,
+    });
+    setSavedAugmentVisLoader(savedAugmentVisLoader);
     setI18n(core.i18n);
     setTypes(types);
     setEmbeddable(embeddable);
@@ -210,6 +226,8 @@ export class VisualizationsPlugin
       overlays: core.overlays,
     });
     setSavedSearchLoader(savedSearchLoader);
+    setNotifications(core.notifications);
+    setDocLinks(core.docLinks);
     return {
       ...types,
       showNewVisModal,

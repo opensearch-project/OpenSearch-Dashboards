@@ -48,7 +48,7 @@ import { ServiceStatus, CoreStatus, InternalStatusServiceSetup } from './types';
 import { getSummaryStatus } from './get_summary_status';
 import { PluginsStatusService } from './plugins_status';
 
-interface SetupDeps {
+export interface SetupDeps {
   opensearch: Pick<InternalOpenSearchServiceSetup, 'status$'>;
   environment: InternalEnvironmentServiceSetup;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
@@ -95,7 +95,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         this.logger.debug(`Recalculated overall status`, { status: summary });
         return summary;
       }),
-      distinctUntilChanged(isDeepStrictEqual),
+      distinctUntilChanged<ServiceStatus<unknown>>(isDeepStrictEqual),
       shareReplay(1)
     );
 
@@ -149,7 +149,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
         opensearch: opensearchStatus,
         savedObjects: savedObjectsStatus,
       })),
-      distinctUntilChanged(isDeepStrictEqual),
+      distinctUntilChanged<CoreStatus>(isDeepStrictEqual),
       shareReplay(1)
     );
   }

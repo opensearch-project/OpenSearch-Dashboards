@@ -22,6 +22,6 @@
       "_cat/aliases",
       "_cat/aliases/{name}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-aliases/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cat/cat-aliases/"
   }
 }

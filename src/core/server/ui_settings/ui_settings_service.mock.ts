@@ -39,6 +39,7 @@ import { UiSettingsService } from './ui_settings_service';
 const createClientMock = () => {
   const mocked: jest.Mocked<IUiSettingsClient> = {
     getRegistered: jest.fn(),
+    getOverrideOrDefault: jest.fn(),
     get: jest.fn(),
     getAll: jest.fn(),
     getUserProvided: jest.fn(),

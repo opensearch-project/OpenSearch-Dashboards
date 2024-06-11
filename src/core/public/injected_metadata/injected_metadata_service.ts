@@ -75,6 +75,7 @@ export interface InjectedMetadataParams {
       };
     };
     branding: Branding;
+    survey?: string;
   };
 }
 
@@ -87,11 +88,13 @@ export interface InjectedMetadataParams {
  * @internal
  */
 export class InjectedMetadataService {
-  private state = deepFreeze(
-    this.params.injectedMetadata
-  ) as InjectedMetadataParams['injectedMetadata'];
+  private state: InjectedMetadataParams['injectedMetadata'];
 
-  constructor(private readonly params: InjectedMetadataParams) {}
+  constructor(private readonly params: InjectedMetadataParams) {
+    this.state = deepFreeze(
+      this.params.injectedMetadata
+    ) as InjectedMetadataParams['injectedMetadata'];
+  }
 
   public start(): InjectedMetadataStart {
     return this.setup();
@@ -146,6 +149,10 @@ export class InjectedMetadataService {
       getBranding: () => {
         return this.state.branding;
       },
+
+      getSurvey: () => {
+        return this.state.survey;
+      },
     };
   }
 }
@@ -180,6 +187,7 @@ export interface InjectedMetadataSetup {
     [key: string]: unknown;
   };
   getBranding: () => Branding;
+  getSurvey: () => string | undefined;
 }
 
 /** @internal */

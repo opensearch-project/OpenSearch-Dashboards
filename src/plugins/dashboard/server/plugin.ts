@@ -53,6 +53,15 @@ export class DashboardPlugin implements Plugin<DashboardPluginSetup, DashboardPl
 
     core.savedObjects.registerType(dashboardSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
+    core.capabilities.registerSwitcher(async (request, capabilites) => {
+      return await core.security.readonlyService().hideForReadonly(request, capabilites, {
+        dashboard: {
+          createNew: false,
+          showWriteControls: false,
+          saveQuery: false,
+        },
+      });
+    });
 
     return {};
   }

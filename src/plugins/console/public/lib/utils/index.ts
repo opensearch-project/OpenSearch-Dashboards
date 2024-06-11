@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { parse, stringify } from '@osd/std';
 import _ from 'lodash';
 import { XJson } from '../../../../opensearch_ui_shared/public';
 
@@ -42,7 +43,7 @@ export function textFromRequest(request: any) {
 }
 
 export function jsonToString(data: any, indent: boolean) {
-  return JSON.stringify(data, null, indent ? 2 : 0);
+  return stringify(data, null, indent ? 2 : 0);
 }
 
 export function formatRequestBodyDoc(data: string[], indent: boolean) {
@@ -51,7 +52,7 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
   for (let i = 0; i < data.length; i++) {
     const curDoc = data[i];
     try {
-      let newDoc = jsonToString(JSON.parse(collapseLiteralStrings(curDoc)), indent);
+      let newDoc = jsonToString(parse(collapseLiteralStrings(curDoc)), indent);
       if (indent) {
         newDoc = expandLiteralStrings(newDoc);
       }

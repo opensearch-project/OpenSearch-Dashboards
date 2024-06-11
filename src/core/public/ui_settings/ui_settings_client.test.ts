@@ -36,7 +36,13 @@ import { UiSettingsClient } from './ui_settings_client';
 let done$: Subject<unknown>;
 
 function setup(options: { defaults?: any; initialSettings?: any } = {}) {
-  const { defaults = { dateFormat: { value: 'Browser' } }, initialSettings = {} } = options;
+  const {
+    defaults = {
+      dateFormat: { value: 'Browser' },
+      aLongNumeral: { value: `${BigInt(Number.MAX_SAFE_INTEGER) + 11n}`, type: 'number' },
+    },
+    initialSettings = {},
+  } = options;
 
   const batchSet = jest.fn(() => ({
     settings: {},
@@ -62,6 +68,7 @@ describe('#get', () => {
   it('gives access to uiSettings values', () => {
     const { client } = setup();
     expect(client.get('dateFormat')).toMatchSnapshot();
+    expect(client.get('aLongNumeral')).toBe(BigInt(Number.MAX_SAFE_INTEGER) + 11n);
   });
 
   it('supports the default value overload', () => {
@@ -82,13 +89,19 @@ describe('#get', () => {
     const { client } = setup();
     // if you are hitting this error, then a test is setting this client value globally and not unsetting it!
     expect(client.isDefault('dateFormat')).toBe(true);
+    expect(client.isDefault('aLongNumeral')).toBe(true);
 
     const defaultDateFormat = client.get('dateFormat');
+    const defaultLongNumeral = client.get('aLongNumeral');
 
     expect(client.get('dateFormat', 'xyz')).toBe('xyz');
+    expect(client.get('aLongNumeral', 1n)).toBe(1n);
+
     // shouldn't change other usages
     expect(client.get('dateFormat')).toBe(defaultDateFormat);
     expect(client.get('dataFormat', defaultDateFormat)).toBe(defaultDateFormat);
+    expect(client.get('aLongNumeral')).toBe(defaultLongNumeral);
+    expect(client.get('aLongNumeral', defaultLongNumeral)).toBe(defaultLongNumeral);
   });
 
   it("throws on unknown properties that don't have a value yet.", () => {

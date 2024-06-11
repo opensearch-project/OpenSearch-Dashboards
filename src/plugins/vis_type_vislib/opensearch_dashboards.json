@@ -3,7 +3,7 @@
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["charts", "data", "expressions", "visualizations", "opensearchDashboardsLegacy"],
+  "requiredPlugins": ["charts", "data", "expressions", "visualizations", "opensearchDashboardsLegacy", "visTypeVega"],
   "optionalPlugins": ["visTypeXy"],
-  "requiredBundles": ["opensearchDashboardsUtils", "visDefaultEditor"]
+  "requiredBundles": ["opensearchDashboardsUtils", "visDefaultEditor", "visAugmenter"]
 }

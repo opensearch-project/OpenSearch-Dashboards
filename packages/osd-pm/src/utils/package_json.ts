@@ -40,6 +40,10 @@ export interface IPackageDependencies {
 export interface IPackageScripts {
   [key: string]: string;
 }
+export interface IPackageBuildTargets {
+  web?: boolean;
+  node?: boolean;
+}
 
 export function readPackageJson(cwd: string): IPackageJson {
   return readPkg({ cwd, normalize: false });

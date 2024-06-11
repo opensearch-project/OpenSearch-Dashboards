@@ -124,19 +124,24 @@ export const buildRangeFilter = (
     filter.meta.formattedValue = formattedValue;
   }
 
-  params = mapValues(params, (value: any) => (field.type === 'number' ? parseFloat(value) : value));
+  params = mapValues(params, (value: any) =>
+    field.type === 'number' && typeof value !== 'bigint'
+      ? isFinite(value) && (value > Number.MAX_SAFE_INTEGER || value < Number.MIN_SAFE_INTEGER)
+        ? BigInt(value)
+        : parseFloat(value)
+      : value
+  );
 
   if ('gte' in params && 'gt' in params) throw new Error('gte and gt are mutually exclusive');
   if ('lte' in params && 'lt' in params) throw new Error('lte and lt are mutually exclusive');
 
   const totalInfinite = ['gt', 'lt'].reduce((acc: number, op: any) => {
-    const key = op in params ? op : `${op}e`;
-    const isInfinite = Math.abs(get(params, key)) === Infinity;
+    const key: keyof RangeFilterParams = op in params ? op : `${op}e`;
+    const isInfinite =
+      typeof params[key] !== 'bigint' && Math.abs(get(params, key) as number) === Infinity;
 
     if (isInfinite) {
       acc++;
-
-      // @ts-ignore
       delete params[key];
     }
 

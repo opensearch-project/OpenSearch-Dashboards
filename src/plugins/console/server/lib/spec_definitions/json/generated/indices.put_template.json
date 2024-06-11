@@ -12,6 +12,6 @@
     "patterns": [
       "_template/{name}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/index-templates/"
+    "documentation": "https://opensearch.org/docs/latest/im-plugin/index-templates/#create-a-template"
   }
 }

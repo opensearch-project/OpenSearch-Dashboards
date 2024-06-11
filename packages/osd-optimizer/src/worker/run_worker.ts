@@ -78,11 +78,13 @@ const exit = (code: number) => {
   setTimeout(() => {
     send(
       workerMsgs.error(
-        new Error('process did not automatically exit within 5 seconds, forcing exit')
+        new Error(
+          `process did not automatically exit within 15 seconds (previous code: ${code}); forcing exit...`
+        )
       )
     );
     process.exit(1);
-  }, 5000).unref();
+  }, 15000).unref();
 };
 
 // check for connected parent on an unref'd timer rather than listening

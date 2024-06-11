@@ -6,12 +6,12 @@
 $animation-time: 3;
 $animation-multiplier: 5;
 $total-duartion: $animation-time * $animation-multiplier;
-$keyframe-multiplier: 1 / $animation-multiplier;
+$keyframe-multiplier: calc(1 / $animation-multiplier);
 
 .vbWorkspace {
   display: grid;
   -ms-grid-rows: auto $euiSizeM 1fr;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: 1fr;
   grid-area: workspace;
   grid-gap: $euiSizeM;
   padding: $euiSizeM;

@@ -5,7 +5,7 @@
   "main": "./target/index.js",
   "license": "Apache-2.0",
   "scripts": {
-    "build": "node ./scripts/build.js",
+    "build": "../../scripts/use_node ./scripts/build.js",
     "osd:bootstrap": "yarn build --dev"
   },
   "dependencies": {
@@ -13,6 +13,7 @@
     "monaco-editor": "~0.17.0"
   },
   "devDependencies": {
+    "@node-rs/xxhash": "^1.3.0",
     "@osd/babel-preset": "1.0.0",
     "@osd/dev-utils": "1.0.0",
     "babel-loader": "^8.2.3",
@@ -21,7 +22,7 @@
     "raw-loader": "^4.0.2",
     "supports-color": "^7.0.0",
     "typescript": "4.0.2",
-    "webpack": "^4.41.5",
+    "webpack": "npm:@amoo-miki/webpack@4.46.0-xxhash.1",
     "webpack-cli": "^4.9.2"
   }
 }

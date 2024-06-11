@@ -8,6 +8,6 @@
       "_render/template",
       "_render/template/{id}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/search-template/"
+    "documentation": "https://opensearch.org/docs/latest/search-plugins/search-template/"
   }
 }

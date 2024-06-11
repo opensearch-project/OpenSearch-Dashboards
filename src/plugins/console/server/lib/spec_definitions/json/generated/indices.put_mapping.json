@@ -21,6 +21,6 @@
     "patterns": [
       "{indices}/_mapping"
     ],
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-put-mapping.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/put-mapping/"
   }
 }

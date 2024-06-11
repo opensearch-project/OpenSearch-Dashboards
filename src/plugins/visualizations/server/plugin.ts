@@ -83,10 +83,13 @@ export class VisualizationsPlugin
           defaultMessage: 'Disable visualizations bucket aggregation types',
         }),
         value: [],
-        description: i18n.translate('visualizations.advancedSettings.visualizeDisableBucketAgg', {
-          defaultMessage: `A comma-separated list of bucket aggregations' names. e.g. significant_terms, terms.
+        description: i18n.translate(
+          'visualizations.advancedSettings.visualizeDisableBucketAgg.description',
+          {
+            defaultMessage: `A comma-separated list of bucket aggregations' names. e.g. significant_terms, terms.
             Deactivates the specified bucket aggregations from visualizations.`,
-        }),
+          }
+        ),
         category: ['visualization'],
         schema: schema.arrayOf(schema.string()),
       },

@@ -75,7 +75,10 @@ export class UiSettingsService
     this.register(getCoreSettings());
 
     const config = await this.config$.pipe(first()).toPromise();
-    this.overrides = config.overrides;
+    this.overrides = config.overrides || {};
+
+    // Use uiSettings.defaults from the config file
+    this.validateAndUpdateConfiguredDefaults(config.defaults);
 
     return {
       register: this.register.bind(this),
@@ -132,6 +135,19 @@ export class UiSettingsService
       if (definition?.schema) {
         definition.schema.validate(value, {}, `ui settings overrides [${key}]`);
       }
+    }
+  }
+
+  private validateAndUpdateConfiguredDefaults(defaults: Record<string, any> = {}) {
+    for (const [key, value] of Object.entries(defaults)) {
+      const definition = this.uiSettingsDefaults.get(key);
+      if (!definition)
+        throw new Error(`[ui settings defaults [${key}]: expected key to be have been registered`);
+
+      if (definition.schema) {
+        definition.schema.validate(value, {}, `ui settings configuration [${key}]`);
+      }
+      definition.value = value;
     }
   }
 }

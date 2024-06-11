@@ -1,0 +1,470 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceMenu can render data source view when only pass id in the activeOption 1`] = `
+<DataSourceView
+  fullWidth={true}
+  hideLocalCluster={false}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction],
+    }
+  }
+  selectedOption={
+    Array [
+      Object {
+        "id": "test",
+      },
+    ]
+  }
+/>
+`;
+
+exports[`DataSourceMenu can render data source view when provide activeOption 1`] = `
+<DataSourceView
+  fullWidth={true}
+  hideLocalCluster={false}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction],
+    }
+  }
+  selectedOption={
+    Array [
+      Object {
+        "id": "test",
+        "label": "test-label",
+      },
+    ]
+  }
+/>
+`;
+
+exports[`DataSourceMenu should render data source aggregated view 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPopover euiPopover--anchorDownLeft"
+        id="dataSourceSViewContextMenuPopover"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            aria-label="dataSourceAggregatedViewButton"
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+            data-test-subj="dataSourceAggregatedViewButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="database"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              />
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPopover euiPopover--anchorDownLeft"
+      id="dataSourceSViewContextMenuPopover"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <button
+          aria-label="dataSourceAggregatedViewButton"
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small dataSourceComponentButtonTitle"
+          data-test-subj="dataSourceAggregatedViewButton"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              class="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+            />
+            <span
+              class="euiButtonEmpty__text"
+            />
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`DataSourceMenu should render data source multi select component 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPopover euiPopover--anchorDownCenter"
+        id="popoverExampleMultiSelect"
+      >
+        <div
+          class="euiPopover__anchor"
+        >
+          <button
+            class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+            data-test-subj="dataSourceFilterGroupButton"
+            type="button"
+          >
+            <span
+              class="euiButtonContent euiButtonEmpty__content"
+            >
+              <span
+                class="euiButtonContent__icon"
+                color="inherit"
+                data-euiicon-type="database"
+              />
+              <span
+                class="euiButtonEmpty__text"
+              >
+                Data sources
+              </span>
+            </span>
+          </button>
+          <span
+            class="euiNotificationBadge euiNotificationBadge--subdued"
+          >
+            0
+          </span>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPopover euiPopover--anchorDownCenter"
+      id="popoverExampleMultiSelect"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <button
+          class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--small euiHeaderLink"
+          data-test-subj="dataSourceFilterGroupButton"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              class="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="database"
+            />
+            <span
+              class="euiButtonEmpty__text"
+            >
+              Data sources
+            </span>
+          </span>
+        </button>
+        <span
+          class="euiNotificationBadge euiNotificationBadge--subdued"
+        >
+          0
+        </span>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`DataSourceMenu should render data source selectable only with local cluster is hidden 1`] = `
+<DataSourceSelectable
+  disabled={false}
+  fullWidth={true}
+  hideLocalCluster={true}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  onSelectedDataSources={[MockFunction]}
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction],
+    }
+  }
+/>
+`;
+
+exports[`DataSourceMenu should render data source selectable only with local cluster not hidden 1`] = `
+<DataSourceSelectable
+  disabled={false}
+  fullWidth={true}
+  hideLocalCluster={false}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  onSelectedDataSources={[MockFunction]}
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction],
+    }
+  }
+/>
+`;
+
+exports[`DataSourceMenu should render data source view if not pass saved object or notification 1`] = `
+<DataSourceView
+  fullWidth={true}
+  hideLocalCluster={false}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+/>
+`;
+
+exports[`DataSourceMenu should render data source view only 1`] = `
+<DataSourceView
+  fullWidth={true}
+  hideLocalCluster={false}
+  notifications={
+    Object {
+      "add": [MockFunction],
+      "addDanger": [MockFunction],
+      "addError": [MockFunction],
+      "addInfo": [MockFunction],
+      "addSuccess": [MockFunction],
+      "addWarning": [MockFunction],
+      "get$": [MockFunction],
+      "remove": [MockFunction],
+    }
+  }
+  savedObjectsClient={
+    Object {
+      "find": [MockFunction],
+    }
+  }
+/>
+`;
+
+exports[`DataSourceMenu should render nothing 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div />
+  </body>,
+  "container": <div />,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;

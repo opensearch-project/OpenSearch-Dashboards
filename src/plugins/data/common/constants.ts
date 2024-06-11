@@ -35,6 +35,7 @@ export const UI_SETTINGS = {
   DOC_HIGHLIGHT: 'doc_table:highlight',
   QUERY_STRING_OPTIONS: 'query:queryString:options',
   QUERY_ALLOW_LEADING_WILDCARDS: 'query:allowLeadingWildcards',
+  QUERY_DATA_SOURCE_READONLY: 'query:dataSourceReadOnly',
   SEARCH_QUERY_LANGUAGE: 'search:queryLanguage',
   SORT_OPTIONS: 'sort:options',
   COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX: 'courier:ignoreFilterIfFieldNotInIndex',
@@ -60,4 +61,5 @@ export const UI_SETTINGS = {
   INDEXPATTERN_PLACEHOLDER: 'indexPattern:placeholder',
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
+  DATAFRAME_HYDRATION_STRATEGY: 'dataframe:hydrationStrategy',
 } as const;

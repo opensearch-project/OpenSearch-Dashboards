@@ -11,6 +11,6 @@
       "_cluster/stats",
       "_cluster/stats/nodes/{nodes}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-stats.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cluster-api/cluster-stats/"
   }
 }

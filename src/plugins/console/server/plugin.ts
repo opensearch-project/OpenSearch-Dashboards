@@ -50,17 +50,26 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     this.log = this.ctx.logger.get();
   }
 
-  async setup({ http, capabilities, getStartServices, opensearch }: CoreSetup) {
+  async setup({ http, capabilities, opensearch, security }: CoreSetup) {
+    const config = await this.ctx.config.create().pipe(first()).toPromise();
+    const globalConfig = await this.ctx.config.legacy.globalConfig$.pipe(first()).toPromise();
+    const proxyPathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
+
     capabilities.registerProvider(() => ({
       dev_tools: {
         show: true,
         save: true,
+        futureNavigation: globalConfig.opensearchDashboards.futureNavigation,
       },
     }));
 
-    const config = await this.ctx.config.create().pipe(first()).toPromise();
-    const globalConfig = await this.ctx.config.legacy.globalConfig$.pipe(first()).toPromise();
-    const proxyPathFilters = config.proxyFilter.map((str: string) => new RegExp(str));
+    capabilities.registerSwitcher(async (request, capabilites) => {
+      return await security.readonlyService().hideForReadonly(request, capabilites, {
+        dev_tools: {
+          save: false,
+        },
+      });
+    });
 
     this.opensearchLegacyConfigService.setup(opensearch.legacy.config$);
 

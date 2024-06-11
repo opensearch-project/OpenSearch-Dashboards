@@ -30,10 +30,8 @@
 
 import React from 'react';
 // @ts-ignore
-import { findTestSubject } from '@elastic/eui/lib/test';
-// @ts-ignore
 import stubbedLogstashFields from 'fixtures/logstash_fields';
-import { mountWithIntl } from 'test_utils/enzyme_helpers';
+import { render, screen, fireEvent } from 'test_utils/testing_lib_helpers';
 import { DiscoverField } from './discover_field';
 import { coreMock } from '../../../../../../core/public/mocks';
 import { IndexPatternField } from '../../../../../data/public';
@@ -63,7 +61,7 @@ jest.mock('../../../opensearch_dashboards_services', () => ({
   }),
 }));
 
-function getComponent({
+function getProps({
   selected = false,
   showDetails = false,
   useShortDots = false,
@@ -110,24 +108,33 @@ function getComponent({
     selected,
     useShortDots,
   };
-  const comp = mountWithIntl(<DiscoverField {...props} />);
-  return { comp, props };
+
+  return props;
 }
 
 describe('discover sidebar field', function () {
-  it('should allow selecting fields', function () {
-    const { comp, props } = getComponent({});
-    findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
+  it('should allow selecting fields', async function () {
+    const props = getProps({});
+    render(<DiscoverField {...props} />);
+
+    await fireEvent.click(screen.getByTestId('fieldToggle-bytes'));
+
     expect(props.onAddField).toHaveBeenCalledWith('bytes');
   });
-  it('should allow deselecting fields', function () {
-    const { comp, props } = getComponent({ selected: true });
-    findTestSubject(comp, 'fieldToggle-bytes').simulate('click');
+  it('should allow deselecting fields', async function () {
+    const props = getProps({ selected: true });
+    render(<DiscoverField {...props} />);
+
+    await fireEvent.click(screen.getByTestId('fieldToggle-bytes'));
+
     expect(props.onRemoveField).toHaveBeenCalledWith('bytes');
   });
-  it('should trigger getDetails', function () {
-    const { comp, props } = getComponent({ selected: true });
-    findTestSubject(comp, 'field-bytes-showDetails').simulate('click');
+  it('should trigger getDetails', async function () {
+    const props = getProps({ selected: true });
+    render(<DiscoverField {...props} />);
+
+    await fireEvent.click(screen.getByTestId('field-bytes-showDetails'));
+
     expect(props.getDetails).toHaveBeenCalledWith(props.field);
   });
   it('should not allow clicking on _source', function () {
@@ -142,11 +149,12 @@ describe('discover sidebar field', function () {
       },
       '_source'
     );
-    const { comp, props } = getComponent({
+    const props = getProps({
       selected: true,
       field,
     });
-    findTestSubject(comp, 'field-_source-showDetails').simulate('click');
-    expect(props.getDetails).not.toHaveBeenCalled();
+    render(<DiscoverField {...props} />);
+
+    expect(screen.queryByTestId('field-_source-showDetails')).toBeNull();
   });
 });

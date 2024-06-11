@@ -29,7 +29,7 @@
  */
 
 import { UI_SETTINGS } from '../../../constants';
-import { GetConfigFn } from '../../../types';
+import { GetConfigFn, GetDataFrameFn, DestroyDataFrameFn } from '../../../types';
 import { ISearchRequestParams } from '../../index';
 import { SearchRequest } from './types';
 
@@ -49,15 +49,49 @@ export function getPreference(getConfig: GetConfigFn) {
     : undefined;
 }
 
+export function getExternalSearchParamsFromRequest(
+  searchRequest: SearchRequest,
+  dependencies: {
+    getConfig: GetConfigFn;
+    getDataFrame: GetDataFrameFn;
+  }
+): ISearchRequestParams {
+  const { getConfig, getDataFrame } = dependencies;
+  const searchParams = getSearchParams(getConfig);
+  const dataFrame = getDataFrame();
+  const indexTitle = searchRequest.index.title || searchRequest.index;
+
+  return {
+    index: indexTitle,
+    body: {
+      ...searchRequest.body,
+      ...(dataFrame && dataFrame?.name === indexTitle ? { df: dataFrame } : {}),
+    },
+    ...searchParams,
+  };
+}
+
 /** @public */
 // TODO: Could provide this on runtime contract with dependencies
 // already wired up.
 export function getSearchParamsFromRequest(
   searchRequest: SearchRequest,
-  dependencies: { getConfig: GetConfigFn }
+  dependencies: {
+    getConfig: GetConfigFn;
+    getDataFrame?: GetDataFrameFn;
+    destroyDataFrame?: DestroyDataFrameFn;
+  }
 ): ISearchRequestParams {
-  const { getConfig } = dependencies;
+  const { getConfig, getDataFrame, destroyDataFrame } = dependencies;
   const searchParams = getSearchParams(getConfig);
+
+  if (getDataFrame && destroyDataFrame) {
+    if (getDataFrame()) {
+      delete searchRequest.body.df;
+      delete searchRequest.indexType;
+      destroyDataFrame();
+    }
+  }
 
   return {
     index: searchRequest.index.title || searchRequest.index,

@@ -6,7 +6,7 @@ Object {
     Object {
       "arguments": Object {
         "expression": Array [
-          ".es(*)",
+          ".opensearch(*)",
         ],
         "interval": Array [
           "auto",
@@ -26,7 +26,7 @@ Object {
     Object {
       "arguments": Object {
         "expression": Array [
-          ".es(index=my*,timefield=\\"date\\",split='test field:3',metric='avg:value')",
+          ".opensearch(index=my*,timefield=\\"date\\",split='test field:3',metric='avg:value')",
         ],
         "interval": Array [
           "auto",

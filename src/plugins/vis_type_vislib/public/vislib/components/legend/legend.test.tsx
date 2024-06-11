@@ -35,7 +35,7 @@ import { I18nProvider } from '@osd/i18n/react';
 import { EuiButtonGroup } from '@elastic/eui';
 
 import { VisLegend, VisLegendProps } from './legend';
-import { legendColors } from './models';
+import { legendColors } from './legend_item';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

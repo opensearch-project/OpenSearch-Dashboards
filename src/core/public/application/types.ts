@@ -47,6 +47,7 @@ import { IUiSettingsClient } from '../ui_settings';
 import { SavedObjectsStart } from '../saved_objects';
 import { AppCategory } from '../../types';
 import { ScopedHistory } from './scoped_history';
+import { WorkspacesStart } from '../workspace';
 
 /**
  * Accessibility status of an application.
@@ -101,6 +102,22 @@ export type AppUpdatableFields = Pick<App, 'status' | 'navLinkStatus' | 'tooltip
  * @public
  */
 export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
+
+/**
+ * Visibilities of the application based on if user is within a workspace
+ *
+ * @public
+ */
+export enum WorkspaceAvailability {
+  /**
+   * The application is not accessible when user is in a workspace.
+   */
+  outsideWorkspace = 2,
+  /**
+   * The application is only accessible when user is in a workspace.
+   */
+  insideWorkspace = 1,
+}
 
 /**
  * @public
@@ -244,6 +261,13 @@ export interface App<HistoryLocationState = unknown> {
    * ```
    */
   exactRoute?: boolean;
+
+  /**
+   * Declare if page is available when inside a workspace.
+   * Defaults to WorkspaceAvailability.outsideWorkspace | WorkspaceAvailability.insideWorkspace,
+   * indicating the application is available within or out of workspace.
+   */
+  workspaceAvailability?: WorkspaceAvailability;
 }
 
 /**
@@ -334,6 +358,8 @@ export interface AppMountContext {
     injectedMetadata: {
       getInjectedVar: (name: string, defaultValue?: any) => unknown;
     };
+    /** {@link WorkspacesService} */
+    workspaces: WorkspacesStart;
   };
 }
 
@@ -503,6 +529,10 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+  /**
+   * Optional datasource id to pass while mounting app
+   */
+  dataSourceId?: string;
 }
 
 /**

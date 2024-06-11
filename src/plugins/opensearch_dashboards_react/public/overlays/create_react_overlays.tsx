@@ -52,9 +52,15 @@ export const createReactOverlays = (
     return services.overlays!.openModal(toMountPoint(<>{node}</>), options);
   };
 
+  const sidecar = () => {
+    checkCoreService();
+    return services.overlays!.sidecar;
+  };
+
   const overlays: OpenSearchDashboardsReactOverlays = {
     openFlyout,
     openModal,
+    sidecar,
   };
 
   return overlays;

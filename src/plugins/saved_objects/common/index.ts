@@ -29,4 +29,7 @@
  */
 
 export const PER_PAGE_SETTING = 'savedObjects:perPage';
+export const PER_PAGE_VALUE = 20;
+
 export const LISTING_LIMIT_SETTING = 'savedObjects:listingLimit';
+export const LISTING_LIMIT_VALUE = 1000;

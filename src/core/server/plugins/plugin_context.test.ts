@@ -56,6 +56,9 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     configPath: 'path',
     opensearchDashboardsVersion: '7.0.0',
     requiredPlugins: ['some-required-dep'],
+    requiredEnginePlugins: {
+      'test-os-plugin1': '^2.2.1',
+    },
     requiredBundles: [],
     optionalPlugins: ['some-optional-dep'],
     server: true,
@@ -95,8 +98,11 @@ describe('createPluginInitializerContext', () => {
     expect(configObject).toStrictEqual({
       opensearchDashboards: {
         index: '.kibana',
+        configIndex: '.opensearch_dashboards_config',
         autocompleteTerminateAfter: duration(100000),
         autocompleteTimeout: duration(1000),
+        dashboardAdmin: { groups: [], users: [] },
+        futureNavigation: false,
       },
       opensearch: {
         shardTimeout: duration(30, 's'),
@@ -104,7 +110,12 @@ describe('createPluginInitializerContext', () => {
         pingTimeout: duration(30, 's'),
       },
       path: { data: fromRoot('data') },
-      savedObjects: { maxImportPayloadBytes: new ByteSizeValue(26214400) },
+      savedObjects: {
+        maxImportPayloadBytes: new ByteSizeValue(26214400),
+        permission: {
+          enabled: false,
+        },
+      },
     });
   });
 

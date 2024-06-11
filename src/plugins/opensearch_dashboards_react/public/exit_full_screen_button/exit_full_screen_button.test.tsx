@@ -29,36 +29,80 @@
  */
 
 import React from 'react';
-import sinon from 'sinon';
 import { ExitFullScreenButton } from './exit_full_screen_button';
 import { keys } from '@elastic/eui';
-import { mount } from 'enzyme';
+import { shallow } from 'enzyme';
+import { getLogosMock } from '../../../../core/common/mocks';
+import { ColorScheme } from '../../../../core/common';
 
-test('is rendered', () => {
-  const component = mount(<ExitFullScreenButton onExitFullScreenMode={() => {}} />);
+const mockProps = () => ({
+  onExitFullScreenMode: jest.fn(),
+  logos: getLogosMock.default,
+});
 
-  expect(component).toMatchSnapshot();
+describe('ExitFullScreenButton', () => {
+  it("is rendered using the dark theme's mark by default", () => {
+    const props = {
+      ...mockProps(),
+    };
+    const component = shallow(<ExitFullScreenButton {...props} />);
+    // In light color-scheme, the button has a dark background
+    const icons = component.find(`EuiIcon[type="${props.logos.Mark.dark.url}"]`);
+
+    expect(icons.length).toEqual(1);
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it("is rendered using the dark theme's mark when light color-scheme is applied", () => {
+    const props = {
+      ...mockProps(),
+      logos: { ...getLogosMock.default, colorScheme: ColorScheme.LIGHT },
+    };
+    const component = shallow(<ExitFullScreenButton {...props} />);
+    // In light color-scheme, the button has a dark background
+    const icons = component.find(`EuiIcon[type="${props.logos.Mark.dark.url}"]`);
+
+    expect(icons.length).toEqual(1);
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it("is rendered using the light theme's mark when dark color-scheme is applied", () => {
+    const props = {
+      ...mockProps(),
+      logos: { ...getLogosMock.default, colorScheme: ColorScheme.DARK },
+    };
+    const component = shallow(<ExitFullScreenButton {...props} />);
+    // In light color-scheme, the button has a dark background
+    const icons = component.find(`EuiIcon[type="${props.logos.Mark.light.url}"]`);
+
+    expect(icons.length).toEqual(1);
+
+    expect(component).toMatchSnapshot();
+  });
 });
 
 describe('onExitFullScreenMode', () => {
-  test('is called when the button is pressed', () => {
-    const onExitHandler = sinon.stub();
-
-    const component = mount(<ExitFullScreenButton onExitFullScreenMode={onExitHandler} />);
-
+  it('is called when the button is pressed', () => {
+    const props = {
+      ...mockProps(),
+    };
+    const component = shallow(<ExitFullScreenButton {...props} />);
     component.find('button').simulate('click');
 
-    sinon.assert.calledOnce(onExitHandler);
+    expect(props.onExitFullScreenMode).toHaveBeenCalledTimes(1);
   });
 
-  test('is called when the ESC key is pressed', () => {
-    const onExitHandler = sinon.stub();
-
-    mount(<ExitFullScreenButton onExitFullScreenMode={onExitHandler} />);
+  it('is called when the ESC key is pressed', () => {
+    const props = {
+      ...mockProps(),
+    };
+    shallow(<ExitFullScreenButton {...props} />);
 
     const escapeKeyEvent = new KeyboardEvent('keydown', { key: keys.ESCAPE } as any);
     document.dispatchEvent(escapeKeyEvent);
 
-    sinon.assert.calledOnce(onExitHandler);
+    expect(props.onExitFullScreenMode).toHaveBeenCalledTimes(1);
   });
 });

@@ -29,6 +29,7 @@
  */
 
 import _ from 'lodash';
+import { stringify } from '@osd/std';
 import { SavedObject, SavedObjectConfig } from '../../types';
 import { extractSearchSourceReferences, expandShorthand } from '../../../../data/public';
 
@@ -64,7 +65,7 @@ export function serializeSavedObject(savedObject: SavedObject, config: SavedObje
     const [searchSourceFields, searchSourceReferences] = extractSearchSourceReferences(
       savedObject.searchSourceFields
     );
-    const searchSourceJSON = JSON.stringify(searchSourceFields);
+    const searchSourceJSON = stringify(searchSourceFields);
     attributes.kibanaSavedObjectMeta = { searchSourceJSON };
     references.push(...searchSourceReferences);
   }

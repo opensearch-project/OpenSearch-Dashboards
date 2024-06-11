@@ -39,6 +39,6 @@
       "_cat/recovery",
       "_cat/recovery/{indices}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-recovery/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cat/cat-recovery/"
   }
 }

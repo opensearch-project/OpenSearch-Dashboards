@@ -29,6 +29,7 @@
  */
 
 const realFs = jest.requireActual('fs');
+const realFsPromises = jest.requireActual('fs/promises');
 
 export const mockReadFile = jest.fn();
 const mockStat = jest.fn();
@@ -36,4 +37,12 @@ jest.doMock('fs', () => ({
   ...realFs,
   readFile: mockReadFile,
   stat: mockStat,
+}));
+
+export const mockReadFilePromise = jest.fn();
+const mockStatPromise = jest.fn();
+jest.doMock('fs/promises', () => ({
+  ...realFsPromises,
+  readFile: mockReadFilePromise,
+  stat: mockStatPromise,
 }));

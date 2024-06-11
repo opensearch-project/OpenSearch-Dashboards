@@ -33,14 +33,18 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'header', 'home', 'timePicker', 'discover']);
   const appsMenu = getService('appsMenu');
   const opensearchArchiver = getService('opensearchArchiver');
+  const opensearchDashboardsServer = getService('opensearchDashboardsServer');
 
   describe('OpenSearch Dashboards browser back navigation should work', function describeIndexTests() {
     before(async () => {
       await opensearchArchiver.loadIfNeeded('discover');
       await opensearchArchiver.loadIfNeeded('logstash_functional');
+      await opensearchDashboardsServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+      });
     });
 
     it('detect navigate back issues', async () => {
@@ -51,8 +55,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const homeUrl = await browser.getCurrentUrl();
 
       // Navigate to discover app
-      await appsMenu.clickLink('Discover');
+      await PageObjects.common.navigateToApp('discover');
       const discoverUrl = await browser.getCurrentUrl();
+
       await PageObjects.timePicker.setDefaultAbsoluteRange();
       const modifiedTimeDiscoverUrl = await browser.getCurrentUrl();
 

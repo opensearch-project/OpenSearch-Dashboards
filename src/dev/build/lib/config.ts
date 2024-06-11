@@ -31,6 +31,7 @@
 import { dirname, resolve, relative } from 'path';
 import os from 'os';
 import loadJsonFile from 'load-json-file';
+import { readFile } from 'fs/promises';
 
 import { getVersionInfo, VersionInfo } from './version_info';
 import {
@@ -67,11 +68,15 @@ export class Config {
     const pkgPath = resolve(__dirname, '../../../../package.json');
     const pkg: Package = loadJsonFile.sync(pkgPath);
 
+    const nvmrcPath = resolve(__dirname, '../../../../.nvmrc');
+    const nvmrcContent = (await readFile(nvmrcPath, 'utf8'))?.trim?.();
+
     return new Config(
       targetAllPlatforms,
       targetPlatforms,
       pkg,
       pkg.engines.node,
+      nvmrcContent,
       dirname(pkgPath),
       await getVersionInfo({
         isRelease,
@@ -86,6 +91,7 @@ export class Config {
     private readonly targetAllPlatforms: boolean,
     private readonly targetPlatforms: TargetPlatforms,
     private readonly pkg: Package,
+    private readonly nodeRange: string,
     private readonly nodeVersion: string,
     private readonly repoRoot: string,
     private readonly versionInfo: VersionInfo,
@@ -97,6 +103,13 @@ export class Config {
    */
   getOpenSearchDashboardsPkg() {
     return this.pkg;
+  }
+
+  /**
+   * Get the node version range compatible with OpenSearch Dashboards
+   */
+  getNodeRange() {
+    return this.nodeRange;
   }
 
   /**
@@ -142,9 +155,10 @@ export class Config {
 
     const platforms: Platform[] = [];
     if (this.targetPlatforms.darwin) platforms.push(this.getPlatform('darwin', 'x64'));
+    if (this.targetPlatforms.darwinArm) platforms.push(this.getPlatform('darwin', 'arm64'));
     if (this.targetPlatforms.linux) platforms.push(this.getPlatform('linux', 'x64'));
-    if (this.targetPlatforms.windows) platforms.push(this.getPlatform('win32', 'x64'));
     if (this.targetPlatforms.linuxArm) platforms.push(this.getPlatform('linux', 'arm64'));
+    if (this.targetPlatforms.windows) platforms.push(this.getPlatform('win32', 'x64'));
 
     if (platforms.length > 0) return platforms;
 

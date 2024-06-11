@@ -34,8 +34,10 @@ jobs:
           installation_id: 22958780
 
       - name: Backport
-        uses: VachaShah/backport@v2.1.0
+        uses: VachaShah/backport@v2.2.0
         with:
           github_token: ${{ steps.github_app_token.outputs.token }}
           head_template: backport/backport-<%= number %>-to-<%= base %>
           files_to_skip: "CHANGELOG.md"
+          labels_template: "<%= JSON.stringify([...labels, 'autocut']) %>"
+          failure_labels: "failed backport"

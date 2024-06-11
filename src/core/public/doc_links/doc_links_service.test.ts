@@ -64,4 +64,16 @@ describe('DocLinksService#start()', () => {
       'https://opensearch.org/docs/1.1/dashboards/index/'
     );
   });
+
+  it('templates the doc links with the build version from injectedMetadata', () => {
+    const injectedMetadata = injectedMetadataServiceMock.createStartContract();
+    injectedMetadata.getOpenSearchDashboardsBranch.mockReturnValue('test-branch');
+    injectedMetadata.getOpenSearchDashboardsVersion.mockReturnValue('1.1.2');
+    const service = new DocLinksService();
+    const api = service.start({ injectedMetadata });
+    expect(api.DOC_LINK_VERSION).toEqual('1.1');
+    expect(api.links.opensearchDashboards.introduction).toEqual(
+      'https://opensearch.org/docs/1.1/dashboards/index/'
+    );
+  });
 });

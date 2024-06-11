@@ -53,7 +53,7 @@ export default class JestJUnitReporter {
   /**
    * Called by jest when all tests complete
    * @param {Object} contexts
-   * @param {JestResults} results see https://facebook.github.io/jest/docs/en/configuration.html#testresultsprocessor-string
+   * @param {JestResults} results see https://jestjs.io/docs/configuration/#testresultsprocessor-string
    * @return {undefined}
    */
   onRunComplete(contexts, results) {
@@ -70,8 +70,9 @@ export default class JestJUnitReporter {
       { skipNullAttributes: true }
     );
 
-    const msToIso = (ms) => (ms ? new Date(ms).toISOString().slice(0, -5) : undefined);
-    const msToSec = (ms) => (ms ? (ms / 1000).toFixed(3) : undefined);
+    const isNumeric = (val) => !isNaN(parseFloat(val)) && isFinite(val);
+    const msToIso = (ms) => (isNumeric(ms) ? new Date(ms).toISOString().slice(0, -5) : undefined);
+    const msToSec = (ms) => (isNumeric(ms) ? (ms / 1000).toFixed(3) : undefined);
 
     root.att({
       name: 'jest',

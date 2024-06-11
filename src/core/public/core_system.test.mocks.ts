@@ -42,6 +42,7 @@ import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
 import { contextServiceMock } from './context/context_service.mock';
 import { integrationsServiceMock } from './integrations/integrations_service.mock';
+import { workspacesServiceMock } from './workspace/workspaces_service.mock';
 import { coreAppMock } from './core_app/core_app.mock';
 
 export const MockInjectedMetadataService = injectedMetadataServiceMock.create();
@@ -144,4 +145,12 @@ export const MockCoreApp = coreAppMock.create();
 export const CoreAppConstructor = jest.fn().mockImplementation(() => MockCoreApp);
 jest.doMock('./core_app', () => ({
   CoreApp: CoreAppConstructor,
+}));
+
+export const MockWorkspacesService = workspacesServiceMock.create();
+export const WorkspacesServiceConstructor = jest
+  .fn()
+  .mockImplementation(() => MockWorkspacesService);
+jest.doMock('./workspace', () => ({
+  WorkspacesService: WorkspacesServiceConstructor,
 }));

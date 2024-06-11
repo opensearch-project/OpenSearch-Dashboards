@@ -31,6 +31,8 @@
 import * as React from 'react';
 import { createReactOverlays } from './create_react_overlays';
 import { overlayServiceMock } from '../../../../core/public/mocks';
+import { toMountPoint } from '../util';
+import { SIDECAR_DOCKED_MODE } from '../../../../core/public';
 
 test('throws if no overlays service provided', () => {
   const overlays = createReactOverlays({});
@@ -83,6 +85,28 @@ test('can open modal with React element', () => {
   expect(container.innerHTML).toMatchInlineSnapshot(`"<div>bar</div>"`);
 });
 
+test('can open sidecar with React element', () => {
+  const coreOverlays = overlayServiceMock.createStartContract();
+  const overlays = createReactOverlays({
+    overlays: coreOverlays,
+  });
+
+  expect(coreOverlays.sidecar.open).toHaveBeenCalledTimes(0);
+
+  overlays.sidecar().open(toMountPoint(<div>bar</div>), {
+    config: {
+      dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+      paddingSize: 460,
+    },
+  });
+
+  expect(coreOverlays.sidecar.open).toHaveBeenCalledTimes(1);
+  const container = document.createElement('div');
+  const mount = coreOverlays.sidecar.open.mock.calls[0][0];
+  mount(container);
+  expect(container.innerHTML).toMatchInlineSnapshot(`"<div>bar</div>"`);
+});
+
 test('passes through flyout options when opening flyout', () => {
   const coreOverlays = overlayServiceMock.createStartContract();
   const overlays = createReactOverlays({
@@ -114,5 +138,28 @@ test('passes through modal options when opening modal', () => {
   expect(coreOverlays.openModal.mock.calls[0][1]).toEqual({
     'data-test-subj': 'foo2',
     closeButtonAriaLabel: 'bar2',
+  });
+});
+
+test('passes through sidecar options when opening sidecar', () => {
+  const coreOverlays = overlayServiceMock.createStartContract();
+  const overlays = createReactOverlays({
+    overlays: coreOverlays,
+  });
+
+  overlays.sidecar().open(toMountPoint(<>foo</>), {
+    'data-test-subj': 'foo2',
+    config: {
+      dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+      paddingSize: 460,
+    },
+  });
+
+  expect(coreOverlays.sidecar.open.mock.calls[0][1]).toEqual({
+    'data-test-subj': 'foo2',
+    config: {
+      dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
+      paddingSize: 460,
+    },
   });
 });

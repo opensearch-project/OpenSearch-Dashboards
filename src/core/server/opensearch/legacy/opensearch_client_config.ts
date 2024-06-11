@@ -32,7 +32,6 @@ import { ConfigOptions } from 'elasticsearch';
 import { cloneDeep } from 'lodash';
 import { Duration } from 'moment';
 import { checkServerIdentity } from 'tls';
-import url from 'url';
 import { pick } from '@osd/std';
 import { Logger } from '../../logging';
 import { OpenSearchConfig } from '../opensearch_config';
@@ -131,17 +130,18 @@ export function parseOpenSearchClientConfig(
   if (Array.isArray(config.hosts)) {
     const needsAuth = auth !== false && config.username && config.password;
     opensearchClientConfig.hosts = config.hosts.map((nodeUrl: string) => {
-      const uri = url.parse(nodeUrl);
+      const uri = new URL('', nodeUrl);
 
       const httpsURI = uri.protocol === 'https:';
       const httpURI = uri.protocol === 'http:';
+      const query = uri.searchParams.toString();
 
       const host: Record<string, unknown> = {
         host: uri.hostname,
         port: uri.port || (httpsURI && '443') || (httpURI && '80'),
         protocol: uri.protocol,
         path: uri.pathname,
-        query: uri.query,
+        query: query === '' ? null : query,
         headers: {
           ...DEFAULT_HEADERS,
           ...config.customHeaders,

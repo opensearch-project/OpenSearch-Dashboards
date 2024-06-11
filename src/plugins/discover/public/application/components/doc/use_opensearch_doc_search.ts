@@ -81,13 +81,18 @@ export function useOpenSearchDocSearch({
         setIndexPattern(indexPatternEntity);
 
         const { rawResponse } = await getServices()
-          .data.search.search({
-            dataSourceId: indexPatternEntity.dataSourceRef?.id,
-            params: {
-              index,
-              body: buildSearchBody(id, indexPatternEntity),
+          .data.search.search(
+            {
+              dataSourceId: indexPatternEntity.dataSourceRef?.id,
+              params: {
+                index,
+                body: buildSearchBody(id, indexPatternEntity),
+              },
             },
-          })
+            {
+              withLongNumeralsSupport: true,
+            }
+          )
           .toPromise();
 
         const hits = rawResponse.hits;

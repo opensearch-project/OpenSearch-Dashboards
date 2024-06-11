@@ -1,0 +1,115 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`table vis toExpressionAst function with customized params 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "aggConfigs": Array [
+          "[]",
+        ],
+        "includeFormatHints": Array [
+          false,
+        ],
+        "index": Array [
+          "123",
+        ],
+        "metricsAtAllLevels": Array [
+          false,
+        ],
+        "partialRows": Array [
+          false,
+        ],
+      },
+      "function": "opensearchaggs",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "visConfig": Array [
+          "{\\"perPage\\":5,\\"percentageCol\\":\\"Count\\",\\"showPartialRows\\":false,\\"showMetricsAtAllLevels\\":false,\\"showTotal\\":true,\\"totalFunc\\":\\"min\\",\\"metrics\\":[],\\"buckets\\":[]}",
+        ],
+      },
+      "function": "opensearch_dashboards_table",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;
+
+exports[`table vis toExpressionAst function with default params 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "aggConfigs": Array [
+          "[]",
+        ],
+        "includeFormatHints": Array [
+          false,
+        ],
+        "index": Array [
+          "123",
+        ],
+        "metricsAtAllLevels": Array [
+          false,
+        ],
+        "partialRows": Array [
+          false,
+        ],
+      },
+      "function": "opensearchaggs",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "visConfig": Array [
+          "{\\"perPage\\":10,\\"percentageCol\\":\\"\\",\\"showPartialRows\\":false,\\"showMetricsAtAllLevels\\":false,\\"showTotal\\":false,\\"totalFunc\\":\\"sum\\",\\"metrics\\":[],\\"buckets\\":[]}",
+        ],
+      },
+      "function": "opensearch_dashboards_table",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;
+
+exports[`table vis toExpressionAst function without params 1`] = `
+Object {
+  "chain": Array [
+    Object {
+      "arguments": Object {
+        "aggConfigs": Array [
+          "[]",
+        ],
+        "includeFormatHints": Array [
+          false,
+        ],
+        "index": Array [
+          "123",
+        ],
+        "metricsAtAllLevels": Array [
+          false,
+        ],
+        "partialRows": Array [
+          false,
+        ],
+      },
+      "function": "opensearchaggs",
+      "type": "function",
+    },
+    Object {
+      "arguments": Object {
+        "visConfig": Array [
+          "{\\"metrics\\":[],\\"buckets\\":[]}",
+        ],
+      },
+      "function": "opensearch_dashboards_table",
+      "type": "function",
+    },
+  ],
+  "type": "expression",
+}
+`;

@@ -31,9 +31,9 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { DocViewer } from './doc_viewer';
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from 'test_utils/helpers';
 import { getDocViewsRegistry } from '../../../opensearch_dashboards_services';
-import { DocViewRenderProps } from '../../doc_views/doc_views_types';
+import { DocViewRenderProps } from '../../../doc_views/doc_views_types';
 
 jest.mock('../../../opensearch_dashboards_services', () => {
   let registry: any[] = [];

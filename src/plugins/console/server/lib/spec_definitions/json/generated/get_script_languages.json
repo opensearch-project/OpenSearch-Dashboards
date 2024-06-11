@@ -5,6 +5,7 @@
     ],
     "patterns": [
       "_script_language"
-    ]
+    ],
+    "documentation": "https://opensearch.org/docs/latest/api-reference/script-apis/get-script-language/"
   }
 }

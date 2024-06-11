@@ -51,7 +51,7 @@ export function readLimits(): Limits {
     }
   }
 
-  return yaml ? (Yaml.safeLoad(yaml) as any) : {};
+  return yaml ? (Yaml.load(yaml) as any) : {};
 }
 
 export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerConfig) {
@@ -109,6 +109,6 @@ export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
     pageLoadAssetSize,
   };
 
-  Fs.writeFileSync(LIMITS_PATH, Yaml.safeDump(newLimits));
+  Fs.writeFileSync(LIMITS_PATH, Yaml.dump(newLimits));
   log.success(`wrote updated limits to ${LIMITS_PATH}`);
 }

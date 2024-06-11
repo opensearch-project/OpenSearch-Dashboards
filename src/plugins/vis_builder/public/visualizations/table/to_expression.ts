@@ -4,7 +4,7 @@
  */
 
 import { SchemaConfig } from '../../../../visualizations/public';
-import { TableVisExpressionFunctionDefinition } from '../../../../vis_type_table_new/public';
+import { TableVisExpressionFunctionDefinition } from '../../../../vis_type_table/public';
 import { AggConfigs, IAggConfig } from '../../../../data/common';
 import { buildExpression, buildExpressionFunction } from '../../../../expressions/public';
 import { RenderState } from '../../application/utils/state_management';
@@ -120,7 +120,7 @@ export const toExpression = async ({ style: styleState, visualization }: TableRo
   };
 
   const tableVis = buildExpressionFunction<TableVisExpressionFunctionDefinition>(
-    'opensearch_dashboards_table_new',
+    'opensearch_dashboards_table',
     {
       visConfig: JSON.stringify(visConfig),
     }

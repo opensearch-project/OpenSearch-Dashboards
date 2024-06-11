@@ -66,11 +66,12 @@ describe('RecentlyAccessed#start()', () => {
   let originalLocalStorage: Storage;
   beforeAll(() => {
     originalLocalStorage = window.localStorage;
-    // @ts-expect-error
+
+    // @ts-expect-error to allow redeclaring a readonly prop
+    delete window.localStorage;
     window.localStorage = new LocalStorageMock();
   });
   beforeEach(() => localStorage.clear());
-  // @ts-expect-error
   afterAll(() => (window.localStorage = originalLocalStorage));
 
   const getStart = async () => {

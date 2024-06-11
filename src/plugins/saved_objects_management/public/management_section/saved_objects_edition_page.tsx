@@ -33,16 +33,19 @@ import { useParams, useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import { i18n } from '@osd/i18n';
 import { CoreStart, ChromeBreadcrumb, ScopedHistory } from 'src/core/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
 import { SavedObjectEdition } from './object_view';
 
 const SavedObjectsEditionPage = ({
   coreStart,
+  uiActionsStart,
   serviceRegistry,
   setBreadcrumbs,
   history,
 }: {
   coreStart: CoreStart;
+  uiActionsStart: UiActionsStart;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   history: ScopedHistory;
@@ -79,6 +82,7 @@ const SavedObjectsEditionPage = ({
       savedObjectsClient={coreStart.savedObjects.client}
       overlays={coreStart.overlays}
       notifications={coreStart.notifications}
+      uiActions={uiActionsStart}
       capabilities={capabilities}
       notFoundType={query.notFound as string}
       history={history}

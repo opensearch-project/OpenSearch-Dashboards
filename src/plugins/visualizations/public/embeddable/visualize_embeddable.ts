@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import _, { get } from 'lodash';
+import _, { get, isEmpty } from 'lodash';
 import { Subscription } from 'rxjs';
 import * as Rx from 'rxjs';
 import { i18n } from '@osd/i18n';
@@ -57,13 +57,26 @@ import {
 } from '../../../expressions/public';
 import { buildPipeline } from '../legacy/build_pipeline';
 import { Vis, SerializedVis } from '../vis';
-import { getExpressions, getUiActions } from '../services';
+import { getExpressions, getNotifications, getUiActions } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { TriggerId } from '../../../ui_actions/public';
 import { SavedObjectAttributes } from '../../../../core/types';
-import { AttributeService } from '../../../dashboard/public';
+import { AttributeService, DASHBOARD_CONTAINER_TYPE } from '../../../dashboard/public';
 import { SavedVisualizationsLoader } from '../saved_visualizations';
+import {
+  SavedAugmentVisLoader,
+  ExprVisLayers,
+  VisLayers,
+  isEligibleForVisLayers,
+  getAugmentVisSavedObjs,
+  buildPipelineFromAugmentVisSavedObjs,
+  getAnyErrors,
+  AugmentVisContext,
+  VisLayer,
+  VisAugmenterEmbeddableConfig,
+  PLUGIN_RESOURCE_DELETE_TRIGGER,
+} from '../../../vis_augmenter/public';
 import { VisSavedObject } from '../types';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
@@ -83,6 +96,11 @@ export interface VisualizeInput extends EmbeddableInput {
   };
   savedVis?: SerializedVis;
   table?: unknown;
+  // TODO: This config, along with other VisAugmenter-related fields (visLayers, savedAugmentVisLoader)
+  // can be decoupled from embeddables plugin entirely. It is only used for changing the underlying
+  // visualization. Instead, we can use ReactExpressionRenderer for handling the rendering.
+  // For details, see https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4483
+  visAugmenterConfig?: VisAugmenterEmbeddableConfig;
 }
 
 export interface VisualizeOutput extends EmbeddableOutput {
@@ -114,7 +132,7 @@ export class VisualizeEmbeddable
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
   private expression: string = '';
-  private vis: Vis;
+  public vis: Vis;
   private domNode: any;
   public readonly type = VISUALIZE_EMBEDDABLE_TYPE;
   private autoRefreshFetchSubscription: Subscription;
@@ -127,6 +145,9 @@ export class VisualizeEmbeddable
     VisualizeByReferenceInput
   >;
   private savedVisualizationsLoader?: SavedVisualizationsLoader;
+  private savedAugmentVisLoader?: SavedAugmentVisLoader;
+  public visLayers?: VisLayer[];
+  private visAugmenterConfig?: VisAugmenterEmbeddableConfig;
 
   constructor(
     timefilter: TimefilterContract,
@@ -138,6 +159,7 @@ export class VisualizeEmbeddable
       VisualizeByReferenceInput
     >,
     savedVisualizationsLoader?: SavedVisualizationsLoader,
+    savedAugmentVisLoader?: SavedAugmentVisLoader,
     parent?: IContainer
   ) {
     super(
@@ -160,7 +182,8 @@ export class VisualizeEmbeddable
     this.vis.uiState.on('reload', this.reload);
     this.attributeService = attributeService;
     this.savedVisualizationsLoader = savedVisualizationsLoader;
-
+    this.savedAugmentVisLoader = savedAugmentVisLoader;
+    this.visAugmenterConfig = initialInput.visAugmenterConfig;
     this.autoRefreshFetchSubscription = timefilter
       .getAutoRefreshFetch$()
       .subscribe(this.updateHandler.bind(this));
@@ -336,6 +359,10 @@ export class VisualizeEmbeddable
               timeFieldName: this.vis.data.indexPattern?.timeFieldName!,
               ...event.data,
             };
+          } else if (triggerId === VIS_EVENT_TO_TRIGGER.externalAction) {
+            context = {
+              savedObjectId: this.vis.id,
+            } as AugmentVisContext;
           } else {
             context = {
               embeddable: this,
@@ -393,10 +420,23 @@ export class VisualizeEmbeddable
     }
     this.abortController = new AbortController();
     const abortController = this.abortController;
+
+    // By waiting for this to complete, this.visLayers will be populated.
+    // Note we only fetch when in the context of a dashboard or in the view
+    // events flyout - we do not show events or have event functionality when
+    // in the vis edit view.
+    const shouldFetchVisLayers =
+      this.parent?.type === DASHBOARD_CONTAINER_TYPE || this.visAugmenterConfig?.inFlyout;
+    if (shouldFetchVisLayers) {
+      await this.populateVisLayers();
+    }
+
     this.expression = await buildPipeline(this.vis, {
       timefilter: this.timefilter,
       timeRange: this.timeRange,
       abortSignal: this.abortController!.signal,
+      visLayers: this.visLayers,
+      visAugmenterConfig: this.visAugmenterConfig,
     });
 
     if (this.handler && !abortController.signal.aborted) {
@@ -464,5 +504,91 @@ export class VisualizeEmbeddable
       },
       { showSaveModal: true, saveModalTitle }
     );
+  };
+
+  /**
+   * Fetches any VisLayers, and filters out to only include ones in the list of
+   * input resource IDs, if specified. Assigns them to this.visLayers.
+   * Note this fn is public so we can fetch vislayers on demand when needed,
+   * e.g., generating other vis embeddables in the view events flyout.
+   */
+  public async populateVisLayers(): Promise<void> {
+    this.visLayers = await this.fetchVisLayers();
+  }
+
+  /**
+   * Collects any VisLayers from plugin expressions functions
+   * by fetching all AugmentVisSavedObjects that meets below criteria:
+   * - includes a reference to the vis saved object id
+   * - includes any of the plugin resource IDs, if specified
+   */
+  fetchVisLayers = async (): Promise<VisLayers> => {
+    try {
+      const expressionParams: IExpressionLoaderParams = {
+        searchContext: {
+          timeRange: this.timeRange,
+          query: this.input.query,
+          filters: this.input.filters,
+        },
+        uiState: this.vis.uiState,
+        inspectorAdapters: this.inspectorAdapters,
+      };
+      const aborted = get(this.abortController, 'signal.aborted', false) as boolean;
+      const augmentVisSavedObjs = await getAugmentVisSavedObjs(
+        this.vis.id,
+        this.savedAugmentVisLoader,
+        undefined,
+        this.visAugmenterConfig?.visLayerResourceIds
+      );
+
+      if (!isEmpty(augmentVisSavedObjs) && !aborted && isEligibleForVisLayers(this.vis)) {
+        const visLayersPipeline = buildPipelineFromAugmentVisSavedObjs(augmentVisSavedObjs);
+        // The initial input for the pipeline will just be an empty arr of VisLayers. As plugin
+        // expression functions are ran, they will incrementally append their generated VisLayers to it.
+        const visLayersPipelineInput = {
+          type: 'vis_layers',
+          layers: [] as VisLayers,
+        };
+        // We cannot use this.handler in this case, since it does not support the run() cmd
+        // we need here. So, we consume the expressions service to run this directly instead.
+        const exprVisLayers = (await getExpressions().run(
+          visLayersPipeline,
+          visLayersPipelineInput,
+          expressionParams as Record<string, unknown>
+        )) as ExprVisLayers;
+        const visLayers = exprVisLayers.layers;
+
+        /**
+         * There may be some stale saved objs if any plugin resources have been deleted since last time
+         * data was fetched from them via the expression functions. Execute this trigger so any listening
+         * action can perform cleanup.
+         *
+         * TODO: this should be automatically handled by the saved objects plugin. Tracking issue:
+         * https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4499
+         */
+        getUiActions().getTrigger(PLUGIN_RESOURCE_DELETE_TRIGGER).exec({
+          savedObjs: augmentVisSavedObjs,
+          visLayers,
+        });
+
+        const err = getAnyErrors(visLayers, this.vis.title);
+        // This is only true when one or more VisLayers has an error
+        if (err !== undefined) {
+          const { toasts } = getNotifications();
+          toasts.addError(err, {
+            title: i18n.translate('visualizations.renderVisTitle', {
+              defaultMessage: 'Error loading data on the {visTitle} chart',
+              values: { visTitle: this.vis.title },
+            }),
+            toastMessage: ' ',
+            id: this.id,
+          });
+        }
+        return visLayers;
+      }
+    } catch {
+      return [] as VisLayers;
+    }
+    return [] as VisLayers;
   };
 }

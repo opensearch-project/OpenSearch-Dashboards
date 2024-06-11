@@ -43,14 +43,14 @@ import type { InjectedMetadataSetup } from '../injected_metadata';
 import { renderApp as renderErrorApp, setupUrlOverflowDetection } from './errors';
 import { renderApp as renderStatusApp } from './status';
 
-interface SetupDeps {
+export interface SetupDeps {
   application: InternalApplicationSetup;
   http: HttpSetup;
   injectedMetadata: InjectedMetadataSetup;
   notifications: NotificationsSetup;
 }
 
-interface StartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
   http: HttpStart;
   notifications: NotificationsStart;

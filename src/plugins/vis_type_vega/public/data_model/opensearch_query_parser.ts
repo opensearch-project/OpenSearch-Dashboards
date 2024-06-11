@@ -207,7 +207,7 @@ export class OpenSearchQueryParser {
       if (context) {
         // Use dashboard context
         const newQuery = cloneDeep(this._filters);
-        if (timefield) {
+        if (timefield && newQuery.type !== 'unsupported') {
           newQuery.bool!.must!.push(body.query);
         }
         body.query = newQuery;
@@ -229,7 +229,7 @@ export class OpenSearchQueryParser {
       name: getRequestName(r, index),
     }));
 
-    const data$ = this._searchAPI.search(opensearchSearches);
+    const data$ = await this._searchAPI.search(opensearchSearches);
 
     const results = await data$.toPromise();
 

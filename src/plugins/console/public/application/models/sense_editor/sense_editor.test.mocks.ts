@@ -32,10 +32,8 @@
 
 import '../legacy_core_editor/legacy_core_editor.test.mocks';
 
-import jQuery from 'jquery';
-jest.spyOn(jQuery, 'ajax').mockImplementation(
-  () =>
-    new Promise(() => {
-      // never resolve
-    }) as any
+global.fetch = jest.fn(() =>
+  Promise.resolve({
+    json: () => Promise.resolve({}),
+  })
 );

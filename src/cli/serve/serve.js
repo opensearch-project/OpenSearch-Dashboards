@@ -32,7 +32,6 @@ import { set as lodashSet } from '@elastic/safer-lodash-set';
 import _ from 'lodash';
 import { statSync } from 'fs';
 import { resolve } from 'path';
-import url from 'url';
 
 import { getConfigPath } from '@osd/utils';
 import { IS_OPENSEARCH_DASHBOARDS_DISTRIBUTABLE } from '../../legacy/utils';
@@ -81,11 +80,11 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
     set('env', 'development');
 
     if (!has('opensearch.username')) {
-      set('opensearch.username', 'opensearch_dashboards_system');
+      set('opensearch.username', 'kibanaserver');
     }
 
     if (!has('opensearch.password')) {
-      set('opensearch.password', 'changeme');
+      set('opensearch.password', 'kibanaserver');
     }
 
     if (opts.ssl) {
@@ -110,7 +109,7 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       const opensearchHosts = (
         (customOpenSearchHosts.length > 0 && customOpenSearchHosts) || ['https://localhost:9200']
       ).map((hostUrl) => {
-        const parsedUrl = url.parse(hostUrl);
+        const parsedUrl = new URL('', hostUrl);
         if (parsedUrl.hostname !== 'localhost') {
           throw new Error(
             `Hostname "${parsedUrl.hostname}" can't be used with --ssl. Must be "localhost" to work with certificates.`
@@ -125,6 +124,59 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
       set('server.ssl.certificateAuthorities', CA_CERT_PATH);
       set('opensearch.hosts', opensearchHosts);
       set('opensearch.ssl.certificateAuthorities', CA_CERT_PATH);
+    }
+
+    if (opts.security) {
+      const customOpenSearchHosts = opts.opensearch
+        ? opts.opensearch.split(',')
+        : [].concat(get('opensearch.hosts') || []);
+
+      const opensearchHosts = (
+        (customOpenSearchHosts.length > 0 && customOpenSearchHosts) || ['https://localhost:9200']
+      ).map((hostUrl) => {
+        const parsedUrl = new URL('', hostUrl);
+        return `https://localhost:${parsedUrl.port}`;
+      });
+
+      if (!get('opensearch.hosts')) {
+        set('opensearch.hosts', opensearchHosts);
+      }
+
+      if (!get('opensearch.ssl.verificationMode')) {
+        set('opensearch.ssl.verificationMode', 'none');
+      }
+
+      if (process.env.OPENSEARCH_USERNAME) {
+        set('opensearch.username', process.env.OPENSEARCH_USERNAME);
+      }
+      if (process.env.OPENSEARCH_PASSWORD) {
+        set('opensearch.password', process.env.OPENSEARCH_PASSWORD);
+      }
+
+      if (!get('opensearch.requestHeadersWhitelist')) {
+        set('opensearch.requestHeadersWhitelist', ['authorization', 'securitytenant']);
+      }
+
+      if (!get('opensearch_security.multitenancy.enabled')) {
+        set('opensearch_security.multitenancy.enabled', true);
+      }
+
+      if (!get('opensearch_security.multitenancy.tenants.preferred')) {
+        set('opensearch_security.multitenancy.tenants.preferred', ['Private', 'Global']);
+      }
+
+      if (
+        !get('opensearch_security.readonly_mode.roles') &&
+        process.env.OPENSEARCH_SECURITY_READONLY_ROLE
+      ) {
+        set('opensearch_security.readonly_mode.roles', [
+          process.env.OPENSEARCH_SECURITY_READONLY_ROLE,
+        ]);
+      }
+
+      if (!get('opensearch_security.cookie.secure')) {
+        set('opensearch_security.cookie.secure', false);
+      }
     }
   }
 
@@ -196,6 +248,8 @@ export default function (program) {
     command
       .option('--dev', 'Run the server with development mode defaults')
       .option('--ssl', 'Run the dev server using HTTPS')
+      .option('--security', 'Run the dev server using security defaults')
+      .option('--sql', 'Run the dev server using SQL/PPL defaults')
       .option('--dist', 'Use production assets from osd/optimizer')
       .option(
         '--no-base-path',

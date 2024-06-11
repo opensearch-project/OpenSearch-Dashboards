@@ -4,11 +4,13 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
+import { CreateAggConfigParams } from '../../../../../data/common';
 import { VisualizationType } from '../../../services/type_service/visualization_type';
 
-interface ActiveVisPayload {
+export interface ActiveVisPayload {
   name: VisualizationType['name'];
   style: VisualizationType['ui']['containerConfig']['style']['defaults'];
+  aggConfigParams: CreateAggConfigParams[];
 }
 
 export const setActiveVisualization = createAction<ActiveVisPayload>('setActiveVisualzation');

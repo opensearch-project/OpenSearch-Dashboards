@@ -26,6 +26,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
+        hideLocalCluster={false}
       />
     );
 
@@ -53,6 +54,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
+        hideLocalCluster={false}
       />
     );
 
@@ -79,6 +81,7 @@ describe('Header', () => {
         goToNextStep={() => {}}
         isNextStepDisabled={true}
         stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
+        hideLocalCluster={false}
       />
     );
 
@@ -95,5 +98,24 @@ describe('Header', () => {
         .find('[data-test-subj="createIndexPatternStepDataSourceNextStepButton"]')
         .prop('isDisabled')
     ).toEqual(false);
+  });
+
+  it('should disable next step when local cluster option is hidden and no other option selected', () => {
+    const component = shallowWithIntl(
+      <Header
+        onDataSourceSelected={() => {}}
+        dataSourceRef={{ type: 'type', id: 'id', title: 'title' }!}
+        goToNextStep={() => {}}
+        isNextStepDisabled={true}
+        stepInfo={{ totalStepNumber: 0, currentStepNumber: 0 }}
+        hideLocalCluster={true}
+      />
+    );
+
+    expect(
+      component
+        .find('[data-test-subj="createIndexPatternStepDataSourceNextStepButton"]')
+        .prop('isDisabled')
+    ).toEqual(true);
   });
 });

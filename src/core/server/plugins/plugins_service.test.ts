@@ -47,7 +47,7 @@ import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import { config } from './plugins_config';
 import { take } from 'rxjs/operators';
-import { DiscoveredPlugin } from './types';
+import { DiscoveredPlugin, CompatibleEnginePluginVersions } from './types';
 
 const { join } = posix;
 const MockPluginsSystem: jest.Mock<PluginsSystem> = PluginsSystem as any;
@@ -78,6 +78,7 @@ const createPlugin = (
     disabled = false,
     version = 'some-version',
     requiredPlugins = [],
+    requiredEnginePlugins = {},
     requiredBundles = [],
     optionalPlugins = [],
     opensearchDashboardsVersion = '7.0.0',
@@ -89,6 +90,7 @@ const createPlugin = (
     disabled?: boolean;
     version?: string;
     requiredPlugins?: string[];
+    requiredEnginePlugins?: CompatibleEnginePluginVersions;
     requiredBundles?: string[];
     optionalPlugins?: string[];
     opensearchDashboardsVersion?: string;
@@ -105,6 +107,7 @@ const createPlugin = (
       configPath: `${configPath}${disabled ? '-disabled' : ''}`,
       opensearchDashboardsVersion,
       requiredPlugins,
+      requiredEnginePlugins,
       requiredBundles,
       optionalPlugins,
       server,
@@ -488,6 +491,7 @@ describe('PluginsService', () => {
         requiredPlugins: [],
         requiredBundles: [],
         optionalPlugins: [],
+        requiredEnginePlugins: {},
       },
     ];
 

@@ -45,7 +45,7 @@ export class SavedObjectsManagementPlugin
     this.logger = this.context.logger.get();
   }
 
-  public async setup({ http, capabilities }: CoreSetup) {
+  public async setup({ http, capabilities, security }: CoreSetup) {
     this.logger.debug('Setting up SavedObjectsManagement plugin');
     registerRoutes({
       http,
@@ -53,6 +53,14 @@ export class SavedObjectsManagementPlugin
     });
 
     capabilities.registerProvider(capabilitiesProvider);
+    capabilities.registerSwitcher(async (request, capabilites) => {
+      return await security.readonlyService().hideForReadonly(request, capabilites, {
+        savedObjectsManagement: {
+          delete: false,
+          edit: false,
+        },
+      });
+    });
 
     return {};
   }

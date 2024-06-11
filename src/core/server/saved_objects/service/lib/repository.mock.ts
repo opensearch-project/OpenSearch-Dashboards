@@ -44,6 +44,7 @@ const create = (): jest.Mocked<ISavedObjectsRepository> => ({
   deleteFromNamespaces: jest.fn(),
   deleteByNamespace: jest.fn(),
   incrementCounter: jest.fn(),
+  deleteByWorkspace: jest.fn(),
 });
 
 export const savedObjectsRepositoryMock = { create };

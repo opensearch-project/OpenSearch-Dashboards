@@ -47,7 +47,7 @@ export class OpenSearchDashboardsLegacyPlugin {
        * Used to power dashboard mode. Should be removed when dashboard mode is removed eventually.
        * @deprecated
        */
-      dashboardConfig: getDashboardConfig(!application.capabilities.dashboard.showWriteControls),
+      dashboardConfig: getDashboardConfig(!application.capabilities?.dashboard?.showWriteControls),
       /**
        * Loads the font-awesome icon font. Should be removed once the last consumer has migrated to EUI
        * @deprecated

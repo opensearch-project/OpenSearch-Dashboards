@@ -1,0 +1,66 @@
+.dataSourceAggregatedViewOuiPanel {
+  width: 300px;
+  border-left-width: 0;
+  border-right-width: 0;
+  border-top-width: 0;
+
+  /* stylelint-disable */
+  .euiSelectableListItem {
+    cursor: default;
+  }
+
+  .euiSelectableListItem__content {
+    cursor: default;
+    padding-left: 0;
+    margin-right: 0;
+
+
+  .euiSelectableListItem__text {
+    max-height: 100%;
+  }
+  .euiSelectableListItem__icon, .euiSelectableListItem__prepend {
+    margin-right: 0;
+  }
+  }
+
+  .dataSourceAggregatedViewOuiFlexGroup {
+    .euiFlexItem {
+      max-width: fit-content;
+    }
+
+      /* stylelint-enable */
+
+    .dataSourceAggregatedViewOuiFlexItem {
+      color: grey;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      display: inline-block;
+      padding-left: 0;
+    }
+  }
+
+  .dataSourceAggregatedViewOuiSwitch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .dataSourceAggregatedViewOuiFlexItem {
+    color: grey;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    padding-left: 0;
+  }
+
+  .dataSourceListAllActiveOuiFlexItem {
+    color: grey;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+    padding-left: 1em;
+  }
+}

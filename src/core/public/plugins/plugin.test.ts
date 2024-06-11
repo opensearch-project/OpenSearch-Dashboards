@@ -45,6 +45,7 @@ function createManifest(
     requiredPlugins: required,
     optionalPlugins: optional,
     requiredBundles: [],
+    requiredEnginePlugins: {},
   } as DiscoveredPlugin;
 }
 

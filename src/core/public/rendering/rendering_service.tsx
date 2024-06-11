@@ -37,7 +37,7 @@ import { InternalApplicationStart } from '../application';
 import { OverlayStart } from '../overlays';
 import { AppWrapper, AppContainer } from './app_containers';
 
-interface StartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
   chrome: InternalChromeStart;
   overlays: OverlayStart;
@@ -63,7 +63,10 @@ export class RenderingService {
         <div className="content" data-test-subj="opensearchDashboardsChrome">
           {chromeUi}
 
-          <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
+          <AppWrapper
+            chromeVisible$={chrome.getIsVisible$()}
+            sidecarConfig$={overlays.sidecar.getSidecarConfig$()}
+          >
             <div className="app-wrapper-panel">
               <div id="globalBannerList">{bannerUi}</div>
               <AppContainer classes$={chrome.getApplicationClasses$()}>{appUi}</AppContainer>

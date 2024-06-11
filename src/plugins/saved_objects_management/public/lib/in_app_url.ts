@@ -38,6 +38,8 @@ export function canViewInApp(uiCapabilities: Capabilities, type: string): boolea
     case 'visualization':
     case 'visualizations':
       return uiCapabilities.visualize.show as boolean;
+    case 'augment-vis':
+      return uiCapabilities.visAugmenter.show as boolean;
     case 'index-pattern':
     case 'index-patterns':
     case 'indexPatterns':
@@ -45,6 +47,8 @@ export function canViewInApp(uiCapabilities: Capabilities, type: string): boolea
     case 'dashboard':
     case 'dashboards':
       return uiCapabilities.dashboard.show as boolean;
+    case 'homepage':
+      return uiCapabilities.home.show as boolean;
     default:
       return uiCapabilities[type].show as boolean;
   }

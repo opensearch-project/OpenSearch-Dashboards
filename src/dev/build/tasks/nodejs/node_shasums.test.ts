@@ -28,50 +28,44 @@
  * under the License.
  */
 
-const mockResponse = `155ae63f0bb47050e0c31b4f8c17dadc79dcfa8e8f4ec9e3974fd7592afa9a4f  node-v8.9.4-aix-ppc64.tar.gz
-ca50f7d2035eb805306e303b644bb1cde170ce2615e0a2c6e95fb80881c48c24  node-v8.9.4-darwin-x64.tar.gz
-cb79e2da37d2b646a06adaddcda67ff6ba0f77f9ca733b041dabf3dad79c7468  node-v8.9.4-darwin-x64.tar.xz
-ef7248e81706daeeec946c19808a50b60ac250e648365d78fda6e40f1f9b23a5  node-v8.9.4-headers.tar.gz
-11ed407a4bc3d8c3e73305ac54e91e64c9a9f6a2ae5476791d6fcc14ac159bfc  node-v8.9.4-headers.tar.xz
-2b133c7d23033fbc2419e66fc08bba35c427a97aba83ed6848b6b4678c0cac65  node-v8.9.4-linux-arm64.tar.gz
-7c0369a5dbc98d0989c208ca3ee1b6db4cba576343014fdbf7d36fd2659f7089  node-v8.9.4-linux-arm64.tar.xz
-81f138e935323246bd5da518eb0ea8ad00008f3c8a8d606e17589a545a9c73d1  node-v8.9.4-linux-armv6l.tar.gz
-501bcae62ea1769924facc9628f407d37753e7a024cf3b12a18ea9dab1b380c9  node-v8.9.4-linux-armv6l.tar.xz
-a0dd9009cb8d4be89c8a31131df16ad5ea1580d10ae426c5142aa34b0ad4ea76  node-v8.9.4-linux-armv7l.tar.gz
-fe19f195df3d4f362d0cf0eef43c1a6a0b6006a1be2a89ee1808091c2ef4d722  node-v8.9.4-linux-armv7l.tar.xz
-c5df73b8571edf97f83b484d6139332fad3b710d51be4aeb8d846059862d4675  node-v8.9.4-linux-ppc64le.tar.gz
-21178be5e4c1dbdd99610d24aa934234a368c542ebabb3d98c31d393cf4adf06  node-v8.9.4-linux-ppc64le.tar.xz
-d6e53ab2f8364528d4c6800adc1e7fccec607fd07a97b83985732c749a7fc846  node-v8.9.4-linux-s390x.tar.gz
-90c6c284db9482a478dd5110e2171435156d56a013aeda2f636b6240eba156bd  node-v8.9.4-linux-s390x.tar.xz
-21fb4690e349f82d708ae766def01d7fec1b085ce1f5ab30d9bda8ee126ca8fc  node-v8.9.4-linux-x64.tar.gz
-68b94aac38cd5d87ab79c5b38306e34a20575f31a3ea788d117c20fffcca3370  node-v8.9.4-linux-x64.tar.xz
-cc2f7a300353422ede336f5e72b71f0d6eac46732a31b7640648378830dd7513  node-v8.9.4-linux-x86.tar.gz
-79f241f31eab5dfe2976fb0633c598dababd207ab0b8a163004f296cd7794a65  node-v8.9.4-linux-x86.tar.xz
-b93767f7e186b1ae7204fedafa4110534f577d18d4204f422b626afdd5061e28  node-v8.9.4.pkg
-e4a5d945091043c937125cd0d515258785cd4ea806fe3b77000d888de23d2ba0  node-v8.9.4-sunos-x64.tar.gz
-b33e8f1495b88fcc0ab1e2579f2f7cf4d39886d577430dcb920a024829d4cf28  node-v8.9.4-sunos-x64.tar.xz
-551729411793e427f5760fe8e46f45612e1e8e7c63e55ad34243ebf8ea9a4a7a  node-v8.9.4-sunos-x86.tar.gz
-6b439bb7204362c0af7a654bce24fcf8059e1772b2f0a9e4e1f8a0b8caa85d26  node-v8.9.4-sunos-x86.tar.xz
-729b44b32b2f82ecd5befac4f7518de0c4e3add34e8fe878f745740a66cbbc01  node-v8.9.4.tar.gz
-6cdcde9c9c1ca9f450a0b24eafa229ca759e576daa0fae892ce74d541ecdc86f  node-v8.9.4.tar.xz
-15a847a28358f9ae40bae42f49b033b0180bc10661632c63a9c8487ae980a8ba  node-v8.9.4-win-x64.7z
-48946e99ac4484e071df25741d2300f3a656f476c5ff3f8116a4746c07ebe3b7  node-v8.9.4-win-x64.zip
-50ad674fb4c89edf35d3fee2136da86631cb7c0504589eb71ce8a3bb176493ed  node-v8.9.4-win-x86.7z
-02e3c65000ac055e05c604aec4cf318212efbd4b60a945ed319072d58314ca32  node-v8.9.4-win-x86.zip
-547689da69bacadfee619d208702b73698d14297bd5fef5d80656897989e91b6  node-v8.9.4-x64.msi
-f9442188c2f66d167a0ac610dee6d16e226ba28ca93f9569e0276268eb8f85dc  node-v8.9.4-x86.msi
-b73841f25d6e75d635770fd1a32e4d74d6ab2feed0fd7708bb40b967ae06f33e  win-x64/node.exe
-5439dc6f0d632ecdeb7342986743a03fe0818e34f0a67e38de74fa9c94886a39  win-x64/node.lib
-6ab35445dd564978019cf4f3cfe11dd342b8450015fc054df99aa6f35f21736a  win-x64/node_pdb.7z
-c064abba981c2373e7e1a8c53b4e4ed1d4927bd9c0f7c065b24dd13b731598bd  win-x64/node_pdb.zip
-c8430b20cd067d8784d5faae04f9447987a472b22b6d0a2403ea4362ecd3d0bc  win-x86/node.exe
-c4edece2c0aa68e816c4e067f397eb12e9d0c81bb37b3d349dbaf47cf246b0b7  win-x86/node.lib
-6a2ee7a0b0074ece27d171418d82ce25a60b87750ec30c5c9fbeaaca8c206fa5  win-x86/node_pdb.7z
-1b44176d888c1bc6a6b05fcc6234031b3b8a58da9de8b99661088f998ac5e269  win-x86/node_pdb.zip`;
+const mockResponse = `a65bd3fe91ffeb31d12a208e811943e3ebba4706553a4845a03d857beaeec51e  node-v99.99.99-aix-ppc64.tar.gz
+82c7bb4869419ce7338669e6739a786dfc7e72f276ffbed663f85ffc905dcdb4  node-v99.99.99-darwin-arm64.tar.gz
+b23cdf4fa0e9f77273720ab18eabdd7691edbb69e08ec3b65afd69bef23fe209  node-v99.99.99-darwin-arm64.tar.xz
+cd520da6e2e89fab881c66a3e9aff02cb0d61d68104b1d6a571dd71bef920870  node-v99.99.99-darwin-x64.tar.gz
+2c8aa0333111c2411564bfb85be44186aeb581392f73c4be5912cbb125d99043  node-v99.99.99-darwin-x64.tar.xz
+effeb73616e5297922ed89a1b94d2664390040a83184504c1cc1305b0c0c853f  node-v99.99.99-headers.tar.gz
+0eb9823c2cc72792c2d4413f57b5a36232e173d7edefb1909c37e364a823f9c7  node-v99.99.99-headers.tar.xz
+dc3dfaee899ed21682e47eaf15525f85aff29013c392490e9b25219cd95b1c35  node-v99.99.99-linux-arm64.tar.gz
+c81dfa0bada232cb4583c44d171ea207934f7356f85f9184b32d0dde69e2e0ea  node-v99.99.99-linux-arm64.tar.xz
+a3968db44e5ae17243d126ff79b1756016b198f7cc94c6fad8522aac481b4ff3  node-v99.99.99-linux-armv7l.tar.gz
+57ba6b71eb039fa896c329e68669b21f6717622c560c6f61a0c97d18ca866b2d  node-v99.99.99-linux-armv7l.tar.xz
+b4e66dcda5ba4a3697be3fded122dabb6a677deee3d7f4d3c7c13ebb5a13844c  node-v99.99.99-linux-ppc64le.tar.gz
+c43142fb9ef30658620ed095f8203beca92f469c1121eeb724df9a48bf0e59a5  node-v99.99.99-linux-ppc64le.tar.xz
+a8b607c3c06f585c4fe9ba45be6dc76ce9459238c91b3f43533aa30344caed87  node-v99.99.99-linux-s390x.tar.gz
+39b15c16347000b0be97133437bde0317dd2307d3fdfce15ddd8680b07a963ef  node-v99.99.99-linux-s390x.tar.xz
+fc83046a93d2189d919005a348db3b2372b598a145d84eb9781a3a4b0f032e95  node-v99.99.99-linux-x64.tar.gz
+44d93d9b4627fe5ae343012d855491d62c7381b236c347f7666a7ad070f26548  node-v99.99.99-linux-x64.tar.xz
+156aa5b9580288fb0b3c6134eb8fac64e50745d78d33eebe9e29eb7ff87b8e1e  node-v99.99.99.pkg
+6a4f5c5d76e5c50cef673099e56f19bc3266ae363f56ca0ab77dd2f3c5088c6d  node-v99.99.99.tar.gz
+33d81a233e235a509adda4a4f2209008d04591979de6b3f0f67c1c906093f118  node-v99.99.99.tar.xz
+007848640ba414f32d968d303e75d9841ecd2cd95d6fdd81f80bc3dcbd74ae44  node-v99.99.99-win-x64.7z
+4b3bd4cb5570cc217490639e93a7e1b7a7a341981366661e514ce61941824a85  node-v99.99.99-win-x64.zip
+681be28e0acd057b4798f357d21eec5f49e21bc803bbbefeb1072bb4f166025a  node-v99.99.99-win-x86.7z
+2a7e0fb22e1a36144ee8183c80ef2705cd9754c1d894f94bb6c94a681de47924  node-v99.99.99-win-x86.zip
+5bfb6f3ab89e198539408f7e0e8ec0b0bd5efe8898573ec05b381228efb45a5d  node-v99.99.99-x64.msi
+09534d1949c795c3e49d257fb72a9fd865ee28955673b87d569d4aec541333e7  node-v99.99.99-x86.msi
+b548a55c2b5ef5de34f4636610bab27077fb9313d34f52280b9ec11dd25e9dd1  win-x64/node.exe
+72b7fab9381af8f4958c8212f3d4cdfff8c7c5b1e33eaad0e7d5888293568cd5  win-x64/node.lib
+3b9474e18a1bbb38b05b1876b4b37056063c2af82212d356a8a5cf91c1a3acf3  win-x64/node_pdb.7z
+6b506b1fe654ca7161373916c7ba7e38f62545236698342fa97fd2faf39ebc4e  win-x64/node_pdb.zip
+36bf0f0a364ca8edc176776764831f9e88bef6d1e8056f6edc474a37b652a794  win-x86/node.exe
+6a85c15a69238f0902b9a734d262bf36d211b273a46d5e3249857d4bb7f6d9b7  win-x86/node.lib
+9256bdefae4491acfd523ca06d4f4344ddc4f1a28aac868b5efb6a72d8023e2a  win-x86/node_pdb.7z
+53c6b29afd58904e5143d9f3298b55695b8ecb2b6c08a9612ed30e9b0ed9589a  win-x86/node_pdb.zip`;
 
 jest.mock('axios', () => ({
   async get(url: string) {
-    expect(url).toBe('https://nodejs.org/dist/v8.9.4/SHASUMS256.txt');
+    expect(url).toBe('https://nodejs.org/dist/v99.99.99/SHASUMS256.txt');
     return {
       status: 200,
       data: mockResponse,
@@ -84,12 +78,19 @@ import { getNodeShasums } from './node_shasums';
 
 describe('src/dev/build/tasks/nodejs/node_shasums', () => {
   it('resolves to an object with shasums for node downloads for version', async () => {
-    const shasums = await getNodeShasums(new ToolingLog(), '8.9.4');
+    const shasums = await getNodeShasums(new ToolingLog(), '99.99.99');
     expect(shasums).toEqual(
       expect.objectContaining({
-        'node-v8.9.4.tar.gz': '729b44b32b2f82ecd5befac4f7518de0c4e3add34e8fe878f745740a66cbbc01',
-        'node-v8.9.4-win-x64.zip':
-          '48946e99ac4484e071df25741d2300f3a656f476c5ff3f8116a4746c07ebe3b7',
+        'node-v99.99.99-linux-x64.tar.gz':
+          'fc83046a93d2189d919005a348db3b2372b598a145d84eb9781a3a4b0f032e95',
+        'node-v99.99.99-linux-arm64.tar.gz':
+          'dc3dfaee899ed21682e47eaf15525f85aff29013c392490e9b25219cd95b1c35',
+        'node-v99.99.99-darwin-x64.tar.gz':
+          'cd520da6e2e89fab881c66a3e9aff02cb0d61d68104b1d6a571dd71bef920870',
+        'node-v99.99.99-darwin-arm64.tar.gz':
+          '82c7bb4869419ce7338669e6739a786dfc7e72f276ffbed663f85ffc905dcdb4',
+        'node-v99.99.99-win-x64.zip':
+          '4b3bd4cb5570cc217490639e93a7e1b7a7a341981366661e514ce61941824a85',
       })
     );
   });

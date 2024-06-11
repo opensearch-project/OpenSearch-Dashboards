@@ -41,6 +41,7 @@ import { overlayServiceMock } from '../../overlays/overlay_service.mock';
 import { AppMountParameters } from '../types';
 import { Observable } from 'rxjs';
 import { MountPoint } from 'opensearch-dashboards/public';
+import { workspacesServiceMock } from '../../mocks';
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 
@@ -67,7 +68,11 @@ describe('ApplicationService', () => {
       context: contextServiceMock.createSetupContract(),
       history: history as any,
     };
-    startDeps = { http, overlays: overlayServiceMock.createStartContract() };
+    startDeps = {
+      http,
+      overlays: overlayServiceMock.createStartContract(),
+      workspaces: workspacesServiceMock.createStartContract(),
+    };
     service = new ApplicationService();
   });
 
@@ -77,7 +82,7 @@ describe('ApplicationService', () => {
         const { register } = service.setup(setupDeps);
 
         let resolveMount: () => void;
-        const promise = new Promise((resolve) => {
+        const promise = new Promise<void>((resolve) => {
           resolveMount = resolve;
         });
 
@@ -111,7 +116,7 @@ describe('ApplicationService', () => {
         const { register } = service.setup(setupDeps);
 
         let resolveMount: () => void;
-        const promise = new Promise((resolve) => {
+        const promise = new Promise<void>((resolve) => {
           resolveMount = resolve;
         });
 
@@ -453,7 +458,7 @@ describe('ApplicationService', () => {
       const { register } = service.setup(setupDeps);
 
       let resolveMount: () => void;
-      const promise = new Promise((resolve) => {
+      const promise = new Promise<void>((resolve) => {
         resolveMount = resolve;
       });
 
@@ -491,7 +496,7 @@ describe('ApplicationService', () => {
       const { register } = service.setup(setupDeps);
 
       let resolveMount: () => void;
-      const promise = new Promise((resolve) => {
+      const promise = new Promise<void>((resolve) => {
         resolveMount = resolve;
       });
 

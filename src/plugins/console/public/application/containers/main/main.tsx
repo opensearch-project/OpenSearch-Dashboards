@@ -30,6 +30,8 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
+// @ts-expect-error
+import { saveAs } from '@elastic/filesaver';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiPageContent } from '@elastic/eui';
 import { ConsoleHistory } from '../console_history';
 import { Editor } from '../editor';
@@ -41,6 +43,7 @@ import {
   HelpPanel,
   SomethingWentWrongCallout,
   NetworkRequestStatusBar,
+  ImportFlyout,
 } from '../../components';
 
 import { useServicesContext, useEditorReadContext, useRequestReadContext } from '../../contexts';
@@ -48,9 +51,13 @@ import { useDataInit } from '../../hooks';
 
 import { getTopNavConfig } from './get_top_nav';
 
-export function Main() {
+interface MainProps {
+  dataSourceId?: string;
+}
+
+export function Main({ dataSourceId }: MainProps) {
   const {
-    services: { storage },
+    services: { storage, objectStorageClient },
   } = useServicesContext();
 
   const { ready: editorsReady } = useEditorReadContext();
@@ -67,6 +74,14 @@ export function Main() {
   const [showingHistory, setShowHistory] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
+  const [showImportFlyout, setShowImportFlyout] = useState(false);
+
+  const onExport = async () => {
+    const results = await objectStorageClient.text.findAll();
+    const senseData = results.sort((a, b) => a.createdAt - b.createdAt)[0];
+    const blob = new Blob([JSON.stringify(senseData || {})], { type: 'application/json' });
+    saveAs(blob, 'sense.json');
+  };
 
   const renderConsoleHistory = () => {
     return editorsReady ? <ConsoleHistory close={() => setShowHistory(false)} /> : null;
@@ -107,6 +122,8 @@ export function Main() {
                   onClickHistory: () => setShowHistory(!showingHistory),
                   onClickSettings: () => setShowSettings(true),
                   onClickHelp: () => setShowHelp(!showHelp),
+                  onClickExport: () => onExport(),
+                  onClickImport: () => setShowImportFlyout(!showImportFlyout),
                 })}
               />
             </EuiFlexItem>
@@ -130,7 +147,7 @@ export function Main() {
         </EuiFlexItem>
         {showingHistory ? <EuiFlexItem grow={false}>{renderConsoleHistory()}</EuiFlexItem> : null}
         <EuiFlexItem>
-          <Editor loading={!done} />
+          <Editor loading={!done} dataSourceId={dataSourceId} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -143,9 +160,15 @@ export function Main() {
         />
       ) : null}
 
-      {showSettings ? <Settings onClose={() => setShowSettings(false)} /> : null}
+      {showSettings ? (
+        <Settings onClose={() => setShowSettings(false)} dataSourceId={dataSourceId} />
+      ) : null}
 
       {showHelp ? <HelpPanel onClose={() => setShowHelp(false)} /> : null}
+
+      {showImportFlyout ? (
+        <ImportFlyout refresh={retry} close={() => setShowImportFlyout(false)} />
+      ) : null}
     </div>
   );
 }

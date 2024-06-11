@@ -35,7 +35,7 @@
 
 import { OpenSearchDashboardsConfigType } from 'src/core/server/opensearch_dashboards_config';
 import { BehaviorSubject } from 'rxjs';
-
+import { Config } from '@osd/config';
 import { Logger } from '../../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../../mappings';
 import { SavedObjectUnsanitizedDoc, SavedObjectsSerializer } from '../../serialization';
@@ -54,6 +54,7 @@ export interface OpenSearchDashboardsMigratorOptions {
   opensearchDashboardsConfig: OpenSearchDashboardsConfigType;
   opensearchDashboardsVersion: string;
   logger: Logger;
+  opensearchDashboardsRawConfig: Config;
 }
 
 export type IOpenSearchDashboardsMigrator = Pick<
@@ -83,6 +84,7 @@ export class OpenSearchDashboardsMigrator {
     status: 'waiting',
   });
   private readonly activeMappings: IndexMapping;
+  private readonly opensearchDashboardsRawConfig: Config;
 
   /**
    * Creates an instance of OpenSearchDashboardsMigrator.
@@ -94,6 +96,7 @@ export class OpenSearchDashboardsMigrator {
     savedObjectsConfig,
     opensearchDashboardsVersion,
     logger,
+    opensearchDashboardsRawConfig,
   }: OpenSearchDashboardsMigratorOptions) {
     this.client = client;
     this.opensearchDashboardsConfig = opensearchDashboardsConfig;
@@ -107,9 +110,13 @@ export class OpenSearchDashboardsMigrator {
       typeRegistry,
       log: this.log,
     });
+    this.opensearchDashboardsRawConfig = opensearchDashboardsRawConfig;
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
-    this.activeMappings = buildActiveMappings(this.mappingProperties);
+    this.activeMappings = buildActiveMappings(
+      this.mappingProperties,
+      this.opensearchDashboardsRawConfig
+    );
   }
 
   /**
@@ -180,7 +187,11 @@ export class OpenSearchDashboardsMigrator {
           index === opensearchDashboardsIndexName
             ? 'opensearch_dashboards_index_template*'
             : undefined,
+        typesToDelete: this.savedObjectsConfig.delete.enabled
+          ? this.savedObjectsConfig.delete.types
+          : undefined,
         convertToAliasScript: indexMap[index].script,
+        opensearchDashboardsRawConfig: this.opensearchDashboardsRawConfig,
       });
     });
 

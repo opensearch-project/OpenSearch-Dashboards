@@ -29,6 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
 import { SavedObjectsClientCommon } from '../..';
 import { createIndexPatternCache } from '.';
 import { IndexPattern } from './index_pattern';
@@ -53,8 +54,8 @@ import { FieldFormatsStartCommon } from '../../field_formats';
 import { UI_SETTINGS, SavedObject } from '../../../common';
 import { SavedObjectNotFound } from '../../../../opensearch_dashboards_utils/common';
 import { IndexPatternMissingIndices } from '../lib';
-import { findByTitle } from '../utils';
-import { DuplicateIndexPatternError } from '../errors';
+import { findByTitle, getIndexPatternTitle } from '../utils';
+import { DuplicateIndexPatternError, MissingIndexPatternError } from '../errors';
 
 const indexPatternCache = createIndexPatternCache();
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
@@ -118,7 +119,27 @@ export class IndexPatternsService {
       fields: ['title'],
       perPage: 10000,
     });
+
+    this.savedObjectsCache = await Promise.all(
+      this.savedObjectsCache.map(async (obj) => {
+        if (obj.type === 'index-pattern') {
+          const result = { ...obj };
+          result.attributes.title = await getIndexPatternTitle(
+            obj.attributes.title,
+            obj.references,
+            this.getDataSource
+          );
+          return result;
+        } else {
+          return obj;
+        }
+      })
+    );
   }
+
+  getDataSource = async (id: string) => {
+    return await this.savedObjectsClient.get<DataSourceAttributes>('data-source', id);
+  };
 
   /**
    * Get list of index pattern ids
@@ -171,8 +192,10 @@ export class IndexPatternsService {
    * Clear index pattern list cache
    * @param id optionally clear a single id
    */
-  clearCache = (id?: string) => {
-    this.savedObjectsCache = null;
+  clearCache = (id?: string, clearSavedObjectsCache: boolean = true) => {
+    if (clearSavedObjectsCache) {
+      this.savedObjectsCache = null;
+    }
     if (id) {
       indexPatternCache.clear(id);
     } else {
@@ -185,6 +208,10 @@ export class IndexPatternsService {
       await this.refreshSavedObjectsCache();
     }
     return this.savedObjectsCache;
+  };
+
+  saveToCache = (id: string, indexPattern: IndexPattern) => {
+    indexPatternCache.set(id, indexPattern);
   };
 
   /**
@@ -261,9 +288,13 @@ export class IndexPatternsService {
    * Refresh field list for a given index pattern
    * @param indexPattern
    */
-  refreshFields = async (indexPattern: IndexPattern) => {
+  refreshFields = async (indexPattern: IndexPattern, skipType = false) => {
     try {
-      const fields = await this.getFieldsForIndexPattern(indexPattern);
+      const indexPatternCopy = skipType
+        ? ({ ...indexPattern, type: undefined } as IndexPattern)
+        : indexPattern;
+
+      const fields = await this.getFieldsForIndexPattern(indexPatternCopy);
       const scripted = indexPattern.getScriptedFields().map((field) => field.spec);
       indexPattern.fields.replaceAll([...fields, ...scripted]);
     } catch (err) {
@@ -478,6 +509,19 @@ export class IndexPatternsService {
     return indexPattern;
   };
 
+  /**
+   * Get an index pattern by title if cached
+   * @param id
+   */
+
+  getByTitle = (title: string, ignoreErrors: boolean = false): IndexPattern => {
+    const indexPattern = indexPatternCache.getByTitle(title);
+    if (!indexPattern && !ignoreErrors) {
+      throw new MissingIndexPatternError(`Missing index pattern: ${title}`);
+    }
+    return indexPattern;
+  };
+
   migrate(indexPattern: IndexPattern, newTitle: string) {
     return this.savedObjectsClient
       .update<IndexPatternAttributes>(
@@ -557,7 +601,11 @@ export class IndexPatternsService {
    */
 
   async createSavedObject(indexPattern: IndexPattern, override = false) {
-    const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
+    const dupe = await findByTitle(
+      this.savedObjectsClient,
+      indexPattern.title,
+      indexPattern.dataSourceRef?.id
+    );
     if (dupe) {
       if (override) {
         await this.delete(dupe.id);

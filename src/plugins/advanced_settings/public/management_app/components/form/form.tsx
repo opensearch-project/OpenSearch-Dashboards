@@ -47,8 +47,9 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
 import { i18n } from '@osd/i18n';
+import { DocLinksStart, ToastsStart } from 'opensearch-dashboards/public';
+import { createPortal } from 'react-dom';
 import { toMountPoint } from '../../../../../opensearch_dashboards_react/public';
-import { DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
 import { getCategoryName } from '../../lib';
 import { Field, getEditableValue } from '../field';
@@ -256,7 +257,7 @@ export class Form extends PureComponent<FormProps> {
   renderCategory(category: Category, settings: FieldSetting[], totalSettings: number) {
     return (
       <Fragment key={category}>
-        <EuiPanel paddingSize="l">
+        <EuiPanel paddingSize="l" id={category}>
           <EuiForm>
             <EuiText>
               <EuiFlexGroup alignItems="baseline">
@@ -336,63 +337,69 @@ export class Form extends PureComponent<FormProps> {
   };
 
   renderBottomBar = () => {
-    const areChangesInvalid = this.areChangesInvalid();
-    return (
-      <EuiBottomBar data-test-subj="advancedSetting-bottomBar">
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          responsive={false}
-          gutterSize="s"
-        >
-          <EuiFlexItem grow={false} className="mgtAdvancedSettingsForm__unsavedCount">
-            <p id="aria-describedby.countOfUnsavedSettings">{this.renderCountOfUnsaved()}</p>
-          </EuiFlexItem>
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="ghost"
-              size="s"
-              iconType="cross"
-              onClick={this.clearAllUnsaved}
-              aria-describedby="aria-describedby.countOfUnsavedSettings"
-              data-test-subj="advancedSetting-cancelButton"
-            >
-              {i18n.translate('advancedSettings.form.cancelButtonLabel', {
-                defaultMessage: 'Cancel changes',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              content={
-                areChangesInvalid &&
-                i18n.translate('advancedSettings.form.saveButtonTooltipWithInvalidChanges', {
-                  defaultMessage: 'Fix invalid settings before saving.',
-                })
-              }
-            >
-              <EuiButton
-                className="mgtAdvancedSettingsForm__button"
-                disabled={areChangesInvalid}
-                color="secondary"
-                fill
+    try {
+      const areChangesInvalid = this.areChangesInvalid();
+      const bottomBar = (
+        <EuiBottomBar data-test-subj="advancedSetting-bottomBar" position="sticky">
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="center"
+            responsive={false}
+            gutterSize="s"
+          >
+            <EuiFlexItem grow={false} className="mgtAdvancedSettingsForm__unsavedCount">
+              <p id="aria-describedby.countOfUnsavedSettings">{this.renderCountOfUnsaved()}</p>
+            </EuiFlexItem>
+            <EuiFlexItem />
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                color="ghost"
                 size="s"
-                iconType="check"
-                onClick={this.saveAll}
+                iconType="cross"
+                onClick={this.clearAllUnsaved}
                 aria-describedby="aria-describedby.countOfUnsavedSettings"
-                isLoading={this.state.loading}
-                data-test-subj="advancedSetting-saveButton"
+                data-test-subj="advancedSetting-cancelButton"
               >
-                {i18n.translate('advancedSettings.form.saveButtonLabel', {
-                  defaultMessage: 'Save changes',
+                {i18n.translate('advancedSettings.form.cancelButtonLabel', {
+                  defaultMessage: 'Cancel changes',
                 })}
-              </EuiButton>
-            </EuiToolTip>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiBottomBar>
-    );
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  areChangesInvalid &&
+                  i18n.translate('advancedSettings.form.saveButtonTooltipWithInvalidChanges', {
+                    defaultMessage: 'Fix invalid settings before saving.',
+                  })
+                }
+              >
+                <EuiButton
+                  className="mgtAdvancedSettingsForm__button"
+                  disabled={areChangesInvalid}
+                  color="secondary"
+                  fill
+                  size="s"
+                  iconType="check"
+                  onClick={this.saveAll}
+                  aria-describedby="aria-describedby.countOfUnsavedSettings"
+                  isLoading={this.state.loading}
+                  data-test-subj="advancedSetting-saveButton"
+                >
+                  {i18n.translate('advancedSettings.form.saveButtonLabel', {
+                    defaultMessage: 'Save changes',
+                  })}
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiBottomBar>
+      );
+
+      return createPortal(bottomBar, document.getElementById('app-wrapper')!);
+    } catch (e) {
+      return null;
+    }
   };
 
   render() {
@@ -400,12 +407,6 @@ export class Form extends PureComponent<FormProps> {
     const { visibleSettings, categories, categoryCounts, clearQuery } = this.props;
     const currentCategories: Category[] = [];
     const hasUnsavedChanges = !isEmpty(unsavedChanges);
-
-    if (hasUnsavedChanges) {
-      document.body.classList.add('osdBody--mgtAdvancedSettingsHasBottomBar');
-    } else {
-      document.body.classList.remove('osdBody--mgtAdvancedSettingsHasBottomBar');
-    }
 
     categories.forEach((category) => {
       if (visibleSettings[category] && visibleSettings[category].length) {

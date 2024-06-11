@@ -27,10 +27,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import { resolve, join } from 'path';
+import { ListrContext } from '.';
 import { I18N_RC } from '../constants';
-import { ErrorReporter, checkConfigNamespacePrefix, arrayify } from '..';
+import { checkConfigNamespacePrefix, arrayify } from '..';
 
 export function checkConfigs(additionalConfigPaths: string | string[] = []) {
   const root = join(__dirname, '../../../../');
@@ -39,7 +39,7 @@ export function checkConfigs(additionalConfigPaths: string | string[] = []) {
   const configPaths = [opensearchDashboardsRC, ...arrayify(additionalConfigPaths)];
 
   return configPaths.map((configPath) => ({
-    task: async (context: { reporter: ErrorReporter }) => {
+    task: async (context: ListrContext) => {
       try {
         await checkConfigNamespacePrefix(configPath);
       } catch (err) {

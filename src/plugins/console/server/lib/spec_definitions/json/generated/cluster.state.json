@@ -38,6 +38,6 @@
       ],
       "indices": null
     },
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-state.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cluster-api/index/"
   }
 }

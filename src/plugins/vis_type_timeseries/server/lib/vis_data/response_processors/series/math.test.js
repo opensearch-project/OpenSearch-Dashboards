@@ -30,6 +30,7 @@
 
 import { mathAgg } from './math';
 import { stdMetric } from './std_metric';
+import { MATH_THROW_MSG } from './evaluate';
 
 describe('math(resp, panel, series)', () => {
   let panel;
@@ -145,7 +146,7 @@ describe('math(resp, panel, series)', () => {
     );
   });
 
-  test('throws on actual tinymath expression errors', () => {
+  test('throws on actual math.js expression errors', () => {
     series.metrics[2].script = 'notExistingFn(params.a)';
     expect(() =>
       stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
@@ -155,5 +156,53 @@ describe('math(resp, panel, series)', () => {
     expect(() =>
       stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
     ).toThrow();
+  });
+
+  test('throws on math.js disabled function: import', () => {
+    series.metrics[2].script = 'import({ pi: 3.14 }, { override: true })';
+
+    expect(() =>
+      stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
+    ).toThrow(MATH_THROW_MSG);
+  });
+
+  test('throws on math.js disabled function: createUnit', () => {
+    series.metrics[2].script = 'createUnit("foo")';
+
+    expect(() =>
+      stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
+    ).toThrow(MATH_THROW_MSG);
+  });
+
+  test('throws on math.js disabled function: evaluate', () => {
+    series.metrics[2].script = 'evaluate("(2+3)/4") ';
+
+    expect(() =>
+      stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
+    ).toThrow(MATH_THROW_MSG);
+  });
+
+  test('throws on math.js disabled function: parse', () => {
+    series.metrics[2].script = '[h = parse("x^2 + x")]';
+
+    expect(() =>
+      stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
+    ).toThrow(MATH_THROW_MSG);
+  });
+
+  test('throws on math.js disabled function: simplify', () => {
+    series.metrics[2].script = 'simplify("2 * 1 * x ^ (2 - 1)")';
+
+    expect(() =>
+      stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
+    ).toThrow(MATH_THROW_MSG);
+  });
+
+  test('throws on math.js disabled function: derivative', () => {
+    series.metrics[2].script = 'derivative("x^2", "x")';
+
+    expect(() =>
+      stdMetric(resp, panel, series)(mathAgg(resp, panel, series)((results) => results))([])
+    ).toThrow(MATH_THROW_MSG);
   });
 });

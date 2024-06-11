@@ -10,7 +10,8 @@ import {
   ResponseError,
 } from '@opensearch-project/opensearch/lib/errors';
 import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
-import { createDataSourceError, DataSourceError } from './error';
+import { createDataSourceError } from './error';
+import { DataSourceError } from '../../common/data_sources';
 import { errors as LegacyErrors } from 'elasticsearch';
 
 const createApiResponseError = ({
@@ -116,5 +117,28 @@ describe('CreateDataSourceError', () => {
     expect(createDataSourceError(new LegacyErrors.ConnectionFault())).toEqual(
       new DataSourceError(new Error('dummy'), 'Connection Failure', 400)
     );
+  });
+
+  it('create data source error should be casted to a 400 DataSourceError', () => {
+    const error = new ResponseError({
+      statusCode: 401,
+      body: {
+        error: {
+          type: 'index_not_found_exception',
+        },
+      },
+      warnings: [],
+      headers: {
+        'WWW-Authenticate': 'content',
+      },
+      meta: {} as any,
+    });
+
+    const actual = new DataSourceError(error);
+
+    expect(actual).toMatchObject({
+      statusCode: 401,
+      body: { error: { type: 'index_not_found_exception' } },
+    });
   });
 });

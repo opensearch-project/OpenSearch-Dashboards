@@ -1,5 +1,6 @@
 extends:
   - stylelint-config-standard-scss
+  - '@osd/stylelint-config'
 rules:
   # while we still use node-sass, only legacy rgb() notation is allowed
   color-function-notation: "legacy"

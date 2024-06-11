@@ -35,6 +35,7 @@ import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
+import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import { StartDependencies, SavedObjectsManagementPluginStart } from '../plugin';
 import { ISavedObjectsManagementServiceRegistry } from '../services';
@@ -44,6 +45,8 @@ interface MountParams {
   core: CoreSetup<StartDependencies, SavedObjectsManagementPluginStart>;
   serviceRegistry: ISavedObjectsManagementServiceRegistry;
   mountParams: ManagementAppMountParams;
+  dataSourceEnabled: boolean;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 let allowedObjectTypes: string[] | undefined;
@@ -58,8 +61,10 @@ export const mountManagementSection = async ({
   core,
   mountParams,
   serviceRegistry,
+  dataSourceEnabled,
+  dataSourceManagement,
 }: MountParams) => {
-  const [coreStart, { data }, pluginStart] = await core.getStartServices();
+  const [coreStart, { data, uiActions }, pluginStart] = await core.getStartServices();
   const { element, history, setBreadcrumbs } = mountParams;
   if (allowedObjectTypes === undefined) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
@@ -88,6 +93,7 @@ export const mountManagementSection = async ({
               <Suspense fallback={<EuiLoadingSpinner />}>
                 <SavedObjectsEditionPage
                   coreStart={coreStart}
+                  uiActionsStart={uiActions}
                   serviceRegistry={serviceRegistry}
                   setBreadcrumbs={setBreadcrumbs}
                   history={history}
@@ -107,6 +113,8 @@ export const mountManagementSection = async ({
                   namespaceRegistry={pluginStart.namespaces}
                   allowedTypes={allowedObjectTypes}
                   setBreadcrumbs={setBreadcrumbs}
+                  dataSourceEnabled={dataSourceEnabled}
+                  dataSourceManagement={dataSourceManagement}
                 />
               </Suspense>
             </RedirectToHomeIfUnauthorized>

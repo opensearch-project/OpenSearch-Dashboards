@@ -39,6 +39,19 @@ export const savedObjectsMigrationConfig = {
     scrollDuration: schema.string({ defaultValue: '15m' }),
     pollInterval: schema.number({ defaultValue: 1500 }),
     skip: schema.boolean({ defaultValue: false }),
+    delete: schema.object(
+      {
+        enabled: schema.boolean({ defaultValue: false }),
+        types: schema.arrayOf(schema.string(), { defaultValue: [] }),
+      },
+      {
+        validate(value) {
+          if (value.enabled === true && value.types.length === 0) {
+            return 'delete types cannot be empty when delete is enabled';
+          }
+        },
+      }
+    ),
   }),
 };
 
@@ -49,6 +62,9 @@ export const savedObjectsConfig = {
   schema: schema.object({
     maxImportPayloadBytes: schema.byteSize({ defaultValue: 26214400 }),
     maxImportExportSize: schema.byteSize({ defaultValue: 10000 }),
+    permission: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+    }),
   }),
 };
 

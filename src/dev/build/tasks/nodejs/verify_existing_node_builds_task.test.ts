@@ -28,15 +28,10 @@
  * under the License.
  */
 
-import Path from 'path';
-import Fs from 'fs';
-
-import { REPO_ROOT } from '@osd/utils';
 import {
   ToolingLog,
   ToolingLogCollectingWriter,
   createAnyInstanceSerializer,
-  createRecursiveSerializer,
 } from '@osd/dev-utils';
 
 import { Config, Platform } from '../../lib';
@@ -48,7 +43,9 @@ jest.mock('../../lib/fs');
 jest.mock('../../lib/get_build_number');
 
 const { getNodeShasums } = jest.requireMock('./node_shasums');
-const { getNodeDownloadInfo } = jest.requireMock('./node_download_info');
+const { getNodeDownloadInfo, getLatestNodeVersion, getRequiredVersion } = jest.requireMock(
+  './node_download_info'
+);
 const { getFileHash } = jest.requireMock('../../lib/fs');
 
 const log = new ToolingLog();
@@ -58,14 +55,6 @@ log.setWriters([testWriter]);
 expect.addSnapshotSerializer(createAnyInstanceSerializer(Config));
 expect.addSnapshotSerializer(createAnyInstanceSerializer(ToolingLog));
 
-const nodeVersion = Fs.readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
-expect.addSnapshotSerializer(
-  createRecursiveSerializer(
-    (s) => typeof s === 'string' && s.includes(nodeVersion),
-    (s) => s.split(nodeVersion).join('<node version>')
-  )
-);
-
 async function setup(actualShaSums?: Record<string, string>) {
   const config = await Config.create({
     isRelease: true,
@@ -74,6 +63,8 @@ async function setup(actualShaSums?: Record<string, string>) {
       linux: false,
       linuxArm: false,
       darwin: false,
+      darwinArm: false,
+      windows: false,
     },
   });
 
@@ -89,8 +80,13 @@ async function setup(actualShaSums?: Record<string, string>) {
     return {
       downloadPath: `${platform.getName()}:${platform.getNodeArch()}:downloadPath`,
       downloadName: `${platform.getName()}:${platform.getNodeArch()}:downloadName`,
+      version: '<node version>',
     };
   });
+
+  getLatestNodeVersion.mockReturnValue('<node version>');
+
+  getRequiredVersion.mockReturnValue('<node version>');
 
   getFileHash.mockImplementation((downloadPath: string) => {
     if (actualShaSums?.[downloadPath]) {
@@ -125,6 +121,7 @@ it('checks shasums for each downloaded node build', async () => {
         Object {
           "type": "return",
           "value": Object {
+            "darwin:darwin-arm64:downloadName": "valid shasum",
             "darwin:darwin-x64:downloadName": "valid shasum",
             "linux:linux-arm64:downloadName": "valid shasum",
             "linux:linux-x64:downloadName": "valid shasum",
@@ -164,6 +161,14 @@ it('checks shasums for each downloaded node build', async () => {
         Array [
           <Config>,
           Platform {
+            "architecture": "arm64",
+            "buildName": "darwin-arm64",
+            "name": "darwin",
+          },
+        ],
+        Array [
+          <Config>,
+          Platform {
             "architecture": "x64",
             "buildName": "windows-x64",
             "name": "win32",
@@ -176,6 +181,7 @@ it('checks shasums for each downloaded node build', async () => {
           "value": Object {
             "downloadName": "linux:linux-x64:downloadName",
             "downloadPath": "linux:linux-x64:downloadPath",
+            "version": "<node version>",
           },
         },
         Object {
@@ -183,6 +189,7 @@ it('checks shasums for each downloaded node build', async () => {
           "value": Object {
             "downloadName": "linux:linux-arm64:downloadName",
             "downloadPath": "linux:linux-arm64:downloadPath",
+            "version": "<node version>",
           },
         },
         Object {
@@ -190,6 +197,15 @@ it('checks shasums for each downloaded node build', async () => {
           "value": Object {
             "downloadName": "darwin:darwin-x64:downloadName",
             "downloadPath": "darwin:darwin-x64:downloadPath",
+            "version": "<node version>",
+          },
+        },
+        Object {
+          "type": "return",
+          "value": Object {
+            "downloadName": "darwin:darwin-arm64:downloadName",
+            "downloadPath": "darwin:darwin-arm64:downloadPath",
+            "version": "<node version>",
           },
         },
         Object {
@@ -197,6 +213,7 @@ it('checks shasums for each downloaded node build', async () => {
           "value": Object {
             "downloadName": "win32:win32-x64:downloadName",
             "downloadPath": "win32:win32-x64:downloadPath",
+            "version": "<node version>",
           },
         },
       ],
@@ -218,11 +235,19 @@ it('checks shasums for each downloaded node build', async () => {
           "sha256",
         ],
         Array [
+          "darwin:darwin-arm64:downloadPath",
+          "sha256",
+        ],
+        Array [
           "win32:win32-x64:downloadPath",
           "sha256",
         ],
       ],
       "results": Array [
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
         Object {
           "type": "return",
           "value": "valid shasum",

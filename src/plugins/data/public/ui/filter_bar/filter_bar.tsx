@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { i18n } from '@osd/i18n';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -38,6 +39,7 @@ import {
 import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import React, { useState } from 'react';
+import { stringify } from '@osd/std';
 
 import { FilterEditor } from './filter_editor';
 import { FilterItem } from './filter_item';
@@ -111,6 +113,9 @@ function FilterBarUI(props: Props) {
         size="xs"
         onClick={() => setIsAddFilterPopoverOpen(true)}
         data-test-subj="addFilter"
+        aria-label={i18n.translate('data.filter.filterBar.addFilterButtonLabel', {
+          defaultMessage: 'Add filter',
+        })}
         className="globalFilterBar__addButton"
       >
         +{' '}
@@ -143,7 +148,7 @@ function FilterBarUI(props: Props) {
                     indexPatterns={props.indexPatterns}
                     onSubmit={onAdd}
                     onCancel={() => setIsAddFilterPopoverOpen(false)}
-                    key={JSON.stringify(newFilter)}
+                    key={stringify(newFilter)}
                   />
                 </EuiFlexItem>
               </div>

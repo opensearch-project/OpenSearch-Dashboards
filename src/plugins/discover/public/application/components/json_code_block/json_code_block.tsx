@@ -31,6 +31,7 @@
 import React from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { stringify } from '@osd/std';
 import { DocViewRenderProps } from '../../doc_views/doc_views_types';
 
 export function JsonCodeBlock({ hit }: DocViewRenderProps) {
@@ -39,7 +40,7 @@ export function JsonCodeBlock({ hit }: DocViewRenderProps) {
   });
   return (
     <EuiCodeBlock aria-label={label} language="json" isCopyable paddingSize="s">
-      {JSON.stringify(hit, null, 2)}
+      {stringify(hit, null, 2)}
     </EuiCodeBlock>
   );
 }

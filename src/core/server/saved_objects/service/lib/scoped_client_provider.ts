@@ -31,8 +31,31 @@
 import { PriorityCollection } from './priority_collection';
 import { SavedObjectsClientContract } from '../../types';
 import { SavedObjectsRepositoryFactory } from '../../saved_objects_service';
-import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
+import {
+  ISavedObjectTypeRegistry,
+  SavedObjectTypeRegistry,
+} from '../../saved_objects_type_registry';
 import { OpenSearchDashboardsRequest } from '../../../http';
+import { ISavedObjectsRepository } from './repository';
+import { IOpenSearchDashboardsMigrator } from '../../migrations';
+
+/**
+ * Options passed to each SavedObjectRepositoryFactoryProvider to aid in creating the repository instance.
+ * @public
+ */
+export interface SavedObjectsRepositoryOptions {
+  migrator: IOpenSearchDashboardsMigrator;
+  typeRegistry: SavedObjectTypeRegistry;
+  includedHiddenTypes: string[];
+}
+
+/**
+ * Provider to invoke to a factory function for creating ISavedObjectRepository {@link ISavedObjectRepository} instances.
+ * @public
+ */
+export type SavedObjectRepositoryFactoryProvider = (
+  options: SavedObjectsRepositoryOptions
+) => ISavedObjectsRepository;
 
 /**
  * Options passed to each SavedObjectsClientWrapperFactory to aid in creating the wrapper instance.

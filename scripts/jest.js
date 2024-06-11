@@ -38,7 +38,7 @@
 //
 //     node scripts/jest --coverage
 //
-// See all cli options in https://facebook.github.io/jest/docs/cli.html
+// See all cli options in https://jestjs.io/docs/cli
 
 var resolve = require('path').resolve;
 process.argv.push('--config', resolve(__dirname, '../src/dev/jest/config.js'));

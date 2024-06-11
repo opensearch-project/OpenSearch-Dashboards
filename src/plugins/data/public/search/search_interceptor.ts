@@ -32,6 +32,7 @@ import { get, trimEnd, debounce } from 'lodash';
 import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'opensearch-dashboards/public';
+import { stringify } from '@osd/std';
 import {
   getCombinedSignal,
   AbortError,
@@ -39,6 +40,7 @@ import {
   IOpenSearchDashboardsSearchResponse,
   ISearchOptions,
   OPENSEARCH_SEARCH_STRATEGY,
+  OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY,
 } from '../../common';
 import { SearchUsageCollector } from './collectors';
 import { SearchTimeoutError, PainlessError, isPainlessError } from './errors';
@@ -113,20 +115,40 @@ export class SearchInterceptor {
   protected runSearch(
     request: IOpenSearchDashboardsSearchRequest,
     signal: AbortSignal,
-    strategy?: string
+    strategy?: string,
+    withLongNumeralsSupport?: boolean
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
     const path = trimEnd(
-      `/internal/search/${strategy || OPENSEARCH_SEARCH_STRATEGY}/${id || ''}`,
+      `/internal/search/${
+        strategy ||
+        (withLongNumeralsSupport
+          ? OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY
+          : OPENSEARCH_SEARCH_STRATEGY)
+      }/${id || ''}`,
       '/'
     );
-    const body = JSON.stringify(searchRequest);
+    /* When long-numerals support is not explicitly requested, it indicates that the response handler
+     * is not capable of handling BigInts. Ideally, because this is the outward request, that wouldn't
+     * matter and `body = stringify(searchRequest)` would be the best option. However, to maintain the
+     * existing behavior, we use @osd/std/json.stringify only when long-numerals support is explicitly
+     * requested. Otherwise, JSON.stringify is used with imprecise numbers for BigInts.
+     *
+     * ToDo: With OSD v3, change to `body = stringify(searchRequest)`.
+     */
+    const body = withLongNumeralsSupport
+      ? stringify(searchRequest)
+      : JSON.stringify(searchRequest, (key: string, value: any) =>
+          typeof value === 'bigint' ? Number(value) : value
+        );
+
     return from(
       this.deps.http.fetch({
         method: 'POST',
         path,
         body,
         signal,
+        withLongNumeralsSupport,
       })
     );
   }
@@ -214,7 +236,12 @@ export class SearchInterceptor {
       });
       this.pendingCount$.next(this.pendingCount$.getValue() + 1);
 
-      return this.runSearch(request, combinedSignal, options?.strategy).pipe(
+      return this.runSearch(
+        request,
+        combinedSignal,
+        options?.strategy,
+        options?.withLongNumeralsSupport
+      ).pipe(
         catchError((e: any) => {
           return throwError(
             this.handleSearchError(e, request, timeoutSignal, options?.abortSignal)

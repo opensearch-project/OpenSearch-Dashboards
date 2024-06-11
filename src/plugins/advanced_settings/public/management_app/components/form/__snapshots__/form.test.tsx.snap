@@ -4,6 +4,7 @@ exports[`Form should not render no settings message when instructed not to 1`] =
 <Fragment>
   <div>
     <EuiPanel
+      id="general"
       paddingSize="l"
     >
       <EuiForm>
@@ -135,6 +136,7 @@ exports[`Form should not render no settings message when instructed not to 1`] =
       size="l"
     />
     <EuiPanel
+      id="dashboard"
       paddingSize="l"
     >
       <EuiForm>
@@ -193,6 +195,7 @@ exports[`Form should render no settings message when there are no settings 1`] =
 <Fragment>
   <div>
     <EuiPanel
+      id="general"
       paddingSize="l"
     >
       <EuiForm>
@@ -324,6 +327,7 @@ exports[`Form should render no settings message when there are no settings 1`] =
       size="l"
     />
     <EuiPanel
+      id="dashboard"
       paddingSize="l"
     >
       <EuiForm>
@@ -382,6 +386,7 @@ exports[`Form should render normally 1`] = `
 <Fragment>
   <div>
     <EuiPanel
+      id="general"
       paddingSize="l"
     >
       <EuiForm>
@@ -513,6 +518,7 @@ exports[`Form should render normally 1`] = `
       size="l"
     />
     <EuiPanel
+      id="dashboard"
       paddingSize="l"
     >
       <EuiForm>
@@ -571,6 +577,7 @@ exports[`Form should render read-only when saving is disabled 1`] = `
 <Fragment>
   <div>
     <EuiPanel
+      id="general"
       paddingSize="l"
     >
       <EuiForm>
@@ -702,6 +709,7 @@ exports[`Form should render read-only when saving is disabled 1`] = `
       size="l"
     />
     <EuiPanel
+      id="dashboard"
       paddingSize="l"
     >
       <EuiForm>

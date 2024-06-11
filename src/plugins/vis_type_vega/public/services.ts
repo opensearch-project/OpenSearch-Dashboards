@@ -28,17 +28,31 @@
  * under the License.
  */
 
-import { CoreStart, NotificationsStart, IUiSettingsClient } from 'src/core/public';
+import {
+  CoreStart,
+  NotificationsStart,
+  IUiSettingsClient,
+  SavedObjectsStart,
+} from 'src/core/public';
 
 import { DataPublicPluginStart } from '../../data/public';
 import { createGetterSetter } from '../../opensearch_dashboards_utils/public';
 import { MapsLegacyConfig } from '../../maps_legacy/config';
+import { UiActionsStart } from '../../ui_actions/public';
 
 export const [getData, setData] = createGetterSetter<DataPublicPluginStart>('Data');
+export const [getDataSourceEnabled, setDataSourceEnabled] = createGetterSetter<{
+  enabled: boolean;
+}>('DataSource');
+export const [getSavedObjectsClient, setSavedObjectsClient] = createGetterSetter<SavedObjectsStart>(
+  'SavedObjects'
+);
 
 export const [getNotifications, setNotifications] = createGetterSetter<NotificationsStart>(
   'Notifications'
 );
+
+export const [getUiActions, setUiActions] = createGetterSetter<UiActionsStart>('UIActions');
 
 export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 

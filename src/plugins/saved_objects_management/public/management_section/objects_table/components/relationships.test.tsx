@@ -243,6 +243,55 @@ describe('Relationships', () => {
     expect(component).toMatchSnapshot();
   });
 
+  it('should render augment-vis objects normally', async () => {
+    const props: RelationshipsProps = {
+      goInspectObject: () => {},
+      canGoInApp: () => true,
+      basePath: httpServiceMock.createSetupContract().basePath,
+      getRelationships: jest.fn().mockImplementation(() => [
+        {
+          type: 'visualization',
+          id: '1',
+          relationship: 'child',
+          meta: {
+            title: 'MyViz',
+            icon: 'visualizeApp',
+            editUrl: '/management/opensearch-dashboards/objects/savedVisualizations/1',
+            inAppUrl: {
+              path: '/edit/1',
+              uiCapabilitiesPath: 'visualize.show',
+            },
+          },
+        },
+      ]),
+      savedObject: {
+        id: '1',
+        type: 'augment-vis',
+        attributes: {},
+        references: [],
+        meta: {
+          title: 'MyAugmentVisObject',
+          icon: 'savedObject',
+          editUrl: '/management/opensearch-dashboards/objects/savedAugmentVis/1',
+        },
+      },
+      close: jest.fn(),
+    };
+
+    const component = shallowWithI18nProvider(<Relationships {...props} />);
+
+    // Make sure we are showing loading
+    expect(component.find('EuiLoadingSpinner').length).toBe(1);
+
+    // Ensure all promises resolve
+    await new Promise((resolve) => process.nextTick(resolve));
+    // Ensure the state changes are reflected
+    component.update();
+
+    expect(props.getRelationships).toHaveBeenCalled();
+    expect(component).toMatchSnapshot();
+  });
+
   it('should render dashboards normally', async () => {
     const props: RelationshipsProps = {
       goInspectObject: () => {},

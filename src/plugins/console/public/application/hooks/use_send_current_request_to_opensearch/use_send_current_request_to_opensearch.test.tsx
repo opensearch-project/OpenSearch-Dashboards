@@ -74,7 +74,10 @@ describe('useSendCurrentRequestToOpenSearch', () => {
 
     const { result } = renderHook(() => useSendCurrentRequestToOpenSearch(), { wrapper: contexts });
     await act(() => result.current());
-    expect(sendRequestToOpenSearch).toHaveBeenCalledWith({ requests: ['test'] });
+    expect(sendRequestToOpenSearch).toHaveBeenCalledWith({
+      requests: ['test'],
+      http: mockContextValue.services.http,
+    });
 
     // Second call should be the request success
     const [, [requestSucceededCall]] = (dispatch as jest.Mock).mock.calls;

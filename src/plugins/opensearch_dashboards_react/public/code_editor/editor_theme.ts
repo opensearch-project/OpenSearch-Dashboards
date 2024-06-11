@@ -122,6 +122,7 @@ export function createTheme(
   };
 }
 
+// TODO: Refactor to use packages/osd-ui-shared-deps/theme.ts: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5661
 const DARK_THEME = createTheme(darkTheme, '#343551');
 const LIGHT_THEME = createTheme(lightTheme, '#E3E4ED');
 

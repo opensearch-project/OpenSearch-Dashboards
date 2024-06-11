@@ -36,6 +36,7 @@ import { SavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { IndexMigrator } from './index_migrator';
 import { MigrationOpts } from './migration_context';
 import { loggingSystemMock } from '../../../logging/logging_system.mock';
+import { configMock } from '../../../config/mocks';
 
 describe('IndexMigrator', () => {
   let testOpts: jest.Mocked<MigrationOpts> & {
@@ -57,6 +58,153 @@ describe('IndexMigrator', () => {
       },
       serializer: new SavedObjectsSerializer(new SavedObjectTypeRegistry()),
     };
+  });
+
+  test('creates the index when permission control for saved objects is enabled', async () => {
+    const { client } = testOpts;
+
+    testOpts.mappingProperties = { foo: { type: 'long' } as any };
+    const rawConfig = configMock.create();
+    rawConfig.get.mockImplementation((path) => {
+      if (path === 'savedObjects.permission.enabled') {
+        return true;
+      } else {
+        return false;
+      }
+    });
+    testOpts.opensearchDashboardsRawConfig = rawConfig;
+
+    withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    expect(client.indices.create).toHaveBeenCalledWith({
+      body: {
+        mappings: {
+          dynamic: 'strict',
+          _meta: {
+            migrationMappingPropertyHashes: {
+              foo: '18c78c995965207ed3f6e7fc5c6e55fe',
+              migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+              namespace: '2f4316de49999235636386fe51dc06c1',
+              namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
+              permissions: 'f3ad308fa2a0c34007eb9ad461d6294a',
+              references: '7997cf5a56cc02bdc9c93361bde732b0',
+              type: '2f4316de49999235636386fe51dc06c1',
+              updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+            },
+          },
+          properties: {
+            foo: { type: 'long' },
+            migrationVersion: { dynamic: 'true', type: 'object' },
+            namespace: { type: 'keyword' },
+            namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
+            type: { type: 'keyword' },
+            updated_at: { type: 'date' },
+            permissions: {
+              properties: {
+                library_read: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+                library_write: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+                read: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+                write: {
+                  properties: {
+                    users: { type: 'keyword' },
+                    groups: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+            references: {
+              type: 'nested',
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+      },
+      index: '.kibana_1',
+    });
+  });
+
+  test('creates the index when workspaces feature flag is enabled', async () => {
+    const { client } = testOpts;
+
+    testOpts.mappingProperties = { foo: { type: 'long' } as any };
+    const rawConfig = configMock.create();
+    rawConfig.get.mockImplementation((path) => {
+      if (path === 'workspace.enabled') {
+        return true;
+      } else {
+        return false;
+      }
+    });
+    testOpts.opensearchDashboardsRawConfig = rawConfig;
+
+    withIndex(client, { index: { statusCode: 404 }, alias: { statusCode: 404 } });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    expect(client.indices.create).toHaveBeenCalledWith({
+      body: {
+        mappings: {
+          dynamic: 'strict',
+          _meta: {
+            migrationMappingPropertyHashes: {
+              foo: '18c78c995965207ed3f6e7fc5c6e55fe',
+              migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+              namespace: '2f4316de49999235636386fe51dc06c1',
+              namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
+              references: '7997cf5a56cc02bdc9c93361bde732b0',
+              type: '2f4316de49999235636386fe51dc06c1',
+              updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+              workspaces: '2f4316de49999235636386fe51dc06c1',
+            },
+          },
+          properties: {
+            foo: { type: 'long' },
+            migrationVersion: { dynamic: 'true', type: 'object' },
+            namespace: { type: 'keyword' },
+            namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
+            type: { type: 'keyword' },
+            updated_at: { type: 'date' },
+            references: {
+              type: 'nested',
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
+              },
+            },
+            workspaces: { type: 'keyword' },
+          },
+        },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+      },
+      index: '.kibana_1',
+    });
   });
 
   test('creates the index if it does not exist', async () => {
@@ -264,6 +412,228 @@ describe('IndexMigrator', () => {
           },
           properties: {
             unknown_complex_field: { dynamic: false, properties: {} },
+            foo: { type: 'text' },
+            migrationVersion: { dynamic: 'true', type: 'object' },
+            namespace: { type: 'keyword' },
+            namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
+            type: { type: 'keyword' },
+            updated_at: { type: 'date' },
+            references: {
+              type: 'nested',
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+      },
+      index: '.kibana_2',
+    });
+  });
+
+  test('deletes saved objects by type if configured', async () => {
+    const { client } = testOpts;
+
+    const deleteType = 'delete_type';
+
+    const rawConfig = configMock.create();
+    rawConfig.get.mockImplementation((path) => {
+      if (path === 'migrations.delete.enabled') {
+        return true;
+      }
+      if (path === 'migrations.delete.types') {
+        return [deleteType];
+      }
+    });
+    testOpts.opensearchDashboardsRawConfig = rawConfig;
+
+    testOpts.mappingProperties = { foo: { type: 'text' } as any };
+
+    withIndex(client, {
+      index: {
+        '.kibana_1': {
+          aliases: {},
+          mappings: {
+            properties: {
+              delete_type: { properties: { type: deleteType } },
+            },
+          },
+        },
+      },
+    });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    expect(client.indices.create).toHaveBeenCalledWith({
+      body: {
+        mappings: {
+          dynamic: 'strict',
+          _meta: {
+            migrationMappingPropertyHashes: {
+              foo: '625b32086eb1d1203564cf85062dd22e',
+              migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+              namespace: '2f4316de49999235636386fe51dc06c1',
+              namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
+              references: '7997cf5a56cc02bdc9c93361bde732b0',
+              type: '2f4316de49999235636386fe51dc06c1',
+              updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+            },
+          },
+          properties: {
+            foo: { type: 'text' },
+            migrationVersion: { dynamic: 'true', type: 'object' },
+            namespace: { type: 'keyword' },
+            namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
+            type: { type: 'keyword' },
+            updated_at: { type: 'date' },
+            references: {
+              type: 'nested',
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+      },
+      index: '.kibana_2',
+    });
+  });
+
+  test('retains saved objects by type if delete is not enabled', async () => {
+    const { client } = testOpts;
+
+    const deleteType = 'delete_type';
+
+    const rawConfig = configMock.create();
+    rawConfig.get.mockImplementation((path) => {
+      if (path === 'migrations.delete.enabled') {
+        return false;
+      }
+      if (path === 'migrations.delete.types') {
+        return [deleteType];
+      }
+    });
+    testOpts.opensearchDashboardsRawConfig = rawConfig;
+
+    testOpts.mappingProperties = { foo: { type: 'text' } as any };
+
+    withIndex(client, {
+      index: {
+        '.kibana_1': {
+          aliases: {},
+          mappings: {
+            properties: {
+              delete_type: { properties: { type: deleteType } },
+            },
+          },
+        },
+      },
+    });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    expect(client.indices.create).toHaveBeenCalledWith({
+      body: {
+        mappings: {
+          dynamic: 'strict',
+          _meta: {
+            migrationMappingPropertyHashes: {
+              foo: '625b32086eb1d1203564cf85062dd22e',
+              migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+              namespace: '2f4316de49999235636386fe51dc06c1',
+              namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
+              references: '7997cf5a56cc02bdc9c93361bde732b0',
+              type: '2f4316de49999235636386fe51dc06c1',
+              updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+            },
+          },
+          properties: {
+            delete_type: { dynamic: false, properties: {} },
+            foo: { type: 'text' },
+            migrationVersion: { dynamic: 'true', type: 'object' },
+            namespace: { type: 'keyword' },
+            namespaces: { type: 'keyword' },
+            originId: { type: 'keyword' },
+            type: { type: 'keyword' },
+            updated_at: { type: 'date' },
+            references: {
+              type: 'nested',
+              properties: {
+                name: { type: 'keyword' },
+                type: { type: 'keyword' },
+                id: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        settings: { number_of_shards: 1, auto_expand_replicas: '0-1' },
+      },
+      index: '.kibana_2',
+    });
+  });
+
+  test('retains saved objects by type if delete types does not exist', async () => {
+    const { client } = testOpts;
+
+    const deleteType = 'delete_type';
+    const retainType = 'retain_type';
+
+    const rawConfig = configMock.create();
+    rawConfig.get.mockImplementation((path) => {
+      if (path === 'migrations.delete.enabled') {
+        return true;
+      }
+      if (path === 'migrations.delete.types') {
+        return [deleteType];
+      }
+    });
+    testOpts.opensearchDashboardsRawConfig = rawConfig;
+
+    testOpts.mappingProperties = { foo: { type: 'text' } as any };
+
+    withIndex(client, {
+      index: {
+        '.kibana_1': {
+          aliases: {},
+          mappings: {
+            properties: {
+              retain_type: { properties: { type: retainType } },
+            },
+          },
+        },
+      },
+    });
+
+    await new IndexMigrator(testOpts).migrate();
+
+    expect(client.indices.create).toHaveBeenCalledWith({
+      body: {
+        mappings: {
+          dynamic: 'strict',
+          _meta: {
+            migrationMappingPropertyHashes: {
+              foo: '625b32086eb1d1203564cf85062dd22e',
+              migrationVersion: '4a1746014a75ade3a714e1db5763276f',
+              namespace: '2f4316de49999235636386fe51dc06c1',
+              namespaces: '2f4316de49999235636386fe51dc06c1',
+              originId: '2f4316de49999235636386fe51dc06c1',
+              references: '7997cf5a56cc02bdc9c93361bde732b0',
+              type: '2f4316de49999235636386fe51dc06c1',
+              updated_at: '00da57df13e94e9d98437d13ace4bfe0',
+            },
+          },
+          properties: {
+            retain_type: { dynamic: false, properties: {} },
             foo: { type: 'text' },
             migrationVersion: { dynamic: 'true', type: 'object' },
             namespace: { type: 'keyword' },

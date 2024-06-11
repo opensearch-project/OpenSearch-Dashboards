@@ -14,7 +14,7 @@
 $osdDefaultFontSize: 14px;
 
 @function canvasToEm($size) {
-  @return #{$size / $osdDefaultFontSize}em;
+  @return #{calc($size / $osdDefaultFontSize)}em;
 }
 
 .osdMarkdown__body {

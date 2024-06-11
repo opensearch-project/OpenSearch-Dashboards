@@ -42,6 +42,7 @@ describe('resolveCapabilities', () => {
       navLinks: {},
       catalogue: {},
       management: {},
+      workspaces: {},
     };
     request = httpServerMock.createOpenSearchDashboardsRequest();
   });
@@ -75,6 +76,7 @@ describe('resolveCapabilities', () => {
         },
         "management": Object {},
         "navLinks": Object {},
+        "workspaces": Object {},
       }
     `);
   });

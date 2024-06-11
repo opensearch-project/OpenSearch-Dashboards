@@ -95,7 +95,10 @@ describe('getOnSave', () => {
             },
           ],
         },
-        "searchSourceFields": Object {},
+        "searchSourceFields": Object {
+          "filter": null,
+          "query": null,
+        },
         "styleState": "",
         "title": "new title",
         "version": 0,

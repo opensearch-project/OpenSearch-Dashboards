@@ -46,6 +46,10 @@ export const visBuilderSavedObjectType: SavedObjectsType = {
         type: 'text',
         index: false,
       },
+      uiState: {
+        type: 'text',
+        index: false,
+      },
       version: { type: 'integer' },
       // Need to add a kibanaSavedObjectMeta attribute here to follow the current saved object flow
       // When we save a saved object, the saved object plugin will extract the search source into two parts

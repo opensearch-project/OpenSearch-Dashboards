@@ -1,0 +1,2 @@
+fix:
+- Fix workspace name duplication check ([#6776](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6776))

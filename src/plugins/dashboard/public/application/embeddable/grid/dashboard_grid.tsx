@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 
 // @ts-ignore
@@ -39,9 +38,9 @@ import classNames from 'classnames';
 import _ from 'lodash';
 import React from 'react';
 import { Subscription } from 'rxjs';
-import ReactGridLayout, { Layout } from 'react-grid-layout';
+import ReactGridLayout, { Layout, ReactGridLayoutProps } from 'react-grid-layout';
+import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../../../embeddable/public';
 import { GridData } from '../../../../common';
-import { ViewMode, EmbeddableChildPanel, EmbeddableStart } from '../../../embeddable_plugin';
 import { DASHBOARD_GRID_COLUMN_COUNT, DASHBOARD_GRID_HEIGHT } from '../dashboard_constants';
 import { DashboardPanelState } from '../types';
 import { withOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -76,9 +75,9 @@ function ResponsiveGrid({
   size: { width: number };
   isViewMode: boolean;
   layout: Layout[];
-  onLayoutChange: () => void;
+  onLayoutChange: ReactGridLayoutProps['onLayoutChange'];
   children: JSX.Element[];
-  maximizedPanelId: string;
+  maximizedPanelId?: string;
   useMargins: boolean;
 }) {
   // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
@@ -171,7 +170,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     let layout;
     try {
       layout = this.buildLayoutFromPanels();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error); // eslint-disable-line no-console
 
       isLayoutInvalid = true;
@@ -283,6 +282,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
           }}
         >
           <EmbeddableChildPanel
+            key={panel.type}
             embeddableId={panel.explicitInput.id}
             container={this.props.container}
             PanelComponent={this.props.PanelComponent}
@@ -304,7 +304,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         isViewMode={isViewMode}
         layout={this.buildLayoutFromPanels()}
         onLayoutChange={this.onLayoutChange}
-        maximizedPanelId={this.state.expandedPanelId}
+        maximizedPanelId={this.state.expandedPanelId!}
         useMargins={this.state.useMargins}
       >
         {this.renderPanels()}

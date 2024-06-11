@@ -238,6 +238,7 @@ export const panel = schema.object({
   ignore_global_filters: numberOptional,
   ignore_global_filter: numberOptional,
   index_pattern: stringRequired,
+  data_source_id: stringOptionalNullable,
   interval: stringRequired,
   isModelInvalid: schema.maybe(schema.boolean()),
   legend_position: stringOptionalNullable,

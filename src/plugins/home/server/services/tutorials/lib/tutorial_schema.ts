@@ -124,7 +124,7 @@ export const tutorialSchema = {
   moduleName: Joi.string(),
   isBeta: Joi.boolean().default(false),
   shortDescription: Joi.string().required(),
-  euiIconType: Joi.string(), // EUI icon type string, one of https://elastic.github.io/eui/#/icons
+  euiIconType: Joi.string(), // OUI icon type string, one of https://oui.opensearch.org/#/display/icons
   longDescription: Joi.string().required(),
   completionTimeMinutes: Joi.number().integer(),
   previewImagePath: Joi.string(),

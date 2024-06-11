@@ -69,6 +69,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<Props> {
           onChange={onChange}
           isClearable={false}
           data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
+          delimiter=","
         />
       </EuiFormRow>
     );

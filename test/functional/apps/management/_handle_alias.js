@@ -67,6 +67,7 @@ export default function ({ getService, getPageObjects }) {
     it('should be able to discover and verify no of hits for alias1', async function () {
       const expectedHitCount = '4';
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('alias1*');
       await retry.try(async function () {
         expect(await PageObjects.discover.getHitCount()).to.be(expectedHitCount);
       });

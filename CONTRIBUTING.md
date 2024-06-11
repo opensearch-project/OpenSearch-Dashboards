@@ -1,6 +1,7 @@
 - [Contributing to OpenSearch](#contributing-to-opensearch-dashboards)
   - [First Things First](#first-things-first)
   - [Ways to Contribute](#ways-to-contribute)
+    - [Join the Discussion](#join-the-discussion)
     - [Bug Reports](#bug-reports)
     - [Feature Requests](#feature-requests)
     - [Documentation Changes](#documentation-changes)
@@ -19,6 +20,11 @@ OpenSearch is a community project that is built and maintained by people just li
 **Only submit your own work** (or work you have sufficient rights to submit) - Please make sure that any code or documentation you submit is your work or you have the rights to submit. We respect the intellectual property rights of others, and as part of contributing, we'll ask you to sign your contribution with a "Developer Certificate of Origin" (DCO) that states you have the rights to submit this work and you understand we'll use your contribution. There's more information about this topic in the [DCO section](#developer-certificate-of-origin).
 
 ## Ways to Contribute
+
+### Join the Discussion
+
+See the [communication guide](COMMUNICATIONS.md)for information on how to join our slack workspace, forum, or developer office hours.
+
 ### Bug Reports
 
 A bug is when software behaves in a way that you didn't expect and the developer didn't intend. To help us understand what's going on, we first want to make sure you're working from the latest version. Please make sure you're testing against the [latest version](https://github.com/opensearch-project/OpenSearch-Dashboards).

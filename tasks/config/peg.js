@@ -34,10 +34,28 @@ module.exports = {
     dest: 'src/plugins/data/common/opensearch_query/kuery/ast/_generated_/kuery.js',
     options: {
       allowedStartRules: ['start', 'Literal'],
+      wrapper: function (src, parser) {
+        return (
+          '/*\n * SPDX-License-Identifier: Apache-2.0\n *\n * The OpenSearch Contributors require contributions made to\n * this file be licensed under the Apache-2.0 license or a\n * compatible open source license.\n *\n * Any modifications Copyright OpenSearch Contributors. See\n * GitHub history for details.\n */\n\n' +
+          'module.exports = ' +
+          parser +
+          ';\n'
+        );
+      },
     },
   },
   timeline_chain: {
-    src: 'src/plugins/vis_type_timeline/public/chain.peg',
-    dest: 'src/plugins/vis_type_timeline/public/_generated_/chain.js',
+    src: 'src/plugins/vis_type_timeline/common/chain.peg',
+    dest: 'src/plugins/vis_type_timeline/common/_generated_/chain.js',
+    options: {
+      wrapper: function (src, parser) {
+        return (
+          '/*\n * SPDX-License-Identifier: Apache-2.0\n *\n * The OpenSearch Contributors require contributions made to\n * this file be licensed under the Apache-2.0 license or a\n * compatible open source license.\n *\n * Any modifications Copyright OpenSearch Contributors. See\n * GitHub history for details.\n */\n\n' +
+          'module.exports = ' +
+          parser +
+          ';\n'
+        );
+      },
+    },
   },
 };

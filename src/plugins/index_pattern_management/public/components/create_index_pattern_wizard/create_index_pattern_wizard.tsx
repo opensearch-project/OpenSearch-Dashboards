@@ -65,7 +65,6 @@ import { DataSourceRef, IndexPatternManagmentContextValue } from '../../types';
 import { MatchedItem } from './types';
 import { DuplicateIndexPatternError, IndexPattern } from '../../../../data/public';
 import { StepDataSource } from './components/step_data_source';
-import { ExperimentalCallout } from '../experimental_callout';
 
 interface CreateIndexPatternWizardState {
   step: StepType;
@@ -281,6 +280,8 @@ export class CreateIndexPatternWizard extends Component<
       currentStepNumber: getCurrentStepNumber(step, this.dataSourceEnabled),
     };
 
+    const hideLocalCluster = this.context.services.hideLocalCluster;
+
     if (isInitiallyLoadingIndices) {
       return <LoadingState />;
     }
@@ -292,7 +293,11 @@ export class CreateIndexPatternWizard extends Component<
         <EuiPageContent>
           {header}
           <EuiHorizontalRule />
-          <StepDataSource goToNextStep={this.goToNextFromDataSource} stepInfo={stepInfo} />
+          <StepDataSource
+            goToNextStep={this.goToNextFromDataSource}
+            stepInfo={stepInfo}
+            hideLocalCluster={hideLocalCluster}
+          />
         </EuiPageContent>
       );
     }
@@ -355,7 +360,6 @@ export class CreateIndexPatternWizard extends Component<
 
     return (
       <>
-        {this.dataSourceEnabled ? <ExperimentalCallout /> : null}
         {content}
         <EuiGlobalToastList
           toasts={this.state.toasts}

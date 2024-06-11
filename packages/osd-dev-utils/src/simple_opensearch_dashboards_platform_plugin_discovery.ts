@@ -28,7 +28,8 @@
  * under the License.
  */
 
-import Path from 'path';
+import { resolve } from 'path';
+import { standardize } from '@osd/cross-platform';
 
 import globby from 'globby';
 
@@ -47,24 +48,23 @@ export function simpleOpenSearchDashboardsPlatformPluginDiscovery(
       ...scanDirs.reduce(
         (acc: string[], dir) => [
           ...acc,
-          Path.resolve(dir, '*/opensearch_dashboards.json'),
-          Path.resolve(dir, '*/*/opensearch_dashboards.json'),
-          Path.resolve(dir, '*/*/*/opensearch_dashboards.json'),
-          Path.resolve(dir, '*/*/*/*/opensearch_dashboards.json'),
-          Path.resolve(dir, '*/*/*/*/*/opensearch_dashboards.json'),
+          resolve(dir, '*/opensearch_dashboards.json'),
+          resolve(dir, '*/!(build)/opensearch_dashboards.json'),
+          resolve(dir, '*/!(build)/*/opensearch_dashboards.json'),
+          resolve(dir, '*/!(build)/*/*/opensearch_dashboards.json'),
+          resolve(dir, '*/!(build)/*/*/*/opensearch_dashboards.json'),
         ],
         []
       ),
-      ...pluginPaths.map((path) => Path.resolve(path, `opensearch_dashboards.json`)),
+      ...pluginPaths.map((path) => resolve(path, `opensearch_dashboards.json`)),
     ])
   );
 
-  const manifestPaths = globby.sync(patterns, { absolute: true }).map((path) =>
-    // absolute paths returned from globby are using normalize or
-    // something so the path separators are `/` even on windows,
-    // Path.resolve solves this
-    Path.resolve(path)
-  );
+  const standardizedPatterns = patterns.map((pattern) => standardize(pattern));
+
+  const manifestPaths = globby
+    .sync(standardizedPatterns, { absolute: true })
+    .map((path) => standardize(resolve(path)));
 
   return manifestPaths.map(parseOpenSearchDashboardsPlatformPlugin);
 }

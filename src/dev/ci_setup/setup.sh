@@ -30,8 +30,8 @@ yarn osd bootstrap --prefer-offline
 ### Download opensearch snapshots
 ###
 echo " -- downloading opensearch snapshot"
-node scripts/opensearch snapshot --download-only;
-node scripts/opensearch snapshot --license=oss --download-only;
+scripts/use_node scripts/opensearch snapshot --download-only;
+scripts/use_node scripts/opensearch snapshot --license=oss --download-only;
 
 
 ###
@@ -64,7 +64,7 @@ fi
 ### rebuild plugin list to ensure it's not out of date
 ###
 echo " -- building plugin list docs"
-node scripts/build_plugin_list_docs
+scripts/use_node scripts/build_plugin_list_docs
 
 ###
 ### verify no git modifications

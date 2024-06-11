@@ -73,7 +73,7 @@ export function HeaderPageProvider({ getService, getPageObjects }: FtrProviderCo
     }
 
     public async clickStackManagement() {
-      await appsMenu.clickLink('Stack Management', { category: 'management' });
+      await appsMenu.clickLink('Dashboards Management', { category: 'management' });
       await this.awaitGlobalLoadingIndicatorHidden();
     }
 

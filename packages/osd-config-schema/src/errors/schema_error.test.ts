@@ -33,11 +33,14 @@ import { SchemaError } from '.';
 
 import { standardize, getRepoRoot } from '@osd/cross-platform';
 
+// ToDo: Remove this logic when Node 14 support is removed
+const isNode14 = process.version.startsWith('v14.');
+
 /**
  * Make all paths in stacktrace relative.
  */
-export const cleanStack = (stack: string) =>
-  stack
+export const cleanStack = (stack: string) => {
+  const result = stack
     .split('\n')
     .filter((line) => !line.includes('node_modules' + sep) && !line.includes('internal/'))
     .map((line) => {
@@ -53,6 +56,11 @@ export const cleanStack = (stack: string) =>
       return line.replace(path, relativePath);
     })
     .join('\n');
+
+  return isNode14
+    ? result.replace(/Error:\s([^\n]+)\n\s*at new ([^ ]+) [^\n]*\n/, '$2: $1\n')
+    : result;
+};
 
 it('includes stack', () => {
   try {

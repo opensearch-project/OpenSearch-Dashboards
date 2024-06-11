@@ -52,6 +52,7 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
   const { header } = getPageObjects(['header']);
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const MenuToggle = getService('MenuToggle');
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const quickSelectTimeMenuToggle = new MenuToggle({
     name: 'QuickSelectTime Menu',
@@ -308,6 +309,83 @@ export function TimePickerProvider({ getService, getPageObjects }: FtrProviderCo
       const fromTime = 'Apr 9, 2018 @ 00:00:00.000';
       const toTime = 'Apr 13, 2018 @ 00:00:00.000';
       await this.setAbsoluteRange(fromTime, toTime);
+    }
+
+    // Helper function to set input value and verify
+    private async setInputValueWithRetry(testSubjectId: string, value: string) {
+      const MAX_ATTEMPTS = 3;
+
+      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        // try to set the value
+        await this.inputValue(testSubjectId, value);
+        await sleep(500);
+
+        // verify if the value was correctly set
+        const actualValue = await (await testSubjects.find(testSubjectId)).getAttribute('value');
+        if (actualValue === value) {
+          return;
+        }
+
+        // if it's the last attempt and value wasn't set correctly, throw an error
+        if (attempt === MAX_ATTEMPTS - 1) {
+          throw new Error(
+            `Failed to set ${testSubjectId} to ${value} after ${MAX_ATTEMPTS} attempts.`
+          );
+        }
+
+        await sleep(500); // wait before retrying
+      }
+    }
+
+    // TODO: This is a temporary method added due to observed issues with panels
+    // not closing in time and incorrect time settings on Discover page. Once these bugs are resolved
+    // and the interactions become more reliable, we should consider removing this method and related helper functions.
+    // Tracking issue: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5241
+    /**
+     * @param {String} fromTime MMM D, YYYY @ HH:mm:ss.SSS
+     * @param {String} toTime MMM D, YYYY @ HH:mm:ss.SSS
+     */
+    public async setDefaultRangeForDiscover() {
+      const fromTime = this.defaultStartTime;
+      const toTime = this.defaultEndTime;
+      log.debug(`Setting absolute range to ${fromTime} to ${toTime}`);
+
+      await this.showStartEndTimes();
+      // make sure to close this verify panel
+      await browser.pressKeys(browser.keys.ESCAPE);
+      await sleep(500);
+
+      // set to time
+      await testSubjects.click('superDatePickerendDatePopoverButton');
+      let panel = await this.getTimePickerPanel();
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      await testSubjects.click('superDatePickerAbsoluteDateInput');
+      await this.setInputValueWithRetry('superDatePickerAbsoluteDateInput', toTime);
+      await browser.pressKeys(browser.keys.ESCAPE); // close popover because sometimes browser can't find start input
+
+      // set from time
+      await testSubjects.click('superDatePickerstartDatePopoverButton');
+      await this.waitPanelIsGone(panel);
+      panel = await this.getTimePickerPanel();
+      await testSubjects.click('superDatePickerAbsoluteTab');
+      await testSubjects.click('superDatePickerAbsoluteDateInput');
+      await this.setInputValueWithRetry('superDatePickerAbsoluteDateInput', fromTime);
+      await browser.pressKeys(browser.keys.ESCAPE);
+
+      const superDatePickerApplyButtonExists = await testSubjects.exists(
+        'superDatePickerApplyTimeButton'
+      );
+      if (superDatePickerApplyButtonExists) {
+        // Timepicker is in top nav
+        // Click super date picker apply button to apply time range
+        await testSubjects.click('superDatePickerApplyTimeButton');
+      } else {
+        // Timepicker is embedded in query bar
+        // click query bar submit button to apply time range
+        await testSubjects.click('querySubmitButton');
+      }
+      await this.waitPanelIsGone(panel);
+      await header.awaitGlobalLoadingIndicatorHidden();
     }
   }
 

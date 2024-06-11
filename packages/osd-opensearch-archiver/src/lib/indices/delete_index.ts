@@ -29,7 +29,7 @@
  */
 
 import { get } from 'lodash';
-import { Client } from 'elasticsearch';
+import { Client } from '@opensearch-project/opensearch';
 import { ToolingLog } from '@osd/dev-utils';
 import { Stats } from '../stats';
 
@@ -46,8 +46,8 @@ export async function deleteIndex(options: {
   const { client, stats, index, log, retryIfSnapshottingCount = 10 } = options;
 
   const getIndicesToDelete = async () => {
-    const aliasInfo = await client.indices.getAlias({ name: index, ignore: [404] });
-    return aliasInfo.status === 404 ? [index] : Object.keys(aliasInfo);
+    const { body, statusCode } = await client.indices.getAlias({ name: index }, { ignore: [404] });
+    return statusCode === 404 ? [index] : Object.keys(body);
   };
 
   try {
@@ -92,7 +92,9 @@ export function isDeleteWhileSnapshotInProgressError(error: object) {
 export async function waitForSnapshotCompletion(client: Client, index: string, log: ToolingLog) {
   const isSnapshotPending = async (repository: string, snapshot: string) => {
     const {
-      snapshots: [status],
+      body: {
+        snapshots: [status],
+      },
     } = await client.snapshot.status({
       repository,
       snapshot,
@@ -103,7 +105,9 @@ export async function waitForSnapshotCompletion(client: Client, index: string, l
   };
 
   const getInProgressSnapshots = async (repository: string) => {
-    const { snapshots: inProgressSnapshots } = await client.snapshot.get({
+    const {
+      body: { snapshots: inProgressSnapshots },
+    } = await client.snapshot.get({
       repository,
       snapshot: '_current',
     });
@@ -112,7 +116,7 @@ export async function waitForSnapshotCompletion(client: Client, index: string, l
 
   for (const repository of Object.keys(await client.snapshot.getRepository({} as any))) {
     const allInProgress = await getInProgressSnapshots(repository);
-    const found = allInProgress.find((s: any) => s.indices.includes(index));
+    const found = allInProgress?.find((s: any) => s.indices.includes(index));
 
     if (!found) {
       continue;

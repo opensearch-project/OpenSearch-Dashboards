@@ -11,6 +11,6 @@
     "patterns": [
       "_snapshot/{repository}/{snapshot}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/snapshot-restore/#take-snapshots"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/snapshots/create-snapshot/"
   }
 }

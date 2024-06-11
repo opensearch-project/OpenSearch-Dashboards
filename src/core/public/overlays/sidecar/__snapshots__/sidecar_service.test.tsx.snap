@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SidecarService SidecarRef#Hide() hide the sidecar when calling hide  1`] = `"<div class=\\"osdSidecarFlyout osdSidecarFlyout--dockedRight osdSidecarFlyout--hide\\" style=\\"width: 460px;\\"><button class=\\"sidecar-resizableButton resizableButton--horizontal\\" data-test-subj=\\"resizableButton\\" type=\\"button\\"></button><div class=\\"osdSidecarMountWrapper\\"><span>Sidecar content</span></div></div>"`;
+
+exports[`SidecarService SidecarRef#Show() recover sidecar when calling show after calling hide 1`] = `"<div class=\\"osdSidecarFlyout osdSidecarFlyout--dockedRight\\" style=\\"width: 460px;\\"><button class=\\"sidecar-resizableButton resizableButton--horizontal\\" data-test-subj=\\"resizableButton\\" type=\\"button\\"></button><div class=\\"osdSidecarMountWrapper\\"><span>Sidecar content</span></div></div>"`;
+
+exports[`SidecarService SidecarRef#close() can be called multiple times on the same SidecarRef 1`] = `
+Array [
+  Array [
+    <div />,
+  ],
+]
+`;
+
+exports[`SidecarService open sidecar does not unmount if targetDom is null 1`] = `"<div class=\\"osdSidecarFlyout osdSidecarFlyout--dockedRight\\" style=\\"width: 460px;\\"><button class=\\"sidecar-resizableButton resizableButton--horizontal\\" data-test-subj=\\"resizableButton\\" type=\\"button\\"></button><div class=\\"osdSidecarMountWrapper\\"><span>Sidecar content</span></div></div>"`;
+
+exports[`SidecarService open sidecar renders a sidecar to the DOM 1`] = `"<div class=\\"osdSidecarFlyout osdSidecarFlyout--dockedRight\\" style=\\"width: 460px;\\"><button class=\\"sidecar-resizableButton resizableButton--horizontal\\" data-test-subj=\\"resizableButton\\" type=\\"button\\"></button><div class=\\"osdSidecarMountWrapper\\"><span>Sidecar content</span></div></div>"`;
+
+exports[`SidecarService open sidecar with a currently active sidecar replaces the current sidecar with a new one 1`] = `"<div class=\\"osdSidecarFlyout osdSidecarFlyout--dockedRight\\" style=\\"width: 460px;\\"><button class=\\"sidecar-resizableButton resizableButton--horizontal\\" data-test-subj=\\"resizableButton\\" type=\\"button\\"></button><div class=\\"osdSidecarMountWrapper\\"><span>Sidecar content 2</span></div></div>"`;

@@ -33,7 +33,6 @@ import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
-import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import { mountReactNode } from '../utils/mount';
 import { InternalApplicationStart } from '../application';
@@ -50,6 +49,10 @@ import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_acce
 import { Header } from './ui';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
 import { Branding } from '../';
+import { getLogos } from '../../common';
+import type { Logos } from '../../common/types';
+import { OverlayStart } from '../overlays';
+
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
 const IS_LOCKED_KEY = 'core.chrome.isLocked';
@@ -59,12 +62,6 @@ export interface ChromeBadge {
   text: string;
   tooltip: string;
   iconType?: IconType;
-}
-
-/** @public */
-export interface ChromeBrand {
-  logo?: string;
-  smallLogo?: string;
 }
 
 /** @public */
@@ -93,14 +90,17 @@ interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
 
-interface StartDeps {
+export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
   http: HttpStart;
   injectedMetadata: InjectedMetadataStart;
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
+  overlays: OverlayStart;
 }
+
+type CollapsibleNavHeaderRender = () => JSX.Element | null;
 
 /** @internal */
 export class ChromeService {
@@ -111,6 +111,7 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
+  private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -123,7 +124,7 @@ export class ChromeService {
    */
   private initVisibility(application: StartDeps['application']) {
     // Start off the chrome service hidden if "embed" is in the hash query string.
-    const isEmbedded = 'embed' in parse(location.hash.slice(1), true).query;
+    const isEmbedded = new URL(location.hash.slice(1), location.origin).searchParams.has('embed');
     this.isForceHidden$ = new BehaviorSubject(isEmbedded);
 
     const appHidden$ = merge(
@@ -146,6 +147,20 @@ export class ChromeService {
     );
   }
 
+  public setup() {
+    return {
+      registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
+        if (this.collapsibleNavHeaderRender) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            '[ChromeService] An existing custom collapsible navigation bar header render has been overridden.'
+          );
+        }
+        this.collapsibleNavHeaderRender = render;
+      },
+    };
+  }
+
   public async start({
     application,
     docLinks,
@@ -153,11 +168,11 @@ export class ChromeService {
     injectedMetadata,
     notifications,
     uiSettings,
+    overlays,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
     const appTitle$ = new BehaviorSubject<string>('Overview');
-    const brand$ = new BehaviorSubject<ChromeBrand>({});
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
@@ -165,6 +180,7 @@ export class ChromeService {
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK);
     const isNavDrawerLocked$ = new BehaviorSubject(localStorage.getItem(IS_LOCKED_KEY) === 'true');
+    const sidecarConfig$ = overlays.sidecar.getSidecarConfig$();
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
@@ -185,6 +201,8 @@ export class ChromeService {
     };
 
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
+
+    const logos = getLogos(injectedMetadata.getBranding(), http.basePath.serverBasePath);
 
     const isIE = () => {
       const ua = window.navigator.userAgent;
@@ -210,7 +228,7 @@ export class ChromeService {
         title: mountReactNode(
           <FormattedMessage
             id="core.chrome.browserDeprecationWarning"
-            defaultMessage="Support for Internet Explorer will be dropped in future versions of this software, please check {link}."
+            defaultMessage="Internet Explorer lacks features required for OpenSearch Dashboards to function correctly; please use one of {link}."
             values={{
               link: (
                 <EuiLink
@@ -220,7 +238,7 @@ export class ChromeService {
                 >
                   <FormattedMessage
                     id="core.chrome.browserDeprecationLink"
-                    defaultMessage="the support matrix on our website"
+                    defaultMessage="the supported browsers listed on our website"
                   />
                 </EuiLink>
               ),
@@ -235,6 +253,7 @@ export class ChromeService {
       navLinks,
       recentlyAccessed,
       docTitle,
+      logos,
 
       getHeaderComponent: () => (
         <Header
@@ -249,7 +268,7 @@ export class ChromeService {
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
           helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
           helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
-          homeHref={http.basePath.prepend('/app/home')}
+          homeHref={application.getUrlForApp('home')}
           isVisible$={this.isVisible$}
           opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
           navLinks$={navLinks.getNavLinks$()}
@@ -262,21 +281,14 @@ export class ChromeService {
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
+          logos={logos}
+          survey={injectedMetadata.getSurvey()}
+          collapsibleNavHeaderRender={this.collapsibleNavHeaderRender}
+          sidecarConfig$={sidecarConfig$}
         />
       ),
 
       setAppTitle: (appTitle: string) => appTitle$.next(appTitle),
-
-      getBrand$: () => brand$.pipe(takeUntil(this.stop$)),
-
-      setBrand: (brand: ChromeBrand) => {
-        brand$.next(
-          Object.freeze({
-            logo: brand.logo,
-            smallLogo: brand.smallLogo,
-          })
-        );
-      },
 
       getIsVisible$: () => this.isVisible$,
 
@@ -337,6 +349,20 @@ export class ChromeService {
 }
 
 /**
+ * ChromeSetup allows plugins to customize the global chrome header UI rendering
+ * before the header UI is mounted.
+ *
+ * @example
+ * Customize the Collapsible Nav's (left nav menu) header section:
+ * ```ts
+ * core.chrome.registerCollapsibleNavHeader(() => <CustomNavHeader />)
+ * ```
+ */
+export interface ChromeSetup {
+  registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
+}
+
+/**
  * ChromeStart allows plugins to customize the global chrome header UI and
  * enrich the UX with additional information about the current location of the
  * browser.
@@ -371,6 +397,8 @@ export interface ChromeStart {
   recentlyAccessed: ChromeRecentlyAccessed;
   /** {@inheritdoc ChromeDocTitle} */
   docTitle: ChromeDocTitle;
+  /** {@inheritdoc Logos} */
+  readonly logos: Logos;
 
   /**
    * Sets the current app's title
@@ -380,31 +408,6 @@ export interface ChromeStart {
    * of mounting applications.
    */
   setAppTitle(appTitle: string): void;
-
-  /**
-   * Get an observable of the current brand information.
-   */
-  getBrand$(): Observable<ChromeBrand>;
-
-  /**
-   * Set the brand configuration.
-   *
-   * @remarks
-   * Normally the `logo` property will be rendered as the
-   * CSS background for the home link in the chrome navigation, but when the page is
-   * rendered in a small window the `smallLogo` will be used and rendered at about
-   * 45px wide.
-   *
-   * @example
-   * ```js
-   * chrome.setBrand({
-   *   logo: 'url(/plugins/app/logo.png) center no-repeat'
-   *   smallLogo: 'url(/plugins/app/logo-small.png) center no-repeat'
-   * })
-   * ```
-   *
-   */
-  setBrand(brand: ChromeBrand): void;
 
   /**
    * Get an observable of the current visibility state of the chrome.

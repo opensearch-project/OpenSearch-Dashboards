@@ -28,6 +28,12 @@
  * under the License.
  */
 
+import { get } from 'lodash';
+import {
+  VisLayerTypes,
+  calculateYAxisPadding,
+  VisFlyoutContext,
+} from '../../../vis_augmenter/public';
 import { vega } from '../lib/vega';
 import { VegaBaseView } from './vega_base_view';
 
@@ -44,6 +50,60 @@ export class VegaView extends VegaBaseView {
     view.warn = this.onWarn.bind(this);
     view.error = this.onError.bind(this);
     if (this._parser.useResize) this.updateVegaSize(view);
+
+    const showPointInTimeEvents =
+      this._parser.visibleVisLayers?.get(VisLayerTypes.PointInTimeEvents) === true;
+
+    if (showPointInTimeEvents) {
+      this.addPointInTimeEventPadding(view);
+      const inFlyout = get(this, '_parser.visAugmenterConfig.inFlyout', false);
+      const flyoutContext = get(
+        this,
+        '_parser.visAugmenterConfig.flyoutContext',
+        VisFlyoutContext.BASE_VIS
+      );
+      const leftValueAxisPadding = get(
+        this,
+        '_parser.visAugmenterConfig.leftValueAxisPadding',
+        false
+      );
+      const rightValueAxisPadding = get(
+        this,
+        '_parser.visAugmenterConfig.rightValueAxisPadding',
+        false
+      );
+      const yAxisConfig = get(this, '_parser.vlspec.config.axisY', {});
+
+      // Autosizing is needed here since autosize won't be set correctly when there is PointInTimeEventLayers.
+      // This is because these layers cause the spec to use `vconcat` under the hood to stack the base chart
+      // with the event chart. Autosize doesn't work at the vega-lite level, so we set here at the vega level.
+      // Details here: https://github.com/opensearch-project/OpenSearch-Dashboards/issues/3485#issuecomment-1507442348
+      view.autosize({
+        type: 'fit',
+        contains: 'padding',
+      });
+
+      if (inFlyout) {
+        const yAxisPadding = calculateYAxisPadding(yAxisConfig);
+        view.padding({
+          ...view.padding(),
+          // If we are displaying an event chart (no vis data), then we need to offset the chart
+          // to align the data / events. We do this by checking if padding is needed on the left
+          // and/or right, and adding padding based on the y axis config.
+          left:
+            leftValueAxisPadding &&
+            (flyoutContext === VisFlyoutContext.EVENT_VIS ||
+              flyoutContext === VisFlyoutContext.TIMELINE_VIS)
+              ? yAxisPadding
+              : 0,
+          right:
+            rightValueAxisPadding && flyoutContext === VisFlyoutContext.EVENT_VIS
+              ? yAxisPadding
+              : 0,
+        });
+      }
+    }
+
     view.initialize(this._$container.get(0), this._$controls.get(0));
 
     if (this._parser.useHover) view.hover();

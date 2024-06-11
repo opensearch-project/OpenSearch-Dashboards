@@ -4,13 +4,17 @@
  */
 
 import { i18n } from '@osd/i18n';
+import { BehaviorSubject } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
 import {
   AppMountParameters,
   AppNavLinkStatus,
+  AppUpdater,
   CoreSetup,
   CoreStart,
   Plugin,
   PluginInitializerContext,
+  ScopedHistory,
 } from '../../../core/public';
 import {
   VisBuilderPluginSetupDependencies,
@@ -19,9 +23,7 @@ import {
   VisBuilderSetup,
   VisBuilderStart,
 } from './types';
-import { VisBuilderEmbeddableFactoryDefinition, VISBUILDER_EMBEDDABLE } from './embeddable';
-import visBuilderIconSecondaryFill from './assets/vis_builder_icon_secondary_fill.svg';
-import visBuilderIcon from './assets/vis_builder_icon.svg';
+import { VisBuilderEmbeddableFactory, VISBUILDER_EMBEDDABLE } from './embeddable';
 import {
   EDIT_PATH,
   PLUGIN_ID,
@@ -41,10 +43,19 @@ import {
   setUISettings,
   setTypeService,
   setReactExpressionRenderer,
+  setQueryService,
+  setUIActions,
 } from './plugin_services';
 import { createSavedVisBuilderLoader } from './saved_visualizations';
 import { registerDefaultTypes } from './visualizations';
 import { ConfigSchema } from '../config';
+import {
+  createOsdUrlStateStorage,
+  createOsdUrlTracker,
+  createStartServicesGetter,
+  withNotifyOnErrors,
+} from '../../opensearch_dashboards_utils/public';
+import { opensearchFilters } from '../../data/public';
 
 export class VisBuilderPlugin
   implements
@@ -55,13 +66,45 @@ export class VisBuilderPlugin
       VisBuilderPluginStartDependencies
     > {
   private typeService = new TypeService();
+  private appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
+  private stopUrlTracking?: () => void;
+  private currentHistory?: ScopedHistory;
 
   constructor(public initializerContext: PluginInitializerContext<ConfigSchema>) {}
 
   public setup(
     core: CoreSetup<VisBuilderPluginStartDependencies, VisBuilderStart>,
-    { embeddable, visualizations }: VisBuilderPluginSetupDependencies
+    { embeddable, visualizations, data }: VisBuilderPluginSetupDependencies
   ) {
+    const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
+      baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
+      defaultSubUrl: '#/',
+      storageKey: `lastUrl:${core.http.basePath.get()}:${PLUGIN_ID}`,
+      navLinkUpdater$: this.appStateUpdater,
+      toastNotifications: core.notifications.toasts,
+      stateParams: [
+        {
+          osdUrlKey: '_g',
+          stateUpdate$: data.query.state$.pipe(
+            filter(
+              ({ changes }) => !!(changes.globalFilters || changes.time || changes.refreshInterval)
+            ),
+            map(({ state }) => ({
+              ...state,
+              filters: state.filters?.filter(opensearchFilters.isFilterPinned),
+            }))
+          ),
+        },
+      ],
+      getHistory: () => {
+        return this.currentHistory!;
+      },
+    });
+    this.stopUrlTracking = () => {
+      stopUrlTracker();
+    };
+
+    // Register Default Visualizations
     const typeService = this.typeService;
     registerDefaultTypes(typeService.setup());
 
@@ -70,51 +113,75 @@ export class VisBuilderPlugin
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
       navLinkStatus: AppNavLinkStatus.hidden,
-      async mount(params: AppMountParameters) {
+      defaultPath: '#/',
+      mount: async (params: AppMountParameters) => {
         // Load application bundle
         const { renderApp } = await import('./application');
 
         // Get start services as specified in opensearch_dashboards.json
         const [coreStart, pluginsStart, selfStart] = await core.getStartServices();
-        const { data, savedObjects, navigation, expressions } = pluginsStart;
+        const { savedObjects, navigation, expressions } = pluginsStart;
+        this.currentHistory = params.history;
 
         // make sure the index pattern list is up to date
-        data.indexPatterns.clearCache();
+        pluginsStart.data.indexPatterns.clearCache();
+        // make sure the filterManager is refreshed
+        const filters = pluginsStart.data.query.filterManager.getFilters();
+        const pinFilters = filters.filter(opensearchFilters.isFilterPinned);
+        pluginsStart.data.query.filterManager.setFilters(pinFilters ? pinFilters : []);
         // make sure a default index pattern exists
         // if not, the page will be redirected to management and visualize won't be rendered
         // TODO: Add the redirect
         await pluginsStart.data.indexPatterns.ensureDefaultIndexPattern();
 
-        // Register Default Visualizations
+        appMounted();
+
+        // dispatch synthetic hash change event to update hash history objects
+        // this is necessary because hash updates triggered by using popState won't trigger this event naturally.
+        const unlistenParentHistory = this.currentHistory.listen(() => {
+          window.dispatchEvent(new HashChangeEvent('hashchange'));
+        });
 
         const services: VisBuilderServices = {
           ...coreStart,
+          appName: PLUGIN_ID,
+          scopedHistory: this.currentHistory,
+          history: this.currentHistory,
+          osdUrlStateStorage: createOsdUrlStateStorage({
+            history: this.currentHistory,
+            useHash: coreStart.uiSettings.get('state:storeInSessionStorage'),
+            ...withNotifyOnErrors(coreStart.notifications.toasts),
+          }),
           toastNotifications: coreStart.notifications.toasts,
-          data,
+          data: pluginsStart.data,
           savedObjectsPublic: savedObjects,
           navigation,
           expressions,
-          history: params.history,
           setHeaderActionMenu: params.setHeaderActionMenu,
           types: typeService.start(),
           savedVisBuilderLoader: selfStart.savedVisBuilderLoader,
           embeddable: pluginsStart.embeddable,
-          scopedHistory: params.history,
+          dashboard: pluginsStart.dashboard,
+          uiActions: pluginsStart.uiActions,
         };
 
         // Instantiate the store
-        const store = await getPreloadedStore(services);
+        const { store, unsubscribe: unsubscribeStore } = await getPreloadedStore(services);
+        const unmount = renderApp(params, services, store);
 
         // Render the application
-        return renderApp(params, services, store);
+        return () => {
+          unlistenParentHistory();
+          unmount();
+          appUnMounted();
+          unsubscribeStore();
+        };
       },
     });
 
     // Register embeddable
-    // TODO: investigate simplification via getter a la visualizations:
-    // const start = createStartServicesGetter(core.getStartServices));
-    // const embeddableFactory = new VisBuilderEmbeddableFactoryDefinition({ start });
-    const embeddableFactory = new VisBuilderEmbeddableFactoryDefinition();
+    const start = createStartServicesGetter(core.getStartServices);
+    const embeddableFactory = new VisBuilderEmbeddableFactory({ start });
     embeddable.registerEmbeddableFactory(VISBUILDER_EMBEDDABLE, embeddableFactory);
 
     // Register the plugin as an alias to create visualization
@@ -124,8 +191,7 @@ export class VisBuilderPlugin
       description: i18n.translate('visBuilder.visPicker.description', {
         defaultMessage: 'Create visualizations using the new VisBuilder',
       }),
-      icon: visBuilderIconSecondaryFill,
-      stage: 'experimental',
+      icon: 'visBuilder',
       aliasApp: PLUGIN_ID,
       aliasPath: '#/',
       appExtensions: {
@@ -135,10 +201,9 @@ export class VisBuilderPlugin
             description: attributes?.description,
             editApp: PLUGIN_ID,
             editUrl: `${EDIT_PATH}/${encodeURIComponent(id)}`,
-            icon: visBuilderIcon,
+            icon: 'visBuilder',
             id,
             savedObjectType: VISBUILDER_SAVED_OBJECT,
-            stage: 'experimental',
             title: attributes?.title,
             typeTitle: VIS_BUILDER_CHART_TYPE,
             updated_at: updatedAt,
@@ -154,7 +219,7 @@ export class VisBuilderPlugin
 
   public start(
     core: CoreStart,
-    { data, expressions }: VisBuilderPluginStartDependencies
+    { expressions, data, uiActions }: VisBuilderPluginStartDependencies
   ): VisBuilderStart {
     const typeService = this.typeService.start();
 
@@ -176,6 +241,8 @@ export class VisBuilderPlugin
     setTimeFilter(data.query.timefilter.timefilter);
     setTypeService(typeService);
     setUISettings(core.uiSettings);
+    setUIActions(uiActions);
+    setQueryService(data.query);
 
     return {
       ...typeService,
@@ -183,5 +250,9 @@ export class VisBuilderPlugin
     };
   }
 
-  public stop() {}
+  public stop() {
+    if (this.stopUrlTracking) {
+      this.stopUrlTracking();
+    }
+  }
 }

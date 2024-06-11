@@ -90,6 +90,7 @@ export const createVegaVisualization = ({ getServiceSettings }) =>
           serviceSettings,
           filterManager,
           timefilter,
+          externalAction: this._vis.API.events.externalAction,
         };
 
         if (vegaParser.useMap) {

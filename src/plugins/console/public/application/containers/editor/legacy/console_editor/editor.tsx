@@ -53,6 +53,7 @@ const { useUIAceKeyboardMode } = ace;
 
 export interface EditorProps {
   initialTextValue: string;
+  dataSourceId?: string;
 }
 
 interface QueryParams {
@@ -76,15 +77,15 @@ const DEFAULT_INPUT_VALUE = `GET _search
 
 const inputId = 'ConAppInputTextarea';
 
-function EditorUI({ initialTextValue }: EditorProps) {
+function EditorUI({ initialTextValue, dataSourceId }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService, opensearchHostService },
+    services: { history, notifications, settings: settingsService, opensearchHostService, http },
     docLinkVersion,
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
-  const sendCurrentRequestToOpenSearch = useSendCurrentRequestToOpenSearch();
+  const sendCurrentRequestToOpenSearch = useSendCurrentRequestToOpenSearch(dataSourceId);
   const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -184,7 +185,12 @@ function EditorUI({ initialTextValue }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
+    retrieveAutoCompleteInfo(
+      http,
+      settingsService,
+      settingsService.getAutocomplete(),
+      dataSourceId
+    );
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
@@ -197,7 +203,15 @@ function EditorUI({ initialTextValue }: EditorProps) {
         editorInstanceRef.current.getCoreEditor().destroy();
       }
     };
-  }, [saveCurrentTextObject, initialTextValue, history, setInputEditor, settingsService]);
+  }, [
+    saveCurrentTextObject,
+    initialTextValue,
+    history,
+    setInputEditor,
+    settingsService,
+    http,
+    dataSourceId,
+  ]);
 
   useEffect(() => {
     const { current: editor } = editorInstanceRef;
@@ -214,10 +228,14 @@ function EditorUI({ initialTextValue }: EditorProps) {
     });
   }, [sendCurrentRequestToOpenSearch, openDocumentation]);
 
+  const tooltipDefaultMessage =
+    dataSourceId === undefined ? `Select a data source` : `Click to send request`;
+
+  const toolTipButtonDiasbled = dataSourceId === undefined;
+
   return (
     <div style={abs} className="conApp">
       <div className="conApp__editor">
-        <ul className="conApp__autoComplete" id="autocomplete" />
         <EuiFlexGroup
           className="conApp__editorActions"
           id="ConAppEditorActions"
@@ -227,16 +245,17 @@ function EditorUI({ initialTextValue }: EditorProps) {
           <EuiFlexItem>
             <EuiToolTip
               content={i18n.translate('console.sendRequestButtonTooltip', {
-                defaultMessage: 'Click to send request',
+                defaultMessage: tooltipDefaultMessage,
               })}
             >
               <button
                 onClick={sendCurrentRequestToOpenSearch}
                 data-test-subj="sendRequestButton"
                 aria-label={i18n.translate('console.sendRequestButtonTooltip', {
-                  defaultMessage: 'Click to send request',
+                  defaultMessage: tooltipDefaultMessage,
                 })}
                 className="conApp__editorActionButton conApp__editorActionButton--success"
+                disabled={toolTipButtonDiasbled}
               >
                 <EuiIcon type="play" />
               </button>

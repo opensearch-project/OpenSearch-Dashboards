@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { registryMock, environmentMock, tutorialMock } from './plugin.test.mocks';
+import { registryMock, environmentMock, tutorialMock, sectionTypeMock } from './plugin.test.mocks';
 import { HomePublicPlugin } from './plugin';
 import { coreMock } from '../../../core/public/mocks';
 import { urlForwardingPluginMock } from '../../url_forwarding/public/mocks';
@@ -41,6 +41,7 @@ describe('HomePublicPlugin', () => {
     registryMock.start.mockClear();
     tutorialMock.setup.mockClear();
     environmentMock.setup.mockClear();
+    sectionTypeMock.setup.mockClear();
   });
 
   describe('setup', () => {
@@ -94,6 +95,14 @@ describe('HomePublicPlugin', () => {
       );
       expect(setup).toHaveProperty('tutorials');
       expect(setup.tutorials).toHaveProperty('setVariable');
+    });
+
+    test('wires up and register applications', async () => {
+      const coreMocks = coreMock.createSetup();
+      await new HomePublicPlugin(mockInitializerContext).setup(coreMocks, {
+        urlForwarding: urlForwardingPluginMock.createSetupContract(),
+      });
+      expect(coreMocks.application.register).toBeCalledTimes(2);
     });
   });
 });

@@ -1,0 +1,46 @@
+name: Apply 'untriaged' label during issue lifecycle
+
+on:
+  issues:
+    types: [opened, reopened, transferred]
+
+jobs:
+  apply-label-if-not-collaborator:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check if issue author is a collaborator
+        id: check-collaborator
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issueAuthor = context.payload.issue.user.login;
+            const repoOwner = context.repo.owner;
+            const repoName = context.repo.repo;
+            let isCollaborator = false;
+            try {
+              // Attempt to fetch user's permission level
+              await github.rest.repos.getCollaboratorPermissionLevel({
+                owner: repoOwner,
+                repo: repoName,
+                username: issueAuthor,
+              });
+
+              // If no error is thrown, the user is a collaborator
+              isCollaborator = true;
+            } catch (error) {
+              // Error thrown indicates the user is not a collaborator,
+              // or does not have explicit permission set.
+              console.log(`${issueAuthor} is not a collaborator.`);
+            }
+            core.setOutput('is_collaborator', isCollaborator.toString());
+      - name: Apply label if not a collaborator
+        if: steps.check-collaborator.outputs.is_collaborator == 'false'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.addLabels({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['untriaged']
+            })

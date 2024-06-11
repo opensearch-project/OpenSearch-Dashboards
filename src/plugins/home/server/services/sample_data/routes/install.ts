@@ -29,7 +29,8 @@
  */
 
 import { schema } from '@osd/config-schema';
-import { IRouter, Logger, RequestHandlerContext } from 'src/core/server';
+import { IRouter, LegacyCallAPIOptions, Logger } from 'src/core/server';
+import { getWorkspaceState } from '../../../../../../core/server/utils';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import {
@@ -39,12 +40,17 @@ import {
 } from '../lib/translate_timestamp';
 import { loadData } from '../lib/load_data';
 import { SampleDataUsageTracker } from '../usage/usage';
+import { getFinalSavedObjects } from '../data_sets/util';
 
 const insertDataIntoIndex = (
   dataIndexConfig: any,
   index: string,
   nowReference: string,
-  context: RequestHandlerContext,
+  caller: (
+    endpoint: string,
+    clientParams?: Record<string, any>,
+    options?: LegacyCallAPIOptions
+  ) => Promise<any>,
   logger: Logger
 ) => {
   function updateTimestamps(doc: any) {
@@ -73,7 +79,8 @@ const insertDataIntoIndex = (
       bulk.push(insertCmd);
       bulk.push(updateTimestamps(doc));
     });
-    const resp = await context.core.opensearch.legacy.client.callAsCurrentUser('bulk', {
+
+    const resp = await caller('bulk', {
       body: bulk,
     });
     if (resp.errors) {
@@ -105,11 +112,18 @@ export function createInstallRoute(
       validate: {
         params: schema.object({ id: schema.string() }),
         // TODO validate now as date
-        query: schema.object({ now: schema.maybe(schema.string()) }),
+        query: schema.object({
+          now: schema.maybe(schema.string()),
+          data_source_id: schema.maybe(schema.string()),
+        }),
       },
     },
     async (context, req, res) => {
       const { params, query } = req;
+      const dataSourceId = query.data_source_id;
+      const workspaceState = getWorkspaceState(req);
+      const workspaceId = workspaceState?.requestWorkspaceId;
+
       const sampleDataset = sampleDatasets.find(({ id }) => id === params.id);
       if (!sampleDataset) {
         return res.notFound();
@@ -118,13 +132,36 @@ export function createInstallRoute(
       const now = query.now ? new Date(query.now) : new Date();
       const nowReference = dateToIso8601IgnoringTime(now);
       const counts = {};
+      const caller = dataSourceId
+        ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
+        : context.core.opensearch.legacy.client.callAsCurrentUser;
+
+      let dataSourceTitle;
+      try {
+        if (dataSourceId) {
+          const dataSource = await context.core.savedObjects.client
+            .get('data-source', dataSourceId)
+            .then((response) => {
+              const attributes: any = response?.attributes || {};
+              return {
+                id: response.id,
+                title: attributes.title,
+              };
+            });
+
+          dataSourceTitle = dataSource.title;
+        }
+      } catch (err) {
+        return res.internalError({ body: err });
+      }
+
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
         const dataIndexConfig = sampleDataset.dataIndices[i];
         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
 
         // clean up any old installation of dataset
         try {
-          await context.core.opensearch.legacy.client.callAsCurrentUser('indices.delete', {
+          await caller('indices.delete', {
             index,
           });
         } catch (err) {
@@ -135,14 +172,13 @@ export function createInstallRoute(
           const createIndexParams = {
             index,
             body: {
-              settings: { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
+              settings: dataSourceId
+                ? { index: { number_of_shards: 1 } }
+                : { index: { number_of_shards: 1, auto_expand_replicas: '0-1' } },
               mappings: { properties: dataIndexConfig.fields },
             },
           };
-          await context.core.opensearch.legacy.client.callAsCurrentUser(
-            'indices.create',
-            createIndexParams
-          );
+          await caller('indices.create', createIndexParams);
         } catch (err) {
           const errMsg = `Unable to create sample data index "${index}", error: ${err.message}`;
           logger.warn(errMsg);
@@ -154,7 +190,7 @@ export function createInstallRoute(
             dataIndexConfig,
             index,
             nowReference,
-            context,
+            caller,
             logger
           );
           (counts as any)[index] = count;
@@ -166,9 +202,16 @@ export function createInstallRoute(
       }
 
       let createResults;
+      const savedObjectsList = getFinalSavedObjects({
+        dataset: sampleDataset,
+        workspaceId,
+        dataSourceId,
+        dataSourceTitle,
+      });
+
       try {
         createResults = await context.core.savedObjects.client.bulkCreate(
-          sampleDataset.savedObjects.map(({ version, ...savedObject }) => savedObject),
+          savedObjectsList.map(({ version, ...savedObject }) => savedObject),
           { overwrite: true }
         );
       } catch (err) {
@@ -192,7 +235,7 @@ export function createInstallRoute(
       return res.ok({
         body: {
           opensearchIndicesCreated: counts,
-          opensearchDashboardsSavedObjectsLoaded: sampleDataset.savedObjects.length,
+          opensearchDashboardsSavedObjectsLoaded: savedObjectsList.length,
         },
       });
     }

@@ -31,3 +31,4 @@
 export * from './utils';
 export { IndexPatternsFetcher, FieldDescriptor, shouldReadFieldFromDocValues } from './fetcher';
 export { IndexPatternsService, IndexPatternsServiceStart } from './index_patterns_service';
+export { decideClient } from './routes';

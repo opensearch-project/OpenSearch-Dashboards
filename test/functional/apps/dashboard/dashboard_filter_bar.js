@@ -39,7 +39,14 @@ export default function ({ getService, getPageObjects }) {
   const opensearchArchiver = getService('opensearchArchiver');
   const opensearchDashboardsServer = getService('opensearchDashboardsServer');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'timePicker']);
+  const PageObjects = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'visualize',
+    'timePicker',
+    'discover',
+  ]);
 
   describe('dashboard filter bar', () => {
     before(async () => {
@@ -185,6 +192,10 @@ export default function ({ getService, getPageObjects }) {
     describe('saved search filtering', function () {
       before(async () => {
         await filterBar.ensureFieldEditorModalIsClosed();
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.timePicker.setDefaultDataRange();
+        await PageObjects.discover.switchDiscoverTable('new');
+        await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultDataRange();
@@ -193,7 +204,12 @@ export default function ({ getService, getPageObjects }) {
       it('are added when a cell magnifying glass is clicked', async function () {
         await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
         await PageObjects.dashboard.waitForRenderComplete();
-        await testSubjects.click('docTableCellFilter');
+
+        // Expand a doc row
+        await testSubjects.click('docTableExpandToggleColumn-0');
+
+        // Add a field filter
+        await testSubjects.click('tableDocViewRow-@message > addInclusiveFilterButton');
 
         const filterCount = await filterBar.getFilterCount();
         expect(filterCount).to.equal(1);

@@ -45,6 +45,7 @@ interface CheckOriginConflictsParams {
   namespace?: string;
   ignoreRegularConflicts?: boolean;
   importIdMap: Map<string, unknown>;
+  dataSourceId?: string;
 }
 
 type CheckOriginConflictParams = Omit<CheckOriginConflictsParams, 'objects'> & {

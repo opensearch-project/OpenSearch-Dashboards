@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '../../../core/public';
 import { Plugin as ExpressionsPublicPlugin } from '../../expressions/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
@@ -41,15 +42,20 @@ import {
   setUISettings,
   setMapsLegacyConfig,
   setInjectedMetadata,
+  setDataSourceEnabled,
+  setSavedObjectsClient,
 } from './services';
 
-import { createVegaFn } from './vega_fn';
+import { createVegaFn } from './expressions/vega_fn';
 import { createVegaTypeDefinition } from './vega_type';
 import { IServiceSettings } from '../../maps_legacy/public';
 import './index.scss';
 import { ConfigSchema } from '../config';
 
 import { getVegaInspectorView } from './vega_inspector';
+import { createLineVegaSpecFn } from './expressions/line_vega_spec_fn';
+import { UiActionsStart } from '../../ui_actions/public';
+import { setUiActions } from './services';
 
 /** @internal */
 export interface VegaVisualizationDependencies {
@@ -66,12 +72,14 @@ export interface VegaPluginSetupDependencies {
   visualizations: VisualizationsSetup;
   inspector: InspectorSetup;
   data: DataPublicPluginSetup;
+  dataSource?: DataSourcePluginSetup;
   mapsLegacy: any;
 }
 
 /** @internal */
 export interface VegaPluginStartDependencies {
   data: DataPublicPluginStart;
+  uiActions: UiActionsStart;
 }
 
 /** @internal */
@@ -84,7 +92,14 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
 
   public async setup(
     core: CoreSetup,
-    { inspector, data, expressions, visualizations, mapsLegacy }: VegaPluginSetupDependencies
+    {
+      inspector,
+      data,
+      expressions,
+      visualizations,
+      mapsLegacy,
+      dataSource,
+    }: VegaPluginSetupDependencies
   ) {
     setInjectedVars({
       enableExternalUrls: this.initializerContext.config.get().enableExternalUrls,
@@ -92,6 +107,7 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     });
     setUISettings(core.uiSettings);
     setMapsLegacyConfig(mapsLegacy.config);
+    setDataSourceEnabled({ enabled: !!dataSource });
 
     const visualizationDependencies: Readonly<VegaVisualizationDependencies> = {
       core,
@@ -104,13 +120,16 @@ export class VegaPlugin implements Plugin<Promise<void>, void> {
     inspector.registerView(getVegaInspectorView({ uiSettings: core.uiSettings }));
 
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
+    expressions.registerFunction(() => createLineVegaSpecFn(visualizationDependencies));
 
     visualizations.createBaseVisualization(createVegaTypeDefinition(visualizationDependencies));
   }
 
-  public start(core: CoreStart, { data }: VegaPluginStartDependencies) {
+  public start(core: CoreStart, { data, uiActions }: VegaPluginStartDependencies) {
     setNotifications(core.notifications);
     setData(data);
+    setSavedObjectsClient(core.savedObjects);
+    setUiActions(uiActions);
     setInjectedMetadata(core.injectedMetadata);
   }
 }

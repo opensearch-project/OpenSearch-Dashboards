@@ -52,35 +52,7 @@ interface Package {
   >;
 }
 
-const packages: Package[] = [
-  {
-    name: 're2',
-    version: '1.15.4',
-    destinationPath: 'node_modules/re2/build/Release/re2.node',
-    extractMethod: 'gunzip',
-    archives: {
-      'darwin-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/darwin-x64-83.gz',
-        sha256: 'b45cd8296fd6eb2a091399c20111af43093ba30c99ed9e5d969278f5ff69ba8f',
-      },
-      'linux-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/linux-x64-83.gz',
-        sha256: '1bbc3f90f0ba105772b37c04e3a718f69544b4df01dda00435c2b8e50b2ad0d9',
-      },
-      'linux-arm64': {
-        url:
-          'https://d1v1sj258etie.cloudfront.net/node-re2/releases/download/1.15.4/linux-arm64-83.tar.gz',
-        sha256: 'f25124adc64d269a513b99abd4a5eed8d7a929db565207f8ece1f3b7b7931668',
-        overriddenExtractMethod: 'untar',
-        overriddenDestinationPath: 'node_modules/re2/build/Release',
-      },
-      'win32-x64': {
-        url: 'https://github.com/uhop/node-re2/releases/download/1.15.4/win32-x64-83.gz',
-        sha256: 'efe939d3cda1d64ee3ee3e60a20613b95166d55632e702c670763ea7e69fca06',
-      },
-    },
-  },
-];
+export const packages: Package[] = [];
 
 async function getInstalledVersion(config: Config, packageName: string) {
   const packageJSONPath = config.resolveFromRepo(
@@ -135,15 +107,20 @@ async function patchModule(
   }
 }
 
-export const PatchNativeModules: Task = {
-  description: 'Patching platform-specific native modules',
-  async run(config, log, build) {
-    for (const pkg of packages) {
-      await Promise.all(
-        config.getTargetPlatforms().map(async (platform) => {
-          await patchModule(config, log, build, platform, pkg);
-        })
-      );
-    }
-  },
-};
+export function createPatchNativeModulesTask(customPackages?: Package[]): Task {
+  return {
+    description: 'Patching platform-specific native modules',
+    async run(config, log, build) {
+      const targetPackages = customPackages || packages;
+      for (const pkg of targetPackages) {
+        await Promise.all(
+          config.getTargetPlatforms().map(async (platform) => {
+            await patchModule(config, log, build, platform, pkg);
+          })
+        );
+      }
+    },
+  };
+}
+
+export const PatchNativeModules = createPatchNativeModulesTask();

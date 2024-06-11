@@ -32,14 +32,14 @@ import { i18n } from '@osd/i18n';
 import React, { PureComponent } from 'react';
 import { EuiScreenReaderOnly, keys } from '@elastic/eui';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { Logos } from 'opensearch-dashboards/public';
 
 export interface ExitFullScreenButtonProps {
   onExitFullScreenMode: () => void;
+  logos: Logos;
 }
 
 import './index.scss';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import OpenSearchMarkDarkMode from '../../../home/public/assets/logos/opensearch_mark_darkmode.svg';
 
 class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   public onKeyDown = (e: KeyboardEvent) => {
@@ -57,6 +57,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
   }
 
   public render() {
+    const colorScheme = this.props.logos.colorScheme !== 'dark' ? 'dark' : 'light';
     return (
       <div>
         <EuiScreenReaderOnly>
@@ -83,7 +84,7 @@ class ExitFullScreenButtonUi extends PureComponent<ExitFullScreenButtonProps> {
           >
             <EuiFlexGroup component="span" responsive={false} alignItems="center" gutterSize="s">
               <EuiFlexItem grow={false}>
-                <EuiIcon type={OpenSearchMarkDarkMode} size="l" />
+                <EuiIcon type={this.props.logos.Mark[colorScheme].url} size="l" />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="exitFullScreenModeText">
                 <div>

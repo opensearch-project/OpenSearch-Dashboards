@@ -252,34 +252,6 @@
             }
           }
         },
-        "timeline": {
-          "properties": {
-            "clicks_total": {
-              "type": "long"
-            },
-            "clicks_7_days": {
-              "type": "long"
-            },
-            "clicks_30_days": {
-              "type": "long"
-            },
-            "clicks_90_days": {
-              "type": "long"
-            },
-            "minutes_on_screen_total": {
-              "type": "float"
-            },
-            "minutes_on_screen_7_days": {
-              "type": "float"
-            },
-            "minutes_on_screen_30_days": {
-              "type": "float"
-            },
-            "minutes_on_screen_90_days": {
-              "type": "float"
-            }
-          }
-        },
         "visualize": {
           "properties": {
             "clicks_total": {
@@ -1342,13 +1314,6 @@
               "type": "long"
             }
           }
-        },
-        "timeline_sheet": {
-          "properties": {
-            "total": {
-              "type": "long"
-            }
-          }
         }
       }
     },
@@ -1372,6 +1337,12 @@
         "visualization:tileMap:maxPrecision": {
           "type": "long"
         },
+        "visualization:enablePluginAugmentation": {
+          "type": "boolean"
+        },
+        "visualization:enablePluginAugmentation.maxPluginObjects": {
+          "type": "number"
+        },
         "securitySolution:ipReputationLinks": {
           "type": "text"
         },
@@ -1393,20 +1364,11 @@
         "timeline:min_interval": {
           "type": "keyword"
         },
-        "timeline:default_rows": {
-          "type": "long"
-        },
-        "timeline:default_columns": {
-          "type": "long"
-        },
         "timeline:quandl.key": {
           "type": "keyword"
         },
         "timeline:es.default_index": {
           "type": "keyword"
-        },
-        "timeline:showTutorial": {
-          "type": "boolean"
         },
         "securitySolution:timeDefaults": {
           "type": "keyword"
@@ -1518,6 +1480,9 @@
         },
         "timepicker:quickRanges": {
           "type": "keyword"
+        },
+        "theme:enableUserControl": {
+          "type": "boolean"
         },
         "theme:version": {
           "type": "keyword"
@@ -1925,19 +1890,6 @@
           }
         },
         "short_url_redirect": {
-          "type": "array",
-          "items": {
-            "properties": {
-              "key": {
-                "type": "keyword"
-              },
-              "value": {
-                "type": "long"
-              }
-            }
-          }
-        },
-        "timeline": {
           "type": "array",
           "items": {
             "properties": {

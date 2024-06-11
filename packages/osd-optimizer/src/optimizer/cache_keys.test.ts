@@ -101,6 +101,8 @@ describe('getOptimizerCacheKey()', () => {
                 "themeTags": Array [
                   "v7dark",
                   "v7light",
+                  "v8dark",
+                  "v8light",
                 ],
               },
             }

@@ -36,7 +36,7 @@ describe('UrlFormat', () => {
     const url = new UrlFormat({});
 
     expect(url.convert('http://opensearch.org', HTML_CONTEXT_TYPE)).toBe(
-      '<span ng-non-bindable><a href="http://opensearch.org" target="_blank" rel="noopener noreferrer">http://opensearch.org</a></span>'
+      '<span><a href="http://opensearch.org" target="_blank" rel="noopener noreferrer">http://opensearch.org</a></span>'
     );
   });
 
@@ -44,7 +44,7 @@ describe('UrlFormat', () => {
     const url = new UrlFormat({ type: 'audio' });
 
     expect(url.convert('http://opensearch.org', HTML_CONTEXT_TYPE)).toBe(
-      '<span ng-non-bindable><audio controls preload="none" src="http://opensearch.org"></span>'
+      '<span><audio controls preload="none" src="http://opensearch.org"></span>'
     );
   });
 
@@ -53,7 +53,7 @@ describe('UrlFormat', () => {
       const url = new UrlFormat({ type: 'img' });
 
       expect(url.convert('http://opensearch.org', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><img src="http://opensearch.org" alt="A dynamically-specified image located at http://opensearch.org" ' +
+        '<span><img src="http://opensearch.org" alt="A dynamically-specified image located at http://opensearch.org" ' +
           'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
       );
     });
@@ -62,7 +62,7 @@ describe('UrlFormat', () => {
       const url = new UrlFormat({ type: 'img', width: '12', height: '55' });
 
       expect(url.convert('http://opensearch.org', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><img src="http://opensearch.org" alt="A dynamically-specified image located at http://opensearch.org" ' +
+        '<span><img src="http://opensearch.org" alt="A dynamically-specified image located at http://opensearch.org" ' +
           'style="width:auto; height:auto; max-width:12px; max-height:55px;"></span>'
       );
     });
@@ -71,7 +71,7 @@ describe('UrlFormat', () => {
       const url = new UrlFormat({ type: 'img', height: '55' });
 
       expect(url.convert('http://opensearch.org', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><img src="http://opensearch.org" alt="A dynamically-specified image located at http://opensearch.org" ' +
+        '<span><img src="http://opensearch.org" alt="A dynamically-specified image located at http://opensearch.org" ' +
           'style="width:auto; height:auto; max-width:none; max-height:55px;"></span>'
       );
     });
@@ -80,7 +80,7 @@ describe('UrlFormat', () => {
       const url = new UrlFormat({ type: 'img', width: '22' });
 
       expect(url.convert('http://opensearch.org', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><img src="http://opensearch.org" alt="A dynamically-specified image located at http://opensearch.org" ' +
+        '<span><img src="http://opensearch.org" alt="A dynamically-specified image located at http://opensearch.org" ' +
           'style="width:auto; height:auto; max-width:22px; max-height:none;"></span>'
       );
     });
@@ -89,7 +89,7 @@ describe('UrlFormat', () => {
       const url = new UrlFormat({ type: 'img', width: 'not a number' });
 
       expect(url.convert('http://opensearch.org', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><img src="http://opensearch.org" alt="A dynamically-specified image located at http://opensearch.org" ' +
+        '<span><img src="http://opensearch.org" alt="A dynamically-specified image located at http://opensearch.org" ' +
           'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
       );
     });
@@ -98,7 +98,7 @@ describe('UrlFormat', () => {
       const url = new UrlFormat({ type: 'img', height: 'not a number' });
 
       expect(url.convert('http://opensearch.org', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><img src="http://opensearch.org" alt="A dynamically-specified image located at http://opensearch.org" ' +
+        '<span><img src="http://opensearch.org" alt="A dynamically-specified image located at http://opensearch.org" ' +
           'style="width:auto; height:auto; max-width:none; max-height:none;"></span>'
       );
     });
@@ -109,7 +109,7 @@ describe('UrlFormat', () => {
       const url = new UrlFormat({ urlTemplate: 'http://{{ value }}' });
 
       expect(url.convert('url', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><a href="http://url" target="_blank" rel="noopener noreferrer">http://url</a></span>'
+        '<span><a href="http://url" target="_blank" rel="noopener noreferrer">http://url</a></span>'
       );
     });
 
@@ -128,7 +128,7 @@ describe('UrlFormat', () => {
       });
 
       expect(url.convert('php', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><a href="http://www.php.com" target="_blank" rel="noopener noreferrer">extension: php</a></span>'
+        '<span><a href="http://www.php.com" target="_blank" rel="noopener noreferrer">extension: php</a></span>'
       );
     });
 
@@ -188,19 +188,19 @@ describe('UrlFormat', () => {
       const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('www.opensearch.org')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards/app/www.opensearch.org" target="_blank" rel="noopener noreferrer">www.opensearch.org</a></span>'
+        '<span><a href="http://opensearch-dashboards/app/www.opensearch.org" target="_blank" rel="noopener noreferrer">www.opensearch.org</a></span>'
       );
 
       expect(converter('opensearch.org')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards/app/opensearch.org" target="_blank" rel="noopener noreferrer">opensearch.org</a></span>'
+        '<span><a href="http://opensearch-dashboards/app/opensearch.org" target="_blank" rel="noopener noreferrer">opensearch.org</a></span>'
       );
 
       expect(converter('opensearch')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards/app/opensearch" target="_blank" rel="noopener noreferrer">opensearch</a></span>'
+        '<span><a href="http://opensearch-dashboards/app/opensearch" target="_blank" rel="noopener noreferrer">opensearch</a></span>'
       );
 
       expect(converter('ftp://opensearch.org')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards/app/ftp://opensearch.org" target="_blank" rel="noopener noreferrer">ftp://opensearch.org</a></span>'
+        '<span><a href="http://opensearch-dashboards/app/ftp://opensearch.org" target="_blank" rel="noopener noreferrer">ftp://opensearch.org</a></span>'
       );
     });
 
@@ -213,19 +213,19 @@ describe('UrlFormat', () => {
       const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('www.opensearch.org')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards/xyz/app/www.opensearch.org" target="_blank" rel="noopener noreferrer">www.opensearch.org</a></span>'
+        '<span><a href="http://opensearch-dashboards/xyz/app/www.opensearch.org" target="_blank" rel="noopener noreferrer">www.opensearch.org</a></span>'
       );
 
       expect(converter('opensearch.org')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards/xyz/app/opensearch.org" target="_blank" rel="noopener noreferrer">opensearch.org</a></span>'
+        '<span><a href="http://opensearch-dashboards/xyz/app/opensearch.org" target="_blank" rel="noopener noreferrer">opensearch.org</a></span>'
       );
 
       expect(converter('opensearch')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards/xyz/app/opensearch" target="_blank" rel="noopener noreferrer">opensearch</a></span>'
+        '<span><a href="http://opensearch-dashboards/xyz/app/opensearch" target="_blank" rel="noopener noreferrer">opensearch</a></span>'
       );
 
       expect(converter('ftp://opensearch.org')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards/xyz/app/ftp://opensearch.org" target="_blank" rel="noopener noreferrer">ftp://opensearch.org</a></span>'
+        '<span><a href="http://opensearch-dashboards/xyz/app/ftp://opensearch.org" target="_blank" rel="noopener noreferrer">ftp://opensearch.org</a></span>'
       );
     });
 
@@ -238,7 +238,7 @@ describe('UrlFormat', () => {
       const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('../app/opensearch-dashboards')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards.host.com/abc/app/../app/opensearch-dashboards" target="_blank" rel="noopener noreferrer">../app/opensearch-dashboards</a></span>'
+        '<span><a href="http://opensearch-dashboards.host.com/abc/app/../app/opensearch-dashboards" target="_blank" rel="noopener noreferrer">../app/opensearch-dashboards</a></span>'
       );
     });
 
@@ -246,11 +246,11 @@ describe('UrlFormat', () => {
       const url = new UrlFormat({});
 
       expect(url.convert('../app/opensearch-dashboards', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable>../app/opensearch-dashboards</span>'
+        '<span>../app/opensearch-dashboards</span>'
       );
 
       expect(url.convert('http://www.opensearch.org', HTML_CONTEXT_TYPE)).toBe(
-        '<span ng-non-bindable><a href="http://www.opensearch.org" target="_blank" rel="noopener noreferrer">http://www.opensearch.org</a></span>'
+        '<span><a href="http://www.opensearch.org" target="_blank" rel="noopener noreferrer">http://www.opensearch.org</a></span>'
       );
     });
 
@@ -264,15 +264,15 @@ describe('UrlFormat', () => {
       const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('#/foo')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards.host.com/nbc/app/discover#/#/foo" target="_blank" rel="noopener noreferrer">#/foo</a></span>'
+        '<span><a href="http://opensearch-dashboards.host.com/nbc/app/discover#/#/foo" target="_blank" rel="noopener noreferrer">#/foo</a></span>'
       );
 
       expect(converter('/nbc/app/discover#/')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards.host.com/nbc/app/discover#/" target="_blank" rel="noopener noreferrer">/nbc/app/discover#/</a></span>'
+        '<span><a href="http://opensearch-dashboards.host.com/nbc/app/discover#/" target="_blank" rel="noopener noreferrer">/nbc/app/discover#/</a></span>'
       );
 
       expect(converter('../foo/bar')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards.host.com/nbc/app/../foo/bar" target="_blank" rel="noopener noreferrer">../foo/bar</a></span>'
+        '<span><a href="http://opensearch-dashboards.host.com/nbc/app/../foo/bar" target="_blank" rel="noopener noreferrer">../foo/bar</a></span>'
       );
     });
 
@@ -285,23 +285,23 @@ describe('UrlFormat', () => {
       const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('10.22.55.66')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards.host.com/app/10.22.55.66" target="_blank" rel="noopener noreferrer">10.22.55.66</a></span>'
+        '<span><a href="http://opensearch-dashboards.host.com/app/10.22.55.66" target="_blank" rel="noopener noreferrer">10.22.55.66</a></span>'
       );
 
       expect(converter('http://www.domain.name/app/opensearch-dashboards#/dashboard/')).toBe(
-        '<span ng-non-bindable><a href="http://www.domain.name/app/opensearch-dashboards#/dashboard/" target="_blank" rel="noopener noreferrer">http://www.domain.name/app/opensearch-dashboards#/dashboard/</a></span>'
+        '<span><a href="http://www.domain.name/app/opensearch-dashboards#/dashboard/" target="_blank" rel="noopener noreferrer">http://www.domain.name/app/opensearch-dashboards#/dashboard/</a></span>'
       );
 
       expect(converter('/app/opensearch-dashboards')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards.host.com/app/opensearch-dashboards" target="_blank" rel="noopener noreferrer">/app/opensearch-dashboards</a></span>'
+        '<span><a href="http://opensearch-dashboards.host.com/app/opensearch-dashboards" target="_blank" rel="noopener noreferrer">/app/opensearch-dashboards</a></span>'
       );
 
       expect(converter('opensearch-dashboards#/dashboard/')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards.host.com/app/opensearch-dashboards#/dashboard/" target="_blank" rel="noopener noreferrer">opensearch-dashboards#/dashboard/</a></span>'
+        '<span><a href="http://opensearch-dashboards.host.com/app/opensearch-dashboards#/dashboard/" target="_blank" rel="noopener noreferrer">opensearch-dashboards#/dashboard/</a></span>'
       );
 
       expect(converter('#/dashboard/')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards.host.com/app/opensearch-dashboards#/dashboard/" target="_blank" rel="noopener noreferrer">#/dashboard/</a></span>'
+        '<span><a href="http://opensearch-dashboards.host.com/app/opensearch-dashboards#/dashboard/" target="_blank" rel="noopener noreferrer">#/dashboard/</a></span>'
       );
     });
 
@@ -314,23 +314,23 @@ describe('UrlFormat', () => {
       const converter = url.getConverterFor(HTML_CONTEXT_TYPE) as Function;
 
       expect(converter('10.22.55.66')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards.host.com/app/10.22.55.66" target="_blank" rel="noopener noreferrer">10.22.55.66</a></span>'
+        '<span><a href="http://opensearch-dashboards.host.com/app/10.22.55.66" target="_blank" rel="noopener noreferrer">10.22.55.66</a></span>'
       );
 
       expect(converter('http://www.domain.name/app/kibana#/dashboard/')).toBe(
-        '<span ng-non-bindable><a href="http://www.domain.name/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">http://www.domain.name/app/kibana#/dashboard/</a></span>'
+        '<span><a href="http://www.domain.name/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">http://www.domain.name/app/kibana#/dashboard/</a></span>'
       );
 
       expect(converter('/app/kibana')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards.host.com/app/kibana" target="_blank" rel="noopener noreferrer">/app/kibana</a></span>'
+        '<span><a href="http://opensearch-dashboards.host.com/app/kibana" target="_blank" rel="noopener noreferrer">/app/kibana</a></span>'
       );
 
       expect(converter('kibana#/dashboard/')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">kibana#/dashboard/</a></span>'
+        '<span><a href="http://opensearch-dashboards.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">kibana#/dashboard/</a></span>'
       );
 
       expect(converter('#/dashboard/')).toBe(
-        '<span ng-non-bindable><a href="http://opensearch-dashboards.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">#/dashboard/</a></span>'
+        '<span><a href="http://opensearch-dashboards.host.com/app/kibana#/dashboard/" target="_blank" rel="noopener noreferrer">#/dashboard/</a></span>'
       );
     });
   });

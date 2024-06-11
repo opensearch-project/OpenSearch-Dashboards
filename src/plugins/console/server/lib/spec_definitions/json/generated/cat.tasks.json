@@ -26,6 +26,6 @@
     "patterns": [
       "_cat/tasks"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-tasks/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cat/cat-tasks/"
   }
 }

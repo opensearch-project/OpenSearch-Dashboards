@@ -221,13 +221,14 @@ export {
   FieldFormatConfig,
   FieldFormatId,
   FieldFormat,
+  DATA_FRAME_TYPES,
 } from '../common';
 
 /*
  * Index patterns:
  */
 
-import { isNestedField, isFilterable } from '../common';
+import { isNestedField, isFilterable, setOverrides, getOverrides } from '../common';
 
 import {
   ILLEGAL_CHARACTERS_KEY,
@@ -251,6 +252,8 @@ export const indexPatterns = {
   ILLEGAL_CHARACTERS,
   isDefault,
   isFilterable,
+  setOverrides,
+  getOverrides,
   isNestedField,
   validate: validateIndexPattern,
   getFromSavedObject,
@@ -434,6 +437,8 @@ export {
   IndexPatternSelectProps,
   QueryStringInput,
   QueryStringInputProps,
+  // for BWC, keeping the old name
+  IUiStart as DataPublicPluginStartUi,
 } from './ui';
 
 /**
@@ -444,6 +449,7 @@ export { Filter, Query, RefreshInterval, TimeRange } from '../common';
 
 export {
   createSavedQueryService,
+  connectStorageToQueryState,
   connectToQueryState,
   syncQueryStateWithUrl,
   QueryState,
@@ -467,6 +473,8 @@ export {
   // osd field types
   castOpenSearchToOsdFieldTypeName,
   getOsdTypeNames,
+  getOsdFieldOverrides,
+  setOsdFieldOverrides,
 } from '../common';
 
 export { isTimeRange, isQuery, isFilter, isFilters } from '../common';
@@ -489,9 +497,32 @@ export {
   DataPublicPluginSetup,
   DataPublicPluginStart,
   IDataPluginServices,
-  DataPublicPluginStartUi,
   DataPublicPluginStartActions,
 } from './types';
 
 // Export plugin after all other imports
 export { DataPublicPlugin as Plugin };
+
+// Export datasources
+export {
+  DataSource,
+  IDataSourceMetadata,
+  IDataSetParams,
+  IDataSourceQueryParams,
+  IDataSourceQueryResult,
+  IDataSourceDataSet,
+  DataSourceConnectionStatus,
+  DataSourceFactory,
+} from './data_sources/datasource';
+export {
+  DataSourceRegistrationError,
+  DataSourceService,
+  IDataSourceFilter,
+  IDataSourceRegistrationResult,
+} from './data_sources/datasource_services';
+export {
+  DataSourceSelectable,
+  DataSourceSelectableProps,
+  DataSourceGroup,
+  DataSourceOption,
+} from './data_sources/datasource_selector';

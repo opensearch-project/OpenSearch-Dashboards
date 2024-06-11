@@ -47,7 +47,9 @@ export default function chainRunner(tlConfig) {
   let sheet;
 
   function throwWithCell(cell, exception) {
-    throw new Error(' in cell #' + (cell + 1) + ': ' + exception.message);
+    const e = new Error(exception.message);
+    e.name = `Expression parse error in cell #${cell + 1}`;
+    throw e;
   }
 
   // Invokes a modifier function, resolving arguments into series as needed

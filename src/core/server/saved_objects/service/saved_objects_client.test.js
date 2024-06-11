@@ -207,3 +207,18 @@ test(`#deleteFromNamespaces`, async () => {
   expect(mockRepository.deleteFromNamespaces).toHaveBeenCalledWith(type, id, namespaces, options);
   expect(result).toBe(returnValue);
 });
+
+test(`#deleteByWorkspace`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    deleteByWorkspace: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const workspace = Symbol();
+  const options = Symbol();
+  const result = await client.deleteByWorkspace(workspace, options);
+
+  expect(mockRepository.deleteByWorkspace).toHaveBeenCalledWith(workspace, options);
+  expect(result).toBe(returnValue);
+});

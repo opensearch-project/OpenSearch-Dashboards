@@ -39,8 +39,8 @@ export default function ({ getService, getPageObjects }) {
     before(async function () {
       // delete .kibana index and then wait for OpenSearch Dashboards to re-create it
       await opensearchDashboardsServer.uiSettings.replace({});
-      await PageObjects.settings.createIndexPattern('logstash-*');
       await PageObjects.settings.navigateTo();
+      await PageObjects.settings.createIndexPattern('logstash-*');
     });
 
     after(async function afterAll() {

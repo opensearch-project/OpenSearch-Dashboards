@@ -33,8 +33,27 @@ import { QueryLanguageSwitcher } from './language_switcher';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
+import { EuiComboBox } from '@elastic/eui';
+import { QueryEnhancement } from '../types';
+
 const startMock = coreMock.createStart();
+
+jest.mock('../../services', () => ({
+  getUiService: () => ({
+    isEnhancementsEnabled: true,
+    queryEnhancements: new Map<string, QueryEnhancement>(),
+    Settings: {
+      setUiOverridesByUserQueryLanguage: jest.fn(),
+    },
+  }),
+  getSearchService: () => ({
+    __enhance: jest.fn(),
+    df: {
+      clear: jest.fn(),
+    },
+    getDefaultSearchInterceptor: jest.fn(),
+  }),
+}));
 
 describe('LanguageSwitcher', () => {
   function wrapInContext(testProps: any) {
@@ -50,7 +69,7 @@ describe('LanguageSwitcher', () => {
     );
   }
 
-  it('should toggle off if language is lucene', () => {
+  it('should select lucene if language is lucene', () => {
     const component = mountWithIntl(
       wrapInContext({
         language: 'lucene',
@@ -59,12 +78,17 @@ describe('LanguageSwitcher', () => {
         },
       })
     );
-    component.find(EuiButtonEmpty).simulate('click');
-    expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
-    expect(component.find('[data-test-subj="languageToggle"]').get(0).props.checked).toBeFalsy();
+    const euiComboBox = component.find(EuiComboBox);
+    expect(euiComboBox.prop('selectedOptions')).toEqual(
+      expect.arrayContaining([
+        {
+          label: 'Lucene',
+        },
+      ])
+    );
   });
 
-  it('should toggle on if language is kuery', () => {
+  it('should select DQL if language is kuery', () => {
     const component = mountWithIntl(
       wrapInContext({
         language: 'kuery',
@@ -73,8 +97,13 @@ describe('LanguageSwitcher', () => {
         },
       })
     );
-    component.find(EuiButtonEmpty).simulate('click');
-    expect(component.find(EuiPopover).prop('isOpen')).toBe(true);
-    expect(component.find('[data-test-subj="languageToggle"]').get(0).props.checked).toBeTruthy();
+    const euiComboBox = component.find(EuiComboBox);
+    expect(euiComboBox.prop('selectedOptions')).toEqual(
+      expect.arrayContaining([
+        {
+          label: 'DQL',
+        },
+      ])
+    );
   });
 });

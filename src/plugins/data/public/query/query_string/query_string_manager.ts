@@ -44,6 +44,10 @@ export class QueryStringManager {
     this.query$ = new BehaviorSubject<Query>(this.getDefaultQuery());
   }
 
+  private getDefaultQueryString() {
+    return this.storage.get('opensearchDashboards.userQueryString') || '';
+  }
+
   private getDefaultLanguage() {
     return (
       this.storage.get('opensearchDashboards.userQueryLanguage') ||
@@ -53,7 +57,7 @@ export class QueryStringManager {
 
   public getDefaultQuery() {
     return {
-      query: '',
+      query: this.getDefaultQueryString(),
       language: this.getDefaultLanguage(),
     };
   }

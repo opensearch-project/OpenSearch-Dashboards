@@ -52,6 +52,7 @@ export type OpenSearchClientConfig = Pick<
   | 'hosts'
   | 'username'
   | 'password'
+  | 'disablePrototypePoisoningProtection'
 > & {
   memoryCircuitBreaker?:
     | OpenSearchConfig['memoryCircuitBreaker']
@@ -113,6 +114,10 @@ export function parseClientOptions(config: OpenSearchClientConfig, scoped: boole
       config.ssl,
       scoped && !config.ssl.alwaysPresentCertificate
     );
+  }
+
+  if (config.disablePrototypePoisoningProtection != null) {
+    clientOptions.disablePrototypePoisoningProtection = config.disablePrototypePoisoningProtection;
   }
 
   return clientOptions;

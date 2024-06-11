@@ -44,12 +44,12 @@ export const Intro = () => {
       iconType="alert"
       color="warning"
     >
-      <div>
+      <p>
         <FormattedMessage
           id="savedObjectsManagement.view.howToModifyObjectDescription"
           defaultMessage="Modifying objects is for advanced users only. Object properties are not validated and invalid objects could cause errors, data loss, or worse. Unless someone with intimate knowledge of the code told you to be in here, you probably shouldn&rsquo;t be."
         />
-      </div>
+      </p>
     </EuiCallOut>
   );
 };

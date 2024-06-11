@@ -41,6 +41,12 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
+import { createDataSourcePickerHandler } from './lib/create_data_source_change_handler';
+import {
+  getSavedObjectsClient,
+  getNotifications,
+  getDataSourceManagementSetup,
+} from '../../services';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
 import { YesNo } from './yes_no';
@@ -112,6 +118,14 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
   };
 
   const model = { ...defaults, ..._model };
+
+  const dataSourceManagementEnabled =
+    !!getDataSourceManagementSetup().dataSourceManagement || false;
+  const handleDataSourceSelectChange = createDataSourcePickerHandler(onChange);
+  const DataSourceSelector = dataSourceManagementEnabled
+    ? getDataSourceManagementSetup().dataSourceManagement.ui.DataSourceSelector
+    : undefined;
+
   const isDefaultIndexPatternUsed = model.default_index_pattern && !model[indexPatternName];
   const intervalValidation = validateIntervalValue(model[intervalName]);
   const selectedTimeRangeOption = timeRangeOptions.find(
@@ -157,18 +171,47 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
+      {!!dataSourceManagementEnabled && (
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EuiFormRow
+              id={htmlId('dataSource')}
+              label={i18n.translate('visTypeTimeseries.indexPattern.dataSourceLabel', {
+                defaultMessage: 'Data source',
+              })}
+            >
+              <DataSourceSelector
+                savedObjectsClient={getSavedObjectsClient().client}
+                notifications={getNotifications().toasts}
+                onSelectedDataSource={handleDataSourceSelectChange}
+                defaultOption={
+                  model.data_source_id !== undefined ? [{ id: model.data_source_id }] : undefined
+                }
+                disabled={false}
+                fullWidth={false}
+                removePrepend={true}
+                isClearable={false}
+              />
+            </EuiFormRow>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFormRow
             id={htmlId('indexPattern')}
             label={i18n.translate('visTypeTimeseries.indexPatternLabel', {
-              defaultMessage: 'Index pattern',
+              defaultMessage: 'Index name',
             })}
             helpText={
-              isDefaultIndexPatternUsed &&
-              i18n.translate('visTypeTimeseries.indexPattern.searchByDefaultIndex', {
-                defaultMessage: 'Default index pattern is used. To query all indexes use *',
-              })
+              isDefaultIndexPatternUsed
+                ? i18n.translate('visTypeTimeseries.indexPattern.searchByDefaultIndex', {
+                    defaultMessage: 'Default index pattern is used. To query all indexes use *',
+                  })
+                : i18n.translate('visTypeTimeseries.indexPattern.searchByIndex', {
+                    defaultMessage:
+                      'Use an asterisk (*) to match multiple indices. Spaces and the characters , /, ?, ", <, >, | are not allowed.',
+                  })
             }
           >
             <EuiFieldText

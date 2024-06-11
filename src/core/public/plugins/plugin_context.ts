@@ -111,6 +111,7 @@ export function createPluginSetupContext<
       registerMountContext: (contextName, provider) =>
         deps.application.registerMountContext(plugin.opaqueId, contextName, provider),
     },
+    chrome: deps.chrome,
     context: deps.context,
     fatalErrors: deps.fatalErrors,
     http: deps.http,
@@ -121,6 +122,7 @@ export function createPluginSetupContext<
       getBranding: deps.injectedMetadata.getBranding,
     },
     getStartServices: () => plugin.startDependencies,
+    workspaces: deps.workspaces,
   };
 }
 
@@ -168,5 +170,6 @@ export function createPluginStartContext<
       getBranding: deps.injectedMetadata.getBranding,
     },
     fatalErrors: deps.fatalErrors,
+    workspaces: deps.workspaces,
   };
 }

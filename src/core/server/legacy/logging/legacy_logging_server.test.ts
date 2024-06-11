@@ -67,13 +67,23 @@ test('correctly forwards log records.', () => {
     meta: { tags: ['important', 'tags'], unknown: 2 },
   };
 
+  const controlSequenceLogRecord = {
+    timestamp: new Date(timestamp),
+    pid: 5355,
+    level: LogLevel.Trace,
+    context: 'some-context.sub-context',
+    message: 'some\u001b[33mCOLORED\u001b[0m',
+    meta: { tags: ['important', 'tags'], unknown: 2 },
+  };
+
   loggingServer.log(firstLogRecord);
   loggingServer.log(secondLogRecord);
   loggingServer.log(thirdLogRecord);
+  loggingServer.log(controlSequenceLogRecord);
 
-  expect(onLogMock).toHaveBeenCalledTimes(3);
+  expect(onLogMock).toHaveBeenCalledTimes(4);
 
-  const [[firstCall], [secondCall], [thirdCall]] = onLogMock.mock.calls;
+  const [[firstCall], [secondCall], [thirdCall], [controlSequenceCall]] = onLogMock.mock.calls;
   expect(firstCall).toMatchInlineSnapshot(`
 Object {
   "data": "some-message",
@@ -102,6 +112,27 @@ Object {
   "data": Object {
     Symbol(log message with metadata): Object {
       "message": "some-message",
+      "metadata": Object {
+        "unknown": 2,
+      },
+    },
+  },
+  "tags": Array [
+    "debug",
+    "some-context",
+    "sub-context",
+    "important",
+    "tags",
+  ],
+  "timestamp": 1554433221100,
+}
+`);
+
+  expect(controlSequenceCall).toMatchInlineSnapshot(`
+Object {
+  "data": Object {
+    Symbol(log message with metadata): Object {
+      "message": "some(U+001b)[33mCOLORED(U+001b)[0m",
       "metadata": Object {
         "unknown": 2,
       },

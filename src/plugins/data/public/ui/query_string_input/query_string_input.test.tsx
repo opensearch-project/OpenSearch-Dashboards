@@ -42,7 +42,7 @@ import { render } from '@testing-library/react';
 
 import { EuiTextArea } from '@elastic/eui';
 
-import { QueryLanguageSwitcher } from './language_switcher';
+import { LegacyQueryLanguageSwitcher } from './legacy_language_switcher';
 import { QueryStringInput } from './';
 import type QueryStringInputUI from './query_string_input';
 
@@ -50,6 +50,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { dataPluginMock } from '../../mocks';
 import { stubIndexPatternWithFields } from '../../stubs';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
+import { SettingsMock } from '../settings/mocks';
 
 const startMock = coreMock.createStart();
 
@@ -83,6 +84,8 @@ const createMockStorage = () => ({
   remove: jest.fn(),
   clear: jest.fn(),
 });
+
+const settingsMock = new SettingsMock(createMockStorage(), new Map());
 
 function wrapQueryStringInputInContext(testProps: any, storage?: any) {
   const defaultOptions = {
@@ -132,7 +135,7 @@ describe('QueryStringInput', () => {
         indexPatterns: [stubIndexPatternWithFields],
       })
     );
-    expect(component.find(QueryLanguageSwitcher).prop('language')).toBe(luceneQuery.language);
+    expect(component.find(LegacyQueryLanguageSwitcher).prop('language')).toBe(luceneQuery.language);
   });
 
   it('Should disable autoFocus on EuiTextArea when disableAutoFocus prop is true', () => {
@@ -173,16 +176,17 @@ describe('QueryStringInput', () => {
           indexPatterns: [stubIndexPatternWithFields],
           disableAutoFocus: true,
           appName: 'discover',
+          settings: settingsMock,
         },
         mockStorage
       )
     );
 
-    component.find(QueryLanguageSwitcher).props().onSelectLanguage('lucene');
-    expect(mockStorage.set).toHaveBeenCalledWith(
-      'opensearchDashboards.userQueryLanguage',
-      'lucene'
-    );
+    component.find(LegacyQueryLanguageSwitcher).props().onSelectLanguage('lucene');
+    expect(settingsMock.updateSettings).toHaveBeenCalledWith({
+      userQueryLanguage: 'lucene',
+      userQueryString: '',
+    });
     expect(mockCallback).toHaveBeenCalledWith({ query: '', language: 'lucene' });
   });
 

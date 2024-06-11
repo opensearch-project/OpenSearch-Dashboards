@@ -83,6 +83,10 @@ interface Props {
   SavedObjectFinder: React.ComponentType<any>;
   stateTransfer?: EmbeddableStateTransfer;
   hideHeader?: boolean;
+  // TODO: the below hasBorder and hasShadow fields may be removed as part of
+  // https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4483
+  hasBorder?: boolean;
+  hasShadow?: boolean;
 }
 
 interface State {
@@ -234,6 +238,8 @@ export class EmbeddablePanel extends React.Component<Props, State> {
         paddingSize="none"
         role="figure"
         aria-labelledby={headerId}
+        hasBorder={this.props.hasBorder}
+        hasShadow={this.props.hasShadow}
       >
         {!this.props.hideHeader && (
           <PanelHeader

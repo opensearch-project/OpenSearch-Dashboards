@@ -34,6 +34,7 @@ import {
   IOpenSearchSearchResponse,
   ISearchOptions,
 } from '../../common/search';
+import { IDataFrameResponse } from '../data_frames';
 
 export type ISearch = (
   request: IOpenSearchDashboardsSearchRequest,
@@ -42,7 +43,9 @@ export type ISearch = (
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-  SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+  SearchStrategyResponse extends
+    | IOpenSearchDashboardsSearchResponse
+    | IDataFrameResponse = IOpenSearchSearchResponse
 >(
   request: SearchStrategyRequest,
   options?: ISearchOptions
@@ -75,6 +78,11 @@ export interface IOpenSearchDashboardsSearchResponse<RawResponse = any> {
    * Indicates whether the results returned are complete or partial
    */
   isPartial?: boolean;
+
+  /**
+   * Indicates whether the results returned need long numerals treatment
+   */
+  withLongNumeralsSupport?: boolean;
 
   rawResponse: RawResponse;
 }

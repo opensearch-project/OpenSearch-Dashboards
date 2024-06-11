@@ -355,47 +355,6 @@
             }
           }
         },
-        "timeline-sheet": {
-          "properties": {
-            "description": {
-              "type": "text"
-            },
-            "hits": {
-              "type": "integer"
-            },
-            "kibanaSavedObjectMeta": {
-              "properties": {
-                "searchSourceJSON": {
-                  "type": "text"
-                }
-              }
-            },
-            "timeline_chart_height": {
-              "type": "integer"
-            },
-            "timeline_columns": {
-              "type": "integer"
-            },
-            "timeline_interval": {
-              "type": "keyword"
-            },
-            "timeline_other_interval": {
-              "type": "keyword"
-            },
-            "timeline_rows": {
-              "type": "integer"
-            },
-            "timeline_sheet": {
-              "type": "text"
-            },
-            "title": {
-              "type": "text"
-            },
-            "version": {
-              "type": "integer"
-            }
-          }
-        },
         "type": {
           "type": "keyword"
         },

@@ -31,7 +31,7 @@
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { ManagementSetup, ManagementStart } from './types';
-import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../home/public';
+import { HomePublicPluginSetup } from '../../home/public';
 import {
   CoreSetup,
   CoreStart,
@@ -49,9 +49,11 @@ import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
+import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
+  managementOverview?: ManagementOverViewPluginSetup;
 }
 
 export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart> {
@@ -63,33 +65,18 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
 
   constructor(private initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup, { home }: ManagementSetupDependencies) {
-    const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
+  private title = i18n.translate('management.dashboardManagement.title', {
+    defaultMessage: 'Dashboards Management',
+  });
 
-    if (home) {
-      home.featureCatalogue.register({
-        id: 'stack-management',
-        title: i18n.translate('management.stackManagement.managementLabel', {
-          defaultMessage: 'Stack Management',
-        }),
-        description: i18n.translate('management.stackManagement.managementDescription', {
-          defaultMessage: 'Your center console for managing the OpenSearch Stack.',
-        }),
-        icon: 'managementApp',
-        path: '/app/management',
-        showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
-        visible: () => this.hasAnyEnabledApps,
-      });
-    }
+  public setup(core: CoreSetup, { home, managementOverview }: ManagementSetupDependencies) {
+    const opensearchDashboardsVersion = this.initializerContext.env.packageInfo.version;
 
     core.application.register({
       id: MANAGEMENT_APP_ID,
-      title: i18n.translate('management.stackManagement.title', {
-        defaultMessage: 'Stack Management',
-      }),
-      order: 9040,
-      icon: '/plugins/home/assets/logos/opensearch_mark_default.svg',
+      title: this.title,
+      order: 9030,
+      icon: '/ui/logos/opensearch_mark.svg',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: this.appUpdater,
       async mount(params: AppMountParameters) {
@@ -102,6 +89,16 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
         });
       },
+    });
+
+    managementOverview?.register({
+      id: MANAGEMENT_APP_ID,
+      title: this.title,
+      description: i18n.translate('management.dashboardManagement.description', {
+        defaultMessage:
+          'Manage Dashboards saved objects and data source connections. You can also modify advanced settings for Dashboards.',
+      }),
+      order: 9030,
     });
 
     return {

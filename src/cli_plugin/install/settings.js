@@ -42,10 +42,11 @@ function generateUrls({ version, plugin }) {
 }
 
 function generatePluginUrl(version, plugin) {
-  const platform = process.platform === 'win32' ? 'windows' : process.platform;
+  const [platform, type] =
+    process.platform === 'win32' ? ['windows', 'zip'] : [process.platform, 'tar'];
   const arch = process.arch === 'arm64' ? 'arm64' : 'x64';
 
-  return `${LATEST_PLUGIN_BASE_URL}/${version}/latest/${platform}/${arch}/tar/builds/opensearch-dashboards/plugins/${plugin}-${version}.zip`;
+  return `${LATEST_PLUGIN_BASE_URL}/${version}/latest/${platform}/${arch}/${type}/builds/opensearch-dashboards/plugins/${plugin}-${version}.zip`;
 }
 
 export function parseMilliseconds(val) {

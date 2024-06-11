@@ -31,6 +31,7 @@
 import { omitBy } from 'lodash';
 import { format } from 'url';
 import { BehaviorSubject } from 'rxjs';
+import { isRelativeUrl, parse } from '@osd/std';
 
 import {
   IBasePath,
@@ -144,7 +145,6 @@ export class Fetch {
       headers: removedUndefined({
         'Content-Type': 'application/json',
         ...options.headers,
-        'osd-version': this.params.opensearchDashboardsVersion,
       }),
     };
 
@@ -156,6 +156,18 @@ export class Fetch {
     // Make sure the system request header is only present if `asSystemRequest` is true.
     if (asSystemRequest) {
       fetchOptions.headers['osd-system-request'] = 'true';
+    }
+
+    /* `osd-version` is used on the server-side to make sure that an incoming request originated from a front-end
+     * of the same version; see core/server/http/lifecycle_handlers.ts
+     * `osd-xsrf` is to satisfy XSRF protection but is only meaningful to OpenSearch Dashboards.
+     *
+     * If the `url` equals `basePath`,  starts with `basePath` + '/', or is relative, add `osd-version` and `osd-xsrf` headers.
+     */
+    const basePath = this.params.basePath.get();
+    if (isRelativeUrl(url) || url === basePath || url.startsWith(`${basePath}/`)) {
+      fetchOptions.headers['osd-version'] = this.params.opensearchDashboardsVersion;
+      fetchOptions.headers['osd-xsrf'] = 'osd-fetch';
     }
 
     return new Request(url, fetchOptions as RequestInit);
@@ -178,12 +190,20 @@ export class Fetch {
       if (NDJSON_CONTENT.test(contentType)) {
         body = await response.blob();
       } else if (JSON_CONTENT.test(contentType)) {
-        body = await response.json();
+        // ToDo: [3.x] Remove withLongNumerals
+        body =
+          fetchOptions.withLongNumeralsSupport || fetchOptions.withLongNumerals
+            ? parse(await response.text())
+            : await response.json();
       } else {
         const text = await response.text();
 
         try {
-          body = JSON.parse(text);
+          // ToDo: [3.x] Remove withLongNumerals
+          body =
+            fetchOptions.withLongNumeralsSupport || fetchOptions.withLongNumerals
+              ? parse(text)
+              : JSON.parse(text);
         } catch (err) {
           body = text;
         }
@@ -200,6 +220,8 @@ export class Fetch {
   }
 
   private shorthand(method: string): HttpHandler {
+    // ToDo: find why 'TResponseBody' of HttpHandler is not assignable to type 'HttpResponse<any>'
+    // @ts-expect-error
     return (pathOrOptions: string | HttpFetchOptionsWithPath, options?: HttpFetchOptions) => {
       const optionsWithPath = validateFetchArguments(pathOrOptions, options);
       return this.fetch({ ...optionsWithPath, method });

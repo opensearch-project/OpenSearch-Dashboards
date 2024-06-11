@@ -45,6 +45,13 @@ function createStartContract(): jest.Mocked<ISearchStart> {
     search: jest.fn(),
     showError: jest.fn(),
     searchSource: searchSourceMock.createStartContract(),
+    __enhance: jest.fn(),
+    getDefaultSearchInterceptor: jest.fn(),
+    df: {
+      get: jest.fn().mockReturnValue({}),
+      set: jest.fn().mockReturnValue({}),
+      clear: jest.fn(),
+    },
   };
 }
 

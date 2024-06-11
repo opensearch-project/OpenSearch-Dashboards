@@ -42,7 +42,7 @@ export const CreateNoticeFile: Task = {
     log.info('Generating notice from source');
     log.indent(4);
     const noticeFromSource = await generateNoticeFromSource({
-      productName: 'OpenSearch',
+      productName: 'OpenSearch (https://opensearch.org/)',
       directory: build.resolvePath(),
       log,
     });
@@ -57,7 +57,7 @@ export const CreateNoticeFile: Task = {
 
     log.info('Generating build notice');
 
-    const { extractDir: nodeDir, version: nodeVersion } = getNodeDownloadInfo(
+    const { extractDir: nodeDir, version: nodeVersion } = await getNodeDownloadInfo(
       config,
       config.hasSpecifiedPlatform()
         ? config.getPlatform(

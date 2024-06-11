@@ -44,6 +44,7 @@ import {
   getHttp,
   getTimeFilter,
   getCapabilities,
+  getSavedAugmentVisLoader,
 } from '../services';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
@@ -88,6 +89,8 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
 
     const editable = getCapabilities().visualize.save as boolean;
 
+    const savedAugmentVisLoader = getSavedAugmentVisLoader();
+
     return new VisualizeEmbeddable(
       getTimeFilter(),
       {
@@ -101,6 +104,7 @@ export const createVisEmbeddableFromObject = (deps: VisualizeEmbeddableFactoryDe
       input,
       attributeService,
       savedVisualizationsLoader,
+      savedAugmentVisLoader,
       parent
     );
   } catch (e) {

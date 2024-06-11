@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import Url from 'url';
 import Https from 'https';
 import Axios, { AxiosResponse } from 'axios';
 
@@ -37,7 +36,7 @@ import { ToolingLog } from '../tooling_log';
 
 const isConcliftOnGetError = (error: any) => {
   return (
-    isAxiosResponseError(error) && error.config.method === 'GET' && error.response.status === 409
+    isAxiosResponseError(error) && error.config?.method === 'GET' && error.response.status === 409
   );
 };
 
@@ -93,7 +92,7 @@ export class OsdClientRequester {
   constructor(private readonly log: ToolingLog, options: Options) {
     this.url = options.url;
     this.httpsAgent =
-      Url.parse(options.url).protocol === 'https:'
+      new URL(options.url).protocol === 'https:'
         ? new Https.Agent({
             ca: options.certificateAuthorities,
           })
@@ -105,11 +104,11 @@ export class OsdClientRequester {
   }
 
   public resolveUrl(relativeUrl: string = '/') {
-    return Url.resolve(this.pickUrl(), relativeUrl);
+    return new URL(relativeUrl, this.pickUrl()).toString();
   }
 
   async request<T>(options: ReqOptions): Promise<AxiosResponse<T>> {
-    const url = Url.resolve(this.pickUrl(), options.path);
+    const url = new URL(options.path, this.pickUrl()).toString();
     const description = options.description || `${options.method} ${url}`;
     let attempt = 0;
     const maxAttempts = options.retries ?? DEFAULT_MAX_ATTEMPTS;

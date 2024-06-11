@@ -46,9 +46,9 @@ import {
 } from './types';
 import { AutocompleteService } from './autocomplete';
 import { SearchService } from './search/search_service';
+import { UiService } from './ui/ui_service';
 import { FieldFormatsService } from './field_formats';
 import { QueryService } from './query';
-import { createIndexPatternSelect } from './ui/index_pattern_select';
 import {
   IndexPatternsService,
   onRedirectNoIndexPattern,
@@ -63,9 +63,9 @@ import {
   setOverlays,
   setQueryService,
   setSearchService,
+  setUiService,
   setUiSettings,
 } from './services';
-import { createSearchBar } from './ui/search_bar/create_search_bar';
 import { opensearchaggs } from './search/expressions';
 import {
   SELECT_RANGE_TRIGGER,
@@ -88,6 +88,11 @@ import {
 
 import { SavedObjectsClientPublicToCommon } from './index_patterns';
 import { indexPatternLoad } from './index_patterns/expressions/load_index_pattern';
+import { DataSourceService } from './data_sources/datasource_services';
+import { DataSourceFactory } from './data_sources/datasource';
+import { registerDefaultDataSource } from './data_sources/register_default_datasource';
+import { DefaultDslDataSource } from './data_sources/default_datasource';
+import { DEFAULT_DATA_SOURCE_TYPE } from './data_sources/constants';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -107,12 +112,14 @@ export class DataPublicPlugin
     > {
   private readonly autocomplete: AutocompleteService;
   private readonly searchService: SearchService;
+  private readonly uiService: UiService;
   private readonly fieldFormatsService: FieldFormatsService;
   private readonly queryService: QueryService;
   private readonly storage: IStorageWrapper;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.searchService = new SearchService(initializerContext);
+    this.uiService = new UiService(initializerContext);
     this.queryService = new QueryService();
     this.fieldFormatsService = new FieldFormatsService();
     this.autocomplete = new AutocompleteService(initializerContext);
@@ -156,13 +163,17 @@ export class DataPublicPlugin
       expressions,
     });
 
+    const uiService = this.uiService.setup(core, {});
+
     return {
+      // TODO: MQL
       autocomplete: this.autocomplete.setup(core),
       search: searchService,
       fieldFormats: this.fieldFormatsService.setup(core),
       query: queryService,
       __enhance: (enhancements: DataPublicPluginEnhancements) => {
-        searchService.__enhance(enhancements.search);
+        if (enhancements.search) searchService.__enhance(enhancements.search);
+        if (enhancements.ui) uiService.__enhance(enhancements.ui);
       },
     };
   }
@@ -212,6 +223,17 @@ export class DataPublicPlugin
       uiActions.getAction(ACTION_GLOBAL_APPLY_FILTER)
     );
 
+    // Create or fetch the singleton instance
+    const dataSourceService = DataSourceService.getInstance();
+    const dataSourceFactory = DataSourceFactory.getInstance();
+    dataSourceFactory.registerDataSourceType(DEFAULT_DATA_SOURCE_TYPE, DefaultDslDataSource);
+    dataSourceService.registerDataSourceFetchers([
+      {
+        type: DEFAULT_DATA_SOURCE_TYPE,
+        registerDataSources: () => registerDefaultDataSource(dataServices),
+      },
+    ]);
+
     const dataServices = {
       actions: {
         createFiltersFromValueClickAction,
@@ -222,20 +244,20 @@ export class DataPublicPlugin
       indexPatterns,
       query,
       search,
+      dataSources: {
+        dataSourceService,
+        dataSourceFactory,
+      },
     };
 
-    const SearchBar = createSearchBar({
-      core,
-      data: dataServices,
-      storage: this.storage,
-    });
+    registerDefaultDataSource(dataServices);
+
+    const uiService = this.uiService.start(core, { dataServices, storage: this.storage });
+    setUiService(uiService);
 
     return {
       ...dataServices,
-      ui: {
-        IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
-        SearchBar,
-      },
+      ui: uiService,
     };
   }
 
@@ -243,5 +265,6 @@ export class DataPublicPlugin
     this.autocomplete.clearProviders();
     this.queryService.stop();
     this.searchService.stop();
+    this.uiService.stop();
   }
 }

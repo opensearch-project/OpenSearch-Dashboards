@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { Filter } from '../filters';
+import { Filter, QueryStringFilter } from '../filters';
 import { filterMatchesIndex } from './filter_matches_index';
 import { IIndexPattern } from '../../index_patterns';
 
@@ -65,5 +65,49 @@ describe('filterMatchesIndex', () => {
     const indexPattern = { id: 'foo', fields: [{ name: 'bar' }] } as IIndexPattern;
 
     expect(filterMatchesIndex(filter, indexPattern)).toBe(true);
+  });
+
+  it('should return false if the custom filter is a different index id', () => {
+    const filter = { meta: { index: 'foo', key: 'bar', type: 'custom' } } as Filter;
+    const indexPattern = { id: 'bar', fields: [{ name: 'foo' }] } as IIndexPattern;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(false);
+  });
+
+  it('should return true if the custom filter is the same index id', () => {
+    const filter = { meta: { index: 'foo', key: 'bar', type: 'custom' } } as Filter;
+    const indexPattern = { id: 'foo', fields: [{ name: 'barf' }] } as IIndexPattern;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(true);
+  });
+
+  it('should return false if a query string filter cannot be parsed', () => {
+    const filter = {
+      meta: { key: 'query', type: 'query_string' },
+      query: { query_string: { query: 'foo"bar' } },
+    } as QueryStringFilter;
+    const indexPattern = { id: 'bar', fields: [{ name: 'foo' }] } as IIndexPattern;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(false);
+  });
+
+  it('should return true if a query string filter references fields in an index', () => {
+    const filter = {
+      meta: { key: 'query', type: 'query_string' },
+      query: { query_string: { query: 'foo: bar AND baz: firzle' } },
+    } as QueryStringFilter;
+    const indexPattern = { id: 'bar', fields: [{ name: 'foo' }, { name: 'baz' }] } as IIndexPattern;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(true);
+  });
+
+  it('should return false if a query string filter references fields not in an index', () => {
+    const filter = {
+      meta: { key: 'query', type: 'query_string' },
+      query: { query_string: { query: 'foo: bar AND baz: firzle' } },
+    } as QueryStringFilter;
+    const indexPattern = { id: 'bar', fields: [{ name: 'foo' }] } as IIndexPattern;
+
+    expect(filterMatchesIndex(filter, indexPattern)).toBe(false);
   });
 });

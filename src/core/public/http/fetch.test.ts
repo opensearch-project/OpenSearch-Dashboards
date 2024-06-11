@@ -825,4 +825,43 @@ describe('Fetch', () => {
       expect(usedSpy).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('long numerals', () => {
+    const longPositive = BigInt(Number.MAX_SAFE_INTEGER) * 2n;
+    const longNegative = BigInt(Number.MIN_SAFE_INTEGER) * 2n;
+
+    it('should use alternate parser on JSON responses when asked to', async () => {
+      fetchMock.get('*', {
+        body: `{"long-max": ${longPositive}, "long-min": ${longNegative}}`,
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      await expect(
+        fetchInstance.fetch('/my/path', { withLongNumeralsSupport: true })
+      ).resolves.toEqual({
+        'long-max': longPositive,
+        'long-min': longNegative,
+      });
+    });
+
+    it('should use alternate parser on non-JSON responses when asked to', async () => {
+      fetchMock.get('*', {
+        body: `{"long-max": ${longPositive}, "long-min": ${longNegative}}`,
+        status: 200,
+        headers: {
+          'Content-Type': 'text',
+        },
+      });
+
+      await expect(
+        fetchInstance.fetch('/my/path', { withLongNumeralsSupport: true })
+      ).resolves.toEqual({
+        'long-max': longPositive,
+        'long-min': longNegative,
+      });
+    });
+  });
 });

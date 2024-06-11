@@ -59,6 +59,9 @@ export const registerFindRoute = (router: IRouter) => {
           namespaces: schema.maybe(
             schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
           ),
+          workspaces: schema.maybe(
+            schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+          ),
         }),
       },
     },
@@ -67,6 +70,7 @@ export const registerFindRoute = (router: IRouter) => {
 
       const namespaces =
         typeof req.query.namespaces === 'string' ? [req.query.namespaces] : req.query.namespaces;
+      const workspaces = query.workspaces ? Array<string>().concat(query.workspaces) : undefined;
 
       const result = await context.core.savedObjects.client.find({
         perPage: query.per_page,
@@ -81,6 +85,7 @@ export const registerFindRoute = (router: IRouter) => {
         fields: typeof query.fields === 'string' ? [query.fields] : query.fields,
         filter: query.filter,
         namespaces,
+        ...(workspaces ? { workspaces } : {}),
       });
 
       return res.ok({ body: result });

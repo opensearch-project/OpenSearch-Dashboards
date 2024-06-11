@@ -19,6 +19,6 @@
     "patterns": [
       "{indices}/_open"
     ],
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-open-close.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/open-index/"
   }
 }

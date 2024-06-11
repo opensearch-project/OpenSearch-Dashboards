@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
     describe('move panel', () => {
       // Specific test after https://github.com/elastic/kibana/issues/14764 fix
       it('Can move panel from bottom to top row', async () => {
-        const lastVisTitle = 'Rendering Test: datatable';
+        const lastVisTitle = 'Rendering Test: pie';
         const panelTitleBeforeMove = await dashboardPanelActions.getPanelHeading(lastVisTitle);
         const position1 = await panelTitleBeforeMove.getPosition();
         await browser.dragAndDrop(

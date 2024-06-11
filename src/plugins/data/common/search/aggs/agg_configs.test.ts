@@ -117,7 +117,7 @@ describe('AggConfigs', () => {
       expect(ac.aggs).toHaveLength(3);
     });
 
-    it('adds new AggConfig entries to AggConfigs by default', () => {
+    it('adds new AggConfig entries to end of AggConfigs by default', () => {
       const configStates = [
         {
           enabled: true,
@@ -136,6 +136,7 @@ describe('AggConfigs', () => {
         schema: 'split',
       });
       expect(ac.aggs).toHaveLength(2);
+      expect(ac.aggs[1].schema).toBe('split');
     });
 
     it('does not add an agg to AggConfigs if addToAggConfigs: false', () => {
@@ -158,6 +159,55 @@ describe('AggConfigs', () => {
           schema: 'split',
         },
         { addToAggConfigs: false }
+      );
+      expect(ac.aggs).toHaveLength(1);
+    });
+
+    it('adds new AggConfig entries to beginning of AggConfigs if mustBeFirst: true', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'histogram',
+          params: {},
+        },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      expect(ac.aggs).toHaveLength(1);
+
+      ac.createAggConfig(
+        {
+          enabled: true,
+          type: 'terms',
+          params: {},
+          schema: 'split',
+        },
+        { mustBeFirst: true }
+      );
+      expect(ac.aggs).toHaveLength(2);
+      expect(ac.aggs[0].schema).toBe('split');
+    });
+
+    it('does not add an agg to AggConfigs if addToAggConfigs: false and mustBeFirst: true', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'histogram',
+          params: {},
+        },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      expect(ac.aggs).toHaveLength(1);
+
+      ac.createAggConfig(
+        {
+          enabled: true,
+          type: 'terms',
+          params: {},
+          schema: 'split',
+        },
+        { addToAggConfigs: false, mustBeFirst: true }
       );
       expect(ac.aggs).toHaveLength(1);
     });

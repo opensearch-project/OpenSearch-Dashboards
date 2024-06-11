@@ -45,5 +45,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./ui_metric'));
     loadTestFile(require.resolve('./telemetry'));
+    loadTestFile(require.resolve('./workspace'));
   });
 }

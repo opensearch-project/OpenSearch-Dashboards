@@ -70,7 +70,10 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     });
 
     it('server plugins have access to registered settings', async () => {
-      await supertest.get('/api/ui-settings-plugin').expect(200).expect({ uiSettingsValue: 2 });
+      const result = await supertest.get('/api/ui-settings-plugin');
+      expect(result.statusCode).to.be(200);
+      expect(Object.keys(result.body).length).to.be(1);
+      expect(Number(result.body.uiSettingsValue)).to.be(2);
     });
   });
 }

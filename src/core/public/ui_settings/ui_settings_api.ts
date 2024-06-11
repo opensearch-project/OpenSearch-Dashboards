@@ -66,7 +66,7 @@ export class UiSettingsApi {
    * before sending the next request
    */
   public batchSet(key: string, value: any) {
-    return new Promise<UiSettingsApiResponse>((resolve, reject) => {
+    return new Promise<UiSettingsApiResponse | undefined>((resolve, reject) => {
       const prev = this.pendingChanges || NOOP_CHANGES;
 
       this.pendingChanges = {

@@ -31,3 +31,4 @@
 export * from './feature_catalogue';
 export * from './environment';
 export * from './tutorials';
+export * from './section_type';

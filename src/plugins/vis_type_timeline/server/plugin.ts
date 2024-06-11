@@ -34,6 +34,7 @@ import { TypeOf, schema } from '@osd/config-schema';
 import { RecursiveReadonly } from '@osd/utility-types';
 import { deepFreeze } from '@osd/std';
 
+import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 import { PluginStart } from '../../data/server';
 import { CoreSetup, PluginInitializerContext } from '../../../core/server';
 import { configSchema } from '../config';
@@ -42,16 +43,14 @@ import { functionsRoute } from './routes/functions';
 import { validateOpenSearchRoute } from './routes/validate_es';
 import { runRoute } from './routes/run';
 import { ConfigManager } from './lib/config_manager';
+import { setDataSourceEnabled } from './lib/services';
 
 const experimentalLabel = i18n.translate('timeline.uiSettings.experimentalLabel', {
   defaultMessage: 'experimental',
 });
 
-/**
- * Describes public Timeline plugin contract returned at the `setup` stage.
- */
-export interface PluginSetupContract {
-  uiEnabled: boolean;
+export interface TimelinePluginSetupDeps {
+  dataSource?: DataSourcePluginSetup;
 }
 
 export interface TimelinePluginStartDeps {
@@ -64,7 +63,7 @@ export interface TimelinePluginStartDeps {
 export class Plugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
-  public async setup(core: CoreSetup): Promise<RecursiveReadonly<PluginSetupContract>> {
+  public async setup(core: CoreSetup, { dataSource }: TimelinePluginSetupDeps): void {
     const config = await this.initializerContext.config
       .create<TypeOf<typeof configSchema>>()
       .pipe(first())
@@ -86,6 +85,8 @@ export class Plugin {
         })
       );
     };
+
+    setDataSourceEnabled({ enabled: !!dataSource });
 
     const logger = this.initializerContext.logger.get('timeline');
 
@@ -111,7 +112,7 @@ export class Plugin {
         value: '@timestamp',
         description: i18n.translate('timeline.uiSettings.timeFieldDescription', {
           defaultMessage: 'Default field containing a timestamp when using {opensearchParam}',
-          values: { opensearchParam: '.es()' },
+          values: { opensearchParam: '.opensearch()' },
         }),
         category: ['timeline'],
         schema: schema.string(),
@@ -123,7 +124,7 @@ export class Plugin {
         value: '_all',
         description: i18n.translate('timeline.uiSettings.defaultIndexDescription', {
           defaultMessage: 'Default opensearch index to search with {opensearchParam}',
-          values: { opensearchParam: '.es()' },
+          values: { opensearchParam: '.opensearch()' },
         }),
         category: ['timeline'],
         schema: schema.string(),
@@ -193,8 +194,6 @@ export class Plugin {
         schema: schema.string(),
       },
     });
-
-    return deepFreeze({ uiEnabled: config.ui.enabled });
   }
 
   public start() {

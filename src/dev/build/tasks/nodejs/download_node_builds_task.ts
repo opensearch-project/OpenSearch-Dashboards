@@ -30,16 +30,26 @@
 
 import { download, GlobalTask } from '../../lib';
 import { getNodeShasums } from './node_shasums';
-import { getNodeDownloadInfo } from './node_download_info';
+import {
+  getNodeDownloadInfo,
+  getNodeVersionDownloadInfo,
+  getRequiredVersion,
+  NODE14_FALLBACK_VERSION,
+} from './node_download_info';
 
 export const DownloadNodeBuilds: GlobalTask = {
   global: true,
   description: 'Downloading node.js builds for all platforms',
   async run(config, log) {
-    const shasums = await getNodeShasums(log, config.getNodeVersion());
-    await Promise.all(
-      config.getTargetPlatforms().map(async (platform) => {
-        const { url, downloadPath, downloadName } = getNodeDownloadInfo(config, platform);
+    const requiredNodeVersion = getRequiredVersion(config);
+    const shasums = await getNodeShasums(log, requiredNodeVersion);
+
+    // ToDo [NODE14]: Remove this Node.js 14 fallback download
+    const node14ShaSums = await getNodeShasums(log, NODE14_FALLBACK_VERSION);
+
+    await Promise.all([
+      ...config.getTargetPlatforms().map(async (platform) => {
+        const { url, downloadPath, downloadName } = await getNodeDownloadInfo(config, platform);
         await download({
           log,
           url,
@@ -47,7 +57,27 @@ export const DownloadNodeBuilds: GlobalTask = {
           destination: downloadPath,
           retries: 3,
         });
-      })
-    );
+      }),
+      // ToDo [NODE14]: Remove this Node.js 14 fallback download
+      ...config.getTargetPlatforms().map(async (platform) => {
+        if (platform.getBuildName() === 'darwin-arm64') {
+          log.warning(`There are no fallback Node.js versions released for darwin-arm64.`);
+          return;
+        }
+        const { url, downloadPath, downloadName } = await getNodeVersionDownloadInfo(
+          NODE14_FALLBACK_VERSION,
+          platform.getNodeArch(),
+          platform.isWindows(),
+          config.resolveFromRepo()
+        );
+        await download({
+          log,
+          url,
+          sha256: node14ShaSums[downloadName],
+          destination: downloadPath,
+          retries: 3,
+        });
+      }),
+    ]);
   },
 };

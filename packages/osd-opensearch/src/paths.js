@@ -35,6 +35,10 @@ function maybeUseBat(bin) {
   return os.platform().startsWith('win') ? `${bin}.bat` : bin;
 }
 
+function maybeUseBatOrShell(bin) {
+  return os.platform().startsWith('win') ? `${bin}.bat` : `${bin}.sh`;
+}
+
 const tempDir = os.tmpdir();
 
 exports.BASE_PATH = path.resolve(tempDir, 'osd-opensearch');
@@ -45,3 +49,6 @@ exports.OPENSEARCH_CONFIG = 'config/opensearch.yml';
 
 exports.OPENSEARCH_KEYSTORE_BIN = maybeUseBat('./bin/opensearch-keystore');
 exports.OPENSEARCH_PLUGIN = maybeUseBat('./bin/opensearch-plugin');
+exports.OPENSEARCH_SECURITY_INSTALL = maybeUseBatOrShell(
+  './plugins/opensearch-security/tools/install_demo_configuration'
+);

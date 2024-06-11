@@ -57,7 +57,7 @@ export function getTimelineVisDefinition(dependencies: TimelineVisDependencies) 
     }),
     visConfig: {
       defaults: {
-        expression: '.es(*)',
+        expression: '.opensearch(*)',
         interval: 'auto',
       },
     },

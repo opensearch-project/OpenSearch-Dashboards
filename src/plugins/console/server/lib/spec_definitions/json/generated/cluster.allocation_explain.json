@@ -11,6 +11,6 @@
     "patterns": [
       "_cluster/allocation/explain"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cluster-allocation/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cluster-api/cluster-allocation/"
   }
 }

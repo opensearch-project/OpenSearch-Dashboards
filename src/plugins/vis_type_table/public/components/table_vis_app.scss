@@ -1,0 +1,12 @@
+// Container for the Table Visualization component
+.visTable {
+  flex: 1 0 0;
+  overflow: auto;
+
+  @include euiScrollBar;
+}
+
+// Group container for table visualization components
+.visTable__group {
+  flex: 0 0 auto;
+}

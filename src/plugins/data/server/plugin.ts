@@ -96,7 +96,7 @@ export class DataServerPlugin
     this.autocompleteService = new AutocompleteService(initializerContext);
   }
 
-  public setup(
+  public async setup(
     core: CoreSetup<DataPluginStartDependencies, DataPluginStart>,
     { expressions, usageCollection, dataSource }: DataPluginSetupDependencies
   ) {
@@ -108,7 +108,7 @@ export class DataServerPlugin
 
     core.uiSettings.register(getUiSettings());
 
-    const searchSetup = this.searchService.setup(core, {
+    const searchSetup = await this.searchService.setup(core, {
       registerFunction: expressions.registerFunction,
       usageCollection,
       dataSource,

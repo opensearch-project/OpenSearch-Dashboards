@@ -102,6 +102,7 @@ describe('xsrf post-auth handler', () => {
       expect(result).toEqual('next');
     });
 
+    // ToDo: Remove; `osd-version` incorrectly used for satisfying XSRF protection
     it('accepts requests with version header', () => {
       const config = createConfig({ xsrf: { whitelist: [], disableProtection: false } });
       const handler = createXsrfPostAuthHandler(config);
@@ -129,7 +130,7 @@ describe('xsrf post-auth handler', () => {
       expect(responseFactory.badRequest).toHaveBeenCalledTimes(1);
       expect(responseFactory.badRequest.mock.calls[0][0]).toMatchInlineSnapshot(`
         Object {
-          "body": "Request must contain a osd-xsrf header.",
+          "body": "Request must contain the osd-xsrf header.",
         }
       `);
       expect(result).toEqual('badRequest');
@@ -199,7 +200,7 @@ describe('versionCheck post-auth handler', () => {
     responseFactory = httpServerMock.createLifecycleResponseFactory();
   });
 
-  it('forward the request to the next interceptor if header matches', () => {
+  it('forward the request to the next interceptor if osd-version header matches the actual version', () => {
     const handler = createVersionCheckPostAuthHandler('actual-version');
     const request = forgeRequest({ headers: { 'osd-version': 'actual-version' } });
 
@@ -212,7 +213,7 @@ describe('versionCheck post-auth handler', () => {
     expect(result).toBe('next');
   });
 
-  it('returns a badRequest error if header does not match', () => {
+  it('returns a badRequest error if osd-version header exists but does not match the actual version', () => {
     const handler = createVersionCheckPostAuthHandler('actual-version');
     const request = forgeRequest({ headers: { 'osd-version': 'another-version' } });
 
@@ -236,7 +237,7 @@ describe('versionCheck post-auth handler', () => {
     expect(result).toBe('badRequest');
   });
 
-  it('forward the request to the next interceptor if header is not present', () => {
+  it('forward the request to the next interceptor if osd-version header is not present', () => {
     const handler = createVersionCheckPostAuthHandler('actual-version');
     const request = forgeRequest({ headers: {} });
 

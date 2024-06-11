@@ -12,6 +12,6 @@
     "patterns": [
       "_search/scroll"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/ux/#scroll-search"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/scroll/"
   }
 }

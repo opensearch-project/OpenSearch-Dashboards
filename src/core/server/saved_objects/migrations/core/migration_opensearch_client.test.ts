@@ -76,4 +76,8 @@ describe('MigrationOpenSearchClient', () => {
       expect(SavedObjectsErrorHelpers.isSavedObjectsClientError(e)).toBe(false);
     }
   });
+
+  it('should have the deleteByQuery method', () => {
+    expect(client.deleteByQuery).toBeDefined();
+  });
 });

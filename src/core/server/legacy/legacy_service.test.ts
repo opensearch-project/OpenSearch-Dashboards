@@ -31,6 +31,8 @@
 jest.mock('../../../legacy/server/osd_server');
 jest.mock('./cluster_manager');
 
+import '@osd/optimizer/target/__mocks__/lmdb';
+
 import { BehaviorSubject, throwError } from 'rxjs';
 import { REPO_ROOT } from '@osd/dev-utils';
 
@@ -58,6 +60,7 @@ import { statusServiceMock } from '../status/status_service.mock';
 import { auditTrailServiceMock } from '../audit_trail/audit_trail_service.mock';
 import { loggingServiceMock } from '../logging/logging_service.mock';
 import { metricsServiceMock } from '../metrics/metrics_service.mock';
+import { securityServiceMock } from '../security/security_service.mock';
 
 const MockOsdServer: jest.Mock<OsdServer> = OsdServer as any;
 
@@ -106,6 +109,7 @@ beforeEach(() => {
       auditTrail: auditTrailServiceMock.createSetupContract(),
       logging: loggingServiceMock.createInternalSetupContract(),
       metrics: metricsServiceMock.createInternalSetupContract(),
+      security: securityServiceMock.createSetupContract(),
     },
     plugins: { 'plugin-id': 'plugin-value' },
     uiPlugins: {

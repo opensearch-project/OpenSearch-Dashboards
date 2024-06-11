@@ -67,14 +67,15 @@ export default function ({ getService, getPageObjects }) {
         name: 'saved search',
         fields: ['bytes', 'agent'],
       });
-      await dashboardExpect.docTableFieldCount(150);
+      // DefaultDiscoverTable loads 10 rows initially and 40 lazily for a total of 50
+      await dashboardExpect.rowCountFromDefaultDiscoverTable(50);
 
       // Set to time range with no data
       await PageObjects.timePicker.setAbsoluteRange(
         'Jan 1, 2000 @ 00:00:00.000',
         'Jan 1, 2000 @ 01:00:00.000'
       );
-      await dashboardExpect.docTableFieldCount(0);
+      await dashboardExpect.rowCountFromDefaultDiscoverTable(0);
     });
 
     it('Timepicker start, end, interval values are set by url', async () => {
@@ -83,7 +84,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
       log.debug('Clicked new dashboard');
       await dashboardVisualizations.createAndAddSavedSearch({
-        name: 'saved search',
+        name: 'saved search 1',
         fields: ['bytes', 'agent'],
       });
       log.debug('added saved search');

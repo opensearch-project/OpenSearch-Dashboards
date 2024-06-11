@@ -5,14 +5,12 @@
 
 import { i18n } from '@osd/i18n';
 import {
-  EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddableOutput,
   ErrorEmbeddable,
   IContainer,
   SavedObjectEmbeddableInput,
 } from '../../../embeddable/public';
-import { VISUALIZE_ENABLE_LABS_SETTING } from '../../../visualizations/public';
 import {
   EDIT_PATH,
   PLUGIN_ID,
@@ -20,34 +18,27 @@ import {
   VisBuilderSavedObjectAttributes,
   VISBUILDER_SAVED_OBJECT,
 } from '../../common';
-import { DisabledEmbeddable } from './disabled_embeddable';
 import {
   VisBuilderEmbeddable,
+  VisBuilderInput,
   VisBuilderOutput,
   VISBUILDER_EMBEDDABLE,
 } from './vis_builder_embeddable';
-import visBuilderIcon from '../assets/vis_builder_icon.svg';
-import {
-  getHttp,
-  getSavedVisBuilderLoader,
-  getTimeFilter,
-  getUISettings,
-} from '../plugin_services';
+import { getStateFromSavedObject } from '../saved_visualizations/transforms';
+import { getHttp, getSavedVisBuilderLoader, getTimeFilter } from '../plugin_services';
+import { StartServicesGetter } from '../../../opensearch_dashboards_utils/public';
+import { VisBuilderPluginStartDependencies } from '../types';
 
-// TODO: use or remove?
-export type VisBuilderEmbeddableFactory = EmbeddableFactory<
-  SavedObjectEmbeddableInput,
-  VisBuilderOutput | EmbeddableOutput,
-  VisBuilderEmbeddable | DisabledEmbeddable,
-  VisBuilderSavedObjectAttributes
->;
+export interface VisBuilderEmbeddableFactoryDeps {
+  start: StartServicesGetter<VisBuilderPluginStartDependencies>;
+}
 
-export class VisBuilderEmbeddableFactoryDefinition
+export class VisBuilderEmbeddableFactory
   implements
     EmbeddableFactoryDefinition<
       SavedObjectEmbeddableInput,
       VisBuilderOutput | EmbeddableOutput,
-      VisBuilderEmbeddable | DisabledEmbeddable,
+      VisBuilderEmbeddable,
       VisBuilderSavedObjectAttributes
     > {
   public readonly type = VISBUILDER_EMBEDDABLE;
@@ -56,11 +47,11 @@ export class VisBuilderEmbeddableFactoryDefinition
     name: PLUGIN_NAME,
     includeFields: ['visualizationState'],
     type: VISBUILDER_SAVED_OBJECT,
-    getIconForSavedObject: () => visBuilderIcon,
+    getIconForSavedObject: () => 'visBuilder',
   };
 
   // TODO: Would it be better to explicitly declare start service dependencies?
-  constructor() {}
+  constructor(private readonly deps: VisBuilderEmbeddableFactoryDeps) {}
 
   public canCreateNew() {
     // Because VisBuilder creation starts with the visualization modal, no need to have a separate entry for VisBuilder until it's separate
@@ -75,26 +66,29 @@ export class VisBuilderEmbeddableFactoryDefinition
 
   public async createFromSavedObject(
     savedObjectId: string,
-    input: Partial<SavedObjectEmbeddableInput> & { id: string },
+    input: VisBuilderInput,
     parent?: IContainer
-  ): Promise<VisBuilderEmbeddable | ErrorEmbeddable | DisabledEmbeddable> {
+  ): Promise<VisBuilderEmbeddable | ErrorEmbeddable> {
     try {
-      const savedVisBuilder = await getSavedVisBuilderLoader().get(savedObjectId);
+      const savedObject = await getSavedVisBuilderLoader().get(savedObjectId);
       const editPath = `${EDIT_PATH}/${savedObjectId}`;
       const editUrl = getHttp().basePath.prepend(`/app/${PLUGIN_ID}${editPath}`);
-      const isLabsEnabled = getUISettings().get<boolean>(VISUALIZE_ENABLE_LABS_SETTING);
-
-      if (!isLabsEnabled) {
-        return new DisabledEmbeddable(PLUGIN_NAME, input);
-      }
+      const savedVis = getStateFromSavedObject(savedObject);
+      const indexPatternService = this.deps.start().plugins.data.indexPatterns;
+      const indexPattern = await indexPatternService.get(
+        savedVis.state.visualization.indexPattern || ''
+      );
+      const indexPatterns = indexPattern ? [indexPattern] : [];
 
       return new VisBuilderEmbeddable(
         getTimeFilter(),
         {
-          savedVisBuilder,
+          savedVis,
           editUrl,
           editPath,
           editable: true,
+          deps: this.deps,
+          indexPatterns,
         },
         {
           ...input,

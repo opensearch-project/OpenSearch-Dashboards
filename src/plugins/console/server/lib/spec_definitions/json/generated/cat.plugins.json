@@ -15,6 +15,6 @@
     "patterns": [
       "_cat/plugins"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cat/cat-plugins/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cat/cat-plugins/"
   }
 }

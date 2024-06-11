@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 import { first, map, shareReplay, takeUntil } from 'rxjs/operators';
 import { merge } from '@osd/std';
 
@@ -48,11 +48,11 @@ import { InternalOpenSearchServiceSetup, InternalOpenSearchServiceStart } from '
 import { pollOpenSearchNodesVersion } from './version_check/ensure_opensearch_version';
 import { calculateStatus$ } from './status';
 
-interface SetupDeps {
+export interface SetupDeps {
   http: InternalHttpServiceSetup;
 }
 
-interface StartDeps {
+export interface StartDeps {
   auditTrail: AuditTrailStart;
 }
 
@@ -91,14 +91,26 @@ export class OpenSearchService
     this.legacyClient = this.createLegacyClusterClient('data', config);
     this.client = this.createClusterClient('data', config);
 
-    const opensearchNodesCompatibility$ = pollOpenSearchNodesVersion({
-      internalClient: this.client.asInternalUser,
-      optimizedHealthcheck: config.optimizedHealthcheck,
-      log: this.log,
-      ignoreVersionMismatch: config.ignoreVersionMismatch,
-      opensearchVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
-      opensearchDashboardsVersion: this.opensearchDashboardsVersion,
-    }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
+    let opensearchNodesCompatibility$;
+    if (config.hosts.length > 0) {
+      opensearchNodesCompatibility$ = pollOpenSearchNodesVersion({
+        internalClient: this.client.asInternalUser,
+        optimizedHealthcheck: config.optimizedHealthcheck,
+        log: this.log,
+        ignoreVersionMismatch: config.ignoreVersionMismatch,
+        opensearchVersionCheckInterval: config.healthCheckDelay.asMilliseconds(),
+        opensearchDashboardsVersion: this.opensearchDashboardsVersion,
+      }).pipe(takeUntil(this.stop$), shareReplay({ refCount: true, bufferSize: 1 }));
+    } else {
+      this.log.debug(`Opensearch is not configured.`);
+      opensearchNodesCompatibility$ = of({
+        isCompatible: true,
+        message: 'Opensearch is not configured',
+        incompatibleNodes: [],
+        warningNodes: [],
+        opensearchDashboardsVersion: this.opensearchDashboardsVersion,
+      });
+    }
 
     this.createLegacyCustomClient = (type, clientConfig = {}) => {
       const finalConfig = merge({}, config, clientConfig);

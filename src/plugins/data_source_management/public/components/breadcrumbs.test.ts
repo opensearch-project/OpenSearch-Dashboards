@@ -9,7 +9,7 @@ import { mockDataSourceAttributesWithAuth } from '../mocks';
 describe('DataSourceManagement: breadcrumbs.ts', () => {
   test('get listing breadcrumb', () => {
     const bc = getListBreadcrumbs();
-    expect(bc[0].text).toBe('Data Sources');
+    expect(bc[0].text).toBe('Data sources');
     expect(bc[0].href).toBe('/');
   });
 

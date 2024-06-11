@@ -88,6 +88,10 @@ export class UiActionsService {
     return trigger.contract;
   };
 
+  public readonly getTriggers = (): TriggerRegistry => {
+    return this.triggers;
+  };
+
   public readonly registerAction = <A extends ActionDefinition>(
     definition: A
   ): Action<ActionContext<A>> => {

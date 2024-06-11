@@ -76,13 +76,13 @@ export const NotFoundErrors = ({ type }: NotFoundErrors) => {
       iconType="alert"
       color="danger"
     >
-      <div>{getMessage()}</div>
-      <div>
+      <p>{getMessage()}</p>
+      <p>
         <FormattedMessage
           id="savedObjectsManagement.view.howToFixErrorDescription"
           defaultMessage="If you know what this error means, go ahead and fix it &mdash; otherwise click the delete button above."
         />
-      </div>
+      </p>
     </EuiCallOut>
   );
 };

@@ -65,6 +65,7 @@ import {
   SearchSourceDependencies,
   SearchSourceService,
   searchSourceRequiredUiSettings,
+  OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY,
 } from '../../common/search';
 import {
   getShardDelayBucketAgg,
@@ -72,6 +73,13 @@ import {
 } from '../../common/search/aggs/buckets/shard_delay';
 import { aggShardDelay } from '../../common/search/aggs/buckets/shard_delay_fn';
 import { ConfigSchema } from '../../config';
+import {
+  DataFrameService,
+  IDataFrame,
+  IDataFrameResponse,
+  createDataFrameCache,
+  dataFrameToSpec,
+} from '../../common';
 
 type StrategyMap = Record<string, ISearchStrategy<any, any>>;
 
@@ -97,6 +105,7 @@ export interface SearchRouteDependencies {
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   private readonly aggsService = new AggsService();
   private readonly searchSourceService = new SearchSourceService();
+  private readonly dfCache = createDataFrameCache();
   private defaultSearchStrategyName: string = OPENSEARCH_SEARCH_STRATEGY;
   private searchStrategies: StrategyMap = {};
 
@@ -105,11 +114,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     private readonly logger: Logger
   ) {}
 
-  public setup(
+  public async setup(
     core: CoreSetup<{}, DataPluginStart>,
     { registerFunction, usageCollection, dataSource }: SearchServiceSetupDependencies
-  ): ISearchSetup {
-    const usage = usageCollection ? usageProvider(core, this.initializerContext) : undefined;
+  ): Promise<ISearchSetup> {
+    const config = await this.initializerContext.config
+      .create<ConfigSchema>()
+      .pipe(first())
+      .toPromise();
+    const usage = usageCollection ? usageProvider(core, config) : undefined;
 
     const router = core.http.createRouter();
     const routeDependencies = {
@@ -125,7 +138,20 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         this.initializerContext.config.legacy.globalConfig$,
         this.logger,
         usage,
-        dataSource
+        dataSource,
+        core.opensearch
+      )
+    );
+
+    this.registerSearchStrategy(
+      OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY,
+      opensearchSearchStrategyProvider(
+        this.initializerContext.config.legacy.globalConfig$,
+        this.logger,
+        usage,
+        dataSource,
+        core.opensearch,
+        true
       )
     );
 
@@ -148,7 +174,8 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       });
 
     return {
-      __enhance: (enhancements: SearchEnhancements) => {
+      __enhance: (enhancements?: SearchEnhancements) => {
+        if (!enhancements) return;
         if (this.searchStrategies.hasOwnProperty(enhancements.defaultStrategy)) {
           this.defaultSearchStrategyName = enhancements.defaultStrategy;
         }
@@ -185,6 +212,29 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             searchSourceRequiredUiSettings
           );
 
+          const dfService: DataFrameService = {
+            get: () => this.dfCache.get(),
+            set: async (dataFrame: IDataFrame) => {
+              if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
+                scopedIndexPatterns.clearCache(this.dfCache.get()!.name, false);
+              }
+              this.dfCache.set(dataFrame);
+              const existingIndexPattern = scopedIndexPatterns.getByTitle(dataFrame.name!, true);
+              const dataSet = await scopedIndexPatterns.create(
+                dataFrameToSpec(dataFrame, existingIndexPattern?.id),
+                !existingIndexPattern?.id
+              );
+              // save to cache by title because the id is not unique for temporary index pattern created
+              scopedIndexPatterns.saveToCache(dataSet.title, dataSet);
+            },
+            clear: () => {
+              if (this.dfCache.get() === undefined) return;
+              // name because the id is not unique for temporary index pattern created
+              scopedIndexPatterns.clearCache(this.dfCache.get()!.name, false);
+              this.dfCache.clear();
+            },
+          };
+
           const searchSourceDependencies: SearchSourceDependencies = {
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: (searchRequest, options) => {
@@ -219,6 +269,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               }),
               loadingCount$: new BehaviorSubject(0),
             },
+            df: dfService,
           };
 
           return this.searchSourceService.start(scopedIndexPatterns, searchSourceDependencies);
@@ -233,18 +284,21 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private registerSearchStrategy = <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends
+      | IOpenSearchDashboardsSearchResponse
+      | IDataFrameResponse = IOpenSearchSearchResponse
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
   ) => {
-    this.logger.debug(`Register strategy ${name}`);
     this.searchStrategies[name] = strategy;
   };
 
   private search = <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends
+      | IOpenSearchDashboardsSearchResponse
+      | IDataFrameResponse = IOpenSearchSearchResponse
   >(
     context: RequestHandlerContext,
     searchRequest: SearchStrategyRequest,
@@ -257,11 +311,12 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   private getSearchStrategy = <
     SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
-    SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
+    SearchStrategyResponse extends
+      | IOpenSearchDashboardsSearchResponse
+      | IDataFrameResponse = IOpenSearchSearchResponse
   >(
     name: string
   ): ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse> => {
-    this.logger.debug(`Get strategy ${name}`);
     const strategy = this.searchStrategies[name];
     if (!strategy) {
       throw new Error(`Search strategy ${name} not found`);

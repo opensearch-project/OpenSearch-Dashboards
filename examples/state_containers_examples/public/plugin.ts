@@ -82,7 +82,7 @@ export class StateContainersExamplesPlugin implements Plugin {
 
     developerExamples.register({
       appId: 'stateContainersExampleBrowserHistory',
-      title: 'State containers using browser history',
+      title: 'State containers: browser history',
       description: `An example todo app that uses browser history and state container utilities like createStateContainerReactHelpers,
        createStateContainer, createOsdUrlStateStorage, createSessionStorageStateStorage,
        syncStates and getStateFromOsdUrl to keep state in sync with the URL. Change some parameters, navigate away and then back, and the
@@ -101,7 +101,7 @@ export class StateContainersExamplesPlugin implements Plugin {
 
     developerExamples.register({
       appId: 'stateContainersExampleHashHistory',
-      title: 'State containers using hash history',
+      title: 'State containers: hash history',
       description: `An example todo app that uses hash history and state container utilities like createStateContainerReactHelpers,
        createStateContainer, createOsdUrlStateStorage, createSessionStorageStateStorage,
        syncStates and getStateFromOsdUrl to keep state in sync with the URL. Change some parameters, navigate away and then back, and the
@@ -120,7 +120,7 @@ export class StateContainersExamplesPlugin implements Plugin {
 
     developerExamples.register({
       appId: PLUGIN_ID,
-      title: 'Sync state from a query bar with the url',
+      title: 'State containers: Sync with the url',
       description: `Shows how to use data.syncQueryStateWitUrl in combination  with state container utilities from opensearch_dashboards_utils to
       show a query bar that stores state in the url and is kept in  sync.
       `,

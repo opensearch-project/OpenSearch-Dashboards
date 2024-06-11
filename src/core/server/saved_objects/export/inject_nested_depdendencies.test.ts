@@ -32,6 +32,10 @@ import { SavedObject } from '../types';
 import { savedObjectsClientMock } from '../../mocks';
 import { getObjectReferencesToFetch, fetchNestedDependencies } from './inject_nested_depdendencies';
 import { SavedObjectsErrorHelpers } from '..';
+import { createStripPromisesSerializer } from '@osd/dev-utils';
+
+// This is to clean Promises
+expect.addSnapshotSerializer(createStripPromisesSerializer());
 
 describe('getObjectReferencesToFetch()', () => {
   test('works with no saved objects', () => {
@@ -82,8 +86,8 @@ describe('getObjectReferencesToFetch()', () => {
     expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
-          "id": "1",
-          "type": "index-pattern",
+          id: 1,
+          type: index-pattern,
         },
       ]
     `);
@@ -139,13 +143,13 @@ describe('injectNestedDependencies', () => {
     const result = await fetchNestedDependencies(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "missingRefs": Array [],
-        "objects": Array [
+        missingRefs: Array [],
+        objects: Array [
           Object {
-            "attributes": Object {},
-            "id": "1",
-            "references": Array [],
-            "type": "index-pattern",
+            attributes: Object {},
+            id: 1,
+            references: Array [],
+            type: index-pattern,
           },
         ],
       }
@@ -176,25 +180,25 @@ describe('injectNestedDependencies', () => {
     const result = await fetchNestedDependencies(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "missingRefs": Array [],
-        "objects": Array [
+        missingRefs: Array [],
+        objects: Array [
           Object {
-            "attributes": Object {},
-            "id": "1",
-            "references": Array [],
-            "type": "index-pattern",
+            attributes: Object {},
+            id: 1,
+            references: Array [],
+            type: index-pattern,
           },
           Object {
-            "attributes": Object {},
-            "id": "2",
-            "references": Array [
+            attributes: Object {},
+            id: 2,
+            references: Array [
               Object {
-                "id": "1",
-                "name": "ref_0",
-                "type": "index-pattern",
+                id: 1,
+                name: ref_0,
+                type: index-pattern,
               },
             ],
-            "type": "search",
+            type: search,
           },
         ],
       }
@@ -229,25 +233,25 @@ describe('injectNestedDependencies', () => {
     const result = await fetchNestedDependencies(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "missingRefs": Array [],
-        "objects": Array [
+        missingRefs: Array [],
+        objects: Array [
           Object {
-            "attributes": Object {},
-            "id": "2",
-            "references": Array [
+            attributes: Object {},
+            id: 2,
+            references: Array [
               Object {
-                "id": "1",
-                "name": "ref_0",
-                "type": "index-pattern",
+                id: 1,
+                name: ref_0,
+                type: index-pattern,
               },
             ],
-            "type": "search",
+            type: search,
           },
           Object {
-            "attributes": Object {},
-            "id": "1",
-            "references": Array [],
-            "type": "index-pattern",
+            attributes: Object {},
+            id: 1,
+            references: Array [],
+            type: index-pattern,
           },
         ],
       }
@@ -258,19 +262,19 @@ describe('injectNestedDependencies', () => {
           Array [
             Array [
               Object {
-                "id": "1",
-                "type": "index-pattern",
+                id: 1,
+                type: index-pattern,
               },
             ],
             Object {
-              "namespace": undefined,
+              namespace: undefined,
             },
           ],
         ],
         "results": Array [
           Object {
-            "type": "return",
-            "value": Promise {},
+            type: return,
+            value: Promise {},
           },
         ],
       }
@@ -350,66 +354,66 @@ describe('injectNestedDependencies', () => {
     const result = await fetchNestedDependencies(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "missingRefs": Array [],
-        "objects": Array [
+        missingRefs: Array [],
+        objects: Array [
           Object {
-            "attributes": Object {},
-            "id": "5",
-            "references": Array [
+            attributes: Object {},
+            id: 5,
+            references: Array [
               Object {
-                "id": "4",
-                "name": "panel_0",
-                "type": "visualization",
+                id: 4,
+                name: panel_0,
+                type: visualization,
               },
               Object {
-                "id": "3",
-                "name": "panel_1",
-                "type": "visualization",
-              },
-            ],
-            "type": "dashboard",
-          },
-          Object {
-            "attributes": Object {},
-            "id": "4",
-            "references": Array [
-              Object {
-                "id": "2",
-                "name": "ref_0",
-                "type": "search",
+                id: 3,
+                name: panel_1,
+                type: visualization,
               },
             ],
-            "type": "visualization",
+            type: dashboard,
           },
           Object {
-            "attributes": Object {},
-            "id": "3",
-            "references": Array [
+            attributes: Object {},
+            id: 4,
+            references: Array [
               Object {
-                "id": "1",
-                "name": "ref_0",
-                "type": "index-pattern",
+                id: 2,
+                name: ref_0,
+                type: search,
               },
             ],
-            "type": "visualization",
+            type: visualization,
           },
           Object {
-            "attributes": Object {},
-            "id": "2",
-            "references": Array [
+            attributes: Object {},
+            id: 3,
+            references: Array [
               Object {
-                "id": "1",
-                "name": "ref_0",
-                "type": "index-pattern",
+                id: 1,
+                name: ref_0,
+                type: index-pattern,
               },
             ],
-            "type": "search",
+            type: visualization,
           },
           Object {
-            "attributes": Object {},
-            "id": "1",
-            "references": Array [],
-            "type": "index-pattern",
+            attributes: Object {},
+            id: 2,
+            references: Array [
+              Object {
+                id: 1,
+                name: ref_0,
+                type: index-pattern,
+              },
+            ],
+            type: search,
+          },
+          Object {
+            attributes: Object {},
+            id: 1,
+            references: Array [],
+            type: index-pattern,
           },
         ],
       }
@@ -420,42 +424,42 @@ describe('injectNestedDependencies', () => {
           Array [
             Array [
               Object {
-                "id": "4",
-                "type": "visualization",
+                id: 4,
+                type: visualization,
               },
               Object {
-                "id": "3",
-                "type": "visualization",
+                id: 3,
+                type: visualization,
               },
             ],
             Object {
-              "namespace": undefined,
+              namespace: undefined,
             },
           ],
           Array [
             Array [
               Object {
-                "id": "2",
-                "type": "search",
+                id: 2,
+                type: search,
               },
               Object {
-                "id": "1",
-                "type": "index-pattern",
+                id: 1,
+                type: index-pattern,
               },
             ],
             Object {
-              "namespace": undefined,
+              namespace: undefined,
             },
           ],
         ],
         "results": Array [
           Object {
-            "type": "return",
-            "value": Promise {},
+            type: return,
+            value: Promise {},
           },
           Object {
-            "type": "return",
-            "value": Promise {},
+            type: return,
+            value: Promise {},
           },
         ],
       }
@@ -503,35 +507,35 @@ describe('injectNestedDependencies', () => {
     const result = await fetchNestedDependencies(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "missingRefs": Array [
+        missingRefs: Array [
           Object {
-            "id": "1",
-            "type": "index-pattern",
+            id: 1,
+            type: index-pattern,
           },
         ],
-        "objects": Array [
+        objects: Array [
           Object {
-            "attributes": Object {},
-            "id": "1",
-            "references": Array [
+            attributes: Object {},
+            id: 1,
+            references: Array [
               Object {
-                "id": "1",
-                "name": "ref_0",
-                "type": "index-pattern",
+                id: 1,
+                name: ref_0,
+                type: index-pattern,
               },
               Object {
-                "id": "2",
-                "name": "ref_1",
-                "type": "index-pattern",
+                id: 2,
+                name: ref_1,
+                type: index-pattern,
               },
             ],
-            "type": "search",
+            type: search,
           },
           Object {
-            "attributes": Object {},
-            "id": "2",
-            "references": Array [],
-            "type": "index-pattern",
+            attributes: Object {},
+            id: 2,
+            references: Array [],
+            type: index-pattern,
           },
         ],
       }
@@ -572,31 +576,31 @@ describe('injectNestedDependencies', () => {
     const result = await fetchNestedDependencies(savedObjects, savedObjectsClient);
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "missingRefs": Array [],
-        "objects": Array [
+        missingRefs: Array [],
+        objects: Array [
           Object {
-            "attributes": Object {},
-            "id": "2",
-            "references": Array [
+            attributes: Object {},
+            id: 2,
+            references: Array [
               Object {
-                "id": "1",
-                "name": "ref_0",
-                "type": "index-pattern",
+                id: 1,
+                name: ref_0,
+                type: index-pattern,
               },
             ],
-            "type": "search",
+            type: search,
           },
           Object {
-            "attributes": Object {},
-            "id": "1",
-            "references": Array [
+            attributes: Object {},
+            id: 1,
+            references: Array [
               Object {
-                "id": "2",
-                "name": "ref_0",
-                "type": "search",
+                id: 2,
+                name: ref_0,
+                type: search,
               },
             ],
-            "type": "index-pattern",
+            type: index-pattern,
           },
         ],
       }
@@ -607,19 +611,19 @@ describe('injectNestedDependencies', () => {
           Array [
             Array [
               Object {
-                "id": "1",
-                "type": "index-pattern",
+                id: 1,
+                type: index-pattern,
               },
             ],
             Object {
-              "namespace": undefined,
+              namespace: undefined,
             },
           ],
         ],
         "results": Array [
           Object {
-            "type": "return",
-            "value": Promise {},
+            type: return,
+            value: Promise {},
           },
         ],
       }

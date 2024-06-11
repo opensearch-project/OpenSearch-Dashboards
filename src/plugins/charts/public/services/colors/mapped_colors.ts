@@ -33,8 +33,8 @@ import Color from 'color';
 
 import { CoreSetup } from 'opensearch-dashboards/public';
 
+import { euiPaletteColorBlind } from '@elastic/eui';
 import { COLOR_MAPPING_SETTING } from '../../../common';
-import { createColorPalette } from './color_palette';
 
 const standardizeColor = (color: string) => new Color(color).hex().toLowerCase();
 
@@ -83,30 +83,36 @@ export class MappedColors {
     const configColors = _.values(configMapping);
     const oldColors = _.values(this._oldMap);
 
+    const alreadyUsedColors: string[] = [];
     const keysToMap: Array<string | number> = [];
     _.each(keys, (key) => {
       // If this key is mapped in the config, it's unnecessary to have it mapped here
-      if (configMapping[key as any]) delete this._mapping[key];
+      if (configMapping[key as any]) {
+        delete this._mapping[key];
+        alreadyUsedColors.push(configMapping[key]);
+      }
 
       // If this key is mapped to a color used by the config color mapping, we need to remap it
       if (_.includes(configColors, this._mapping[key])) keysToMap.push(key);
 
       // if key exist in oldMap, move it to mapping
-      if (this._oldMap[key]) this._mapping[key] = this._oldMap[key];
+      if (this._oldMap[key]) {
+        this._mapping[key] = this._oldMap[key];
+        alreadyUsedColors.push(this._mapping[key]);
+      }
 
       // If this key isn't mapped, we need to map it
       if (this.get(key) == null) keysToMap.push(key);
     });
 
-    // Generate a color palette big enough that all new keys can have unique color values
-    const allColors = _(this._mapping).values().union(configColors).union(oldColors).value();
-    const colorPalette = createColorPalette(allColors.length + keysToMap.length);
-    let newColors = _.difference(colorPalette, allColors);
+    // Choose colors from euiPaletteColorBlind and filter out any already assigned to keys
+    const colorPalette = euiPaletteColorBlind({
+      rotations: Math.ceil(keys.length / 10),
+      direction: 'both',
+    })
+      .filter((color) => !alreadyUsedColors.includes(color.toLowerCase()))
+      .slice(0, keysToMap.length);
 
-    while (keysToMap.length > newColors.length) {
-      newColors = newColors.concat(_.sampleSize(allColors, keysToMap.length - newColors.length));
-    }
-
-    _.merge(this._mapping, _.zipObject(keysToMap, newColors));
+    _.merge(this._mapping, _.zipObject(keysToMap, colorPalette));
   }
 }

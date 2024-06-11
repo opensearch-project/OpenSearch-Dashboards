@@ -8,21 +8,10 @@ exports[`Relationships from legacy app should render dashboards normally 1`] = `
     hasBorder={true}
   >
     <EuiTitle
+      className="eui-textBreakWord"
       size="m"
     >
       <h2>
-        <EuiToolTip
-          content="dashboard"
-          delay="regular"
-          position="top"
-        >
-          <EuiIcon
-            aria-label="dashboard"
-            size="m"
-            type="dashboardApp"
-          />
-        </EuiToolTip>
-          
         MyDashboard
       </h2>
     </EuiTitle>
@@ -167,21 +156,10 @@ exports[`Relationships from legacy app should render errors 1`] = `
     hasBorder={true}
   >
     <EuiTitle
+      className="eui-textBreakWord"
       size="m"
     >
       <h2>
-        <EuiToolTip
-          content="dashboard"
-          delay="regular"
-          position="top"
-        >
-          <EuiIcon
-            aria-label="dashboard"
-            size="m"
-            type="dashboardApp"
-          />
-        </EuiToolTip>
-          
         MyDashboard
       </h2>
     </EuiTitle>
@@ -197,7 +175,9 @@ exports[`Relationships from legacy app should render errors 1`] = `
         />
       }
     >
-      foo
+      <p>
+        foo
+      </p>
     </EuiCallOut>
   </EuiFlyoutBody>
 </EuiFlyout>
@@ -211,21 +191,10 @@ exports[`Relationships from legacy app should render index patterns normally 1`]
     hasBorder={true}
   >
     <EuiTitle
+      className="eui-textBreakWord"
       size="m"
     >
       <h2>
-        <EuiToolTip
-          content="index patterns"
-          delay="regular"
-          position="top"
-        >
-          <EuiIcon
-            aria-label="index patterns"
-            size="m"
-            type="indexPatternApp"
-          />
-        </EuiToolTip>
-          
         MyIndexPattern*
       </h2>
     </EuiTitle>
@@ -375,21 +344,10 @@ exports[`Relationships from legacy app should render searches normally 1`] = `
     hasBorder={true}
   >
     <EuiTitle
+      className="eui-textBreakWord"
       size="m"
     >
       <h2>
-        <EuiToolTip
-          content="search"
-          delay="regular"
-          position="top"
-        >
-          <EuiIcon
-            aria-label="search"
-            size="m"
-            type="search"
-          />
-        </EuiToolTip>
-          
         MySearch
       </h2>
     </EuiTitle>
@@ -539,21 +497,10 @@ exports[`Relationships from legacy app should render visualizations normally 1`]
     hasBorder={true}
   >
     <EuiTitle
+      className="eui-textBreakWord"
       size="m"
     >
       <h2>
-        <EuiToolTip
-          content="visualization"
-          delay="regular"
-          position="top"
-        >
-          <EuiIcon
-            aria-label="visualization"
-            size="m"
-            type="visualizeApp"
-          />
-        </EuiToolTip>
-          
         MyViz
       </h2>
     </EuiTitle>
@@ -690,6 +637,140 @@ exports[`Relationships from legacy app should render visualizations normally 1`]
 </EuiFlyout>
 `;
 
+exports[`Relationships should render augment-vis objects normally 1`] = `
+<EuiFlyout
+  onClose={[MockFunction]}
+>
+  <EuiFlyoutHeader
+    hasBorder={true}
+  >
+    <EuiTitle
+      className="eui-textBreakWord"
+      size="m"
+    >
+      <h2>
+        MyAugmentVisObject
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
+  <EuiFlyoutBody>
+    <div>
+      <EuiCallOut>
+        <p>
+          Here are the saved objects related to MyAugmentVisObject. Deleting this augment-vis affects its parent objects, but not its children.
+        </p>
+      </EuiCallOut>
+      <EuiSpacer />
+      <EuiInMemoryTable
+        columns={
+          Array [
+            Object {
+              "align": "center",
+              "description": "Type of the saved object",
+              "field": "type",
+              "name": "Type",
+              "render": [Function],
+              "sortable": false,
+              "width": "50px",
+            },
+            Object {
+              "data-test-subj": "directRelationship",
+              "dataType": "string",
+              "field": "relationship",
+              "name": "Direct relationship",
+              "render": [Function],
+              "sortable": false,
+              "width": "125px",
+            },
+            Object {
+              "dataType": "string",
+              "description": "Title of the saved object",
+              "field": "meta.title",
+              "name": "Title",
+              "render": [Function],
+              "sortable": false,
+            },
+            Object {
+              "actions": Array [
+                Object {
+                  "available": [Function],
+                  "data-test-subj": "relationshipsTableAction-inspect",
+                  "description": "Inspect this saved object",
+                  "icon": "inspect",
+                  "name": "Inspect",
+                  "onClick": [Function],
+                  "type": "icon",
+                },
+              ],
+              "name": "Actions",
+            },
+          ]
+        }
+        items={
+          Array [
+            Object {
+              "id": "1",
+              "meta": Object {
+                "editUrl": "/management/opensearch-dashboards/objects/savedVisualizations/1",
+                "icon": "visualizeApp",
+                "inAppUrl": Object {
+                  "path": "/edit/1",
+                  "uiCapabilitiesPath": "visualize.show",
+                },
+                "title": "MyViz",
+              },
+              "relationship": "child",
+              "type": "visualization",
+            },
+          ]
+        }
+        pagination={true}
+        responsive={true}
+        rowProps={[Function]}
+        search={
+          Object {
+            "filters": Array [
+              Object {
+                "field": "relationship",
+                "multiSelect": "or",
+                "name": "Direct relationship",
+                "options": Array [
+                  Object {
+                    "name": "parent",
+                    "value": "parent",
+                    "view": "Parent",
+                  },
+                  Object {
+                    "name": "child",
+                    "value": "child",
+                    "view": "Child",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+              Object {
+                "field": "type",
+                "multiSelect": "or",
+                "name": "Type",
+                "options": Array [
+                  Object {
+                    "name": "visualization",
+                    "value": "visualization",
+                    "view": "visualization",
+                  },
+                ],
+                "type": "field_value_selection",
+              },
+            ],
+          }
+        }
+        tableLayout="fixed"
+      />
+    </div>
+  </EuiFlyoutBody>
+</EuiFlyout>
+`;
+
 exports[`Relationships should render dashboards normally 1`] = `
 <EuiFlyout
   onClose={[MockFunction]}
@@ -698,21 +779,10 @@ exports[`Relationships should render dashboards normally 1`] = `
     hasBorder={true}
   >
     <EuiTitle
+      className="eui-textBreakWord"
       size="m"
     >
       <h2>
-        <EuiToolTip
-          content="dashboard"
-          delay="regular"
-          position="top"
-        >
-          <EuiIcon
-            aria-label="dashboard"
-            size="m"
-            type="dashboardApp"
-          />
-        </EuiToolTip>
-          
         MyDashboard
       </h2>
     </EuiTitle>
@@ -857,21 +927,10 @@ exports[`Relationships should render errors 1`] = `
     hasBorder={true}
   >
     <EuiTitle
+      className="eui-textBreakWord"
       size="m"
     >
       <h2>
-        <EuiToolTip
-          content="dashboard"
-          delay="regular"
-          position="top"
-        >
-          <EuiIcon
-            aria-label="dashboard"
-            size="m"
-            type="dashboardApp"
-          />
-        </EuiToolTip>
-          
         MyDashboard
       </h2>
     </EuiTitle>
@@ -887,7 +946,9 @@ exports[`Relationships should render errors 1`] = `
         />
       }
     >
-      foo
+      <p>
+        foo
+      </p>
     </EuiCallOut>
   </EuiFlyoutBody>
 </EuiFlyout>
@@ -901,21 +962,10 @@ exports[`Relationships should render index patterns normally 1`] = `
     hasBorder={true}
   >
     <EuiTitle
+      className="eui-textBreakWord"
       size="m"
     >
       <h2>
-        <EuiToolTip
-          content="index patterns"
-          delay="regular"
-          position="top"
-        >
-          <EuiIcon
-            aria-label="index patterns"
-            size="m"
-            type="indexPatternApp"
-          />
-        </EuiToolTip>
-          
         MyIndexPattern*
       </h2>
     </EuiTitle>
@@ -1065,21 +1115,10 @@ exports[`Relationships should render searches normally 1`] = `
     hasBorder={true}
   >
     <EuiTitle
+      className="eui-textBreakWord"
       size="m"
     >
       <h2>
-        <EuiToolTip
-          content="search"
-          delay="regular"
-          position="top"
-        >
-          <EuiIcon
-            aria-label="search"
-            size="m"
-            type="search"
-          />
-        </EuiToolTip>
-          
         MySearch
       </h2>
     </EuiTitle>
@@ -1229,21 +1268,10 @@ exports[`Relationships should render visualizations normally 1`] = `
     hasBorder={true}
   >
     <EuiTitle
+      className="eui-textBreakWord"
       size="m"
     >
       <h2>
-        <EuiToolTip
-          content="visualization"
-          delay="regular"
-          position="top"
-        >
-          <EuiIcon
-            aria-label="visualization"
-            size="m"
-            type="visualizeApp"
-          />
-        </EuiToolTip>
-          
         MyViz
       </h2>
     </EuiTitle>

@@ -1,0 +1,9 @@
+.deSidebar {
+  &_panel {
+    border-top: 0;
+  }
+
+  &_dataSource {
+    border-bottom: $euiBorderThin !important;
+  }
+}

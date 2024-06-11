@@ -1,0 +1,19 @@
+@startuml
+title: Current Saved Object Service Flow
+actor User
+participant "Saved Object Client" as Client
+participant "Saved Object Repository" as Repo
+participant "Opensearch" as OS
+
+User -> Client: Create Saved Object
+Client -> Repo: Create Saved Object
+Repo -> OS: Index Saved Object
+OS --> Repo: Saved Object Saved
+Client -> User: Saved Object Created
+User -> Client: Get Saved Object
+Client -> Repo: Get Saved Object
+Repo -> OS: Get Saved Object
+OS --> Repo: Return Saved Object
+Repo -> Client: Return Saved Object
+Client -> User: Saved Object Data
+@enduml

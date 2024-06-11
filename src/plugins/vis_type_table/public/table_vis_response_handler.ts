@@ -28,82 +28,87 @@
  * under the License.
  */
 
-import { Required } from '@osd/utility-types';
-
 import { getFormatService } from './services';
-import { Input } from './table_vis_fn';
+import { OpenSearchDashboardsDatatable } from '../../expressions/public';
+import { FormattedColumn, TableVisConfig } from './types';
+import { convertToFormattedData } from './utils/convert_to_formatted_data';
 
-export interface TableContext {
-  tables: Array<TableGroup | Table>;
-  direction?: 'row' | 'column';
+export interface Table {
+  columns: OpenSearchDashboardsDatatable['columns'];
+  rows: OpenSearchDashboardsDatatable['rows'];
+}
+
+export interface FormattedTableContext extends Table {
+  formattedColumns: FormattedColumn[];
 }
 
 export interface TableGroup {
-  $parent: TableContext;
-  table: Input;
-  tables: Table[];
+  table: FormattedTableContext;
   title: string;
-  name: string;
-  key: any;
-  column: number;
-  row: number;
 }
 
-export interface Table {
-  $parent?: TableGroup;
-  columns: Input['columns'];
-  rows: Input['rows'];
+export interface TableVisData {
+  table?: FormattedTableContext;
+  tableGroups: TableGroup[];
+  direction?: 'row' | 'column';
 }
 
-export function tableVisResponseHandler(table: Input, dimensions: any): TableContext {
-  const converted: TableContext = {
-    tables: [],
-  };
+export function tableVisResponseHandler(
+  input: OpenSearchDashboardsDatatable,
+  config: TableVisConfig
+): TableVisData {
+  let table: FormattedTableContext | undefined;
+  const tableGroups: TableGroup[] = [];
+  let direction: TableVisData['direction'];
 
-  const split = dimensions.splitColumn || dimensions.splitRow;
+  const split = config.splitColumn || config.splitRow;
 
   if (split) {
-    converted.direction = dimensions.splitRow ? 'row' : 'column';
+    direction = config.splitRow ? 'row' : 'column';
     const splitColumnIndex = split[0].accessor;
     const splitColumnFormatter = getFormatService().deserialize(split[0].format);
-    const splitColumn = table.columns[splitColumnIndex];
-    const splitMap = {};
+    const splitColumn = input.columns[splitColumnIndex];
+    const splitMap: { [key: string]: number } = {};
     let splitIndex = 0;
 
-    table.rows.forEach((row, rowIndex) => {
+    input.rows.forEach((row, rowIndex) => {
       const splitValue: any = row[splitColumn.id];
 
       if (!splitMap.hasOwnProperty(splitValue as any)) {
         (splitMap as any)[splitValue] = splitIndex++;
-        const tableGroup: Required<TableGroup, 'tables'> = {
-          $parent: converted,
+        const tableGroup: TableGroup = {
           title: `${splitColumnFormatter.convert(splitValue)}: ${splitColumn.name}`,
-          name: splitColumn.name,
-          key: splitValue,
-          column: splitColumnIndex,
-          row: rowIndex,
-          table,
-          tables: [],
+          table: {
+            formattedColumns: [],
+            rows: [],
+            columns: input.columns,
+          },
         };
 
-        tableGroup.tables.push({
-          $parent: tableGroup,
-          columns: table.columns,
-          rows: [],
-        });
-
-        converted.tables.push(tableGroup);
+        tableGroups.push(tableGroup);
       }
 
-      const tableIndex = (splitMap as any)[splitValue];
-      (converted.tables[tableIndex] as any).tables[0].rows.push(row);
+      const tableIndex = splitMap[splitValue];
+      tableGroups[tableIndex].table.rows.push(row);
+    });
+
+    // format tables
+    tableGroups.forEach((tableGroup) => {
+      tableGroup.table = convertToFormattedData(tableGroup.table, config);
     });
   } else {
-    converted.tables.push({
-      columns: table.columns,
-      rows: table.rows,
-    });
+    table = convertToFormattedData(
+      {
+        columns: input.columns,
+        rows: input.rows,
+      },
+      config
+    );
   }
 
-  return converted;
+  return {
+    table,
+    tableGroups,
+    direction,
+  };
 }

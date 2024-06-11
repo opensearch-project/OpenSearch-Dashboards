@@ -109,6 +109,7 @@ export default () =>
         }),
         events: Joi.any().default({}),
         dest: Joi.string().default('stdout'),
+        ignoreEnospcError: Joi.boolean().default(false),
         filter: Joi.any().default({}),
         json: Joi.boolean().when('dest', {
           is: 'stdout',
@@ -227,6 +228,7 @@ export default () =>
     opensearchDashboards: Joi.object({
       enabled: Joi.boolean().default(true),
       index: Joi.string().default('.kibana'),
+      configIndex: Joi.string().default('.opensearch_dashboards_config'),
       autocompleteTerminateAfter: Joi.number().integer().min(1).default(100000),
       // TODO Also allow units here like in opensearch config once this is moved to the new platform
       autocompleteTimeout: Joi.number().integer().min(1).default(1000),
@@ -247,6 +249,14 @@ export default () =>
         applicationTitle: Joi.any().default(''),
         useExpandedHeader: Joi.boolean().default(true),
       }),
+      survey: Joi.object({
+        url: Joi.any().default('/'),
+      }),
+      dashboardAdmin: Joi.object({
+        groups: Joi.array().items(Joi.string()).default([]),
+        users: Joi.array().items(Joi.string()).default([]),
+      }),
+      futureNavigation: Joi.boolean().default(false),
     }).default(),
 
     savedObjects: HANDLED_IN_NEW_PLATFORM,

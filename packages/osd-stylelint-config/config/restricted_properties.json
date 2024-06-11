@@ -1,0 +1,17 @@
+{
+  "font-family": {
+    "explanation": "All \"font-family\" styles should be inherited from OUI themes and components. Remove the rule.",
+    "approved": [
+      "src/plugins/maps_legacy/public/map/_leaflet_overrides.scss",
+      "src/plugins/maps_legacy/public/map/_legend.scss",
+      "src/plugins/opensearch_dashboards_legacy/public/font_awesome/font_awesome.scss",
+      "src/plugins/opensearch_dashboards_react/public/markdown/_markdown.scss",
+      "packages/osd-ui-framework/src/components/tool_bar/_tool_bar_search.scss",
+      "packages/osd-ui-framework/src/global_styling/mixins/_global_mixins.scss",
+      "src/plugins/data/public/ui/typeahead/_suggestion.scss",
+      "src/plugins/vis_type_timeseries/public/application/components/_error.scss",
+      "packages/osd-ui-framework/src/components/form/check_box/_check_box.scss",
+      "src/plugins/discover/public/application/components/doc_viewer/doc_viewer.scss"
+    ]
+  }
+}

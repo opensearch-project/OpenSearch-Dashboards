@@ -3,14 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { get } from 'lodash';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import produce from 'immer';
 import { Draft } from 'immer';
 import { EuiIconTip } from '@elastic/eui';
-import { search } from '../../../../../data/public';
 import { NumberInputOption, SwitchOption } from '../../../../../charts/public';
 import {
   useTypedDispatch,

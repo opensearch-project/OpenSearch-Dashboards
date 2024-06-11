@@ -266,3 +266,43 @@ test('format() meta can override log level objects', () => {
     },
   });
 });
+
+test('format() correctly removes control sequences', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        timestamp,
+        context: '123',
+        message: 'some\u001b[33mCOLORED\u001b[0m',
+        error: {
+          message: 'error \u001b[33mCOLORED\u001b[0m',
+          name: 'Some error name',
+          stack: 'stack \u001b[33mCOLORED\u001b[0m',
+        },
+        level: LogLevel.Error,
+        pid: 3,
+        meta: {
+          log: {
+            level: 'FATAL',
+          },
+        },
+      })
+    )
+  ).toStrictEqual({
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    error: {
+      message: 'error (U+001b)[33mCOLORED(U+001b)[0m',
+      stack_trace: 'stack (U+001b)[33mCOLORED(U+001b)[0m',
+      type: 'Some error name',
+    },
+    message: 'some(U+001b)[33mCOLORED(U+001b)[0m',
+    log: {
+      level: 'FATAL',
+      logger: '123',
+    },
+    process: {
+      pid: 3,
+    },
+  });
+});

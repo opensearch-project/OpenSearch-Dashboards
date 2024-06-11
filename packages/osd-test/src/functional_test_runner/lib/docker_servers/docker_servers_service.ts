@@ -28,7 +28,6 @@
  * under the License.
  */
 
-import Url from 'url';
 import execa from 'execa';
 import * as Rx from 'rxjs';
 import { filter, take, map } from 'rxjs/operators';
@@ -54,11 +53,7 @@ export class DockerServersService {
     this.servers = Object.entries(configs).map(([name, config]) => ({
       ...config,
       name,
-      url: Url.format({
-        protocol: 'http:',
-        hostname: 'localhost',
-        port: config.port,
-      }),
+      url: new URL(`http://localhost:${config.port}`).toString(),
     }));
 
     this.lifecycle.beforeTests.add(async () => {

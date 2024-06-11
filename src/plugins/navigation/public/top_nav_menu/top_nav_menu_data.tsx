@@ -30,6 +30,7 @@
 
 import { EuiButtonProps } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import { string } from 'mathjs';
 
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 
@@ -42,9 +43,12 @@ export interface TopNavMenuData {
   className?: string;
   disableButton?: boolean | (() => boolean);
   tooltip?: string | (() => string | undefined);
+  ariaLabel?: string;
   emphasize?: boolean;
   iconType?: EuiIconType;
   iconSide?: EuiButtonProps['iconSide'];
+  // @deprecated - experimental, do not use yet. Will be removed in a future minor version
+  type?: 'toggle' | 'button';
 }
 
 export interface RegisteredTopNavMenuData extends TopNavMenuData {

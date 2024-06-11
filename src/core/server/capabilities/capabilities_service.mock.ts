@@ -52,6 +52,7 @@ const createCapabilitiesMock = (): Capabilities => {
     navLinks: {},
     management: {},
     catalogue: {},
+    workspaces: {},
   };
 };
 

@@ -35,6 +35,7 @@ import {
 import typeDetect from 'type-detect';
 import Boom from '@hapi/boom';
 import * as stream from 'stream';
+import { stringify } from '@osd/std';
 
 import {
   HttpResponsePayload,
@@ -108,16 +109,27 @@ export class HapiResponseAdapter {
     opensearchDashboardsResponse: OpenSearchDashboardsResponse<HttpResponsePayload>
   ) {
     const response = this.responseToolkit
-      .response(opensearchDashboardsResponse.payload)
+      .response(
+        opensearchDashboardsResponse.options.withLongNumeralsSupport
+          ? stringify(opensearchDashboardsResponse.payload)
+          : opensearchDashboardsResponse.payload
+      )
       .code(opensearchDashboardsResponse.status);
     setHeaders(response, opensearchDashboardsResponse.options.headers);
+    if (opensearchDashboardsResponse.options.withLongNumeralsSupport) {
+      setHeaders(response, {
+        'content-type': 'application/json',
+      });
+    }
     return response;
   }
 
   private toRedirect(
     opensearchDashboardsResponse: OpenSearchDashboardsResponse<HttpResponsePayload>
   ) {
-    const { headers } = opensearchDashboardsResponse.options;
+    const {
+      headers,
+    }: { headers?: Record<string, string | string[]> } = opensearchDashboardsResponse.options;
     if (!headers || typeof headers.location !== 'string') {
       throw new Error("expected 'location' header to be set");
     }

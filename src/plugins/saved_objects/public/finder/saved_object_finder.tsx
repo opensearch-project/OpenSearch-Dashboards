@@ -60,6 +60,8 @@ import {
   SavedObjectsStart,
 } from 'src/core/public';
 
+import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
+import { getIndexPatternTitle } from '../../../data/common/index_patterns/utils';
 import { LISTING_LIMIT_SETTING } from '../../common';
 
 export interface SavedObjectMetaData<T = unknown> {
@@ -155,7 +157,28 @@ class SavedObjectFinderUi extends React.Component<
       defaultSearchOperator: 'AND',
     });
 
-    resp.savedObjects = resp.savedObjects.filter((savedObject) => {
+    const getDataSource = async (id: string) => {
+      const client = this.props.savedObjects.client;
+      return await client.get<DataSourceAttributes>('data-source', id);
+    };
+
+    const savedObjects = await Promise.all(
+      resp.savedObjects.map(async (obj) => {
+        if (obj.type === 'index-pattern') {
+          const result = { ...obj };
+          result.attributes.title = await getIndexPatternTitle(
+            obj.attributes.title!,
+            obj.references,
+            getDataSource
+          );
+          return result;
+        } else {
+          return obj;
+        }
+      })
+    );
+
+    resp.savedObjects = savedObjects.filter((savedObject) => {
       const metaData = metaDataMap[savedObject.type];
       if (metaData.showSavedObject) {
         return metaData.showSavedObject(savedObject);

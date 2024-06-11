@@ -77,18 +77,6 @@
   z-index: $euiZLevel1;
 }
 
-// SASSTODO: This component seems to not be used anymore?
-// Possibly replaced by the Ace version
-.conApp__autoComplete {
-  position: absolute;
-  left: -1000px;
-  visibility: hidden;
-
-  /* by pass any other element in ace and resize bar, but not modal popups  */
-  z-index: $euiZLevel1 + 2;
-  margin-top: 22px;
-}
-
 .conApp__settingsModal {
   min-width: 460px;
 }

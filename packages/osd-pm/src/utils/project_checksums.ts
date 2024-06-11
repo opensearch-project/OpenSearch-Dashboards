@@ -28,10 +28,8 @@
  * under the License.
  */
 
-import Fs from 'fs';
+import { stat } from 'fs/promises';
 import Crypto from 'crypto';
-
-import { promisify } from 'util';
 
 import execa from 'execa';
 
@@ -45,7 +43,6 @@ export type ChecksumMap = Map<string, string | undefined>;
 /** map of [repo relative path to changed file, type of change] */
 type Changes = Map<string, 'modified' | 'deleted' | 'invalid' | 'untracked'>;
 
-const statAsync = promisify(Fs.stat);
 const projectBySpecificitySorter = (a: Project, b: Project) => b.path.length - a.path.length;
 
 /** Get the changed files for a set of projects */
@@ -184,7 +181,7 @@ async function getChecksum(
           return `${path}:deleted`;
         }
 
-        const stats = await statAsync(osd.getAbsolute(path));
+        const stats = await stat(osd.getAbsolute(path));
         log.verbose(`[${project.name}] modified time ${stats.mtimeMs} for ${path}`);
         return `${path}:${stats.mtimeMs}`;
       })

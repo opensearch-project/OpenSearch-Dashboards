@@ -20,6 +20,6 @@
       "_msearch/template",
       "{indices}/_msearch/template"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/query-dsl/full-text/#multi-match"
+    "documentation": "https://opensearch.org/docs/latest/search-plugins/search-template/"
   }
 }

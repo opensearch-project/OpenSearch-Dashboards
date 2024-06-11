@@ -1,0 +1,17 @@
+{
+  "name": "dashboard_listing_test_plugin",
+  "version": "1.0.0",
+  "main": "target/test/plugin_functional/plugins/dashboard_listing_test_plugin",
+  "opensearchDashboards": {
+    "version": "opensearchDashboards",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Apache-2.0",
+  "scripts": {
+    "osd": "../../../../scripts/use_node ../../../../scripts/osd.js",
+    "build": "../../../../scripts/use_node ../../../../scripts/remove.js './target' && tsc"
+  },
+  "devDependencies": {
+    "typescript": "4.0.2"
+  }
+}

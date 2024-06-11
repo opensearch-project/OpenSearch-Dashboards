@@ -4,7 +4,7 @@
 
 ### Description
 
-The tool is used to extract default messages from all `*.{js, ts, jsx, tsx, html }` files in provided plugins directories to a JSON file.
+The tool is used to extract default messages from all `*.{js, ts, jsx, tsx }` files in provided plugins directories to a JSON file.
 
 It uses Babel to parse code and build an AST for each file or a single JS expression if whole file parsing is impossible. The tool is able to validate, extract and match IDs, default messages and descriptions only if they are defined statically and together, otherwise it will fail with detailed explanation. That means one can't define ID in one place and default message in another, or use function call to dynamically create default message etc.
 
@@ -18,33 +18,6 @@ The `defaultMessage` must contain ICU references to all keys in the `values` and
 
 The `description` is optional, `values` is optional too unless `defaultMessage` references to it.
 
-* **Angular (.html)**
-
-  * **Filter**
-
-    ```
-    {{ ::'pluginNamespace.messageId' | i18n: {
-      defaultMessage: 'Default message string literal, {key}',
-      values: { key: 'value' },
-      description: 'Message context or description'
-    } }}
-    ```
-
-    * Don't break `| i18n: {` with line breaks, and don't skip whitespaces around `i18n:`.
-    * `::` operator is optional. Omit it if you need data binding for the `values`.
-
-  * **Directive**
-
-    ```html
-    <p
-      i18n-id="pluginNamespace.messageId"
-      i18n-default-message="Default message string literal, {key}. {emphasizedText}"
-      i18n-values="{ key: value, html_emphasizedText: htmlString }"
-      i18n-description="Message context or description"
-    ></p>
-    ```
-
-    * `html_` prefixes will be removed from `i18n-values` keys before validation.
 
 * **React (.jsx, .tsx)**
 

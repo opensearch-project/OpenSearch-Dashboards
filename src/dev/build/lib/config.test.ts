@@ -52,6 +52,7 @@ const setup = async ({
   targetAllPlatforms = true,
   targetPlatforms = {
     darwin: false,
+    darwinArm: false,
     linux: false,
     linuxArm: false,
     windows: false,
@@ -60,6 +61,7 @@ const setup = async ({
   targetAllPlatforms?: boolean;
   targetPlatforms?: {
     darwin: boolean;
+    darwinArm: boolean;
     linux: boolean;
     linuxArm: boolean;
     windows: boolean;
@@ -79,19 +81,17 @@ describe('#getOpenSearchDashboardsPkg()', () => {
   });
 });
 
-describe('#getNodeVersion()', () => {
-  it('returns the node version from the OpenSearch Dashboards package.json', async () => {
+describe('#getNodeRange()', () => {
+  it('returns the node version range from the OpenSearch Dashboards package.json', async () => {
     const config = await setup();
-    expect(config.getNodeVersion()).toEqual(pkg.engines.node);
+    expect(config.getNodeRange()).toEqual(pkg.engines.node);
   });
 });
 
 describe('#getRepoRelativePath()', () => {
   it('converts an absolute path to relative path, from the root of the repo', async () => {
     const config = await setup();
-    expect(config.getRepoRelativePath(__dirname)).toMatchInlineSnapshot(
-      `"${standardize('src/dev/build/lib', false, true)}"`
-    );
+    expect(config.getRepoRelativePath(__dirname)).toMatchInlineSnapshot(`"src/dev/build/lib"`);
   });
 });
 
@@ -117,6 +117,7 @@ describe('#hasSpecifiedPlatform', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: true,
+        darwinArm: false,
         linux: false,
         linuxArm: false,
         windows: false,
@@ -130,6 +131,7 @@ describe('#hasSpecifiedPlatform', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: false,
+        darwinArm: false,
         linux: false,
         linuxArm: true,
         windows: false,
@@ -143,6 +145,7 @@ describe('#hasSpecifiedPlatform', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: false,
+        darwinArm: false,
         linux: true,
         linuxArm: false,
         windows: false,
@@ -197,6 +200,7 @@ describe('#getTargetPlatforms()', () => {
         .sort()
     ).toMatchInlineSnapshot(`
       Array [
+        "darwin-arm64",
         "darwin-x64",
         "linux-arm64",
         "linux-x64",
@@ -210,6 +214,7 @@ describe('#getTargetPlatforms()', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: true,
+        darwinArm: false,
         linux: false,
         linuxArm: false,
         windows: false,
@@ -233,6 +238,7 @@ describe('#getTargetPlatforms()', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: false,
+        darwinArm: false,
         linux: true,
         linuxArm: false,
         windows: false,
@@ -256,6 +262,7 @@ describe('#getTargetPlatforms()', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: false,
+        darwinArm: false,
         linux: false,
         linuxArm: true,
         windows: false,
@@ -279,6 +286,7 @@ describe('#getTargetPlatforms()', () => {
       targetAllPlatforms: false,
       targetPlatforms: {
         darwin: true,
+        darwinArm: false,
         linux: false,
         linuxArm: true,
         windows: false,
@@ -315,7 +323,7 @@ describe('#getNodePlatforms()', () => {
         .getTargetPlatforms()
         .map((p) => p.getNodeArch())
         .sort()
-    ).toEqual(['darwin-x64', 'linux-arm64', 'linux-x64', 'win32-x64']);
+    ).toEqual(['darwin-arm64', 'darwin-x64', 'linux-arm64', 'linux-x64', 'win32-x64']);
   });
 
   it('returns this platform and linux, when targetAllPlatforms = false', async () => {

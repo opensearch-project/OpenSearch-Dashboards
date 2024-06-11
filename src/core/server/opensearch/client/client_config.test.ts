@@ -184,6 +184,24 @@ describe('parseClientOptions', () => {
               ]
           `);
     });
+
+    it('`disablePrototypePoisoningProtection` option', () => {
+      expect(
+        parseClientOptions(createConfig({ disablePrototypePoisoningProtection: false }), false)
+          .disablePrototypePoisoningProtection
+      ).toEqual(false);
+      expect(
+        parseClientOptions(createConfig({ disablePrototypePoisoningProtection: true }), false)
+          .disablePrototypePoisoningProtection
+      ).toEqual(true);
+
+      expect(
+        parseClientOptions(createConfig({}), false).disablePrototypePoisoningProtection
+      ).toBeUndefined();
+      expect(
+        parseClientOptions(createConfig({}), true).disablePrototypePoisoningProtection
+      ).toBeUndefined();
+    });
   });
 
   describe('authorization', () => {

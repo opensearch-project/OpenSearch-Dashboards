@@ -43,7 +43,7 @@
  */
 .kuiLocalSearchAssistedInput__assistance {
   position: absolute;
-  right: $kuiFormControlHorizontalPadding / 2;
+  right: calc($kuiFormControlHorizontalPadding / 2);
   top: 50%; /* 1 */
   z-index: 2;
   transform: translateY(-50%); /* 1 */

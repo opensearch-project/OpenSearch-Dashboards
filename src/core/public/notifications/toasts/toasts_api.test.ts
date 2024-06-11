@@ -105,6 +105,24 @@ describe('#get$()', () => {
     toasts.remove('bar');
     expect(onToasts).not.toHaveBeenCalled();
   });
+
+  it('does not emit a new toast list when a toast with the same id is passed to add()', () => {
+    const toasts = new ToastsApi(toastDeps());
+    const onToasts = jest.fn();
+
+    toasts.get$().subscribe(onToasts);
+    toasts.add({
+      id: 'foo',
+      title: 'foo',
+    });
+    onToasts.mockClear();
+
+    toasts.add({
+      id: 'foo',
+      title: 'bar',
+    });
+    expect(onToasts).not.toHaveBeenCalled();
+  });
 });
 
 describe('#add()', () => {
@@ -134,6 +152,11 @@ describe('#add()', () => {
   it('accepts a string, uses it as the title', async () => {
     const toasts = new ToastsApi(toastDeps());
     expect(toasts.add('foo')).toHaveProperty('title', 'foo');
+  });
+
+  it('accepts an id and does not auto increment', async () => {
+    const toasts = new ToastsApi(toastDeps());
+    expect(toasts.add({ id: 'foo', title: 'not foo' })).toHaveProperty('id', 'foo');
   });
 });
 

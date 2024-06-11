@@ -28,10 +28,6 @@
  * under the License.
  */
 
-import { readFileSync } from 'fs';
-import Path from 'path';
-
-import { REPO_ROOT } from '@osd/utils';
 import {
   ToolingLog,
   ToolingLogCollectingWriter,
@@ -41,6 +37,7 @@ import {
 
 import { Config } from '../../lib';
 import { ExtractNodeBuilds } from './extract_node_builds_task';
+import { getRequiredVersion } from './node_download_info';
 
 jest.mock('../../lib/fs');
 jest.mock('../../lib/get_build_number');
@@ -53,14 +50,6 @@ log.setWriters([testWriter]);
 
 expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
-const nodeVersion = readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
-expect.addSnapshotSerializer(
-  createRecursiveSerializer(
-    (s) => typeof s === 'string' && s.includes(nodeVersion),
-    (s) => s.split(nodeVersion).join('<node version>')
-  )
-);
-
 async function setup() {
   const config = await Config.create({
     isRelease: true,
@@ -69,9 +58,20 @@ async function setup() {
       linux: false,
       linuxArm: false,
       darwin: false,
+      darwinArm: false,
       windows: false,
     },
   });
+
+  const realNodeVersion = getRequiredVersion(config);
+  if (realNodeVersion) {
+    expect.addSnapshotSerializer(
+      createRecursiveSerializer(
+        (s) => typeof s === 'string' && s.includes(realNodeVersion),
+        (s) => s.split(realNodeVersion).join('<node version>')
+      )
+    );
+  }
 
   return { config };
 }
@@ -124,11 +124,46 @@ it('runs expected fs operations', async () => {
             "strip": 1,
           },
         ],
+        Array [
+          <absolute path>/.node_binaries/<node version>/node-v<node version>-darwin-arm64.tar.gz,
+          <absolute path>/.node_binaries/<node version>/darwin-arm64,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/14.21.3/node-v14.21.3-linux-x64.tar.gz,
+          <absolute path>/.node_binaries/14.21.3/linux-x64,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/14.21.3/node-v14.21.3-linux-arm64.tar.gz,
+          <absolute path>/.node_binaries/14.21.3/linux-arm64,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/14.21.3/node-v14.21.3-darwin-x64.tar.gz,
+          <absolute path>/.node_binaries/14.21.3/darwin-x64,
+          Object {
+            "strip": 1,
+          },
+        ],
       ],
       "unzip": Array [
         Array [
           <absolute path>/.node_binaries/<node version>/node-v<node version>-win-x64.zip,
           <absolute path>/.node_binaries/<node version>/win32-x64,
+          Object {
+            "strip": 1,
+          },
+        ],
+        Array [
+          <absolute path>/.node_binaries/14.21.3/node-v14.21.3-win-x64.zip,
+          <absolute path>/.node_binaries/14.21.3/win32-x64,
           Object {
             "strip": 1,
           },

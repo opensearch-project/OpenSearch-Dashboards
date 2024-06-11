@@ -1,21 +1,19 @@
 {
   "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "./target/types",
+    "outDir": "./target",
+    "emitDeclarationOnly": true,
+    "stripInternal": true,
+    "declarationMap": true,
+    "types": ["jest", "node"]
+  },
   "include": [
     "src/**/*.ts",
     "src/**/*.tsx",
     "types/intl_format_cache.d.ts",
     "types/intl_relativeformat.d.ts"
   ],
-  "exclude": [
-    "target"
-  ],
-  "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "./target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
-  }
+  "exclude": ["target"]
 }

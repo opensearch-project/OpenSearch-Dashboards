@@ -1927,6 +1927,46 @@ exports[`DataSourceTable should get datasources successful should render normall
                                           </EuiButtonContent>
                                         </button>
                                       </EuiButtonEmpty>
+                                      <EuiBadge
+                                        iconSide="left"
+                                        iconType="starFilled"
+                                      >
+                                        <EuiInnerText>
+                                          <span
+                                            className="euiBadge euiBadge--iconLeft"
+                                            style={
+                                              Object {
+                                                "backgroundColor": "#d3dae6",
+                                                "color": "#000",
+                                              }
+                                            }
+                                            title="Default"
+                                          >
+                                            <span
+                                              className="euiBadge__content"
+                                            >
+                                              <span
+                                                className="euiBadge__text"
+                                              >
+                                                Default
+                                              </span>
+                                              <EuiIcon
+                                                className="euiBadge__icon"
+                                                color="inherit"
+                                                size="s"
+                                                type="starFilled"
+                                              >
+                                                <span
+                                                  className="euiBadge__icon"
+                                                  color="inherit"
+                                                  data-euiicon-type="starFilled"
+                                                  size="s"
+                                                />
+                                              </EuiIcon>
+                                            </span>
+                                          </span>
+                                        </EuiInnerText>
+                                      </EuiBadge>
                                     </div>
                                   </td>
                                 </EuiTableRowCell>

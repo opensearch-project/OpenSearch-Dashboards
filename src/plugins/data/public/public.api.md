@@ -368,6 +368,20 @@ export enum BUCKET_TYPES {
 // @public
 export const castOpenSearchToOsdFieldTypeName: (opensearchType: OPENSEARCH_FIELD_TYPES | string) => OSD_FIELD_TYPES;
 
+// @public
+export const connectStorageToQueryState = (
+  {
+    filterManager,
+    queryString,
+    state$,
+  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
+  OsdUrlStateStorage: IOsdUrlStateStorage,
+  syncConfig: {
+    filters: FilterStateStore;
+    query: boolean;
+  }
+) => () => void;
+
 // Warning: (ae-forgotten-export) The symbol "QuerySetup" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "BaseStateContainer" needs to be exported by the entry point index.d.ts
 // Warning: (ae-missing-release-tag) "connectToQueryState" is exported by the package, but it is missing a release tag (@alpha, @beta, @public, or @internal)

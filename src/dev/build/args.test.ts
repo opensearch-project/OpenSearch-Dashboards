@@ -60,6 +60,7 @@ it('build dist for current platform, without packages, by default', () => {
         "targetAllPlatforms": false,
         "targetPlatforms": Object {
           "darwin": false,
+          "darwinArm": false,
           "linux": false,
           "linuxArm": false,
           "windows": false,
@@ -89,6 +90,7 @@ it('build dist for linux x64 platform, without packages, if --linux is passed', 
         "targetAllPlatforms": false,
         "targetPlatforms": Object {
           "darwin": false,
+          "darwinArm": false,
           "linux": true,
           "linuxArm": false,
           "windows": false,
@@ -118,6 +120,7 @@ it('build dist for linux arm64 platform, without packages, if --linux-arm is pas
         "targetAllPlatforms": false,
         "targetPlatforms": Object {
           "darwin": false,
+          "darwinArm": false,
           "linux": false,
           "linuxArm": true,
           "windows": false,
@@ -147,6 +150,7 @@ it('build dist for darwin x64 platform, without packages, if --darwin is passed'
         "targetAllPlatforms": false,
         "targetPlatforms": Object {
           "darwin": true,
+          "darwinArm": false,
           "linux": false,
           "linuxArm": false,
           "windows": false,
@@ -176,6 +180,7 @@ it('build dist for windows x64 platform, without packages, if --windows is passe
         "targetAllPlatforms": false,
         "targetPlatforms": Object {
           "darwin": false,
+          "darwinArm": false,
           "linux": false,
           "linuxArm": false,
           "windows": true,
@@ -205,6 +210,7 @@ it('builds packages if --all-platforms is passed', () => {
         "targetAllPlatforms": true,
         "targetPlatforms": Object {
           "darwin": false,
+          "darwinArm": false,
           "linux": false,
           "linuxArm": false,
           "windows": false,
@@ -234,6 +240,7 @@ it('limits packages if --rpm passed with --all-platforms', () => {
         "targetAllPlatforms": true,
         "targetPlatforms": Object {
           "darwin": false,
+          "darwinArm": false,
           "linux": false,
           "linuxArm": false,
           "windows": false,
@@ -263,6 +270,7 @@ it('limits packages if --deb passed with --all-platforms', () => {
         "targetAllPlatforms": true,
         "targetPlatforms": Object {
           "darwin": false,
+          "darwinArm": false,
           "linux": false,
           "linuxArm": false,
           "windows": false,
@@ -293,6 +301,7 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "targetAllPlatforms": true,
         "targetPlatforms": Object {
           "darwin": false,
+          "darwinArm": false,
           "linux": false,
           "linuxArm": false,
           "windows": false,
@@ -323,6 +332,7 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "targetAllPlatforms": true,
         "targetPlatforms": Object {
           "darwin": false,
+          "darwinArm": false,
           "linux": false,
           "linuxArm": false,
           "windows": false,

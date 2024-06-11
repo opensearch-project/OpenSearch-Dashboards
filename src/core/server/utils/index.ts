@@ -32,3 +32,5 @@ export * from './crypto';
 export * from './from_root';
 export * from './package_json';
 export * from './streams';
+export { getWorkspaceIdFromUrl, cleanWorkspaceId } from '../../utils';
+export { updateWorkspaceState, getWorkspaceState } from './workspace';

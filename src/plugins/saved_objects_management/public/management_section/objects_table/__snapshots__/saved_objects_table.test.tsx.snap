@@ -74,6 +74,146 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
 </EuiConfirmModal>
 `;
 
+exports[`SavedObjectsTable delete should show error toast when failing to delete saved objects 1`] = `
+<EuiConfirmModal
+  buttonColor="danger"
+  cancelButtonText={
+    <FormattedMessage
+      defaultMessage="Cancel"
+      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+      values={Object {}}
+    />
+  }
+  confirmButtonText={
+    <FormattedMessage
+      defaultMessage="Delete"
+      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+      values={Object {}}
+    />
+  }
+  defaultFocusedButton="confirm"
+  onCancel={[Function]}
+  onConfirm={[Function]}
+  title={
+    <FormattedMessage
+      defaultMessage="Delete saved objects"
+      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
+      values={Object {}}
+    />
+  }
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="This action will delete the following saved objects:"
+      id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+      values={Object {}}
+    />
+  </p>
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "type",
+          "name": "Type",
+          "render": [Function],
+          "width": "50px",
+        },
+        Object {
+          "field": "id",
+          "name": "Id",
+        },
+        Object {
+          "field": "meta.title",
+          "name": "Title",
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "type": "index-pattern",
+        },
+      ]
+    }
+    pagination={true}
+    responsive={true}
+    sorting={false}
+    tableLayout="fixed"
+  />
+</EuiConfirmModal>
+`;
+
+exports[`SavedObjectsTable delete should show error toast when failing to delete saved objects 2`] = `
+<EuiConfirmModal
+  buttonColor="danger"
+  cancelButtonText={
+    <FormattedMessage
+      defaultMessage="Cancel"
+      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.cancelButtonLabel"
+      values={Object {}}
+    />
+  }
+  confirmButtonText={
+    <FormattedMessage
+      defaultMessage="Delete"
+      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModal.deleteButtonLabel"
+      values={Object {}}
+    />
+  }
+  defaultFocusedButton="confirm"
+  onCancel={[Function]}
+  onConfirm={[Function]}
+  title={
+    <FormattedMessage
+      defaultMessage="Delete saved objects"
+      id="savedObjectsManagement.objectsTable.deleteSavedObjectsConfirmModalTitle"
+      values={Object {}}
+    />
+  }
+>
+  <p>
+    <FormattedMessage
+      defaultMessage="This action will delete the following saved objects:"
+      id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+      values={Object {}}
+    />
+  </p>
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "type",
+          "name": "Type",
+          "render": [Function],
+          "width": "50px",
+        },
+        Object {
+          "field": "id",
+          "name": "Id",
+        },
+        Object {
+          "field": "meta.title",
+          "name": "Title",
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "id": "1",
+          "type": "index-pattern",
+        },
+      ]
+    }
+    pagination={true}
+    responsive={true}
+    sorting={false}
+    tableLayout="fixed"
+  />
+</EuiConfirmModal>
+`;
+
 exports[`SavedObjectsTable export should allow the user to choose when exporting all 1`] = `
 <EuiModal
   onClose={[Function]}
@@ -231,6 +371,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
             "edit": false,
             "read": true,
           },
+          "workspaces": Object {},
         },
         "currentAppId$": Observable {
           "_isScalar": false,
@@ -257,10 +398,13 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "has": [MockFunction],
         }
       }
+      availableWorkspaces={Array []}
       basePath={
         BasePath {
           "basePath": "",
+          "clientBasePath": "",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "",
@@ -274,6 +418,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
           "has": [MockFunction],
         }
       }
+      currentWorkspaceId=""
       filters={
         Array [
           Object {

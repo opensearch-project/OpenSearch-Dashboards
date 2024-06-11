@@ -36,17 +36,20 @@ import { DiscoveredPlugin, PluginName } from './types';
 import { createPluginSetupContext, createPluginStartContext } from './plugin_context';
 import { PluginsServiceSetupDeps, PluginsServiceStartDeps } from './plugins_service';
 import { PluginDependencies } from '.';
+import { CrossCompatibilityService } from '../cross_compatibility';
 
 const Sec = 1000;
 /** @internal */
 export class PluginsSystem {
   private readonly plugins = new Map<PluginName, PluginWrapper>();
   private readonly log: Logger;
+  private readonly crossCompatibilityService: CrossCompatibilityService;
   // `satup`, the past-tense version of the noun `setup`.
   private readonly satupPlugins: PluginName[] = [];
 
   constructor(private readonly coreContext: CoreContext) {
     this.log = coreContext.logger.get('plugins-system');
+    this.crossCompatibilityService = new CrossCompatibilityService(coreContext);
   }
 
   public addPlugin(plugin: PluginWrapper) {
@@ -158,11 +161,27 @@ export class PluginsSystem {
         timeout: 30 * Sec,
         errorMessage: `Start lifecycle of "${pluginName}" plugin wasn't completed in 30sec. Consider disabling the plugin and re-start.`,
       });
-
       contracts.set(pluginName, contract);
     }
+    await this.healthCheckOpenSearchPlugins(deps);
 
     return contracts;
+  }
+
+  public async healthCheckOpenSearchPlugins(deps: PluginsServiceStartDeps) {
+    // make _cat/plugins?format=json call to the OpenSearch instance
+    const opensearchInstalledPlugins = await this.crossCompatibilityService.getOpenSearchPlugins(
+      deps.opensearch
+    );
+    for (const pluginName of this.satupPlugins) {
+      this.log.debug(`For plugin "${pluginName}"...`);
+      const plugin = this.plugins.get(pluginName)!;
+      this.crossCompatibilityService.checkPluginVersionCompatibility(
+        plugin.requiredEnginePlugins,
+        opensearchInstalledPlugins,
+        pluginName
+      );
+    }
   }
 
   public async stopPlugins() {
@@ -203,6 +222,7 @@ export class PluginsSystem {
               uiPluginNames.includes(p)
             ),
             requiredBundles: plugin.manifest.requiredBundles,
+            requiredEnginePlugins: plugin.manifest.requiredEnginePlugins,
           },
         ];
       })

@@ -31,9 +31,11 @@
 import { schema } from '@osd/config-schema';
 import _ from 'lodash';
 import { IRouter } from 'src/core/server';
+import { getWorkspaceState } from '../../../../../../core/server/utils';
 import { SampleDatasetSchema } from '../lib/sample_dataset_registry_types';
 import { createIndexName } from '../lib/create_index_name';
 import { SampleDataUsageTracker } from '../usage/usage';
+import { getFinalSavedObjects } from '../data_sets/util';
 
 export function createUninstallRoute(
   router: IRouter,
@@ -45,34 +47,31 @@ export function createUninstallRoute(
       path: '/api/sample_data/{id}',
       validate: {
         params: schema.object({ id: schema.string() }),
+        query: schema.object({
+          data_source_id: schema.maybe(schema.string()),
+        }),
       },
     },
-    async (
-      {
-        core: {
-          opensearch: {
-            legacy: {
-              client: { callAsCurrentUser },
-            },
-          },
-          savedObjects: { client: savedObjectsClient },
-        },
-      },
-      request,
-      response
-    ) => {
+    async (context, request, response) => {
       const sampleDataset = sampleDatasets.find(({ id }) => id === request.params.id);
+      const dataSourceId = request.query.data_source_id;
+      const workspaceState = getWorkspaceState(request);
+      const workspaceId = workspaceState?.requestWorkspaceId;
 
       if (!sampleDataset) {
         return response.notFound();
       }
+
+      const caller = dataSourceId
+        ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
+        : context.core.opensearch.legacy.client.callAsCurrentUser;
 
       for (let i = 0; i < sampleDataset.dataIndices.length; i++) {
         const dataIndexConfig = sampleDataset.dataIndices[i];
         const index = createIndexName(sampleDataset.id, dataIndexConfig.id);
 
         try {
-          await callAsCurrentUser('indices.delete', { index });
+          await caller('indices.delete', { index });
         } catch (err) {
           return response.customError({
             statusCode: err.status,
@@ -83,8 +82,14 @@ export function createUninstallRoute(
         }
       }
 
-      const deletePromises = sampleDataset.savedObjects.map(({ type, id }) =>
-        savedObjectsClient.delete(type, id)
+      const savedObjectsList = getFinalSavedObjects({
+        dataset: sampleDataset,
+        workspaceId,
+        dataSourceId,
+      });
+
+      const deletePromises = savedObjectsList.map(({ type, id }) =>
+        context.core.savedObjects.client.delete(type, id)
       );
 
       try {

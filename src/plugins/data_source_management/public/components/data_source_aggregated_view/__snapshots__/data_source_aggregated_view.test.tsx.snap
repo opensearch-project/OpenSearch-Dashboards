@@ -1,0 +1,2916 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceAggregatedView empty state test due to filter out with local cluster hiding should render warning when no data sources added 1`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView empty state test due to filter out with local cluster hiding should render warning when no data sources added 2`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (0)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView empty state test with local cluster hiding should render warning when no data sources added 1`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView empty state test with local cluster hiding should render warning when no data sources added 2`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView empty state test with local cluster hiding should render warning when no data sources added 3`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (0)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView empty state test with local cluster hiding should render warning when no data sources added 4`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (0)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView error state test no matter hide local cluster or not should render error state when catch error 1`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView error state test no matter hide local cluster or not should render error state when catch error 2`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView error state test no matter hide local cluster or not should render error state when catch error 3`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (0)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView error state test no matter hide local cluster or not should render error state when catch error 4`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (0)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: dataSourceSelection) should render normally and call selectDataSource 1`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (0)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSources is set to false) should render normally with local cluster and active selections configured 1`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={1}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={3}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={
+              Array [
+                Object {
+                  "checked": "on",
+                  "disabled": true,
+                  "id": "test2",
+                  "label": "test2",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test3",
+                  "label": "test3",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "",
+                  "label": "Local cluster",
+                },
+              ]
+            }
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (1)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSources is set to false) should render normally with local cluster and active selections configured 2`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={2}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={4}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={
+              Array [
+                Object {
+                  "checked": "on",
+                  "disabled": true,
+                  "id": "test1",
+                  "label": "test1",
+                },
+                Object {
+                  "checked": "on",
+                  "disabled": true,
+                  "id": "test2",
+                  "label": "test2",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test3",
+                  "label": "test3",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "",
+                  "label": "Local cluster",
+                },
+              ]
+            }
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (2)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSources is set to false) should render normally with local cluster and active selections configured 3`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={1}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={2}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={
+              Array [
+                Object {
+                  "checked": "on",
+                  "disabled": true,
+                  "id": "test2",
+                  "label": "test2",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test3",
+                  "label": "test3",
+                },
+              ]
+            }
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (1)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSources is set to false) should render normally with local cluster and active selections configured 4`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={2}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={3}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={
+              Array [
+                Object {
+                  "checked": "on",
+                  "disabled": true,
+                  "id": "test1",
+                  "label": "test1",
+                },
+                Object {
+                  "checked": "on",
+                  "disabled": true,
+                  "id": "test2",
+                  "label": "test2",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test3",
+                  "label": "test3",
+                },
+              ]
+            }
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (2)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSources is set to false) should render normally with local cluster and active selections configured 5`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={3}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={
+              Array [
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test2",
+                  "label": "test2",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test3",
+                  "label": "test3",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "",
+                  "label": "Local cluster",
+                },
+              ]
+            }
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (0)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSources is set to false) should render normally with local cluster and active selections configured 6`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={4}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={
+              Array [
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test1",
+                  "label": "test1",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test2",
+                  "label": "test2",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test3",
+                  "label": "test3",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "",
+                  "label": "Local cluster",
+                },
+              ]
+            }
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (0)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSources is set to false) should render normally with local cluster and active selections configured 7`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={2}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={
+              Array [
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test2",
+                  "label": "test2",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test3",
+                  "label": "test3",
+                },
+              ]
+            }
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (0)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read active view (displayAllCompatibleDataSources is set to false) should render normally with local cluster and active selections configured 8`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      activeDataSourceCount={0}
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={3}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={
+              Array [
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test1",
+                  "label": "test1",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test2",
+                  "label": "test2",
+                },
+                Object {
+                  "checked": undefined,
+                  "disabled": true,
+                  "id": "test3",
+                  "label": "test3",
+                },
+              ]
+            }
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+      <EuiPanel
+        borderRadius="m"
+        className="dataSourceAggregatedViewOuiPanel"
+        color="transparent"
+        hasBorder={false}
+        hasShadow={false}
+      >
+        <EuiSwitch
+          checked={false}
+          className="dataSourceAggregatedViewOuiSwitch"
+          compressed={true}
+          label="Used on this page (0)"
+          onChange={[Function]}
+        />
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true) should render normally with local cluster configured, default datasource removed or added, and if activeDataSourceIds is present or filtered out 1`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true) should render normally with local cluster configured, default datasource removed or added, and if activeDataSourceIds is present or filtered out 2`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true) should render normally with local cluster configured, default datasource removed or added, and if activeDataSourceIds is present or filtered out 3`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true) should render normally with local cluster configured, default datasource removed or added, and if activeDataSourceIds is present or filtered out 4`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true) should render normally with local cluster configured, default datasource removed or added, and if activeDataSourceIds is present or filtered out 5`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true) should render normally with local cluster configured, default datasource removed or added, and if activeDataSourceIds is present or filtered out 6`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true) should render normally with local cluster configured, default datasource removed or added, and if activeDataSourceIds is present or filtered out 7`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true) should render normally with local cluster configured, default datasource removed or added, and if activeDataSourceIds is present or filtered out 8`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true) should render normally with local cluster configured, default datasource removed or added, and if activeDataSourceIds is present or filtered out 9`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;
+
+exports[`DataSourceAggregatedView: read all view (displayAllCompatibleDataSources is set to true) should render normally with local cluster configured, default datasource removed or added, and if activeDataSourceIds is present or filtered out 10`] = `
+<Fragment>
+  <EuiPopover
+    anchorPosition="downLeft"
+    button={
+      <DataSourceMenuPopoverButton
+        className="dataSourceAggregatedView"
+        onClick={[Function]}
+      />
+    }
+    closePopover={[Function]}
+    display="inlineBlock"
+    hasArrow={true}
+    id="dataSourceSViewContextMenuPopover"
+    isOpen={false}
+    ownFocus={true}
+    panelPaddingSize="none"
+  >
+    <DataSourceDropDownHeader
+      application={
+        Object {
+          "applications$": BehaviorSubject {
+            "_isScalar": false,
+            "_value": Map {},
+            "closed": false,
+            "hasError": false,
+            "isStopped": false,
+            "observers": Array [],
+            "thrownError": null,
+          },
+          "capabilities": Object {
+            "catalogue": Object {},
+            "management": Object {},
+            "navLinks": Object {},
+            "workspaces": Object {},
+          },
+          "currentAppId$": Observable {
+            "_isScalar": false,
+            "source": Subject {
+              "_isScalar": false,
+              "closed": false,
+              "hasError": false,
+              "isStopped": false,
+              "observers": Array [],
+              "thrownError": null,
+            },
+          },
+          "getUrlForApp": [MockFunction],
+          "navigateToApp": [MockFunction],
+          "navigateToUrl": [MockFunction],
+          "registerMountContext": [MockFunction],
+        }
+      }
+      totalDataSourceCount={0}
+    />
+    <EuiContextMenuPanel
+      hasFocus={true}
+      items={Array []}
+    >
+      <EuiPanel
+        borderRadius="none"
+        className="dataSourceAggregatedViewOuiPanel"
+        hasShadow={false}
+        paddingSize="none"
+      >
+        <EuiPanel
+          borderRadius="none"
+          className="dataSourceAggregatedViewOuiPanel"
+          color="subdued"
+          paddingSize="s"
+        >
+          <EuiSelectable
+            isPreFiltered={false}
+            options={Array []}
+            renderOption={[Function]}
+            searchable={false}
+            singleSelection={false}
+          >
+            <Component />
+          </EuiSelectable>
+        </EuiPanel>
+      </EuiPanel>
+    </EuiContextMenuPanel>
+  </EuiPopover>
+</Fragment>
+`;

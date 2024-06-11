@@ -37,6 +37,7 @@ import { getServices } from '../opensearch_dashboards_services';
 
 import {
   EuiPage,
+  EuiPanel,
   EuiTabs,
   EuiTab,
   EuiFlexItem,
@@ -48,9 +49,9 @@ import {
 } from '@elastic/eui';
 
 import { getTutorials } from '../load_tutorials';
-
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
+import { DataSourceSelector } from '../../../../data_source_management/public';
 
 const ALL_TAB_ID = 'all';
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -81,6 +82,8 @@ class TutorialDirectoryUi extends React.Component {
       selectedTabId: openTab,
       tutorialCards: [],
       notices: getServices().tutorialService.getDirectoryNotices(),
+      isDataSourceEnabled: !!getServices().dataSource,
+      isLocalClusterHidden: getServices().dataSource?.hideLocalCluster ?? false,
     };
   }
 
@@ -90,14 +93,17 @@ class TutorialDirectoryUi extends React.Component {
 
   async componentDidMount() {
     this._isMounted = true;
-
-    getServices().chrome.setBreadcrumbs([
-      {
+    const { chrome } = getServices();
+    const { withoutHomeBreadCrumb } = this.props;
+    const breadcrumbs = [{ text: addDataTitle }];
+    if (!withoutHomeBreadCrumb) {
+      breadcrumbs.splice(0, 0, {
         text: homeTitle,
         href: '#/',
-      },
-      { text: addDataTitle },
-    ]);
+      });
+    }
+
+    chrome.setBreadcrumbs(breadcrumbs);
 
     const tutorialConfigs = await getTutorials();
 
@@ -178,7 +184,14 @@ class TutorialDirectoryUi extends React.Component {
 
   renderTabContent = () => {
     if (this.state.selectedTabId === SAMPLE_DATA_TAB_ID) {
-      return <SampleDataSetCards addBasePath={this.props.addBasePath} />;
+      return (
+        <SampleDataSetCards
+          addBasePath={this.props.addBasePath}
+          dataSourceId={this.state.selectedDataSourceId}
+          isDataSourceEnabled={this.state.isDataSourceEnabled}
+          isLocalClusterHidden={this.state.isLocalClusterHidden}
+        />
+      );
     }
 
     return (
@@ -208,6 +221,28 @@ class TutorialDirectoryUi extends React.Component {
           })}
       </EuiFlexGrid>
     );
+  };
+
+  onSelectedDataSourceChange = (e) => {
+    const dataSourceId = e[0] ? e[0].id : undefined;
+    this.setState({ selectedDataSourceId: dataSourceId });
+  };
+
+  renderDataSourceSelector = () => {
+    const { isDataSourceEnabled, isLocalClusterHidden } = this.state;
+
+    return isDataSourceEnabled ? (
+      <div className="sampleDataSourceSelector">
+        <DataSourceSelector
+          savedObjectsClient={getServices().savedObjectsClient}
+          notifications={getServices().toastNotifications}
+          onSelectedDataSource={this.onSelectedDataSourceChange}
+          disabled={!isDataSourceEnabled}
+          hideLocalCluster={isLocalClusterHidden}
+          uiSettings={getServices().uiSettings}
+        />
+      </div>
+    ) : null;
   };
 
   renderNotices = () => {
@@ -260,17 +295,28 @@ class TutorialDirectoryUi extends React.Component {
     );
   };
 
-  render() {
+  renderPageBody = () => {
     return (
-      <EuiPage restrictWidth={1200}>
-        <EuiPageBody component="main">
-          {this.renderHeader()}
-          <EuiSpacer size="m" />
-          <EuiTabs>{this.renderTabs()}</EuiTabs>
-          <EuiSpacer />
-          {this.renderTabContent()}
-        </EuiPageBody>
-      </EuiPage>
+      <EuiPageBody component="main">
+        {this.renderHeader()}
+        <EuiSpacer size="m" />
+        {this.renderDataSourceSelector()}
+        <EuiTabs>{this.renderTabs()}</EuiTabs>
+        <EuiSpacer />
+        {this.renderTabContent()}
+      </EuiPageBody>
+    );
+  };
+
+  render() {
+    const { isDataSourceEnabled } = this.state;
+
+    return isDataSourceEnabled ? (
+      <EuiPanel paddingSize={'l'} style={{ width: '70%', margin: '50px auto' }}>
+        {this.renderPageBody()}
+      </EuiPanel>
+    ) : (
+      <EuiPage restrictWidth={1200}>{this.renderPageBody()}</EuiPage>
     );
   }
 }
@@ -279,6 +325,7 @@ TutorialDirectoryUi.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   openTab: PropTypes.string,
   isCloudEnabled: PropTypes.bool.isRequired,
+  withoutHomeBreadCrumb: PropTypes.bool,
 };
 
 export const TutorialDirectory = injectI18n(TutorialDirectoryUi);

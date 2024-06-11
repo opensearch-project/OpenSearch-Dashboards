@@ -41,6 +41,6 @@
       "_cluster/health",
       "_cluster/health/{indices}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/opensearch/rest-api/cluster-health/"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/cluster-api/cluster-health/"
   }
 }

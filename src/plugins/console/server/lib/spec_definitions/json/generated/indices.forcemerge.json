@@ -21,6 +21,6 @@
       "_forcemerge",
       "{indices}/_forcemerge"
     ],
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/indices-forcemerge.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/index-apis/index/"
   }
 }

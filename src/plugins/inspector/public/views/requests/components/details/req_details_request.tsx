@@ -31,6 +31,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { EuiCodeBlock } from '@elastic/eui';
+import { stringify } from '@osd/std';
 import { Request } from '../../../../../common/adapters/request/types';
 import { RequestDetailsProps } from '../types';
 
@@ -55,7 +56,7 @@ export class RequestDetailsRequest extends Component<RequestDetailsProps> {
         isCopyable
         data-test-subj="inspectorRequestBody"
       >
-        {JSON.stringify(json, null, 2)}
+        {stringify(json, null, 2)}
       </EuiCodeBlock>
     );
   }

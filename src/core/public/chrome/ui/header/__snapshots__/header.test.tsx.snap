@@ -66,6 +66,7 @@ exports[`Header handles visibility and lock changes 1`] = `
         "catalogue": Object {},
         "management": Object {},
         "navLinks": Object {},
+        "workspaces": Object {},
       },
       "currentActionMenu$": BehaviorSubject {
         "_isScalar": false,
@@ -241,24 +242,15 @@ exports[`Header handles visibility and lock changes 1`] = `
   basePath={
     BasePath {
       "basePath": "/test",
+      "clientBasePath": "",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
     }
   }
-  branding={
-    Object {
-      "applicationTitle": "OpenSearch Dashboards",
-      "darkMode": false,
-      "logo": Object {
-        "defaultUrl": "/",
-      },
-      "mark": Object {
-        "defaultUrl": "/",
-      },
-    }
-  }
+  branding={Object {}}
   breadcrumbs$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1437,6 +1429,71 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  logos={
+    Object {
+      "AnimatedMark": Object {
+        "dark": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+        },
+        "light": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
+        },
+        "type": "default",
+        "url": "/ui/logos/opensearch_spinner_on_light.svg",
+      },
+      "Application": Object {
+        "dark": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+        },
+        "light": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "type": "default",
+        "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+      },
+      "CenterMark": Object {
+        "dark": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+        },
+        "light": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "type": "default",
+        "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+      },
+      "Mark": Object {
+        "dark": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_dark.svg",
+        },
+        "light": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "type": "default",
+        "url": "/ui/logos/opensearch_mark_on_light.svg",
+      },
+      "OpenSearch": Object {
+        "dark": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_dark.svg",
+        },
+        "light": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "type": "default",
+        "url": "/ui/logos/opensearch_on_light.svg",
+      },
+      "colorScheme": "light",
+    }
+  }
   navControlsCenter$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1870,6 +1927,59 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  sidecarConfig$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {
+        "dockedMode": "right",
+        "paddingSize": 640,
+      },
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  survey="/"
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -1887,18 +1997,8 @@ exports[`Header handles visibility and lock changes 1`] = `
               "borders": "none",
               "items": Array [
                 <HeaderLogo
-                  branding={
-                    Object {
-                      "applicationTitle": "OpenSearch Dashboards",
-                      "darkMode": false,
-                      "logo": Object {
-                        "defaultUrl": "/",
-                      },
-                      "mark": Object {
-                        "defaultUrl": "/",
-                      },
-                    }
-                  }
+                  backgroundColorScheme="dark"
+                  branding={Object {}}
                   forceNavigation$={
                     BehaviorSubject {
                       "_isScalar": false,
@@ -1986,6 +2086,71 @@ exports[`Header handles visibility and lock changes 1`] = `
                     }
                   }
                   href="/"
+                  logos={
+                    Object {
+                      "AnimatedMark": Object {
+                        "dark": Object {
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                        },
+                        "light": Object {
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                        },
+                        "type": "default",
+                        "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                      },
+                      "Application": Object {
+                        "dark": Object {
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                        },
+                        "light": Object {
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                        },
+                        "type": "default",
+                        "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                      },
+                      "CenterMark": Object {
+                        "dark": Object {
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                        },
+                        "light": Object {
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                        },
+                        "type": "default",
+                        "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                      },
+                      "Mark": Object {
+                        "dark": Object {
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                        },
+                        "light": Object {
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_mark_on_light.svg",
+                        },
+                        "type": "default",
+                        "url": "/ui/logos/opensearch_mark_on_light.svg",
+                      },
+                      "OpenSearch": Object {
+                        "dark": Object {
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_on_dark.svg",
+                        },
+                        "light": Object {
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_on_light.svg",
+                        },
+                        "type": "default",
+                        "url": "/ui/logos/opensearch_on_light.svg",
+                      },
+                      "colorScheme": "light",
+                    }
+                  }
                   navLinks$={
                     BehaviorSubject {
                       "_isScalar": false,
@@ -2305,10 +2470,20 @@ exports[`Header handles visibility and lock changes 1`] = `
             },
           ]
         }
+        style={
+          Object {
+            "paddingRight": 640,
+          }
+        }
         theme="dark"
       >
         <div
           className="euiHeader euiHeader--dark euiHeader--fixed expandedHeader"
+          style={
+            Object {
+              "paddingRight": 640,
+            }
+          }
         >
           <EuiHeaderSection
             key="items-0"
@@ -2324,18 +2499,8 @@ exports[`Header handles visibility and lock changes 1`] = `
                   className="euiHeaderSectionItem"
                 >
                   <HeaderLogo
-                    branding={
-                      Object {
-                        "applicationTitle": "OpenSearch Dashboards",
-                        "darkMode": false,
-                        "logo": Object {
-                          "defaultUrl": "/",
-                        },
-                        "mark": Object {
-                          "defaultUrl": "/",
-                        },
-                      }
-                    }
+                    backgroundColorScheme="dark"
+                    branding={Object {}}
                     forceNavigation$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -2423,6 +2588,71 @@ exports[`Header handles visibility and lock changes 1`] = `
                       }
                     }
                     href="/"
+                    logos={
+                      Object {
+                        "AnimatedMark": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                        },
+                        "Application": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                        },
+                        "CenterMark": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                        },
+                        "Mark": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_mark_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_mark_on_light.svg",
+                        },
+                        "OpenSearch": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_on_light.svg",
+                        },
+                        "colorScheme": "light",
+                      }
+                    }
                     navLinks$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -2563,12 +2793,12 @@ exports[`Header handles visibility and lock changes 1`] = `
                       onClick={[Function]}
                     >
                       <img
-                        alt="OpenSearch Dashboards logo"
+                        alt="opensearch dashboards logo"
                         className="logoImage"
-                        data-test-image-url="/"
-                        data-test-subj="customLogo"
+                        data-test-image-url="/ui/logos/opensearch_dashboards_on_dark.svg"
+                        data-test-subj="defaultLogo"
                         loading="lazy"
-                        src="/"
+                        src="/ui/logos/opensearch_dashboards_on_dark.svg"
                       />
                     </a>
                   </HeaderLogo>
@@ -2745,9 +2975,19 @@ exports[`Header handles visibility and lock changes 1`] = `
       <EuiHeader
         className="primaryHeader"
         position="fixed"
+        style={
+          Object {
+            "paddingRight": 640,
+          }
+        }
       >
         <div
           className="euiHeader euiHeader--default euiHeader--fixed primaryHeader"
+          style={
+            Object {
+              "paddingRight": 640,
+            }
+          }
         >
           <EuiHeaderSection
             grow={false}
@@ -2797,6 +3037,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                                 >
                                   <span
                                     data-euiicon-type="menu"
+                                    title="Menu"
                                   />
                                 </span>
                               </span>
@@ -2841,11 +3082,13 @@ exports[`Header handles visibility and lock changes 1`] = `
                               >
                                 <EuiIcon
                                   size="m"
+                                  title="Menu"
                                   type="menu"
                                 >
                                   <span
                                     data-euiicon-type="menu"
                                     size="m"
+                                    title="Menu"
                                   />
                                 </EuiIcon>
                               </span>
@@ -2924,18 +3167,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                   className="euiHeaderSectionItem euiHeaderSectionItem--borderRight"
                 >
                   <HomeLoader
-                    branding={
-                      Object {
-                        "applicationTitle": "OpenSearch Dashboards",
-                        "darkMode": false,
-                        "logo": Object {
-                          "defaultUrl": "/",
-                        },
-                        "mark": Object {
-                          "defaultUrl": "/",
-                        },
-                      }
-                    }
+                    branding={Object {}}
                     forceNavigation$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -3109,6 +3341,71 @@ exports[`Header handles visibility and lock changes 1`] = `
                         "thrownError": null,
                       }
                     }
+                    logos={
+                      Object {
+                        "AnimatedMark": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                        },
+                        "Application": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                        },
+                        "CenterMark": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                        },
+                        "Mark": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_mark_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_mark_on_light.svg",
+                        },
+                        "OpenSearch": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_on_light.svg",
+                        },
+                        "colorScheme": "light",
+                      }
+                    }
                     navLinks$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -3275,10 +3572,10 @@ exports[`Header handles visibility and lock changes 1`] = `
                                     >
                                       <span
                                         class="logoImage"
-                                        data-euiicon-type="/"
-                                        data-test-image-url="/"
-                                        data-test-subj="customMark"
-                                        title="OpenSearch Dashboards home"
+                                        data-euiicon-type="home"
+                                        data-test-image-url="home"
+                                        data-test-subj="homeIcon"
+                                        title="opensearch dashboards home"
                                       />
                                     </div>
                                     <div
@@ -3336,34 +3633,88 @@ exports[`Header handles visibility and lock changes 1`] = `
                                     className="homeIconContainer"
                                   >
                                     <HomeIcon
-                                      applicationTitle="OpenSearch Dashboards"
-                                      darkMode={false}
-                                      logo={
+                                      branding={Object {}}
+                                      logos={
                                         Object {
-                                          "defaultUrl": "/",
-                                        }
-                                      }
-                                      mark={
-                                        Object {
-                                          "defaultUrl": "/",
+                                          "AnimatedMark": Object {
+                                            "dark": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                                            },
+                                            "light": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                                            },
+                                            "type": "default",
+                                            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                                          },
+                                          "Application": Object {
+                                            "dark": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                                            },
+                                            "light": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                                            },
+                                            "type": "default",
+                                            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                                          },
+                                          "CenterMark": Object {
+                                            "dark": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                                            },
+                                            "light": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                                            },
+                                            "type": "default",
+                                            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                                          },
+                                          "Mark": Object {
+                                            "dark": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                                            },
+                                            "light": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_mark_on_light.svg",
+                                            },
+                                            "type": "default",
+                                            "url": "/ui/logos/opensearch_mark_on_light.svg",
+                                          },
+                                          "OpenSearch": Object {
+                                            "dark": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_on_dark.svg",
+                                            },
+                                            "light": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_on_light.svg",
+                                            },
+                                            "type": "default",
+                                            "url": "/ui/logos/opensearch_on_light.svg",
+                                          },
+                                          "colorScheme": "light",
                                         }
                                       }
                                     >
                                       <EuiIcon
                                         className="logoImage"
-                                        data-test-image-url="/"
-                                        data-test-subj="customMark"
-                                        size="l"
-                                        title="OpenSearch Dashboards home"
-                                        type="/"
+                                        data-test-image-url="home"
+                                        data-test-subj="homeIcon"
+                                        size="m"
+                                        title="opensearch dashboards home"
+                                        type="home"
                                       >
                                         <span
                                           className="logoImage"
-                                          data-euiicon-type="/"
-                                          data-test-image-url="/"
-                                          data-test-subj="customMark"
-                                          size="l"
-                                          title="OpenSearch Dashboards home"
+                                          data-euiicon-type="home"
+                                          data-test-image-url="home"
+                                          data-test-subj="homeIcon"
+                                          size="m"
+                                          title="opensearch dashboards home"
                                         />
                                       </EuiIcon>
                                     </HomeIcon>
@@ -3590,19 +3941,16 @@ exports[`Header handles visibility and lock changes 1`] = `
                 "thrownError": null,
               }
             }
-            isDarkMode={false}
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
                 Array [
                   Object {
-                    "className": "osdBreadcrumbs",
                     "data-test-subj": "breadcrumb first last",
                     "text": "test",
                   },
                 ]
               }
-              className="osdHeaderBreadcrumbs"
               data-test-subj="breadcrumbs"
               max={10}
             >
@@ -3610,32 +3958,39 @@ exports[`Header handles visibility and lock changes 1`] = `
                 breadcrumbs={
                   Array [
                     Object {
-                      "className": "osdBreadcrumbs",
                       "data-test-subj": "breadcrumb first last",
                       "text": "test",
                     },
                   ]
                 }
-                className="euiHeaderBreadcrumbs osdHeaderBreadcrumbs"
+                className="euiHeaderBreadcrumbs"
                 data-test-subj="breadcrumbs"
                 max={10}
                 truncate={true}
               >
                 <nav
                   aria-label="breadcrumb"
-                  className="euiBreadcrumbs euiHeaderBreadcrumbs osdHeaderBreadcrumbs euiBreadcrumbs--truncate"
+                  className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate"
                   data-test-subj="breadcrumbs"
                 >
-                  <EuiInnerText>
-                    <span
-                      aria-current="page"
-                      className="euiBreadcrumb osdBreadcrumbs euiBreadcrumb--last"
-                      data-test-subj="breadcrumb first last"
-                      title="test"
+                  <div
+                    className="euiBreadcrumbWall euiBreadcrumbWall--single"
+                  >
+                    <div
+                      className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first euiBreadcrumbWrapper--last"
                     >
-                      test
-                    </span>
-                  </EuiInnerText>
+                      <EuiInnerText>
+                        <span
+                          aria-current="page"
+                          className="euiBreadcrumb euiBreadcrumb--last"
+                          data-test-subj="breadcrumb first last"
+                          title="test"
+                        >
+                          test
+                        </span>
+                      </EuiInnerText>
+                    </div>
+                  </div>
                 </nav>
               </EuiBreadcrumbs>
             </EuiHeaderBreadcrumbs>
@@ -3883,6 +4238,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                         "thrownError": null,
                       }
                     }
+                    side="right"
                   />
                 </div>
               </EuiHeaderSectionItem>
@@ -4593,6 +4949,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                     }
                     opensearchDashboardsDocLink="/docs"
                     opensearchDashboardsVersion="1.0.0"
+                    surveyLink="/"
                     useDefaultContent={true}
                   >
                     <HeaderHelpMenuUI
@@ -5398,6 +5755,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                       }
                       opensearchDashboardsDocLink="/docs"
                       opensearchDashboardsVersion="1.0.0"
+                      surveyLink="/"
                       useDefaultContent={true}
                     >
                       <EuiPopover
@@ -5411,7 +5769,8 @@ exports[`Header handles visibility and lock changes 1`] = `
                           >
                             <EuiIcon
                               size="m"
-                              type="help"
+                              title="Help"
+                              type="questionInCircle"
                             />
                           </EuiHeaderSectionItemButton>
                         }
@@ -5462,7 +5821,8 @@ exports[`Header handles visibility and lock changes 1`] = `
                                             class="euiHeaderSectionItemButton__content"
                                           >
                                             <span
-                                              data-euiicon-type="help"
+                                              data-euiicon-type="questionInCircle"
+                                              title="Help"
                                             />
                                           </span>
                                         </span>
@@ -5504,11 +5864,13 @@ exports[`Header handles visibility and lock changes 1`] = `
                                         >
                                           <EuiIcon
                                             size="m"
-                                            type="help"
+                                            title="Help"
+                                            type="questionInCircle"
                                           >
                                             <span
-                                              data-euiicon-type="help"
+                                              data-euiicon-type="questionInCircle"
                                               size="m"
+                                              title="Help"
                                             />
                                           </EuiIcon>
                                         </span>
@@ -5585,22 +5947,12 @@ exports[`Header handles visibility and lock changes 1`] = `
       basePath={
         BasePath {
           "basePath": "/test",
+          "clientBasePath": "",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "/test",
-        }
-      }
-      branding={
-        Object {
-          "applicationTitle": "OpenSearch Dashboards",
-          "darkMode": false,
-          "logo": Object {
-            "defaultUrl": "/",
-          },
-          "mark": Object {
-            "defaultUrl": "/",
-          },
         }
       }
       closeNav={[Function]}
@@ -5662,6 +6014,71 @@ exports[`Header handles visibility and lock changes 1`] = `
       id="mockId"
       isLocked={true}
       isNavOpen={false}
+      logos={
+        Object {
+          "AnimatedMark": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_spinner_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "Application": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "CenterMark": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "Mark": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_mark_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_mark_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "OpenSearch": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "colorScheme": "light",
+        }
+      }
       navLinks$={
         BehaviorSubject {
           "_isScalar": false,
@@ -6417,6 +6834,7 @@ exports[`Header renders condensed header 1`] = `
         "catalogue": Object {},
         "management": Object {},
         "navLinks": Object {},
+        "workspaces": Object {},
       },
       "currentActionMenu$": BehaviorSubject {
         "_isScalar": false,
@@ -6592,7 +7010,9 @@ exports[`Header renders condensed header 1`] = `
   basePath={
     BasePath {
       "basePath": "/test",
+      "clientBasePath": "",
       "get": [Function],
+      "getBasePath": [Function],
       "prepend": [Function],
       "remove": [Function],
       "serverBasePath": "/test",
@@ -6600,14 +7020,6 @@ exports[`Header renders condensed header 1`] = `
   }
   branding={
     Object {
-      "applicationTitle": "Foobar Dashboards",
-      "darkMode": false,
-      "logo": Object {
-        "defaultUrl": "/foo",
-      },
-      "mark": Object {
-        "defaultUrl": "/foo",
-      },
       "useExpandedHeader": false,
     }
   }
@@ -7743,6 +8155,71 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  logos={
+    Object {
+      "AnimatedMark": Object {
+        "dark": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+        },
+        "light": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_spinner_on_light.svg",
+        },
+        "type": "default",
+        "url": "/ui/logos/opensearch_spinner_on_light.svg",
+      },
+      "Application": Object {
+        "dark": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+        },
+        "light": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+        },
+        "type": "default",
+        "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+      },
+      "CenterMark": Object {
+        "dark": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+        },
+        "light": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+        },
+        "type": "default",
+        "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+      },
+      "Mark": Object {
+        "dark": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_dark.svg",
+        },
+        "light": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_mark_on_light.svg",
+        },
+        "type": "default",
+        "url": "/ui/logos/opensearch_mark_on_light.svg",
+      },
+      "OpenSearch": Object {
+        "dark": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_dark.svg",
+        },
+        "light": Object {
+          "type": "default",
+          "url": "/ui/logos/opensearch_on_light.svg",
+        },
+        "type": "default",
+        "url": "/ui/logos/opensearch_on_light.svg",
+      },
+      "colorScheme": "light",
+    }
+  }
   navControlsCenter$={
     BehaviorSubject {
       "_isScalar": false,
@@ -8050,6 +8527,59 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  sidecarConfig$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {
+        "dockedMode": "right",
+        "paddingSize": 640,
+      },
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  survey="/"
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -8061,9 +8591,19 @@ exports[`Header renders condensed header 1`] = `
       <EuiHeader
         className="primaryHeader"
         position="fixed"
+        style={
+          Object {
+            "paddingRight": 640,
+          }
+        }
       >
         <div
           className="euiHeader euiHeader--default euiHeader--fixed primaryHeader"
+          style={
+            Object {
+              "paddingRight": 640,
+            }
+          }
         >
           <EuiHeaderSection
             grow={false}
@@ -8113,6 +8653,7 @@ exports[`Header renders condensed header 1`] = `
                                 >
                                   <span
                                     data-euiicon-type="menu"
+                                    title="Menu"
                                   />
                                 </span>
                               </span>
@@ -8157,11 +8698,13 @@ exports[`Header renders condensed header 1`] = `
                               >
                                 <EuiIcon
                                   size="m"
+                                  title="Menu"
                                   type="menu"
                                 >
                                   <span
                                     data-euiicon-type="menu"
                                     size="m"
+                                    title="Menu"
                                   />
                                 </EuiIcon>
                               </span>
@@ -8242,14 +8785,6 @@ exports[`Header renders condensed header 1`] = `
                   <HomeLoader
                     branding={
                       Object {
-                        "applicationTitle": "Foobar Dashboards",
-                        "darkMode": false,
-                        "logo": Object {
-                          "defaultUrl": "/foo",
-                        },
-                        "mark": Object {
-                          "defaultUrl": "/foo",
-                        },
                         "useExpandedHeader": false,
                       }
                     }
@@ -8389,6 +8924,71 @@ exports[`Header renders condensed header 1`] = `
                         "thrownError": null,
                       }
                     }
+                    logos={
+                      Object {
+                        "AnimatedMark": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                        },
+                        "Application": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                        },
+                        "CenterMark": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                        },
+                        "Mark": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_mark_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_mark_on_light.svg",
+                        },
+                        "OpenSearch": Object {
+                          "dark": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_on_dark.svg",
+                          },
+                          "light": Object {
+                            "type": "default",
+                            "url": "/ui/logos/opensearch_on_light.svg",
+                          },
+                          "type": "default",
+                          "url": "/ui/logos/opensearch_on_light.svg",
+                        },
+                        "colorScheme": "light",
+                      }
+                    }
                     navLinks$={
                       BehaviorSubject {
                         "_isScalar": false,
@@ -8511,10 +9111,10 @@ exports[`Header renders condensed header 1`] = `
                                     >
                                       <span
                                         class="logoImage"
-                                        data-euiicon-type="/foo"
-                                        data-test-image-url="/foo"
-                                        data-test-subj="customMark"
-                                        title="Foobar Dashboards home"
+                                        data-euiicon-type="/ui/logos/opensearch_mark_on_light.svg"
+                                        data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
+                                        data-test-subj="defaultMark"
+                                        title="opensearch dashboards home"
                                       />
                                     </div>
                                     <div
@@ -8572,35 +9172,92 @@ exports[`Header renders condensed header 1`] = `
                                     className="homeIconContainer"
                                   >
                                     <HomeIcon
-                                      applicationTitle="Foobar Dashboards"
-                                      darkMode={false}
-                                      logo={
+                                      branding={
                                         Object {
-                                          "defaultUrl": "/foo",
+                                          "useExpandedHeader": false,
                                         }
                                       }
-                                      mark={
+                                      logos={
                                         Object {
-                                          "defaultUrl": "/foo",
+                                          "AnimatedMark": Object {
+                                            "dark": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                                            },
+                                            "light": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                                            },
+                                            "type": "default",
+                                            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                                          },
+                                          "Application": Object {
+                                            "dark": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                                            },
+                                            "light": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                                            },
+                                            "type": "default",
+                                            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                                          },
+                                          "CenterMark": Object {
+                                            "dark": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                                            },
+                                            "light": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                                            },
+                                            "type": "default",
+                                            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                                          },
+                                          "Mark": Object {
+                                            "dark": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                                            },
+                                            "light": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_mark_on_light.svg",
+                                            },
+                                            "type": "default",
+                                            "url": "/ui/logos/opensearch_mark_on_light.svg",
+                                          },
+                                          "OpenSearch": Object {
+                                            "dark": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_on_dark.svg",
+                                            },
+                                            "light": Object {
+                                              "type": "default",
+                                              "url": "/ui/logos/opensearch_on_light.svg",
+                                            },
+                                            "type": "default",
+                                            "url": "/ui/logos/opensearch_on_light.svg",
+                                          },
+                                          "colorScheme": "light",
                                         }
                                       }
-                                      useExpandedHeader={false}
                                     >
                                       <EuiIcon
                                         className="logoImage"
-                                        data-test-image-url="/foo"
-                                        data-test-subj="customMark"
+                                        data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
+                                        data-test-subj="defaultMark"
                                         size="l"
-                                        title="Foobar Dashboards home"
-                                        type="/foo"
+                                        title="opensearch dashboards home"
+                                        type="/ui/logos/opensearch_mark_on_light.svg"
                                       >
                                         <span
                                           className="logoImage"
-                                          data-euiicon-type="/foo"
-                                          data-test-image-url="/foo"
-                                          data-test-subj="customMark"
+                                          data-euiicon-type="/ui/logos/opensearch_mark_on_light.svg"
+                                          data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
+                                          data-test-subj="defaultMark"
                                           size="l"
-                                          title="Foobar Dashboards home"
+                                          title="opensearch dashboards home"
                                         />
                                       </EuiIcon>
                                     </HomeIcon>
@@ -8823,19 +9480,16 @@ exports[`Header renders condensed header 1`] = `
                 "thrownError": null,
               }
             }
-            isDarkMode={false}
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
                 Array [
                   Object {
-                    "className": "osdBreadcrumbs",
                     "data-test-subj": "breadcrumb first",
                     "text": "test",
                   },
                 ]
               }
-              className="osdHeaderBreadcrumbs"
               data-test-subj="breadcrumbs"
               max={10}
             >
@@ -8843,32 +9497,39 @@ exports[`Header renders condensed header 1`] = `
                 breadcrumbs={
                   Array [
                     Object {
-                      "className": "osdBreadcrumbs",
                       "data-test-subj": "breadcrumb first",
                       "text": "test",
                     },
                   ]
                 }
-                className="euiHeaderBreadcrumbs osdHeaderBreadcrumbs"
+                className="euiHeaderBreadcrumbs"
                 data-test-subj="breadcrumbs"
                 max={10}
                 truncate={true}
               >
                 <nav
                   aria-label="breadcrumb"
-                  className="euiBreadcrumbs euiHeaderBreadcrumbs osdHeaderBreadcrumbs euiBreadcrumbs--truncate"
+                  className="euiBreadcrumbs euiHeaderBreadcrumbs euiBreadcrumbs--truncate"
                   data-test-subj="breadcrumbs"
                 >
-                  <EuiInnerText>
-                    <span
-                      aria-current="page"
-                      className="euiBreadcrumb osdBreadcrumbs euiBreadcrumb--last"
-                      data-test-subj="breadcrumb first"
-                      title="test"
+                  <div
+                    className="euiBreadcrumbWall euiBreadcrumbWall--single"
+                  >
+                    <div
+                      className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first euiBreadcrumbWrapper--last"
                     >
-                      test
-                    </span>
-                  </EuiInnerText>
+                      <EuiInnerText>
+                        <span
+                          aria-current="page"
+                          className="euiBreadcrumb euiBreadcrumb--last"
+                          data-test-subj="breadcrumb first"
+                          title="test"
+                        >
+                          test
+                        </span>
+                      </EuiInnerText>
+                    </div>
+                  </div>
                 </nav>
               </EuiBreadcrumbs>
             </EuiHeaderBreadcrumbs>
@@ -9116,6 +9777,7 @@ exports[`Header renders condensed header 1`] = `
                         "thrownError": null,
                       }
                     }
+                    side="right"
                   />
                 </div>
               </EuiHeaderSectionItem>
@@ -9826,6 +10488,7 @@ exports[`Header renders condensed header 1`] = `
                     }
                     opensearchDashboardsDocLink="/docs"
                     opensearchDashboardsVersion="1.0.0"
+                    surveyLink="/"
                     useDefaultContent={true}
                   >
                     <HeaderHelpMenuUI
@@ -10631,6 +11294,7 @@ exports[`Header renders condensed header 1`] = `
                       }
                       opensearchDashboardsDocLink="/docs"
                       opensearchDashboardsVersion="1.0.0"
+                      surveyLink="/"
                       useDefaultContent={true}
                     >
                       <EuiPopover
@@ -10644,7 +11308,8 @@ exports[`Header renders condensed header 1`] = `
                           >
                             <EuiIcon
                               size="m"
-                              type="help"
+                              title="Help"
+                              type="questionInCircle"
                             />
                           </EuiHeaderSectionItemButton>
                         }
@@ -10695,7 +11360,8 @@ exports[`Header renders condensed header 1`] = `
                                             class="euiHeaderSectionItemButton__content"
                                           >
                                             <span
-                                              data-euiicon-type="help"
+                                              data-euiicon-type="questionInCircle"
+                                              title="Help"
                                             />
                                           </span>
                                         </span>
@@ -10737,11 +11403,13 @@ exports[`Header renders condensed header 1`] = `
                                         >
                                           <EuiIcon
                                             size="m"
-                                            type="help"
+                                            title="Help"
+                                            type="questionInCircle"
                                           >
                                             <span
-                                              data-euiicon-type="help"
+                                              data-euiicon-type="questionInCircle"
                                               size="m"
+                                              title="Help"
                                             />
                                           </EuiIcon>
                                         </span>
@@ -10818,23 +11486,12 @@ exports[`Header renders condensed header 1`] = `
       basePath={
         BasePath {
           "basePath": "/test",
+          "clientBasePath": "",
           "get": [Function],
+          "getBasePath": [Function],
           "prepend": [Function],
           "remove": [Function],
           "serverBasePath": "/test",
-        }
-      }
-      branding={
-        Object {
-          "applicationTitle": "Foobar Dashboards",
-          "darkMode": false,
-          "logo": Object {
-            "defaultUrl": "/foo",
-          },
-          "mark": Object {
-            "defaultUrl": "/foo",
-          },
-          "useExpandedHeader": false,
         }
       }
       closeNav={[Function]}
@@ -10891,6 +11548,71 @@ exports[`Header renders condensed header 1`] = `
       id="mockId"
       isLocked={false}
       isNavOpen={false}
+      logos={
+        Object {
+          "AnimatedMark": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_spinner_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_spinner_on_light.svg",
+          },
+          "Application": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+          },
+          "CenterMark": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+          },
+          "Mark": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_mark_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_mark_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_mark_on_light.svg",
+          },
+          "OpenSearch": Object {
+            "dark": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_on_dark.svg",
+            },
+            "light": Object {
+              "type": "default",
+              "url": "/ui/logos/opensearch_on_light.svg",
+            },
+            "type": "default",
+            "url": "/ui/logos/opensearch_on_light.svg",
+          },
+          "colorScheme": "light",
+        }
+      }
       navLinks$={
         BehaviorSubject {
           "_isScalar": false,

@@ -139,7 +139,7 @@ function DateRangesParamEditor({
     <EuiFormRow display={'rowCompressed'} fullWidth>
       <>
         <EuiText size="xs">
-          <EuiLink href={services.docLinks.links.noDocumentation.dateMath} target="_blank">
+          <EuiLink href={services.docLinks.links.opensearch.dateMath} target="_blank">
             <FormattedMessage
               id="visDefaultEditor.controls.dateRanges.acceptedDateFormatsLinkText"
               defaultMessage="Acceptable date formats"

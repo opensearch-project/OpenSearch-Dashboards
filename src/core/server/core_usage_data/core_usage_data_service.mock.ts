@@ -105,7 +105,7 @@ const createStartContractMock = () => {
               keyConfigured: false,
               keystoreConfigured: false,
               redirectHttpFromPortConfigured: false,
-              supportedProtocols: ['TLSv1.1', 'TLSv1.2'],
+              supportedProtocols: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
               truststoreConfigured: false,
             },
             xsrf: {

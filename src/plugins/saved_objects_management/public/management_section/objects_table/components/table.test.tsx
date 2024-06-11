@@ -37,6 +37,7 @@ import { actionServiceMock } from '../../../services/action_service.mock';
 import { columnServiceMock } from '../../../services/column_service.mock';
 import { SavedObjectsManagementAction } from '../../..';
 import { Table, TableProps } from './table';
+import { WorkspaceAttribute } from 'opensearch-dashboards/public';
 
 const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,
@@ -113,6 +114,52 @@ describe('Table', () => {
     const component = shallowWithI18nProvider(<Table {...defaultProps} />);
 
     expect(component).toMatchSnapshot();
+  });
+
+  it('should render gotoApp link correctly for workspace', () => {
+    const item = {
+      id: 'dashboard-1',
+      type: 'dashboard',
+      workspaces: ['ws-1'],
+      attributes: {},
+      references: [],
+      meta: {
+        title: `My-Dashboard-test`,
+        icon: 'indexPatternApp',
+        editUrl: '/management/opensearch-dashboards/objects/savedDashboards/dashboard-1',
+        inAppUrl: {
+          path: '/app/dashboards#/view/dashboard-1',
+          uiCapabilitiesPath: 'dashboard.show',
+        },
+      },
+    };
+    const props = {
+      ...defaultProps,
+      availableWorkspaces: [{ id: 'ws-1', name: 'My workspace' } as WorkspaceAttribute],
+      items: [item],
+    };
+    // not in a workspace
+    let component = shallowWithI18nProvider(<Table {...props} />);
+
+    let table = component.find('EuiBasicTable');
+    let columns = table.prop<
+      Array<{ render: (id: string, record: unknown) => React.ReactElement }>
+    >('columns');
+    let content = columns[1].render('My-Dashboard-test', item);
+    expect(content.props.href).toEqual('http://localhost/w/ws-1/app/dashboards#/view/dashboard-1');
+
+    // in a workspace
+    const currentWorkspaceId = 'foo-ws';
+    component = shallowWithI18nProvider(
+      <Table {...props} currentWorkspaceId={currentWorkspaceId} />
+    );
+
+    table = component.find('EuiBasicTable');
+    columns = table.prop('columns');
+    content = columns[1].render('My-Dashboard-test', item);
+    expect(content.props.href).toEqual(
+      `http://localhost/w/${currentWorkspaceId}/app/dashboards#/view/dashboard-1`
+    );
   });
 
   it('should handle query parse error', () => {

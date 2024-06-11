@@ -38,9 +38,14 @@ import { parseClientOptions, OpenSearchClientConfig } from './client_config';
 
 export const configureClient = (
   config: OpenSearchClientConfig,
-  { logger, scoped = false }: { logger: Logger; scoped?: boolean }
+  {
+    logger,
+    scoped = false,
+    withLongNumeralsSupport = false,
+  }: { logger: Logger; scoped?: boolean; withLongNumeralsSupport?: boolean }
 ): Client => {
   const clientOptions = parseClientOptions(config, scoped);
+  if (withLongNumeralsSupport) clientOptions.enableLongNumeralSupport = true;
 
   const client = new Client(clientOptions);
   addLogging(client, logger, config.logQueries);

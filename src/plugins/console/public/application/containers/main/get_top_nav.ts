@@ -34,9 +34,17 @@ interface Props {
   onClickHistory: () => void;
   onClickSettings: () => void;
   onClickHelp: () => void;
+  onClickExport: () => void;
+  onClickImport: () => void;
 }
 
-export function getTopNavConfig({ onClickHistory, onClickSettings, onClickHelp }: Props) {
+export function getTopNavConfig({
+  onClickHistory,
+  onClickSettings,
+  onClickHelp,
+  onClickExport,
+  onClickImport,
+}: Props) {
   return [
     {
       id: 'history',
@@ -76,6 +84,32 @@ export function getTopNavConfig({ onClickHistory, onClickSettings, onClickHelp }
         onClickHelp();
       },
       testId: 'consoleHelpButton',
+    },
+    {
+      id: 'export',
+      label: i18n.translate('console.topNav.exportTabLabel', {
+        defaultMessage: 'Export',
+      }),
+      description: i18n.translate('console.topNav.exportTabDescription', {
+        defaultMessage: 'Export',
+      }),
+      onClick: () => {
+        onClickExport();
+      },
+      testId: 'consoleExportButton',
+    },
+    {
+      id: 'import',
+      label: i18n.translate('console.topNav.importTabLabel', {
+        defaultMessage: 'Import',
+      }),
+      description: i18n.translate('console.topNav.importTabDescription', {
+        defaultMessage: 'Import',
+      }),
+      onClick: () => {
+        onClickImport();
+      },
+      testId: 'consoleImportButton',
     },
   ];
 }

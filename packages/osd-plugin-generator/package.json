@@ -5,13 +5,13 @@
   "license": "Apache-2.0",
   "main": "target/index.js",
   "scripts": {
-    "osd:bootstrap": "node scripts/build",
-    "osd:watch": "node scripts/build --watch"
+    "osd:bootstrap": "../../scripts/use_node scripts/build",
+    "osd:watch": "../../scripts/use_node scripts/build --watch"
   },
   "dependencies": {
     "@osd/cross-platform": "1.0.0",
     "@osd/dev-utils": "1.0.0",
-    "ejs": "^3.1.7",
+    "ejs": "^3.1.10",
     "execa": "^4.0.2",
     "inquirer": "^7.3.3",
     "normalize-path": "^3.0.0",

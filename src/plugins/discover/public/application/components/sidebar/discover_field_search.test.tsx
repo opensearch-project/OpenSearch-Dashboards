@@ -31,8 +31,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { DiscoverFieldSearch, Props } from './discover_field_search';
+import { findTestSubject } from 'test_utils/helpers';
+import { DiscoverFieldSearch, NUM_FILTERS, Props } from './discover_field_search';
 import { EuiButtonGroupProps, EuiPopover } from '@elastic/eui';
 import { ReactWrapper } from 'enzyme';
 
@@ -63,7 +63,7 @@ describe('DiscoverFieldSearch', () => {
     const onChange = jest.fn();
     const component = mountComponent({ ...defaultProps, ...{ onChange } });
     let btn = findTestSubject(component, 'toggleFieldFilterButton');
-    expect(btn.hasClass('euiFacetButton--isSelected')).toBeFalsy();
+    expect(btn.hasClass('euiFilterButton-hasActiveFilters')).toBeFalsy();
     btn.simulate('click');
     const aggregatableButtonGroup = findButtonGroup(component, 'aggregatable');
     act(() => {
@@ -72,7 +72,7 @@ describe('DiscoverFieldSearch', () => {
     });
     component.update();
     btn = findTestSubject(component, 'toggleFieldFilterButton');
-    expect(btn.hasClass('euiFacetButton--isSelected')).toBe(true);
+    expect(btn.hasClass('euiFilterButton-hasActiveFilters')).toBe(true);
     expect(onChange).toBeCalledWith('aggregatable', true);
   });
 
@@ -82,7 +82,7 @@ describe('DiscoverFieldSearch', () => {
     btn.simulate('click');
     btn = findTestSubject(component, 'toggleFieldFilterButton');
     const badge = btn.find('.euiNotificationBadge');
-    // no active filters
+    // available filters
     expect(badge.text()).toEqual('0');
     // change value of aggregatable select
     const aggregatableButtonGroup = findButtonGroup(component, 'aggregatable');

@@ -39,33 +39,38 @@ const TEST_FILTER_COLUMN_NAMES = [
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const browser = getService('browser');
-  const docTable = getService('docTable');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
 
   describe('discover - context - back navigation', function contextSize() {
     before(async function () {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.switchDiscoverTable('new');
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
+        await PageObjects.discover.clickFieldListItemDetails(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
       }
     });
 
-    it('should go back after loading', async function () {
-      await retry.waitFor('user navigating to context and returning to discover', async () => {
-        // navigate to the context view
+    it('should open a new tab after loading surrounding documents', async function () {
+      await retry.waitFor('user navigating to context', async () => {
         const initialHitCount = await PageObjects.discover.getHitCount();
-        await docTable.clickRowToggle({ rowIndex: 0 });
-        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
-        await rowActions[0].click();
-        await PageObjects.context.waitUntilContextLoadingHasFinished();
-        await PageObjects.context.clickSuccessorLoadMoreButton();
-        await PageObjects.context.clickSuccessorLoadMoreButton();
-        await PageObjects.context.clickSuccessorLoadMoreButton();
-        await PageObjects.context.waitUntilContextLoadingHasFinished();
-        await browser.goBack();
-        await PageObjects.discover.waitForDocTableLoadingComplete();
+
+        // click inspect row
+        await testSubjects.click('docTableExpandToggleColumn-0');
+        // click view surrounding documents
+        await testSubjects.click('docTableRowAction-0');
+
+        //navigate to the new window
+        await testSubjects.exists('docTable');
+        await browser.switchTab(1);
+
+        //close the new tab and get back to the old tab
+        await browser.closeCurrentWindow();
+        await browser.switchTab(0);
+
+        await testSubjects.click('euiFlyoutCloseButton');
         const hitCount = await PageObjects.discover.getHitCount();
         return initialHitCount === hitCount;
       });

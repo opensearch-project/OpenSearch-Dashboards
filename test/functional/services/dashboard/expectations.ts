@@ -36,6 +36,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const dataGrid = getService('dataGrid');
   const find = getService('find');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['dashboard', 'visualize']);
@@ -69,10 +70,10 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
       });
     }
 
-    async docTableFieldCount(expectedCount: number) {
-      log.debug(`DashboardExpect.docTableFieldCount(${expectedCount})`);
+    async dataGridTableCellCount(expectedCount: number) {
+      log.debug(`DashboardExpect.dataGridTableCellCount(${expectedCount})`);
       await retry.try(async () => {
-        const docTableCells = await testSubjects.findAll('docTableField', findTimeout);
+        const docTableCells = await testSubjects.findAll('dataGridRowCell', findTimeout);
         expect(docTableCells.length).to.be(expectedCount);
       });
     }
@@ -233,22 +234,21 @@ export function DashboardExpectProvider({ getService, getPageObjects }: FtrProvi
     async savedSearchRowCount(expectedCount: number) {
       log.debug(`DashboardExpect.savedSearchRowCount(${expectedCount})`);
       await retry.try(async () => {
-        const savedSearchRows = await testSubjects.findAll(
-          'docTableExpandToggleColumn',
-          findTimeout
-        );
-        expect(savedSearchRows.length).to.be(expectedCount);
+        // Need to change it here to find out how many rows there are
+        const timeStamps = await dataGrid.getDataGridTableColumn('date');
+        expect(timeStamps.length).to.be(expectedCount);
       });
     }
 
-    async dataTableRowCount(expectedCount: number) {
-      log.debug(`DashboardExpect.dataTableRowCount(${expectedCount})`);
+    async rowCountFromDefaultDiscoverTable(expectedCount: number) {
+      log.debug(`DashboardExpect.rowCountFromDefaultDiscoverTable(${expectedCount})`);
+      // Rows have no identifiers but we can count using the identifiers of the first cells in each data row
       await retry.try(async () => {
-        const dataTableRows = await find.allByCssSelector(
-          '[data-test-subj="paginated-table-body"] [data-cell-content]',
+        const firstCells = await find.allByCssSelector(
+          'td[data-test-subj="docTableExpandToggleColumn"]',
           findTimeout
         );
-        expect(dataTableRows.length).to.be(expectedCount);
+        expect(firstCells.length).to.be(expectedCount);
       });
     }
 

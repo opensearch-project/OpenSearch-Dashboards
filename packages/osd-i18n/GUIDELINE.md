@@ -92,17 +92,6 @@ The long term plan is to rely on using `FormattedMessage` and `i18n.translate()`
 Currently, we support the following ReactJS `i18n` tools, but they will be removed in future releases:
 - Usage of `props.intl.formatmessage()` (where `intl` is  passed to `props` by `injectI18n` HOC).
 
-#### In AngularJS
-
-The long term plan is to rely on using `i18n.translate()` by statically importing `i18n` from the `@osd/i18n` package. **Avoid using the `i18n` filter and the `i18n` service injected in controllers, directives, services.**
-
-- Call JS function `i18n.translate()` from the `@osd/i18n` package.
-- Use `i18nId` directive in template.
-
-Currently, we support the following AngluarJS `i18n` tools, but they will be removed in future releases:
-- Usage of `i18n` service in controllers, directives, services by injecting it.
-- Usage of `i18n` filter in template for attribute translation. Note: Use one-time binding ("{{:: ... }}") in filters wherever it's possible to prevent unnecessary expression re-evaluation.
-
 #### In JavaScript
 
 - Use `i18n.translate()` in NodeJS or any other framework agnostic code, where `i18n` is the I18n engine from `@osd/i18n` package.

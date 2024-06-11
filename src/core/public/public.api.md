@@ -1110,6 +1110,8 @@ export interface OverlayStart {
     //
     // (undocumented)
     openModal: OverlayModalStart['open'];
+    // (undocumented)
+    sidecar: OverlaySidecarStart;
 }
 
 export { PackageInfo }

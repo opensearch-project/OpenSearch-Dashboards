@@ -41,6 +41,7 @@ const protocolMap = new Map<string, number>([
   ['TLSv1', cryptoConstants.SSL_OP_NO_TLSv1],
   ['TLSv1.1', cryptoConstants.SSL_OP_NO_TLSv1_1],
   ['TLSv1.2', cryptoConstants.SSL_OP_NO_TLSv1_2],
+  ['TLSv1.3', cryptoConstants.SSL_OP_NO_TLSv1_3],
 ]);
 
 export const sslSchema = schema.object(
@@ -67,8 +68,13 @@ export const sslSchema = schema.object(
     }),
     redirectHttpFromPort: schema.maybe(schema.number()),
     supportedProtocols: schema.arrayOf(
-      schema.oneOf([schema.literal('TLSv1'), schema.literal('TLSv1.1'), schema.literal('TLSv1.2')]),
-      { defaultValue: ['TLSv1.1', 'TLSv1.2'], minSize: 1 }
+      schema.oneOf([
+        schema.literal('TLSv1'),
+        schema.literal('TLSv1.1'),
+        schema.literal('TLSv1.2'),
+        schema.literal('TLSv1.3'),
+      ]),
+      { defaultValue: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'], minSize: 1 }
     ),
     clientAuthentication: schema.oneOf(
       [schema.literal('none'), schema.literal('optional'), schema.literal('required')],

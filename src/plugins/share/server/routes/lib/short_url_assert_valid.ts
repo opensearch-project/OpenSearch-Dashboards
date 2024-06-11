@@ -48,7 +48,7 @@ export function shortUrlAssertValid(url: string) {
   }
 
   const pathnameParts = trim(pathname === null ? undefined : pathname, '/').split('/');
-  if (pathnameParts.length !== 2 || pathnameParts[0] !== 'app' || !pathnameParts[1]) {
+  if (pathnameParts[0] !== 'app' || !pathnameParts[1]) {
     throw Boom.notAcceptable(
       `Short url target path must be in the format "/app/{{appId}}", found "${pathname}"`
     );

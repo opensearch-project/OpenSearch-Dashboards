@@ -35,12 +35,11 @@
  *************************************************************/
 
 import Path from 'path';
-import Url from 'url';
 import readline from 'readline';
 
 import { RunWithCommands, createFlagError } from '@osd/dev-utils';
+import { Client, ClientOptions } from '@opensearch-project/opensearch';
 import { readConfigFile } from '@osd/test';
-import legacyElasticsearch from 'elasticsearch';
 
 import { OpenSearchArchiver } from './opensearch_archiver';
 
@@ -57,7 +56,7 @@ export function runCli() {
                              default: ${defaultConfigPath}
         --opensearch-url           url for OpenSearch, prefer the --config flag
         --opensearch-dashboards-url       url for OpenSearch Dashboards, prefer the --config flag
-        --dir              where arechives are stored, prefer the --config flag
+        --dir              where archives are stored, prefer the --config flag
       `,
     },
     async extendContext({ log, flags, addCleanupTask }) {
@@ -72,7 +71,7 @@ export function runCli() {
         throw createFlagError('--opensearch-url must be a string');
       }
       if (!opensearchUrl && config) {
-        opensearchUrl = Url.format(config.get('servers.opensearch'));
+        opensearchUrl = config.get('servers.opensearch.serverUrl');
       }
       if (!opensearchUrl) {
         throw createFlagError('--opensearch-url or --config must be defined');
@@ -83,7 +82,7 @@ export function runCli() {
         throw createFlagError('--opensearch-dashboards-url must be a string');
       }
       if (!opensearchDashboardsUrl && config) {
-        opensearchDashboardsUrl = Url.format(config.get('servers.opensearchDashboards'));
+        opensearchDashboardsUrl = config.get('servers.opensearchDashboards.serverUrl') as string;
       }
       if (!opensearchDashboardsUrl) {
         throw createFlagError('---url or --config must be defined');
@@ -100,10 +99,11 @@ export function runCli() {
         throw createFlagError('--dir or --config must be defined');
       }
 
-      const client = new legacyElasticsearch.Client({
-        host: opensearchUrl,
-        log: flags.verbose ? 'trace' : [],
-      });
+      const clientOptions: ClientOptions = {
+        node: opensearchUrl.toString(),
+      };
+
+      const client = new Client(clientOptions);
       addCleanupTask(() => client.close());
 
       const opensearchArchiver = new OpenSearchArchiver({
@@ -239,7 +239,7 @@ export function runCli() {
             output: process.stdout,
           });
 
-          await new Promise((resolveInput) => {
+          await new Promise<void>((resolveInput) => {
             rl.question(`Press enter when you're done`, () => {
               rl.close();
               resolveInput();

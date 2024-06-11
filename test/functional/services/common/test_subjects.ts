@@ -122,9 +122,17 @@ export function TestSubjectsProvider({ getService }: FtrProviderContext) {
       await find.clickByCssSelectorWhenNotDisabled(testSubjSelector(selector), { timeout });
     }
 
-    public async click(selector: string, timeout: number = FIND_TIME): Promise<void> {
+    public async click(
+      selector: string,
+      timeout: number = FIND_TIME,
+      parentSelector?: string
+    ): Promise<void> {
       log.debug(`TestSubjects.click(${selector})`);
-      await find.clickByCssSelector(testSubjSelector(selector), timeout);
+      await find.clickByCssSelector(
+        testSubjSelector(selector),
+        timeout,
+        parentSelector && testSubjSelector(parentSelector)
+      );
     }
 
     public async doubleClick(selector: string, timeout: number = FIND_TIME): Promise<void> {

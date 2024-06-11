@@ -13,6 +13,6 @@
       "_scripts/{id}",
       "_scripts/{id}/{context}"
     ],
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/modules-scripting.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/script-apis/create-stored-script/"
   }
 }

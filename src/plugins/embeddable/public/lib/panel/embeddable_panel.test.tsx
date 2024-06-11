@@ -32,7 +32,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { nextTick } from 'test_utils/enzyme_helpers';
 
-import { findTestSubject } from '@elastic/eui/lib/test';
+import { findTestSubject } from 'test_utils/helpers';
 import { I18nProvider } from '@osd/i18n/react';
 import { CONTEXT_MENU_TRIGGER } from '../triggers';
 import { Action, UiActionsStart, ActionType } from '../../../../ui_actions/public';

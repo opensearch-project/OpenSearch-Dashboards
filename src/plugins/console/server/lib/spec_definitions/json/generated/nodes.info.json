@@ -27,6 +27,6 @@
         "transport"
       ]
     },
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-nodes-info.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/nodes-apis/nodes-info/"
   }
 }

@@ -17,7 +17,7 @@ import { CreateDataSourceWizardWithRouter } from '../components/create_data_sour
 import { DataSourceTableWithRouter } from '../components/data_source_table';
 import { DataSourceManagementContext } from '../types';
 import { EditDataSourceWithRouter } from '../components/edit_data_source';
-import { ExperimentalCallout } from './compoenent/experimental_callout';
+import { AuthenticationMethodRegistry } from '../auth_registry';
 
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
@@ -25,7 +25,8 @@ export interface DataSourceManagementStartDependencies {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<DataSourceManagementStartDependencies>,
-  params: ManagementAppMountParams
+  params: ManagementAppMountParams,
+  authMethodsRegistry: AuthenticationMethodRegistry
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
@@ -41,13 +42,13 @@ export async function mountManagementSection(
     http,
     docLinks,
     setBreadcrumbs: params.setBreadcrumbs,
+    authenticationMethodRegistry: authMethodsRegistry,
   };
 
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>
       <I18nProvider>
         <Router history={params.history}>
-          <ExperimentalCallout docLinks={docLinks} />
           <Switch>
             <Route path={['/create']}>
               <CreateDataSourceWizardWithRouter />

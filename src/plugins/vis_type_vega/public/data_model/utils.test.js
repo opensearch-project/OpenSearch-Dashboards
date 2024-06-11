@@ -59,9 +59,7 @@ describe('Utils.handleInvalidQuery', () => {
   test('should return null if input object has function as property', async () => {
     const input = {
       key1: 'value1',
-      key2: () => {
-        alert('Hello!');
-      },
+      key2: () => jest.fn(),
     };
 
     expect(Utils.handleInvalidQuery(input)).toBe(null);
@@ -71,9 +69,7 @@ describe('Utils.handleInvalidQuery', () => {
     const input = {
       key1: 'value1',
       key2: {
-        func: () => {
-          alert('Hello!');
-        },
+        func: () => jest.fn(),
       },
     };
     expect(Utils.handleInvalidQuery(input)).toBe(null);
@@ -90,5 +86,48 @@ describe('Utils.handleInvalidQuery', () => {
         Utils.handleInvalidQuery(value);
       }).toThrowError();
     });
+  });
+
+  test('should identify object contains function properties', async () => {
+    const input1 = {
+      key1: 'value1',
+      key2: () => jest.fn(),
+    };
+
+    expect(Utils.checkForFunctionProperty(input1)).toBe(true);
+
+    const input2 = {
+      key1: () => jest.fn(),
+      key2: 'value1',
+    };
+
+    expect(Utils.checkForFunctionProperty(input2)).toBe(true);
+
+    const nestedInput = {
+      key1: {
+        nestedKey1: 'nestedValue1',
+        nestedKey2: () => jest.fn(),
+      },
+      key2: 'value1',
+    };
+
+    expect(Utils.checkForFunctionProperty(nestedInput)).toBe(true);
+
+    const inputWithoutFn = {
+      key1: 'value1',
+      key2: 'value2',
+    };
+
+    expect(Utils.checkForFunctionProperty(inputWithoutFn)).toBe(false);
+
+    const nestedInputWithoutFn = {
+      key1: {
+        nestedKey1: 'nestedValue1',
+        nestedKey2: 'nestedValue2',
+      },
+      key2: 'value2',
+    };
+
+    expect(Utils.checkForFunctionProperty(nestedInputWithoutFn)).toBe(false);
   });
 });

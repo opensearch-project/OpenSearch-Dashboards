@@ -31,11 +31,112 @@
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import _ from 'lodash';
-import { BaseStateContainer } from '../../../../opensearch_dashboards_utils/public';
+import {
+  BaseStateContainer,
+  IOsdUrlStateStorage,
+} from '../../../../opensearch_dashboards_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
 import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
 import { validateTimeRange } from '../timefilter';
+
+/**
+ * Helper function to sync up filter and query services in data plugin
+ * with a URL state storage so plugins can persist the app filter and query
+ * values across refresh
+ * @param QueryService: either setup or start
+ * @param  OsdUrlStateStorage to use for syncing and store data
+ * @param syncConfig app filter and query
+ */
+export const connectStorageToQueryState = (
+  {
+    filterManager,
+    queryString,
+    state$,
+  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
+  OsdUrlStateStorage: IOsdUrlStateStorage,
+  syncConfig: {
+    filters: FilterStateStore;
+    query: boolean;
+  }
+) => {
+  try {
+    const syncKeys: Array<keyof QueryStateChange> = [];
+    if (syncConfig.query) {
+      syncKeys.push('query');
+    }
+    if (syncConfig.filters === FilterStateStore.APP_STATE) {
+      syncKeys.push('appFilters');
+    }
+
+    const initialStateFromURL: QueryState = OsdUrlStateStorage.get('_q') ?? {
+      query: queryString.getDefaultQuery(),
+      filters: filterManager.getAppFilters(),
+    };
+
+    // set up initial '_q' flag in the URL to sync query and filter changes
+    if (!OsdUrlStateStorage.get('_q')) {
+      OsdUrlStateStorage.set('_q', initialStateFromURL, {
+        replace: true,
+      });
+    }
+
+    if (syncConfig.query && !_.isEqual(initialStateFromURL.query, queryString.getQuery())) {
+      if (initialStateFromURL.query) {
+        queryString.setQuery(_.cloneDeep(initialStateFromURL.query));
+      }
+    }
+
+    if (syncConfig.filters === FilterStateStore.APP_STATE) {
+      if (
+        !initialStateFromURL.filters ||
+        !compareFilters(initialStateFromURL.filters, filterManager.getAppFilters(), {
+          ...COMPARE_ALL_OPTIONS,
+          state: false,
+        })
+      ) {
+        if (initialStateFromURL.filters) {
+          filterManager.setAppFilters(_.cloneDeep(initialStateFromURL.filters));
+        }
+      }
+
+      const subs: Subscription[] = [
+        state$
+          .pipe(
+            filter(({ changes }) => {
+              return syncKeys.some((syncKey) => changes[syncKey]);
+            }),
+            map(({ changes, state }) => {
+              const newState: QueryState = {
+                query: state.query,
+                filters: state.filters,
+              };
+              if (syncConfig.query && changes.query) {
+                newState.query = queryString.getQuery();
+              }
+
+              if (syncConfig.filters === FilterStateStore.APP_STATE && changes.appFilters) {
+                newState.filters = filterManager.getAppFilters();
+              }
+
+              return newState;
+            })
+          )
+          .subscribe((newState) => {
+            OsdUrlStateStorage.set('_q', newState, {
+              replace: true,
+            });
+          }),
+      ];
+
+      return () => {
+        subs.forEach((s) => s.unsubscribe());
+      };
+    }
+  } catch (err) {
+    return;
+  }
+};
 
 /**
  * Helper to setup two-way syncing of global data and a state container

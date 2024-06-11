@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { parse } from '@osd/std';
 import { SearchSourceFields } from './types';
 import { InvalidJSONProperty } from '../../../../opensearch_dashboards_utils/common';
 
@@ -35,7 +36,7 @@ export const parseSearchSourceJSON = (searchSourceJSON: string) => {
   // if we have a searchSource, set its values based on the searchSourceJson field
   let searchSourceValues: SearchSourceFields;
   try {
-    searchSourceValues = JSON.parse(searchSourceJSON);
+    searchSourceValues = parse(searchSourceJSON);
   } catch (e) {
     throw new InvalidJSONProperty(
       `Invalid JSON in search source. ${e.message} JSON: ${searchSourceJSON}`

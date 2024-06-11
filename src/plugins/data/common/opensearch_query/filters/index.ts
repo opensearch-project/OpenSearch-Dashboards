@@ -35,6 +35,7 @@ export * from './build_filters';
 export * from './custom_filter';
 export * from './exists_filter';
 export * from './geo_bounding_box_filter';
+export * from './geo_shape_filter';
 export * from './geo_polygon_filter';
 export * from './get_display_value';
 export * from './get_filter_field';

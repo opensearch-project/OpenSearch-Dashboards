@@ -1,0 +1,25 @@
+{
+  "/#[a-fA-F0-9]{3}(?:[a-fA-F0-9]{3})?/": {
+    "explanation": "All colors should be inherited from the OUI theme, not hard-coded. Either remove the custom color rule or use OUI SASS variables instead.",
+    "approved": [
+      "src/core/public/_variables.scss",
+      "src/core/public/styles/_ace_overrides.scss",
+      "packages/osd-ui-framework/src/components/tool_bar/_tool_bar_search.scss",
+      "packages/osd-ui-framework/src/components/view/_index.scss",
+      "src/core/public/chrome/ui/header/header_breadcrumbs.scss",
+      "src/plugins/vis_type_timeseries/public/application/components/vis_types/_vis_types.scss",
+      "src/plugins/vis_type_vislib/public/vislib/visualizations/point_series/_labels.scss"
+    ]
+  },
+  "/(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\\([^)]*\\)/": {
+    "explanation": "All colors should be inherited from the OUI theme, not hard-coded. Either remove the custom color rule or use OUI SASS variables instead.",
+    "approved": [
+      "src/core/public/styles/_ace_overrides.scss",
+      "src/plugins/opensearch_dashboards_react/public/markdown/_markdown.scss",
+      "packages/osd-ui-framework/src/components/info_panel/_info_panel.scss",
+      "packages/osd-ui-framework/src/components/local_nav/_local_menu.scss",
+      "packages/osd-ui-framework/src/global_styling/mixins/_shadow.scss",
+      "packages/osd-ui-framework/src/global_styling/variables/_colors.scss"
+    ]
+  }
+}

@@ -29,6 +29,7 @@
  */
 
 import _ from 'lodash';
+import { parse } from '@osd/std';
 import {
   OpenSearchResponse,
   SavedObject,
@@ -109,7 +110,7 @@ export async function applyOpenSearchResp(
         // remember the reference - this is required for error handling on legacy imports
         savedObject.unresolvedIndexPatternReference = {
           name: 'kibanaSavedObjectMeta.searchSourceJSON.index',
-          id: JSON.parse(meta.searchSourceJSON).index,
+          id: parse(meta.searchSourceJSON).index,
           type: 'index-pattern',
         };
       }

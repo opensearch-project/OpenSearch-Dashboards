@@ -1,0 +1,24 @@
+.dataSourceViewOuiPanel {
+  width: 300px;
+
+  /* stylelint-disable */
+
+  .euiSelectableListItem__text {
+    max-height: 100%;
+  }
+}
+
+.dataSourceViewOuiFlexGroup {
+  .euiFlexItem {
+    max-width: fit-content;
+  }
+    /* stylelint-enable */
+
+  .dataSourceViewOuiFlexItem {
+    color: grey;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    display: inline-block;
+  }
+}

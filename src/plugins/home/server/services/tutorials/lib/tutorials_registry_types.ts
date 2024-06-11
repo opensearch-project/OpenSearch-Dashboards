@@ -95,7 +95,7 @@ export interface TutorialSchema {
   moduleName?: string;
   isBeta?: boolean;
   shortDescription: string;
-  euiIconType?: IconType; // EUI icon type string, one of https://elastic.github.io/eui/#/display/icons;
+  euiIconType?: IconType; // OUI icon type string, one of https://oui.opensearch.org/#/display/icons;
   longDescription: string;
   completionTimeMinutes?: number;
   previewImagePath?: string;

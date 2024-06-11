@@ -94,10 +94,10 @@ test('throws if config at path does not match schema', async () => {
     );
 
   await expect(valuesReceived).toMatchInlineSnapshot(`
-      Array [
-        [Error: [config validation of [key]]: expected value of type [string] but got [number]],
-      ]
-  `);
+          Array [
+            [ValidationError: [config validation of [key]]: expected value of type [string] but got [number]],
+          ]
+        `);
 });
 
 test('re-validate config when updated', async () => {
@@ -120,11 +120,11 @@ test('re-validate config when updated', async () => {
   rawConfig$.next({ key: 123 });
 
   await expect(valuesReceived).toMatchInlineSnapshot(`
-        Array [
-          "value",
-          [Error: [config validation of [key]]: expected value of type [string] but got [number]],
-        ]
-  `);
+          Array [
+            "value",
+            [ValidationError: [config validation of [key]]: expected value of type [string] but got [number]],
+          ]
+        `);
 });
 
 test("returns undefined if fetching optional config at a path that doesn't exist", async () => {

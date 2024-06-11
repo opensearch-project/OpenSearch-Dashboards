@@ -80,8 +80,12 @@ export function getCallMsearch(dependencies: CallMsearchDependencies) {
     const config = await globalConfig$.pipe(first()).toPromise();
     const timeout = getShardTimeout(config);
 
-    // trackTotalHits is not supported by msearch
-    const { trackTotalHits, ...defaultParams } = await getDefaultSearchParams(uiSettings);
+    // trackTotalHits and dataFrameHydrationStrategy is not supported by msearch
+    const {
+      trackTotalHits,
+      dataFrameHydrationStrategy,
+      ...defaultParams
+    } = await getDefaultSearchParams(uiSettings);
 
     const body = convertRequestBody(params.body, timeout);
 

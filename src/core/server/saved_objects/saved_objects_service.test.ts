@@ -34,14 +34,15 @@ import {
   clientProviderInstanceMock,
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { ByteSizeValue } from '@osd/config-schema';
 import { errors as opensearchErrors } from '@opensearch-project/opensearch';
 
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
-import { Env } from '../config';
-import { configServiceMock } from '../mocks';
+import { Config, Env, ObjectToConfigAdapter } from '../config';
+import { configServiceMock, savedObjectsRepositoryMock } from '../mocks';
 import { opensearchServiceMock } from '../opensearch/opensearch_service.mock';
 import { opensearchClientMock } from '../opensearch/client/mocks';
 import { httpServiceMock } from '../http/http_service.mock';
@@ -49,6 +50,8 @@ import { httpServerMock } from '../http/http_server.mocks';
 import { SavedObjectsClientFactoryProvider } from './service/lib';
 import { NodesVersionCompatibility } from '../opensearch/version_check/ensure_opensearch_version';
 import { SavedObjectsRepository } from './service/lib/repository';
+import { SavedObjectRepositoryFactoryProvider } from './service/lib/scoped_client_provider';
+import { ServiceStatusLevels } from '../status';
 
 jest.mock('./service/lib/repository');
 
@@ -67,6 +70,13 @@ describe('SavedObjectsService', () => {
         maxImportExportSize: new ByteSizeValue(0),
       });
     });
+    const config$ = new BehaviorSubject<Config>(
+      new ObjectToConfigAdapter({
+        savedObjects: { permission: { enabled: true } },
+      })
+    );
+
+    configService.getConfig$.mockReturnValue(config$);
     return mockCoreContext.create({ configService, env });
   };
 
@@ -167,6 +177,52 @@ describe('SavedObjectsService', () => {
 
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(1);
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
+      });
+    });
+
+    describe('#setRepositoryFactoryProvider', () => {
+      it('throws error if a repository is already registered', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const firstRepository: SavedObjectRepositoryFactoryProvider = () =>
+          savedObjectsRepositoryMock.create();
+        const secondRepository: SavedObjectRepositoryFactoryProvider = () =>
+          savedObjectsRepositoryMock.create();
+
+        setup.setRepositoryFactoryProvider(firstRepository);
+
+        expect(() => {
+          setup.setRepositoryFactoryProvider(secondRepository);
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"custom repository factory is already set, and can only be set once"`
+        );
+      });
+    });
+
+    describe('#setStatus', () => {
+      it('throws error if custom status is already set', async () => {
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const customStatus1$ = of({
+          level: ServiceStatusLevels.available,
+          summary: 'Saved Object Service is using external storage and it is up',
+        });
+        const customStatus2$ = of({
+          level: ServiceStatusLevels.unavailable,
+          summary: 'Saved Object Service is not connected to external storage and it is down',
+        });
+
+        setup.setStatus(customStatus1$);
+
+        expect(() => {
+          setup.setStatus(customStatus2$);
+        }).toThrowErrorMatchingInlineSnapshot(
+          `"custom saved object service status is already set, and can only be set once"`
+        );
       });
     });
   });
@@ -281,6 +337,24 @@ describe('SavedObjectsService', () => {
       }).toThrowErrorMatchingInlineSnapshot(
         `"cannot call \`registerType\` after service startup."`
       );
+
+      const customRpository: SavedObjectRepositoryFactoryProvider = () =>
+        savedObjectsRepositoryMock.create();
+
+      expect(() => {
+        setup.setRepositoryFactoryProvider(customRpository);
+      }).toThrowErrorMatchingInlineSnapshot(
+        '"cannot call `setRepositoryFactoryProvider` after service startup."'
+      );
+
+      const customStatus$ = of({
+        level: ServiceStatusLevels.available,
+        summary: 'Saved Object Service is using external storage and it is up',
+      });
+
+      expect(() => {
+        setup.setStatus(customStatus$);
+      }).toThrowErrorMatchingInlineSnapshot('"cannot call `setStatus` after service startup."');
     });
 
     describe('#getTypeRegistry', () => {
@@ -367,6 +441,70 @@ describe('SavedObjectsService', () => {
         ] = (SavedObjectsRepository.createRepository as jest.Mocked<any>).mock.calls;
 
         expect(includedHiddenTypes).toEqual(['someHiddenType']);
+      });
+
+      it('Should not create SavedObjectsRepository when custom repository is registered ', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        const setup = await soService.setup(coreSetup);
+
+        const customRpository: SavedObjectRepositoryFactoryProvider = () =>
+          savedObjectsRepositoryMock.create();
+        setup.setRepositoryFactoryProvider(customRpository);
+
+        const coreStart = createStartDeps();
+        const { createInternalRepository } = await soService.start(coreStart);
+        createInternalRepository();
+
+        expect(SavedObjectsRepository.createRepository as jest.Mocked<any>).not.toHaveBeenCalled();
+      });
+
+      it('Should create SavedObjectsRepository when no custom repository is registered ', async () => {
+        const coreContext = createCoreContext({ skipMigration: false });
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        await soService.setup(coreSetup);
+
+        const coreStart = createStartDeps();
+        const { createInternalRepository } = await soService.start(coreStart);
+        createInternalRepository();
+
+        expect(SavedObjectsRepository.createRepository as jest.Mocked<any>).toHaveBeenCalled();
+      });
+    });
+
+    describe('#savedObjectServiceStatus', () => {
+      it('Saved objects service status should be custom when set using setStatus', async () => {
+        const coreContext = createCoreContext({});
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        const setup = await soService.setup(coreSetup);
+
+        const customStatus$ = of({
+          level: ServiceStatusLevels.available,
+          summary: 'Saved Object Service is using external storage and it is up',
+        });
+        setup.setStatus(customStatus$);
+        const coreStart = createStartDeps();
+        await soService.start(coreStart);
+        expect(await setup.status$.pipe(first()).toPromise()).toMatchObject({
+          level: ServiceStatusLevels.available,
+          summary: 'Saved Object Service is using external storage and it is up',
+        });
+      });
+
+      it('Saved objects service should be default when custom status is not set', async () => {
+        const coreContext = createCoreContext({});
+        const soService = new SavedObjectsService(coreContext);
+        const coreSetup = createSetupDeps();
+        const setup = await soService.setup(coreSetup);
+        const coreStart = createStartDeps();
+        await soService.start(coreStart);
+        expect(await setup.status$.pipe(first()).toPromise()).toMatchObject({
+          level: ServiceStatusLevels.available,
+          summary: 'SavedObjects service has completed migrations and is available',
+        });
       });
     });
   });

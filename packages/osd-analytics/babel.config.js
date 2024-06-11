@@ -30,7 +30,7 @@
 
 // We can't use common OpenSearch Dashboards presets here because of babel versions incompatibility
 module.exports = {
-  plugins: ['@babel/plugin-proposal-class-properties'],
+  plugins: ['@babel/plugin-transform-class-properties'],
   env: {
     web: {
       presets: ['@osd/babel-preset/webpack_preset'],

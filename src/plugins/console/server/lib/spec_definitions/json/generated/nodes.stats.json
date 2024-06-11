@@ -60,6 +60,6 @@
         "warmer"
       ]
     },
-    "documentation": "https://opensearch.org/docs/latest/guide/en/elasticsearch/reference/master/cluster-nodes-stats.html"
+    "documentation": "https://opensearch.org/docs/latest/api-reference/nodes-apis/nodes-stats/"
   }
 }

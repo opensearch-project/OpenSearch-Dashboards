@@ -16,7 +16,8 @@
   ],
   "requiredBundles": [
     "opensearchDashboardsUtils",
-    "charts", 
+    "charts",
     "visDefaultEditor"
-  ]
+  ],
+  "optionalPlugins": ["dataSource"]
 }
