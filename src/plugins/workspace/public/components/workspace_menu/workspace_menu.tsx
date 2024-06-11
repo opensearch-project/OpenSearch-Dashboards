@@ -49,7 +49,7 @@ function getFilteredWorkspaceList(
   ].slice(0, 5);
 }
 
-export const WorkspaceMenu = ({ coreStart, setFocusGroup }: Props) => {
+export const WorkspaceMenu = ({ coreStart, onGroupClick }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const workspaceList = useObservable(coreStart.workspaces.workspaceList$, []);
@@ -191,21 +191,26 @@ export const WorkspaceMenu = ({ coreStart, setFocusGroup }: Props) => {
       >
         <EuiContextMenu initialPanelId={0} panels={panels} />
       </EuiPopover>
-      {selectedUseCase.map((useCase) => {
-        const useCaseDescription = WORKSPACE_USE_CASES[useCase];
-        return (
-          <EuiListGroupItem
-            color="text"
-            size="s"
-            key={useCase}
-            title={useCaseDescription.title}
-            label={useCaseDescription.title}
-            onClick={() => {
-              setFocusGroup(useCase);
-            }}
-          />
-        );
-      })}
+      <EuiCollapsibleNavGroup>
+        {selectedUseCase.map((useCase) => {
+          const useCaseDescription = WORKSPACE_USE_CASES[useCase];
+          return (
+            <EuiListGroupItem
+              color="text"
+              size="s"
+              key={useCase}
+              title={useCaseDescription.title}
+              label={useCaseDescription.title}
+              onClick={(e) => {
+                onGroupClick(e, {
+                  id: useCase || '',
+                  label: useCaseDescription.title,
+                });
+              }}
+            />
+          );
+        })}
+      </EuiCollapsibleNavGroup>
     </EuiListGroup>
   );
 };

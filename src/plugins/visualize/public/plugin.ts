@@ -157,7 +157,7 @@ export class VisualizePlugin
       euiIconType: 'inputOutput',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      group: DEFAULT_GROUPS.observability,
+      group: DEFAULT_GROUPS.analytics,
       updater$: this.appStateUpdater.asObservable(),
       // remove all references to visualize
       mount: async (params: AppMountParameters) => {

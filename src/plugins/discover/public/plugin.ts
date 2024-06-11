@@ -258,6 +258,7 @@ export class DiscoverPlugin
       euiIconType: 'inputOutput',
       defaultPath: '#/',
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
+      group: DEFAULT_GROUPS.analytics,
       mount: async (params: AppMountParameters) => {
         if (!this.initializeServices) {
           throw Error('Discover plugin method initializeServices is undefined');
@@ -289,7 +290,6 @@ export class DiscoverPlugin
 
         return () => {};
       },
-      group: DEFAULT_GROUPS.observability,
     });
 
     plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {

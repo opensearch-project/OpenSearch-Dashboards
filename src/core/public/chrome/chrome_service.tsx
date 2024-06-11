@@ -101,7 +101,7 @@ export interface StartDeps {
 }
 
 export interface CollapsibleNavHeaderRenderProps {
-  setFocusGroup: React.Dispatch<React.SetStateAction<AppCategory | undefined>>;
+  onGroupClick: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, group: AppCategory) => void;
 }
 
 export type CollapsibleNavHeaderRender = (

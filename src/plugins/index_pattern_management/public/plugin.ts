@@ -29,7 +29,13 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  AppMountParameters,
+} from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataSourcePluginSetup, DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
@@ -40,6 +46,7 @@ import {
 } from './service';
 
 import { ManagementSetup } from '../../management/public';
+import { DEFAULT_GROUPS } from '../../../core/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -109,6 +116,26 @@ export class IndexPatternManagementPlugin
         return mountManagementSection(
           core.getStartServices,
           params,
+          () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
+          dataSource
+        );
+      },
+    });
+
+    core.application.register({
+      id: IPM_APP_ID,
+      title: 'index patterns',
+      group: DEFAULT_GROUPS.settings,
+      mount: async (params: AppMountParameters<unknown>) => {
+        const { mountManagementSection } = await import('./management_app');
+        const [coreStart] = await core.getStartServices();
+        return mountManagementSection(
+          core.getStartServices,
+          {
+            ...params,
+            basePath: core.http.basePath.get(),
+            setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+          },
           () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
           dataSource
         );

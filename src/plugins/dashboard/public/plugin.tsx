@@ -371,7 +371,7 @@ export class DashboardPlugin
       defaultPath: `#${DashboardConstants.LANDING_PAGE_PATH}`,
       updater$: this.appStateUpdater,
       category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-      group: DEFAULT_GROUPS.observability,
+      group: DEFAULT_GROUPS.analytics,
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart, dashboardStart] = await core.getStartServices();
         this.currentHistory = params.history;
