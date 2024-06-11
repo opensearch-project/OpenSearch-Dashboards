@@ -32,7 +32,6 @@ import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
 import React, { Component } from 'react';
-import ResizeObserver from 'resize-observer-polyfill';
 import { get, isEqual } from 'lodash';
 
 import {

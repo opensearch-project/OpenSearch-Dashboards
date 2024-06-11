@@ -113,7 +113,7 @@
     "**/nth-check": "^2.0.1",
     "**/semver": "^7.5.3",
     "**/set-value": "^4.1.0",
-    "**/tar":"^6.2.1",
+    "**/tar": "^6.2.1",
     "**/topo/hoek": "npm:@amoo-miki/hoek@6.1.3",
     "**/trim": "^0.0.3",
     "**/typescript": "4.6.4",
@@ -158,6 +158,7 @@
     "@hapi/podium": "^4.1.3",
     "@hapi/vision": "^6.1.0",
     "@hapi/wreck": "^17.1.0",
+    "@opensearch-dashboards-test/opensearch-dashboards-test-library": "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz",
     "@opensearch-project/opensearch": "^2.9.0",
     "@opensearch/datemath": "5.0.3",
     "@osd/ace": "1.0.0",
@@ -242,9 +243,7 @@
     "type-detect": "^4.0.8",
     "uuid": "3.3.2",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "^2.10.0",
-    "@opensearch-dashboards-test/opensearch-dashboards-test-library": "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz"
-
+    "yauzl": "^2.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.22.9",
@@ -343,6 +342,7 @@
     "@types/react-virtualized": "^9.18.7",
     "@types/recompose": "^0.30.6",
     "@types/redux-mock-store": "^1.0.6",
+    "@types/resize-observer-browser": "^0.1.11",
     "@types/selenium-webdriver": "^4.0.9",
     "@types/semver": "^7.5.0",
     "@types/sinon": "^7.0.13",
@@ -463,7 +463,6 @@
     "redux-mock-store": "^1.5.4",
     "regenerate": "^1.4.0",
     "reselect": "^4.0.0",
-    "resize-observer-polyfill": "^1.5.1",
     "selenium-webdriver": "^4.0.0-alpha.7",
     "simple-git": "^3.16.0",
     "sinon": "^7.4.2",
