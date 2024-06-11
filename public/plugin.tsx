@@ -11,7 +11,7 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
-import { SQLAsyncQlSearchInterceptor } from './search/sql_async_search_interceptor';
+// import { SQLAsyncQlSearchInterceptor } from './search/sql_async_search_interceptor';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -41,13 +41,13 @@ export class QueryEnhancementsPlugin
       usageCollector: data.search.usageCollector,
     });
 
-    const sqlAsyncSearchInterceptor = new SQLAsyncQlSearchInterceptor({
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
-      startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
-    });
+    // const sqlAsyncSearchInterceptor = new SQLAsyncQlSearchInterceptor({
+    //   toasts: core.notifications.toasts,
+    //   http: core.http,
+    //   uiSettings: core.uiSettings,
+    //   startServices: core.getStartServices(),
+    //   usageCollector: data.search.usageCollector,
+    // });
 
     data.__enhance({
       ui: {
@@ -64,6 +64,7 @@ export class QueryEnhancementsPlugin
             extensions: [createQueryAssistExtension(core.http, 'PPL')],
           },
           fields: {
+            filterable: false,
             visualizable: false,
           },
           supportedAppNames: ['discover'],
@@ -91,25 +92,25 @@ export class QueryEnhancementsPlugin
       },
     });
 
-    data.__enhance({
-      ui: {
-        query: {
-          language: 'SQL Async',
-          search: sqlAsyncSearchInterceptor,
-          searchBar: {
-            showDatePicker: false,
-            showFilterBar: false,
-            queryStringInput: { initialValue: 'SHOW DATABASES IN mys3' },
-          },
-          fields: {
-            filterable: false,
-            visualizable: false,
-          },
-          showDocLinks: false,
-          supportedAppNames: ['discover'],
-        },
-      },
-    });
+    // data.__enhance({
+    //   ui: {
+    //     query: {
+    //       language: 'SQL Async',
+    //       search: sqlAsyncSearchInterceptor,
+    //       searchBar: {
+    //         showDatePicker: false,
+    //         showFilterBar: false,
+    //         queryStringInput: { initialValue: 'SHOW DATABASES IN mys3' },
+    //       },
+    //       fields: {
+    //         filterable: false,
+    //         visualizable: false,
+    //       },
+    //       showDocLinks: false,
+    //       supportedAppNames: ['discover'],
+    //     },
+    //   },
+    // });
 
     return {};
   }
