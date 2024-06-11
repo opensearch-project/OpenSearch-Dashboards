@@ -25,6 +25,7 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Xinrui Bai                | [xinruiba](https://github.com/xinruiba)             | Amazon      |
 | Ella Zhu                  | [zhyuanqi](https://github.com/zhyuanqi)             | Amazon      |
 | Eric Wei                  | [mengweieric](https://github.com/mengweieric)       | Amazon      |
+| Suchit Sahoo              | [LDrago27](https://github.com/LDrago27)             | Amazon      | 
 
 ## Emeritus
 
