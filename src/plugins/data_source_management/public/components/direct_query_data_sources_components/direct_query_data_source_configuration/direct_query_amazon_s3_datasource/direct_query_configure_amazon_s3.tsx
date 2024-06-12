@@ -77,7 +77,13 @@ const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = (props)
   const [details, setDetails] = useState(currentDetails);
   const [arn, setArn] = useState(currentArn);
   const [store, setStore] = useState(currentStore);
-  const { setBreadcrumbs } = useOpenSearchDashboards<DataSourceManagementContext>().services.chrome;
+  const {
+    chrome,
+    setBreadcrumbs,
+    savedObjects,
+    notifications: { toasts },
+    uiSettings,
+  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   useEffect(() => {
     setBreadcrumbs(getCreateAmazonS3SourceBreadcrumbs());
