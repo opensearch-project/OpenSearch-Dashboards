@@ -1,2 +1,2 @@
 fix:
-- Hide duplicated scrollbars. ([#5616](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5616))
+- Prevent unnecessary scrollbars inside table visualizations ([#5616](https://github.com/opensearch-project/OpenSearch-Dashboards/issues/5616))
