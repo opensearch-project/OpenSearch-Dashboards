@@ -44,6 +44,21 @@ export function getCreateOpenSearchDataSourceBreadcrumbs() {
   ];
 }
 
+export function getCreateAmazonS3SourceBreadcrumbs() {
+  return [
+    ...getCreateBreadcrumbs(),
+    {
+      text: i18n.translate(
+        'dataSourcesManagement.dataSources.createAmazonS3DataSourceBreadcrumbs',
+        {
+          defaultMessage: 'Amazon S3',
+        }
+      ),
+      href: `/configure/AmazonS3AWSGlue`,
+    },
+  ];
+}
+
 export function getEditBreadcrumbs(dataSource: DataSourceAttributes) {
   return [
     ...getListBreadcrumbs(),

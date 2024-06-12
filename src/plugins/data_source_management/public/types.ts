@@ -15,6 +15,7 @@ import {
 } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { i18n } from '@osd/i18n';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { AuthType } from '../../data_source/common/data_sources';
 import { SigV4ServiceName } from '../../data_source/common/data_sources';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
@@ -148,3 +149,5 @@ export type DatasourceType = 'S3GLUE' | 'PROMETHEUS';
 export type DatasourceStatus = 'ACTIVE' | 'DISABLED';
 
 export type AuthMethod = 'noauth' | 'basicauth' | 'awssigv4';
+
+export type Role = EuiComboBoxOptionOption;
