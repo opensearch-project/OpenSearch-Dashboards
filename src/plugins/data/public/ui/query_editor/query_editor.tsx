@@ -37,8 +37,6 @@ export interface QueryEditorProps {
   onChangeQueryEditorFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query, dateRange?: TimeRange) => void;
   getQueryStringInitialValue?: (language: string) => string;
-  // TODO: MQL datasources: we should consider this
-  // getQueryStringDataSource?: (language: string) => string;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
