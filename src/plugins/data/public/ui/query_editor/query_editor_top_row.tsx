@@ -1,67 +1,47 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
-/*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
  */
 
 import dateMath from '@elastic/datemath';
 import classNames from 'classnames';
-import React, { useState } from 'react';
-import { i18n } from '@osd/i18n';
+import React, { useRef, useState } from 'react';
 
 import {
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLink,
   EuiSuperDatePicker,
   EuiFieldText,
   prettyDuration,
 } from '@elastic/eui';
 // @ts-ignore
 import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/react';
-import { Toast } from 'src/core/public';
-import { IDataPluginServices, IIndexPattern, TimeRange, TimeHistoryContract, Query } from '../..';
+import { isEqual, compact } from 'lodash';
+import {
+  IDataPluginServices,
+  IIndexPattern,
+  TimeRange,
+  TimeHistoryContract,
+  Query,
+  DataSource,
+} from '../..';
 import {
   useOpenSearchDashboards,
-  toMountPoint,
   withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-import QueryStringInputUI from './query_string_input';
-import { doesKueryExpressionHaveLuceneSyntaxError, UI_SETTINGS } from '../../../common';
-import { PersistedLog, getQueryLog } from '../../query';
+import QueryEditorUI from './query_editor';
+import { UI_SETTINGS } from '../../../common';
+import { PersistedLog, fromUser, getQueryLog } from '../../query';
 import { NoDataPopover } from './no_data_popover';
+import { Settings } from '../types';
 
-const QueryStringInput = withOpenSearchDashboards(QueryStringInputUI);
+const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
 // @internal
-export interface QueryBarTopRowProps {
+export interface QueryEditorTopRowProps {
   query?: Query;
+  containerRef?: React.RefCallback<HTMLDivElement>;
+  settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
@@ -69,9 +49,10 @@ export interface QueryBarTopRowProps {
   disableAutoFocus?: boolean;
   screenTitle?: string;
   indexPatterns?: Array<IIndexPattern | string>;
+  dataSource?: DataSource;
   isLoading?: boolean;
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
-  showQueryInput?: boolean;
+  showQueryEditor?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -80,6 +61,7 @@ export interface QueryBarTopRowProps {
   showAutoRefreshOnly?: boolean;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   customSubmitButton?: any;
+  filterBar?: any;
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
@@ -87,16 +69,30 @@ export interface QueryBarTopRowProps {
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default function QueryBarTopRow(props: QueryBarTopRowProps) {
+export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
-  const [isQueryInputFocused, setIsQueryInputFocused] = useState(false);
+  const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
+  const queryEditorHeaderRef = useRef<HTMLDivElement | null>(null);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const { uiSettings, notifications, storage, appName, docLinks } = opensearchDashboards.services;
+  const { uiSettings, storage, appName } = opensearchDashboards.services;
 
-  const osdDQLDocs: string = docLinks!.links.opensearchDashboards.dql.base;
+  const isDataSourceReadOnly = uiSettings.get(UI_SETTINGS.QUERY_DATA_SOURCE_READONLY);
 
   const queryLanguage = props.query && props.query.language;
+  const queryUiEnhancement =
+    (queryLanguage &&
+      props.settings &&
+      props.settings.getQueryEnhancements(queryLanguage)?.searchBar) ||
+    null;
+  const parsedQuery =
+    !queryUiEnhancement || isValidQuery(props.query)
+      ? props.query!
+      : { query: getQueryStringInitialValue(queryLanguage!), language: queryLanguage! };
+  if (!isEqual(parsedQuery?.query, props.query?.query)) {
+    onQueryChange(parsedQuery);
+    onSubmit({ query: parsedQuery, dateRange: getDateRange() });
+  }
   const persistedLog: PersistedLog | undefined = React.useMemo(
     () =>
       queryLanguage && uiSettings && storage && appName
@@ -116,20 +112,24 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   function getDateRange() {
     const defaultTimeSetting = uiSettings!.get(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
     return {
-      from: props.dateRangeFrom || defaultTimeSetting.from,
-      to: props.dateRangeTo || defaultTimeSetting.to,
+      from:
+        props.dateRangeFrom ||
+        queryUiEnhancement?.dateRange?.initialFrom ||
+        defaultTimeSetting.from,
+      to: props.dateRangeTo || queryUiEnhancement?.dateRange?.initialTo || defaultTimeSetting.to,
     };
   }
 
-  function onQueryChange(query: Query) {
+  function onQueryChange(query: Query, dateRange?: TimeRange) {
+    if (queryUiEnhancement && !isValidQuery(query)) return;
     props.onChange({
       query,
-      dateRange: getDateRange(),
+      dateRange: dateRange ?? getDateRange(),
     });
   }
 
-  function onChangeQueryInputFocus(isFocused: boolean) {
-    setIsQueryInputFocused(isFocused);
+  function onChangeQueryEditorFocus(isFocused: boolean) {
+    setIsQueryEditorFocused(isFocused);
   }
 
   function onTimeChange({
@@ -172,8 +172,6 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   }
 
   function onSubmit({ query, dateRange }: { query?: Query; dateRange: TimeRange }) {
-    handleLuceneSyntaxWarning();
-
     if (props.timeHistory) {
       props.timeHistory.add(dateRange);
     }
@@ -181,10 +179,10 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     props.onSubmit({ query, dateRange });
   }
 
-  function onInputSubmit(query: Query) {
+  function onInputSubmit(query: Query, dateRange?: TimeRange) {
     onSubmit({
       query,
-      dateRange: getDateRange(),
+      dateRange: dateRange ?? getDateRange(),
     });
   }
 
@@ -196,21 +194,74 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
     return valueAsMoment.toISOString();
   }
 
-  function renderQueryInput() {
-    if (!shouldRenderQueryInput()) return;
+  function isValidQuery(query: Query | undefined) {
+    if (!query || !query.query) return false;
+    return (
+      !Array.isArray(props.indexPatterns!) ||
+      compact(props.indexPatterns!).length === 0 ||
+      !isDataSourceReadOnly ||
+      fromUser(query!.query).includes(
+        typeof props.indexPatterns[0] === 'string'
+          ? props.indexPatterns[0]
+          : props.indexPatterns[0].title
+      )
+    );
+  }
+
+  // TODO: MQL datasources: we should consider this
+  // function getQueryStringDataSource(language: string) {
+  //   const { indexPatterns, queryEnhancements } = props;
+  //   const input = queryEnhancements?.get(language)?.searchBar?.queryStringInput?.initialValue;
+
+  //   if (
+  //     !indexPatterns ||
+  //     (!Array.isArray(indexPatterns) && compact(indexPatterns).length > 0) ||
+  //     !input
+  //   )
+  //     return '';
+
+  //   const defaultDataSource = indexPatterns[0];
+  //   return typeof defaultDataSource === 'string' ? defaultDataSource : defaultDataSource.title;
+  // }
+
+  function getQueryStringInitialValue(language: string) {
+    const { indexPatterns, settings } = props;
+    const input = settings?.getQueryEnhancements(language)?.searchBar?.queryStringInput
+      ?.initialValue;
+
+    if (
+      !indexPatterns ||
+      (!Array.isArray(indexPatterns) && compact(indexPatterns).length > 0) ||
+      !input
+    )
+      return '';
+
+    const defaultDataSource = indexPatterns[0];
+    const dataSource =
+      typeof defaultDataSource === 'string' ? defaultDataSource : defaultDataSource.title;
+
+    return input.replace('<data_source>', dataSource);
+  }
+
+  function renderQueryEditor() {
+    if (!shouldRenderQueryEditor()) return;
     return (
       <EuiFlexItem>
-        <QueryStringInput
+        <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
           prepend={props.prepend}
-          query={props.query!}
+          query={parsedQuery}
+          containerRef={props.containerRef}
+          settings={props.settings!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
-          onChangeQueryInputFocus={onChangeQueryInputFocus}
+          onChangeQueryEditorFocus={onChangeQueryEditorFocus}
           onSubmit={onInputSubmit}
+          getQueryStringInitialValue={getQueryStringInitialValue}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
+          queryEditorHeaderRef={queryEditorHeaderRef}
         />
       </EuiFlexItem>
     );
@@ -233,11 +284,18 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
   }
 
   function shouldRenderDatePicker(): boolean {
-    return Boolean(props.showDatePicker || props.showAutoRefreshOnly);
+    return Boolean(
+      (props.showDatePicker && (queryUiEnhancement?.showDatePicker ?? true)) ??
+        (props.showAutoRefreshOnly && (queryUiEnhancement?.showAutoRefreshOnly ?? true))
+    );
   }
 
-  function shouldRenderQueryInput(): boolean {
-    return Boolean(props.showQueryInput && props.indexPatterns && props.query && storage);
+  function shouldRenderQueryEditor(): boolean {
+    // TODO: MQL probably can modify to not care about index patterns
+    // TODO: call queryUiEnhancement?.showQueryEditor
+    return Boolean(
+      props.showQueryEditor && props.settings && props.indexPatterns && props.query && storage
+    );
   }
 
   function renderUpdateButton() {
@@ -250,9 +308,6 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         isLoading={props.isLoading}
         onClick={onClickSubmitButton}
         data-test-subj="querySubmitButton"
-        aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
-          defaultMessage: 'Submit query',
-        })}
       />
     );
 
@@ -297,9 +352,9 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         };
       });
 
-    const wrapperClasses = classNames('osdQueryBar__datePickerWrapper', {
+    const wrapperClasses = classNames('osdQueryEditor__datePickerWrapper', {
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      'osdQueryBar__datePickerWrapper-isHidden': isQueryInputFocused,
+      'osdQueryEditor__datePickerWrapper-isHidden': isQueryEditorFocused,
     });
 
     return (
@@ -317,88 +372,38 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           commonlyUsedRanges={commonlyUsedRanges}
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
-          className="osdQueryBar__datePicker"
+          className="osdQueryEditor__datePicker"
         />
       </EuiFlexItem>
     );
   }
 
-  function handleLuceneSyntaxWarning() {
-    if (!props.query) return;
-    const { query, language } = props.query;
-    if (
-      language === 'kuery' &&
-      typeof query === 'string' &&
-      (!storage || !storage.get('opensearchDashboards.luceneSyntaxWarningOptOut')) &&
-      doesKueryExpressionHaveLuceneSyntaxError(query)
-    ) {
-      const toast = notifications!.toasts.addWarning({
-        title: i18n.translate('data.query.queryBar.luceneSyntaxWarningTitle', {
-          defaultMessage: 'Lucene syntax warning',
-        }),
-        text: toMountPoint(
-          <div>
-            <p>
-              <FormattedMessage
-                id="data.query.queryBar.luceneSyntaxWarningMessage"
-                defaultMessage="It looks like you may be trying to use Lucene query syntax, although you
-               have opensearchDashboards Query Language (DQL) selected. Please review the DQL docs {link}."
-                values={{
-                  link: (
-                    <EuiLink href={osdDQLDocs} target="_blank">
-                      <FormattedMessage
-                        id="data.query.queryBar.syntaxOptionsDescription.docsLinkText"
-                        defaultMessage="here"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiButton size="s" onClick={() => onLuceneSyntaxWarningOptOut(toast)}>
-                  <FormattedMessage
-                    id="data.query.queryBar.luceneSyntaxWarningOptOutText"
-                    defaultMessage="Don't show again"
-                  />
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-        ),
-      });
-    }
-  }
-
-  function onLuceneSyntaxWarningOptOut(toast: Toast) {
-    if (!storage) return;
-    storage.set('opensearchDashboards.luceneSyntaxWarningOptOut', true);
-    notifications!.toasts.remove(toast);
-  }
-
-  const classes = classNames('osdQueryBar', {
-    'osdQueryBar--withDatePicker': props.showDatePicker,
+  const classes = classNames('osdQueryEditor', {
+    'osdQueryEditor--withDatePicker': props.showDatePicker,
   });
 
   return (
-    <>
-      <EuiFlexGroup
-        className={classes}
-        responsive={!!props.showDatePicker}
-        gutterSize="s"
-        justifyContent="flexEnd"
-      >
-        {renderQueryInput()}
-        {renderSharingMetaFields()}
-        <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup
+      className={classes}
+      responsive={!!props.showDatePicker}
+      gutterSize="xs"
+      direction="column"
+      justifyContent="flexEnd"
+    >
+      {renderQueryEditor()}
+      <EuiFlexItem>
+        <EuiFlexGroup responsive={false} gutterSize="none">
+          <EuiFlexItem grow={false}>{props.filterBar}</EuiFlexItem>
+          <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
-QueryBarTopRow.defaultProps = {
-  showQueryInput: true,
+QueryEditorTopRow.defaultProps = {
+  showQueryEditor: true,
   showDatePicker: true,
   showAutoRefreshOnly: false,
 };
