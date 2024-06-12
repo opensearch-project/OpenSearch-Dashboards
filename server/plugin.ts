@@ -12,7 +12,6 @@ import { defineRoutes } from './routes';
 import { EnginePlugin } from './search/engine_plugin';
 import { PPLPlugin } from './search/ppl/ppl_plugin';
 import { pplSearchStrategyProvider } from './search/ppl/ppl_search_strategy';
-import { sqlAsyncSearchStrategyProvider } from './search/sql/sql_async_search_strategy';
 import { sqlSearchStrategyProvider } from './search/sql/sql_search_strategy';
 import {
   QueryEnhancementsPluginSetup,
@@ -42,25 +41,13 @@ export class QueryEnhancementsPlugin
 
     const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
     const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
-    const sqlAsyncSearchStrategy = sqlAsyncSearchStrategyProvider(
-      this.config$,
-      this.logger,
-      client
-    );
 
     data.search.registerSearchStrategy(PPL_SEARCH_STRATEGY, pplSearchStrategy);
     data.search.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategy);
-    data.search.registerSearchStrategy(SQL_ASYNC_SEARCH_STRATEGY, sqlAsyncSearchStrategy);
-
-    core.http.registerRouteHandlerContext('query_assist', () => ({
-      logger: this.logger,
-      dataSourceEnabled: !!dataSource,
-    }));
 
     defineRoutes(this.logger, router, {
       ppl: pplSearchStrategy,
       sql: sqlSearchStrategy,
-      sqlasync: sqlAsyncSearchStrategy,
     });
 
     this.logger.info('queryEnhancements: Setup complete');

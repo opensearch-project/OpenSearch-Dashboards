@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return (
