@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
+import { RouteComponentProps, useParams, withRouter } from 'react-router-dom';
 import { ConfigureS3DatasourcePanel } from './direct_query_amazon_s3_datasource/direct_query_configure_amazon_s3';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 // import { DATACONNECTIONS_BASE, SECURITY_ROLES } from '../../../../../common/constants/shared';
@@ -36,12 +36,11 @@ import {
 } from '../../breadcrumbs';
 
 interface ConfigureDatasourceProps extends RouteComponentProps {
-  urlType: string;
   notifications: NotificationsStart;
 }
 
-const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = (props) => {
-  const { urlType, notifications, history } = props;
+const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({ notifications }) => {
+  const { type: urlType } = useParams<{ type: string }>();
   const {
     chrome,
     setBreadcrumbs,

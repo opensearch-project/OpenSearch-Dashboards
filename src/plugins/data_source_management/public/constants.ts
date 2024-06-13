@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DatasourceType } from './types';
+import { DirectQueryDatasourceType } from './types';
 
+// TODO: this will be replaced
 export const OPENSEARCH_DOCUMENTATION_URL =
   'https://opensearch.org/docs/latest/dashboards/management/data-sources/';
 
@@ -17,7 +18,7 @@ export const OPENSEARCH_ACC_DOCUMENTATION_URL =
 export const QUERY_RESTRICTED = 'query-restricted';
 export const QUERY_ALL = 'query-all';
 
-export const DatasourceTypeToDisplayName: { [key in DatasourceType]: string } = {
+export const DatasourceTypeToDisplayName: { [key in DirectQueryDatasourceType]: string } = {
   PROMETHEUS: 'Prometheus',
   S3GLUE: 'Amazon S3',
 };
@@ -26,7 +27,7 @@ export const PROMETHEUS_URL = 'Prometheus';
 export const AMAZON_S3_URL = 'AmazonS3AWSGlue';
 export const OPENSEARCH_URL = 'OpenSearch';
 
-export const UrlToDatasourceType: { [key: string]: DatasourceType } = {
+export const UrlToDatasourceType: { [key: string]: DirectQueryDatasourceType } = {
   [PROMETHEUS_URL]: 'PROMETHEUS',
   [AMAZON_S3_URL]: 'S3GLUE',
 };

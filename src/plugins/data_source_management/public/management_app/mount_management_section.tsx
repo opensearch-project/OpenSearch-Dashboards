@@ -57,10 +57,7 @@ export async function mountManagementSection(
               <CreateDataSourceWizardWithRouter />
             </Route>
             <Route path={['/configure/:type']}>
-              <ConfigureDirectQueryDataSourceWithRouter
-                notifications={notifications}
-                urlType={params.history.location.pathname.split('/')[2]}
-              />
+              <ConfigureDirectQueryDataSourceWithRouter notifications={notifications} />
             </Route>
             <Route path={['/:id']}>
               <EditDataSourceWithRouter />
