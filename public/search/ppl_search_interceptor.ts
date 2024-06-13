@@ -65,6 +65,14 @@ export class PPLQlSearchInterceptor extends SearchInterceptor {
       } <= '${formatDate(toDate)}'`;
     };
 
+    const insertTimeFilter = (query: string, filter: string) => {
+      const pipes = query.split('|');
+      return pipes
+        .slice(0, 1)
+        .concat(filter.substring(filter.indexOf('where')), pipes.slice(1))
+        .join(' | ');
+    };
+
     const getAggQsFn = ({
       qs,
       aggConfig,
@@ -144,16 +152,17 @@ export class PPLQlSearchInterceptor extends SearchInterceptor {
           const df = response.body;
           const timeField = getTimeField(df, aggConfig);
           const timeFilter = getTimeFilter(timeField);
+          const newQuery = insertTimeFilter(queryString, timeFilter);
           updateDataFrameMeta({
             dataFrame: df,
-            qs: queryString,
+            qs: newQuery,
             aggConfig,
             timeField,
             timeFilter,
             getAggQsFn: getAggQsFn.bind(this),
           });
 
-          return fetchDataFrame(queryString, df);
+          return fetchDataFrame(newQuery, df);
         })
       );
     }
@@ -161,9 +170,10 @@ export class PPLQlSearchInterceptor extends SearchInterceptor {
     if (dataFrame) {
       const timeField = getTimeField(dataFrame, aggConfig);
       const timeFilter = getTimeFilter(timeField);
+      const newQuery = insertTimeFilter(queryString, timeFilter);
       updateDataFrameMeta({
         dataFrame,
-        qs: queryString,
+        qs: newQuery,
         aggConfig,
         timeField,
         timeFilter,
