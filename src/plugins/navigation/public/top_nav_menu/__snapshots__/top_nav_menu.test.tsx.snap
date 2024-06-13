@@ -50,6 +50,7 @@ exports[`TopNavMenu mounts the data source menu as well as top nav menu 1`] = `
           "getSelection$": [Function],
           "getSelectionValue": [Function],
           "remove": [Function],
+          "removedComponentIds": Array [],
           "selectDataSource": [Function],
           "selectedDataSource$": BehaviorSubject {
             "_isScalar": false,
@@ -93,6 +94,7 @@ exports[`TopNavMenu mounts the data source menu if showDataSourceMenu is true 1`
           "getSelection$": [Function],
           "getSelectionValue": [Function],
           "remove": [Function],
+          "removedComponentIds": Array [],
           "selectDataSource": [Function],
           "selectedDataSource$": BehaviorSubject {
             "_isScalar": false,

@@ -13,18 +13,15 @@ import {
   EuiFieldText,
   EuiText,
   EuiColorPicker,
-  EuiHorizontalRule,
-  EuiTab,
-  EuiTabs,
+  EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
 import { WorkspaceFormProps } from './types';
-import { WorkspaceFormTabs } from './constants';
 import { useWorkspaceForm } from './use_workspace_form';
-import { WorkspaceFeatureSelector } from './workspace_feature_selector';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
+import { WorkspaceUseCase } from './workspace_use_case';
 
 export const WorkspaceForm = (props: WorkspaceFormProps) => {
   const {
@@ -32,31 +29,23 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     defaultValues,
     operationType,
     permissionEnabled,
+    workspaceConfigurableApps,
     permissionLastAdminItemDeletable,
   } = props;
   const {
     formId,
     formData,
     formErrors,
-    selectedTab,
     numberOfErrors,
     handleFormSubmit,
     handleColorChange,
-    handleFeaturesChange,
+    handleUseCasesChange,
     handleNameInputChange,
-    handleTabFeatureClick,
     setPermissionSettings,
-    handleTabPermissionClick,
-    handleDescriptionInputChange,
+    handleDescriptionChange,
   } = useWorkspaceForm(props);
   const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
-    defaultMessage: 'Workspace Details',
-  });
-  const featureVisibilityTitle = i18n.translate('workspace.form.featureVisibility.title', {
-    defaultMessage: 'Feature Visibility',
-  });
-  const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
-    defaultMessage: 'Users & Permissions',
+    defaultMessage: 'Enter Details',
   });
 
   return (
@@ -65,7 +54,6 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         <EuiTitle size="s">
           <h2>{workspaceDetailsTitle}</h2>
         </EuiTitle>
-        <EuiHorizontalRule margin="xs" />
         <EuiSpacer size="s" />
         <EuiFormRow
           label={i18n.translate('workspace.form.workspaceDetails.name.label', {
@@ -83,6 +71,9 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
             onChange={handleNameInputChange}
             readOnly={!!defaultValues?.reserved}
             data-test-subj="workspaceForm-workspaceDetails-nameInputText"
+            placeholder={i18n.translate('workspace.form.workspaceDetails.name.placeholder', {
+              defaultMessage: 'Enter a name',
+            })}
           />
         </EuiFormRow>
         <EuiFormRow
@@ -91,18 +82,29 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
               Description - <i>optional</i>
             </>
           }
-          helpText={i18n.translate('workspace.form.workspaceDetails.description.helpText', {
-            defaultMessage:
-              'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
-          })}
           isInvalid={!!formErrors.description}
           error={formErrors.description}
         >
-          <EuiFieldText
-            value={formData.description}
-            onChange={handleDescriptionInputChange}
-            data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
-          />
+          <>
+            <EuiText size="xs" color="subdued">
+              {i18n.translate('workspace.form.workspaceDetails.description.introduction', {
+                defaultMessage:
+                  'Help others understand the purpose of this workspace by providing an overview of the workspace you’re creating.',
+              })}
+            </EuiText>
+            <EuiTextArea
+              value={formData.description}
+              onChange={handleDescriptionChange}
+              data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
+              rows={4}
+              placeholder={i18n.translate(
+                'workspace.form.workspaceDetails.description.placeholder',
+                {
+                  defaultMessage: 'Describe the workspace',
+                }
+              )}
+            />
+          </>
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('workspace.form.workspaceDetails.color.label', {
@@ -127,47 +129,40 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         </EuiFormRow>
       </EuiPanel>
       <EuiSpacer />
-
-      <EuiTabs>
-        <EuiTab
-          onClick={handleTabFeatureClick}
-          isSelected={selectedTab === WorkspaceFormTabs.FeatureVisibility}
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h2>
+            {i18n.translate('workspace.form.workspaceUseCase.title', {
+              defaultMessage: 'Choose one or more focus areas',
+            })}
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiFormRow
+          label={i18n.translate('workspace.form.workspaceUseCase.name.label', {
+            defaultMessage: 'Use case',
+          })}
+          isInvalid={!!formErrors.features}
+          error={formErrors.features}
+          fullWidth
         >
-          <EuiText>{featureVisibilityTitle}</EuiText>
-        </EuiTab>
-        {permissionEnabled && (
-          <EuiTab
-            onClick={handleTabPermissionClick}
-            isSelected={selectedTab === WorkspaceFormTabs.UsersAndPermissions}
-          >
-            <EuiText>{usersAndPermissionsTitle}</EuiText>
-          </EuiTab>
-        )}
-      </EuiTabs>
-      {selectedTab === WorkspaceFormTabs.FeatureVisibility && (
-        <EuiPanel>
-          <EuiTitle size="s">
-            <h2>{featureVisibilityTitle}</h2>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-          <EuiSpacer size="s" />
-          <WorkspaceFeatureSelector
-            selectedFeatures={formData.features}
-            onChange={handleFeaturesChange}
-            workspaceConfigurableApps={props.workspaceConfigurableApps}
+          <WorkspaceUseCase
+            configurableApps={workspaceConfigurableApps}
+            value={formData.useCases}
+            onChange={handleUseCasesChange}
           />
-        </EuiPanel>
-      )}
-      {selectedTab === WorkspaceFormTabs.UsersAndPermissions && (
+        </EuiFormRow>
+      </EuiPanel>
+      <EuiSpacer />
+      {permissionEnabled && (
         <EuiPanel>
           <EuiTitle size="s">
             <h2>
               {i18n.translate('workspace.form.usersAndPermissions.title', {
-                defaultMessage: 'Users & Permissions',
+                defaultMessage: 'Manage access and permissions',
               })}
             </h2>
           </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
           <WorkspacePermissionSettingPanel
             errors={formErrors.permissionSettings}
             onChange={setPermissionSettings}

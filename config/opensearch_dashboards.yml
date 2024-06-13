@@ -88,6 +88,22 @@
 # To disregard the validity of SSL certificates, change this setting's value to 'none'.
 #opensearch.ssl.verificationMode: full
 
+# Allowed cipher suites list can be configured below, in preference order.
+# Cipher suite names should be in OpenSSL format (https://www.openssl.org/docs/man1.1.1/man1/ciphers.html#CIPHER-SUITE-NAMES)
+# Default set of cipher suites for your system can be checked by running the following command in your terminal:
+# echo 'console.log(require("crypto").constants.defaultCoreCipherList.split(":"))' | node -
+# Below you can find an example of cipher suites considered to be secure
+# Keep in mind that older clients might not support them
+# Refer to https://ciphersuite.info/ and https://ssl-config.mozilla.org/ for more details and recommendations about cipher suites
+# Keep in mind that restricting cipher suites might disable older versions of TLS, as not all cipher suites are supported by them
+#server.ssl.cipherSuites:
+#  - TLS_AES_256_GCM_SHA384
+#  - TLS_CHACHA20_POLY1305_SHA256
+#  - TLS_AES_128_GCM_SHA256
+#  - ECDHE-ECDSA-AES256-GCM-SHA384
+#  - ECDHE-ECDSA-CHACHA20-POLY1305
+#  - ECDHE-ECDSA-AES128-GCM-SHA256
+
 # Time in milliseconds to wait for OpenSearch to respond to pings. Defaults to the value of
 # the opensearch.requestTimeout setting.
 #opensearch.pingTimeout: 1500
@@ -320,6 +336,7 @@
 # savedObjects.permission.enabled: true
 
 # Set the value to true to enable workspace feature
+# Please note, workspace will not work with multi-tenancy. To enable workspace feature, you need to disable multi-tenancy first with `opensearch_security.multitenancy.enabled: false`
 # workspace.enabled: false
 
 # Optional settings to specify saved object types to be deleted during migration.

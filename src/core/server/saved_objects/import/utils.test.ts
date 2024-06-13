@@ -9,6 +9,7 @@ import {
   getDataSourceTitleFromId,
   getUpdatedTSVBVisState,
   updateDataSourceNameInVegaSpec,
+  updateDataSourceNameInTimeline,
 } from './utils';
 import { parse } from 'hjson';
 import { isEqual } from 'lodash';
@@ -196,6 +197,38 @@ describe('updateDataSourceNameInVegaSpec()', () => {
     );
 
     expect(isEqual(originalHJSONParse, hjsonParse)).toBe(true);
+  });
+});
+
+describe('updateDataSourceNameInTimeline()', () => {
+  test('When a timeline expression does not contain a data source name, modify the expression', () => {
+    const expression =
+      '.opensearch(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp).lines(show=true).points(show=true).yaxis(label="Average bytes")';
+    const expectedExpression =
+      '.opensearch(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp, data_source_name="newDataSource").lines(show=true).points(show=true).yaxis(label="Average bytes")';
+    expect(updateDataSourceNameInTimeline(expression, 'newDataSource')).toBe(expectedExpression);
+  });
+
+  test('When a timeline expression contains a data source name, then do nothing', () => {
+    const expression =
+      '.opensearch(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp, data_source_name=newDataSource).lines(show=true).points(show=true).yaxis(label="Average bytes")';
+    expect(updateDataSourceNameInTimeline(expression, 'newDataSource')).toBe(expression);
+  });
+
+  test('When a timeline expression contains multiple timeline expression, modify each of them', () => {
+    const expression =
+      '.opensearch(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp,data_source_name=aos211).lines(show=true).points(show=true).yaxis(label="Average bytes"),.opensearch(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp).lines(show=true).points(show=true).yaxis(label="Average bytes")';
+    const expectedExpression =
+      '.opensearch(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp,data_source_name=aos211).lines(show=true).points(show=true).yaxis(label="Average bytes"),.opensearch(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp, data_source_name="aos211").lines(show=true).points(show=true).yaxis(label="Average bytes")';
+    expect(updateDataSourceNameInTimeline(expression, 'aos211')).toBe(expectedExpression);
+  });
+
+  test('When a timeline expression contains multiple timeline expression and the datasource name contains space, we modify each of them', () => {
+    const expression =
+      '.es(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp).lines(show=true).points(show=true).yaxis(label="Average bytes"),.elasticsearch(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp).lines(show=true).points(show=true).yaxis(label="Average bytes")';
+    const expectedExpression =
+      '.es(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp, data_source_name="aos 211").lines(show=true).points(show=true).yaxis(label="Average bytes"),.elasticsearch(opensearch_dashboards_sample_data_logs, metric=avg:bytes, timefield=@timestamp, data_source_name="aos 211").lines(show=true).points(show=true).yaxis(label="Average bytes")';
+    expect(updateDataSourceNameInTimeline(expression, 'aos 211')).toBe(expectedExpression);
   });
 });
 
