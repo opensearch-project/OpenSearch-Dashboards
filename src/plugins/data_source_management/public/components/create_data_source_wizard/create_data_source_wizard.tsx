@@ -78,6 +78,7 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
       // Fetch data source metadata from added OS/ES domain/cluster
       const metadata = await fetchDataSourceMetaData(http, attributes);
       attributes.dataSourceVersion = metadata.dataSourceVersion;
+      attributes.dataSourceEngineType = metadata.dataSourceEngineType;
       attributes.installedPlugins = metadata.installedPlugins;
       await createSingleDataSource(savedObjects.client, attributes);
       // Set the first create data source as default data source.
