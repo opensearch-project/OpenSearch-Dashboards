@@ -151,3 +151,11 @@ export type DatasourceStatus = 'ACTIVE' | 'DISABLED';
 export type AuthMethod = 'noauth' | 'basicauth' | 'awssigv4';
 
 export type Role = EuiComboBoxOptionOption;
+
+export interface PermissionsConfigurationProps {
+  roles: Role[];
+  selectedRoles: Role[];
+  setSelectedRoles: React.Dispatch<React.SetStateAction<Role[]>>;
+  layout: 'horizontal' | 'vertical';
+  hasSecurityAccess: boolean;
+}

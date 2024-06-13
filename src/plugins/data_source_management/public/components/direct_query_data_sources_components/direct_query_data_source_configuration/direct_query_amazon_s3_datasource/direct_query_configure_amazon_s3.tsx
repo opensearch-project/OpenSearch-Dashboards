@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React, { useState, useEffect } from 'react';
+import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {
   EuiPanel,
   EuiTitle,
@@ -15,20 +17,18 @@ import {
   EuiSelect,
   EuiCallOut,
 } from '@elastic/eui';
-import React, { useState, useEffect } from 'react';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext } from '../../../../types';
 import { getCreateAmazonS3SourceBreadcrumbs } from '../../../breadcrumbs';
 import { AuthMethod, OPENSEARCH_S3_DOCUMENTATION_URL } from '../../../constants';
-// import { QueryPermissionsConfiguration } from './query_permissions';
+import { QueryPermissionsConfiguration } from '../query_permissions';
 import { Role } from '../../../../types';
 import { AuthDetails } from '../direct_query_data_source_auth_details';
 // import { NameRow } from '../../../../types';
 
 interface ConfigureS3DatasourceProps extends RouteComponentProps {
   roles: Role[];
-  selectedQueryPermissionRoles: Role[];
+  selectedQueryPermissionRoles?: Role[];
   setSelectedQueryPermissionRoles: React.Dispatch<React.SetStateAction<Role[]>>;
   currentName: string;
   currentDetails: string;
@@ -62,7 +62,7 @@ const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = (props)
     roles,
     currentAuthMethod,
     setAuthMethodForRequest,
-    selectedQueryPermissionRoles,
+    selectedQueryPermissionRoles = [],
     setSelectedQueryPermissionRoles,
     currentPassword,
     currentUsername,
@@ -232,13 +232,13 @@ const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = (props)
 
         <EuiSpacer />
 
-        {/* <QueryPermissionsConfiguration
+        <QueryPermissionsConfiguration
           roles={roles}
           selectedRoles={selectedQueryPermissionRoles}
           setSelectedRoles={setSelectedQueryPermissionRoles}
           layout={'vertical'}
           hasSecurityAccess={hasSecurityAccess}
-        /> */}
+        />
       </EuiPanel>
     </div>
   );

@@ -13,6 +13,7 @@ export const OPENSEARCH_S3_DOCUMENTATION_URL =
 
 export const OPENSEARCH_ACC_DOCUMENTATION_URL =
   'https://opensearch.org/docs/latest/dashboards/management/accelerate-external-data/';
+
 export const QUERY_RESTRICTED = 'query-restricted';
 export const QUERY_ALL = 'query-all';
 
