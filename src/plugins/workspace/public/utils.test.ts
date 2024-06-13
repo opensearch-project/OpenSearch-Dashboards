@@ -8,6 +8,7 @@ import {
   featureMatchesConfig,
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
+  isFeatureIdInsideUseCase,
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
 
@@ -95,6 +96,14 @@ describe('workspace utils: featureMatchesConfig', () => {
     expect(match({ id: 'integrations', category: { id: 'management', label: 'Management' } })).toBe(
       true
     );
+  });
+
+  it('should match features include by any use cases', () => {
+    const match = featureMatchesConfig(['use-case-observability', 'use-case-analytics']);
+    expect(match({ id: 'dashboards' })).toBe(true);
+    expect(match({ id: 'observability-traces' })).toBe(true);
+    expect(match({ id: 'alerting' })).toBe(true);
+    expect(match({ id: 'not-in-any-use-case' })).toBe(false);
   });
 });
 
@@ -259,5 +268,11 @@ describe('workspace utils: filterWorkspaceConfigurableApps', () => {
     expect(filteredApps.length).toEqual(2);
     expect(filteredApps[0].id).toEqual('dashboards');
     expect(filteredApps[1].id).toEqual('management');
+  });
+});
+
+describe('workspace utils: isFeatureIdInsideUseCase', () => {
+  it('should return false for invalid use case', () => {
+    expect(isFeatureIdInsideUseCase('discover', 'use-case-invalid')).toBe(false);
   });
 });

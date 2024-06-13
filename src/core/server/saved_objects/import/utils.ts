@@ -91,6 +91,25 @@ export const updateDataSourceNameInVegaSpec = (
       });
 };
 
+export const updateDataSourceNameInTimeline = (
+  timelineExpression: string,
+  dataSourceTitle: string
+) => {
+  const expressionRegex = /\.(opensearch|es|elasticsearch)\(([^)]*)\)/g;
+
+  const replaceCallback = (match: string, funcName: string, args: string) => {
+    if (!args.includes('data_source_name')) {
+      let expressionArgs = args.trim();
+      expressionArgs = `${expressionArgs}, data_source_name="${dataSourceTitle}"`;
+      return `.${funcName}(${expressionArgs})`;
+    }
+    return match;
+  };
+
+  const modifiedExpression = timelineExpression.replace(expressionRegex, replaceCallback);
+  return modifiedExpression;
+};
+
 export const getDataSourceTitleFromId = async (
   dataSourceId: string,
   savedObjectsClient: SavedObjectsClientContract
@@ -102,7 +121,7 @@ export const getDataSourceTitleFromId = async (
 };
 
 export const extractVegaSpecFromSavedObject = (savedObject: SavedObject) => {
-  if (isVegaVisualization(savedObject)) {
+  if (confirmVisualizationType(savedObject, 'vega')) {
     // @ts-expect-error
     const visStateObject = JSON.parse(savedObject.attributes?.visState);
     return visStateObject.params.spec;
@@ -111,12 +130,26 @@ export const extractVegaSpecFromSavedObject = (savedObject: SavedObject) => {
   return undefined;
 };
 
-const isVegaVisualization = (savedObject: SavedObject) => {
+export const extractTimelineExpression = (savedObject: SavedObject) => {
+  if (!confirmVisualizationType(savedObject, 'timelion')) {
+    return undefined;
+  }
+  // @ts-expect-error
+  const visStateString = savedObject.attributes?.visState;
+  if (!visStateString) {
+    return undefined;
+  }
+
+  const visStateObject = JSON.parse(visStateString);
+  return visStateObject.params.expression;
+};
+
+const confirmVisualizationType = (savedObject: SavedObject, visualizationType: string) => {
   // @ts-expect-error
   const visState = savedObject.attributes?.visState;
   if (!!visState) {
     const visStateObject = JSON.parse(visState);
-    return !!visStateObject.type && visStateObject.type === 'vega';
+    return !!visStateObject.type && visStateObject.type === visualizationType;
   }
   return false;
 };

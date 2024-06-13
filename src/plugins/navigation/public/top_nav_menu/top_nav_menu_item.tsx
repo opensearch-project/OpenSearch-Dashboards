@@ -56,6 +56,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
     iconSide: props.iconSide,
     'data-test-subj': props.testId,
     className: props.className,
+    'aria-label': props.ariaLabel,
   };
 
   let component;

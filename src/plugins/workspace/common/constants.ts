@@ -79,3 +79,106 @@ export const WORKSPACE_APP_CATEGORIES: Record<string, AppCategory> = Object.free
     order: 14000,
   },
 });
+/**
+ *
+ * This is a temp solution to store relationships between use cases  and features.
+ * The relationship should be provided by plugin itself. The workspace plugin should
+ * provide some method to register single feature to the use case map instead of
+ * store a static map in workspace.
+ *
+ */
+export const WORKSPACE_USE_CASES = Object.freeze({
+  observability: {
+    id: 'observability',
+    title: i18n.translate('workspace.usecase.observability.title', {
+      defaultMessage: 'Observability',
+    }),
+    description: i18n.translate('workspace.usecase.observability.description', {
+      defaultMessage:
+        'Gain visibility into system health, performance, and reliability through monitoring and analysis of logs, metrics, and traces.',
+    }),
+    features: [
+      'discover',
+      'dashboards',
+      'visualize',
+      'maps-dashboards',
+      'observability-notebooks',
+      'reports-dashboards',
+      'integrations',
+      'alerting',
+      'anomaly-detection-dashboards',
+      'observability-metrics',
+      'observability-traces',
+      'observability-applications',
+      // Add management avoid index patterns application not found for dashboards or visualize
+      'management',
+    ] as string[],
+  },
+  'security-analytics': {
+    id: 'security-analytics',
+    title: i18n.translate('workspace.usecase.security.analytics.title', {
+      defaultMessage: 'Security Analytics',
+    }),
+    description: i18n.translate('workspace.usecase.analytics.description', {
+      defaultMessage:
+        'Detect and investigate potential security threats and vulnerabilities across your systems and data.',
+    }),
+    features: [
+      'discover',
+      'dashboards',
+      'visualize',
+      'maps-dashboards',
+      'observability-notebooks',
+      'reports-dashboards',
+      'integrations',
+      'alerting',
+      'anomaly-detection-dashboards',
+      'opensearch_security_analytics_dashboards',
+      // Add management avoid index patterns application not found for dashboards or visualize
+      'management',
+    ] as string[],
+  },
+  analytics: {
+    id: 'analytics',
+    title: i18n.translate('workspace.usecase.analytics.title', {
+      defaultMessage: 'Analytics',
+    }),
+    description: i18n.translate('workspace.usecase.analytics.description', {
+      defaultMessage:
+        'Analyze data to derive insights, identify patterns and trends, and make data-driven decisions.',
+    }),
+    features: [
+      'discover',
+      'dashboards',
+      'visualize',
+      'maps-dashboards',
+      'observability-notebooks',
+      'reports-dashboards',
+      'integrations',
+      'alerting',
+      'anomaly-detection-dashboards',
+      // Add management avoid index patterns application not found for dashboards or visualize
+      'management',
+    ] as string[],
+  },
+  search: {
+    id: 'search',
+    title: i18n.translate('workspace.usecase.search.title', {
+      defaultMessage: 'Search',
+    }),
+    description: i18n.translate('workspace.usecase.search.description', {
+      defaultMessage:
+        "Quickly find and explore relevant information across your organization's data sources.",
+    }),
+    features: [
+      'discover',
+      'dashboards',
+      'visualize',
+      'maps-dashboards',
+      'reports-dashboards',
+      'searchRelevance',
+      // Add management avoid index patterns application not found for dashboards or visualize
+      'management',
+    ] as string[],
+  },
+});

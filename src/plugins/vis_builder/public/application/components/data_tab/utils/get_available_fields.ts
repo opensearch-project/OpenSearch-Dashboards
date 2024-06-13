@@ -17,7 +17,7 @@ export const getAvailableFields = (
   filterFieldTypes: FieldTypes = '*'
 ) => {
   const filteredFields = fields.filter((field: IndexPatternField) => {
-    if (!field.aggregatable || isNestedField(field) || field.scripted) {
+    if (!field.aggregatable || isNestedField(field)) {
       return false;
     }
 

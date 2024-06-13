@@ -17,11 +17,8 @@ const navigateToApp = jest.fn();
 const notificationToastsAddSuccess = jest.fn();
 const notificationToastsAddDanger = jest.fn();
 const PublicAPPInfoMap = new Map([
-  ['app1', { id: 'app1', title: 'app1' }],
-  ['app2', { id: 'app2', title: 'app2', category: { id: 'category1', label: 'category1' } }],
-  ['app3', { id: 'app3', category: { id: 'category1', label: 'category1' } }],
-  ['app4', { id: 'app4', category: { id: 'category2', label: 'category2' } }],
-  ['app5', { id: 'app5', category: { id: 'category2', label: 'category2' } }],
+  ['data-explorer', { id: 'data-explorer', title: 'Data Explorer' }],
+  ['dashboards', { id: 'dashboards', title: 'Dashboards' }],
 ]);
 const createWorkspacesSetupContractMockWithValue = () => {
   const currentWorkspaceId$ = new BehaviorSubject<string>('abljlsds');
@@ -29,7 +26,7 @@ const createWorkspacesSetupContractMockWithValue = () => {
     id: 'abljlsds',
     name: 'test1',
     description: 'test1',
-    features: [],
+    features: ['use-case-observability'],
     color: '',
     icon: '',
     reserved: false,
@@ -138,23 +135,6 @@ describe('WorkspaceUpdater', () => {
     expect(workspaceClientUpdate).not.toHaveBeenCalled();
   });
 
-  it('cannot update workspace with invalid description', async () => {
-    const { getByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-      />
-    );
-    const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
-    fireEvent.input(nameInput, {
-      target: { value: 'test workspace name' },
-    });
-    const descriptionInput = getByTestId('workspaceForm-workspaceDetails-descriptionInputText');
-    fireEvent.input(descriptionInput, {
-      target: { value: '~' },
-    });
-    expect(workspaceClientUpdate).not.toHaveBeenCalled();
-  });
-
   it('cancel update workspace', async () => {
     const { findByText, getByTestId } = render(
       <WorkspaceUpdater
@@ -190,10 +170,9 @@ describe('WorkspaceUpdater', () => {
       target: { value: '#000000' },
     });
 
-    fireEvent.click(getByTestId('workspaceForm-workspaceFeatureVisibility-app1'));
-    fireEvent.click(getByTestId('workspaceForm-workspaceFeatureVisibility-category1'));
+    fireEvent.click(getByTestId('workspaceUseCase-observability'));
+    fireEvent.click(getByTestId('workspaceUseCase-analytics'));
 
-    fireEvent.click(getByText('Users & Permissions'));
     fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-user-addNew'));
     const userIdInput = getAllByText('Select')[0];
     fireEvent.click(userIdInput);
@@ -209,7 +188,7 @@ describe('WorkspaceUpdater', () => {
         name: 'test workspace name',
         color: '#000000',
         description: 'test workspace description',
-        features: expect.arrayContaining(['app1', 'app2', 'app3']),
+        features: expect.arrayContaining(['use-case-analytics']),
       }),
       {
         read: {

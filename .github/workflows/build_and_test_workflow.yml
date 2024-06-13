@@ -10,11 +10,15 @@ on:
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
+      - '.lycheeignore'
+      - 'changelogs/fragments/**'
   pull_request:
     branches: ['**']
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
+      - '.lycheeignore'
+      - 'changelogs/fragments/**'
 
 env:
   TEST_BROWSER_HEADLESS: 1
