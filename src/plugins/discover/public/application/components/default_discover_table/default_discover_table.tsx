@@ -181,11 +181,9 @@ const DefaultDiscoverTableUI = ({
       // Load the first batch of rows and adjust the columns to the contents
       tableElement.style.tableLayout = 'auto';
       // To prevent influencing the auto-sizing, unset the widths from a previous render
-      tableElement
-        .querySelectorAll('thead > tr > th:not(:first-child):not(:last-child)')
-        .forEach((th) => {
-          (th as HTMLTableCellElement).style.width = 'unset';
-        });
+      tableElement.querySelectorAll('thead > tr > th:not(:first-child)').forEach((th) => {
+        (th as HTMLTableCellElement).style.width = 'unset';
+      });
 
       tableLayoutRequestFrameRef.current = requestAnimationFrame(() => {
         if (tableElement) {
