@@ -34,7 +34,7 @@ import {
   EuiCompressedSelect,
 } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
-import { isEmpty } from 'lodash';
+import { isEmpty, result } from 'lodash';
 import React, { Component } from 'react';
 import { validateParams } from './lib/filter_editor_utils';
 
@@ -79,7 +79,7 @@ class ValueInputTypeUI extends Component<Props> {
                 ? (value as BigInt).toString()
                 : value
             }
-            onChange={this.onChange}
+            onChange={this.onNumberChange}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -149,6 +149,17 @@ class ValueInputTypeUI extends Component<Props> {
   private onBoolChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const boolValue = event.target.value === 'true';
     this.props.onChange(boolValue);
+  };
+
+  private onNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const params = event.target.value;
+    this.props.onChange(
+      typeof params === 'string'
+        ? parseFloat(params)
+        : typeof params === 'bigint'
+        ? (params as BigInt).toString()
+        : params
+    );
   };
 
   private onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
