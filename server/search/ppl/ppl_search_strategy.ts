@@ -38,10 +38,7 @@ export const pplSearchStrategyProvider = (
 
     const describeQuery = `describe ${source}`;
 
-    const searchQuery = `${Array.from(pipeMap.entries())
-      .filter(([key]) => key !== 'stats' && key !== 'fields')
-      .map(([key, value]) => (key === 'source' ? `${key}=${value}` : `${key} ${value}`))
-      .join(' | ')} ${pipeMap.has('fields') ? `| fields ${pipeMap.get('fields')}` : ''}`;
+    const searchQuery = query;
 
     const filters = pipeMap.get('where');
 
