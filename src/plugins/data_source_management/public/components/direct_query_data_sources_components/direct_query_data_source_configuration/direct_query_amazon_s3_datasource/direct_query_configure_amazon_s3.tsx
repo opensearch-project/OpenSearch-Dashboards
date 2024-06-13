@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 import {
   EuiPanel,
@@ -19,12 +19,10 @@ import {
 } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext } from '../../../../types';
-import { getCreateAmazonS3SourceBreadcrumbs } from '../../../breadcrumbs';
 import { AuthMethod, OPENSEARCH_S3_DOCUMENTATION_URL } from '../../../constants';
 import { QueryPermissionsConfiguration } from '../query_permissions';
 import { Role } from '../../../../types';
 import { AuthDetails } from '../direct_query_data_source_auth_details';
-// import { NameRow } from '../../../../types';
 
 interface ConfigureS3DatasourceProps extends RouteComponentProps {
   roles: Role[];
@@ -49,7 +47,7 @@ interface ConfigureS3DatasourceProps extends RouteComponentProps {
   setArnForRequest: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = (props) => {
+export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = (props) => {
   const {
     setNameForRequest,
     setDetailsForRequest,
@@ -77,17 +75,6 @@ const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = (props)
   const [details, setDetails] = useState(currentDetails);
   const [arn, setArn] = useState(currentArn);
   const [store, setStore] = useState(currentStore);
-  const {
-    chrome,
-    setBreadcrumbs,
-    savedObjects,
-    notifications: { toasts },
-    uiSettings,
-  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
-
-  useEffect(() => {
-    setBreadcrumbs(getCreateAmazonS3SourceBreadcrumbs());
-  }, [setBreadcrumbs]);
 
   const authOptions = [
     { value: 'basicauth', text: 'Basic authentication' },
@@ -121,13 +108,6 @@ const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = (props)
           <h3>Data source details</h3>
         </EuiText>
         <EuiSpacer size="m" />
-        {/* <NameRow
-          key={error}
-          currentName={currentName}
-          setNameForRequest={setNameForRequest}
-          currentError={error}
-          setErrorForForm={setError}
-        /> */}
         <EuiFormRow label="Description - Optional">
           <EuiTextArea
             placeholder="Describe data source"

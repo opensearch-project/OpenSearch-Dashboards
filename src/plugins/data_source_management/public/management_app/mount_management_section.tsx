@@ -15,9 +15,9 @@ import { CreateDataSourceWizardWithRouter } from '../components/create_data_sour
 import { EditDataSourceWithRouter } from '../components/edit_data_source';
 import { DataSourceHomePanel } from '../components/data_source_home_panel/data_source_home_panel';
 import { CreateDataSourcePanel } from '../components/data_source_creation_panel/create_data_source_panel';
-import { ConfigureS3DatasourcePanelWithRouter } from '../components/direct_query_data_sources_components/direct_query_data_source_configuration/direct_query_amazon_s3_datasource/direct_query_configure_amazon_s3';
 import { DataSourceManagementContext } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
+import { ConfigureDirectQueryDataSourceWithRouter } from '../components/direct_query_data_sources_components/direct_query_data_source_configuration/configure_direct_query_data_sources';
 
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
@@ -56,8 +56,11 @@ export async function mountManagementSection(
             <Route path={['/configure/OpenSearch']}>
               <CreateDataSourceWizardWithRouter />
             </Route>
-            <Route path={['/configure/AmazonS3AWSGlue']}>
-              <ConfigureS3DatasourcePanelWithRouter {...params} />
+            <Route path={['/configure/:type']}>
+              <ConfigureDirectQueryDataSourceWithRouter
+                notifications={notifications}
+                urlType={params.history.location.pathname.split('/')[2]}
+              />
             </Route>
             <Route path={['/:id']}>
               <EditDataSourceWithRouter />

@@ -44,7 +44,7 @@ export function getCreateOpenSearchDataSourceBreadcrumbs() {
   ];
 }
 
-export function getCreateAmazonS3SourceBreadcrumbs() {
+export function getCreateAmazonS3DataSourceBreadcrumbs() {
   return [
     ...getCreateBreadcrumbs(),
     {
@@ -55,6 +55,21 @@ export function getCreateAmazonS3SourceBreadcrumbs() {
         }
       ),
       href: `/configure/AmazonS3AWSGlue`,
+    },
+  ];
+}
+
+export function getCreatePrometheusDataSourceBreadcrumbs() {
+  return [
+    ...getCreateBreadcrumbs(),
+    {
+      text: i18n.translate(
+        'dataSourcesManagement.dataSources.createPrometheusDataSourceBreadcrumbs',
+        {
+          defaultMessage: 'Prometheus',
+        }
+      ),
+      href: `/configure/Prometheus`,
     },
   ];
 }
