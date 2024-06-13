@@ -15,16 +15,26 @@ import {
   EuiSpacer,
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import { DatasourceStatus, DatasourceType } from '../../../types';
+import React, { useCallback, useEffect, useState } from 'react';
+import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
+import {
+  DirectQueryDatasourceDetails,
+  DirectQueryDatasourceStatus,
+  DirectQueryDatasourceType,
+} from '../../../types';
 import { DeleteModal } from './delete_modal';
 import PrometheusLogo from '../icons/prometheus_logo.svg';
 import S3Logo from '../icons/s3_logo.svg';
 
 interface DataConnection {
-  connectionType: DatasourceType;
+  connectionType: DirectQueryDatasourceType;
   name: string;
-  dsStatus: DatasourceStatus;
+  dsStatus: DirectQueryDatasourceStatus;
+}
+
+interface ManageDirectQueryDataConnectionsTableProps {
+  http: HttpStart;
+  notifications: NotificationsStart;
 }
 
 // Custom truncate function
@@ -33,26 +43,35 @@ const truncate = (text: string, length: number) => {
   return text.substring(0, length) + '...';
 };
 
-export const ManageDirectQueryDataConnectionsTable = () => {
+export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDataConnectionsTableProps> = ({
+  http,
+  notifications,
+}) => {
   const [data, setData] = useState<DataConnection[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
 
+  const fetchDataSources = useCallback(() => {
+    http
+      .get('/api/dataconnections')
+      .then((res: DirectQueryDatasourceDetails[]) => {
+        const dataConnections = res.map((dataConnection: DirectQueryDatasourceDetails) => {
+          return {
+            name: dataConnection.name,
+            connectionType: dataConnection.connector,
+            dsStatus: dataConnection.status,
+          };
+        });
+        setData(dataConnections);
+      })
+      .catch((err) => {
+        notifications.toasts.addDanger('Could not fetch data sources');
+      });
+  }, [http, notifications.toasts]);
+
   useEffect(() => {
-    // Populate with dummy data on mount
-    const dummyData: DataConnection[] = [
-      { name: 'myglue', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
-      { name: 'myglue_notrust', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
-      { name: 'mys3_dummy2', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
-      { name: 'prometheus-test', connectionType: 'PROMETHEUS', dsStatus: 'ACTIVE' },
-      { name: 'mys3_dummy3', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
-      { name: 'test-156', connectionType: 'PROMETHEUS', dsStatus: 'ACTIVE' },
-      { name: 'mys3_dummy5', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
-      { name: 'mys3_dummy4', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
-      { name: 'mys3', connectionType: 'S3GLUE', dsStatus: 'ACTIVE' },
-    ];
-    setData(dummyData);
-  }, []);
+    fetchDataSources();
+  }, [fetchDataSources]);
 
   const deleteConnection = (connectionName: string) => {
     setData(

@@ -22,7 +22,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 // import { DATACONNECTIONS_BASE, SECURITY_ROLES } from '../../../../../common/constants/shared';
 // import { ReviewS3Datasource } from './review_s3_datasource_configuration';
 // import { useToast } from '../../../../../public/components/common/toast';
-import { DataSourceManagementContext, DatasourceType, Role } from '../../../types';
+import { DataSourceManagementContext, DirectQueryDatasourceType, Role } from '../../../types';
 // import { ConfigurePrometheusDatasource } from './configure_prometheus_datasource';
 // import { ReviewPrometheusDatasource } from './review_prometheus_datasource_configuration';
 import { DatasourceTypeToDisplayName, UrlToDatasourceType } from '../../../constants';
@@ -145,7 +145,9 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = (prop
     setBreadcrumbs(breadcrumbs);
   }, [urlType, setBreadcrumbs]);
 
-  const ConfigureDatasource = (configurationProps: { datasourceType: DatasourceType }) => {
+  const ConfigureDatasource = (configurationProps: {
+    datasourceType: DirectQueryDatasourceType;
+  }) => {
     const { datasourceType } = configurationProps;
     switch (datasourceType) {
       case 'S3GLUE':

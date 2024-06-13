@@ -9,7 +9,7 @@ import { History } from 'history';
 import s3Svg from '../direct_query_data_sources_components/icons/s3_logo.svg';
 import prometheusSvg from '../direct_query_data_sources_components/icons/prometheus_logo.svg';
 import opensearchLogSvg from '../direct_query_data_sources_components/icons/opensearch_logo.svg'; // Import OpenSearch logo
-import { DatasourceType } from '../../types';
+import { DirectQueryDatasourceType } from '../../types';
 import { AMAZON_S3_URL, PROMETHEUS_URL, OPENSEARCH_URL } from '../../constants'; // Add OpenSearchURL
 
 export interface DatasourceCard {

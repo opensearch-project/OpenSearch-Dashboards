@@ -144,13 +144,31 @@ export {
 } from '../../data_source/common/data_sources';
 
 // Direct Query datasources types
-export type DatasourceType = 'S3GLUE' | 'PROMETHEUS';
+export type DirectQueryDatasourceType = 'S3GLUE' | 'PROMETHEUS';
 
-export type DatasourceStatus = 'ACTIVE' | 'DISABLED';
+export type DirectQueryDatasourceStatus = 'ACTIVE' | 'DISABLED';
 
 export type AuthMethod = 'noauth' | 'basicauth' | 'awssigv4';
 
 export type Role = EuiComboBoxOptionOption;
+
+export interface S3GlueProperties {
+  'glue.indexstore.opensearch.uri': string;
+  'glue.indexstore.opensearch.region': string;
+}
+
+export interface PrometheusProperties {
+  'prometheus.uri': string;
+}
+
+export interface DirectQueryDatasourceDetails {
+  allowedRoles: string[];
+  name: string;
+  connector: DirectQueryDatasourceType;
+  description: string;
+  properties: S3GlueProperties | PrometheusProperties;
+  status: DirectQueryDatasourceStatus;
+}
 
 export interface PermissionsConfigurationProps {
   roles: Role[];
