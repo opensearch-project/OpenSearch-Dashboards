@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { createGetterSetter } from '../../../src/plugins/opensearch_dashboards_utils/common';
 import { IStorageWrapper } from '../../../src/plugins/opensearch_dashboards_utils/public';
 import { DataPublicPluginStart } from '../../../src/plugins/data/public';

@@ -1,8 +1,12 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
 import { IStorageWrapper, Storage } from '../../../src/plugins/opensearch_dashboards_utils/public';
-import { PPLQlSearchInterceptor } from './search/ppl_search_interceptor';
-import { SQLQlSearchInterceptor } from './search/sql_search_interceptor';
+import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
 import { setData, setStorage } from './services';
 import {
   QueryEnhancementsPluginSetup,
@@ -23,7 +27,7 @@ export class QueryEnhancementsPlugin
     core: CoreSetup,
     { data }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
-    const pplSearchInterceptor = new PPLQlSearchInterceptor({
+    const pplSearchInterceptor = new PPLSearchInterceptor({
       toasts: core.notifications.toasts,
       http: core.http,
       uiSettings: core.uiSettings,
@@ -31,7 +35,7 @@ export class QueryEnhancementsPlugin
       usageCollector: data.search.usageCollector,
     });
 
-    const sqlSearchInterceptor = new SQLQlSearchInterceptor({
+    const sqlSearchInterceptor = new SQLSearchInterceptor({
       toasts: core.notifications.toasts,
       http: core.http,
       uiSettings: core.uiSettings,

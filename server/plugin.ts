@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { Observable } from 'rxjs';
 import {
   CoreSetup,
@@ -7,18 +12,15 @@ import {
   PluginInitializerContext,
   SharedGlobalConfig,
 } from '../../../src/core/server';
-import { PPL_SEARCH_STRATEGY, SQL_ASYNC_SEARCH_STRATEGY, SQL_SEARCH_STRATEGY } from '../common';
+import { SEARCH_STRATEGY } from '../common';
 import { defineRoutes } from './routes';
-import { EnginePlugin } from './search/engine_plugin';
-import { PPLPlugin } from './search/ppl/ppl_plugin';
-import { pplSearchStrategyProvider } from './search/ppl/ppl_search_strategy';
-import { sqlSearchStrategyProvider } from './search/sql/sql_search_strategy';
+import { pplSearchStrategyProvider, sqlSearchStrategyProvider } from './search';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
   QueryEnhancementsPluginStart,
 } from './types';
-import { uiSettings } from './ui_settings';
+import { OpenSearchPPLPlugin, OpenSearchObservabilityPlugin } from './utils';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -34,16 +36,14 @@ export class QueryEnhancementsPlugin
     const router = core.http.createRouter();
     // Register server side APIs
     const client = core.opensearch.legacy.createClient('opensearch_observability', {
-      plugins: [PPLPlugin, EnginePlugin],
+      plugins: [OpenSearchPPLPlugin, OpenSearchObservabilityPlugin],
     });
-
-    core.uiSettings.register(uiSettings);
 
     const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
     const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
 
-    data.search.registerSearchStrategy(PPL_SEARCH_STRATEGY, pplSearchStrategy);
-    data.search.registerSearchStrategy(SQL_SEARCH_STRATEGY, sqlSearchStrategy);
+    data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL, pplSearchStrategy);
+    data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL, sqlSearchStrategy);
 
     defineRoutes(this.logger, router, {
       ppl: pplSearchStrategy,
