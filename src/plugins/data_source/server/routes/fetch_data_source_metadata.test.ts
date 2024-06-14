@@ -165,7 +165,9 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
 
     const router = httpSetup.createRouter('');
     dataSourceClient.info.mockImplementationOnce(() =>
-      opensearchClientMock.createSuccessTransportRequestPromise({ version: { number: '2.11.0' } })
+      opensearchClientMock.createSuccessTransportRequestPromise({
+        version: { number: '2.11.0', distribution: 'opensearch' },
+      })
     );
 
     const installedPlugins = [
@@ -201,6 +203,7 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       .expect(200);
     expect(result.body).toEqual({
       dataSourceVersion: '2.11.0',
+      dataSourceEngineType: 'OpenSearch',
       installedPlugins: ['opensearch-ml', 'opensearch-sql'],
     });
     expect(dataSourceServiceSetupMock.getDataSourceClient).toHaveBeenCalledWith(
@@ -224,6 +227,7 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       .expect(200);
     expect(result.body).toEqual({
       dataSourceVersion: '2.11.0',
+      dataSourceEngineType: 'OpenSearch',
       installedPlugins: ['opensearch-ml', 'opensearch-sql'],
     });
   });
@@ -324,6 +328,7 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       .expect(200);
     expect(result.body).toEqual({
       dataSourceVersion: '2.11.0',
+      dataSourceEngineType: 'OpenSearch',
       installedPlugins: ['opensearch-ml', 'opensearch-sql'],
     });
   });
@@ -338,6 +343,7 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       .expect(200);
     expect(result.body).toEqual({
       dataSourceVersion: '2.11.0',
+      dataSourceEngineType: 'OpenSearch',
       installedPlugins: ['opensearch-ml', 'opensearch-sql'],
     });
   });
@@ -352,6 +358,7 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       .expect(200);
     expect(result.body).toEqual({
       dataSourceVersion: '2.11.0',
+      dataSourceEngineType: 'OpenSearch',
       installedPlugins: ['opensearch-ml', 'opensearch-sql'],
     });
   });
@@ -366,6 +373,7 @@ describe(`Fetch DataSource MetaData ${URL}`, () => {
       .expect(200);
     expect(result.body).toEqual({
       dataSourceVersion: '2.11.0',
+      dataSourceEngineType: 'OpenSearch',
       installedPlugins: ['opensearch-ml', 'opensearch-sql'],
     });
   });
