@@ -47,7 +47,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import { debounce, compact, isEqual, isFunction } from 'lodash';
 import { Toast } from 'src/core/public';
-import { IDataPluginServices, IIndexPattern, Query, TimeRange } from '../..';
+import { IDataPluginServices, IIndexPattern, Query } from '../..';
 import { QuerySuggestion, QuerySuggestionTypes } from '../../autocomplete';
 
 import {
@@ -56,18 +56,13 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
-import { LegacyQueryLanguageSwitcher } from './legacy_language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
-import { Settings, SuggestionsComponent } from '..';
-import { DataSettings, QueryEnhancement } from '../types';
+import { SuggestionsComponent } from '..';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
   query: Query;
-  isEnhancementsEnabled?: boolean;
-  queryEnhancements?: Map<string, QueryEnhancement>;
-  settings?: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
   prepend?: any;
@@ -76,10 +71,9 @@ export interface QueryStringInputProps {
   placeholder?: string;
   languageSwitcherPopoverAnchorPosition?: PopoverAnchorPosition;
   onBlur?: () => void;
-  onChange?: (query: Query, dateRange?: TimeRange) => void;
+  onChange?: (query: Query) => void;
   onChangeQueryInputFocus?: (isFocused: boolean) => void;
-  onSubmit?: (query: Query, dateRange?: TimeRange) => void;
-  getQueryStringInitialValue?: (language: string) => string;
+  onSubmit?: (query: Query) => void;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
@@ -114,7 +108,6 @@ const KEY_CODES = {
 };
 
 // Needed for React.lazy
-// TODO: MQL export this and let people extended this
 // eslint-disable-next-line import/no-default-export
 export default class QueryStringInputUI extends Component<Props, State> {
   public state: State = {
@@ -137,13 +130,9 @@ export default class QueryStringInputUI extends Component<Props, State> {
   private queryBarInputDivRefInstance: RefObject<HTMLDivElement> = createRef();
 
   private getQueryString = () => {
-    if (!this.props.query.query) {
-      return this.props.getQueryStringInitialValue?.(this.props.query.language) ?? '';
-    }
     return toUser(this.props.query.query);
   };
 
-  // TODO: MQL don't do this here? || Fetch data sources
   private fetchIndexPatterns = async () => {
     const stringPatterns = this.props.indexPatterns.filter(
       (indexPattern) => typeof indexPattern === 'string'
@@ -235,7 +224,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   }, 100);
 
-  private onSubmit = (query: Query, dateRange?: TimeRange) => {
+  private onSubmit = (query: Query) => {
     if (this.props.onSubmit) {
       if (this.persistedLog) {
         this.persistedLog.add(query.query);
@@ -245,11 +234,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  private onChange = (query: Query, dateRange?: TimeRange) => {
+  private onChange = (query: Query) => {
     this.updateSuggestions();
 
     if (this.props.onChange) {
-      this.props.onChange({ query: fromUser(query.query), language: query.language }, dateRange);
+      this.props.onChange({ query: fromUser(query.query), language: query.language });
     }
   };
 
@@ -468,7 +457,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
     }
   };
 
-  // TODO: MQL consider moving language select language of setting search source here
   private onSelectLanguage = (language: string) => {
     // Send telemetry info every time the user opts in or out of kuery
     // As a result it is important this function only ever gets called in the
@@ -477,28 +465,11 @@ export default class QueryStringInputUI extends Component<Props, State> {
       body: JSON.stringify({ opt_in: language === 'kuery' }),
     });
 
-    const newQuery = {
-      query: this.props.getQueryStringInitialValue?.(language) ?? '',
-      language,
-    };
+    this.services.storage.set('opensearchDashboards.userQueryLanguage', language);
 
-    const fields = this.props.queryEnhancements?.get(newQuery.language)?.fields;
-    const newSettings: DataSettings = {
-      userQueryLanguage: newQuery.language,
-      userQueryString: newQuery.query,
-      ...(fields && { uiOverrides: { fields } }),
-    };
-    this.props.settings?.updateSettings(newSettings);
-
-    const dateRangeEnhancement = this.props.queryEnhancements?.get(language)?.searchBar?.dateRange;
-    const dateRange = dateRangeEnhancement
-      ? {
-          from: dateRangeEnhancement.initialFrom!,
-          to: dateRangeEnhancement.initialTo!,
-        }
-      : undefined;
-    this.onChange(newQuery, dateRange);
-    this.onSubmit(newQuery, dateRange);
+    const newQuery = { query: '', language };
+    this.onChange(newQuery);
+    this.onSubmit(newQuery);
   };
 
   private onOutsideClick = () => {
@@ -648,14 +619,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
     return (
       <div className={className}>
         {this.props.prepend}
-        {!!this.props.isEnhancementsEnabled && (
-          <QueryLanguageSwitcher
-            language={this.props.query.language}
-            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-            onSelectLanguage={this.onSelectLanguage}
-            appName={this.services.appName}
-          />
-        )}
         <EuiOutsideClickDetector onOutsideClick={this.onOutsideClick}>
           <div
             {...ariaCombobox}
@@ -733,13 +696,12 @@ export default class QueryStringInputUI extends Component<Props, State> {
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
-        {!!!this.props.isEnhancementsEnabled && (
-          <LegacyQueryLanguageSwitcher
-            language={this.props.query.language}
-            anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-            onSelectLanguage={this.onSelectLanguage}
-          />
-        )}
+
+        <QueryLanguageSwitcher
+          language={this.props.query.language}
+          anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+          onSelectLanguage={this.onSelectLanguage}
+        />
       </div>
     );
   }

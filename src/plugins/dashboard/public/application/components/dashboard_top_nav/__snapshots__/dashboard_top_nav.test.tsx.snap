@@ -393,8 +393,9 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "Settings": undefined,
-                "isEnhancementsEnabled": false,
-                "queryEnhancements": Map {},
+                "container$": Observable {
+                  "_isScalar": false,
+                },
               },
             },
             "docLinks": Object {
@@ -1392,8 +1393,9 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "Settings": undefined,
-                "isEnhancementsEnabled": false,
-                "queryEnhancements": Map {},
+                "container$": Observable {
+                  "_isScalar": false,
+                },
               },
             },
             "docLinks": Object {
@@ -2391,8 +2393,9 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "Settings": undefined,
-                "isEnhancementsEnabled": false,
-                "queryEnhancements": Map {},
+                "container$": Observable {
+                  "_isScalar": false,
+                },
               },
             },
             "docLinks": Object {
@@ -3390,8 +3393,9 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "Settings": undefined,
-                "isEnhancementsEnabled": false,
-                "queryEnhancements": Map {},
+                "container$": Observable {
+                  "_isScalar": false,
+                },
               },
             },
             "docLinks": Object {
@@ -4389,8 +4393,9 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "Settings": undefined,
-                "isEnhancementsEnabled": false,
-                "queryEnhancements": Map {},
+                "container$": Observable {
+                  "_isScalar": false,
+                },
               },
             },
             "docLinks": Object {
@@ -5388,8 +5393,9 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "Settings": undefined,
-                "isEnhancementsEnabled": false,
-                "queryEnhancements": Map {},
+                "container$": Observable {
+                  "_isScalar": false,
+                },
               },
             },
             "docLinks": Object {

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Observable } from 'rxjs';
 import { SearchInterceptor } from '../search';
 import { IndexPatternSelectProps } from './index_pattern_select';
 import { StatefulSearchBarProps } from './search_bar';
@@ -57,9 +58,8 @@ export interface IUiSetup {
  * Data plugin prewired UI components
  */
 export interface IUiStart {
-  isEnhancementsEnabled: boolean;
-  queryEnhancements: Map<string, QueryEnhancement>;
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
   Settings: Settings;
+  container$: Observable<HTMLDivElement | null>;
 }

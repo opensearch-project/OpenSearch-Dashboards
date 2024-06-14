@@ -234,7 +234,7 @@ export class DataPublicPlugin
       },
     ]);
 
-    const dataServices = {
+    const dataServices: Omit<DataPublicPluginStart, 'ui'> = {
       actions: {
         createFiltersFromValueClickAction,
         createFiltersFromRangeSelectAction,
