@@ -43,11 +43,12 @@ import {
 import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
 import { IDataPluginServices } from '../../types';
-import { TimeRange, Query, Filter, IIndexPattern } from '../../../common';
+import { TimeRange, Query, Filter, IIndexPattern, UI_SETTINGS } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
-import { QueryEnhancement, Settings } from '../types';
+import { Settings } from '../types';
+import { QueryEditorTopRow } from '../query_editor';
 
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
@@ -79,9 +80,8 @@ export interface SearchBarOwnProps {
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
-  isEnhancementsEnabled?: boolean;
-  queryEnhancements?: Map<string, QueryEnhancement>;
   settings?: Settings;
+  containerRef?: React.RefCallback<HTMLDivElement>;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
@@ -206,8 +206,23 @@ class SearchBarUI extends Component<SearchBarProps, State> {
     );
   };
 
-  private shouldRenderQueryBar() {
+  private supportsEnhancements() {
+    return this.props.settings?.supportsEnhancementsEnabled(this.services.appName);
+  }
+
+  private shouldRenderQueryEditor(isEnhancementsEnabledOverride: boolean) {
     // TODO: MQL handle no index patterns?
+    if (!isEnhancementsEnabledOverride) return false;
+    const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
+    // TODO: MQL showQueryEditor should be a prop of it's own but using showQueryInput for now
+    const showQueryEditor =
+      this.props.showQueryInput && this.props.indexPatterns && this.state.query;
+    return this.props.showQueryBar && (showDatePicker || showQueryEditor);
+  }
+
+  private shouldRenderQueryBar(isEnhancementsEnabledOverride: boolean) {
+    // TODO: MQL handle no index patterns?
+    if (isEnhancementsEnabledOverride) return false;
     const showDatePicker = this.props.showDatePicker || this.props.showAutoRefreshOnly;
     const showQueryInput =
       this.props.showQueryInput && this.props.indexPatterns && this.state.query;
@@ -221,7 +236,8 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       this.props.filters &&
       this.props.indexPatterns &&
       compact(this.props.indexPatterns).length > 0 &&
-      (this.props.queryEnhancements?.get(this.state.query?.language!)?.searchBar?.showFilterBar ??
+      (this.props.settings?.getQueryEnhancements(this.state.query?.language!)?.searchBar
+        ?.showFilterBar ??
         true)
     );
   }
@@ -388,6 +404,15 @@ class SearchBarUI extends Component<SearchBarProps, State> {
   }
 
   public render() {
+    const isEnhancementsEnabledOverride =
+      this.supportsEnhancements() &&
+      this.services.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+
+    this.props.settings?.setUserQueryLanguageBlocklist(
+      this.services.uiSettings.get(UI_SETTINGS.SEARCH_QUERY_LANGUAGE_BLOCKLIST)
+    );
+    this.props.settings?.setUserQueryEnhancementsEnabled(isEnhancementsEnabledOverride);
+
     const savedQueryManagement = this.state.query && this.props.onClearSavedQuery && (
       <SavedQueryManagementComponent
         showSaveQuery={this.props.showSaveQuery}
@@ -399,41 +424,6 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         onClearSavedQuery={this.props.onClearSavedQuery}
       />
     );
-
-    let queryBar;
-    if (this.shouldRenderQueryBar()) {
-      // TODO: MQL make this default query bar top row but this.props.queryEnhancements.get(language) can pass a component
-      queryBar = (
-        <QueryBarTopRow
-          timeHistory={this.props.timeHistory}
-          isEnhancementsEnabled={this.props.isEnhancementsEnabled}
-          queryEnhancements={this.props.queryEnhancements}
-          settings={this.props.settings}
-          query={this.state.query}
-          screenTitle={this.props.screenTitle}
-          onSubmit={this.onQueryBarSubmit}
-          indexPatterns={this.props.indexPatterns}
-          isLoading={this.props.isLoading}
-          prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
-          showDatePicker={this.props.showDatePicker}
-          dateRangeFrom={this.state.dateRangeFrom}
-          dateRangeTo={this.state.dateRangeTo}
-          isRefreshPaused={this.props.isRefreshPaused}
-          refreshInterval={this.props.refreshInterval}
-          showAutoRefreshOnly={this.props.showAutoRefreshOnly}
-          showQueryInput={this.props.showQueryInput}
-          onRefresh={this.props.onRefresh}
-          onRefreshChange={this.props.onRefreshChange}
-          onChange={this.onQueryBarChange}
-          isDirty={this.isDirty()}
-          customSubmitButton={
-            this.props.customSubmitButton ? this.props.customSubmitButton : undefined
-          }
-          dataTestSubj={this.props.dataTestSubj}
-          indicateNoData={this.props.indicateNoData}
-        />
-      );
-    }
 
     let filterBar;
     if (this.shouldRenderFilterBar()) {
@@ -465,10 +455,78 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       );
     }
 
+    let queryBar;
+    if (this.shouldRenderQueryBar(isEnhancementsEnabledOverride)) {
+      queryBar = (
+        <QueryBarTopRow
+          timeHistory={this.props.timeHistory}
+          query={this.state.query}
+          screenTitle={this.props.screenTitle}
+          onSubmit={this.onQueryBarSubmit}
+          indexPatterns={this.props.indexPatterns}
+          isLoading={this.props.isLoading}
+          prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
+          showDatePicker={this.props.showDatePicker}
+          dateRangeFrom={this.state.dateRangeFrom}
+          dateRangeTo={this.state.dateRangeTo}
+          isRefreshPaused={this.props.isRefreshPaused}
+          refreshInterval={this.props.refreshInterval}
+          showAutoRefreshOnly={this.props.showAutoRefreshOnly}
+          showQueryInput={this.props.showQueryInput}
+          onRefresh={this.props.onRefresh}
+          onRefreshChange={this.props.onRefreshChange}
+          onChange={this.onQueryBarChange}
+          isDirty={this.isDirty()}
+          customSubmitButton={
+            this.props.customSubmitButton ? this.props.customSubmitButton : undefined
+          }
+          dataTestSubj={this.props.dataTestSubj}
+          indicateNoData={this.props.indicateNoData}
+        />
+      );
+    }
+
+    let queryEditor;
+    if (this.shouldRenderQueryEditor(isEnhancementsEnabledOverride)) {
+      queryEditor = (
+        <QueryEditorTopRow
+          timeHistory={this.props.timeHistory}
+          containerRef={this.props.containerRef}
+          settings={this.props.settings}
+          query={this.state.query}
+          screenTitle={this.props.screenTitle}
+          onSubmit={this.onQueryBarSubmit}
+          indexPatterns={this.props.indexPatterns}
+          isLoading={this.props.isLoading}
+          prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
+          showDatePicker={this.props.showDatePicker}
+          dateRangeFrom={this.state.dateRangeFrom}
+          dateRangeTo={this.state.dateRangeTo}
+          isRefreshPaused={this.props.isRefreshPaused}
+          refreshInterval={this.props.refreshInterval}
+          showAutoRefreshOnly={this.props.showAutoRefreshOnly}
+          showQueryEditor={this.props.showQueryInput}
+          onRefresh={this.props.onRefresh}
+          onRefreshChange={this.props.onRefreshChange}
+          onChange={this.onQueryBarChange}
+          isDirty={this.isDirty()}
+          customSubmitButton={
+            this.props.customSubmitButton ? this.props.customSubmitButton : undefined
+          }
+          filterBar={filterBar}
+          dataTestSubj={this.props.dataTestSubj}
+          indicateNoData={this.props.indicateNoData}
+        />
+      );
+    }
+
+    const className = isEnhancementsEnabledOverride ? 'globalQueryEditor' : 'globalQueryBar';
+
     return (
-      <div className="globalQueryBar" data-test-subj="globalQueryBar">
+      <div className={className} data-test-subj={className}>
         {queryBar}
-        {filterBar}
+        {queryEditor}
+        {!isEnhancementsEnabledOverride && filterBar}
 
         {this.state.showSaveQueryModal ? (
           <SaveQueryForm
