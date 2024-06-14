@@ -30,6 +30,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 export function StringParameter({ id, label, value, setParameter }) {
   const handleChange = (evt) => {
@@ -37,12 +38,9 @@ export function StringParameter({ id, label, value, setParameter }) {
   };
 
   return (
-    <div className="visEditorSidebar__formRow">
-      <label className="visEditorSidebar__formLabel">{label}</label>
-      <div className="visEditorSidebar__formControl kuiFieldGroupSection--wide">
-        <input className="kuiTextInput" type="text" value={value} onChange={handleChange} />
-      </div>
-    </div>
+    <EuiFormRow label={label}>
+        <EuiFieldText value={value} onChange={handleChange} />
+  </EuiFormRow>
   );
 }
 
