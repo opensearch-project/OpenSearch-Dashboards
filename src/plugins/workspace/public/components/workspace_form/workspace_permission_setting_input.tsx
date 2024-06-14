@@ -10,14 +10,53 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiButtonGroup,
+  EuiFormRow,
+  EuiText,
 } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import {
   WorkspacePermissionItemType,
   optionIdToWorkspacePermissionModesMap,
-  permissionModeOptions,
+  PermissionModeId,
 } from './constants';
 import { getPermissionModeId } from './utils';
+
+export const permissionModeOptions = [
+  {
+    id: PermissionModeId.Read,
+    label: (
+      <EuiText size="s">
+        {i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.read', {
+          defaultMessage: 'Read',
+        })}
+      </EuiText>
+    ),
+  },
+  {
+    id: PermissionModeId.ReadAndWrite,
+    label: (
+      <EuiText size="s">
+        {i18n.translate(
+          'workspace.form.permissionSettingPanel.permissionModeOptions.readAndWrite',
+          {
+            defaultMessage: 'Read & Write',
+          }
+        )}
+      </EuiText>
+    ),
+  },
+  {
+    id: PermissionModeId.Owner,
+    label: (
+      <EuiText size="s">
+        {i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.owner', {
+          defaultMessage: 'Owner',
+        })}
+      </EuiText>
+    ),
+  },
+];
 
 export interface WorkspacePermissionSettingInputProps {
   index: number;
@@ -91,26 +130,59 @@ export const WorkspacePermissionSettingInput = ({
   }, [index, onDelete]);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="l">
-      <EuiFlexItem>
-        <EuiComboBox
-          singleSelection
-          selectedOptions={groupOrUserIdSelectedOptions}
-          onCreateOption={handleGroupOrUserIdCreate}
-          onChange={handleGroupOrUserIdChange}
-          placeholder="Select"
-          style={{ width: 200 }}
-        />
+    <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
+      <EuiFlexItem style={{ maxWidth: 400 }}>
+        <EuiFormRow
+          label={
+            index === 0
+              ? type === WorkspacePermissionItemType.User
+                ? i18n.translate('workspaceForm.permissionSetting.userLabel', {
+                    defaultMessage: 'User',
+                  })
+                : i18n.translate('workspaceForm.permissionSetting.groupLabel', {
+                    defaultMessage: 'User group',
+                  })
+              : undefined
+          }
+        >
+          <EuiComboBox
+            singleSelection
+            selectedOptions={groupOrUserIdSelectedOptions}
+            onCreateOption={handleGroupOrUserIdCreate}
+            onChange={handleGroupOrUserIdChange}
+            placeholder={
+              type === WorkspacePermissionItemType.User
+                ? i18n.translate('workspaceForm.permissionSetting.selectUser', {
+                    defaultMessage: 'Select a user',
+                  })
+                : i18n.translate('workspaceForm.permissionSetting.selectUserGroup', {
+                    defaultMessage: 'Select a user group',
+                  })
+            }
+          />
+        </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonGroup
-          type="single"
-          isDisabled={!deletable}
-          legend="Permission Modes"
-          options={permissionModeOptions}
-          idSelected={permissionModesSelectedId}
-          onChange={handlePermissionModeOptionChange}
-        />
+      <EuiFlexItem style={{ maxWidth: 332 }}>
+        <EuiFormRow
+          label={
+            index === 0
+              ? i18n.translate('workspaceForm.permissionSetting.permissionLabel', {
+                  defaultMessage: 'Permissions',
+                })
+              : undefined
+          }
+        >
+          <EuiButtonGroup
+            type="single"
+            isDisabled={!deletable}
+            legend="Permission Modes"
+            options={permissionModeOptions}
+            idSelected={permissionModesSelectedId}
+            onChange={handlePermissionModeOptionChange}
+            buttonSize="m"
+            isFullWidth
+          />
+        </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
