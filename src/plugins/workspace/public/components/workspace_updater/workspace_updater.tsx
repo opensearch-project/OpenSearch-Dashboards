@@ -119,9 +119,9 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   }
 
   return (
-    <EuiPage paddingSize="none">
+    <EuiPage>
       <EuiPageBody>
-        {!props.hideTitle ? <EuiPageHeader restrictWidth pageTitle="Update Workspace" /> : null}
+        {!props.hideTitle ? <EuiPageHeader pageTitle="Update Workspace" /> : null}
         <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"
@@ -129,7 +129,6 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
           paddingSize="none"
           color="subdued"
           hasShadow={false}
-          style={{ width: '100%', maxWidth: props.maxWidth ? props.maxWidth : 1000 }}
         >
           {application && (
             <WorkspaceForm

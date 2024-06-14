@@ -76,9 +76,9 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   );
 
   return (
-    <EuiPage paddingSize="none">
+    <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader restrictWidth pageTitle="Create a workspace" />
+        <EuiPageHeader pageTitle="Create a workspace" />
         <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"
@@ -86,11 +86,6 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
           paddingSize="none"
           color="subdued"
           hasShadow={false}
-          /**
-           * Since above EuiPageHeader has a maxWidth: 1000 style,
-           * add maxWidth: 1000 below to align with the above page header
-           **/
-          style={{ width: '100%', maxWidth: 1000 }}
         >
           {application && (
             <WorkspaceForm
