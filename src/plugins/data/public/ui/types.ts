@@ -7,8 +7,8 @@ import { Observable } from 'rxjs';
 import { SearchInterceptor } from '../search';
 import { IndexPatternSelectProps } from './index_pattern_select';
 import { StatefulSearchBarProps } from './search_bar';
-import { Settings } from './settings';
 import { SearchBarExtensionConfig } from './search_bar_extensions';
+import { Settings } from './settings';
 import { SuggestionsComponentProps } from './typeahead/suggestions_component';
 
 export * from './settings';
@@ -33,7 +33,6 @@ export interface QueryEnhancement {
       initialFrom?: string;
       initialTo?: string;
     };
-    extensions?: SearchBarExtensionConfig[];
   };
   fields?: {
     filterable?: boolean;
@@ -47,6 +46,7 @@ export interface QueryEnhancement {
 
 export interface UiEnhancements {
   query?: QueryEnhancement;
+  searchBarExtensions?: SearchBarExtensionConfig[];
 }
 
 /**

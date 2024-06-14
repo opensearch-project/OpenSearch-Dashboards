@@ -72,6 +72,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
   const queryEditorHeaderRef = useRef<HTMLDivElement | null>(null);
+  const queryEditorBannerRef = useRef<HTMLDivElement | null>(null);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName } = opensearchDashboards.services;
@@ -84,6 +85,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       props.settings &&
       props.settings.getQueryEnhancements(queryLanguage)?.searchBar) ||
     null;
+  const searchBarExtensions = props.settings?.getSearchBarExtensions();
   const parsedQuery =
     !queryUiEnhancement || isValidQuery(props.query)
       ? props.query!
@@ -245,17 +247,26 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
           queryEditorHeaderRef={queryEditorHeaderRef}
+          queryEditorBannerRef={queryEditorBannerRef}
         />
       </EuiFlexItem>
     );
   }
 
   function renderSearchBarExtensions() {
-    if (!shouldRenderSearchBarExtensions() || !queryEditorHeaderRef.current) return;
+    if (
+      !shouldRenderSearchBarExtensions() ||
+      !queryEditorHeaderRef.current ||
+      !queryEditorBannerRef.current ||
+      !queryLanguage
+    )
+      return;
     return (
       <SearchBarExtensions
-        configs={queryUiEnhancement?.extensions}
-        portalContainer={queryEditorHeaderRef.current}
+        language={queryLanguage}
+        configs={searchBarExtensions}
+        componentContainer={queryEditorHeaderRef.current}
+        bannerContainer={queryEditorBannerRef.current}
         indexPatterns={props.indexPatterns}
         dataSource={props.dataSource}
       />
@@ -294,7 +305,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderSearchBarExtensions(): boolean {
-    return Boolean(queryUiEnhancement?.extensions?.length);
+    return Boolean(searchBarExtensions?.length);
   }
 
   function renderUpdateButton() {

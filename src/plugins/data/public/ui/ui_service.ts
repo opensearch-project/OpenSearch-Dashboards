@@ -3,17 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
 import { BehaviorSubject } from 'rxjs';
-import { IUiStart, IUiSetup, QueryEnhancement, UiEnhancements } from './types';
-
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { IStorageWrapper } from '../../../opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../../config';
+import { DataPublicPluginStart } from '../types';
 import { createIndexPatternSelect } from './index_pattern_select';
 import { createSearchBar } from './search_bar/create_search_bar';
+import { SearchBarExtensionConfig } from './search_bar_extensions';
 import { createSettings } from './settings';
-import { DataPublicPluginStart } from '../types';
-import { IStorageWrapper } from '../../../opensearch_dashboards_utils/public';
 import { SuggestionsComponent } from './typeahead';
+import { IUiSetup, IUiStart, QueryEnhancement, UiEnhancements } from './types';
 
 /** @internal */
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -28,6 +28,7 @@ export interface UiServiceStartDependencies {
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
   private queryEnhancements: Map<string, QueryEnhancement> = new Map();
+  private searchBarExtensions: SearchBarExtensionConfig[] = [];
   private container$ = new BehaviorSubject<HTMLDivElement | null>(null);
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -44,6 +45,9 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
         if (enhancements.query && enhancements.query.language) {
           this.queryEnhancements.set(enhancements.query.language, enhancements.query);
         }
+        if (enhancements.searchBarExtensions) {
+          this.searchBarExtensions.push(...enhancements.searchBarExtensions);
+        }
       },
     };
   }
@@ -54,6 +58,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       search: dataServices.search,
       storage,
       queryEnhancements: this.queryEnhancements,
+      searchBarExtensions: this.searchBarExtensions,
     });
 
     const setContainerRef = (ref: HTMLDivElement | null) => {

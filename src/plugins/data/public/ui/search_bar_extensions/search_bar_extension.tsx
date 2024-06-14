@@ -12,7 +12,8 @@ import { DataSource } from '../../data_sources/datasource';
 interface SearchBarExtensionProps {
   config: SearchBarExtensionConfig;
   dependencies: SearchBarExtensionDependencies;
-  portalContainer: Element;
+  componentContainer: Element;
+  bannerContainer: Element;
 }
 
 export interface SearchBarExtensionDependencies {
@@ -24,6 +25,10 @@ export interface SearchBarExtensionDependencies {
    * Currently selected data source.
    */
   dataSource?: DataSource;
+  /**
+   * Currently selected query language.
+   */
+  language: string;
 }
 
 export interface SearchBarExtensionConfig {
@@ -41,18 +46,40 @@ export interface SearchBarExtensionConfig {
    */
   isEnabled: (dependencies: SearchBarExtensionDependencies) => Promise<boolean>;
   /**
-   * A function that returns the mount point for the search bar extension.
+   * A function that returns the search bar extension component. The component
+   * will be displayed on top of the query editor in the search bar.
    * @param dependencies - The dependencies required for the extension.
    * @returns The component the search bar extension.
    */
-  getComponent: (dependencies: SearchBarExtensionDependencies) => React.ReactElement;
+  getComponent?: (dependencies: SearchBarExtensionDependencies) => React.ReactElement | null;
+  /**
+   * A function that returns the search bar extension banner. The banner is a
+   * component that will be displayed on top of the search bar.
+   * @param dependencies - The dependencies required for the extension.
+   * @returns The component the search bar extension.
+   */
+  getBanner?: (dependencies: SearchBarExtensionDependencies) => React.ReactElement | null;
 }
+
+const SearchBarExtensionPortal: React.FC<{ container: Element }> = (props) => {
+  if (!props.children) return null;
+
+  return ReactDOM.createPortal(
+    <EuiErrorBoundary>{props.children}</EuiErrorBoundary>,
+    props.container
+  );
+};
 
 export const SearchBarExtension: React.FC<SearchBarExtensionProps> = (props) => {
   const [isEnabled, setIsEnabled] = useState(false);
   const isMounted = useRef(true);
 
-  const component = useMemo(() => props.config.getComponent(props.dependencies), [
+  const banner = useMemo(() => props.config.getBanner?.(props.dependencies), [
+    props.config,
+    props.dependencies,
+  ]);
+
+  const component = useMemo(() => props.config.getComponent?.(props.dependencies), [
     props.config,
     props.dependencies,
   ]);
@@ -72,8 +99,14 @@ export const SearchBarExtension: React.FC<SearchBarExtensionProps> = (props) => 
 
   if (!isEnabled) return null;
 
-  return ReactDOM.createPortal(
-    <EuiErrorBoundary>{component}</EuiErrorBoundary>,
-    props.portalContainer
+  return (
+    <>
+      <SearchBarExtensionPortal container={props.bannerContainer}>
+        {banner}
+      </SearchBarExtensionPortal>
+      <SearchBarExtensionPortal container={props.componentContainer}>
+        {component}
+      </SearchBarExtensionPortal>
+    </>
   );
 };

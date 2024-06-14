@@ -12,11 +12,12 @@ import {
 
 interface SearchBarExtensionsProps extends SearchBarExtensionDependencies {
   configs?: SearchBarExtensionConfig[];
-  portalContainer: Element;
+  componentContainer: Element;
+  bannerContainer: Element;
 }
 
 const SearchBarExtensions: React.FC<SearchBarExtensionsProps> = React.memo((props) => {
-  const { configs, portalContainer, ...dependencies } = props;
+  const { configs, componentContainer, bannerContainer, ...dependencies } = props;
 
   const sortedConfigs = useMemo(() => {
     if (!configs) return [];
@@ -39,7 +40,8 @@ const SearchBarExtensions: React.FC<SearchBarExtensionsProps> = React.memo((prop
           key={config.id}
           config={config}
           dependencies={dependencies}
-          portalContainer={portalContainer}
+          componentContainer={componentContainer}
+          bannerContainer={bannerContainer}
         />
       ))}
     </>

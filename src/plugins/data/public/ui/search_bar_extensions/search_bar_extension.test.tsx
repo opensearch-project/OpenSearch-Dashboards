@@ -32,6 +32,7 @@ const mockIndexPattern = {
 
 describe('SearchBarExtension', () => {
   const getComponentMock = jest.fn();
+  const getBannerMock = jest.fn();
   const isEnabledMock = jest.fn();
 
   const defaultProps: SearchBarExtensionProps = {
@@ -40,11 +41,14 @@ describe('SearchBarExtension', () => {
       order: 1,
       isEnabled: isEnabledMock,
       getComponent: getComponentMock,
+      getBanner: getBannerMock,
     },
     dependencies: {
       indexPatterns: [mockIndexPattern],
+      language: 'Test',
     },
-    portalContainer: document.createElement('div'),
+    componentContainer: document.createElement('div'),
+    bannerContainer: document.createElement('div'),
   };
 
   beforeEach(() => {
@@ -54,11 +58,13 @@ describe('SearchBarExtension', () => {
   it('renders correctly when isEnabled is true', async () => {
     isEnabledMock.mockResolvedValue(true);
     getComponentMock.mockReturnValue(<div>Test Component</div>);
+    getBannerMock.mockReturnValue(<div>Test Banner</div>);
 
     const { getByText } = render(<SearchBarExtension {...defaultProps} />);
 
     await waitFor(() => {
       expect(getByText('Test Component')).toBeInTheDocument();
+      expect(getByText('Test Banner')).toBeInTheDocument();
     });
 
     expect(isEnabledMock).toHaveBeenCalled();

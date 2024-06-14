@@ -38,7 +38,9 @@ describe('SearchBarExtensions', () => {
         ],
       },
     ],
-    portalContainer: document.createElement('div'),
+    componentContainer: document.createElement('div'),
+    bannerContainer: document.createElement('div'),
+    language: 'Test',
   };
 
   beforeEach(() => {
@@ -87,7 +89,7 @@ describe('SearchBarExtensions', () => {
 
     expect(SearchBarExtension).toHaveBeenCalledWith(
       expect.objectContaining({
-        dependencies: { indexPatterns: defaultProps.indexPatterns },
+        dependencies: { indexPatterns: defaultProps.indexPatterns, language: 'Test' },
       }),
       expect.anything()
     );

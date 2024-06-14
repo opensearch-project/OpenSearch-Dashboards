@@ -5,10 +5,11 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { IStorageWrapper } from '../../../../opensearch_dashboards_utils/public';
-import { ConfigSchema } from '../../../config';
 import { setOverrides as setFieldOverrides } from '../../../common';
-import { QueryEnhancement } from '../types';
+import { ConfigSchema } from '../../../config';
 import { ISearchStart } from '../../search';
+import { SearchBarExtensionConfig } from '../search_bar_extensions';
+import { QueryEnhancement } from '../types';
 
 export interface DataSettings {
   userQueryLanguage: string;
@@ -31,7 +32,8 @@ export class Settings {
     private readonly config: ConfigSchema['enhancements'],
     private readonly search: ISearchStart,
     private readonly storage: IStorageWrapper,
-    private readonly queryEnhancements: Map<string, QueryEnhancement>
+    private readonly queryEnhancements: Map<string, QueryEnhancement>,
+    private readonly searchBarExtensions: SearchBarExtensionConfig[]
   ) {
     this.isEnabled = this.config.enabled;
     this.setUserQueryEnhancementsEnabled(this.isEnabled);
@@ -63,6 +65,10 @@ export class Settings {
 
   getQueryEnhancements(language: string) {
     return this.queryEnhancements.get(language);
+  }
+
+  getSearchBarExtensions() {
+    return this.searchBarExtensions;
   }
 
   getUserQueryLanguageBlocklist() {
@@ -149,8 +155,15 @@ interface Deps {
   search: ISearchStart;
   storage: IStorageWrapper;
   queryEnhancements: Map<string, QueryEnhancement>;
+  searchBarExtensions: SearchBarExtensionConfig[];
 }
 
-export function createSettings({ config, search, storage, queryEnhancements }: Deps) {
-  return new Settings(config, search, storage, queryEnhancements);
+export function createSettings({
+  config,
+  search,
+  storage,
+  queryEnhancements,
+  searchBarExtensions,
+}: Deps) {
+  return new Settings(config, search, storage, queryEnhancements, searchBarExtensions);
 }
