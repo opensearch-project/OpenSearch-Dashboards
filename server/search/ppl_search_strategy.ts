@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import { first } from 'rxjs/operators';
 import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
