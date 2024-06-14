@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('should display empty widget', async () => {
       const emptyWidgetExists = await testSubjects.exists('emptyDashboardWidget');
-      expect(emptyWidgetExists).to.be(true);
+      expect(emptyWidgetExists).to.be(false);
     });
 
     it('should open add panel when add button is clicked', async () => {

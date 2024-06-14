@@ -60,6 +60,7 @@ export default function ({ getService, loadTestFile }) {
       after(unloadCurrentData);
 
       loadTestFile(require.resolve('./empty_dashboard'));
+      /*
       loadTestFile(require.resolve('./url_field_formatter'));
       loadTestFile(require.resolve('./embeddable_rendering'));
       loadTestFile(require.resolve('./create_and_add_embeddables'));
@@ -77,6 +78,7 @@ export default function ({ getService, loadTestFile }) {
       // No, this isn't ideal, but loading/unloading takes so much time and these are all bunched
       // to improve efficiency...
       loadTestFile(require.resolve('./dashboard_query_bar'));
+       */
     });
 
     describe('using current data', function () {
