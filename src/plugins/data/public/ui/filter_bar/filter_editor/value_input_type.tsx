@@ -34,7 +34,7 @@ import {
   EuiCompressedSelect,
 } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
-import { isEmpty, result } from 'lodash';
+import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
 import { validateParams } from './lib/filter_editor_utils';
 
