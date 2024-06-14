@@ -51,6 +51,10 @@ export class AutocompleteService {
   private getValueSuggestions?: ValueSuggestionsGetFn;
 
   private addQuerySuggestionProvider = (language: string, provider: QuerySuggestionGetFn): void => {
+    console.log(
+      'this.autocompleteConfig.querySuggestions.enabled: ',
+      this.autocompleteConfig.querySuggestions.enabled
+    );
     if (language && provider && this.autocompleteConfig.querySuggestions.enabled) {
       this.querySuggestionProviders.set(language, provider);
     }

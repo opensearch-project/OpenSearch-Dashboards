@@ -30,7 +30,6 @@
 
 import React, { Component, RefObject, createRef } from 'react';
 import { i18n } from '@osd/i18n';
-
 import classNames from 'classnames';
 import {
   EuiTextArea,
@@ -190,7 +189,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
           selectionEnd,
           signal: this.abortController.signal,
         })) || [];
-
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
@@ -683,7 +681,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
               </EuiTextArea>
             </div>
             <EuiPortal>
-              <SuggestionsComponent
+              {/* <SuggestionsComponent
                 show={this.state.isSuggestionsVisible}
                 suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
                 index={this.state.index}
@@ -692,7 +690,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                 loadMore={this.increaseLimit}
                 queryBarRect={this.state.queryBarRect}
                 size={this.props.size}
-              />
+              /> */}
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>
