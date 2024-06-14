@@ -31,7 +31,6 @@ export interface WorkspacePermissionSettingPanelProps {
 
 interface UserOrGroupSectionProps
   extends Omit<WorkspacePermissionSettingPanelProps, 'lastAdminItemDeletable'> {
-  title: string;
   nonDeletableIndex: number;
   type: WorkspacePermissionItemType;
   nextIdGenerator: () => number;

@@ -14,6 +14,9 @@ import {
   EuiText,
   EuiColorPicker,
   EuiTextArea,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -22,6 +25,8 @@ import { WorkspaceFormProps } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 import { WorkspaceUseCase } from './workspace_use_case';
+import { WorkspaceOperationType } from './constants';
+import { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
 
 export const WorkspaceForm = (props: WorkspaceFormProps) => {
   const {
@@ -50,6 +55,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
 
   return (
     <EuiForm id={formId} onSubmit={handleFormSubmit} component="form">
+      <WorkspaceFormErrorCallout errors={formErrors} />
       <EuiPanel>
         <EuiTitle size="s">
           <h2>{workspaceDetailsTitle}</h2>
@@ -173,12 +179,39 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         </EuiPanel>
       )}
       <EuiSpacer />
-      <WorkspaceBottomBar
-        operationType={operationType}
-        formId={formId}
-        application={application}
-        numberOfErrors={numberOfErrors}
-      />
+      {operationType === WorkspaceOperationType.Create && (
+        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiButton data-test-subj="workspaceForm-bottomBar-cancelButton">
+              {i18n.translate('workspace.form.bottomBar.cancel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {operationType === WorkspaceOperationType.Create && (
+              <EuiButton
+                fill
+                type="submit"
+                form={formId}
+                data-test-subj="workspaceForm-bottomBar-createButton"
+              >
+                {i18n.translate('workspace.form.bottomBar.createWorkspace', {
+                  defaultMessage: 'Create workspace',
+                })}
+              </EuiButton>
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {operationType === WorkspaceOperationType.Update && (
+        <WorkspaceBottomBar
+          operationType={operationType}
+          formId={formId}
+          application={application}
+          numberOfErrors={numberOfErrors}
+        />
+      )}
     </EuiForm>
   );
 };
