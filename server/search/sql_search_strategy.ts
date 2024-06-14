@@ -1,13 +1,19 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
-import { ISearchStrategy, SearchUsage } from '../../../../../src/plugins/data/server';
+import { ISearchStrategy, SearchUsage } from '../../../../src/plugins/data/server';
 import {
+  IDataFrameError,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
   PartialDataFrame,
   createDataFrame,
-} from '../../../../../src/plugins/data/common';
-import { SQLFacet } from './sql_facet';
+} from '../../../../src/plugins/data/common';
+import { Facet } from '../utils';
 
 export const sqlSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -15,7 +21,7 @@ export const sqlSearchStrategyProvider = (
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  const sqlFacet = new SQLFacet(client);
+  const sqlFacet = new Facet(client, logger, 'ppl.sqlQuery');
 
   return {
     search: async (context, request: any, options) => {
@@ -28,7 +34,7 @@ export const sqlSearchStrategyProvider = (
             type: 'data_frame',
             body: { error: rawResponse.data },
             took: rawResponse.took,
-          };
+          } as IDataFrameError;
         }
 
         const partial: PartialDataFrame = {

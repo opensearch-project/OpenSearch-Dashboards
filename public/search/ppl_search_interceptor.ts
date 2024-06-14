@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { trimEnd } from 'lodash';
 import { Observable, from } from 'rxjs';
 import { stringify } from '@osd/std';
@@ -20,10 +25,10 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../../src/plugins/data/public';
-import { formatDate, PPL_SEARCH_STRATEGY, removeKeyword } from '../../common';
+import { formatDate, SEARCH_STRATEGY, removeKeyword, API } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
-export class PPLQlSearchInterceptor extends SearchInterceptor {
+export class PPLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
 
@@ -42,7 +47,7 @@ export class PPLQlSearchInterceptor extends SearchInterceptor {
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = trimEnd('/api/pplql/search');
+    const path = trimEnd(API.PPL_SEARCH);
     const { timefilter } = this.queryService;
     const dateRange = timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(dateRange, 'YYYY-MM-DD HH:mm:ss.SSS');
@@ -186,6 +191,6 @@ export class PPLQlSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    return this.runSearch(request, options.abortSignal, PPL_SEARCH_STRATEGY);
+    return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.PPL);
   }
 }

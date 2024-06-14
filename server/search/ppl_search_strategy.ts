@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { first } from 'rxjs/operators';
 import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
@@ -5,15 +10,16 @@ import {
   ISearchStrategy,
   getDefaultSearchParams,
   SearchUsage,
-} from '../../../../../src/plugins/data/server';
+} from '../../../../src/plugins/data/server';
 import {
+  IDataFrameError,
   IDataFrameResponse,
   IDataFrameWithAggs,
   IOpenSearchDashboardsSearchRequest,
   createDataFrame,
-} from '../../../../../src/plugins/data/common';
-import { PPLFacet } from './ppl_facet';
-import { getFields } from '../../../common/utils';
+} from '../../../../src/plugins/data/common';
+import { getFields } from '../../common/utils';
+import { Facet } from '../utils';
 
 export const pplSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -21,7 +27,7 @@ export const pplSearchStrategyProvider = (
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  const pplFacet = new PPLFacet(client);
+  const pplFacet = new Facet(client, logger, 'ppl.pplQuery', true);
 
   const parseRequest = (query: string) => {
     const pipeMap = new Map<string, string>();
@@ -78,7 +84,7 @@ export const pplSearchStrategyProvider = (
             type: 'data_frame',
             body: { error: rawResponse.data },
             took: rawResponse.took,
-          };
+          } as IDataFrameError;
         }
 
         const dataFrame = createDataFrame({

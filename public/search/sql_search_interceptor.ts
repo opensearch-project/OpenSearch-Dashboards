@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { trimEnd } from 'lodash';
 import { Observable, from } from 'rxjs';
 import { stringify } from '@osd/std';
@@ -10,10 +15,10 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../../src/plugins/data/public';
-import { SQL_SEARCH_STRATEGY } from '../../common';
+import { API, SEARCH_STRATEGY } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
-export class SQLQlSearchInterceptor extends SearchInterceptor {
+export class SQLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
 
@@ -32,7 +37,7 @@ export class SQLQlSearchInterceptor extends SearchInterceptor {
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = trimEnd('/api/sqlql/search');
+    const path = trimEnd(API.SQL_SEARCH);
 
     const fetchDataFrame = (queryString: string, df = null) => {
       const body = stringify({ query: { qs: queryString, format: 'jdbc' }, df });
@@ -56,7 +61,7 @@ export class SQLQlSearchInterceptor extends SearchInterceptor {
       if (!df.body.error) return;
       const jsError = new Error(df.body.error.response);
       this.deps.toasts.addError(jsError, {
-        title: i18n.translate('dqlPlugin.sqlQueryError', {
+        title: i18n.translate('queryEnhancements.sqlQueryError', {
           defaultMessage: 'Could not complete the SQL query',
         }),
         toastMessage: df.body.error.msg,
@@ -67,6 +72,6 @@ export class SQLQlSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    return this.runSearch(request, options.abortSignal, SQL_SEARCH_STRATEGY);
+    return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.SQL);
   }
 }
