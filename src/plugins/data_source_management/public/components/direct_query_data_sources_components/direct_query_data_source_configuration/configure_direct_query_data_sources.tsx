@@ -48,7 +48,6 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({ no
     http,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   // const { setToast } = useToast();
-  // TODO: remove these dummies
   const [error, setError] = useState<string>('');
   const [authMethod, setAuthMethod] = useState<AuthMethod>('basicauth');
   const [name, setName] = useState('');
@@ -60,58 +59,7 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({ no
   const [accessKey, setAccessKey] = useState('');
   const [secretKey, setSecretKey] = useState('');
   const [region, setRegion] = useState('');
-  const [roles, setRoles] = useState<Role[]>([
-    { label: 'observability_read_access' },
-    { label: 'kibana_user' },
-    { label: 'own_index' },
-    { label: 'snapshot_management_read_access' },
-    { label: 'all_access' },
-    { label: 'logstash' },
-    { label: 'observability_full_access' },
-    { label: 'point_in_time_full_access' },
-    { label: 'flow_framework_full_access' },
-    { label: 'cross_cluster_replication_leader_full_access' },
-    { label: 'ppl_full_access' },
-    { label: 'security_analytics_read_access' },
-    { label: 'security_analytics_full_access' },
-    { label: 'knn_full_access' },
-    { label: 'readall_and_monitor' },
-    { label: 'flow_framework_read_access' },
-    { label: 'security_rest_api_full_access' },
-    { label: 'kibana_read_only' },
-    { label: 'cross_cluster_search_remote_full_access' },
-    { label: 'anomaly_read_access' },
-    { label: 'reports_instances_read_access' },
-    { label: 'snapshot_management_full_access' },
-    { label: 'readall' },
-    { label: 'asynchronous_search_full_access' },
-    { label: 'ml_full_access' },
-    { label: 'reports_full_access' },
-    { label: 'ip2geo_datasource_full_access' },
-    { label: 'notebooks_read_access' },
-    { label: 'security_analytics_ack_alerts' },
-    { label: 'flint_role' },
-    { label: 'alerting_full_access' },
-    { label: 'alerting_read_access' },
-    { label: 'cross_cluster_replication_follower_full_access' },
-    { label: 'manage_snapshots' },
-    { label: 'notifications_full_access' },
-    { label: 'index_pattern_only' },
-    { label: 'ml_query_assistant_access' },
-    { label: 'notifications_read_access' },
-    { label: 'knn_read_access' },
-    { label: 'asynchronous_search_read_access' },
-    { label: 'index_management_full_access' },
-    { label: 'ml_read_access' },
-    { label: 'reports_read_access' },
-    { label: 'anomaly_full_access' },
-    { label: 'security_rest_api_access' },
-    { label: 'ip2geo_datasource_read_access' },
-    { label: 'alerting_ack_alerts' },
-    { label: 'kibana_server' },
-    { label: 'notebooks_full_access' },
-    { label: 'query_insights_full_access' },
-  ]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [hasSecurityAccess, setHasSecurityAccess] = useState(true);
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>([]);
   const [page, setPage] = useState<'configure' | 'review'>('configure');
@@ -127,9 +75,21 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({ no
   ];
 
   const DATACONNECTIONS_BASE = '/api/dataconnections';
-  const SECURITY_ROLES = '/api/v1/configuration/roles';
 
   useEffect(() => {
+    // Fetch security roles from the API
+    http!
+      .get('/api/v1/configuration/roles')
+      .then((data) =>
+        setRoles(
+          Object.keys(data.data).map((key) => {
+            return { label: key };
+          })
+        )
+      )
+      .catch((err) => setHasSecurityAccess(false));
+
+    // Set breadcrumbs based on the urlType
     let breadcrumbs;
     switch (urlType) {
       case 'AmazonS3AWSGlue':
@@ -142,7 +102,7 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({ no
         breadcrumbs = getCreateBreadcrumbs();
     }
     setBreadcrumbs(breadcrumbs);
-  }, [urlType, setBreadcrumbs]);
+  }, [urlType, setBreadcrumbs, http]);
 
   const ConfigureDatasource = (configurationProps: {
     datasourceType: DirectQueryDatasourceType;
