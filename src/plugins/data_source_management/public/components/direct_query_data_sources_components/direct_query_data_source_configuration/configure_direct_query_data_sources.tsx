@@ -9,25 +9,20 @@ import {
   EuiPage,
   EuiPageBody,
   EuiSpacer,
-  EuiButton,
   EuiSteps,
   EuiPageSideBar,
   EuiBottomBar,
   EuiButtonEmpty,
+  EuiButton,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { RouteComponentProps, useParams, withRouter } from 'react-router-dom';
 import { ConfigureS3DatasourcePanel } from './direct_query_amazon_s3_datasource/direct_query_configure_amazon_s3_data_sources';
+import { ReviewS3Datasource } from './direct_query_amazon_s3_datasource/direct_query_review_amazon_s3_data_source';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-// import { DATACONNECTIONS_BASE, SECURITY_ROLES } from '../../../../../common/constants/shared';
-// import { ReviewS3Datasource } from './review_s3_datasource_configuration';
-// import { useToast } from '../../../../../public/components/common/toast';
 import { DataSourceManagementContext, DirectQueryDatasourceType, Role } from '../../../types';
-// import { ConfigurePrometheusDatasource } from './configure_prometheus_datasource';
-// import { ReviewPrometheusDatasource } from './review_prometheus_datasource_configuration';
 import { DatasourceTypeToDisplayName, UrlToDatasourceType } from '../../../constants';
 import { AuthMethod } from '../../../types';
-// import { formatError } from '../../utils';
 import { NotificationsStart } from '../../../../../../core/public';
 import {
   getCreateAmazonS3DataSourceBreadcrumbs,
@@ -39,7 +34,10 @@ interface ConfigureDatasourceProps extends RouteComponentProps {
   notifications: NotificationsStart;
 }
 
-const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({ notifications }) => {
+const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
+  notifications,
+  history,
+}) => {
   const { type: urlType } = useParams<{ type: string }>();
   const {
     chrome,
@@ -47,7 +45,7 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({ no
     notifications: { toasts },
     http,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
-  // const { setToast } = useToast();
+
   const [error, setError] = useState<string>('');
   const [authMethod, setAuthMethod] = useState<AuthMethod>('basicauth');
   const [name, setName] = useState('');
@@ -76,6 +74,82 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({ no
 
   const DATACONNECTIONS_BASE = '/api/dataconnections';
 
+  const formatError = (errorName: string, errorMessage: string, errorDetails: string) => {
+    return {
+      name: errorName,
+      message: errorMessage,
+      body: {
+        attributes: {
+          error: {
+            caused_by: {
+              type: '',
+              reason: errorDetails,
+            },
+          },
+        },
+      },
+    };
+  };
+
+  const createDatasource = useCallback(() => {
+    let response;
+    switch (type) {
+      case 'S3GLUE':
+        const s3properties =
+          authMethod === 'basicauth'
+            ? {
+                'glue.auth.type': 'iam_role',
+                'glue.auth.role_arn': arn,
+                'glue.indexstore.opensearch.uri': storeURI,
+                'glue.indexstore.opensearch.auth': authMethod,
+                'glue.indexstore.opensearch.auth.username': username,
+                'glue.indexstore.opensearch.auth.password': password,
+              }
+            : {
+                'glue.auth.type': 'iam_role',
+                'glue.auth.role_arn': arn,
+                'glue.indexstore.opensearch.uri': storeURI,
+                'glue.indexstore.opensearch.auth': authMethod,
+              };
+        response = http!.post(`${DATACONNECTIONS_BASE}`, {
+          body: JSON.stringify({
+            name,
+            allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
+            connector: 's3glue',
+            properties: s3properties,
+          }),
+        });
+        break;
+      default:
+        response = Promise.reject('Invalid data source type');
+    }
+    response
+      .then(() => {
+        toasts.addSuccess(`Data source ${name} created`);
+        history.push('/manage');
+      })
+      .catch((err) => {
+        const formattedError = formatError(err.name, err.message, err.body.message);
+        notifications.toasts.addError(formattedError, {
+          title: 'Could not create data source',
+        });
+        setPage('configure');
+      });
+  }, [
+    authMethod,
+    arn,
+    http,
+    name,
+    notifications.toasts,
+    selectedQueryPermissionRoles,
+    storeURI,
+    toasts,
+    type,
+    username,
+    password,
+    history,
+  ]);
+
   useEffect(() => {
     // Fetch security roles from the API
     http!
@@ -87,7 +161,7 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({ no
           })
         )
       )
-      .catch((err) => setHasSecurityAccess(false));
+      .catch(() => setHasSecurityAccess(false));
 
     // Set breadcrumbs based on the urlType
     let breadcrumbs;
@@ -132,6 +206,7 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({ no
             hasSecurityAccess={hasSecurityAccess}
             error={error}
             setError={setError}
+            history={history}
           />
         );
       default:
@@ -139,94 +214,68 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({ no
     }
   };
 
-  // const ReviewSaveOrCancel = useCallback(() => {
-  //   return (
-  //     <EuiBottomBar>
-  //       <EuiFlexGroup justifyContent="flexEnd">
-  //         <EuiFlexItem grow={false}>
-  //           <EuiButtonEmpty
-  //             onClick={() => {
-  //               history.push('/new');
-  //             }}
-  //             color="ghost"
-  //             size="s"
-  //             iconType="cross"
-  //           >
-  //             Cancel
-  //           </EuiButtonEmpty>
-  //         </EuiFlexItem>
-  //         <EuiFlexItem grow={false}>
-  //           <EuiButton
-  //             onClick={() => (page === 'review' ? setPage('configure') : {})}
-  //             color="ghost"
-  //             size="s"
-  //             iconType="arrowLeft"
-  //           >
-  //             Previous
-  //           </EuiButton>
-  //         </EuiFlexItem>
-  //         <EuiFlexItem grow={false}>
-  //           <EuiButton
-  //             onClick={() => (page === 'review' ? createDatasource() : setPage('review'))}
-  //             size="s"
-  //             iconType="arrowRight"
-  //             fill
-  //           >
-  //             {page === 'configure'
-  //               ? `Review Configuration`
-  //               : `Connect to ${DatasourceTypeToDisplayName[type]}`}
-  //           </EuiButton>
-  //         </EuiFlexItem>
-  //       </EuiFlexGroup>
-  //     </EuiBottomBar>
-  //   );
-  // }, [page, history]);
+  const ReviewDatasourceConfiguration = (configurationProps: { datasourceType: string }) => {
+    const { datasourceType } = configurationProps;
+    switch (datasourceType) {
+      case 'S3GLUE':
+        return (
+          <ReviewS3Datasource
+            currentName={name}
+            currentDetails={details}
+            currentArn={arn}
+            currentStore={storeURI}
+            selectedQueryPermissionRoles={selectedQueryPermissionRoles}
+            currentAuthMethod={authMethod}
+            goBack={() => setPage('configure')}
+          />
+        );
+      default:
+        return <></>;
+    }
+  };
 
-  // const createDatasource = () => {
-  //   let response;
-  //   switch (type) {
-  //     case 'S3GLUE':
-  //       const s3properties =
-  //         authMethod === 'basicauth'
-  //           ? {
-  //               'glue.auth.type': 'iam_role',
-  //               'glue.auth.role_arn': arn,
-  //               'glue.indexstore.opensearch.uri': storeURI,
-  //               'glue.indexstore.opensearch.auth': authMethod,
-  //               'glue.indexstore.opensearch.auth.username': username,
-  //               'glue.indexstore.opensearch.auth.password': password,
-  //             }
-  //           : {
-  //               'glue.auth.type': 'iam_role',
-  //               'glue.auth.role_arn': arn,
-  //               'glue.indexstore.opensearch.uri': storeURI,
-  //               'glue.indexstore.opensearch.auth': authMethod,
-  //             };
-  //       response = http!.post(`${DATACONNECTIONS_BASE}`, {
-  //         body: JSON.stringify({
-  //           name,
-  //           allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
-  //           connector: 's3glue',
-  //           properties: s3properties,
-  //         }),
-  //       });
-  //       break;
-  //     default:
-  //       response = Promise.reject('Invalid data source type');
-  //   }
-  //   response
-  //     .then(() => {
-  //       toasts.addSuccess(`Data source ${name} created`);
-  //       history.push('/manage');
-  //     })
-  //     .catch((err) => {
-  //       const formattedError = formatError(err.name, err.message, err.body.message);
-  //       notifications.toasts.addError(formattedError, {
-  //         title: 'Could not create data source',
-  //       });
-  //       setPage('configure');
-  //     });
-  // };
+  const ReviewSaveOrCancel = useCallback(() => {
+    return (
+      <EuiBottomBar>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              onClick={() => {
+                history.push('/create');
+              }}
+              color="ghost"
+              size="s"
+              iconType="cross"
+            >
+              Cancel
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() => setPage('configure')}
+              color="ghost"
+              size="s"
+              iconType="arrowLeft"
+            >
+              Previous
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              onClick={() => (page === 'review' ? createDatasource() : setPage('review'))}
+              size="s"
+              iconType="arrowRight"
+              fill
+            >
+              {page === 'configure'
+                ? `Review Configuration`
+                : `Connect to ${DatasourceTypeToDisplayName[type]}`}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiBottomBar>
+    );
+  }, [page, history, createDatasource, type]);
 
   return (
     <EuiPage>
@@ -237,12 +286,11 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({ no
         {page === 'configure' ? (
           <ConfigureDatasource datasourceType={type} />
         ) : (
-          // <ReviewDatasourceConfiguration datasourceType={type} />
-          <>111</>
+          <ReviewDatasourceConfiguration datasourceType={type} />
         )}
         <EuiSpacer size="xl" />
         <EuiSpacer size="xl" />
-        {/* <ReviewSaveOrCancel /> */}
+        <ReviewSaveOrCancel />
       </EuiPageBody>
     </EuiPage>
   );
