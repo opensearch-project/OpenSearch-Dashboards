@@ -81,7 +81,7 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getAllByText('Admin')[1]);
+    fireEvent.click(renderResult.getAllByText('Owner')[1]);
     expect(onChangeMock).toHaveBeenCalledWith([
       {
         id: 0,
@@ -189,10 +189,10 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult } = setup({
       errors: { '0': 'User permission setting error', '1': 'Group permission setting error' },
     });
-    expect(renderResult.container.querySelectorAll('.euiFormRow')[0]).toHaveTextContent(
+    expect(renderResult.container.querySelectorAll('.euiFormErrorText')[0]).toHaveTextContent(
       'User permission setting error'
     );
-    expect(renderResult.container.querySelectorAll('.euiFormRow')[1]).toHaveTextContent(
+    expect(renderResult.container.querySelectorAll('.euiFormErrorText')[1]).toHaveTextContent(
       'Group permission setting error'
     );
   });
