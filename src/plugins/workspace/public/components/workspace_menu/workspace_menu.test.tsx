@@ -26,7 +26,27 @@ describe('<WorkspaceMenu />', () => {
     jest.restoreAllMocks();
   });
 
-  it('should display a list of workspaces and use case in the dropdown', async () => {
+  it('should display a list of workspaces in the dropdown', () => {
+    coreStartMock.workspaces.workspaceList$.next([
+      { id: 'workspace-1', name: 'workspace 1' },
+      { id: 'workspace-2', name: 'workspace 2' },
+    ]);
+
+    render(<WorkspaceMenu coreStart={coreStartMock} />);
+    fireEvent.click(screen.getByText(/select a workspace/i));
+
+    expect(screen.getByText(/workspace 1/i)).toBeInTheDocument();
+    expect(screen.getByText(/workspace 2/i)).toBeInTheDocument();
+  });
+
+  it('should display a list of use cases in the dropdown', async () => {
+    const originalLocation = window.location;
+    Object.defineProperty(window, 'location', {
+      value: {
+        assign: jest.fn(),
+      },
+    });
+
     coreStartMock.workspaces.workspaceList$.next([
       {
         id: 'workspace-1',
@@ -38,14 +58,10 @@ describe('<WorkspaceMenu />', () => {
           'use-case-search',
         ],
       },
-      { id: 'workspace-2', name: 'workspace 2', features: ['use-case-observability'] },
     ]);
 
     render(<WorkspaceMenu coreStart={coreStartMock} />);
     fireEvent.click(screen.getByText(/select a workspace/i));
-
-    expect(screen.getByText(/workspace 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/workspace 2/i)).toBeInTheDocument();
 
     const rightArrowButton = screen
       .getByTestId('context-menu-item-workspace-1')
@@ -58,6 +74,16 @@ describe('<WorkspaceMenu />', () => {
       expect(screen.getByText(/use case/i)).toBeInTheDocument();
       expect(screen.getByText(/observability/i)).toBeInTheDocument();
       expect(screen.getByText(/security-analytics/i)).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByText(/observability/i));
+
+    expect(window.location.assign).toHaveBeenCalledWith(
+      'https://test.com/w/workspace-1/app/workspace_overview'
+    );
+
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
     });
   });
 
