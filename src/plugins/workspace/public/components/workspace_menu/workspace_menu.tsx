@@ -4,20 +4,28 @@
  */
 
 import { i18n } from '@osd/i18n';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
 import {
-  EuiButtonIcon,
+  EuiButton,
+  EuiButtonEmpty,
   EuiContextMenu,
+  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiListGroup,
   EuiListGroupItem,
+  EuiPanel,
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { FormattedMessage } from '@osd/i18n/react';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 
 import {
   WORKSPACE_CREATE_APP_ID,
@@ -26,10 +34,13 @@ import {
 } from '../../../common/constants';
 import { cleanWorkspaceId, formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
+import { getUseCaseFromFeatureConfig } from '../../utils';
 
 interface Props {
   coreStart: CoreStart;
 }
+
+const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
 
 /**
  * Return maximum five workspaces, the current selected workspace
@@ -42,13 +53,15 @@ function getFilteredWorkspaceList(
   return [
     ...(currentWorkspace ? [currentWorkspace] : []),
     ...workspaceList.filter((workspace) => workspace.id !== currentWorkspace?.id),
-  ].slice(0, 5);
+  ].slice(0, 7);
 }
 
 export const WorkspaceMenu = ({ coreStart }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const workspaceList = useObservable(coreStart.workspaces.workspaceList$, []);
+  const [searchValue, setSearchValue] = useState<string>('');
+  const useCasePanels: EuiContextMenuPanelDescriptor[] = [];
 
   const defaultHeaderName = i18n.translate(
     'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
@@ -56,7 +69,13 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       defaultMessage: 'Select a workspace',
     }
   );
-  const filteredWorkspaceList = getFilteredWorkspaceList(workspaceList, currentWorkspace);
+
+  const filteredWorkspaceList = useMemo(() => {
+    return getFilteredWorkspaceList(workspaceList, currentWorkspace).filter((workspace) =>
+      workspace.name.toLowerCase().includes(searchValue.toLowerCase())
+    );
+  }, [workspaceList, searchValue, currentWorkspace]);
+
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
 
   const openPopover = () => {
@@ -67,7 +86,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     setPopover(false);
   };
 
-  const workspaceToItem = (workspace: WorkspaceObject) => {
+  const workspaceToItem = (workspace: WorkspaceObject, index: number) => {
     const workspaceURL = formatUrlWithWorkspaceId(
       coreStart.application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
         absolute: false,
@@ -75,60 +94,52 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       workspace.id,
       coreStart.http.basePath
     );
-    const name =
-      currentWorkspace?.name === workspace.name ? (
-        <EuiText>
-          <strong>{workspace.name}</strong>
-        </EuiText>
-      ) : (
-        workspace.name
-      );
+
+    const useCase = workspace.features
+      ?.map(getUseCaseFromFeatureConfig)
+      .filter(isNotNull)
+      .map((uc) => {
+        return {
+          name: uc,
+          // Todo: this should be a link to the use case overview page.
+          onClick: () => {
+            window.location.assign(workspaceURL);
+          },
+          'data-test-subj': `context-menu-item-${workspace.id}-${uc}`,
+          icon: <EuiIcon type="bolt" />,
+        };
+      });
+
+    useCasePanels.push({
+      id: index + 1,
+      title: 'use case',
+      width: 300,
+      items: useCase,
+    });
+
+    const name = (
+      <EuiText
+        onClick={(e) => {
+          e.stopPropagation();
+          window.location.assign(workspaceURL);
+        }}
+      >
+        {workspace.name}
+      </EuiText>
+    );
     return {
       name,
       key: workspace.id,
+      panel: index + 1,
+      'data-test-subj': `context-menu-item-${workspace.id}`,
       icon: <EuiIcon type="stopFilled" color={workspace.color ?? 'primary'} />,
-      onClick: () => {
-        window.location.assign(workspaceURL);
-      },
     };
   };
 
   const getWorkspaceListItems = () => {
     const workspaceListItems: EuiContextMenuPanelItemDescriptor[] = filteredWorkspaceList.map(
-      workspaceToItem
+      (workspace, index) => workspaceToItem(workspace, index)
     );
-    workspaceListItems.push({
-      icon: <EuiIcon type="plus" />,
-      name: i18n.translate('core.ui.primaryNav.workspaceContextMenu.createWorkspace', {
-        defaultMessage: 'Create workspace',
-      }),
-      key: WORKSPACE_CREATE_APP_ID,
-      onClick: () => {
-        window.location.assign(
-          cleanWorkspaceId(
-            coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
-              absolute: false,
-            })
-          )
-        );
-      },
-    });
-    workspaceListItems.push({
-      icon: <EuiIcon type="folderClosed" />,
-      name: i18n.translate('core.ui.primaryNav.workspaceContextMenu.allWorkspace', {
-        defaultMessage: 'All workspaces',
-      }),
-      key: WORKSPACE_LIST_APP_ID,
-      onClick: () => {
-        window.location.assign(
-          cleanWorkspaceId(
-            coreStart.application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
-              absolute: false,
-            })
-          )
-        );
-      },
-    });
     return workspaceListItems;
   };
 
@@ -152,27 +163,14 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     </>
   );
 
-  const currentWorkspaceTitle = (
-    <EuiFlexGroup alignItems="center">
-      <EuiFlexItem grow={true}>
-        <EuiText size="s">{currentWorkspaceName}</EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          iconType="cross"
-          onClick={closePopover}
-          aria-label="close workspace dropdown"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-
   const panels = [
     {
       id: 0,
-      title: currentWorkspaceTitle,
+      title: 'all workspace',
+      width: 300,
       items: getWorkspaceListItems(),
     },
+    ...useCasePanels,
   ];
 
   return (
@@ -185,7 +183,58 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       panelPaddingSize="none"
       anchorPosition="downCenter"
     >
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
+        <EuiFieldSearch
+          placeholder="find a workspace"
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          fullWidth
+        />
+      </EuiPanel>
+      <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+      <EuiHorizontalRule margin="xs" />
+      <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
+        <EuiFlexGroup justifyContent="spaceEvenly">
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              key={WORKSPACE_CREATE_APP_ID}
+              onClick={() => {
+                window.location.assign(
+                  cleanWorkspaceId(
+                    coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
+                      absolute: false,
+                    })
+                  )
+                );
+              }}
+            >
+              <EuiIcon type="plus" />
+              <FormattedMessage
+                id="core.ui.primaryNav.createWorkspace"
+                defaultMessage="Create workspace"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="s"
+              key={WORKSPACE_LIST_APP_ID}
+              onClick={() => {
+                window.location.assign(
+                  cleanWorkspaceId(
+                    coreStart.application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
+                      absolute: false,
+                    })
+                  )
+                );
+              }}
+            >
+              <FormattedMessage id="core.ui.primaryNav.allWorkspace" defaultMessage="View all" />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     </EuiPopover>
   );
 };

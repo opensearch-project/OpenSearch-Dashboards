@@ -26,10 +26,19 @@ describe('<WorkspaceMenu />', () => {
     jest.restoreAllMocks();
   });
 
-  it('should display a list of workspaces in the dropdown', () => {
+  it('should display a list of workspaces and use case in the dropdown', async () => {
     coreStartMock.workspaces.workspaceList$.next([
-      { id: 'workspace-1', name: 'workspace 1' },
-      { id: 'workspace-2', name: 'workspace 2' },
+      {
+        id: 'workspace-1',
+        name: 'workspace 1',
+        features: [
+          'use-case-observability',
+          'use-case-security-analytics',
+          'use-case-analytics',
+          'use-case-search',
+        ],
+      },
+      { id: 'workspace-2', name: 'workspace 2', features: ['use-case-observability'] },
     ]);
 
     render(<WorkspaceMenu coreStart={coreStartMock} />);
@@ -37,6 +46,37 @@ describe('<WorkspaceMenu />', () => {
 
     expect(screen.getByText(/workspace 1/i)).toBeInTheDocument();
     expect(screen.getByText(/workspace 2/i)).toBeInTheDocument();
+
+    const rightArrowButton = screen
+      .getByTestId('context-menu-item-workspace-1')
+      .querySelector('.euiContextMenu__icon')!;
+    expect(rightArrowButton).toBeInTheDocument();
+
+    fireEvent.click(rightArrowButton);
+
+    await waitFor(() => {
+      expect(screen.getByText(/use case/i)).toBeInTheDocument();
+      expect(screen.getByText(/observability/i)).toBeInTheDocument();
+      expect(screen.getByText(/security-analytics/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should search a workspace in the dropdown', () => {
+    coreStartMock.workspaces.workspaceList$.next([
+      { id: 'workspace-1', name: 'workspace 1' },
+      { id: 'workspace-2', name: 'workspace 2' },
+    ]);
+
+    render(<WorkspaceMenu coreStart={coreStartMock} />);
+    fireEvent.click(screen.getByText(/select a workspace/i));
+    const searchField = screen.getByPlaceholderText('find a workspace');
+
+    expect(searchField).toBeInTheDocument();
+
+    fireEvent.change(searchField, { target: { value: 'workspace 1' } });
+
+    expect(screen.getByText('workspace 1')).toBeInTheDocument();
+    expect(screen.queryByText('workspace 2')).not.toBeInTheDocument();
   });
 
   it('should display current workspace name', () => {
@@ -49,10 +89,10 @@ describe('<WorkspaceMenu />', () => {
     render(<WorkspaceMenu coreStart={coreStartMock} />);
     fireEvent.click(screen.getByText(/select a workspace/i));
 
-    expect(screen.getByLabelText(/close workspace dropdown/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByLabelText(/close workspace dropdown/i));
+    expect(screen.getByText(/ALL WORKSPACE/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/select a workspace/i));
     await waitFor(() => {
-      expect(screen.queryByLabelText(/close workspace dropdown/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/ALL WORKSPACE/i)).not.toBeInTheDocument();
     });
   });
 
@@ -110,7 +150,7 @@ describe('<WorkspaceMenu />', () => {
 
     render(<WorkspaceMenu coreStart={coreStartMock} />);
     fireEvent.click(screen.getByText(/select a workspace/i));
-    fireEvent.click(screen.getByText(/all workspace/i));
+    fireEvent.click(screen.getByText(/View all/i));
     expect(window.location.assign).toHaveBeenCalledWith('https://test.com/app/workspace_list');
 
     Object.defineProperty(window, 'location', {
