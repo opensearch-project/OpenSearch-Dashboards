@@ -72,7 +72,7 @@ const QueryEditorExtensionPortal: React.FC<{ container: Element }> = (props) => 
 
 export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props) => {
   const [isEnabled, setIsEnabled] = useState(false);
-  const isMounted = useRef(true);
+  const isMounted = useRef(false);
 
   const banner = useMemo(() => props.config.getBanner?.(props.dependencies), [
     props.config,

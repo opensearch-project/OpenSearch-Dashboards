@@ -464,6 +464,7 @@ export {
   TimeHistoryContract,
   QueryStateChange,
   QueryStart,
+  PersistedLog,
 } from './query';
 
 export { AggsStart } from './search/aggs';
@@ -526,5 +527,3 @@ export {
   DataSourceGroup,
   DataSourceOption,
 } from './data_sources/datasource_selector';
-
-export { PersistedLog } from './query';
