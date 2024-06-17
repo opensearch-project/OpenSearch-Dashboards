@@ -3,66 +3,86 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// import { EuiText, EuiFormRow, EuiFieldText } from '@elastic/eui';
-// import React, { useEffect, useState } from 'react';
-// import { coreRefs } from '../../../../../public/framework/core_refs';
+import { EuiText, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import React, { useEffect, useState } from 'react';
+import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { DataSourceManagementContext } from '../../../types';
 
-// interface ConfigureNameProps {
-//   currentName: string;
-//   currentError: string;
-//   setErrorForForm: React.Dispatch<React.SetStateAction<string>>;
-//   setNameForRequest: React.Dispatch<React.SetStateAction<string>>;
-// }
+interface ConfigureNameProps {
+  currentName: string;
+  currentError: string;
+  setErrorForForm: React.Dispatch<React.SetStateAction<string>>;
+  setNameForRequest: React.Dispatch<React.SetStateAction<string>>;
+}
 
-// export const NameRow = (props: ConfigureNameProps) => {
-//   const { setNameForRequest, currentName, currentError, setErrorForForm } = props;
-//   const { pplService } = coreRefs;
+export const NameRow: React.FC<ConfigureNameProps> = ({
+  setNameForRequest,
+  currentName,
+  currentError,
+  setErrorForForm,
+}) => {
+  const { http } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
-//   const [name, setName] = useState<string>(currentName);
-//   const [existingNames, setExistingNames] = useState<string[]>([]);
+  const [name, setName] = useState<string>(currentName);
+  const [existingNames, setExistingNames] = useState<string[]>([]);
 
-//   useEffect(() => {
-//     pplService!.fetch({ query: 'show datasources', format: 'jdbc' }).then((dataconnections) =>
-//       setExistingNames(
-//         dataconnections.jsonData.map((x) => {
-//           return x.DATASOURCE_NAME;
-//         })
-//       )
-//     );
-//   }, []);
+  useEffect(() => {
+    const fetchDataSources = async () => {
+      try {
+        const response = await http.post('/api/ppl/search', {
+          headers: {
+            'Content-Type': 'application/json',
+            'kbn-xsrf': 'true',
+          },
+          body: JSON.stringify({
+            query: 'show datasources',
+            format: 'jdbc',
+          }),
+        });
+        const dataconnections = await response.json();
+        setExistingNames(dataconnections.jsonData.map((x) => x.DATASOURCE_NAME));
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching data sources:', error);
+      }
+    };
 
-//   const onBlur = (e) => {
-//     if (e.target.value === '') {
-//       setErrorForForm('Name is a required parameter.');
-//     } else if (existingNames.includes(e.target.value)) {
-//       setErrorForForm('Name must be unique across data sources.');
-//     } else {
-//       setErrorForForm('');
-//     }
+    fetchDataSources();
+  }, [http]);
 
-//     setNameForRequest(e.target.value);
-//   };
+  const onBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === '') {
+      setErrorForForm('Name is a required parameter.');
+    } else if (existingNames.includes(value)) {
+      setErrorForForm('Name must be unique across data sources.');
+    } else {
+      setErrorForForm('');
+    }
 
-//   return (
-//     <EuiFormRow label="Data source name" isInvalid={currentError.length !== 0} error={currentError}>
-//       <>
-//         <EuiText size="xs">
-//           <p>
-//             Connection name that OpenSearch Dashboards references. This name should be descriptive
-//             and concise.
-//           </p>
-//         </EuiText>
-//         <EuiFieldText
-//           data-test-subj="name"
-//           placeholder="Title"
-//           value={name}
-//           onChange={(e) => {
-//             setName(e.target.value);
-//           }}
-//           onBlur={onBlur}
-//           isInvalid={currentError.length !== 0}
-//         />
-//       </>
-//     </EuiFormRow>
-//   );
-// };
+    setNameForRequest(value);
+  };
+
+  return (
+    <EuiFormRow label="Data source name" isInvalid={currentError.length !== 0} error={currentError}>
+      <>
+        <EuiText size="xs">
+          <p>
+            Connection name that OpenSearch Dashboards references. This name should be descriptive
+            and concise.
+          </p>
+        </EuiText>
+        <EuiFieldText
+          data-test-subj="name"
+          placeholder="Title"
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
+          onBlur={onBlur}
+          isInvalid={currentError.length !== 0}
+        />
+      </>
+    </EuiFormRow>
+  );
+};

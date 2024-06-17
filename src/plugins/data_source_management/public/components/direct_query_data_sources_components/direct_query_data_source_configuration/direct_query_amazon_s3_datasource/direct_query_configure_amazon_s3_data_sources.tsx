@@ -18,11 +18,11 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { DataSourceManagementContext } from '../../../../types';
 import { AuthMethod, OPENSEARCH_S3_DOCUMENTATION_URL } from '../../../constants';
 import { QueryPermissionsConfiguration } from '../query_permissions';
 import { Role } from '../../../../types';
 import { AuthDetails } from '../direct_query_data_source_auth_details';
+import { NameRow } from '../name_row';
 
 interface ConfigureS3DatasourceProps extends RouteComponentProps {
   roles: Role[];
@@ -69,7 +69,6 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
     hasSecurityAccess,
     error,
     setError,
-    history,
   } = props;
 
   const [details, setDetails] = useState(currentDetails);
@@ -108,6 +107,12 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
           <h3>Data source details</h3>
         </EuiText>
         <EuiSpacer size="m" />
+        <NameRow
+          currentName={currentName}
+          currentError={error}
+          setErrorForForm={setError}
+          setNameForRequest={setNameForRequest}
+        />
         <EuiFormRow label="Description - Optional">
           <EuiTextArea
             placeholder="Describe data source"
