@@ -18,7 +18,9 @@ import {
 import React, { useEffect, useState, useCallback } from 'react';
 import { RouteComponentProps, useParams, withRouter } from 'react-router-dom';
 import { ConfigureS3DatasourcePanel } from './direct_query_amazon_s3_datasource/direct_query_configure_amazon_s3_data_source';
+import { ConfigurePrometheusDatasourcePanel } from './direct_query_prometheus_data_source/direct_query_configure_prometheus_data_source';
 import { ReviewS3Datasource } from './direct_query_amazon_s3_datasource/direct_query_review_amazon_s3_data_source';
+import { ReviewPrometheusDatasource } from './direct_query_prometheus_data_source/direct_query_review_prometheus_data_source';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext, DirectQueryDatasourceType, Role } from '../../../types';
 import { DatasourceTypeToDisplayName, UrlToDatasourceType } from '../../../constants';
@@ -120,6 +122,31 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
           }),
         });
         break;
+      case 'PROMETHEUS':
+        const prometheusProperties =
+          authMethod === 'basicauth'
+            ? {
+                'prometheus.uri': storeURI,
+                'prometheus.auth.type': authMethod,
+                'prometheus.auth.username': username,
+                'prometheus.auth.password': password,
+              }
+            : {
+                'prometheus.uri': storeURI,
+                'prometheus.auth.type': authMethod,
+                'prometheus.auth.access_key': accessKey,
+                'prometheus.auth.secret_key': secretKey,
+                'prometheus.auth.region': region,
+              };
+        response = http!.post(`${DATACONNECTIONS_BASE}`, {
+          body: JSON.stringify({
+            name,
+            allowedRoles: selectedQueryPermissionRoles.map((role) => role.label),
+            connector: 'prometheus',
+            properties: prometheusProperties,
+          }),
+        });
+        break;
       default:
         response = Promise.reject('Invalid data source type');
     }
@@ -147,6 +174,9 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
     type,
     username,
     password,
+    accessKey,
+    secretKey,
+    region,
     history,
   ]);
 
@@ -209,6 +239,35 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
             history={history}
           />
         );
+      case 'PROMETHEUS':
+        return (
+          <ConfigurePrometheusDatasourcePanel
+            currentName={name}
+            currentDetails={details}
+            setNameForRequest={setName}
+            setDetailsForRequest={setDetails}
+            currentStore={storeURI}
+            setStoreForRequest={setStoreURI}
+            roles={roles}
+            currentUsername={username}
+            setUsernameForRequest={setUsername}
+            currentPassword={password}
+            setPasswordForRequest={setPassword}
+            selectedQueryPermissionRoles={selectedQueryPermissionRoles}
+            setSelectedQueryPermissionRoles={setSelectedQueryPermissionRoles}
+            currentAccessKey={accessKey}
+            currentSecretKey={secretKey}
+            setAccessKeyForRequest={setAccessKey}
+            setSecretKeyForRequest={setSecretKey}
+            currentRegion={region}
+            setRegionForRequest={setRegion}
+            currentAuthMethod={authMethod}
+            setAuthMethodForRequest={setAuthMethod}
+            hasSecurityAccess={hasSecurityAccess}
+            error={error}
+            setError={setError}
+          />
+        );
       default:
         return <></>;
     }
@@ -224,6 +283,19 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
             currentDetails={details}
             currentArn={arn}
             currentStore={storeURI}
+            selectedQueryPermissionRoles={selectedQueryPermissionRoles}
+            currentAuthMethod={authMethod}
+            goBack={() => setPage('configure')}
+          />
+        );
+      case 'PROMETHEUS':
+        return (
+          <ReviewPrometheusDatasource
+            currentName={name}
+            currentDetails={details}
+            currentArn={arn}
+            currentStore={storeURI}
+            currentUsername={username}
             selectedQueryPermissionRoles={selectedQueryPermissionRoles}
             currentAuthMethod={authMethod}
             goBack={() => setPage('configure')}
