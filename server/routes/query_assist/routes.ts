@@ -1,15 +1,13 @@
 import { schema, Type } from '@osd/config-schema';
 import { IRouter } from 'opensearch-dashboards/server';
 import { isResponseError } from '../../../../../src/core/server/opensearch/client/errors';
-import { ERROR_DETAILS } from '../../../common/query_assist';
+import { ERROR_DETAILS, SUPPORTED_LANGUAGES } from '../../../common/query_assist';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
 import { AGENT_CONFIG_NAME_MAP } from './index';
 import { createPPLResponseBody } from './ppl/create_response';
 
 export function registerQueryAssistRoutes(router: IRouter) {
-  const languageSchema = schema.oneOf(
-    Object.keys(AGENT_CONFIG_NAME_MAP).map(schema.literal) as [Type<'PPL'>]
-  );
+  const languageSchema = schema.oneOf(SUPPORTED_LANGUAGES.map(schema.literal) as [Type<'PPL'>]);
 
   router.get(
     {
@@ -52,8 +50,6 @@ export function registerQueryAssistRoutes(router: IRouter) {
     },
     async (context, request, response) => {
       try {
-        if (!(request.body.language in AGENT_CONFIG_NAME_MAP))
-          throw new Error('Unsupported language.');
         const agentResponse = await requestAgentByConfig({
           context,
           configName: AGENT_CONFIG_NAME_MAP[request.body.language],

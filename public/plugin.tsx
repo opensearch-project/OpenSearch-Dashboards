@@ -55,7 +55,6 @@ export class QueryEnhancementsPlugin
               initialTo: moment().add(2, 'days').toISOString(),
             },
             showFilterBar: false,
-            extensions: [createQueryAssistExtension(core.http, 'PPL')],
           },
           fields: {
             filterable: false,
@@ -83,6 +82,12 @@ export class QueryEnhancementsPlugin
           showDocLinks: false,
           supportedAppNames: ['discover'],
         },
+      },
+    });
+
+    data.__enhance({
+      ui: {
+        queryEditorExtension: createQueryAssistExtension(core.http),
       },
     });
 

@@ -1,7 +1,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
 import React, { SyntheticEvent, useMemo, useRef, useState } from 'react';
 import { IDataPluginServices, PersistedLog } from '../../../../../src/plugins/data/public';
-import { SearchBarExtensionDependencies } from '../../../../../src/plugins/data/public/ui/search_bar_extensions/search_bar_extension';
+import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
 import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { QueryAssistParameters } from '../../../common/query_assist';
 import { getStorage } from '../../services';
@@ -12,8 +12,7 @@ import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
 
 interface QueryAssistInputProps {
-  language: string;
-  dependencies: SearchBarExtensionDependencies;
+  dependencies: QueryEditorExtensionDependencies;
 }
 
 export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
@@ -53,7 +52,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     const params: QueryAssistParameters = {
       question: inputRef.current.value,
       index: selectedIndex,
-      language: props.language,
+      language: props.dependencies.language,
       dataSourceId,
     };
     const { response, error } = await generateQuery(params);
@@ -91,7 +90,11 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFormRow>
-      <QueryAssistCallOut language={props.language} type={callOutType} onDismiss={dismissCallout} />
+      <QueryAssistCallOut
+        language={props.dependencies.language}
+        type={callOutType}
+        onDismiss={dismissCallout}
+      />
     </EuiForm>
   );
 };

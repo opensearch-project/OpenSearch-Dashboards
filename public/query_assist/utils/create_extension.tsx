@@ -1,14 +1,13 @@
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React from 'react';
 import { getMdsDataSourceId } from '.';
-import { SearchBarExtensionConfig } from '../../../../../src/plugins/data/public/ui/search_bar_extensions';
+import { QueryEditorExtensionConfig } from '../../../../../src/plugins/data/public/ui/query_editor';
+import { SUPPORTED_LANGUAGES } from '../../../common/query_assist';
 import { getData } from '../../services';
 import { QueryAssistBar } from '../components';
+import { QueryAssistBanner } from '../components/query_assist_banner';
 
-export const createQueryAssistExtension = (
-  http: HttpSetup,
-  language: string
-): SearchBarExtensionConfig => {
+export const createQueryAssistExtension = (http: HttpSetup): QueryEditorExtensionConfig => {
   return {
     id: 'query-assist',
     order: 1000,
@@ -27,17 +26,29 @@ export const createQueryAssistExtension = (
         const cached = agentConfiguredMap.get(dataSourceId);
         if (cached !== undefined) return cached;
         const configured = await http
-          .get<{ configured: boolean }>(`/api/ql/query_assist/configured/${language}`, {
-            query: { dataSourceId },
-          })
+          .get<{ configured: boolean }>(
+            `/api/ql/query_assist/configured/${dependencies.language}`,
+            {
+              query: { dataSourceId },
+            }
+          )
           .then((response) => response.configured)
           .catch(() => false);
         agentConfiguredMap.set(dataSourceId, configured);
         return configured;
       };
     })(),
-    getComponent: (dependencies) => (
-      <QueryAssistBar language={language} dependencies={dependencies} />
-    ),
+    getComponent: (dependencies) => {
+      // only show the component if user is on a supported language.
+      // @ts-expect-error language can be an arbitrary string and fail the check
+      if (!SUPPORTED_LANGUAGES.includes(dependencies.language)) return null;
+      return <QueryAssistBar dependencies={dependencies} />;
+    },
+    getBanner: (dependencies) => {
+      // advertise query assist if user is not on a supported language.
+      // @ts-expect-error language can be an arbitrary string and fail the check
+      if (SUPPORTED_LANGUAGES.includes(dependencies.language)) return null;
+      return <QueryAssistBanner />;
+    },
   };
 };

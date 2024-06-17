@@ -2,6 +2,8 @@ import { TimeRange } from '../../../../src/plugins/data/common';
 
 export const ERROR_DETAILS = { GUARDRAILS_TRIGGERED: 'guardrails triggered' };
 
+export const SUPPORTED_LANGUAGES = ['PPL'] as const;
+
 export interface QueryAssistResponse {
   query: string;
   timeRange?: TimeRange;
