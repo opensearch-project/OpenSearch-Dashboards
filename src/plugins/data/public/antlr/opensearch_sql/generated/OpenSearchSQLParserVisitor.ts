@@ -43,6 +43,7 @@ import { DatetimeContext } from "./OpenSearchSQLParser.js";
 import { IntervalContext } from "./OpenSearchSQLParser.js";
 import { NullContext } from "./OpenSearchSQLParser.js";
 import { DecimalLiteralContext } from "./OpenSearchSQLParser.js";
+import { NumericLiteralContext } from "./OpenSearchSQLParser.js";
 import { StringLiteralContext } from "./OpenSearchSQLParser.js";
 import { BooleanLiteralContext } from "./OpenSearchSQLParser.js";
 import { RealLiteralContext } from "./OpenSearchSQLParser.js";
@@ -113,6 +114,8 @@ import { CaseFuncAlternativeContext } from "./OpenSearchSQLParser.js";
 import { RegularAggregateFunctionCallContext } from "./OpenSearchSQLParser.js";
 import { CountStarFunctionCallContext } from "./OpenSearchSQLParser.js";
 import { DistinctCountFunctionCallContext } from "./OpenSearchSQLParser.js";
+import { PercentileApproxFunctionCallContext } from "./OpenSearchSQLParser.js";
+import { PercentileApproxFunctionContext } from "./OpenSearchSQLParser.js";
 import { FilterClauseContext } from "./OpenSearchSQLParser.js";
 import { AggregationFunctionNameContext } from "./OpenSearchSQLParser.js";
 import { MathematicalFunctionNameContext } from "./OpenSearchSQLParser.js";
@@ -413,6 +416,12 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitDecimalLiteral?: (ctx: DecimalLiteralContext) => Result;
+    /**
+     * Visit a parse tree produced by `OpenSearchSQLParser.numericLiteral`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitNumericLiteral?: (ctx: NumericLiteralContext) => Result;
     /**
      * Visit a parse tree produced by `OpenSearchSQLParser.stringLiteral`.
      * @param ctx the parse tree
@@ -867,6 +876,19 @@ export class OpenSearchSQLParserVisitor<Result> extends AbstractParseTreeVisitor
      * @return the visitor result
      */
     visitDistinctCountFunctionCall?: (ctx: DistinctCountFunctionCallContext) => Result;
+    /**
+     * Visit a parse tree produced by the `percentileApproxFunctionCall`
+     * labeled alternative in `OpenSearchSQLParser.aggregateFunction`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitPercentileApproxFunctionCall?: (ctx: PercentileApproxFunctionCallContext) => Result;
+    /**
+     * Visit a parse tree produced by `OpenSearchSQLParser.percentileApproxFunction`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitPercentileApproxFunction?: (ctx: PercentileApproxFunctionContext) => Result;
     /**
      * Visit a parse tree produced by `OpenSearchSQLParser.filterClause`.
      * @param ctx the parse tree
