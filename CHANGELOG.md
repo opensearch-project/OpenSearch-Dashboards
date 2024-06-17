@@ -236,6 +236,7 @@ Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### 🔩 Tests
 
 - Rename cypress config file to its version supported convention ([#6137](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6137))
+- [Tests] Migrate VisBuilder functional tests into Dashboards repo ([#6102](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6102))
 
 ## [2.12.0 - 2024-02-20](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/2.12.0)
 
