@@ -87,13 +87,6 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
           <h1>{`Configure Amazon S3 data source`}</h1>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          {`Connect to Amazon S3 via AWS Glue Data Catalog with Amazon EMR as an execution engine. `}
-          <EuiLink external={true} href={OPENSEARCH_S3_DOCUMENTATION_URL} target="blank">
-            Learn more
-          </EuiLink>
-        </EuiText>
-        <EuiSpacer size="s" />
         <EuiCallOut title="Setup Amazon EMR as execution engine first" iconType="iInCircle">
           <EuiText size="s" color="subdued">
             {`Connect to Amazon S3 via AWS Glue Data Catalog with Amazon EMR as an execution engine. `}
