@@ -71,6 +71,7 @@ test('set correct defaults', () => {
   expect(configValue).toMatchInlineSnapshot(`
     OpenSearchConfig {
       "apiVersion": "7.x",
+      "compression": undefined,
       "customHeaders": Object {},
       "disablePrototypePoisoningProtection": undefined,
       "healthCheckDelay": "PT2.5S",
