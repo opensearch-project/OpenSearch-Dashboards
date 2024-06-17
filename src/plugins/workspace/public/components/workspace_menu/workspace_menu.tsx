@@ -86,22 +86,18 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     setPopover(false);
   };
 
-  const workspaceToItem = (workspace: WorkspaceObject, index: number) => {
-    const workspaceURL = formatUrlWithWorkspaceId(
-      coreStart.application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
-        absolute: false,
-      }),
-      workspace.id,
-      coreStart.http.basePath
-    );
-
+  const workspaceUseCaseToItem = (
+    workspace: WorkspaceObject,
+    index: number,
+    workspaceURL: string
+  ) => {
     const useCase = workspace.features
       ?.map(getUseCaseFromFeatureConfig)
       .filter(isNotNull)
       .map((uc) => {
         return {
           name: uc,
-          // Todo: this should be a link to the use case overview page.
+          // TODO: this should be a link to the use case overview page.
           onClick: () => {
             window.location.assign(workspaceURL);
           },
@@ -111,11 +107,23 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       });
 
     useCasePanels.push({
-      id: index + 1,
+      id: index,
       title: 'use case',
       width: 300,
       items: useCase,
     });
+  };
+
+  const workspaceToItem = (workspace: WorkspaceObject, index: number) => {
+    const workspaceURL = formatUrlWithWorkspaceId(
+      coreStart.application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+        absolute: false,
+      }),
+      workspace.id,
+      coreStart.http.basePath
+    );
+
+    workspaceUseCaseToItem(workspace, index, workspaceURL);
 
     const name = (
       <EuiText
@@ -130,7 +138,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     return {
       name,
       key: workspace.id,
-      panel: index + 1,
+      panel: index,
       'data-test-subj': `context-menu-item-${workspace.id}`,
       icon: <EuiIcon type="stopFilled" color={workspace.color ?? 'primary'} />,
     };
@@ -138,7 +146,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
 
   const getWorkspaceListItems = () => {
     const workspaceListItems: EuiContextMenuPanelItemDescriptor[] = filteredWorkspaceList.map(
-      (workspace, index) => workspaceToItem(workspace, index)
+      (workspace, index) => workspaceToItem(workspace, index + 1)
     );
     return workspaceListItems;
   };
@@ -194,9 +202,10 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
       <EuiPopoverFooter paddingSize="s">
         <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
-          <EuiFlexGroup justifyContent="spaceEvenly">
+          <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
+                fill
                 size="s"
                 key={WORKSPACE_CREATE_APP_ID}
                 onClick={() => {
@@ -218,7 +227,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                size="s"
+                size="xs"
                 key={WORKSPACE_LIST_APP_ID}
                 onClick={() => {
                   window.location.assign(
