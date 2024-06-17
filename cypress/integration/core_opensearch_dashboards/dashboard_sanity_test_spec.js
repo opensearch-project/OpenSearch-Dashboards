@@ -14,6 +14,7 @@ import {
  * 2) add sample data of eCommerce, flights, web logs from tutorial page
  * 3) check each sample data dashboard key UI elements display
  */
+
 export function dashboardSanityTests() {
   const commonUI = new CommonUI(cy);
   const miscUtils = new MiscUtils(cy);
