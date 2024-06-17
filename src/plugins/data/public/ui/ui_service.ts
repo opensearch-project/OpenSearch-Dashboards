@@ -9,8 +9,8 @@ import { IStorageWrapper } from '../../../opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../../config';
 import { DataPublicPluginStart } from '../types';
 import { createIndexPatternSelect } from './index_pattern_select';
-import { createSearchBar } from './search_bar/create_search_bar';
 import { QueryEditorExtensionConfig } from './query_editor';
+import { createSearchBar } from './search_bar/create_search_bar';
 import { createSettings } from './settings';
 import { SuggestionsComponent } from './typeahead';
 import { IUiSetup, IUiStart, QueryEnhancement, UiEnhancements } from './types';
@@ -28,7 +28,7 @@ export interface UiServiceStartDependencies {
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
   private queryEnhancements: Map<string, QueryEnhancement> = new Map();
-  private queryEditorExtensions: Map<string, QueryEditorExtensionConfig> = new Map();
+  private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig> = {};
   private container$ = new BehaviorSubject<HTMLDivElement | null>(null);
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -46,10 +46,8 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
           this.queryEnhancements.set(enhancements.query.language, enhancements.query);
         }
         if (enhancements.queryEditorExtension) {
-          this.queryEditorExtensions.set(
-            enhancements.queryEditorExtension.id,
-            enhancements.queryEditorExtension
-          );
+          this.queryEditorExtensionMap[enhancements.queryEditorExtension.id] =
+            enhancements.queryEditorExtension;
         }
       },
     };
@@ -61,7 +59,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       search: dataServices.search,
       storage,
       queryEnhancements: this.queryEnhancements,
-      queryEditorExtensions: this.queryEditorExtensions,
+      queryEditorExtensionMap: this.queryEditorExtensionMap,
     });
 
     const setContainerRef = (ref: HTMLDivElement | null) => {

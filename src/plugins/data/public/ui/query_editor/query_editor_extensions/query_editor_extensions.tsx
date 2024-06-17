@@ -11,7 +11,7 @@ import {
 } from './query_editor_extension';
 
 interface QueryEditorExtensionsProps extends QueryEditorExtensionDependencies {
-  configMap?: Map<string, QueryEditorExtensionConfig>;
+  configMap?: Record<string, QueryEditorExtensionConfig>;
   componentContainer: Element;
   bannerContainer: Element;
 }
@@ -20,7 +20,7 @@ const QueryEditorExtensions: React.FC<QueryEditorExtensionsProps> = React.memo((
   const { configMap, componentContainer, bannerContainer, ...dependencies } = props;
 
   const sortedConfigs = useMemo(() => {
-    if (!configMap?.size) return [];
+    if (!configMap || !Object.keys(configMap)) return [];
     return Object.values(configMap).sort((a, b) => a.order - b.order);
   }, [configMap]);
 

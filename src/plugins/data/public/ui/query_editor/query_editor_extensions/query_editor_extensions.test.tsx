@@ -53,15 +53,15 @@ describe('QueryEditorExtensions', () => {
   });
 
   it('renders without any items in map', () => {
-    const { container } = render(<QueryEditorExtensions {...defaultProps} configMap={new Map()} />);
+    const { container } = render(<QueryEditorExtensions {...defaultProps} configMap={{}} />);
     expect(container).toBeEmptyDOMElement();
   });
 
   it('correctly orders configurations based on order property', () => {
-    const configMap = new Map([
-      ['1', { id: '1', order: 2, isEnabled: jest.fn(), getComponent: jest.fn() }],
-      ['2', { id: '2', order: 1, isEnabled: jest.fn(), getComponent: jest.fn() }],
-    ]);
+    const configMap = {
+      '1': { id: '1', order: 2, isEnabled: jest.fn(), getComponent: jest.fn() },
+      '2': { id: '2', order: 1, isEnabled: jest.fn(), getComponent: jest.fn() },
+    };
 
     const { getAllByText } = render(
       <QueryEditorExtensions {...defaultProps} configMap={configMap} />
@@ -74,9 +74,9 @@ describe('QueryEditorExtensions', () => {
   });
 
   it('passes dependencies correctly to QueryEditorExtension', async () => {
-    const configMap = new Map([
-      ['1', { id: '1', order: 1, isEnabled: jest.fn(), getComponent: jest.fn() }],
-    ]);
+    const configMap = {
+      '1': { id: '1', order: 1, isEnabled: jest.fn(), getComponent: jest.fn() },
+    };
 
     const { getByText } = render(<QueryEditorExtensions {...defaultProps} configMap={configMap} />);
 

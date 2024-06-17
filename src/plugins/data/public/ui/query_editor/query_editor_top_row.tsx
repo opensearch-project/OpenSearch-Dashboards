@@ -85,7 +85,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       props.settings &&
       props.settings.getQueryEnhancements(queryLanguage)?.searchBar) ||
     null;
-  const queryEditorExtensions = props.settings?.getQueryEditorExtensions();
+  const queryEditorExtensionMap = props.settings?.getQueryEditorExtensionMap();
   const parsedQuery =
     !queryUiEnhancement || isValidQuery(props.query)
       ? props.query!
@@ -264,7 +264,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     return (
       <QueryEditorExtensions
         language={queryLanguage}
-        configMap={queryEditorExtensions}
+        configMap={queryEditorExtensionMap}
         componentContainer={queryEditorHeaderRef.current}
         bannerContainer={queryEditorBannerRef.current}
         indexPatterns={props.indexPatterns}
@@ -305,7 +305,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderQueryEditorExtensions(): boolean {
-    return Boolean(queryEditorExtensions?.size);
+    return Boolean(queryEditorExtensionMap && Object.keys(queryEditorExtensionMap).length);
   }
 
   function renderUpdateButton() {

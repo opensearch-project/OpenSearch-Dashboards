@@ -33,7 +33,7 @@ export class Settings {
     private readonly search: ISearchStart,
     private readonly storage: IStorageWrapper,
     private readonly queryEnhancements: Map<string, QueryEnhancement>,
-    private readonly queryEditorExtensions: Map<string, QueryEditorExtensionConfig>
+    private readonly queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>
   ) {
     this.isEnabled = this.config.enabled;
     this.setUserQueryEnhancementsEnabled(this.isEnabled);
@@ -67,8 +67,8 @@ export class Settings {
     return this.queryEnhancements.get(language);
   }
 
-  getQueryEditorExtensions() {
-    return this.queryEditorExtensions;
+  getQueryEditorExtensionMap() {
+    return this.queryEditorExtensionMap;
   }
 
   getUserQueryLanguageBlocklist() {
@@ -155,7 +155,7 @@ interface Deps {
   search: ISearchStart;
   storage: IStorageWrapper;
   queryEnhancements: Map<string, QueryEnhancement>;
-  queryEditorExtensions: Map<string, QueryEditorExtensionConfig>;
+  queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>;
 }
 
 export function createSettings({
@@ -163,7 +163,7 @@ export function createSettings({
   search,
   storage,
   queryEnhancements,
-  queryEditorExtensions,
+  queryEditorExtensionMap,
 }: Deps) {
-  return new Settings(config, search, storage, queryEnhancements, queryEditorExtensions);
+  return new Settings(config, search, storage, queryEnhancements, queryEditorExtensionMap);
 }
