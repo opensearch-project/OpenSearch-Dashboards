@@ -153,6 +153,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private getSuggestions = async () => {
+    console.log('suggestions????');
     if (!this.inputRef) {
       return;
     }
@@ -190,6 +191,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
           selectionEnd,
           signal: this.abortController.signal,
         })) || [];
+      console.log('query input suggestions: ', suggestions);
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
@@ -234,6 +236,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private onChange = (query: Query) => {
+    console.log('onChange????');
     this.updateSuggestions();
 
     if (this.props.onChange) {

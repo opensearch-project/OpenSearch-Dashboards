@@ -41,6 +41,7 @@ export function findCursorTokenIndex(
 
   for (let i = 0; i < tokenStream.size; i++) {
     const token = tokenStream.get(i);
+    console.log('this token is: ', token.text);
     const { startColumn, startLine, endColumn, endLine } = getTokenPosition(token, whitespaceToken);
 
     // endColumn makes sense only if startLine === endLine

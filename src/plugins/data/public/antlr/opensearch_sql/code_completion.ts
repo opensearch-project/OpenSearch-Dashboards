@@ -33,7 +33,7 @@ import {
 import { TokenDictionary } from './table';
 import { createParser } from './parse';
 import { SqlErrorListener } from './sql_error_listerner';
-// import { findCursorTokenIndex } from './cursor';
+import { findCursorTokenIndex } from './cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 
 function getCursorIndex(query: string, cursor: { line: number; column: number }): number {
@@ -56,12 +56,12 @@ function getTokenNameByType(parser, tokenType) {
 }
 
 export const getSuggestions = async ({ selectionStart, selectionEnd, query }) => {
-  // console.log('selectionStart: ', selectionStart, ' query: ', query);
+  console.log('selectionStart: ', selectionStart, ' selectionEnd: ', selectionEnd);
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
     line: 1,
     column: selectionStart + 1,
   });
-  // console.log('this suggestions: ', suggestions);
+  console.log('this suggestions: ', suggestions);
   // console.log(
   //   'selectionStart: ',
   //   selectionStart,
@@ -99,71 +99,67 @@ const lineSeparatorRegex = /\r\n|\n|\r/g;
 // const endColumn = startColumn + (token.text?.length || 0);
 
 // Function to get the start and end positions of a token
-function getTokenPosition(token: Token, whitespaceToken: number) {
-  const startColumn = token.start;
-  const endColumn = token.stop + 1;
-  const startLine = token.line;
-  const endLine =
-    token.type !== whitespaceToken || !token.text
-      ? startLine
-      : startLine + (token.text.match(lineSeparatorRegex)?.length || 0);
+// function getTokenPosition(token: Token, whitespaceToken: number) {
+//   const startColumn = token.start;
+//   const endColumn = token.stop + 1;
+//   const startLine = token.line;
+//   const endLine =
+//     token.type !== whitespaceToken || !token.text
+//       ? startLine
+//       : startLine + (token.text.match(lineSeparatorRegex)?.length || 0);
 
-  return { startColumn, startLine, endColumn, endLine };
-}
+//   return { startColumn, startLine, endColumn, endLine };
+// }
 
 // Function to convert a cursor position (line and column) into a token index
-export function findCursorTokenIndex(
-  tokenStream: CommonTokenStream,
-  cursor: { line: number; column: number },
-  whitespaceToken: number,
-  actualIndex?: boolean
-): number | undefined {
-  // Convert the cursor column from 1-based to 0-based indexing
-  const cursorCol = cursor.column - 1;
+// export function findCursorTokenIndex(
+//   tokenStream: CommonTokenStream,
+//   cursor: { line: number; column: number },
+//   whitespaceToken: number,
+//   actualIndex?: boolean
+// ): number | undefined {
+//   // Convert the cursor column from 1-based to 0-based indexing
+//   const cursorCol = cursor.column - 1;
+//   console.log('tokenStream: ', tokenStream);
+//   for (let i = 0; i < tokenStream.size; i++) {
+//     const token = tokenStream.get(i);
+//     const { startColumn, startLine, endColumn, endLine } = getTokenPosition(token, whitespaceToken);
+//     // console.log('is white space: ', token.type === whitespaceToken);
+//     // console.log(
+//     //   `Token ${i}: type: ${token.type}, '${token.text}' at [${startLine},${startColumn}] - [${endLine},${endColumn}]`
+//     // );
 
-  for (let i = 0; i < tokenStream.size; i++) {
-    const token = tokenStream.get(i);
-    const { startColumn, startLine, endColumn, endLine } = getTokenPosition(token, whitespaceToken);
-    console.log('is white space: ', token.type === whitespaceToken);
-    console.log(
-      `Token ${i}: type: ${token.type}, '${token.text}' at [${startLine},${startColumn}] - [${endLine},${endColumn}]`
-    );
+//     // Check if the token ends after the cursor position or is on the same line and ends after the cursor column
+//     if (endLine > cursor.line || (startLine === cursor.line && endColumn >= cursorCol)) {
+//       if (actualIndex) {
+//         return i;
+//       }
 
-    // Check if the token ends after the cursor position or is on the same line and ends after the cursor column
-    if (endLine > cursor.line || (startLine === cursor.line && endColumn >= cursorCol)) {
-      if (actualIndex) {
-        return i;
-      }
+//       // Handle the case where the cursor is positioned at the start of an identifier
+//       if (
+//         i > 0 &&
+//         startLine === cursor.line &&
+//         startColumn === cursorCol &&
+//         possibleIdentifierPrefixRegex.test(tokenStream.get(i - 1).text || '')
+//       ) {
+//         return i - 1;
+//       } else if (token.type === whitespaceToken) {
+//         return i + 1;
+//       }
+//       return i;
+//     }
+//   }
 
-      // Handle the case where the cursor is positioned at the start of an identifier
-      if (
-        i > 0 &&
-        startLine === cursor.line &&
-        startColumn === cursorCol &&
-        possibleIdentifierPrefixRegex.test(tokenStream.get(i - 1).text || '')
-      ) {
-        return i - 1;
-      } else if (token.type === whitespaceToken) {
-        return i + 1;
-      }
-      return i;
-    }
-  }
-
-  // Handle the edge case where the cursor is at the end of the input string
-  const lastToken: Token = tokenStream.get(tokenStream.size - 1);
-  if (
-    cursor.line >= lastToken.line &&
-    cursor.column >= lastToken.start + (lastToken.text?.length || 0)
-  ) {
-    return tokenStream.size - 1;
-  }
-
-  console.error(
-    `Error: Could not find cursor token index for line: ${cursor.line}, column: ${cursor.column}`
-  );
-  return undefined;
-}
+//   // Handle the edge case where the cursor is at the end of the input string
+//   const lastToken: Token = tokenStream.get(tokenStream.size - 1);
+//   if (
+//     cursor.line >= lastToken.line &&
+//     cursor.column >= lastToken.start + (lastToken.text?.length || 0)
+//   ) {
+//     return tokenStream.size - 1;
+//   }
+//   return undefined;
+// }
 
 // Example function to log tokens for debugging
 function logTokens(tokenStream: CommonTokenStream) {
@@ -205,23 +201,21 @@ export const parseQuery = <
   context,
 }: ParsingSubject<A, L, P>) => {
   const parser = createParser(Lexer, Parser, query);
-  // const parser = new OpenSearchSQLParser(
-  //   new CommonTokenStream(new OpenSearchSQLLexer(CharStream.fromString(query)))
-  // );
-  // const tokenStream = parser.inputStream as CommonTokenStream;
   const { tokenStream } = parser;
-  // logTokens(tokenStream);
-  // const whitespaceToken = OpenSearchSQLLexer.SPACE;
   const errorListener = new SqlErrorListener(tokenDictionary.SPACE);
 
   parser.removeErrorListeners();
   parser.addErrorListener(errorListener);
   getParseTree(parser);
+
   const core = new CodeCompletionCore(parser);
   core.ignoredTokens = ignoredTokens;
   core.preferredRules = rulesToVisit;
-  const commonTokenStream = tokenStream as CommonTokenStream;
-  const cursorTokenIndex = findCursorTokenIndex(commonTokenStream, cursor, tokenDictionary.SPACE);
+  // const commonTokenStream = tokenStream as CommonTokenStream;
+  console.log('this tokenStream: ', tokenStream);
+  console.log('cursor: ', cursor);
+  const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, tokenDictionary.SPACE);
+  console.log('cursorTokenIndex: ', cursorTokenIndex);
   if (cursorTokenIndex === undefined) {
     throw new Error(
       `Could not find cursor token index for line: ${cursor.line}, column: ${cursor.column}`
@@ -280,9 +274,9 @@ export const getOpenSearchSqlAutoCompleteSuggestions = (
 //   'SELECT * FROM opensearch_dashboards_sample_data_ecommerce ',
 //   { line: 1, column: 59 }
 // );
-const parsed2 = getOpenSearchSqlAutoCompleteSuggestions(
-  'SELECT * FROM opensearch_dashboards_sample_data_ecommerce ',
-  { line: 1, column: 59 }
-);
-// console.log('parsed1: ', parsed1);
-console.log('parsed2: ', parsed2);
+// const parsed2 = getOpenSearchSqlAutoCompleteSuggestions(
+//   'SELECT * FROM opensearch_dashboards_sample_data_ecommerce ',
+//   { line: 1, column: 59 }
+// );
+// // console.log('parsed1: ', parsed1);
+// console.log('parsed2: ', parsed2);

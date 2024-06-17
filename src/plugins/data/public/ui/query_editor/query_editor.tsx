@@ -7,6 +7,7 @@ import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator, PopoverAnchorPosition } fro
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
+import { monaco } from '@osd/monaco';
 import { Settings } from '..';
 import { DataSource, IDataPluginServices, IIndexPattern, Query, TimeRange } from '../..';
 import {
@@ -20,6 +21,9 @@ import { DataSettings } from '../types';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
+
+const LANGUAGE_ID = 'SQL';
+monaco.languages.register({ id: LANGUAGE_ID });
 
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -282,6 +286,38 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
+  provideCompletionItems = async (model: monaco.editor.ITextModel, position: monaco.Position) => {
+    const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
+      query: this.getQueryString(),
+      selectionStart: position.column - 1,
+      selectionEnd: position.column - 1,
+      language: this.props.query.language,
+      indexPatterns: this.state.indexPatterns,
+    });
+
+    console.log('suggestions: ', suggestions);
+
+    return {
+      suggestions: suggestions
+        ? suggestions.suggestKeywords.map((s) => ({
+            label: s.value,
+            kind: monaco.languages.CompletionItemKind.Text,
+            insertText: s.value,
+          }))
+        : [],
+    };
+
+    // return {
+    //   suggestions: suggestions
+    //     ? suggestions.suggestKeywords.list.map((s) => ({
+    //         label: s.text,
+    //         kind: monaco.languages.CompletionItemKind.Text,
+    //         insertText: s.text,
+    //       }))
+    //     : [],
+    // };
+  };
+
   public render() {
     const className = classNames(this.props.className);
     const headerClassName = classNames('osdQueryEditorHeader', this.props.headerClassName);
@@ -318,7 +354,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             <div ref={this.headerRef} className={headerClassName} />
             <CodeEditor
               height={70}
-              languageId="opensearchql"
+              languageId={this.props.query.language}
               value={this.getQueryString()}
               onChange={this.onInputChange}
               options={{
@@ -332,6 +368,9 @@ export default class QueryEditorUI extends Component<Props, State> {
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',
                 wrappingIndent: 'indent',
+              }}
+              suggestionProvider={{
+                provideCompletionItems: this.provideCompletionItems,
               }}
             />
           </EuiFlexItem>
