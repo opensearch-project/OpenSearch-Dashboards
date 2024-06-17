@@ -94,12 +94,15 @@ export const registerFetchDataSourceMetaDataRoute = async (
           dataSourceAttr
         );
 
-        const dataSourceVersion = await dataSourceValidator.fetchDataSourceVersion();
+        const dataSourceInfo = await dataSourceValidator.fetchDataSourceInfo();
+        const dataSourceVersion = dataSourceInfo.dataSourceVersion;
+        const dataSourceEngineType = dataSourceInfo.dataSourceEngineType;
         const installedPlugins = Array.from(await dataSourceValidator.fetchInstalledPlugins());
 
         return response.ok({
           body: {
             dataSourceVersion,
+            dataSourceEngineType,
             installedPlugins,
           },
         });
