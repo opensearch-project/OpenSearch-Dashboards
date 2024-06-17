@@ -13,12 +13,12 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
   EuiPopover,
+  EuiPopoverFooter,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -192,49 +192,50 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
         />
       </EuiPanel>
       <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
-      <EuiHorizontalRule margin="xs" />
-      <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
-        <EuiFlexGroup justifyContent="spaceEvenly">
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              key={WORKSPACE_CREATE_APP_ID}
-              onClick={() => {
-                window.location.assign(
-                  cleanWorkspaceId(
-                    coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
-                      absolute: false,
-                    })
-                  )
-                );
-              }}
-            >
-              <EuiIcon type="plus" />
-              <FormattedMessage
-                id="core.ui.primaryNav.createWorkspace"
-                defaultMessage="Create workspace"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              key={WORKSPACE_LIST_APP_ID}
-              onClick={() => {
-                window.location.assign(
-                  cleanWorkspaceId(
-                    coreStart.application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
-                      absolute: false,
-                    })
-                  )
-                );
-              }}
-            >
-              <FormattedMessage id="core.ui.primaryNav.allWorkspace" defaultMessage="View all" />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiPanel>
+      <EuiPopoverFooter paddingSize="s">
+        <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
+          <EuiFlexGroup justifyContent="spaceEvenly">
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                size="s"
+                key={WORKSPACE_CREATE_APP_ID}
+                onClick={() => {
+                  window.location.assign(
+                    cleanWorkspaceId(
+                      coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
+                        absolute: false,
+                      })
+                    )
+                  );
+                }}
+              >
+                <EuiIcon type="plus" />
+                <FormattedMessage
+                  id="core.ui.primaryNav.createWorkspace"
+                  defaultMessage="Create workspace"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                key={WORKSPACE_LIST_APP_ID}
+                onClick={() => {
+                  window.location.assign(
+                    cleanWorkspaceId(
+                      coreStart.application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
+                        absolute: false,
+                      })
+                    )
+                  );
+                }}
+              >
+                <FormattedMessage id="core.ui.primaryNav.allWorkspace" defaultMessage="View all" />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiPopoverFooter>
     </EuiPopover>
   );
 };
