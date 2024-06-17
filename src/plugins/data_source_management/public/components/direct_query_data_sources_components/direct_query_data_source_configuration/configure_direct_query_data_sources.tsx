@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState, useCallback } from 'react';
 import { RouteComponentProps, useParams, withRouter } from 'react-router-dom';
-import { ConfigureS3DatasourcePanel } from './direct_query_amazon_s3_datasource/direct_query_configure_amazon_s3_data_sources';
+import { ConfigureS3DatasourcePanel } from './direct_query_amazon_s3_datasource/direct_query_configure_amazon_s3_data_source';
 import { ReviewS3Datasource } from './direct_query_amazon_s3_datasource/direct_query_review_amazon_s3_data_source';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext, DirectQueryDatasourceType, Role } from '../../../types';
