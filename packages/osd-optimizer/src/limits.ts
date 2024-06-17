@@ -34,7 +34,7 @@ import dedent from 'dedent';
 import Yaml from 'js-yaml';
 import { createFailError, ToolingLog } from '@osd/dev-utils';
 
-import { OptimizerConfig, getMetrics, Limits } from './optimizer';
+import { OptimizerConfig, getMetrics, Limits, SortedLimits } from './optimizer';
 
 const LIMITS_PATH = require.resolve('../limits.yml');
 const DEFAULT_BUDGET = 15000;
@@ -93,22 +93,37 @@ export function validateLimitsForAllBundles(log: ToolingLog, config: OptimizerCo
 export function updateBundleLimits(log: ToolingLog, config: OptimizerConfig) {
   const metrics = getMetrics(log, config);
 
-  const pageLoadAssetSize: NonNullable<Limits['pageLoadAssetSize']> = {};
+  let externalPlugins: { [id: string]: number } = {};
+  let osdPlugins: { [id: string]: number } = {};
 
-  for (const metric of metrics.sort((a, b) => a.id.localeCompare(b.id))) {
+  // Categorize all metrics
+  for (const metric of metrics) {
     if (metric.group === 'page load bundle size') {
       const existingLimit = config.limits.pageLoadAssetSize?.[metric.id];
-      pageLoadAssetSize[metric.id] =
+      const limitValue =
         existingLimit != null && existingLimit >= metric.value
           ? existingLimit
           : metric.value + DEFAULT_BUDGET;
+
+      if (metric.id.includes('Dashboards')) {
+        externalPlugins[metric.id] = limitValue;
+      } else {
+        osdPlugins[metric.id] = limitValue;
+      }
     }
   }
 
-  const newLimits: Limits = {
-    pageLoadAssetSize,
+  // Sort each category by their values
+  externalPlugins = Object.fromEntries(Object.entries(externalPlugins).sort((a, b) => b[1] - a[1]));
+  osdPlugins = Object.fromEntries(Object.entries(osdPlugins).sort((a, b) => b[1] - a[1]));
+
+  const newLimits: SortedLimits = {
+    pageLoadAssetSize: {
+      'External Plugins': externalPlugins,
+      'OpenSearch Dashboards Plugins': osdPlugins,
+    },
   };
 
-  Fs.writeFileSync(LIMITS_PATH, Yaml.dump(newLimits));
-  log.success(`wrote updated limits to ${LIMITS_PATH}`);
+  Fs.writeFileSync(LIMITS_PATH, Yaml.dump(newLimits, { noRefs: true }));
+  log.success(`Wrote updated and sorted limits to ${LIMITS_PATH}`);
 }
