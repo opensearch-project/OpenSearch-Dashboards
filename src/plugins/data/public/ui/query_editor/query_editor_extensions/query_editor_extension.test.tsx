@@ -5,15 +5,15 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
-import { IIndexPattern } from '../../../common';
-import { SearchBarExtension } from './search_bar_extension';
+import { IIndexPattern } from '../../../../common';
+import { QueryEditorExtension } from './query_editor_extension';
 
 jest.mock('react-dom', () => ({
   ...jest.requireActual('react-dom'),
   createPortal: jest.fn((element) => element),
 }));
 
-type SearchBarExtensionProps = ComponentProps<typeof SearchBarExtension>;
+type QueryEditorExtensionProps = ComponentProps<typeof QueryEditorExtension>;
 
 const mockIndexPattern = {
   id: '1234',
@@ -30,12 +30,12 @@ const mockIndexPattern = {
   ],
 } as IIndexPattern;
 
-describe('SearchBarExtension', () => {
+describe('QueryEditorExtension', () => {
   const getComponentMock = jest.fn();
   const getBannerMock = jest.fn();
   const isEnabledMock = jest.fn();
 
-  const defaultProps: SearchBarExtensionProps = {
+  const defaultProps: QueryEditorExtensionProps = {
     config: {
       id: 'test-extension',
       order: 1,
@@ -60,7 +60,7 @@ describe('SearchBarExtension', () => {
     getComponentMock.mockReturnValue(<div>Test Component</div>);
     getBannerMock.mockReturnValue(<div>Test Banner</div>);
 
-    const { getByText } = render(<SearchBarExtension {...defaultProps} />);
+    const { getByText } = render(<QueryEditorExtension {...defaultProps} />);
 
     await waitFor(() => {
       expect(getByText('Test Component')).toBeInTheDocument();
@@ -75,7 +75,7 @@ describe('SearchBarExtension', () => {
     isEnabledMock.mockResolvedValue(false);
     getComponentMock.mockReturnValue(<div>Test Component</div>);
 
-    const { queryByText } = render(<SearchBarExtension {...defaultProps} />);
+    const { queryByText } = render(<QueryEditorExtension {...defaultProps} />);
 
     await waitFor(() => {
       expect(queryByText('Test Component')).toBeNull();

@@ -10,7 +10,7 @@ import { ConfigSchema } from '../../config';
 import { DataPublicPluginStart } from '../types';
 import { createIndexPatternSelect } from './index_pattern_select';
 import { createSearchBar } from './search_bar/create_search_bar';
-import { SearchBarExtensionConfig } from './search_bar_extensions';
+import { QueryEditorExtensionConfig } from './query_editor';
 import { createSettings } from './settings';
 import { SuggestionsComponent } from './typeahead';
 import { IUiSetup, IUiStart, QueryEnhancement, UiEnhancements } from './types';
@@ -28,7 +28,7 @@ export interface UiServiceStartDependencies {
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
   private queryEnhancements: Map<string, QueryEnhancement> = new Map();
-  private searchBarExtensions: SearchBarExtensionConfig[] = [];
+  private queryEditorExtensions: Map<string, QueryEditorExtensionConfig> = new Map();
   private container$ = new BehaviorSubject<HTMLDivElement | null>(null);
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -45,8 +45,11 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
         if (enhancements.query && enhancements.query.language) {
           this.queryEnhancements.set(enhancements.query.language, enhancements.query);
         }
-        if (enhancements.searchBarExtensions) {
-          this.searchBarExtensions.push(...enhancements.searchBarExtensions);
+        if (enhancements.queryEditorExtension) {
+          this.queryEditorExtensions.set(
+            enhancements.queryEditorExtension.id,
+            enhancements.queryEditorExtension
+          );
         }
       },
     };
@@ -58,7 +61,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       search: dataServices.search,
       storage,
       queryEnhancements: this.queryEnhancements,
-      searchBarExtensions: this.searchBarExtensions,
+      queryEditorExtensions: this.queryEditorExtensions,
     });
 
     const setContainerRef = (ref: HTMLDivElement | null) => {

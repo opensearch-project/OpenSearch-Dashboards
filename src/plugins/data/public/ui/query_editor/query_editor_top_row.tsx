@@ -29,7 +29,7 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { UI_SETTINGS } from '../../../common';
 import { fromUser, getQueryLog, PersistedLog } from '../../query';
-import { SearchBarExtensions } from '../search_bar_extensions';
+import { QueryEditorExtensions } from './query_editor_extensions';
 import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
@@ -85,7 +85,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       props.settings &&
       props.settings.getQueryEnhancements(queryLanguage)?.searchBar) ||
     null;
-  const searchBarExtensions = props.settings?.getSearchBarExtensions();
+  const queryEditorExtensions = props.settings?.getQueryEditorExtensions();
   const parsedQuery =
     !queryUiEnhancement || isValidQuery(props.query)
       ? props.query!
@@ -253,18 +253,18 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     );
   }
 
-  function renderSearchBarExtensions() {
+  function renderQueryEditorExtensions() {
     if (
-      !shouldRenderSearchBarExtensions() ||
+      !shouldRenderQueryEditorExtensions() ||
       !queryEditorHeaderRef.current ||
       !queryEditorBannerRef.current ||
       !queryLanguage
     )
       return;
     return (
-      <SearchBarExtensions
+      <QueryEditorExtensions
         language={queryLanguage}
-        configs={searchBarExtensions}
+        configMap={queryEditorExtensions}
         componentContainer={queryEditorHeaderRef.current}
         bannerContainer={queryEditorBannerRef.current}
         indexPatterns={props.indexPatterns}
@@ -304,8 +304,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     );
   }
 
-  function shouldRenderSearchBarExtensions(): boolean {
-    return Boolean(searchBarExtensions?.length);
+  function shouldRenderQueryEditorExtensions(): boolean {
+    return Boolean(queryEditorExtensions?.size);
   }
 
   function renderUpdateButton() {
@@ -400,7 +400,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       direction="column"
       justifyContent="flexEnd"
     >
-      {renderSearchBarExtensions()}
+      {renderQueryEditorExtensions()}
       {renderQueryEditor()}
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="none">

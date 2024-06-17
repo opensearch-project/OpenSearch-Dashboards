@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 import { SearchInterceptor } from '../search';
 import { IndexPatternSelectProps } from './index_pattern_select';
 import { StatefulSearchBarProps } from './search_bar';
-import { SearchBarExtensionConfig } from './search_bar_extensions';
+import { QueryEditorExtensionConfig } from './query_editor/query_editor_extensions';
 import { Settings } from './settings';
 import { SuggestionsComponentProps } from './typeahead/suggestions_component';
 
@@ -46,7 +46,7 @@ export interface QueryEnhancement {
 
 export interface UiEnhancements {
   query?: QueryEnhancement;
-  searchBarExtensions?: SearchBarExtensionConfig[];
+  queryEditorExtension?: QueryEditorExtensionConfig;
 }
 
 /**

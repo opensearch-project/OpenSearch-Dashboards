@@ -6,17 +6,17 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
-import { IIndexPattern } from '../../../common';
-import { DataSource } from '../../data_sources/datasource';
+import { IIndexPattern } from '../../../../common';
+import { DataSource } from '../../../data_sources/datasource';
 
-interface SearchBarExtensionProps {
-  config: SearchBarExtensionConfig;
-  dependencies: SearchBarExtensionDependencies;
+interface QueryEditorExtensionProps {
+  config: QueryEditorExtensionConfig;
+  dependencies: QueryEditorExtensionDependencies;
   componentContainer: Element;
   bannerContainer: Element;
 }
 
-export interface SearchBarExtensionDependencies {
+export interface QueryEditorExtensionDependencies {
   /**
    * Currently selected index patterns.
    */
@@ -31,7 +31,7 @@ export interface SearchBarExtensionDependencies {
   language: string;
 }
 
-export interface SearchBarExtensionConfig {
+export interface QueryEditorExtensionConfig {
   /**
    * The id for the search bar extension.
    */
@@ -44,24 +44,24 @@ export interface SearchBarExtensionConfig {
    * A function that determines if the search bar extension is enabled and should be rendered on UI.
    * @returns whether the extension is enabled.
    */
-  isEnabled: (dependencies: SearchBarExtensionDependencies) => Promise<boolean>;
+  isEnabled: (dependencies: QueryEditorExtensionDependencies) => Promise<boolean>;
   /**
    * A function that returns the search bar extension component. The component
    * will be displayed on top of the query editor in the search bar.
    * @param dependencies - The dependencies required for the extension.
    * @returns The component the search bar extension.
    */
-  getComponent?: (dependencies: SearchBarExtensionDependencies) => React.ReactElement | null;
+  getComponent?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
   /**
    * A function that returns the search bar extension banner. The banner is a
    * component that will be displayed on top of the search bar.
    * @param dependencies - The dependencies required for the extension.
    * @returns The component the search bar extension.
    */
-  getBanner?: (dependencies: SearchBarExtensionDependencies) => React.ReactElement | null;
+  getBanner?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
 }
 
-const SearchBarExtensionPortal: React.FC<{ container: Element }> = (props) => {
+const QueryEditorExtensionPortal: React.FC<{ container: Element }> = (props) => {
   if (!props.children) return null;
 
   return ReactDOM.createPortal(
@@ -70,7 +70,7 @@ const SearchBarExtensionPortal: React.FC<{ container: Element }> = (props) => {
   );
 };
 
-export const SearchBarExtension: React.FC<SearchBarExtensionProps> = (props) => {
+export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props) => {
   const [isEnabled, setIsEnabled] = useState(false);
   const isMounted = useRef(true);
 
@@ -101,12 +101,12 @@ export const SearchBarExtension: React.FC<SearchBarExtensionProps> = (props) => 
 
   return (
     <>
-      <SearchBarExtensionPortal container={props.bannerContainer}>
+      <QueryEditorExtensionPortal container={props.bannerContainer}>
         {banner}
-      </SearchBarExtensionPortal>
-      <SearchBarExtensionPortal container={props.componentContainer}>
+      </QueryEditorExtensionPortal>
+      <QueryEditorExtensionPortal container={props.componentContainer}>
         {component}
-      </SearchBarExtensionPortal>
+      </QueryEditorExtensionPortal>
     </>
   );
 };
