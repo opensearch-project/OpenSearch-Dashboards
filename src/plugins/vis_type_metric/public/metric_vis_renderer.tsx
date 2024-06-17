@@ -31,7 +31,6 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
 import { MetricVisRenderValue } from './metric_vis_fn';
 // @ts-ignore
@@ -47,14 +46,12 @@ export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRender
     });
 
     render(
-      <VisualizationContainer className="mtrVis" showNoResult={!visData.rows?.length}>
-        <MetricVisComponent
-          visData={visData}
-          visParams={visConfig}
-          renderComplete={handlers.done}
-          fireEvent={handlers.event}
-        />
-      </VisualizationContainer>,
+      <MetricVisComponent
+        visData={visData}
+        visParams={visConfig}
+        renderComplete={handlers.done}
+        fireEvent={handlers.event}
+      />,
       domNode
     );
   },

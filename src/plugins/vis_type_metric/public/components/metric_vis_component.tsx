@@ -40,6 +40,7 @@ import { VisParams, MetricVisMetric } from '../types';
 import { getFormatService } from '../services';
 import { SchemaConfig } from '../../../visualizations/public';
 import { Range } from '../../../expressions/public';
+import { VisualizationContainer } from '../../../visualizations/public';
 
 import './metric_vis.scss';
 
@@ -214,12 +215,12 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
   }
 
   render() {
-    let metricsHtml;
-    if (this.props.visData) {
-      const metrics = this.processTableGroups(this.props.visData);
-      metricsHtml = metrics.map(this.renderMetric);
-    }
-    return metricsHtml;
+    const metrics = this.props.visData.rows ? this.processTableGroups(this.props.visData) : [];
+    return (
+      <VisualizationContainer className="mtrVis" showNoResult={metrics.length === 0}>
+        {metrics.length > 0 ? metrics.map(this.renderMetric) : null}
+      </VisualizationContainer>
+    );
   }
 }
 
