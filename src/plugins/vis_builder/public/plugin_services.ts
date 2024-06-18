@@ -10,6 +10,7 @@ import { HttpStart, IUiSettingsClient } from '../../../core/public';
 import { ExpressionsStart } from '../../expressions/public';
 import { TypeServiceStart } from './services/type_service';
 import { UiActionsStart } from '../../ui_actions/public';
+import { UsageCollectionStart } from '../../usage_collection/public';
 
 export const [getSearchService, setSearchService] = createGetterSetter<
   DataPublicPluginStart['search']
@@ -43,3 +44,7 @@ export const [getUIActions, setUIActions] = createGetterSetter<UiActionsStart>('
 export const [getQueryService, setQueryService] = createGetterSetter<
   DataPublicPluginStart['query']
 >('Query');
+
+export const [getUsageCollector, setUsageCollector] = createGetterSetter<UsageCollectionStart>(
+  'UsageCollector'
+);

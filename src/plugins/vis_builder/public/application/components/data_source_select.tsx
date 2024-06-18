@@ -11,6 +11,9 @@ import { useIndexPatterns } from '../utils/use';
 import { useTypedDispatch } from '../utils/state_management';
 import { setIndexPattern } from '../utils/state_management/visualization_slice';
 import { IndexPattern } from '../../../../data/public';
+import { getUsageCollector } from '../../plugin_services';
+import { METRIC_TYPE } from '../../../../usage_collection/public';
+import { PLUGIN_NAME, VIS_BUILDER_UI_METRIC } from '../../../common';
 
 function indexPatternEquality(A?: SearchableDropdownOption, B?: SearchableDropdownOption): boolean {
   return !A || !B ? false : A.id === B.id;
@@ -36,6 +39,11 @@ export const DataSourceSelect = () => {
       onChange={(option) => {
         const foundOption = indexPatterns.filter((s) => s.id === option.id)[0];
         if (foundOption !== undefined && typeof foundOption.id === 'string') {
+          getUsageCollector().reportUiStats(
+            PLUGIN_NAME,
+            METRIC_TYPE.COUNT,
+            VIS_BUILDER_UI_METRIC.indexPatternChanged
+          );
           dispatch(setIndexPattern(foundOption.id));
         }
       }}

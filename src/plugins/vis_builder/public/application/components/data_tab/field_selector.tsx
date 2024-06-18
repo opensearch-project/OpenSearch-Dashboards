@@ -16,6 +16,9 @@ import { Field, DraggableFieldButton } from './field';
 import { FieldDetails } from './types';
 import { getAvailableFields, getDetails } from './utils';
 import './field_selector.scss';
+import { getUsageCollector } from '../../../plugin_services';
+import { METRIC_TYPE } from '../../../../../usage_collection/public';
+import { PLUGIN_NAME, VIS_BUILDER_UI_METRIC } from '../../../../common';
 
 interface IFieldCategories {
   categorical: IndexPatternField[];
@@ -61,6 +64,11 @@ export const FieldSelector = () => {
 
   const getDetailsByField = useCallback(
     (ipField: IndexPatternField) => {
+      getUsageCollector().reportUiStats(
+        PLUGIN_NAME,
+        METRIC_TYPE.COUNT,
+        VIS_BUILDER_UI_METRIC.fieldSummary
+      );
       return getDetails(ipField, hits, indexPattern);
     },
     [hits, indexPattern]

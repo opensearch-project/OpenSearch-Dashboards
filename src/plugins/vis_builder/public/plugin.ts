@@ -45,6 +45,7 @@ import {
   setReactExpressionRenderer,
   setQueryService,
   setUIActions,
+  setUsageCollector,
 } from './plugin_services';
 import { createSavedVisBuilderLoader } from './saved_visualizations';
 import { registerDefaultTypes } from './visualizations';
@@ -74,7 +75,7 @@ export class VisBuilderPlugin
 
   public setup(
     core: CoreSetup<VisBuilderPluginStartDependencies, VisBuilderStart>,
-    { embeddable, visualizations, data }: VisBuilderPluginSetupDependencies
+    { embeddable, visualizations, data, usageCollection }: VisBuilderPluginSetupDependencies
   ) {
     const { appMounted, appUnMounted, stop: stopUrlTracker } = createOsdUrlTracker({
       baseUrl: core.http.basePath.prepend(`/app/${PLUGIN_ID}`),
@@ -219,7 +220,7 @@ export class VisBuilderPlugin
 
   public start(
     core: CoreStart,
-    { expressions, data, uiActions }: VisBuilderPluginStartDependencies
+    { expressions, data, uiActions, usageCollection }: VisBuilderPluginStartDependencies
   ): VisBuilderStart {
     const typeService = this.typeService.start();
 
@@ -243,6 +244,7 @@ export class VisBuilderPlugin
     setUISettings(core.uiSettings);
     setUIActions(uiActions);
     setQueryService(data.query);
+    setUsageCollector(usageCollection);
 
     return {
       ...typeService,

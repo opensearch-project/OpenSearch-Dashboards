@@ -24,6 +24,9 @@ import {
   useTypedSelector,
 } from '../utils/state_management';
 import { getPersistedAggParams } from '../utils/get_persisted_agg_params';
+import { getUsageCollector } from '../../plugin_services';
+import { METRIC_TYPE } from '../../../../usage_collection/public';
+import { PLUGIN_NAME, VIS_BUILDER_UI_METRIC } from '../../../common';
 
 export const RightNavUI = () => {
   const { ui, name: activeVisName } = useVisualizationType();
@@ -56,6 +59,11 @@ export const RightNavUI = () => {
       };
 
       if (persistedAggParams.length < aggConfigParams.length) return setConfirmAggs(newVis);
+      getUsageCollector().reportUiStats(
+        PLUGIN_NAME,
+        METRIC_TYPE.COUNT,
+        VIS_BUILDER_UI_METRIC.visualizationType + '_' + newVisName
+      );
 
       dispatch(setActiveVisualization(newVis));
     },
