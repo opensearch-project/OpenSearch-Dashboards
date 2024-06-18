@@ -17,7 +17,12 @@ import {
   EuiFieldSearch,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-import { HttpStart, NotificationsStart, SavedObjectsStart } from 'opensearch-dashboards/public';
+import {
+  HttpStart,
+  IUiSettingsClient,
+  NotificationsStart,
+  SavedObjectsStart,
+} from 'opensearch-dashboards/public';
 import {
   DirectQueryDatasourceDetails,
   DirectQueryDatasourceStatus,
@@ -39,6 +44,7 @@ interface ManageDirectQueryDataConnectionsTableProps {
   http: HttpStart;
   notifications: NotificationsStart;
   savedObjects: SavedObjectsStart;
+  uiSettings: IUiSettingsClient;
 }
 
 // Custom truncate function
@@ -51,6 +57,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   http,
   notifications,
   savedObjects,
+  uiSettings,
 }) => {
   const [data, setData] = useState<DataConnection[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -207,13 +214,14 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
 
   const customSearchBar = (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} style={{ width: '30%' }}>
         <DataSourceSelector
           savedObjectsClient={savedObjects.client}
           notifications={notifications.toasts}
           onSelectedDataSource={handleSelectedDataSourceChange}
           disabled={false}
-          fullWidth={false}
+          fullWidth={true}
+          uiSettings={uiSettings}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
