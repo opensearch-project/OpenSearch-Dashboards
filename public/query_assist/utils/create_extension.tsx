@@ -1,54 +1,92 @@
 import { HttpSetup } from 'opensearch-dashboards/public';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { getMdsDataSourceId } from '.';
 import { QueryEditorExtensionConfig } from '../../../../../src/plugins/data/public/ui/query_editor';
-import { SUPPORTED_LANGUAGES } from '../../../common/query_assist';
+import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
 import { getData } from '../../services';
 import { QueryAssistBar } from '../components';
 import { QueryAssistBanner } from '../components/query_assist_banner';
+
+let availableLanguagesByDataSource: Map<string | undefined, string[]>;
+
+/**
+ * @param dependencies - QueryEditorExtensionDependencies.
+ * @param http - HttpSetup.
+ * @returns list of query assist agents configured languages in the data source
+ * associated with the currently selected index pattern.
+ */
+const getAvailableLanguages = async (
+  dependencies: QueryEditorExtensionDependencies,
+  http: HttpSetup
+) => {
+  if (!availableLanguagesByDataSource) availableLanguagesByDataSource = new Map();
+
+  const dataSourceId = await getMdsDataSourceId(
+    getData().indexPatterns,
+    dependencies.indexPatterns?.at(0)
+  );
+  const cached = availableLanguagesByDataSource.get(dataSourceId);
+  if (cached !== undefined) return cached;
+
+  const languages = await http
+    .get<{ configuredLanguages: string[] }>('/api/ql/query_assist/configured_languages', {
+      query: { dataSourceId },
+    })
+    .then((response) => response.configuredLanguages)
+    .catch(() => []);
+  availableLanguagesByDataSource.set(dataSourceId, languages);
+  return languages;
+};
 
 export const createQueryAssistExtension = (http: HttpSetup): QueryEditorExtensionConfig => {
   return {
     id: 'query-assist',
     order: 1000,
-    isEnabled: (() => {
-      const agentConfiguredMap: Map<string | undefined, boolean> = new Map();
-      return async (dependencies) => {
-        // currently query assist tool relies on opensearch API to get index
-        // mappings, other data sources are not supported
-        if (dependencies.dataSource && dependencies.dataSource?.getType() !== 'default')
-          return false;
+    isEnabled: async (dependencies) => {
+      // currently query assist tool relies on opensearch API to get index
+      // mappings, non-default data source types are not supported
+      if (dependencies.dataSource && dependencies.dataSource?.getType() !== 'default') return false;
 
-        const dataSourceId = await getMdsDataSourceId(
-          getData().indexPatterns,
-          dependencies.indexPatterns?.at(0)
-        );
-        const cached = agentConfiguredMap.get(dataSourceId);
-        if (cached !== undefined) return cached;
-        const configured = await http
-          .get<{ configured: boolean }>(
-            `/api/ql/query_assist/configured/${dependencies.language}`,
-            {
-              query: { dataSourceId },
-            }
-          )
-          .then((response) => response.configured)
-          .catch(() => false);
-        agentConfiguredMap.set(dataSourceId, configured);
-        return configured;
-      };
-    })(),
+      const languages = await getAvailableLanguages(dependencies, http);
+      return languages.length > 0;
+    },
     getComponent: (dependencies) => {
       // only show the component if user is on a supported language.
-      // @ts-expect-error language can be an arbitrary string and fail the check
-      if (!SUPPORTED_LANGUAGES.includes(dependencies.language)) return null;
-      return <QueryAssistBar dependencies={dependencies} />;
+      return (
+        <QueryAssistWrapper dependencies={dependencies} http={http}>
+          <QueryAssistBar dependencies={dependencies} />
+        </QueryAssistWrapper>
+      );
     },
     getBanner: (dependencies) => {
       // advertise query assist if user is not on a supported language.
-      // @ts-expect-error language can be an arbitrary string and fail the check
-      if (SUPPORTED_LANGUAGES.includes(dependencies.language)) return null;
-      return <QueryAssistBanner />;
+      return (
+        <QueryAssistWrapper dependencies={dependencies} http={http} invert>
+          <QueryAssistBanner />
+        </QueryAssistWrapper>
+      );
     },
   };
+};
+
+interface QueryAssistWrapperProps {
+  dependencies: QueryEditorExtensionDependencies;
+  http: HttpSetup;
+  invert?: boolean;
+}
+
+const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
+  const [visible, setVisible] = useState(false);
+  useEffect(() => {
+    const checkAvailability = async () => {
+      const available = (await getAvailableLanguages(props.dependencies, props.http)).includes(
+        props.dependencies.language
+      );
+      setVisible(props.invert ? !available : available);
+    };
+    checkAvailability();
+  }, [props]);
+
+  if (!visible) return null;
+  return <>{props.children}</>;
 };

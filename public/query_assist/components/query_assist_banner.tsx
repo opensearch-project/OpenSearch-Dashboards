@@ -16,11 +16,7 @@ import { getStorage } from '../../services';
 
 const BANNER_STORAGE_KEY = 'queryAssist:banner:show';
 
-interface QueryAssistBannerProps {
-  dependencies: QueryEditorExtensionDependencies;
-}
-
-export const QueryAssistBanner: React.FC<QueryAssistBannerProps> = (props) => {
+export const QueryAssistBanner: React.FC = () => {
   const storage = getStorage();
   const [showCallOut, _setShowCallOut] = useState(true);
   const setShowCallOut: typeof _setShowCallOut = (show) => {

@@ -11,11 +11,8 @@ export function registerQueryAssistRoutes(router: IRouter) {
 
   router.get(
     {
-      path: '/api/ql/query_assist/configured/{language}',
+      path: '/api/ql/query_assist/configured_languages',
       validate: {
-        params: schema.object({
-          language: languageSchema,
-        }),
         query: schema.object({
           dataSourceId: schema.maybe(schema.string()),
         }),
@@ -26,12 +23,19 @@ export function registerQueryAssistRoutes(router: IRouter) {
         context.query_assist.dataSourceEnabled && request.query.dataSourceId
           ? await context.dataSource.opensearch.getClient(request.query.dataSourceId)
           : context.core.opensearch.client.asCurrentUser;
+      const configuredLanguages: string[] = [];
       try {
-        // if the call does not throw any error, then the agent is properly configured
-        await getAgentIdByConfig(client, AGENT_CONFIG_NAME_MAP[request.params.language]);
-        return response.ok({ body: { configured: true } });
+        await Promise.allSettled(
+          SUPPORTED_LANGUAGES.map((language) =>
+            getAgentIdByConfig(client, AGENT_CONFIG_NAME_MAP[language]).then(() =>
+              // if the call does not throw any error, then the agent is properly configured
+              configuredLanguages.push(language)
+            )
+          )
+        );
+        return response.ok({ body: { configuredLanguages } });
       } catch (error) {
-        return response.ok({ body: { configured: false, error: error.message } });
+        return response.ok({ body: { configuredLanguages, error: error.message } });
       }
     }
   );
