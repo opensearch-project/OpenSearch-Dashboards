@@ -34,7 +34,7 @@ const tabs = [
 ];
 
 export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
-  const { setBreadcrumbs, notifications, http } = useOpenSearchDashboards<
+  const { setBreadcrumbs, notifications, http, savedObjects } = useOpenSearchDashboards<
     DataSourceManagementContext
   >().services;
 
@@ -85,7 +85,11 @@ export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
             <DataSourceTableWithRouter {...props} />
           )}
           {selectedTabId === 'manageDirectQueryDataSources' && (
-            <ManageDirectQueryDataConnectionsTable http={http} notifications={notifications} />
+            <ManageDirectQueryDataConnectionsTable
+              http={http}
+              notifications={notifications}
+              savedObjects={savedObjects}
+            />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

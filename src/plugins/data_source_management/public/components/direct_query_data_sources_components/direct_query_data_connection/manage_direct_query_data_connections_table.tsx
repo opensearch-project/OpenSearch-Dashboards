@@ -16,7 +16,7 @@ import {
   EuiTableFieldDataColumnType,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
-import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
+import { HttpStart, NotificationsStart, SavedObjectsStart } from 'opensearch-dashboards/public';
 import {
   DirectQueryDatasourceDetails,
   DirectQueryDatasourceStatus,
@@ -25,6 +25,8 @@ import {
 import { DeleteModal } from './delete_modal';
 import PrometheusLogo from '../icons/prometheus_logo.svg';
 import S3Logo from '../icons/s3_logo.svg';
+import { DataSourceSelector } from '../../data_source_selector';
+import { DataSourceOption } from '../../data_source_menu/types';
 
 interface DataConnection {
   connectionType: DirectQueryDatasourceType;
@@ -35,6 +37,7 @@ interface DataConnection {
 interface ManageDirectQueryDataConnectionsTableProps {
   http: HttpStart;
   notifications: NotificationsStart;
+  savedObjects: SavedObjectsStart;
 }
 
 // Custom truncate function
@@ -46,14 +49,17 @@ const truncate = (text: string, length: number) => {
 export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDataConnectionsTableProps> = ({
   http,
   notifications,
+  savedObjects,
 }) => {
   const [data, setData] = useState<DataConnection[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+  const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | undefined>(undefined);
 
   const fetchDataSources = useCallback(() => {
+    const dataSourceMDSId = selectedDataSourceId || '';
     http
-      .get('/api/dataconnections')
+      .get(`/api/dataconnections/dataSourceMDSId=${dataSourceMDSId}`)
       .then((res: DirectQueryDatasourceDetails[]) => {
         const dataConnections = res.map((dataConnection: DirectQueryDatasourceDetails) => {
           return {
@@ -67,11 +73,16 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       .catch((err) => {
         notifications.toasts.addDanger('Could not fetch data sources');
       });
-  }, [http, notifications.toasts]);
+  }, [http, notifications.toasts, selectedDataSourceId]);
 
   useEffect(() => {
     fetchDataSources();
   }, [fetchDataSources]);
+
+  const handleSelectedDataSourceChange = (e: DataSourceOption[]) => {
+    const dataSourceId = e[0] ? e[0].id : undefined;
+    setSelectedDataSourceId(dataSourceId);
+  };
 
   const deleteConnection = (connectionName: string) => {
     setData(
@@ -208,19 +219,32 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false} style={{ width: '100%' }}>
-          <EuiInMemoryTable
-            items={entries}
-            itemId="id"
-            columns={tableColumns}
-            tableLayout="auto"
-            pagination={{
-              initialPageSize: 10,
-              pageSizeOptions: [5, 10, 15],
-            }}
-            search={search}
-            allowNeutralSort={false}
-            isSelectable={true}
-          />
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={true}>
+              <EuiInMemoryTable
+                items={entries}
+                itemId="id"
+                columns={tableColumns}
+                tableLayout="auto"
+                pagination={{
+                  initialPageSize: 10,
+                  pageSizeOptions: [5, 10, 15],
+                }}
+                search={search}
+                allowNeutralSort={false}
+                isSelectable={true}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <DataSourceSelector
+                savedObjectsClient={savedObjects.client}
+                notifications={notifications.toasts}
+                onSelectedDataSource={handleSelectedDataSourceChange}
+                disabled={false}
+                fullWidth={true}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       {isModalVisible && modalLayout}
