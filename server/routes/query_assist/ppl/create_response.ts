@@ -11,7 +11,6 @@ export const createPPLResponseBody = (agentResponse: AgentResponse): QueryAssist
     .replace(/[\r\n]/g, ' ')
     .trim()
     .replace(/ISNOTNULL/g, 'isnotnull') // https://github.com/opensearch-project/sql/issues/2431
-    .replace(/`/g, '') // https://github.com/opensearch-project/dashboards-observability/issues/509, https://github.com/opensearch-project/dashboards-observability/issues/557
     .replace(/\bSPAN\(/g, 'span('); // https://github.com/opensearch-project/dashboards-observability/issues/759
   return { query: ppl };
 };
