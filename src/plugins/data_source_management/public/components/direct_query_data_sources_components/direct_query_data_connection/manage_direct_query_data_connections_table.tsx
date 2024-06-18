@@ -14,6 +14,7 @@ import {
   EuiPageBody,
   EuiSpacer,
   EuiTableFieldDataColumnType,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import { HttpStart, NotificationsStart, SavedObjectsStart } from 'opensearch-dashboards/public';
@@ -55,8 +56,11 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
   const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | undefined>(undefined);
+  const [searchText, setSearchText] = useState<string>('');
 
   const fetchDataSources = useCallback(() => {
+    if (selectedDataSourceId === undefined) return;
+
     const dataSourceMDSId = selectedDataSourceId || '';
     http
       .get(`/api/dataconnections/dataSourceMDSId=${dataSourceMDSId}`)
@@ -201,50 +205,52 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
     },
   ] as Array<EuiTableFieldDataColumnType<unknown>>;
 
-  const search = {
-    box: {
-      incremental: true,
-    },
-  };
+  const customSearchBar = (
+    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
+      <EuiFlexItem grow={false}>
+        <DataSourceSelector
+          savedObjectsClient={savedObjects.client}
+          notifications={notifications.toasts}
+          onSelectedDataSource={handleSelectedDataSourceChange}
+          disabled={false}
+          fullWidth={false}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <EuiFieldSearch
+          placeholder="Search..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          isClearable
+          fullWidth={true}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 
-  const entries = data.map((dataconnection: DataConnection) => {
-    const name = dataconnection.name;
-    const connectionType = dataconnection.connectionType;
-    const dsStatus = dataconnection.dsStatus;
-    return { connectionType, name, dsStatus, data: { name, connectionType } };
-  });
+  const entries = data.filter((dataconnection) =>
+    dataconnection.name.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   return (
     <EuiPageBody component="div">
       <EuiSpacer size="s" />
       <EuiFlexGroup justifyContent="center">
         <EuiFlexItem grow={false} style={{ width: '100%' }}>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={true}>
-              <EuiInMemoryTable
-                items={entries}
-                itemId="id"
-                columns={tableColumns}
-                tableLayout="auto"
-                pagination={{
-                  initialPageSize: 10,
-                  pageSizeOptions: [5, 10, 15],
-                }}
-                search={search}
-                allowNeutralSort={false}
-                isSelectable={true}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <DataSourceSelector
-                savedObjectsClient={savedObjects.client}
-                notifications={notifications.toasts}
-                onSelectedDataSource={handleSelectedDataSourceChange}
-                disabled={false}
-                fullWidth={true}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {customSearchBar}
+          <EuiSpacer size="s" />
+          <EuiInMemoryTable
+            items={entries}
+            itemId="id"
+            columns={tableColumns}
+            tableLayout="auto"
+            pagination={{
+              initialPageSize: 10,
+              pageSizeOptions: [5, 10, 15],
+            }}
+            allowNeutralSort={false}
+            isSelectable={true}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       {isModalVisible && modalLayout}
