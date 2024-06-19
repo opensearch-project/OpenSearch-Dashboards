@@ -58,10 +58,22 @@ describe('navigation settings', () => {
       expect(() => validate('modern')).not.toThrow();
       expect(() => validate('legacy')).not.toThrow();
       expect(() => validate('invalid')).toThrowErrorMatchingInlineSnapshot(`
-"types that failed validation:
-- [0]: expected value to equal [modern]
-- [1]: expected value to equal [legacy]"
-`);
+        "types that failed validation:
+        - [0]: expected value to equal [modern]
+        - [1]: expected value to equal [legacy]"
+      `);
+    });
+  });
+
+  describe('useCaseEnabled', () => {
+    const validate = getValidationFn(navigationSettings.useCaseEnabled);
+
+    it('should only accept valid values', () => {
+      expect(() => validate(false)).not.toThrow();
+      expect(() => validate(true)).not.toThrow();
+      expect(() => validate('invalid')).toThrowErrorMatchingInlineSnapshot(
+        `"expected value of type [boolean] but got [string]"`
+      );
     });
   });
 });

@@ -80,5 +80,17 @@ export const getNavigationSettings = (): Record<string, UiSettingsParams> => {
       category: ['appearance'],
       schema: schema.oneOf([schema.literal('modern'), schema.literal('legacy')]),
     },
+    useCaseEnabled: {
+      name: i18n.translate('core.ui_settings.params.useCaseEnabledName', {
+        defaultMessage: 'Enable use case in navigation',
+      }),
+      value: false,
+      description: i18n.translate('core.ui_settings.params.useCaseEnabledDesc', {
+        defaultMessage: 'Used to control whether navigation items are grouped into use cases.',
+      }),
+      category: ['appearance'],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
   };
 };
