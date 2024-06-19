@@ -71,6 +71,8 @@ import {
   RightNavigationOrder,
   RightNavigationButton,
   RightNavigationButtonProps,
+  ChromeUseCase,
+  ChromeRegistrationNavLink,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -366,6 +368,8 @@ export {
   RightNavigationOrder,
   RightNavigationButton,
   RightNavigationButtonProps,
+  ChromeUseCase,
+  ChromeRegistrationNavLink,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
