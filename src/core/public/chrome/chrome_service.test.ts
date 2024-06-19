@@ -90,6 +90,8 @@ async function start({
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
   const service = new ChromeService(options);
 
+  service.setup({ uiSettings: startDeps.uiSettings });
+
   if (cspConfigMock) {
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
   }
@@ -119,8 +121,9 @@ describe('setup', () => {
     const customHeaderMock = React.createElement('TestCustomNavHeader');
     const renderMock = jest.fn().mockReturnValue(customHeaderMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup();
+    const chromeSetup = chrome.setup({ uiSettings });
     chromeSetup.registerCollapsibleNavHeader(renderMock);
 
     const chromeStart = await chrome.start(defaultStartDeps());
@@ -135,8 +138,9 @@ describe('setup', () => {
     const customHeaderMock = React.createElement('TestCustomNavHeader');
     const renderMock = jest.fn().mockReturnValue(customHeaderMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup();
+    const chromeSetup = chrome.setup({ uiSettings });
     // call 1st time
     chromeSetup.registerCollapsibleNavHeader(renderMock);
     // call 2nd time
@@ -145,6 +149,15 @@ describe('setup', () => {
     expect(warnMock).toHaveBeenCalledWith(
       '[ChromeService] An existing custom collapsible navigation bar header render has been overridden.'
     );
+  });
+
+  it('should return useCaseEnabled from ui settings', () => {
+    const chrome = new ChromeService({ browserSupportsCsp: true });
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    uiSettings.get$.mockImplementation(() => new Rx.BehaviorSubject(true));
+
+    const chromeSetup = chrome.setup({ uiSettings });
+    expect(chromeSetup.getUseCaseEnabled()).toBe(true);
   });
 });
 
@@ -485,6 +498,15 @@ describe('start', () => {
       `);
     });
   });
+
+  it('should return useCaseEnabled from ui settings', async () => {
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    uiSettings.get$.mockImplementation(() => new Rx.BehaviorSubject(true));
+    const startDeps = defaultStartDeps();
+    const { chrome } = await start({ startDeps: { ...startDeps, uiSettings } });
+
+    expect(chrome.getUseCaseEnabled()).toBe(true);
+  });
 });
 
 describe('stop', () => {
@@ -515,5 +537,20 @@ describe('stop', () => {
         chrome.getHelpExtension$()
       ).toPromise()
     ).resolves.toBe(undefined);
+  });
+
+  it('should not update useCaseEnabled after stopped', async () => {
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    const useCaseEnabled$ = new Rx.BehaviorSubject(true);
+    uiSettings.get$.mockImplementation(() => useCaseEnabled$);
+    const startDeps = defaultStartDeps();
+    const { chrome, service } = await start({ startDeps: { ...startDeps, uiSettings } });
+
+    useCaseEnabled$.next(false);
+    expect(chrome.getUseCaseEnabled()).toBe(false);
+
+    service.stop();
+    useCaseEnabled$.next(true);
+    expect(chrome.getUseCaseEnabled()).toBe(false);
   });
 });

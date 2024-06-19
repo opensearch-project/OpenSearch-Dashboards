@@ -31,7 +31,15 @@
 import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  merge,
+  Observable,
+  of,
+  ReplaySubject,
+  Subscription,
+} from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { EuiLink } from '@elastic/eui';
 import { mountReactNode } from '../utils/mount';
@@ -90,6 +98,10 @@ interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
 
+interface SetupDeps {
+  uiSettings: IUiSettingsClient;
+}
+
 export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
@@ -112,6 +124,8 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
+  private useCaseEnabled: boolean = false;
+  private useCaseEnabledUiSettingsSubscription: Subscription | undefined;
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -147,7 +161,12 @@ export class ChromeService {
     );
   }
 
-  public setup() {
+  public setup({ uiSettings }: SetupDeps) {
+    this.useCaseEnabledUiSettingsSubscription = uiSettings
+      .get$('useCaseEnabled', false)
+      .subscribe((value) => {
+        this.useCaseEnabled = value;
+      });
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
         if (this.collapsibleNavHeaderRender) {
@@ -158,6 +177,7 @@ export class ChromeService {
         }
         this.collapsibleNavHeaderRender = render;
       },
+      getUseCaseEnabled: () => this.useCaseEnabled,
     };
   }
 
@@ -339,12 +359,15 @@ export class ChromeService {
       setCustomNavLink: (customNavLink?: ChromeNavLink) => {
         customNavLink$.next(customNavLink);
       },
+
+      getUseCaseEnabled: () => this.useCaseEnabled,
     };
   }
 
   public stop() {
     this.navLinks.stop();
     this.stop$.next();
+    this.useCaseEnabledUiSettingsSubscription?.unsubscribe();
   }
 }
 
@@ -360,6 +383,10 @@ export class ChromeService {
  */
 export interface ChromeSetup {
   registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
+  /**
+   * Get a boolean value to indicates whether use case is enabled
+   */
+  getUseCaseEnabled: () => boolean;
 }
 
 /**
@@ -486,6 +513,11 @@ export interface ChromeStart {
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
+
+  /**
+   * Get a boolean value to indicates whether use case is enabled
+   */
+  getUseCaseEnabled: () => boolean;
 }
 
 /** @internal */
@@ -495,4 +527,7 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getHeaderComponent(): JSX.Element;
+  /**
+   * Get a boolean value to indicates whether use case is enabled
+   */
 }
