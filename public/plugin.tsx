@@ -48,12 +48,13 @@ export class QueryEnhancementsPlugin
           language: 'PPL',
           search: pplSearchInterceptor,
           searchBar: {
-            queryStringInput: { initialValue: 'source=<data_source>' },
+            queryStringInput: { initialValue: 'source = <data_source>' },
             dateRange: {
               initialFrom: moment().subtract(2, 'days').toISOString(),
               initialTo: moment().add(2, 'days').toISOString(),
             },
             showFilterBar: false,
+            showDataSourceSelector: false,
           },
           fields: {
             filterable: false,
@@ -72,6 +73,7 @@ export class QueryEnhancementsPlugin
           searchBar: {
             showDatePicker: false,
             showFilterBar: false,
+            showDataSourceSelector: false,
             queryStringInput: { initialValue: 'SELECT * FROM <data_source>' },
           },
           fields: {
