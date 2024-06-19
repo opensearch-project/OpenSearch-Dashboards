@@ -311,7 +311,6 @@ export default class QueryEditorUI extends Component<Props, State> {
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',
                 wrappingIndent: 'indent',
-                selectionHighlight: false,
               }}
             />
           </EuiFlexItem>
