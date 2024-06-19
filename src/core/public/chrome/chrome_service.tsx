@@ -111,6 +111,9 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
+  private readonly useCaseList$ = new BehaviorSubject<
+    Array<ChromeUseCase & { navLinks: ChromeRegistrationNavLink[] }>
+  >([]);
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
 
   constructor(private readonly params: ConstructorParams) {}
@@ -147,7 +150,7 @@ export class ChromeService {
     );
   }
 
-  public setup() {
+  public setup(): ChromeSetup {
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
         if (this.collapsibleNavHeaderRender) {
@@ -158,6 +161,29 @@ export class ChromeService {
         }
         this.collapsibleNavHeaderRender = render;
       },
+      registerNavLink: (useCase: ChromeUseCase, navLink: ChromeRegistrationNavLink) => {
+        const currentUseCaseList = [...this.useCaseList$.getValue()];
+        const findItem = currentUseCaseList.find((item) => item.id === useCase.id);
+        if (findItem) {
+          const findNavLinks = findItem.navLinks.find((link) => link.id === navLink.id);
+          if (findNavLinks) {
+            // eslint-disable-next-line no-console
+            console.warn(
+              `[ChromeService] Navlink of ${navLink.id} has already been registered in use case ${useCase.id}`
+            );
+            return;
+          }
+          findItem.navLinks.push(navLink);
+        } else {
+          currentUseCaseList.push({
+            ...useCase,
+            navLinks: [navLink],
+          });
+        }
+
+        this.useCaseList$.next(currentUseCaseList);
+      },
+      getUseCases$: () => this.useCaseList$.pipe(takeUntil(this.stop$)),
     };
   }
 
@@ -339,6 +365,8 @@ export class ChromeService {
       setCustomNavLink: (customNavLink?: ChromeNavLink) => {
         customNavLink$.next(customNavLink);
       },
+
+      getUseCases$: () => this.useCaseList$.pipe(takeUntil(this.stop$)),
     };
   }
 
@@ -360,6 +388,14 @@ export class ChromeService {
  */
 export interface ChromeSetup {
   registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
+  registerNavLink: (useCase: ChromeUseCase, navLink: ChromeRegistrationNavLink) => void;
+  getUseCases$: () => Observable<
+    Array<
+      ChromeUseCase & {
+        navLinks: ChromeRegistrationNavLink[];
+      }
+    >
+  >;
 }
 
 /**
@@ -486,6 +522,8 @@ export interface ChromeStart {
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
+
+  getUseCases$: ChromeSetup['getUseCases$'];
 }
 
 /** @internal */
@@ -495,4 +533,20 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getHeaderComponent(): JSX.Element;
+}
+
+/** @public */
+export interface ChromeUseCase {
+  id: string;
+  title: string;
+  description: string;
+  order?: number;
+  icon?: string;
+  reserved?: boolean; // use cases like data administration / settings and setup is not configurable through workspace
+}
+
+/** @public */
+export interface ChromeRegistrationNavLink
+  extends Omit<ChromeNavLink, 'href' | 'baseUrl' | 'title'> {
+  title?: ChromeNavLink['title'];
 }

@@ -31,7 +31,7 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import * as Rx from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
+import { first, take, toArray } from 'rxjs/operators';
 import { App, PublicAppInfo } from '../application';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
@@ -39,7 +39,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import { ChromeService } from './chrome_service';
+import { ChromeRegistrationNavLink, ChromeService, ChromeUseCase } from './chrome_service';
 import { getAppInfo } from '../application/utils';
 import { overlayServiceMock } from '../mocks';
 
@@ -110,6 +110,27 @@ afterAll(() => {
   (window as any).localStorage = originalLocalStorage;
 });
 
+const mockedUseCaseFoo: ChromeUseCase = {
+  id: 'foo',
+  title: 'foo',
+  description: 'foo',
+};
+
+const mockedUseCaseBar: ChromeUseCase = {
+  id: 'bar',
+  title: 'bar',
+  description: 'bar',
+};
+
+const mockedNavLinkFoo: ChromeRegistrationNavLink = {
+  id: 'foo',
+};
+
+const mockedNavLinkBar: ChromeRegistrationNavLink = {
+  id: 'bar',
+  title: 'bar',
+};
+
 describe('setup', () => {
   afterEach(() => {
     jest.restoreAllMocks();
@@ -144,6 +165,45 @@ describe('setup', () => {
     expect(warnMock).toHaveBeenCalledTimes(1);
     expect(warnMock).toHaveBeenCalledWith(
       '[ChromeService] An existing custom collapsible navigation bar header render has been overridden.'
+    );
+  });
+
+  it('should be able registerNavLink', async () => {
+    const warnMock = jest.fn();
+    jest.spyOn(console, 'warn').mockImplementation(warnMock);
+    const chrome = new ChromeService({ browserSupportsCsp: true });
+
+    const chromeSetup = chrome.setup();
+
+    chromeSetup.registerNavLink(mockedUseCaseFoo, mockedNavLinkFoo);
+    chromeSetup.registerNavLink(mockedUseCaseBar, mockedNavLinkBar);
+    chromeSetup.registerNavLink(mockedUseCaseFoo, mockedNavLinkBar);
+    const useCaseList = await chromeSetup.getUseCases$().pipe(first()).toPromise();
+    expect(useCaseList.length).toEqual(2);
+    expect(useCaseList[0].navLinks.length).toEqual(2);
+    expect(useCaseList[1].navLinks.length).toEqual(1);
+    expect(useCaseList[0].id).toEqual(mockedUseCaseFoo.id);
+    expect(warnMock).toBeCalledTimes(0);
+  });
+
+  it('should output warning message if registerNavLink with same use case id and navLink id', async () => {
+    const warnMock = jest.fn();
+    jest.spyOn(console, 'warn').mockImplementation(warnMock);
+    const chrome = new ChromeService({ browserSupportsCsp: true });
+
+    const chromeSetup = chrome.setup();
+
+    chromeSetup.registerNavLink(mockedUseCaseFoo, mockedNavLinkFoo);
+    chromeSetup.registerNavLink(mockedUseCaseBar, mockedNavLinkBar);
+    chromeSetup.registerNavLink(mockedUseCaseFoo, mockedNavLinkFoo);
+    const useCaseList = await chromeSetup.getUseCases$().pipe(first()).toPromise();
+    expect(useCaseList.length).toEqual(2);
+    expect(useCaseList[0].navLinks.length).toEqual(1);
+    expect(useCaseList[1].navLinks.length).toEqual(1);
+    expect(useCaseList[0].id).toEqual(mockedUseCaseFoo.id);
+    expect(warnMock).toBeCalledTimes(1);
+    expect(warnMock).toBeCalledWith(
+      `[ChromeService] Navlink of ${mockedUseCaseFoo.id} has already been registered in use case ${mockedUseCaseFoo.id}`
     );
   });
 });
@@ -483,6 +543,27 @@ describe('start', () => {
           ],
         ]
       `);
+    });
+  });
+
+  describe('use case', () => {
+    it('should be able to get the use cases registered through registerNavLinks', async () => {
+      const startDeps = defaultStartDeps([]);
+      const chrome = new ChromeService({ browserSupportsCsp: true });
+
+      const chromeSetup = chrome.setup();
+
+      chromeSetup.registerNavLink(mockedUseCaseFoo, mockedNavLinkFoo);
+      chromeSetup.registerNavLink(mockedUseCaseBar, mockedNavLinkBar);
+
+      const chromeStart = await chrome.start(startDeps);
+
+      const useCaseList = await chromeStart.getUseCases$().pipe(first()).toPromise();
+
+      expect(useCaseList.length).toEqual(2);
+      expect(useCaseList[0].navLinks.length).toEqual(1);
+      expect(useCaseList[1].navLinks.length).toEqual(1);
+      expect(useCaseList[0].id).toEqual(mockedUseCaseFoo.id);
     });
   });
 });
