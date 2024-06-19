@@ -132,57 +132,33 @@ export const WorkspacePermissionSettingInput = ({
   return (
     <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
       <EuiFlexItem style={{ maxWidth: 400 }}>
-        <EuiFormRow
-          label={
-            index === 0
-              ? type === WorkspacePermissionItemType.User
-                ? i18n.translate('workspaceForm.permissionSetting.userLabel', {
-                    defaultMessage: 'User',
-                  })
-                : i18n.translate('workspaceForm.permissionSetting.groupLabel', {
-                    defaultMessage: 'User group',
-                  })
-              : undefined
+        <EuiComboBox
+          singleSelection
+          selectedOptions={groupOrUserIdSelectedOptions}
+          onCreateOption={handleGroupOrUserIdCreate}
+          onChange={handleGroupOrUserIdChange}
+          placeholder={
+            type === WorkspacePermissionItemType.User
+              ? i18n.translate('workspaceForm.permissionSetting.selectUser', {
+                  defaultMessage: 'Select a user',
+                })
+              : i18n.translate('workspaceForm.permissionSetting.selectUserGroup', {
+                  defaultMessage: 'Select a user group',
+                })
           }
-        >
-          <EuiComboBox
-            singleSelection
-            selectedOptions={groupOrUserIdSelectedOptions}
-            onCreateOption={handleGroupOrUserIdCreate}
-            onChange={handleGroupOrUserIdChange}
-            placeholder={
-              type === WorkspacePermissionItemType.User
-                ? i18n.translate('workspaceForm.permissionSetting.selectUser', {
-                    defaultMessage: 'Select a user',
-                  })
-                : i18n.translate('workspaceForm.permissionSetting.selectUserGroup', {
-                    defaultMessage: 'Select a user group',
-                  })
-            }
-          />
-        </EuiFormRow>
+        />
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: 332 }}>
-        <EuiFormRow
-          label={
-            index === 0
-              ? i18n.translate('workspaceForm.permissionSetting.permissionLabel', {
-                  defaultMessage: 'Permissions',
-                })
-              : undefined
-          }
-        >
-          <EuiButtonGroup
-            type="single"
-            isDisabled={!deletable}
-            legend="Permission Modes"
-            options={permissionModeOptions}
-            idSelected={permissionModesSelectedId}
-            onChange={handlePermissionModeOptionChange}
-            buttonSize="m"
-            isFullWidth
-          />
-        </EuiFormRow>
+        <EuiButtonGroup
+          type="single"
+          isDisabled={!deletable}
+          legend="Permission Modes"
+          options={permissionModeOptions}
+          idSelected={permissionModesSelectedId}
+          onChange={handlePermissionModeOptionChange}
+          buttonSize="m"
+          isFullWidth
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon

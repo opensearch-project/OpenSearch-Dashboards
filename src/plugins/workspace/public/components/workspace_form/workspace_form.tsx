@@ -169,6 +169,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
               })}
             </h2>
           </EuiTitle>
+          <EuiSpacer size="m" />
           <WorkspacePermissionSettingPanel
             errors={formErrors.permissionSettings}
             onChange={setPermissionSettings}
