@@ -9,6 +9,7 @@ import { render, screen } from '@testing-library/react';
 import { IndexPatternField } from '../../../../../data/public';
 
 import { DraggableFieldButton } from './field';
+import { DropResult, EuiDragDropContext, EuiDroppable } from '@elastic/eui';
 
 describe('visBuilder field', function () {
   describe('DraggableFieldButton', () => {
@@ -28,7 +29,13 @@ describe('visBuilder field', function () {
           'bytes'
         ),
       };
-      render(<DraggableFieldButton {...props} />);
+      render(
+        <EuiDragDropContext onDragEnd={(result: DropResult) => {}}>
+          <EuiDroppable droppableId="1">
+            <DraggableFieldButton index={1} {...props} />
+          </EuiDroppable>
+        </EuiDragDropContext>
+      );
 
       const button = screen.getByTestId('field-bytes-showDetails');
 
