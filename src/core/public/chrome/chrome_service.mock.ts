@@ -37,6 +37,7 @@ const createSetupContractMock = () => {
   return {
     registerCollapsibleNavHeader: jest.fn(),
     registerNavLink: jest.fn(),
+    getUseCases$: () => new BehaviorSubject([]),
   };
 };
 
