@@ -127,10 +127,7 @@ export class SectionTypeService {
             }
 
             if (heroes || sections) {
-              homepage
-                .save({})
-                .then(() => error$.next(undefined))
-                .catch((e) => error$.next(e));
+              homepage.save({});
             }
           })
         );
