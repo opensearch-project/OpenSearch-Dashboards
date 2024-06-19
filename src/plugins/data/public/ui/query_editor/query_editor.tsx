@@ -85,7 +85,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     queryEditorRect: undefined,
   };
 
-  public inputRef: HTMLTextAreaElement | null = null;
+  public inputRef: HTMLElement | null = null;
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
@@ -311,7 +311,6 @@ export default class QueryEditorUI extends Component<Props, State> {
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',
                 wrappingIndent: 'indent',
-                selectionHighlight: false,
               }}
             />
           </EuiFlexItem>
