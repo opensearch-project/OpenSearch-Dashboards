@@ -36,7 +36,6 @@ export class GroupBy extends PPLNode {
    * @returns An object containing the tokens of the group fields and the span.
    */
   getTokens(): Tokens {
-    console.log('this.fields: ', this.fields);
     return {
       group_fields: this.fields.map((field) => field.getTokens()),
       span: this.span,

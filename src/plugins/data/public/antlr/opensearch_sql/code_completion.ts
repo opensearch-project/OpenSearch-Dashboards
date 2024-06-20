@@ -9,6 +9,7 @@
  * GitHub history for details.
  */
 
+import { stringify } from '@osd/std';
 import {
   CharStream,
   CommonTokenStream,
@@ -35,141 +36,106 @@ import { createParser } from './parse';
 import { SqlErrorListener } from './sql_error_listerner';
 import { findCursorTokenIndex } from './cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
-
-function getCursorIndex(query: string, cursor: { line: number; column: number }): number {
-  const lines = query.split(/\r?\n/);
-  let cursorIndex = 0;
-
-  for (let i = 0; i < cursor.line - 1; i++) {
-    cursorIndex += lines[i].length + 1; // +1 for newline character
-  }
-
-  cursorIndex += cursor.column - 1; // Convert to 0-based index
-
-  return cursorIndex;
-}
-
-function getTokenNameByType(parser, tokenType) {
-  return (
-    parser.vocabulary.getSymbolicName(tokenType) || parser.vocabulary.getLiteralName(tokenType)
-  );
-}
+import { getUiSettings } from '../../services';
+import { field } from 'vega';
 
 export const getSuggestions = async ({ selectionStart, selectionEnd, query }) => {
-  console.log('selectionStart: ', selectionStart, ' selectionEnd: ', selectionEnd);
+  const { api } = getUiSettings();
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
     line: 1,
     column: selectionStart + 1,
   });
-  console.log('this suggestions: ', suggestions);
-  // console.log(
-  //   'selectionStart: ',
-  //   selectionStart,
-  //   ' query: ',
-  //   query,
-  //   ' selectionEnd: ',
-  //   selectionEnd
-  // );
-  // const cursorIndex = selectionStart;
-  // const parser = new OpenSearchSQLParser(
-  //   new CommonTokenStream(new OpenSearchSQLLexer(CharStream.fromString(query)))
-  // );
-  // const tree = parser.sqlStatement();
-  // const core = new CodeCompletionCore(parser);
-  // const candidates = core.collectCandidates(cursorIndex, tree);
-  // const suggestions = [];
-  // for (const [tokenType, _] of candidates.tokens.entries()) {
-  //   const tokenName = getTokenNameByType(parser, tokenType);
-  //   if (tokenName) {
-  //     suggestions.push(tokenName);
-  //   }
-  // }
-  return suggestions;
+
+  console.log('built in suggestions: ', suggestions);
+
+  const finalSuggestions = [];
+
+  // fetch columns
+  if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
+    const tableNames = suggestions.suggestColumns?.tables?.map((table) => table.name) ?? [];
+    const schemas = await fetchTableSchemas(tableNames, api);
+    schemas.forEach((schema, index) => {
+      if (schema.body?.fields?.length > 0) {
+        const columns = schema.body.fields.find((col) => col.name === 'COLUMN_NAME');
+        finalSuggestions.push(...columns.values.map((col: string) => ({ text: col })));
+      }
+    });
+
+    if (
+      'suggestValuesForColumn' in suggestions &&
+      /\S/.test(suggestions.suggestValuesForColumn as string)
+    ) {
+      const values = await fetchColumnValues(
+        tableNames,
+        suggestions.suggestValuesForColumn as string,
+        api
+      );
+      console.log('values: ', values);
+      values.forEach((value) => {
+        if (value.body?.fields?.length > 0) {
+          finalSuggestions.push(
+            ...value.body.fields[0].values.map((colVal: string) => ({ text: `'${colVal}'` }))
+          );
+        }
+      });
+    }
+  }
+
+  if (suggestions.suggestFunctions) {
+    finalSuggestions.push(
+      ...suggestions.suggestFunctions.map((sf) => ({
+        text: sf.value,
+        description: sf.description,
+      }))
+    );
+  }
+
+  // fetch functions
+  if ('suggestAggregateFunctions' in suggestions && suggestions.suggestAggregateFunctions) {
+  }
+
+  if ('suggestKeywords' in suggestions && (suggestions.suggestKeywords?.length ?? 0) > 0) {
+    finalSuggestions.push(...suggestions.suggestKeywords!.map((sk) => ({ text: sk.value })));
+  }
+
+  return finalSuggestions;
+};
+
+const fetchColumnValues = async (tables: string[], column: string, api) => {
+  return Promise.all(
+    tables.map(async (table) => {
+      const body = stringify({
+        query: { qs: `SELECT DISTINCT ${column} FROM ${table} LIMIT 10`, format: 'jdbc' },
+        df: null,
+      });
+      return api.http.fetch({
+        method: 'POST',
+        path: '/api/enhancements/search/sql',
+        body,
+        undefined,
+      });
+    })
+  );
+};
+
+const fetchTableSchemas = async (tables: string[], api) => {
+  return Promise.all(
+    tables.map(async (table) => {
+      const body = stringify({
+        query: { qs: `DESCRIBE TABLES LIKE ${table}`, format: 'jdbc' },
+        df: null,
+      });
+      return api.http.fetch({
+        method: 'POST',
+        path: '/api/enhancements/search/sql',
+        body,
+        undefined,
+      });
+    })
+  );
 };
 
 const quotesRegex = /^'(.*)'$/;
-
-// Regex to identify if a token is an identifier (usually a word)
-const possibleIdentifierPrefixRegex = /[\w]$/;
-
-// Helper regex to match line separators
-const lineSeparatorRegex = /\r\n|\n|\r/g;
-
-// const startColumn = token.charPositionInLine;
-// const endColumn = startColumn + (token.text?.length || 0);
-
-// Function to get the start and end positions of a token
-// function getTokenPosition(token: Token, whitespaceToken: number) {
-//   const startColumn = token.start;
-//   const endColumn = token.stop + 1;
-//   const startLine = token.line;
-//   const endLine =
-//     token.type !== whitespaceToken || !token.text
-//       ? startLine
-//       : startLine + (token.text.match(lineSeparatorRegex)?.length || 0);
-
-//   return { startColumn, startLine, endColumn, endLine };
-// }
-
-// Function to convert a cursor position (line and column) into a token index
-// export function findCursorTokenIndex(
-//   tokenStream: CommonTokenStream,
-//   cursor: { line: number; column: number },
-//   whitespaceToken: number,
-//   actualIndex?: boolean
-// ): number | undefined {
-//   // Convert the cursor column from 1-based to 0-based indexing
-//   const cursorCol = cursor.column - 1;
-//   console.log('tokenStream: ', tokenStream);
-//   for (let i = 0; i < tokenStream.size; i++) {
-//     const token = tokenStream.get(i);
-//     const { startColumn, startLine, endColumn, endLine } = getTokenPosition(token, whitespaceToken);
-//     // console.log('is white space: ', token.type === whitespaceToken);
-//     // console.log(
-//     //   `Token ${i}: type: ${token.type}, '${token.text}' at [${startLine},${startColumn}] - [${endLine},${endColumn}]`
-//     // );
-
-//     // Check if the token ends after the cursor position or is on the same line and ends after the cursor column
-//     if (endLine > cursor.line || (startLine === cursor.line && endColumn >= cursorCol)) {
-//       if (actualIndex) {
-//         return i;
-//       }
-
-//       // Handle the case where the cursor is positioned at the start of an identifier
-//       if (
-//         i > 0 &&
-//         startLine === cursor.line &&
-//         startColumn === cursorCol &&
-//         possibleIdentifierPrefixRegex.test(tokenStream.get(i - 1).text || '')
-//       ) {
-//         return i - 1;
-//       } else if (token.type === whitespaceToken) {
-//         return i + 1;
-//       }
-//       return i;
-//     }
-//   }
-
-//   // Handle the edge case where the cursor is at the end of the input string
-//   const lastToken: Token = tokenStream.get(tokenStream.size - 1);
-//   if (
-//     cursor.line >= lastToken.line &&
-//     cursor.column >= lastToken.start + (lastToken.text?.length || 0)
-//   ) {
-//     return tokenStream.size - 1;
-//   }
-//   return undefined;
-// }
-
-// Example function to log tokens for debugging
-function logTokens(tokenStream: CommonTokenStream) {
-  for (let i = 0; i < tokenStream.size; i++) {
-    const token = tokenStream.get(i);
-    console.log(
-      `Token ${i}: ${token.text} (Type: ${token.type}, Line: ${token.line}, Column: ${token.charPositionInLine})`
-    );
-  }
-}
 
 export interface ParsingSubject<A extends AutocompleteResultBase, L, P> {
   Lexer: LexerConstructor<L>;
@@ -211,7 +177,6 @@ export const parseQuery = <
   const core = new CodeCompletionCore(parser);
   core.ignoredTokens = ignoredTokens;
   core.preferredRules = rulesToVisit;
-  // const commonTokenStream = tokenStream as CommonTokenStream;
   console.log('this tokenStream: ', tokenStream);
   console.log('cursor: ', cursor);
   const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, tokenDictionary.SPACE);
@@ -265,18 +230,3 @@ export const getOpenSearchSqlAutoCompleteSuggestions = (
     cursor,
   });
 };
-
-// const parsed1 = getOpenSearchSqlAutoCompleteSuggestions('SELECT * FROM ', {
-//   line: 0,
-//   column: 13,
-// });
-// const parsed2 = getOpenSearchSqlAutoCompleteSuggestions(
-//   'SELECT * FROM opensearch_dashboards_sample_data_ecommerce ',
-//   { line: 1, column: 59 }
-// );
-// const parsed2 = getOpenSearchSqlAutoCompleteSuggestions(
-//   'SELECT * FROM opensearch_dashboards_sample_data_ecommerce ',
-//   { line: 1, column: 59 }
-// );
-// // console.log('parsed1: ', parsed1);
-// console.log('parsed2: ', parsed2);

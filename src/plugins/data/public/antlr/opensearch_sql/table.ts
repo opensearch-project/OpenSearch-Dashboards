@@ -224,9 +224,11 @@ export function getPreviousToken(
 ): Token | undefined {
   let currentIndex = tokenIndex - 1;
 
+  console.log('tokenType: ', tokenType);
+
   while (currentIndex > -1) {
     const token = tokenStream.get(currentIndex);
-
+    console.log('token.type: ', token.type, ' tokenType: ', tokenType, ' token: ', token);
     // This is the end of previous statement, so we want to exit
     if (token.type === dictionary.SEMICOLON) {
       return undefined;

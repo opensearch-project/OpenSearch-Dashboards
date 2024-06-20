@@ -43,9 +43,9 @@ const qm = new QueryManager();
 const statsPartial = qm.queryParser().parse(q1).getParsedTokens();
 const nonStatsPartial = qm.queryParser().parse(q2).getParsedTokens();
 const wherePartial = qm.queryParser().parse(q2).getParsedTokens();
-console.log('q1: ', statsPartial); 
-console.log('q2: ', nonStatsPartial);
-console.log('wherePartial: ', wherePartial);
+// console.log('q1: ', statsPartial); 
+// console.log('q2: ', nonStatsPartial);
+// console.log('wherePartial: ', wherePartial);
 
 export const getSuggestions = async ({ selectionStart, query }) => {
   try {
