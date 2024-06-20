@@ -464,6 +464,7 @@ export {
   TimeHistoryContract,
   QueryStateChange,
   QueryStart,
+  PersistedLog,
 } from './query';
 
 export { AggsStart } from './search/aggs';
