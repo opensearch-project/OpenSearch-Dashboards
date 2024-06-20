@@ -29,7 +29,7 @@
  */
 
 import _ from 'lodash';
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { CoreStart } from 'src/core/public';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { OpenSearchDashboardsContextProvider } from '../../../../opensearch_dashboards_react/public';
@@ -41,15 +41,14 @@ import { useSavedQuery } from './lib/use_saved_query';
 import { DataPublicPluginStart } from '../../types';
 import { Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
-import { QueryEnhancement, Settings } from '../types';
+import { Settings } from '../types';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: IStorageWrapper;
-  isEnhancementsEnabled: boolean;
-  queryEnhancements: Map<string, QueryEnhancement>;
   settings: Settings;
+  setContainerRef: (ref: HTMLDivElement | null) => void;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -138,9 +137,8 @@ export function createSearchBar({
   core,
   storage,
   data,
-  isEnhancementsEnabled,
-  queryEnhancements,
   settings,
+  setContainerRef,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -175,6 +173,12 @@ export function createSearchBar({
       savedQueryId: props.savedQueryId,
       notifications: core.notifications,
     });
+
+    const containerRef = useCallback((node) => {
+      if (node) {
+        setContainerRef(node);
+      }
+    }, []);
 
     // Fire onQuerySubmit on query or timerange change
     useEffect(() => {
@@ -214,9 +218,8 @@ export function createSearchBar({
           isRefreshPaused={refreshInterval.pause}
           filters={filters}
           query={query}
-          isEnhancementsEnabled={isEnhancementsEnabled}
-          queryEnhancements={queryEnhancements}
           settings={settings}
+          containerRef={containerRef}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}

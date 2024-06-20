@@ -4,6 +4,7 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from 'src/core/public';
+import { BehaviorSubject } from 'rxjs';
 import { IUiStart, IUiSetup, QueryEnhancement, UiEnhancements } from './types';
 
 import { ConfigSchema } from '../../config';
@@ -26,6 +27,7 @@ export interface UiServiceStartDependencies {
 export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
   private queryEnhancements: Map<string, QueryEnhancement> = new Map();
+  private container$ = new BehaviorSubject<HTMLDivElement | null>(null);
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     const { enhancements } = initializerContext.config.get<ConfigSchema>();
@@ -46,23 +48,30 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
   }
 
   public start(core: CoreStart, { dataServices, storage }: UiServiceStartDependencies): IUiStart {
-    const Settings = createSettings({ storage, queryEnhancements: this.queryEnhancements });
+    const Settings = createSettings({
+      config: this.enhancementsConfig,
+      search: dataServices.search,
+      storage,
+      queryEnhancements: this.queryEnhancements,
+    });
+
+    const setContainerRef = (ref: HTMLDivElement | null) => {
+      this.container$.next(ref);
+    };
 
     const SearchBar = createSearchBar({
       core,
       data: dataServices,
       storage,
-      isEnhancementsEnabled: this.enhancementsConfig?.enabled,
-      queryEnhancements: this.queryEnhancements,
       settings: Settings,
+      setContainerRef,
     });
 
     return {
-      isEnhancementsEnabled: this.enhancementsConfig?.enabled,
-      queryEnhancements: this.queryEnhancements,
       IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
       SearchBar,
       Settings,
+      container$: this.container$,
     };
   }
 
