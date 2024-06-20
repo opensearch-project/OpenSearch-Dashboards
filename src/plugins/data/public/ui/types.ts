@@ -7,7 +7,9 @@ import { Observable } from 'rxjs';
 import { SearchInterceptor } from '../search';
 import { IndexPatternSelectProps } from './index_pattern_select';
 import { StatefulSearchBarProps } from './search_bar';
+import { QueryEditorExtensionConfig } from './query_editor/query_editor_extensions';
 import { Settings } from './settings';
+import { SuggestionsComponentProps } from './typeahead/suggestions_component';
 
 export * from './settings';
 
@@ -44,6 +46,7 @@ export interface QueryEnhancement {
 
 export interface UiEnhancements {
   query?: QueryEnhancement;
+  queryEditorExtension?: QueryEditorExtensionConfig;
 }
 
 /**
@@ -60,6 +63,7 @@ export interface IUiSetup {
 export interface IUiStart {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
+  SuggestionsComponent: React.ComponentType<SuggestionsComponentProps>;
   Settings: Settings;
   container$: Observable<HTMLDivElement | null>;
 }
