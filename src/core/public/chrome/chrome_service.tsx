@@ -546,7 +546,7 @@ export interface ChromeNavGroup {
   description: string;
   order?: number;
   icon?: EuiIconType;
-  type: GROUP_TYPE; // group with type of GROUP_TYPE.SYSTEM_GROUP will always be displayed before USE_CASE_GROUP
+  type: GROUP_TYPE; // group with type of GROUP_TYPE.SYSTEM_GROUP will always display before USE_CASE_GROUP
 }
 
 /** @public */
