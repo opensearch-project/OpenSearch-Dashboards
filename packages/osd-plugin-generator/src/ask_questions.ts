@@ -51,6 +51,10 @@ export const INTERNAL_PLUGIN_LOCATIONS: Array<{ name: string; value: string }> =
     value: Path.resolve(REPO_ROOT, 'src/plugins'),
   },
   {
+    name: 'OpenSearch Dashboards Extra',
+    value: Path.resolve(REPO_ROOT, 'osd-extra/plugins'),
+  },
+  {
     name: 'OpenSearch Dashboards OSS Functional Testing',
     value: Path.resolve(REPO_ROOT, 'test/plugin_functional/plugins'),
   },

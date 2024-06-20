@@ -180,6 +180,7 @@ export class OptimizerConfig {
       Path.resolve(repoRoot, 'plugins'),
       ...(examples ? [Path.resolve('examples')] : []),
       Path.resolve(repoRoot, 'opensearch-dashboards-extra'),
+      Path.resolve(repoRoot, 'osd-extra/plugins'),
     ];
 
     if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {
