@@ -39,7 +39,12 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import { ChromeRegistrationNavLink, ChromeService, ChromeNavGroup } from './chrome_service';
+import {
+  ChromeRegistrationNavLink,
+  ChromeService,
+  ChromeNavGroup,
+  GROUP_TYPE,
+} from './chrome_service';
 import { getAppInfo } from '../application/utils';
 import { overlayServiceMock } from '../mocks';
 
@@ -114,12 +119,14 @@ const mockedGroupFoo: ChromeNavGroup = {
   id: 'foo',
   title: 'foo',
   description: 'foo',
+  type: GROUP_TYPE.SYSTEM_GROUP,
 };
 
 const mockedGroupBar: ChromeNavGroup = {
   id: 'bar',
   title: 'bar',
   description: 'bar',
+  type: GROUP_TYPE.USE_CASE_GROUP,
 };
 
 const mockedNavLinkFoo: ChromeRegistrationNavLink = {
