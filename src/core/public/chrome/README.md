@@ -112,16 +112,31 @@ Gets an Observable of the array of recently accessed history :-
    chrome.docTitle.change('My application title')
    chrome.docTitle.change(['My application', 'My section'])
    ```
-### UseCaseService:
-- Interface : ChromeUseCase
+### GroupService:
+- Interface : ChromeNavGroup
 - Methods :
-Register a use case :-
+Register a group :-
 
-`registerNavLink: (useCase: ChromeUseCase, navLink: ChromeRegistrationNavLink) => void;`
+`addNavToGroup: (group: ChromeNavGroup, navLink: ChromeRegistrationNavLink) => void;`
 
-Gets an Observable of the array of registered use cases :-
+Gets an Observable of the array of registered groups :-
 
-`getUseCases$: Observable<Array<ChromeUseCase & { navLinks: ChromeRegistrationNavLink[] }>>`
+`getGroupsMap$: Observable<Record<string, NavGroupItemInMap>>`
+##### Register a new group with a navLink
+
+  ```ts
+    chrome.addNavToGroup(
+      { 
+        id: 'my-group',
+        title: 'A demo group',
+        description: 'description for demo group'
+      },
+      {
+        id: 'nav'
+      }
+    )
+   ```
+
 ### UI :
 ###### consists of tsx/scss files && renders UI components from css Library e.g ```<Progress props={props}>```
 

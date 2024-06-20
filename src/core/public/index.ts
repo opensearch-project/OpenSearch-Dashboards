@@ -71,7 +71,7 @@ import {
   RightNavigationOrder,
   RightNavigationButton,
   RightNavigationButtonProps,
-  ChromeUseCase,
+  ChromeNavGroup,
   ChromeRegistrationNavLink,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
@@ -368,7 +368,7 @@ export {
   RightNavigationOrder,
   RightNavigationButton,
   RightNavigationButtonProps,
-  ChromeUseCase,
+  ChromeNavGroup,
   ChromeRegistrationNavLink,
 };
 

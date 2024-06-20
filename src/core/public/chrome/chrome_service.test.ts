@@ -39,7 +39,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import { ChromeRegistrationNavLink, ChromeService, ChromeUseCase } from './chrome_service';
+import { ChromeRegistrationNavLink, ChromeService, ChromeNavGroup } from './chrome_service';
 import { getAppInfo } from '../application/utils';
 import { overlayServiceMock } from '../mocks';
 
@@ -110,13 +110,13 @@ afterAll(() => {
   (window as any).localStorage = originalLocalStorage;
 });
 
-const mockedUseCaseFoo: ChromeUseCase = {
+const mockedGroupFoo: ChromeNavGroup = {
   id: 'foo',
   title: 'foo',
   description: 'foo',
 };
 
-const mockedUseCaseBar: ChromeUseCase = {
+const mockedGroupBar: ChromeNavGroup = {
   id: 'bar',
   title: 'bar',
   description: 'bar',
@@ -128,7 +128,6 @@ const mockedNavLinkFoo: ChromeRegistrationNavLink = {
 
 const mockedNavLinkBar: ChromeRegistrationNavLink = {
   id: 'bar',
-  title: 'bar',
 };
 
 describe('setup', () => {
@@ -168,42 +167,39 @@ describe('setup', () => {
     );
   });
 
-  it('should be able registerNavLink', async () => {
+  it('should be able addNavToGroup', async () => {
     const warnMock = jest.fn();
     jest.spyOn(console, 'warn').mockImplementation(warnMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
 
     const chromeSetup = chrome.setup();
 
-    chromeSetup.registerNavLink(mockedUseCaseFoo, mockedNavLinkFoo);
-    chromeSetup.registerNavLink(mockedUseCaseBar, mockedNavLinkBar);
-    chromeSetup.registerNavLink(mockedUseCaseFoo, mockedNavLinkBar);
-    const useCaseList = await chromeSetup.getUseCases$().pipe(first()).toPromise();
-    expect(useCaseList.length).toEqual(2);
-    expect(useCaseList[0].navLinks.length).toEqual(2);
-    expect(useCaseList[1].navLinks.length).toEqual(1);
-    expect(useCaseList[0].id).toEqual(mockedUseCaseFoo.id);
+    chromeSetup.addNavToGroup(mockedGroupFoo, mockedNavLinkFoo);
+    chromeSetup.addNavToGroup(mockedGroupBar, mockedNavLinkBar);
+    chromeSetup.addNavToGroup(mockedGroupFoo, mockedNavLinkBar);
+    const groupsMap = await chromeSetup.getGroupsMap$().pipe(first()).toPromise();
+    expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(2);
+    expect(groupsMap[mockedGroupBar.id].navLinks.length).toEqual(1);
+    expect(groupsMap[mockedGroupFoo.id].id).toEqual(mockedGroupFoo.id);
     expect(warnMock).toBeCalledTimes(0);
   });
 
-  it('should output warning message if registerNavLink with same use case id and navLink id', async () => {
+  it('should output warning message if addNavToGroup with same group id and navLink id', async () => {
     const warnMock = jest.fn();
     jest.spyOn(console, 'warn').mockImplementation(warnMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
 
     const chromeSetup = chrome.setup();
 
-    chromeSetup.registerNavLink(mockedUseCaseFoo, mockedNavLinkFoo);
-    chromeSetup.registerNavLink(mockedUseCaseBar, mockedNavLinkBar);
-    chromeSetup.registerNavLink(mockedUseCaseFoo, mockedNavLinkFoo);
-    const useCaseList = await chromeSetup.getUseCases$().pipe(first()).toPromise();
-    expect(useCaseList.length).toEqual(2);
-    expect(useCaseList[0].navLinks.length).toEqual(1);
-    expect(useCaseList[1].navLinks.length).toEqual(1);
-    expect(useCaseList[0].id).toEqual(mockedUseCaseFoo.id);
+    chromeSetup.addNavToGroup(mockedGroupFoo, mockedNavLinkFoo);
+    chromeSetup.addNavToGroup(mockedGroupBar, mockedNavLinkBar);
+    chromeSetup.addNavToGroup(mockedGroupFoo, mockedNavLinkFoo);
+    const groupsMap = await chromeSetup.getGroupsMap$().pipe(first()).toPromise();
+    expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(1);
+    expect(groupsMap[mockedGroupBar.id].navLinks.length).toEqual(1);
     expect(warnMock).toBeCalledTimes(1);
     expect(warnMock).toBeCalledWith(
-      `[ChromeService] Navlink of ${mockedUseCaseFoo.id} has already been registered in use case ${mockedUseCaseFoo.id}`
+      `[ChromeService] Navlink of ${mockedGroupFoo.id} has already been registered in group ${mockedGroupFoo.id}`
     );
   });
 });
@@ -546,24 +542,23 @@ describe('start', () => {
     });
   });
 
-  describe('use case', () => {
-    it('should be able to get the use cases registered through registerNavLinks', async () => {
+  describe('group', () => {
+    it('should be able to get the groups registered through addNavToGroups', async () => {
       const startDeps = defaultStartDeps([]);
       const chrome = new ChromeService({ browserSupportsCsp: true });
 
       const chromeSetup = chrome.setup();
 
-      chromeSetup.registerNavLink(mockedUseCaseFoo, mockedNavLinkFoo);
-      chromeSetup.registerNavLink(mockedUseCaseBar, mockedNavLinkBar);
+      chromeSetup.addNavToGroup(mockedGroupFoo, mockedNavLinkFoo);
+      chromeSetup.addNavToGroup(mockedGroupBar, mockedNavLinkBar);
 
       const chromeStart = await chrome.start(startDeps);
 
-      const useCaseList = await chromeStart.getUseCases$().pipe(first()).toPromise();
+      const groupsMap = await chromeStart.getGroupsMap$().pipe(first()).toPromise();
 
-      expect(useCaseList.length).toEqual(2);
-      expect(useCaseList[0].navLinks.length).toEqual(1);
-      expect(useCaseList[1].navLinks.length).toEqual(1);
-      expect(useCaseList[0].id).toEqual(mockedUseCaseFoo.id);
+      expect(Object.keys(groupsMap).length).toEqual(2);
+      expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(1);
+      expect(groupsMap[mockedGroupBar.id].navLinks.length).toEqual(1);
     });
   });
 });

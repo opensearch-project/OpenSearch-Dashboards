@@ -36,7 +36,7 @@ export {
   ChromeStart,
   InternalChromeStart,
   ChromeHelpExtension,
-  ChromeUseCase,
+  ChromeNavGroup,
   ChromeRegistrationNavLink,
 } from './chrome_service';
 export {

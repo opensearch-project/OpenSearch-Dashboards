@@ -29,6 +29,7 @@
  */
 
 import { EuiBreadcrumb, IconType } from '@elastic/eui';
+import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
@@ -48,7 +49,7 @@ import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
-import { Branding } from '../';
+import { AppCategory, Branding } from '../';
 import { getLogos } from '../../common';
 import type { Logos } from '../../common/types';
 import { OverlayStart } from '../overlays';
@@ -102,6 +103,10 @@ export interface StartDeps {
 
 type CollapsibleNavHeaderRender = () => JSX.Element | null;
 
+type NavGroupItemInMap = ChromeNavGroup & {
+  navLinks: ChromeRegistrationNavLink[];
+};
+
 /** @internal */
 export class ChromeService {
   private isVisible$!: Observable<boolean>;
@@ -111,9 +116,7 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
-  private readonly useCaseList$ = new BehaviorSubject<
-    Array<ChromeUseCase & { navLinks: ChromeRegistrationNavLink[] }>
-  >([]);
+  private readonly groupsMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({});
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
 
   constructor(private readonly params: ConstructorParams) {}
@@ -161,29 +164,31 @@ export class ChromeService {
         }
         this.collapsibleNavHeaderRender = render;
       },
-      registerNavLink: (useCase: ChromeUseCase, navLink: ChromeRegistrationNavLink) => {
-        const currentUseCaseList = [...this.useCaseList$.getValue()];
-        const findItem = currentUseCaseList.find((item) => item.id === useCase.id);
-        if (findItem) {
-          const findNavLinks = findItem.navLinks.find((link) => link.id === navLink.id);
-          if (findNavLinks) {
+      addNavToGroup: (navGroup: ChromeNavGroup, navLink: ChromeRegistrationNavLink) => {
+        // Construct a new groups map pointer.
+        const currentGroupsMap = { ...this.groupsMap$.getValue() };
+        const matchedGroup = currentGroupsMap[navGroup.id];
+        if (matchedGroup) {
+          const links = matchedGroup.navLinks;
+          const IfNavExist = !!links.find((link) => link.id === navLink.id);
+          if (IfNavExist) {
             // eslint-disable-next-line no-console
             console.warn(
-              `[ChromeService] Navlink of ${navLink.id} has already been registered in use case ${useCase.id}`
+              `[ChromeService] Navlink of ${navLink.id} has already been registered in group ${navGroup.id}`
             );
             return;
           }
-          findItem.navLinks.push(navLink);
+          matchedGroup.navLinks.push(navLink);
         } else {
-          currentUseCaseList.push({
-            ...useCase,
+          currentGroupsMap[navGroup.id] = {
+            ...navGroup,
             navLinks: [navLink],
-          });
+          };
         }
 
-        this.useCaseList$.next(currentUseCaseList);
+        this.groupsMap$.next(currentGroupsMap);
       },
-      getUseCases$: () => this.useCaseList$.pipe(takeUntil(this.stop$)),
+      getGroupsMap$: () => this.groupsMap$.pipe(takeUntil(this.stop$)),
     };
   }
 
@@ -366,7 +371,7 @@ export class ChromeService {
         customNavLink$.next(customNavLink);
       },
 
-      getUseCases$: () => this.useCaseList$.pipe(takeUntil(this.stop$)),
+      getGroupsMap$: () => this.groupsMap$.pipe(takeUntil(this.stop$)),
     };
   }
 
@@ -388,14 +393,8 @@ export class ChromeService {
  */
 export interface ChromeSetup {
   registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
-  registerNavLink: (useCase: ChromeUseCase, navLink: ChromeRegistrationNavLink) => void;
-  getUseCases$: () => Observable<
-    Array<
-      ChromeUseCase & {
-        navLinks: ChromeRegistrationNavLink[];
-      }
-    >
-  >;
+  addNavToGroup: (group: ChromeNavGroup, navLink: ChromeRegistrationNavLink) => void;
+  getGroupsMap$: () => Observable<Record<string, NavGroupItemInMap>>;
 }
 
 /**
@@ -523,7 +522,7 @@ export interface ChromeStart {
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
 
-  getUseCases$: ChromeSetup['getUseCases$'];
+  getGroupsMap$: ChromeSetup['getGroupsMap$'];
 }
 
 /** @internal */
@@ -535,18 +534,24 @@ export interface InternalChromeStart extends ChromeStart {
   getHeaderComponent(): JSX.Element;
 }
 
+export enum GROUP_TYPE {
+  SYSTEM_GROUP = 'SYSTEM_GROUP',
+  USE_CASE_GROUP = 'USE_CASE_GROUP',
+}
+
 /** @public */
-export interface ChromeUseCase {
+export interface ChromeNavGroup {
   id: string;
   title: string;
   description: string;
   order?: number;
-  icon?: string;
-  reserved?: boolean; // use cases like data administration / settings and setup is not configurable through workspace
+  icon?: EuiIconType;
+  type: GROUP_TYPE; // group with type of GROUP_TYPE.SYSTEM_GROUP will always be displayed before USE_CASE_GROUP
 }
 
 /** @public */
-export interface ChromeRegistrationNavLink
-  extends Omit<ChromeNavLink, 'href' | 'baseUrl' | 'title'> {
-  title?: ChromeNavLink['title'];
+export interface ChromeRegistrationNavLink {
+  id: string;
+  category?: AppCategory;
+  order?: number;
 }
