@@ -29,10 +29,10 @@ import {
 } from '../../../../opensearch_dashboards_react/public';
 import { UI_SETTINGS } from '../../../common';
 import { fromUser, getQueryLog, PersistedLog } from '../../query';
-import { QueryEditorExtensions } from './query_editor_extensions';
 import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
+import { QueryEditorExtensions } from './query_editor_extensions';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
@@ -255,10 +255,12 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
   function renderQueryEditorExtensions() {
     if (
-      !shouldRenderQueryEditorExtensions() ||
-      !queryEditorHeaderRef.current ||
-      !queryEditorBannerRef.current ||
-      !queryLanguage
+      !(
+        queryEditorHeaderRef.current &&
+        queryEditorBannerRef.current &&
+        queryLanguage &&
+        shouldRenderQueryEditorExtensions()
+      )
     )
       return;
     return (
@@ -305,7 +307,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderQueryEditorExtensions(): boolean {
-    return Boolean(queryEditorExtensionMap && Object.keys(queryEditorExtensionMap).length);
+    return Boolean(queryEditorExtensionMap && Object.keys(queryEditorExtensionMap).length > 0);
   }
 
   function renderUpdateButton() {
