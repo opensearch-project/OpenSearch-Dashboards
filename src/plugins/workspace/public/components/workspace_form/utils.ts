@@ -14,7 +14,13 @@ import {
   WorkspacePermissionItemType,
 } from './constants';
 
-import { WorkspaceFormErrors, WorkspaceFormSubmitData, WorkspacePermissionSetting } from './types';
+import {
+  WorkspaceFormError,
+  WorkspaceFormErrorCode,
+  WorkspaceFormErrors,
+  WorkspaceFormSubmitData,
+  WorkspacePermissionSetting,
+} from './types';
 
 export const appendDefaultFeatureIds = (ids: string[]) => {
   // concat default checked ids and unique the result
@@ -190,64 +196,87 @@ export const validateWorkspaceForm = (
   const { name, permissionSettings, features } = formData;
   if (name) {
     if (!isValidFormTextInput(name)) {
-      formErrors.name = i18n.translate('workspace.form.detail.name.invalid', {
-        defaultMessage: 'Invalid workspace name',
-      });
+      formErrors.name = {
+        code: WorkspaceFormErrorCode.InvalidWorkspaceName,
+        message: i18n.translate('workspace.form.detail.name.invalid', {
+          defaultMessage: 'Invalid workspace name',
+        }),
+      };
     }
   } else {
-    formErrors.name = i18n.translate('workspace.form.detail.name.empty', {
-      defaultMessage: "Name can't be empty.",
-    });
+    formErrors.name = {
+      code: WorkspaceFormErrorCode.WorkspaceNameMissing,
+      message: i18n.translate('workspace.form.detail.name.empty', {
+        defaultMessage: "Name can't be empty.",
+      }),
+    };
   }
   if (!features || !features.some((featureConfig) => isUseCaseFeatureConfig(featureConfig))) {
-    formErrors.features = i18n.translate('workspace.form.features.empty', {
-      defaultMessage: 'Use case is required. Select a use case.',
-    });
+    formErrors.features = {
+      code: WorkspaceFormErrorCode.UseCaseMissing,
+      message: i18n.translate('workspace.form.features.empty', {
+        defaultMessage: 'Use case is required. Select a use case.',
+      }),
+    };
   }
   if (permissionSettings) {
-    const permissionSettingsErrors: { [key: number]: string } = {};
+    const permissionSettingsErrors: { [key: number]: WorkspaceFormError } = {};
     for (let i = 0; i < permissionSettings.length; i++) {
       const setting = permissionSettings[i];
       if (!setting.type) {
-        permissionSettingsErrors[setting.id] = i18n.translate(
-          'workspace.form.permission.invalidate.type',
-          {
+        permissionSettingsErrors[setting.id] = {
+          code: WorkspaceFormErrorCode.InvalidPermissionType,
+          message: i18n.translate('workspace.form.permission.invalidate.type', {
             defaultMessage: 'Invalid type',
-          }
-        );
+          }),
+        };
       } else if (!setting.modes || setting.modes.length === 0) {
-        permissionSettingsErrors[setting.id] = i18n.translate(
-          'workspace.form.permission.invalidate.modes',
-          {
+        permissionSettingsErrors[setting.id] = {
+          code: WorkspaceFormErrorCode.InvalidPermissionModes,
+          message: i18n.translate('workspace.form.permission.invalidate.modes', {
             defaultMessage: 'Invalid permission modes',
-          }
-        );
+          }),
+        };
       } else if (setting.type === WorkspacePermissionItemType.User && !setting.userId) {
-        permissionSettingsErrors[setting.id] = i18n.translate(
-          'workspace.form.permission.invalidate.userId',
-          {
-            defaultMessage: 'Invalid user id',
-          }
-        );
+        permissionSettingsErrors[setting.id] = {
+          code: WorkspaceFormErrorCode.PermissionUserIdMissing,
+          message: i18n.translate('workspace.form.permission.invalidate.userId', {
+            defaultMessage: 'User is required. Enter a user.',
+          }),
+        };
       } else if (setting.type === WorkspacePermissionItemType.Group && !setting.group) {
-        permissionSettingsErrors[setting.id] = i18n.translate(
-          'workspace.form.permission.invalidate.group',
-          {
-            defaultMessage: 'Invalid user group',
-          }
-        );
+        permissionSettingsErrors[setting.id] = {
+          code: WorkspaceFormErrorCode.PermissionUserGroupMissing,
+          message: i18n.translate('workspace.form.permission.invalidate.group', {
+            defaultMessage: 'User group is required. Enter a user group.',
+          }),
+        };
       } else if (
         isUserOrGroupPermissionSettingDuplicated(
           permissionSettings.slice(0, i),
           setting as WorkspacePermissionSetting
         )
       ) {
-        permissionSettingsErrors[setting.id] = i18n.translate(
-          'workspace.form.permission.invalidate.group',
-          {
-            defaultMessage: 'Duplicate permission setting',
-          }
-        );
+        permissionSettingsErrors[setting.id] = {
+          code:
+            setting.type === WorkspacePermissionItemType.User
+              ? WorkspaceFormErrorCode.DuplicateUserPermissionSetting
+              : WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
+          message:
+            setting.type === WorkspacePermissionItemType.User
+              ? i18n.translate(
+                  'workspace.form.permission.invalidate.duplicateUserPermissionSetting',
+                  {
+                    defaultMessage: 'User must be unique. Enter a unique user.',
+                  }
+                )
+              : i18n.translate(
+                  'workspace.form.permission.invalidate.duplicateUserGroupPermissionSetting',
+                  {
+                    defaultMessage: 'User group must be unique. Enter a unique user group.',
+                  }
+                ),
+        };
       }
     }
     if (Object.keys(permissionSettingsErrors).length > 0) {

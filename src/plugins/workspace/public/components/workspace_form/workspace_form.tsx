@@ -55,7 +55,13 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
 
   return (
     <EuiForm id={formId} onSubmit={handleFormSubmit} component="form">
-      <WorkspaceFormErrorCallout errors={formErrors} />
+      {numberOfErrors > 0 && (
+        <>
+          <WorkspaceFormErrorCallout errors={formErrors} />
+          <EuiSpacer />
+        </>
+      )}
+
       <EuiPanel>
         <EuiTitle size="s">
           <h2>{workspaceDetailsTitle}</h2>
@@ -70,7 +76,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
               'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
           })}
           isInvalid={!!formErrors.name}
-          error={formErrors.name}
+          error={formErrors.name?.message}
         >
           <EuiFieldText
             value={formData.name}
@@ -89,7 +95,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
             </>
           }
           isInvalid={!!formErrors.description}
-          error={formErrors.description}
+          error={formErrors.description?.message}
         >
           <>
             <EuiText size="xs" color="subdued">
@@ -117,7 +123,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
             defaultMessage: 'Color',
           })}
           isInvalid={!!formErrors.color}
-          error={formErrors.color}
+          error={formErrors.color?.message}
         >
           <div>
             <EuiText size="xs" color="subdued">
@@ -149,7 +155,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
             defaultMessage: 'Use case',
           })}
           isInvalid={!!formErrors.features}
-          error={formErrors.features}
+          error={formErrors.features?.message}
           fullWidth
         >
           <WorkspaceUseCase

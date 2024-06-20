@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { WorkspacePermissionSetting } from './types';
+import { WorkspaceFormError, WorkspacePermissionSetting } from './types';
 import {
   WorkspacePermissionItemType,
   optionIdToWorkspacePermissionModesMap,
@@ -19,7 +19,7 @@ import {
 import { generateNextPermissionSettingsId, getPermissionModeId } from './utils';
 
 export interface WorkspacePermissionSettingPanelProps {
-  errors?: { [key: number]: string };
+  errors?: { [key: number]: WorkspaceFormError };
   lastAdminItemDeletable: boolean;
   permissionSettings: Array<
     Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
@@ -116,7 +116,7 @@ const UserOrGroupSection = ({
       <EuiSpacer size="xs" />
       {permissionSettings.map((item, index) => (
         <React.Fragment key={item.id}>
-          <EuiFormRow fullWidth isInvalid={!!errors?.[item.id]} error={errors?.[item.id]}>
+          <EuiFormRow fullWidth isInvalid={!!errors?.[item.id]} error={errors?.[item.id]?.message}>
             <WorkspacePermissionSettingInput
               {...item}
               type={type}

@@ -34,10 +34,27 @@ export interface WorkspaceFormData extends WorkspaceFormSubmitData {
   reserved?: boolean;
 }
 
+export enum WorkspaceFormErrorCode {
+  InvalidWorkspaceName,
+  WorkspaceNameMissing,
+  UseCaseMissing,
+  InvalidPermissionType,
+  InvalidPermissionModes,
+  PermissionUserIdMissing,
+  PermissionUserGroupMissing,
+  DuplicateUserPermissionSetting,
+  DuplicateUserGroupPermissionSetting,
+}
+
+export interface WorkspaceFormError {
+  message: string;
+  code: WorkspaceFormErrorCode;
+}
+
 export type WorkspaceFormErrors = {
-  [key in keyof Omit<WorkspaceFormData, 'permissionSettings'>]?: string;
+  [key in keyof Omit<WorkspaceFormData, 'permissionSettings'>]?: WorkspaceFormError;
 } & {
-  permissionSettings?: { [key: number]: string };
+  permissionSettings?: { [key: number]: WorkspaceFormError };
 };
 
 export interface WorkspaceFormProps {

@@ -122,7 +122,6 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
     <EuiPage>
       <EuiPageBody>
         {!props.hideTitle ? <EuiPageHeader pageTitle="Update Workspace" /> : null}
-        <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
