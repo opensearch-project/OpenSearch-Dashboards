@@ -189,7 +189,6 @@ export interface SavedObjectsImportOptions {
   createNewCopies: boolean;
   dataSourceId?: string;
   dataSourceTitle?: string;
-  dataSourceEnabled?: boolean;
   workspaces?: SavedObjectsBaseOptions['workspaces'];
 }
 
