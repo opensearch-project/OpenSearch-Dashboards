@@ -50,6 +50,7 @@ export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions
       cache: true,
       dist: false,
       runExamples: false,
+      runExtras: false,
       ...(options.cliArgs || {}),
     },
     isDevClusterMaster:
