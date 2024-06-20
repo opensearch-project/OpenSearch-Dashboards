@@ -148,6 +148,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "getUseCases$": [MockFunction],
               "logos": Object {
                 "AnimatedMark": Object {
                   "dark": Object {
@@ -1322,6 +1323,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "getUseCases$": [MockFunction],
               "logos": Object {
                 "AnimatedMark": Object {
                   "dark": Object {
@@ -2557,6 +2559,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "getUseCases$": [MockFunction],
               "logos": Object {
                 "AnimatedMark": Object {
                   "dark": Object {
@@ -3792,6 +3795,7 @@ exports[`dashboard listing renders table rows 1`] = `
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "getUseCases$": [MockFunction],
               "logos": Object {
                 "AnimatedMark": Object {
                   "dark": Object {
@@ -5027,6 +5031,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               "getHelpExtension$": [MockFunction],
               "getIsNavDrawerLocked$": [MockFunction],
               "getIsVisible$": [MockFunction],
+              "getUseCases$": [MockFunction],
               "logos": Object {
                 "AnimatedMark": Object {
                   "dark": Object {
