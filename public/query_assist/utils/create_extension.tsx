@@ -77,14 +77,20 @@ interface QueryAssistWrapperProps {
 
 const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
   const [visible, setVisible] = useState(false);
+
   useEffect(() => {
-    const checkAvailability = async () => {
+    let mounted = true;
+
+    (async () => {
       const available = (await getAvailableLanguages(props.dependencies, props.http)).includes(
         props.dependencies.language
       );
-      setVisible(props.invert ? !available : available);
+      if (mounted) setVisible(props.invert ? !available : available);
+    })();
+
+    return () => {
+      mounted = false;
     };
-    checkAvailability();
   }, [props]);
 
   if (!visible) return null;

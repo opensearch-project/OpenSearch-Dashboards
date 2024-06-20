@@ -9,7 +9,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useState } from 'react';
-import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
 import { SUPPORTED_LANGUAGES } from '../../../common/query_assist';
 import assistantLogo from '../../assets/query_assist_logo.svg';
 import { getStorage } from '../../services';

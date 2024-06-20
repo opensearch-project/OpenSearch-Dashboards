@@ -79,7 +79,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
             props.previousQuestion ||
             (props.selectedIndex
               ? `Ask a natural language question about ${props.selectedIndex} to generate a query`
-              : 'Select an index pattern to ask a question')
+              : 'Select an index to ask a question')
           }
           prepend={<EuiIcon type={assistantLogo} />}
           fullWidth

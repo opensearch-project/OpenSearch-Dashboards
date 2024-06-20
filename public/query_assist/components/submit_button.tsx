@@ -1,5 +1,5 @@
-import React from 'react';
 import { EuiButtonIcon } from '@elastic/eui';
+import React from 'react';
 
 interface SubmitButtonProps {
   isDisabled: boolean;
@@ -14,6 +14,7 @@ export const QueryAssistSubmitButton: React.FC<SubmitButtonProps> = (props) => {
       size="s"
       type="submit"
       aria-label="Submit question to query assistant"
+      data-test-subj="query-assist-submit-button"
     />
   );
 };
