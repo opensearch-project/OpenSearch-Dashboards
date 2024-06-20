@@ -98,7 +98,7 @@ interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
 
-interface SetupDeps {
+export interface SetupDeps {
   uiSettings: IUiSettingsClient;
 }
 
