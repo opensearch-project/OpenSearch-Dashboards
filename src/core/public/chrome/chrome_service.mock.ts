@@ -34,10 +34,12 @@ import { ChromeBadge, ChromeBreadcrumb, ChromeService, InternalChromeStart } fro
 import { getLogosMock } from '../../common/mocks';
 
 const createSetupContractMock = () => {
+  const getUserCaseMock = jest.fn();
+  getUserCaseMock.mockReturnValue(new BehaviorSubject([]));
   return {
     registerCollapsibleNavHeader: jest.fn(),
     registerNavLink: jest.fn(),
-    getUseCases$: () => new BehaviorSubject([]),
+    getUseCases$: getUserCaseMock,
   };
 };
 
