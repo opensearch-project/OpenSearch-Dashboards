@@ -258,27 +258,27 @@ export default class QueryEditorUI extends Component<Props, State> {
       indexPatterns: this.state.indexPatterns,
     });
 
-    console.log('suggestions: ', suggestions);
-
-    return {
-      suggestions: suggestions
-        ? suggestions.suggestKeywords.map((s) => ({
-            label: s.value,
-            kind: monaco.languages.CompletionItemKind.Text,
-            insertText: s.value,
-          }))
-        : [],
-    };
+    console.log('provideCompletionItems suggestions: ', suggestions);
 
     // return {
     //   suggestions: suggestions
-    //     ? suggestions.suggestKeywords.list.map((s) => ({
-    //         label: s.text,
+    //     ? suggestions.suggestKeywords.map((s) => ({
+    //         label: s.value,
     //         kind: monaco.languages.CompletionItemKind.Text,
-    //         insertText: s.text,
+    //         insertText: s.value,
     //       }))
     //     : [],
     // };
+
+    return {
+      suggestions: suggestions
+        ? suggestions.map((s) => ({
+            label: s.text,
+            kind: monaco.languages.CompletionItemKind.Text,
+            insertText: s.text,
+          }))
+        : [],
+    };
   };
 
   public render() {

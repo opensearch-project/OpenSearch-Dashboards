@@ -21,7 +21,7 @@ export interface AutocompleteResultBase {
   suggestKeywords?: KeywordSuggestion[];
   suggestTemplates?: boolean;
   suggestAggregateFunctions?: boolean;
-  suggestFunctions?: boolean;
+  suggestScalarFunctions?: boolean;
   suggestColumns?: ColumnSuggestion;
   suggestColumnAliases?: ColumnAliasSuggestion[];
   suggestDatabases?: boolean;
@@ -84,11 +84,6 @@ export interface CursorPosition {
 
 export interface OpenSearchSqlAutocompleteResult extends AutocompleteResultBase {
   suggestViewsOrTables?: TableOrViewSuggestion;
-  suggestIndexes?: boolean;
-  suggestTriggers?: boolean;
-  suggestConstraints?: ConstraintSuggestion;
-  suggestRoles?: boolean;
-  suggestUsers?: boolean;
 }
 
 export enum TableOrViewSuggestion {

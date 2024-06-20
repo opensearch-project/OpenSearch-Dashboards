@@ -51,12 +51,7 @@ export function createParser<L extends LexerType, P extends ParserType>(
   Parser: ParserConstructor<P>,
   query: string
 ): P {
-  const inputStream = CharStream.fromString(query);
-  const lexer = new Lexer(inputStream);
-  const tokenStream = new CommonTokenStream(lexer);
-  console.log('inner tokenStream: ', tokenStream);
-  const parser = new Parser(tokenStream);
-  // const parser = new Parser(new CommonTokenStream(new Lexer(CharStream.fromString(query))));
+  const parser = new Parser(new CommonTokenStream(new Lexer(CharStream.fromString(query))));
   parser.removeErrorListeners();
   return parser;
 }

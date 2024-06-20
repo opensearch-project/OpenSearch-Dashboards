@@ -24,63 +24,63 @@ public class OpenSearchSQLParser extends Parser {
 		LAST=36, LEFT=37, LIKE=38, LIMIT=39, LONG=40, MATCH=41, NATURAL=42, MISSING_LITERAL=43, 
 		NOT=44, NULL_LITERAL=45, NULLS=46, ON=47, OR=48, ORDER=49, OUTER=50, OVER=51, 
 		PARTITION=52, REGEXP=53, RIGHT=54, SELECT=55, SHOW=56, STRING=57, THEN=58, 
-		TRUE=59, UNION=60, USING=61, WHEN=62, WHERE=63, MISSING=64, EXCEPT=65, 
-		AVG=66, COUNT=67, MAX=68, MIN=69, SUM=70, VAR_POP=71, VAR_SAMP=72, VARIANCE=73, 
-		STD=74, STDDEV=75, STDDEV_POP=76, STDDEV_SAMP=77, SUBSTRING=78, TRIM=79, 
-		END=80, FULL=81, OFFSET=82, INTERVAL=83, MICROSECOND=84, SECOND=85, MINUTE=86, 
-		HOUR=87, DAY=88, WEEK=89, MONTH=90, QUARTER=91, YEAR=92, SECOND_MICROSECOND=93, 
-		MINUTE_MICROSECOND=94, MINUTE_SECOND=95, HOUR_MICROSECOND=96, HOUR_SECOND=97, 
-		HOUR_MINUTE=98, DAY_MICROSECOND=99, DAY_SECOND=100, DAY_MINUTE=101, DAY_HOUR=102, 
-		YEAR_MONTH=103, TABLES=104, ABS=105, ACOS=106, ADD=107, ADDTIME=108, ASCII=109, 
-		ASIN=110, ATAN=111, ATAN2=112, CBRT=113, CEIL=114, CEILING=115, CONCAT=116, 
-		CONCAT_WS=117, CONV=118, CONVERT_TZ=119, COS=120, COSH=121, COT=122, CRC32=123, 
-		CURDATE=124, CURTIME=125, CURRENT_DATE=126, CURRENT_TIME=127, CURRENT_TIMESTAMP=128, 
-		DATE=129, DATE_ADD=130, DATE_FORMAT=131, DATE_SUB=132, DATEDIFF=133, DAYNAME=134, 
-		DAYOFMONTH=135, DAYOFWEEK=136, DAYOFYEAR=137, DEGREES=138, DIVIDE=139, 
-		E=140, EXP=141, EXPM1=142, EXTRACT=143, FLOOR=144, FROM_DAYS=145, FROM_UNIXTIME=146, 
-		GET_FORMAT=147, IF=148, IFNULL=149, ISNULL=150, LAST_DAY=151, LENGTH=152, 
-		LN=153, LOCALTIME=154, LOCALTIMESTAMP=155, LOCATE=156, LOG=157, LOG10=158, 
-		LOG2=159, LOWER=160, LTRIM=161, MAKEDATE=162, MAKETIME=163, MODULUS=164, 
-		MONTHNAME=165, MULTIPLY=166, NOW=167, NULLIF=168, PERIOD_ADD=169, PERIOD_DIFF=170, 
-		PI=171, POSITION=172, POW=173, POWER=174, RADIANS=175, RAND=176, REPLACE=177, 
-		RINT=178, ROUND=179, RTRIM=180, REVERSE=181, SEC_TO_TIME=182, SIGN=183, 
-		SIGNUM=184, SIN=185, SINH=186, SQRT=187, STR_TO_DATE=188, SUBDATE=189, 
-		SUBTIME=190, SUBTRACT=191, SYSDATE=192, TAN=193, TIME=194, TIMEDIFF=195, 
-		TIME_FORMAT=196, TIME_TO_SEC=197, TIMESTAMP=198, TRUNCATE=199, TO_DAYS=200, 
-		TO_SECONDS=201, UNIX_TIMESTAMP=202, UPPER=203, UTC_DATE=204, UTC_TIME=205, 
-		UTC_TIMESTAMP=206, D=207, T=208, TS=209, LEFT_BRACE=210, RIGHT_BRACE=211, 
-		DENSE_RANK=212, RANK=213, ROW_NUMBER=214, DATE_HISTOGRAM=215, DAY_OF_MONTH=216, 
-		DAY_OF_YEAR=217, DAY_OF_WEEK=218, EXCLUDE=219, EXTENDED_STATS=220, FIELD=221, 
-		FILTER=222, GEO_BOUNDING_BOX=223, GEO_CELL=224, GEO_DISTANCE=225, GEO_DISTANCE_RANGE=226, 
-		GEO_INTERSECTS=227, GEO_POLYGON=228, HISTOGRAM=229, HOUR_OF_DAY=230, INCLUDE=231, 
-		IN_TERMS=232, MATCHPHRASE=233, MATCH_PHRASE=234, MATCHPHRASEQUERY=235, 
-		SIMPLE_QUERY_STRING=236, QUERY_STRING=237, MATCH_PHRASE_PREFIX=238, MATCHQUERY=239, 
-		MATCH_QUERY=240, MINUTE_OF_DAY=241, MINUTE_OF_HOUR=242, MONTH_OF_YEAR=243, 
-		MULTIMATCH=244, MULTI_MATCH=245, MULTIMATCHQUERY=246, NESTED=247, PERCENTILES=248, 
-		PERCENTILE=249, PERCENTILE_APPROX=250, REGEXP_QUERY=251, REVERSE_NESTED=252, 
-		QUERY=253, RANGE=254, SCORE=255, SCOREQUERY=256, SCORE_QUERY=257, SECOND_OF_MINUTE=258, 
-		STATS=259, TERM=260, TERMS=261, TIMESTAMPADD=262, TIMESTAMPDIFF=263, TOPHITS=264, 
-		TYPEOF=265, WEEK_OF_YEAR=266, WEEKOFYEAR=267, WEEKDAY=268, WILDCARDQUERY=269, 
-		WILDCARD_QUERY=270, SUBSTR=271, STRCMP=272, ADDDATE=273, YEARWEEK=274, 
-		ALLOW_LEADING_WILDCARD=275, ANALYZER=276, ANALYZE_WILDCARD=277, AUTO_GENERATE_SYNONYMS_PHRASE_QUERY=278, 
-		BOOST=279, CASE_INSENSITIVE=280, CUTOFF_FREQUENCY=281, DEFAULT_FIELD=282, 
-		DEFAULT_OPERATOR=283, ESCAPE=284, ENABLE_POSITION_INCREMENTS=285, FIELDS=286, 
-		FLAGS=287, FUZZINESS=288, FUZZY_MAX_EXPANSIONS=289, FUZZY_PREFIX_LENGTH=290, 
-		FUZZY_REWRITE=291, FUZZY_TRANSPOSITIONS=292, LENIENT=293, LOW_FREQ_OPERATOR=294, 
-		MAX_DETERMINIZED_STATES=295, MAX_EXPANSIONS=296, MINIMUM_SHOULD_MATCH=297, 
-		OPERATOR=298, PHRASE_SLOP=299, PREFIX_LENGTH=300, QUOTE_ANALYZER=301, 
-		QUOTE_FIELD_SUFFIX=302, REWRITE=303, SLOP=304, TIE_BREAKER=305, TIME_ZONE=306, 
-		TYPE=307, ZERO_TERMS_QUERY=308, HIGHLIGHT=309, HIGHLIGHT_PRE_TAGS=310, 
-		HIGHLIGHT_POST_TAGS=311, MATCH_BOOL_PREFIX=312, STAR=313, SLASH=314, MODULE=315, 
-		PLUS=316, MINUS=317, DIV=318, MOD=319, EQUAL_SYMBOL=320, GREATER_SYMBOL=321, 
-		LESS_SYMBOL=322, EXCLAMATION_SYMBOL=323, BIT_NOT_OP=324, BIT_OR_OP=325, 
-		BIT_AND_OP=326, BIT_XOR_OP=327, DOT=328, LR_BRACKET=329, RR_BRACKET=330, 
-		LT_SQR_PRTHS=331, RT_SQR_PRTHS=332, COMMA=333, SEMI=334, AT_SIGN=335, 
-		ZERO_DECIMAL=336, ONE_DECIMAL=337, TWO_DECIMAL=338, SINGLE_QUOTE_SYMB=339, 
-		DOUBLE_QUOTE_SYMB=340, REVERSE_QUOTE_SYMB=341, COLON_SYMB=342, START_NATIONAL_STRING_LITERAL=343, 
-		STRING_LITERAL=344, DECIMAL_LITERAL=345, HEXADECIMAL_LITERAL=346, REAL_LITERAL=347, 
-		NULL_SPEC_LITERAL=348, BIT_STRING=349, ID=350, DOUBLE_QUOTE_ID=351, BACKTICK_QUOTE_ID=352, 
-		ERROR_RECOGNITION=353;
+		TRUE=59, UNION=60, USING=61, WHEN=62, WHERE=63, EXCEPT=64, AVG=65, COUNT=66, 
+		MAX=67, MIN=68, SUM=69, VAR_POP=70, VAR_SAMP=71, VARIANCE=72, STD=73, 
+		STDDEV=74, STDDEV_POP=75, STDDEV_SAMP=76, SUBSTRING=77, TRIM=78, END=79, 
+		FULL=80, OFFSET=81, INTERVAL=82, MICROSECOND=83, SECOND=84, MINUTE=85, 
+		HOUR=86, DAY=87, WEEK=88, MONTH=89, QUARTER=90, YEAR=91, SECOND_MICROSECOND=92, 
+		MINUTE_MICROSECOND=93, MINUTE_SECOND=94, HOUR_MICROSECOND=95, HOUR_SECOND=96, 
+		HOUR_MINUTE=97, DAY_MICROSECOND=98, DAY_SECOND=99, DAY_MINUTE=100, DAY_HOUR=101, 
+		YEAR_MONTH=102, TABLES=103, ABS=104, ACOS=105, ADD=106, ADDTIME=107, ASCII=108, 
+		ASIN=109, ATAN=110, ATAN2=111, CBRT=112, CEIL=113, CEILING=114, CONCAT=115, 
+		CONCAT_WS=116, CONV=117, CONVERT_TZ=118, COS=119, COSH=120, COT=121, CRC32=122, 
+		CURDATE=123, CURTIME=124, CURRENT_DATE=125, CURRENT_TIME=126, CURRENT_TIMESTAMP=127, 
+		DATE=128, DATE_ADD=129, DATE_FORMAT=130, DATE_SUB=131, DATEDIFF=132, DAYNAME=133, 
+		DAYOFMONTH=134, DAYOFWEEK=135, DAYOFYEAR=136, DEGREES=137, DIVIDE=138, 
+		E=139, EXP=140, EXPM1=141, EXTRACT=142, FLOOR=143, FROM_DAYS=144, FROM_UNIXTIME=145, 
+		GET_FORMAT=146, IF=147, IFNULL=148, ISNULL=149, LAST_DAY=150, LENGTH=151, 
+		LN=152, LOCALTIME=153, LOCALTIMESTAMP=154, LOCATE=155, LOG=156, LOG10=157, 
+		LOG2=158, LOWER=159, LTRIM=160, MAKEDATE=161, MAKETIME=162, MODULUS=163, 
+		MONTHNAME=164, MULTIPLY=165, NOW=166, NULLIF=167, PERIOD_ADD=168, PERIOD_DIFF=169, 
+		PI=170, POSITION=171, POW=172, POWER=173, RADIANS=174, RAND=175, REPLACE=176, 
+		RINT=177, ROUND=178, RTRIM=179, REVERSE=180, SEC_TO_TIME=181, SIGN=182, 
+		SIGNUM=183, SIN=184, SINH=185, SQRT=186, STR_TO_DATE=187, SUBDATE=188, 
+		SUBTIME=189, SUBTRACT=190, SYSDATE=191, TAN=192, TIME=193, TIMEDIFF=194, 
+		TIME_FORMAT=195, TIME_TO_SEC=196, TIMESTAMP=197, TRUNCATE=198, TO_DAYS=199, 
+		TO_SECONDS=200, UNIX_TIMESTAMP=201, UPPER=202, UTC_DATE=203, UTC_TIME=204, 
+		UTC_TIMESTAMP=205, D=206, T=207, TS=208, LEFT_BRACE=209, RIGHT_BRACE=210, 
+		DENSE_RANK=211, RANK=212, ROW_NUMBER=213, DATE_HISTOGRAM=214, DAY_OF_MONTH=215, 
+		DAY_OF_YEAR=216, DAY_OF_WEEK=217, EXCLUDE=218, EXTENDED_STATS=219, FIELD=220, 
+		FILTER=221, GEO_BOUNDING_BOX=222, GEO_CELL=223, GEO_DISTANCE=224, GEO_DISTANCE_RANGE=225, 
+		GEO_INTERSECTS=226, GEO_POLYGON=227, HISTOGRAM=228, HOUR_OF_DAY=229, INCLUDE=230, 
+		IN_TERMS=231, MATCHPHRASE=232, MATCH_PHRASE=233, MATCHPHRASEQUERY=234, 
+		SIMPLE_QUERY_STRING=235, QUERY_STRING=236, MATCH_PHRASE_PREFIX=237, MATCHQUERY=238, 
+		MATCH_QUERY=239, MINUTE_OF_DAY=240, MINUTE_OF_HOUR=241, MONTH_OF_YEAR=242, 
+		MULTIMATCH=243, MULTI_MATCH=244, MULTIMATCHQUERY=245, NESTED=246, PERCENTILES=247, 
+		PERCENTILE=248, PERCENTILE_APPROX=249, REGEXP_QUERY=250, REVERSE_NESTED=251, 
+		QUERY=252, RANGE=253, SCORE=254, SCOREQUERY=255, SCORE_QUERY=256, SECOND_OF_MINUTE=257, 
+		STATS=258, TERM=259, TERMS=260, TIMESTAMPADD=261, TIMESTAMPDIFF=262, TOPHITS=263, 
+		TYPEOF=264, WEEK_OF_YEAR=265, WEEKOFYEAR=266, WEEKDAY=267, WILDCARDQUERY=268, 
+		WILDCARD_QUERY=269, SUBSTR=270, STRCMP=271, ADDDATE=272, YEARWEEK=273, 
+		ALLOW_LEADING_WILDCARD=274, ANALYZER=275, ANALYZE_WILDCARD=276, AUTO_GENERATE_SYNONYMS_PHRASE_QUERY=277, 
+		BOOST=278, CASE_INSENSITIVE=279, CUTOFF_FREQUENCY=280, DEFAULT_FIELD=281, 
+		DEFAULT_OPERATOR=282, ESCAPE=283, ENABLE_POSITION_INCREMENTS=284, FIELDS=285, 
+		FLAGS=286, FUZZINESS=287, FUZZY_MAX_EXPANSIONS=288, FUZZY_PREFIX_LENGTH=289, 
+		FUZZY_REWRITE=290, FUZZY_TRANSPOSITIONS=291, LENIENT=292, LOW_FREQ_OPERATOR=293, 
+		MAX_DETERMINIZED_STATES=294, MAX_EXPANSIONS=295, MINIMUM_SHOULD_MATCH=296, 
+		OPERATOR=297, PHRASE_SLOP=298, PREFIX_LENGTH=299, QUOTE_ANALYZER=300, 
+		QUOTE_FIELD_SUFFIX=301, REWRITE=302, SLOP=303, TIE_BREAKER=304, TIME_ZONE=305, 
+		TYPE=306, ZERO_TERMS_QUERY=307, HIGHLIGHT=308, HIGHLIGHT_PRE_TAGS=309, 
+		HIGHLIGHT_POST_TAGS=310, MATCH_BOOL_PREFIX=311, STAR=312, SLASH=313, MODULE=314, 
+		PLUS=315, MINUS=316, DIV=317, MOD=318, EQUAL_SYMBOL=319, GREATER_SYMBOL=320, 
+		LESS_SYMBOL=321, EXCLAMATION_SYMBOL=322, BIT_NOT_OP=323, BIT_OR_OP=324, 
+		BIT_AND_OP=325, BIT_XOR_OP=326, DOT=327, LR_BRACKET=328, RR_BRACKET=329, 
+		LT_SQR_PRTHS=330, RT_SQR_PRTHS=331, COMMA=332, SEMI=333, AT_SIGN=334, 
+		ZERO_DECIMAL=335, ONE_DECIMAL=336, TWO_DECIMAL=337, SINGLE_QUOTE_SYMB=338, 
+		DOUBLE_QUOTE_SYMB=339, REVERSE_QUOTE_SYMB=340, COLON_SYMB=341, START_NATIONAL_STRING_LITERAL=342, 
+		STRING_LITERAL=343, DECIMAL_LITERAL=344, HEXADECIMAL_LITERAL=345, REAL_LITERAL=346, 
+		NULL_SPEC_LITERAL=347, BIT_STRING=348, ID=349, DOUBLE_QUOTE_ID=350, BACKTICK_QUOTE_ID=351, 
+		ERROR_RECOGNITION=352;
 	public static final int
 		RULE_root = 0, RULE_sqlStatement = 1, RULE_dmlStatement = 2, RULE_selectStatement = 3, 
 		RULE_adminStatement = 4, RULE_showStatement = 5, RULE_describeStatement = 6, 
@@ -164,19 +164,19 @@ public class OpenSearchSQLParser extends Parser {
 			"'DELETE'", "'DESC'", "'DESCRIBE'", "'DISTINCT'", "'DOUBLE'", "'ELSE'", 
 			"'EXISTS'", "'FALSE'", "'FLOAT'", "'FIRST'", "'FROM'", "'GROUP'", "'HAVING'", 
 			"'IN'", "'INNER'", "'INT'", "'INTEGER'", "'IS'", "'JOIN'", "'LAST'", 
-			"'LEFT'", "'LIKE'", "'LIMIT'", "'LONG'", "'MATCH'", "'NATURAL'", null, 
+			"'LEFT'", "'LIKE'", "'LIMIT'", "'LONG'", "'MATCH'", "'NATURAL'", "'MISSING'", 
 			"'NOT'", "'NULL'", "'NULLS'", "'ON'", "'OR'", "'ORDER'", "'OUTER'", "'OVER'", 
 			"'PARTITION'", "'REGEXP'", "'RIGHT'", "'SELECT'", "'SHOW'", "'STRING'", 
-			"'THEN'", "'TRUE'", "'UNION'", "'USING'", "'WHEN'", "'WHERE'", null, 
-			"'MINUS'", "'AVG'", "'COUNT'", "'MAX'", "'MIN'", "'SUM'", "'VAR_POP'", 
-			"'VAR_SAMP'", "'VARIANCE'", "'STD'", "'STDDEV'", "'STDDEV_POP'", "'STDDEV_SAMP'", 
-			"'SUBSTRING'", "'TRIM'", "'END'", "'FULL'", "'OFFSET'", "'INTERVAL'", 
-			"'MICROSECOND'", "'SECOND'", "'MINUTE'", "'HOUR'", "'DAY'", "'WEEK'", 
-			"'MONTH'", "'QUARTER'", "'YEAR'", "'SECOND_MICROSECOND'", "'MINUTE_MICROSECOND'", 
-			"'MINUTE_SECOND'", "'HOUR_MICROSECOND'", "'HOUR_SECOND'", "'HOUR_MINUTE'", 
-			"'DAY_MICROSECOND'", "'DAY_SECOND'", "'DAY_MINUTE'", "'DAY_HOUR'", "'YEAR_MONTH'", 
-			"'TABLES'", "'ABS'", "'ACOS'", "'ADD'", "'ADDTIME'", "'ASCII'", "'ASIN'", 
-			"'ATAN'", "'ATAN2'", "'CBRT'", "'CEIL'", "'CEILING'", "'CONCAT'", "'CONCAT_WS'", 
+			"'THEN'", "'TRUE'", "'UNION'", "'USING'", "'WHEN'", "'WHERE'", "'MINUS'", 
+			"'AVG'", "'COUNT'", "'MAX'", "'MIN'", "'SUM'", "'VAR_POP'", "'VAR_SAMP'", 
+			"'VARIANCE'", "'STD'", "'STDDEV'", "'STDDEV_POP'", "'STDDEV_SAMP'", "'SUBSTRING'", 
+			"'TRIM'", "'END'", "'FULL'", "'OFFSET'", "'INTERVAL'", "'MICROSECOND'", 
+			"'SECOND'", "'MINUTE'", "'HOUR'", "'DAY'", "'WEEK'", "'MONTH'", "'QUARTER'", 
+			"'YEAR'", "'SECOND_MICROSECOND'", "'MINUTE_MICROSECOND'", "'MINUTE_SECOND'", 
+			"'HOUR_MICROSECOND'", "'HOUR_SECOND'", "'HOUR_MINUTE'", "'DAY_MICROSECOND'", 
+			"'DAY_SECOND'", "'DAY_MINUTE'", "'DAY_HOUR'", "'YEAR_MONTH'", "'TABLES'", 
+			"'ABS'", "'ACOS'", "'ADD'", "'ADDTIME'", "'ASCII'", "'ASIN'", "'ATAN'", 
+			"'ATAN2'", "'CBRT'", "'CEIL'", "'CEILING'", "'CONCAT'", "'CONCAT_WS'", 
 			"'CONV'", "'CONVERT_TZ'", "'COS'", "'COSH'", "'COT'", "'CRC32'", "'CURDATE'", 
 			"'CURTIME'", "'CURRENT_DATE'", "'CURRENT_TIME'", "'CURRENT_TIMESTAMP'", 
 			"'DATE'", "'DATE_ADD'", "'DATE_FORMAT'", "'DATE_SUB'", "'DATEDIFF'", 
@@ -232,8 +232,8 @@ public class OpenSearchSQLParser extends Parser {
 			"LIMIT", "LONG", "MATCH", "NATURAL", "MISSING_LITERAL", "NOT", "NULL_LITERAL", 
 			"NULLS", "ON", "OR", "ORDER", "OUTER", "OVER", "PARTITION", "REGEXP", 
 			"RIGHT", "SELECT", "SHOW", "STRING", "THEN", "TRUE", "UNION", "USING", 
-			"WHEN", "WHERE", "MISSING", "EXCEPT", "AVG", "COUNT", "MAX", "MIN", "SUM", 
-			"VAR_POP", "VAR_SAMP", "VARIANCE", "STD", "STDDEV", "STDDEV_POP", "STDDEV_SAMP", 
+			"WHEN", "WHERE", "EXCEPT", "AVG", "COUNT", "MAX", "MIN", "SUM", "VAR_POP", 
+			"VAR_SAMP", "VARIANCE", "STD", "STDDEV", "STDDEV_POP", "STDDEV_SAMP", 
 			"SUBSTRING", "TRIM", "END", "FULL", "OFFSET", "INTERVAL", "MICROSECOND", 
 			"SECOND", "MINUTE", "HOUR", "DAY", "WEEK", "MONTH", "QUARTER", "YEAR", 
 			"SECOND_MICROSECOND", "MINUTE_MICROSECOND", "MINUTE_SECOND", "HOUR_MICROSECOND", 
@@ -1297,7 +1297,7 @@ public class OpenSearchSQLParser extends Parser {
 			setState(305);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 18014604735086720L) != 0) || ((((_la - 66)) & ~0x3f) == 0 && ((1L << (_la - 66)) & -549621813217L) != 0) || ((((_la - 130)) & ~0x3f) == 0 && ((1L << (_la - 130)) & -4398046650369L) != 0) || ((((_la - 194)) & ~0x3f) == 0 && ((1L << (_la - 194)) & 9992430556348415L) != 0) || ((((_la - 258)) & ~0x3f) == 0 && ((1L << (_la - 258)) & 2306405959167240065L) != 0) || ((((_la - 328)) & ~0x3f) == 0 && ((1L << (_la - 328)) & 20971521L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 18014604735086720L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & -549621813217L) != 0) || ((((_la - 129)) & ~0x3f) == 0 && ((1L << (_la - 129)) & -4398046650369L) != 0) || ((((_la - 193)) & ~0x3f) == 0 && ((1L << (_la - 193)) & 9992430556348415L) != 0) || ((((_la - 257)) & ~0x3f) == 0 && ((1L << (_la - 257)) & 2306405959167240065L) != 0) || ((((_la - 327)) & ~0x3f) == 0 && ((1L << (_la - 327)) & 20971521L) != 0)) {
 				{
 				setState(302);
 				_errHandler.sync(this);
@@ -1616,7 +1616,7 @@ public class OpenSearchSQLParser extends Parser {
 				setState(326);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
-				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 18014604735086720L) != 0) || ((((_la - 66)) & ~0x3f) == 0 && ((1L << (_la - 66)) & -549621813217L) != 0) || ((((_la - 130)) & ~0x3f) == 0 && ((1L << (_la - 130)) & -4398046650369L) != 0) || ((((_la - 194)) & ~0x3f) == 0 && ((1L << (_la - 194)) & 9992430556348415L) != 0) || ((((_la - 258)) & ~0x3f) == 0 && ((1L << (_la - 258)) & 2306405959167240065L) != 0) || ((((_la - 328)) & ~0x3f) == 0 && ((1L << (_la - 328)) & 20971521L) != 0)) {
+				if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 18014604735086720L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & -549621813217L) != 0) || ((((_la - 129)) & ~0x3f) == 0 && ((1L << (_la - 129)) & -4398046650369L) != 0) || ((((_la - 193)) & ~0x3f) == 0 && ((1L << (_la - 193)) & 9992430556348415L) != 0) || ((((_la - 257)) & ~0x3f) == 0 && ((1L << (_la - 257)) & 2306405959167240065L) != 0) || ((((_la - 327)) & ~0x3f) == 0 && ((1L << (_la - 327)) & 20971521L) != 0)) {
 					{
 					setState(323);
 					_errHandler.sync(this);
@@ -2171,7 +2171,7 @@ public class OpenSearchSQLParser extends Parser {
 				setState(393);
 				((ScalarWindowFunctionContext)_localctx).functionName = _input.LT(1);
 				_la = _input.LA(1);
-				if ( !(((((_la - 212)) & ~0x3f) == 0 && ((1L << (_la - 212)) & 7L) != 0)) ) {
+				if ( !(((((_la - 211)) & ~0x3f) == 0 && ((1L << (_la - 211)) & 7L) != 0)) ) {
 					((ScalarWindowFunctionContext)_localctx).functionName = (Token)_errHandler.recoverInline(this);
 				}
 				else {
@@ -2542,7 +2542,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(437);
 			_la = _input.LA(1);
-			if ( !(((((_la - 336)) & ~0x3f) == 0 && ((1L << (_la - 336)) & 519L) != 0)) ) {
+			if ( !(((((_la - 335)) & ~0x3f) == 0 && ((1L << (_la - 335)) & 519L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -3086,7 +3086,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(485);
 			_la = _input.LA(1);
-			if ( !(((((_la - 126)) & ~0x3f) == 0 && ((1L << (_la - 126)) & 805306375L) != 0) || ((((_la - 204)) & ~0x3f) == 0 && ((1L << (_la - 204)) & 7L) != 0)) ) {
+			if ( !(((((_la - 125)) & ~0x3f) == 0 && ((1L << (_la - 125)) & 805306375L) != 0) || ((((_la - 203)) & ~0x3f) == 0 && ((1L << (_la - 203)) & 7L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -3184,7 +3184,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(491);
 			_la = _input.LA(1);
-			if ( !(((((_la - 84)) & ~0x3f) == 0 && ((1L << (_la - 84)) & 1048575L) != 0)) ) {
+			if ( !(((((_la - 83)) & ~0x3f) == 0 && ((1L << (_la - 83)) & 1048575L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -4028,7 +4028,7 @@ public class OpenSearchSQLParser extends Parser {
 						setState(571);
 						((MathExpressionAtomContext)_localctx).mathOperator = _input.LT(1);
 						_la = _input.LA(1);
-						if ( !(((((_la - 313)) & ~0x3f) == 0 && ((1L << (_la - 313)) & 7L) != 0)) ) {
+						if ( !(((((_la - 312)) & ~0x3f) == 0 && ((1L << (_la - 312)) & 7L) != 0)) ) {
 							((MathExpressionAtomContext)_localctx).mathOperator = (Token)_errHandler.recoverInline(this);
 						}
 						else {
@@ -4751,7 +4751,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(654);
 			_la = _input.LA(1);
-			if ( !(((((_la - 84)) & ~0x3f) == 0 && ((1L << (_la - 84)) & 511L) != 0)) ) {
+			if ( !(((((_la - 83)) & ~0x3f) == 0 && ((1L << (_la - 83)) & 511L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -4800,7 +4800,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(656);
 			_la = _input.LA(1);
-			if ( !(((((_la - 93)) & ~0x3f) == 0 && ((1L << (_la - 93)) & 2047L) != 0)) ) {
+			if ( !(((((_la - 92)) & ~0x3f) == 0 && ((1L << (_la - 92)) & 2047L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -6465,7 +6465,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(891);
 			_la = _input.LA(1);
-			if ( !(((((_la - 66)) & ~0x3f) == 0 && ((1L << (_la - 66)) & 4095L) != 0)) ) {
+			if ( !(((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & 4095L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -6763,7 +6763,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(922);
 			_la = _input.LA(1);
-			if ( !(((((_la - 106)) & ~0x3f) == 0 && ((1L << (_la - 106)) & 4295082097L) != 0) || ((((_la - 175)) & ~0x3f) == 0 && ((1L << (_la - 175)) & 265217L) != 0)) ) {
+			if ( !(((((_la - 105)) & ~0x3f) == 0 && ((1L << (_la - 105)) & 4295082097L) != 0) || ((((_la - 174)) & ~0x3f) == 0 && ((1L << (_la - 174)) & 265217L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -6807,7 +6807,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(924);
 			_la = _input.LA(1);
-			if ( !(((((_la - 107)) & ~0x3f) == 0 && ((1L << (_la - 107)) & 720575944674246657L) != 0) || _la==SUBTRACT || _la==MOD) ) {
+			if ( !(((((_la - 106)) & ~0x3f) == 0 && ((1L << (_la - 106)) & 720575944674246657L) != 0) || _la==SUBTRACT || _la==MOD) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -7373,7 +7373,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(987);
 			_la = _input.LA(1);
-			if ( !(_la==LEFT || _la==RIGHT || ((((_la - 78)) & ~0x3f) == 0 && ((1L << (_la - 78)) & 826781204483L) != 0) || ((((_la - 152)) & ~0x3f) == 0 && ((1L << (_la - 152)) & 2251800652546833L) != 0) || _la==SUBSTR || _la==STRCMP) ) {
+			if ( !(_la==LEFT || _la==RIGHT || ((((_la - 77)) & ~0x3f) == 0 && ((1L << (_la - 77)) & 826781204483L) != 0) || ((((_la - 151)) & ~0x3f) == 0 && ((1L << (_la - 151)) & 2251800652546833L) != 0) || _la==SUBSTR || _la==STRCMP) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -7415,7 +7415,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(989);
 			_la = _input.LA(1);
-			if ( !(((((_la - 148)) & ~0x3f) == 0 && ((1L << (_la - 148)) & 1048583L) != 0)) ) {
+			if ( !(((((_la - 147)) & ~0x3f) == 0 && ((1L << (_la - 147)) & 1048583L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -7546,7 +7546,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(997);
 			_la = _input.LA(1);
-			if ( !(((((_la - 255)) & ~0x3f) == 0 && ((1L << (_la - 255)) & 7L) != 0)) ) {
+			if ( !(((((_la - 254)) & ~0x3f) == 0 && ((1L << (_la - 254)) & 7L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -7594,7 +7594,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(999);
 			_la = _input.LA(1);
-			if ( !(_la==MATCH || ((((_la - 233)) & ~0x3f) == 0 && ((1L << (_la - 233)) & 206158430439L) != 0) || _la==MATCH_BOOL_PREFIX) ) {
+			if ( !(_la==MATCH || ((((_la - 232)) & ~0x3f) == 0 && ((1L << (_la - 232)) & 206158430439L) != 0) || _la==MATCH_BOOL_PREFIX) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -7637,7 +7637,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(1001);
 			_la = _input.LA(1);
-			if ( !(((((_la - 236)) & ~0x3f) == 0 && ((1L << (_la - 236)) & 1795L) != 0)) ) {
+			if ( !(((((_la - 235)) & ~0x3f) == 0 && ((1L << (_la - 235)) & 1795L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -7679,7 +7679,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(1003);
 			_la = _input.LA(1);
-			if ( !(((((_la - 233)) & ~0x3f) == 0 && ((1L << (_la - 233)) & 195L) != 0)) ) {
+			if ( !(((((_la - 232)) & ~0x3f) == 0 && ((1L << (_la - 232)) & 195L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -7768,7 +7768,7 @@ public class OpenSearchSQLParser extends Parser {
 			setState(1015);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 594530332636688384L) != 0) || ((((_la - 66)) & ~0x3f) == 0 && ((1L << (_la - 66)) & -549621678081L) != 0) || ((((_la - 130)) & ~0x3f) == 0 && ((1L << (_la - 130)) & -1L) != 0) || ((((_la - 194)) & ~0x3f) == 0 && ((1L << (_la - 194)) & -1603281948214689793L) != 0) || ((((_la - 258)) & ~0x3f) == 0 && ((1L << (_la - 258)) & 3191363285945548721L) != 0) || ((((_la - 328)) & ~0x3f) == 0 && ((1L << (_la - 328)) & 30082819L) != 0)) {
+			if ((((_la) & ~0x3f) == 0 && ((1L << _la) & 594530332636688384L) != 0) || ((((_la - 65)) & ~0x3f) == 0 && ((1L << (_la - 65)) & -549621678081L) != 0) || ((((_la - 129)) & ~0x3f) == 0 && ((1L << (_la - 129)) & -1L) != 0) || ((((_la - 193)) & ~0x3f) == 0 && ((1L << (_la - 193)) & -1603281948214689793L) != 0) || ((((_la - 257)) & ~0x3f) == 0 && ((1L << (_la - 257)) & 3191363285945548721L) != 0) || ((((_la - 327)) & ~0x3f) == 0 && ((1L << (_la - 327)) & 30082819L) != 0)) {
 				{
 				setState(1007);
 				functionArg();
@@ -8025,7 +8025,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(1033);
 			_la = _input.LA(1);
-			if ( !(((((_la - 275)) & ~0x3f) == 0 && ((1L << (_la - 275)) & 17179869183L) != 0)) ) {
+			if ( !(((((_la - 274)) & ~0x3f) == 0 && ((1L << (_la - 274)) & 17179869183L) != 0)) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -9099,7 +9099,7 @@ public class OpenSearchSQLParser extends Parser {
 			{
 			setState(1109);
 			_la = _input.LA(1);
-			if ( !(((((_la - 26)) & ~0x3f) == 0 && ((1L << (_la - 26)) & 36062881879426049L) != 0) || ((((_la - 207)) & ~0x3f) == 0 && ((1L << (_la - 207)) & 16391L) != 0) || _la==TYPE) ) {
+			if ( !(((((_la - 26)) & ~0x3f) == 0 && ((1L << (_la - 26)) & 18031440939713537L) != 0) || ((((_la - 206)) & ~0x3f) == 0 && ((1L << (_la - 206)) & 16391L) != 0) || _la==TYPE) ) {
 			_errHandler.recoverInline(this);
 			}
 			else {
@@ -9168,7 +9168,7 @@ public class OpenSearchSQLParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u0161\u0458\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
+		"\u0004\u0001\u0160\u0458\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001"+
 		"\u0002\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004"+
 		"\u0002\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007"+
 		"\u0002\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b"+
@@ -9302,23 +9302,23 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0094\u0096\u0098\u009a\u009c\u009e\u00a0\u00a2\u00a4\u00a6\u00a8\u00aa"+
 		"\u00ac\u00ae\u00b0\u00b2\u00b4\u00b6\u00b8\u00ba\u00bc\u00be\u00c0\u00c2"+
 		"\u00c4\u00c6\u00c8\u00ca\u00cc\u00ce\u00d0\u00d2\u00d4\u00d6\u00d8\u00da"+
-		"\u00dc\u00de\u00e0\u00e2\u0000!\u0002\u0000\u013b\u013b\u015e\u015e\u0002"+
+		"\u00dc\u00de\u00e0\u00e2\u0000!\u0002\u0000\u013a\u013a\u015d\u015d\u0002"+
 		"\u0000\u0005\u0005\u0014\u0014\u0002\u0000\b\b\u0012\u0012\u0002\u0000"+
-		"\u001a\u001a$$\u0001\u0000\u00d4\u00d6\u0002\u0000\u0150\u0152\u0159\u0159"+
-		"\u0002\u0000\u0158\u0158\u015f\u015f\u0002\u0000\u0018\u0018;;\u0001\u0000"+
-		"\u013c\u013d\u0002\u0000\u0081\u0081\u00cf\u00cf\u0002\u0000\u00c2\u00c2"+
-		"\u00d0\u00d0\u0002\u0000\u00c6\u00c6\u00d1\u00d1\u0003\u0000~\u0080\u009a"+
-		"\u009b\u00cc\u00ce\u0001\u0000Tg\u0001\u0000\u0139\u013b\u0001\u0000\u0106"+
-		"\u0107\u0004\u0000\u0010\u0010\u0081\u0081\u00c2\u00c2\u00c6\u00c6\u0001"+
-		"\u0000T\\\u0001\u0000]g\u0001\u0000\u00f9\u00fa\u0001\u0000BM\u0007\u0000"+
-		"jjnpxz\u008a\u008a\u00af\u00af\u00b9\u00ba\u00c1\u00c1\u0006\u0000kk\u008b"+
-		"\u008b\u00a4\u00a4\u00a6\u00a6\u00bf\u00bf\u013f\u013f\f\u0000%%66NOm"+
-		"mtu\u0098\u0098\u009c\u009c\u00a0\u00a1\u00b1\u00b1\u00b4\u00b5\u00cb"+
-		"\u00cb\u010f\u0110\u0002\u0000\u0094\u0096\u00a8\u00a8\u0001\u0000\u00ff"+
-		"\u0101\u0005\u0000))\u00e9\u00eb\u00ee\u00f0\u010d\u010e\u0138\u0138\u0002"+
-		"\u0000\u00ec\u00ed\u00f4\u00f6\u0002\u0000\u00e9\u00ea\u00ef\u00f0\u0001"+
-		"\u0000\u00f4\u00f5\u0001\u0000\u0113\u0134\u0001\u0000\u0136\u0137\u0007"+
-		"\u0000\u001a\u001a$$BFQQ\u00cf\u00d1\u00dd\u00dd\u0133\u0133\u04c4\u0000"+
+		"\u001a\u001a$$\u0001\u0000\u00d3\u00d5\u0002\u0000\u014f\u0151\u0158\u0158"+
+		"\u0002\u0000\u0157\u0157\u015e\u015e\u0002\u0000\u0018\u0018;;\u0001\u0000"+
+		"\u013b\u013c\u0002\u0000\u0080\u0080\u00ce\u00ce\u0002\u0000\u00c1\u00c1"+
+		"\u00cf\u00cf\u0002\u0000\u00c5\u00c5\u00d0\u00d0\u0003\u0000}\u007f\u0099"+
+		"\u009a\u00cb\u00cd\u0001\u0000Sf\u0001\u0000\u0138\u013a\u0001\u0000\u0105"+
+		"\u0106\u0004\u0000\u0010\u0010\u0080\u0080\u00c1\u00c1\u00c5\u00c5\u0001"+
+		"\u0000S[\u0001\u0000\\f\u0001\u0000\u00f8\u00f9\u0001\u0000AL\u0007\u0000"+
+		"iimowy\u0089\u0089\u00ae\u00ae\u00b8\u00b9\u00c0\u00c0\u0006\u0000jj\u008a"+
+		"\u008a\u00a3\u00a3\u00a5\u00a5\u00be\u00be\u013e\u013e\f\u0000%%66MNl"+
+		"lst\u0097\u0097\u009b\u009b\u009f\u00a0\u00b0\u00b0\u00b3\u00b4\u00ca"+
+		"\u00ca\u010e\u010f\u0002\u0000\u0093\u0095\u00a7\u00a7\u0001\u0000\u00fe"+
+		"\u0100\u0005\u0000))\u00e8\u00ea\u00ed\u00ef\u010c\u010d\u0137\u0137\u0002"+
+		"\u0000\u00eb\u00ec\u00f3\u00f5\u0002\u0000\u00e8\u00e9\u00ee\u00ef\u0001"+
+		"\u0000\u00f3\u00f4\u0001\u0000\u0112\u0133\u0001\u0000\u0135\u0136\u0007"+
+		"\u0000\u001a\u001a$$AEPP\u00ce\u00d0\u00dc\u00dc\u0132\u0132\u04c4\u0000"+
 		"\u00e5\u0001\u0000\u0000\u0000\u0002\u00ee\u0001\u0000\u0000\u0000\u0004"+
 		"\u00f0\u0001\u0000\u0000\u0000\u0006\u00f2\u0001\u0000\u0000\u0000\b\u00f6"+
 		"\u0001\u0000\u0000\u0000\n\u00f8\u0001\u0000\u0000\u0000\f\u00fc\u0001"+
@@ -9374,7 +9374,7 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0444\u0001\u0000\u0000\u0000\u00e0\u0453\u0001\u0000\u0000\u0000\u00e2"+
 		"\u0455\u0001\u0000\u0000\u0000\u00e4\u00e6\u0003\u0002\u0001\u0000\u00e5"+
 		"\u00e4\u0001\u0000\u0000\u0000\u00e5\u00e6\u0001\u0000\u0000\u0000\u00e6"+
-		"\u00e8\u0001\u0000\u0000\u0000\u00e7\u00e9\u0005\u014e\u0000\u0000\u00e8"+
+		"\u00e8\u0001\u0000\u0000\u0000\u00e7\u00e9\u0005\u014d\u0000\u0000\u00e8"+
 		"\u00e7\u0001\u0000\u0000\u0000\u00e8\u00e9\u0001\u0000\u0000\u0000\u00e9"+
 		"\u00ea\u0001\u0000\u0000\u0000\u00ea\u00eb\u0005\u0000\u0000\u0001\u00eb"+
 		"\u0001\u0001\u0000\u0000\u0000\u00ec\u00ef\u0003\u0004\u0002\u0000\u00ed"+
@@ -9384,9 +9384,9 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0003\u0016\u000b\u0000\u00f3\u0007\u0001\u0000\u0000\u0000\u00f4\u00f7"+
 		"\u0003\n\u0005\u0000\u00f5\u00f7\u0003\f\u0006\u0000\u00f6\u00f4\u0001"+
 		"\u0000\u0000\u0000\u00f6\u00f5\u0001\u0000\u0000\u0000\u00f7\t\u0001\u0000"+
-		"\u0000\u0000\u00f8\u00f9\u00058\u0000\u0000\u00f9\u00fa\u0005h\u0000\u0000"+
+		"\u0000\u0000\u00f8\u00f9\u00058\u0000\u0000\u00f9\u00fa\u0005g\u0000\u0000"+
 		"\u00fa\u00fb\u0003\u0010\b\u0000\u00fb\u000b\u0001\u0000\u0000\u0000\u00fc"+
-		"\u00fd\u0005\u0013\u0000\u0000\u00fd\u00fe\u0005h\u0000\u0000\u00fe\u0100"+
+		"\u00fd\u0005\u0013\u0000\u0000\u00fd\u00fe\u0005g\u0000\u0000\u00fe\u0100"+
 		"\u0003\u0010\b\u0000\u00ff\u0101\u0003\u000e\u0007\u0000\u0100\u00ff\u0001"+
 		"\u0000\u0000\u0000\u0100\u0101\u0001\u0000\u0000\u0000\u0101\r\u0001\u0000"+
 		"\u0000\u0000\u0102\u0103\u0005\u000f\u0000\u0000\u0103\u0104\u0005&\u0000"+
@@ -9406,10 +9406,10 @@ public class OpenSearchSQLParser extends Parser {
 		"\u011a\u0001\u0000\u0000\u0000\u011b\u011c\u0001\u0000\u0000\u0000\u011c"+
 		"\u011d\u0001\u0000\u0000\u0000\u011d\u011e\u0003\u001c\u000e\u0000\u011e"+
 		"\u0019\u0001\u0000\u0000\u0000\u011f\u0120\u0007\u0001\u0000\u0000\u0120"+
-		"\u001b\u0001\u0000\u0000\u0000\u0121\u0124\u0005\u0139\u0000\u0000\u0122"+
+		"\u001b\u0001\u0000\u0000\u0000\u0121\u0124\u0005\u0138\u0000\u0000\u0122"+
 		"\u0124\u0003\u001e\u000f\u0000\u0123\u0121\u0001\u0000\u0000\u0000\u0123"+
 		"\u0122\u0001\u0000\u0000\u0000\u0124\u0129\u0001\u0000\u0000\u0000\u0125"+
-		"\u0126\u0005\u014d\u0000\u0000\u0126\u0128\u0003\u001e\u000f\u0000\u0127"+
+		"\u0126\u0005\u014c\u0000\u0000\u0126\u0128\u0003\u001e\u000f\u0000\u0127"+
 		"\u0125\u0001\u0000\u0000\u0000\u0128\u012b\u0001\u0000\u0000\u0000\u0129"+
 		"\u0127\u0001\u0000\u0000\u0000\u0129\u012a\u0001\u0000\u0000\u0000\u012a"+
 		"\u001d\u0001\u0000\u0000\u0000\u012b\u0129\u0001\u0000\u0000\u0000\u012c"+
@@ -9430,8 +9430,8 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0000\u0143\u0144\u0001\u0000\u0000\u0000\u0144\u0145\u0001\u0000\u0000"+
 		"\u0000\u0145\u0147\u0003\u00dcn\u0000\u0146\u0143\u0001\u0000\u0000\u0000"+
 		"\u0146\u0147\u0001\u0000\u0000\u0000\u0147\u0151\u0001\u0000\u0000\u0000"+
-		"\u0148\u0149\u0005\u0149\u0000\u0000\u0149\u014a\u0003\u0016\u000b\u0000"+
-		"\u014a\u014c\u0005\u014a\u0000\u0000\u014b\u014d\u0005\u0007\u0000\u0000"+
+		"\u0148\u0149\u0005\u0148\u0000\u0000\u0149\u014a\u0003\u0016\u000b\u0000"+
+		"\u014a\u014c\u0005\u0149\u0000\u0000\u014b\u014d\u0005\u0007\u0000\u0000"+
 		"\u014c\u014b\u0001\u0000\u0000\u0000\u014c\u014d\u0001\u0000\u0000\u0000"+
 		"\u014d\u014e\u0001\u0000\u0000\u0000\u014e\u014f\u0003\u00dcn\u0000\u014f"+
 		"\u0151\u0001\u0000\u0000\u0000\u0150\u0141\u0001\u0000\u0000\u0000\u0150"+
@@ -9439,14 +9439,14 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0005?\u0000\u0000\u0153\u0154\u0003Z-\u0000\u0154%\u0001\u0000\u0000"+
 		"\u0000\u0155\u0156\u0005\u001c\u0000\u0000\u0156\u0157\u0005\u000b\u0000"+
 		"\u0000\u0157\u0158\u0003(\u0014\u0000\u0158\'\u0001\u0000\u0000\u0000"+
-		"\u0159\u015e\u0003*\u0015\u0000\u015a\u015b\u0005\u014d\u0000\u0000\u015b"+
+		"\u0159\u015e\u0003*\u0015\u0000\u015a\u015b\u0005\u014c\u0000\u0000\u015b"+
 		"\u015d\u0003*\u0015\u0000\u015c\u015a\u0001\u0000\u0000\u0000\u015d\u0160"+
 		"\u0001\u0000\u0000\u0000\u015e\u015c\u0001\u0000\u0000\u0000\u015e\u015f"+
 		"\u0001\u0000\u0000\u0000\u015f)\u0001\u0000\u0000\u0000\u0160\u015e\u0001"+
 		"\u0000\u0000\u0000\u0161\u0162\u0003Z-\u0000\u0162+\u0001\u0000\u0000"+
 		"\u0000\u0163\u0164\u0005\u001d\u0000\u0000\u0164\u0165\u0003Z-\u0000\u0165"+
 		"-\u0001\u0000\u0000\u0000\u0166\u0167\u00051\u0000\u0000\u0167\u0168\u0005"+
-		"\u000b\u0000\u0000\u0168\u016d\u00030\u0018\u0000\u0169\u016a\u0005\u014d"+
+		"\u000b\u0000\u0000\u0168\u016d\u00030\u0018\u0000\u0169\u016a\u0005\u014c"+
 		"\u0000\u0000\u016a\u016c\u00030\u0018\u0000\u016b\u0169\u0001\u0000\u0000"+
 		"\u0000\u016c\u016f\u0001\u0000\u0000\u0000\u016d\u016b\u0001\u0000\u0000"+
 		"\u0000\u016d\u016e\u0001\u0000\u0000\u0000\u016e/\u0001\u0000\u0000\u0000"+
@@ -9456,27 +9456,27 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0005.\u0000\u0000\u0175\u0177\u0007\u0003\u0000\u0000\u0176\u0174\u0001"+
 		"\u0000\u0000\u0000\u0176\u0177\u0001\u0000\u0000\u0000\u01771\u0001\u0000"+
 		"\u0000\u0000\u0178\u017c\u0005\'\u0000\u0000\u0179\u017a\u0003>\u001f"+
-		"\u0000\u017a\u017b\u0005\u014d\u0000\u0000\u017b\u017d\u0001\u0000\u0000"+
+		"\u0000\u017a\u017b\u0005\u014c\u0000\u0000\u017b\u017d\u0001\u0000\u0000"+
 		"\u0000\u017c\u0179\u0001\u0000\u0000\u0000\u017c\u017d\u0001\u0000\u0000"+
 		"\u0000\u017d\u017e\u0001\u0000\u0000\u0000\u017e\u0185\u0003>\u001f\u0000"+
 		"\u017f\u0180\u0005\'\u0000\u0000\u0180\u0181\u0003>\u001f\u0000\u0181"+
-		"\u0182\u0005R\u0000\u0000\u0182\u0183\u0003>\u001f\u0000\u0183\u0185\u0001"+
+		"\u0182\u0005Q\u0000\u0000\u0182\u0183\u0003>\u001f\u0000\u0183\u0185\u0001"+
 		"\u0000\u0000\u0000\u0184\u0178\u0001\u0000\u0000\u0000\u0184\u017f\u0001"+
 		"\u0000\u0000\u0000\u01853\u0001\u0000\u0000\u0000\u0186\u0187\u00036\u001b"+
 		"\u0000\u0187\u0188\u00038\u001c\u0000\u01885\u0001\u0000\u0000\u0000\u0189"+
-		"\u018a\u0007\u0004\u0000\u0000\u018a\u018c\u0005\u0149\u0000\u0000\u018b"+
+		"\u018a\u0007\u0004\u0000\u0000\u018a\u018c\u0005\u0148\u0000\u0000\u018b"+
 		"\u018d\u0003\u00b8\\\u0000\u018c\u018b\u0001\u0000\u0000\u0000\u018c\u018d"+
 		"\u0001\u0000\u0000\u0000\u018d\u018e\u0001\u0000\u0000\u0000\u018e\u0191"+
-		"\u0005\u014a\u0000\u0000\u018f\u0191\u0003\u0094J\u0000\u0190\u0189\u0001"+
+		"\u0005\u0149\u0000\u0000\u018f\u0191\u0003\u0094J\u0000\u0190\u0189\u0001"+
 		"\u0000\u0000\u0000\u0190\u018f\u0001\u0000\u0000\u0000\u01917\u0001\u0000"+
-		"\u0000\u0000\u0192\u0193\u00053\u0000\u0000\u0193\u0195\u0005\u0149\u0000"+
+		"\u0000\u0000\u0192\u0193\u00053\u0000\u0000\u0193\u0195\u0005\u0148\u0000"+
 		"\u0000\u0194\u0196\u0003:\u001d\u0000\u0195\u0194\u0001\u0000\u0000\u0000"+
 		"\u0195\u0196\u0001\u0000\u0000\u0000\u0196\u0198\u0001\u0000\u0000\u0000"+
 		"\u0197\u0199\u0003.\u0017\u0000\u0198\u0197\u0001\u0000\u0000\u0000\u0198"+
 		"\u0199\u0001\u0000\u0000\u0000\u0199\u019a\u0001\u0000\u0000\u0000\u019a"+
-		"\u019b\u0005\u014a\u0000\u0000\u019b9\u0001\u0000\u0000\u0000\u019c\u019d"+
+		"\u019b\u0005\u0149\u0000\u0000\u019b9\u0001\u0000\u0000\u0000\u019c\u019d"+
 		"\u00054\u0000\u0000\u019d\u019e\u0005\u000b\u0000\u0000\u019e\u01a3\u0003"+
-		"Z-\u0000\u019f\u01a0\u0005\u014d\u0000\u0000\u01a0\u01a2\u0003Z-\u0000"+
+		"Z-\u0000\u019f\u01a0\u0005\u014c\u0000\u0000\u01a0\u01a2\u0003Z-\u0000"+
 		"\u01a1\u019f\u0001\u0000\u0000\u0000\u01a2\u01a5\u0001\u0000\u0000\u0000"+
 		"\u01a3\u01a1\u0001\u0000\u0000\u0000\u01a3\u01a4\u0001\u0000\u0000\u0000"+
 		"\u01a4;\u0001\u0000\u0000\u0000\u01a5\u01a3\u0001\u0000\u0000\u0000\u01a6"+
@@ -9495,27 +9495,27 @@ public class OpenSearchSQLParser extends Parser {
 		"\u01b7\u0001\u0000\u0000\u0000\u01b9\u01b8\u0001\u0000\u0000\u0000\u01ba"+
 		"A\u0001\u0000\u0000\u0000\u01bb\u01bc\u0007\u0006\u0000\u0000\u01bcC\u0001"+
 		"\u0000\u0000\u0000\u01bd\u01be\u0007\u0007\u0000\u0000\u01beE\u0001\u0000"+
-		"\u0000\u0000\u01bf\u01c0\u0005\u015b\u0000\u0000\u01c0G\u0001\u0000\u0000"+
+		"\u0000\u0000\u01bf\u01c0\u0005\u015a\u0000\u0000\u01c0G\u0001\u0000\u0000"+
 		"\u0000\u01c1\u01c2\u0007\b\u0000\u0000\u01c2I\u0001\u0000\u0000\u0000"+
 		"\u01c3\u01c4\u0005-\u0000\u0000\u01c4K\u0001\u0000\u0000\u0000\u01c5\u01c9"+
 		"\u0003N\'\u0000\u01c6\u01c9\u0003P(\u0000\u01c7\u01c9\u0003R)\u0000\u01c8"+
 		"\u01c5\u0001\u0000\u0000\u0000\u01c8\u01c6\u0001\u0000\u0000\u0000\u01c8"+
 		"\u01c7\u0001\u0000\u0000\u0000\u01c9M\u0001\u0000\u0000\u0000\u01ca\u01cb"+
-		"\u0005\u0081\u0000\u0000\u01cb\u01d2\u0003B!\u0000\u01cc\u01cd\u0005\u00d2"+
+		"\u0005\u0080\u0000\u0000\u01cb\u01d2\u0003B!\u0000\u01cc\u01cd\u0005\u00d1"+
 		"\u0000\u0000\u01cd\u01ce\u0007\t\u0000\u0000\u01ce\u01cf\u0003B!\u0000"+
-		"\u01cf\u01d0\u0005\u00d3\u0000\u0000\u01d0\u01d2\u0001\u0000\u0000\u0000"+
+		"\u01cf\u01d0\u0005\u00d2\u0000\u0000\u01d0\u01d2\u0001\u0000\u0000\u0000"+
 		"\u01d1\u01ca\u0001\u0000\u0000\u0000\u01d1\u01cc\u0001\u0000\u0000\u0000"+
-		"\u01d2O\u0001\u0000\u0000\u0000\u01d3\u01d4\u0005\u00c2\u0000\u0000\u01d4"+
-		"\u01db\u0003B!\u0000\u01d5\u01d6\u0005\u00d2\u0000\u0000\u01d6\u01d7\u0007"+
-		"\n\u0000\u0000\u01d7\u01d8\u0003B!\u0000\u01d8\u01d9\u0005\u00d3\u0000"+
+		"\u01d2O\u0001\u0000\u0000\u0000\u01d3\u01d4\u0005\u00c1\u0000\u0000\u01d4"+
+		"\u01db\u0003B!\u0000\u01d5\u01d6\u0005\u00d1\u0000\u0000\u01d6\u01d7\u0007"+
+		"\n\u0000\u0000\u01d7\u01d8\u0003B!\u0000\u01d8\u01d9\u0005\u00d2\u0000"+
 		"\u0000\u01d9\u01db\u0001\u0000\u0000\u0000\u01da\u01d3\u0001\u0000\u0000"+
 		"\u0000\u01da\u01d5\u0001\u0000\u0000\u0000\u01dbQ\u0001\u0000\u0000\u0000"+
-		"\u01dc\u01dd\u0005\u00c6\u0000\u0000\u01dd\u01e4\u0003B!\u0000\u01de\u01df"+
-		"\u0005\u00d2\u0000\u0000\u01df\u01e0\u0007\u000b\u0000\u0000\u01e0\u01e1"+
-		"\u0003B!\u0000\u01e1\u01e2\u0005\u00d3\u0000\u0000\u01e2\u01e4\u0001\u0000"+
+		"\u01dc\u01dd\u0005\u00c5\u0000\u0000\u01dd\u01e4\u0003B!\u0000\u01de\u01df"+
+		"\u0005\u00d1\u0000\u0000\u01df\u01e0\u0007\u000b\u0000\u0000\u01e0\u01e1"+
+		"\u0003B!\u0000\u01e1\u01e2\u0005\u00d2\u0000\u0000\u01e2\u01e4\u0001\u0000"+
 		"\u0000\u0000\u01e3\u01dc\u0001\u0000\u0000\u0000\u01e3\u01de\u0001\u0000"+
 		"\u0000\u0000\u01e4S\u0001\u0000\u0000\u0000\u01e5\u01e6\u0007\f\u0000"+
-		"\u0000\u01e6U\u0001\u0000\u0000\u0000\u01e7\u01e8\u0005S\u0000\u0000\u01e8"+
+		"\u0000\u01e6U\u0001\u0000\u0000\u0000\u01e7\u01e8\u0005R\u0000\u0000\u01e8"+
 		"\u01e9\u0003Z-\u0000\u01e9\u01ea\u0003X,\u0000\u01eaW\u0001\u0000\u0000"+
 		"\u0000\u01eb\u01ec\u0007\r\u0000\u0000\u01ecY\u0001\u0000\u0000\u0000"+
 		"\u01ed\u01ee\u0006-\uffff\uffff\u0000\u01ee\u01ef\u0005,\u0000\u0000\u01ef"+
@@ -9543,21 +9543,21 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0005\"\u0000\u0000\u0219\u0224\u0003d2\u0000\u021a\u021c\n\u0001\u0000"+
 		"\u0000\u021b\u021d\u0005,\u0000\u0000\u021c\u021b\u0001\u0000\u0000\u0000"+
 		"\u021c\u021d\u0001\u0000\u0000\u0000\u021d\u021e\u0001\u0000\u0000\u0000"+
-		"\u021e\u021f\u0005\u001e\u0000\u0000\u021f\u0220\u0005\u0149\u0000\u0000"+
-		"\u0220\u0221\u0003^/\u0000\u0221\u0222\u0005\u014a\u0000\u0000\u0222\u0224"+
+		"\u021e\u021f\u0005\u001e\u0000\u0000\u021f\u0220\u0005\u0148\u0000\u0000"+
+		"\u0220\u0221\u0003^/\u0000\u0221\u0222\u0005\u0149\u0000\u0000\u0222\u0224"+
 		"\u0001\u0000\u0000\u0000\u0223\u0201\u0001\u0000\u0000\u0000\u0223\u0205"+
 		"\u0001\u0000\u0000\u0000\u0223\u020e\u0001\u0000\u0000\u0000\u0223\u0214"+
 		"\u0001\u0000\u0000\u0000\u0223\u0217\u0001\u0000\u0000\u0000\u0223\u021a"+
 		"\u0001\u0000\u0000\u0000\u0224\u0227\u0001\u0000\u0000\u0000\u0225\u0223"+
 		"\u0001\u0000\u0000\u0000\u0225\u0226\u0001\u0000\u0000\u0000\u0226]\u0001"+
 		"\u0000\u0000\u0000\u0227\u0225\u0001\u0000\u0000\u0000\u0228\u022d\u0003"+
-		"Z-\u0000\u0229\u022a\u0005\u014d\u0000\u0000\u022a\u022c\u0003Z-\u0000"+
+		"Z-\u0000\u0229\u022a\u0005\u014c\u0000\u0000\u022a\u022c\u0003Z-\u0000"+
 		"\u022b\u0229\u0001\u0000\u0000\u0000\u022c\u022f\u0001\u0000\u0000\u0000"+
 		"\u022d\u022b\u0001\u0000\u0000\u0000\u022d\u022e\u0001\u0000\u0000\u0000"+
 		"\u022e_\u0001\u0000\u0000\u0000\u022f\u022d\u0001\u0000\u0000\u0000\u0230"+
 		"\u0231\u00060\uffff\uffff\u0000\u0231\u0239\u0003<\u001e\u0000\u0232\u0239"+
-		"\u0003\u00d8l\u0000\u0233\u0239\u0003f3\u0000\u0234\u0235\u0005\u0149"+
-		"\u0000\u0000\u0235\u0236\u0003Z-\u0000\u0236\u0237\u0005\u014a\u0000\u0000"+
+		"\u0003\u00d8l\u0000\u0233\u0239\u0003f3\u0000\u0234\u0235\u0005\u0148"+
+		"\u0000\u0000\u0235\u0236\u0003Z-\u0000\u0236\u0237\u0005\u0149\u0000\u0000"+
 		"\u0237\u0239\u0001\u0000\u0000\u0000\u0238\u0230\u0001\u0000\u0000\u0000"+
 		"\u0238\u0232\u0001\u0000\u0000\u0000\u0238\u0233\u0001\u0000\u0000\u0000"+
 		"\u0238\u0234\u0001\u0000\u0000\u0000\u0239\u0242\u0001\u0000\u0000\u0000"+
@@ -9567,23 +9567,23 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0000\u0240\u023d\u0001\u0000\u0000\u0000\u0241\u0244\u0001\u0000\u0000"+
 		"\u0000\u0242\u0240\u0001\u0000\u0000\u0000\u0242\u0243\u0001\u0000\u0000"+
 		"\u0000\u0243a\u0001\u0000\u0000\u0000\u0244\u0242\u0001\u0000\u0000\u0000"+
-		"\u0245\u0251\u0005\u0140\u0000\u0000\u0246\u0251\u0005\u0141\u0000\u0000"+
-		"\u0247\u0251\u0005\u0142\u0000\u0000\u0248\u0249\u0005\u0142\u0000\u0000"+
-		"\u0249\u0251\u0005\u0140\u0000\u0000\u024a\u024b\u0005\u0141\u0000\u0000"+
-		"\u024b\u0251\u0005\u0140\u0000\u0000\u024c\u024d\u0005\u0142\u0000\u0000"+
-		"\u024d\u0251\u0005\u0141\u0000\u0000\u024e\u024f\u0005\u0143\u0000\u0000"+
-		"\u024f\u0251\u0005\u0140\u0000\u0000\u0250\u0245\u0001\u0000\u0000\u0000"+
+		"\u0245\u0251\u0005\u013f\u0000\u0000\u0246\u0251\u0005\u0140\u0000\u0000"+
+		"\u0247\u0251\u0005\u0141\u0000\u0000\u0248\u0249\u0005\u0141\u0000\u0000"+
+		"\u0249\u0251\u0005\u013f\u0000\u0000\u024a\u024b\u0005\u0140\u0000\u0000"+
+		"\u024b\u0251\u0005\u013f\u0000\u0000\u024c\u024d\u0005\u0141\u0000\u0000"+
+		"\u024d\u0251\u0005\u0140\u0000\u0000\u024e\u024f\u0005\u0142\u0000\u0000"+
+		"\u024f\u0251\u0005\u013f\u0000\u0000\u0250\u0245\u0001\u0000\u0000\u0000"+
 		"\u0250\u0246\u0001\u0000\u0000\u0000\u0250\u0247\u0001\u0000\u0000\u0000"+
 		"\u0250\u0248\u0001\u0000\u0000\u0000\u0250\u024a\u0001\u0000\u0000\u0000"+
 		"\u0250\u024c\u0001\u0000\u0000\u0000\u0250\u024e\u0001\u0000\u0000\u0000"+
 		"\u0251c\u0001\u0000\u0000\u0000\u0252\u0254\u0005,\u0000\u0000\u0253\u0252"+
 		"\u0001\u0000\u0000\u0000\u0253\u0254\u0001\u0000\u0000\u0000\u0254\u0255"+
 		"\u0001\u0000\u0000\u0000\u0255\u0256\u0005-\u0000\u0000\u0256e\u0001\u0000"+
-		"\u0000\u0000\u0257\u0258\u0003\u00acV\u0000\u0258\u0259\u0005\u0149\u0000"+
-		"\u0000\u0259\u025a\u0003\u00dam\u0000\u025a\u025b\u0005\u014a\u0000\u0000"+
+		"\u0000\u0000\u0257\u0258\u0003\u00acV\u0000\u0258\u0259\u0005\u0148\u0000"+
+		"\u0000\u0259\u025a\u0003\u00dam\u0000\u025a\u025b\u0005\u0149\u0000\u0000"+
 		"\u025b\u0272\u0001\u0000\u0000\u0000\u025c\u025d\u0003~?\u0000\u025d\u025e"+
-		"\u0005\u0149\u0000\u0000\u025e\u025f\u0003\u00b8\\\u0000\u025f\u0260\u0005"+
-		"\u014a\u0000\u0000\u0260\u0272\u0001\u0000\u0000\u0000\u0261\u0272\u0003"+
+		"\u0005\u0148\u0000\u0000\u025e\u025f\u0003\u00b8\\\u0000\u025f\u0260\u0005"+
+		"\u0149\u0000\u0000\u0260\u0272\u0001\u0000\u0000\u0000\u0261\u0272\u0003"+
 		"\u0080@\u0000\u0262\u0272\u00034\u001a\u0000\u0263\u0272\u0003\u0094J"+
 		"\u0000\u0264\u0266\u0003\u0094J\u0000\u0265\u0267\u0003.\u0017\u0000\u0266"+
 		"\u0265\u0001\u0000\u0000\u0000\u0266\u0267\u0001\u0000\u0000\u0000\u0267"+
@@ -9598,35 +9598,35 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0271\u026c\u0001\u0000\u0000\u0000\u0271\u026d\u0001\u0000\u0000\u0000"+
 		"\u0271\u026e\u0001\u0000\u0000\u0000\u0271\u026f\u0001\u0000\u0000\u0000"+
 		"\u0271\u0270\u0001\u0000\u0000\u0000\u0272g\u0001\u0000\u0000\u0000\u0273"+
-		"\u0274\u0003j5\u0000\u0274\u0275\u0005\u0149\u0000\u0000\u0275\u0276\u0003"+
-		"r9\u0000\u0276\u0277\u0005\u014d\u0000\u0000\u0277\u0278\u0003\u00ba]"+
-		"\u0000\u0278\u0279\u0005\u014d\u0000\u0000\u0279\u027a\u0003\u00ba]\u0000"+
-		"\u027a\u027b\u0005\u014a\u0000\u0000\u027bi\u0001\u0000\u0000\u0000\u027c"+
+		"\u0274\u0003j5\u0000\u0274\u0275\u0005\u0148\u0000\u0000\u0275\u0276\u0003"+
+		"r9\u0000\u0276\u0277\u0005\u014c\u0000\u0000\u0277\u0278\u0003\u00ba]"+
+		"\u0000\u0278\u0279\u0005\u014c\u0000\u0000\u0279\u027a\u0003\u00ba]\u0000"+
+		"\u027a\u027b\u0005\u0149\u0000\u0000\u027bi\u0001\u0000\u0000\u0000\u027c"+
 		"\u027d\u0007\u000f\u0000\u0000\u027dk\u0001\u0000\u0000\u0000\u027e\u027f"+
-		"\u0005\u0093\u0000\u0000\u027f\u0280\u0005\u0149\u0000\u0000\u0280\u0281"+
-		"\u0003n7\u0000\u0281\u0282\u0005\u014d\u0000\u0000\u0282\u0283\u0003\u00ba"+
-		"]\u0000\u0283\u0284\u0005\u014a\u0000\u0000\u0284m\u0001\u0000\u0000\u0000"+
+		"\u0005\u0092\u0000\u0000\u027f\u0280\u0005\u0148\u0000\u0000\u0280\u0281"+
+		"\u0003n7\u0000\u0281\u0282\u0005\u014c\u0000\u0000\u0282\u0283\u0003\u00ba"+
+		"]\u0000\u0283\u0284\u0005\u0149\u0000\u0000\u0284m\u0001\u0000\u0000\u0000"+
 		"\u0285\u0286\u0007\u0010\u0000\u0000\u0286o\u0001\u0000\u0000\u0000\u0287"+
-		"\u0288\u0005\u008f\u0000\u0000\u0288\u0289\u0005\u0149\u0000\u0000\u0289"+
+		"\u0288\u0005\u008e\u0000\u0000\u0288\u0289\u0005\u0148\u0000\u0000\u0289"+
 		"\u028a\u0003v;\u0000\u028a\u028b\u0005\u001b\u0000\u0000\u028b\u028c\u0003"+
-		"\u00ba]\u0000\u028c\u028d\u0005\u014a\u0000\u0000\u028dq\u0001\u0000\u0000"+
+		"\u00ba]\u0000\u028c\u028d\u0005\u0149\u0000\u0000\u028dq\u0001\u0000\u0000"+
 		"\u0000\u028e\u028f\u0007\u0011\u0000\u0000\u028fs\u0001\u0000\u0000\u0000"+
 		"\u0290\u0291\u0007\u0012\u0000\u0000\u0291u\u0001\u0000\u0000\u0000\u0292"+
 		"\u0295\u0003r9\u0000\u0293\u0295\u0003t:\u0000\u0294\u0292\u0001\u0000"+
 		"\u0000\u0000\u0294\u0293\u0001\u0000\u0000\u0000\u0295w\u0001\u0000\u0000"+
-		"\u0000\u0296\u0297\u0005\u0135\u0000\u0000\u0297\u0298\u0005\u0149\u0000"+
-		"\u0000\u0298\u029d\u0003\u00c8d\u0000\u0299\u029a\u0005\u014d\u0000\u0000"+
+		"\u0000\u0296\u0297\u0005\u0134\u0000\u0000\u0297\u0298\u0005\u0148\u0000"+
+		"\u0000\u0298\u029d\u0003\u00c8d\u0000\u0299\u029a\u0005\u014c\u0000\u0000"+
 		"\u029a\u029c\u0003\u00be_\u0000\u029b\u0299\u0001\u0000\u0000\u0000\u029c"+
 		"\u029f\u0001\u0000\u0000\u0000\u029d\u029b\u0001\u0000\u0000\u0000\u029d"+
 		"\u029e\u0001\u0000\u0000\u0000\u029e\u02a0\u0001\u0000\u0000\u0000\u029f"+
-		"\u029d\u0001\u0000\u0000\u0000\u02a0\u02a1\u0005\u014a\u0000\u0000\u02a1"+
-		"y\u0001\u0000\u0000\u0000\u02a2\u02a3\u0005\u00ac\u0000\u0000\u02a3\u02a4"+
-		"\u0005\u0149\u0000\u0000\u02a4\u02a5\u0003\u00ba]\u0000\u02a5\u02a6\u0005"+
-		"\u001e\u0000\u0000\u02a6\u02a7\u0003\u00ba]\u0000\u02a7\u02a8\u0005\u014a"+
+		"\u029d\u0001\u0000\u0000\u0000\u02a0\u02a1\u0005\u0149\u0000\u0000\u02a1"+
+		"y\u0001\u0000\u0000\u0000\u02a2\u02a3\u0005\u00ab\u0000\u0000\u02a3\u02a4"+
+		"\u0005\u0148\u0000\u0000\u02a4\u02a5\u0003\u00ba]\u0000\u02a5\u02a6\u0005"+
+		"\u001e\u0000\u0000\u02a6\u02a7\u0003\u00ba]\u0000\u02a7\u02a8\u0005\u0149"+
 		"\u0000\u0000\u02a8{\u0001\u0000\u0000\u0000\u02a9\u02aa\u0003\u00c8d\u0000"+
-		"\u02aa\u02ab\u0005\u0140\u0000\u0000\u02ab\u02ac\u0005\u00f0\u0000\u0000"+
-		"\u02ac\u02ad\u0005\u0149\u0000\u0000\u02ad\u02ae\u0003\u00cae\u0000\u02ae"+
-		"\u02af\u0005\u014a\u0000\u0000\u02af}\u0001\u0000\u0000\u0000\u02b0\u02b7"+
+		"\u02aa\u02ab\u0005\u013f\u0000\u0000\u02ab\u02ac\u0005\u00ef\u0000\u0000"+
+		"\u02ac\u02ad\u0005\u0148\u0000\u0000\u02ad\u02ae\u0003\u00cae\u0000\u02ae"+
+		"\u02af\u0005\u0149\u0000\u0000\u02af}\u0001\u0000\u0000\u0000\u02b0\u02b7"+
 		"\u0003\u009cN\u0000\u02b1\u02b7\u0003\u00a2Q\u0000\u02b2\u02b7\u0003\u00a4"+
 		"R\u0000\u02b3\u02b7\u0003\u00a6S\u0000\u02b4\u02b7\u0003\u00aaU\u0000"+
 		"\u02b5\u02b7\u0003\u00acV\u0000\u02b6\u02b0\u0001\u0000\u0000\u0000\u02b6"+
@@ -9639,17 +9639,17 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0000\u0000\u02be\u02c1\u0001\u0000\u0000\u0000\u02bf\u02c0\u0005\u0016"+
 		"\u0000\u0000\u02c0\u02c2\u0003\u00ba]\u0000\u02c1\u02bf\u0001\u0000\u0000"+
 		"\u0000\u02c1\u02c2\u0001\u0000\u0000\u0000\u02c2\u02c3\u0001\u0000\u0000"+
-		"\u0000\u02c3\u02c4\u0005P\u0000\u0000\u02c4\u02d9\u0001\u0000\u0000\u0000"+
+		"\u0000\u02c3\u02c4\u0005O\u0000\u0000\u02c4\u02d9\u0001\u0000\u0000\u0000"+
 		"\u02c5\u02c7\u0005\f\u0000\u0000\u02c6\u02c8\u0003\u0092I\u0000\u02c7"+
 		"\u02c6\u0001\u0000\u0000\u0000\u02c8\u02c9\u0001\u0000\u0000\u0000\u02c9"+
 		"\u02c7\u0001\u0000\u0000\u0000\u02c9\u02ca\u0001\u0000\u0000\u0000\u02ca"+
 		"\u02cd\u0001\u0000\u0000\u0000\u02cb\u02cc\u0005\u0016\u0000\u0000\u02cc"+
 		"\u02ce\u0003\u00ba]\u0000\u02cd\u02cb\u0001\u0000\u0000\u0000\u02cd\u02ce"+
 		"\u0001\u0000\u0000\u0000\u02ce\u02cf\u0001\u0000\u0000\u0000\u02cf\u02d0"+
-		"\u0005P\u0000\u0000\u02d0\u02d9\u0001\u0000\u0000\u0000\u02d1\u02d2\u0005"+
-		"\r\u0000\u0000\u02d2\u02d3\u0005\u0149\u0000\u0000\u02d3\u02d4\u0003Z"+
+		"\u0005O\u0000\u0000\u02d0\u02d9\u0001\u0000\u0000\u0000\u02d1\u02d2\u0005"+
+		"\r\u0000\u0000\u02d2\u02d3\u0005\u0148\u0000\u0000\u02d3\u02d4\u0003Z"+
 		"-\u0000\u02d4\u02d5\u0005\u0007\u0000\u0000\u02d5\u02d6\u0003\u0090H\u0000"+
-		"\u02d6\u02d7\u0005\u014a\u0000\u0000\u02d7\u02d9\u0001\u0000\u0000\u0000"+
+		"\u02d6\u02d7\u0005\u0149\u0000\u0000\u02d7\u02d9\u0001\u0000\u0000\u0000"+
 		"\u02d8\u02b8\u0001\u0000\u0000\u0000\u02d8\u02c5\u0001\u0000\u0000\u0000"+
 		"\u02d8\u02d1\u0001\u0000\u0000\u0000\u02d9\u0081\u0001\u0000\u0000\u0000"+
 		"\u02da\u02e0\u0003\u0086C\u0000\u02db\u02e0\u0003\u0088D\u0000\u02dc\u02e0"+
@@ -9657,61 +9657,61 @@ public class OpenSearchSQLParser extends Parser {
 		"G\u0000\u02df\u02da\u0001\u0000\u0000\u0000\u02df\u02db\u0001\u0000\u0000"+
 		"\u0000\u02df\u02dc\u0001\u0000\u0000\u0000\u02df\u02dd\u0001\u0000\u0000"+
 		"\u0000\u02df\u02de\u0001\u0000\u0000\u0000\u02e0\u0083\u0001\u0000\u0000"+
-		"\u0000\u02e1\u02e2\u0003\u00aeW\u0000\u02e2\u02e3\u0005\u0149\u0000\u0000"+
-		"\u02e3\u02e6\u0003\u0082A\u0000\u02e4\u02e5\u0005\u014d\u0000\u0000\u02e5"+
+		"\u0000\u02e1\u02e2\u0003\u00aeW\u0000\u02e2\u02e3\u0005\u0148\u0000\u0000"+
+		"\u02e3\u02e6\u0003\u0082A\u0000\u02e4\u02e5\u0005\u014c\u0000\u0000\u02e5"+
 		"\u02e7\u0003\u00c6c\u0000\u02e6\u02e4\u0001\u0000\u0000\u0000\u02e6\u02e7"+
 		"\u0001\u0000\u0000\u0000\u02e7\u02e8\u0001\u0000\u0000\u0000\u02e8\u02e9"+
-		"\u0005\u014a\u0000\u0000\u02e9\u0085\u0001\u0000\u0000\u0000\u02ea\u02eb"+
-		"\u0003\u00a8T\u0000\u02eb\u02ec\u0005\u0149\u0000\u0000\u02ec\u02f1\u0003"+
-		"\u00cae\u0000\u02ed\u02ee\u0005\u014d\u0000\u0000\u02ee\u02f0\u0003\u00bc"+
+		"\u0005\u0149\u0000\u0000\u02e9\u0085\u0001\u0000\u0000\u0000\u02ea\u02eb"+
+		"\u0003\u00a8T\u0000\u02eb\u02ec\u0005\u0148\u0000\u0000\u02ec\u02f1\u0003"+
+		"\u00cae\u0000\u02ed\u02ee\u0005\u014c\u0000\u0000\u02ee\u02f0\u0003\u00bc"+
 		"^\u0000\u02ef\u02ed\u0001\u0000\u0000\u0000\u02f0\u02f3\u0001\u0000\u0000"+
 		"\u0000\u02f1\u02ef\u0001\u0000\u0000\u0000\u02f1\u02f2\u0001\u0000\u0000"+
 		"\u0000\u02f2\u02f4\u0001\u0000\u0000\u0000\u02f3\u02f1\u0001\u0000\u0000"+
-		"\u0000\u02f4\u02f5\u0005\u014a\u0000\u0000\u02f5\u0087\u0001\u0000\u0000"+
-		"\u0000\u02f6\u02f7\u0003\u00b0X\u0000\u02f7\u02f8\u0005\u0149\u0000\u0000"+
-		"\u02f8\u02f9\u0003\u00c8d\u0000\u02f9\u02fa\u0005\u014d\u0000\u0000\u02fa"+
-		"\u02ff\u0003\u00cae\u0000\u02fb\u02fc\u0005\u014d\u0000\u0000\u02fc\u02fe"+
+		"\u0000\u02f4\u02f5\u0005\u0149\u0000\u0000\u02f5\u0087\u0001\u0000\u0000"+
+		"\u0000\u02f6\u02f7\u0003\u00b0X\u0000\u02f7\u02f8\u0005\u0148\u0000\u0000"+
+		"\u02f8\u02f9\u0003\u00c8d\u0000\u02f9\u02fa\u0005\u014c\u0000\u0000\u02fa"+
+		"\u02ff\u0003\u00cae\u0000\u02fb\u02fc\u0005\u014c\u0000\u0000\u02fc\u02fe"+
 		"\u0003\u00bc^\u0000\u02fd\u02fb\u0001\u0000\u0000\u0000\u02fe\u0301\u0001"+
 		"\u0000\u0000\u0000\u02ff\u02fd\u0001\u0000\u0000\u0000\u02ff\u0300\u0001"+
 		"\u0000\u0000\u0000\u0300\u0302\u0001\u0000\u0000\u0000\u0301\u02ff\u0001"+
-		"\u0000\u0000\u0000\u0302\u0303\u0005\u014a\u0000\u0000\u0303\u0089\u0001"+
-		"\u0000\u0000\u0000\u0304\u0305\u0003\u00b2Y\u0000\u0305\u0306\u0005\u0149"+
-		"\u0000\u0000\u0306\u0307\u0005\u014b\u0000\u0000\u0307\u030c\u0003\u00c4"+
-		"b\u0000\u0308\u0309\u0005\u014d\u0000\u0000\u0309\u030b\u0003\u00c4b\u0000"+
+		"\u0000\u0000\u0000\u0302\u0303\u0005\u0149\u0000\u0000\u0303\u0089\u0001"+
+		"\u0000\u0000\u0000\u0304\u0305\u0003\u00b2Y\u0000\u0305\u0306\u0005\u0148"+
+		"\u0000\u0000\u0306\u0307\u0005\u014a\u0000\u0000\u0307\u030c\u0003\u00c4"+
+		"b\u0000\u0308\u0309\u0005\u014c\u0000\u0000\u0309\u030b\u0003\u00c4b\u0000"+
 		"\u030a\u0308\u0001\u0000\u0000\u0000\u030b\u030e\u0001\u0000\u0000\u0000"+
 		"\u030c\u030a\u0001\u0000\u0000\u0000\u030c\u030d\u0001\u0000\u0000\u0000"+
 		"\u030d\u030f\u0001\u0000\u0000\u0000\u030e\u030c\u0001\u0000\u0000\u0000"+
-		"\u030f\u0310\u0005\u014c\u0000\u0000\u0310\u0311\u0005\u014d\u0000\u0000"+
-		"\u0311\u0316\u0003\u00cae\u0000\u0312\u0313\u0005\u014d\u0000\u0000\u0313"+
+		"\u030f\u0310\u0005\u014b\u0000\u0000\u0310\u0311\u0005\u014c\u0000\u0000"+
+		"\u0311\u0316\u0003\u00cae\u0000\u0312\u0313\u0005\u014c\u0000\u0000\u0313"+
 		"\u0315\u0003\u00bc^\u0000\u0314\u0312\u0001\u0000\u0000\u0000\u0315\u0318"+
 		"\u0001\u0000\u0000\u0000\u0316\u0314\u0001\u0000\u0000\u0000\u0316\u0317"+
 		"\u0001\u0000\u0000\u0000\u0317\u0319\u0001\u0000\u0000\u0000\u0318\u0316"+
-		"\u0001\u0000\u0000\u0000\u0319\u031a\u0005\u014a\u0000\u0000\u031a\u032a"+
+		"\u0001\u0000\u0000\u0000\u0319\u031a\u0005\u0149\u0000\u0000\u031a\u032a"+
 		"\u0001\u0000\u0000\u0000\u031b\u031c\u0003\u00b2Y\u0000\u031c\u031d\u0005"+
-		"\u0149\u0000\u0000\u031d\u031e\u0003\u00d2i\u0000\u031e\u031f\u0005\u014d"+
-		"\u0000\u0000\u031f\u0324\u0003\u00d4j\u0000\u0320\u0321\u0005\u014d\u0000"+
+		"\u0148\u0000\u0000\u031d\u031e\u0003\u00d2i\u0000\u031e\u031f\u0005\u014c"+
+		"\u0000\u0000\u031f\u0324\u0003\u00d4j\u0000\u0320\u0321\u0005\u014c\u0000"+
 		"\u0000\u0321\u0323\u0003\u00bc^\u0000\u0322\u0320\u0001\u0000\u0000\u0000"+
 		"\u0323\u0326\u0001\u0000\u0000\u0000\u0324\u0322\u0001\u0000\u0000\u0000"+
 		"\u0324\u0325\u0001\u0000\u0000\u0000\u0325\u0327\u0001\u0000\u0000\u0000"+
-		"\u0326\u0324\u0001\u0000\u0000\u0000\u0327\u0328\u0005\u014a\u0000\u0000"+
+		"\u0326\u0324\u0001\u0000\u0000\u0000\u0327\u0328\u0005\u0149\u0000\u0000"+
 		"\u0328\u032a\u0001\u0000\u0000\u0000\u0329\u0304\u0001\u0000\u0000\u0000"+
 		"\u0329\u031b\u0001\u0000\u0000\u0000\u032a\u008b\u0001\u0000\u0000\u0000"+
-		"\u032b\u032c\u0003\u00c8d\u0000\u032c\u032d\u0005\u0140\u0000\u0000\u032d"+
-		"\u032e\u0003\u00b4Z\u0000\u032e\u032f\u0005\u0149\u0000\u0000\u032f\u0334"+
-		"\u0003\u00cae\u0000\u0330\u0331\u0005\u014d\u0000\u0000\u0331\u0333\u0003"+
+		"\u032b\u032c\u0003\u00c8d\u0000\u032c\u032d\u0005\u013f\u0000\u0000\u032d"+
+		"\u032e\u0003\u00b4Z\u0000\u032e\u032f\u0005\u0148\u0000\u0000\u032f\u0334"+
+		"\u0003\u00cae\u0000\u0330\u0331\u0005\u014c\u0000\u0000\u0331\u0333\u0003"+
 		"\u00bc^\u0000\u0332\u0330\u0001\u0000\u0000\u0000\u0333\u0336\u0001\u0000"+
 		"\u0000\u0000\u0334\u0332\u0001\u0000\u0000\u0000\u0334\u0335\u0001\u0000"+
 		"\u0000\u0000\u0335\u0337\u0001\u0000\u0000\u0000\u0336\u0334\u0001\u0000"+
-		"\u0000\u0000\u0337\u0338\u0005\u014a\u0000\u0000\u0338\u008d\u0001\u0000"+
-		"\u0000\u0000\u0339\u033a\u0003\u00c8d\u0000\u033a\u033b\u0005\u0140\u0000"+
-		"\u0000\u033b\u033c\u0003\u00b6[\u0000\u033c\u033d\u0005\u0149\u0000\u0000"+
-		"\u033d\u0342\u0003\u00cae\u0000\u033e\u033f\u0005\u014d\u0000\u0000\u033f"+
+		"\u0000\u0000\u0337\u0338\u0005\u0149\u0000\u0000\u0338\u008d\u0001\u0000"+
+		"\u0000\u0000\u0339\u033a\u0003\u00c8d\u0000\u033a\u033b\u0005\u013f\u0000"+
+		"\u0000\u033b\u033c\u0003\u00b6[\u0000\u033c\u033d\u0005\u0148\u0000\u0000"+
+		"\u033d\u0342\u0003\u00cae\u0000\u033e\u033f\u0005\u014c\u0000\u0000\u033f"+
 		"\u0341\u0003\u00bc^\u0000\u0340\u033e\u0001\u0000\u0000\u0000\u0341\u0344"+
 		"\u0001\u0000\u0000\u0000\u0342\u0340\u0001\u0000\u0000\u0000\u0342\u0343"+
 		"\u0001\u0000\u0000\u0000\u0343\u0345\u0001\u0000\u0000\u0000\u0344\u0342"+
-		"\u0001\u0000\u0000\u0000\u0345\u0346\u0005\u014a\u0000\u0000\u0346\u008f"+
-		"\u0001\u0000\u0000\u0000\u0347\u0352\u0005\u0081\u0000\u0000\u0348\u0352"+
-		"\u0005\u00c2\u0000\u0000\u0349\u0352\u0005\u00c6\u0000\u0000\u034a\u0352"+
+		"\u0001\u0000\u0000\u0000\u0345\u0346\u0005\u0149\u0000\u0000\u0346\u008f"+
+		"\u0001\u0000\u0000\u0000\u0347\u0352\u0005\u0080\u0000\u0000\u0348\u0352"+
+		"\u0005\u00c1\u0000\u0000\u0349\u0352\u0005\u00c5\u0000\u0000\u034a\u0352"+
 		"\u0005 \u0000\u0000\u034b\u0352\u0005!\u0000\u0000\u034c\u0352\u0005\u0015"+
 		"\u0000\u0000\u034d\u0352\u0005(\u0000\u0000\u034e\u0352\u0005\u0019\u0000"+
 		"\u0000\u034f\u0352\u00059\u0000\u0000\u0350\u0352\u0005\t\u0000\u0000"+
@@ -9723,37 +9723,37 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0352\u0091\u0001\u0000\u0000\u0000\u0353\u0354\u0005>\u0000\u0000\u0354"+
 		"\u0355\u0003\u00ba]\u0000\u0355\u0356\u0005:\u0000\u0000\u0356\u0357\u0003"+
 		"\u00ba]\u0000\u0357\u0093\u0001\u0000\u0000\u0000\u0358\u0359\u0003\u009a"+
-		"M\u0000\u0359\u035a\u0005\u0149\u0000\u0000\u035a\u035b\u0003\u00ba]\u0000"+
-		"\u035b\u035c\u0005\u014a\u0000\u0000\u035c\u0369\u0001\u0000\u0000\u0000"+
-		"\u035d\u035e\u0005C\u0000\u0000\u035e\u035f\u0005\u0149\u0000\u0000\u035f"+
-		"\u0360\u0005\u0139\u0000\u0000\u0360\u0369\u0005\u014a\u0000\u0000\u0361"+
-		"\u0362\u0005C\u0000\u0000\u0362\u0363\u0005\u0149\u0000\u0000\u0363\u0364"+
+		"M\u0000\u0359\u035a\u0005\u0148\u0000\u0000\u035a\u035b\u0003\u00ba]\u0000"+
+		"\u035b\u035c\u0005\u0149\u0000\u0000\u035c\u0369\u0001\u0000\u0000\u0000"+
+		"\u035d\u035e\u0005B\u0000\u0000\u035e\u035f\u0005\u0148\u0000\u0000\u035f"+
+		"\u0360\u0005\u0138\u0000\u0000\u0360\u0369\u0005\u0149\u0000\u0000\u0361"+
+		"\u0362\u0005B\u0000\u0000\u0362\u0363\u0005\u0148\u0000\u0000\u0363\u0364"+
 		"\u0005\u0014\u0000\u0000\u0364\u0365\u0003\u00ba]\u0000\u0365\u0366\u0005"+
-		"\u014a\u0000\u0000\u0366\u0369\u0001\u0000\u0000\u0000\u0367\u0369\u0003"+
+		"\u0149\u0000\u0000\u0366\u0369\u0001\u0000\u0000\u0000\u0367\u0369\u0003"+
 		"\u0096K\u0000\u0368\u0358\u0001\u0000\u0000\u0000\u0368\u035d\u0001\u0000"+
 		"\u0000\u0000\u0368\u0361\u0001\u0000\u0000\u0000\u0368\u0367\u0001\u0000"+
 		"\u0000\u0000\u0369\u0095\u0001\u0000\u0000\u0000\u036a\u036b\u0007\u0013"+
-		"\u0000\u0000\u036b\u036c\u0005\u0149\u0000\u0000\u036c\u036d\u0003\u00ba"+
-		"]\u0000\u036d\u036e\u0005\u014d\u0000\u0000\u036e\u0371\u0003@ \u0000"+
-		"\u036f\u0370\u0005\u014d\u0000\u0000\u0370\u0372\u0003@ \u0000\u0371\u036f"+
+		"\u0000\u0000\u036b\u036c\u0005\u0148\u0000\u0000\u036c\u036d\u0003\u00ba"+
+		"]\u0000\u036d\u036e\u0005\u014c\u0000\u0000\u036e\u0371\u0003@ \u0000"+
+		"\u036f\u0370\u0005\u014c\u0000\u0000\u0370\u0372\u0003@ \u0000\u0371\u036f"+
 		"\u0001\u0000\u0000\u0000\u0371\u0372\u0001\u0000\u0000\u0000\u0372\u0373"+
-		"\u0001\u0000\u0000\u0000\u0373\u0374\u0005\u014a\u0000\u0000\u0374\u0097"+
-		"\u0001\u0000\u0000\u0000\u0375\u0376\u0005\u00de\u0000\u0000\u0376\u0377"+
-		"\u0005\u0149\u0000\u0000\u0377\u0378\u0005?\u0000\u0000\u0378\u0379\u0003"+
-		"Z-\u0000\u0379\u037a\u0005\u014a\u0000\u0000\u037a\u0099\u0001\u0000\u0000"+
+		"\u0001\u0000\u0000\u0000\u0373\u0374\u0005\u0149\u0000\u0000\u0374\u0097"+
+		"\u0001\u0000\u0000\u0000\u0375\u0376\u0005\u00dd\u0000\u0000\u0376\u0377"+
+		"\u0005\u0148\u0000\u0000\u0377\u0378\u0005?\u0000\u0000\u0378\u0379\u0003"+
+		"Z-\u0000\u0379\u037a\u0005\u0149\u0000\u0000\u037a\u0099\u0001\u0000\u0000"+
 		"\u0000\u037b\u037c\u0007\u0014\u0000\u0000\u037c\u009b\u0001\u0000\u0000"+
-		"\u0000\u037d\u0399\u0005i\u0000\u0000\u037e\u0399\u0005q\u0000\u0000\u037f"+
-		"\u0399\u0005r\u0000\u0000\u0380\u0399\u0005s\u0000\u0000\u0381\u0399\u0005"+
-		"v\u0000\u0000\u0382\u0399\u0005{\u0000\u0000\u0383\u0399\u0005\u008c\u0000"+
-		"\u0000\u0384\u0399\u0005\u008d\u0000\u0000\u0385\u0399\u0005\u008e\u0000"+
-		"\u0000\u0386\u0399\u0005\u0090\u0000\u0000\u0387\u0399\u0005\u0099\u0000"+
-		"\u0000\u0388\u0399\u0005\u009d\u0000\u0000\u0389\u0399\u0005\u009e\u0000"+
-		"\u0000\u038a\u0399\u0005\u009f\u0000\u0000\u038b\u0399\u0005\u013f\u0000"+
-		"\u0000\u038c\u0399\u0005\u00ab\u0000\u0000\u038d\u0399\u0005\u00ad\u0000"+
-		"\u0000\u038e\u0399\u0005\u00ae\u0000\u0000\u038f\u0399\u0005\u00b0\u0000"+
-		"\u0000\u0390\u0399\u0005\u00b2\u0000\u0000\u0391\u0399\u0005\u00b3\u0000"+
-		"\u0000\u0392\u0399\u0005\u00b7\u0000\u0000\u0393\u0399\u0005\u00b8\u0000"+
-		"\u0000\u0394\u0399\u0005\u00bb\u0000\u0000\u0395\u0399\u0005\u00c7\u0000"+
+		"\u0000\u037d\u0399\u0005h\u0000\u0000\u037e\u0399\u0005p\u0000\u0000\u037f"+
+		"\u0399\u0005q\u0000\u0000\u0380\u0399\u0005r\u0000\u0000\u0381\u0399\u0005"+
+		"u\u0000\u0000\u0382\u0399\u0005z\u0000\u0000\u0383\u0399\u0005\u008b\u0000"+
+		"\u0000\u0384\u0399\u0005\u008c\u0000\u0000\u0385\u0399\u0005\u008d\u0000"+
+		"\u0000\u0386\u0399\u0005\u008f\u0000\u0000\u0387\u0399\u0005\u0098\u0000"+
+		"\u0000\u0388\u0399\u0005\u009c\u0000\u0000\u0389\u0399\u0005\u009d\u0000"+
+		"\u0000\u038a\u0399\u0005\u009e\u0000\u0000\u038b\u0399\u0005\u013e\u0000"+
+		"\u0000\u038c\u0399\u0005\u00aa\u0000\u0000\u038d\u0399\u0005\u00ac\u0000"+
+		"\u0000\u038e\u0399\u0005\u00ad\u0000\u0000\u038f\u0399\u0005\u00af\u0000"+
+		"\u0000\u0390\u0399\u0005\u00b1\u0000\u0000\u0391\u0399\u0005\u00b2\u0000"+
+		"\u0000\u0392\u0399\u0005\u00b6\u0000\u0000\u0393\u0399\u0005\u00b7\u0000"+
+		"\u0000\u0394\u0399\u0005\u00ba\u0000\u0000\u0395\u0399\u0005\u00c6\u0000"+
 		"\u0000\u0396\u0399\u0003\u009eO\u0000\u0397\u0399\u0003\u00a0P\u0000\u0398"+
 		"\u037d\u0001\u0000\u0000\u0000\u0398\u037e\u0001\u0000\u0000\u0000\u0398"+
 		"\u037f\u0001\u0000\u0000\u0000\u0398\u0380\u0001\u0000\u0000\u0000\u0398"+
@@ -9771,35 +9771,35 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0397\u0001\u0000\u0000\u0000\u0399\u009d\u0001\u0000\u0000\u0000\u039a"+
 		"\u039b\u0007\u0015\u0000\u0000\u039b\u009f\u0001\u0000\u0000\u0000\u039c"+
 		"\u039d\u0007\u0016\u0000\u0000\u039d\u00a1\u0001\u0000\u0000\u0000\u039e"+
-		"\u03da\u0003T*\u0000\u039f\u03da\u0005\u0111\u0000\u0000\u03a0\u03da\u0005"+
-		"l\u0000\u0000\u03a1\u03da\u0005w\u0000\u0000\u03a2\u03da\u0005|\u0000"+
-		"\u0000\u03a3\u03da\u0005}\u0000\u0000\u03a4\u03da\u0005\u0081\u0000\u0000"+
-		"\u03a5\u03da\u0005\u0082\u0000\u0000\u03a6\u03da\u0005\u0083\u0000\u0000"+
-		"\u03a7\u03da\u0005\u0084\u0000\u0000\u03a8\u03da\u0005\u0085\u0000\u0000"+
-		"\u03a9\u03da\u0005\u0010\u0000\u0000\u03aa\u03da\u0005X\u0000\u0000\u03ab"+
-		"\u03da\u0005\u0086\u0000\u0000\u03ac\u03da\u0005\u0087\u0000\u0000\u03ad"+
-		"\u03da\u0005\u00d8\u0000\u0000\u03ae\u03da\u0005\u0088\u0000\u0000\u03af"+
-		"\u03da\u0005\u0089\u0000\u0000\u03b0\u03da\u0005\u00d9\u0000\u0000\u03b1"+
-		"\u03da\u0005\u00da\u0000\u0000\u03b2\u03da\u0005\u0091\u0000\u0000\u03b3"+
-		"\u03da\u0005\u0092\u0000\u0000\u03b4\u03da\u0005W\u0000\u0000\u03b5\u03da"+
-		"\u0005\u00e6\u0000\u0000\u03b6\u03da\u0005\u0097\u0000\u0000\u03b7\u03da"+
-		"\u0005\u00a2\u0000\u0000\u03b8\u03da\u0005\u00a3\u0000\u0000\u03b9\u03da"+
-		"\u0005T\u0000\u0000\u03ba\u03da\u0005V\u0000\u0000\u03bb\u03da\u0005\u00f1"+
-		"\u0000\u0000\u03bc\u03da\u0005\u00f2\u0000\u0000\u03bd\u03da\u0005Z\u0000"+
-		"\u0000\u03be\u03da\u0005\u00a5\u0000\u0000\u03bf\u03da\u0005\u00f3\u0000"+
-		"\u0000\u03c0\u03da\u0005\u00a7\u0000\u0000\u03c1\u03da\u0005\u00a9\u0000"+
-		"\u0000\u03c2\u03da\u0005\u00aa\u0000\u0000\u03c3\u03da\u0005[\u0000\u0000"+
-		"\u03c4\u03da\u0005\u00b6\u0000\u0000\u03c5\u03da\u0005U\u0000\u0000\u03c6"+
-		"\u03da\u0005\u0102\u0000\u0000\u03c7\u03da\u0005\u00bd\u0000\u0000\u03c8"+
-		"\u03da\u0005\u00be\u0000\u0000\u03c9\u03da\u0005\u00c0\u0000\u0000\u03ca"+
-		"\u03da\u0005\u00bc\u0000\u0000\u03cb\u03da\u0005\u00c2\u0000\u0000\u03cc"+
-		"\u03da\u0005\u00c4\u0000\u0000\u03cd\u03da\u0005\u00c5\u0000\u0000\u03ce"+
-		"\u03da\u0005\u00c3\u0000\u0000\u03cf\u03da\u0005\u00c6\u0000\u0000\u03d0"+
-		"\u03da\u0005\u00c8\u0000\u0000\u03d1\u03da\u0005\u00c9\u0000\u0000\u03d2"+
-		"\u03da\u0005\u00ca\u0000\u0000\u03d3\u03da\u0005Y\u0000\u0000\u03d4\u03da"+
-		"\u0005\u010c\u0000\u0000\u03d5\u03da\u0005\u010a\u0000\u0000\u03d6\u03da"+
-		"\u0005\u010b\u0000\u0000\u03d7\u03da\u0005\\\u0000\u0000\u03d8\u03da\u0005"+
-		"\u0112\u0000\u0000\u03d9\u039e\u0001\u0000\u0000\u0000\u03d9\u039f\u0001"+
+		"\u03da\u0003T*\u0000\u039f\u03da\u0005\u0110\u0000\u0000\u03a0\u03da\u0005"+
+		"k\u0000\u0000\u03a1\u03da\u0005v\u0000\u0000\u03a2\u03da\u0005{\u0000"+
+		"\u0000\u03a3\u03da\u0005|\u0000\u0000\u03a4\u03da\u0005\u0080\u0000\u0000"+
+		"\u03a5\u03da\u0005\u0081\u0000\u0000\u03a6\u03da\u0005\u0082\u0000\u0000"+
+		"\u03a7\u03da\u0005\u0083\u0000\u0000\u03a8\u03da\u0005\u0084\u0000\u0000"+
+		"\u03a9\u03da\u0005\u0010\u0000\u0000\u03aa\u03da\u0005W\u0000\u0000\u03ab"+
+		"\u03da\u0005\u0085\u0000\u0000\u03ac\u03da\u0005\u0086\u0000\u0000\u03ad"+
+		"\u03da\u0005\u00d7\u0000\u0000\u03ae\u03da\u0005\u0087\u0000\u0000\u03af"+
+		"\u03da\u0005\u0088\u0000\u0000\u03b0\u03da\u0005\u00d8\u0000\u0000\u03b1"+
+		"\u03da\u0005\u00d9\u0000\u0000\u03b2\u03da\u0005\u0090\u0000\u0000\u03b3"+
+		"\u03da\u0005\u0091\u0000\u0000\u03b4\u03da\u0005V\u0000\u0000\u03b5\u03da"+
+		"\u0005\u00e5\u0000\u0000\u03b6\u03da\u0005\u0096\u0000\u0000\u03b7\u03da"+
+		"\u0005\u00a1\u0000\u0000\u03b8\u03da\u0005\u00a2\u0000\u0000\u03b9\u03da"+
+		"\u0005S\u0000\u0000\u03ba\u03da\u0005U\u0000\u0000\u03bb\u03da\u0005\u00f0"+
+		"\u0000\u0000\u03bc\u03da\u0005\u00f1\u0000\u0000\u03bd\u03da\u0005Y\u0000"+
+		"\u0000\u03be\u03da\u0005\u00a4\u0000\u0000\u03bf\u03da\u0005\u00f2\u0000"+
+		"\u0000\u03c0\u03da\u0005\u00a6\u0000\u0000\u03c1\u03da\u0005\u00a8\u0000"+
+		"\u0000\u03c2\u03da\u0005\u00a9\u0000\u0000\u03c3\u03da\u0005Z\u0000\u0000"+
+		"\u03c4\u03da\u0005\u00b5\u0000\u0000\u03c5\u03da\u0005T\u0000\u0000\u03c6"+
+		"\u03da\u0005\u0101\u0000\u0000\u03c7\u03da\u0005\u00bc\u0000\u0000\u03c8"+
+		"\u03da\u0005\u00bd\u0000\u0000\u03c9\u03da\u0005\u00bf\u0000\u0000\u03ca"+
+		"\u03da\u0005\u00bb\u0000\u0000\u03cb\u03da\u0005\u00c1\u0000\u0000\u03cc"+
+		"\u03da\u0005\u00c3\u0000\u0000\u03cd\u03da\u0005\u00c4\u0000\u0000\u03ce"+
+		"\u03da\u0005\u00c2\u0000\u0000\u03cf\u03da\u0005\u00c5\u0000\u0000\u03d0"+
+		"\u03da\u0005\u00c7\u0000\u0000\u03d1\u03da\u0005\u00c8\u0000\u0000\u03d2"+
+		"\u03da\u0005\u00c9\u0000\u0000\u03d3\u03da\u0005X\u0000\u0000\u03d4\u03da"+
+		"\u0005\u010b\u0000\u0000\u03d5\u03da\u0005\u0109\u0000\u0000\u03d6\u03da"+
+		"\u0005\u010a\u0000\u0000\u03d7\u03da\u0005[\u0000\u0000\u03d8\u03da\u0005"+
+		"\u0111\u0000\u0000\u03d9\u039e\u0001\u0000\u0000\u0000\u03d9\u039f\u0001"+
 		"\u0000\u0000\u0000\u03d9\u03a0\u0001\u0000\u0000\u0000\u03d9\u03a1\u0001"+
 		"\u0000\u0000\u0000\u03d9\u03a2\u0001\u0000\u0000\u0000\u03d9\u03a3\u0001"+
 		"\u0000\u0000\u0000\u03d9\u03a4\u0001\u0000\u0000\u0000\u03d9\u03a5\u0001"+
@@ -9831,33 +9831,33 @@ public class OpenSearchSQLParser extends Parser {
 		"\u0000\u0000\u0000\u03d9\u03d8\u0001\u0000\u0000\u0000\u03da\u00a3\u0001"+
 		"\u0000\u0000\u0000\u03db\u03dc\u0007\u0017\u0000\u0000\u03dc\u00a5\u0001"+
 		"\u0000\u0000\u0000\u03dd\u03de\u0007\u0018\u0000\u0000\u03de\u00a7\u0001"+
-		"\u0000\u0000\u0000\u03df\u03e0\u0005\u00fd\u0000\u0000\u03e0\u00a9\u0001"+
-		"\u0000\u0000\u0000\u03e1\u03e2\u0005\u0109\u0000\u0000\u03e2\u00ab\u0001"+
-		"\u0000\u0000\u0000\u03e3\u03e4\u0005\u00f7\u0000\u0000\u03e4\u00ad\u0001"+
+		"\u0000\u0000\u0000\u03df\u03e0\u0005\u00fc\u0000\u0000\u03e0\u00a9\u0001"+
+		"\u0000\u0000\u0000\u03e1\u03e2\u0005\u0108\u0000\u0000\u03e2\u00ab\u0001"+
+		"\u0000\u0000\u0000\u03e3\u03e4\u0005\u00f6\u0000\u0000\u03e4\u00ad\u0001"+
 		"\u0000\u0000\u0000\u03e5\u03e6\u0007\u0019\u0000\u0000\u03e6\u00af\u0001"+
 		"\u0000\u0000\u0000\u03e7\u03e8\u0007\u001a\u0000\u0000\u03e8\u00b1\u0001"+
 		"\u0000\u0000\u0000\u03e9\u03ea\u0007\u001b\u0000\u0000\u03ea\u00b3\u0001"+
 		"\u0000\u0000\u0000\u03eb\u03ec\u0007\u001c\u0000\u0000\u03ec\u00b5\u0001"+
 		"\u0000\u0000\u0000\u03ed\u03ee\u0007\u001d\u0000\u0000\u03ee\u00b7\u0001"+
-		"\u0000\u0000\u0000\u03ef\u03f4\u0003\u00ba]\u0000\u03f0\u03f1\u0005\u014d"+
+		"\u0000\u0000\u0000\u03ef\u03f4\u0003\u00ba]\u0000\u03f0\u03f1\u0005\u014c"+
 		"\u0000\u0000\u03f1\u03f3\u0003\u00ba]\u0000\u03f2\u03f0\u0001\u0000\u0000"+
 		"\u0000\u03f3\u03f6\u0001\u0000\u0000\u0000\u03f4\u03f2\u0001\u0000\u0000"+
 		"\u0000\u03f4\u03f5\u0001\u0000\u0000\u0000\u03f5\u03f8\u0001\u0000\u0000"+
 		"\u0000\u03f6\u03f4\u0001\u0000\u0000\u0000\u03f7\u03ef\u0001\u0000\u0000"+
 		"\u0000\u03f7\u03f8\u0001\u0000\u0000\u0000\u03f8\u00b9\u0001\u0000\u0000"+
 		"\u0000\u03f9\u03fa\u0003Z-\u0000\u03fa\u00bb\u0001\u0000\u0000\u0000\u03fb"+
-		"\u03fc\u0003\u00c0`\u0000\u03fc\u03fd\u0005\u0140\u0000\u0000\u03fd\u03fe"+
+		"\u03fc\u0003\u00c0`\u0000\u03fc\u03fd\u0005\u013f\u0000\u0000\u03fd\u03fe"+
 		"\u0003\u00ccf\u0000\u03fe\u0404\u0001\u0000\u0000\u0000\u03ff\u0400\u0003"+
-		"B!\u0000\u0400\u0401\u0005\u0140\u0000\u0000\u0401\u0402\u0003\u00ccf"+
+		"B!\u0000\u0400\u0401\u0005\u013f\u0000\u0000\u0401\u0402\u0003\u00ccf"+
 		"\u0000\u0402\u0404\u0001\u0000\u0000\u0000\u0403\u03fb\u0001\u0000\u0000"+
 		"\u0000\u0403\u03ff\u0001\u0000\u0000\u0000\u0404\u00bd\u0001\u0000\u0000"+
-		"\u0000\u0405\u0406\u0003\u00c2a\u0000\u0406\u0407\u0005\u0140\u0000\u0000"+
+		"\u0000\u0405\u0406\u0003\u00c2a\u0000\u0406\u0407\u0005\u013f\u0000\u0000"+
 		"\u0407\u0408\u0003\u00ceg\u0000\u0408\u00bf\u0001\u0000\u0000\u0000\u0409"+
 		"\u040a\u0007\u001e\u0000\u0000\u040a\u00c1\u0001\u0000\u0000\u0000\u040b"+
 		"\u040c\u0007\u001f\u0000\u0000\u040c\u00c3\u0001\u0000\u0000\u0000\u040d"+
 		"\u0416\u0003\u00c8d\u0000\u040e\u040f\u0003\u00c8d\u0000\u040f\u0410\u0003"+
 		"\u00c6c\u0000\u0410\u0416\u0001\u0000\u0000\u0000\u0411\u0412\u0003\u00c8"+
-		"d\u0000\u0412\u0413\u0005\u0147\u0000\u0000\u0413\u0414\u0003\u00c6c\u0000"+
+		"d\u0000\u0412\u0413\u0005\u0146\u0000\u0000\u0413\u0414\u0003\u00c6c\u0000"+
 		"\u0414\u0416\u0001\u0000\u0000\u0000\u0415\u040d\u0001\u0000\u0000\u0000"+
 		"\u0415\u040e\u0001\u0000\u0000\u0000\u0415\u0411\u0001\u0000\u0000\u0000"+
 		"\u0416\u00c5\u0001\u0000\u0000\u0000\u0417\u0418\u0003@ \u0000\u0418\u00c7"+
@@ -9867,30 +9867,30 @@ public class OpenSearchSQLParser extends Parser {
 		"\u041e\u00cb\u0001\u0000\u0000\u0000\u041f\u0422\u0003\u00deo\u0000\u0420"+
 		"\u0422\u0003<\u001e\u0000\u0421\u041f\u0001\u0000\u0000\u0000\u0421\u0420"+
 		"\u0001\u0000\u0000\u0000\u0422\u00cd\u0001\u0000\u0000\u0000\u0423\u0424"+
-		"\u0003B!\u0000\u0424\u00cf\u0001\u0000\u0000\u0000\u0425\u0429\u0005\u011e"+
-		"\u0000\u0000\u0426\u0429\u0005\u00fd\u0000\u0000\u0427\u0429\u0003B!\u0000"+
+		"\u0003B!\u0000\u0424\u00cf\u0001\u0000\u0000\u0000\u0425\u0429\u0005\u011d"+
+		"\u0000\u0000\u0426\u0429\u0005\u00fc\u0000\u0000\u0427\u0429\u0003B!\u0000"+
 		"\u0428\u0425\u0001\u0000\u0000\u0000\u0428\u0426\u0001\u0000\u0000\u0000"+
 		"\u0428\u0427\u0001\u0000\u0000\u0000\u0429\u00d1\u0001\u0000\u0000\u0000"+
-		"\u042a\u042b\u0003\u00d0h\u0000\u042b\u042c\u0005\u0140\u0000\u0000\u042c"+
+		"\u042a\u042b\u0003\u00d0h\u0000\u042b\u042c\u0005\u013f\u0000\u0000\u042c"+
 		"\u042d\u0003\u00ccf\u0000\u042d\u00d3\u0001\u0000\u0000\u0000\u042e\u042f"+
-		"\u0003\u00d0h\u0000\u042f\u0430\u0005\u0140\u0000\u0000\u0430\u0431\u0003"+
+		"\u0003\u00d0h\u0000\u042f\u0430\u0005\u013f\u0000\u0000\u0430\u0431\u0003"+
 		"\u00ccf\u0000\u0431\u0439\u0001\u0000\u0000\u0000\u0432\u0433\u0003\u00d0"+
-		"h\u0000\u0433\u0434\u0005\u0140\u0000\u0000\u0434\u0435\u0005\u014b\u0000"+
-		"\u0000\u0435\u0436\u0003\u00ccf\u0000\u0436\u0437\u0005\u014c\u0000\u0000"+
+		"h\u0000\u0433\u0434\u0005\u013f\u0000\u0000\u0434\u0435\u0005\u014a\u0000"+
+		"\u0000\u0435\u0436\u0003\u00ccf\u0000\u0436\u0437\u0005\u014b\u0000\u0000"+
 		"\u0437\u0439\u0001\u0000\u0000\u0000\u0438\u042e\u0001\u0000\u0000\u0000"+
 		"\u0438\u0432\u0001\u0000\u0000\u0000\u0439\u00d5\u0001\u0000\u0000\u0000"+
 		"\u043a\u043b\u0003\u00deo\u0000\u043b\u00d7\u0001\u0000\u0000\u0000\u043c"+
 		"\u043d\u0003\u00deo\u0000\u043d\u00d9\u0001\u0000\u0000\u0000\u043e\u043f"+
-		"\u0003\u00deo\u0000\u043f\u0440\u0005\u0148\u0000\u0000\u0440\u0441\u0005"+
-		"\u0139\u0000\u0000\u0441\u00db\u0001\u0000\u0000\u0000\u0442\u0443\u0003"+
+		"\u0003\u00deo\u0000\u043f\u0440\u0005\u0147\u0000\u0000\u0440\u0441\u0005"+
+		"\u0138\u0000\u0000\u0441\u00db\u0001\u0000\u0000\u0000\u0442\u0443\u0003"+
 		"\u00e0p\u0000\u0443\u00dd\u0001\u0000\u0000\u0000\u0444\u0449\u0003\u00e0"+
-		"p\u0000\u0445\u0446\u0005\u0148\u0000\u0000\u0446\u0448\u0003\u00e0p\u0000"+
+		"p\u0000\u0445\u0446\u0005\u0147\u0000\u0000\u0446\u0448\u0003\u00e0p\u0000"+
 		"\u0447\u0445\u0001\u0000\u0000\u0000\u0448\u044b\u0001\u0000\u0000\u0000"+
 		"\u0449\u0447\u0001\u0000\u0000\u0000\u0449\u044a\u0001\u0000\u0000\u0000"+
 		"\u044a\u00df\u0001\u0000\u0000\u0000\u044b\u0449\u0001\u0000\u0000\u0000"+
-		"\u044c\u044e\u0005\u0148\u0000\u0000\u044d\u044c\u0001\u0000\u0000\u0000"+
+		"\u044c\u044e\u0005\u0147\u0000\u0000\u044d\u044c\u0001\u0000\u0000\u0000"+
 		"\u044d\u044e\u0001\u0000\u0000\u0000\u044e\u044f\u0001\u0000\u0000\u0000"+
-		"\u044f\u0454\u0005\u015e\u0000\u0000\u0450\u0454\u0005\u0160\u0000\u0000"+
+		"\u044f\u0454\u0005\u015d\u0000\u0000\u0450\u0454\u0005\u015f\u0000\u0000"+
 		"\u0451\u0454\u0003\u00e2q\u0000\u0452\u0454\u0003~?\u0000\u0453\u044d"+
 		"\u0001\u0000\u0000\u0000\u0453\u0450\u0001\u0000\u0000\u0000\u0453\u0451"+
 		"\u0001\u0000\u0000\u0000\u0453\u0452\u0001\u0000\u0000\u0000\u0454\u00e1"+
