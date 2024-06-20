@@ -170,8 +170,8 @@ export class ChromeService {
         const matchedGroup = currentGroupsMap[navGroup.id];
         if (matchedGroup) {
           const links = matchedGroup.navLinks;
-          const IfNavExist = !!links.find((link) => link.id === navLink.id);
-          if (IfNavExist) {
+          const isLinkExistInGroup = !!links.find((link) => link.id === navLink.id);
+          if (isLinkExistInGroup) {
             // eslint-disable-next-line no-console
             console.warn(
               `[ChromeService] Navlink of ${navLink.id} has already been registered in group ${navGroup.id}`
