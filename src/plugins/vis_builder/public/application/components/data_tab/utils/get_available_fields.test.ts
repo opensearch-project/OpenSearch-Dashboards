@@ -44,7 +44,7 @@ describe('getAvailableFields', () => {
       },
     ]);
 
-    expect(getAvailableFields(fields).length).toBe(1);
+    expect(getAvailableFields(fields).length).toBe(2);
   });
 
   test('should return all fields if filterFieldTypes was not specified', () => {
@@ -54,6 +54,21 @@ describe('getAvailableFields', () => {
       },
       {
         name: 'field 2',
+      },
+    ]);
+
+    expect(getAvailableFields(fields).length).toBe(2);
+  });
+
+  test('should return scripted fields', () => {
+    const fields = createIndexFields([
+      {
+        name: 'field 1',
+        scripted: true,
+      },
+      {
+        name: 'field 2',
+        scripted: true,
       },
     ]);
 
