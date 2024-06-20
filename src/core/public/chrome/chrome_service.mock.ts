@@ -36,6 +36,7 @@ import { getLogosMock } from '../../common/mocks';
 const createSetupContractMock = () => {
   return {
     registerCollapsibleNavHeader: jest.fn(),
+    getUseCaseEnabled: jest.fn(),
   };
 };
 
@@ -86,6 +87,7 @@ const createStartContractMock = () => {
     getIsNavDrawerLocked$: jest.fn(),
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),
+    getUseCaseEnabled: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
