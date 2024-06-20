@@ -47,6 +47,8 @@ export interface QueryEditorProps {
   isInvalid?: boolean;
   queryEditorHeaderRef: React.RefObject<HTMLDivElement>;
   queryEditorHeaderClassName?: string;
+  queryEditorBannerRef: React.RefObject<HTMLDivElement>;
+  queryEditorBannerClassName?: string;
 }
 
 interface Props extends QueryEditorProps {
@@ -289,8 +291,14 @@ export default class QueryEditorUI extends Component<Props, State> {
       this.props.queryEditorHeaderClassName
     );
 
+    const queryEditorBannerClassName = classNames(
+      'osdQueryEditorBanner',
+      this.props.queryEditorBannerClassName
+    );
+
     return (
       <div className={className}>
+        <div ref={this.props.queryEditorBannerRef} className={queryEditorBannerClassName} />
         <EuiFlexGroup gutterSize="xs" direction="column">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs">
