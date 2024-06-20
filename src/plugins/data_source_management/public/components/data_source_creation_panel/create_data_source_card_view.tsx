@@ -22,9 +22,13 @@ export interface DatasourceCard {
 
 interface CreateDataSourceCardViewProps {
   history: History;
+  featureFlagStatus: boolean;
 }
 
-export function CreateDataSourceCardView({ history }: CreateDataSourceCardViewProps) {
+export function CreateDataSourceCardView({
+  history,
+  featureFlagStatus,
+}: CreateDataSourceCardViewProps) {
   const Datasources: DatasourceCard[] = [
     {
       name: 'S3GLUE',
@@ -40,13 +44,17 @@ export function CreateDataSourceCardView({ history }: CreateDataSourceCardViewPr
       displayIcon: <EuiIcon type={prometheusSvg} size="xl" />,
       onClick: () => history.push(`/configure/${PROMETHEUS_URL}`),
     },
-    {
-      name: 'OPENSEARCH',
-      displayName: 'OpenSearch',
-      description: 'Connect to OpenSearch',
-      displayIcon: <EuiIcon type={opensearchLogSvg} size="xl" />,
-      onClick: () => history.push(`/configure/${OPENSEARCH_URL}`),
-    },
+    ...(featureFlagStatus
+      ? [
+          {
+            name: 'OPENSEARCH',
+            displayName: 'OpenSearch',
+            description: 'Connect to OpenSearch',
+            displayIcon: <EuiIcon type={opensearchLogSvg} size="xl" />,
+            onClick: () => history.push(`/configure/${OPENSEARCH_URL}`),
+          },
+        ]
+      : []),
   ];
 
   const renderRows = (datasources: DatasourceCard[]) => {

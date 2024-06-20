@@ -22,19 +22,15 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { DataSourceManagementContext } from '../../types';
 
-const tabs = [
-  {
-    id: 'manageDirectQueryDataSources',
-    name: 'Direct query connections',
-  },
-  {
-    id: 'manageOpensearchDataSources',
-    name: 'OpenSearch connections',
-  },
-];
+interface DataSourceHomePanelProps extends RouteComponentProps {
+  featureFlagStatus: boolean;
+}
 
-export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
-  const { setBreadcrumbs, notifications, http, savedObjects } = useOpenSearchDashboards<
+export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
+  featureFlagStatus,
+  ...props
+}) => {
+  const { setBreadcrumbs, notifications, http, savedObjects, uiSettings } = useOpenSearchDashboards<
     DataSourceManagementContext
   >().services;
 
@@ -47,6 +43,21 @@ export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
   const onSelectedTabChanged = (id: string) => {
     setSelectedTabId(id);
   };
+
+  const tabs = [
+    {
+      id: 'manageDirectQueryDataSources',
+      name: 'Direct query connections',
+    },
+    ...(featureFlagStatus
+      ? [
+          {
+            id: 'manageOpensearchDataSources',
+            name: 'OpenSearch connections',
+          },
+        ]
+      : []),
+  ];
 
   const renderTabs = () => {
     return tabs.map((tab) => (
@@ -81,7 +92,7 @@ export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiSpacer size="s" />
-          {selectedTabId === 'manageOpensearchDataSources' && (
+          {selectedTabId === 'manageOpensearchDataSources' && featureFlagStatus && (
             <DataSourceTableWithRouter {...props} />
           )}
           {selectedTabId === 'manageDirectQueryDataSources' && (
@@ -89,6 +100,8 @@ export const DataSourceHomePanel: React.FC<RouteComponentProps> = (props) => {
               http={http}
               notifications={notifications}
               savedObjects={savedObjects}
+              uiSettings={uiSettings}
+              featureFlagStatus={featureFlagStatus}
             />
           )}
         </EuiFlexItem>

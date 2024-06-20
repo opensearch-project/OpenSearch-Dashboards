@@ -45,6 +45,7 @@ interface ManageDirectQueryDataConnectionsTableProps {
   notifications: NotificationsStart;
   savedObjects: SavedObjectsStart;
   uiSettings: IUiSettingsClient;
+  featureFlagStatus: boolean;
 }
 
 // Custom truncate function
@@ -58,6 +59,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   notifications,
   savedObjects,
   uiSettings,
+  featureFlagStatus,
 }) => {
   const [data, setData] = useState<DataConnection[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -66,25 +68,25 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   const [searchText, setSearchText] = useState<string>('');
 
   const fetchDataSources = useCallback(() => {
-    if (selectedDataSourceId === undefined) return;
+    const endpoint =
+      featureFlagStatus && selectedDataSourceId
+        ? `/api/dataconnections/dataSourceMDSId=${selectedDataSourceId}`
+        : `/api/dataconnections`;
 
-    const dataSourceMDSId = selectedDataSourceId || '';
     http
-      .get(`/api/dataconnections/dataSourceMDSId=${dataSourceMDSId}`)
+      .get(endpoint)
       .then((res: DirectQueryDatasourceDetails[]) => {
-        const dataConnections = res.map((dataConnection: DirectQueryDatasourceDetails) => {
-          return {
-            name: dataConnection.name,
-            connectionType: dataConnection.connector,
-            dsStatus: dataConnection.status,
-          };
-        });
+        const dataConnections = res.map((dataConnection: DirectQueryDatasourceDetails) => ({
+          name: dataConnection.name,
+          connectionType: dataConnection.connector,
+          dsStatus: dataConnection.status,
+        }));
         setData(dataConnections);
       })
       .catch((err) => {
         notifications.toasts.addDanger('Could not fetch data sources');
       });
-  }, [http, notifications.toasts, selectedDataSourceId]);
+  }, [http, notifications.toasts, selectedDataSourceId, featureFlagStatus]);
 
   useEffect(() => {
     fetchDataSources();
@@ -96,11 +98,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   };
 
   const deleteConnection = (connectionName: string) => {
-    setData(
-      data.filter((connection) => {
-        return !(connection.name === connectionName);
-      })
-    );
+    setData(data.filter((connection) => !(connection.name === connectionName)));
   };
 
   const displayDeleteModal = (connectionName: string) => {
@@ -214,16 +212,18 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
 
   const customSearchBar = (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
-      <EuiFlexItem grow={false} style={{ width: '30%' }}>
-        <DataSourceSelector
-          savedObjectsClient={savedObjects.client}
-          notifications={notifications.toasts}
-          onSelectedDataSource={handleSelectedDataSourceChange}
-          disabled={false}
-          fullWidth={true}
-          uiSettings={uiSettings}
-        />
-      </EuiFlexItem>
+      {featureFlagStatus && (
+        <EuiFlexItem grow={false} style={{ width: '30%' }}>
+          <DataSourceSelector
+            savedObjectsClient={savedObjects.client}
+            notifications={notifications.toasts}
+            onSelectedDataSource={handleSelectedDataSourceChange}
+            fullWidth={true}
+            uiSettings={uiSettings}
+            disabled={false}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={true}>
         <EuiFieldSearch
           placeholder="Search..."

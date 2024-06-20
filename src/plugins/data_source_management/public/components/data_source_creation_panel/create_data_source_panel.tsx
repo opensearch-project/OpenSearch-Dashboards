@@ -12,7 +12,14 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { getCreateBreadcrumbs } from '../breadcrumbs';
 import { DataSourceManagementContext } from '../../types';
 
-export const CreateDataSourcePanel: React.FC<RouteComponentProps> = (props) => {
+interface CreateDataSourcePanelProps extends RouteComponentProps {
+  featureFlagStatus: boolean;
+}
+
+export const CreateDataSourcePanel: React.FC<CreateDataSourcePanelProps> = ({
+  featureFlagStatus,
+  ...props
+}) => {
   const {
     chrome,
     setBreadcrumbs,
@@ -34,7 +41,7 @@ export const CreateDataSourcePanel: React.FC<RouteComponentProps> = (props) => {
           </EuiPageHeader>
         </EuiFlexItem>
         <EuiFlexItem>
-          <CreateDataSourceCardView history={props.history} />
+          <CreateDataSourceCardView history={props.history} featureFlagStatus={featureFlagStatus} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
