@@ -38,7 +38,7 @@ export {
   ChromeHelpExtension,
   ChromeNavGroup,
   ChromeRegistrationNavLink,
-  GROUP_TYPE,
+  NavGroupType,
 } from './chrome_service';
 export {
   ChromeHelpExtensionMenuLink,

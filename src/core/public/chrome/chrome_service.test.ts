@@ -43,7 +43,7 @@ import {
   ChromeRegistrationNavLink,
   ChromeService,
   ChromeNavGroup,
-  GROUP_TYPE,
+  NavGroupType,
 } from './chrome_service';
 import { getAppInfo } from '../application/utils';
 import { overlayServiceMock } from '../mocks';
@@ -119,14 +119,13 @@ const mockedGroupFoo: ChromeNavGroup = {
   id: 'foo',
   title: 'foo',
   description: 'foo',
-  type: GROUP_TYPE.SYSTEM_GROUP,
+  type: NavGroupType.SYSTEM,
 };
 
 const mockedGroupBar: ChromeNavGroup = {
   id: 'bar',
   title: 'bar',
   description: 'bar',
-  type: GROUP_TYPE.USE_CASE_GROUP,
 };
 
 const mockedNavLinkFoo: ChromeRegistrationNavLink = {
@@ -174,34 +173,32 @@ describe('setup', () => {
     );
   });
 
-  it('should be able addNavToGroup', async () => {
+  it('should be able addNavLinksToGroup', async () => {
     const warnMock = jest.fn();
     jest.spyOn(console, 'warn').mockImplementation(warnMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
 
     const chromeSetup = chrome.setup();
 
-    chromeSetup.addNavToGroup(mockedGroupFoo, mockedNavLinkFoo);
-    chromeSetup.addNavToGroup(mockedGroupBar, mockedNavLinkBar);
-    chromeSetup.addNavToGroup(mockedGroupFoo, mockedNavLinkBar);
-    const groupsMap = await chromeSetup.getGroupsMap$().pipe(first()).toPromise();
+    chromeSetup.addNavLinksToGroup(mockedGroupFoo, [mockedGroupFoo, mockedGroupBar]);
+    chromeSetup.addNavLinksToGroup(mockedGroupBar, [mockedGroupBar]);
+    const groupsMap = await chromeSetup.getNavGroupsMap$().pipe(first()).toPromise();
     expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(2);
     expect(groupsMap[mockedGroupBar.id].navLinks.length).toEqual(1);
     expect(groupsMap[mockedGroupFoo.id].id).toEqual(mockedGroupFoo.id);
     expect(warnMock).toBeCalledTimes(0);
   });
 
-  it('should output warning message if addNavToGroup with same group id and navLink id', async () => {
+  it('should output warning message if addNavLinksToGroup with same group id and navLink id', async () => {
     const warnMock = jest.fn();
     jest.spyOn(console, 'warn').mockImplementation(warnMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
 
     const chromeSetup = chrome.setup();
 
-    chromeSetup.addNavToGroup(mockedGroupFoo, mockedNavLinkFoo);
-    chromeSetup.addNavToGroup(mockedGroupBar, mockedNavLinkBar);
-    chromeSetup.addNavToGroup(mockedGroupFoo, mockedNavLinkFoo);
-    const groupsMap = await chromeSetup.getGroupsMap$().pipe(first()).toPromise();
+    chromeSetup.addNavLinksToGroup(mockedGroupFoo, [mockedNavLinkFoo, mockedGroupFoo]);
+    chromeSetup.addNavLinksToGroup(mockedGroupBar, [mockedGroupBar]);
+    const groupsMap = await chromeSetup.getNavGroupsMap$().pipe(first()).toPromise();
     expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(1);
     expect(groupsMap[mockedGroupBar.id].navLinks.length).toEqual(1);
     expect(warnMock).toBeCalledTimes(1);
@@ -550,18 +547,18 @@ describe('start', () => {
   });
 
   describe('group', () => {
-    it('should be able to get the groups registered through addNavToGroups', async () => {
+    it('should be able to get the groups registered through addNavLinksToGroups', async () => {
       const startDeps = defaultStartDeps([]);
       const chrome = new ChromeService({ browserSupportsCsp: true });
 
       const chromeSetup = chrome.setup();
 
-      chromeSetup.addNavToGroup(mockedGroupFoo, mockedNavLinkFoo);
-      chromeSetup.addNavToGroup(mockedGroupBar, mockedNavLinkBar);
+      chromeSetup.addNavLinksToGroup(mockedGroupFoo, [mockedNavLinkFoo]);
+      chromeSetup.addNavLinksToGroup(mockedGroupBar, [mockedNavLinkBar]);
 
       const chromeStart = await chrome.start(startDeps);
 
-      const groupsMap = await chromeStart.getGroupsMap$().pipe(first()).toPromise();
+      const groupsMap = await chromeStart.getNavGroupsMap$().pipe(first()).toPromise();
 
       expect(Object.keys(groupsMap).length).toEqual(2);
       expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(1);

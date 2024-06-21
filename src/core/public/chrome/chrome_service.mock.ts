@@ -38,8 +38,8 @@ const createSetupContractMock = () => {
   getGroupsMapMock.mockReturnValue(new BehaviorSubject({}));
   return {
     registerCollapsibleNavHeader: jest.fn(),
-    addNavToGroup: jest.fn(),
-    getGroupsMap$: getGroupsMapMock,
+    addNavLinksToGroup: jest.fn(),
+    getNavGroupsMap$: getGroupsMapMock,
   };
 };
 
@@ -90,7 +90,7 @@ const createStartContractMock = () => {
     getIsNavDrawerLocked$: jest.fn(),
     getCustomNavLink$: jest.fn(),
     setCustomNavLink: jest.fn(),
-    getGroupsMap$: jest.fn(),
+    getNavGroupsMap$: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
@@ -100,7 +100,7 @@ const createStartContractMock = () => {
   startContract.getCustomNavLink$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getHelpExtension$.mockReturnValue(new BehaviorSubject(undefined));
   startContract.getIsNavDrawerLocked$.mockReturnValue(new BehaviorSubject(false));
-  startContract.getGroupsMap$.mockReturnValue(new BehaviorSubject({}));
+  startContract.getNavGroupsMap$.mockReturnValue(new BehaviorSubject({}));
   return startContract;
 };
 

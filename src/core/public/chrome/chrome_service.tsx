@@ -116,7 +116,7 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
-  private readonly groupsMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({});
+  private readonly navGroupsMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({});
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
 
   constructor(private readonly params: ConstructorParams) {}
@@ -153,6 +153,33 @@ export class ChromeService {
     );
   }
 
+  private addNavLinkToGroup(
+    currentGroupsMap: Record<string, NavGroupItemInMap>,
+    navGroup: ChromeNavGroup,
+    navLink: ChromeRegistrationNavLink
+  ) {
+    const matchedGroup = currentGroupsMap[navGroup.id];
+    if (matchedGroup) {
+      const links = matchedGroup.navLinks;
+      const isLinkExistInGroup = !!links.find((link) => link.id === navLink.id);
+      if (isLinkExistInGroup) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `[ChromeService] Navlink of ${navLink.id} has already been registered in group ${navGroup.id}`
+        );
+        return currentGroupsMap;
+      }
+      matchedGroup.navLinks.push(navLink);
+    } else {
+      currentGroupsMap[navGroup.id] = {
+        ...navGroup,
+        navLinks: [navLink],
+      };
+    }
+
+    return currentGroupsMap;
+  }
+
   public setup(): ChromeSetup {
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
@@ -164,31 +191,18 @@ export class ChromeService {
         }
         this.collapsibleNavHeaderRender = render;
       },
-      addNavToGroup: (navGroup: ChromeNavGroup, navLink: ChromeRegistrationNavLink) => {
+      addNavLinksToGroup: (navGroup: ChromeNavGroup, navLinks: ChromeRegistrationNavLink[]) => {
         // Construct a new groups map pointer.
-        const currentGroupsMap = { ...this.groupsMap$.getValue() };
-        const matchedGroup = currentGroupsMap[navGroup.id];
-        if (matchedGroup) {
-          const links = matchedGroup.navLinks;
-          const isLinkExistInGroup = !!links.find((link) => link.id === navLink.id);
-          if (isLinkExistInGroup) {
-            // eslint-disable-next-line no-console
-            console.warn(
-              `[ChromeService] Navlink of ${navLink.id} has already been registered in group ${navGroup.id}`
-            );
-            return;
-          }
-          matchedGroup.navLinks.push(navLink);
-        } else {
-          currentGroupsMap[navGroup.id] = {
-            ...navGroup,
-            navLinks: [navLink],
-          };
-        }
+        const currentGroupsMap = { ...this.navGroupsMap$.getValue() };
 
-        this.groupsMap$.next(currentGroupsMap);
+        const navGroupsMapAfterAdd = navLinks.reduce(
+          (groupsMap, navLink) => this.addNavLinkToGroup(groupsMap, navGroup, navLink),
+          currentGroupsMap
+        );
+
+        this.navGroupsMap$.next(navGroupsMapAfterAdd);
       },
-      getGroupsMap$: () => this.groupsMap$.pipe(takeUntil(this.stop$)),
+      getNavGroupsMap$: () => this.navGroupsMap$.pipe(takeUntil(this.stop$)),
     };
   }
 
@@ -371,7 +385,7 @@ export class ChromeService {
         customNavLink$.next(customNavLink);
       },
 
-      getGroupsMap$: () => this.groupsMap$.pipe(takeUntil(this.stop$)),
+      getNavGroupsMap$: () => this.navGroupsMap$.pipe(takeUntil(this.stop$)),
     };
   }
 
@@ -393,8 +407,8 @@ export class ChromeService {
  */
 export interface ChromeSetup {
   registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
-  addNavToGroup: (group: ChromeNavGroup, navLink: ChromeRegistrationNavLink) => void;
-  getGroupsMap$: () => Observable<Record<string, NavGroupItemInMap>>;
+  addNavLinksToGroup: (group: ChromeNavGroup, navLinks: ChromeRegistrationNavLink[]) => void;
+  getNavGroupsMap$: () => Observable<Record<string, NavGroupItemInMap>>;
 }
 
 /**
@@ -522,7 +536,7 @@ export interface ChromeStart {
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
 
-  getGroupsMap$: ChromeSetup['getGroupsMap$'];
+  getNavGroupsMap$: ChromeSetup['getNavGroupsMap$'];
 }
 
 /** @internal */
@@ -534,9 +548,8 @@ export interface InternalChromeStart extends ChromeStart {
   getHeaderComponent(): JSX.Element;
 }
 
-export enum GROUP_TYPE {
-  SYSTEM_GROUP = 'SYSTEM_GROUP',
-  USE_CASE_GROUP = 'USE_CASE_GROUP',
+export enum NavGroupType {
+  SYSTEM = 'system',
 }
 
 /** @public */
@@ -546,7 +559,12 @@ export interface ChromeNavGroup {
   description: string;
   order?: number;
   icon?: EuiIconType;
-  type: GROUP_TYPE; // group with type of GROUP_TYPE.SYSTEM_GROUP will always display before USE_CASE_GROUP
+
+  // group with type of NavGroupType.SYSTEM:
+  // 1. Always display before USE_CASE_GROUP.
+  // 2. Not pickable within workspace creation page.
+  // Default: NavGroupType.useCase
+  type?: NavGroupType;
 }
 
 /** @public */

@@ -117,23 +117,23 @@ Gets an Observable of the array of recently accessed history :-
 - Methods :
 Register a group :-
 
-`addNavToGroup: (group: ChromeNavGroup, navLink: ChromeRegistrationNavLink) => void;`
+`addNavLinksToGroup: (group: ChromeNavGroup, navLinks: ChromeRegistrationNavLink[]) => void;`
 
 Gets an Observable of the array of registered groups :-
 
-`getGroupsMap$: Observable<Record<string, NavGroupItemInMap>>`
+`getNavGroupsMap$: Observable<Record<string, NavGroupItemInMap>>`
 ##### Register a new group with a navLink
 
   ```ts
-    chrome.addNavToGroup(
+    chrome.addNavLinksToGroup(
       { 
         id: 'my-group',
         title: 'A demo group',
         description: 'description for demo group'
       },
-      {
+      [{
         id: 'nav'
-      }
+      }]
     )
    ```
 
