@@ -29,7 +29,6 @@ export interface WorkspaceFormSubmitData {
   name: string;
   description?: string;
   features?: string[];
-  color?: string;
   permissionSettings?: WorkspacePermissionSetting[];
 }
 

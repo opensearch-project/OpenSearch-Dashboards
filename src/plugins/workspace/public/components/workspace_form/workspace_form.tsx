@@ -12,7 +12,6 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiText,
-  EuiColorPicker,
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -42,7 +41,6 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     numberOfErrors,
     numberOfChanges,
     handleFormSubmit,
-    handleColorChange,
     handleUseCasesChange,
     handleNameInputChange,
     setPermissionSettings,
@@ -116,27 +114,6 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
               )}
             />
           </>
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('workspace.form.workspaceDetails.color.label', {
-            defaultMessage: 'Color',
-          })}
-          isInvalid={!!formErrors.color}
-          error={formErrors.color?.message}
-        >
-          <div>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('workspace.form.workspaceDetails.color.helpText', {
-                defaultMessage: 'Accent color for your workspace',
-              })}
-            </EuiText>
-            <EuiSpacer size={'s'} />
-            <EuiColorPicker
-              color={formData.color}
-              onChange={handleColorChange}
-              data-test-subj="workspaceForm-workspaceDetails-colorPicker"
-            />
-          </div>
         </EuiFormRow>
       </EuiPanel>
       <EuiSpacer />

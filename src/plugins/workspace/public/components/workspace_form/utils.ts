@@ -61,23 +61,18 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   return numberOfErrors;
 };
 
-const isSamePermissionSetting = (
-  a: Partial<WorkspacePermissionSetting>,
-  b: Partial<WorkspacePermissionSetting>
-) =>
-  (a.type === WorkspacePermissionItemType.User &&
-    b.type === WorkspacePermissionItemType.User &&
-    a.userId === b.userId) ||
-  (a.type === WorkspacePermissionItemType.Group &&
-    b.type === WorkspacePermissionItemType.Group &&
-    a.group === b.group);
-
-export const isUserOrGroupPermissionSettingDuplicated = (
+export const hasSameUserIdOrGroup = (
   permissionSettings: Array<Partial<WorkspacePermissionSetting>>,
   permissionSettingToCheck: WorkspacePermissionSetting
 ) =>
-  permissionSettings.some((permissionSetting) =>
-    isSamePermissionSetting(permissionSetting, permissionSettingToCheck)
+  permissionSettings.some(
+    (permissionSetting) =>
+      (permissionSetting.type === WorkspacePermissionItemType.User &&
+        permissionSettingToCheck.type === WorkspacePermissionItemType.User &&
+        permissionSetting.userId === permissionSettingToCheck.userId) ||
+      (permissionSetting.type === WorkspacePermissionItemType.Group &&
+        permissionSettingToCheck.type === WorkspacePermissionItemType.Group &&
+        permissionSetting.group === permissionSettingToCheck.group)
   );
 
 /**
@@ -211,10 +206,7 @@ const validateUserPermissionSetting = (
       }),
     };
   }
-  if (
-    !!setting.userId &&
-    isUserOrGroupPermissionSettingDuplicated(previousPermissionSettings, setting)
-  ) {
+  if (!!setting.userId && hasSameUserIdOrGroup(previousPermissionSettings, setting)) {
     return {
       code: WorkspaceFormErrorCode.DuplicateUserPermissionSetting,
       message: i18n.translate(
@@ -240,10 +232,7 @@ const validateUserGroupPermissionSetting = (
       }),
     };
   }
-  if (
-    !!setting.group &&
-    isUserOrGroupPermissionSettingDuplicated(previousPermissionSettings, setting)
-  ) {
+  if (!!setting.group && hasSameUserIdOrGroup(previousPermissionSettings, setting)) {
     return {
       code: WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
       message: i18n.translate(
@@ -404,6 +393,22 @@ export const generatePermissionSettingsState = (
     } as typeof finalPermissionSettings[0]);
   }
   return finalPermissionSettings;
+};
+
+interface PermissionSettingLike
+  extends Omit<Partial<WorkspaceUserPermissionSetting>, 'type'>,
+    Omit<Partial<WorkspaceUserGroupPermissionSetting>, 'type'> {
+  type?: string;
+}
+const isSamePermissionSetting = (a: PermissionSettingLike, b: PermissionSettingLike) => {
+  return (
+    a.id === b.id &&
+    a.type === b.type &&
+    a.userId === b.userId &&
+    a.group === b.group &&
+    a.modes?.length === b.modes?.length &&
+    a.modes?.every((mode) => b.modes?.includes(mode))
+  );
 };
 
 export const getNumberOfChanges = (
