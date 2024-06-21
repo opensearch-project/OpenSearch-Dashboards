@@ -15,6 +15,8 @@ import {
   EuiSpacer,
   EuiTableFieldDataColumnType,
   EuiFieldSearch,
+  EuiLoadingSpinner,
+  EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -66,12 +68,19 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
   const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | undefined>(undefined);
   const [searchText, setSearchText] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchDataSources = useCallback(() => {
+    if (featureFlagStatus && !selectedDataSourceId) {
+      return;
+    }
+
     const endpoint =
       featureFlagStatus && selectedDataSourceId
         ? `/api/dataconnections/dataSourceMDSId=${selectedDataSourceId}`
         : `/api/dataconnections`;
+
+    setIsLoading(true);
 
     http
       .get(endpoint)
@@ -85,6 +94,9 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       })
       .catch((err) => {
         notifications.toasts.addDanger('Could not fetch data sources');
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, [http, notifications.toasts, selectedDataSourceId, featureFlagStatus]);
 
@@ -247,18 +259,26 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
         <EuiFlexItem grow={false} style={{ width: '100%' }}>
           {customSearchBar}
           <EuiSpacer size="s" />
-          <EuiInMemoryTable
-            items={entries}
-            itemId="id"
-            columns={tableColumns}
-            tableLayout="auto"
-            pagination={{
-              initialPageSize: 10,
-              pageSizeOptions: [5, 10, 15],
-            }}
-            allowNeutralSort={false}
-            isSelectable={true}
-          />
+          {isLoading || (featureFlagStatus && selectedDataSourceId === undefined) ? (
+            <div style={{ textAlign: 'center', marginTop: '2rem' }}>
+              <EuiLoadingSpinner size="xl" />
+              <EuiSpacer size="m" />
+              <EuiText>Loading direct query data connections...</EuiText>
+            </div>
+          ) : (
+            <EuiInMemoryTable
+              items={entries}
+              itemId="id"
+              columns={tableColumns}
+              tableLayout="auto"
+              pagination={{
+                initialPageSize: 10,
+                pageSizeOptions: [5, 10, 15],
+              }}
+              allowNeutralSort={false}
+              isSelectable={true}
+            />
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
       {isModalVisible && modalLayout}
