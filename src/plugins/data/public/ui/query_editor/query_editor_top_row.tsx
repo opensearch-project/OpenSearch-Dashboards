@@ -32,7 +32,6 @@ import { fromUser, getQueryLog, PersistedLog } from '../../query';
 import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
-import { QueryEditorExtensions } from './query_editor_extensions';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
@@ -71,8 +70,6 @@ export interface QueryEditorTopRowProps {
 export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
-  const queryEditorHeaderRef = useRef<HTMLDivElement | null>(null);
-  const queryEditorBannerRef = useRef<HTMLDivElement | null>(null);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName } = opensearchDashboards.services;
@@ -85,7 +82,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       props.settings &&
       props.settings.getQueryEnhancements(queryLanguage)?.searchBar) ||
     null;
-  const queryEditorExtensionMap = props.settings?.getQueryEditorExtensionMap();
   const parsedQuery =
     !queryUiEnhancement || isValidQuery(props.query)
       ? props.query!
@@ -235,6 +231,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
+          dataSource={props.dataSource}
           prepend={props.prepend}
           query={parsedQuery}
           containerRef={props.containerRef}
@@ -246,32 +243,9 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           getQueryStringInitialValue={getQueryStringInitialValue}
           persistedLog={persistedLog}
           dataTestSubj={props.dataTestSubj}
-          queryEditorHeaderRef={queryEditorHeaderRef}
-          queryEditorBannerRef={queryEditorBannerRef}
+          queryLanguage={queryLanguage}
         />
       </EuiFlexItem>
-    );
-  }
-
-  function renderQueryEditorExtensions() {
-    if (
-      !(
-        queryEditorHeaderRef.current &&
-        queryEditorBannerRef.current &&
-        queryLanguage &&
-        shouldRenderQueryEditorExtensions()
-      )
-    )
-      return;
-    return (
-      <QueryEditorExtensions
-        language={queryLanguage}
-        configMap={queryEditorExtensionMap}
-        componentContainer={queryEditorHeaderRef.current}
-        bannerContainer={queryEditorBannerRef.current}
-        indexPatterns={props.indexPatterns}
-        dataSource={props.dataSource}
-      />
     );
   }
 
@@ -304,10 +278,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     return Boolean(
       props.showQueryEditor && props.settings && props.indexPatterns && props.query && storage
     );
-  }
-
-  function shouldRenderQueryEditorExtensions(): boolean {
-    return Boolean(queryEditorExtensionMap && Object.keys(queryEditorExtensionMap).length > 0);
   }
 
   function renderUpdateButton() {
@@ -402,7 +372,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       direction="column"
       justifyContent="flexEnd"
     >
-      {renderQueryEditorExtensions()}
       {renderQueryEditor()}
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="none">
