@@ -560,10 +560,13 @@ export interface ChromeNavGroup {
   order?: number;
   icon?: EuiIconType;
 
-  // group with type of NavGroupType.SYSTEM:
-  // 1. Always display before USE_CASE_GROUP.
-  // 2. Not pickable within workspace creation page.
-  // Default: NavGroupType.useCase
+  /**
+   * Groups with type of NavGroupType.SYSTEM will:
+   * 1. Always display before USE_CASE_GROUP.
+   * 2. Not be pickable within the workspace creation page.
+   *
+   * @default undefined indicates it is of type useCase
+   */
   type?: NavGroupType;
 }
 
