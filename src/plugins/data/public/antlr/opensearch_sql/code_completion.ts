@@ -37,7 +37,6 @@ import { SqlErrorListener } from './sql_error_listerner';
 import { findCursorTokenIndex } from './cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { getUiSettings } from '../../services';
-import { field } from 'vega';
 
 export const getSuggestions = async ({ selectionStart, selectionEnd, query }) => {
   const { api } = getUiSettings();
@@ -50,7 +49,7 @@ export const getSuggestions = async ({ selectionStart, selectionEnd, query }) =>
 
   const finalSuggestions = [];
 
-  // fetch columns
+  // fetch columns and values
   if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
     const tableNames = suggestions.suggestColumns?.tables?.map((table) => table.name) ?? [];
     const schemas = await fetchTableSchemas(tableNames, api);
@@ -63,14 +62,14 @@ export const getSuggestions = async ({ selectionStart, selectionEnd, query }) =>
 
     if (
       'suggestValuesForColumn' in suggestions &&
-      /\S/.test(suggestions.suggestValuesForColumn as string)
+      /\S/.test(suggestions.suggestValuesForColumn as string) &&
+      suggestions.suggestValuesForColumn !== undefined
     ) {
       const values = await fetchColumnValues(
         tableNames,
         suggestions.suggestValuesForColumn as string,
         api
       );
-      console.log('values: ', values);
       values.forEach((value) => {
         if (value.body?.fields?.length > 0) {
           finalSuggestions.push(
@@ -81,13 +80,13 @@ export const getSuggestions = async ({ selectionStart, selectionEnd, query }) =>
     }
   }
 
-  if (suggestions.suggestFunctions) {
-    finalSuggestions.push(
-      ...suggestions.suggestFunctions.map((sf) => ({
-        text: sf.value,
-        description: sf.description,
-      }))
-    );
+  if (suggestions.suggestScalarFunctions) {
+    // finalSuggestions.push(
+    //   ...suggestions.suggestFunctions.map((sf) => ({
+    //     text: sf.value,
+    //     description: sf.description,
+    //   }))
+    // );
   }
 
   // fetch functions
@@ -177,10 +176,7 @@ export const parseQuery = <
   const core = new CodeCompletionCore(parser);
   core.ignoredTokens = ignoredTokens;
   core.preferredRules = rulesToVisit;
-  console.log('this tokenStream: ', tokenStream);
-  console.log('cursor: ', cursor);
   const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, tokenDictionary.SPACE);
-  console.log('cursorTokenIndex: ', cursorTokenIndex);
   if (cursorTokenIndex === undefined) {
     throw new Error(
       `Could not find cursor token index for line: ${cursor.line}, column: ${cursor.column}`
@@ -188,9 +184,7 @@ export const parseQuery = <
   }
 
   const suggestKeywords: KeywordSuggestion[] = [];
-  // debugger;
   const { tokens, rules } = core.collectCandidates(cursorTokenIndex, context);
-  console.log('tokens: ', tokens, ' rules: ', rules);
   tokens.forEach((_, tokenType) => {
     // Literal keyword names are quoted
     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');

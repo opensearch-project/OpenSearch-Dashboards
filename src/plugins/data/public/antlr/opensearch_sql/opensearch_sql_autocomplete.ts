@@ -46,38 +46,16 @@ const tokenDictionary: TokenDictionary = {
 function getIgnoredTokens(): number[] {
   const tokens = [];
 
-  // const firstOperatorIndex = OpenSearchSQLParser.VAR_ASSIGN;
-  // const lastOperatorIndex = OpenSearchSQLParser.ERROR_RECONGNIGION;
-  // for (let i = firstOperatorIndex; i <= lastOperatorIndex; i++) {
-  //   // We actually want Star to appear in autocomplete
-  //   if (i !== OpenSearchSQLParser.STAR) {
-  //     tokens.push(i);
-  //   }
-  // }
-
-  // const firstCharsetIndex = OpenSearchSQLParser.ARMSCII8;
-  // const lastCharsetIndex = OpenSearchSQLParser.UTF8MB4;
-  // for (let i = firstCharsetIndex; i <= lastCharsetIndex; i++) {
-  //   tokens.push(i);
-  // }
-
-  // Ignoring functions for now, need custom logic for them later
-  const firstFunctionIndex = OpenSearchSQLParser.AVG;
-  const lastFunctionIndex = OpenSearchSQLParser.UTC_TIMESTAMP;
-  for (let i = firstFunctionIndex; i <= lastFunctionIndex; i++) {
-    tokens.push(i);
+  const firstOperatorIndex = OpenSearchSQLParser.ABS;
+  const lastOperatorIndex = OpenSearchSQLParser.ERROR_RECOGNITION;
+  for (let i = firstOperatorIndex; i <= lastOperatorIndex; i++) {
+    // We actually want Star to appear in autocomplete
+    if (i !== OpenSearchSQLParser.STAR) {
+      tokens.push(i);
+    }
   }
 
-  // const firstCommonFunctionIndex = OpenSearchSQLParser.ABS;
-  // const lastCommonFunctionIndex = OpenSearchSQLParser.X_FUNCTION;
-  // for (let i = firstCommonFunctionIndex; i <= lastCommonFunctionIndex; i++) {
-  //   tokens.push(i);
-  // }
-
   tokens.push(OpenSearchSQLParser.EOF);
-
-  // KEY is an alias for INDEX, and we should not suggest it because it's legacy
-  // tokens.push(OpenSearchSQLParser.KEY);
 
   return tokens;
 }
@@ -211,9 +189,14 @@ function processVisitedRules(
         break;
       }
       case OpenSearchSQLParser.RULE_constant: {
-        const previousToken = getPreviousToken(tokenStream, tokenDictionary, cursorTokenIndex, OpenSearchSQLLexer.ID);
+        const previousToken = getPreviousToken(
+          tokenStream,
+          tokenDictionary,
+          cursorTokenIndex,
+          OpenSearchSQLLexer.ID
+        );
         if (previousToken) {
-          suggestValuesForColumn = previousToken.text; // Assume this is the column name
+          suggestValuesForColumn = previousToken.text;
         }
         break;
       }
@@ -226,7 +209,7 @@ function processVisitedRules(
     suggestScalarFunctions,
     shouldSuggestColumns,
     shouldSuggestColumnAliases,
-    suggestValuesForColumn
+    suggestValuesForColumn,
   };
 }
 
@@ -286,9 +269,7 @@ function enrichAutocompleteResult(
     if (shouldSuggestColumns && tableContextSuggestion) {
       result.suggestColumns = tableContextSuggestion;
     }
-    // if (shouldSuggestConstraints && tableContextSuggestion) {
-    //   result.suggestConstraints = tableContextSuggestion;
-    // }
+
     if (shouldSuggestColumnAliases && suggestColumnAliases) {
       result.suggestColumnAliases = suggestColumnAliases;
     }
