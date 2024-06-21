@@ -5,7 +5,9 @@
 
 import { OpenSearchClient } from 'opensearch-dashboards/server';
 import { createDataSourceError } from '../lib/error';
-import { SigV4ServiceName } from '../../common/data_sources';
+import { DataSourceEngineType, SigV4ServiceName } from '../../common/data_sources';
+import { DataSourceInfo } from '../types';
+
 export class DataSourceConnectionValidator {
   constructor(
     private readonly callDataCluster: OpenSearchClient,
@@ -36,26 +38,42 @@ export class DataSourceConnectionValidator {
     }
   }
 
-  async fetchDataSourceVersion() {
-    let dataSourceVersion = '';
+  async fetchDataSourceInfo() {
+    const dataSourceInfo: DataSourceInfo = {
+      dataSourceVersion: '',
+      dataSourceEngineType: DataSourceEngineType.NA,
+    };
+
     try {
       // OpenSearch Serverless does not have version concept
       if (
         this.dataSourceAttr.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
       ) {
-        return dataSourceVersion;
+        dataSourceInfo.dataSourceEngineType = DataSourceEngineType.OpenSearchServerless;
+        return dataSourceInfo;
       }
+
       await this.callDataCluster
         .info()
         .then((response) => response.body)
         .then((body) => {
-          dataSourceVersion = body.version.number;
+          dataSourceInfo.dataSourceVersion = body.version.number;
+
+          if (
+            body.version.distribution !== null &&
+            body.version.distribution !== undefined &&
+            body.version.distribution === 'opensearch'
+          ) {
+            dataSourceInfo.dataSourceEngineType = DataSourceEngineType.OpenSearch;
+          } else {
+            dataSourceInfo.dataSourceEngineType = DataSourceEngineType.Elasticsearch;
+          }
         });
 
-      return dataSourceVersion;
+      return dataSourceInfo;
     } catch (e) {
-      // return empty dataSource version instead of throwing exception in case info() api call fails
-      return dataSourceVersion;
+      // return default dataSourceInfo instead of throwing exception in case info() api call fails
+      return dataSourceInfo;
     }
   }
 

@@ -1,0 +1,2 @@
+fix:
+- Update error message in timeline visualization when MDS disabled ([#7069](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7069))

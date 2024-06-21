@@ -72,7 +72,10 @@ const createStartContract = (isEnhancementsEnabled: boolean = false): Start => {
     search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
-    ui: uiServiceMock.createStartContract(isEnhancementsEnabled),
+    ui: uiServiceMock.createStartContract(
+      isEnhancementsEnabled,
+      searchServiceMock.createStartContract()
+    ),
     indexPatterns: ({
       find: jest.fn((search) => [{ id: search, title: search }]),
       createField: jest.fn(() => {}),
