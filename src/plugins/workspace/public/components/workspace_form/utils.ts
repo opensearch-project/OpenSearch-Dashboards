@@ -119,12 +119,6 @@ export const convertPermissionSettingsToPermissions = (
   }, {});
 };
 
-const isWorkspacePermissionMode = (test: string): test is WorkspacePermissionMode =>
-  test === WorkspacePermissionMode.LibraryRead ||
-  test === WorkspacePermissionMode.LibraryWrite ||
-  test === WorkspacePermissionMode.Read ||
-  test === WorkspacePermissionMode.Write;
-
 export const convertPermissionsToPermissionSettings = (permissions: SavedObjectPermissions) => {
   const permissionSettings: WorkspacePermissionSetting[] = [];
   const finalPermissionSettings: WorkspacePermissionSetting[] = [];
@@ -154,8 +148,14 @@ export const convertPermissionsToPermissionSettings = (permissions: SavedObjectP
     });
   };
 
-  Object.keys(permissions).forEach((mode) => {
-    if (isWorkspacePermissionMode(mode)) {
+  // Since owner should always be the first row of permissions, specific the process order let owner moved to the top
+  [
+    WorkspacePermissionMode.Write,
+    WorkspacePermissionMode.LibraryWrite,
+    WorkspacePermissionMode.LibraryRead,
+    WorkspacePermissionMode.Read,
+  ].forEach((mode) => {
+    if (permissions[mode]) {
       processUsersOrGroups(permissions[mode].users, WorkspacePermissionItemType.User, mode);
       processUsersOrGroups(permissions[mode].groups, WorkspacePermissionItemType.Group, mode);
     }
