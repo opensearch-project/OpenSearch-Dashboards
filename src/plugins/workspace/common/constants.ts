@@ -30,6 +30,9 @@ export enum WorkspacePermissionMode {
 
 export const WORKSPACE_ID_CONSUMER_WRAPPER_ID = 'workspace_id_consumer';
 
+export const MAX_WORKSPACE_PICKER_NUM = 5;
+export const MAX_WORKSPACE_NAME_LENGTH = 25;
+
 /**
  * The priority for these wrappers matters:
  * 1. WORKSPACE_ID_CONSUMER wrapper should be the first wrapper to execute, as it will add the `workspaces` field

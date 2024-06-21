@@ -15,6 +15,14 @@ describe('<WorkspaceMenu />', () => {
 
   beforeEach(() => {
     coreStartMock = coreMock.createStart();
+    coreStartMock.application.capabilities = {
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      savedObjectsManagement: {},
+      workspaces: { isDashboardAdmin: true, permissionEnabled: true },
+    };
+
     coreStartMock.workspaces.initialized$.next(true);
     jest.spyOn(coreStartMock.application, 'getUrlForApp').mockImplementation((appId: string) => {
       return `https://test.com/app/${appId}`;
@@ -71,7 +79,6 @@ describe('<WorkspaceMenu />', () => {
     fireEvent.click(rightArrowButton);
 
     await waitFor(() => {
-      expect(screen.getByText(/use case/i)).toBeInTheDocument();
       expect(screen.getByText(/observability/i)).toBeInTheDocument();
       expect(screen.getByText(/security-analytics/i)).toBeInTheDocument();
     });
@@ -95,7 +102,7 @@ describe('<WorkspaceMenu />', () => {
 
     render(<WorkspaceMenu coreStart={coreStartMock} />);
     fireEvent.click(screen.getByText(/select a workspace/i));
-    const searchField = screen.getByPlaceholderText('find a workspace');
+    const searchField = screen.getByPlaceholderText(/find a workspace/i);
 
     expect(searchField).toBeInTheDocument();
 
@@ -115,10 +122,10 @@ describe('<WorkspaceMenu />', () => {
     render(<WorkspaceMenu coreStart={coreStartMock} />);
     fireEvent.click(screen.getByText(/select a workspace/i));
 
-    expect(screen.getByText(/ALL WORKSPACE/i)).toBeInTheDocument();
+    expect(screen.getByText(/all workspaces/i)).toBeInTheDocument();
     fireEvent.click(screen.getByText(/select a workspace/i));
     await waitFor(() => {
-      expect(screen.queryByText(/ALL WORKSPACE/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/all workspaces/i)).not.toBeInTheDocument();
     });
   });
 

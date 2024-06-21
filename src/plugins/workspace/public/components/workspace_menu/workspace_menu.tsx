@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './workspace_menu.scss';
 import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
@@ -27,10 +28,13 @@ import type {
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 
+import { truncate } from 'lodash';
 import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
   WORKSPACE_OVERVIEW_APP_ID,
+  MAX_WORKSPACE_PICKER_NUM,
+  MAX_WORKSPACE_NAME_LENGTH,
 } from '../../../common/constants';
 import { cleanWorkspaceId, formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
@@ -39,8 +43,6 @@ import { getUseCaseFromFeatureConfig } from '../../utils';
 interface Props {
   coreStart: CoreStart;
 }
-
-const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
 
 /**
  * Return maximum five workspaces, the current selected workspace
@@ -53,7 +55,7 @@ function getFilteredWorkspaceList(
   return [
     ...(currentWorkspace ? [currentWorkspace] : []),
     ...workspaceList.filter((workspace) => workspace.id !== currentWorkspace?.id),
-  ].slice(0, 7);
+  ];
 }
 
 export const WorkspaceMenu = ({ coreStart }: Props) => {
@@ -70,10 +72,22 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     }
   );
 
+  const defaultSearchPlaceholder = i18n.translate(
+    'core.ui.primaryNav.workspacePickerMenu.defaultSearchPlaceholder',
+    {
+      defaultMessage: 'Find a workspace',
+    }
+  );
+
+  const hasPermissionToCreateWorkspace = () => {
+    const { permissionEnabled, isDashboardAdmin } = coreStart.application.capabilities.workspaces;
+    return !permissionEnabled || isDashboardAdmin;
+  };
+
   const filteredWorkspaceList = useMemo(() => {
-    return getFilteredWorkspaceList(workspaceList, currentWorkspace).filter((workspace) =>
-      workspace.name.toLowerCase().includes(searchValue.toLowerCase())
-    );
+    return getFilteredWorkspaceList(workspaceList, currentWorkspace)
+      .filter((workspace) => workspace.name.toLowerCase().includes(searchValue.toLowerCase()))
+      .slice(0, MAX_WORKSPACE_PICKER_NUM);
   }, [workspaceList, searchValue, currentWorkspace]);
 
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
@@ -91,27 +105,33 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     index: number,
     workspaceURL: string
   ) => {
-    const useCase = workspace.features
-      ?.map(getUseCaseFromFeatureConfig)
-      .filter(isNotNull)
-      .map((uc) => {
-        return {
-          name: uc,
-          // TODO: this should be a link to the use case overview page.
-          onClick: () => {
-            window.location.assign(workspaceURL);
-          },
-          'data-test-subj': `context-menu-item-${workspace.id}-${uc}`,
-          icon: <EuiIcon type="bolt" />,
-        };
-      });
+    const useCases = workspace.features?.map(getUseCaseFromFeatureConfig).filter(Boolean) || [];
+    // If the wokspace has only one use case, do not show the use case menu.
+    if (useCases.length <= 1) {
+      return false;
+    }
+    const useCaseMenuItems = useCases.map((useCase) => {
+      return {
+        name: useCase,
+        onClick: () => {
+          window.location.assign(workspaceURL);
+        },
+        'data-test-subj': `context-menu-item-${workspace.id}-${useCase}`,
+        icon: <EuiIcon type="bolt" />,
+      };
+    });
 
     useCasePanels.push({
       id: index,
-      title: 'use case',
+      title: (
+        <span className="custom-title">
+          {truncate(workspace.name, { length: MAX_WORKSPACE_NAME_LENGTH })}
+        </span>
+      ),
       width: 300,
-      items: useCase,
+      items: useCaseMenuItems,
     });
+    return true;
   };
 
   const workspaceToItem = (workspace: WorkspaceObject, index: number) => {
@@ -123,7 +143,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       coreStart.http.basePath
     );
 
-    workspaceUseCaseToItem(workspace, index, workspaceURL);
+    const shouldShowUseCases = workspaceUseCaseToItem(workspace, index, workspaceURL);
 
     const name = (
       <EuiText
@@ -132,15 +152,16 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
           window.location.assign(workspaceURL);
         }}
       >
-        {workspace.name}
+        {truncate(workspace.name, { length: MAX_WORKSPACE_NAME_LENGTH })}
       </EuiText>
     );
+
     return {
       name,
       key: workspace.id,
-      panel: index,
       'data-test-subj': `context-menu-item-${workspace.id}`,
       icon: <EuiIcon type="stopFilled" color={workspace.color ?? 'primary'} />,
+      ...(shouldShowUseCases && { panel: index }),
     };
   };
 
@@ -174,7 +195,14 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   const panels = [
     {
       id: 0,
-      title: 'all workspace',
+      title: (
+        <span className="custom-title">
+          <FormattedMessage
+            id="core.ui.primaryNav.contextMenuTitle.allWorkspaces"
+            defaultMessage="All workspaces"
+          />
+        </span>
+      ),
       width: 300,
       items: getWorkspaceListItems(),
     },
@@ -193,7 +221,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     >
       <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
         <EuiFieldSearch
-          placeholder="find a workspace"
+          placeholder={defaultSearchPlaceholder}
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
           fullWidth
@@ -204,28 +232,30 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
         <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                size="s"
-                key={WORKSPACE_CREATE_APP_ID}
-                onClick={() => {
-                  window.location.assign(
-                    cleanWorkspaceId(
-                      coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
-                        absolute: false,
-                      })
-                    )
-                  );
-                }}
-              >
-                <EuiIcon type="plus" />
-                <FormattedMessage
-                  id="core.ui.primaryNav.createWorkspace"
-                  defaultMessage="Create workspace"
-                />
-              </EuiButton>
+              {hasPermissionToCreateWorkspace() && (
+                <EuiButton
+                  fill
+                  iconType="plus"
+                  size="s"
+                  key={WORKSPACE_CREATE_APP_ID}
+                  onClick={() => {
+                    window.location.assign(
+                      cleanWorkspaceId(
+                        coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
+                          absolute: false,
+                        })
+                      )
+                    );
+                  }}
+                >
+                  <FormattedMessage
+                    id="core.ui.primaryNav.createWorkspace"
+                    defaultMessage="Create workspace"
+                  />
+                </EuiButton>
+              )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
               <EuiButtonEmpty
                 size="xs"
                 key={WORKSPACE_LIST_APP_ID}
