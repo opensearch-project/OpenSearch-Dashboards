@@ -96,6 +96,8 @@ interface Options {
   /** set to true to inspecting workers when the parent process is being inspected */
   inspectWorkers?: boolean;
 
+  /** include only min plugins in default scan dirs */
+  min?: boolean;
   /** include examples in default scan dirs */
   examples?: boolean;
   /** absolute paths to specific plugins that should be built */
@@ -152,6 +154,7 @@ export interface ParsedOptions {
 export class OptimizerConfig {
   static parseOptions(options: Options): ParsedOptions {
     const watch = !!options.watch;
+    const min = !!options.min;
     const dist = !!options.dist;
     const examples = !!options.examples;
     const profileWebpack = !!options.profileWebpack;
@@ -177,10 +180,10 @@ export class OptimizerConfig {
      */
     const pluginScanDirs = options.pluginScanDirs || [
       Path.resolve(repoRoot, 'src/plugins'),
+      ...(min ? [] : [Path.resolve(repoRoot, 'osd-extra/plugins')]),
       Path.resolve(repoRoot, 'plugins'),
       ...(examples ? [Path.resolve('examples')] : []),
       Path.resolve(repoRoot, 'opensearch-dashboards-extra'),
-      Path.resolve(repoRoot, 'osd-extra/plugins'),
     ];
 
     if (!pluginScanDirs.every((p) => Path.isAbsolute(p))) {

@@ -1,0 +1,23 @@
+{
+  "name": "osd-extra",
+  "private": true,
+  "scripts": {
+    "osd": "scripts/use_node ../scripts/osd",
+    "build": "gulp build"
+  },
+  "opensearchDashboards": {
+    "build": {
+      "intermediateBuildDirectory": "build/plugin/opensearchDashboards/osd-extra",
+      "min": false
+    },
+    "clean": {
+      "extraPatterns": [
+        "plugins/*/target"
+      ]
+    }
+  },
+  "engines": {
+    "node": ">=14.20.1 <19",
+    "yarn": "^1.22.10"
+  }
+}

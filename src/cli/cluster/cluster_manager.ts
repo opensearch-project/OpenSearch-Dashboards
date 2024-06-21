@@ -53,7 +53,7 @@ export type SomeCliArgs = Pick<
   | 'repl'
   | 'disableOptimizer'
   | 'watch'
-  | 'runExtras'
+  | 'min'
   | 'runExamples'
   | 'cache'
   | 'dist'
@@ -159,6 +159,7 @@ export class ClusterManager {
       const scanDirs = [
         ...config.get<string[]>('plugins.scanDirs'),
         resolve(REPO_ROOT, 'src/plugins'),
+        resolve(REPO_ROOT, 'osd-extra/plugins'),
       ];
       const extraPaths = [...pluginPaths, ...scanDirs];
 

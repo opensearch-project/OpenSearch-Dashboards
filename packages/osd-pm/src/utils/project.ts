@@ -54,6 +54,7 @@ interface BuildConfig {
   skip?: boolean;
   intermediateBuildDirectory?: string;
   oss?: boolean;
+  min?: boolean;
 }
 
 interface CleanConfig {

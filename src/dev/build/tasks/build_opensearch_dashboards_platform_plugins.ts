@@ -47,6 +47,7 @@ export const BuildOpenSearchDashboardsPlatformPlugins: Task = {
       outputRoot: build.resolvePath(),
       cache: false,
       examples: false,
+      min: build.isMin(),
       watch: false,
       dist: true,
       includeCoreBundle: true,

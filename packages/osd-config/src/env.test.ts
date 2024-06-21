@@ -225,24 +225,24 @@ test('pluginSearchPaths does not contains examples plugins path if --run-example
   expect(env.pluginSearchPaths).not.toContain('/some/home/dir/examples');
 });
 
-test('pluginSearchPaths contains extras plugins path if --run-extras flag is true', () => {
+test('pluginSearchPaths contains extras plugins path if --min flag is false', () => {
   const env = new Env(
     '/some/home/dir',
     packageInfos,
     getEnvOptions({
-      cliArgs: { runExtras: true },
+      cliArgs: { min: false },
     })
   );
 
   expect(env.pluginSearchPaths).toContain('/some/home/dir/osd-extra/plugins');
 });
 
-test('pluginSearchPaths does not extras examples plugins path if --run-extras flag is false', () => {
+test('pluginSearchPaths does not extras examples plugins path if --min flag is true', () => {
   const env = new Env(
     '/some/home/dir',
     packageInfos,
     getEnvOptions({
-      cliArgs: { runExtras: false },
+      cliArgs: { min: true },
     })
   );
 

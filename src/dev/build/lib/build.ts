@@ -36,7 +36,11 @@ import { Platform } from './platform';
 export class Build {
   private name = 'opensearch-dashboards';
 
-  constructor(private config: Config) {}
+  constructor(private config: Config, private min: boolean) {}
+
+  isMin() {
+    return !!this.min;
+  }
 
   resolvePath(...args: string[]) {
     return this.config.resolveFromRepo('build', this.name, ...args);
@@ -45,6 +49,7 @@ export class Build {
   resolvePathForPlatform(platform: Platform, ...args: string[]) {
     return this.config.resolveFromRepo(
       'build',
+      this.min ? 'min' : '',
       `opensearch-dashboards-${this.config.getBuildVersion()}-${platform.getBuildName()}`,
       ...args
     );

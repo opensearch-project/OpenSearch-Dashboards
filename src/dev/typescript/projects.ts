@@ -35,6 +35,7 @@ import { Project } from './project';
 
 export const PROJECTS = [
   new Project(resolve(REPO_ROOT, 'tsconfig.json')),
+  new Project(resolve(REPO_ROOT, 'osd-extra/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'test/tsconfig.json'), { name: 'opensearch-dashboards/test' }),
   new Project(resolve(REPO_ROOT, 'src/test_utils/tsconfig.json')),
   new Project(resolve(REPO_ROOT, 'src/core/tsconfig.json')),
@@ -47,6 +48,9 @@ export const PROJECTS = [
     .map((path) => new Project(resolve(REPO_ROOT, path))),
   ...glob
     .sync('src/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
+    .map((path) => new Project(resolve(REPO_ROOT, path))),
+  ...glob
+    .sync('osd-extra/plugins/*/tsconfig.json', { cwd: REPO_ROOT })
     .map((path) => new Project(resolve(REPO_ROOT, path))),
   ...glob
     .sync('examples/*/tsconfig.json', { cwd: REPO_ROOT })

@@ -231,7 +231,7 @@ export default function (program) {
       []
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
-    .option('--run-extras', 'Adds plugin paths for all the OpenSearch Dashboards extra plugins')
+    .option('--min', 'Start OpenSearch Dashboards without extra plugins')
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (CAN_REPL) {
@@ -288,7 +288,6 @@ export default function (program) {
         watch: !!opts.watch,
         repl: !!opts.repl,
         runExamples: !!opts.runExamples,
-        runExtras: !!opts.runExtras,
         // We want to run without base path when the `--run-examples` flag is given so that we can use local
         // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
         // We can tell users they only have to run with `yarn start --run-examples` to get those
@@ -297,6 +296,7 @@ export default function (program) {
         basePath: opts.runExamples ? false : !!opts.basePath,
         optimize: !!opts.optimize,
         disableOptimizer: !opts.optimizer,
+        min: !!opts.min,
         cache: !!opts.cache,
         dist: !!opts.dist,
       },

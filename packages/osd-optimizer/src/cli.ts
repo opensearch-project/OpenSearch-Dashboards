@@ -49,6 +49,11 @@ run(
       throw createFlagError('expected --watch to have no value');
     }
 
+    const min = flags.min ?? false;
+    if (typeof min !== 'boolean') {
+      throw createFlagError('expected --min to have no value');
+    }
+
     const cache = flags.cache ?? true;
     if (typeof cache !== 'boolean') {
       throw createFlagError('expected --cache to have no value');
@@ -115,6 +120,7 @@ run(
       repoRoot: REPO_ROOT,
       watch,
       maxWorkerCount,
+      min: min && !(validateLimits || updateLimits),
       dist: dist || updateLimits,
       cache,
       examples: examples && !(validateLimits || updateLimits),
@@ -153,6 +159,7 @@ run(
       boolean: [
         'core',
         'watch',
+        'min',
         'examples',
         'dist',
         'cache',
@@ -173,6 +180,7 @@ run(
       help: `
         --watch            run the optimizer in watch mode
         --workers          max number of workers to use
+        --min              only build min plugins
         --profile          profile the webpack builds and write stats.json files to build outputs
         --no-core          disable generating the core bundle
         --no-cache         disable the cache

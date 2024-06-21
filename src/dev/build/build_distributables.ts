@@ -35,6 +35,8 @@ import * as Tasks from './tasks';
 
 export interface BuildOptions {
   isRelease: boolean;
+  buildMinDist: boolean;
+  buildDefaultDist: boolean;
   downloadFreshNode: boolean;
   createArchives: boolean;
   createRpmPackage: boolean;
@@ -56,6 +58,8 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   const run = createRunner({
     config,
     log,
+    buildDefaultDist: options.buildDefaultDist,
+    buildMinDist: options.buildMinDist,
   });
 
   /**

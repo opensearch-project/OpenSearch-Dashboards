@@ -37,6 +37,7 @@ import { discoverPlugins } from './discover_plugins';
 import { generatePluginList } from './generate_plugin_list';
 
 const OSS_PLUGIN_DIR = Path.resolve(REPO_ROOT, 'src/plugins');
+const EXTRA_PLUGIN_DIR = Path.resolve(REPO_ROOT, 'osd-extra/plugins');
 const OUTPUT_PATH = Path.resolve(REPO_ROOT, 'docs/developer/plugin-list.asciidoc');
 
 export function runPluginListCli() {
@@ -45,7 +46,11 @@ export function runPluginListCli() {
     const ossPlugins = discoverPlugins(OSS_PLUGIN_DIR);
     log.success(`found ${ossPlugins.length} plugins`);
 
+    log.info('looking for extra plugins');
+    const extraPlugins = discoverPlugins(EXTRA_PLUGIN_DIR);
+    log.success(`found ${extraPlugins.length} plugins`);
+
     log.info('writing plugin list to', OUTPUT_PATH);
-    Fs.writeFileSync(OUTPUT_PATH, generatePluginList(ossPlugins));
+    Fs.writeFileSync(OUTPUT_PATH, generatePluginList(ossPlugins, extraPlugins));
   });
 }

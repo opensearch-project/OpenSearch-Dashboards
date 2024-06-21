@@ -110,6 +110,7 @@ export class OpenSearchDashboards {
   getFilteredProjects(options: {
     skipOpenSearchDashboardsPlugins: boolean;
     ossOnly: boolean;
+    minOnly: boolean;
     exclude: string[];
     include: string[];
   }) {
@@ -157,6 +158,15 @@ export class OpenSearchDashboards {
       log,
     })!;
 
-    return new Map([...opensearchDashboardsDeps.entries()]);
+    const extraDeps = resolveDepsForProject({
+      project: this.getProject('osd-extra')!,
+      yarnLock,
+      osd: this,
+      includeDependentProject: true,
+      productionDepsOnly: true,
+      log,
+    })!;
+
+    return new Map([...opensearchDashboardsDeps.entries(), ...extraDeps.entries()]);
   }
 }

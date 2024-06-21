@@ -179,6 +179,20 @@ export const CleanExtraFilesFromModules: Task = {
         regularExpressions,
       })
     );
+
+    if (!build.isMin()) {
+      try {
+        log.info(
+          'Deleted %d files',
+          await scanDelete({
+            directory: build.resolvePath('osd-extra/node_modules'),
+            regularExpressions,
+          })
+        );
+      } catch (ex) {
+        log.error(ex);
+      }
+    }
   },
 };
 

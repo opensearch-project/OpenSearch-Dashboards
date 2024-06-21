@@ -83,7 +83,7 @@ run(
       throw createFailError(`${chalk.white.bgRed(' I18N ERROR ')} --fix can't have a value`);
     }
 
-    const srcPaths = Array().concat(path || ['./src', './packages']);
+    const srcPaths = Array().concat(path || ['./src', './packages', './osd-extra']);
 
     const list = new Listr<ListrContext>(
       [
