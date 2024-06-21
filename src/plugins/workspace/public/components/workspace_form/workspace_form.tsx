@@ -14,9 +14,6 @@ import {
   EuiText,
   EuiColorPicker,
   EuiTextArea,
-  EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -27,6 +24,7 @@ import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_
 import { WorkspaceUseCase } from './workspace_use_case';
 import { WorkspaceOperationType } from './constants';
 import { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
+import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
 
 export const WorkspaceForm = (props: WorkspaceFormProps) => {
   const {
@@ -42,6 +40,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     formData,
     formErrors,
     numberOfErrors,
+    numberOfChanges,
     handleFormSubmit,
     handleColorChange,
     handleUseCasesChange,
@@ -187,36 +186,13 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
       )}
       <EuiSpacer />
       {operationType === WorkspaceOperationType.Create && (
-        <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButton data-test-subj="workspaceForm-bottomBar-cancelButton">
-              {i18n.translate('workspace.form.bottomBar.cancel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            {operationType === WorkspaceOperationType.Create && (
-              <EuiButton
-                fill
-                type="submit"
-                form={formId}
-                data-test-subj="workspaceForm-bottomBar-createButton"
-              >
-                {i18n.translate('workspace.form.bottomBar.createWorkspace', {
-                  defaultMessage: 'Create workspace',
-                })}
-              </EuiButton>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <WorkspaceCreateActionPanel formId={formId} application={application} />
       )}
       {operationType === WorkspaceOperationType.Update && (
         <WorkspaceBottomBar
-          operationType={operationType}
           formId={formId}
           application={application}
-          numberOfErrors={numberOfErrors}
+          numberOfChanges={numberOfChanges}
         />
       )}
     </EuiForm>

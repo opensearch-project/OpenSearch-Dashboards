@@ -99,18 +99,28 @@ const UserOrGroupSection = ({
     <div>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem style={{ maxWidth: 400 }}>
-          {type === WorkspacePermissionItemType.User
-            ? i18n.translate('workspaceForm.permissionSetting.userLabel', {
-                defaultMessage: 'User',
-              })
-            : i18n.translate('workspaceForm.permissionSetting.groupLabel', {
-                defaultMessage: 'User group',
-              })}
+          <EuiFormRow
+            label={
+              type === WorkspacePermissionItemType.User
+                ? i18n.translate('workspaceForm.permissionSetting.userLabel', {
+                    defaultMessage: 'User',
+                  })
+                : i18n.translate('workspaceForm.permissionSetting.groupLabel', {
+                    defaultMessage: 'User group',
+                  })
+            }
+          >
+            <></>
+          </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem style={{ maxWidth: 332 }}>
-          {i18n.translate('workspaceForm.permissionSetting.permissionLabel', {
-            defaultMessage: 'Permissions',
-          })}
+          <EuiFormRow
+            label={i18n.translate('workspaceForm.permissionSetting.permissionLabel', {
+              defaultMessage: 'Permissions',
+            })}
+          >
+            <></>
+          </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
@@ -121,7 +131,11 @@ const UserOrGroupSection = ({
               {...item}
               type={type}
               index={index}
-              deletable={index !== nonDeletableIndex}
+              deletable={
+                type === WorkspacePermissionItemType.Group ||
+                index > 0 ||
+                (!!item.modes && getPermissionModeId(item.modes) !== PermissionModeId.Owner)
+              }
               onDelete={handleDelete}
               onGroupOrUserIdChange={handleGroupOrUserIdChange}
               onPermissionModesChange={handlePermissionModesChange}
@@ -230,7 +244,7 @@ export const WorkspacePermissionSettingPanel = ({
         type={WorkspacePermissionItemType.User}
         nextIdGenerator={nextIdGenerator}
       />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <UserOrGroupSection
         errors={errors}
         onChange={handleGroupPermissionSettingsChange}

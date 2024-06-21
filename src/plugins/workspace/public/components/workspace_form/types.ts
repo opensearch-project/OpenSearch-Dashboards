@@ -7,19 +7,23 @@ import type { ApplicationStart, PublicAppInfo } from '../../../../../core/public
 import type { WorkspacePermissionMode } from '../../../common/constants';
 import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 
+export interface WorkspaceUserPermissionSetting {
+  id: number;
+  type: WorkspacePermissionItemType.User;
+  userId: string;
+  modes: WorkspacePermissionMode[];
+}
+
+export interface WorkspaceUserGroupPermissionSetting {
+  id: number;
+  type: WorkspacePermissionItemType.Group;
+  group: string;
+  modes: WorkspacePermissionMode[];
+}
+
 export type WorkspacePermissionSetting =
-  | {
-      id: number;
-      type: WorkspacePermissionItemType.User;
-      userId: string;
-      modes: WorkspacePermissionMode[];
-    }
-  | {
-      id: number;
-      type: WorkspacePermissionItemType.Group;
-      group: string;
-      modes: WorkspacePermissionMode[];
-    };
+  | WorkspaceUserPermissionSetting
+  | WorkspaceUserGroupPermissionSetting;
 
 export interface WorkspaceFormSubmitData {
   name: string;
@@ -61,7 +65,7 @@ export interface WorkspaceFormProps {
   application: ApplicationStart;
   onSubmit?: (formData: WorkspaceFormSubmitData) => void;
   defaultValues?: WorkspaceFormData;
-  operationType?: WorkspaceOperationType;
+  operationType: WorkspaceOperationType;
   workspaceConfigurableApps?: PublicAppInfo[];
   permissionEnabled?: boolean;
   permissionLastAdminItemDeletable?: boolean;

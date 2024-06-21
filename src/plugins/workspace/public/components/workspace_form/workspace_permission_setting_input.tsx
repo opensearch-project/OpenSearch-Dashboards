@@ -160,15 +160,17 @@ export const WorkspacePermissionSettingInput = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          color="danger"
-          aria-label="Delete permission setting"
-          iconType="trash"
-          display="base"
-          size="m"
-          onClick={handleDelete}
-          isDisabled={!deletable}
-        />
+        {deletable && (
+          <EuiButtonIcon
+            color="danger"
+            aria-label="Delete permission setting"
+            iconType="trash"
+            display="base"
+            size="m"
+            onClick={handleDelete}
+            isDisabled={!deletable}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
