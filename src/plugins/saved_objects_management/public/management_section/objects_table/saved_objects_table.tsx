@@ -69,6 +69,8 @@ import {
   ApplicationStart,
   WorkspacesStart,
   WorkspaceAttribute,
+  SavedObjectsImportSuccess,
+  SavedObjectsImportError,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
 import { PUBLIC_WORKSPACE_ID, PUBLIC_WORKSPACE_NAME } from '../../../../../core/public';
@@ -96,7 +98,14 @@ import {
   SavedObjectsManagementColumnServiceStart,
   SavedObjectsManagementNamespaceServiceStart,
 } from '../../services';
-import { Header, Table, Flyout, Relationships, SavedObjectsDuplicateModal } from './components';
+import {
+  Header,
+  Table,
+  Flyout,
+  Relationships,
+  SavedObjectsDuplicateModal,
+  DuplicateResultFlyout,
+} from './components';
 import { DataPublicPluginStart } from '../../../../../plugins/data/public';
 import { DuplicateObject } from '../types';
 import { formatWorkspaceIdParams } from '../../utils';
@@ -151,6 +160,10 @@ export interface SavedObjectsTableState {
   currentWorkspaceId?: string;
   workspaceEnabled: boolean;
   availableWorkspaces?: WorkspaceAttribute[];
+  isShowingDuplicateResultFlyout: boolean;
+  failedCopies: SavedObjectsImportError[];
+  successfulCopies: SavedObjectsImportSuccess[];
+  targetWorkspaceName: string;
 }
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
@@ -189,6 +202,10 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       currentWorkspaceId: this.props.workspaces.currentWorkspaceId$.getValue(),
       availableWorkspaces: this.props.workspaces.workspaceList$.getValue(),
       workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
+      isShowingDuplicateResultFlyout: false,
+      failedCopies: [],
+      successfulCopies: [],
+      targetWorkspaceName: '',
     };
   }
 
@@ -728,61 +745,13 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         targetWorkspace,
         includeReferencesDeep
       );
-      const successCount = result.success
-        ? savedObjects.length
-        : savedObjects.length - result.errors.length;
-      if (result.success) {
-        notifications.toasts.addSuccess({
-          title: i18n.translate(
-            'savedObjectsManagement.objectsTable.duplicate.successNotification',
-            {
-              defaultMessage:
-                'Successfully copied {successCount, plural, one {{objectTitle}} other {# saved objects}} {includeReferencesDeep, select, true {and the related objects } false { }}to {targetWorkspaceName}.',
-              values: {
-                successCount,
-                objectTitle: savedObjects[0].meta.title,
-                includeReferencesDeep,
-                targetWorkspaceName,
-              },
-            }
-          ),
-        });
-      } else {
-        const errorIds = result.errors ? result.errors.map((item: { id: string }) => item.id) : [];
-        const errorTitleMessages = savedObjects
-          .filter((obj) => errorIds.includes(obj.id))
-          .map((obj) => <li>{obj.meta.title}</li>);
-        const errorText = i18n.translate(
-          'savedObjectsManagement.objectsTable.duplicate.dangerNotificationText',
-          {
-            defaultMessage:
-              'Unable to copy {errorCount, plural, one {# saved object} other {# saved objects}}:',
-            values: {
-              errorCount: result.errors.length,
-            },
-          }
-        );
-        notifications.toasts.addDanger({
-          title: i18n.translate(
-            'savedObjectsManagement.objectsTable.duplicate.dangerNotification',
-            {
-              defaultMessage:
-                'Successfully copied {successCount, plural,=0 {# saved object} one {# saved object} other {# saved objects}} {includeReferencesDeep, select, true {and the related objects } false { }}to {targetWorkspaceName}.',
-              values: {
-                successCount,
-                includeReferencesDeep,
-                targetWorkspaceName,
-              },
-            }
-          ),
-          text: toMountPoint(
-            <div>
-              <> {errorText} </>
-              <> {errorTitleMessages} </>
-            </div>
-          ),
-        });
-      }
+
+      this.setState({
+        isShowingDuplicateResultFlyout: true,
+        failedCopies: result.success ? [] : result.errors,
+        successfulCopies: result.successCount > 0 ? result.successResults : [],
+        targetWorkspaceName,
+      });
     } catch (e) {
       notifications.toasts.addDanger({
         title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
@@ -811,6 +780,32 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         notifications={this.props.notifications}
         onClose={this.hideDuplicateModal}
         selectedSavedObjects={duplicateSelectedSavedObjects}
+      />
+    );
+  }
+
+  hideDuplicateResultFlyout = () => {
+    this.setState({ isShowingDuplicateResultFlyout: false });
+  };
+
+  renderDuplicateResultFlyout() {
+    const {
+      isShowingDuplicateResultFlyout,
+      targetWorkspaceName,
+      failedCopies,
+      successfulCopies,
+    } = this.state;
+
+    if (!isShowingDuplicateResultFlyout) {
+      return null;
+    }
+
+    return (
+      <DuplicateResultFlyout
+        workspaceName={targetWorkspaceName}
+        failedCopies={failedCopies}
+        successfulCopies={successfulCopies}
+        onClose={this.hideDuplicateResultFlyout}
       />
     );
   }
@@ -1148,6 +1143,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         {this.renderDeleteConfirmModal()}
         {this.renderExportAllOptionsModal()}
         {this.renderDuplicateModal()}
+        {this.renderDuplicateResultFlyout()}
         <Header
           onExportAll={() => this.setState({ isShowingExportAllOptionsModal: true })}
           onImport={this.showImportFlyout}

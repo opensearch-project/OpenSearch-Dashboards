@@ -33,3 +33,4 @@ export { Table } from './table';
 export { Flyout } from './flyout';
 export { Relationships } from './relationships';
 export { SavedObjectsDuplicateModal } from './duplicate_modal';
+export { DuplicateResultFlyout } from './duplicate_result_flyout';

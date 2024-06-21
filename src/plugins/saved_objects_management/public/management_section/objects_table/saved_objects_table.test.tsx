@@ -936,9 +936,8 @@ describe('SavedObjectsTable', () => {
       );
       component.update();
 
-      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Successfully copied 2 saved objects to bar.',
-      });
+      expect(component.state('isShowingDuplicateResultFlyout')).toEqual(true);
+      expect(component.find('DuplicateResultFlyout').length).toEqual(1);
     });
 
     it('should duplicate single object', async () => {
@@ -964,12 +963,11 @@ describe('SavedObjectsTable', () => {
       );
       component.update();
 
-      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
-        title: 'Successfully copied object-1 and the related objects to bar.',
-      });
+      expect(component.state('isShowingDuplicateResultFlyout')).toEqual(true);
+      expect(component.find('DuplicateResultFlyout').length).toEqual(1);
     });
 
-    it('should show error when duplicating selected object is fail', async () => {
+    it('should show result flyout when duplicating success and failure coexist', async () => {
       const component = shallowRender({ applications, workspaces });
       component.setState({ isShowingDuplicateModal: true });
 
@@ -977,6 +975,13 @@ describe('SavedObjectsTable', () => {
       await new Promise((resolve) => process.nextTick(resolve));
       // Ensure the state changes are reflected
       component.update();
+
+      getDuplicateSavedObjectsMock.mockImplementationOnce(() => ({
+        success: false,
+        successCount: 1,
+        successResults: [{ id: '1' }],
+        errors: [{ id: '2' }],
+      }));
 
       await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
 
@@ -991,16 +996,8 @@ describe('SavedObjectsTable', () => {
       );
       component.update();
 
-      getDuplicateSavedObjectsMock.mockImplementationOnce(() => ({
-        success: false,
-        errors: [{ id: '1' }, { id: '2' }],
-      }));
-
-      await component.instance().onDuplicate(mockSelectedSavedObjects, false, 'workspace2', 'bar');
-      expect(notifications.toasts.addDanger).toHaveBeenCalled();
-      expect((notifications.toasts.addDanger as jest.Mock).mock.calls[0][0].title).toMatch(
-        'Successfully copied 0 saved object to bar.'
-      );
+      expect(component.state('isShowingDuplicateResultFlyout')).toEqual(true);
+      expect(component.find('DuplicateResultFlyout').length).toEqual(1);
     });
 
     it('should catch error when duplicating selected object is fail', async () => {
