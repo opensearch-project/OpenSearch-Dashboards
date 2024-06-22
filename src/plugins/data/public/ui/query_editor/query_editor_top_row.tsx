@@ -245,6 +245,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           onSubmit={onInputSubmit}
           getQueryStringInitialValue={getQueryStringInitialValue}
           persistedLog={persistedLog}
+          className="osdQueryEditor"
           dataTestSubj={props.dataTestSubj}
           queryEditorHeaderRef={queryEditorHeaderRef}
           queryEditorBannerRef={queryEditorBannerRef}
