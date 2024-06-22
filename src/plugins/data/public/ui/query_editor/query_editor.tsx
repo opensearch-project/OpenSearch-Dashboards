@@ -17,7 +17,7 @@ import {
 import { QuerySuggestion } from '../../autocomplete';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
-import { DataSettings, QueryEnhancement } from '../types';
+import { DataSettings } from '../types';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 
@@ -56,7 +56,7 @@ interface Props extends QueryEditorProps {
 }
 
 interface State {
-  queryEnhancements: Map<string, QueryEnhancement>;
+  isDataSourcesVisible: boolean;
   isSuggestionsVisible: boolean;
   index: number | null;
   suggestions: QuerySuggestion[];
@@ -81,7 +81,7 @@ const KEY_CODES = {
 // eslint-disable-next-line import/no-default-export
 export default class QueryEditorUI extends Component<Props, State> {
   public state: State = {
-    queryEnhancements: new Map(),
+    isDataSourcesVisible: true,
     isSuggestionsVisible: false,
     index: null,
     suggestions: [],
@@ -89,7 +89,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     queryEditorRect: undefined,
   };
 
-  public inputRef: HTMLTextAreaElement | null = null;
+  public inputRef: HTMLElement | null = null;
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
@@ -173,7 +173,8 @@ export default class QueryEditorUI extends Component<Props, State> {
       language,
     };
 
-    const fields = this.props.settings.getQueryEnhancements(newQuery.language)?.fields;
+    const enhancement = this.props.settings.getQueryEnhancements(newQuery.language);
+    const fields = enhancement?.fields;
     const newSettings: DataSettings = {
       userQueryLanguage: newQuery.language,
       userQueryString: newQuery.query,
@@ -181,8 +182,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     };
     this.props.settings?.updateSettings(newSettings);
 
-    const dateRangeEnhancement = this.props.settings.getQueryEnhancements(language)?.searchBar
-      ?.dateRange;
+    const dateRangeEnhancement = enhancement?.searchBar?.dateRange;
     const dateRange = dateRangeEnhancement
       ? {
           from: dateRangeEnhancement.initialFrom!,
@@ -191,6 +191,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       : undefined;
     this.onChange(newQuery, dateRange);
     this.onSubmit(newQuery, dateRange);
+    this.setState({ isDataSourcesVisible: enhancement?.searchBar?.showDataSourceSelector ?? true });
   };
 
   private initPersistedLog = () => {
@@ -198,6 +199,15 @@ export default class QueryEditorUI extends Component<Props, State> {
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(uiSettings, storage, appName, this.props.query.language);
+  };
+
+  private initDataSourcesVisibility = () => {
+    if (this.componentIsUnmounting) return;
+
+    const isDataSourcesVisible =
+      this.props.settings.getQueryEnhancements(this.props.query.language)?.searchBar
+        ?.showDataSourceSelector ?? true;
+    this.setState({ isDataSourcesVisible });
   };
 
   public onMouseEnterSuggestion = (index: number) => {
@@ -214,6 +224,7 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     this.initPersistedLog();
     // this.fetchIndexPatterns().then(this.updateSuggestions);
+    this.initDataSourcesVisibility();
     this.handleListUpdate();
 
     window.addEventListener('scroll', this.handleListUpdate, {
@@ -301,23 +312,21 @@ export default class QueryEditorUI extends Component<Props, State> {
         <div ref={this.props.queryEditorBannerRef} className={queryEditorBannerClassName} />
         <EuiFlexGroup gutterSize="xs" direction="column">
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs">
+            <EuiFlexGroup gutterSize="xs" alignItems="center" className={`${className}__wrapper`}>
               <EuiFlexItem grow={false}>{this.props.prepend}</EuiFlexItem>
-              <EuiFlexItem>
-                <EuiFlexGroup gutterSize="xs">
-                  <EuiFlexItem grow={false}>
-                    <div ref={this.props.containerRef} />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={true}>
-                    <QueryLanguageSelector
-                      language={this.props.query.language}
-                      anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-                      onSelectLanguage={this.onSelectLanguage}
-                      appName={this.services.appName}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+              <EuiFlexItem grow={false} className={`${className}__languageWrapper`}>
+                <QueryLanguageSelector
+                  language={this.props.query.language}
+                  anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+                  onSelectLanguage={this.onSelectLanguage}
+                  appName={this.services.appName}
+                />
               </EuiFlexItem>
+              {this.state.isDataSourcesVisible && (
+                <EuiFlexItem grow={false} className={`${className}__dataSourceWrapper`}>
+                  <div ref={this.props.containerRef} />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem onClick={this.onClickInput} grow={true}>
