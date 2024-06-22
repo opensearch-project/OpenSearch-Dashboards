@@ -54,6 +54,7 @@ export class QueryEnhancementsPlugin
               initialTo: moment().add(2, 'days').toISOString(),
             },
             showFilterBar: false,
+            showDataSourceSelector: false,
           },
           fields: {
             filterable: false,
@@ -72,6 +73,7 @@ export class QueryEnhancementsPlugin
           searchBar: {
             showDatePicker: false,
             showFilterBar: false,
+            showDataSourceSelector: false,
             queryStringInput: { initialValue: 'SELECT * FROM <data_source>' },
           },
           fields: {
