@@ -94,7 +94,13 @@ export function getLegacyDisplayedColumns(
       colRightIdx: idx + 1 >= columns.length ? -1 : idx + 1,
     };
   });
-  return !hideTimeField && indexPattern.timeFieldName
-    ? [getTimeColumn(indexPattern.timeFieldName), ...columnProps]
+
+  const shouldIncludeTimeField =
+    !hideTimeField &&
+    typeof indexPattern.timeFieldName === 'string' &&
+    !columns.includes(indexPattern.timeFieldName);
+
+  return shouldIncludeTimeField
+    ? [getTimeColumn(indexPattern.timeFieldName as string), ...columnProps]
     : columnProps;
 }
