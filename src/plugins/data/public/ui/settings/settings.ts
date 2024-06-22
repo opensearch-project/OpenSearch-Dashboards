@@ -89,7 +89,6 @@ export class Settings {
 
   setUserQueryLanguage(language: string) {
     this.storage.set('opensearchDashboards.userQueryLanguage', language);
-    this.search.df.clear();
     const queryEnhancement = this.queryEnhancements.get(language);
     this.search.__enhance({
       searchInterceptor: queryEnhancement

@@ -82,16 +82,8 @@ export function getSearchParamsFromRequest(
     destroyDataFrame?: DestroyDataFrameFn;
   }
 ): ISearchRequestParams {
-  const { getConfig, getDataFrame, destroyDataFrame } = dependencies;
+  const { getConfig } = dependencies;
   const searchParams = getSearchParams(getConfig);
-
-  if (getDataFrame && destroyDataFrame) {
-    if (getDataFrame()) {
-      delete searchRequest.body.df;
-      delete searchRequest.indexType;
-      destroyDataFrame();
-    }
-  }
 
   return {
     index: searchRequest.index.title || searchRequest.index,

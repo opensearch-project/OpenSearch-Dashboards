@@ -30,18 +30,7 @@ export const updateSearchSource = async ({
   histogramConfigs,
 }: Props) => {
   const { uiSettings, data } = services;
-  let dataSet = indexPattern;
-  const dataFrame = searchSource?.getDataFrame();
-  if (
-    searchSource &&
-    dataFrame &&
-    dataFrame.name &&
-    dataFrame.name !== '' &&
-    dataSet.title !== dataFrame.name
-  ) {
-    dataSet = data.indexPatterns.getByTitle(dataFrame.name, true) ?? dataSet;
-    searchSource.setField('index', dataSet);
-  }
+  const dataSet = indexPattern;
 
   const sortForSearchSource = getSortForSearchSource(
     sort,

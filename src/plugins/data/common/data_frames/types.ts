@@ -14,10 +14,11 @@ export enum DATA_FRAME_TYPES {
   POLLING = 'data_frame_polling',
 }
 
-export interface DataFrameService {
-  get: () => IDataFrame | undefined;
-  set: (dataFrame: IDataFrame) => Promise<void>;
-  clear: () => void;
+export interface DataFramesService {
+  get: (name: string) => IDataFrame | undefined;
+  set: (name: string, df: IDataFrame) => void;
+  clear: (name: string) => void;
+  clearAll: () => void;
 }
 
 /**

@@ -87,7 +87,13 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/common';
 import { IIndexPattern } from '../../index_patterns';
-import { DATA_FRAME_TYPES, IDataFrame, IDataFrameResponse, convertResult } from '../../data_frames';
+import {
+  DATA_FRAME_TYPES,
+  DataFramesService,
+  IDataFrame,
+  IDataFrameResponse,
+  convertResult,
+} from '../../data_frames';
 import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
 import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
@@ -138,11 +144,7 @@ export interface SearchSourceDependencies extends FetchHandlers {
     request: SearchStrategyRequest,
     options: ISearchOptions
   ) => Promise<SearchStrategyResponse>;
-  df: {
-    get: () => IDataFrame | undefined;
-    set: (dataFrame: IDataFrame) => Promise<void>;
-    clear: () => void;
-  };
+  dfs: DataFramesService;
 }
 
 /** @public **/
@@ -286,8 +288,8 @@ export class SearchSource {
    * Get the data frame of this SearchSource
    * @return {undefined|IDataFrame}
    */
-  getDataFrame() {
-    return this.dependencies.df.get();
+  getDataFrame(dfName: string) {
+    return this.dependencies.dfs.get(dfName);
   }
 
   /**
@@ -296,20 +298,24 @@ export class SearchSource {
    * @async
    * @return {undefined|IDataFrame}
    */
-  async setDataFrame(dataFrame: IDataFrame | undefined) {
+  async setDataFrame(dfName: string, dataFrame: IDataFrame | undefined) {
     if (dataFrame) {
-      await this.dependencies.df.set(dataFrame);
+      await this.dependencies.dfs.set(dfName, dataFrame);
     } else {
-      this.destroyDataFrame();
+      this.destroyDataFrame(dfName);
     }
-    return this.getDataFrame();
+    return this.getDataFrame(dfName);
   }
 
   /**
    * Clear the data frame of this SearchSource
    */
-  destroyDataFrame() {
-    this.dependencies.df.clear();
+  destroyDataFrame(dfName: string) {
+    this.dependencies.dfs.clear(dfName);
+  }
+
+  clearDataFramesCache() {
+    this.dependencies.dfs.clearAll();
   }
 
   /**

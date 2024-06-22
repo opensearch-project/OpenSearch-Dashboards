@@ -47,7 +47,7 @@ export * from './data_frames/types';
  * not possible.
  */
 export type GetConfigFn = <T = any>(key: string, defaultOverride?: T) => T;
-export type GetDataFrameFn = () => IDataFrame | undefined;
+export type GetDataFrameFn = (dfName: string) => IDataFrame | undefined;
 export type GetDataFrameAggQsFn = ({
   qs,
   aggConfig,
@@ -60,5 +60,5 @@ export type GetDataFrameAggQsFn = ({
   timeFilter: any;
 }) => any;
 
-export type DestroyDataFrameFn = () => void;
+export type DestroyDataFrameFn = (dfName: string) => void;
 export type GetAggTypeFn = (id: string) => BucketAggType<any> | MetricAggType<any>;
