@@ -140,7 +140,7 @@ export const OpenSearchObservabilityPlugin = (client: any, config: any, componen
   });
 
   observability.getJobStatus = createAction(client, components, {
-    endpoint: `${URI.ASYNC_QUERY}/<%=queryId%>`,
+    endpoint: `${URI.ASYNC_QUERY}`,
     method: 'GET',
     paramKey: 'queryId',
   });

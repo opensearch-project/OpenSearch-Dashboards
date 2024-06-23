@@ -16,6 +16,7 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
+import { SQLAsyncQlSearchInterceptor } from './search/sql_async_search_interceptor';
 
 export type PublicConfig = Pick<ConfigSchema, 'queryAssist'>;
 
@@ -48,6 +49,16 @@ export class QueryEnhancementsPlugin
       startServices: core.getStartServices(),
       usageCollector: data.search.usageCollector,
     });
+
+    const sqlAsyncSearchInterceptor = new SQLAsyncQlSearchInterceptor({
+      toasts: core.notifications.toasts,
+      http: core.http,
+      uiSettings: core.uiSettings,
+      startServices: core.getStartServices(),
+      usageCollector: data.search.usageCollector,
+    });
+
+    
     data.__enhance({
       ui: {
         query: {
@@ -81,6 +92,27 @@ export class QueryEnhancementsPlugin
             showFilterBar: false,
             showDataSourceSelector: false,
             queryStringInput: { initialValue: 'SELECT * FROM <data_source>' },
+          },
+          fields: {
+            filterable: false,
+            visualizable: false,
+          },
+          showDocLinks: false,
+          supportedAppNames: ['discover'],
+        },
+      },
+    });
+
+    data.__enhance({
+      ui: {
+        query: {
+          language: 'SQL Async',
+          search: sqlAsyncSearchInterceptor,
+          searchBar: {
+            showDatePicker: false,
+            showFilterBar: false,
+            showDataSourceSelector: false,
+            queryStringInput: { initialValue: '' },
           },
           fields: {
             filterable: false,
