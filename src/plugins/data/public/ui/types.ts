@@ -21,6 +21,7 @@ export interface QueryEnhancement {
   // Leave blank to support all data sources
   // supportedDataSourceTypes?: Record<string, GenericDataSource>;
   searchBar?: {
+    showDataSourceSelector?: boolean;
     showQueryInput?: boolean;
     showFilterBar?: boolean;
     showDatePicker?: boolean;
