@@ -37,6 +37,16 @@ import { SqlErrorListener } from './sql_error_listerner';
 import { findCursorTokenIndex } from './cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { getUiSettings } from '../../services';
+import { SQL_SYMBOLS } from './constants';
+
+const getSymbolSuggestionType = (field: string) => {
+  if (SQL_SYMBOLS.KEY_WORDS.includes(field)) {
+    return 'keyword';
+  } else if (SQL_SYMBOLS.FUNCTIONS.includes(field)) {
+    return 'function';
+  }
+  return 'text';
+};
 
 export const getSuggestions = async ({ selectionStart, selectionEnd, query }) => {
   const { api } = getUiSettings();
@@ -56,7 +66,14 @@ export const getSuggestions = async ({ selectionStart, selectionEnd, query }) =>
     schemas.forEach((schema, index) => {
       if (schema.body?.fields?.length > 0) {
         const columns = schema.body.fields.find((col) => col.name === 'COLUMN_NAME');
-        finalSuggestions.push(...columns.values.map((col: string) => ({ text: col })));
+        const fieldTypes = schema.body.fields.find((col) => col.name === 'COLUMN_NAME');
+        finalSuggestions.push(
+          ...columns.values.map((col: string) => ({
+            text: col,
+            type: 'field',
+            fieldType: fieldTypes ? fieldTypes.values[index] : '',
+          }))
+        );
       }
     });
 
@@ -73,7 +90,10 @@ export const getSuggestions = async ({ selectionStart, selectionEnd, query }) =>
       values.forEach((value) => {
         if (value.body?.fields?.length > 0) {
           finalSuggestions.push(
-            ...value.body.fields[0].values.map((colVal: string) => ({ text: `'${colVal}'` }))
+            ...value.body.fields[0].values.map((colVal: string) => ({
+              text: `'${colVal}'`,
+              type: 'value',
+            }))
           );
         }
       });
@@ -94,7 +114,12 @@ export const getSuggestions = async ({ selectionStart, selectionEnd, query }) =>
   }
 
   if ('suggestKeywords' in suggestions && (suggestions.suggestKeywords?.length ?? 0) > 0) {
-    finalSuggestions.push(...suggestions.suggestKeywords!.map((sk) => ({ text: sk.value })));
+    finalSuggestions.push(
+      ...suggestions.suggestKeywords!.map((sk) => ({
+        text: sk.value,
+        type: getSymbolSuggestionType(sk.value),
+      }))
+    );
   }
 
   return finalSuggestions;
