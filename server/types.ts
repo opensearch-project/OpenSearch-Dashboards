@@ -4,7 +4,7 @@
  */
 
 import { DataPluginSetup } from 'src/plugins/data/server/plugin';
-import { DataSourcePluginStart } from '../../../src/plugins/data_source/server';
+import { DataSourcePluginSetup } from '../../../src/plugins/data_source/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryEnhancementsPluginSetup {}
@@ -13,7 +13,7 @@ export interface QueryEnhancementsPluginStart {}
 
 export interface QueryEnhancementsPluginSetupDependencies {
   data: DataPluginSetup;
-  dataSource?: DataSourcePluginStart;
+  dataSource?: DataSourcePluginSetup;
 }
 
 export interface ISchema {

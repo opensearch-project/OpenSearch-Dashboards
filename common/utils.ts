@@ -3,6 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { IDataFrame } from 'src/plugins/data/common';
+import { from } from 'rxjs';
+import { FetchDataFrameContext } from './types';
+
 export const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return (
@@ -29,4 +33,21 @@ export const getFields = (rawResponse: any) => {
 
 export const removeKeyword = (queryString: string | undefined) => {
   return queryString?.replace(new RegExp('.keyword'), '') ?? '';
+};
+
+export const fetchDataFrame = (
+  context: FetchDataFrameContext,
+  queryString: string,
+  df: IDataFrame
+) => {
+  const { http, path, signal } = context;
+  const body = JSON.stringify({ query: { qs: queryString, format: 'jdbc' }, df });
+  return from(
+    http.fetch({
+      method: 'POST',
+      path,
+      body,
+      signal,
+    })
+  );
 };

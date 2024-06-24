@@ -39,6 +39,11 @@ export class QueryEnhancementsPlugin
       plugins: [OpenSearchPPLPlugin, OpenSearchObservabilityPlugin],
     });
 
+    if (dataSource) {
+      dataSource.registerCustomApiSchema(OpenSearchPPLPlugin);
+      dataSource.registerCustomApiSchema(OpenSearchObservabilityPlugin);
+    }
+
     const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
     const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
 
