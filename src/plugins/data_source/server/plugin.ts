@@ -22,9 +22,13 @@ import { DataSourcePluginConfigType } from '../config';
 import { LoggingAuditor } from './audit/logging_auditor';
 import { CryptographyService, CryptographyServiceSetup } from './cryptography_service';
 import { DataSourceService, DataSourceServiceSetup } from './data_source_service';
-import { DataSourceSavedObjectsClientWrapper, dataSource } from './saved_objects';
+import {
+  DataSourceSavedObjectsClientWrapper,
+  dataSource,
+  DataSourcePermissionClientWrapper,
+} from './saved_objects';
 import { AuthenticationMethod, DataSourcePluginSetup, DataSourcePluginStart } from './types';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
+import { DATA_SOURCE_PERMISSION_CLIENT_WRAPPER_ID, DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
 
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../src/core/server/http/router';
@@ -33,6 +37,7 @@ import { registerTestConnectionRoute } from './routes/test_connection';
 import { registerFetchDataSourceMetaDataRoute } from './routes/fetch_data_source_metadata';
 import { AuthenticationMethodRegistry, IAuthenticationMethodRegistry } from './auth_registry';
 import { CustomApiSchemaRegistry } from './schema_registry';
+import { EditMode } from '../common/data_sources';
 
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
   private readonly logger: Logger;
@@ -66,6 +71,19 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       const dataSourcePluginStart = selfStart as DataSourcePluginStart;
       return dataSourcePluginStart.getAuthenticationMethodRegistry();
     });
+
+    const { editMode } = config;
+
+    if (editMode && editMode !== EditMode.None) {
+      const dataSourcePermissionWrapper = new DataSourcePermissionClientWrapper(editMode);
+
+      // Add data source permission client wrapper factory
+      core.savedObjects.addClientWrapper(
+        2,
+        DATA_SOURCE_PERMISSION_CLIENT_WRAPPER_ID,
+        dataSourcePermissionWrapper.wrapperFactory
+      );
+    }
 
     const dataSourceSavedObjectsClientWrapper = new DataSourceSavedObjectsClientWrapper(
       cryptographyServiceSetup,

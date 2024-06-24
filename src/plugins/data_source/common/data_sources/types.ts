@@ -60,3 +60,9 @@ export enum DataSourceEngineType {
   Elasticsearch = 'Elasticsearch',
   NA = 'No Engine Type Available',
 }
+
+export enum EditMode {
+  ReadOnly = 'read_only',
+  AdminOnly = 'admin_only',
+  None = 'none',
+}

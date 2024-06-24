@@ -5,3 +5,4 @@
 
 export { dataSource } from './data_source';
 export { DataSourceSavedObjectsClientWrapper } from './data_source_saved_objects_client_wrapper';
+export { DataSourcePermissionClientWrapper } from './data_source_permission_client_wrapper';
