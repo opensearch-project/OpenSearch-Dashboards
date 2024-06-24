@@ -194,46 +194,6 @@ describe('validateWorkspaceForm', () => {
       },
     });
   });
-  it('should return error if permission setting user id is invalid', () => {
-    expect(
-      validateWorkspaceForm({
-        name: 'test',
-        permissionSettings: [
-          {
-            id: 0,
-            type: WorkspacePermissionItemType.User,
-            modes: [WorkspacePermissionMode.LibraryRead],
-            userId: '',
-          },
-        ],
-      }).permissionSettings
-    ).toEqual({
-      0: {
-        code: WorkspaceFormErrorCode.PermissionUserIdMissing,
-        message: 'Invalid user id',
-      },
-    });
-  });
-  it('should return error if permission setting group is invalid', () => {
-    expect(
-      validateWorkspaceForm({
-        name: 'test',
-        permissionSettings: [
-          {
-            id: 0,
-            type: WorkspacePermissionItemType.Group,
-            modes: [WorkspacePermissionMode.LibraryRead],
-            group: '',
-          },
-        ],
-      }).permissionSettings
-    ).toEqual({
-      0: {
-        code: WorkspaceFormErrorCode.PermissionUserGroupMissing,
-        message: 'Invalid user group',
-      },
-    });
-  });
 
   it('should return error if permission setting is duplicate', () => {
     expect(
@@ -281,7 +241,7 @@ describe('validateWorkspaceForm', () => {
     ).toEqual({
       1: {
         code: WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
-        message: 'Duplicate permission setting',
+        message: 'User group must be unique. Enter a unique user group.',
       },
     });
   });

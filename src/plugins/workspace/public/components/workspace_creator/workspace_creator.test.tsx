@@ -155,22 +155,15 @@ describe('WorkspaceCreator', () => {
     fireEvent.input(descriptionInput, {
       target: { value: 'test workspace description' },
     });
-    const colorSelector = getByTestId(
-      'euiColorPickerAnchor workspaceForm-workspaceDetails-colorPicker'
-    );
-    fireEvent.input(colorSelector, {
-      target: { value: '#000000' },
-    });
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'test workspace name',
-        color: '#000000',
         description: 'test workspace description',
         features: expect.arrayContaining(['use-case-observability']),
       }),
-      undefined
+      { library_write: { users: ['%current_user%'] }, write: { users: ['%current_user%'] } }
     );
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
@@ -220,8 +213,8 @@ describe('WorkspaceCreator', () => {
     expect(notificationToastsAddSuccess).not.toHaveBeenCalled();
   });
 
-  it('create workspace with customized permissions', async () => {
-    const { getByTestId, getAllByText } = render(
+  it('create workspace with current user', async () => {
+    const { getByTestId } = render(
       <WorkspaceCreator
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
       />
@@ -232,23 +225,17 @@ describe('WorkspaceCreator', () => {
     });
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-user-addNew'));
-    const userIdInput = getAllByText('Select')[0];
-    fireEvent.click(userIdInput);
-    fireEvent.input(getByTestId('comboBoxSearchInput'), {
-      target: { value: 'test user id' },
-    });
-    fireEvent.blur(getByTestId('comboBoxSearchInput'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'test workspace name',
       }),
       {
-        read: {
-          users: ['test user id'],
+        write: {
+          users: ['%current_user%'],
         },
-        library_read: {
-          users: ['test user id'],
+        library_write: {
+          users: ['%current_user%'],
         },
       }
     );

@@ -130,7 +130,7 @@ describe('WorkspacePermissionSettingInput', () => {
     ]);
   });
 
-  it('should not able to delete last user admin permission setting', () => {
+  it('should hide first user permission setting delete button', () => {
     const { renderResult } = setup({
       lastAdminItemDeletable: false,
       permissionSettings: [
@@ -143,51 +143,15 @@ describe('WorkspacePermissionSettingInput', () => {
       ],
     });
 
-    expect(renderResult.getByLabelText('Delete permission setting')).toBeDisabled();
-  });
-
-  it('should not able to delete last group admin permission setting', () => {
-    const { renderResult } = setup({
-      lastAdminItemDeletable: false,
-      permissionSettings: [
-        {
-          id: 0,
-          type: WorkspacePermissionItemType.Group,
-          group: 'bar',
-          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-        },
-      ],
-    });
-
-    expect(renderResult.getByLabelText('Delete permission setting')).toBeDisabled();
-  });
-
-  it('should able to delete permission setting if more than one admin permission', () => {
-    const { renderResult } = setup({
-      lastAdminItemDeletable: false,
-      permissionSettings: [
-        {
-          id: 0,
-          type: WorkspacePermissionItemType.User,
-          userId: 'foo',
-          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-        },
-        {
-          id: 0,
-          type: WorkspacePermissionItemType.Group,
-          group: 'bar',
-          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-        },
-      ],
-    });
-
-    expect(renderResult.getAllByLabelText('Delete permission setting')[0]).not.toBeDisabled();
-    expect(renderResult.getAllByLabelText('Delete permission setting')[1]).not.toBeDisabled();
+    expect(renderResult.queryByLabelText('Delete permission setting')).toBeNull();
   });
 
   it('should render consistent errors', () => {
     const { renderResult } = setup({
-      errors: { '0': 'User permission setting error', '1': 'Group permission setting error' },
+      errors: {
+        '0': { code: 0, message: 'User permission setting error' },
+        '1': { code: 0, message: 'Group permission setting error' },
+      },
     });
     expect(renderResult.container.querySelectorAll('.euiFormErrorText')[0]).toHaveTextContent(
       'User permission setting error'

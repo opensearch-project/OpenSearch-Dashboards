@@ -6,7 +6,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { applicationServiceMock } from '../../../../../core/public/mocks';
-import { WorkspaceFormData } from './types';
+import { WorkspaceFormData, WorkspaceFormErrorCode } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 
 const setup = (defaultValues?: WorkspaceFormData) => {
@@ -37,7 +37,10 @@ describe('useWorkspaceForm', () => {
     });
     expect(renderResult.result.current.formErrors).toEqual(
       expect.objectContaining({
-        name: 'Invalid workspace name',
+        name: {
+          code: WorkspaceFormErrorCode.InvalidWorkspaceName,
+          message: 'Invalid workspace name',
+        },
       })
     );
     expect(onSubmitMock).not.toHaveBeenCalled();
@@ -54,7 +57,10 @@ describe('useWorkspaceForm', () => {
     });
     expect(renderResult.result.current.formErrors).toEqual(
       expect.objectContaining({
-        features: 'Use case is required. Select a use case.',
+        features: {
+          code: WorkspaceFormErrorCode.UseCaseMissing,
+          message: 'Use case is required. Select a use case.',
+        },
       })
     );
     expect(onSubmitMock).not.toHaveBeenCalled();

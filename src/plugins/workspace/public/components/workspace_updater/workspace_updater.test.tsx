@@ -7,7 +7,7 @@ import React from 'react';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import { WorkspaceUpdater as WorkspaceCreatorComponent } from './workspace_updater';
+import { WorkspaceUpdater as WorkspaceUpdaterComponent } from './workspace_updater';
 import { coreMock, workspacesServiceMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 
@@ -22,14 +22,20 @@ const PublicAPPInfoMap = new Map([
 ]);
 const createWorkspacesSetupContractMockWithValue = () => {
   const currentWorkspaceId$ = new BehaviorSubject<string>('abljlsds');
-  const currentWorkspace: WorkspaceObject = {
+  const currentWorkspace = {
     id: 'abljlsds',
     name: 'test1',
     description: 'test1',
     features: ['use-case-observability'],
-    color: '',
-    icon: '',
     reserved: false,
+    permissions: {
+      library_write: {
+        users: ['foo'],
+      },
+      write: {
+        users: ['foo'],
+      },
+    },
   };
   const workspaceList$ = new BehaviorSubject<WorkspaceObject[]>([currentWorkspace]);
   const currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(currentWorkspace);
@@ -79,7 +85,7 @@ const WorkspaceUpdater = (props: any) => {
 
   return (
     <Provider>
-      <WorkspaceCreatorComponent {...props} />
+      <WorkspaceUpdaterComponent {...props} />
     </Provider>
   );
 };
@@ -148,7 +154,7 @@ describe('WorkspaceUpdater', () => {
   });
 
   it('update workspace successfully', async () => {
-    const { getByTestId, getByText, getAllByText } = render(
+    const { getByTestId, getAllByTestId } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
       />
@@ -163,38 +169,30 @@ describe('WorkspaceUpdater', () => {
       target: { value: 'test workspace description' },
     });
 
-    const colorSelector = getByTestId(
-      'euiColorPickerAnchor workspaceForm-workspaceDetails-colorPicker'
-    );
-    fireEvent.input(colorSelector, {
-      target: { value: '#000000' },
-    });
-
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspaceUseCase-analytics'));
 
-    fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-user-addNew'));
-    const userIdInput = getAllByText('Select')[0];
+    const userIdInput = getAllByTestId('comboBoxSearchInput')[0];
     fireEvent.click(userIdInput);
-    fireEvent.input(getByTestId('comboBoxSearchInput'), {
+
+    fireEvent.input(userIdInput, {
       target: { value: 'test user id' },
     });
-    fireEvent.blur(getByTestId('comboBoxSearchInput'));
+    fireEvent.blur(userIdInput);
 
     fireEvent.click(getByTestId('workspaceForm-bottomBar-updateButton'));
     expect(workspaceClientUpdate).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
         name: 'test workspace name',
-        color: '#000000',
         description: 'test workspace description',
         features: expect.arrayContaining(['use-case-analytics']),
       }),
       {
-        read: {
+        library_write: {
           users: ['test user id'],
         },
-        library_read: {
+        write: {
           users: ['test user id'],
         },
       }
