@@ -527,7 +527,4 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getHeaderComponent(): JSX.Element;
-  /**
-   * Get a boolean value to indicates whether use case is enabled
-   */
 }
