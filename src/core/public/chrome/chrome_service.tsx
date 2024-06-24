@@ -29,7 +29,6 @@
  */
 
 import { EuiBreadcrumb, IconType } from '@elastic/eui';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
@@ -49,7 +48,7 @@ import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
-import { AppCategory, Branding } from '../';
+import { AppCategory, Branding, ChromeNavGroup } from '../';
 import { getLogos } from '../../common';
 import type { Logos } from '../../common/types';
 import { OverlayStart } from '../overlays';
@@ -546,28 +545,6 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getHeaderComponent(): JSX.Element;
-}
-
-export enum NavGroupType {
-  SYSTEM = 'system',
-}
-
-/** @public */
-export interface ChromeNavGroup {
-  id: string;
-  title: string;
-  description: string;
-  order?: number;
-  icon?: EuiIconType;
-
-  /**
-   * Groups with type of NavGroupType.SYSTEM will:
-   * 1. Always display before USE_CASE_GROUP.
-   * 2. Not be pickable within the workspace creation page.
-   *
-   * @default undefined indicates it is of type useCase
-   */
-  type?: NavGroupType;
 }
 
 /** @public */
