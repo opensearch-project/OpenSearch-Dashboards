@@ -28,8 +28,6 @@ export class Facet {
     try {
       const { format, df, ...query } = request.body;
       const params = {
-        queryId: request?.params?.queryId,
-        sessionId: request?.params?.sessionId,
         body: { ...query },
         ...(format !== 'jdbc' && { format }),
       };
