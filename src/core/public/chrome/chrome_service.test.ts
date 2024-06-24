@@ -39,12 +39,7 @@ import { httpServiceMock } from '../http/http_service.mock';
 import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
-import {
-  ChromeRegistrationNavLink,
-  ChromeService,
-  ChromeNavGroup,
-  NavGroupType,
-} from './chrome_service';
+import { ChromeRegistrationNavLink, ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
 import { overlayServiceMock } from '../mocks';
 
@@ -115,14 +110,13 @@ afterAll(() => {
   (window as any).localStorage = originalLocalStorage;
 });
 
-const mockedGroupFoo: ChromeNavGroup = {
+const mockedGroupFoo = {
   id: 'foo',
   title: 'foo',
   description: 'foo',
-  type: NavGroupType.SYSTEM,
 };
 
-const mockedGroupBar: ChromeNavGroup = {
+const mockedGroupBar = {
   id: 'bar',
   title: 'bar',
   description: 'bar',
