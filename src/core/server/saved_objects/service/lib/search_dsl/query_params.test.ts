@@ -35,6 +35,7 @@ type KueryNode = any;
 import { SavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
 import { ALL_NAMESPACES_STRING } from '../utils';
 import { getQueryParams } from './query_params';
+import { PUBLIC_WORKSPACE_ID } from '../../../../../server';
 
 const registerTypes = (registry: SavedObjectTypeRegistry) => {
   registry.registerType({
@@ -638,6 +639,28 @@ describe('#getQueryParams', () => {
               {
                 bool: {
                   must: [{ term: { workspaces: 'foo' } }],
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      });
+
+      it('using global workspace', () => {
+        const result: Result = getQueryParams({
+          registry,
+          workspaces: [PUBLIC_WORKSPACE_ID],
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                bool: {
+                  should: [
+                    { term: { workspaces: PUBLIC_WORKSPACE_ID } },
+                    { bool: { must_not: { exists: { field: 'workspaces' } } } },
+                  ],
                 },
               },
             ],

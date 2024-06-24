@@ -112,7 +112,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
     const isPermissionControlEnabled = globalConfig.savedObjects.permission.enabled === true;
 
-    this.client = new WorkspaceClient(core);
+    this.client = new WorkspaceClient(core, this.logger);
 
     await this.client.setup(core);
 
@@ -136,7 +136,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     core.savedObjects.addClientWrapper(
       PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
       WORKSPACE_ID_CONSUMER_WRAPPER_ID,
-      new WorkspaceIdConsumerWrapper(isPermissionControlEnabled).wrapperFactory
+      new WorkspaceIdConsumerWrapper().wrapperFactory
     );
 
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();

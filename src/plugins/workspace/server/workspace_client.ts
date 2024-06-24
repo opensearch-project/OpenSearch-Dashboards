@@ -10,6 +10,10 @@ import {
   CoreSetup,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
+  PUBLIC_WORKSPACE_ID,
+  PUBLIC_WORKSPACE_NAME,
+  Logger,
+  ACL,
 } from '../../../core/server';
 import { WORKSPACE_TYPE } from '../../../core/server';
 import {
@@ -24,6 +28,7 @@ import { generateRandomId } from './utils';
 import {
   WORKSPACE_ID_CONSUMER_WRAPPER_ID,
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+  WorkspacePermissionMode,
 } from '../common/constants';
 
 const WORKSPACE_ID_SIZE = 6;
@@ -35,9 +40,11 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
 export class WorkspaceClient implements IWorkspaceClientImpl {
   private setupDep: CoreSetup;
   private savedObjects?: SavedObjectsServiceStart;
+  private logger: Logger;
 
-  constructor(core: CoreSetup) {
+  constructor(core: CoreSetup, logger: Logger) {
     this.setupDep = core;
+    this.logger = logger;
   }
 
   private getScopedClientWithoutPermission(
@@ -76,6 +83,47 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   private formatError(error: Error | any): string {
     return error.message || error.error || 'Error';
+  }
+  private async createGlobalWorkspace(requestDetail: IRequestDetail) {
+    // Permission of global workspace defaults to read only for all users except OSD admins
+    const globalWorkspaceACL = new ACL().addPermission(
+      [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
+      {
+        users: ['*'],
+      }
+    );
+    const globalWorkspaceAttribute: Omit<WorkspaceAttribute, 'id' | 'permissions'> = {
+      name: i18n.translate('workspaces.public.workspace.default.name', {
+        defaultMessage: 'Global workspace',
+      }),
+      features: [
+        'use-case-observability',
+        'use-case-security-analytics',
+        'use-case-analytics',
+        'use-case-search',
+        '*',
+      ],
+      // Global workspace cannot be deleted
+      reserved: true,
+    };
+    const savedObjectClient = this.getScopedClientWithoutPermission(requestDetail);
+    try {
+      // The global workspace is created by the OSD admin who logged in for the first time.
+      this.logger.info(`Creating ${PUBLIC_WORKSPACE_NAME} by login user`);
+      const createResult = await savedObjectClient?.create(
+        WORKSPACE_TYPE,
+        globalWorkspaceAttribute,
+        {
+          id: PUBLIC_WORKSPACE_ID,
+          permissions: globalWorkspaceACL.getPermissions(),
+        }
+      );
+      if (createResult?.id) {
+        this.logger.info(`Successfully created ${PUBLIC_WORKSPACE_NAME}.`);
+      }
+    } catch (e) {
+      this.logger.error(`Create ${PUBLIC_WORKSPACE_NAME} error: ${e?.toString() || ''}`);
+    }
   }
   public async setup(core: CoreSetup): Promise<IResponse<boolean>> {
     this.setupDep.savedObjects.registerType(workspace);
@@ -128,6 +176,19 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     options: WorkspaceFindOptions
   ): ReturnType<IWorkspaceClientImpl['list']> {
     try {
+      const { saved_objects: allSavedObjects } = await this.getScopedClientWithoutPermission(
+        requestDetail
+      )!.find<WorkspaceAttribute>({
+        ...options,
+        type: WORKSPACE_TYPE,
+      });
+
+      const hasGlobalWorkspace = allSavedObjects.some((item) => item.id === PUBLIC_WORKSPACE_ID);
+      // Create global(public) workspace if public workspace id can not be found.
+      if (!hasGlobalWorkspace) {
+        await this.createGlobalWorkspace(requestDetail);
+      }
+
       const {
         saved_objects: savedObjects,
         ...others

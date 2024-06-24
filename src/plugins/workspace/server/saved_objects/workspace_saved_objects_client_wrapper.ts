@@ -27,6 +27,7 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
   SavedObjectsDeleteByWorkspaceOptions,
+  PUBLIC_WORKSPACE_ID,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import {
@@ -162,12 +163,20 @@ export class WorkspaceSavedObjectsClientWrapper {
      *
      * Checks if the provided saved object lacks both workspaces and permissions.
      * If a saved object lacks both attributes, it implies that the object is neither associated
-     * with any workspaces nor has permissions defined by itself. Such objects are considered "public"
-     * and will be excluded from permission checks.
+     * with any workspaces nor has permissions defined by itself. Such objects are considered as
+     * legacy object from global tenant and will belong to global(public) workspace.
      *
      **/
     if (!savedObject.workspaces && !savedObject.permissions) {
-      return true;
+      // User can add sample data in home page.
+      // The advance setting will be updated after adding sample data.
+      if (['config', WORKSPACE_TYPE].includes(savedObject.type)) return true;
+      // Currently, user only have the write permission in the home page.
+      return await this.validateAtLeastOnePermittedWorkspaces(
+        [PUBLIC_WORKSPACE_ID],
+        request,
+        workspacePermissionModes
+      );
     }
 
     let hasPermission = false;
