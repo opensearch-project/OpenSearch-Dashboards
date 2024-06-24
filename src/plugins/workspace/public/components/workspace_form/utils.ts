@@ -208,9 +208,9 @@ const validateUserPermissionSetting = (
   }
   if (!!setting.userId && hasSameUserIdOrGroup(previousPermissionSettings, setting)) {
     return {
-      code: WorkspaceFormErrorCode.DuplicateUserPermissionSetting,
+      code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
       message: i18n.translate(
-        'workspace.form.permission.invalidate.duplicateUserPermissionSetting',
+        'workspace.form.permission.invalidate.DuplicateUserIdPermissionSetting',
         {
           defaultMessage: 'User must be unique. Enter a unique user.',
         }

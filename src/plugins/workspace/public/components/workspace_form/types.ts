@@ -45,7 +45,7 @@ export enum WorkspaceFormErrorCode {
   InvalidPermissionModes,
   PermissionUserIdMissing,
   PermissionUserGroupMissing,
-  DuplicateUserPermissionSetting,
+  DuplicateUserIdPermissionSetting,
   DuplicateUserGroupPermissionSetting,
 }
 

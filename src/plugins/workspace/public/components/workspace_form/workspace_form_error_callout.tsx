@@ -30,7 +30,7 @@ const getSuggestionFromErrorCode = (error: WorkspaceFormError) => {
       return i18n.translate('workspace.form.errorCallout.missingUserGroup', {
         defaultMessage: 'Enter a user group.',
       });
-    case WorkspaceFormErrorCode.DuplicateUserPermissionSetting:
+    case WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting:
       return i18n.translate('workspace.form.errorCallout.duplicatePermission', {
         defaultMessage: 'Enter a unique user.',
       });
@@ -60,7 +60,7 @@ const WorkspaceFormErrorCalloutItem = ({
   );
 };
 
-interface WorkspaceFormErrorCalloutProps {
+export interface WorkspaceFormErrorCalloutProps {
   errors: WorkspaceFormErrors;
 }
 
@@ -79,7 +79,7 @@ export const WorkspaceFormErrorCallout = ({ errors }: WorkspaceFormErrorCalloutP
 
     return (
       <li>
-        {(errorCode === WorkspaceFormErrorCode.DuplicateUserPermissionSetting ||
+        {(errorCode === WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting ||
           errorCode === WorkspaceFormErrorCode.PermissionUserIdMissing) &&
           i18n.translate('workspace.form.errorCallout.userPermissionKey', {
             defaultMessage: 'User:',
@@ -87,7 +87,7 @@ export const WorkspaceFormErrorCallout = ({ errors }: WorkspaceFormErrorCalloutP
         {(errorCode === WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting ||
           errorCode === WorkspaceFormErrorCode.PermissionUserGroupMissing) &&
           i18n.translate('workspace.form.errorCallout.userGroupPermissionKey', {
-            defaultMessage: 'Group:',
+            defaultMessage: 'User Group:',
           })}
         &nbsp;
         {getSuggestionFromErrorCode(findingError)}
@@ -115,7 +115,9 @@ export const WorkspaceFormErrorCallout = ({ errors }: WorkspaceFormErrorCalloutP
             />
           )}
           {renderPermissionSettingSuggestion(WorkspaceFormErrorCode.PermissionUserIdMissing)}
-          {renderPermissionSettingSuggestion(WorkspaceFormErrorCode.DuplicateUserPermissionSetting)}
+          {renderPermissionSettingSuggestion(
+            WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting
+          )}
           {renderPermissionSettingSuggestion(WorkspaceFormErrorCode.PermissionUserGroupMissing)}
           {renderPermissionSettingSuggestion(
             WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting
