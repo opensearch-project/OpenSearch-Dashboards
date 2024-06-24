@@ -2,7 +2,6 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -66,17 +65,13 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   const [data, setData] = useState<DataConnection[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
-  const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | undefined>(undefined);
+  const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | undefined>('');
   const [searchText, setSearchText] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchDataSources = useCallback(() => {
-    if (featureFlagStatus && !selectedDataSourceId) {
-      return;
-    }
-
     const endpoint =
-      featureFlagStatus && selectedDataSourceId
+      featureFlagStatus && selectedDataSourceId !== undefined
         ? `/api/dataconnections/dataSourceMDSId=${selectedDataSourceId}`
         : `/api/dataconnections`;
 
@@ -105,7 +100,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   }, [fetchDataSources]);
 
   const handleSelectedDataSourceChange = (e: DataSourceOption[]) => {
-    const dataSourceId = e[0] ? e[0].id : undefined;
+    const dataSourceId = e[0] ? e[0].id : '';
     setSelectedDataSourceId(dataSourceId);
   };
 
@@ -259,7 +254,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
         <EuiFlexItem grow={false} style={{ width: '100%' }}>
           {customSearchBar}
           <EuiSpacer size="s" />
-          {isLoading || (featureFlagStatus && selectedDataSourceId === undefined) ? (
+          {isLoading ? (
             <div style={{ textAlign: 'center', marginTop: '2rem' }}>
               <EuiLoadingSpinner size="xl" />
               <EuiSpacer size="m" />
