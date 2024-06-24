@@ -167,7 +167,7 @@ describe('setup', () => {
     );
   });
 
-  it('should be able addNavLinksToGroup', async () => {
+  it('should be able to `addNavLinksToGroup`', async () => {
     const warnMock = jest.fn();
     jest.spyOn(console, 'warn').mockImplementation(warnMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
@@ -183,7 +183,7 @@ describe('setup', () => {
     expect(warnMock).toBeCalledTimes(0);
   });
 
-  it('should output warning message if addNavLinksToGroup with same group id and navLink id', async () => {
+  it('should output warning message if `addNavLinksToGroup` with same group id and navLink id', async () => {
     const warnMock = jest.fn();
     jest.spyOn(console, 'warn').mockImplementation(warnMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
