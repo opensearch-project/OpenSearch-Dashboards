@@ -170,7 +170,9 @@ export class WorkspaceSavedObjectsClientWrapper {
     if (!savedObject.workspaces && !savedObject.permissions) {
       // User can add sample data in home page.
       // The advance setting will be updated after adding sample data.
-      if (['config', WORKSPACE_TYPE].includes(savedObject.type)) return true;
+      if (['config', WORKSPACE_TYPE].includes(savedObject.type)) {
+        return true;
+      }
       // Currently, user only have the write permission in the home page.
       return await this.validateAtLeastOnePermittedWorkspaces(
         [PUBLIC_WORKSPACE_ID],
