@@ -285,6 +285,7 @@ export const validateWorkspaceForm = (
     const requiredSettingIds = initialFormData?.permissionSettings?.map((item) => item.id);
     const isUserIdOrGroupRequired = (settingId: number) =>
       !!requiredSettingIds?.includes(settingId);
+    let firstUserRequiredFlag = true;
     for (let i = 0; i < permissionSettings.length; i++) {
       const setting = permissionSettings[i];
       if (!setting.type) {
@@ -304,12 +305,13 @@ export const validateWorkspaceForm = (
       } else if (setting.type === WorkspacePermissionItemType.User) {
         const validateResult = validateUserPermissionSetting(
           setting as WorkspaceUserPermissionSetting,
-          isUserIdOrGroupRequired(setting.id),
+          isUserIdOrGroupRequired(setting.id) || firstUserRequiredFlag,
           permissionSettings.slice(0, i)
         );
         if (validateResult) {
           permissionSettingsErrors[setting.id] = validateResult;
         }
+        firstUserRequiredFlag = false;
       } else if (setting.type === WorkspacePermissionItemType.Group) {
         const validateResult = validateUserGroupPermissionSetting(
           setting as WorkspaceUserGroupPermissionSetting,
