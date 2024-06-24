@@ -57,7 +57,10 @@ export const parseRawQueryString = (rawQueryString: string) => {
     formattedQs(key: string = '.'): string {
       const parts = rawQueryString.split('::');
       if (parts.length > 1) {
-        return parts.slice(0, 1).join('') + parts.slice(1).join(key);
+        return (parts.slice(0, 1).join('') + parts.slice(1).join(key)).replace(
+          new RegExp(key + '$'),
+          ''
+        );
       }
       return rawQueryString;
     },
