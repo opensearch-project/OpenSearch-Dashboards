@@ -1,7 +1,7 @@
 import { EuiFieldText, EuiIcon, EuiOutsideClickDetector, EuiPortal } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { PersistedLog, QuerySuggestionTypes } from '../../../../../src/plugins/data/public';
-import assistantLogo from '../../assets/query_assist_logo.svg';
+import assistantMark from '../../assets/query_assist_mark.svg';
 import { getData } from '../../services';
 
 interface QueryAssistInputProps {
@@ -81,7 +81,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
               ? `Ask a natural language question about ${props.selectedIndex} to generate a query`
               : 'Select an index to ask a question')
           }
-          prepend={<EuiIcon type={assistantLogo} />}
+          prepend={<EuiIcon type={assistantMark} />}
           fullWidth
         />
         <EuiPortal>

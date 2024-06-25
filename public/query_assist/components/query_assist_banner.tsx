@@ -10,7 +10,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useState } from 'react';
 import { SUPPORTED_LANGUAGES } from '../../../common/query_assist';
-import assistantLogo from '../../assets/query_assist_logo.svg';
+import assistantMark from '../../assets/query_assist_mark.svg';
 import { getStorage } from '../../services';
 
 const BANNER_STORAGE_KEY = 'queryAssist:banner:show';
@@ -33,7 +33,7 @@ export const QueryAssistBanner: React.FC = () => {
       title={
         <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiIcon size="l" type={assistantLogo} />
+            <EuiIcon size="l" type={assistantMark} />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiBadge>
