@@ -46,7 +46,7 @@ export async function getDefaultSearchParams(uiSettingsClient: IUiSettingsClient
     UI_SETTINGS.COURIER_MAX_CONCURRENT_SHARD_REQUESTS
   );
   const dataFrameHydrationStrategy = await uiSettingsClient.get<string>(
-    UI_SETTINGS.DATAFRAME_HYDRATION_STRATEGY
+    UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY
   );
   return {
     maxConcurrentShardRequests:

@@ -74,6 +74,7 @@ export const QueryLanguageSelector = (props: Props) => {
 
   return (
     <EuiComboBox
+      fullWidth
       className="languageSelector"
       data-test-subj="languageSelector"
       options={languageOptions}
