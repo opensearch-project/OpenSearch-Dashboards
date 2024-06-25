@@ -1,0 +1,2 @@
+fix:
+- Colors of the visualizations with more than 10 items ([#7051](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7051))
