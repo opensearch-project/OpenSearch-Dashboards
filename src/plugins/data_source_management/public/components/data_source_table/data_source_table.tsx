@@ -275,6 +275,8 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     );
   };
 
+  /* Render Ui elements*/
+  /* Render table */
   const renderTableContent = () => {
     return (
       <>
