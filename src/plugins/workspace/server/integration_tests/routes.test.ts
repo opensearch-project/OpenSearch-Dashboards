@@ -577,7 +577,10 @@ describe('workspace service api integration test when savedObjects.permission.en
         .post(root, `/api/workspaces`)
         .send({
           attributes: omitId(testWorkspace),
-          permissions: { invalid_type: { users: ['foo'] } },
+          settings: {
+            permissions: { invalid_type: { users: ['foo'] } },
+            dataSources: [],
+          },
         })
         .expect(400);
 
@@ -613,7 +616,10 @@ describe('workspace service api integration test when savedObjects.permission.en
           attributes: {
             ...omitId(testWorkspace),
           },
-          permissions: { write: { users: ['foo'] } },
+          settings: {
+            permissions: { write: { users: ['foo'] } },
+            dataSources: [],
+          },
         })
         .expect(200);
       expect(updateResult.body.result).toBe(true);
