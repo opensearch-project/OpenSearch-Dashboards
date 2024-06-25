@@ -114,20 +114,16 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   );
 
   useEffect(() => {
-    const initSelectedDataSources = async () => {
-      const rawFormData = getFormDataFromWorkspace(currentWorkspace);
-      if (savedObjects && currentWorkspace) {
-        getDataSourcesList(savedObjects.client, [currentWorkspace.id]).then(
-          (selectedDataSources) => {
-            setCurrentWorkspaceFormData({
-              ...rawFormData,
-              selectedDataSources,
-            });
-          }
-        );
-      }
-    };
-    initSelectedDataSources();
+    const rawFormData = getFormDataFromWorkspace(currentWorkspace);
+
+    if (savedObjects && currentWorkspace) {
+      getDataSourcesList(savedObjects.client, [currentWorkspace.id]).then((selectedDataSources) => {
+        setCurrentWorkspaceFormData({
+          ...rawFormData,
+          selectedDataSources,
+        });
+      });
+    }
   }, [currentWorkspace, savedObjects]);
 
   if (!currentWorkspaceFormData) {
