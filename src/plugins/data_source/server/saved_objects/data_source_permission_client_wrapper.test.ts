@@ -15,13 +15,12 @@ describe('DataSourcePermissionClientWrapper', () => {
   const requestHandlerContext = coreMock.createRequestHandlerContext();
   const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
 
-  const attributes = (attribute?: any) => {
-    return {
-      title: 'data-source',
-      description: 'jest testing',
-      endpoint: 'https://test.com',
-      ...attribute,
-    };
+  const attributes = {
+    title: 'data-source',
+    description: 'jest testing',
+    endpoint: 'https://test.com',
+    auth: { type: 'no_auth' },
+    workspaces: ['workspace-1'],
   };
 
   const dataSource = {
@@ -144,7 +143,21 @@ describe('DataSourcePermissionClientWrapper', () => {
   });
 
   describe('edit mode is read_only', () => {
-    const mockedClient = savedObjectsClientMock.create();
+    const mockedClient = {
+      get: jest.fn().mockImplementation(async (type, id) => {
+        return {
+          id,
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes,
+        };
+      }),
+      create: jest.fn(),
+      bulkCreate: jest.fn(),
+      delete: jest.fn(),
+      update: jest.fn(),
+      bulkUpdate: jest.fn(),
+    };
+    // const mockedClient = savedObjectsClientMock.create();
     const wrapperInstance = new DataSourcePermissionClientWrapper(EditMode.ReadOnly);
     const wrapperClient = wrapperInstance.wrapperFactory({
       client: mockedClient,
@@ -204,6 +217,35 @@ describe('DataSourcePermissionClientWrapper', () => {
 
       await wrapperClient.delete('dashboard', 'dashboard-id');
       expect(mockedClient.delete).toBeCalledWith('dashboard', 'dashboard-id', {});
+    });
+
+    describe('assign workspaces to data source', () => {
+      it('should update data source when options have workspaces', async () => {
+        await wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', attributes, {
+          workspaces: ['workspace-1'],
+        });
+        expect(mockedClient.update).toBeCalledWith(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id',
+          attributes,
+          { workspaces: ['workspace-1'] }
+        );
+      });
+
+      it('should not update data source when attributes have changed', async () => {
+        let errorCatched;
+        try {
+          await wrapperClient.update(
+            DATA_SOURCE_SAVED_OBJECT_TYPE,
+            'data-source-id',
+            { title: 'new title' },
+            { workspaces: ['workspace-1'] }
+          );
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched.message).toEqual(errorMessage);
+      });
     });
   });
 });

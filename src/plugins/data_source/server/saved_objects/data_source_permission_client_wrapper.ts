@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+import _ from 'lodash';
 import {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
@@ -79,10 +80,23 @@ export class DataSourcePermissionClientWrapper {
       attributes: Partial<T>,
       options: SavedObjectsUpdateOptions = {}
     ): Promise<SavedObjectsUpdateResponse<T>> => {
-      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type) {
-        throw this.generatePermissionError();
+      if (DATA_SOURCE_SAVED_OBJECT_TYPE !== type) {
+        return await wrapperOptions.client.update(type, id, attributes, options);
       }
-      return await wrapperOptions.client.update(type, id, attributes, options);
+
+      // If the editMode is read only, the OSD admin can assign workspaces to the data source.
+      if (this.editMode === EditMode.ReadOnly && options.workspaces) {
+        const originalDataSource = await wrapperOptions.client.get(type, id);
+        const attributesToCompare = ['title', 'description', 'auth'];
+        const originalAttributes = _.pick(originalDataSource.attributes, attributesToCompare);
+        const updateAttributes = _.pick(attributes, attributesToCompare);
+
+        if (_.isEqual(originalAttributes, updateAttributes)) {
+          return await wrapperOptions.client.update(type, id, attributes, options);
+        }
+      }
+
+      throw this.generatePermissionError();
     };
 
     const bulkUpdateWithEditMode = async <T = unknown>(
