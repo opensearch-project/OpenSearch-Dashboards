@@ -42,6 +42,11 @@ const createWorkspacesSetupContractMockWithValue = () => {
   };
 };
 
+const dataSourcesList = [
+  { id: '1', title: 'ds1' },
+  { id: '2', title: 'ds2' },
+];
+
 const mockCoreStart = coreMock.createStart();
 
 const WorkspaceUpdater = (props: any) => {
@@ -73,6 +78,13 @@ const WorkspaceUpdater = (props: any) => {
       workspaceClient: {
         ...mockCoreStart.workspaces,
         update: workspaceClientUpdate,
+      },
+      savedObjects: {
+        ...mockCoreStart.savedObjects,
+        client: {
+          ...mockCoreStart.savedObjects.client,
+          find: jest.fn().mockResolvedValue(dataSourcesList),
+        },
       },
     },
   });
@@ -148,7 +160,7 @@ describe('WorkspaceUpdater', () => {
   });
 
   it('update workspace successfully', async () => {
-    const { getByTestId, getByText, getAllByText } = render(
+    const { getByTestId, getAllByText } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
       />

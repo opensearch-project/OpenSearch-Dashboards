@@ -105,7 +105,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
  * @public
  */
 export interface SavedObjectsBulkUpdateObject<T = unknown>
-  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references' | 'permissions'> {
+  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references' | 'permissions' | 'workspaces'> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -189,6 +189,7 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   refresh?: MutatingOperationRefreshSetting;
   /** permission control describe by ACL object */
   permissions?: Permissions;
+  workspaces?: string[];
 }
 
 /**
@@ -461,6 +462,50 @@ export class SavedObjectsClient {
     options: SavedObjectsDeleteByWorkspaceOptions = {}
   ): Promise<any> => {
     return await this._repository.deleteByWorkspace(workspace, options);
+  };
+
+  /**
+   * Remove a saved object from workspaces
+   * @param type
+   * @param id
+   * @param workspaces
+   */
+  deleteFromWorkspaces = async <T = unknown>(type: string, id: string, workspaces: string[]) => {
+    if (!workspaces || workspaces.length === 0) {
+      throw new TypeError(`Workspace is required.`);
+    }
+    const object = await this.get<T>(type, id);
+    const existingWorkspaces = object.workspaces;
+    const newWorkspaces = existingWorkspaces?.filter((item) => {
+      return workspaces.indexOf(item) === -1;
+    });
+    return await this.update<T>(type, id, object.attributes, {
+      workspaces: newWorkspaces,
+    });
+  };
+
+  /**
+   * Add a saved object to workspaces
+   * @param type
+   * @param id
+   * @param workspaces
+   */
+  addToWorkspaces = async <T = unknown>(
+    type: string,
+    id: string,
+    workspaces: string[]
+  ): Promise<any> => {
+    if (!workspaces || workspaces.length === 0) {
+      throw new TypeError(`Workspace is required.`);
+    }
+    const object = await this.get<T>(type, id);
+    const existingWorkspaces = object.workspaces ?? [];
+    const mergedWorkspaces = existingWorkspaces.concat(workspaces);
+    const nonDuplicatedWorkspaces = Array.from(new Set(mergedWorkspaces));
+
+    return await this.update<T>(type, id, object.attributes, {
+      workspaces: nonDuplicatedWorkspaces,
+    });
   };
 
   /**

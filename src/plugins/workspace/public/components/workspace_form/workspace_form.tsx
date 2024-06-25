@@ -22,10 +22,12 @@ import { WorkspaceFormProps } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 import { WorkspaceUseCase } from './workspace_use_case';
+import { SelectDataSourcePanel } from './select_data_source_panel';
 
 export const WorkspaceForm = (props: WorkspaceFormProps) => {
   const {
     application,
+    savedObjects,
     defaultValues,
     operationType,
     permissionEnabled,
@@ -42,6 +44,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     handleUseCasesChange,
     handleNameInputChange,
     setPermissionSettings,
+    setSelectedDataSources,
     handleDescriptionChange,
   } = useWorkspaceForm(props);
   const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
@@ -172,6 +175,23 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           />
         </EuiPanel>
       )}
+      <EuiSpacer />
+      <EuiPanel>
+        <EuiTitle size="s">
+          <h2>
+            {i18n.translate('workspace.form.selectDataSource.title', {
+              defaultMessage: 'Select Data Sources',
+            })}
+          </h2>
+        </EuiTitle>
+        <SelectDataSourcePanel
+          errors={formErrors.selectedDataSources}
+          onChange={setSelectedDataSources}
+          savedObjects={savedObjects}
+          selectedDataSources={formData.selectedDataSources}
+          data-test-subj={`workspaceForm-dataSourcePanel`}
+        />
+      </EuiPanel>
       <EuiSpacer />
       <WorkspaceBottomBar
         operationType={operationType}

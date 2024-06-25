@@ -23,7 +23,7 @@ export interface WorkspaceCreatorProps {
 
 export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const {
-    services: { application, notifications, http, workspaceClient },
+    services: { application, notifications, http, workspaceClient, savedObjects },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
   const workspaceConfigurableApps = useObservable(
     props.workspaceConfigurableApps$ ?? of(undefined)
@@ -34,11 +34,11 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     async (data: WorkspaceFormSubmitData) => {
       let result;
       try {
-        const { permissionSettings, ...attributes } = data;
-        result = await workspaceClient.create(
-          attributes,
-          convertPermissionSettingsToPermissions(permissionSettings)
-        );
+        const { permissionSettings, selectedDataSources, ...attributes } = data;
+        result = await workspaceClient.create(attributes, {
+          dataSources: selectedDataSources,
+          permissions: convertPermissionSettingsToPermissions(permissionSettings),
+        });
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.create.success', {
@@ -92,9 +92,10 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
            **/
           style={{ width: '100%', maxWidth: 1000 }}
         >
-          {application && (
+          {application && savedObjects && (
             <WorkspaceForm
               application={application}
+              savedObjects={savedObjects}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
               workspaceConfigurableApps={workspaceConfigurableApps}

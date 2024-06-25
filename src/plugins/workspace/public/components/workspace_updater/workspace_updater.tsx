@@ -21,6 +21,8 @@ import {
   convertPermissionsToPermissionSettings,
   convertPermissionSettingsToPermissions,
 } from '../workspace_form';
+import { getDataSourcesList } from '../../utils';
+import { DataSource } from '../../../common/types';
 
 export interface WorkspaceUpdaterProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
@@ -42,9 +44,13 @@ function getFormDataFromWorkspace(
   };
 }
 
+type FormDataFromWorkspace = ReturnType<typeof getFormDataFromWorkspace> & {
+  selectedDataSources?: DataSource[];
+};
+
 export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   const {
-    services: { application, workspaces, notifications, http, workspaceClient },
+    services: { application, workspaces, notifications, http, workspaceClient, savedObjects },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
@@ -52,9 +58,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   const workspaceConfigurableApps = useObservable(
     props.workspaceConfigurableApps$ ?? of(undefined)
   );
-  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState(
-    getFormDataFromWorkspace(currentWorkspace)
-  );
+  const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<FormDataFromWorkspace>();
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
@@ -69,12 +73,11 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
       }
 
       try {
-        const { permissionSettings, ...attributes } = data;
-        result = await workspaceClient.update(
-          currentWorkspace.id,
-          attributes,
-          convertPermissionSettingsToPermissions(permissionSettings)
-        );
+        const { permissionSettings, selectedDataSources, ...attributes } = data;
+        result = await workspaceClient.update(currentWorkspace.id, attributes, {
+          dataSources: selectedDataSources,
+          permissions: convertPermissionSettingsToPermissions(permissionSettings),
+        });
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.update.success', {
@@ -111,8 +114,21 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   );
 
   useEffect(() => {
-    setCurrentWorkspaceFormData(getFormDataFromWorkspace(currentWorkspace));
-  }, [currentWorkspace]);
+    const initSelectedDataSources = async () => {
+      const rawFormData = getFormDataFromWorkspace(currentWorkspace);
+      if (savedObjects && currentWorkspace) {
+        getDataSourcesList(savedObjects.client, [currentWorkspace.id]).then(
+          (selectedDataSources) => {
+            setCurrentWorkspaceFormData({
+              ...rawFormData,
+              selectedDataSources,
+            });
+          }
+        );
+      }
+    };
+    initSelectedDataSources();
+  }, [currentWorkspace, savedObjects]);
 
   if (!currentWorkspaceFormData) {
     return null;
@@ -131,7 +147,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
           hasShadow={false}
           style={{ width: '100%', maxWidth: props.maxWidth ? props.maxWidth : 1000 }}
         >
-          {application && (
+          {application && savedObjects && (
             <WorkspaceForm
               application={application}
               defaultValues={currentWorkspaceFormData}
@@ -140,6 +156,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
               workspaceConfigurableApps={workspaceConfigurableApps}
               permissionEnabled={isPermissionEnabled}
               permissionLastAdminItemDeletable={false}
+              savedObjects={savedObjects}
             />
           )}
         </EuiPageContent>
