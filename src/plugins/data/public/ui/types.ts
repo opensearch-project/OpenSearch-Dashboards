@@ -3,10 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Observable } from 'rxjs';
 import { SearchInterceptor } from '../search';
 import { IndexPatternSelectProps } from './index_pattern_select';
 import { StatefulSearchBarProps } from './search_bar';
+import { QueryEditorExtensionConfig } from './query_editor/query_editor_extensions';
 import { Settings } from './settings';
+import { SuggestionsComponentProps } from './typeahead/suggestions_component';
 
 export * from './settings';
 
@@ -18,6 +21,7 @@ export interface QueryEnhancement {
   // Leave blank to support all data sources
   // supportedDataSourceTypes?: Record<string, GenericDataSource>;
   searchBar?: {
+    showDataSourceSelector?: boolean;
     showQueryInput?: boolean;
     showFilterBar?: boolean;
     showDatePicker?: boolean;
@@ -43,6 +47,7 @@ export interface QueryEnhancement {
 
 export interface UiEnhancements {
   query?: QueryEnhancement;
+  queryEditorExtension?: QueryEditorExtensionConfig;
 }
 
 /**
@@ -57,9 +62,9 @@ export interface IUiSetup {
  * Data plugin prewired UI components
  */
 export interface IUiStart {
-  isEnhancementsEnabled: boolean;
-  queryEnhancements: Map<string, QueryEnhancement>;
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
+  SuggestionsComponent: React.ComponentType<SuggestionsComponentProps>;
   Settings: Settings;
+  container$: Observable<HTMLDivElement | null>;
 }

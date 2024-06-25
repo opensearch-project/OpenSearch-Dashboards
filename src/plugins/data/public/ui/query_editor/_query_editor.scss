@@ -1,0 +1,66 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.osdQueryEditor__wrap {
+  height: 200px;
+  width: 500px;
+}
+
+.osdQueryEditorHeader {
+  max-height: 400px;
+
+  // TODO fix styling: with "overflow: auto" the scroll bar appears although the content is below max-height
+  // overflow: auto;
+}
+
+.osdQueryEditor__languageWrapper {
+  :first-child {
+    box-shadow: none !important;
+    height: 100%;
+    border-radius: 0;
+  }
+}
+
+.osdQueryEditor__dataSourceWrapper {
+  .dataExplorerDSSelect {
+    border-bottom: $euiBorderThin !important;
+
+    div:is([class$="--group"]) {
+      padding: 0 !important;
+    }
+
+    .sourceRefreshText {
+      max-height: 40px;
+    }
+  }
+}
+
+@include euiBreakpoint("xs", "s") {
+  .osdQueryEditor--withDatePicker {
+    > :first-child {
+      // Change the order of the query bar and date picker so that the date picker is top
+      // and the query bar still aligns with filters
+      order: 1;
+
+      // EUI Flexbox adds too much margin between responded items, this just moves it up
+      margin-top: $euiSizeS * -1;
+    }
+  }
+}
+
+// IE specific fix for the datepicker to not collapse
+@include euiBreakpoint("m", "l", "xl") {
+  .osdQueryEditor__datePickerWrapper {
+    max-width: 40vw;
+    flex-grow: 0 !important;
+    flex-basis: auto !important;
+
+    &.osdQueryEditor__datePickerWrapper-isHidden {
+      width: 0;
+      overflow: hidden;
+      max-width: 0;
+    }
+  }
+}

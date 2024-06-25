@@ -3,8 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { IStorageWrapper } from '../../../../opensearch_dashboards_utils/public';
 import { setOverrides as setFieldOverrides } from '../../../common';
+import { ConfigSchema } from '../../../config';
+import { ISearchStart } from '../../search';
+import { QueryEditorExtensionConfig } from '../query_editor/query_editor_extensions';
 import { QueryEnhancement } from '../types';
 
 export interface DataSettings {
@@ -20,10 +24,64 @@ export interface DataSettings {
 }
 
 export class Settings {
+  private isEnabled = false;
+  private enabledQueryEnhancementsUpdated$ = new BehaviorSubject<boolean>(this.isEnabled);
+  private enhancedAppNames: string[] = [];
+
   constructor(
+    private readonly config: ConfigSchema['enhancements'],
+    private readonly search: ISearchStart,
     private readonly storage: IStorageWrapper,
-    private readonly queryEnhancements: Map<string, QueryEnhancement>
-  ) {}
+    private readonly queryEnhancements: Map<string, QueryEnhancement>,
+    private readonly queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>
+  ) {
+    this.isEnabled = this.config.enabled;
+    this.setUserQueryEnhancementsEnabled(this.isEnabled);
+    this.enhancedAppNames = this.isEnabled ? this.config.supportedAppNames : [];
+  }
+
+  supportsEnhancementsEnabled(appName: string) {
+    return this.enhancedAppNames.includes(appName);
+  }
+
+  getEnabledQueryEnhancementsUpdated$ = () => {
+    return this.enabledQueryEnhancementsUpdated$.asObservable();
+  };
+
+  setUserQueryEnhancementsEnabled(enabled: boolean) {
+    // If previously enabled and now disabled, reset query to kuery
+    if (this.isEnabled && !enabled) {
+      this.setUserQueryLanguage('kuery');
+      this.setUserQueryString('');
+    }
+    this.isEnabled = enabled;
+    this.enabledQueryEnhancementsUpdated$.next(this.isEnabled);
+    return true;
+  }
+
+  getAllQueryEnhancements() {
+    return this.queryEnhancements;
+  }
+
+  getQueryEnhancements(language: string) {
+    return this.queryEnhancements.get(language);
+  }
+
+  getQueryEditorExtensionMap() {
+    return this.queryEditorExtensionMap;
+  }
+
+  getUserQueryLanguageBlocklist() {
+    return this.storage.get('opensearchDashboards.userQueryLanguageBlocklist') || [];
+  }
+
+  setUserQueryLanguageBlocklist(languages: string[]) {
+    this.storage.set(
+      'opensearchDashboards.userQueryLanguageBlocklist',
+      languages.map((language) => language.toLowerCase())
+    );
+    return true;
+  }
 
   getUserQueryLanguage() {
     return this.storage.get('opensearchDashboards.userQueryLanguage') || 'kuery';
@@ -31,6 +89,15 @@ export class Settings {
 
   setUserQueryLanguage(language: string) {
     this.storage.set('opensearchDashboards.userQueryLanguage', language);
+    this.search.df.clear();
+    const queryEnhancement = this.queryEnhancements.get(language);
+    this.search.__enhance({
+      searchInterceptor: queryEnhancement
+        ? queryEnhancement.search
+        : this.search.getDefaultSearchInterceptor(),
+    });
+    this.setUiOverridesByUserQueryLanguage(language);
+
     return true;
   }
 
@@ -84,10 +151,19 @@ export class Settings {
 }
 
 interface Deps {
+  config: ConfigSchema['enhancements'];
+  search: ISearchStart;
   storage: IStorageWrapper;
   queryEnhancements: Map<string, QueryEnhancement>;
+  queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>;
 }
 
-export function createSettings({ storage, queryEnhancements }: Deps) {
-  return new Settings(storage, queryEnhancements);
+export function createSettings({
+  config,
+  search,
+  storage,
+  queryEnhancements,
+  queryEditorExtensionMap,
+}: Deps) {
+  return new Settings(config, search, storage, queryEnhancements, queryEditorExtensionMap);
 }
