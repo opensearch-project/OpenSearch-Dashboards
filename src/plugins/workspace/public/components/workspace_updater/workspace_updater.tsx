@@ -45,7 +45,7 @@ function getFormDataFromWorkspace(
 }
 
 type FormDataFromWorkspace = ReturnType<typeof getFormDataFromWorkspace> & {
-  selectedDataSources?: DataSource[];
+  selectedDataSources: DataSource[];
 };
 
 export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
@@ -116,7 +116,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   useEffect(() => {
     const rawFormData = getFormDataFromWorkspace(currentWorkspace);
 
-    if (savedObjects && currentWorkspace) {
+    if (rawFormData && savedObjects && currentWorkspace) {
       getDataSourcesList(savedObjects.client, [currentWorkspace.id]).then((selectedDataSources) => {
         setCurrentWorkspaceFormData({
           ...rawFormData,
