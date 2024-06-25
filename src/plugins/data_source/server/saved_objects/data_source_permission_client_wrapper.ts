@@ -145,7 +145,7 @@ export class DataSourcePermissionClientWrapper {
     };
 
     const isDashboardAdmin = getWorkspaceState(wrapperOptions.request)?.isDashboardAdmin;
-    if (this.editMode === EditMode.AdminOnly && isDashboardAdmin) {
+    if (this.editMode === EditMode.AdminOnly && isDashboardAdmin !== false) {
       return wrapperOptions.client;
     }
 

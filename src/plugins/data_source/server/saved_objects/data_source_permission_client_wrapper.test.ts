@@ -36,6 +36,7 @@ describe('DataSourcePermissionClientWrapper', () => {
 
   describe('edit mode is admin_only', () => {
     describe('user is not osd admin', () => {
+      jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: false });
       const mockedClient = savedObjectsClientMock.create();
       const wrapperInstance = new DataSourcePermissionClientWrapper(EditMode.AdminOnly);
       const wrapperClient = wrapperInstance.wrapperFactory({
@@ -91,6 +92,57 @@ describe('DataSourcePermissionClientWrapper', () => {
     });
     describe('user is osd admin', () => {
       jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: true });
+      const mockedClient = savedObjectsClientMock.create();
+      const wrapperInstance = new DataSourcePermissionClientWrapper(EditMode.AdminOnly);
+      const wrapperClient = wrapperInstance.wrapperFactory({
+        client: mockedClient,
+        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
+        request: requestMock,
+      });
+
+      it('should create data source when user is admin', async () => {
+        jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: true });
+        await wrapperClient.create(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes, {});
+        expect(mockedClient.create).toBeCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, attributes, {});
+      });
+
+      it('should bulk create data source when user is admin', async () => {
+        jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: true });
+        const mockCreateObjects = [dataSource];
+        await wrapperClient.bulkCreate(mockCreateObjects, { overwrite: true });
+        expect(mockedClient.bulkCreate).toBeCalledWith(mockCreateObjects, { overwrite: true });
+      });
+
+      it('should update data source when user is admin', async () => {
+        jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: true });
+        await wrapperClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id', {});
+        expect(mockedClient.update).toBeCalledWith(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'data-source-id',
+          {}
+        );
+      });
+
+      it('should bulk update data source when user is admin', async () => {
+        jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: true });
+        const mockUpdateObjects = [
+          {
+            ...dataSource,
+            id: 'data-source-id',
+          },
+        ];
+        await wrapperClient.bulkUpdate(mockUpdateObjects, {});
+        expect(mockedClient.bulkUpdate).toBeCalledWith(mockUpdateObjects, {});
+      });
+
+      it('should delete data source', async () => {
+        jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ isDashboardAdmin: true });
+        await wrapperClient.delete(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
+        expect(mockedClient.delete).toBeCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'data-source-id');
+      });
+    });
+    describe('any user is osd admin when osd admin is not configured', () => {
+      jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({});
       const mockedClient = savedObjectsClientMock.create();
       const wrapperInstance = new DataSourcePermissionClientWrapper(EditMode.AdminOnly);
       const wrapperClient = wrapperInstance.wrapperFactory({
