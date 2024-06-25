@@ -28,27 +28,25 @@
  * under the License.
  */
 
-import { compact } from 'lodash';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import classNames from 'classnames';
+import { compact, get, isEqual } from 'lodash';
 import React, { Component } from 'react';
 import ResizeObserver from 'resize-observer-polyfill';
-import { get, isEqual } from 'lodash';
-
+import { DataSource } from '../..';
 import {
-  withOpenSearchDashboards,
   OpenSearchDashboardsReactContextValue,
+  withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-
-import QueryBarTopRow from '../query_string_input/query_bar_top_row';
-import { SavedQueryAttributes, TimeHistoryContract, SavedQuery } from '../../query';
+import { Filter, IIndexPattern, Query, TimeRange, UI_SETTINGS } from '../../../common';
+import { SavedQuery, SavedQueryAttributes, TimeHistoryContract } from '../../query';
 import { IDataPluginServices } from '../../types';
-import { TimeRange, Query, Filter, IIndexPattern, UI_SETTINGS } from '../../../common';
 import { FilterBar } from '../filter_bar/filter_bar';
+import { QueryEditorTopRow } from '../query_editor';
+import QueryBarTopRow from '../query_string_input/query_bar_top_row';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementComponent } from '../saved_query_management';
 import { Settings } from '../types';
-import { QueryEditorTopRow } from '../query_editor';
 
 interface SearchBarInjectedDeps {
   opensearchDashboards: OpenSearchDashboardsReactContextValue<IDataPluginServices>;
@@ -62,6 +60,7 @@ interface SearchBarInjectedDeps {
 
 export interface SearchBarOwnProps {
   indexPatterns?: IIndexPattern[];
+  dataSource?: DataSource;
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
@@ -497,6 +496,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
+          dataSource={this.props.dataSource}
           isLoading={this.props.isLoading}
           prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
           showDatePicker={this.props.showDatePicker}

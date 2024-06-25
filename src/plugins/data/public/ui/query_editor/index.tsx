@@ -24,3 +24,5 @@ export const QueryEditor = (props: QueryEditorProps) => (
   </React.Suspense>
 );
 export type { QueryEditorProps };
+
+export { QueryEditorExtensions, QueryEditorExtensionConfig } from './query_editor_extensions';
