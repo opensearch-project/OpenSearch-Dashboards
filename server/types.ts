@@ -5,6 +5,8 @@
 
 import { DataPluginSetup } from 'src/plugins/data/server/plugin';
 import { DataSourcePluginSetup } from '../../../src/plugins/data_source/server';
+import { Logger } from '../../../src/core/server';
+import { ConfigSchema } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryEnhancementsPluginSetup {}
@@ -47,4 +49,14 @@ export interface FacetRequest {
     query: string;
     format?: string;
   };
+}
+
+declare module '../../../src/core/server' {
+  interface RequestHandlerContext {
+    query_assist: {
+      logger: Logger;
+      configPromise: Promise<ConfigSchema>;
+      dataSourceEnabled: boolean;
+    };
+  }
 }

@@ -4,6 +4,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { first } from 'rxjs/operators';
 import {
   CoreSetup,
   CoreStart,
@@ -13,6 +14,7 @@ import {
   SharedGlobalConfig,
 } from '../../../src/core/server';
 import { SEARCH_STRATEGY } from '../common';
+import { ConfigSchema } from '../common/config';
 import { defineRoutes } from './routes';
 import { pplSearchStrategyProvider, sqlSearchStrategyProvider } from './search';
 import {
@@ -20,13 +22,13 @@ import {
   QueryEnhancementsPluginSetupDependencies,
   QueryEnhancementsPluginStart,
 } from './types';
-import { OpenSearchPPLPlugin, OpenSearchObservabilityPlugin } from './utils';
+import { OpenSearchObservabilityPlugin, OpenSearchPPLPlugin } from './utils';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
   private readonly logger: Logger;
   private readonly config$: Observable<SharedGlobalConfig>;
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config$ = initializerContext.config.legacy.globalConfig$;
   }
@@ -49,6 +51,15 @@ export class QueryEnhancementsPlugin
 
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL, pplSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL, sqlSearchStrategy);
+
+    core.http.registerRouteHandlerContext('query_assist', () => ({
+      logger: this.logger,
+      configPromise: this.initializerContext.config
+        .create<ConfigSchema>()
+        .pipe(first())
+        .toPromise(),
+      dataSourceEnabled: !!dataSource,
+    }));
 
     defineRoutes(this.logger, router, {
       ppl: pplSearchStrategy,
