@@ -588,7 +588,10 @@ describe('workspace service api integration test when savedObjects.permission.en
         .post(root, `/api/workspaces`)
         .send({
           attributes: omitId(testWorkspace),
-          permissions: { read: { users: ['foo'] } },
+          settings: {
+            permissions: { read: { users: ['foo'] } },
+            dataSources: [],
+          },
         })
         .expect(200);
 
