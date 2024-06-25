@@ -1,17 +1,14 @@
-import { schema, Type } from '@osd/config-schema';
+import { schema } from '@osd/config-schema';
 import { IRouter } from 'opensearch-dashboards/server';
 import { isResponseError } from '../../../../../src/core/server/opensearch/client/errors';
-import { ERROR_DETAILS, SUPPORTED_LANGUAGES } from '../../../common/query_assist';
+import { API, ERROR_DETAILS } from '../../../common';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
-import { AGENT_CONFIG_NAME_MAP } from './index';
-import { createPPLResponseBody } from './ppl/create_response';
+import { createResponseBody } from './createResponse';
 
 export function registerQueryAssistRoutes(router: IRouter) {
-  const languageSchema = schema.oneOf(SUPPORTED_LANGUAGES.map(schema.literal) as [Type<'PPL'>]);
-
   router.get(
     {
-      path: '/api/ql/query_assist/configured_languages',
+      path: API.QUERY_ASSIST.LANGUAGES,
       validate: {
         query: schema.object({
           dataSourceId: schema.maybe(schema.string()),
@@ -19,6 +16,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
       },
     },
     async (context, request, response) => {
+      const config = await context.query_assist.configPromise;
       const client =
         context.query_assist.dataSourceEnabled && request.query.dataSourceId
           ? await context.dataSource.opensearch.getClient(request.query.dataSourceId)
@@ -26,10 +24,10 @@ export function registerQueryAssistRoutes(router: IRouter) {
       const configuredLanguages: string[] = [];
       try {
         await Promise.allSettled(
-          SUPPORTED_LANGUAGES.map((language) =>
-            getAgentIdByConfig(client, AGENT_CONFIG_NAME_MAP[language]).then(() =>
-              // if the call does not throw any error, then the agent is properly configured
-              configuredLanguages.push(language)
+          config.queryAssist.supportedLanguages.map((languageConfig) =>
+            // if the call does not throw any error, then the agent is properly configured
+            getAgentIdByConfig(client, languageConfig.agentConfig).then(() =>
+              configuredLanguages.push(languageConfig.language)
             )
           )
         );
@@ -42,21 +40,26 @@ export function registerQueryAssistRoutes(router: IRouter) {
 
   router.post(
     {
-      path: '/api/ql/query_assist/generate',
+      path: API.QUERY_ASSIST.GENERATE,
       validate: {
         body: schema.object({
           index: schema.string(),
           question: schema.string(),
-          language: languageSchema,
+          language: schema.string(),
           dataSourceId: schema.maybe(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
+      const config = await context.query_assist.configPromise;
+      const languageConfig = config.queryAssist.supportedLanguages.find(
+        (c) => c.language === request.body.language
+      );
+      if (!languageConfig) return response.badRequest({ body: 'Unsupported language' });
       try {
         const agentResponse = await requestAgentByConfig({
           context,
-          configName: AGENT_CONFIG_NAME_MAP[request.body.language],
+          configName: languageConfig.agentConfig,
           body: {
             parameters: {
               index: request.body.index,
@@ -65,7 +68,7 @@ export function registerQueryAssistRoutes(router: IRouter) {
           },
           dataSourceId: request.body.dataSourceId,
         });
-        const responseBody = createPPLResponseBody(agentResponse);
+        const responseBody = createResponseBody(languageConfig.language, agentResponse);
         return response.ok({ body: responseBody });
       } catch (error) {
         if (isResponseError(error)) {

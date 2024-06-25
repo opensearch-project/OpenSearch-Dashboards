@@ -1,5 +1,5 @@
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
-import { ERROR_DETAILS } from '../../../common/query_assist';
+import { ERROR_DETAILS } from '../../../common';
 
 export class ProhibitedQueryError extends Error {
   constructor(message?: string) {

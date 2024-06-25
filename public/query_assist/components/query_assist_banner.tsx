@@ -9,13 +9,16 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { useState } from 'react';
-import { SUPPORTED_LANGUAGES } from '../../../common/query_assist';
 import assistantMark from '../../assets/query_assist_mark.svg';
 import { getStorage } from '../../services';
 
 const BANNER_STORAGE_KEY = 'queryAssist:banner:show';
 
-export const QueryAssistBanner: React.FC = () => {
+interface QueryAssistBannerProps {
+  languages: string[];
+}
+
+export const QueryAssistBanner: React.FC<QueryAssistBannerProps> = (props) => {
   const storage = getStorage();
   const [showCallOut, _setShowCallOut] = useState(true);
   const setShowCallOut: typeof _setShowCallOut = (show) => {
@@ -50,7 +53,7 @@ export const QueryAssistBanner: React.FC = () => {
                 <FormattedMessage
                   id="queryAssist.banner.title.suffix"
                   defaultMessage="Natural Language Query Generation for {languages}"
-                  values={{ languages: SUPPORTED_LANGUAGES.join(', ') }}
+                  values={{ languages: props.languages.join(', ') }}
                 />
               </EuiLink>
             </EuiTextColor>

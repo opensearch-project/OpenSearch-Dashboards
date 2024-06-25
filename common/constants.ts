@@ -17,6 +17,10 @@ export const API = {
   SEARCH: `${BASE_API}/search`,
   PPL_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.PPL}`,
   SQL_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.SQL}`,
+  QUERY_ASSIST: {
+    LANGUAGES: `${BASE_API}/assist/languages`,
+    GENERATE: `${BASE_API}/assist/generate`,
+  },
 };
 
 export const URI = {
@@ -34,3 +38,5 @@ export const OPENSEARCH_API = {
 };
 
 export const UI_SETTINGS = {};
+
+export const ERROR_DETAILS = { GUARDRAILS_TRIGGERED: 'guardrails triggered' };
