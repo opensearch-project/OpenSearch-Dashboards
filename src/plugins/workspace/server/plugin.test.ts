@@ -6,7 +6,7 @@
 import { OnPostAuthHandler, OnPreRoutingHandler } from 'src/core/server';
 import { coreMock, httpServerMock } from '../../../core/server/mocks';
 import { WorkspacePlugin } from './plugin';
-import { getWorkspaceState } from '../../../core/server/utils';
+import { getWorkspaceState, updateWorkspaceState } from '../../../core/server/utils';
 import * as utilsExports from './utils';
 
 describe('Workspace server plugin', () => {
@@ -38,6 +38,23 @@ describe('Workspace server plugin', () => {
       }
     `);
     expect(setupMock.savedObjects.addClientWrapper).toBeCalledTimes(4);
+
+    let registerSwitcher;
+    let result;
+    updateWorkspaceState(request, { isDashboardAdmin: false });
+    registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
+    result = registerSwitcher(request, capabilities);
+    expect(result).toEqual({ opensearchDashboards: { isDashboardAdmin: false } });
+
+    updateWorkspaceState(request, { isDashboardAdmin: true });
+    registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
+    result = registerSwitcher(request, capabilities);
+    expect(result).toEqual({ opensearchDashboards: { isDashboardAdmin: true } });
+
+    updateWorkspaceState(request, {});
+    registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
+    result = registerSwitcher(request, capabilities);
+    expect(result).toEqual({ opensearchDashboards: { isDashboardAdmin: true } });
   });
 
   it('#proxyWorkspaceTrafficToRealHandler', async () => {
