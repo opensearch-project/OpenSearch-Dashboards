@@ -8,7 +8,9 @@ import { QueryEnhancementsPlugin } from './plugin';
 import { configSchema, ConfigSchema } from '../common/config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
-  exposeToBrowser: {},
+  exposeToBrowser: {
+    queryAssist: true,
+  },
   schema: configSchema,
 };
 

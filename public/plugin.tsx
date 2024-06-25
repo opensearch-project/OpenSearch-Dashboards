@@ -4,8 +4,10 @@
  */
 
 import moment from 'moment';
-import { CoreSetup, CoreStart, Plugin } from '../../../src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../src/core/public';
 import { IStorageWrapper, Storage } from '../../../src/plugins/opensearch_dashboards_utils/public';
+import { ConfigSchema } from '../common/config';
+import { createQueryAssistExtension } from './query_assist';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
 import { setData, setStorage } from './services';
 import {
@@ -15,11 +17,15 @@ import {
   QueryEnhancementsPluginStartDependencies,
 } from './types';
 
+export type PublicConfig = Pick<ConfigSchema, 'queryAssist'>;
+
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
   private readonly storage: IStorageWrapper;
+  private readonly config: PublicConfig;
 
-  constructor() {
+  constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get<PublicConfig>();
     this.storage = new Storage(window.localStorage);
   }
 
@@ -83,6 +89,12 @@ export class QueryEnhancementsPlugin
           showDocLinks: false,
           supportedAppNames: ['discover'],
         },
+      },
+    });
+
+    data.__enhance({
+      ui: {
+        queryEditorExtension: createQueryAssistExtension(core.http, this.config),
       },
     });
 

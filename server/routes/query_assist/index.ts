@@ -1,0 +1,1 @@
+export { registerQueryAssistRoutes } from './routes';
