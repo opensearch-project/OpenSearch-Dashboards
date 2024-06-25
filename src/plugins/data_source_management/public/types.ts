@@ -15,6 +15,7 @@ import {
 } from 'src/core/public';
 import { ManagementAppMountParams } from 'src/plugins/management/public';
 import { i18n } from '@osd/i18n';
+import { EuiComboBoxOptionOption } from '@elastic/eui';
 import { AuthType } from '../../data_source/common/data_sources';
 import { SigV4ServiceName } from '../../data_source/common/data_sources';
 import { OpenSearchDashboardsReactContextValue } from '../../opensearch_dashboards_react/public';
@@ -141,3 +142,38 @@ export {
   DataSourceAttributes,
   DataSourceError,
 } from '../../data_source/common/data_sources';
+
+// Direct Query datasources types
+export type DirectQueryDatasourceType = 'S3GLUE' | 'PROMETHEUS';
+
+export type DirectQueryDatasourceStatus = 'ACTIVE' | 'DISABLED';
+
+export type AuthMethod = 'noauth' | 'basicauth' | 'awssigv4';
+
+export type Role = EuiComboBoxOptionOption;
+
+export interface S3GlueProperties {
+  'glue.indexstore.opensearch.uri': string;
+  'glue.indexstore.opensearch.region': string;
+}
+
+export interface PrometheusProperties {
+  'prometheus.uri': string;
+}
+
+export interface DirectQueryDatasourceDetails {
+  allowedRoles: string[];
+  name: string;
+  connector: DirectQueryDatasourceType;
+  description: string;
+  properties: S3GlueProperties | PrometheusProperties;
+  status: DirectQueryDatasourceStatus;
+}
+
+export interface PermissionsConfigurationProps {
+  roles: Role[];
+  selectedRoles: Role[];
+  setSelectedRoles: React.Dispatch<React.SetStateAction<Role[]>>;
+  layout: 'horizontal' | 'vertical';
+  hasSecurityAccess: boolean;
+}
