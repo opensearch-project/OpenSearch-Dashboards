@@ -12,15 +12,25 @@ import * as utilsExports from './utils';
 describe('Workspace server plugin', () => {
   it('#setup', async () => {
     let value;
+    const capabilities = {} as any;
     const setupMock = coreMock.createSetup();
     const initializerContextConfigMock = coreMock.createPluginInitializerContext({
       enabled: true,
     });
+    const request = httpServerMock.createOpenSearchDashboardsRequest();
+
     setupMock.capabilities.registerProvider.mockImplementationOnce((fn) => (value = fn()));
+    setupMock.capabilities.registerSwitcher.mockImplementationOnce((fn) => {
+      return fn(request, capabilities);
+    });
+
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
     await workspacePlugin.setup(setupMock);
     expect(value).toMatchInlineSnapshot(`
       Object {
+        "opensearchDashboards": Object {
+          "isDashboardAdmin": true,
+        },
         "workspaces": Object {
           "enabled": true,
           "permissionEnabled": true,

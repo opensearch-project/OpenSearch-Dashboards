@@ -30,6 +30,7 @@ import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import {
   cleanWorkspaceId,
   getWorkspaceIdFromUrl,
+  getWorkspaceState,
   updateWorkspaceState,
 } from '../../../core/server/utils';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
@@ -157,7 +158,12 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
         enabled: true,
         permissionEnabled: isPermissionControlEnabled,
       },
+      opensearchDashboards: { isDashboardAdmin: true },
     }));
+    core.capabilities.registerSwitcher((request) => {
+      const isDashboardAdmin = getWorkspaceState(request).isDashboardAdmin !== false;
+      return { opensearchDashboards: { isDashboardAdmin } };
+    });
 
     return {
       client: this.client,
