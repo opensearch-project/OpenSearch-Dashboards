@@ -23,6 +23,7 @@ export const CreateDataSourcePanel: React.FC<CreateDataSourcePanelProps> = ({
   const {
     chrome,
     setBreadcrumbs,
+    savedObjects,
     notifications: { toasts },
     uiSettings,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;

@@ -73,51 +73,6 @@ export function getCreatePrometheusDataSourceBreadcrumbs() {
   ];
 }
 
-export function getCreateOpenSearchDataSourceBreadcrumbs() {
-  return [
-    ...getCreateBreadcrumbs(),
-    {
-      text: i18n.translate(
-        'dataSourcesManagement.dataSources.createOpenSearchDataSourceBreadcrumbs',
-        {
-          defaultMessage: 'Open Search',
-        }
-      ),
-      href: `/configure/OpenSearch`,
-    },
-  ];
-}
-
-export function getCreateAmazonS3DataSourceBreadcrumbs() {
-  return [
-    ...getCreateBreadcrumbs(),
-    {
-      text: i18n.translate(
-        'dataSourcesManagement.dataSources.createAmazonS3DataSourceBreadcrumbs',
-        {
-          defaultMessage: 'Amazon S3',
-        }
-      ),
-      href: `/configure/AmazonS3AWSGlue`,
-    },
-  ];
-}
-
-export function getCreatePrometheusDataSourceBreadcrumbs() {
-  return [
-    ...getCreateBreadcrumbs(),
-    {
-      text: i18n.translate(
-        'dataSourcesManagement.dataSources.createPrometheusDataSourceBreadcrumbs',
-        {
-          defaultMessage: 'Prometheus',
-        }
-      ),
-      href: `/configure/Prometheus`,
-    },
-  ];
-}
-
 export function getEditBreadcrumbs(dataSource: DataSourceAttributes) {
   return [
     ...getListBreadcrumbs(),
