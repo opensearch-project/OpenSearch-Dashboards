@@ -33,7 +33,7 @@ export class DataSourcePermissionClientWrapper {
       attributes: T,
       options?: SavedObjectsCreateOptions
     ) => {
-      if (this.hasNoDataSourcePermission(type)) {
+      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type) {
         throw this.generatePermissionError();
       }
       return await wrapperOptions.client.create(type, attributes, options);
@@ -47,7 +47,7 @@ export class DataSourcePermissionClientWrapper {
       const allowedSavedObjects: Array<SavedObjectsBulkCreateObject<T>> = [];
 
       objects.forEach((item) => {
-        if (this.hasNoDataSourcePermission(item.type)) {
+        if (DATA_SOURCE_SAVED_OBJECT_TYPE === item.type) {
           disallowedSavedObjects.push(item);
           return;
         }
@@ -79,7 +79,7 @@ export class DataSourcePermissionClientWrapper {
       attributes: Partial<T>,
       options: SavedObjectsUpdateOptions = {}
     ): Promise<SavedObjectsUpdateResponse<T>> => {
-      if (this.hasNoDataSourcePermission(type)) {
+      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type) {
         throw this.generatePermissionError();
       }
       return await wrapperOptions.client.update(type, id, attributes, options);
@@ -93,7 +93,7 @@ export class DataSourcePermissionClientWrapper {
       const allowedSavedObjects: Array<SavedObjectsBulkUpdateObject<T>> = [];
 
       objects.forEach((item) => {
-        if (this.hasNoDataSourcePermission(item.type)) {
+        if (DATA_SOURCE_SAVED_OBJECT_TYPE === item.type) {
           disallowedSavedObjects.push(item);
           return;
         }
@@ -124,7 +124,7 @@ export class DataSourcePermissionClientWrapper {
       id: string,
       options: SavedObjectsDeleteOptions = {}
     ) => {
-      if (this.hasNoDataSourcePermission(type)) {
+      if (DATA_SOURCE_SAVED_OBJECT_TYPE === type) {
         throw this.generatePermissionError();
       }
       return await wrapperOptions.client.delete(type, id, options);
@@ -153,14 +153,6 @@ export class DataSourcePermissionClientWrapper {
   };
 
   constructor(private editMode: string) {}
-
-  private hasNoDataSourcePermission = (type: string): boolean => {
-    if (DATA_SOURCE_SAVED_OBJECT_TYPE !== type) {
-      return false;
-    }
-
-    return this.editMode === EditMode.ReadOnly || this.editMode === EditMode.AdminOnly;
-  };
 
   private generatePermissionError = () =>
     SavedObjectsErrorHelpers.decorateForbiddenError(

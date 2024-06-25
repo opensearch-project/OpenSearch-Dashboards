@@ -28,7 +28,11 @@ import {
   DataSourcePermissionClientWrapper,
 } from './saved_objects';
 import { AuthenticationMethod, DataSourcePluginSetup, DataSourcePluginStart } from './types';
-import { DATA_SOURCE_PERMISSION_CLIENT_WRAPPER_ID, DATA_SOURCE_SAVED_OBJECT_TYPE } from '../common';
+import {
+  DATA_SOURCE_PERMISSION_CLIENT_WRAPPER_ID,
+  DATA_SOURCE_SAVED_OBJECT_TYPE,
+  ORDER_FOR_DATA_SOURCE_PERMISSION_WRAPPER,
+} from '../common';
 
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { ensureRawRequest } from '../../../../src/core/server/http/router';
@@ -79,10 +83,17 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
 
       // Add data source permission client wrapper factory
       core.savedObjects.addClientWrapper(
-        2,
+        ORDER_FOR_DATA_SOURCE_PERMISSION_WRAPPER,
         DATA_SOURCE_PERMISSION_CLIENT_WRAPPER_ID,
         dataSourcePermissionWrapper.wrapperFactory
       );
+
+      core.capabilities.registerProvider(() => ({
+        dataSource: {
+          readOnly: editMode === EditMode.ReadOnly,
+          adminOnly: editMode === EditMode.AdminOnly,
+        },
+      }));
     }
 
     const dataSourceSavedObjectsClientWrapper = new DataSourceSavedObjectsClientWrapper(
