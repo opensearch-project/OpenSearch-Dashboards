@@ -102,7 +102,7 @@ export interface StartDeps {
 
 type CollapsibleNavHeaderRender = () => JSX.Element | null;
 
-type NavGroupItemInMap = ChromeNavGroup & {
+export type NavGroupItemInMap = ChromeNavGroup & {
   navLinks: ChromeRegistrationNavLink[];
 };
 
