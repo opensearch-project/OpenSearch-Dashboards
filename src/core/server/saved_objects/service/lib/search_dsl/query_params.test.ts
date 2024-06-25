@@ -33,9 +33,8 @@ import { opensearchKuery } from '../../../opensearch_query';
 type KueryNode = any;
 
 import { SavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
-import { ALL_NAMESPACES_STRING } from '../utils';
+import { ALL_NAMESPACES_STRING, PUBLIC_WORKSPACE_ID } from '../utils';
 import { getQueryParams } from './query_params';
-import { PUBLIC_WORKSPACE_ID } from '../../../../../server';
 
 const registerTypes = (registry: SavedObjectTypeRegistry) => {
   registry.registerType({
