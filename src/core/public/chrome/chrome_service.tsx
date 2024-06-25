@@ -124,8 +124,8 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
-  private useCaseEnabled: boolean = false;
-  private useCaseEnabledUiSettingsSubscription: Subscription | undefined;
+  private navGroupEnabled: boolean = false;
+  private navGroupEnabledUiSettingsSubscription: Subscription | undefined;
 
   constructor(private readonly params: ConstructorParams) {}
 
@@ -162,10 +162,10 @@ export class ChromeService {
   }
 
   public setup({ uiSettings }: SetupDeps) {
-    this.useCaseEnabledUiSettingsSubscription = uiSettings
-      .get$('useCaseEnabled', false)
+    this.navGroupEnabledUiSettingsSubscription = uiSettings
+      .get$('navGroupEnabled', false)
       .subscribe((value) => {
-        this.useCaseEnabled = value;
+        this.navGroupEnabled = value;
       });
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
@@ -177,7 +177,7 @@ export class ChromeService {
         }
         this.collapsibleNavHeaderRender = render;
       },
-      getUseCaseEnabled: () => this.useCaseEnabled,
+      getNavGroupEnabled: () => this.navGroupEnabled,
     };
   }
 
@@ -360,14 +360,14 @@ export class ChromeService {
         customNavLink$.next(customNavLink);
       },
 
-      getUseCaseEnabled: () => this.useCaseEnabled,
+      getNavGroupEnabled: () => this.navGroupEnabled,
     };
   }
 
   public stop() {
     this.navLinks.stop();
     this.stop$.next();
-    this.useCaseEnabledUiSettingsSubscription?.unsubscribe();
+    this.navGroupEnabledUiSettingsSubscription?.unsubscribe();
   }
 }
 
@@ -386,7 +386,7 @@ export interface ChromeSetup {
   /**
    * Get a boolean value to indicates whether use case is enabled
    */
-  getUseCaseEnabled: () => boolean;
+  getNavGroupEnabled: () => boolean;
 }
 
 /**
@@ -517,7 +517,7 @@ export interface ChromeStart {
   /**
    * Get a boolean value to indicates whether use case is enabled
    */
-  getUseCaseEnabled: () => boolean;
+  getNavGroupEnabled: () => boolean;
 }
 
 /** @internal */

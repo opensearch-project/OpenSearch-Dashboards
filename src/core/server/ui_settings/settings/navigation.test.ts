@@ -65,8 +65,8 @@ describe('navigation settings', () => {
     });
   });
 
-  describe('useCaseEnabled', () => {
-    const validate = getValidationFn(navigationSettings.useCaseEnabled);
+  describe('navGroupEnabled', () => {
+    const validate = getValidationFn(navigationSettings.navGroupEnabled);
 
     it('should only accept valid values', () => {
       expect(() => validate(false)).not.toThrow();
