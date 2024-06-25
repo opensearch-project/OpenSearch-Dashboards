@@ -1531,11 +1531,10 @@ export class SavedObjectsRepository {
           response
         )[0] as any;
 
-        // eslint-disable-next-line @typescript-eslint/naming-convention
         const {
           [type]: attributes,
           references,
-          updated_at,
+          updated_at: updatedAt,
           permissions,
           workspaces,
         } = documentToSave;
@@ -1553,7 +1552,7 @@ export class SavedObjectsRepository {
           type,
           ...(namespaces && { namespaces }),
           ...(originId && { originId }),
-          updated_at,
+          updated_at: updatedAt,
           version: encodeVersion(seqNo, primaryTerm),
           attributes,
           references,
