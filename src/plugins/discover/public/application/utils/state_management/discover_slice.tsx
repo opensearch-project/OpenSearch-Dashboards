@@ -111,9 +111,6 @@ export const discoverSlice = createSlice({
     setState(state, action: PayloadAction<DiscoverState>) {
       return action.payload;
     },
-    getState(state, action: PayloadAction<DiscoverState>) {
-      return state;
-    },
     addColumn(state, action: PayloadAction<{ column: string; index?: number }>) {
       const columns = utils.addColumn(state.columns || [], action.payload);
       return { ...state, columns: buildColumns(columns) };
@@ -217,7 +214,6 @@ export const {
   setSort,
   setInterval,
   setState,
-  getState,
   updateState,
   setSavedSearchId,
   setMetadata,

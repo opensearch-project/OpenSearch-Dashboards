@@ -136,7 +136,7 @@ describe('discoverSlice', () => {
     expect(result.columns).toEqual(['column1', 'column2', 'column3']);
   });
 
-  it('should set the savedQuery when a valid string is provided', () => {
+  it('should set the savedQuery when a valid id is provided', () => {
     const savedQueryId = 'some-query-id';
     const action = { type: 'discover/setSavedQuery', payload: savedQueryId };
     const result = discoverSlice.reducer(initialState, action);
