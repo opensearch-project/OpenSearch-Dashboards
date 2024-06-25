@@ -12,6 +12,7 @@ import {
   WorkspacesSetup,
 } from '../../../core/public';
 import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
+import { DataSource } from '../common/types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -185,7 +186,10 @@ export class WorkspaceClient {
    */
   public async create(
     attributes: Omit<WorkspaceAttribute, 'id'>,
-    permissions?: SavedObjectPermissions
+    settings: {
+      dataSources?: DataSource[];
+      permissions?: SavedObjectPermissions;
+    }
   ): Promise<IResponse<Pick<WorkspaceAttributeWithPermission, 'id'>>> {
     const path = this.getPath();
 
@@ -193,7 +197,7 @@ export class WorkspaceClient {
       method: 'POST',
       body: JSON.stringify({
         attributes,
-        permissions,
+        settings,
       }),
     });
 
@@ -272,12 +276,15 @@ export class WorkspaceClient {
   public async update(
     id: string,
     attributes: Partial<WorkspaceAttribute>,
-    permissions?: SavedObjectPermissions
+    settings: {
+      dataSources?: DataSource[];
+      permissions?: SavedObjectPermissions;
+    }
   ): Promise<IResponse<boolean>> {
     const path = this.getPath(id);
     const body = {
       attributes,
-      permissions,
+      settings,
     };
 
     const result = await this.safeFetch(path, {

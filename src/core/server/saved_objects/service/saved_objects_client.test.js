@@ -222,3 +222,44 @@ test(`#deleteByWorkspace`, async () => {
   expect(mockRepository.deleteByWorkspace).toHaveBeenCalledWith(workspace, options);
   expect(result).toBe(returnValue);
 });
+
+test(`#deleteFromWorkspaces`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    get: jest.fn().mockResolvedValue(returnValue),
+    update: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const workspaces = Symbol();
+  const result = await client.deleteFromWorkspaces(type, id, workspaces);
+
+  expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
+  expect(mockRepository.update).toHaveBeenCalledWith(type, id, undefined, {
+    workspaces: undefined,
+  });
+  expect(result).toBe(returnValue);
+});
+
+test(`#addToWorkspaces`, async () => {
+  const returnValue = Symbol();
+  const mockRepository = {
+    get: jest.fn().mockResolvedValue(returnValue),
+    update: jest.fn().mockResolvedValue(returnValue),
+  };
+  const client = new SavedObjectsClient(mockRepository);
+
+  const type = Symbol();
+  const id = Symbol();
+  const workspaces = Symbol();
+  const result = await client.addToWorkspaces(type, id, workspaces);
+
+  expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
+  expect(mockRepository.update).toHaveBeenCalledWith(type, id, undefined, {
+    workspaces: [workspaces],
+  });
+
+  expect(result).toBe(returnValue);
+});
