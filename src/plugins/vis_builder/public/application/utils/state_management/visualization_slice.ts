@@ -16,6 +16,7 @@ export interface VisualizationState {
     aggConfigParams: CreateAggConfigParams[];
     draftAgg?: CreateAggConfigParams;
   };
+  savedQuery?: string;
 }
 
 const initialState: VisualizationState = {
@@ -115,6 +116,18 @@ export const slice = createSlice({
         [action.payload.paramName]: action.payload.value,
       };
     },
+    setSavedQuery(state, action: PayloadAction<string | undefined>) {
+      if (action.payload === undefined) {
+        // if the payload is undefined, remove the savedQuery property
+        const { savedQuery, ...restState } = state;
+        return restState;
+      } else {
+        return {
+          ...state,
+          savedQuery: action.payload,
+        };
+      }
+    },
     setState: (_state, action: PayloadAction<VisualizationState>) => {
       return action.payload;
     },
@@ -138,5 +151,6 @@ export const {
   updateAggConfigParams,
   setAggParamValue,
   reorderAgg,
+  setSavedQuery,
   setState,
 } = slice.actions;
