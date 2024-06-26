@@ -5,16 +5,6 @@
 
 import { DirectQueryDatasourceType } from './types';
 
-// TODO: this will be replaced
-export const OPENSEARCH_DOCUMENTATION_URL =
-  'https://opensearch.org/docs/latest/dashboards/management/data-sources/';
-
-export const OPENSEARCH_S3_DOCUMENTATION_URL =
-  'https://opensearch.org/docs/latest/dashboards/management/S3-data-source/';
-
-export const OPENSEARCH_ACC_DOCUMENTATION_URL =
-  'https://opensearch.org/docs/latest/dashboards/management/accelerate-external-data/';
-
 export const QUERY_RESTRICTED = 'query-restricted';
 export const QUERY_ALL = 'query-all';
 

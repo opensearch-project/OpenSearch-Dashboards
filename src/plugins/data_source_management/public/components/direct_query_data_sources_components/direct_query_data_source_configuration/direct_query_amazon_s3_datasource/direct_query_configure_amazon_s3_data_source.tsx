@@ -18,7 +18,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
-import { AuthMethod, OPENSEARCH_S3_DOCUMENTATION_URL } from '../../../constants';
+import { AuthMethod } from '../../../constants';
 import { QueryPermissionsConfiguration } from '../query_permissions';
 import { Role } from '../../../../types';
 import { AuthDetails } from '../direct_query_data_source_auth_details';
@@ -75,6 +75,9 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
   const [arn, setArn] = useState(currentArn);
   const [store, setStore] = useState(currentStore);
 
+  const { services } = useOpenSearchDashboards();
+  const docLinks = services.docLinks;
+
   const authOptions = [
     { value: 'basicauth', text: 'Basic authentication' },
     { value: 'noauth', text: 'No authentication' },
@@ -90,9 +93,15 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
         <EuiCallOut title="Setup Amazon EMR as execution engine first" iconType="iInCircle">
           <EuiText size="s" color="subdued">
             {`Connect to Amazon S3 via AWS Glue Data Catalog with Amazon EMR as an execution engine. `}
-            <EuiLink external={true} href={OPENSEARCH_S3_DOCUMENTATION_URL} target="blank">
-              Learn more
-            </EuiLink>
+            {docLinks && (
+              <EuiLink
+                external={true}
+                href={docLinks.links.opensearchDashboards.dataSource.s3DataSource}
+                target="blank"
+              >
+                Learn more
+              </EuiLink>
+            )}
           </EuiText>
         </EuiCallOut>
         <EuiSpacer />

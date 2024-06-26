@@ -419,6 +419,8 @@ export class DocLinksService {
           dataSource: {
             // https://opensearch.org/docs/latest/dashboards/discover/multi-data-sources/
             guide: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}discover/multi-data-sources/`,
+            // https://opensearch.org/docs/latest/dashboards/management/S3-data-source/
+            s3DataSource: `${OPENSEARCH_DASHBOARDS_VERSIONED_DOCS}management/S3-data-source/`,
           },
           visualize: {
             // https://opensearch.org/docs/latest/dashboards/visualize/viz-index/
@@ -821,6 +823,7 @@ export interface DocLinksStart {
       readonly browser: string;
       readonly dataSource: {
         readonly guide: string;
+        s3DataSource: string;
       };
       readonly visualize: Record<string, string>;
       readonly management: Record<string, string>;
