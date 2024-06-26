@@ -565,6 +565,7 @@ export interface InternalChromeStart extends ChromeStart {
 /** @public */
 export interface ChromeRegistrationNavLink {
   id: string;
+  title?: string;
   category?: AppCategory;
   order?: number;
 }
