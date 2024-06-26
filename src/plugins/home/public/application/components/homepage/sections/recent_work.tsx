@@ -57,28 +57,30 @@ const render = renderFn(() => {
       <EuiFlexGrid columns={4}>
         {recentAccessed.slice(0, 8).map((recentAccessItem: ChromeRecentlyAccessedHistoryItem) => {
           const recentWorkItem = itemType.filter((item) => item.type === recentAccessItem.type);
-          return (
-            <EuiFlexItem>
-              <EuiCard
-                layout="horizontal"
-                title={recentAccessItem.label}
-                titleSize="xs"
-                description={
-                  <>
-                    <EuiIcon
-                      size="m"
-                      className="recent-work-title-icon"
-                      type={recentWorkItem[0].icon}
-                    />
-                    {recentWorkItem[0].name}
-                    <br />
-                    {'Last updated ' + moment(recentAccessItem?.updatedAt).fromNow()}
-                  </>
-                }
-                onClick={() => navigateToUrl(services.addBasePath(recentAccessItem.link))}
-              />
-            </EuiFlexItem>
-          );
+          if (recentWorkItem[0]) {
+            return (
+              <EuiFlexItem>
+                <EuiCard
+                  layout="horizontal"
+                  title={recentAccessItem.label}
+                  titleSize="xs"
+                  description={
+                    <>
+                      <EuiIcon
+                        size="m"
+                        className="recent-work-title-icon"
+                        type={recentWorkItem[0].icon}
+                      />
+                      {recentWorkItem[0].name}
+                      <br />
+                      {'Last updated ' + moment(recentAccessItem?.updatedAt).fromNow()}
+                    </>
+                  }
+                  onClick={() => navigateToUrl(services.addBasePath(recentAccessItem.link))}
+                />
+              </EuiFlexItem>
+            );
+          }
         })}
       </EuiFlexGrid>
     </div>

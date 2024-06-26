@@ -83,6 +83,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     core,
     toastNotifications,
     osdUrlStateStorage,
+    chrome,
   } = services;
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
