@@ -62,10 +62,10 @@ export class RecentlyAccessedService {
         link: string,
         label: string,
         id: string,
-        extraProps: { type?: string; updatedAt?: number }
+        extraProps?: { type?: string; updatedAt?: number }
       ) => {
-        const type = extraProps.type;
-        const updatedAt = extraProps.updatedAt;
+        const type = extraProps!.type;
+        const updatedAt = extraProps!.updatedAt;
         history.add({
           link,
           label,
@@ -107,7 +107,7 @@ export interface ChromeRecentlyAccessed {
     link: string,
     label: string,
     id: string,
-    extraProps: { type?: string; updatedAt?: number }
+    extraProps?: { type?: string; updatedAt?: number }
   ): void;
 
   /**
