@@ -46,6 +46,29 @@ export const getRawQueryString = (
 };
 
 /**
+ * Parses a raw query string and extracts the query string and data source.
+ * @param rawQueryString - The raw query string to parse.
+ * @returns An object containing the parsed query string and data source (if found).
+ */
+export const parseRawQueryString = (rawQueryString: string) => {
+  const rawDataSource = rawQueryString.match(/::(.*?)::/);
+  return {
+    qs: rawQueryString.replace(/::.*?::/, ''),
+    formattedQs(key: string = '.'): string {
+      const parts = rawQueryString.split('::');
+      if (parts.length > 1) {
+        return (parts.slice(0, 1).join('') + parts.slice(1).join(key)).replace(
+          new RegExp(key + '$'),
+          ''
+        );
+      }
+      return rawQueryString;
+    },
+    ...(rawDataSource && { dataSource: rawDataSource[1] }),
+  };
+};
+
+/**
  * Returns the raw aggregations from the search request.
  *
  * @param searchRequest - search request object
@@ -379,6 +402,7 @@ export const updateDataFrameMeta = ({
   getAggQsFn: GetDataFrameAggQsFn;
 }) => {
   dataFrame.meta = {
+    ...dataFrame.meta,
     aggs: aggConfig,
     aggsQs: {
       [aggConfig.id]: getAggQsFn({
