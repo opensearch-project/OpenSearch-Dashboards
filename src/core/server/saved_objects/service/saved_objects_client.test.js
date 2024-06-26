@@ -243,6 +243,15 @@ test(`#deleteFromWorkspaces`, async () => {
   expect(result).toBe(returnValue);
 });
 
+test(`#deleteFromWorkspaces should throw error if no workspaces passed`, () => {
+  const mockRepository = {};
+  const client = new SavedObjectsClient(mockRepository);
+  const type = Symbol();
+  const id = Symbol();
+  const workspaces = [];
+  expect(() => client.deleteFromWorkspaces(type, id, workspaces)).rejects.toThrowError();
+});
+
 test(`#addToWorkspaces`, async () => {
   const returnValue = Symbol();
   const mockRepository = {
@@ -262,4 +271,13 @@ test(`#addToWorkspaces`, async () => {
   });
 
   expect(result).toBe(returnValue);
+});
+
+test(`#addToWorkspaces should throw error if no workspaces passed`, () => {
+  const mockRepository = {};
+  const client = new SavedObjectsClient(mockRepository);
+  const type = Symbol();
+  const id = Symbol();
+  const workspaces = [];
+  expect(() => client.addToWorkspaces(type, id, workspaces)).rejects.toThrowError();
 });
