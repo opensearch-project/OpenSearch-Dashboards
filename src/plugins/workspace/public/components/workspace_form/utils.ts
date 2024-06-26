@@ -273,7 +273,7 @@ export const validateWorkspaceForm = (
         });
       } else if (isSelectedDataSourcesDuplicated(selectedDataSources.slice(0, i), row)) {
         dataSourcesErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
-          defaultMessage: 'Duplicate permission setting',
+          defaultMessage: 'Duplicate data sources',
         });
       }
     }
