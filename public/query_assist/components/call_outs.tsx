@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { EuiCallOut, EuiCallOutProps } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';

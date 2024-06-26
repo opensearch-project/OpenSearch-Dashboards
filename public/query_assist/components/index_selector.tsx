@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { EuiComboBox, EuiComboBoxOptionOption, EuiText } from '@elastic/eui';
 import React from 'react';
 import { useIndexPatterns, useIndices } from '../hooks/use_indices';

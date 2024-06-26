@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
 import React, { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { IDataPluginServices, PersistedLog } from '../../../../../src/plugins/data/public';

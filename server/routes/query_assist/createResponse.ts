@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { QueryAssistResponse } from '../../../common/query_assist';
 import { AgentResponse } from './agents';
 import { createPPLResponseBody } from './ppl/create_response';
