@@ -33,7 +33,11 @@ import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_object
 import { ManagementSetup } from '../../../plugins/management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
-import { filterWorkspaceConfigurableApps, isAppAccessibleInWorkspace } from './utils';
+import {
+  addRecentWorkspace,
+  filterWorkspaceConfigurableApps,
+  isAppAccessibleInWorkspace,
+} from './utils';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -210,6 +214,8 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
             }
             currentAppIdSubscription.unsubscribe();
           });
+          // Add workspace id to recent workspaces.
+          addRecentWorkspace(workspaceId);
         })();
       }
     }

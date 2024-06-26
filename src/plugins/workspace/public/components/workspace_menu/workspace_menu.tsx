@@ -35,10 +35,11 @@ import {
   WORKSPACE_OVERVIEW_APP_ID,
   MAX_WORKSPACE_PICKER_NUM,
   MAX_WORKSPACE_NAME_LENGTH,
+  MAX_SUGGEST_WORKSPACE_PICKER_NUM,
 } from '../../../common/constants';
 import { cleanWorkspaceId, formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
-import { getUseCaseFromFeatureConfig } from '../../utils';
+import { getRecentWorkspaces, getUseCaseFromFeatureConfig } from '../../utils';
 
 interface Props {
   coreStart: CoreStart;
@@ -89,6 +90,21 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       .filter((workspace) => workspace.name.toLowerCase().includes(searchValue.toLowerCase()))
       .slice(0, MAX_WORKSPACE_PICKER_NUM);
   }, [workspaceList, searchValue, currentWorkspace]);
+
+  const suggestedWorkspaces = useMemo(() => {
+    const localStoreWorkspaces = getRecentWorkspaces() || [];
+    const recentWorkspacesList: WorkspaceObject[] = [];
+
+    localStoreWorkspaces.forEach((workspaceId) => {
+      const workspace = workspaceList.find((ws) => ws.id === workspaceId);
+      if (workspace) {
+        recentWorkspacesList.push(workspace);
+      }
+    });
+    return recentWorkspacesList
+      .filter((workspace) => workspace.name.toLowerCase().includes(searchValue.toLowerCase()))
+      .slice(0, MAX_SUGGEST_WORKSPACE_PICKER_NUM);
+  }, [searchValue, workspaceList]);
 
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
 
@@ -165,8 +181,8 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     };
   };
 
-  const getWorkspaceListItems = () => {
-    const workspaceListItems: EuiContextMenuPanelItemDescriptor[] = filteredWorkspaceList.map(
+  const getWorkspaceListItems = (panelsWorkspaceList: WorkspaceObject[]) => {
+    const workspaceListItems: EuiContextMenuPanelItemDescriptor[] = panelsWorkspaceList.map(
       (workspace, index) => workspaceToItem(workspace, index + 1)
     );
     return workspaceListItems;
@@ -204,7 +220,24 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
         </span>
       ),
       width: 300,
-      items: getWorkspaceListItems(),
+      items: getWorkspaceListItems(filteredWorkspaceList),
+    },
+    ...useCasePanels,
+  ];
+
+  const suggestWorkspacePanels = [
+    {
+      id: 0,
+      title: (
+        <span className="custom-title">
+          <FormattedMessage
+            id="core.ui.primaryNav.contextMenuTitle.suggestedWorkspaces"
+            defaultMessage="Suggested workspaces"
+          />
+        </span>
+      ),
+      width: 300,
+      items: getWorkspaceListItems(suggestedWorkspaces),
     },
     ...useCasePanels,
   ];
@@ -227,7 +260,18 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
           fullWidth
         />
       </EuiPanel>
-      <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={suggestWorkspacePanels}
+        size="s"
+        data-test-subj="context-menu-suggested-workspaces"
+      />
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={panels}
+        size="s"
+        data-test-subj="context-menu-all-workspaces"
+      />
       <EuiPopoverFooter paddingSize="s">
         <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
           <EuiFlexGroup alignItems="center" gutterSize="s">

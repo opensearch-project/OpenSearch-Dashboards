@@ -9,6 +9,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { WorkspaceMenu } from './workspace_menu';
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from '../../../../../core/public';
+import { addRecentWorkspace } from '../../utils';
 
 describe('<WorkspaceMenu />', () => {
   let coreStartMock: CoreStart;
@@ -32,6 +33,7 @@ describe('<WorkspaceMenu />', () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
+    localStorage.clear();
   });
 
   it('should display a list of workspaces in the dropdown', () => {
@@ -92,6 +94,23 @@ describe('<WorkspaceMenu />', () => {
     Object.defineProperty(window, 'location', {
       value: originalLocation,
     });
+  });
+
+  it('should display a list of suggested workspaces in the dropdown', () => {
+    addRecentWorkspace('workspace-1');
+    coreStartMock.workspaces.workspaceList$.next([
+      { id: 'workspace-1', name: 'workspace 1' },
+      { id: 'workspace-2', name: 'workspace 2' },
+    ]);
+
+    render(<WorkspaceMenu coreStart={coreStartMock} />);
+    fireEvent.click(screen.getByText(/select a workspace/i));
+
+    expect(screen.getByText(/suggested workspaces/i)).toBeInTheDocument();
+    expect(screen.getByTestId('context-menu-suggested-workspaces')).toHaveTextContent(
+      /workspace 1/i
+    );
+    localStorage.clear();
   });
 
   it('should search a workspace in the dropdown', () => {

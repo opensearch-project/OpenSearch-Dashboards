@@ -5,8 +5,10 @@
 
 import { AppNavLinkStatus, PublicAppInfo } from '../../../core/public';
 import {
+  addRecentWorkspace,
   featureMatchesConfig,
   filterWorkspaceConfigurableApps,
+  getRecentWorkspaces,
   isAppAccessibleInWorkspace,
   isFeatureIdInsideUseCase,
 } from './utils';
@@ -274,5 +276,25 @@ describe('workspace utils: filterWorkspaceConfigurableApps', () => {
 describe('workspace utils: isFeatureIdInsideUseCase', () => {
   it('should return false for invalid use case', () => {
     expect(isFeatureIdInsideUseCase('discover', 'use-case-invalid')).toBe(false);
+  });
+});
+
+describe('workspace utils: local storage', () => {
+  const workspace = {
+    id: 'workspace-id',
+    name: 'workspace-name',
+    description: 'workspace-description',
+  };
+  it('should add recent workspace to local storage', () => {
+    const updatedWorkspaces = addRecentWorkspace(workspace.id);
+    expect(updatedWorkspaces).toEqual([workspace.id]);
+
+    // Add the same workspace again
+    const updatedWorkspacesAgain = addRecentWorkspace(workspace.id);
+    expect(updatedWorkspacesAgain).toEqual([workspace.id]);
+  });
+
+  it('should get recent workspace to local storage', () => {
+    expect(getRecentWorkspaces()).toEqual([workspace.id]);
   });
 });
