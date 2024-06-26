@@ -112,7 +112,6 @@ Gets an Observable of the array of recently accessed history :-
    chrome.docTitle.change('My application title')
    chrome.docTitle.change(['My application', 'My section'])
    ```
-
 ### UI :
 ###### consists of tsx/scss files && renders UI components from css Library e.g ```<Progress props={props}>```
 
