@@ -62,7 +62,9 @@ const render = renderFn(() => {
               <EuiFlexItem>
                 <EuiCard
                   layout="horizontal"
-                  title={recentAccessItem.label}
+                  title={i18n.translate('homepage.recentWorkSection.title', {
+                    defaultMessage: recentAccessItem.label,
+                  })}
                   titleSize="xs"
                   description={
                     <>
@@ -71,9 +73,14 @@ const render = renderFn(() => {
                         className="recent-work-title-icon"
                         type={recentWorkItem[0].icon}
                       />
-                      {recentWorkItem[0].name}
+                      {i18n.translate('homepage.recentWorkSection.name', {
+                        defaultMessage: recentWorkItem[0].name,
+                      })}
                       <br />
-                      {'Last updated ' + moment(recentAccessItem?.updatedAt).fromNow()}
+                      {i18n.translate('homepage.recentWorkSection.updatedAt', {
+                        defaultMessage:
+                          'Last updated ' + moment(recentAccessItem?.updatedAt).fromNow(),
+                      })}
                     </>
                   }
                   onClick={() => navigateToUrl(services.addBasePath(recentAccessItem.link))}

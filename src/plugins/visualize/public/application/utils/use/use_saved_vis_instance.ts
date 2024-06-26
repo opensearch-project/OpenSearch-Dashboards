@@ -32,7 +32,6 @@ import { useEffect, useRef, useState } from 'react';
 import { EventEmitter } from 'events';
 import { parse } from 'query-string';
 import { i18n } from '@osd/i18n';
-import moment from 'moment';
 
 import { redirectWhenMissing } from '../../../../../opensearch_dashboards_utils/public';
 import { DefaultEditorController } from '../../../../../vis_default_editor/public';
@@ -106,8 +105,7 @@ export const useSavedVisInstance = (
               savedVisInstance.savedVis.getFullPath(),
               savedVisInstance.savedVis.title,
               visualizationIdFromUrl,
-              savedVisInstance.savedVis.getOpenSearchType(),
-              moment(Date.now()).format('MM/DD/YYYY HH:mm')
+              { type: savedVisInstance.savedVis.getOpenSearchType(), updatedAt: Date.now() }
             );
           }
         }

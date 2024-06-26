@@ -40,7 +40,7 @@ export interface ChromeRecentlyAccessedHistoryItem {
   label: string;
   id: string;
   type?: string;
-  updatedAt?: string;
+  updatedAt?: number;
 }
 
 interface StartDeps {
@@ -58,7 +58,14 @@ export class RecentlyAccessedService {
 
     return {
       /** Adds a new item to the history. */
-      add: (link: string, label: string, id: string, type?: string, updatedAt?: string) => {
+      add: (
+        link: string,
+        label: string,
+        id: string,
+        extraProps: { type?: string; updatedAt?: number }
+      ) => {
+        const type = extraProps.type;
+        const updatedAt = extraProps.updatedAt;
         history.add({
           link,
           label,
@@ -96,7 +103,12 @@ export interface ChromeRecentlyAccessed {
    * @param type the item type
    * @param updatedAt the time that the item is last updated at
    */
-  add(link: string, label: string, id: string, type?: string, updatedAt?: string): void;
+  add(
+    link: string,
+    label: string,
+    id: string,
+    extraProps: { type?: string; updatedAt?: number }
+  ): void;
 
   /**
    * Gets an Array of the current recently accessed history.

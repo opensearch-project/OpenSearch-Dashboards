@@ -5,7 +5,6 @@
 
 import { i18n } from '@osd/i18n';
 import { useEffect, useState } from 'react';
-import moment from 'moment';
 import { SavedObject } from '../../../../../saved_objects/public';
 import {
   InvalidJSONProperty,
@@ -79,8 +78,7 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
             savedVisBuilderVis.getFullPath(),
             title,
             savedVisBuilderVis.id,
-            savedVisBuilderVis.getOpenSearchType(),
-            moment(Date.now()).format('MM/DD/YYYY HH:mm')
+            { type: savedVisBuilderVis.getOpenSearchType(), updatedAt: Date.now() }
           );
 
           dispatch(setUIStateState(state.ui));

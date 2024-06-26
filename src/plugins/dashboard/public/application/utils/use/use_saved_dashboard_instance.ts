@@ -6,7 +6,6 @@
 import { i18n } from '@osd/i18n';
 import { EventEmitter } from 'events';
 import { useEffect, useRef, useState } from 'react';
-import moment from 'moment';
 import {
   redirectWhenMissing,
   SavedObjectNotFound,
@@ -131,8 +130,7 @@ export const useSavedDashboardInstance = ({
               savedDashboard.getFullPath(),
               savedDashboard.title,
               dashboardIdFromUrl,
-              savedDashboard.getOpenSearchType(),
-              moment(Date.now()).format('MM/DD/YYYY HH:mm')
+              { type: savedDashboard.getOpenSearchType(), updatedAt: Date.now() }
             );
             setSavedDashboardInstance(dashboardInstance);
           } catch (error: any) {
