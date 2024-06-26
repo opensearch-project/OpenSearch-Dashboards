@@ -33,7 +33,7 @@ import { opensearchKuery } from '../../../opensearch_query';
 type KueryNode = any;
 
 import { ISavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
-import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING, PUBLIC_WORKSPACE_ID } from '../utils';
+import { ALL_NAMESPACES_STRING, DEFAULT_NAMESPACE_STRING } from '../utils';
 import { SavedObjectsFindOptions } from '../../../types';
 import { ACL } from '../../../permission_control/acl';
 
@@ -140,18 +140,6 @@ function getClauseForWorkspace(workspace: string) {
         must: {
           match_all: {},
         },
-      },
-    };
-  }
-
-  // `PUBLIC_WORKSPACE_ID` includes both saved objects without any workspace and with `PUBLIC_WORKSPACE_ID` workspace
-  if (workspace === PUBLIC_WORKSPACE_ID) {
-    return {
-      bool: {
-        should: [
-          { term: { workspaces: workspace } },
-          { bool: { must_not: { exists: { field: 'workspaces' } } } },
-        ],
       },
     };
   }

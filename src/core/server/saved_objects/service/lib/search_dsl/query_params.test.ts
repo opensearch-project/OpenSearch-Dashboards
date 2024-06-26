@@ -33,7 +33,7 @@ import { opensearchKuery } from '../../../opensearch_query';
 type KueryNode = any;
 
 import { SavedObjectTypeRegistry } from '../../../saved_objects_type_registry';
-import { ALL_NAMESPACES_STRING, PUBLIC_WORKSPACE_ID } from '../utils';
+import { ALL_NAMESPACES_STRING } from '../utils';
 import { getQueryParams } from './query_params';
 
 const registerTypes = (registry: SavedObjectTypeRegistry) => {
@@ -638,28 +638,6 @@ describe('#getQueryParams', () => {
               {
                 bool: {
                   must: [{ term: { workspaces: 'foo' } }],
-                },
-              },
-            ],
-            minimum_should_match: 1,
-          },
-        });
-      });
-
-      it('using global workspace', () => {
-        const result: Result = getQueryParams({
-          registry,
-          workspaces: [PUBLIC_WORKSPACE_ID],
-        });
-        expect(result.query.bool.filter[1]).toEqual({
-          bool: {
-            should: [
-              {
-                bool: {
-                  should: [
-                    { term: { workspaces: PUBLIC_WORKSPACE_ID } },
-                    { bool: { must_not: { exists: { field: 'workspaces' } } } },
-                  ],
                 },
               },
             ],
