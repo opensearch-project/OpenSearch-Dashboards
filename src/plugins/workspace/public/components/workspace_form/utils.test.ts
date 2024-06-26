@@ -7,6 +7,7 @@ import {
   validateWorkspaceForm,
   convertPermissionSettingsToPermissions,
   convertPermissionsToPermissionSettings,
+  getNumberOfErrors,
 } from './utils';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import { WorkspacePermissionItemType } from './constants';
@@ -264,5 +265,50 @@ describe('validateWorkspaceForm', () => {
         features: ['use-case-observability'],
       })
     ).toEqual({});
+  });
+
+  it('should return error if selected data source id is null', () => {
+    expect(
+      validateWorkspaceForm({
+        name: 'test',
+        selectedDataSources: [
+          {
+            id: '',
+            title: 'title',
+          },
+        ],
+      }).selectedDataSources
+    ).toEqual({ 0: 'Invalid data source' });
+  });
+
+  it('should return error if selected data source id is duplicated', () => {
+    expect(
+      validateWorkspaceForm({
+        name: 'test',
+        selectedDataSources: [
+          {
+            id: 'id',
+            title: 'title1',
+          },
+          {
+            id: 'id',
+            title: 'title2',
+          },
+        ],
+      }).selectedDataSources
+    ).toEqual({ 0: 'Duplicate data sources', '1': 'Duplicate data sources' });
+  });
+});
+
+describe('getNumberOfErrors', () => {
+  it('should calculate the error number of data sources form', () => {
+    expect(
+      getNumberOfErrors({
+        selectedDataSources: {
+          '0': 'Invalid data source',
+        },
+      })
+    ).toEqual(1);
+    expect(getNumberOfErrors({})).toEqual(0);
   });
 });
