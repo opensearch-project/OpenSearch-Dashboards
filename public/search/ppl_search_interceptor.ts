@@ -4,8 +4,7 @@
  */
 
 import { trimEnd } from 'lodash';
-import { Observable, from } from 'rxjs';
-import { stringify } from '@osd/std';
+import { Observable, throwError } from 'rxjs';
 import { concatMap } from 'rxjs/operators';
 import {
   DataFrameAggConfig,
@@ -25,7 +24,14 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../../src/plugins/data/public';
-import { formatDate, SEARCH_STRATEGY, removeKeyword, API } from '../../common';
+import {
+  formatDate,
+  SEARCH_STRATEGY,
+  removeKeyword,
+  API,
+  FetchDataFrameContext,
+  fetchDataFrame,
+} from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
 export class PPLSearchInterceptor extends SearchInterceptor {
@@ -47,22 +53,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = trimEnd(API.PPL_SEARCH);
+    const dfContext: FetchDataFrameContext = {
+      http: this.deps.http,
+      path: trimEnd(API.PPL_SEARCH),
+      signal,
+    };
     const { timefilter } = this.queryService;
     const dateRange = timefilter.timefilter.getTime();
     const { fromDate, toDate } = formatTimePickerDate(dateRange, 'YYYY-MM-DD HH:mm:ss.SSS');
-
-    const fetchDataFrame = (queryString: string, df = null) => {
-      const body = stringify({ query: { qs: queryString, format: 'jdbc' }, df });
-      return from(
-        this.deps.http.fetch({
-          method: 'POST',
-          path,
-          body,
-          signal,
-        })
-      );
-    };
 
     const getTimeFilter = (timeField: any) => {
       return ` | where ${timeField?.name} >= '${formatDate(fromDate)}' and ${
@@ -143,51 +141,59 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       }
     };
 
-    let queryString = removeKeyword(getRawQueryString(searchRequest)) ?? '';
     const dataFrame = getRawDataFrame(searchRequest);
+    if (!dataFrame) {
+      return throwError(this.handleSearchError('DataFrame is not defined', request, signal!));
+    }
+
+    let queryString = dataFrame.meta?.queryConfig?.qs ?? getRawQueryString(searchRequest) ?? '';
     const aggConfig = getAggConfig(
       searchRequest,
       {},
       this.aggsService.types.get.bind(this)
     ) as DataFrameAggConfig;
 
-    if (!dataFrame) {
-      return fetchDataFrame(queryString).pipe(
+    if (!dataFrame.schema) {
+      return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
         concatMap((response) => {
           const df = response.body;
           const timeField = getTimeField(df, aggConfig);
-          const timeFilter = getTimeFilter(timeField);
-          const newQuery = insertTimeFilter(queryString, timeFilter);
-          updateDataFrameMeta({
-            dataFrame: df,
-            qs: newQuery,
-            aggConfig,
-            timeField,
-            timeFilter,
-            getAggQsFn: getAggQsFn.bind(this),
-          });
-
-          return fetchDataFrame(newQuery, df);
+          if (timeField) {
+            const timeFilter = getTimeFilter(timeField);
+            const newQuery = insertTimeFilter(queryString, timeFilter);
+            updateDataFrameMeta({
+              dataFrame: df,
+              qs: newQuery,
+              aggConfig,
+              timeField,
+              timeFilter,
+              getAggQsFn: getAggQsFn.bind(this),
+            });
+            return fetchDataFrame(dfContext, newQuery, df);
+          }
+          return fetchDataFrame(dfContext, queryString, df);
         })
       );
     }
 
-    if (dataFrame) {
+    if (dataFrame.schema) {
       const timeField = getTimeField(dataFrame, aggConfig);
-      const timeFilter = getTimeFilter(timeField);
-      const newQuery = insertTimeFilter(queryString, timeFilter);
-      updateDataFrameMeta({
-        dataFrame,
-        qs: newQuery,
-        aggConfig,
-        timeField,
-        timeFilter,
-        getAggQsFn: getAggQsFn.bind(this),
-      });
-      queryString += timeFilter;
+      if (timeField) {
+        const timeFilter = getTimeFilter(timeField);
+        const newQuery = insertTimeFilter(queryString, timeFilter);
+        updateDataFrameMeta({
+          dataFrame,
+          qs: newQuery,
+          aggConfig,
+          timeField,
+          timeFilter,
+          getAggQsFn: getAggQsFn.bind(this),
+        });
+        queryString += timeFilter;
+      }
     }
 
-    return fetchDataFrame(queryString, dataFrame);
+    return fetchDataFrame(dfContext, queryString, dataFrame);
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {

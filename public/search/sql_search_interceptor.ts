@@ -4,9 +4,10 @@
  */
 
 import { trimEnd } from 'lodash';
-import { Observable, from } from 'rxjs';
-import { stringify } from '@osd/std';
+import { Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
+import { concatMap } from 'rxjs/operators';
+import { getRawDataFrame, getRawQueryString } from '../../../../src/plugins/data/common';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -15,7 +16,7 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../../src/plugins/data/public';
-import { API, SEARCH_STRATEGY } from '../../common';
+import { API, FetchDataFrameContext, SEARCH_STRATEGY, fetchDataFrame } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
@@ -37,27 +38,19 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = trimEnd(API.SQL_SEARCH);
-
-    const fetchDataFrame = (queryString: string, df = null) => {
-      const body = stringify({ query: { qs: queryString, format: 'jdbc' }, df });
-      return from(
-        this.deps.http.fetch({
-          method: 'POST',
-          path,
-          body,
-          signal,
-        })
-      );
+    const dfContext: FetchDataFrameContext = {
+      http: this.deps.http,
+      path: trimEnd(API.SQL_SEARCH),
+      signal,
     };
 
-    const dataFrame = fetchDataFrame(
-      searchRequest.params.body.query.queries[0].query,
-      searchRequest.params.body.df
-    );
+    const dataFrame = getRawDataFrame(searchRequest);
+    if (!dataFrame) {
+      return throwError(this.handleSearchError('DataFrame is not defined', request, signal!));
+    }
 
     // subscribe to dataFrame to see if an error is returned, display a toast message if so
-    dataFrame.subscribe((df) => {
+    dataFrame.subscribe((df: any) => {
       if (!df.body.error) return;
       const jsError = new Error(df.body.error.response);
       this.deps.toasts.addError(jsError, {
@@ -68,7 +61,18 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       });
     });
 
-    return dataFrame;
+    const queryString = dataFrame.meta?.queryConfig?.qs ?? getRawQueryString(searchRequest) ?? '';
+
+    if (!dataFrame.schema) {
+      return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
+        concatMap((response) => {
+          const df = response.body;
+          return fetchDataFrame(dfContext, queryString, df);
+        })
+      );
+    }
+
+    return fetchDataFrame(dfContext, queryString, dataFrame);
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {

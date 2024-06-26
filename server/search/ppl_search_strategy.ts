@@ -12,6 +12,7 @@ import {
   SearchUsage,
 } from '../../../../src/plugins/data/server';
 import {
+  DATA_FRAME_TYPES,
   IDataFrameError,
   IDataFrameResponse,
   IDataFrameWithAggs,
@@ -42,8 +43,6 @@ export const pplSearchStrategyProvider = (
 
     const source = pipeMap.get('source');
 
-    const describeQuery = `describe ${source}`;
-
     const searchQuery = query;
 
     const filters = pipeMap.get('where');
@@ -55,7 +54,6 @@ export const pplSearchStrategyProvider = (
 
     return {
       map: pipeMap,
-      describe: describeQuery,
       search: searchQuery,
       aggs: aggsQuery,
     };
@@ -73,15 +71,17 @@ export const pplSearchStrategyProvider = (
       try {
         const requestParams = parseRequest(request.body.query.qs);
         const source = requestParams?.map.get('source');
-        const { schema, meta } = request.body.df ?? {};
+        const { schema, meta } = request.body.df;
+
         request.body.query =
           !schema || dataFrameHydrationStrategy === 'perQuery'
             ? `source=${source} | head`
             : requestParams.search;
-        const rawResponse: any = await pplFacet.describeQuery(request);
+        const rawResponse: any = await pplFacet.describeQuery(context, request);
+
         if (!rawResponse.success) {
           return {
-            type: 'data_frame',
+            type: DATA_FRAME_TYPES.DEFAULT,
             body: { error: rawResponse.data },
             took: rawResponse.took,
           } as IDataFrameError;
@@ -103,7 +103,7 @@ export const pplSearchStrategyProvider = (
             const aggRequest = parseRequest(aggQueryString as string);
             const query = aggRequest.aggs;
             request.body.query = query;
-            const rawAggs: any = await pplFacet.describeQuery(request);
+            const rawAggs: any = await pplFacet.describeQuery(context, request);
             (dataFrame as IDataFrameWithAggs).aggs = {};
             (dataFrame as IDataFrameWithAggs).aggs[key] = rawAggs.data.datarows?.map((hit: any) => {
               return {
@@ -115,7 +115,7 @@ export const pplSearchStrategyProvider = (
         }
 
         return {
-          type: 'data_frame',
+          type: DATA_FRAME_TYPES.DEFAULT,
           body: dataFrame,
           took: rawResponse.took,
         } as IDataFrameResponse;

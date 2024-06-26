@@ -7,6 +7,7 @@ import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-das
 import { Observable } from 'rxjs';
 import { ISearchStrategy, SearchUsage } from '../../../../src/plugins/data/server';
 import {
+  DATA_FRAME_TYPES,
   IDataFrameError,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
@@ -27,11 +28,11 @@ export const sqlSearchStrategyProvider = (
     search: async (context, request: any, options) => {
       try {
         request.body.query = request.body.query.qs;
-        const rawResponse: any = await sqlFacet.describeQuery(request);
+        const rawResponse: any = await sqlFacet.describeQuery(context, request);
 
         if (!rawResponse.success) {
           return {
-            type: 'data_frame',
+            type: DATA_FRAME_TYPES.DEFAULT,
             body: { error: rawResponse.data },
             took: rawResponse.took,
           } as IDataFrameError;
@@ -51,7 +52,7 @@ export const sqlSearchStrategyProvider = (
         if (usage) usage.trackSuccess(rawResponse.took);
 
         return {
-          type: 'data_frame',
+          type: DATA_FRAME_TYPES.DEFAULT,
           body: dataFrame,
           took: rawResponse.took,
         } as IDataFrameResponse;
