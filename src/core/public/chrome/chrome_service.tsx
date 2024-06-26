@@ -403,6 +403,18 @@ export class ChromeService {
  * ```ts
  * core.chrome.registerCollapsibleNavHeader(() => <CustomNavHeader />)
  * ```
+ *
+ * @example
+ * Add navLinks to a nav group:
+ * ```ts
+ * core.chrome.addNavLinksToGroup(DEFAULT_NAV_GROUPS, [{ id: 'id-for-your-application' }])
+ * ```
+ *
+ * @example
+ * Get the observable of registered navGroups map:
+ * ```ts
+ * core.chrome.getNavGroupsMap$();
+ * ```
  */
 export interface ChromeSetup {
   registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
@@ -535,6 +547,9 @@ export interface ChromeStart {
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
 
+  /**
+   * Get an observable of the nav groups
+   */
   getNavGroupsMap$: ChromeSetup['getNavGroupsMap$'];
 }
 

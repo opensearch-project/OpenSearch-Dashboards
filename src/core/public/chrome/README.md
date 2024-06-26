@@ -112,30 +112,6 @@ Gets an Observable of the array of recently accessed history :-
    chrome.docTitle.change('My application title')
    chrome.docTitle.change(['My application', 'My section'])
    ```
-### GroupService:
-- Interface : ChromeNavGroup
-- Methods :
-Register a group :-
-
-`addNavLinksToGroup: (group: ChromeNavGroup, navLinks: ChromeRegistrationNavLink[]) => void;`
-
-Gets an Observable of the array of registered groups :-
-
-`getNavGroupsMap$: Observable<Record<string, NavGroupItemInMap>>`
-##### Register a new group with a navLink
-
-  ```ts
-    chrome.addNavLinksToGroup(
-      { 
-        id: 'my-group',
-        title: 'A demo group',
-        description: 'description for demo group'
-      },
-      [{
-        id: 'nav'
-      }]
-    )
-   ```
 
 ### UI :
 ###### consists of tsx/scss files && renders UI components from css Library e.g ```<Progress props={props}>```
