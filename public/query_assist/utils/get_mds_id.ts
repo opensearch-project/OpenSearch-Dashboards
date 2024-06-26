@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { IIndexPattern, IndexPatternsContract } from '../../../../../src/plugins/data/public';
 
 export const getMdsDataSourceId = async (

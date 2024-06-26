@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { TimeRange } from '../../../../src/plugins/data/common';
 
 export interface QueryAssistResponse {

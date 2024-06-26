@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { EuiFieldText, EuiIcon, EuiOutsideClickDetector, EuiPortal } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { PersistedLog, QuerySuggestionTypes } from '../../../../../src/plugins/data/public';

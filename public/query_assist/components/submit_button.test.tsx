@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { fireEvent, render } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 import { QueryAssistSubmitButton } from './submit_button';

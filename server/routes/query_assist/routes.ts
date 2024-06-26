@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { schema } from '@osd/config-schema';
 import { IRouter } from 'opensearch-dashboards/server';
 import { isResponseError } from '../../../../../src/core/server/opensearch/client/errors';

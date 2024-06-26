@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { UI_SETTINGS } from '../../../../../src/plugins/data/common';
 import { PersistedLog } from '../../../../../src/plugins/data/public';

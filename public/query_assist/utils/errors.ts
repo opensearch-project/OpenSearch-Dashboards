@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { ERROR_DETAILS } from '../../../common';
 

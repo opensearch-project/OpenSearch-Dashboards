@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { ApiResponse } from '@opensearch-project/opensearch';
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { RequestHandlerContext } from 'src/core/server';
