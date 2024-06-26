@@ -34,7 +34,7 @@ import { Config } from './config';
 import { Platform } from './platform';
 
 export class Build {
-  private name = 'opensearch-dashboards';
+  private name = this.min ? 'opensearch-dashboard-min' : 'opensearch-dashboards';
 
   constructor(private config: Config, private min: boolean) {}
 

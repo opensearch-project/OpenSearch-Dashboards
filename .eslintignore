@@ -10,6 +10,7 @@
 /optimize
 /plugins
 /test/fixtures/scenarios
+/osd-extra/build
 node_modules
 target
 

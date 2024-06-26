@@ -72,6 +72,9 @@ export async function generateNoticeFromSource({ productName, directory, log }: 
       '{node_modules,build,dist,data,built_assets}/**',
       'packages/*/{node_modules,build,dist}/**',
       'src/plugins/*/{node_modules,build,dist}/**',
+      'osd-extra/{node_modules,build,dist,data}/**',
+      'osd-extra/packages/*/{node_modules,build,dist}/**',
+      'osd-extra/plugins/**/{node_modules,build,dist}/**',
       '**/target/**',
     ],
   };
