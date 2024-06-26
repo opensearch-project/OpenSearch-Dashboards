@@ -296,7 +296,7 @@ describe('validateWorkspaceForm', () => {
           },
         ],
       }).selectedDataSources
-    ).toEqual({ 0: 'Duplicate data sources', '1': 'Duplicate data sources' });
+    ).toEqual({ '1': 'Duplicate data sources' });
   });
 });
 
