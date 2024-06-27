@@ -42,18 +42,20 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
     <div>
       <EuiPanel>
         <EuiTitle>
-          <h1>{`Review Prometheus data source configuration`}</h1>
+          <h1 data-test-subj="reviewTitle">{`Review Prometheus data source configuration`}</h1>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiSpacer />
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiText>
-              <h3>Data source configuration</h3>
+              <h3 data-test-subj="dataSourceConfigTitle">Data source configuration</h3>
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={goBack}>Edit</EuiButton>
+            <EuiButton onClick={goBack} data-test-subj="editButton">
+              Edit
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule />
@@ -62,14 +64,18 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Data source name</EuiText>
-                <EuiText size="s" className="overview-content">
+                <EuiText className="overview-title" data-test-subj="dataSourceNameTitle">
+                  Data source name
+                </EuiText>
+                <EuiText size="s" className="overview-content" data-test-subj="currentName">
                   {currentName}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Description</EuiText>
-                <EuiText size="s" className="overview-content">
+                <EuiText className="overview-title" data-test-subj="descriptionTitle">
+                  Description
+                </EuiText>
+                <EuiText size="s" className="overview-content" data-test-subj="currentDetails">
                   {currentDetails}
                 </EuiText>
               </EuiFlexItem>
@@ -78,14 +84,18 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Prometheus URI</EuiText>
-                <EuiText size="s" className="overview-content">
+                <EuiText className="overview-title" data-test-subj="prometheusURITitle">
+                  Prometheus URI
+                </EuiText>
+                <EuiText size="s" className="overview-content" data-test-subj="currentStore">
                   {currentStore}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Authentication method</EuiText>
-                <EuiText size="s" className="overview-content">
+                <EuiText className="overview-title" data-test-subj="authMethodTitle">
+                  Authentication method
+                </EuiText>
+                <EuiText size="s" className="overview-content" data-test-subj="currentAuthMethod">
                   {currentAuthMethod === 'basicauth'
                     ? 'Basic authentication'
                     : 'AWS Signature Version 4'}
@@ -96,8 +106,10 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
           <EuiFlexItem>
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiText className="overview-title">Query permissions</EuiText>
-                <EuiText size="s" className="overview-content">
+                <EuiText className="overview-title" data-test-subj="queryPermissionsTitle">
+                  Query permissions
+                </EuiText>
+                <EuiText size="s" className="overview-content" data-test-subj="currentPermissions">
                   {selectedQueryPermissionRoles && selectedQueryPermissionRoles.length
                     ? `Restricted - ${selectedQueryPermissionRoles
                         .map((role) => role.label)
