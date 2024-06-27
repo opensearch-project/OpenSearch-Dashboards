@@ -2,6 +2,7 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -29,7 +30,7 @@ import {
   DirectQueryDatasourceStatus,
   DirectQueryDatasourceType,
 } from '../../../types';
-import { DeleteModal } from './delete_modal';
+import { DeleteModal } from './direct_query_data_source_delete_modal';
 import PrometheusLogo from '../icons/prometheus_logo.svg';
 import S3Logo from '../icons/s3_logo.svg';
 import { DataSourceSelector } from '../../data_source_selector';
