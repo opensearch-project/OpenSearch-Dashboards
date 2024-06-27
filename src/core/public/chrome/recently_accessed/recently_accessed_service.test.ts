@@ -79,7 +79,7 @@ describe('RecentlyAccessed#start()', () => {
     const http = httpServiceMock.createStartContract();
     const workspaces = workspacesServiceMock.createStartContract();
     const recentlyAccessed = await new RecentlyAccessedService().start({ http, workspaces });
-    return { http, recentlyAccessed };
+    return { http, recentlyAccessed, workspaces };
   };
 
   it('allows adding and getting items', async () => {
@@ -150,5 +150,14 @@ Array [
   ],
 ]
 `);
+  });
+
+  it('adding items with workspaceId if is inside a workspace', async () => {
+    const { recentlyAccessed, workspaces } = await getStart();
+    workspaces.currentWorkspaceId$.next('foo');
+    recentlyAccessed.add('/app/item1', 'Item 1', 'item1');
+    expect(recentlyAccessed.get()).toEqual([
+      { link: '/app/item1', label: 'Item 1', id: 'item1', workspaceId: 'foo' },
+    ]);
   });
 });
