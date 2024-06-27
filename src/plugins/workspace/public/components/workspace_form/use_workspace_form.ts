@@ -32,6 +32,7 @@ export const useWorkspaceForm = ({
   defaultValues,
   operationType,
   onSubmit,
+  permissionEnabled,
 }: WorkspaceFormProps) => {
   const applications = useApplications(application);
   const [name, setName] = useState(defaultValues?.name);
@@ -97,7 +98,7 @@ export const useWorkspaceForm = ({
       const currentFormData = getFormDataRef.current();
       const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(
         currentFormData,
-        defaultValuesRef.current
+        !!permissionEnabled
       );
       setFormErrors(currentFormErrors);
       if (getNumberOfErrors(currentFormErrors) > 0) {
@@ -115,7 +116,7 @@ export const useWorkspaceForm = ({
         ) as WorkspacePermissionSetting[],
       });
     },
-    [onSubmit]
+    [onSubmit, permissionEnabled]
   );
 
   const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {

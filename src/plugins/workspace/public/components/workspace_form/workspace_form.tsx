@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -32,7 +32,6 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     operationType,
     permissionEnabled,
     workspaceConfigurableApps,
-    permissionLastAdminItemDeletable,
   } = props;
   const {
     formId,
@@ -49,6 +48,9 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
   const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
     defaultMessage: 'Enter details',
   });
+  const disabledUserOrGroupInputIdsRef = useRef(
+    defaultValues?.permissionSettings?.map((item) => item.id) ?? []
+  );
 
   return (
     <EuiForm id={formId} onSubmit={handleFormSubmit} component="form">
@@ -153,10 +155,10 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           </EuiTitle>
           <EuiSpacer size="m" />
           <WorkspacePermissionSettingPanel
-            errors={formErrors.permissionSettings}
+            errors={formErrors.permissionSettings?.fields}
             onChange={setPermissionSettings}
             permissionSettings={formData.permissionSettings}
-            lastAdminItemDeletable={!!permissionLastAdminItemDeletable}
+            disabledUserOrGroupInputIds={disabledUserOrGroupInputIdsRef.current}
             data-test-subj={`workspaceForm-permissionSettingPanel`}
           />
         </EuiPanel>

@@ -47,6 +47,7 @@ export enum WorkspaceFormErrorCode {
   PermissionUserGroupMissing,
   DuplicateUserIdPermissionSetting,
   DuplicateUserGroupPermissionSetting,
+  PermissionSettingOwnerMissing,
 }
 
 export interface WorkspaceFormError {
@@ -57,7 +58,10 @@ export interface WorkspaceFormError {
 export type WorkspaceFormErrors = {
   [key in keyof Omit<WorkspaceFormData, 'permissionSettings'>]?: WorkspaceFormError;
 } & {
-  permissionSettings?: { [key: number]: WorkspaceFormError };
+  permissionSettings?: {
+    overall?: WorkspaceFormError;
+    fields?: { [key: number]: WorkspaceFormError };
+  };
 };
 
 export interface WorkspaceFormProps {
@@ -67,5 +71,4 @@ export interface WorkspaceFormProps {
   operationType: WorkspaceOperationType;
   workspaceConfigurableApps?: PublicAppInfo[];
   permissionEnabled?: boolean;
-  permissionLastAdminItemDeletable?: boolean;
 }

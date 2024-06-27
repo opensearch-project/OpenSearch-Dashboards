@@ -52,8 +52,11 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   if (formErrors.description) {
     numberOfErrors += 1;
   }
-  if (formErrors.permissionSettings) {
-    numberOfErrors += Object.keys(formErrors.permissionSettings).length;
+  if (formErrors.permissionSettings?.fields) {
+    numberOfErrors += Object.keys(formErrors.permissionSettings.fields).length;
+  }
+  if (formErrors.permissionSettings?.overall) {
+    numberOfErrors += 1;
   }
   if (formErrors.features) {
     numberOfErrors += 1;
@@ -195,17 +198,8 @@ export const convertPermissionsToPermissionSettings = (permissions: SavedObjectP
 
 const validateUserPermissionSetting = (
   setting: WorkspaceUserPermissionSetting,
-  required: boolean,
   previousPermissionSettings: Array<Partial<WorkspacePermissionSetting>>
 ) => {
-  if (required && !setting.userId) {
-    return {
-      code: WorkspaceFormErrorCode.PermissionUserIdMissing,
-      message: i18n.translate('workspace.form.permission.invalidate.userId', {
-        defaultMessage: 'User is required. Enter a user.',
-      }),
-    };
-  }
   if (!!setting.userId && hasSameUserIdOrGroup(previousPermissionSettings, setting)) {
     return {
       code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
@@ -221,17 +215,8 @@ const validateUserPermissionSetting = (
 
 const validateUserGroupPermissionSetting = (
   setting: WorkspaceUserGroupPermissionSetting,
-  required: boolean,
   previousPermissionSettings: Array<Partial<WorkspacePermissionSetting>>
 ) => {
-  if (required && !setting.group) {
-    return {
-      code: WorkspaceFormErrorCode.PermissionUserGroupMissing,
-      message: i18n.translate('workspace.form.permission.invalidate.group', {
-        defaultMessage: 'User group is required. Enter a user group.',
-      }),
-    };
-  }
   if (!!setting.group && hasSameUserIdOrGroup(previousPermissionSettings, setting)) {
     return {
       code: WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
@@ -245,13 +230,78 @@ const validateUserGroupPermissionSetting = (
   }
 };
 
+const validatePermissionSetting = (
+  permissionSettings?: Array<
+    Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
+  >
+) => {
+  const permissionSettingMissingError = {
+    code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
+    message: i18n.translate('workspace.form.permission.setting.missing', {
+      defaultMessage: 'Permission setting missing',
+    }),
+  };
+  if (!permissionSettings) {
+    return {
+      overall: permissionSettingMissingError,
+    };
+  }
+
+  const permissionSettingsErrors: { [key: number]: WorkspaceFormError } = {};
+  for (let i = 0; i < permissionSettings.length; i++) {
+    const setting = permissionSettings[i];
+    if (!setting.type) {
+      permissionSettingsErrors[setting.id] = {
+        code: WorkspaceFormErrorCode.InvalidPermissionType,
+        message: i18n.translate('workspace.form.permission.invalidate.type', {
+          defaultMessage: 'Invalid type',
+        }),
+      };
+    } else if (!setting.modes || setting.modes.length === 0) {
+      permissionSettingsErrors[setting.id] = {
+        code: WorkspaceFormErrorCode.InvalidPermissionModes,
+        message: i18n.translate('workspace.form.permission.invalidate.modes', {
+          defaultMessage: 'Invalid permission modes',
+        }),
+      };
+    } else if (setting.type === WorkspacePermissionItemType.User) {
+      const validateResult = validateUserPermissionSetting(
+        setting as WorkspaceUserPermissionSetting,
+        permissionSettings.slice(0, i)
+      );
+      if (validateResult) {
+        permissionSettingsErrors[setting.id] = validateResult;
+      }
+    } else if (setting.type === WorkspacePermissionItemType.Group) {
+      const validateResult = validateUserGroupPermissionSetting(
+        setting as WorkspaceUserGroupPermissionSetting,
+        permissionSettings.slice(0, i)
+      );
+      if (validateResult) {
+        permissionSettingsErrors[setting.id] = validateResult;
+      }
+    }
+  }
+
+  return {
+    ...(!permissionSettings.some(
+      (setting) => setting.modes && getPermissionModeId(setting.modes) === PermissionModeId.Owner
+    )
+      ? { overall: permissionSettingMissingError }
+      : {}),
+    ...(Object.keys(permissionSettingsErrors).length > 0
+      ? { fields: permissionSettingsErrors }
+      : {}),
+  };
+};
+
 export const validateWorkspaceForm = (
   formData: Omit<Partial<WorkspaceFormSubmitData>, 'permissionSettings'> & {
     permissionSettings?: Array<
       Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
     >;
   },
-  initialFormData?: WorkspaceFormSubmitData
+  isPermissionEnabled: boolean
 ) => {
   const formErrors: WorkspaceFormErrors = {};
   const { name, permissionSettings, features } = formData;
@@ -280,52 +330,8 @@ export const validateWorkspaceForm = (
       }),
     };
   }
-  if (permissionSettings) {
-    const permissionSettingsErrors: { [key: number]: WorkspaceFormError } = {};
-    const requiredSettingIds = initialFormData?.permissionSettings?.map((item) => item.id);
-    const isUserIdOrGroupRequired = (settingId: number) =>
-      !!requiredSettingIds?.includes(settingId);
-    let firstUserRequiredFlag = true;
-    for (let i = 0; i < permissionSettings.length; i++) {
-      const setting = permissionSettings[i];
-      if (!setting.type) {
-        permissionSettingsErrors[setting.id] = {
-          code: WorkspaceFormErrorCode.InvalidPermissionType,
-          message: i18n.translate('workspace.form.permission.invalidate.type', {
-            defaultMessage: 'Invalid type',
-          }),
-        };
-      } else if (!setting.modes || setting.modes.length === 0) {
-        permissionSettingsErrors[setting.id] = {
-          code: WorkspaceFormErrorCode.InvalidPermissionModes,
-          message: i18n.translate('workspace.form.permission.invalidate.modes', {
-            defaultMessage: 'Invalid permission modes',
-          }),
-        };
-      } else if (setting.type === WorkspacePermissionItemType.User) {
-        const validateResult = validateUserPermissionSetting(
-          setting as WorkspaceUserPermissionSetting,
-          isUserIdOrGroupRequired(setting.id) || firstUserRequiredFlag,
-          permissionSettings.slice(0, i)
-        );
-        if (validateResult) {
-          permissionSettingsErrors[setting.id] = validateResult;
-        }
-        firstUserRequiredFlag = false;
-      } else if (setting.type === WorkspacePermissionItemType.Group) {
-        const validateResult = validateUserGroupPermissionSetting(
-          setting as WorkspaceUserGroupPermissionSetting,
-          isUserIdOrGroupRequired(setting.id),
-          permissionSettings.slice(0, i)
-        );
-        if (validateResult) {
-          permissionSettingsErrors[setting.id] = validateResult;
-        }
-      }
-    }
-    if (Object.keys(permissionSettingsErrors).length > 0) {
-      formErrors.permissionSettings = permissionSettingsErrors;
-    }
+  if (isPermissionEnabled) {
+    formErrors.permissionSettings = validatePermissionSetting(permissionSettings);
   }
   return formErrors;
 };

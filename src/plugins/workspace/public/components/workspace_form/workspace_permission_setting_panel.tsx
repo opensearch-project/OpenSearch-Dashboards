@@ -16,11 +16,11 @@ import {
   WorkspacePermissionSettingInput,
   WorkspacePermissionSettingInputProps,
 } from './workspace_permission_setting_input';
-import { generateNextPermissionSettingsId, getPermissionModeId } from './utils';
+import { generateNextPermissionSettingsId } from './utils';
 
 export interface WorkspacePermissionSettingPanelProps {
   errors?: { [key: number]: WorkspaceFormError };
-  lastAdminItemDeletable: boolean;
+  disabledUserOrGroupInputIds: number[];
   permissionSettings: Array<
     Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
   >;
@@ -29,9 +29,7 @@ export interface WorkspacePermissionSettingPanelProps {
   ) => void;
 }
 
-interface UserOrGroupSectionProps
-  extends Omit<WorkspacePermissionSettingPanelProps, 'lastAdminItemDeletable'> {
-  nonDeletableIndex: number;
+interface UserOrGroupSectionProps extends WorkspacePermissionSettingPanelProps {
   type: WorkspacePermissionItemType;
   nextIdGenerator: () => number;
 }
@@ -42,7 +40,7 @@ const UserOrGroupSection = ({
   onChange,
   nextIdGenerator,
   permissionSettings,
-  nonDeletableIndex,
+  disabledUserOrGroupInputIds,
 }: UserOrGroupSectionProps) => {
   // default permission mode is read
   const handleAddNewOne = useCallback(() => {
@@ -131,11 +129,7 @@ const UserOrGroupSection = ({
               {...item}
               type={type}
               index={index}
-              deletable={
-                type === WorkspacePermissionItemType.Group ||
-                index > 0 ||
-                (!!item.modes && getPermissionModeId(item.modes) !== PermissionModeId.Owner)
-              }
+              userOrGroupDisabled={disabledUserOrGroupInputIds.includes(item.id)}
               onDelete={handleDelete}
               onGroupOrUserIdChange={handleGroupOrUserIdChange}
               onPermissionModesChange={handlePermissionModesChange}
@@ -165,7 +159,7 @@ export const WorkspacePermissionSettingPanel = ({
   errors,
   onChange,
   permissionSettings,
-  lastAdminItemDeletable,
+  disabledUserOrGroupInputIds,
 }: WorkspacePermissionSettingPanelProps) => {
   const userPermissionSettings = useMemo(
     () =>
@@ -181,29 +175,6 @@ export const WorkspacePermissionSettingPanel = ({
       ) ?? [],
     [permissionSettings]
   );
-
-  const { userNonDeletableIndex, groupNonDeletableIndex } = useMemo(() => {
-    if (
-      lastAdminItemDeletable ||
-      // Permission setting can be deleted if there are more than one admin setting
-      [...userPermissionSettings, ...groupPermissionSettings].filter(
-        (permission) =>
-          permission.modes && getPermissionModeId(permission.modes) === PermissionModeId.Owner
-      ).length > 1
-    ) {
-      return { userNonDeletableIndex: -1, groupNonDeletableIndex: -1 };
-    }
-    return {
-      userNonDeletableIndex: userPermissionSettings.findIndex(
-        (permission) =>
-          permission.modes && getPermissionModeId(permission.modes) === PermissionModeId.Owner
-      ),
-      groupNonDeletableIndex: groupPermissionSettings.findIndex(
-        (permission) =>
-          permission.modes && getPermissionModeId(permission.modes) === PermissionModeId.Owner
-      ),
-    };
-  }, [userPermissionSettings, groupPermissionSettings, lastAdminItemDeletable]);
 
   const nextIdRef = useRef(generateNextPermissionSettingsId(permissionSettings));
 
@@ -239,19 +210,19 @@ export const WorkspacePermissionSettingPanel = ({
       <UserOrGroupSection
         errors={errors}
         onChange={handleUserPermissionSettingsChange}
-        nonDeletableIndex={userNonDeletableIndex}
         permissionSettings={userPermissionSettings}
         type={WorkspacePermissionItemType.User}
         nextIdGenerator={nextIdGenerator}
+        disabledUserOrGroupInputIds={disabledUserOrGroupInputIds}
       />
       <EuiSpacer size="m" />
       <UserOrGroupSection
         errors={errors}
         onChange={handleGroupPermissionSettingsChange}
-        nonDeletableIndex={groupNonDeletableIndex}
         permissionSettings={groupPermissionSettings}
         type={WorkspacePermissionItemType.Group}
         nextIdGenerator={nextIdGenerator}
+        disabledUserOrGroupInputIds={disabledUserOrGroupInputIds}
       />
     </div>
   );

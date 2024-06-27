@@ -38,6 +38,10 @@ const getSuggestionFromErrorCode = (error: WorkspaceFormError) => {
       return i18n.translate('workspace.form.errorCallout.duplicatePermission', {
         defaultMessage: 'Enter a unique user group.',
       });
+    case WorkspaceFormErrorCode.PermissionSettingOwnerMissing:
+      return i18n.translate('workspace.form.errorCallout.permissionSettingOwnerMissing', {
+        defaultMessage: 'Enter an owner at user or user group permission setting.',
+      });
     default:
       return error.message;
   }
@@ -66,10 +70,10 @@ export interface WorkspaceFormErrorCalloutProps {
 
 export const WorkspaceFormErrorCallout = ({ errors }: WorkspaceFormErrorCalloutProps) => {
   const renderPermissionSettingSuggestion = (errorCode: WorkspaceFormErrorCode) => {
-    if (!errors.permissionSettings) {
+    if (!errors.permissionSettings?.fields) {
       return null;
     }
-    const findingError = Object.values(errors.permissionSettings).find(
+    const findingError = Object.values(errors.permissionSettings.fields).find(
       (item) => item.code === errorCode
     );
 
@@ -121,6 +125,14 @@ export const WorkspaceFormErrorCallout = ({ errors }: WorkspaceFormErrorCalloutP
           {renderPermissionSettingSuggestion(WorkspaceFormErrorCode.PermissionUserGroupMissing)}
           {renderPermissionSettingSuggestion(
             WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting
+          )}
+          {errors.permissionSettings?.overall && (
+            <WorkspaceFormErrorCalloutItem
+              errorKey={i18n.translate('workspace.form.errorCallout.useCaseKey', {
+                defaultMessage: 'Permission setting:',
+              })}
+              message={getSuggestionFromErrorCode(errors.permissionSettings.overall)}
+            />
           )}
         </ul>
       </EuiText>

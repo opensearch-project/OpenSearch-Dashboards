@@ -59,11 +59,12 @@ export const permissionModeOptions = [
 
 export interface WorkspacePermissionSettingInputProps {
   index: number;
-  deletable: boolean;
   type: WorkspacePermissionItemType;
   userId?: string;
   group?: string;
   modes?: WorkspacePermissionMode[];
+  deletable?: boolean;
+  userOrGroupDisabled: boolean;
   onGroupOrUserIdChange: (
     groupOrUserId:
       | { type: WorkspacePermissionItemType.User; userId?: string }
@@ -83,7 +84,8 @@ export const WorkspacePermissionSettingInput = ({
   userId,
   group,
   modes,
-  deletable,
+  deletable = true,
+  userOrGroupDisabled,
   onDelete,
   onGroupOrUserIdChange,
   onPermissionModesChange,
@@ -145,6 +147,7 @@ export const WorkspacePermissionSettingInput = ({
                   defaultMessage: 'Select a user group',
                 })
           }
+          isDisabled={userOrGroupDisabled}
         />
       </EuiFlexItem>
       <EuiFlexItem style={{ maxWidth: 332 }}>
