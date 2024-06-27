@@ -42,7 +42,7 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
     <div>
       <EuiPanel>
         <EuiTitle>
-          <h1>{`Review Amazon S3 data source configuration`}</h1>
+          <h1 data-test-subj="reviewTitle">{`Review Amazon S3 data source configuration`}</h1>
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiSpacer />
@@ -53,7 +53,9 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={goBack}>Edit</EuiButton>
+            <EuiButton onClick={goBack} data-test-subj="editButton">
+              Edit
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule />
@@ -63,13 +65,13 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
                 <EuiText className="overview-title">Data source name</EuiText>
-                <EuiText size="s" className="overview-content">
+                <EuiText size="s" className="overview-content" data-test-subj="currentName">
                   {currentName}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText className="overview-title">Description</EuiText>
-                <EuiText size="s" className="overview-content">
+                <EuiText size="s" className="overview-content" data-test-subj="currentDetails">
                   {currentDetails}
                 </EuiText>
               </EuiFlexItem>
@@ -79,13 +81,13 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
                 <EuiText className="overview-title">AWS Glue authentication ARN</EuiText>
-                <EuiText size="s" className="overview-content">
+                <EuiText size="s" className="overview-content" data-test-subj="currentArn">
                   {currentArn}
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText className="overview-title">AWS Glue index store URI</EuiText>
-                <EuiText size="s" className="overview-content">
+                <EuiText size="s" className="overview-content" data-test-subj="currentStore">
                   {currentStore}
                 </EuiText>
               </EuiFlexItem>
@@ -95,7 +97,7 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
                 <EuiText className="overview-title">Query permissions</EuiText>
-                <EuiText size="s" className="overview-content">
+                <EuiText size="s" className="overview-content" data-test-subj="currentPermissions">
                   {selectedQueryPermissionRoles && selectedQueryPermissionRoles.length
                     ? `Restricted - ${selectedQueryPermissionRoles
                         .map((role) => role.label)
@@ -105,7 +107,7 @@ export const ReviewS3Datasource = (props: ConfigureS3DatasourceProps) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText className="overview-title">Authentication method</EuiText>
-                <EuiText size="s" className="overview-content">
+                <EuiText size="s" className="overview-content" data-test-subj="currentAuthMethod">
                   {currentAuthMethod === 'basicauth' ? 'Basic authentication' : 'No authentication'}
                 </EuiText>
               </EuiFlexItem>
