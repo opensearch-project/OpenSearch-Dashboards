@@ -48,10 +48,15 @@ import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
-import { AppCategory, Branding, ChromeNavGroup } from '../';
+import { Branding } from '../';
 import { getLogos } from '../../common';
 import type { Logos } from '../../common/types';
 import { OverlayStart } from '../overlays';
+import {
+  ChromeNavGroupService,
+  ChromeNavGroupServiceSetupContract,
+  ChromeNavGroupServiceStartContract,
+} from './nav_group';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -102,10 +107,6 @@ export interface StartDeps {
 
 type CollapsibleNavHeaderRender = () => JSX.Element | null;
 
-export type NavGroupItemInMap = ChromeNavGroup & {
-  navLinks: ChromeRegistrationNavLink[];
-};
-
 /** @internal */
 export class ChromeService {
   private isVisible$!: Observable<boolean>;
@@ -115,7 +116,7 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
-  private readonly navGroupsMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({});
+  private readonly navGroup = new ChromeNavGroupService();
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
 
   constructor(private readonly params: ConstructorParams) {}
@@ -152,34 +153,8 @@ export class ChromeService {
     );
   }
 
-  private addNavLinkToGroup(
-    currentGroupsMap: Record<string, NavGroupItemInMap>,
-    navGroup: ChromeNavGroup,
-    navLink: ChromeRegistrationNavLink
-  ) {
-    const matchedGroup = currentGroupsMap[navGroup.id];
-    if (matchedGroup) {
-      const links = matchedGroup.navLinks;
-      const isLinkExistInGroup = !!links.find((link) => link.id === navLink.id);
-      if (isLinkExistInGroup) {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `[ChromeService] Navlink of ${navLink.id} has already been registered in group ${navGroup.id}`
-        );
-        return currentGroupsMap;
-      }
-      matchedGroup.navLinks.push(navLink);
-    } else {
-      currentGroupsMap[navGroup.id] = {
-        ...navGroup,
-        navLinks: [navLink],
-      };
-    }
-
-    return currentGroupsMap;
-  }
-
   public setup(): ChromeSetup {
+    const navGroup = this.navGroup.setup();
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
         if (this.collapsibleNavHeaderRender) {
@@ -190,18 +165,7 @@ export class ChromeService {
         }
         this.collapsibleNavHeaderRender = render;
       },
-      addNavLinksToGroup: (navGroup: ChromeNavGroup, navLinks: ChromeRegistrationNavLink[]) => {
-        // Construct a new groups map pointer.
-        const currentGroupsMap = { ...this.navGroupsMap$.getValue() };
-
-        const navGroupsMapAfterAdd = navLinks.reduce(
-          (groupsMap, navLink) => this.addNavLinkToGroup(groupsMap, navGroup, navLink),
-          currentGroupsMap
-        );
-
-        this.navGroupsMap$.next(navGroupsMapAfterAdd);
-      },
-      getNavGroupsMap$: () => this.navGroupsMap$.pipe(takeUntil(this.stop$)),
+      navGroup,
     };
   }
 
@@ -230,6 +194,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
+    const navGroup = await this.navGroup.start();
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -298,6 +263,7 @@ export class ChromeService {
       recentlyAccessed,
       docTitle,
       logos,
+      navGroup,
 
       getHeaderComponent: () => (
         <Header
@@ -383,8 +349,6 @@ export class ChromeService {
       setCustomNavLink: (customNavLink?: ChromeNavLink) => {
         customNavLink$.next(customNavLink);
       },
-
-      getNavGroupsMap$: () => this.navGroupsMap$.pipe(takeUntil(this.stop$)),
     };
   }
 
@@ -404,22 +368,10 @@ export class ChromeService {
  * core.chrome.registerCollapsibleNavHeader(() => <CustomNavHeader />)
  * ```
  *
- * @example
- * Add navLinks to a nav group:
- * ```ts
- * core.chrome.addNavLinksToGroup(DEFAULT_NAV_GROUPS, [{ id: 'id-for-your-application' }])
- * ```
- *
- * @example
- * Get the observable of registered navGroups map:
- * ```ts
- * core.chrome.getNavGroupsMap$();
- * ```
  */
 export interface ChromeSetup {
   registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
-  addNavLinksToGroup: (group: ChromeNavGroup, navLinks: ChromeRegistrationNavLink[]) => void;
-  getNavGroupsMap$: () => Observable<Record<string, NavGroupItemInMap>>;
+  navGroup: ChromeNavGroupServiceSetupContract;
 }
 
 /**
@@ -457,6 +409,8 @@ export interface ChromeStart {
   recentlyAccessed: ChromeRecentlyAccessed;
   /** {@inheritdoc ChromeDocTitle} */
   docTitle: ChromeDocTitle;
+  /** {@inheritdoc NavGroupService} */
+  navGroup: ChromeNavGroupServiceStartContract;
   /** {@inheritdoc Logos} */
   readonly logos: Logos;
 
@@ -546,11 +500,6 @@ export interface ChromeStart {
    * Get an observable of the current locked state of the nav drawer.
    */
   getIsNavDrawerLocked$(): Observable<boolean>;
-
-  /**
-   * Get an observable of the nav groups
-   */
-  getNavGroupsMap$: ChromeSetup['getNavGroupsMap$'];
 }
 
 /** @internal */
@@ -560,12 +509,4 @@ export interface InternalChromeStart extends ChromeStart {
    * @internal
    */
   getHeaderComponent(): JSX.Element;
-}
-
-/** @public */
-export interface ChromeRegistrationNavLink {
-  id: string;
-  title?: string;
-  category?: AppCategory;
-  order?: number;
 }
