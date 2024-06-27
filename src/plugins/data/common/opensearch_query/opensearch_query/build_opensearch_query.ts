@@ -70,7 +70,11 @@ export function buildOpenSearchQuery(
     (language) => language !== 'kuery' && language.toLowerCase() !== 'lucene'
   );
   if (unsupportedQueries.length > 0) {
+    const asyncQueries = Object.keys(unsupportedQueries).filter(
+      (language) => language.toLowerCase().includes('async')
+    );
     return {
+      // type: `unsupported${asyncQueries.length > 0 && 'async'}`,
       type: 'unsupported',
       queries,
       filters,

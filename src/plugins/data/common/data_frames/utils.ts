@@ -19,6 +19,8 @@ import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
 import { IOpenSearchDashboardsSearchRequest } from '../search';
 import { GetAggTypeFn, GetDataFrameAggQsFn, TimeRange } from '../types';
+import { Observable, Subscription, interval } from 'rxjs';
+import { switchMap, takeWhile } from 'rxjs/operators';
 
 /**
  * Returns the raw data frame from the search request.
@@ -473,9 +475,9 @@ export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatter
                 values:
                   subFieldType === 'object'
                     ? Object.entries(value as Record<string, unknown>)?.map(([k, v]) => ({
-                        name: `${subFieldName}.${k}`,
-                        type: typeof v,
-                      }))
+                      name: `${subFieldName}.${k}`,
+                      type: typeof v,
+                    }))
                     : [],
               } as IFieldType);
             }
@@ -498,12 +500,79 @@ export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatter
   };
 };
 
-export class Polling<T, P = void> {
+// export class DataFramePolling<T, P = void> {
+//   public data: T | null = null;
+//   public error: Error | null = null;
+//   public loading: boolean = true;
+//   private shouldPoll: boolean = false;
+//   private intervalRef?: NodeJS.Timeout;
+
+//   constructor(
+//     private fetchFunction$: Observable<FetchFunction<T, P>>,
+//     private interval: number = 5000,
+//     private onPollingSuccess: (data: T) => boolean,
+//     private onPollingError: (error: Error) => boolean
+//   ) { }
+
+//   async fetchData(params?: P) {
+//     this.loading = true;
+//     this.fetchFunction$(params).subscribe((resp) => {
+//       this.data = resp;
+//       if (this.onPollingSuccess(this.data)) {
+//         this.shouldPoll = false;
+//       }
+//     }).catch((err) => {
+//       this.error = err as Error;
+//       this.loading = false;
+
+//       if (this.onPollingError(this.error)) {
+//         this.shouldPoll = false;
+//       }
+//     });
+//   }
+
+//   async startPolling(params?: P) {
+//     this.shouldPoll = true;
+//     if (!this.intervalRef) {
+//       this.intervalRef = setInterval(() => {
+//         if (this.shouldPoll) {
+//           this.fetchData(params).;
+//         } else {
+//           clearInterval(this.intervalRef);
+//           this.intervalRef = undefined;
+//         }
+//       }, this.interval);
+//     }
+//   }
+
+//   // stopPolling() {
+//   //   this.shouldPoll = false;
+//   //   if (this.intervalRef) {
+//   //     clearInterval(this.intervalRef);
+//   //     this.intervalRef = undefined;
+//   //   }
+//   // }
+
+//   async waitForPolling(params?: P): Promise<any> {
+//     return new Promise<any>((resolve) => {
+//       const checkLoading = () => {
+//         if (!this.loading) {
+//           resolve(this.fetchFunction(params));
+//         } else {
+//           setTimeout(checkLoading, 5000);
+//         }
+//       };
+//       checkLoading();
+//     });
+//   }
+// }
+
+export class DataFramePolling<T, P = void> {
   public data: T | null = null;
   public error: Error | null = null;
   public loading: boolean = true;
   private shouldPoll: boolean = false;
-  private intervalRef?: NodeJS.Timeout;
+  private pollingSubscription?: Subscription;
 
   constructor(
     private fetchFunction: FetchFunction<T, P>,
@@ -512,55 +581,71 @@ export class Polling<T, P = void> {
     private onPollingError?: (error: Error) => boolean
   ) {}
 
-  async fetchData(params?: P) {
-    this.loading = true;
-    try {
-      const result = await this.fetchFunction(params);
-      this.data = result;
-      this.loading = false;
-
-      if (this.onPollingSuccess && this.onPollingSuccess(result)) {
-        this.stopPolling();
-      }
-    } catch (err) {
-      this.error = err as Error;
-      this.loading = false;
-
-      if (this.onPollingError && this.onPollingError(this.error)) {
-        this.stopPolling();
-      }
-    }
-  }
-
-  async startPolling(params?: P) {
+  startPolling(params?: P) {
     this.shouldPoll = true;
-    if (!this.intervalRef) {
-      this.intervalRef = setInterval(() => {
-        if (this.shouldPoll) {
-          this.fetchData(params);
+    if (!this.pollingSubscription || this.pollingSubscription.closed) {
+      this.pollingSubscription = interval(this.interval).pipe(
+        switchMap(() => this.fetchFunction(params)),
+      ).subscribe(
+        result => {
+          this.data = result;
+          this.loading = false;
+
+          if (this.onPollingSuccess && this.onPollingSuccess(result)) {
+            this.stopPolling();
+          }
+        },
+        error => {
+          this.error = error as Error;
+          this.loading = false;
+
+          if (this.onPollingError && this.onPollingError(this.error)) {
+            this.stopPolling();
+          }
         }
-      }, this.interval);
+      );
     }
   }
 
   stopPolling() {
     this.shouldPoll = false;
-    if (this.intervalRef) {
-      clearInterval(this.intervalRef);
-      this.intervalRef = undefined;
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
     }
   }
 
-  async waitForPolling(): Promise<void> {
-    return new Promise<void>((resolve) => {
-      const checkLoading = () => {
-        if (!this.loading) {
-          resolve();
-        } else {
-          setTimeout(checkLoading, 5000);
+  waitForPolling(params?: P): Observable<T> {
+    return new Observable<T>(observer => {
+      const pollingInterval = interval(this.interval);
+
+      const pollingSubscription = pollingInterval.pipe(
+        switchMap(() => this.fetchFunction(params)),
+        takeWhile(() => this.shouldPoll)
+      ).subscribe(
+        result => {
+          this.data = result;
+          this.loading = false;
+
+          if (this.onPollingSuccess && this.onPollingSuccess(result)) {
+            observer.next(result);
+            observer.complete();
+            this.stopPolling();
+          }
+        },
+        error => {
+          this.error = error as Error;
+          this.loading = false;
+
+          if (this.onPollingError && this.onPollingError(this.error)) {
+            observer.error(error);
+            this.stopPolling();
+          }
         }
+      );
+
+      return () => {
+        pollingSubscription.unsubscribe();
       };
-      checkLoading();
     });
   }
 }

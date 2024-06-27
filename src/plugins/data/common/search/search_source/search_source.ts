@@ -476,7 +476,11 @@ export class SearchSource {
   }
 
   private isUnsupportedRequest(request: SearchRequest): boolean {
-    return request.body!.query.hasOwnProperty('type') && request.body!.query.type === 'unsupported';
+    return request.body!.query.hasOwnProperty('type') && request.body!.query.type.includes('unsupported');
+  }
+
+  private isPollingRequest(request: SearchRequest): boolean {
+    return request.body!.query.hasOwnProperty('type') && request.body!.query.type.includes('async');
   }
 
   private getRawQueryStringFromRequest(request: SearchRequest): string | undefined {
