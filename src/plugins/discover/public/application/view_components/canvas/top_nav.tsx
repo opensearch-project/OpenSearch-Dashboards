@@ -14,18 +14,22 @@ import { IndexPattern } from '../../../opensearch_dashboards_services';
 import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { useDiscoverContext } from '../context';
+import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_management';
 
 export interface TopNavProps {
   opts: {
     setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
     onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   };
+  showSaveQuery: boolean;
 }
 
-export const TopNav = ({ opts }: TopNavProps) => {
+export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
+  const state = useSelector((s) => s.discover);
+  const dispatch = useDispatch();
 
   const {
     navigation: {
@@ -79,13 +83,17 @@ export const TopNav = ({ opts }: TopNavProps) => {
     indexPattern,
   ]);
 
+  const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
+    dispatch(setSavedQuery(newSavedQueryId));
+  };
+
   return (
     <TopNavMenu
       appName={PLUGIN_ID}
       config={topNavLinks}
       showSearchBar
       showDatePicker={showDatePicker}
-      showSaveQuery
+      showSaveQuery={showSaveQuery}
       useDefaultBehaviors
       setMenuMountPoint={opts.setHeaderActionMenu}
       indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
@@ -94,6 +102,8 @@ export const TopNav = ({ opts }: TopNavProps) => {
       // is ported to main, pass dataSource to TopNavMenu by picking
       // commit 328e08e688c again.
       onQuerySubmit={opts.onQuerySubmit}
+      savedQueryId={state.savedQuery}
+      onSavedQueryIdChange={updateSavedQueryId}
     />
   );
 };
