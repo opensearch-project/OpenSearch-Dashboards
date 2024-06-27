@@ -95,6 +95,10 @@ interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
 
+export interface SetupDeps {
+  uiSettings: IUiSettingsClient;
+}
+
 export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
@@ -153,8 +157,8 @@ export class ChromeService {
     );
   }
 
-  public setup(): ChromeSetup {
-    const navGroup = this.navGroup.setup();
+  public setup({ uiSettings }: SetupDeps): ChromeSetup {
+    const navGroup = this.navGroup.setup({ uiSettings });
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
         if (this.collapsibleNavHeaderRender) {
@@ -355,6 +359,7 @@ export class ChromeService {
   public stop() {
     this.navLinks.stop();
     this.stop$.next();
+    this.navGroup.stop();
   }
 }
 

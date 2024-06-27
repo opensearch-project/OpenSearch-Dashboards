@@ -39,6 +39,7 @@ const createSetupContractMock = () => {
     navGroup: {
       getNavGroupsMap$: jest.fn(() => new BehaviorSubject({})),
       addNavLinksToGroup: jest.fn(),
+      getNavGroupEnabled: jest.fn(),
     },
   };
 };
@@ -76,6 +77,7 @@ const createStartContractMock = () => {
     },
     navGroup: {
       getNavGroupsMap$: jest.fn(() => new BehaviorSubject({})),
+      getNavGroupEnabled: jest.fn(),
     },
     setAppTitle: jest.fn(),
     setIsVisible: jest.fn(),
