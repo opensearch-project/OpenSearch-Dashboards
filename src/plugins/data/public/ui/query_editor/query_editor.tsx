@@ -58,6 +58,7 @@ interface State {
   index: number | null;
   suggestions: QuerySuggestion[];
   indexPatterns: IIndexPattern[];
+  queryEditorRect: DOMRect | undefined;
 }
 
 const KEY_CODES = {
@@ -82,6 +83,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     index: null,
     suggestions: [],
     indexPatterns: [],
+    queryEditorRect: undefined,
   };
 
   public inputRef: HTMLTextAreaElement | null = null;
@@ -89,6 +91,8 @@ export default class QueryEditorUI extends Component<Props, State> {
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
   private services = this.props.opensearchDashboards.services;
+  private componentIsUnmounting = false;
+  private queryEditorDivRefInstance: RefObject<HTMLDivElement> = createRef();
   private headerRef: RefObject<HTMLDivElement> = createRef();
   private bannerRef: RefObject<HTMLDivElement> = createRef();
   private extensionMap = this.props.settings?.getQueryEditorExtensionMap();
@@ -234,6 +238,12 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     this.initPersistedLog();
     // this.fetchIndexPatterns().then(this.updateSuggestions);
+    this.handleListUpdate();
+
+    window.addEventListener('scroll', this.handleListUpdate, {
+      passive: true, // for better performance as we won't call preventDefault
+      capture: true, // scroll events don't bubble, they must be captured instead
+    });
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -247,7 +257,17 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
+    this.componentIsUnmounting = true;
+    window.removeEventListener('scroll', this.handleListUpdate, { capture: true });
   }
+
+  handleListUpdate = () => {
+    if (this.componentIsUnmounting) return;
+
+    return this.setState({
+      queryEditorRect: this.queryEditorDivRefInstance.current?.getBoundingClientRect(),
+    });
+  };
 
   handleOnFocus = () => {
     if (this.props.onChangeQueryEditorFocus) {
