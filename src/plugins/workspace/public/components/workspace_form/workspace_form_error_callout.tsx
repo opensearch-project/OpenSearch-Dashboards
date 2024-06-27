@@ -12,11 +12,11 @@ const getSuggestionFromErrorCode = (error: WorkspaceFormError) => {
   switch (error.code) {
     case WorkspaceFormErrorCode.WorkspaceNameMissing:
       return i18n.translate('workspace.form.errorCallout.nameMissing', {
-        defaultMessage: 'Enter a workspace name.',
+        defaultMessage: 'Enter a name.',
       });
     case WorkspaceFormErrorCode.InvalidWorkspaceName:
       return i18n.translate('workspace.form.errorCallout.nameInvalid', {
-        defaultMessage: 'Enter a valid workspace name.',
+        defaultMessage: 'Enter a valid name.',
       });
     case WorkspaceFormErrorCode.UseCaseMissing:
       return i18n.translate('workspace.form.errorCallout.useCaseMissing', {

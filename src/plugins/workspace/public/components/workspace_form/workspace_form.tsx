@@ -47,7 +47,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     handleDescriptionChange,
   } = useWorkspaceForm(props);
   const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
-    defaultMessage: 'Enter Details',
+    defaultMessage: 'Enter details',
   });
 
   return (

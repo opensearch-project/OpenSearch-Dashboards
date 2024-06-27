@@ -260,7 +260,7 @@ export const validateWorkspaceForm = (
       formErrors.name = {
         code: WorkspaceFormErrorCode.InvalidWorkspaceName,
         message: i18n.translate('workspace.form.detail.name.invalid', {
-          defaultMessage: 'Invalid workspace name',
+          defaultMessage: 'Name is invalid. Enter a valid name.',
         }),
       };
     }
