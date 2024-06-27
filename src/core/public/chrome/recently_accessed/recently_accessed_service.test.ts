@@ -29,6 +29,7 @@
  */
 
 import { httpServiceMock } from '../../http/http_service.mock';
+import { workspacesServiceMock } from '../../mocks';
 import { RecentlyAccessedService } from './recently_accessed_service';
 import { Subject } from 'rxjs';
 import { takeUntil, bufferCount } from 'rxjs/operators';
@@ -76,7 +77,8 @@ describe('RecentlyAccessed#start()', () => {
 
   const getStart = async () => {
     const http = httpServiceMock.createStartContract();
-    const recentlyAccessed = await new RecentlyAccessedService().start({ http });
+    const workspaces = workspacesServiceMock.createStartContract();
+    const recentlyAccessed = await new RecentlyAccessedService().start({ http, workspaces });
     return { http, recentlyAccessed };
   };
 
