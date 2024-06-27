@@ -92,7 +92,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   }, [workspaceList, searchValue, currentWorkspace]);
 
   const suggestedWorkspaces = useMemo(() => {
-    const localStoreWorkspaces = getRecentWorkspaces() || [];
+    const localStoreWorkspaces = getRecentWorkspaces();
     const recentWorkspacesList: WorkspaceObject[] = [];
 
     localStoreWorkspaces.forEach((workspaceId) => {
@@ -122,13 +122,13 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     workspaceURL: string
   ) => {
     const useCases = workspace.features?.map(getUseCaseFromFeatureConfig).filter(Boolean) || [];
-    // If the wokspace has only one use case, do not show the use case menu.
+    // If the workspace has only one use case, do not show the use case menu.
     if (useCases.length <= 1) {
       return false;
     }
     const useCaseMenuItems = useCases.map((useCase) => {
       return {
-        name: useCase,
+        name: <EuiText> {useCase}</EuiText>,
         onClick: () => {
           window.location.assign(workspaceURL);
         },
@@ -160,15 +160,17 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     );
 
     const shouldShowUseCases = workspaceUseCaseToItem(workspace, index, workspaceURL);
-
-    const name = (
+    const workspaceName = truncate(workspace.name, { length: MAX_WORKSPACE_NAME_LENGTH });
+    const name = shouldShowUseCases ? (
+      <EuiText> {workspaceName}</EuiText>
+    ) : (
       <EuiText
         onClick={(e) => {
           e.stopPropagation();
           window.location.assign(workspaceURL);
         }}
       >
-        {truncate(workspace.name, { length: MAX_WORKSPACE_NAME_LENGTH })}
+        {workspaceName}
       </EuiText>
     );
 
@@ -192,7 +194,13 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     <>
       <EuiListGroup style={{ width: 318 }} maxWidth={false}>
         <EuiListGroupItem
-          iconType="spacesApp"
+          icon={
+            currentWorkspace ? (
+              <EuiIcon type="stopFilled" color={currentWorkspace.color ?? 'primary'} />
+            ) : (
+              <EuiIcon type="spacesApp" />
+            )
+          }
           label={currentWorkspaceName}
           onClick={openPopover}
           extraAction={{
