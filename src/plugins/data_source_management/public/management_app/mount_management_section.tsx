@@ -64,9 +64,11 @@ export async function mountManagementSection(
             <Route path={['/configure/:type']}>
               <ConfigureDirectQueryDataSourceWithRouter notifications={notifications} />
             </Route>
-            <Route path={['/:id']}>
-              <EditDataSourceWithRouter />
-            </Route>
+            {featureFlagStatus && (
+              <Route path={['/:id']}>
+                <EditDataSourceWithRouter />
+              </Route>
+            )}
             <Route path={['/']}>
               <DataSourceHomePanel history={params.history} featureFlagStatus={featureFlagStatus} />
             </Route>
