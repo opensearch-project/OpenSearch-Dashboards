@@ -106,7 +106,7 @@ export class QueryEnhancementsPlugin
     data.__enhance({
       ui: {
         query: {
-          language: 'SQL Async',
+          language: 'SQLAsync',
           search: sqlAsyncSearchInterceptor,
           searchBar: {
             showDatePicker: false,

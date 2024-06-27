@@ -51,3 +51,19 @@ export const fetchDataFrame = (
     })
   );
 };
+
+export const fetchDataFramePolling = (  
+  context: FetchDataFrameContext,
+  df: IDataFrame
+) => {
+  const { http, path, signal } = context;
+  const queryId = df.meta?.queryId;
+  console.log('queryId:', queryId);
+  return from(
+    http.fetch({
+      method: 'GET',
+      path: `${path}/${queryId}`,
+      signal
+    })
+  );
+}

@@ -58,6 +58,39 @@ function defineRoute(
       }
     }
   );
+
+  router.get(
+    {
+      path: `${path}/{queryId}`,
+      validate: {
+        params: schema.object({
+          queryId: schema.string(),
+        }),
+      },
+    },
+    async (context, req, res): Promise<any> => {
+      try {
+        console.log('in jobs query id route');
+        const queryRes: IDataFrameResponse = await searchStrategies[searchStrategyId].search(
+          context,
+          req as any,
+          {}
+        );
+        const result: any = {
+          body: {
+            ...queryRes,
+          },
+        };
+        return res.ok(result);
+      } catch (err) {
+        logger.error(err);
+        return res.custom({
+          statusCode: 500,
+          body: err,
+        });
+      }
+    }
+  );
 }
 
 export function defineRoutes(
@@ -70,6 +103,7 @@ export function defineRoutes(
 ) {
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.PPL);
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQL);
+  defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQLAsync);
   registerQueryAssistRoutes(router);
   // defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQLAsync);
   // sql async jobs
@@ -83,7 +117,7 @@ export function defineRoutes(
             format: schema.string(),
           }),
           df: schema.any(),
-          dataSource: schema.string(),
+          dataSource: schema.nullable(schema.string()),
         }),
       },
     },

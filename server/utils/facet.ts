@@ -31,6 +31,8 @@ export class Facet {
         body: { ...query },
         ...(format !== 'jdbc' && { format }),
       };
+      console.log('request in facet:', request);
+      // this.logger.info(request);
       const dataSourceId = df?.meta?.queryConfig?.dataSourceId;
       const client = dataSourceId
         ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI

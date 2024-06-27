@@ -24,6 +24,7 @@ export class GetFacet {
     try {
       const params = request.params;
       const queryRes = await this.client.asScoped(request).callAsCurrentUser(endpoint, params);
+      console.log('queryRes:', queryRes);
       return {
         success: true,
         data: queryRes,

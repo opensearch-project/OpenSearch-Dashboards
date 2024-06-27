@@ -1,5 +1,5 @@
 import { trimEnd } from 'lodash';
-import { Observable, from } from 'rxjs';
+import { BehaviorSubject, Observable, from, of, throwError } from 'rxjs';
 import { stringify } from '@osd/std';
 import { i18n } from '@osd/i18n';
 import {
@@ -10,14 +10,17 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../../src/plugins/data/public';
-import { getRawDataFrame, getRawQueryString } from '../../../../src/plugins/data/common';
-import { SEARCH_STRATEGY } from '../../common';
+import { DataFramePolling, getRawDataFrame, getRawQueryString, IDataFrameResponse } from '../../../../src/plugins/data/common';
+import { API, FetchDataFrameContext, SEARCH_STRATEGY, fetchDataFrame, fetchDataFramePolling } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
+import { concatMap } from 'rxjs/operators';
 
 export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
-  // protected sessionService!: DataPublicPluginStart['search']['session'];
+  // protected sessionService!: DataPublicPluginStart['search']['session']
+  protected dataFrame$ = new BehaviorSubject<IDataFrameResponse | undefined>(undefined);
+
 
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
@@ -35,57 +38,58 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
     strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = trimEnd('/api/sqlasyncql/jobs');
-
-    function extractDataSourceName(query: string): string {
-      const datasourceRegex = /(?:FROM|IN)\s+([^\s.]+)/i; // Matches 'FROM <datasource>' or 'IN <datasource>'
-
-      const match = datasourceRegex.exec(query);
-      if (match && match[1]) {
-        return match[1];
-      }
-
-      return '';
-    }
-
-    const fetchDataFrame = (queryString: string | undefined, dataSource: string, df = null) => {
-      const body = stringify({
-        query: { qs: queryString, format: 'jdbc' },
-        dataSource,
-        df,
-      });
-      return from(
-        this.deps.http.fetch({
-          method: 'POST',
-          path,
-          body,
-          signal,
-        })
-      );
+    const path = trimEnd(API.SQL_ASYNC_SEARCH);
+    const dfContext: FetchDataFrameContext = {
+      http: this.deps.http,
+      path,
+      signal,
     };
 
-    const rawDataFrame = getRawDataFrame(searchRequest);
-    const queryString = getRawQueryString(searchRequest);
-    const dataFrame = fetchDataFrame(
-      queryString,
-      extractDataSourceName(queryString),
-      rawDataFrame
+    const dataFrame = getRawDataFrame(searchRequest);
+    if (!dataFrame) {
+      return throwError(this.handleSearchError('DataFrame is not defined', request, signal!));
+    }
+
+    const queryString = dataFrame.meta?.queryConfig?.formattedQs() ?? getRawQueryString(searchRequest) ?? '';
+
+
+    const onPollingSuccess = (pollingResult: any) => {
+      if (pollingResult && pollingResult.body.meta.status === 'SUCCESS') {
+        return true;
+      }
+      if (pollingResult.body.meta.status === 'FAILED') {
+        const jsError = new Error(pollingResult.data.error.response);
+        this.deps.toasts.addError(jsError, {
+          title: i18n.translate('queryEnhancements.sqlQueryError', {
+            defaultMessage: 'Could not complete the SQL async query',
+          }),
+          toastMessage: pollingResult.data.error.response,
+        });
+        return true;
+      }
+      return false;
+    }
+
+    const onPollingError = (error: Error) => {
+      console.error(error);
+      // abort here
+      throw new Error();
+      return true;
+    }
+
+    return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
+      concatMap((jobResponse) => {
+        const df = jobResponse.body;
+        const dataFramePolling = new DataFramePolling<any, any>(
+          async () => of(fetchDataFramePolling(dfContext, df)),
+          5000,
+          onPollingSuccess,
+          onPollingError
+        );
+        dataFramePolling.startPolling();
+        return from(dataFramePolling.waitForPolling());
+      })
     );
-
-    // subscribe to dataFrame to see if an error is returned, display a toast message if so
-    dataFrame.subscribe((df) => {
-      // TODO: MQL Async: clean later
-      if (!df.body.error) return;
-      const jsError = new Error(df.body.error.response);
-      this.deps.toasts.addError(jsError, {
-        title: i18n.translate('queryEnhancements.sqlQueryError', {
-          defaultMessage: 'Could not complete the SQL async query',
-        }),
-        toastMessage: df.body.error.msg,
-      });
-    });
-
-    return dataFrame;
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
