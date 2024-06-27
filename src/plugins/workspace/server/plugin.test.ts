@@ -28,7 +28,7 @@ describe('Workspace server plugin', () => {
     await workspacePlugin.setup(setupMock);
     expect(value).toMatchInlineSnapshot(`
       Object {
-        "opensearchDashboards": Object {
+        "dashboards": Object {
           "isDashboardAdmin": true,
         },
         "workspaces": Object {
@@ -44,17 +44,17 @@ describe('Workspace server plugin', () => {
     updateWorkspaceState(request, { isDashboardAdmin: false });
     registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
     result = registerSwitcher(request, capabilities);
-    expect(result).toEqual({ opensearchDashboards: { isDashboardAdmin: false } });
+    expect(result).toEqual({ dashboards: { isDashboardAdmin: false } });
 
     updateWorkspaceState(request, { isDashboardAdmin: true });
     registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
     result = registerSwitcher(request, capabilities);
-    expect(result).toEqual({ opensearchDashboards: { isDashboardAdmin: true } });
+    expect(result).toEqual({ dashboards: { isDashboardAdmin: true } });
 
     updateWorkspaceState(request, {});
     registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
     result = registerSwitcher(request, capabilities);
-    expect(result).toEqual({ opensearchDashboards: { isDashboardAdmin: true } });
+    expect(result).toEqual({ dashboards: { isDashboardAdmin: true } });
   });
 
   it('#proxyWorkspaceTrafficToRealHandler', async () => {
