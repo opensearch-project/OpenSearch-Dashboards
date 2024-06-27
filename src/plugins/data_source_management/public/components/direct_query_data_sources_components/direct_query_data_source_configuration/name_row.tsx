@@ -64,25 +64,23 @@ export const NameRow: React.FC<ConfigureNameProps> = ({
   };
 
   return (
-    <EuiFormRow label="Data source name" isInvalid={currentError.length !== 0} error={currentError}>
-      <>
-        <EuiText size="xs">
-          <p>
-            Connection name that OpenSearch Dashboards references. This name should be descriptive
-            and concise.
-          </p>
-        </EuiText>
-        <EuiFieldText
-          data-test-subj="name"
-          placeholder="Title"
-          value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-          }}
-          onBlur={onBlur}
-          isInvalid={currentError.length !== 0}
-        />
-      </>
+    <EuiFormRow
+      label="Data source name"
+      isInvalid={currentError.length !== 0}
+      error={currentError}
+      helpText="Connection name that OpenSearch Dashboards references. This name should be descriptive and concise."
+    >
+      <EuiFieldText
+        data-test-subj="direct_query-data-source-name"
+        id="data-source-name"
+        placeholder="Title"
+        value={name}
+        onChange={(e) => {
+          setName(e.target.value);
+        }}
+        onBlur={onBlur}
+        isInvalid={currentError.length !== 0}
+      />
     </EuiFormRow>
   );
 };
