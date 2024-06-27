@@ -367,7 +367,6 @@ export class ChromeService {
  * ```ts
  * core.chrome.registerCollapsibleNavHeader(() => <CustomNavHeader />)
  * ```
- *
  */
 export interface ChromeSetup {
   registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
