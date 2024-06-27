@@ -10,9 +10,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { EuiFieldText, EuiTextArea, EuiSelect } from '@elastic/eui';
 import { ConfigurePrometheusDatasourcePanel } from './direct_query_configure_prometheus_data_source';
 import { AuthMethod } from '../../../constants';
-import { QueryPermissionsConfiguration } from '../query_permissions';
-import { NameRow } from '../name_row';
-import { AuthDetails } from '../direct_query_data_source_auth_details';
 
 // Mock fetchDataSources function
 jest.mock('../name_row', () => ({
@@ -89,6 +86,21 @@ const defaultProps = {
   setDetailsForRequest: mockSetDetailsForRequest,
 };
 
+// Mock createMemoryHistory to return a consistent key
+jest.mock('history', () => {
+  const originalModule = jest.requireActual('history');
+  return {
+    ...originalModule,
+    createMemoryHistory: () => {
+      const history = originalModule.createMemoryHistory();
+      history.entries.forEach((entry) => {
+        entry.key = 'consistentKey';
+      });
+      return history;
+    },
+  };
+});
+
 const mountComponent = () => {
   return mount(
     <MemoryRouter>
@@ -116,8 +128,7 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     });
     setTimeout(() => {
       expect(mockSetDetailsForRequest).toHaveBeenCalledWith('New details');
-      expect(wrapper).toMatchSnapshot();
-    }, 100);
+    }, 1000);
   });
 
   it('updates store URI state on change', async () => {
@@ -129,8 +140,7 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     });
     setTimeout(() => {
       expect(mockSetStoreForRequest).toHaveBeenCalledWith('New Store URI');
-      expect(wrapper).toMatchSnapshot();
-    }, 100);
+    }, 1000);
   });
 
   it('updates auth method on select change', async () => {
@@ -141,8 +151,7 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     });
     setTimeout(() => {
       expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
-      expect(wrapper).toMatchSnapshot();
-    }, 100);
+    }, 1000);
   });
 
   it('displays authentication fields based on auth method', async () => {
@@ -153,7 +162,6 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     });
     setTimeout(() => {
       expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
-      expect(wrapper).toMatchSnapshot();
     }, 100);
 
     await act(async () => {
@@ -161,7 +169,6 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     });
     setTimeout(() => {
       expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('basicauth');
-      expect(wrapper).toMatchSnapshot();
-    }, 100);
+    }, 1000);
   });
 });

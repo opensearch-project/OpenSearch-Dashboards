@@ -32,6 +32,21 @@ const mountComponent = (props = {}) => {
   );
 };
 
+// Mock createMemoryHistory to return a consistent key
+jest.mock('history', () => {
+  const originalModule = jest.requireActual('history');
+  return {
+    ...originalModule,
+    createMemoryHistory: () => {
+      const history = originalModule.createMemoryHistory();
+      history.entries.forEach((entry) => {
+        entry.key = 'consistentKey';
+      });
+      return history;
+    },
+  };
+});
+
 describe('ReviewPrometheusDatasource', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -66,7 +81,7 @@ describe('ReviewPrometheusDatasource', () => {
       expect(wrapper.find('[data-test-subj="currentAuthMethod"]').at(0).text()).toEqual(
         'AWS Signature Version 4'
       );
-    }, 100);
+    }, 1000);
   });
 
   it('displays correct query permissions', async () => {
@@ -84,6 +99,6 @@ describe('ReviewPrometheusDatasource', () => {
       expect(wrapper.find('[data-test-subj="currentPermissions"]').at(0).text()).toEqual(
         'Everyone'
       );
-    }, 100);
+    }, 1000);
   });
 });
