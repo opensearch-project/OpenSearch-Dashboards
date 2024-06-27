@@ -46,6 +46,7 @@ export interface DiscoverState {
   /**
    * Metadata for the view
    */
+  savedQuery?: string;
   metadata?: {
     /**
      * Number of lines to display per row
@@ -188,6 +189,18 @@ export const discoverSlice = createSlice({
         },
       };
     },
+    setSavedQuery(state, action: PayloadAction<string | undefined>) {
+      if (action.payload === undefined) {
+        // if the payload is undefined, remove the savedQuery property
+        const { savedQuery, ...restState } = state;
+        return restState;
+      } else {
+        return {
+          ...state,
+          savedQuery: action.payload,
+        };
+      }
+    },
   },
 });
 
@@ -204,5 +217,6 @@ export const {
   updateState,
   setSavedSearchId,
   setMetadata,
+  setSavedQuery,
 } = discoverSlice.actions;
 export const { reducer } = discoverSlice;
