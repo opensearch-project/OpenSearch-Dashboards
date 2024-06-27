@@ -12,7 +12,7 @@ exports[`ReviewPrometheusDatasource renders correctly 1`] = `
         "entries": Array [
           Object {
             "hash": "",
-            "key": "fa9d5t",
+            "key": "consistentKey",
             "pathname": "/",
             "search": "",
             "state": undefined,
@@ -26,7 +26,7 @@ exports[`ReviewPrometheusDatasource renders correctly 1`] = `
         "listen": [Function],
         "location": Object {
           "hash": "",
-          "key": "fa9d5t",
+          "key": "consistentKey",
           "pathname": "/",
           "search": "",
           "state": undefined,

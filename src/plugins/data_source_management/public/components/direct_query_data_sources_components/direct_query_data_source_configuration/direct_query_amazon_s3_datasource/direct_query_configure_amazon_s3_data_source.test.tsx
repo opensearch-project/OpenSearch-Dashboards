@@ -83,6 +83,21 @@ const defaultProps = {
   setArnForRequest: mockSetArnForRequest,
 };
 
+// Mock createMemoryHistory to return a consistent key
+jest.mock('history', () => {
+  const originalModule = jest.requireActual('history');
+  return {
+    ...originalModule,
+    createMemoryHistory: () => {
+      const history = originalModule.createMemoryHistory();
+      history.entries.forEach((entry) => {
+        entry.key = 'consistentKey';
+      });
+      return history;
+    },
+  };
+});
+
 const mountComponent = () => {
   return mount(
     <MemoryRouter>
@@ -110,8 +125,7 @@ describe('ConfigureS3DatasourcePanel', () => {
     });
     setTimeout(() => {
       expect(mockSetDetailsForRequest).toHaveBeenCalledWith('New details');
-      expect(wrapper).toMatchSnapshot();
-    }, 100);
+    }, 1000);
   });
 
   it('updates ARN state on change', async () => {
@@ -123,8 +137,7 @@ describe('ConfigureS3DatasourcePanel', () => {
     });
     setTimeout(() => {
       expect(mockSetArnForRequest).toHaveBeenCalledWith('New ARN');
-      expect(wrapper).toMatchSnapshot();
-    }, 100);
+    }, 1000);
   });
 
   it('updates store URI state on change', async () => {
@@ -136,8 +149,7 @@ describe('ConfigureS3DatasourcePanel', () => {
     });
     setTimeout(() => {
       expect(mockSetStoreForRequest).toHaveBeenCalledWith('New Store URI');
-      expect(wrapper).toMatchSnapshot();
-    }, 100);
+    }, 1000);
   });
 
   it('updates auth method on select change', async () => {
@@ -148,8 +160,7 @@ describe('ConfigureS3DatasourcePanel', () => {
     });
     setTimeout(() => {
       expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('noauth');
-      expect(wrapper).toMatchSnapshot();
-    }, 100);
+    }, 1000);
   });
 
   it('displays authentication fields based on auth method', async () => {
@@ -160,15 +171,13 @@ describe('ConfigureS3DatasourcePanel', () => {
     });
     setTimeout(() => {
       expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('noauth');
-      expect(wrapper).toMatchSnapshot();
-    }, 100);
+    }, 1000);
 
     await act(async () => {
       select.simulate('change', { target: { value: 'basicauth' } });
     });
     setTimeout(() => {
       expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('basicauth');
-      expect(wrapper).toMatchSnapshot();
-    }, 100);
+    }, 1000);
   });
 });

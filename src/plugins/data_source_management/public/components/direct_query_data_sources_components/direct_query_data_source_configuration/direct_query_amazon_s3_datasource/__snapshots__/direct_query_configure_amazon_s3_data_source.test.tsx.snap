@@ -12,7 +12,7 @@ exports[`ConfigureS3DatasourcePanel renders correctly 1`] = `
         "entries": Array [
           Object {
             "hash": "",
-            "key": "dk9ldy",
+            "key": "consistentKey",
             "pathname": "/",
             "search": "",
             "state": undefined,
@@ -26,7 +26,7 @@ exports[`ConfigureS3DatasourcePanel renders correctly 1`] = `
         "listen": [Function],
         "location": Object {
           "hash": "",
-          "key": "dk9ldy",
+          "key": "consistentKey",
           "pathname": "/",
           "search": "",
           "state": undefined,
@@ -84,7 +84,7 @@ exports[`ConfigureS3DatasourcePanel renders correctly 1`] = `
             "entries": Array [
               Object {
                 "hash": "",
-                "key": "dk9ldy",
+                "key": "consistentKey",
                 "pathname": "/",
                 "search": "",
                 "state": undefined,
@@ -98,7 +98,7 @@ exports[`ConfigureS3DatasourcePanel renders correctly 1`] = `
             "listen": [Function],
             "location": Object {
               "hash": "",
-              "key": "dk9ldy",
+              "key": "consistentKey",
               "pathname": "/",
               "search": "",
               "state": undefined,
@@ -110,7 +110,7 @@ exports[`ConfigureS3DatasourcePanel renders correctly 1`] = `
         location={
           Object {
             "hash": "",
-            "key": "dk9ldy",
+            "key": "consistentKey",
             "pathname": "/",
             "search": "",
             "state": undefined,
