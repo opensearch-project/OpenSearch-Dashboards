@@ -36,7 +36,7 @@ interface ConfigureDatasourceProps extends RouteComponentProps {
   notifications: NotificationsStart;
 }
 
-const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
+export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
   notifications,
   history,
 }) => {
@@ -308,7 +308,7 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
 
   const ReviewSaveOrCancel = useCallback(() => {
     return (
-      <EuiBottomBar>
+      <EuiBottomBar data-test-subj="reviewSaveOrCancel">
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
@@ -318,6 +318,7 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
               color="ghost"
               size="s"
               iconType="cross"
+              data-test-subj="cancelButton"
             >
               Cancel
             </EuiButtonEmpty>
@@ -328,6 +329,7 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
               color="ghost"
               size="s"
               iconType="arrowLeft"
+              data-test-subj="previousButton"
             >
               Previous
             </EuiButton>
@@ -338,6 +340,7 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
               size="s"
               iconType="arrowRight"
               fill
+              data-test-subj="nextButton"
             >
               {page === 'configure'
                 ? `Review Configuration`
@@ -352,7 +355,7 @@ const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> = ({
   return (
     <EuiPage>
       <EuiPageSideBar>
-        <EuiSteps titleSize="xs" steps={ConfigureDatasourceSteps} />
+        <EuiSteps titleSize="xs" steps={ConfigureDatasourceSteps} data-test-subj="configureSteps" />
       </EuiPageSideBar>
       <EuiPageBody>
         {page === 'configure' ? (
