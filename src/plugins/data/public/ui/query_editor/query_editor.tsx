@@ -21,7 +21,7 @@ import { DataSettings } from '../types';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 
-const LANGUAGE_ID = 'SQL';
+const LANGUAGE_ID = 'kuery';
 monaco.languages.register({ id: LANGUAGE_ID });
 
 export interface QueryEditorProps {
