@@ -12,6 +12,6 @@ export const capabilitiesProvider = () => ({
     show: true,
     // showWriteControls: true,
     // save: true,
-    // saveQuery: true,
+    saveQuery: true,
   },
 });

@@ -98,6 +98,6 @@ export interface IDataFrameResponse extends SearchResponse<any> {
   took: number;
 }
 
-export interface IDataFrameError {
+export interface IDataFrameError extends IDataFrameResponse {
   error: Error;
 }
