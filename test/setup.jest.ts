@@ -14,7 +14,6 @@ global.TextEncoder = TextEncoder;
 global.TextDecoder = TextDecoder as typeof global.TextDecoder;
 
 window.URL.createObjectURL = () => '';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 HTMLCanvasElement.prototype.getContext = () => '' as any;
 Element.prototype.scrollIntoView = jest.fn();
 window.IntersectionObserver = (class IntersectionObserver {

@@ -7,8 +7,12 @@
     "build": "yarn plugin-helpers build",
     "plugin-helpers": "node ../../scripts/plugin_helpers",
     "test": "../../node_modules/.bin/jest --config ./test/jest.config.js",
-    "osd": "node ../../scripts/osd"
+    "osd": "node ../../scripts/osd",
+    "lint": "node ../../scripts/eslint"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {},
+  "eslintIgnore": [
+    "target/*"
+  ]
 }
