@@ -1,0 +1,2 @@
+fix:
+- [Workspace]Limit data source permission when workspace enabled ([#7125](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7125))
