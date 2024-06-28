@@ -8,8 +8,11 @@ import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { MemoryRouter } from 'react-router-dom';
 import { EuiFieldText, EuiTextArea, EuiSelect } from '@elastic/eui';
-import { ConfigurePrometheusDatasourcePanel } from './direct_query_configure_prometheus_data_source';
+import { ConfigureS3DatasourcePanelWithRouter } from './configure_amazon_s3_data_source';
 import { AuthMethod } from '../../../constants';
+import { QueryPermissionsConfiguration } from '../query_permissions';
+import { NameRow } from '../name_row';
+import { AuthDetails } from '../direct_query_data_source_auth_details';
 
 // Mock fetchDataSources function
 jest.mock('../name_row', () => ({
@@ -51,13 +54,11 @@ const mockSetSelectedQueryPermissionRoles = jest.fn();
 const mockSetError = jest.fn();
 const mockSetNameForRequest = jest.fn();
 const mockSetDetailsForRequest = jest.fn();
+const mockSetArnForRequest = jest.fn();
 const mockSetStoreForRequest = jest.fn();
 const mockSetAuthMethodForRequest = jest.fn();
 const mockSetUsernameForRequest = jest.fn();
 const mockSetPasswordForRequest = jest.fn();
-const mockSetAccessKeyForRequest = jest.fn();
-const mockSetSecretKeyForRequest = jest.fn();
-const mockSetRegionForRequest = jest.fn();
 
 const defaultProps = {
   roles: mockRoles,
@@ -65,25 +66,21 @@ const defaultProps = {
   setSelectedQueryPermissionRoles: mockSetSelectedQueryPermissionRoles,
   currentName: '',
   currentDetails: '',
+  currentArn: '',
   currentStore: '',
+  currentAuthMethod: 'basicauth' as AuthMethod,
   currentUsername: '',
   currentPassword: '',
-  currentAccessKey: '',
-  currentSecretKey: '',
-  currentRegion: '',
-  currentAuthMethod: 'basicauth' as AuthMethod,
   hasSecurityAccess: true,
   error: '',
   setError: mockSetError,
   setAuthMethodForRequest: mockSetAuthMethodForRequest,
-  setRegionForRequest: mockSetRegionForRequest,
-  setAccessKeyForRequest: mockSetAccessKeyForRequest,
-  setSecretKeyForRequest: mockSetSecretKeyForRequest,
   setPasswordForRequest: mockSetPasswordForRequest,
   setUsernameForRequest: mockSetUsernameForRequest,
   setStoreForRequest: mockSetStoreForRequest,
   setNameForRequest: mockSetNameForRequest,
   setDetailsForRequest: mockSetDetailsForRequest,
+  setArnForRequest: mockSetArnForRequest,
 };
 
 // Mock createMemoryHistory to return a consistent key
@@ -104,12 +101,12 @@ jest.mock('history', () => {
 const mountComponent = () => {
   return mount(
     <MemoryRouter>
-      <ConfigurePrometheusDatasourcePanel {...defaultProps} />
+      <ConfigureS3DatasourcePanelWithRouter {...defaultProps} />
     </MemoryRouter>
   );
 };
 
-describe('ConfigurePrometheusDatasourcePanel', () => {
+describe('ConfigureS3DatasourcePanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -131,9 +128,21 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     }, 1000);
   });
 
+  it('updates ARN state on change', async () => {
+    const wrapper = mountComponent();
+    const arnField = wrapper.find(EuiFieldText).at(0);
+    await act(async () => {
+      arnField.simulate('change', { target: { value: 'New ARN' } });
+      arnField.simulate('blur', { target: { value: 'New ARN' } });
+    });
+    setTimeout(() => {
+      expect(mockSetArnForRequest).toHaveBeenCalledWith('New ARN');
+    }, 1000);
+  });
+
   it('updates store URI state on change', async () => {
     const wrapper = mountComponent();
-    const storeField = wrapper.find(EuiFieldText).at(0);
+    const storeField = wrapper.find(EuiFieldText).at(1);
     await act(async () => {
       storeField.simulate('change', { target: { value: 'New Store URI' } });
       storeField.simulate('blur', { target: { value: 'New Store URI' } });
@@ -147,10 +156,10 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     const wrapper = mountComponent();
     const select = wrapper.find(EuiSelect).at(0);
     await act(async () => {
-      select.simulate('change', { target: { value: 'awssigv4' } });
+      select.simulate('change', { target: { value: 'noauth' } });
     });
     setTimeout(() => {
-      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
+      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('noauth');
     }, 1000);
   });
 
@@ -158,11 +167,11 @@ describe('ConfigurePrometheusDatasourcePanel', () => {
     const wrapper = mountComponent();
     const select = wrapper.find(EuiSelect).at(0);
     await act(async () => {
-      select.simulate('change', { target: { value: 'awssigv4' } });
+      select.simulate('change', { target: { value: 'noauth' } });
     });
     setTimeout(() => {
-      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('awssigv4');
-    }, 100);
+      expect(mockSetAuthMethodForRequest).toHaveBeenCalledWith('noauth');
+    }, 1000);
 
     await act(async () => {
       select.simulate('change', { target: { value: 'basicauth' } });

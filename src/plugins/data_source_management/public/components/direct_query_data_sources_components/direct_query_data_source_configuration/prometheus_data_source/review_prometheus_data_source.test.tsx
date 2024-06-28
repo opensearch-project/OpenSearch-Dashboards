@@ -7,7 +7,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
-import { ReviewPrometheusDatasource } from './direct_query_review_prometheus_data_source';
+import { ReviewPrometheusDatasource } from './review_prometheus_data_source';
 import { AuthMethod } from '../../../constants';
 import { Role } from '../../../../types';
 
