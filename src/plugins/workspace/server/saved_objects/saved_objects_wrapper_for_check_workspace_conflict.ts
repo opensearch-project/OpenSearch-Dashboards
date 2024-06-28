@@ -412,10 +412,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       bulkCreate: bulkCreateWithWorkspaceConflictCheck,
       checkConflicts: checkConflictWithWorkspaceConflictCheck,
       delete: wrapperOptions.client.delete,
-      find: (options: SavedObjectsFindOptions) =>
-        // TODO: The `formatFindParams` is a workaround for 2.14 to always list global data sources,
-        //       should remove this workaround in the upcoming release once readonly share is available.
-        wrapperOptions.client.find(this.formatFindParams(options)),
+      find: wrapperOptions.client.find,
       bulkGet: wrapperOptions.client.bulkGet,
       get: wrapperOptions.client.get,
       update: wrapperOptions.client.update,
