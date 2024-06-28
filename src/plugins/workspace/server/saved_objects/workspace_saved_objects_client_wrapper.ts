@@ -33,6 +33,7 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WorkspacePermissionMode,
 } from '../../common/constants';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -158,6 +159,14 @@ export class WorkspaceSavedObjectsClientWrapper {
     objectPermissionModes: WorkspacePermissionMode[],
     validateAllWorkspaces = true
   ) {
+    /**
+     * A data source saved object without workspaces attributes will be treated as a global data source.
+     * This kind of data source is not allowed for non dashboard admin. The dashboard admin will bypass this
+     * client wrapper, so denied all access to the global data source saved object here.
+     */
+    if (savedObject.type === DATA_SOURCE_SAVED_OBJECT_TYPE && !savedObject.workspaces) {
+      return false;
+    }
     /**
      *
      * Checks if the provided saved object lacks both workspaces and permissions.
@@ -490,7 +499,29 @@ export class WorkspaceSavedObjectsClientWrapper {
           })
         ).saved_objects.map((item) => item.id);
 
-        if (options.workspaces && options.workspaces.length > 0) {
+        if (options.type === DATA_SOURCE_SAVED_OBJECT_TYPE) {
+          // Overwrite the acl search params and workspace search operator here to avoid any global data source saved objects be response.
+          options.ACLSearchParams = {};
+          options.workspacesSearchOperator = 'AND';
+          /**
+           * If options.workspaces is not defined, find all data sources within user permitted workspaces.
+           * If options.workspaces is defined, filter out not permitted workspaces before find data sources.
+           */
+          options.workspaces = options.workspaces
+            ? options.workspaces.filter((item) => permittedWorkspaceIds.includes(item))
+            : permittedWorkspaceIds;
+
+          /**
+           * Passing an empty workspaces array will lead to the generated query missing the workspaces condition,
+           * which would return all data. Therefore,  direct return an empty result when no permitted workspaces.
+           */
+          if (!options.workspaces.length) {
+            return {
+              saved_objects: [],
+              total: 0,
+            };
+          }
+        } else if (options.workspaces && options.workspaces.length > 0) {
           const permittedWorkspaces = options.workspaces.filter((item) =>
             permittedWorkspaceIds.includes(item)
           );

@@ -18,6 +18,7 @@ import {
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import * as utilsExports from '../../utils';
 import { updateWorkspaceState } from '../../../../../core/server/utils';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../data_source/common';
 
 const repositoryKit = (() => {
   const savedObjects: Array<{ type: string; id: string }> = [];
@@ -77,6 +78,9 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
             permission: {
               enabled: true,
             },
+          },
+          data_source: {
+            enabled: true,
           },
           migrations: { skip: false },
         },
@@ -892,6 +896,114 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         ACLError = e;
       }
       expect(SavedObjectsErrorHelpers.isNotFoundError(ACLError)).toBe(true);
+    });
+  });
+
+  describe('data source', () => {
+    beforeAll(async () => {
+      await repositoryKit.create(
+        internalSavedObjectsRepository,
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        {
+          title: 'Global data source',
+        },
+        {
+          id: 'global-data-source',
+        }
+      );
+      await repositoryKit.create(
+        internalSavedObjectsRepository,
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        {
+          title: 'Data source in workspace 1',
+        },
+        {
+          id: 'data-source-in-workspace-1',
+          workspaces: ['workspace-1'],
+        }
+      );
+    });
+
+    it('should throw permission error when get global data source with non dashboard admin', async () => {
+      let error;
+      try {
+        await permittedSavedObjectedClient.get(DATA_SOURCE_SAVED_OBJECT_TYPE, 'global-data-source');
+      } catch (e) {
+        error = e;
+      }
+      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
+    });
+
+    it('should return requested data source normally for non dashboard admin', async () => {
+      const dataSource = await permittedSavedObjectedClient.get(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        'data-source-in-workspace-1'
+      );
+      expect(dataSource).toEqual(
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            title: 'Data source in workspace 1',
+          }),
+        })
+      );
+    });
+
+    it('should return requested global data source for dashboard admin', async () => {
+      const dataSource = await dashboardAdminSavedObjectedClient.get(
+        DATA_SOURCE_SAVED_OBJECT_TYPE,
+        'global-data-source'
+      );
+      expect(dataSource).toEqual(
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            title: 'Global data source',
+          }),
+        })
+      );
+    });
+
+    it('should filter out global data source for non dashboard admin', async () => {
+      const dataSourcesResult = await permittedSavedObjectedClient.find({
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      });
+      expect(dataSourcesResult.total).toEqual(1);
+      expect(dataSourcesResult.saved_objects).toEqual([
+        expect.objectContaining({
+          attributes: expect.objectContaining({
+            title: 'Data source in workspace 1',
+          }),
+        }),
+      ]);
+    });
+
+    it('should return empty data source list when find with not permitted workspace', async () => {
+      const dataSourcesResult = await permittedSavedObjectedClient.find({
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+        workspaces: ['one-not-permitted-workspace'],
+      });
+      expect(dataSourcesResult.total).toEqual(0);
+      expect(dataSourcesResult.saved_objects).toEqual([]);
+    });
+
+    it('should return all data sources for dashboard admin', async () => {
+      const dataSourcesResult = await dashboardAdminSavedObjectedClient.find({
+        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      });
+      expect(dataSourcesResult.total).toEqual(2);
+      expect(dataSourcesResult.saved_objects).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              title: 'Global data source',
+            }),
+          }),
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              title: 'Data source in workspace 1',
+            }),
+          }),
+        ])
+      );
     });
   });
 });
