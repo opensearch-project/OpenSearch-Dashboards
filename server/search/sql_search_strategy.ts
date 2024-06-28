@@ -17,7 +17,7 @@ import {
 import { Facet } from '../utils';
 
 export const sqlSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>,
+  _config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   client: ILegacyClusterClient,
   usage?: SearchUsage
@@ -25,7 +25,7 @@ export const sqlSearchStrategyProvider = (
   const sqlFacet = new Facet(client, logger, 'ppl.sqlQuery');
 
   return {
-    search: async (context, request: any, options) => {
+    search: async (context, request: any, _options) => {
       try {
         request.body.query = request.body.query.qs;
         const rawResponse: any = await sqlFacet.describeQuery(context, request);
