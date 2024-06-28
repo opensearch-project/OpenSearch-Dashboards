@@ -7,7 +7,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { MemoryRouter } from 'react-router-dom';
 import { act } from 'react-dom/test-utils';
-import { ReviewS3Datasource } from './direct_query_review_amazon_s3_data_source';
+import { ReviewS3Datasource } from './review_amazon_s3_data_source';
 import { AuthMethod } from '../../../constants';
 import { Role } from '../../../../types';
 
