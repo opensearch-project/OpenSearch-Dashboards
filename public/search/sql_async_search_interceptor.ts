@@ -9,8 +9,8 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../../src/plugins/data/public';
-import { DataFramePolling, getRawDataFrame, getRawQueryString, IDataFrameResponse } from '../../../../src/plugins/data/common';
-import { API, FetchDataFrameContext, SEARCH_STRATEGY, fetchDataFrame, fetchDataFramePolling } from '../../common';
+import { getRawDataFrame, getRawQueryString, IDataFrameResponse } from '../../../../src/plugins/data/common';
+import { API, DataFramePolling, FetchDataFrameContext, SEARCH_STRATEGY, fetchDataFrame, fetchDataFramePolling } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 import { concatMap } from 'rxjs/operators';
 

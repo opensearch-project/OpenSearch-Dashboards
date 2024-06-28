@@ -10,3 +10,5 @@ export interface FetchDataFrameContext {
   path: string;
   signal?: AbortSignal;
 }
+
+export type FetchFunction<T, P = void> = (params?: P) => Observable<T>;
