@@ -1,0 +1,73 @@
+name: Lint
+
+on: [pull_request]
+
+env:
+  PLUGIN_NAME: dashboards-query-enhancements
+  OPENSEARCH_DASHBOARDS_VERSION: "main"
+
+jobs:
+  build:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout OpenSearch Dashboards
+        uses: actions/checkout@v2
+        with:
+          repository: opensearch-project/Opensearch-Dashboards
+          ref: ${{ env.OPENSEARCH_DASHBOARDS_VERSION }}
+          path: OpenSearch-Dashboards
+
+      - name: Checkout query enhancements
+        uses: actions/checkout@v2
+        with:
+          path: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
+          fetch-depth: 0
+
+      - name: Get node and yarn versions
+        working-directory: ${{ env.WORKING_DIR }}
+        id: versions_step
+        run: |
+          echo "::set-output name=node_version::$(cat ./OpenSearch-Dashboards/.nvmrc | cut -d"." -f1)"
+          echo "::set-output name=yarn_version::$(node -p "(require('./OpenSearch-Dashboards/package.json').engines.yarn).match(/[.0-9]+/)[0]")"
+
+      - name: Setup node
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ steps.versions_step.outputs.node_version }}
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install correct yarn version for OpenSearch Dashboards
+        run: |
+          npm uninstall -g yarn
+          echo "Installing yarn ${{ steps.versions_step.outputs.yarn_version }}"
+          npm i -g yarn@${{ steps.versions_step.outputs.yarn_version }}
+
+      - name: Bootstrap the plugin
+        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
+        run: yarn osd bootstrap --single-version=loose
+
+      - name: Get list of changed files using GitHub Action
+        uses: lots0logs/gh-action-get-changed-files@2.2.2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check Changes of Files
+        run: |
+          echo "FILES_MODIFIED=$(cat ${HOME}/files_modified.json)"
+          echo "FILES_ADDED=$(cat ${HOME}/files_added.json)"
+          echo "FILES_RENAMED=$(cat ${HOME}/files_renamed.json)"
+          echo "FILES_DELETED=$(cat ${HOME}/files_deleted.json)"
+
+      - name: Lint Changed Files
+        run: |
+          CHANGED_FILES=($(jq -r '.[]' ${HOME}/files_modified.json ${HOME}/files_added.json | grep '.\+.\(js\|ts\|tsx\)$' | sort -u))
+          if [[ -n "$CHANGED_FILES" ]]; then
+            echo 'These are the changed files:'
+            printf '%s\n' "${CHANGED_FILES[@]}"
+            yarn lint "${CHANGED_FILES[@]}"
+          else
+            echo "No matched files to lint."
+          fi
+        working-directory: OpenSearch-Dashboards/plugins/${{ env.PLUGIN_NAME }}
