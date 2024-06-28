@@ -53,31 +53,35 @@ const mockedNavLinkService = mockedNavLink.start({
   application: mockedApplicationService,
 });
 
+const mockedGetNavLinks = jest.fn();
+jest.spyOn(mockedNavLinkService, 'getNavLinks$').mockImplementation(mockedGetNavLinks);
+mockedGetNavLinks.mockReturnValue(
+  new Rx.BehaviorSubject([
+    {
+      id: 'foo',
+    },
+    {
+      id: 'bar',
+    },
+    {
+      id: 'foo-in-category-foo',
+    },
+    {
+      id: 'foo-in-category-bar',
+    },
+    {
+      id: 'bar-in-category-foo',
+    },
+    {
+      id: 'bar-in-category-bar',
+    },
+    {
+      id: 'link-with-parent-nav-link-id',
+    },
+  ])
+);
+
 describe('ChromeNavGroupService#setup()', () => {
-  const mockedGetNavLinks = jest.fn();
-  jest.spyOn(mockedNavLinkService, 'getNavLinks$').mockImplementation(mockedGetNavLinks);
-  mockedGetNavLinks.mockReturnValue(
-    new Rx.BehaviorSubject([
-      {
-        id: 'foo',
-      },
-      {
-        id: 'bar',
-      },
-      {
-        id: 'foo-in-category-foo',
-      },
-      {
-        id: 'foo-in-category-bar',
-      },
-      {
-        id: 'bar-in-category-foo',
-      },
-      {
-        id: 'bar-in-category-bar',
-      },
-    ])
-  );
   it('should be able to `addNavLinksToGroup`', async () => {
     const warnMock = jest.fn();
     jest.spyOn(console, 'warn').mockImplementation(warnMock);
@@ -160,6 +164,10 @@ describe('ChromeNavGroupService#start()', () => {
         category: mockedCategoryBar,
       },
       mockedNavLinkBar,
+      {
+        id: 'link-with-parent-nav-link-id',
+        parentNavLinkId: 'not-exist-id',
+      },
     ]);
     chromeNavGroupServiceSetup.addNavLinksToGroup(mockedGroupBar, [mockedNavLinkBar]);
 
@@ -175,6 +183,7 @@ describe('ChromeNavGroupService#start()', () => {
       'bar',
       'foo-in-category-bar',
       'bar-in-category-bar',
+      'link-with-parent-nav-link-id',
     ]);
     expect(groupsMap[mockedGroupBar.id].navLinks.length).toEqual(1);
   });
