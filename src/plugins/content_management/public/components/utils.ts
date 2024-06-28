@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { BehaviorSubject } from 'rxjs';
 import { Content, Section } from '../services';
 import { ViewMode } from '../../../embeddable/public';

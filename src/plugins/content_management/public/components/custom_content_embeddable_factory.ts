@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { i18n } from '@osd/i18n';
 import { EmbeddableFactoryDefinition, IContainer } from '../../../embeddable/public';
 import {
