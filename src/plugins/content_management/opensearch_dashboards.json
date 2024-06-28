@@ -1,0 +1,9 @@
+{
+  "id": "contentManagement",
+  "version": "opensearchDashboards",
+  "server": false,
+  "ui": true,
+  "requiredPlugins": ["embeddable"],
+  "optionalPlugins": [],
+  "requiredBundles": ["embeddable"]
+}

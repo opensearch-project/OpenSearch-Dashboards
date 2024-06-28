@@ -42,6 +42,7 @@ import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../opensearch_dashboards_services';
 import { useMount } from 'react-use';
 import { USE_NEW_HOME_PAGE } from '../../../common/constants';
+import { PageRender } from '../../../../content_management/public';
 
 const RedirectToDefaultApp = () => {
   useMount(() => {
@@ -88,9 +89,12 @@ export function HomeApp({ directories, solutions }) {
     environmentService,
     telemetry,
     uiSettings,
+    contentManagement,
+    embeddable,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
+  const page = contentManagement.getPage('home');
 
   const renderTutorial = (props) => {
     return (
@@ -119,6 +123,8 @@ export function HomeApp({ directories, solutions }) {
 
   const homepage = <Homepage />;
 
+  const nextHome = <PageRender page={page} embeddable={embeddable} />;
+
   return (
     <I18nProvider>
       <Router>
@@ -134,13 +140,13 @@ export function HomeApp({ directories, solutions }) {
                 {legacyHome}
               </Route>
               <Route exact path="/">
-                {homepage}
+                {nextHome}
               </Route>
             </>
           ) : (
             <>
               <Route exact path="/next-home">
-                {homepage}
+                {nextHome}
               </Route>
               <Route exact path="/">
                 {legacyHome}

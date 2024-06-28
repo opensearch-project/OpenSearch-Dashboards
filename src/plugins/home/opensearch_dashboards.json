@@ -3,7 +3,7 @@
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "urlForwarding", "savedObjects"],
+  "requiredPlugins": ["data", "urlForwarding", "savedObjects", "contentManagement", "embeddable"],
   "optionalPlugins": ["usageCollection", "telemetry", "dataSource"],
-  "requiredBundles": ["opensearchDashboardsReact", "dataSourceManagement"]
+  "requiredBundles": ["opensearchDashboardsReact", "dataSourceManagement", "contentManagement"]
 }
