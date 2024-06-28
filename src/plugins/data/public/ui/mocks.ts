@@ -3,8 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { Observable } from 'rxjs';
 import { SettingsMock } from './settings/mocks';
 import { IUiSetup, IUiStart } from './types';
+import { ISearchStart } from '../search/types';
 
 const createMockWebStorage = () => ({
   clear: jest.fn(),
@@ -29,14 +31,21 @@ function createSetupContract(): jest.Mocked<IUiSetup> {
   };
 }
 
-function createStartContract(isEnhancementsEnabled: boolean = false): jest.Mocked<IUiStart> {
+function createStartContract(
+  isEnhancementsEnabled: boolean = false,
+  searchServiceMock: jest.Mocked<ISearchStart>
+): jest.Mocked<IUiStart> {
   const queryEnhancements = new Map();
   return {
-    isEnhancementsEnabled,
-    queryEnhancements,
     IndexPatternSelect: jest.fn(),
     SearchBar: jest.fn(),
-    Settings: new SettingsMock(createMockStorage(), queryEnhancements),
+    Settings: new SettingsMock(
+      { enabled: isEnhancementsEnabled, supportedAppNames: ['discover'] },
+      searchServiceMock,
+      createMockStorage(),
+      queryEnhancements
+    ),
+    container$: new Observable(),
   };
 }
 

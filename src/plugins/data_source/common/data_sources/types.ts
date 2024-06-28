@@ -9,7 +9,8 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   title: string;
   description?: string;
   endpoint: string;
-  dataSourceVersion?: string;
+  dataSourceVersion: string;
+  dataSourceEngineType?: DataSourceEngineType;
   installedPlugins?: string[];
   auth: {
     type: AuthType | string;
@@ -52,3 +53,10 @@ export enum SigV4ServiceName {
 }
 
 export { DataSourceError } from './error';
+
+export enum DataSourceEngineType {
+  OpenSearch = 'OpenSearch',
+  OpenSearchServerless = 'OpenSearch Serverless',
+  Elasticsearch = 'Elasticsearch',
+  NA = 'No Engine Type Available',
+}

@@ -23,10 +23,12 @@ import {
   DataSourceRef,
   IndexPatternManagmentContext,
 } from 'src/plugins/index_pattern_management/public/types';
+import semver from 'semver';
 import { useOpenSearchDashboards } from '../../../../../../../../../plugins/opensearch_dashboards_react/public';
 import { getDataSources } from '../../../../../../components/utils';
 import { DataSourceTableItem, StepInfo } from '../../../../types';
 import { LoadingState } from '../../../loading_state';
+import * as pluginManifest from '../../../../../../../opensearch_dashboards.json';
 
 interface HeaderProps {
   onDataSourceSelected: (id: string, type: string, title: string) => void;
@@ -68,6 +70,12 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
       .then((fetchedDataSources: DataSourceTableItem[]) => {
         setIsLoading(false);
         if (fetchedDataSources?.length) {
+          fetchedDataSources = fetchedDataSources.filter((dataSource) =>
+            semver.satisfies(
+              dataSource.datasourceversion,
+              pluginManifest.supportedOSDataSourceVersions
+            )
+          );
           setDataSources(fetchedDataSources);
         }
       })

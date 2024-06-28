@@ -11,6 +11,7 @@ import {
 } from 'src/core/server';
 import {
   DataSourceAttributes,
+  DataSourceEngineType,
   AuthType,
   UsernamePasswordTypedContent,
   SigV4Content,
@@ -97,4 +98,9 @@ export interface DataSourcePluginSetup {
 export interface DataSourcePluginStart {
   getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
   getCustomApiSchemaRegistry: () => CustomApiSchemaRegistry;
+}
+
+export interface DataSourceInfo {
+  dataSourceVersion?: string;
+  dataSourceEngineType?: DataSourceEngineType;
 }
