@@ -28,7 +28,7 @@ export function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLi
   return allCategories;
 }
 
-export function fullfillRegistrationLinksToChromeNavLinks(
+export function fulfillRegistrationLinksToChromeNavLinks(
   registerNavLinks: ChromeRegistrationNavLink[],
   navLinks: ChromeNavLink[]
 ): Array<ChromeNavLink & { order?: number }> {

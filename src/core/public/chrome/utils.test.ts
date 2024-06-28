@@ -7,7 +7,7 @@ import { ChromeRegistrationNavLink } from './nav_group';
 import { ChromeNavLink } from './nav_links';
 import {
   getAllCategories,
-  fullfillRegistrationLinksToChromeNavLinks,
+  fulfillRegistrationLinksToChromeNavLinks,
   getOrderedLinks,
   getOrderedLinksOrCategories,
   flattenLinksOrCategories,
@@ -69,7 +69,7 @@ describe('getAllCategories', () => {
   });
 });
 
-describe('fullfillRegistrationLinksToChromeNavLinks', () => {
+describe('fulfillRegistrationLinksToChromeNavLinks', () => {
   it('should return fullfilled ChromeNavLink', () => {
     const registrationNavLinks: ChromeRegistrationNavLink[] = [
       {
@@ -86,11 +86,11 @@ describe('fullfillRegistrationLinksToChromeNavLinks', () => {
       },
     ];
     const navLinks: ChromeNavLink[] = [mockedNavLinkA, mockedNavLinkB];
-    const fullfilledResult = fullfillRegistrationLinksToChromeNavLinks(
+    const fulfilledResult = fulfillRegistrationLinksToChromeNavLinks(
       registrationNavLinks,
       navLinks
     );
-    expect(fullfilledResult).toEqual([mockedNavLinkA, mockedNavLinkB]);
+    expect(fulfilledResult).toEqual([mockedNavLinkA, mockedNavLinkB]);
   });
 });
 

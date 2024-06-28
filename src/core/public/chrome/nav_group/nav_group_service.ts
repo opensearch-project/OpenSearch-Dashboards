@@ -9,7 +9,7 @@ import { map, takeUntil } from 'rxjs/operators';
 import { IUiSettingsClient } from '../../ui_settings';
 import {
   flattenLinksOrCategories,
-  fullfillRegistrationLinksToChromeNavLinks,
+  fulfillRegistrationLinksToChromeNavLinks,
   getOrderedLinksOrCategories,
 } from '../utils';
 import { ChromeNavLinks } from '../nav_links';
@@ -85,7 +85,7 @@ export class ChromeNavGroupService {
           return Object.keys(navGroupsMap).reduce((sortedNavGroupsMap, navGroupId) => {
             const navGroup = navGroupsMap[navGroupId];
             const sortedNavLinks = getOrderedLinksOrCategories(
-              fullfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, navLinks)
+              fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, navLinks)
             );
             sortedNavGroupsMap[navGroupId] = {
               ...navGroup,
