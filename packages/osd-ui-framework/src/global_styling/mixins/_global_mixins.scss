@@ -150,10 +150,6 @@
   }
 }
 
-/**
- * We specifically don't include Angular's ng-${state} classes here because we don't want to be tightly
- * coupled with Angular.
- */
 @mixin formControlInvalid {
   border-color: $kuiDangerBorderColor;
 }
