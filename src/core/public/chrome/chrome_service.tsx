@@ -198,7 +198,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
-    const navGroup = await this.navGroup.start();
+    const navGroup = await this.navGroup.start({ navLinks });
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {

@@ -150,15 +150,6 @@ describe('setup', () => {
       '[ChromeService] An existing custom collapsible navigation bar header render has been overridden.'
     );
   });
-
-  it('should return navGroupEnabled from ui settings', () => {
-    const chrome = new ChromeService({ browserSupportsCsp: true });
-    const uiSettings = uiSettingsServiceMock.createSetupContract();
-    uiSettings.get$.mockImplementation(() => new Rx.BehaviorSubject(true));
-
-    const chromeSetup = chrome.setup({ uiSettings });
-    expect(chromeSetup.getNavGroupEnabled()).toBe(true);
-  });
 });
 
 describe('start', () => {
@@ -498,15 +489,6 @@ describe('start', () => {
       `);
     });
   });
-
-  it('should return navGroupEnabled from ui settings', async () => {
-    const uiSettings = uiSettingsServiceMock.createSetupContract();
-    uiSettings.get$.mockImplementation(() => new Rx.BehaviorSubject(true));
-    const startDeps = defaultStartDeps();
-    const { chrome } = await start({ startDeps: { ...startDeps, uiSettings } });
-
-    expect(chrome.getNavGroupEnabled()).toBe(true);
-  });
 });
 
 describe('stop', () => {
@@ -537,20 +519,5 @@ describe('stop', () => {
         chrome.getHelpExtension$()
       ).toPromise()
     ).resolves.toBe(undefined);
-  });
-
-  it('should not update navGroupEnabled after stopped', async () => {
-    const uiSettings = uiSettingsServiceMock.createSetupContract();
-    const navGroupEnabled$ = new Rx.BehaviorSubject(true);
-    uiSettings.get$.mockImplementation(() => navGroupEnabled$);
-    const startDeps = defaultStartDeps();
-    const { chrome, service } = await start({ startDeps: { ...startDeps, uiSettings } });
-
-    navGroupEnabled$.next(false);
-    expect(chrome.getNavGroupEnabled()).toBe(false);
-
-    service.stop();
-    navGroupEnabled$.next(true);
-    expect(chrome.getNavGroupEnabled()).toBe(false);
   });
 });

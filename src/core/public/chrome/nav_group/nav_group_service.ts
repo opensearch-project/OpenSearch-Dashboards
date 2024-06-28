@@ -3,15 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, ReplaySubject, Subscription } from 'rxjs';
 import { AppCategory, ChromeNavGroup, ChromeNavLink } from 'opensearch-dashboards/public';
-import { map } from 'rxjs/operators';
+import { map, takeUntil } from 'rxjs/operators';
 import { IUiSettingsClient } from '../../ui_settings';
 import {
   flattenLinksOrCategories,
   fullfillRegistrationLinksToChromeNavLinks,
   getOrderedLinksOrCategories,
 } from '../utils';
+import { ChromeNavLinks, NavLinksService } from '../nav_links';
 
 /** @public */
 export interface ChromeRegistrationNavLink {
@@ -46,6 +47,7 @@ export interface ChromeNavGroupServiceStartContract {
 /** @internal */
 export class ChromeNavGroupService {
   private readonly navGroupsMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({});
+  private readonly stop$ = new ReplaySubject(1);
   private navLinks$: Observable<Array<Readonly<ChromeNavLink>>> = new BehaviorSubject([]);
   private navGroupEnabled: boolean = false;
   private navGroupEnabledUiSettingsSubscription: Subscription | undefined;
@@ -76,21 +78,23 @@ export class ChromeNavGroupService {
     return currentGroupsMap;
   }
   private getLinksSortedNavGroupsMap() {
-    return combineLatest([this.navGroupsMap$, this.navLinks$]).pipe(
-      map(([navGroupsMap, navLinks]) => {
-        return Object.keys(navGroupsMap).reduce((sortedNavGroupsMap, navGroupId) => {
-          const navGroup = navGroupsMap[navGroupId];
-          const sortedNavLinks = getOrderedLinksOrCategories(
-            fullfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, navLinks)
-          );
-          sortedNavGroupsMap[navGroupId] = {
-            ...navGroup,
-            navLinks: flattenLinksOrCategories(sortedNavLinks),
-          };
-          return sortedNavGroupsMap;
-        }, {} as Record<string, NavGroupItemInMap>);
-      })
-    );
+    return combineLatest([this.navGroupsMap$, this.navLinks$])
+      .pipe(takeUntil(this.stop$))
+      .pipe(
+        map(([navGroupsMap, navLinks]) => {
+          return Object.keys(navGroupsMap).reduce((sortedNavGroupsMap, navGroupId) => {
+            const navGroup = navGroupsMap[navGroupId];
+            const sortedNavLinks = getOrderedLinksOrCategories(
+              fullfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, navLinks)
+            );
+            sortedNavGroupsMap[navGroupId] = {
+              ...navGroup,
+              navLinks: flattenLinksOrCategories(sortedNavLinks),
+            };
+            return sortedNavGroupsMap;
+          }, {} as Record<string, NavGroupItemInMap>);
+        })
+      );
   }
   setup({ uiSettings }: { uiSettings: IUiSettingsClient }): ChromeNavGroupServiceSetupContract {
     this.navGroupEnabledUiSettingsSubscription = uiSettings
@@ -114,13 +118,19 @@ export class ChromeNavGroupService {
       getNavGroupEnabled: () => this.navGroupEnabled,
     };
   }
-  async start(): Promise<ChromeNavGroupServiceStartContract> {
+  async start({
+    navLinks,
+  }: {
+    navLinks: ChromeNavLinks;
+  }): Promise<ChromeNavGroupServiceStartContract> {
+    this.navLinks$ = navLinks.getNavLinks$();
     return {
       getNavGroupsMap$: () => this.getLinksSortedNavGroupsMap(),
       getNavGroupEnabled: () => this.navGroupEnabled,
     };
   }
   async stop() {
+    this.stop$.next();
     this.navGroupEnabledUiSettingsSubscription?.unsubscribe();
   }
 }
