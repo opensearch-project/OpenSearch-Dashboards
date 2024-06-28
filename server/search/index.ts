@@ -5,3 +5,4 @@
 
 export { pplSearchStrategyProvider } from './ppl_search_strategy';
 export { sqlSearchStrategyProvider } from './sql_search_strategy';
+export { sqlAsyncSearchStrategyProvider } from './sql_async_search_strategy';

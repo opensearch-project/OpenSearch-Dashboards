@@ -58,6 +58,38 @@ function defineRoute(
       }
     }
   );
+
+  router.get(
+    {
+      path: `${path}/{queryId}`,
+      validate: {
+        params: schema.object({
+          queryId: schema.string(),
+        }),
+      },
+    },
+    async (context, req, res): Promise<any> => {
+      try {
+        const queryRes: IDataFrameResponse = await searchStrategies[searchStrategyId].search(
+          context,
+          req as any,
+          {}
+        );
+        const result: any = {
+          body: {
+            ...queryRes,
+          },
+        };
+        return res.ok(result);
+      } catch (err) {
+        logger.error(err);
+        return res.custom({
+          statusCode: 500,
+          body: err,
+        });
+      }
+    }
+  );
 }
 
 export function defineRoutes(
@@ -70,5 +102,44 @@ export function defineRoutes(
 ) {
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.PPL);
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQL);
+  defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQLAsync);
   registerQueryAssistRoutes(router);
+  // defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQLAsync);
+  // sql async jobs
+  router.post(
+    {
+      path: `/api/sqlasyncql/jobs`,
+      validate: {
+        body: schema.object({
+          query: schema.object({
+            qs: schema.string(),
+            format: schema.string(),
+          }),
+          df: schema.any(),
+          dataSource: schema.nullable(schema.string()),
+        }),
+      },
+    },
+    async (context, req, res): Promise<any> => {
+      try {
+        const queryRes: IDataFrameResponse = await searchStrategies.sqlasync.search(
+          context,
+          req as any,
+          {}
+        );
+        const result: any = {
+          body: {
+            ...queryRes,
+          },
+        };
+        return res.ok(result);
+      } catch (err) {
+        logger.error(err);
+        return res.custom({
+          statusCode: 500,
+          body: err,
+        });
+      }
+    }
+  );
 }

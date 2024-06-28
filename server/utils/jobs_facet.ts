@@ -7,35 +7,23 @@ import { Logger } from 'opensearch-dashboards/server';
 import { FacetResponse, IPPLEventsDataSource, IPPLVisualizationDataSource } from '../types';
 import { shimSchemaRow, shimStats } from '.';
 
-export class Facet {
+export class JobsFacet {
   constructor(
-    private defaultClient: any,
+    private client: any,
     private logger: Logger,
     private endpoint: string,
     private shimResponse: boolean = false
   ) {
-    this.defaultClient = defaultClient;
+    this.client = client;
     this.logger = logger;
     this.endpoint = endpoint;
     this.shimResponse = shimResponse;
   }
 
-  protected fetch = async (
-    context: any,
-    request: any,
-    endpoint: string
-  ): Promise<FacetResponse> => {
+  protected fetch = async (request: any, endpoint: string): Promise<FacetResponse> => {
     try {
-      const { format, df, ...query } = request.body;
-      const params = {
-        body: { ...query },
-        ...(format !== 'jdbc' && { format }),
-      };
-      const dataSourceId = df?.meta?.queryConfig?.dataSourceId;
-      const client = dataSourceId
-        ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
-        : this.defaultClient.asScoped(request).callAsCurrentUser;
-      const queryRes = await client(endpoint, params);
+      const params = request.params;
+      const queryRes = await this.client.asScoped(request).callAsCurrentUser(endpoint, params);
       return {
         success: true,
         data: queryRes,
@@ -49,8 +37,8 @@ export class Facet {
     }
   };
 
-  public describeQuery = async (context: any, request: any): Promise<FacetResponse> => {
-    const response = await this.fetch(context, request, this.endpoint);
+  public describeQuery = async (request: any): Promise<FacetResponse> => {
+    const response = await this.fetch(request, this.endpoint);
     if (!this.shimResponse) return response;
 
     const { format: dataType } = request.body;
