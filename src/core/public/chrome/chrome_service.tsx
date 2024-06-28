@@ -358,8 +358,8 @@ export class ChromeService {
 
   public stop() {
     this.navLinks.stop();
-    this.stop$.next();
     this.navGroup.stop();
+    this.stop$.next();
   }
 }
 

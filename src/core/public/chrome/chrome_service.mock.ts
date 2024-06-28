@@ -37,7 +37,6 @@ const createSetupContractMock = () => {
   return {
     registerCollapsibleNavHeader: jest.fn(),
     navGroup: {
-      getNavGroupsMap$: jest.fn(() => new BehaviorSubject({})),
       addNavLinksToGroup: jest.fn(),
       getNavGroupEnabled: jest.fn(),
     },

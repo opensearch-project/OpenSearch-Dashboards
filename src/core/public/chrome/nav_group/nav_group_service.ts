@@ -12,7 +12,7 @@ import {
   fullfillRegistrationLinksToChromeNavLinks,
   getOrderedLinksOrCategories,
 } from '../utils';
-import { ChromeNavLinks, NavLinksService } from '../nav_links';
+import { ChromeNavLinks } from '../nav_links';
 
 /** @public */
 export interface ChromeRegistrationNavLink {
@@ -77,7 +77,7 @@ export class ChromeNavGroupService {
 
     return currentGroupsMap;
   }
-  private getLinksSortedNavGroupsMap() {
+  private getSortedNavGroupsMap() {
     return combineLatest([this.navGroupsMap$, this.navLinks$])
       .pipe(takeUntil(this.stop$))
       .pipe(
@@ -125,7 +125,7 @@ export class ChromeNavGroupService {
   }): Promise<ChromeNavGroupServiceStartContract> {
     this.navLinks$ = navLinks.getNavLinks$();
     return {
-      getNavGroupsMap$: () => this.getLinksSortedNavGroupsMap(),
+      getNavGroupsMap$: () => this.getSortedNavGroupsMap(),
       getNavGroupEnabled: () => this.navGroupEnabled,
     };
   }
