@@ -8,7 +8,7 @@ import { groupBy, sortBy } from 'lodash';
 import { ChromeNavLink } from './nav_links';
 import { ChromeRegistrationNavLink } from './nav_group';
 
-const LinkItemType = {
+export const LinkItemType = {
   LINK: 'link',
   CATEGORY: 'category',
 } as const;
@@ -18,7 +18,7 @@ export type LinkItem = { order?: number } & (
   | { itemType: 'category'; category?: AppCategory; links?: ChromeNavLink[] }
 );
 
-function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
+export function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
 
   for (const [key, value] of Object.entries(allCategorizedLinks)) {
