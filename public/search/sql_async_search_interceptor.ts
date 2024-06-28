@@ -1,6 +1,7 @@
 import { trimEnd } from 'lodash';
-import { BehaviorSubject, Observable, from, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
+import { concatMap } from 'rxjs/operators';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -9,16 +10,25 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../../src/plugins/data/public';
-import { getRawDataFrame, getRawQueryString, IDataFrameResponse } from '../../../../src/plugins/data/common';
-import { API, DataFramePolling, FetchDataFrameContext, SEARCH_STRATEGY, fetchDataFrame, fetchDataFramePolling } from '../../common';
+import {
+  getRawDataFrame,
+  getRawQueryString,
+  IDataFrameResponse,
+} from '../../../../src/plugins/data/common';
+import {
+  API,
+  DataFramePolling,
+  FetchDataFrameContext,
+  SEARCH_STRATEGY,
+  fetchDataFrame,
+  fetchDataFramePolling,
+} from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
-import { concatMap } from 'rxjs/operators';
 
-export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
+export class SQLAsyncSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
   protected dataFrame$ = new BehaviorSubject<IDataFrameResponse | undefined>(undefined);
-
 
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
@@ -47,8 +57,8 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
       return throwError(this.handleSearchError('DataFrame is not defined', request, signal!));
     }
 
-    const queryString = dataFrame.meta?.queryConfig?.formattedQs() ?? getRawQueryString(searchRequest) ?? '';
-
+    const queryString =
+      dataFrame.meta?.queryConfig?.formattedQs() ?? getRawQueryString(searchRequest) ?? '';
 
     const onPollingSuccess = (pollingResult: any) => {
       if (pollingResult && pollingResult.body.meta.status === 'SUCCESS') {
@@ -65,12 +75,11 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
         return true;
       }
       return false;
-    }
+    };
 
     const onPollingError = (error: Error) => {
-      console.error('Polling error:', error);
       throw new Error();
-    }
+    };
 
     return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
       concatMap((jobResponse) => {

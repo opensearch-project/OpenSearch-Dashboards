@@ -48,7 +48,7 @@ export class DataFramePolling<T, P = void> {
     private interval: number = 5000,
     private onPollingSuccess?: (data: T) => boolean,
     private onPollingError?: (error: Error) => boolean
-  ) { }
+  ) {}
 
   fetchData(params?: P) {
     this.loading = true;
@@ -126,17 +126,14 @@ export const fetchDataFrame = (
   );
 };
 
-export const fetchDataFramePolling = (  
-  context: FetchDataFrameContext,
-  df: IDataFrame
-) => {
+export const fetchDataFramePolling = (context: FetchDataFrameContext, df: IDataFrame) => {
   const { http, path, signal } = context;
   const queryId = df.meta?.queryId;
   return from(
     http.fetch({
       method: 'GET',
       path: `${path}/${queryId}`,
-      signal
+      signal,
     })
   );
-}
+};
