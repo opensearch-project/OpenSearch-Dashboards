@@ -58,7 +58,6 @@ export const fetchDataFramePolling = (
 ) => {
   const { http, path, signal } = context;
   const queryId = df.meta?.queryId;
-  console.log('queryId:', queryId);
   return from(
     http.fetch({
       method: 'GET',

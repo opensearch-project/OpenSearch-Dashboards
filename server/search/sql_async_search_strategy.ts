@@ -10,11 +10,10 @@ import {
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
   PartialDataFrame,
-  Polling,
   createDataFrame,
 } from '../../../../src/plugins/data/common';
 import { Facet } from '../utils';
-import { GetFacet } from '../utils';
+import { JobsFacet } from '../utils';
 
 export const sqlAsyncSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -22,19 +21,14 @@ export const sqlAsyncSearchStrategyProvider = (
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  // const sqlAsyncFacet = new SQLAsyncFacet(client);
-  // const sqlAsyncJobsFacet = new SQLAsyncJobsFacet(client);
-
   const sqlAsyncFacet = new Facet(client, logger, 'observability.runDirectQuery');
-  const sqlAsyncJobsFacet = new GetFacet(client, logger, 'observability.getJobStatus');
+  const sqlAsyncJobsFacet = new JobsFacet(client, logger, 'observability.getJobStatus');
 
   return {
     search: async (context, request: any, options) => {
-      console.log('request in search strategy:', request);
       try {
         // Create job: this should return a queryId and sessionId
         if (request?.body?.query?.qs) {
-          console.log('found query in request in search strategy');
           const df = request.body?.df;
           request.body = {
             query: request.body.query.qs,
@@ -65,14 +59,12 @@ export const sqlAsyncSearchStrategyProvider = (
             sessionId,
           };
           dataFrame.name = request.body?.datasource;
-          console.log('dataframe in strategy:', dataFrame);
           return {
             type: 'data_frame_polling',
             body: dataFrame,
             took: rawResponse.took,
           };
         } else {
-          console.log('did not find query in request in search strategy');
           const queryId = request.params.queryId;
           request.params = { queryId }
           const asyncResponse = await sqlAsyncJobsFacet.describeQuery(request);
@@ -91,6 +83,7 @@ export const sqlAsyncSearchStrategyProvider = (
           dataFrame.meta = {
             status,
             queryId,
+            error: status === 'FAILED' && asyncResponse.data?.error
           };
           dataFrame.name = request.body?.datasource;
   
@@ -102,160 +95,7 @@ export const sqlAsyncSearchStrategyProvider = (
             body: dataFrame,
             took: asyncResponse.took,
           };
-          // let asyncResponse = {};
-          // const handleDirectQuerySuccess = (pollingResult: any) => {
-          //   if (pollingResult && pollingResult.data.status === 'SUCCESS') {
-          //     asyncResponse = pollingResult;
-          //     return true;
-          //   }
-          //   if (pollingResult.data.status === 'FAILED') {
-          //     console.error('polling failed:', pollingResult.data);
-          //     asyncResponse = {
-          //       type: 'data_frame_polling',
-          //       body: { error: pollingResult.data.error },
-          //       took: pollingResult.took,
-          //     };
-          //     throw new Error();
-          //   }
-          //   return false;
-          // };
-          // const handleDirectQueryError = (error: Error) => {
-          //   // eslint-disable-next-line no-console
-          //   console.error(error);
-          //   return true;
-          // };
-          // const polling = new Polling<any, any>(
-          //   async () => {
-          //     request.params = { queryId }
-          //     return sqlAsyncJobsFacet.describeQuery(request);
-          //   },
-          //   5000,
-          //   handleDirectQuerySuccess,
-          //   handleDirectQueryError
-          // );
-          // polling.startPolling();
-          // await polling.waitForPolling();
-
-          // if (!asyncResponse.success) {
-          //   return {
-          //     type: 'data_frame_polling',
-          //     body: { error: asyncResponse.data },
-          //     took: asyncResponse.took,
-          //   };
-          // }
-          // if (asyncResponse?.body?.error) {
-          //   return asyncResponse;
-          // }
-  
-          // const partial: PartialDataFrame = {
-          //   name: '',
-          //   fields: asyncResponse?.data?.schema || [],
-          // };
-          // const dataFrame = createDataFrame(partial);
-          // dataFrame.fields.forEach((field, index) => {
-          //   field.values = asyncResponse?.data.datarows.map((row: any) => row[index]);
-          // });
-  
-          // dataFrame.size = asyncResponse?.data?.datarows?.length || 0;
-  
-          // dataFrame.meta = {
-          //   queryId,
-          // };
-          // dataFrame.name = request.body?.datasource;
-  
-          // // TODO: MQL should this be the time for polling or the time for job creation?
-          // if (usage) usage.trackSuccess(asyncResponse.took);
-  
-          // return {
-          //   type: 'data_frame_polling',
-          //   body: dataFrame,
-          //   took: asyncResponse.took,
-          // };
         }
-        // const df = request.body?.df;
-        // request.body = {
-        //   query: request.body.query.qs,
-        //   datasource: df?.meta?.queryConfig?.dataSource,
-        //   lang: 'sql',
-        //   sessionId: df?.meta?.sessionId,
-        // }
-        // const rawResponse = await sqlAsyncFacet.describeQuery(context, request);
-        // // handles failure
-        // if (!rawResponse.success) {
-        //   return {
-        //     type: 'data_frame_polling',
-        //     body: { error: rawResponse.data },
-        //     took: rawResponse.took,
-        //   };
-        // }
-        // const queryId = rawResponse.data?.queryId;
-        // const sessionId = rawResponse.data?.sessionId;
-
-        // // start polling logic
-        // let asyncResponse = rawResponse;
-        // const handleDirectQuerySuccess = (pollingResult: any) => {
-        //   if (pollingResult && pollingResult.data.status === 'SUCCESS') {
-        //     asyncResponse = pollingResult;
-        //     return true;
-        //   }
-        //   if (pollingResult.data.status === 'FAILED') {
-        //     console.error('polling failed:', pollingResult.data);
-        //     asyncResponse = {
-        //       type: 'data_frame_polling',
-        //       body: { error: pollingResult.data.error },
-        //       took: pollingResult.took,
-        //     };
-        //     throw new Error();
-        //   }
-        //   return false;
-        // };
-        // const handleDirectQueryError = (error: Error) => {
-        //   // eslint-disable-next-line no-console
-        //   console.error(error);
-        //   return true;
-        // };
-        // const polling = new Polling<any, any>(
-        //   async () => {
-        //     request.params = { queryId }
-        //     return sqlAsyncJobsFacet.describeQuery(request);
-        //   },
-        //   5000,
-        //   handleDirectQuerySuccess,
-        //   handleDirectQueryError
-        // );
-        // polling.startPolling();
-        // await polling.waitForPolling();
-
-        // if (asyncResponse?.body?.error) {
-        //   return asyncResponse;
-        // }
-
-        // const partial: PartialDataFrame = {
-        //   name: '',
-        //   fields: asyncResponse?.data?.schema || [],
-        // };
-        // const dataFrame = createDataFrame(partial);
-        // dataFrame.fields.forEach((field, index) => {
-        //   field.values = asyncResponse?.data.datarows.map((row: any) => row[index]);
-        // });
-
-        // dataFrame.size = asyncResponse?.data?.datarows?.length || 0;
-
-        // dataFrame.meta = {
-        //   query: request.body.query,
-        //   queryId,
-        //   sessionId,
-        // };
-        // dataFrame.name = request.body?.datasource;
-
-        // // TODO: MQL should this be the time for polling or the time for job creation?
-        // if (usage) usage.trackSuccess(rawResponse.took);
-
-        // return {
-        //   type: 'data_frame_polling',
-        //   body: dataFrame,
-        //   took: rawResponse.took,
-        // };
       } catch (e) {
         logger.error(`sqlAsyncSearchStrategy: ${e.message}`);
         if (usage) usage.trackError();

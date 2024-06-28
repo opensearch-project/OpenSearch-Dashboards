@@ -70,7 +70,6 @@ function defineRoute(
     },
     async (context, req, res): Promise<any> => {
       try {
-        console.log('in jobs query id route');
         const queryRes: IDataFrameResponse = await searchStrategies[searchStrategyId].search(
           context,
           req as any,

@@ -1,6 +1,5 @@
 import { trimEnd } from 'lodash';
-import { BehaviorSubject, Observable, from, of, throwError } from 'rxjs';
-import { stringify } from '@osd/std';
+import { BehaviorSubject, Observable, from, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import {
   DataPublicPluginStart,
@@ -18,7 +17,6 @@ import { concatMap } from 'rxjs/operators';
 export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
-  // protected sessionService!: DataPublicPluginStart['search']['session']
   protected dataFrame$ = new BehaviorSubject<IDataFrameResponse | undefined>(undefined);
 
 
@@ -28,7 +26,6 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
     deps.startServices.then(([coreStart, depsStart]) => {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
       this.aggsService = (depsStart as QueryEnhancementsPluginStartDependencies).data.search.aggs;
-      // this.sessionService = (depsStart as QueryEnhancementsPluginStartDependencies).data.search.session;
     });
   }
 
@@ -57,7 +54,7 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
       if (pollingResult && pollingResult.body.meta.status === 'SUCCESS') {
         return true;
       }
-      if (pollingResult.body.meta.status === 'FAILED') {
+      if (pollingResult && pollingResult.body.meta.status === 'FAILED') {
         const jsError = new Error(pollingResult.data.error.response);
         this.deps.toasts.addError(jsError, {
           title: i18n.translate('queryEnhancements.sqlQueryError', {
@@ -71,23 +68,21 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
     }
 
     const onPollingError = (error: Error) => {
-      console.error(error);
-      // abort here
+      console.error('Polling error:', error);
       throw new Error();
-      return true;
     }
 
     return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
       concatMap((jobResponse) => {
         const df = jobResponse.body;
         const dataFramePolling = new DataFramePolling<any, any>(
-          async () => of(fetchDataFramePolling(dfContext, df)),
+          () => fetchDataFramePolling(dfContext, df),
           5000,
           onPollingSuccess,
           onPollingError
         );
         dataFramePolling.startPolling();
-        return from(dataFramePolling.waitForPolling());
+        return dataFramePolling.waitForPolling();
       })
     );
   }
