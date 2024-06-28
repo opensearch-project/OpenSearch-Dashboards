@@ -17,10 +17,10 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState, useCallback } from 'react';
 import { RouteComponentProps, useParams, withRouter } from 'react-router-dom';
-import { ConfigureS3DatasourcePanel } from './amazon_s3_datasource/configure_amazon_s3_data_source';
-import { ConfigurePrometheusDatasourcePanel } from './prometheus_data_source/configure_prometheus_data_source';
-import { ReviewS3Datasource } from './amazon_s3_datasource/review_amazon_s3_data_source';
-import { ReviewPrometheusDatasource } from './prometheus_data_source/review_prometheus_data_source';
+import { ConfigureS3DatasourcePanel } from './amazon_s3/configure_amazon_s3_data_source';
+import { ConfigurePrometheusDatasourcePanel } from './prometheus/configure_prometheus_data_source';
+import { ReviewS3Datasource } from './amazon_s3/review_amazon_s3_data_source';
+import { ReviewPrometheusDatasource } from './prometheus/review_prometheus_data_source';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext, DirectQueryDatasourceType, Role } from '../../../types';
 import { DatasourceTypeToDisplayName, UrlToDatasourceType } from '../../../constants';
