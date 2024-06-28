@@ -102,5 +102,3 @@ export interface IDataFrameResponse extends SearchResponse<any> {
 export interface IDataFrameError extends IDataFrameResponse {
   error: Error;
 }
-
-export type FetchFunction<T, P = void> = (params?: P) => Observable<T>;

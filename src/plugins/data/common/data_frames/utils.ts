@@ -5,6 +5,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import datemath from '@opensearch/datemath';
+import { Subscription } from 'rxjs';
 import {
   DATA_FRAME_TYPES,
   DataFrameAggConfig,
@@ -18,7 +19,6 @@ import {
 import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';
 import { IOpenSearchDashboardsSearchRequest } from '../search';
-import { Subscription } from 'rxjs';
 import { GetAggTypeFn, GetDataFrameAggQsFn, TimeRange } from '../types';
 
 /**
@@ -474,9 +474,9 @@ export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatter
                 values:
                   subFieldType === 'object'
                     ? Object.entries(value as Record<string, unknown>)?.map(([k, v]) => ({
-                      name: `${subFieldName}.${k}`,
-                      type: typeof v,
-                    }))
+                        name: `${subFieldName}.${k}`,
+                        type: typeof v,
+                      }))
                     : [],
               } as IFieldType);
             }
@@ -498,77 +498,3 @@ export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatter
     fields: fields.reduce(flattenFields, {} as IndexPatternFieldMap),
   };
 };
-
-export class DataFramePolling<T, P = void> {
-  public data: T | null = null;
-  public error: Error | null = null;
-  public loading: boolean = true;
-  private shouldPoll: boolean = false;
-  private intervalRef?: NodeJS.Timeout;
-  private subscription?: Subscription;
-
-  constructor(
-    private fetchFunction: FetchFunction<T, P>,
-    private interval: number = 5000,
-    private onPollingSuccess?: (data: T) => boolean,
-    private onPollingError?: (error: Error) => boolean
-  ) { }
-
-  fetchData(params?: P) {
-    this.loading = true;
-    this.subscription = this.fetchFunction(params).subscribe({
-      next: (result: any) => {
-        this.data = result;
-        this.loading = false;
-
-        if (this.onPollingSuccess && this.onPollingSuccess(result)) {
-          this.stopPolling();
-        }
-      },
-      error: (err: any) => {
-        this.error = err as Error;
-        this.loading = false;
-
-        if (this.onPollingError && this.onPollingError(this.error)) {
-          this.stopPolling();
-        }
-      },
-    });
-  }
-
-  startPolling(params?: P) {
-    this.shouldPoll = true;
-    if (!this.intervalRef) {
-      this.intervalRef = setInterval(() => {
-        if (this.shouldPoll) {
-          this.fetchData(params);
-        }
-      }, this.interval);
-    }
-  }
-
-  stopPolling() {
-    this.shouldPoll = false;
-    if (this.intervalRef) {
-      clearInterval(this.intervalRef);
-      this.intervalRef = undefined;
-    }
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = undefined;
-    }
-  }
-
-  waitForPolling(): Promise<void> {
-    return new Promise<any>((resolve) => {
-      const checkLoading = () => {
-        if (!this.loading) {
-          resolve(this.data);
-        } else {
-          setTimeout(checkLoading, this.interval);
-        }
-      };
-      checkLoading();
-    });
-  }
-}
