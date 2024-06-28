@@ -4,6 +4,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { Observable } from 'rxjs';
 import { IFieldType } from './fields';
 
 export * from './_df_cache';
@@ -102,4 +103,4 @@ export interface IDataFrameError extends IDataFrameResponse {
   error: Error;
 }
 
-export type FetchFunction<T, P = void> = (params?: P) => Promise<T>;
+export type FetchFunction<T, P = void> = (params?: P) => Observable<T>;
