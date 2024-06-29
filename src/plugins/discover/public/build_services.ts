@@ -51,6 +51,7 @@ import { ChartsPluginStart } from 'src/plugins/charts/public';
 import { VisualizationsStart } from 'src/plugins/visualizations/public';
 import { SavedObjectOpenSearchDashboardsServices } from 'src/plugins/saved_objects/public';
 
+import { DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { DiscoverStartPlugins } from './plugin';
 import { createSavedSearchesLoader, SavedSearch } from './saved_searches';
 import { getHistory } from './opensearch_dashboards_services';
@@ -66,6 +67,7 @@ export interface DiscoverServices {
   chrome: ChromeStart;
   core: CoreStart;
   data: DataPublicPluginStart;
+  dataSource?: DataSourcePluginStart;
   docLinks: DocLinksStart;
   history: () => History;
   theme: ChartsPluginStart['theme'];
@@ -107,6 +109,7 @@ export function buildServices(
     chrome: core.chrome,
     core,
     data: plugins.data,
+    dataSource: plugins.dataSource,
     docLinks: core.docLinks,
     theme: plugins.charts.theme,
     filterManager: plugins.data.query.filterManager,
