@@ -28,7 +28,13 @@ export const pplSearchStrategyProvider = (
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  const pplFacet = new Facet(client, logger, 'ppl.pplQuery', true);
+  const pplFacet = new Facet({
+    client,
+    logger,
+    endpoint: 'ppl.pplQuery',
+    useJobs: false,
+    shimResponse: true,
+  });
 
   const parseRequest = (query: string) => {
     const pipeMap = new Map<string, string>();

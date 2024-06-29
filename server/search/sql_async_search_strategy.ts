@@ -14,7 +14,7 @@ import {
   PartialDataFrame,
   createDataFrame,
 } from '../../../../src/plugins/data/common';
-import { Facet, JobsFacet } from '../utils';
+import { Facet } from '../utils';
 
 export const sqlAsyncSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,
@@ -22,8 +22,13 @@ export const sqlAsyncSearchStrategyProvider = (
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  const sqlAsyncFacet = new Facet(client, logger, 'observability.runDirectQuery');
-  const sqlAsyncJobsFacet = new JobsFacet(client, logger, 'observability.getJobStatus');
+  const sqlAsyncFacet = new Facet({ client, logger, endpoint: 'observability.runDirectQuery' });
+  const sqlAsyncJobsFacet = new Facet({
+    client,
+    logger,
+    endpoint: 'observability.getJobStatus',
+    useJobs: true,
+  });
 
   return {
     search: async (context, request: any, options) => {
@@ -37,7 +42,7 @@ export const sqlAsyncSearchStrategyProvider = (
             lang: 'sql',
             sessionId: df?.meta?.sessionId,
           };
-          const rawResponse = await sqlAsyncFacet.describeQuery(context, request);
+          const rawResponse: any = await sqlAsyncFacet.describeQuery(context, request);
           // handles failure
           if (!rawResponse.success) {
             return {
@@ -64,11 +69,11 @@ export const sqlAsyncSearchStrategyProvider = (
             type: DATA_FRAME_TYPES.POLLING,
             body: dataFrame,
             took: rawResponse.took,
-          };
+          } as IDataFrameResponse;
         } else {
           const queryId = request.params.queryId;
           request.params = { queryId };
-          const asyncResponse = await sqlAsyncJobsFacet.describeQuery(request);
+          const asyncResponse: any = await sqlAsyncJobsFacet.describeQuery(context, request);
           const status = asyncResponse.data.status;
           const partial: PartialDataFrame = {
             name: '',
@@ -95,7 +100,7 @@ export const sqlAsyncSearchStrategyProvider = (
             type: DATA_FRAME_TYPES.POLLING,
             body: dataFrame,
             took: asyncResponse.took,
-          };
+          } as IDataFrameResponse;
         }
       } catch (e) {
         logger.error(`sqlAsyncSearchStrategy: ${e.message}`);

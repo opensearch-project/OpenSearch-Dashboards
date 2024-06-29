@@ -110,7 +110,7 @@ export class QueryEnhancementsPlugin
             showDatePicker: false,
             showFilterBar: false,
             showDataSourceSelector: false,
-            queryStringInput: { initialValue: '' },
+            queryStringInput: { initialValue: 'SHOW DATABASES IN ::mys3::' },
           },
           fields: {
             filterable: false,
