@@ -7,16 +7,26 @@ import { Logger } from 'opensearch-dashboards/server';
 import { FacetResponse, IPPLEventsDataSource, IPPLVisualizationDataSource } from '../types';
 import { shimSchemaRow, shimStats } from '.';
 
+export interface FacetProps {
+  client: any;
+  logger: Logger;
+  endpoint: string;
+  useJobs?: boolean;
+  shimResponse?: boolean;
+}
+
 export class Facet {
-  constructor(
-    private defaultClient: any,
-    private logger: Logger,
-    private endpoint: string,
-    private shimResponse: boolean = false
-  ) {
-    this.defaultClient = defaultClient;
+  private defaultClient: any;
+  private logger: Logger;
+  private endpoint: string;
+  private useJobs: boolean;
+  private shimResponse: boolean;
+
+  constructor({ client, logger, endpoint, useJobs = false, shimResponse = false }: FacetProps) {
+    this.defaultClient = client;
     this.logger = logger;
     this.endpoint = endpoint;
+    this.useJobs = useJobs;
     this.shimResponse = shimResponse;
   }
 
@@ -49,8 +59,36 @@ export class Facet {
     }
   };
 
+  protected fetchJobs = async (
+    context: any,
+    request: any,
+    endpoint: string
+  ): Promise<FacetResponse> => {
+    try {
+      const params = request.params;
+      const { df } = request.body;
+      const dataSourceId = df?.meta?.queryConfig?.dataSourceId;
+      const client = dataSourceId
+        ? context.dataSource.opensearch.legacy.getClient(dataSourceId).callAPI
+        : this.defaultClient.asScoped(request).callAsCurrentUser;
+      const queryRes = await client(endpoint, params);
+      return {
+        success: true,
+        data: queryRes,
+      };
+    } catch (err: any) {
+      this.logger.error(`Facet fetch: ${endpoint}: ${err}`);
+      return {
+        success: false,
+        data: err,
+      };
+    }
+  };
+
   public describeQuery = async (context: any, request: any): Promise<FacetResponse> => {
-    const response = await this.fetch(context, request, this.endpoint);
+    const response = this.useJobs
+      ? await this.fetchJobs(context, request, this.endpoint)
+      : await this.fetch(context, request, this.endpoint);
     if (!this.shimResponse) return response;
 
     const { format: dataType } = request.body;

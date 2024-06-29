@@ -20,7 +20,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 export {
   Facet,
-  JobsFacet,
+  FacetProps,
   OpenSearchPPLPlugin,
   OpenSearchObservabilityPlugin,
   shimStats,

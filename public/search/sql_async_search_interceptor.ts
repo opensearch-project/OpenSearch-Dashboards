@@ -1,8 +1,9 @@
 import { trimEnd } from 'lodash';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
-import { concatMap } from 'rxjs/operators';
+import { concatMap, map } from 'rxjs/operators';
 import {
+  DATA_FRAME_TYPES,
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
   IOpenSearchDashboardsSearchResponse,
@@ -62,7 +63,7 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
 
     const onPollingSuccess = (pollingResult: any) => {
       if (pollingResult && pollingResult.body.meta.status === 'SUCCESS') {
-        return true;
+        return false;
       }
       if (pollingResult && pollingResult.body.meta.status === 'FAILED') {
         const jsError = new Error(pollingResult.data.error.response);
@@ -72,15 +73,27 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
           }),
           toastMessage: pollingResult.data.error.response,
         });
-        return true;
+        return false;
       }
-      return false;
+
+      this.deps.toasts.addInfo({
+        title: i18n.translate('queryEnhancements.sqlQueryPolling', {
+          defaultMessage: 'Polling query job results...',
+        }),
+      });
+
+      return true;
     };
 
     const onPollingError = (error: Error) => {
-      throw new Error();
+      throw new Error(error.message);
     };
 
+    this.deps.toasts.addInfo({
+      title: i18n.translate('queryEnhancements.sqlQueryInfo', {
+        defaultMessage: 'Starting query job...',
+      }),
+    });
     return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
       concatMap((jobResponse) => {
         const df = jobResponse.body;
@@ -90,13 +103,18 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
           onPollingSuccess,
           onPollingError
         );
-        dataFramePolling.startPolling();
-        return dataFramePolling.waitForPolling();
+        return dataFramePolling.fetch().pipe(
+          map(() => {
+            const dfPolling = dataFramePolling.data;
+            dfPolling.type = DATA_FRAME_TYPES.DEFAULT;
+            return dfPolling;
+          })
+        );
       })
     );
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.SQLAsync);
+    return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.SQL_ASYNC);
   }
 }
