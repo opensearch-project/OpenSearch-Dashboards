@@ -3,7 +3,13 @@ import { DQLLexer } from './generated/DQLLexer';
 import { DQLParser, FieldContext } from './generated/DQLParser';
 import { DQLParserVisitor } from './generated/DQLParserVisitor';
 
-export const getSuggestions = async ({ selectionStart, selectionEnd, query }) => {
+export const getSuggestions = async ({
+  selectionStart,
+  selectionEnd,
+  query,
+  language,
+  indexPatterns,
+}) => {
   console.log('dsl query:', query);
 
   const inputStream = CharStream.fromString(query);
@@ -25,5 +31,16 @@ export const getSuggestions = async ({ selectionStart, selectionEnd, query }) =>
   const result = visitor.visit(tree);
   // console.log('dql parsing results:', result);
 
-  return [{ text: 'something', type: 'text' }];
+  // the schema from that
+  const fieldNames = indexPatterns[0].fields.map((idxField: { displayName: string }) => {
+    return idxField.displayName;
+  });
+  console.log('fields', fieldNames);
+
+  // put all the fields into the autosuggest
+  const fieldSuggestions = fieldNames.map((field) => {
+    return { text: field, type: 'text' };
+  });
+
+  return fieldSuggestions;
 };
