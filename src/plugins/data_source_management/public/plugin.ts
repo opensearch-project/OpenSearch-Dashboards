@@ -82,7 +82,7 @@ export class DataSourceManagementPlugin
       .then(([coreStart]) => coreStart.savedObjects);
 
     const column = new DataSourceColumn(savedObjectPromise);
-    // indexPatternManagement.columns.register(column);
+    indexPatternManagement.columns.register(column);
 
     const featureFlagStatus = !!dataSource;
 
