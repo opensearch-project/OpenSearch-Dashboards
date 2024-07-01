@@ -15,10 +15,12 @@ import { ManagementAppMountParams } from '../../../management/public';
 
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { CreateDataSourceWizardWithRouter } from '../components/create_data_source_wizard';
-import { DataSourceTableWithRouter } from '../components/data_source_table';
-import { DataSourceManagementContext } from '../types';
 import { EditDataSourceWithRouter } from '../components/edit_data_source';
+import { DataSourceHomePanel } from '../components/data_source_home_panel/data_source_home_panel';
+import { CreateDataSourcePanel } from '../components/data_source_creation_panel/create_data_source_panel';
+import { DataSourceManagementContext } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
+import { ConfigureDirectQueryDataSourceWithRouter } from '../components/direct_query_data_sources_components/direct_query_data_source_configuration/configure_direct_query_data_sources';
 
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
@@ -27,7 +29,8 @@ export interface DataSourceManagementStartDependencies {
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<DataSourceManagementStartDependencies>,
   params: ManagementAppMountParams & { wrapInPage?: boolean },
-  authMethodsRegistry: AuthenticationMethodRegistry
+  authMethodsRegistry: AuthenticationMethodRegistry,
+  featureFlagStatus: boolean
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
@@ -50,13 +53,23 @@ export async function mountManagementSection(
     <Router history={params.history}>
       <Switch>
         <Route path={['/create']}>
-          <CreateDataSourceWizardWithRouter />
+          <CreateDataSourcePanel {...params} featureFlagStatus={featureFlagStatus} />
         </Route>
-        <Route path={['/:id']}>
-          <EditDataSourceWithRouter />
+        {featureFlagStatus && (
+          <Route path={['/configure/OpenSearch']}>
+            <CreateDataSourceWizardWithRouter />
+          </Route>
+        )}
+        <Route path={['/configure/:type']}>
+          <ConfigureDirectQueryDataSourceWithRouter notifications={notifications} />
         </Route>
+        {featureFlagStatus && (
+          <Route path={['/:id']}>
+            <EditDataSourceWithRouter />
+          </Route>
+        )}
         <Route path={['/']}>
-          <DataSourceTableWithRouter />
+          <DataSourceHomePanel history={params.history} featureFlagStatus={featureFlagStatus} />
         </Route>
       </Switch>
     </Router>

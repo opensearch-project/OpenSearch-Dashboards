@@ -1,0 +1,85 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateDataSourceCardView renders correctly 1`] = `
+<EuiPanel>
+  <EuiFlexGroup
+    gutterSize="l"
+    style={
+      Object {
+        "flexWrap": "wrap",
+      }
+    }
+  >
+    <EuiFlexItem
+      key="S3GLUE"
+      style={
+        Object {
+          "maxWidth": "14rem",
+          "minWidth": "14rem",
+        }
+      }
+    >
+      <EuiCard
+        data-test-subj="datasource_card_s3glue"
+        description="Connect to Amazon S3 via AWS Glue Data Catalog"
+        icon={
+          <EuiIcon
+            size="xl"
+            type="test-file-stub"
+          />
+        }
+        onClick={[Function]}
+        title="Amazon S3"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="PROMETHEUS"
+      style={
+        Object {
+          "maxWidth": "14rem",
+          "minWidth": "14rem",
+        }
+      }
+    >
+      <EuiCard
+        data-test-subj="datasource_card_prometheus"
+        description="Connect to Prometheus"
+        icon={
+          <EuiIcon
+            size="xl"
+            type="test-file-stub"
+          />
+        }
+        onClick={[Function]}
+        title="Prometheus"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      key="OPENSEARCH"
+      style={
+        Object {
+          "maxWidth": "14rem",
+          "minWidth": "14rem",
+        }
+      }
+    >
+      <EuiCard
+        data-test-subj="datasource_card_opensearch"
+        description="Connect to OpenSearch"
+        icon={
+          <EuiIcon
+            size="xl"
+            type="test-file-stub"
+          />
+        }
+        onClick={[Function]}
+        title="OpenSearch"
+        titleElement="span"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer />
+</EuiPanel>
+`;
