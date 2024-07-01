@@ -24,6 +24,12 @@ export type Section =
       order: number;
       title?: string;
       description?: string;
+    }
+  | {
+      kind: 'card';
+      id: string;
+      order: number;
+      title?: string;
     };
 
 export type Content =
@@ -38,6 +44,13 @@ export type Content =
       id: string;
       order: number;
       render: () => React.ReactElement;
+    }
+  | {
+      kind: 'card';
+      id: string;
+      title: string;
+      description: string;
+      onClick?: () => void;
     };
 
 export type VisualizationInput =

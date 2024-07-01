@@ -22,6 +22,10 @@ import {
 } from './types';
 import { CUSTOM_CONTENT_RENDER } from './components/custom_content_embeddable';
 import { CustomContentEmbeddableFactoryDefinition } from './components/custom_content_embeddable_factory';
+import { CARD_CONTAINER, CardContainer } from './components/card_container/card_container';
+import { CardContainerFactoryDefinition } from './components/card_container/card_container_factory';
+import { CARD_EMBEDDABLE } from './components/card_container/card_embeddable';
+import { CardEmbeddableFactoryDefinition } from './components/card_container/card_embeddable_factory';
 
 export class ContentManagementPublicPlugin
   implements
@@ -44,6 +48,18 @@ export class ContentManagementPublicPlugin
     deps.embeddable.registerEmbeddableFactory(
       CUSTOM_CONTENT_RENDER,
       new CustomContentEmbeddableFactoryDefinition()
+    );
+
+    deps.embeddable.registerEmbeddableFactory(
+      CARD_EMBEDDABLE,
+      new CardEmbeddableFactoryDefinition()
+    );
+
+    deps.embeddable.registerEmbeddableFactory(
+      CARD_CONTAINER,
+      new CardContainerFactoryDefinition(async () => ({
+        embeddableServices: (await core.getStartServices())[1].embeddable,
+      }))
     );
 
     core.application.register({

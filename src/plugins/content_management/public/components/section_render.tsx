@@ -3,14 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
 
 import { Content, Section } from '../services';
-import { EmbeddableRenderer, EmbeddableStart } from '../../../embeddable/public';
+import { EmbeddableInput, EmbeddableRenderer, EmbeddableStart } from '../../../embeddable/public';
 import { DashboardContainerInput } from '../../../dashboard/public';
-import { createDashboardSection } from './utils';
+import { createCardSection, createDashboardSection } from './utils';
+import { CARD_CONTAINER } from './card_container/card_container';
+import { EuiTitle } from '@elastic/eui';
 
 interface Props {
   section: Section;
@@ -18,7 +20,11 @@ interface Props {
   embeddable: EmbeddableStart;
 }
 
-export const SectionRender = ({ section, embeddable, contents$ }: Props) => {
+export interface CardInput extends EmbeddableInput {
+  description: string;
+}
+
+const DashboardSection = ({ section, embeddable, contents$ }: Props) => {
   const contents = useObservable(contents$);
   const [input, setInput] = useState<DashboardContainerInput>();
 
@@ -32,8 +38,42 @@ export const SectionRender = ({ section, embeddable, contents$ }: Props) => {
 
   if (section.kind === 'dashboard' && factory && input) {
     // const input = createDashboardSection(section, contents ?? []);
-    console.log(input);
     return <EmbeddableRenderer factory={factory} input={input} />;
   }
+
+  return null;
+};
+
+const CardSection = ({ section, embeddable, contents$ }: Props) => {
+  const contents = useObservable(contents$);
+  const input = useMemo(() => {
+    return createCardSection(section, contents ?? []);
+  }, [section, contents]);
+
+  const factory = embeddable.getEmbeddableFactory(CARD_CONTAINER);
+
+  if (section.kind === 'card' && factory && input) {
+    return (
+      <div style={{ padding: '0 8px' }}>
+        <EuiTitle size="s">
+          <h2>{section.title}</h2>
+        </EuiTitle>
+        <EmbeddableRenderer factory={factory} input={input} />
+      </div>
+    );
+  }
+
+  return null;
+};
+
+export const SectionRender = ({ section, embeddable, contents$ }: Props) => {
+  if (section.kind === 'dashboard') {
+    return <DashboardSection section={section} embeddable={embeddable} contents$={contents$} />;
+  }
+
+  if (section.kind === 'card') {
+    return <CardSection section={section} embeddable={embeddable} contents$={contents$} />;
+  }
+
   return null;
 };

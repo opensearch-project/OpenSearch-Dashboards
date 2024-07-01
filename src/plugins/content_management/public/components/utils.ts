@@ -8,10 +8,55 @@ import { Content, Section } from '../services';
 import { ViewMode } from '../../../embeddable/public';
 import { DashboardContainerInput } from '../../../dashboard/public';
 import { CUSTOM_CONTENT_RENDER } from './custom_content_embeddable';
+import { CardContainerInput } from './card_container/card_container';
+import { CARD_EMBEDDABLE } from './card_container/card_embeddable';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 
+export const createCardSection = (
+  section: Section,
+  contents: Content[]
+): CardContainerInput | null => {
+  if (section.kind !== 'card') {
+    throw new Error(`function does not support section.type: ${section.kind}`);
+  }
+
+  const panels: CardContainerInput['panels'] = {};
+
+  const input: CardContainerInput = {
+    id: section.id,
+    title: section.title ?? '',
+    hidePanelTitles: true,
+    viewMode: ViewMode.VIEW,
+    panels: panels,
+  };
+
+  contents.forEach((content) => {
+    if (content.kind === 'card') {
+      panels[content.id] = {
+        type: CARD_EMBEDDABLE,
+        explicitInput: {
+          id: content.id,
+          title: content.title,
+          description: content.description,
+          onClick: content.onClick,
+        },
+      };
+    }
+  });
+
+  if (Object.keys(panels).length === 0) {
+    return null;
+  }
+
+  return input;
+};
+
 export const createDashboardSection = async (section: Section, contents: Content[]) => {
+  if (section.kind !== 'dashboard') {
+    throw new Error(`function does not support section.type: ${section.kind}`);
+  }
+
   const panels: DashboardContainerInput['panels'] = {};
   let x = 0;
   let y = 0;
@@ -31,6 +76,7 @@ export const createDashboardSection = async (section: Section, contents: Content
       type: '',
       explicitInput: {
         id: content.id,
+        disabledActions: ['togglePanel'],
       },
     };
 

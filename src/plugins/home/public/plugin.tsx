@@ -37,6 +37,7 @@ import {
 } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { first } from 'rxjs/operators';
+import React from 'react';
 
 import { Branding } from 'src/core/types';
 import {
@@ -71,6 +72,7 @@ import {
 } from '../../content_management/public';
 import { renderHomeCard } from './application/card_render';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -221,10 +223,17 @@ export class HomePublicPlugin
     sectionTypes.registerSection(workWithDataSection);
     sectionTypes.registerSection(learnBasicsSection);
 
-    contentManagement.registerPage({ id: 'home', title: 'Home' }).createSection({
+    const page = contentManagement.registerPage({ id: 'home', title: 'Home' });
+    page.createSection({
       id: 'service_cards',
       order: 3000,
       kind: 'dashboard',
+    });
+    page.createSection({
+      id: 'get_started',
+      order: 1000,
+      title: 'Define your path forward with OpenSearch',
+      kind: 'card',
     });
 
     return {
@@ -290,6 +299,66 @@ export class HomePublicPlugin
         order: 30,
         kind: 'custom',
         render: renderHomeCard,
+      });
+      page.addContent('get_started', {
+        id: 'get_started_1',
+        kind: 'card',
+        description: 'description 1',
+        title: 'title 1',
+        onClick: () => {
+          const modal = core.overlays.openModal(
+            toMountPoint(
+              <div>
+                test <button onClick={() => modal.close()}>close</button>
+              </div>
+            )
+          );
+        },
+      });
+      page.addContent('get_started', {
+        id: 'get_started_2',
+        kind: 'card',
+        description: 'description 2',
+        title: 'title 2',
+        onClick: () => {
+          const modal = core.overlays.openModal(
+            toMountPoint(
+              <div>
+                test <button onClick={() => modal.close()}>close</button>
+              </div>
+            )
+          );
+        },
+      });
+      page.addContent('get_started', {
+        id: 'get_started_3',
+        kind: 'card',
+        description: 'description 3',
+        title: 'title 3',
+        onClick: () => {
+          const modal = core.overlays.openModal(
+            toMountPoint(
+              <div>
+                test <button onClick={() => modal.close()}>close</button>
+              </div>
+            )
+          );
+        },
+      });
+      page.addContent('get_started', {
+        id: 'get_started_4',
+        kind: 'card',
+        description: 'description 4',
+        title: 'title 4',
+        onClick: () => {
+          const modal = core.overlays.openModal(
+            toMountPoint(
+              <div>
+                test <button onClick={() => modal.close()}>close</button>
+              </div>
+            )
+          );
+        },
       });
     }
 
