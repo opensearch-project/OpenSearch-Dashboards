@@ -23,7 +23,7 @@ interface IDataSelectorRefresherProps {
 export const DataSelectorRefresher: React.FC<IDataSelectorRefresherProps> = React.memo(
   ({ tooltipText, onRefresh, buttonProps, toolTipProps }) => {
     return (
-      <EuiText size="s">
+      <EuiText size="s" className="sourceRefreshText">
         <EuiToolTip
           position="right"
           content={i18n.translate('data.datasource.selector.refreshDataSources', {
@@ -34,10 +34,10 @@ export const DataSelectorRefresher: React.FC<IDataSelectorRefresherProps> = Reac
           {...toolTipProps}
         >
           <EuiButtonIcon
-            size="s"
             onClick={onRefresh}
             iconType="refresh"
             aria-label="sourceRefresh"
+            className="sourceRefreshButton"
             data-test-subj="sourceRefreshButton"
             {...buttonProps}
           />

@@ -162,6 +162,7 @@ export const DataSourceSelectable = ({
   return (
     <EuiComboBox
       {...comboBoxProps}
+      className="dataExplorerDSSelect"
       data-test-subj="dataExplorerDSSelect"
       placeholder={i18n.translate('data.datasource.selectADatasource', {
         defaultMessage: DATA_SELECTOR_DEFAULT_PLACEHOLDER,
