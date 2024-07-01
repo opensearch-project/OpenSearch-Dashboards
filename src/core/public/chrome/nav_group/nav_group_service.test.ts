@@ -10,6 +10,7 @@ import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.moc
 import { NavLinksService } from '../nav_links';
 import { applicationServiceMock, httpServiceMock } from '../../mocks';
 import { AppCategory } from 'opensearch-dashboards/public';
+import { DEFAULT_NAV_GROUPS } from '../../';
 
 const mockedGroupFoo = {
   id: 'foo',
@@ -217,5 +218,68 @@ describe('ChromeNavGroupService#start()', () => {
     chromeNavGroupService.stop();
     navGroupEnabled$.next(true);
     expect(chromeNavGroupServiceStart.getNavGroupEnabled()).toBe(false);
+  });
+});
+
+describe('nav group updater', () => {
+  it('should emit updated nav group after nav group updater called', async () => {
+    const navGroup = new ChromeNavGroupService();
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    uiSettings.get$.mockImplementation(() => new Rx.BehaviorSubject(true));
+
+    const navGroupSetup = navGroup.setup({ uiSettings });
+    navGroupSetup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.dataAdministration, [
+      {
+        id: 'foo',
+      },
+    ]);
+    const navGroupStart = await navGroup.start({ navLinks: mockedNavLinkService });
+
+    expect(await navGroupStart.getNavGroupsMap$().pipe(first()).toPromise()).toEqual({
+      dataAdministration: expect.not.objectContaining({
+        status: expect.anything,
+      }),
+    });
+    navGroupSetup.registerNavGroupUpdater(
+      new Rx.BehaviorSubject(() => ({
+        status: 2,
+      }))
+    );
+    expect(await navGroupStart.getNavGroupsMap$().pipe(first()).toPromise()).toEqual({
+      dataAdministration: expect.objectContaining({
+        status: 2,
+      }),
+    });
+  });
+
+  it('should reset to original status after nav group updater unregister', async () => {
+    const navGroup = new ChromeNavGroupService();
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    uiSettings.get$.mockImplementation(() => new Rx.BehaviorSubject(true));
+
+    const navGroupSetup = navGroup.setup({ uiSettings });
+    navGroupSetup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.dataAdministration, [
+      {
+        id: 'foo',
+      },
+    ]);
+    const appUpdater$ = new Rx.BehaviorSubject(() => ({
+      status: 2,
+    }));
+    const unregister = navGroupSetup.registerNavGroupUpdater(appUpdater$);
+    const navGroupStart = await navGroup.start({ navLinks: mockedNavLinkService });
+    expect(await navGroupStart.getNavGroupsMap$().pipe(first()).toPromise()).toEqual({
+      dataAdministration: expect.objectContaining({
+        status: 2,
+      }),
+    });
+
+    unregister();
+
+    expect(await navGroupStart.getNavGroupsMap$().pipe(first()).toPromise()).toEqual({
+      dataAdministration: expect.not.objectContaining({
+        status: expect.anything,
+      }),
+    });
   });
 });

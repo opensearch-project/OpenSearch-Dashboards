@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { BehaviorSubject, combineLatest, Observable, ReplaySubject, Subscription } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { AppCategory, ChromeNavGroup, ChromeNavLink } from 'opensearch-dashboards/public';
-import { map, takeUntil } from 'rxjs/operators';
+import { map, switchMap, takeUntil } from 'rxjs/operators';
 import { IUiSettingsClient } from '../../ui_settings';
 import {
   flattenLinksOrCategories,
@@ -31,12 +31,15 @@ export type NavGroupItemInMap = ChromeNavGroup & {
   navLinks: ChromeRegistrationNavLink[];
 };
 
+export type ChromeNavGroupUpdater = (navGroup: ChromeNavGroup) => Partial<ChromeNavGroup> | void;
+
 export interface ChromeNavGroupServiceSetupContract {
   addNavLinksToGroup: (navGroup: ChromeNavGroup, navLinks: ChromeRegistrationNavLink[]) => void;
   /**
    * Get a boolean value to indicates whether use case is enabled
    */
   getNavGroupEnabled: () => boolean;
+  registerNavGroupUpdater: (navGroupUpdater: Observable<ChromeNavGroupUpdater>) => () => void;
 }
 
 export interface ChromeNavGroupServiceStartContract {
@@ -51,6 +54,7 @@ export class ChromeNavGroupService {
   private navLinks$: Observable<Array<Readonly<ChromeNavLink>>> = new BehaviorSubject([]);
   private navGroupEnabled: boolean = false;
   private navGroupEnabledUiSettingsSubscription: Subscription | undefined;
+  private navGroupUpdaters$$ = new BehaviorSubject<Array<Observable<ChromeNavGroupUpdater>>>([]);
   private addNavLinkToGroup(
     currentGroupsMap: Record<string, NavGroupItemInMap>,
     navGroup: ChromeNavGroup,
@@ -78,7 +82,7 @@ export class ChromeNavGroupService {
     return currentGroupsMap;
   }
   private getSortedNavGroupsMap$() {
-    return combineLatest([this.navGroupsMap$, this.navLinks$])
+    return combineLatest([this.getUpdatedNavGroupsMap$(), this.navLinks$])
       .pipe(takeUntil(this.stop$))
       .pipe(
         map(([navGroupsMap, navLinks]) => {
@@ -95,6 +99,33 @@ export class ChromeNavGroupService {
           }, {} as Record<string, NavGroupItemInMap>);
         })
       );
+  }
+
+  private getUpdatedNavGroupsMap$() {
+    return combineLatest([this.navGroupsMap$, this.navGroupUpdaters$$]).pipe(
+      switchMap(([navGroupsMap, updaters$]) => {
+        if (updaters$.length === 0) {
+          return of(navGroupsMap);
+        }
+        return combineLatest(updaters$).pipe(
+          map((updaters) => {
+            return Object.keys(navGroupsMap).reduce<Record<string, NavGroupItemInMap>>(
+              (previousValue, currentKey) => ({
+                ...previousValue,
+                [currentKey]: updaters.reduce(
+                  (prevNavGroup, currentUpdater) => ({
+                    ...prevNavGroup,
+                    ...currentUpdater(prevNavGroup),
+                  }),
+                  navGroupsMap[currentKey]
+                ),
+              }),
+              {}
+            );
+          })
+        );
+      })
+    );
   }
   setup({ uiSettings }: { uiSettings: IUiSettingsClient }): ChromeNavGroupServiceSetupContract {
     this.navGroupEnabledUiSettingsSubscription = uiSettings
@@ -116,6 +147,14 @@ export class ChromeNavGroupService {
         this.navGroupsMap$.next(navGroupsMapAfterAdd);
       },
       getNavGroupEnabled: () => this.navGroupEnabled,
+      registerNavGroupUpdater: (updater$) => {
+        this.navGroupUpdaters$$.next([...this.navGroupUpdaters$$.getValue(), updater$]);
+        return () => {
+          this.navGroupUpdaters$$.next(
+            this.navGroupUpdaters$$.getValue().filter((item) => item !== updater$)
+          );
+        };
+      },
     };
   }
   async start({
