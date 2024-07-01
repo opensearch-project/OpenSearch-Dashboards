@@ -93,6 +93,7 @@ describe('ChromeNavGroupService#setup()', () => {
     chromeNavGroupServiceSetup.addNavLinksToGroup(mockedGroupBar, [mockedGroupBar]);
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
     });
     const groupsMap = await chromeNavGroupServiceStart.getNavGroupsMap$().pipe(first()).toPromise();
     expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(2);
@@ -115,6 +116,7 @@ describe('ChromeNavGroupService#setup()', () => {
     chromeNavGroupServiceSetup.addNavLinksToGroup(mockedGroupBar, [mockedGroupBar]);
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
     });
     const groupsMap = await chromeNavGroupServiceStart.getNavGroupsMap$().pipe(first()).toPromise();
     expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(1);
@@ -171,7 +173,10 @@ describe('ChromeNavGroupService#start()', () => {
     ]);
     chromeNavGroupServiceSetup.addNavLinksToGroup(mockedGroupBar, [mockedNavLinkBar]);
 
-    const chromeStart = await chromeNavGroupService.start({ navLinks: mockedNavLinkService });
+    const chromeStart = await chromeNavGroupService.start({
+      navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
+    });
 
     const groupsMap = await chromeStart.getNavGroupsMap$().pipe(first()).toPromise();
 
@@ -195,6 +200,7 @@ describe('ChromeNavGroupService#start()', () => {
     chromeNavGroupService.setup({ uiSettings });
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
     });
 
     expect(chromeNavGroupServiceStart.getNavGroupEnabled()).toBe(true);
@@ -209,6 +215,7 @@ describe('ChromeNavGroupService#start()', () => {
     chromeNavGroupService.setup({ uiSettings });
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
     });
 
     navGroupEnabled$.next(false);

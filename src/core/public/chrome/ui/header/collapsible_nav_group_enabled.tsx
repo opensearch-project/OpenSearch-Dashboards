@@ -16,6 +16,7 @@ import {
   EuiFlexGroup,
   EuiSideNavItemType,
   EuiSideNav,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
@@ -26,7 +27,7 @@ import { ChromeNavLink } from '../..';
 import { ChromeNavGroup, NavGroupType } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { OnIsLockedUpdate } from './';
+import { HeaderProps, OnIsLockedUpdate } from './';
 import { createEuiListItem } from './nav_link';
 import type { Logos } from '../../../../common/types';
 import { CollapsibleNavHeaderRender } from '../../chrome_service';
@@ -54,6 +55,8 @@ interface Props {
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   logos: Logos;
   navGroupsMap$: Rx.Observable<Record<string, NavGroupItemInMap>>;
+  onNavGroupSelected: HeaderProps['onNavGroupSelected'];
+  currentNavgroup$: Rx.Observable<ChromeNavGroup | undefined>;
 }
 
 interface NavGroupsProps {
@@ -132,6 +135,7 @@ export function CollapsibleNavGroupEnabled({
   navigateToApp,
   navigateToUrl,
   logos,
+  onNavGroupSelected,
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
@@ -139,8 +143,7 @@ export function CollapsibleNavGroupEnabled({
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const lockRef = useRef<HTMLButtonElement>(null);
-
-  const [focusGroup, setFocusGroup] = useState<ChromeNavGroup | undefined>(undefined);
+  const focusGroup = useObservable(observables.currentNavgroup$, undefined);
 
   const [shouldShrinkSecondNavigation, setShouldShrinkSecondNavigation] = useState(false);
 
@@ -150,9 +153,9 @@ export function CollapsibleNavGroupEnabled({
       const findMatchedGroup = orderedGroups.find(
         (group) => !!group.navLinks.find((navLink) => navLink.id === appId)
       );
-      setFocusGroup(findMatchedGroup);
+      onNavGroupSelected(findMatchedGroup?.id);
     }
-  }, [appId, navGroupsMap, focusGroup]);
+  }, [appId, navGroupsMap, focusGroup, onNavGroupSelected]);
 
   const secondNavigation = focusGroup ? (
     <>
@@ -228,7 +231,7 @@ export function CollapsibleNavGroupEnabled({
       navGroupsMap[group.id]?.navLinks,
       navLinks
     );
-    setFocusGroup(group);
+    onNavGroupSelected(group.id);
 
     // the `navGroupsMap[group.id]?.navLinks` has already been sorted
     const firstLink = fulfilledLinks[0];
@@ -318,7 +321,7 @@ export function CollapsibleNavGroupEnabled({
                               isActive={group.id === focusGroup?.id}
                               onClick={(e) => {
                                 if (focusGroup?.id === group.id) {
-                                  setFocusGroup(undefined);
+                                  onNavGroupSelected(undefined);
                                 } else {
                                   onGroupClick(e, group);
                                 }
@@ -342,7 +345,7 @@ export function CollapsibleNavGroupEnabled({
                               isActive={group.id === focusGroup?.id}
                               onClick={(e) => {
                                 if (focusGroup?.id === group.id) {
-                                  setFocusGroup(undefined);
+                                  onNavGroupSelected(undefined);
                                 } else {
                                   onGroupClick(e, group);
                                 }

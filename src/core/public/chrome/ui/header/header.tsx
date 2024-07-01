@@ -44,6 +44,7 @@ import classnames from 'classnames';
 import React, { createRef, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
+import { ChromeNavGroup } from 'opensearch-dashboards/public';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -103,6 +104,8 @@ export interface HeaderProps {
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
   navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
   navGroupEnabled: boolean;
+  onNavGroupSelected: (groupId: string | undefined) => void;
+  currentNavgroup$: Observable<ChromeNavGroup | undefined>;
 }
 
 export function Header({
@@ -117,6 +120,7 @@ export function Header({
   logos,
   collapsibleNavHeaderRender,
   navGroupEnabled,
+  onNavGroupSelected,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -283,6 +287,8 @@ export function Header({
             customNavLink$={observables.customNavLink$}
             logos={logos}
             navGroupsMap$={observables.navGroupsMap$}
+            onNavGroupSelected={onNavGroupSelected}
+            currentNavgroup$={observables.currentNavgroup$}
           />
         ) : (
           <CollapsibleNav

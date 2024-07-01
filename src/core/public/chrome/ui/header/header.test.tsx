@@ -79,6 +79,8 @@ function mockProps() {
     }),
     navGroupsMap$: new BehaviorSubject({}),
     navGroupEnabled: false,
+    currentNavgroup$: new BehaviorSubject(undefined),
+    onNavGroupSelected: () => {},
   };
 }
 

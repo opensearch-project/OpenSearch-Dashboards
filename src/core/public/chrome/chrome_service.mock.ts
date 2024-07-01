@@ -37,8 +37,11 @@ const createSetupContractMock = () => {
   return {
     registerCollapsibleNavHeader: jest.fn(),
     navGroup: {
-      addNavLinksToGroup: jest.fn(),
       getNavGroupEnabled: jest.fn(),
+      addNavLinksToGroup: jest.fn(),
+      prependNavgroupToBreadcrumbs: jest.fn(),
+      getCurrentNavGroup$: jest.fn(() => new BehaviorSubject(undefined)),
+      setCurrentNavGroup: jest.fn(),
     },
   };
 };
@@ -77,6 +80,9 @@ const createStartContractMock = () => {
     navGroup: {
       getNavGroupsMap$: jest.fn(() => new BehaviorSubject({})),
       getNavGroupEnabled: jest.fn(),
+      prependNavgroupToBreadcrumbs: jest.fn(),
+      getCurrentNavGroup$: jest.fn(() => new BehaviorSubject(undefined)),
+      setCurrentNavGroup: jest.fn(),
     },
     setAppTitle: jest.fn(),
     setIsVisible: jest.fn(),

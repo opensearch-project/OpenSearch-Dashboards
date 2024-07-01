@@ -304,6 +304,17 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  currentNavgroup$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1882,6 +1893,7 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
   onIsLockedUpdate={[Function]}
+  onNavGroupSelected={[Function]}
   opensearchDashboardsDocLink="/docs"
   opensearchDashboardsVersion="1.0.0"
   recentlyAccessed$={
@@ -7084,6 +7096,17 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  currentNavgroup$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
@@ -8500,6 +8523,7 @@ exports[`Header renders condensed header 1`] = `
     }
   }
   onIsLockedUpdate={[Function]}
+  onNavGroupSelected={[Function]}
   opensearchDashboardsDocLink="/docs"
   opensearchDashboardsVersion="1.0.0"
   recentlyAccessed$={
