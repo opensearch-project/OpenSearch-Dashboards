@@ -38,7 +38,13 @@ describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
     const wrapper = mount(
-      <HeaderBreadcrumbs appTitle$={new BehaviorSubject('')} breadcrumbs$={breadcrumbs$} />
+      <HeaderBreadcrumbs
+        navgroupEnabled={false}
+        currentNavgroup$={new BehaviorSubject(undefined)}
+        prependCurrentNavgroupToBreadcrumbs={jest.fn()}
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+      />
     );
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
 

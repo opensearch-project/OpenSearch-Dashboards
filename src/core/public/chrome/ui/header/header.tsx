@@ -44,6 +44,7 @@ import classnames from 'classnames';
 import React, { createRef, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
+import { ChromeNavGroup } from 'opensearch-dashboards/public';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -95,6 +96,11 @@ export interface HeaderProps {
   logos: Logos;
   survey: string | undefined;
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
+  navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
+  navGroupEnabled: boolean;
+  onNavGroupSelected: (groupId: string | undefined) => void;
+  currentNavgroup$: Observable<ChromeNavGroup | undefined>;
+  prependCurrentNavgroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => ChromeBreadcrumb[];
 }
 
 export function Header({
@@ -108,6 +114,9 @@ export function Header({
   survey,
   logos,
   collapsibleNavHeaderRender,
+  navGroupEnabled,
+  onNavGroupSelected,
+  prependCurrentNavgroupToBreadcrumbs,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -221,6 +230,9 @@ export function Header({
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
+              currentNavgroup$={observables.currentNavgroup$}
+              navgroupEnabled={navGroupEnabled}
+              prependCurrentNavgroupToBreadcrumbs={prependCurrentNavgroupToBreadcrumbs}
             />
 
             <EuiHeaderSectionItem border="none">

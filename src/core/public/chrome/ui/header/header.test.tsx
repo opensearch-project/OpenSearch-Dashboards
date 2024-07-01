@@ -77,6 +77,11 @@ function mockProps() {
       dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
       paddingSize: 640,
     }),
+    navGroupsMap$: new BehaviorSubject({}),
+    navGroupEnabled: false,
+    currentNavgroup$: new BehaviorSubject(undefined),
+    onNavGroupSelected: jest.fn(),
+    prependCurrentNavgroupToBreadcrumbs: jest.fn(),
   };
 }
 

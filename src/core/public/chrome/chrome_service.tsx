@@ -109,7 +109,7 @@ export interface StartDeps {
   overlays: OverlayStart;
 }
 
-type CollapsibleNavHeaderRender = () => JSX.Element | null;
+export type CollapsibleNavHeaderRender = () => JSX.Element | null;
 
 /** @internal */
 export class ChromeService {
@@ -198,7 +198,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
-    const navGroup = await this.navGroup.start({ navLinks });
+    const navGroup = await this.navGroup.start({ navLinks, application });
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -299,6 +299,11 @@ export class ChromeService {
           survey={injectedMetadata.getSurvey()}
           collapsibleNavHeaderRender={this.collapsibleNavHeaderRender}
           sidecarConfig$={sidecarConfig$}
+          navGroupsMap$={navGroup.getNavGroupsMap$()}
+          navGroupEnabled={navGroup.getNavGroupEnabled()}
+          onNavGroupSelected={navGroup.setCurrentNavGroup}
+          currentNavgroup$={navGroup.getCurrentNavGroup$()}
+          prependCurrentNavgroupToBreadcrumbs={navGroup.prependCurrentNavgroupToBreadcrumbs}
         />
       ),
 

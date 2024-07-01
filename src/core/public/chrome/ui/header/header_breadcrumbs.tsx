@@ -33,20 +33,35 @@ import classNames from 'classnames';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
+import { ChromeNavGroup } from 'opensearch-dashboards/public';
 import { ChromeBreadcrumb } from '../../chrome_service';
 
 interface Props {
   appTitle$: Observable<string>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  navgroupEnabled: boolean;
+  currentNavgroup$: Observable<ChromeNavGroup | undefined>;
+  prependCurrentNavgroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => ChromeBreadcrumb[];
 }
 
-export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
+export function HeaderBreadcrumbs({
+  appTitle$,
+  breadcrumbs$,
+  navgroupEnabled,
+  currentNavgroup$,
+  prependCurrentNavgroupToBreadcrumbs,
+}: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
   let crumbs = breadcrumbs;
 
   if (breadcrumbs.length === 0 && appTitle) {
     crumbs = [{ text: appTitle }];
+  }
+
+  const currentNavgroup = useObservable(currentNavgroup$, undefined);
+  if (navgroupEnabled && currentNavgroup) {
+    crumbs = prependCurrentNavgroupToBreadcrumbs(crumbs);
   }
 
   crumbs = crumbs.map((breadcrumb, i) => ({
