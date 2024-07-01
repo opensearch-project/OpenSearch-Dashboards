@@ -823,7 +823,7 @@ export interface DocLinksStart {
       readonly browser: string;
       readonly dataSource: {
         readonly guide: string;
-        readonly s3DataSource: string;
+        s3DataSource: string;
       };
       readonly visualize: Record<string, string>;
       readonly management: Record<string, string>;
