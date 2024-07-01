@@ -71,6 +71,7 @@ export class PluginWrapper<
   public readonly includesServerPlugin: PluginManifest['server'];
   public readonly includesUiPlugin: PluginManifest['ui'];
   public readonly supportedOSDataSourceVersions: PluginManifest['supportedOSDataSourceVersions'];
+  public readonly requiredOSDataSourcePlugins: PluginManifest['requiredOSDataSourcePlugins'];
 
   private readonly log: Logger;
   private readonly initializerContext: PluginInitializerContext;
@@ -102,6 +103,7 @@ export class PluginWrapper<
     this.includesServerPlugin = params.manifest.server;
     this.includesUiPlugin = params.manifest.ui;
     this.supportedOSDataSourceVersions = params.manifest.supportedOSDataSourceVersions;
+    this.requiredOSDataSourcePlugins = params.manifest.requiredOSDataSourcePlugins;
   }
 
   /**
