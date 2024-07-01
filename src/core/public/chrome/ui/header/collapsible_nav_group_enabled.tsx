@@ -16,7 +16,6 @@ import {
   EuiFlexGroup,
   EuiSideNavItemType,
   EuiSideNav,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { sortBy } from 'lodash';
@@ -33,8 +32,9 @@ import type { Logos } from '../../../../common/types';
 import { CollapsibleNavHeaderRender } from '../../chrome_service';
 import { NavGroupItemInMap } from '../../nav_group';
 import {
-  fullfillRegistrationLinksToChromeNavLinks,
+  fulfillRegistrationLinksToChromeNavLinks,
   getOrderedLinksOrCategories,
+  LinkItem,
   LinkItemType,
 } from '../../utils';
 
@@ -85,28 +85,32 @@ function NavGroups({ navLinks, suffix, style, appId, navigateToApp, onClick }: N
     };
   };
   const orderedLinksOrCategories = getOrderedLinksOrCategories(navLinks);
+  const createSideNavItem = (navLink: LinkItem): EuiSideNavItemType<{}> => {
+    if (navLink.itemType === LinkItemType.LINK) {
+      return createNavItem({
+        link: navLink.link,
+      });
+    }
+
+    if (navLink.itemType === LinkItemType.PARENT_LINK && navLink.link) {
+      return {
+        ...createNavItem({ link: navLink.link }),
+        items: navLink.links.map((subNavLink) => createSideNavItem(subNavLink)),
+      };
+    }
+
+    if (navLink.itemType === LinkItemType.CATEGORY) {
+      return {
+        id: navLink.category?.id ?? '',
+        name: <div className="padding-horizontal">{navLink.category?.label ?? ''}</div>,
+        items: navLink.links?.map((link) => createSideNavItem(link)),
+      };
+    }
+
+    return {} as EuiSideNavItemType<{}>;
+  };
   const sideNavItems = orderedLinksOrCategories
-    .map((navLink): EuiSideNavItemType<{}> | undefined => {
-      if (navLink.itemType === LinkItemType.LINK) {
-        return createNavItem({
-          link: navLink.link,
-        });
-      }
-
-      if (navLink.itemType === LinkItemType.PARENT_LINK && navLink.link) {
-        return createNavItem({
-          link: navLink.link,
-        });
-      }
-
-      if (navLink.itemType === LinkItemType.CATEGORY) {
-        return {
-          id: navLink.category?.id ?? '',
-          name: <div className="padding-horizontal">{navLink.category?.label ?? ''}</div>,
-          items: navLink.links?.map((link) => createNavItem({ link })),
-        };
-      }
-    })
+    .map((navLink) => createSideNavItem(navLink))
     .filter((item): item is EuiSideNavItemType<{}> => !!item);
   return (
     <EuiFlexItem className="eui-yScroll" style={style}>
@@ -187,7 +191,7 @@ export function CollapsibleNavGroupEnabled({
             </EuiFlexGroup>
           </div>
           <NavGroups
-            navLinks={fullfillRegistrationLinksToChromeNavLinks(
+            navLinks={fulfillRegistrationLinksToChromeNavLinks(
               navGroupsMap[focusGroup.id]?.navLinks || [],
               navLinks
             )}
@@ -220,24 +224,14 @@ export function CollapsibleNavGroupEnabled({
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
     group: ChromeNavGroup
   ) => {
-    const fullfilledLinks = fullfillRegistrationLinksToChromeNavLinks(
+    const fulfilledLinks = fulfillRegistrationLinksToChromeNavLinks(
       navGroupsMap[group.id]?.navLinks,
       navLinks
     );
-    const orderedLinksOrCategories = getOrderedLinksOrCategories(fullfilledLinks);
     setFocusGroup(group);
-    let firstLink: ChromeNavLink | null = null;
-    orderedLinksOrCategories.find((linkOrCategory) => {
-      if (linkOrCategory.itemType === LinkItemType.CATEGORY) {
-        if (linkOrCategory.links?.length) {
-          firstLink = linkOrCategory.links[0];
-          return true;
-        }
-      } else if (linkOrCategory.itemType === LinkItemType.LINK) {
-        firstLink = linkOrCategory.link;
-        return true;
-      }
-    });
+
+    // the `navGroupsMap[group.id]?.navLinks` has already been sorted
+    const firstLink = fulfilledLinks[0];
     if (firstLink) {
       const propsForEui = createEuiListItem({
         link: firstLink,
