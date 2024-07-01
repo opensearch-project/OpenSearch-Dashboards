@@ -416,6 +416,7 @@ test('set defaults for all missing optional fields', async () => {
     requiredBundles: [],
     server: true,
     ui: false,
+    supportedOSDataSourceVersions: undefined,
   });
 });
 
@@ -434,6 +435,7 @@ test('return all set optional fields as they are in manifest', async () => {
           'test-opensearch-plugin-2': '>=1.0.0',
         },
         ui: true,
+        supportedOSDataSourceVersions: '>=1.0.0',
       })
     )
   );
@@ -452,6 +454,7 @@ test('return all set optional fields as they are in manifest', async () => {
     },
     server: false,
     ui: true,
+    supportedOSDataSourceVersions: '>=1.0.0',
   });
 });
 
