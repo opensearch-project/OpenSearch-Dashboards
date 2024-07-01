@@ -1789,6 +1789,17 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
   navGroupEnabled={false}
+  navGroupsMap$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {},
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navLinks$={
     BehaviorSubject {
       "_isScalar": false,
@@ -8540,6 +8551,17 @@ exports[`Header renders condensed header 1`] = `
     }
   }
   navGroupEnabled={false}
+  navGroupsMap$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {},
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navLinks$={
     BehaviorSubject {
       "_isScalar": false,
