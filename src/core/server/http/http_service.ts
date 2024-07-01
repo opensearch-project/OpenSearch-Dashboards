@@ -36,7 +36,7 @@ import { pick } from '@osd/std';
 import { CoreService } from '../../types';
 import { Logger, LoggerFactory } from '../logging';
 import { ContextSetup } from '../context';
-import { Env } from '../config';
+import { Env, InternalDynamicConfigServiceStart } from '../config';
 import { CoreContext } from '../core_context';
 import { PluginOpaqueId } from '../plugins';
 import { CspConfigType, config as cspConfig } from '../csp';
@@ -58,6 +58,10 @@ import { registerCoreHandlers } from './lifecycle_handlers';
 
 export interface SetupDeps {
   context: ContextSetup;
+}
+
+export interface StartDeps {
+  dynamicConfigService: InternalDynamicConfigServiceStart;
 }
 
 /** @internal */
@@ -140,7 +144,7 @@ export class HttpService
     };
   }
 
-  public async start() {
+  public async start(deps: StartDeps) {
     const config = await this.config$.pipe(first()).toPromise();
     if (this.shouldListen(config)) {
       if (this.notReadyServer) {
@@ -154,7 +158,7 @@ export class HttpService
         await this.httpsRedirectServer.start(config);
       }
 
-      await this.httpServer.start();
+      await this.httpServer.start(deps.dynamicConfigService);
     }
 
     return this.getStartContract();

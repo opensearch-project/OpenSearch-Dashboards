@@ -36,6 +36,7 @@ import { createHttpServer } from '../../http/test_utils';
 import { HttpService, IRouter } from '../../http';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { ServerMetricsCollector } from '../collectors/server';
+import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
 
 const requestWaitDelay = 25;
 
@@ -44,6 +45,7 @@ describe('ServerMetricsCollector', () => {
   let collector: ServerMetricsCollector;
   let hapiServer: HapiServer;
   let router: IRouter;
+  const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
   const sendGet = (path: string) => supertest(hapiServer.listener).get(path);
@@ -65,7 +67,7 @@ describe('ServerMetricsCollector', () => {
     router.get({ path: '/', validate: false }, async (ctx, req, res) => {
       return res.ok({ body: '' });
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     let metrics = await collector.collect();
 
@@ -103,7 +105,7 @@ describe('ServerMetricsCollector', () => {
       await never;
       return res.ok({ body: '' });
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await sendGet('/');
     const discoReq1 = sendGet('/disconnect').end(() => null);
@@ -159,7 +161,7 @@ describe('ServerMetricsCollector', () => {
       await delay(250);
       return res.ok({ body: '' });
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     await Promise.all([sendGet('/no-delay'), sendGet('/250-ms')]);
     let metrics = await collector.collect();
@@ -183,7 +185,7 @@ describe('ServerMetricsCollector', () => {
       await waitSubject.pipe(take(1)).toPromise();
       return res.ok({ body: '' });
     });
-    await server.start();
+    await server.start({ dynamicConfigService });
 
     const waitForHits = (hits: number) =>
       hitSubject
@@ -222,7 +224,7 @@ describe('ServerMetricsCollector', () => {
       router.get({ path: '/', validate: false }, async (ctx, req, res) => {
         return res.ok({ body: '' });
       });
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       await sendGet('/');
       await sendGet('/');
@@ -272,7 +274,7 @@ describe('ServerMetricsCollector', () => {
         return res.ok({ body: '' });
       });
 
-      await server.start();
+      await server.start({ dynamicConfigService });
 
       await Promise.all([sendGet('/no-delay'), sendGet('/500-ms')]);
       let metrics = await collector.collect();

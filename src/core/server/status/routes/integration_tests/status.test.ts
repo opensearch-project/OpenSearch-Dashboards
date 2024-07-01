@@ -42,6 +42,7 @@ import { HttpService, InternalHttpServiceSetup } from '../../../http';
 import { registerStatusRoute } from '../status';
 import { ServiceStatus, ServiceStatusLevels } from '../../types';
 import { statusServiceMock } from '../../status_service.mock';
+import { dynamicConfigServiceMock } from '../../../config/dynamic_config_service.mock';
 
 const coreId = Symbol('core');
 
@@ -100,7 +101,8 @@ describe('GET /api/status', () => {
       }
     });
 
-    await server.start();
+    const dynamicConfigService = dynamicConfigServiceMock.createInternalStartContract();
+    await server.start({ dynamicConfigService });
   };
 
   afterEach(async () => {

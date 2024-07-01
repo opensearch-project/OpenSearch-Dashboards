@@ -55,6 +55,8 @@ import { IsAuthenticated, AuthStateStorage, GetAuthState } from './auth_state_st
 import { AuthHeadersStorage, GetAuthHeaders } from './auth_headers_storage';
 import { BasePath } from './base_path_service';
 import { HttpServiceSetup, HttpServerInfo } from './types';
+import { InternalDynamicConfigServiceStart } from '../config';
+import { CspConfigType } from '../csp';
 
 /** @internal */
 export interface HttpServerSetup {
@@ -165,7 +167,7 @@ export class HttpServer {
     };
   }
 
-  public async start() {
+  public async start(dynamicConfigService: InternalDynamicConfigServiceStart) {
     if (this.server === undefined) {
       throw new Error('Http server is not setup up yet');
     }
@@ -174,6 +176,8 @@ export class HttpServer {
       return;
     }
     this.log.debug('starting http server');
+
+    this.registerDynamicConfigHandlers(dynamicConfigService);
 
     for (const router of this.registeredRouters) {
       for (const route of router.getRoutes()) {
@@ -446,6 +450,20 @@ export class HttpServer {
         },
       },
       options: { auth: false },
+    });
+  }
+
+  private registerDynamicConfigHandlers(dynamicConfig: InternalDynamicConfigServiceStart) {
+    this.server!.ext('onPreAuth', async (request, h) => {
+      const store = dynamicConfig.getAsyncLocalStore();
+      const configurationClient = dynamicConfig.getClient();
+      const cspConfig = (await configurationClient.getConfig(
+        { name: 'csp' },
+        { asyncLocalStorageContext: store! }
+      )) as CspConfigType;
+      this.config?.updateConfigs({ cspConfig });
+
+      return h.continue;
     });
   }
 }

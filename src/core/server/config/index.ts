@@ -50,3 +50,5 @@ export {
   PackageInfo,
   LegacyObjectToConfigAdapter,
 } from '@osd/config';
+
+export * from './types';

@@ -32,15 +32,18 @@ import { mockCoreContext } from '../../core_context.mock';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { pluginServiceMock } from '../../plugins/plugins_service.mock';
 import { statusServiceMock } from '../../status/status_service.mock';
+import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
 
 const context = mockCoreContext.create();
 const http = httpServiceMock.createInternalSetupContract();
 const uiPlugins = pluginServiceMock.createUiPlugins();
 const status = statusServiceMock.createInternalSetupContract();
+const dynamicConfig = dynamicConfigServiceMock.createInternalSetupContract();
 
 export const mockRenderingServiceParams = context;
 export const mockRenderingSetupDeps = {
   http,
   uiPlugins,
   status,
+  dynamicConfig,
 };

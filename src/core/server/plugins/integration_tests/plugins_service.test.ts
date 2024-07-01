@@ -44,6 +44,7 @@ import { environmentServiceMock } from '../../environment/environment_service.mo
 import { coreMock } from '../../mocks';
 import { Plugin, CompatibleEnginePluginVersions } from '../types';
 import { PluginWrapper } from '../plugin';
+import { dynamicConfigServiceMock } from '../../config/dynamic_config_service.mock';
 
 describe('PluginsService', () => {
   const logger = loggingSystemMock.create();
@@ -117,12 +118,14 @@ describe('PluginsService', () => {
     const rawConfigService = rawConfigServiceMock.create({ rawConfig$: config$ });
     const configService = new ConfigService(rawConfigService, env, logger);
     await configService.setSchema(config.path, config.schema);
+    const dynamicConfigService = dynamicConfigServiceMock.create();
 
     pluginsService = new PluginsService({
       coreId: Symbol('core'),
       env,
       logger,
       configService,
+      dynamicConfigService,
     });
   });
 
