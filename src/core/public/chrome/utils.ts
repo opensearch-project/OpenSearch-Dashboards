@@ -4,9 +4,25 @@
  */
 
 import { AppCategory } from 'opensearch-dashboards/public';
-import { groupBy, sortBy } from 'lodash';
 import { ChromeNavLink } from './nav_links';
 import { ChromeRegistrationNavLink } from './nav_group';
+
+type KeyOf<T> = keyof T;
+
+const sortBy = <T>(key: KeyOf<T>) => {
+  return (a: T, b: T): number => (a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0);
+};
+
+const groupBy = <T>(array: T[], getKey: (item: T) => string | undefined): Record<string, T[]> => {
+  return array.reduce((result, currentValue) => {
+    const groupKey = String(getKey(currentValue));
+    if (!result[groupKey]) {
+      result[groupKey] = [];
+    }
+    result[groupKey].push(currentValue);
+    return result;
+  }, {} as Record<string, T[]>);
+};
 
 export const LinkItemType = {
   LINK: 'link',
@@ -20,7 +36,9 @@ export type LinkItem = { order?: number } & (
   | { itemType: 'category'; category?: AppCategory; links?: LinkItem[] }
 );
 
-export function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
+export function getAllCategories(
+  allCategorizedLinks: Record<string, Array<ChromeNavLink & ChromeRegistrationNavLink>>
+) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
 
   for (const [key, value] of Object.entries(allCategorizedLinks)) {
@@ -30,6 +48,13 @@ export function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLi
   return allCategories;
 }
 
+/**
+ * This function accept an array of ChromeRegistrationNavLink and an array of ChromeNavLink
+ * return an fulfilled array of items which are the merged result of the registerNavLinks and navLinks.
+ * @param registerNavLinks ChromeRegistrationNavLink[]
+ * @param navLinks ChromeNavLink[]
+ * @returns Array<ChromeNavLink & ChromeRegistrationNavLink>
+ */
 export function fulfillRegistrationLinksToChromeNavLinks(
   registerNavLinks: ChromeRegistrationNavLink[],
   navLinks: ChromeNavLink[]
@@ -37,7 +62,7 @@ export function fulfillRegistrationLinksToChromeNavLinks(
   const allExistingNavLinkId = navLinks.map((link) => link.id);
   return (
     registerNavLinks
-      ?.filter((navLink) => allExistingNavLinkId.includes(navLink.id))
+      .filter((navLink) => allExistingNavLinkId.includes(navLink.id))
       .map((navLink) => ({
         ...navLinks[allExistingNavLinkId.indexOf(navLink.id)],
         ...navLink,
@@ -46,7 +71,7 @@ export function fulfillRegistrationLinksToChromeNavLinks(
 }
 
 export const getOrderedLinks = (navLinks: ChromeNavLink[]): ChromeNavLink[] =>
-  sortBy(navLinks, (link) => link.order);
+  navLinks.sort(sortBy('order'));
 
 export function flattenLinksOrCategories(linkItems: LinkItem[]): ChromeNavLink[] {
   return linkItems.reduce((acc, item) => {
@@ -67,18 +92,18 @@ export function flattenLinksOrCategories(linkItems: LinkItem[]): ChromeNavLink[]
 
 export const generateItemTypeByLink = (
   navLink: ChromeNavLink & ChromeRegistrationNavLink,
-  navLinksGoupedByParentNavLink: Record<string, ChromeNavLink[]>
+  navLinksGroupedByParentNavLink: Record<string, ChromeNavLink[]>
 ): LinkItem => {
-  const navLinksUnderParentId = navLinksGoupedByParentNavLink[navLink.id];
+  const navLinksUnderParentId = navLinksGroupedByParentNavLink[navLink.id];
 
   if (navLinksUnderParentId) {
     return {
       itemType: LinkItemType.PARENT_LINK,
       link: navLink,
       links: getOrderedLinks(navLinksUnderParentId || []).map((navLinkUnderParentId) =>
-        generateItemTypeByLink(navLinkUnderParentId, navLinksGoupedByParentNavLink)
+        generateItemTypeByLink(navLinkUnderParentId, navLinksGroupedByParentNavLink)
       ),
-      order: navLink?.order,
+      order: navLink.order,
     };
   } else {
     return {
@@ -99,7 +124,7 @@ export function getOrderedLinksOrCategories(
 ): LinkItem[] {
   // Get the nav links group by parent nav link
   const allNavLinksWithParentNavLink = navLinks.filter((navLink) => navLink.parentNavLinkId);
-  const navLinksGoupedByParentNavLink = groupBy(
+  const navLinksGroupedByParentNavLink = groupBy(
     allNavLinksWithParentNavLink,
     (navLink) => navLink.parentNavLinkId
   );
@@ -113,14 +138,14 @@ export function getOrderedLinksOrCategories(
   const categoryDictionary = getAllCategories(allCategorizedLinks);
 
   // Get all the parent nav ids that defined by nested items but can not find matched parent nav in navLinks
-  const unusedParentNavLinks = Object.keys(navLinksGoupedByParentNavLink).filter(
+  const unusedParentNavLinks = Object.keys(navLinksGroupedByParentNavLink).filter(
     (navLinkId) => !navLinks.find((navLink) => navLink.id === navLinkId)
   );
 
   const result = [
     // Nav links without category, the order is determined by link itself
     ...unknowns.map((linkWithoutCategory) =>
-      generateItemTypeByLink(linkWithoutCategory, navLinksGoupedByParentNavLink)
+      generateItemTypeByLink(linkWithoutCategory, navLinksGroupedByParentNavLink)
     ),
     // Nav links with category, the order is determined by category order
     ...Object.keys(allCategorizedLinks).map((categoryKey) => {
@@ -129,7 +154,7 @@ export function getOrderedLinksOrCategories(
         category: categoryDictionary[categoryKey],
         order: categoryDictionary[categoryKey]?.order,
         links: getOrderedLinks(allCategorizedLinks[categoryKey]).map((navLink) =>
-          generateItemTypeByLink(navLink, navLinksGoupedByParentNavLink)
+          generateItemTypeByLink(navLink, navLinksGroupedByParentNavLink)
         ),
       };
     }),
@@ -139,12 +164,12 @@ export function getOrderedLinksOrCategories(
     ...unusedParentNavLinks.reduce((total, groupId) => {
       return [
         ...total,
-        ...navLinksGoupedByParentNavLink[groupId].map((navLink) =>
-          generateItemTypeByLink(navLink, navLinksGoupedByParentNavLink)
+        ...navLinksGroupedByParentNavLink[groupId].map((navLink) =>
+          generateItemTypeByLink(navLink, navLinksGroupedByParentNavLink)
         ),
       ];
     }, [] as LinkItem[]),
   ];
 
-  return sortBy(result, (item) => item.order);
+  return result.sort(sortBy('order'));
 }

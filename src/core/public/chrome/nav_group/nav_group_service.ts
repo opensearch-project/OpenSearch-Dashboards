@@ -59,7 +59,7 @@ export class ChromeNavGroupService {
     const matchedGroup = currentGroupsMap[navGroup.id];
     if (matchedGroup) {
       const links = matchedGroup.navLinks;
-      const isLinkExistInGroup = !!links.find((link) => link.id === navLink.id);
+      const isLinkExistInGroup = links.some((link) => link.id === navLink.id);
       if (isLinkExistInGroup) {
         // eslint-disable-next-line no-console
         console.warn(
@@ -77,7 +77,7 @@ export class ChromeNavGroupService {
 
     return currentGroupsMap;
   }
-  private getSortedNavGroupsMap() {
+  private getSortedNavGroupsMap$() {
     return combineLatest([this.navGroupsMap$, this.navLinks$])
       .pipe(takeUntil(this.stop$))
       .pipe(
@@ -125,7 +125,7 @@ export class ChromeNavGroupService {
   }): Promise<ChromeNavGroupServiceStartContract> {
     this.navLinks$ = navLinks.getNavLinks$();
     return {
-      getNavGroupsMap$: () => this.getSortedNavGroupsMap(),
+      getNavGroupsMap$: () => this.getSortedNavGroupsMap$(),
       getNavGroupEnabled: () => this.navGroupEnabled,
     };
   }
