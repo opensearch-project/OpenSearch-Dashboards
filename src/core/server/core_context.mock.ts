@@ -34,17 +34,21 @@ import { Env, IConfigService } from './config';
 import { configServiceMock, getEnvOptions } from './config/mocks';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { ILoggingSystem } from './logging';
+import { dynamicConfigServiceMock } from './config/dynamic_config_service.mock';
+import { IDynamicConfigService } from './config/dynamic_config_service';
 
 function create({
   env = Env.createDefault(REPO_ROOT, getEnvOptions()),
   logger = loggingSystemMock.create(),
   configService = configServiceMock.create(),
+  dynamicConfigService = dynamicConfigServiceMock.create(),
 }: {
   env?: Env;
   logger?: jest.Mocked<ILoggingSystem>;
   configService?: jest.Mocked<IConfigService>;
+  dynamicConfigService?: jest.Mocked<IDynamicConfigService>;
 } = {}): DeeplyMockedKeys<CoreContext> {
-  return { coreId: Symbol(), env, logger, configService };
+  return { coreId: Symbol(), env, logger, configService, dynamicConfigService };
 }
 
 export const mockCoreContext = {

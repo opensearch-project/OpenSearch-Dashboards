@@ -45,8 +45,15 @@ import { CspConfig } from '.';
 
 describe('CspConfig', () => {
   test('DEFAULT', () => {
-    expect(CspConfig.DEFAULT).toMatchInlineSnapshot(`
-      CspConfig {
+    const expectObject = {
+      rules: CspConfig.DEFAULT.rules,
+      header: CspConfig.DEFAULT.header,
+      warnLegacyBrowsers: CspConfig.DEFAULT.warnLegacyBrowsers,
+      strict: CspConfig.DEFAULT.strict,
+    };
+
+    expect(expectObject).toMatchInlineSnapshot(`
+      Object {
         "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "rules": Array [
           "script-src 'unsafe-eval' 'self'",
@@ -60,8 +67,16 @@ describe('CspConfig', () => {
   });
 
   test('defaults from config', () => {
-    expect(new CspConfig()).toMatchInlineSnapshot(`
-      CspConfig {
+    const defaultCspConfig = new CspConfig();
+    const expectObject = {
+      rules: defaultCspConfig.rules,
+      header: defaultCspConfig.header,
+      warnLegacyBrowsers: defaultCspConfig.warnLegacyBrowsers,
+      strict: defaultCspConfig.strict,
+    };
+
+    expect(expectObject).toMatchInlineSnapshot(`
+      Object {
         "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "rules": Array [
           "script-src 'unsafe-eval' 'self'",
@@ -75,8 +90,16 @@ describe('CspConfig', () => {
   });
 
   test('creates from partial config', () => {
-    expect(new CspConfig({ strict: true, warnLegacyBrowsers: false })).toMatchInlineSnapshot(`
-      CspConfig {
+    const defaultCspConfig = new CspConfig({ strict: true, warnLegacyBrowsers: false });
+    const expectObject = {
+      rules: defaultCspConfig.rules,
+      header: defaultCspConfig.header,
+      warnLegacyBrowsers: defaultCspConfig.warnLegacyBrowsers,
+      strict: defaultCspConfig.strict,
+    };
+
+    expect(expectObject).toMatchInlineSnapshot(`
+      Object {
         "header": "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
         "rules": Array [
           "script-src 'unsafe-eval' 'self'",
@@ -90,10 +113,16 @@ describe('CspConfig', () => {
   });
 
   test('computes header from rules', () => {
-    const cspConfig = new CspConfig({ rules: ['alpha', 'beta', 'gamma'] });
+    const defaultCspConfig = new CspConfig({ rules: ['alpha', 'beta', 'gamma'] });
+    const expectObject = {
+      rules: defaultCspConfig.rules,
+      header: defaultCspConfig.header,
+      warnLegacyBrowsers: defaultCspConfig.warnLegacyBrowsers,
+      strict: defaultCspConfig.strict,
+    };
 
-    expect(cspConfig).toMatchInlineSnapshot(`
-      CspConfig {
+    expect(expectObject).toMatchInlineSnapshot(`
+      Object {
         "header": "alpha; beta; gamma",
         "rules": Array [
           "alpha",
