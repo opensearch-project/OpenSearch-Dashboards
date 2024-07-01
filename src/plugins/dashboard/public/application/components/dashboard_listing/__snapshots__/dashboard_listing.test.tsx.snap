@@ -219,6 +219,10 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -1392,6 +1396,10 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
+              },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -2628,6 +2636,10 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -3863,6 +3875,10 @@ exports[`dashboard listing renders table rows 1`] = `
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -5097,6 +5113,10 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
+              },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
