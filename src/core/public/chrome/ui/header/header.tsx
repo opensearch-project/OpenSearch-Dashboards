@@ -54,7 +54,11 @@ import {
 } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { ChromeHelpExtension, ChromeBranding } from '../../chrome_service';
+import {
+  ChromeHelpExtension,
+  ChromeBranding,
+  CollapsibleNavHeaderRender,
+} from '../../chrome_service';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -66,13 +70,15 @@ import { HeaderActionMenu } from './header_action_menu';
 import { HeaderLogo } from './header_logo';
 import type { Logos } from '../../../../common/types';
 import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
+import { CollapsibleNavGroupEnabled } from './collapsible_nav_group_enabled';
+import { NavGroupItemInMap } from '../../nav_group';
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  collapsibleNavHeaderRender?: () => JSX.Element | null;
+  collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;
@@ -95,6 +101,8 @@ export interface HeaderProps {
   logos: Logos;
   survey: string | undefined;
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
+  navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
+  navGroupEnabled: boolean;
 }
 
 export function Header({
@@ -108,6 +116,7 @@ export function Header({
   survey,
   logos,
   collapsibleNavHeaderRender,
+  navGroupEnabled,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -253,28 +262,52 @@ export function Header({
           </EuiHeader>
         </div>
 
-        <CollapsibleNav
-          appId$={application.currentAppId$}
-          collapsibleNavHeaderRender={collapsibleNavHeaderRender}
-          id={navId}
-          isLocked={isLocked}
-          navLinks$={observables.navLinks$}
-          recentlyAccessed$={observables.recentlyAccessed$}
-          isNavOpen={isNavOpen}
-          homeHref={homeHref}
-          basePath={basePath}
-          navigateToApp={application.navigateToApp}
-          navigateToUrl={application.navigateToUrl}
-          onIsLockedUpdate={onIsLockedUpdate}
-          closeNav={() => {
-            setIsNavOpen(false);
-            if (toggleCollapsibleNavRef.current) {
-              toggleCollapsibleNavRef.current.focus();
-            }
-          }}
-          customNavLink$={observables.customNavLink$}
-          logos={logos}
-        />
+        {navGroupEnabled ? (
+          <CollapsibleNavGroupEnabled
+            appId$={application.currentAppId$}
+            collapsibleNavHeaderRender={collapsibleNavHeaderRender}
+            id={navId}
+            isLocked={isLocked}
+            navLinks$={observables.navLinks$}
+            isNavOpen={isNavOpen}
+            basePath={basePath}
+            navigateToApp={application.navigateToApp}
+            navigateToUrl={application.navigateToUrl}
+            onIsLockedUpdate={onIsLockedUpdate}
+            closeNav={() => {
+              setIsNavOpen(false);
+              if (toggleCollapsibleNavRef.current) {
+                toggleCollapsibleNavRef.current.focus();
+              }
+            }}
+            customNavLink$={observables.customNavLink$}
+            logos={logos}
+            navGroupsMap$={observables.navGroupsMap$}
+          />
+        ) : (
+          <CollapsibleNav
+            appId$={application.currentAppId$}
+            collapsibleNavHeaderRender={collapsibleNavHeaderRender}
+            id={navId}
+            isLocked={isLocked}
+            navLinks$={observables.navLinks$}
+            recentlyAccessed$={observables.recentlyAccessed$}
+            isNavOpen={isNavOpen}
+            homeHref={homeHref}
+            basePath={basePath}
+            navigateToApp={application.navigateToApp}
+            navigateToUrl={application.navigateToUrl}
+            onIsLockedUpdate={onIsLockedUpdate}
+            closeNav={() => {
+              setIsNavOpen(false);
+              if (toggleCollapsibleNavRef.current) {
+                toggleCollapsibleNavRef.current.focus();
+              }
+            }}
+            customNavLink$={observables.customNavLink$}
+            logos={logos}
+          />
+        )}
       </header>
     </>
   );
