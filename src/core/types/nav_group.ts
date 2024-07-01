@@ -6,10 +6,11 @@
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
 /**
- * Groups with type of NavGroupType.SYSTEM will:
- * 1. Always display before USE_CASE_GROUP.
- * 2. Not be pickable within the workspace creation page.
+ * There are two types of navGroup:
+ * 1: system nav group, like data administration / settings and setup
+ * 2: use case group, like observability.
  *
+ * by default the nav group will be regarded as use case group.
  */
 export enum NavGroupType {
   SYSTEM = 'system',
@@ -22,9 +23,5 @@ export interface ChromeNavGroup {
   description: string;
   order?: number;
   icon?: EuiIconType;
-  /**
-   *
-   * @default undefined indicates it is of type useCase
-   */
   type?: NavGroupType;
 }
