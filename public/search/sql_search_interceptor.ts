@@ -49,24 +49,21 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       return throwError(this.handleSearchError('DataFrame is not defined', request, signal!));
     }
 
-    // subscribe to dataFrame to see if an error is returned, display a toast message if so
-    dataFrame.subscribe((df: any) => {
-      if (!df.body.error) return;
-      const jsError = new Error(df.body.error.response);
-      this.deps.toasts.addError(jsError, {
-        title: i18n.translate('queryEnhancements.sqlQueryError', {
-          defaultMessage: 'Could not complete the SQL query',
-        }),
-        toastMessage: df.body.error.msg,
-      });
-    });
-
     const queryString = dataFrame.meta?.queryConfig?.qs ?? getRawQueryString(searchRequest) ?? '';
 
     if (!dataFrame.schema) {
       return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
         concatMap((response) => {
           const df = response.body;
+          if (df.error) {
+            const jsError = new Error(df.error.response);
+            this.deps.toasts.addError(jsError, {
+              title: i18n.translate('queryEnhancements.sqlQueryError', {
+                defaultMessage: 'Could not complete the SQL query',
+              }),
+              toastMessage: df.error.msg,
+            });
+          }
           return fetchDataFrame(dfContext, queryString, df);
         })
       );

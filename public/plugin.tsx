@@ -8,7 +8,7 @@ import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../..
 import { IStorageWrapper, Storage } from '../../../src/plugins/opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../common/config';
 import { createQueryAssistExtension } from './query_assist';
-import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
+import { PPLSearchInterceptor, SQLSearchInterceptor, SQLAsyncSearchInterceptor } from './search';
 import { setData, setStorage } from './services';
 import {
   QueryEnhancementsPluginSetup,
@@ -16,7 +16,6 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
-import { SQLAsyncQlSearchInterceptor } from './search/sql_async_search_interceptor';
 
 export type PublicConfig = Pick<ConfigSchema, 'queryAssist'>;
 
@@ -50,7 +49,7 @@ export class QueryEnhancementsPlugin
       usageCollector: data.search.usageCollector,
     });
 
-    const sqlAsyncSearchInterceptor = new SQLAsyncQlSearchInterceptor({
+    const sqlAsyncSearchInterceptor = new SQLAsyncSearchInterceptor({
       toasts: core.notifications.toasts,
       http: core.http,
       uiSettings: core.uiSettings,
@@ -58,7 +57,6 @@ export class QueryEnhancementsPlugin
       usageCollector: data.search.usageCollector,
     });
 
-    
     data.__enhance({
       ui: {
         query: {
@@ -112,7 +110,7 @@ export class QueryEnhancementsPlugin
             showDatePicker: false,
             showFilterBar: false,
             showDataSourceSelector: false,
-            queryStringInput: { initialValue: '' },
+            queryStringInput: { initialValue: 'SHOW DATABASES IN ::mys3::' },
           },
           fields: {
             filterable: false,

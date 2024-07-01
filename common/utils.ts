@@ -4,7 +4,8 @@
  */
 
 import { IDataFrame } from 'src/plugins/data/common';
-import { Subscription, from } from 'rxjs';
+import { Observable, Subscription, from, throwError, timer } from 'rxjs';
+import { catchError, concatMap, last, takeWhile, tap } from 'rxjs/operators';
 import { FetchDataFrameContext, FetchFunction } from './types';
 
 export const formatDate = (dateString: string) => {
@@ -46,9 +47,24 @@ export class DataFramePolling<T, P = void> {
   constructor(
     private fetchFunction: FetchFunction<T, P>,
     private interval: number = 5000,
-    private onPollingSuccess?: (data: T) => boolean,
-    private onPollingError?: (error: Error) => boolean
-  ) { }
+    private onPollingSuccess: (data: T) => boolean,
+    private onPollingError: (error: Error) => boolean
+  ) {}
+
+  fetch(): Observable<T> {
+    return timer(0, this.interval).pipe(
+      concatMap(() => this.fetchFunction()),
+      takeWhile((resp) => this.onPollingSuccess(resp), true),
+      tap((resp: T) => {
+        this.data = resp;
+      }),
+      last(),
+      catchError((error: Error) => {
+        this.onPollingError(error);
+        return throwError(error);
+      })
+    );
+  }
 
   fetchData(params?: P) {
     this.loading = true;
@@ -126,17 +142,15 @@ export const fetchDataFrame = (
   );
 };
 
-export const fetchDataFramePolling = (  
-  context: FetchDataFrameContext,
-  df: IDataFrame
-) => {
+export const fetchDataFramePolling = (context: FetchDataFrameContext, df: IDataFrame) => {
   const { http, path, signal } = context;
   const queryId = df.meta?.queryId;
+  const dataSourceId = df.meta?.queryConfig?.dataSourceId;
   return from(
     http.fetch({
       method: 'GET',
-      path: `${path}/${queryId}`,
-      signal
+      path: `${path}/${queryId}${dataSourceId ? `/${dataSourceId}` : ''}`,
+      signal,
     })
   );
-}
+};

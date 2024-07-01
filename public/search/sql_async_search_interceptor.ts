@@ -1,7 +1,9 @@
 import { trimEnd } from 'lodash';
-import { BehaviorSubject, Observable, from, throwError } from 'rxjs';
+import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
+import { concatMap, map } from 'rxjs/operators';
 import {
+  DATA_FRAME_TYPES,
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
   IOpenSearchDashboardsSearchResponse,
@@ -9,16 +11,25 @@ import {
   SearchInterceptor,
   SearchInterceptorDeps,
 } from '../../../../src/plugins/data/public';
-import { getRawDataFrame, getRawQueryString, IDataFrameResponse } from '../../../../src/plugins/data/common';
-import { API, DataFramePolling, FetchDataFrameContext, SEARCH_STRATEGY, fetchDataFrame, fetchDataFramePolling } from '../../common';
+import {
+  getRawDataFrame,
+  getRawQueryString,
+  IDataFrameResponse,
+} from '../../../../src/plugins/data/common';
+import {
+  API,
+  DataFramePolling,
+  FetchDataFrameContext,
+  SEARCH_STRATEGY,
+  fetchDataFrame,
+  fetchDataFramePolling,
+} from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
-import { concatMap } from 'rxjs/operators';
 
-export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
+export class SQLAsyncSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
   protected dataFrame$ = new BehaviorSubject<IDataFrameResponse | undefined>(undefined);
-
 
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
@@ -47,12 +58,12 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
       return throwError(this.handleSearchError('DataFrame is not defined', request, signal!));
     }
 
-    const queryString = dataFrame.meta?.queryConfig?.formattedQs() ?? getRawQueryString(searchRequest) ?? '';
-
+    const queryString =
+      dataFrame.meta?.queryConfig?.formattedQs() ?? getRawQueryString(searchRequest) ?? '';
 
     const onPollingSuccess = (pollingResult: any) => {
       if (pollingResult && pollingResult.body.meta.status === 'SUCCESS') {
-        return true;
+        return false;
       }
       if (pollingResult && pollingResult.body.meta.status === 'FAILED') {
         const jsError = new Error(pollingResult.data.error.response);
@@ -62,16 +73,27 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
           }),
           toastMessage: pollingResult.data.error.response,
         });
-        return true;
+        return false;
       }
-      return false;
-    }
+
+      this.deps.toasts.addInfo({
+        title: i18n.translate('queryEnhancements.sqlQueryPolling', {
+          defaultMessage: 'Polling query job results...',
+        }),
+      });
+
+      return true;
+    };
 
     const onPollingError = (error: Error) => {
-      console.error('Polling error:', error);
-      throw new Error();
-    }
+      throw new Error(error.message);
+    };
 
+    this.deps.toasts.addInfo({
+      title: i18n.translate('queryEnhancements.sqlQueryInfo', {
+        defaultMessage: 'Starting query job...',
+      }),
+    });
     return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
       concatMap((jobResponse) => {
         const df = jobResponse.body;
@@ -81,13 +103,18 @@ export class SQLAsyncQlSearchInterceptor extends SearchInterceptor {
           onPollingSuccess,
           onPollingError
         );
-        dataFramePolling.startPolling();
-        return dataFramePolling.waitForPolling();
+        return dataFramePolling.fetch().pipe(
+          map(() => {
+            const dfPolling = dataFramePolling.data;
+            dfPolling.type = DATA_FRAME_TYPES.DEFAULT;
+            return dfPolling;
+          })
+        );
       })
     );
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.SQLAsync);
+    return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.SQL_ASYNC);
   }
 }

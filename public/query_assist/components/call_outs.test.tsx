@@ -5,9 +5,14 @@
 
 import { render } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
+import { IntlProvider } from 'react-intl';
 import { QueryAssistCallOut } from './call_outs';
 
 type Props = ComponentProps<typeof QueryAssistCallOut>;
+
+const IntlWrapper = ({ children }: { children: unknown }) => (
+  <IntlProvider locale="en">{children}</IntlProvider>
+);
 
 const renderCallOut = (overrideProps: Partial<Props> = {}) => {
   const props: Props = Object.assign<Props, Partial<Props>>(
@@ -18,7 +23,9 @@ const renderCallOut = (overrideProps: Partial<Props> = {}) => {
     },
     overrideProps
   );
-  const component = render(<QueryAssistCallOut {...props} />);
+  const component = render(<QueryAssistCallOut {...props} />, {
+    wrapper: IntlWrapper,
+  });
   return { component, props: props as jest.MockedObjectDeep<Props> };
 };
 

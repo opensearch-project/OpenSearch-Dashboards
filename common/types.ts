@@ -4,6 +4,7 @@
  */
 
 import { CoreSetup } from 'opensearch-dashboards/public';
+import { Observable } from 'rxjs';
 
 export interface FetchDataFrameContext {
   http: CoreSetup['http'];

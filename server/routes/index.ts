@@ -90,39 +90,20 @@ function defineRoute(
       }
     }
   );
-}
 
-export function defineRoutes(
-  logger: Logger,
-  router: IRouter,
-  searchStrategies: Record<
-    string,
-    ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse>
-  >
-) {
-  defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.PPL);
-  defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQL);
-  defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQLAsync);
-  registerQueryAssistRoutes(router);
-  // defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQLAsync);
-  // sql async jobs
-  router.post(
+  router.get(
     {
-      path: `/api/sqlasyncql/jobs`,
+      path: `${path}/{queryId}/{dataSourceId}`,
       validate: {
-        body: schema.object({
-          query: schema.object({
-            qs: schema.string(),
-            format: schema.string(),
-          }),
-          df: schema.any(),
-          dataSource: schema.nullable(schema.string()),
+        params: schema.object({
+          queryId: schema.string(),
+          dataSourceId: schema.string(),
         }),
       },
     },
     async (context, req, res): Promise<any> => {
       try {
-        const queryRes: IDataFrameResponse = await searchStrategies.sqlasync.search(
+        const queryRes: IDataFrameResponse = await searchStrategies[searchStrategyId].search(
           context,
           req as any,
           {}
@@ -142,4 +123,18 @@ export function defineRoutes(
       }
     }
   );
+}
+
+export function defineRoutes(
+  logger: Logger,
+  router: IRouter,
+  searchStrategies: Record<
+    string,
+    ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse>
+  >
+) {
+  defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.PPL);
+  defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQL);
+  defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQL_ASYNC);
+  registerQueryAssistRoutes(router);
 }
