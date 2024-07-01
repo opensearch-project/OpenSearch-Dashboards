@@ -16,7 +16,11 @@ import {
 import { SEARCH_STRATEGY } from '../common';
 import { ConfigSchema } from '../common/config';
 import { defineRoutes } from './routes';
-import { pplSearchStrategyProvider, sqlSearchStrategyProvider, sqlAsyncSearchStrategyProvider } from './search';
+import {
+  pplSearchStrategyProvider,
+  sqlSearchStrategyProvider,
+  sqlAsyncSearchStrategyProvider,
+} from './search';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
@@ -48,7 +52,11 @@ export class QueryEnhancementsPlugin
 
     const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
     const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
-    const sqlAsyncSearchStrategy = sqlAsyncSearchStrategyProvider(this.config$, this.logger, client);
+    const sqlAsyncSearchStrategy = sqlAsyncSearchStrategyProvider(
+      this.config$,
+      this.logger,
+      client
+    );
 
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL, pplSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL, sqlSearchStrategy);
