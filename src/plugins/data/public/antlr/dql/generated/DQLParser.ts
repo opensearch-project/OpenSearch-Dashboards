@@ -12,8 +12,8 @@ type int = number;
 
 
 export class DQLParser extends antlr.Parser {
-    public static readonly AND = 1;
-    public static readonly OR = 2;
+    public static readonly OR = 1;
+    public static readonly AND = 2;
     public static readonly NOT = 3;
     public static readonly GT = 4;
     public static readonly LT = 5;
@@ -48,7 +48,7 @@ export class DQLParser extends antlr.Parser {
     ];
 
     public static readonly symbolicNames = [
-        null, "AND", "OR", "NOT", "GT", "LT", "GE", "LE", "EQ", "LPAREN", 
+        null, "OR", "AND", "NOT", "GT", "LT", "GE", "LE", "EQ", "LPAREN", 
         "RPAREN", "DOT", "PHRASE", "NUMBER", "DATESTRING", "IDENTIFIER", 
         "WS"
     ];
@@ -107,7 +107,7 @@ export class DQLParser extends antlr.Parser {
             this.state = 33;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            while (_la === 2) {
+            while (_la === 1) {
                 {
                 {
                 this.state = 29;
@@ -147,7 +147,7 @@ export class DQLParser extends antlr.Parser {
             this.state = 41;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            while (_la === 1) {
+            while (_la === 2) {
                 {
                 {
                 this.state = 37;
@@ -361,7 +361,7 @@ export class DQLParser extends antlr.Parser {
             this.state = 74;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            while (_la === 2) {
+            while (_la === 1) {
                 {
                 {
                 this.state = 70;
@@ -558,9 +558,9 @@ export class DQLParser extends antlr.Parser {
         0,4,7,95,0,26,1,0,0,0,2,28,1,0,0,0,4,36,1,0,0,0,6,47,1,0,0,0,8,56,
         1,0,0,0,10,58,1,0,0,0,12,62,1,0,0,0,14,66,1,0,0,0,16,68,1,0,0,0,
         18,79,1,0,0,0,20,87,1,0,0,0,22,93,1,0,0,0,24,95,1,0,0,0,26,27,3,
-        2,1,0,27,1,1,0,0,0,28,33,3,4,2,0,29,30,5,2,0,0,30,32,3,4,2,0,31,
+        2,1,0,27,1,1,0,0,0,28,33,3,4,2,0,29,30,5,1,0,0,30,32,3,4,2,0,31,
         29,1,0,0,0,32,35,1,0,0,0,33,31,1,0,0,0,33,34,1,0,0,0,34,3,1,0,0,
-        0,35,33,1,0,0,0,36,41,3,6,3,0,37,38,5,1,0,0,38,40,3,6,3,0,39,37,
+        0,35,33,1,0,0,0,36,41,3,6,3,0,37,38,5,2,0,0,38,40,3,6,3,0,39,37,
         1,0,0,0,40,43,1,0,0,0,41,39,1,0,0,0,41,42,1,0,0,0,42,5,1,0,0,0,43,
         41,1,0,0,0,44,45,5,3,0,0,45,48,3,6,3,0,46,48,3,8,4,0,47,44,1,0,0,
         0,47,46,1,0,0,0,48,7,1,0,0,0,49,50,5,9,0,0,50,51,3,0,0,0,51,52,5,
@@ -568,7 +568,7 @@ export class DQLParser extends antlr.Parser {
         0,56,49,1,0,0,0,56,53,1,0,0,0,56,54,1,0,0,0,56,55,1,0,0,0,57,9,1,
         0,0,0,58,59,3,18,9,0,59,60,3,24,12,0,60,61,3,20,10,0,61,11,1,0,0,
         0,62,63,3,18,9,0,63,64,5,8,0,0,64,65,3,22,11,0,65,13,1,0,0,0,66,
-        67,5,15,0,0,67,15,1,0,0,0,68,69,5,9,0,0,69,74,3,14,7,0,70,71,5,2,
+        67,5,15,0,0,67,15,1,0,0,0,68,69,5,9,0,0,69,74,3,14,7,0,70,71,5,1,
         0,0,71,73,3,14,7,0,72,70,1,0,0,0,73,76,1,0,0,0,74,72,1,0,0,0,74,
         75,1,0,0,0,75,77,1,0,0,0,76,74,1,0,0,0,77,78,5,10,0,0,78,17,1,0,
         0,0,79,84,5,15,0,0,80,81,5,11,0,0,81,83,5,15,0,0,82,80,1,0,0,0,83,

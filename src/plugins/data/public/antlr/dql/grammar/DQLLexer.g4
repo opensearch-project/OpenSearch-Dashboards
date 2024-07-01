@@ -1,8 +1,8 @@
 lexer grammar DQLLexer;
 
 // Keywords
-AND: [aA] [nN] [dD];
 OR: [oO] [rR];
+AND: [aA] [nN] [dD];
 NOT: [nN] [oO] [tT];
 
 // Operators
@@ -23,7 +23,9 @@ NUMBER: '-'? [0-9]+ ('.' [0-9]+)?;
 DATESTRING:
 	'"' [0-9] [0-9] [0-9] [0-9] '-' [0-9] [0-9] '-' [0-9] [0-9] '"';
 IDENTIFIER: [a-zA-Z_*][a-zA-Z0-9_*]*;
-WS: [ \t\r\n]+ -> skip;
+
+// SKIP
+WS: [ \t\r\n]+ -> channel(HIDDEN);
 
 // Fragments
 fragment ESC: '\\' .;

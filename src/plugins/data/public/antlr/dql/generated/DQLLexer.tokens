@@ -1,5 +1,5 @@
-AND=1
-OR=2
+OR=1
+AND=2
 NOT=3
 GT=4
 LT=5
