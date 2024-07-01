@@ -29,6 +29,7 @@ import { QueryEnhancementsPluginStartDependencies } from '../types';
 export class SQLAsyncSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
+  protected indexPatterns!: DataPublicPluginStart['indexPatterns'];
   protected dataFrame$ = new BehaviorSubject<IDataFrameResponse | undefined>(undefined);
 
   constructor(deps: SearchInterceptorDeps) {

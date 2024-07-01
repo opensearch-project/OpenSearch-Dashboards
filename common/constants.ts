@@ -23,6 +23,9 @@ export const API = {
     LANGUAGES: `${BASE_API}/assist/languages`,
     GENERATE: `${BASE_API}/assist/generate`,
   },
+  DATA_SOURCE: {
+    CONNECTIONS: `${BASE_API}/datasource/connections`,
+  },
 };
 
 export const URI = {
