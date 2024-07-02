@@ -35,6 +35,7 @@ import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 import { setupTopNavThemeButton } from './register_nav_control';
 import { DEFAULT_NAV_GROUPS } from '../../../core/public';
+import { AppStatus } from '../../../core/public';
 
 const component = new ComponentRegistry();
 
@@ -66,7 +67,7 @@ export class AdvancedSettingsPlugin
     core.application.register({
       id: 'settings',
       title,
-      chromeless: !core.chrome.navGroup.getNavGroupEnabled(),
+      status: core.chrome.navGroup.getNavGroupEnabled() ? AppStatus.accessible : AppStatus.inaccessible,
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import(
           './management_app/mount_management_section'

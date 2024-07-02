@@ -61,7 +61,7 @@ import {
 } from './services';
 import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
-import { DEFAULT_NAV_GROUPS } from '../../../core/public';
+import { DEFAULT_NAV_GROUPS, AppStatus } from '../../../core/public';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -157,7 +157,7 @@ export class SavedObjectsManagementPlugin
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
         defaultMessage: 'Saved objects',
       }),
-      chromeless: !core.chrome.navGroup.getNavGroupEnabled(),
+      status: core.chrome.navGroup.getNavGroupEnabled() ? AppStatus.accessible : AppStatus.inaccessible,
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_section');
         const [coreStart] = await core.getStartServices();

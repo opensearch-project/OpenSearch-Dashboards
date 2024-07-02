@@ -46,7 +46,7 @@ import {
 } from './service';
 
 import { ManagementSetup } from '../../management/public';
-import { DEFAULT_NAV_GROUPS } from '../../../core/public';
+import { DEFAULT_NAV_GROUPS, AppStatus } from '../../../core/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -125,7 +125,7 @@ export class IndexPatternManagementPlugin
     core.application.register({
       id: IPM_APP_ID,
       title: sectionsHeader,
-      chromeless: !core.chrome.navGroup.getNavGroupEnabled(),
+      status: core.chrome.navGroup.getNavGroupEnabled() ? AppStatus.accessible : AppStatus.inaccessible,
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_app');
         const [coreStart] = await core.getStartServices();
