@@ -49,7 +49,6 @@ const sorting = {
 export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const {
     chrome,
-    setBreadcrumbs,
     savedObjects,
     notifications: { toasts },
     uiSettings,
@@ -72,26 +71,26 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     );
 
     /* fetch data sources*/
-    fetchDataSources();
+    // fetchDataSources();
   });
 
-  const fetchDataSources = () => {
-    setIsLoading(true);
-    getDataSources(savedObjects.client)
-      .then((response: DataSourceTableItem[]) => {
-        setDataSources(response);
-      })
-      .catch(() => {
-        setDataSources([]);
-        handleDisplayToastMessage({
-          id: 'dataSourcesManagement.dataSourceListing.fetchDataSourceFailMsg',
-          defaultMessage: 'Error occurred while fetching the records for Data sources.',
-        });
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
+  // const fetchDataSources = () => {
+  //   setIsLoading(true);
+  //   getDataSources(savedObjects.client)
+  //     .then((response: DataSourceTableItem[]) => {
+  //       setDataSources(response);
+  //     })
+  //     .catch(() => {
+  //       setDataSources([]);
+  //       handleDisplayToastMessage({
+  //         id: 'dataSourcesManagement.dataSourceListing.fetchDataSourceFailMsg',
+  //         defaultMessage: 'Error occurred while fetching the records for Data sources.',
+  //       });
+  //     })
+  //     .finally(() => {
+  //       setIsLoading(false);
+  //     });
+  // };
 
   /* Table search config */
   const renderDeleteButton = () => {
@@ -222,7 +221,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       .then(() => {
         setSelectedDataSources([]);
         // Fetch data sources
-        fetchDataSources();
+        // fetchDataSources();
         setConfirmDeleteVisible(false);
         // Check if default data source is deleted or not.
         // if yes, then set the first existing datasource as default datasource.

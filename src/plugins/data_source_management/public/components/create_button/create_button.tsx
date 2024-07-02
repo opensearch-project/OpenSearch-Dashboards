@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { History } from 'history';
-
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 

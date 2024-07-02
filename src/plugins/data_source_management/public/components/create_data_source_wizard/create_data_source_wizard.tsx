@@ -43,7 +43,6 @@ export const CreateDataSourceWizard: React.FunctionComponent<CreateDataSourceWiz
   const [existingDatasourceNamesList, setExistingDatasourceNamesList] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  /* Set breadcrumb */
   useEffectOnce(() => {
     setBreadcrumbs(getCreateOpenSearchDataSourceBreadcrumbs());
     getExistingDataSourceNames();
