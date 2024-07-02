@@ -16,8 +16,7 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
-import { createDataSourceConnectionExtension } from './data_source_connection';
-import { DataSourceConnectionServiceStart } from './data_source_connection/services/data_source_connection_service';
+import { ConnectionsService, createDataSourceConnectionExtension } from './data_source_connection';
 
 export type PublicConfig = Pick<ConfigSchema, 'queryAssist'>;
 
@@ -25,11 +24,12 @@ export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
   private readonly storage: IStorageWrapper;
   private readonly config: PublicConfig;
-  private readonly connectionService: DataSourceConnectionService;
+  private readonly connectionsService: ConnectionsService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<PublicConfig>();
     this.storage = new Storage(window.localStorage);
+    this.connectionsService = new ConnectionsService();
   }
 
   public setup(
@@ -133,7 +133,10 @@ export class QueryEnhancementsPlugin
 
     data.__enhance({
       ui: {
-        queryEditorExtension: createDataSourceConnectionExtension(core.http, this.config),
+        queryEditorExtension: createDataSourceConnectionExtension(
+          this.connectionsService.setup({ http: core.http }),
+          this.config
+        ),
       },
     });
 

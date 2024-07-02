@@ -4,3 +4,4 @@
  */
 
 export { createDataSourceConnectionExtension } from './utils';
+export * from './services';

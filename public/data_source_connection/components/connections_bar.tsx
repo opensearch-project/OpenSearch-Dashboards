@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { IDataPluginServices } from '../../../../../src/plugins/data/public';
 import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
 import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
@@ -11,16 +11,14 @@ import {
   DataSourceSelector,
   DataSourceOption,
 } from '../../../../../src/plugins/data_source_management/public';
-import { DataSourceConnectionServiceStart } from '../services/data_source_connection_service';
+import { IConnectionsServiceSetup } from '../../types';
 
-interface DataSourceConnectionProps {
+interface ConnectionsProps {
   dependencies: QueryEditorExtensionDependencies;
-  connectionService: DataSourceConnectionServiceStart;
+  connectionsService: IConnectionsServiceSetup;
 }
 
-export const DataSourceConnectionBar: React.FC<DataSourceConnectionProps> = ({
-  connectionService,
-}) => {
+export const ConnectionsBar: React.FC<ConnectionsProps> = ({ connectionsService }) => {
   const { services } = useOpenSearchDashboards<IDataPluginServices>();
   const {
     savedObjects,
@@ -31,13 +29,26 @@ export const DataSourceConnectionBar: React.FC<DataSourceConnectionProps> = ({
   );
 
   useEffect(() => {
-    const subscriptions = connectionService.getSelectedConnection$().subscribe((connection) => {
+    const subscriptions = connectionsService.getSelectedConnection().subscribe((connection) => {
       setSelectedConnection(connection);
     });
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [connectionService]);
+  }, [connectionsService]);
+
+  const handleSelectedConnection = useCallback(
+    (id: string | undefined) => {
+      if (!id) {
+        setSelectedConnection(undefined);
+        return;
+      }
+      connectionsService.getConnectionById(id).then((connection) => {
+        setSelectedConnection(connection);
+      });
+    },
+    [connectionsService]
+  );
 
   return (
     <DataSourceSelector
@@ -45,8 +56,10 @@ export const DataSourceConnectionBar: React.FC<DataSourceConnectionProps> = ({
       notifications={toasts}
       disabled={false}
       fullWidth={false}
+      removePrepend={true}
+      isClearable={false}
       onSelectedDataSource={(dataSource) =>
-        connectionService.setSelectedConnection(dataSource[0]?.id || undefined)
+        handleSelectedConnection(dataSource[0]?.id || undefined)
       }
     />
   );
