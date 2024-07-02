@@ -13,8 +13,6 @@ const findFieldSuggestions = (indexPatterns) => {
       return idxField.displayName;
     });
 
-  console.log('get all fields from idx', indexPatterns[0].fields.getAll());
-
   const fieldSuggestions: { text: string; type: string }[] = fieldNames.map((field: string) => {
     return { text: field, type: 'text' };
   });
@@ -61,9 +59,6 @@ export const getSuggestions = async ({
 
   // gets candidates at specified token index
   const candidates = core.collectCandidates(cursorIndex);
-  candidates.tokens.forEach((_, k) => {
-    console.log('token candidate names', parser.vocabulary.getSymbolicName(k));
-  });
 
   let completions = [];
 
