@@ -29,6 +29,7 @@
  */
 
 import { SavedObjectReference } from '../../../../core/types';
+import { SavedObjectWithMetadata } from '../../common';
 
 export interface ObjectField {
   type: FieldType;
@@ -47,3 +48,5 @@ export interface SubmittedFormData {
   attributes: any;
   references: SavedObjectReference[];
 }
+
+export type DuplicateObject = Pick<SavedObjectWithMetadata, 'id' | 'type' | 'meta' | 'workspaces'>;

@@ -107,6 +107,9 @@ const defaultProps: TableProps = {
   isSearching: false,
   onShowRelationships: () => {},
   canDelete: true,
+  onDuplicate: () => {},
+  onDuplicateSingle: () => {},
+  showDuplicate: false,
 };
 
 describe('Table', () => {
@@ -223,5 +226,24 @@ describe('Table', () => {
     expect(onActionRefresh).not.toHaveBeenCalled();
     someAction.onClick();
     expect(onActionRefresh).toHaveBeenCalled();
+  });
+
+  it('should call onDuplicateSingle when show duplicate', () => {
+    const onDuplicateSingle = jest.fn();
+    const showDuplicate = true;
+    const customizedProps = { ...defaultProps, onDuplicateSingle, showDuplicate };
+    const component = shallowWithI18nProvider(<Table {...customizedProps} />);
+    expect(component).toMatchSnapshot();
+
+    const table = component.find('EuiBasicTable');
+    const columns = table.prop('columns') as any[];
+    const actionColumn = columns.find((x) => x.hasOwnProperty('actions')) as { actions: any[] };
+    const duplicateAction = actionColumn.actions.find(
+      (x) => x['data-test-subj'] === 'savedObjectsTableAction-duplicate'
+    );
+
+    expect(onDuplicateSingle).not.toHaveBeenCalled();
+    duplicateAction.onClick();
+    expect(onDuplicateSingle).toHaveBeenCalled();
   });
 });

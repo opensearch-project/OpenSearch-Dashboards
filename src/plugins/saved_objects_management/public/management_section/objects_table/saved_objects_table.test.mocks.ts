@@ -80,3 +80,8 @@ export const getRelationshipsMock = jest.fn();
 jest.doMock('../../lib/get_relationships', () => ({
   getRelationships: getRelationshipsMock,
 }));
+
+export const getDuplicateSavedObjectsMock = jest.fn();
+jest.doMock('../../lib/duplicate_saved_objects', () => ({
+  duplicateSavedObjects: getDuplicateSavedObjectsMock,
+}));
