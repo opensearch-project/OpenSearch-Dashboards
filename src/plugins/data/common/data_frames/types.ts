@@ -4,6 +4,7 @@
  */
 
 import { SearchResponse } from 'elasticsearch';
+import { Observable } from 'rxjs';
 import { IFieldType } from './fields';
 
 export * from './_df_cache';

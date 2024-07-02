@@ -5,6 +5,7 @@
 
 import { SearchResponse } from 'elasticsearch';
 import datemath from '@opensearch/datemath';
+import { Subscription } from 'rxjs';
 import {
   DATA_FRAME_TYPES,
   DataFrameAggConfig,
@@ -13,6 +14,7 @@ import {
   IDataFrameWithAggs,
   IDataFrameResponse,
   PartialDataFrame,
+  FetchFunction,
 } from './types';
 import { IFieldType } from './fields';
 import { IndexPatternFieldMap, IndexPatternSpec } from '../index_patterns';

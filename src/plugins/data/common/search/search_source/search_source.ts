@@ -441,6 +441,12 @@ export class SearchSource {
           const dataFrameResponse = response as IDataFrameResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+        } else if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.POLLING) {
+          const dataFrameResponse = response as IDataFrameResponse;
+          if (!response.body?.error) {
+            await this.setDataFrame(dataFrameResponse.body as IDataFrame);
+          }
+          return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
         }
         // TODO: MQL else if data_frame_polling then poll for the data frame updating the df fields only
       }
@@ -470,7 +476,11 @@ export class SearchSource {
   }
 
   private isUnsupportedRequest(request: SearchRequest): boolean {
-    return request.body!.query.hasOwnProperty('type') && request.body!.query.type === 'unsupported';
+    return request.body!.query.hasOwnProperty('type') && request.body!.query.type.includes('unsupported');
+  }
+
+  private isPollingRequest(request: SearchRequest): boolean {
+    return request.body!.query.hasOwnProperty('type') && request.body!.query.type.includes('async');
   }
 
   private getRawQueryStringFromRequest(request: SearchRequest): string | undefined {
