@@ -1,0 +1,2 @@
+fix:
+- Fix add filter for numeric scripted field ([#7022](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7022))
