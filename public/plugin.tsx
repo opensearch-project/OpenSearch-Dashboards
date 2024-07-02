@@ -30,7 +30,7 @@ export class QueryEnhancementsPlugin
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
     { data }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
     this.connectionsService = new ConnectionsService({
