@@ -79,6 +79,7 @@ function mockProps() {
     }),
     navGroupEnabled: false,
     currentNavgroup$: new BehaviorSubject(undefined),
+    navGroupsMap$: new BehaviorSubject({}),
   };
 }
 
