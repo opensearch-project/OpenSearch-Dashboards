@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CoreSetup } from 'opensearch-dashboards/public';
-import { Observable } from 'rxjs';
+import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
+import { DataSourcePluginStart } from 'src/plugins/data_source/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryEnhancementsPluginSetup {}
@@ -19,6 +19,7 @@ export interface QueryEnhancementsPluginSetupDependencies {
 
 export interface QueryEnhancementsPluginStartDependencies {
   data: DataPublicPluginStart;
+  dataSource?: DataSourcePluginStart;
 }
 
 export interface Connection {
@@ -30,13 +31,5 @@ export interface Connection {
 }
 export interface ConnectionsServiceDeps {
   http: CoreSetup['http'];
+  startServices: Promise<[CoreStart, any, unknown]>;
 }
-export interface IConnectionsServiceSetup {
-  setSelectedConnection: (connection: Connection | undefined) => void;
-  getSelectedConnection: () => Observable<Connection | undefined>;
-  getConnections: () => Promise<Observable<Connection[]>>;
-  getConnectionById: (id: string) => Promise<Observable<Connection>>;
-}
-
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface IConnectionsServiceStart {}

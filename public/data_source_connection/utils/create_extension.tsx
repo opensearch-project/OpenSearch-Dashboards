@@ -3,16 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { QueryEditorExtensionConfig } from '../../../../../src/plugins/data/public/ui/query_editor';
-import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
-import { PublicConfig } from '../../plugin';
+import { ConfigSchema } from '../../../common/config';
 import { ConnectionsBar } from '../components';
-import { IConnectionsServiceSetup } from '../../types';
+import { ConnectionsService } from '../services';
 
 export const createDataSourceConnectionExtension = (
-  connectionsService: IConnectionsServiceSetup,
-  config: PublicConfig
+  connectionsService: ConnectionsService,
+  config: ConfigSchema
 ): QueryEditorExtensionConfig => {
   return {
     id: 'data-source-connection',
@@ -21,33 +20,7 @@ export const createDataSourceConnectionExtension = (
       return true;
     },
     getComponent: (dependencies) => {
-      return (
-        <ConnectionsWrapper dependencies={dependencies}>
-          <ConnectionsBar dependencies={dependencies} connectionsService={connectionsService} />
-        </ConnectionsWrapper>
-      );
+      return <ConnectionsBar dependencies={dependencies} connectionsService={connectionsService} />;
     },
   };
-};
-
-interface ConnectionsWrapperProps {
-  dependencies: QueryEditorExtensionDependencies;
-  invert?: boolean;
-}
-
-const ConnectionsWrapper: React.FC<ConnectionsWrapperProps> = (props) => {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    let mounted = true;
-
-    if (mounted) setVisible(true);
-
-    return () => {
-      mounted = false;
-    };
-  }, [props]);
-
-  if (!visible) return null;
-  return <>{props.children}</>;
 };

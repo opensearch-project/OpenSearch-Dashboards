@@ -9,7 +9,7 @@ import { getMdsDataSourceId } from '.';
 import { QueryEditorExtensionConfig } from '../../../../../src/plugins/data/public/ui/query_editor';
 import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
 import { API } from '../../../common';
-import { PublicConfig } from '../../plugin';
+import { ConfigSchema } from '../../../common/config';
 import { getData } from '../../services';
 import { QueryAssistBar } from '../components';
 import { QueryAssistBanner } from '../components/query_assist_banner';
@@ -47,7 +47,7 @@ const getAvailableLanguages = async (
 
 export const createQueryAssistExtension = (
   http: HttpSetup,
-  config: PublicConfig
+  config: ConfigSchema['queryAssist']
 ): QueryEditorExtensionConfig => {
   return {
     id: 'query-assist',
@@ -72,9 +72,7 @@ export const createQueryAssistExtension = (
       // advertise query assist if user is not on a supported language.
       return (
         <QueryAssistWrapper dependencies={dependencies} http={http} invert>
-          <QueryAssistBanner
-            languages={config.queryAssist.supportedLanguages.map((conf) => conf.language)}
-          />
+          <QueryAssistBanner languages={config.supportedLanguages.map((conf) => conf.language)} />
         </QueryAssistWrapper>
       );
     },

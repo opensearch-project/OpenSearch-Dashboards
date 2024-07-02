@@ -18,18 +18,14 @@ import {
 } from './types';
 import { ConnectionsService, createDataSourceConnectionExtension } from './data_source_connection';
 
-export type PublicConfig = Pick<ConfigSchema, 'queryAssist'>;
-
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
   private readonly storage: IStorageWrapper;
-  private readonly config: PublicConfig;
-  private readonly connectionsService: ConnectionsService;
+  private readonly config: ConfigSchema;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<PublicConfig>();
+    this.config = initializerContext.config.get<ConfigSchema>();
     this.storage = new Storage(window.localStorage);
-    this.connectionsService = new ConnectionsService();
   }
 
   public setup(
@@ -72,7 +68,8 @@ export class QueryEnhancementsPlugin
               initialTo: moment().add(2, 'days').toISOString(),
             },
             showFilterBar: false,
-            showDataSourceSelector: false,
+            showDataSetsSelector: false,
+            showDataSourcesSelector: true,
           },
           fields: {
             filterable: false,
@@ -91,7 +88,8 @@ export class QueryEnhancementsPlugin
           searchBar: {
             showDatePicker: false,
             showFilterBar: false,
-            showDataSourceSelector: false,
+            showDataSetsSelector: false,
+            showDataSourcesSelector: true,
             queryStringInput: { initialValue: 'SELECT * FROM <data_source>' },
           },
           fields: {
@@ -112,7 +110,8 @@ export class QueryEnhancementsPlugin
           searchBar: {
             showDatePicker: false,
             showFilterBar: false,
-            showDataSourceSelector: false,
+            showDataSetsSelector: false,
+            showDataSourcesSelector: true,
             queryStringInput: { initialValue: 'SHOW DATABASES IN ::mys3::' },
           },
           fields: {
@@ -127,16 +126,18 @@ export class QueryEnhancementsPlugin
 
     data.__enhance({
       ui: {
-        queryEditorExtension: createQueryAssistExtension(core.http, this.config),
+        queryEditorExtension: createQueryAssistExtension(core.http, this.config.queryAssist),
       },
+    });
+
+    const connectionsService = new ConnectionsService({
+      startServices: core.getStartServices(),
+      http: core.http,
     });
 
     data.__enhance({
       ui: {
-        queryEditorExtension: createDataSourceConnectionExtension(
-          this.connectionsService.setup({ http: core.http }),
-          this.config
-        ),
+        queryEditorExtension: createDataSourceConnectionExtension(connectionsService, this.config),
       },
     });
 
