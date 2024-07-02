@@ -79,7 +79,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       icon: '/ui/logos/opensearch_mark.svg',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: this.appUpdater,
-      chromeless: core.chrome.navGroup.getNavGroupEnabled(),
+      status: core.chrome.navGroup.getNavGroupEnabled() ? AppStatus.inaccessible : AppStatus.accessible,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart] = await core.getStartServices();

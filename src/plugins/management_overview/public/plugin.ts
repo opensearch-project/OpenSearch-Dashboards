@@ -66,7 +66,7 @@ export class ManagementOverViewPlugin
       icon: '/ui/logos/opensearch_mark.svg',
       order: 9000,
       category: DEFAULT_APP_CATEGORIES.management,
-      status: coreSetup.chrome.navGroup.getNavGroupEnabled() ? AppStatus.inaccessible : undefined,
+      status: coreSetup.chrome.navGroup.getNavGroupEnabled() ? AppStatus.inaccessible : AppStatus.accessible,
       mount: async (params: AppMountParameters) => {
         const { element } = params;
         const [core] = await getStartServices();
