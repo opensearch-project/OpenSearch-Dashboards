@@ -32,5 +32,5 @@ export interface Connection {
 
 export interface ConnectionsServiceDeps {
   http: CoreSetup['http'];
-  startServices: Promise<[CoreStart, any, unknown]>;
+  startServices: Promise<[CoreStart, QueryEnhancementsPluginStartDependencies, unknown]>;
 }
