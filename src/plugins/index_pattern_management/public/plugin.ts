@@ -29,7 +29,13 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  AppMountParameters,
+} from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataSourcePluginSetup, DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
@@ -40,6 +46,7 @@ import {
 } from './service';
 
 import { ManagementSetup } from '../../management/public';
+import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -114,6 +121,35 @@ export class IndexPatternManagementPlugin
         );
       },
     });
+
+    core.application.register({
+      id: IPM_APP_ID,
+      title: sectionsHeader,
+      chromeless: !core.chrome.navGroup.getNavGroupEnabled(),
+      mount: async (params: AppMountParameters) => {
+        const { mountManagementSection } = await import('./management_app');
+        const [coreStart] = await core.getStartServices();
+
+        return mountManagementSection(
+          core.getStartServices,
+          {
+            ...params,
+            basePath: core.http.basePath.get(),
+            setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+            wrapInPage: true,
+          },
+          () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
+          dataSource
+        );
+      },
+    });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: IPM_APP_ID,
+        order: 200,
+      },
+    ]);
 
     return this.indexPatternManagementService.setup({ httpClient: core.http });
   }

@@ -18,6 +18,7 @@ import {
   PublicAppInfo,
   ChromeBreadcrumb,
   WorkspaceAvailability,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -295,7 +296,9 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     core.application.register({
       id: WORKSPACE_LIST_APP_ID,
       title: '',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.default
+        : AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
@@ -307,6 +310,19 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
      * register workspace column into saved objects table
      */
     savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
+
+    /**
+     * Add workspace list to settings and setup group
+     */
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: WORKSPACE_LIST_APP_ID,
+        order: 150,
+        title: i18n.translate('workspace.settings.workspaceSettings', {
+          defaultMessage: 'Workspace settings',
+        }),
+      },
+    ]);
 
     return {};
   }
