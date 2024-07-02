@@ -37,9 +37,13 @@ export default function DiscoverPanel(props: ViewProps) {
   const { data$, indexPattern } = useDiscoverContext();
   const [fetchState, setFetchState] = useState<SearchData>(data$.getValue());
 
-  const { columns } = useSelector((state) => ({
-    columns: state.discover.columns,
-  }));
+  const { columns } = useSelector((state) => {
+    const stateColumns = state.discover.columns;
+    // check if state columns is not undefined, otherwise use buildColumns
+    return {
+      columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
+    };
+  });
 
   const prevColumns = useRef(columns);
   const dispatch = useDispatch();
@@ -49,6 +53,7 @@ export default function DiscoverPanel(props: ViewProps) {
     if (columns !== prevColumns.current) {
       let updatedColumns = buildColumns(columns);
       if (
+        columns &&
         timeFieldname &&
         !prevColumns.current.includes(timeFieldname) &&
         columns.includes(timeFieldname)

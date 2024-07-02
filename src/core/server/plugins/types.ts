@@ -200,6 +200,12 @@ export interface PluginManifest {
    * @deprecated
    */
   readonly extraPublicDirs?: string[];
+
+  /**
+   * Specifies the supported version range when adding OpenSearch cluster as data sources.
+   * Value will be following semver as a range for example ">= 1.3.0"
+   */
+  readonly supportedOSDataSourceVersions?: string;
 }
 
 /**

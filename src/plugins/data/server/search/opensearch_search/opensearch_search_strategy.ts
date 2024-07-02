@@ -43,7 +43,7 @@ import {
   getShardTimeout,
   shimAbortSignal,
 } from '..';
-import { decideClient } from './decide_client';
+import { decideClient } from '../../../../data_source/common/util/';
 
 export const opensearchSearchStrategyProvider = (
   config$: Observable<SharedGlobalConfig>,

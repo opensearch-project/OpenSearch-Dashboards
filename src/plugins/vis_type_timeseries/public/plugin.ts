@@ -53,6 +53,7 @@ import {
   setChartsSetup,
   setDataSourceManagementSetup,
   setNotifications,
+  setDataSourceSetup,
 } from './services';
 import { DataPublicPluginStart } from '../../data/public';
 import { ChartsPluginSetup } from '../../charts/public';
@@ -94,6 +95,7 @@ export class MetricsPlugin implements Plugin<Promise<void>, void> {
     setChartsSetup(charts);
     visualizations.createReactVisualization(metricsVisDefinition);
     setDataSourceManagementSetup({ dataSourceManagement });
+    setDataSourceSetup({ dataSource });
   }
 
   public start(core: CoreStart, { data }: MetricsPluginStartDependencies) {

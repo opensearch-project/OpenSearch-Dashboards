@@ -5,5 +5,6 @@
   "ui": true,
   "optionalPlugins": ["dataSource"],
   "requiredPlugins": ["management", "data", "urlForwarding"],
-  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils"]
+  "requiredBundles": ["opensearchDashboardsReact", "opensearchDashboardsUtils"],
+  "supportedOSDataSourceVersions": ">=1.0.0"
 }

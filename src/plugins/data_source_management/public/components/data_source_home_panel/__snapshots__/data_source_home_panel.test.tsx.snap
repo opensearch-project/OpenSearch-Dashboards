@@ -1,0 +1,75 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DataSourceHomePanel renders correctly 1`] = `
+<EuiPanel>
+  <EuiFlexGroup
+    direction="column"
+  >
+    <EuiFlexItem>
+      <EuiPageHeader>
+        <EuiFlexGroup
+          alignItems="center"
+          justifyContent="spaceBetween"
+        >
+          <EuiFlexItem
+            grow={false}
+          >
+            <DataSourceHeader
+              history={
+                Object {
+                  "push": [MockFunction],
+                }
+              }
+            />
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <CreateButton
+              dataTestSubj="createDataSourceButton"
+              history={
+                Object {
+                  "push": [MockFunction],
+                }
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPageHeader>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiSpacer
+        size="s"
+      />
+      <EuiTabs>
+        <EuiTab
+          isSelected={true}
+          key="manageDirectQueryDataSources"
+          onClick={[Function]}
+        >
+          Direct query connections
+        </EuiTab>
+        <EuiTab
+          isSelected={false}
+          key="manageOpensearchDataSources"
+          onClick={[Function]}
+        >
+          OpenSearch connections
+        </EuiTab>
+      </EuiTabs>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <EuiSpacer
+        size="s"
+      />
+      <ManageDirectQueryDataConnectionsTable
+        featureFlagStatus={true}
+        http={Object {}}
+        notifications={Object {}}
+        savedObjects={Object {}}
+        uiSettings={Object {}}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;

@@ -142,6 +142,25 @@ export class IndexPatternsService {
   };
 
   /**
+   * Finds a data source by its title.
+   *
+   * @param title - The title of the data source to find.
+   * @param size - The number of results to return. Defaults to 10.
+   * @returns The first matching data source or undefined if not found.
+   */
+  findDataSourceByTitle = async (title: string, size: number = 10) => {
+    const savedObjectsResponse = await this.savedObjectsClient.find<DataSourceAttributes>({
+      type: 'data-source',
+      fields: ['title'],
+      search: title,
+      searchFields: ['title'],
+      perPage: size,
+    });
+
+    return savedObjectsResponse[0] || undefined;
+  };
+
+  /**
    * Get list of index pattern ids
    * @param refresh Force refresh of index pattern list
    */

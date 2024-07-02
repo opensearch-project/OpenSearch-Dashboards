@@ -77,6 +77,7 @@ function createPluginManifest(manifestProps: Partial<PluginManifest> = {}): Plug
     requiredBundles: [],
     server: true,
     ui: true,
+    supportedOSDataSourceVersions: '>=1.0.0',
     ...manifestProps,
   };
 }
@@ -125,6 +126,7 @@ test('`constructor` correctly initializes plugin instance', () => {
   expect(plugin.path).toBe('some-plugin-path');
   expect(plugin.requiredPlugins).toEqual(['some-required-dep']);
   expect(plugin.optionalPlugins).toEqual(['some-optional-dep']);
+  expect(plugin.supportedOSDataSourceVersions).toEqual('>=1.0.0');
 });
 
 test('`setup` fails if `plugin` initializer is not exported', async () => {

@@ -94,6 +94,11 @@ export interface OverlayFlyoutStart {
    * @return {@link OverlayRef} A reference to the opened flyout panel.
    */
   open(mount: MountPoint, options?: OverlayFlyoutOpenOptions): OverlayRef;
+
+  /**
+   * Closes any open flyout panel.
+   */
+  close(): void;
 }
 
 /**
@@ -148,6 +153,12 @@ export class FlyoutService {
         );
 
         return flyout;
+      },
+      close: () => {
+        if (this.activeFlyout) {
+          this.activeFlyout.close();
+          this.cleanupDom();
+        }
       },
     };
   }

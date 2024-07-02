@@ -73,4 +73,25 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     order: 5000,
     euiIconType: 'managementApp',
   },
+  investigate: {
+    id: 'investigate',
+    label: i18n.translate('core.ui.investigate.label', {
+      defaultMessage: 'Investigate',
+    }),
+    order: 1000,
+  },
+  dashboardAndReport: {
+    id: 'dashboardAndReport',
+    label: i18n.translate('core.ui.dashboardAndReport.label', {
+      defaultMessage: 'Dashboard and report',
+    }),
+    order: 2000,
+  },
+  analyzeSearch: {
+    id: 'analyzeSearch',
+    label: i18n.translate('core.ui.analyzeSearch.label', {
+      defaultMessage: 'Analyze search',
+    }),
+    order: 4000,
+  },
 });

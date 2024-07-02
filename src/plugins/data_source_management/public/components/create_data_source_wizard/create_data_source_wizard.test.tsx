@@ -107,7 +107,7 @@ describe('Datasource Management: Create Datasource Wizard', () => {
         await component.find(formIdentifier).first().prop('handleCancel')();
       });
 
-      expect(history.push).toBeCalledWith('');
+      expect(history.push).toBeCalledWith('/create');
     });
   });
 

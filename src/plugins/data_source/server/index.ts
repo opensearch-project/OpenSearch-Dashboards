@@ -24,5 +24,4 @@ export {
   DataSourcePluginSetup,
   DataSourcePluginStart,
   DataSourcePluginRequestContext,
-  DataSourceError,
 } from './types';

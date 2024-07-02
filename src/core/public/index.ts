@@ -71,6 +71,7 @@ import {
   RightNavigationOrder,
   RightNavigationButton,
   RightNavigationButtonProps,
+  ChromeRegistrationNavLink,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -103,6 +104,7 @@ export {
   cleanWorkspaceId,
   PUBLIC_WORKSPACE_ID,
   PUBLIC_WORKSPACE_NAME,
+  DEFAULT_NAV_GROUPS,
 } from '../utils';
 export {
   AppCategory,
@@ -114,6 +116,8 @@ export {
   StringValidationRegex,
   StringValidationRegexString,
   WorkspaceAttribute,
+  ChromeNavGroup,
+  NavGroupType,
 } from '../types';
 
 export {
@@ -366,6 +370,7 @@ export {
   RightNavigationOrder,
   RightNavigationButton,
   RightNavigationButtonProps,
+  ChromeRegistrationNavLink,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';

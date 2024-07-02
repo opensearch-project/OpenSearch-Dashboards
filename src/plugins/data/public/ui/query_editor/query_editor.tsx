@@ -8,7 +8,7 @@ import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
 import { Settings } from '..';
-import { IDataPluginServices, IIndexPattern, Query, TimeRange } from '../..';
+import { DataSource, IDataPluginServices, IIndexPattern, Query, TimeRange } from '../..';
 import {
   CodeEditor,
   OpenSearchDashboardsReactContextValue,
@@ -19,9 +19,11 @@ import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { DataSettings } from '../types';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
+import { QueryEditorExtensions } from './query_editor_extensions';
 
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
+  dataSource?: DataSource;
   query: Query;
   containerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
@@ -41,10 +43,9 @@ export interface QueryEditorProps {
   size?: SuggestionsListSize;
   className?: string;
   isInvalid?: boolean;
-  queryEditorHeaderRef: React.RefObject<HTMLDivElement>;
-  queryEditorHeaderClassName?: string;
-  queryEditorBannerRef: React.RefObject<HTMLDivElement>;
-  queryEditorBannerClassName?: string;
+  queryLanguage?: string;
+  headerClassName?: string;
+  bannerClassName?: string;
 }
 
 interface Props extends QueryEditorProps {
@@ -57,7 +58,6 @@ interface State {
   index: number | null;
   suggestions: QuerySuggestion[];
   indexPatterns: IIndexPattern[];
-  queryEditorRect: DOMRect | undefined;
 }
 
 const KEY_CODES = {
@@ -82,7 +82,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     index: null,
     suggestions: [],
     indexPatterns: [],
-    queryEditorRect: undefined,
   };
 
   public inputRef: HTMLElement | null = null;
@@ -91,7 +90,9 @@ export default class QueryEditorUI extends Component<Props, State> {
   private abortController?: AbortController;
   private services = this.props.opensearchDashboards.services;
   private componentIsUnmounting = false;
-  private queryEditorDivRefInstance: RefObject<HTMLDivElement> = createRef();
+  private headerRef: RefObject<HTMLDivElement> = createRef();
+  private bannerRef: RefObject<HTMLDivElement> = createRef();
+  private extensionMap = this.props.settings?.getQueryEditorExtensionMap();
 
   private getQueryString = () => {
     if (!this.props.query.query) {
@@ -119,6 +120,30 @@ export default class QueryEditorUI extends Component<Props, State> {
       indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
     });
   };
+
+  private renderQueryEditorExtensions() {
+    if (
+      !(
+        this.headerRef.current &&
+        this.bannerRef.current &&
+        this.props.queryLanguage &&
+        this.extensionMap &&
+        Object.keys(this.extensionMap).length > 0
+      )
+    ) {
+      return null;
+    }
+    return (
+      <QueryEditorExtensions
+        language={this.props.queryLanguage}
+        configMap={this.extensionMap}
+        componentContainer={this.headerRef.current}
+        bannerContainer={this.bannerRef.current}
+        indexPatterns={this.props.indexPatterns}
+        dataSource={this.props.dataSource}
+      />
+    );
+  }
 
   private onSubmit = (query: Query, dateRange?: TimeRange) => {
     if (this.props.onSubmit) {
@@ -221,12 +246,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     this.initPersistedLog();
     // this.fetchIndexPatterns().then(this.updateSuggestions);
     this.initDataSourcesVisibility();
-    this.handleListUpdate();
-
-    window.addEventListener('scroll', this.handleListUpdate, {
-      passive: true, // for better performance as we won't call preventDefault
-      capture: true, // scroll events don't bubble, they must be captured instead
-    });
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -241,16 +260,7 @@ export default class QueryEditorUI extends Component<Props, State> {
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
     this.componentIsUnmounting = true;
-    window.removeEventListener('scroll', this.handleListUpdate, { capture: true });
   }
-
-  handleListUpdate = () => {
-    if (this.componentIsUnmounting) return;
-
-    return this.setState({
-      queryEditorRect: this.queryEditorDivRefInstance.current?.getBoundingClientRect(),
-    });
-  };
 
   handleOnFocus = () => {
     if (this.props.onChangeQueryEditorFocus) {
@@ -260,20 +270,12 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   public render() {
     const className = classNames(this.props.className);
-
-    const queryEditorHeaderClassName = classNames(
-      'osdQueryEditorHeader',
-      this.props.queryEditorHeaderClassName
-    );
-
-    const queryEditorBannerClassName = classNames(
-      'osdQueryEditorBanner',
-      this.props.queryEditorBannerClassName
-    );
+    const headerClassName = classNames('osdQueryEditorHeader', this.props.headerClassName);
+    const bannerClassName = classNames('osdQueryEditorBanner', this.props.bannerClassName);
 
     return (
       <div className={className}>
-        <div ref={this.props.queryEditorBannerRef} className={queryEditorBannerClassName} />
+        <div ref={this.bannerRef} className={bannerClassName} />
         <EuiFlexGroup gutterSize="xs" direction="column">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" className={`${className}__wrapper`}>
@@ -294,7 +296,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem onClick={this.onClickInput} grow={true}>
-            <div ref={this.props.queryEditorHeaderRef} className={queryEditorHeaderClassName} />
+            <div ref={this.headerRef} className={headerClassName} />
             <CodeEditor
               height={70}
               languageId="opensearchql"
@@ -315,6 +317,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {this.renderQueryEditorExtensions()}
       </div>
     );
   }

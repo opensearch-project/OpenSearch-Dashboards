@@ -52,6 +52,11 @@ import { Branding } from '../';
 import { getLogos } from '../../common';
 import type { Logos } from '../../common/types';
 import { OverlayStart } from '../overlays';
+import {
+  ChromeNavGroupService,
+  ChromeNavGroupServiceSetupContract,
+  ChromeNavGroupServiceStartContract,
+} from './nav_group';
 
 export { ChromeNavControls, ChromeRecentlyAccessed, ChromeDocTitle };
 
@@ -90,6 +95,10 @@ interface ConstructorParams {
   browserSupportsCsp: boolean;
 }
 
+export interface SetupDeps {
+  uiSettings: IUiSettingsClient;
+}
+
 export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
@@ -111,6 +120,7 @@ export class ChromeService {
   private readonly navLinks = new NavLinksService();
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
+  private readonly navGroup = new ChromeNavGroupService();
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
 
   constructor(private readonly params: ConstructorParams) {}
@@ -147,7 +157,8 @@ export class ChromeService {
     );
   }
 
-  public setup() {
+  public setup({ uiSettings }: SetupDeps): ChromeSetup {
+    const navGroup = this.navGroup.setup({ uiSettings });
     return {
       registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => {
         if (this.collapsibleNavHeaderRender) {
@@ -158,6 +169,7 @@ export class ChromeService {
         }
         this.collapsibleNavHeaderRender = render;
       },
+      navGroup,
     };
   }
 
@@ -186,6 +198,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start({ document: window.document });
+    const navGroup = await this.navGroup.start({ navLinks });
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -254,6 +267,7 @@ export class ChromeService {
       recentlyAccessed,
       docTitle,
       logos,
+      navGroup,
 
       getHeaderComponent: () => (
         <Header
@@ -344,6 +358,7 @@ export class ChromeService {
 
   public stop() {
     this.navLinks.stop();
+    this.navGroup.stop();
     this.stop$.next();
   }
 }
@@ -360,6 +375,7 @@ export class ChromeService {
  */
 export interface ChromeSetup {
   registerCollapsibleNavHeader: (render: CollapsibleNavHeaderRender) => void;
+  navGroup: ChromeNavGroupServiceSetupContract;
 }
 
 /**
@@ -397,6 +413,8 @@ export interface ChromeStart {
   recentlyAccessed: ChromeRecentlyAccessed;
   /** {@inheritdoc ChromeDocTitle} */
   docTitle: ChromeDocTitle;
+  /** {@inheritdoc NavGroupService} */
+  navGroup: ChromeNavGroupServiceStartContract;
   /** {@inheritdoc Logos} */
   readonly logos: Logos;
 

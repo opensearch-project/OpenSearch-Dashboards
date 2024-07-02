@@ -383,3 +383,20 @@ export { getDataSourceSelection, setDataSourceSelection };
 export const generateComponentId = () => {
   return uuid.v4();
 };
+
+export const formatError = (name: string, message: string, details: string) => {
+  return {
+    name,
+    message,
+    body: {
+      attributes: {
+        error: {
+          caused_by: {
+            type: '',
+            reason: details,
+          },
+        },
+      },
+    },
+  };
+};
