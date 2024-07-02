@@ -164,7 +164,7 @@ export class WorkspaceSavedObjectsClientWrapper {
      * This kind of data source is not allowed for non dashboard admin. The dashboard admin will bypass this
      * client wrapper, so denied all access to the global data source saved object here.
      */
-    if (savedObject.type === DATA_SOURCE_SAVED_OBJECT_TYPE && !savedObject.workspaces) {
+    if (savedObject.type === DATA_SOURCE_SAVED_OBJECT_TYPE && (!savedObject.workspaces || savedObject.workspaces.length === 0)) {
       return false;
     }
     /**
