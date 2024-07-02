@@ -475,14 +475,30 @@ export class SavedObjectsClient {
       throw new TypeError(`Workspaces is required.`);
     }
     const object = await this.get<T>(type, id);
-    const existingWorkspaces = object.workspaces;
-    const newWorkspaces = existingWorkspaces?.filter((item) => {
+    const existingWorkspaces = object.workspaces ?? [];
+    const newWorkspaces = existingWorkspaces.filter((item) => {
       return workspaces.indexOf(item) === -1;
     });
-    return await this.update<T>(type, id, object.attributes, {
-      workspaces: newWorkspaces,
-      version: object.version,
-    });
+    if (newWorkspaces.length > 0) {
+      return await this.update<T>(type, id, object.attributes, {
+        workspaces: newWorkspaces,
+        version: object.version,
+      });
+    } else {
+      // If there is no workspaces assigned, will create object with overwrite to delete workspace property.
+      return await this.create(
+        type,
+        {
+          ...object.attributes,
+        },
+        {
+          id,
+          permissions: object.permissions,
+          overwrite: true,
+          version: object.version,
+        }
+      );
+    }
   };
 
   /**
