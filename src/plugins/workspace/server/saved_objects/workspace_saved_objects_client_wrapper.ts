@@ -513,7 +513,7 @@ export class WorkspaceSavedObjectsClientWrapper {
 
           /**
            * Passing an empty workspaces array will lead to the generated query missing the workspaces condition,
-           * which would return all data. Therefore,  direct return an empty result when no permitted workspaces.
+           * which would return all data. Therefore, directly return an empty result when no permitted workspaces.
            */
           if (!options.workspaces.length) {
             return {
