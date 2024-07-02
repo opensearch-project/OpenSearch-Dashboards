@@ -499,20 +499,4 @@ describe('WorkspaceConflictSavedObjectsClientWrapper', () => {
       );
     });
   });
-
-  describe('find', () => {
-    beforeEach(() => {
-      mockedClient.find.mockClear();
-    });
-
-    it(`workspaces parameters should be removed when finding data sources`, async () => {
-      await wrapperClient.find({
-        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-        workspaces: ['foo'],
-      });
-      expect(mockedClient.find).toBeCalledWith({
-        type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-      });
-    });
-  });
 });

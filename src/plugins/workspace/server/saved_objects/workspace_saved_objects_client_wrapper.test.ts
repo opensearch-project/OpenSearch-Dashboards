@@ -7,6 +7,7 @@ import { getWorkspaceState, updateWorkspaceState } from '../../../../core/server
 import { SavedObjectsErrorHelpers } from '../../../../core/server';
 import { WorkspaceSavedObjectsClientWrapper } from './workspace_saved_objects_client_wrapper';
 import { httpServerMock } from '../../../../core/server/mocks';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
 
 const DASHBOARD_ADMIN = 'dashnoard_admin';
 const NO_DASHBOARD_ADMIN = 'no_dashnoard_admin';
@@ -46,6 +47,17 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
       id: 'not-permitted-workspace',
       attributes: { name: 'Not permitted workspace' },
     },
+    {
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      id: 'global-data-source',
+      attributes: { title: 'Global data source' },
+    },
+    {
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      id: 'workspace-1-data-source',
+      attributes: { title: 'Workspace 1 data source' },
+      workspaces: ['workspace-1'],
+    },
   ];
   const clientMock = {
     get: jest.fn().mockImplementation(async (type, id) => {
@@ -77,7 +89,17 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
         ),
       };
     }),
-    find: jest.fn(),
+    find: jest.fn().mockImplementation(({ type, workspaces }) => {
+      const savedObjects = savedObjectsStore.filter(
+        (item) =>
+          item.type === type &&
+          (!workspaces || item.workspaces?.some((workspaceId) => workspaces.includes(workspaceId)))
+      );
+      return {
+        saved_objects: savedObjects,
+        total: savedObjects.length,
+      };
+    }),
     deleteByWorkspace: jest.fn(),
   };
   const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
@@ -878,6 +900,111 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         await wrapper.deleteByWorkspace('not-permitted-workspace');
         expect(clientMock.deleteByWorkspace).toHaveBeenCalledWith('not-permitted-workspace');
         expect(permissionControlMock.validate).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('data source', () => {
+      it('should throw permission error when accessing global data source with non dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.get(DATA_SOURCE_SAVED_OBJECT_TYPE, 'global-data-source');
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid saved objects permission');
+      });
+      it('should return global data source for dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper(DASHBOARD_ADMIN);
+        const dataSource = await wrapper.get(DATA_SOURCE_SAVED_OBJECT_TYPE, 'global-data-source');
+        expect(dataSource).toEqual(
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              title: 'Global data source',
+            }),
+          })
+        );
+      });
+
+      it('should return workspace 1 data source for permitted user', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        const dataSource = await wrapper.get(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'workspace-1-data-source'
+        );
+        expect(dataSource).toEqual(
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              title: 'Workspace 1 data source',
+            }),
+          })
+        );
+      });
+
+      it('should return all data sources for dashboard admin', async () => {
+        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper(DASHBOARD_ADMIN);
+        const result = await wrapper.find({ type: DATA_SOURCE_SAVED_OBJECT_TYPE });
+
+        expect(clientMock.find).toHaveBeenCalledWith({
+          type: 'data-source',
+        });
+        expect(result.saved_objects).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "attributes": Object {
+                "title": "Global data source",
+              },
+              "id": "global-data-source",
+              "type": "data-source",
+            },
+            Object {
+              "attributes": Object {
+                "title": "Workspace 1 data source",
+              },
+              "id": "workspace-1-data-source",
+              "type": "data-source",
+              "workspaces": Array [
+                "workspace-1",
+              ],
+            },
+          ]
+        `);
+      });
+
+      it('should only return permitted data source for non dashboard admin', async () => {
+        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
+        const result = await wrapper.find({ type: DATA_SOURCE_SAVED_OBJECT_TYPE });
+
+        expect(clientMock.find).toHaveBeenCalledWith({
+          type: 'data-source',
+          workspaces: ['workspace-1'],
+          ACLSearchParams: {},
+          workspacesSearchOperator: 'AND',
+        });
+        expect(result.saved_objects).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "attributes": Object {
+                "title": "Workspace 1 data source",
+              },
+              "id": "workspace-1-data-source",
+              "type": "data-source",
+              "workspaces": Array [
+                "workspace-1",
+              ],
+            },
+          ]
+        `);
+      });
+
+      it('should return empty data source list for not permitted workspace non dashboard admin', async () => {
+        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
+        const result = await wrapper.find({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          workspaces: ['workspace-2'],
+        });
+
+        expect(result.saved_objects).toMatchInlineSnapshot(`Array []`);
       });
     });
   });
