@@ -80,6 +80,7 @@ export interface SearchBarOwnProps {
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
   settings?: Settings;
+  dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
@@ -490,6 +491,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       queryEditor = (
         <QueryEditorTopRow
           timeHistory={this.props.timeHistory}
+          dataSourceContainerRef={this.props.dataSourceContainerRef}
           containerRef={this.props.containerRef}
           settings={this.props.settings}
           query={this.state.query}
