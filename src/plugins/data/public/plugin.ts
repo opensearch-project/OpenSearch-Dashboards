@@ -170,7 +170,7 @@ export class DataPublicPlugin
 
     const ac = this.autocomplete.setup(core);
     ac.addQuerySuggestionProvider('PPL', getPPLSuggestions);
-    ac.addQuerySuggestionProvider('SQL', getDQLSuggestions);
+    ac.addQuerySuggestionProvider('SQL', getSQLSuggestions);
     ac.addQuerySuggestionProvider('kuery', getDQLSuggestions);
 
     return {
