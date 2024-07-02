@@ -5,57 +5,29 @@
 
 import React, { FC, useState, useMemo } from 'react';
 import { i18n } from '@osd/i18n';
-import {
-  EuiPanel,
-  EuiButtonIcon,
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiPanel, EuiButtonIcon, EuiTitle, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { RenderFn, Section as SectionType } from '../../../services/section_type/section_type';
 import { LazyRender } from './lazy_render';
 
 interface Props {
   render: RenderFn;
   title: SectionType['title'];
-  description?: SectionType['description'];
-  links?: SectionType['links'];
+  headerComponent?: React.ReactNode;
 }
 
-export const Section: FC<Props> = ({ render, title, description, links }) => {
+export const Section: FC<Props> = ({ render, title, headerComponent }) => {
   const [isExpanded, setExpanded] = useState(true);
-
-  const hasDescription = !!description;
-  const hasLinks = Array.isArray(links) && links.length > 0;
-  const hasDescriptionSection = hasDescription || hasLinks;
-  const hasDescriptionSpacer = hasDescription && hasLinks;
-
   const toggleExpanded = () => setExpanded((expanded) => !expanded);
 
   const memoizedContent = useMemo(
     () => (
       <EuiFlexGroup direction="row" data-test-subj="homepageSectionContent">
-        {hasDescriptionSection && (
-          <EuiFlexItem grow={1}>
-            <EuiText>{description}</EuiText>
-            {hasDescriptionSpacer && <EuiSpacer />}
-            {hasLinks &&
-              links.map(({ label, url, props }, i) => (
-                <EuiLink key={i} {...props} href={url}>
-                  {label}
-                </EuiLink>
-              ))}
-          </EuiFlexItem>
-        )}
         <EuiFlexItem grow={3}>
           <LazyRender render={render} />
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [description, hasDescriptionSection, hasDescriptionSpacer, hasLinks, links, render]
+    [render]
   );
 
   return (
@@ -66,6 +38,12 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
       data-test-subj="homepageSection"
     >
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow>
+          <EuiTitle size="m">
+            <h2>{title}</h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{headerComponent}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
@@ -79,11 +57,6 @@ export const Section: FC<Props> = ({ render, title, description, links }) => {
                 : i18n.translate('home.section.expand', { defaultMessage: 'Expand section' })
             }
           />
-        </EuiFlexItem>
-        <EuiFlexItem grow>
-          <EuiTitle size="m">
-            <h2>{title}</h2>
-          </EuiTitle>
         </EuiFlexItem>
       </EuiFlexGroup>
       {isExpanded && memoizedContent}

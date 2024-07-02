@@ -28,6 +28,8 @@
  * under the License.
  */
 
+import moment from 'moment';
+
 import {
   SavedObject,
   SavedObjectConfig,
@@ -123,7 +125,9 @@ export async function saveSavedObject(
       chrome.recentlyAccessed.add(
         savedObject.getFullPath(),
         savedObject.title,
-        String(savedObject.id)
+        String(savedObject.id),
+        savedObject.getOpenSearchType(),
+        moment(Date.now()).format('MM/DD/YYYY HH:mm')
       );
     }
     savedObject.isSaving = false;

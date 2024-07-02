@@ -3,149 +3,147 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { FC } from 'react';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiTitle,
-  EuiSpacer,
-  EuiListGroup,
-  EuiListGroupItemProps,
-  IconType,
-} from '@elastic/eui';
+import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiCard, EuiLink } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { Section } from '../../../../services/section_type/section_type';
 import { renderFn } from './utils';
 import { getServices } from '../../../opensearch_dashboards_services';
 
-const Card: FC<{
-  iconType: IconType;
-  title: string;
-  listItems: EuiListGroupItemProps[];
-}> = ({ iconType, title, listItems }) => (
-  <EuiFlexItem grow={1}>
-    <EuiFlexGroup direction="row" alignItems="center" gutterSize="m" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={iconType} size="xl" />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="s">
-          <span>{title}</span>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type="popout" />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiSpacer size="m" />
-    <EuiListGroup listItems={listItems} flush />
-  </EuiFlexItem>
-);
+import '../_homepage.scss';
 
 const render = renderFn(() => {
   const services = getServices();
-  const logos = services.chrome.logos;
-
-  const gettingStartedLinks: EuiListGroupItemProps[] = [
-    {
-      label: i18n.translate('home.sections.learnBasics.gettingStarted.quickstart', {
-        defaultMessage: 'OpenSearch Dashboards quickstart',
-      }),
-      href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
-      target: '_blank',
-    },
-    {
-      label: i18n.translate('home.sections.learnBasics.gettingStarted.dataVis', {
-        defaultMessage: 'Building data visualizations',
-      }),
-      href: 'https://opensearch.org/docs/latest/dashboards/visualize/viz-index/',
-      target: '_blank',
-    },
-    {
-      label: i18n.translate('home.sections.learnBasics.gettingStarted.dashboards', {
-        defaultMessage: 'Creating dashboards',
-      }),
-      href: 'https://opensearch.org/docs/latest/dashboards/dashboard/index/',
-      target: '_blank',
-    },
-  ];
-
-  const dataDiscoveryLinks: EuiListGroupItemProps[] = [
-    {
-      label: i18n.translate('home.sections.learnBasics.dataDiscovery.getFamiliar', {
-        defaultMessage: 'Get familiar with Discover',
-      }),
-      href: 'https://opensearch.org/docs/latest/dashboards/discover/index-discover/',
-      target: '_blank',
-    },
-    {
-      label: i18n.translate('home.sections.learnBasics.dataDiscovery.runQueries', {
-        defaultMessage: 'Run queries in the Dev Tools Console',
-      }),
-      href: 'https://opensearch.org/docs/latest/dashboards/dev-tools/run-queries/',
-      target: '_blank',
-    },
-    {
-      label: i18n.translate('home.sections.learnBasics.dataDiscovery.indexes', {
-        defaultMessage: 'Working with indexes',
-      }),
-      href: 'https://opensearch.org/docs/latest/dashboards/im-dashboards/index/',
-      target: '_blank',
-    },
-  ];
-
-  const observabilityLinks: EuiListGroupItemProps[] = [
-    {
-      label: i18n.translate('home.sections.learnBasics.observability.logExplorer', {
-        defaultMessage: 'Get familiar with Log Explorer',
-      }),
-      href: 'https://opensearch.org/docs/latest/observing-your-data/event-analytics/',
-      target: '_blank',
-    },
-    {
-      label: i18n.translate('home.sections.learnBasics.observability.prometheus', {
-        defaultMessage: 'Explore prometheus metrics',
-      }),
-      href: 'https://opensearch.org/docs/latest/observing-your-data/prometheusmetrics/',
-      target: '_blank',
-    },
-    {
-      label: i18n.translate('home.sections.learnBasics.observability.traces', {
-        defaultMessage: 'Dive into traces and spans',
-      }),
-      href: 'https://opensearch.org/docs/latest/observing-your-data/trace/ta-dashboards/',
-      target: '_blank',
-    },
-  ];
+  const navigateToUrl = services.application.navigateToUrl;
 
   return (
-    <EuiPanel>
-      <EuiFlexGroup wrap direction="row" alignItems="stretch" gutterSize="xl">
-        <Card
-          iconType={logos.Mark.url}
-          title={i18n.translate('home.sections.learnBasics.gettingStarted.title', {
-            defaultMessage: 'Getting started',
-          })}
-          listItems={gettingStartedLinks}
-        />
-        <Card
-          iconType="discoverApp"
-          title={i18n.translate('home.sections.learnBasics.dataDiscovery.title', {
-            defaultMessage: 'Explore data',
-          })}
-          listItems={dataDiscoveryLinks}
-        />
-        <Card
-          iconType="eye"
-          title={i18n.translate('home.sections.learnBasics.observability.title', {
-            defaultMessage: 'Observability',
-          })}
-          listItems={observabilityLinks}
-        />
+    <div>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={1}>
+          <EuiCard
+            layout="horizontal"
+            icon={<EuiIcon size="xl" type="document" />}
+            title={
+              <p>
+                Quickstart guide
+                <EuiIcon size="m" type="popout" className="popover-title-icon" />
+              </p>
+            }
+            titleSize="xs"
+            description={i18n.translate('home.sections.learnBasics.quickstart.description', {
+              defaultMessage: 'Get started in minutes with OpenSearch Dashboards.',
+            })}
+            onClick={() =>
+              navigateToUrl('https://opensearch.org/docs/latest/dashboards/quickstart/')
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={1}>
+          <EuiCard
+            layout="horizontal"
+            icon={<EuiIcon size="xl" type="document" />}
+            title={
+              <p>
+                Building data visualizations
+                <EuiIcon size="m" type="popout" className="popover-title-icon" />
+              </p>
+            }
+            titleSize="xs"
+            description={i18n.translate('home.sections.learnBasics.visualization.description', {
+              defaultMessage:
+                'Design interactive charts and graphs to unlock insights from your data.',
+            })}
+            onClick={() =>
+              navigateToUrl('https://opensearch.org/docs/latest/dashboards/visualize/viz-index/')
+            }
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiPanel>
+      <EuiFlexGroup wrap direction="row" alignItems="stretch">
+        <EuiFlexItem>
+          <EuiCard
+            layout="horizontal"
+            icon={<EuiIcon size="xl" type="document" />}
+            title={
+              <p>
+                Creating dashboards
+                <EuiIcon size="m" type="popout" className="popover-title-icon" />
+              </p>
+            }
+            titleSize="xs"
+            description={i18n.translate('home.sections.learnBasics.dashboard.description', {
+              defaultMessage: 'Build interactive dashboards to explore and analyze your data.',
+            })}
+            onClick={() =>
+              navigateToUrl('https://opensearch.org/docs/latest/dashboards/dashboard/index/')
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            layout="horizontal"
+            icon={<EuiIcon size="xl" type="document" />}
+            title={
+              <p>
+                Get familiar with Discover
+                <EuiIcon size="m" type="popout" className="popover-title-icon" />
+              </p>
+            }
+            titleSize="xs"
+            description={i18n.translate('home.sections.learnBasics.discover.description', {
+              defaultMessage: 'Transform raw data into actionable insights.',
+            })}
+            onClick={() =>
+              navigateToUrl(
+                'https://opensearch.org/docs/latest/dashboards/discover/index-discover/'
+              )
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup wrap direction="row" alignItems="stretch">
+        <EuiFlexItem>
+          <EuiCard
+            layout="horizontal"
+            icon={<EuiIcon size="xl" type="document" />}
+            title={
+              <p>
+                Running queries in Dev Tools console
+                <EuiIcon size="m" type="popout" className="popover-title-icon" />
+              </p>
+            }
+            titleSize="xs"
+            description={i18n.translate('home.sections.learnBasics.devtool.description', {
+              defaultMessage:
+                'Execute queries and explore your code directly in OpenSearch Dashboards using Query DSL.',
+            })}
+            onClick={() =>
+              navigateToUrl('https://opensearch.org/docs/latest/dashboards/dev-tools/run-queries/')
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            layout="horizontal"
+            icon={<EuiIcon size="xl" type="document" />}
+            title={
+              <p>
+                Working with indexes
+                <EuiIcon size="m" type="popout" className="popover-title-icon" />
+              </p>
+            }
+            titleSize="xs"
+            description={i18n.translate('home.sections.learnBasics.index.description', {
+              defaultMessage:
+                'Effortlessly build and manage indexes for faster, more efficient data access.',
+            })}
+            onClick={() =>
+              navigateToUrl('https://opensearch.org/docs/latest/dashboards/im-dashboards/index/')
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 });
 
@@ -154,20 +152,14 @@ export const learnBasicsSection: Section = {
   title: i18n.translate('home.sections.learnBasics.title', {
     defaultMessage: 'Learn OpenSearch basics',
   }),
-  description: i18n.translate('home.sections.learnBasics.description', {
-    defaultMessage: 'Core concepts to get you started with OpenSearch.',
-  }),
-  links: [
-    {
-      label: i18n.translate('home.sections.learnBasics.documentation', {
-        defaultMessage: 'Documentation',
-      }),
-      url: 'https://opensearch.org/docs/latest/',
-      props: {
-        external: true,
-        target: '_blank',
-      },
-    },
-  ],
   render,
+  headerComponent: (
+    <EuiLink
+      href="https://opensearch.org/docs/latest/"
+      target="_blank"
+      className="learn-basics-links"
+    >
+      See all documentation
+    </EuiLink>
+  ),
 };
