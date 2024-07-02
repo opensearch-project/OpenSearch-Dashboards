@@ -21,7 +21,7 @@ import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
 import { SimpleDataSet } from '../../../common';
 import { createDQLEditor, createDefaultEditor } from './editors';
 
-const LANGUAGE_ID = 'SQL';
+const LANGUAGE_ID = 'kuery';
 monaco.languages.register({ id: LANGUAGE_ID });
 
 export interface QueryEditorProps {
@@ -230,7 +230,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
-    // this.fetchIndexPatterns().then(this.updateSuggestions);
   }
 
   public componentDidUpdate(prevProps: Props) {
