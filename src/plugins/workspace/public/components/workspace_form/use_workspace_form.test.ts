@@ -6,6 +6,7 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { applicationServiceMock } from '../../../../../core/public/mocks';
+import { WorkspaceOperationType } from './constants';
 import { WorkspaceFormData, WorkspaceFormErrorCode } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 
@@ -16,6 +17,7 @@ const setup = (defaultValues?: WorkspaceFormData) => {
       application: applicationServiceMock.createStartContract(),
       defaultValues,
       onSubmit: onSubmitMock,
+      operationType: WorkspaceOperationType.Create,
     },
   });
   return {
@@ -25,7 +27,7 @@ const setup = (defaultValues?: WorkspaceFormData) => {
 };
 
 describe('useWorkspaceForm', () => {
-  it('should return "Invalid workspace name" and not call onSubmit when invalid name', async () => {
+  it('should return invalid workspace name error and not call onSubmit when invalid name', async () => {
     const { renderResult, onSubmitMock } = setup({
       id: 'foo',
       name: '~',
@@ -39,7 +41,7 @@ describe('useWorkspaceForm', () => {
       expect.objectContaining({
         name: {
           code: WorkspaceFormErrorCode.InvalidWorkspaceName,
-          message: 'Invalid workspace name',
+          message: 'Name is invalid. Enter a valid name.',
         },
       })
     );
