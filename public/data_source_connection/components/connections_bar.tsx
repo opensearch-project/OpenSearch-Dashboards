@@ -9,10 +9,7 @@ import { combineLatest } from 'rxjs';
 import { DataPublicPluginStart, IDataPluginServices } from '../../../../../src/plugins/data/public';
 import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
 import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
-import {
-  DataSourceSelector,
-  DataSourceOption,
-} from '../../../../../src/plugins/data_source_management/public';
+import { DataSourceSelector } from '../../../../../src/plugins/data_source_management/public';
 import { ConnectionsService } from '../services';
 
 interface ConnectionsProps {
@@ -26,9 +23,6 @@ export const ConnectionsBar: React.FC<ConnectionsProps> = ({ connectionsService 
     savedObjects,
     notifications: { toasts },
   } = services;
-  const [selectedConnection, setSelectedConnection] = useState<DataSourceOption | undefined>(
-    undefined
-  );
   const [isDataSourceEnabled, setIsDataSourceEnabled] = useState<boolean>(false);
   const [uiService, setUiService] = useState<DataPublicPluginStart['ui'] | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -36,7 +30,7 @@ export const ConnectionsBar: React.FC<ConnectionsProps> = ({ connectionsService 
   useEffect(() => {
     const subscription = combineLatest([
       connectionsService.getUiService(),
-      connectionsService.getDataSourceEnabled(),
+      connectionsService.getIsDataSourceEnabled$(),
     ]).subscribe(([service, enabled]) => {
       setUiService(service);
       setIsDataSourceEnabled(enabled);
@@ -72,8 +66,8 @@ export const ConnectionsBar: React.FC<ConnectionsProps> = ({ connectionsService 
   ]);
 
   useEffect(() => {
-    const subscriptions = connectionsService.getSelectedConnection().subscribe((connection) => {
-      setSelectedConnection(connection);
+    const subscriptions = connectionsService.getSelectedConnection$().subscribe((connection) => {
+      connectionsService.setSelectedConnection$(connection);
     });
     return () => {
       subscriptions.unsubscribe();
@@ -83,11 +77,11 @@ export const ConnectionsBar: React.FC<ConnectionsProps> = ({ connectionsService 
   const handleSelectedConnection = useCallback(
     (id: string | undefined) => {
       if (!id) {
-        setSelectedConnection(undefined);
+        connectionsService.setSelectedConnection$(undefined);
         return;
       }
       connectionsService.getConnectionById(id).subscribe((connection) => {
-        setSelectedConnection(connection);
+        connectionsService.setSelectedConnection$(connection);
       });
     },
     [connectionsService]

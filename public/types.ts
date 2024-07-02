@@ -29,6 +29,7 @@ export interface Connection {
   installedPlugins?: string[];
   auth?: any;
 }
+
 export interface ConnectionsServiceDeps {
   http: CoreSetup['http'];
   startServices: Promise<[CoreStart, any, unknown]>;

@@ -22,6 +22,7 @@ export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
   private readonly storage: IStorageWrapper;
   private readonly config: ConfigSchema;
+  private connectionsService!: ConnectionsService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -32,29 +33,43 @@ export class QueryEnhancementsPlugin
     core: CoreSetup,
     { data }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
-    const pplSearchInterceptor = new PPLSearchInterceptor({
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
+    this.connectionsService = new ConnectionsService({
       startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
+      http: core.http,
     });
 
-    const sqlSearchInterceptor = new SQLSearchInterceptor({
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
-      startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
-    });
+    const pplSearchInterceptor = new PPLSearchInterceptor(
+      {
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      },
+      this.connectionsService
+    );
 
-    const sqlAsyncSearchInterceptor = new SQLAsyncSearchInterceptor({
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
-      startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
-    });
+    const sqlSearchInterceptor = new SQLSearchInterceptor(
+      {
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      },
+      this.connectionsService
+    );
+
+    const sqlAsyncSearchInterceptor = new SQLAsyncSearchInterceptor(
+      {
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      },
+      this.connectionsService
+    );
 
     data.__enhance({
       ui: {
@@ -130,14 +145,12 @@ export class QueryEnhancementsPlugin
       },
     });
 
-    const connectionsService = new ConnectionsService({
-      startServices: core.getStartServices(),
-      http: core.http,
-    });
-
     data.__enhance({
       ui: {
-        queryEditorExtension: createDataSourceConnectionExtension(connectionsService, this.config),
+        queryEditorExtension: createDataSourceConnectionExtension(
+          this.connectionsService,
+          this.config
+        ),
       },
     });
 

@@ -11,18 +11,31 @@ import { Connection, ConnectionsServiceDeps } from '../../types';
 export class ConnectionsService {
   protected http!: ConnectionsServiceDeps['http'];
   private uiService$ = new BehaviorSubject<DataPublicPluginStart['ui'] | undefined>(undefined);
-  private isDataSourceEnabled$ = new BehaviorSubject<boolean>(false);
-  private selectedConnection$ = new BehaviorSubject<Connection | undefined>(undefined);
+  private isDataSourceEnabled = false;
+  private isDataSourceEnabled$ = new BehaviorSubject<boolean>(this.isDataSourceEnabled);
+  private selectedConnection: Connection | undefined = undefined;
+  private selectedConnection$ = new BehaviorSubject<Connection | undefined>(
+    this.selectedConnection
+  );
 
   constructor(deps: ConnectionsServiceDeps) {
     deps.startServices.then(([coreStart, depsStart]) => {
       this.http = deps.http;
-      this.isDataSourceEnabled$.next(depsStart.dataSource?.dataSourceEnabled || false);
       this.uiService$.next(depsStart.data.ui);
+      this.setIsDataSourceEnabled$(depsStart.dataSource?.dataSourceEnabled || false);
     });
   }
 
-  getDataSourceEnabled = () => {
+  getIsDataSourceEnabled = () => {
+    return this.isDataSourceEnabled;
+  };
+
+  setIsDataSourceEnabled$ = (isDataSourceEnabled: boolean) => {
+    this.isDataSourceEnabled = isDataSourceEnabled;
+    this.isDataSourceEnabled$.next(this.isDataSourceEnabled);
+  };
+
+  getIsDataSourceEnabled$ = () => {
     return this.isDataSourceEnabled$.asObservable();
   };
 
@@ -49,11 +62,16 @@ export class ConnectionsService {
     );
   };
 
-  setSelectedConnection = (connection: Connection | undefined) => {
-    this.selectedConnection$.next(connection);
+  getSelectedConnection = () => {
+    return this.selectedConnection;
   };
 
-  getSelectedConnection = () => {
+  setSelectedConnection$ = (connection: Connection | undefined) => {
+    this.selectedConnection = connection;
+    this.selectedConnection$.next(this.selectedConnection);
+  };
+
+  getSelectedConnection$ = () => {
     return this.selectedConnection$.asObservable();
   };
 }

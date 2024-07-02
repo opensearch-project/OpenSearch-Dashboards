@@ -33,12 +33,16 @@ import {
   fetchDataFrame,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
+import { ConnectionsService } from '../data_source_connection';
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
 
-  constructor(deps: SearchInterceptorDeps) {
+  constructor(
+    deps: SearchInterceptorDeps,
+    private readonly connectionsService: ConnectionsService
+  ) {
     super(deps);
 
     deps.startServices.then(([coreStart, depsStart]) => {
@@ -147,6 +151,16 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     }
 
     let queryString = dataFrame.meta?.queryConfig?.qs ?? getRawQueryString(searchRequest) ?? '';
+
+    dataFrame.meta = {
+      ...dataFrame.meta,
+      queryConfig: {
+        ...dataFrame.meta.queryConfig,
+        ...(this.connectionsService.getSelectedConnection() && {
+          dataSourceId: this.connectionsService.getSelectedConnection()?.id,
+        }),
+      },
+    };
     const aggConfig = getAggConfig(
       searchRequest,
       {},

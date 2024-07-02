@@ -25,6 +25,7 @@ import {
   fetchDataFramePolling,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
+import { ConnectionsService } from '../data_source_connection';
 
 export class SQLAsyncSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
@@ -32,7 +33,10 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
   protected indexPatterns!: DataPublicPluginStart['indexPatterns'];
   protected dataFrame$ = new BehaviorSubject<IDataFrameResponse | undefined>(undefined);
 
-  constructor(deps: SearchInterceptorDeps) {
+  constructor(
+    deps: SearchInterceptorDeps,
+    private readonly connectionsService: ConnectionsService
+  ) {
     super(deps);
 
     deps.startServices.then(([coreStart, depsStart]) => {
@@ -61,6 +65,16 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
 
     const queryString =
       dataFrame.meta?.queryConfig?.formattedQs() ?? getRawQueryString(searchRequest) ?? '';
+
+    dataFrame.meta = {
+      ...dataFrame.meta,
+      queryConfig: {
+        ...dataFrame.meta.queryConfig,
+        ...(this.connectionsService.getSelectedConnection() && {
+          dataSourceId: this.connectionsService.getSelectedConnection()?.id,
+        }),
+      },
+    };
 
     const onPollingSuccess = (pollingResult: any) => {
       if (pollingResult && pollingResult.body.meta.status === 'SUCCESS') {
