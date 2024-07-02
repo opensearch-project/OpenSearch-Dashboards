@@ -18,12 +18,16 @@ import {
 } from '../../../../src/plugins/data/public';
 import { API, FetchDataFrameContext, SEARCH_STRATEGY, fetchDataFrame } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
+import { ConnectionsService } from '../data_source_connection';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
 
-  constructor(deps: SearchInterceptorDeps) {
+  constructor(
+    deps: SearchInterceptorDeps,
+    private readonly connectionsService: ConnectionsService
+  ) {
     super(deps);
 
     deps.startServices.then(([coreStart, depsStart]) => {
@@ -50,6 +54,16 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     }
 
     const queryString = dataFrame.meta?.queryConfig?.qs ?? getRawQueryString(searchRequest) ?? '';
+
+    dataFrame.meta = {
+      ...dataFrame.meta,
+      queryConfig: {
+        ...dataFrame.meta.queryConfig,
+        ...(this.connectionsService.getSelectedConnection() && {
+          dataSourceId: this.connectionsService.getSelectedConnection()?.id,
+        }),
+      },
+    };
 
     if (!dataFrame.schema) {
       return fetchDataFrame(dfContext, queryString, dataFrame).pipe(

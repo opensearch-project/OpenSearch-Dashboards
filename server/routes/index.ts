@@ -17,6 +17,7 @@ import {
 import { ISearchStrategy } from '../../../../src/plugins/data/server';
 import { API, SEARCH_STRATEGY } from '../../common';
 import { registerQueryAssistRoutes } from './query_assist';
+import { registerDataSourceConnectionsRoutes } from './data_source_connection';
 
 function defineRoute(
   logger: Logger,
@@ -136,5 +137,6 @@ export function defineRoutes(
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.PPL);
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQL);
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQL_ASYNC);
+  registerDataSourceConnectionsRoutes(router);
   registerQueryAssistRoutes(router);
 }

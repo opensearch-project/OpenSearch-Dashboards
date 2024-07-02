@@ -16,46 +16,66 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
-
-export type PublicConfig = Pick<ConfigSchema, 'queryAssist'>;
+import { ConnectionsService, createDataSourceConnectionExtension } from './data_source_connection';
 
 export class QueryEnhancementsPlugin
-  implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
+  implements
+    Plugin<
+      QueryEnhancementsPluginSetup,
+      QueryEnhancementsPluginStart,
+      QueryEnhancementsPluginSetupDependencies,
+      QueryEnhancementsPluginStartDependencies
+    > {
   private readonly storage: IStorageWrapper;
-  private readonly config: PublicConfig;
+  private readonly config: ConfigSchema;
+  private connectionsService!: ConnectionsService;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.config = initializerContext.config.get<PublicConfig>();
+    this.config = initializerContext.config.get<ConfigSchema>();
     this.storage = new Storage(window.localStorage);
   }
 
   public setup(
-    core: CoreSetup,
+    core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
     { data }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
-    const pplSearchInterceptor = new PPLSearchInterceptor({
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
+    this.connectionsService = new ConnectionsService({
       startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
+      http: core.http,
     });
 
-    const sqlSearchInterceptor = new SQLSearchInterceptor({
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
-      startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
-    });
+    const pplSearchInterceptor = new PPLSearchInterceptor(
+      {
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      },
+      this.connectionsService
+    );
 
-    const sqlAsyncSearchInterceptor = new SQLAsyncSearchInterceptor({
-      toasts: core.notifications.toasts,
-      http: core.http,
-      uiSettings: core.uiSettings,
-      startServices: core.getStartServices(),
-      usageCollector: data.search.usageCollector,
-    });
+    const sqlSearchInterceptor = new SQLSearchInterceptor(
+      {
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      },
+      this.connectionsService
+    );
+
+    const sqlAsyncSearchInterceptor = new SQLAsyncSearchInterceptor(
+      {
+        toasts: core.notifications.toasts,
+        http: core.http,
+        uiSettings: core.uiSettings,
+        startServices: core.getStartServices(),
+        usageCollector: data.search.usageCollector,
+      },
+      this.connectionsService
+    );
 
     data.__enhance({
       ui: {
@@ -69,7 +89,8 @@ export class QueryEnhancementsPlugin
               initialTo: moment().add(2, 'days').toISOString(),
             },
             showFilterBar: false,
-            showDataSourceSelector: false,
+            showDataSetsSelector: false,
+            showDataSourcesSelector: true,
           },
           fields: {
             filterable: false,
@@ -88,7 +109,8 @@ export class QueryEnhancementsPlugin
           searchBar: {
             showDatePicker: false,
             showFilterBar: false,
-            showDataSourceSelector: false,
+            showDataSetsSelector: false,
+            showDataSourcesSelector: true,
             queryStringInput: { initialValue: 'SELECT * FROM <data_source>' },
           },
           fields: {
@@ -109,7 +131,8 @@ export class QueryEnhancementsPlugin
           searchBar: {
             showDatePicker: false,
             showFilterBar: false,
-            showDataSourceSelector: false,
+            showDataSetsSelector: false,
+            showDataSourcesSelector: true,
             queryStringInput: { initialValue: 'SHOW DATABASES IN ::mys3::' },
           },
           fields: {
@@ -124,7 +147,16 @@ export class QueryEnhancementsPlugin
 
     data.__enhance({
       ui: {
-        queryEditorExtension: createQueryAssistExtension(core.http, this.config),
+        queryEditorExtension: createQueryAssistExtension(core.http, this.config.queryAssist),
+      },
+    });
+
+    data.__enhance({
+      ui: {
+        queryEditorExtension: createDataSourceConnectionExtension(
+          this.connectionsService,
+          this.config
+        ),
       },
     });
 

@@ -58,5 +58,10 @@ declare module '../../../src/core/server' {
       configPromise: Promise<ConfigSchema>;
       dataSourceEnabled: boolean;
     };
+    data_source_connection: {
+      logger: Logger;
+      configPromise: Promise<ConfigSchema>;
+      dataSourceEnabled: boolean;
+    };
   }
 }
