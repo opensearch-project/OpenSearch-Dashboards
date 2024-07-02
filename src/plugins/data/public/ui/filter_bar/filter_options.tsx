@@ -179,13 +179,13 @@ class FilterOptionsUI extends Component<Props, State> {
         panelPaddingSize="none"
         repositionOnScroll
       >
-        <EuiPopoverTitle>
+        <EuiPopoverTitle paddingSize="s">
           <FormattedMessage
             id="data.filter.searchBar.changeAllFiltersTitle"
             defaultMessage="Change all filters"
           />
         </EuiPopoverTitle>
-        <EuiContextMenu initialPanelId={0} panels={[panelTree]} />
+        <EuiContextMenu initialPanelId={0} panels={[panelTree]} size="s" />
       </EuiPopover>
     );
   }

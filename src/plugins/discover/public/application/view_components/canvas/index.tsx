@@ -129,6 +129,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
     >
       <EuiContextMenu
         initialPanelId={0}
+        size="s"
         panels={[
           {
             id: 0,

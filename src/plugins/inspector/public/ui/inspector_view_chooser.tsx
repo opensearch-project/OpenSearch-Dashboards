@@ -140,7 +140,7 @@ export class InspectorViewChooser extends Component<Props, State> {
         anchorPosition="downRight"
         repositionOnScroll
       >
-        <EuiContextMenuPanel items={views.map(this.renderView)} />
+        <EuiContextMenuPanel items={views.map(this.renderView)} size="s" />
       </EuiPopover>
     );
   }

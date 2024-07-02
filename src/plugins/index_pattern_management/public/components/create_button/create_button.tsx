@@ -107,6 +107,7 @@ export class CreateButton extends Component<Props, State> {
           anchorPosition="downLeft"
         >
           <EuiContextMenuPanel
+            size="s"
             items={options.map((option) => {
               return (
                 <EuiContextMenuItem
@@ -114,7 +115,7 @@ export class CreateButton extends Component<Props, State> {
                   onClick={option.onClick}
                   data-test-subj={option.testSubj}
                 >
-                  <EuiDescriptionList style={{ whiteSpace: 'nowrap' }}>
+                  <EuiDescriptionList style={{ whiteSpace: 'nowrap' }} compressed={true}>
                     <EuiDescriptionListTitle>
                       {option.text}
                       {option.isBeta ? <Fragment> {this.renderBetaBadge()}</Fragment> : null}
