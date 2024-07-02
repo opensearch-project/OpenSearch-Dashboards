@@ -19,7 +19,13 @@ import {
 import { ConnectionsService, createDataSourceConnectionExtension } from './data_source_connection';
 
 export class QueryEnhancementsPlugin
-  implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart, QueryEnhancementsPluginSetupDependencies, QueryEnhancementsPluginStartDependencies> {
+  implements
+    Plugin<
+      QueryEnhancementsPluginSetup,
+      QueryEnhancementsPluginStart,
+      QueryEnhancementsPluginSetupDependencies,
+      QueryEnhancementsPluginStartDependencies
+    > {
   private readonly storage: IStorageWrapper;
   private readonly config: ConfigSchema;
   private connectionsService!: ConnectionsService;
