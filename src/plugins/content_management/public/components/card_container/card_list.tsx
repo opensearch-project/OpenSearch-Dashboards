@@ -15,7 +15,7 @@ interface Props {
   embeddableServices: EmbeddableStart;
 }
 
-const GetStartedCardInner = ({ embeddable, input, embeddableServices }: Props) => {
+const CardListInner = ({ embeddable, input, embeddableServices }: Props) => {
   const cards = Object.values(input.panels).map((panel) => {
     const child = embeddable.getChild(panel.explicitInput.id);
     return (
@@ -31,9 +31,9 @@ const GetStartedCardInner = ({ embeddable, input, embeddableServices }: Props) =
   );
 };
 
-export const GetStartedCard = withEmbeddableSubscription<
+export const CardList = withEmbeddableSubscription<
   ContainerInput,
   ContainerOutput,
   IContainer,
   { embeddableServices: EmbeddableStart }
->(GetStartedCardInner);
+>(CardListInner);

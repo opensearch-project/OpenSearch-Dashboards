@@ -6,7 +6,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Container, ContainerInput, EmbeddableStart } from '../../../../embeddable/public';
-import { GetStartedCard } from './get_started_card';
+import { CardList } from './card_list';
 
 export const CARD_CONTAINER = 'CARD_CONTAINER';
 
@@ -32,7 +32,7 @@ export class CardContainer extends Container<{}, ContainerInput> {
     }
     this.node = node;
     ReactDOM.render(
-      <GetStartedCard embeddable={this} embeddableServices={this.embeddableServices} />,
+      <CardList embeddable={this} embeddableServices={this.embeddableServices} />,
       node
     );
   }
