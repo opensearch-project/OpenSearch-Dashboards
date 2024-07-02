@@ -31,11 +31,6 @@
 import { ResizeChecker } from './resize_checker';
 import { EventEmitter } from 'events';
 
-// If you want to know why these mocks are created,
-// please check: https://github.com/elastic/kibana/pull/44750
-jest.mock('resize-observer-polyfill');
-import ResizeObserver from 'resize-observer-polyfill';
-
 class MockElement {
   public clientWidth: number;
   public clientHeight: number;
@@ -62,14 +57,26 @@ class MockElement {
   }
 }
 
-(ResizeObserver as any).mockImplementation(function (this: any, callback: any) {
-  this.observe = function (el: MockElement) {
-    el.addEventListener('resize', callback);
-  };
-  this.disconnect = function () {};
-  this.unobserve = function (el: MockElement) {
-    el.removeEventListener('resize', callback);
-  };
+beforeAll(() => {
+  jest
+    .spyOn(global, 'ResizeObserver')
+    .mockImplementation(function (
+      this: ResizeObserver,
+      callback: ResizeObserverCallback
+    ): ResizeObserver {
+      this.observe = function (el: HTMLElement) {
+        el.addEventListener('resize', callback as any);
+      };
+      this.disconnect = function () {};
+      this.unobserve = function (el: HTMLElement) {
+        el.removeEventListener('resize', callback as any);
+      };
+      return this as ResizeObserver;
+    });
+});
+
+afterAll(() => {
+  jest.restoreAllMocks();
 });
 
 describe('Resize Checker', () => {

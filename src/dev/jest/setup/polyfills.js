@@ -39,3 +39,5 @@ const MutationObserver = require('mutation-observer');
 Object.defineProperty(window, 'MutationObserver', { value: MutationObserver });
 
 require('whatwg-fetch');
+
+global.ResizeObserver = require('../mocks/resize_observer_mock');
