@@ -472,7 +472,7 @@ export class SavedObjectsClient {
    */
   deleteFromWorkspaces = async <T = unknown>(type: string, id: string, workspaces: string[]) => {
     if (!workspaces || workspaces.length === 0) {
-      throw new TypeError(`Workspace is required.`);
+      throw new TypeError(`Workspaces is required.`);
     }
     const object = await this.get<T>(type, id);
     const existingWorkspaces = object.workspaces;
@@ -481,6 +481,7 @@ export class SavedObjectsClient {
     });
     return await this.update<T>(type, id, object.attributes, {
       workspaces: newWorkspaces,
+      version: object.version,
     });
   };
 
@@ -496,7 +497,7 @@ export class SavedObjectsClient {
     workspaces: string[]
   ): Promise<any> => {
     if (!workspaces || workspaces.length === 0) {
-      throw new TypeError(`Workspace is required.`);
+      throw new TypeError(`Workspaces is required.`);
     }
     const object = await this.get<T>(type, id);
     const existingWorkspaces = object.workspaces ?? [];
@@ -505,6 +506,7 @@ export class SavedObjectsClient {
 
     return await this.update<T>(type, id, object.attributes, {
       workspaces: nonDuplicatedWorkspaces,
+      version: object.version,
     });
   };
 

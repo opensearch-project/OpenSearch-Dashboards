@@ -20,14 +20,13 @@ import {
   WorkspaceAttributeWithPermission,
 } from './types';
 import { workspace } from './saved_objects';
-import { generateRandomId } from './utils';
+import { generateRandomId, getDataSourcesList } from './utils';
 import {
   WORKSPACE_ID_CONSUMER_WRAPPER_ID,
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
 } from '../common/constants';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../data_source/common';
 import { DataSource } from '../common/types';
-import { getDataSourcesList } from './utils';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -107,6 +106,13 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
       }
+
+      if (dataSources) {
+        for (const ds of dataSources) {
+          await client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, ds.id, [id]);
+        }
+      }
+
       const result = await client.create<Omit<WorkspaceAttribute, 'id'>>(
         WORKSPACE_TYPE,
         attributes,
@@ -115,11 +121,6 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           permissions,
         }
       );
-      if (dataSources) {
-        for (const ds of dataSources) {
-          await client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, ds.id, [id]);
-        }
-      }
 
       return {
         success: true,
