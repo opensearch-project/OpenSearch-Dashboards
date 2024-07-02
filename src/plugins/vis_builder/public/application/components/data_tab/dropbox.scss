@@ -15,6 +15,10 @@
     border-bottom: none;
   }
 
+  &__droppable {
+    min-height: 1px;
+  }
+
   &__container {
     display: grid;
     grid-gap: calc($euiSizeXS / 2);
