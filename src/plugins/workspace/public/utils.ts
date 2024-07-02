@@ -41,6 +41,9 @@ export const isFeatureIdInsideUseCase = (featureId: string, featureConfig: strin
   return false;
 };
 
+export const isNavGroupInFeatureConfigs = (navGroupId: string, featureConfigs: string[]) =>
+  featureConfigs.includes(getUseCaseFeatureConfig(navGroupId));
+
 /**
  * Checks if a given feature matches the provided feature configuration.
  *

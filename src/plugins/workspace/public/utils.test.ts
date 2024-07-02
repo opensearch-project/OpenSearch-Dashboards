@@ -9,6 +9,7 @@ import {
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
   isFeatureIdInsideUseCase,
+  isNavGroupInFeatureConfigs,
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
 
@@ -274,5 +275,21 @@ describe('workspace utils: filterWorkspaceConfigurableApps', () => {
 describe('workspace utils: isFeatureIdInsideUseCase', () => {
   it('should return false for invalid use case', () => {
     expect(isFeatureIdInsideUseCase('discover', 'use-case-invalid')).toBe(false);
+  });
+});
+
+describe('workspace utils: isNavGroupInFeatureConfigs', () => {
+  it('should return false if nav group not in feature configs', () => {
+    expect(
+      isNavGroupInFeatureConfigs('dataAdministration', [
+        'use-case-observability',
+        'use-case-search',
+      ])
+    ).toBe(false);
+  });
+  it('should return true if nav group in feature configs', () => {
+    expect(
+      isNavGroupInFeatureConfigs('observability', ['use-case-observability', 'use-case-search'])
+    ).toBe(true);
   });
 });

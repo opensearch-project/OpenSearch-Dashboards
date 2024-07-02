@@ -39,6 +39,7 @@ const createSetupContractMock = () => {
     navGroup: {
       addNavLinksToGroup: jest.fn(),
       getNavGroupEnabled: jest.fn(),
+      registerNavGroupUpdater: jest.fn(),
     },
   };
 };
