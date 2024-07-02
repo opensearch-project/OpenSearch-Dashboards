@@ -102,6 +102,11 @@ export class DataSourceManagementPlugin
       },
     });
 
+    // when the feature flag is disabled, we don't need to register any of the mds components
+    if (!featureFlagStatus) {
+      return undefined;
+    }
+
     const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
       if (this.started) {
         throw new Error(
@@ -111,29 +116,27 @@ export class DataSourceManagementPlugin
       this.authMethodsRegistry.registerAuthenticationMethod(authMethod);
     };
 
-    if (dataSource) {
-      if (dataSource.noAuthenticationTypeEnabled) {
-        registerAuthenticationMethod(noAuthCredentialAuthMethod);
-      }
-      if (dataSource.usernamePasswordAuthEnabled) {
-        registerAuthenticationMethod(usernamePasswordAuthMethod);
-      }
-      if (dataSource.awsSigV4AuthEnabled) {
-        registerAuthenticationMethod(sigV4AuthMethod);
-      }
-
-      setHideLocalCluster({ enabled: dataSource.hideLocalCluster });
-      setUiSettings(uiSettings);
-      // This instance will be got in each data source selector component.
-      setDataSourceSelection(this.dataSourceSelection);
+    if (dataSource.noAuthenticationTypeEnabled) {
+      registerAuthenticationMethod(noAuthCredentialAuthMethod);
     }
+    if (dataSource.usernamePasswordAuthEnabled) {
+      registerAuthenticationMethod(usernamePasswordAuthMethod);
+    }
+    if (dataSource.awsSigV4AuthEnabled) {
+      registerAuthenticationMethod(sigV4AuthMethod);
+    }
+
+    setHideLocalCluster({ enabled: dataSource.hideLocalCluster });
+    setUiSettings(uiSettings);
+    // This instance will be got in each data source selector component.
+    setDataSourceSelection(this.dataSourceSelection);
 
     return {
       registerAuthenticationMethod,
       // Other plugins can get this instance from setupDeps and use to get selected data sources.
       dataSourceSelection: this.dataSourceSelection,
       ui: {
-        DataSourceSelector: dataSource ? createDataSourceSelector(uiSettings, dataSource) : null,
+        DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
         getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
       },
       getDefaultDataSourceId,
