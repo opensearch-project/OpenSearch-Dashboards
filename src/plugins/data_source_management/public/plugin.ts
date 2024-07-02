@@ -4,7 +4,14 @@
  */
 
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
+import {
+  AppMountParameters,
+  AppStatus,
+  CoreSetup,
+  CoreStart,
+  DEFAULT_NAV_GROUPS,
+  Plugin,
+} from '../../../core/public';
 
 import { PLUGIN_NAME } from '../common';
 import { createDataSourceSelector } from './components/data_source_selector/create_data_source_selector';
@@ -101,6 +108,38 @@ export class DataSourceManagementPlugin
         );
       },
     });
+
+    core.application.register({
+      id: DSM_APP_ID,
+      title: PLUGIN_NAME,
+      order: 100,
+      status: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
+      mount: async (params: AppMountParameters) => {
+        const { mountManagementSection } = await import('./management_app');
+        const [coreStart] = await core.getStartServices();
+
+        return mountManagementSection(
+          core.getStartServices,
+          {
+            ...params,
+            basePath: core.http.basePath.get(),
+            setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+            wrapInPage: true,
+          },
+          this.authMethodsRegistry,
+          featureFlagStatus
+        );
+      },
+    });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.dataAdministration, [
+      {
+        id: DSM_APP_ID,
+        order: 200,
+      },
+    ]);
 
     const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
       if (this.started) {

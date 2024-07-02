@@ -33,7 +33,7 @@ import { lazy } from 'react';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { url } from '../../opensearch_dashboards_utils/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { DEFAULT_APP_CATEGORIES, DEFAULT_NAV_GROUPS } from '../../../core/public';
 import { UrlGeneratorState } from '../../share/public';
 import { DocViewInput, DocViewInputFn } from './application/doc_views/doc_views_types';
 import { generateDocViewsUrl } from './application/components/doc_views/generate_doc_views_url';
@@ -290,6 +290,38 @@ export class DiscoverPlugin
         return () => {};
       },
     });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: PLUGIN_ID,
+        category: DEFAULT_APP_CATEGORIES.investigate,
+        order: 200,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
+      {
+        id: PLUGIN_ID,
+        category: DEFAULT_APP_CATEGORIES.investigate,
+        order: 100,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
+      {
+        id: PLUGIN_ID,
+        category: DEFAULT_APP_CATEGORIES.investigate,
+        order: 100,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+      {
+        id: PLUGIN_ID,
+        category: DEFAULT_APP_CATEGORIES.analyzeSearch,
+        order: 200,
+      },
+    ]);
 
     plugins.urlForwarding.forwardApp('doc', 'discover', (path) => {
       return `#${path}`;

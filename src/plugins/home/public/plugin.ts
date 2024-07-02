@@ -135,7 +135,10 @@ export class HomePublicPlugin
     core.application.register({
       id: PLUGIN_ID,
       title: 'Home',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      order: 100,
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? undefined
+        : AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
         setCommonService();
