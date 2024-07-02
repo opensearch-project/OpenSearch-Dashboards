@@ -59,6 +59,10 @@ export const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
   }),
+  editMode: schema.oneOf(
+    [schema.literal('read_only'), schema.literal('admin_only'), schema.literal('none')],
+    { defaultValue: 'none' }
+  ),
 });
 
 export type DataSourcePluginConfigType = TypeOf<typeof configSchema>;

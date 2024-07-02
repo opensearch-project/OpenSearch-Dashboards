@@ -1,0 +1,2 @@
+feat:
+- [DataSource] Add a flag to control the edit permission of datasource. ([#7091](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7091))
