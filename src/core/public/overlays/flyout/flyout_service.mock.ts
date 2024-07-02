@@ -37,6 +37,7 @@ const createStartContractMock = () => {
       close: jest.fn(),
       onClose: Promise.resolve(),
     }),
+    close: jest.fn(),
   };
   return startContract;
 };
