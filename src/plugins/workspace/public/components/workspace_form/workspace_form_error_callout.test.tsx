@@ -37,7 +37,7 @@ describe('WorkspaceFormErrorCallout', () => {
       },
     });
 
-    expect(renderResult.getByText('Name: Enter a workspace name.')).toBeInTheDocument();
+    expect(renderResult.getByText('Name: Enter a name.')).toBeInTheDocument();
 
     renderResult.rerender(
       <WorkspaceFormErrorCallout
@@ -45,41 +45,43 @@ describe('WorkspaceFormErrorCallout', () => {
       />
     );
 
-    expect(renderResult.getByText('Name: Enter a valid workspace name.')).toBeInTheDocument();
+    expect(renderResult.getByText('Name: Enter a valid name.')).toBeInTheDocument();
   });
 
   it('should render use case suggestion', () => {
     const { renderResult } = setup({
       errors: {
-        name: {
-          code: WorkspaceFormErrorCode.WorkspaceNameMissing,
+        features: {
+          code: WorkspaceFormErrorCode.UseCaseMissing,
           message: '',
         },
       },
     });
 
-    expect(renderResult.getByText('Name: Enter a workspace name.')).toBeInTheDocument();
+    expect(renderResult.getByText('Use case: Select a use case.')).toBeInTheDocument();
   });
 
   it('should combine user permission settings suggestions', () => {
     const { renderResult } = setup({
       errors: {
         permissionSettings: {
-          0: {
-            code: WorkspaceFormErrorCode.PermissionUserIdMissing,
-            message: '',
-          },
-          1: {
-            code: WorkspaceFormErrorCode.PermissionUserIdMissing,
-            message: '',
-          },
-          2: {
-            code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
-            message: '',
-          },
-          3: {
-            code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
-            message: '',
+          fields: {
+            0: {
+              code: WorkspaceFormErrorCode.PermissionUserIdMissing,
+              message: '',
+            },
+            1: {
+              code: WorkspaceFormErrorCode.PermissionUserIdMissing,
+              message: '',
+            },
+            2: {
+              code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
+              message: '',
+            },
+            3: {
+              code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
+              message: '',
+            },
           },
         },
       },
@@ -96,21 +98,23 @@ describe('WorkspaceFormErrorCallout', () => {
     const { renderResult } = setup({
       errors: {
         permissionSettings: {
-          0: {
-            code: WorkspaceFormErrorCode.PermissionUserGroupMissing,
-            message: '',
-          },
-          1: {
-            code: WorkspaceFormErrorCode.PermissionUserGroupMissing,
-            message: '',
-          },
-          2: {
-            code: WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
-            message: '',
-          },
-          3: {
-            code: WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
-            message: '',
+          fields: {
+            0: {
+              code: WorkspaceFormErrorCode.PermissionUserGroupMissing,
+              message: '',
+            },
+            1: {
+              code: WorkspaceFormErrorCode.PermissionUserGroupMissing,
+              message: '',
+            },
+            2: {
+              code: WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
+              message: '',
+            },
+            3: {
+              code: WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
+              message: '',
+            },
           },
         },
       },
