@@ -10,6 +10,7 @@ import {
   getOSDAdminConfigFromYMLConfig,
   getPrincipalsFromRequest,
   updateDashboardAdminStateForRequest,
+  transferCurrentUserInPermissions,
 } from './utils';
 import { getWorkspaceState } from '../../../core/server/utils';
 import { Observable, of } from 'rxjs';
@@ -150,5 +151,32 @@ describe('workspace utils', () => {
     const [groups, users] = await getOSDAdminConfigFromYMLConfig(globalConfig$);
     expect(groups).toEqual([]);
     expect(users).toEqual([]);
+  });
+
+  it('should transfer current user placeholder in permissions', () => {
+    expect(transferCurrentUserInPermissions('foo', undefined)).toBeUndefined();
+    expect(
+      transferCurrentUserInPermissions('foo', {
+        library_write: {
+          users: ['%current_user%', 'bar'],
+        },
+        write: {
+          users: ['%current_user%'],
+        },
+        read: {
+          users: ['bar'],
+        },
+      })
+    ).toEqual({
+      library_write: {
+        users: ['foo', 'bar'],
+      },
+      write: {
+        users: ['foo'],
+      },
+      read: {
+        users: ['bar'],
+      },
+    });
   });
 });
