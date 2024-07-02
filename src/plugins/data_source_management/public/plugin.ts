@@ -113,7 +113,9 @@ export class DataSourceManagementPlugin
       id: DSM_APP_ID,
       title: PLUGIN_NAME,
       order: 100,
-      status: core.chrome.navGroup.getNavGroupEnabled() ? AppStatus.accessible : AppStatus.inaccessible,
+      status: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_app');
         const [coreStart] = await core.getStartServices();

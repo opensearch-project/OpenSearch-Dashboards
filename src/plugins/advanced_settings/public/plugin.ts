@@ -67,7 +67,9 @@ export class AdvancedSettingsPlugin
     core.application.register({
       id: 'settings',
       title,
-      status: core.chrome.navGroup.getNavGroupEnabled() ? AppStatus.accessible : AppStatus.inaccessible,
+      status: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import(
           './management_app/mount_management_section'

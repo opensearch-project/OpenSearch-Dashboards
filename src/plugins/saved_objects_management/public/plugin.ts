@@ -157,7 +157,9 @@ export class SavedObjectsManagementPlugin
       title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
         defaultMessage: 'Saved objects',
       }),
-      status: core.chrome.navGroup.getNavGroupEnabled() ? AppStatus.accessible : AppStatus.inaccessible,
+      status: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_section');
         const [coreStart] = await core.getStartServices();
