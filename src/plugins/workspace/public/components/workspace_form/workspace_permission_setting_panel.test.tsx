@@ -30,7 +30,7 @@ const setup = (options?: Partial<WorkspacePermissionSettingPanelProps>) => {
   ];
   const renderResult = render(
     <WorkspacePermissionSettingPanel
-      lastAdminItemDeletable={true}
+      disabledUserOrGroupInputIds={[]}
       permissionSettings={permissionSettings}
       onChange={onChangeMock}
       {...options}
@@ -130,20 +130,31 @@ describe('WorkspacePermissionSettingInput', () => {
     ]);
   });
 
-  it('should hide first user permission setting delete button', () => {
+  it('should not able to edit user or group when disabled', () => {
     const { renderResult } = setup({
-      lastAdminItemDeletable: false,
       permissionSettings: [
         {
           id: 0,
           type: WorkspacePermissionItemType.User,
-          userId: 'foo',
+          userId: 'user-1',
+          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+        },
+        {
+          id: 1,
+          type: WorkspacePermissionItemType.Group,
+          group: 'user-group-1',
           modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
         },
       ],
+      disabledUserOrGroupInputIds: [0, 1],
     });
 
-    expect(renderResult.queryByLabelText('Delete permission setting')).toBeNull();
+    expect(renderResult.getByText('user-1')?.closest('div[role="combobox"]')).toHaveClass(
+      'euiComboBox-isDisabled'
+    );
+    expect(renderResult.getByText('user-group-1')?.closest('div[role="combobox"]')).toHaveClass(
+      'euiComboBox-isDisabled'
+    );
   });
 
   it('should render consistent errors', () => {
