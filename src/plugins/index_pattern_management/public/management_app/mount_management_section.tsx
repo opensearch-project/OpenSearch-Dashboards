@@ -37,6 +37,7 @@ import { I18nProvider } from '@osd/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
+import { EuiPage } from '@elastic/eui';
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
 import { ManagementAppMountParams } from '../../../management/public';
 import {
@@ -60,7 +61,7 @@ const readOnlyBadge = {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<IndexPatternManagementStartDependencies>,
-  params: ManagementAppMountParams,
+  params: ManagementAppMountParams & { wrapInPage?: boolean },
   getMlCardState: () => MlCardState,
   dataSource?: DataSourcePluginSetup
 ) {
@@ -94,26 +95,28 @@ export async function mountManagementSection(
     hideLocalCluster,
   };
 
+  const content = (
+    <Router history={params.history}>
+      <Switch>
+        <Route path={['/create']}>
+          <CreateIndexPatternWizardWithRouter />
+        </Route>
+        <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
+          <CreateEditFieldContainer />
+        </Route>
+        <Route path={['/patterns/:id']}>
+          <EditIndexPatternContainer />
+        </Route>
+        <Route path={['/']}>
+          <IndexPatternTableWithRouter canSave={canSave} />
+        </Route>
+      </Switch>
+    </Router>
+  );
+
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>
-      <I18nProvider>
-        <Router history={params.history}>
-          <Switch>
-            <Route path={['/create']}>
-              <CreateIndexPatternWizardWithRouter />
-            </Route>
-            <Route path={['/patterns/:id/field/:fieldName', '/patterns/:id/create-field/']}>
-              <CreateEditFieldContainer />
-            </Route>
-            <Route path={['/patterns/:id']}>
-              <EditIndexPatternContainer />
-            </Route>
-            <Route path={['/']}>
-              <IndexPatternTableWithRouter canSave={canSave} />
-            </Route>
-          </Switch>
-        </Router>
-      </I18nProvider>
+      <I18nProvider>{params.wrapInPage ? <EuiPage>{content}</EuiPage> : content}</I18nProvider>
     </OpenSearchDashboardsContextProvider>,
     params.element
   );

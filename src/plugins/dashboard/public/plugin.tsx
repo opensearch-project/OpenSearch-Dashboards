@@ -84,7 +84,7 @@ import {
   OpenSearchDashboardsLegacyStart,
 } from '../../opensearch_dashboards_legacy/public';
 import { FeatureCatalogueCategory, HomePublicPluginSetup } from '../../../plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { DEFAULT_APP_CATEGORIES, DEFAULT_NAV_GROUPS } from '../../../core/public';
 
 import {
   ACTION_CLONE_PANEL,
@@ -452,6 +452,36 @@ export class DashboardPlugin
     };
 
     core.application.register(app);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: app.id,
+        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+        order: 100,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
+      {
+        id: app.id,
+        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+        order: 100,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
+      {
+        id: app.id,
+        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+        order: 100,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+      {
+        id: app.id,
+        category: DEFAULT_APP_CATEGORIES.analyzeSearch,
+        order: 300,
+      },
+    ]);
+
     urlForwarding.forwardApp(
       DashboardConstants.DASHBOARDS_ID,
       DashboardConstants.DASHBOARDS_ID,
