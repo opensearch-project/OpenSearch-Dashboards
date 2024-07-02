@@ -37,10 +37,13 @@ export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
     },
     core: {
       application: { getUrlForApp },
+      savedObjects,
     },
     data,
     chrome,
     osdUrlStateStorage,
+    notifications,
+    dataSource,
   } = services;
 
   const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
@@ -104,6 +107,16 @@ export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
       onQuerySubmit={opts.onQuerySubmit}
       savedQueryId={state.savedQuery}
       onSavedQueryIdChange={updateSavedQueryId}
+      showDataSourceMenu={dataSource?.dataSourceEnabled}
+      dataSourceMenuConfig={{
+        componentType: 'DataSourceAggregatedView',
+        componentConfig: {
+          fullWidth: true,
+          savedObjects: savedObjects.client,
+          notifications,
+          displayAllCompatibleDataSources: true,
+        },
+      }}
     />
   );
 };

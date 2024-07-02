@@ -30,6 +30,7 @@ import { Start as InspectorPublicPluginStart } from 'src/plugins/inspector/publi
 import { stringify } from 'query-string';
 import rison from 'rison-node';
 import { lazy } from 'react';
+import { DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { DataPublicPluginStart, DataPublicPluginSetup, opensearchFilters } from '../../data/public';
 import { SavedObjectLoader } from '../../saved_objects/public';
 import { url } from '../../opensearch_dashboards_utils/public';
@@ -139,6 +140,7 @@ export interface DiscoverStartPlugins {
   navigation: NavigationStart;
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  dataSource?: DataSourcePluginStart;
   share?: SharePluginStart;
   opensearchDashboardsLegacy: OpenSearchDashboardsLegacyStart;
   urlForwarding: UrlForwardingStart;
