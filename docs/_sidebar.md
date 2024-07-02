@@ -50,6 +50,7 @@
       - [Inspector](../src/plugins/inspector/README.md)
       - [Legacy_export](../src/plugins/legacy_export/README.md)
       - [Navigation](../src/plugins/navigation/README.md)
+      - [Newsfeed](../src/plugins/newsfeed/README.md)
       - [Opensearch_dashboards_legacy](../src/plugins/opensearch_dashboards_legacy/README.md)
       - [Opensearch_dashboards_overview](../src/plugins/opensearch_dashboards_overview/README.md)
       - [Opensearch_dashboards_react](../src/plugins/opensearch_dashboards_react/README.md)
