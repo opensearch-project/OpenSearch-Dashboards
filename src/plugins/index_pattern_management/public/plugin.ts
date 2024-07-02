@@ -125,7 +125,9 @@ export class IndexPatternManagementPlugin
     core.application.register({
       id: IPM_APP_ID,
       title: sectionsHeader,
-      status: core.chrome.navGroup.getNavGroupEnabled() ? AppStatus.accessible : AppStatus.inaccessible,
+      status: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import('./management_app');
         const [coreStart] = await core.getStartServices();
