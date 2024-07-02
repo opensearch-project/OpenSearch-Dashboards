@@ -34,13 +34,13 @@ import { DataSourceSelectionService } from './service/data_source_selection_serv
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
   indexPatternManagement: IndexPatternManagementSetup;
-  dataSource: DataSourcePluginSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 export interface DataSourceManagementPluginSetup {
   registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
   ui: {
-    DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
+    DataSourceSelector: React.ComponentType<DataSourceSelectorProps> | null;
     getDataSourceMenu: <T>() => React.ComponentType<DataSourceMenuProps<T>>;
   };
   dataSourceSelection: DataSourceSelectionService;
@@ -84,6 +84,8 @@ export class DataSourceManagementPlugin
     const column = new DataSourceColumn(savedObjectPromise);
     indexPatternManagement.columns.register(column);
 
+    const featureFlagStatus = !!dataSource;
+
     opensearchDashboardsSection.registerApp({
       id: DSM_APP_ID,
       title: PLUGIN_NAME,
@@ -91,7 +93,12 @@ export class DataSourceManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params, this.authMethodsRegistry);
+        return mountManagementSection(
+          core.getStartServices,
+          params,
+          this.authMethodsRegistry,
+          featureFlagStatus
+        );
       },
     });
 
@@ -104,27 +111,29 @@ export class DataSourceManagementPlugin
       this.authMethodsRegistry.registerAuthenticationMethod(authMethod);
     };
 
-    if (dataSource.noAuthenticationTypeEnabled) {
-      registerAuthenticationMethod(noAuthCredentialAuthMethod);
-    }
-    if (dataSource.usernamePasswordAuthEnabled) {
-      registerAuthenticationMethod(usernamePasswordAuthMethod);
-    }
-    if (dataSource.awsSigV4AuthEnabled) {
-      registerAuthenticationMethod(sigV4AuthMethod);
-    }
+    if (dataSource) {
+      if (dataSource.noAuthenticationTypeEnabled) {
+        registerAuthenticationMethod(noAuthCredentialAuthMethod);
+      }
+      if (dataSource.usernamePasswordAuthEnabled) {
+        registerAuthenticationMethod(usernamePasswordAuthMethod);
+      }
+      if (dataSource.awsSigV4AuthEnabled) {
+        registerAuthenticationMethod(sigV4AuthMethod);
+      }
 
-    setHideLocalCluster({ enabled: dataSource.hideLocalCluster });
-    setUiSettings(uiSettings);
-    // This instance will be got in each data source selector component.
-    setDataSourceSelection(this.dataSourceSelection);
+      setHideLocalCluster({ enabled: dataSource.hideLocalCluster });
+      setUiSettings(uiSettings);
+      // This instance will be got in each data source selector component.
+      setDataSourceSelection(this.dataSourceSelection);
+    }
 
     return {
       registerAuthenticationMethod,
       // Other plugins can get this instance from setupDeps and use to get selected data sources.
       dataSourceSelection: this.dataSourceSelection,
       ui: {
-        DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
+        DataSourceSelector: dataSource ? createDataSourceSelector(uiSettings, dataSource) : null,
         getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
       },
       getDefaultDataSourceId,

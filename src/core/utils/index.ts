@@ -44,3 +44,4 @@ export {
   PUBLIC_WORKSPACE_NAME,
 } from './constants';
 export { getWorkspaceIdFromUrl, formatUrlWithWorkspaceId, cleanWorkspaceId } from './workspace';
+export { DEFAULT_NAV_GROUPS } from './default_nav_groups';
