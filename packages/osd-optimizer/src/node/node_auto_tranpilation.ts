@@ -64,6 +64,10 @@ const IGNORE_PATTERNS = [
   // is `x-pack` and `b` is not `node_modules`
   /[\/\\]node_modules[\/\\](?!x-pack[\/\\](?!node_modules)([^\/\\]+))([^\/\\]+[\/\\][^\/\\]+)/,
 
+  // ignore paths matching `/node_modules/{a}/{b}`, unless `a`
+  // is `osd-extra` and `b` is not `node_modules`
+  /[\/\\]node_modules[\/\\](?!osd-extra[\/\\](?!node_modules)([^\/\\]+))([^\/\\]+[\/\\][^\/\\]+)/,
+
   // ignore any path in the packages, unless it is in the package's
   // root `src` directory, in any test or __tests__ directory, or it
   // ends with .test.js, .test.ts, or .test.tsx

@@ -409,6 +409,7 @@ describe('PluginsService', () => {
             resolve(process.cwd(), 'src', 'plugins'),
             resolve(process.cwd(), 'plugins'),
             resolve(process.cwd(), '..', 'opensearch-dashboards-extra'),
+            resolve(process.cwd(), 'osd-extra', 'plugins'),
           ],
         },
         { coreId, env, logger, configService },

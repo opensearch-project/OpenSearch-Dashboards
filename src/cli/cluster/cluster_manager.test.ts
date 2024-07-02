@@ -53,6 +53,7 @@ const CLI_ARGS: SomeCliArgs = {
   quiet: false,
   repl: false,
   runExamples: false,
+  min: false,
   silent: false,
   watch: false,
   cache: false,

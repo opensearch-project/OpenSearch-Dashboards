@@ -34,12 +34,18 @@ interface Options {
   rootPath: string;
   skipOpenSearchDashboardsPlugins?: boolean;
   ossOnly?: boolean;
+  minOnly?: boolean;
 }
 
 /**
  * Returns all the paths where plugins are located
  */
-export function getProjectPaths({ rootPath, ossOnly, skipOpenSearchDashboardsPlugins }: Options) {
+export function getProjectPaths({
+  rootPath,
+  ossOnly,
+  minOnly,
+  skipOpenSearchDashboardsPlugins,
+}: Options) {
   const projectPaths = [rootPath, resolve(rootPath, 'packages/*')];
 
   // This is needed in order to install the dependencies for the declared
@@ -54,6 +60,11 @@ export function getProjectPaths({ rootPath, ossOnly, skipOpenSearchDashboardsPlu
   projectPaths.push(resolve(rootPath, 'test/plugin_functional/plugins/*'));
   projectPaths.push(resolve(rootPath, 'test/interpreter_functional/plugins/*'));
   projectPaths.push(resolve(rootPath, 'examples/*'));
+
+  if (!minOnly) {
+    projectPaths.push(resolve(rootPath, 'osd-extra'));
+    projectPaths.push(resolve(rootPath, 'osd-extra/plugins/*'));
+  }
 
   if (!skipOpenSearchDashboardsPlugins) {
     projectPaths.push(resolve(rootPath, '../opensearch-dashboards-extra/*'));

@@ -126,6 +126,8 @@
   "workspaces": {
     "packages": [
       "packages/*",
+      "osd-extra",
+      "osd-extra/plugins/*",
       "examples/*",
       "test/plugin_functional/plugins/*",
       "test/interpreter_functional/plugins/*"
@@ -135,6 +137,7 @@
       "**/@types/*/**",
       "**/grunt-*",
       "**/grunt-*/**",
+      "osd-extra/typescript",
       "@elastic/eui/rehype-react",
       "@elastic/eui/remark-rehype",
       "@elastic/eui/remark-rehype/**"

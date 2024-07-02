@@ -72,7 +72,18 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-const build = new Build(config);
+const minBuild = new Build(config, true);
+const build = new Build(config, false);
+
+describe('#isMin()', () => {
+  it('returns true for min', () => {
+    expect(minBuild.isMin()).toBe(true);
+  });
+
+  it('returns false for default build', () => {
+    expect(build.isMin()).toBe(false);
+  });
+});
 
 describe('#getName()', () => {
   it('returns opensearch-dashboards for  build', () => {

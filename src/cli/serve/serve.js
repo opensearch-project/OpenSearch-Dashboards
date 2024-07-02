@@ -231,6 +231,7 @@ export default function (program) {
       []
     )
     .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector)
+    .option('--min', 'Start OpenSearch Dashboards without extra plugins')
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (CAN_REPL) {
@@ -295,6 +296,7 @@ export default function (program) {
         basePath: opts.runExamples ? false : !!opts.basePath,
         optimize: !!opts.optimize,
         disableOptimizer: !opts.optimizer,
+        min: !!opts.min,
         cache: !!opts.cache,
         dist: !!opts.dist,
       },

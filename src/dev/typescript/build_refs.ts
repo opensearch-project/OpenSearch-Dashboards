@@ -29,10 +29,12 @@
  */
 
 import execa from 'execa';
+import Path from 'path';
 import { run, ToolingLog } from '@osd/dev-utils';
 
 export async function buildAllRefs(log: ToolingLog) {
   await buildRefs(log, 'tsconfig.refs.json');
+  await buildRefs(log, Path.join('osd-extra', 'tsconfig.refs.json'));
 }
 
 async function buildRefs(log: ToolingLog, projectPath: string) {

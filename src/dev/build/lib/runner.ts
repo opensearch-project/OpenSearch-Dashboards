@@ -38,6 +38,8 @@ import { Config } from './config';
 interface Options {
   config: Config;
   log: ToolingLog;
+  buildMinDist: boolean;
+  buildDefaultDist: boolean;
 }
 
 export interface GlobalTask {
@@ -52,7 +54,7 @@ export interface Task {
   run(config: Config, log: ToolingLog, build: Build): Promise<void>;
 }
 
-export function createRunner({ config, log }: Options) {
+export function createRunner({ config, log, buildMinDist, buildDefaultDist }: Options) {
   async function execTask(desc: string, task: Task | GlobalTask, lastArg: any) {
     log.info(desc);
     log.indent(4);
@@ -82,7 +84,13 @@ export function createRunner({ config, log }: Options) {
     }
   }
 
-  const builds: Build[] = [new Build(config)];
+  const builds: Build[] = [];
+  if (buildDefaultDist) {
+    builds.push(new Build(config, false));
+  }
+  if (buildMinDist) {
+    builds.push(new Build(config, true));
+  }
 
   /**
    * Run a task by calling its `run()` method with three arguments:

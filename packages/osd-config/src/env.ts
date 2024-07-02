@@ -50,6 +50,7 @@ export interface CliArgs {
   watch: boolean;
   repl: boolean;
   basePath: boolean;
+  min: boolean;
   /** @deprecated use disableOptimizer to know if the @osd/optimizer is disabled in development */
   optimize?: boolean;
   runExamples: boolean;
@@ -132,6 +133,7 @@ export class Env {
      */
     this.pluginSearchPaths = [
       resolve(this.homeDir, 'src', 'plugins'),
+      ...(options.cliArgs.min ? [] : [resolve(this.homeDir, 'osd-extra', 'plugins')]),
       resolve(this.homeDir, 'plugins'),
       ...(options.cliArgs.runExamples ? [resolve(this.homeDir, 'examples')] : []),
       resolve(this.homeDir, '..', 'opensearch-dashboards-extra'),

@@ -48,7 +48,15 @@ process.env.osdWorkerType = 'managr';
 
 export type SomeCliArgs = Pick<
   CliArgs,
-  'quiet' | 'silent' | 'repl' | 'disableOptimizer' | 'watch' | 'runExamples' | 'cache' | 'dist'
+  | 'quiet'
+  | 'silent'
+  | 'repl'
+  | 'disableOptimizer'
+  | 'watch'
+  | 'min'
+  | 'runExamples'
+  | 'cache'
+  | 'dist'
 >;
 
 const firstAllTrue = (...sources: Array<Rx.Observable<boolean>>) =>
@@ -151,6 +159,7 @@ export class ClusterManager {
       const scanDirs = [
         ...config.get<string[]>('plugins.scanDirs'),
         resolve(REPO_ROOT, 'src/plugins'),
+        resolve(REPO_ROOT, 'osd-extra/plugins'),
       ];
       const extraPaths = [...pluginPaths, ...scanDirs];
 

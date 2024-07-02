@@ -57,7 +57,7 @@ function* printPlugins(plugins: Plugins, includes: string[]) {
   }
 }
 
-export function generatePluginList(ossPlugins: Plugins) {
+export function generatePluginList(ossPlugins: Plugins, extraPlugins: Plugins) {
   const includes: string[] = [];
 
   return `////
@@ -86,6 +86,18 @@ NOTE:
 |Description
 
 ${Array.from(printPlugins(ossPlugins, includes)).join('\n')}
+
+|===
+
+[discrete]
+=== osd-extra/plugins
+
+[%header,cols=2*]
+|===
+|Name
+|Description
+
+${Array.from(printPlugins(extraPlugins, includes)).join('\n')}
 
 ${Array.from(includes).join('\n')}
 `;

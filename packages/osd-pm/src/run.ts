@@ -39,12 +39,14 @@ export async function runCommand(command: ICommand, config: Omit<ICommandConfig,
   try {
     log.debug(`Running [${command.name}] command from [${config.rootPath}]`);
 
+    log.info(`kawika min: ${config.options.min}`);
     const osd = await OpenSearchDashboards.loadFrom(config.rootPath);
     const projects = osd.getFilteredProjects({
       skipOpenSearchDashboardsPlugins: Boolean(
         config.options['skip-opensearch-dashboards-plugins']
       ),
       ossOnly: Boolean(config.options.oss),
+      minOnly: Boolean(config.options.min),
       exclude: toArray(config.options.exclude),
       include: toArray(config.options.include),
     });

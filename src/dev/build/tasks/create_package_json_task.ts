@@ -60,6 +60,12 @@ export const CreatePackageJson: Task = {
       dependencies: pkg.dependencies,
     };
 
+    if (build.isMin()) {
+      newPkg.workspaces.packages = newPkg.workspaces.packages.filter(
+        (p) => !p.startsWith('osd-extra')
+      );
+    }
+
     await write(build.resolvePath('package.json'), JSON.stringify(newPkg, null, '  '));
   },
 };
