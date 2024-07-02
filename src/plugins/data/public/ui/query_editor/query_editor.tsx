@@ -22,7 +22,7 @@ import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 
-const LANGUAGE_ID = 'SQL';
+const LANGUAGE_ID = 'kuery';
 monaco.languages.register({ id: LANGUAGE_ID });
 
 export interface QueryEditorProps {
@@ -259,7 +259,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
-    // this.fetchIndexPatterns().then(this.updateSuggestions);
+    this.fetchIndexPatterns();
     this.setState({
       isDataSourcesVisible: this.initDataSourcesVisibility() || true,
       isDataSetsVisible: this.initDataSetsVisibility() || true,
@@ -267,6 +267,10 @@ export default class QueryEditorUI extends Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Props) {
+    if (prevProps.indexPatterns !== this.props.indexPatterns) {
+      this.fetchIndexPatterns();
+    }
+
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });
