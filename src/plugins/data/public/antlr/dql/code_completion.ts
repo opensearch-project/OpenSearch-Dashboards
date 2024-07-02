@@ -13,6 +13,8 @@ const findFieldSuggestions = (indexPatterns) => {
       return idxField.displayName;
     });
 
+  console.log('get all fields from idx', indexPatterns[0].fields.getAll());
+
   const fieldSuggestions: { text: string; type: string }[] = fieldNames.map((field: string) => {
     return { text: field, type: 'text' };
   });
@@ -41,6 +43,21 @@ export const getSuggestions = async ({
 
   // specify preferred rules to appear in candidate collection
   core.preferredRules = new Set([DQLParser.RULE_field]);
+
+  // specify tokens to ignore
+  core.ignoredTokens = new Set([
+    DQLParser.EOF,
+    DQLParser.LPAREN,
+    DQLParser.RPAREN,
+    DQLParser.DOT,
+    DQLParser.EQ,
+    DQLParser.GE,
+    DQLParser.GT,
+    DQLParser.LE,
+    DQLParser.LT,
+    DQLParser.NUMBER,
+    DQLParser.PHRASE,
+  ]);
 
   // gets candidates at specified token index
   const candidates = core.collectCandidates(cursorIndex);
