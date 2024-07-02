@@ -95,6 +95,7 @@ import { DefaultDslDataSource } from './data_sources/default_datasource';
 import { DEFAULT_DATA_SOURCE_TYPE } from './data_sources/constants';
 import { getSuggestions as getSQLSuggestions } from './antlr/opensearch_sql/code_completion';
 import { getSuggestions as getPPLSuggestions } from './antlr/opensearch_ppl/code_completion';
+import { getSuggestions as getDQLSuggestions } from './antlr/dql/code_completion';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -169,7 +170,8 @@ export class DataPublicPlugin
 
     const ac = this.autocomplete.setup(core);
     ac.addQuerySuggestionProvider('PPL', getPPLSuggestions);
-    ac.addQuerySuggestionProvider('SQL', getSQLSuggestions);
+    ac.addQuerySuggestionProvider('SQL', getDQLSuggestions);
+    ac.addQuerySuggestionProvider('kuery', getDQLSuggestions);
 
     return {
       // TODO: MQL
