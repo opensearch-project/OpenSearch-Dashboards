@@ -15,6 +15,7 @@ import {
 } from './constants';
 
 import { WorkspaceFormErrors, WorkspaceFormSubmitData, WorkspacePermissionSetting } from './types';
+import { DataSource } from '../../../common/types';
 
 export const appendDefaultFeatureIds = (ids: string[]) => {
   // concat default checked ids and unique the result
@@ -40,6 +41,9 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   }
   if (formErrors.permissionSettings) {
     numberOfErrors += Object.keys(formErrors.permissionSettings).length;
+  }
+  if (formErrors.selectedDataSources) {
+    numberOfErrors += Object.keys(formErrors.selectedDataSources).length;
   }
   if (formErrors.features) {
     numberOfErrors += 1;
@@ -179,6 +183,11 @@ export const convertPermissionsToPermissionSettings = (permissions: SavedObjectP
   return finalPermissionSettings;
 };
 
+export const isSelectedDataSourcesDuplicated = (
+  selectedDataSources: DataSource[],
+  row: DataSource
+) => selectedDataSources.some((ds) => ds.id === row.id);
+
 export const validateWorkspaceForm = (
   formData: Omit<Partial<WorkspaceFormSubmitData>, 'permissionSettings'> & {
     permissionSettings?: Array<
@@ -187,7 +196,7 @@ export const validateWorkspaceForm = (
   }
 ) => {
   const formErrors: WorkspaceFormErrors = {};
-  const { name, permissionSettings, features } = formData;
+  const { name, permissionSettings, features, selectedDataSources } = formData;
   if (name) {
     if (!isValidFormTextInput(name)) {
       formErrors.name = i18n.translate('workspace.form.detail.name.invalid', {
@@ -252,6 +261,24 @@ export const validateWorkspaceForm = (
     }
     if (Object.keys(permissionSettingsErrors).length > 0) {
       formErrors.permissionSettings = permissionSettingsErrors;
+    }
+  }
+  if (selectedDataSources) {
+    const dataSourcesErrors: { [key: number]: string } = {};
+    for (let i = 0; i < selectedDataSources.length; i++) {
+      const row = selectedDataSources[i];
+      if (!row.id) {
+        dataSourcesErrors[i] = i18n.translate('workspace.form.dataSource.invalid', {
+          defaultMessage: 'Invalid data source',
+        });
+      } else if (isSelectedDataSourcesDuplicated(selectedDataSources.slice(0, i), row)) {
+        dataSourcesErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
+          defaultMessage: 'Duplicate data sources',
+        });
+      }
+    }
+    if (Object.keys(dataSourcesErrors).length > 0) {
+      formErrors.selectedDataSources = dataSourcesErrors;
     }
   }
   return formErrors;
