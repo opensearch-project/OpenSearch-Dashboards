@@ -11,7 +11,7 @@ export const WORKSPACE_PATH_PREFIX = '/w';
 
 /**
  * public workspace has parity with global tenant,
- * it includes saved objects with `public` as its workspace or without any workspce info
+ * it includes saved objects with `public` as its workspace or without any workspace info
  */
 export const PUBLIC_WORKSPACE_ID = 'public';
 

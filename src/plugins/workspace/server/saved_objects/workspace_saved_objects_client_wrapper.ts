@@ -27,6 +27,7 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
   SavedObjectsDeleteByWorkspaceOptions,
+  PUBLIC_WORKSPACE_ID,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import {
@@ -162,8 +163,8 @@ export class WorkspaceSavedObjectsClientWrapper {
      *
      * Checks if the provided saved object lacks both workspaces and permissions.
      * If a saved object lacks both attributes, it implies that the object is neither associated
-     * with any workspaces nor has permissions defined by itself. Such objects are considered "public"
-     * and will be excluded from permission checks.
+     * with any workspaces nor has permissions defined by itself. Such objects are considered as
+     * legacy object from global tenant.
      *
      **/
     if (!savedObject.workspaces && !savedObject.permissions) {

@@ -156,7 +156,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
               return {
                 type,
                 id: id as string,
-                fields: ['id', 'workspaces'],
+                fields: ['id', 'workspaces', 'permissions'],
               };
             })
         : [];
