@@ -25,6 +25,7 @@ export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
   dataSource?: DataSource;
   query: Query;
+  dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
   disableAutoFocus?: boolean;
@@ -54,6 +55,7 @@ interface Props extends QueryEditorProps {
 
 interface State {
   isDataSourcesVisible: boolean;
+  isDataSetsVisible: boolean;
   isSuggestionsVisible: boolean;
   index: number | null;
   suggestions: QuerySuggestion[];
@@ -77,7 +79,8 @@ const KEY_CODES = {
 // eslint-disable-next-line import/no-default-export
 export default class QueryEditorUI extends Component<Props, State> {
   public state: State = {
-    isDataSourcesVisible: true,
+    isDataSourcesVisible: false,
+    isDataSetsVisible: true,
     isSuggestionsVisible: false,
     index: null,
     suggestions: [],
@@ -212,7 +215,10 @@ export default class QueryEditorUI extends Component<Props, State> {
       : undefined;
     this.onChange(newQuery, dateRange);
     this.onSubmit(newQuery, dateRange);
-    this.setState({ isDataSourcesVisible: enhancement?.searchBar?.showDataSourceSelector ?? true });
+    this.setState({ isDataSetsVisible: enhancement?.searchBar?.showDataSetsSelector ?? true });
+    this.setState({
+      isDataSourcesVisible: enhancement?.searchBar?.showDataSourcesSelector ?? true,
+    });
   };
 
   private initPersistedLog = () => {
@@ -227,8 +233,17 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     const isDataSourcesVisible =
       this.props.settings.getQueryEnhancements(this.props.query.language)?.searchBar
-        ?.showDataSourceSelector ?? true;
+        ?.showDataSourcesSelector ?? true;
     this.setState({ isDataSourcesVisible });
+  };
+
+  private initDataSetsVisibility = () => {
+    if (this.componentIsUnmounting) return;
+
+    const isDataSetsVisible =
+      this.props.settings.getQueryEnhancements(this.props.query.language)?.searchBar
+        ?.showDataSetsSelector ?? true;
+    this.setState({ isDataSetsVisible });
   };
 
   public onMouseEnterSuggestion = (index: number) => {
@@ -246,6 +261,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     this.initPersistedLog();
     // this.fetchIndexPatterns().then(this.updateSuggestions);
     this.initDataSourcesVisibility();
+    this.initDataSetsVisibility();
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -280,6 +296,11 @@ export default class QueryEditorUI extends Component<Props, State> {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" className={`${className}__wrapper`}>
               <EuiFlexItem grow={false}>{this.props.prepend}</EuiFlexItem>
+              {this.state.isDataSourcesVisible && (
+                <EuiFlexItem grow={false} className={`${className}__dataSourceWrapper`}>
+                  <div ref={this.props.dataSourceContainerRef} />
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false} className={`${className}__languageWrapper`}>
                 <QueryLanguageSelector
                   language={this.props.query.language}
@@ -288,8 +309,8 @@ export default class QueryEditorUI extends Component<Props, State> {
                   appName={this.services.appName}
                 />
               </EuiFlexItem>
-              {this.state.isDataSourcesVisible && (
-                <EuiFlexItem grow={false} className={`${className}__dataSourceWrapper`}>
+              {this.state.isDataSetsVisible && (
+                <EuiFlexItem grow={false} className={`${className}__dataSetWrapper`}>
                   <div ref={this.props.containerRef} />
                 </EuiFlexItem>
               )}
