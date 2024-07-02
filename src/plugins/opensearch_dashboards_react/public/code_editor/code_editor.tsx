@@ -127,31 +127,31 @@ export class CodeEditor extends React.Component<Props, {}> {
       this.props.editorWillMount();
     }
 
-    monaco.languages.onLanguage(this.props.languageId, () => {
-      if (this.props.suggestionProvider) {
-        monaco.languages.registerCompletionItemProvider(
-          this.props.languageId,
-          this.props.suggestionProvider
-        );
-      }
+    // TEMPORARY fix for suggestion providor not appear for more than one language
+    ['SQL', 'kuery'].forEach((language) => {
+      monaco.languages.onLanguage(language, () => {
+        if (this.props.suggestionProvider) {
+          monaco.languages.registerCompletionItemProvider(language, this.props.suggestionProvider);
+        }
 
-      if (this.props.signatureProvider) {
-        monaco.languages.registerSignatureHelpProvider(
-          this.props.languageId,
-          this.props.signatureProvider
-        );
-      }
+        if (this.props.signatureProvider) {
+          monaco.languages.registerSignatureHelpProvider(
+            this.props.languageId,
+            this.props.signatureProvider
+          );
+        }
 
-      if (this.props.hoverProvider) {
-        monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
-      }
+        if (this.props.hoverProvider) {
+          monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
+        }
 
-      if (this.props.languageConfiguration) {
-        monaco.languages.setLanguageConfiguration(
-          this.props.languageId,
-          this.props.languageConfiguration
-        );
-      }
+        if (this.props.languageConfiguration) {
+          monaco.languages.setLanguageConfiguration(
+            this.props.languageId,
+            this.props.languageConfiguration
+          );
+        }
+      });
     });
 
     // Register the theme
