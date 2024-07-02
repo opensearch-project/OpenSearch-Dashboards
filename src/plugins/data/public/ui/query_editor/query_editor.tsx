@@ -22,8 +22,11 @@ import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 
-const LANGUAGE_ID = 'kuery';
-monaco.languages.register({ id: LANGUAGE_ID });
+const LANGUAGE_ID_SQL = 'SQL';
+monaco.languages.register({ id: LANGUAGE_ID_SQL });
+
+const LANGUAGE_ID_KUERY = 'kuery';
+monaco.languages.register({ id: LANGUAGE_ID_KUERY });
 
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -267,7 +270,7 @@ export default class QueryEditorUI extends Component<Props, State> {
   }
 
   public componentDidUpdate(prevProps: Props) {
-    if (prevProps.indexPatterns !== this.props.indexPatterns) {
+    if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
       this.fetchIndexPatterns();
     }
 
