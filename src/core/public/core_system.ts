@@ -236,6 +236,7 @@ export class CoreSystem {
         notifications,
         uiSettings,
         overlays,
+        workspaces,
       });
 
       this.coreApp.start({ application, http, notifications, uiSettings });

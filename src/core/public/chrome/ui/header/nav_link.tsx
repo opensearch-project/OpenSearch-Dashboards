@@ -35,6 +35,7 @@ import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../
 import { HttpStart } from '../../../http';
 import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
+import { formatUrlWithWorkspaceId } from '../../../utils';
 
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
@@ -126,8 +127,12 @@ export function createRecentNavLink(
   basePath: HttpStart['basePath'],
   navigateToUrl: InternalApplicationStart['navigateToUrl']
 ): RecentNavLink {
-  const { link, label } = recentLink;
-  const href = relativeToAbsolute(basePath.prepend(link));
+  const { link, label, workspaceId } = recentLink;
+  const href = relativeToAbsolute(
+    basePath.prepend(formatUrlWithWorkspaceId(link, workspaceId || '', basePath), {
+      withoutClientBasePath: true,
+    })
+  );
   const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
   let titleAndAriaLabel = label;
 

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { isActiveNavLink, createEuiListItem } from './nav_link';
+import { isActiveNavLink, createEuiListItem, createRecentNavLink } from './nav_link';
 import { ChromeNavLink } from '../../..';
 import { httpServiceMock } from '../../../http/http_service.mock';
 
@@ -59,5 +59,50 @@ describe('createEuiListItem', () => {
       isActiveNavLink(mockProps.appId, mockProps.link.id)
     );
     expect(listItem).toHaveProperty('isDisabled', mockProps.link.disabled);
+  });
+});
+
+describe('createRecentNavLink', () => {
+  const mockNavLinks: ChromeNavLink[] = [
+    {
+      id: 'foo',
+      title: 'foo',
+      baseUrl: '/app/foo',
+      href: '/app/foo',
+    },
+  ];
+  const mockedNavigateToUrl = jest.fn();
+  beforeEach(() => {
+    mockedNavigateToUrl.mockClear();
+  });
+  it('create a recent link with correct properties', () => {
+    const recentLink = createRecentNavLink(
+      {
+        id: 'foo',
+        label: 'foo',
+        link: '/app/foo',
+      },
+      mockNavLinks,
+      mockBasePath,
+      mockedNavigateToUrl
+    );
+
+    expect(recentLink.href).toEqual('http://localhost/test/app/foo');
+  });
+
+  it('create a recent link with workspace id', () => {
+    const recentLink = createRecentNavLink(
+      {
+        id: 'foo',
+        label: 'foo',
+        link: '/app/foo',
+        workspaceId: 'foo',
+      },
+      mockNavLinks,
+      mockBasePath,
+      mockedNavigateToUrl
+    );
+
+    expect(recentLink.href).toEqual('http://localhost/test/w/foo/app/foo');
   });
 });
