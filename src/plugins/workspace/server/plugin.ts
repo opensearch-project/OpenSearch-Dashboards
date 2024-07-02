@@ -158,11 +158,12 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
         enabled: true,
         permissionEnabled: isPermissionControlEnabled,
       },
-      dashboards: { isDashboardAdmin: true },
+      dashboards: { isDashboardAdmin: false },
     }));
     // Dynamically update capabilities based on the auth information from request.
     core.capabilities.registerSwitcher((request) => {
-      const isDashboardAdmin = !!getWorkspaceState(request).isDashboardAdmin;
+      // If the value is undefined/true, the user is dashboard admin.
+      const isDashboardAdmin = getWorkspaceState(request).isDashboardAdmin !== false;
       return { dashboards: { isDashboardAdmin } };
     });
 

@@ -29,7 +29,7 @@ describe('Workspace server plugin', () => {
     expect(value).toMatchInlineSnapshot(`
       Object {
         "dashboards": Object {
-          "isDashboardAdmin": true,
+          "isDashboardAdmin": false,
         },
         "workspaces": Object {
           "enabled": true,
@@ -51,7 +51,7 @@ describe('Workspace server plugin', () => {
     result = registerSwitcher(request, capabilities);
     expect(result).toEqual({ dashboards: { isDashboardAdmin: true } });
 
-    updateWorkspaceState(request, {});
+    updateWorkspaceState(request, { isDashboardAdmin: undefined });
     registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
     result = registerSwitcher(request, capabilities);
     expect(result).toEqual({ dashboards: { isDashboardAdmin: true } });
