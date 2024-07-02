@@ -6,7 +6,8 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { applicationServiceMock } from '../../../../../core/public/mocks';
-import { WorkspaceFormData } from './types';
+import { WorkspaceOperationType } from './constants';
+import { WorkspaceFormData, WorkspaceFormErrorCode } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 
 const setup = (defaultValues?: WorkspaceFormData) => {
@@ -16,6 +17,7 @@ const setup = (defaultValues?: WorkspaceFormData) => {
       application: applicationServiceMock.createStartContract(),
       defaultValues,
       onSubmit: onSubmitMock,
+      operationType: WorkspaceOperationType.Create,
     },
   });
   return {
@@ -25,7 +27,7 @@ const setup = (defaultValues?: WorkspaceFormData) => {
 };
 
 describe('useWorkspaceForm', () => {
-  it('should return "Invalid workspace name" and not call onSubmit when invalid name', async () => {
+  it('should return invalid workspace name error and not call onSubmit when invalid name', async () => {
     const { renderResult, onSubmitMock } = setup({
       id: 'foo',
       name: '~',
@@ -37,7 +39,10 @@ describe('useWorkspaceForm', () => {
     });
     expect(renderResult.result.current.formErrors).toEqual(
       expect.objectContaining({
-        name: 'Invalid workspace name',
+        name: {
+          code: WorkspaceFormErrorCode.InvalidWorkspaceName,
+          message: 'Name is invalid. Enter a valid name.',
+        },
       })
     );
     expect(onSubmitMock).not.toHaveBeenCalled();
@@ -54,7 +59,10 @@ describe('useWorkspaceForm', () => {
     });
     expect(renderResult.result.current.formErrors).toEqual(
       expect.objectContaining({
-        features: 'Use case is required. Select a use case.',
+        features: {
+          code: WorkspaceFormErrorCode.UseCaseMissing,
+          message: 'Use case is required. Select a use case.',
+        },
       })
     );
     expect(onSubmitMock).not.toHaveBeenCalled();

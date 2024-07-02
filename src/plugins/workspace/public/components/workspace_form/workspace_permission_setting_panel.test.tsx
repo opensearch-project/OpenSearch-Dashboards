@@ -30,7 +30,7 @@ const setup = (options?: Partial<WorkspacePermissionSettingPanelProps>) => {
   ];
   const renderResult = render(
     <WorkspacePermissionSettingPanel
-      lastAdminItemDeletable={true}
+      disabledUserOrGroupInputIds={[]}
       permissionSettings={permissionSettings}
       onChange={onChangeMock}
       {...options}
@@ -81,7 +81,7 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getAllByText('Admin')[1]);
+    fireEvent.click(renderResult.getAllByText('Owner')[1]);
     expect(onChangeMock).toHaveBeenCalledWith([
       {
         id: 0,
@@ -130,69 +130,44 @@ describe('WorkspacePermissionSettingInput', () => {
     ]);
   });
 
-  it('should not able to delete last user admin permission setting', () => {
+  it('should not able to edit user or group when disabled', () => {
     const { renderResult } = setup({
-      lastAdminItemDeletable: false,
       permissionSettings: [
         {
           id: 0,
           type: WorkspacePermissionItemType.User,
-          userId: 'foo',
+          userId: 'user-1',
           modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
         },
-      ],
-    });
-
-    expect(renderResult.getByLabelText('Delete permission setting')).toBeDisabled();
-  });
-
-  it('should not able to delete last group admin permission setting', () => {
-    const { renderResult } = setup({
-      lastAdminItemDeletable: false,
-      permissionSettings: [
         {
-          id: 0,
+          id: 1,
           type: WorkspacePermissionItemType.Group,
-          group: 'bar',
+          group: 'user-group-1',
           modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
         },
       ],
+      disabledUserOrGroupInputIds: [0, 1],
     });
 
-    expect(renderResult.getByLabelText('Delete permission setting')).toBeDisabled();
-  });
-
-  it('should able to delete permission setting if more than one admin permission', () => {
-    const { renderResult } = setup({
-      lastAdminItemDeletable: false,
-      permissionSettings: [
-        {
-          id: 0,
-          type: WorkspacePermissionItemType.User,
-          userId: 'foo',
-          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-        },
-        {
-          id: 0,
-          type: WorkspacePermissionItemType.Group,
-          group: 'bar',
-          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
-        },
-      ],
-    });
-
-    expect(renderResult.getAllByLabelText('Delete permission setting')[0]).not.toBeDisabled();
-    expect(renderResult.getAllByLabelText('Delete permission setting')[1]).not.toBeDisabled();
+    expect(renderResult.getByText('user-1')?.closest('div[role="combobox"]')).toHaveClass(
+      'euiComboBox-isDisabled'
+    );
+    expect(renderResult.getByText('user-group-1')?.closest('div[role="combobox"]')).toHaveClass(
+      'euiComboBox-isDisabled'
+    );
   });
 
   it('should render consistent errors', () => {
     const { renderResult } = setup({
-      errors: { '0': 'User permission setting error', '1': 'Group permission setting error' },
+      errors: {
+        '0': { code: 0, message: 'User permission setting error' },
+        '1': { code: 0, message: 'Group permission setting error' },
+      },
     });
-    expect(renderResult.container.querySelectorAll('.euiFormRow')[0]).toHaveTextContent(
+    expect(renderResult.container.querySelectorAll('.euiFormErrorText')[0]).toHaveTextContent(
       'User permission setting error'
     );
-    expect(renderResult.container.querySelectorAll('.euiFormRow')[1]).toHaveTextContent(
+    expect(renderResult.container.querySelectorAll('.euiFormErrorText')[1]).toHaveTextContent(
       'Group permission setting error'
     );
   });

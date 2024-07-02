@@ -65,7 +65,7 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onGroupOrUserIdChangeMock } = setup();
 
     expect(onGroupOrUserIdChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getByText('Select'));
+    fireEvent.click(renderResult.getByText('Select a user'));
     fireEvent.input(renderResult.getByTestId('comboBoxSearchInput'), {
       target: { value: 'user1' },
     });
@@ -78,7 +78,7 @@ describe('WorkspacePermissionSettingInput', () => {
     });
 
     expect(onGroupOrUserIdChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getByText('Select'));
+    fireEvent.click(renderResult.getByText('Select a user group'));
     fireEvent.input(renderResult.getByTestId('comboBoxSearchInput'), {
       target: { value: 'group' },
     });
@@ -100,7 +100,7 @@ describe('WorkspacePermissionSettingInput', () => {
     const { renderResult, onPermissionModesChangeMock } = setup({});
 
     expect(onPermissionModesChangeMock).not.toHaveBeenCalled();
-    fireEvent.click(renderResult.getByText('Admin'));
+    fireEvent.click(renderResult.getByText('Owner'));
     expect(onPermissionModesChangeMock).toHaveBeenCalledWith(['library_write', 'write'], 0);
   });
 

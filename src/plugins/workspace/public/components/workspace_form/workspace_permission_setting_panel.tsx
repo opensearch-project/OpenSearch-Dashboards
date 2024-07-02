@@ -4,9 +4,9 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { EuiButton, EuiFormRow, EuiText, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { WorkspacePermissionSetting } from './types';
+import { WorkspaceFormError, WorkspacePermissionSetting } from './types';
 import {
   WorkspacePermissionItemType,
   optionIdToWorkspacePermissionModesMap,
@@ -16,11 +16,11 @@ import {
   WorkspacePermissionSettingInput,
   WorkspacePermissionSettingInputProps,
 } from './workspace_permission_setting_input';
-import { generateNextPermissionSettingsId, getPermissionModeId } from './utils';
+import { generateNextPermissionSettingsId } from './utils';
 
 export interface WorkspacePermissionSettingPanelProps {
-  errors?: { [key: number]: string };
-  lastAdminItemDeletable: boolean;
+  errors?: { [key: number]: WorkspaceFormError };
+  disabledUserOrGroupInputIds: number[];
   permissionSettings: Array<
     Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
   >;
@@ -29,22 +29,18 @@ export interface WorkspacePermissionSettingPanelProps {
   ) => void;
 }
 
-interface UserOrGroupSectionProps
-  extends Omit<WorkspacePermissionSettingPanelProps, 'lastAdminItemDeletable'> {
-  title: string;
-  nonDeletableIndex: number;
+interface UserOrGroupSectionProps extends WorkspacePermissionSettingPanelProps {
   type: WorkspacePermissionItemType;
   nextIdGenerator: () => number;
 }
 
 const UserOrGroupSection = ({
   type,
-  title,
   errors,
   onChange,
   nextIdGenerator,
   permissionSettings,
-  nonDeletableIndex,
+  disabledUserOrGroupInputIds,
 }: UserOrGroupSectionProps) => {
   // default permission mode is read
   const handleAddNewOne = useCallback(() => {
@@ -99,18 +95,41 @@ const UserOrGroupSection = ({
 
   return (
     <div>
-      <EuiText>
-        <strong>{title}</strong>
-      </EuiText>
-      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="m">
+        <EuiFlexItem style={{ maxWidth: 400 }}>
+          <EuiFormRow
+            label={
+              type === WorkspacePermissionItemType.User
+                ? i18n.translate('workspaceForm.permissionSetting.userLabel', {
+                    defaultMessage: 'User',
+                  })
+                : i18n.translate('workspaceForm.permissionSetting.groupLabel', {
+                    defaultMessage: 'User group',
+                  })
+            }
+          >
+            <></>
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem style={{ maxWidth: 332 }}>
+          <EuiFormRow
+            label={i18n.translate('workspaceForm.permissionSetting.permissionLabel', {
+              defaultMessage: 'Permissions',
+            })}
+          >
+            <></>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="xs" />
       {permissionSettings.map((item, index) => (
         <React.Fragment key={item.id}>
-          <EuiFormRow isInvalid={!!errors?.[item.id]} error={errors?.[item.id]}>
+          <EuiFormRow fullWidth isInvalid={!!errors?.[item.id]} error={errors?.[item.id]?.message}>
             <WorkspacePermissionSettingInput
               {...item}
               type={type}
               index={index}
-              deletable={index !== nonDeletableIndex}
+              userOrGroupDisabled={disabledUserOrGroupInputIds.includes(item.id)}
               onDelete={handleDelete}
               onGroupOrUserIdChange={handleGroupOrUserIdChange}
               onPermissionModesChange={handlePermissionModesChange}
@@ -119,14 +138,18 @@ const UserOrGroupSection = ({
         </React.Fragment>
       ))}
       <EuiButton
-        fill
         fullWidth={false}
         onClick={handleAddNewOne}
         data-test-subj={`workspaceForm-permissionSettingPanel-${type}-addNew`}
+        color="secondary"
       >
-        {i18n.translate('workspace.form.permissionSettingPanel.addNew', {
-          defaultMessage: 'Add New',
-        })}
+        {type === WorkspacePermissionItemType.User
+          ? i18n.translate('workspace.form.permissionSettingPanel.addUser', {
+              defaultMessage: 'Add user',
+            })
+          : i18n.translate('workspace.form.permissionSettingPanel.addUserGroup', {
+              defaultMessage: 'Add user group',
+            })}
       </EuiButton>
     </div>
   );
@@ -136,7 +159,7 @@ export const WorkspacePermissionSettingPanel = ({
   errors,
   onChange,
   permissionSettings,
-  lastAdminItemDeletable,
+  disabledUserOrGroupInputIds,
 }: WorkspacePermissionSettingPanelProps) => {
   const userPermissionSettings = useMemo(
     () =>
@@ -152,29 +175,6 @@ export const WorkspacePermissionSettingPanel = ({
       ) ?? [],
     [permissionSettings]
   );
-
-  const { userNonDeletableIndex, groupNonDeletableIndex } = useMemo(() => {
-    if (
-      lastAdminItemDeletable ||
-      // Permission setting can be deleted if there are more than one admin setting
-      [...userPermissionSettings, ...groupPermissionSettings].filter(
-        (permission) =>
-          permission.modes && getPermissionModeId(permission.modes) === PermissionModeId.Admin
-      ).length > 1
-    ) {
-      return { userNonDeletableIndex: -1, groupNonDeletableIndex: -1 };
-    }
-    return {
-      userNonDeletableIndex: userPermissionSettings.findIndex(
-        (permission) =>
-          permission.modes && getPermissionModeId(permission.modes) === PermissionModeId.Admin
-      ),
-      groupNonDeletableIndex: groupPermissionSettings.findIndex(
-        (permission) =>
-          permission.modes && getPermissionModeId(permission.modes) === PermissionModeId.Admin
-      ),
-    };
-  }, [userPermissionSettings, groupPermissionSettings, lastAdminItemDeletable]);
 
   const nextIdRef = useRef(generateNextPermissionSettingsId(permissionSettings));
 
@@ -208,27 +208,21 @@ export const WorkspacePermissionSettingPanel = ({
   return (
     <div>
       <UserOrGroupSection
-        title={i18n.translate('workspace.form.permissionSettingPanel.userTitle', {
-          defaultMessage: 'User',
-        })}
         errors={errors}
         onChange={handleUserPermissionSettingsChange}
-        nonDeletableIndex={userNonDeletableIndex}
         permissionSettings={userPermissionSettings}
         type={WorkspacePermissionItemType.User}
         nextIdGenerator={nextIdGenerator}
+        disabledUserOrGroupInputIds={disabledUserOrGroupInputIds}
       />
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
       <UserOrGroupSection
-        title={i18n.translate('workspace.form.permissionSettingPanel.userGroupTitle', {
-          defaultMessage: 'User Groups',
-        })}
         errors={errors}
         onChange={handleGroupPermissionSettingsChange}
-        nonDeletableIndex={groupNonDeletableIndex}
         permissionSettings={groupPermissionSettings}
         type={WorkspacePermissionItemType.Group}
         nextIdGenerator={nextIdGenerator}
+        disabledUserOrGroupInputIds={disabledUserOrGroupInputIds}
       />
     </div>
   );

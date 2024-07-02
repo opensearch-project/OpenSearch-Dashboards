@@ -4,12 +4,7 @@
  */
 
 import { useCallback, useState, FormEventHandler, useRef, useMemo } from 'react';
-import {
-  htmlIdGenerator,
-  EuiFieldTextProps,
-  EuiColorPickerProps,
-  EuiTextAreaProps,
-} from '@elastic/eui';
+import { htmlIdGenerator, EuiFieldTextProps, EuiTextAreaProps } from '@elastic/eui';
 
 import { useApplications } from '../../hooks';
 import {
@@ -19,17 +14,33 @@ import {
 } from '../../utils';
 
 import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
-import { appendDefaultFeatureIds, getNumberOfErrors, validateWorkspaceForm } from './utils';
+import {
+  appendDefaultFeatureIds,
+  generatePermissionSettingsState,
+  getNumberOfChanges,
+  getNumberOfErrors,
+  validateWorkspaceForm,
+} from './utils';
+import { WorkspacePermissionItemType } from './constants';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
 
 const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
 
-export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: WorkspaceFormProps) => {
+export const useWorkspaceForm = ({
+  application,
+  defaultValues,
+  operationType,
+  onSubmit,
+  permissionEnabled,
+}: WorkspaceFormProps) => {
   const applications = useApplications(application);
   const [name, setName] = useState(defaultValues?.name);
   const [description, setDescription] = useState(defaultValues?.description);
-  const [color, setColor] = useState(defaultValues?.color);
+  const defaultValuesRef = useRef(defaultValues);
+  const initialPermissionSettingsRef = useRef(
+    generatePermissionSettingsState(operationType, defaultValues?.permissionSettings)
+  );
 
   const [featureConfigs, setFeatureConfigs] = useState(
     appendDefaultFeatureIds(defaultValues?.features ?? [])
@@ -40,11 +51,7 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   );
   const [permissionSettings, setPermissionSettings] = useState<
     Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
-  >(
-    defaultValues?.permissionSettings && defaultValues.permissionSettings.length > 0
-      ? defaultValues.permissionSettings
-      : []
-  );
+  >(initialPermissionSettingsRef.current);
 
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
   const numberOfErrors = useMemo(() => getNumberOfErrors(formErrors), [formErrors]);
@@ -54,11 +61,18 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     description,
     features: featureConfigs,
     useCases: selectedUseCases,
-    color,
     permissionSettings,
   });
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
+  const formData = getFormData();
+  const numberOfChanges = defaultValuesRef.current
+    ? getNumberOfChanges(formData, {
+        ...defaultValuesRef.current,
+        // The user form will insert some empty permission rows, should ignore these rows not treated as user new added.
+        permissionSettings: initialPermissionSettingsRef.current,
+      })
+    : 0;
 
   if (!formIdRef.current) {
     formIdRef.current = workspaceHtmlIdGenerator();
@@ -81,22 +95,28 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
   const handleFormSubmit = useCallback<FormEventHandler>(
     (e) => {
       e.preventDefault();
-      const formData = getFormDataRef.current();
-      const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(formData);
+      const currentFormData = getFormDataRef.current();
+      const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(
+        currentFormData,
+        !!permissionEnabled
+      );
       setFormErrors(currentFormErrors);
       if (getNumberOfErrors(currentFormErrors) > 0) {
         return;
       }
 
       onSubmit?.({
-        name: formData.name!,
-        description: formData.description,
-        features: formData.features,
-        color: formData.color,
-        permissionSettings: formData.permissionSettings as WorkspacePermissionSetting[],
+        name: currentFormData.name!,
+        description: currentFormData.description,
+        features: currentFormData.features,
+        permissionSettings: currentFormData.permissionSettings.filter(
+          (item) =>
+            (item.type === WorkspacePermissionItemType.User && !!item.userId) ||
+            (item.type === WorkspacePermissionItemType.Group && !!item.group)
+        ) as WorkspacePermissionSetting[],
       });
     },
-    [onSubmit]
+    [onSubmit, permissionEnabled]
   );
 
   const handleNameInputChange = useCallback<Required<EuiFieldTextProps>['onChange']>((e) => {
@@ -107,18 +127,14 @@ export const useWorkspaceForm = ({ application, defaultValues, onSubmit }: Works
     setDescription(e.target.value);
   }, []);
 
-  const handleColorChange = useCallback<Required<EuiColorPickerProps>['onChange']>((text) => {
-    setColor(text);
-  }, []);
-
   return {
     formId: formIdRef.current,
-    formData: getFormData(),
+    formData,
     formErrors,
     applications,
     numberOfErrors,
+    numberOfChanges,
     handleFormSubmit,
-    handleColorChange,
     handleUseCasesChange,
     handleNameInputChange,
     setPermissionSettings,

@@ -13,9 +13,11 @@ import {
   Principals,
   PrincipalType,
   SharedGlobalConfig,
+  Permissions,
 } from '../../../core/server';
 import { AuthInfo } from './types';
 import { updateWorkspaceState } from '../../../core/server/utils';
+import { CURRENT_USER_PLACEHOLDER } from '../common/constants';
 
 /**
  * Generate URL friendly random ID
@@ -88,4 +90,25 @@ export const getOSDAdminConfigFromYMLConfig = async (
   const usersResult = (globalConfig.opensearchDashboards?.dashboardAdmin?.users || []) as string[];
 
   return [groupsResult, usersResult];
+};
+
+export const transferCurrentUserInPermissions = (
+  realUserId: string,
+  permissions: Permissions | undefined
+) => {
+  if (!permissions) {
+    return permissions;
+  }
+  return Object.keys(permissions).reduce<Permissions>(
+    (previousPermissions, currentKey) => ({
+      ...previousPermissions,
+      [currentKey]: {
+        ...permissions[currentKey],
+        users: permissions[currentKey].users?.map((user) =>
+          user === CURRENT_USER_PLACEHOLDER ? realUserId : user
+        ),
+      },
+    }),
+    {}
+  );
 };
