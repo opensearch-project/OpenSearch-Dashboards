@@ -50,11 +50,6 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
   private isConfigType(type: SavedObject['type']): boolean {
     return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
   }
-  private formatFindParams(options: SavedObjectsFindOptions): SavedObjectsFindOptions {
-    const isListingDataSource = this.isDataSourceType(options.type);
-    const { workspaces, ...otherOptions } = options;
-    return isListingDataSource ? otherOptions : options;
-  }
 
   /**
    * Workspace is a concept to manage saved objects and the `workspaces` field of each object indicates workspaces the object belongs to.
