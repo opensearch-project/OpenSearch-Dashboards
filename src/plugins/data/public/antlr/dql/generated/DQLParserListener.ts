@@ -11,7 +11,8 @@ import { PrimaryExpressionContext } from "./DQLParser.js";
 import { ComparisonExpressionContext } from "./DQLParser.js";
 import { FieldExpressionContext } from "./DQLParser.js";
 import { TermSearchContext } from "./DQLParser.js";
-import { TermOrExpressionContext } from "./DQLParser.js";
+import { GroupExpressionContext } from "./DQLParser.js";
+import { GroupContentContext } from "./DQLParser.js";
 import { FieldContext } from "./DQLParser.js";
 import { RangeValueContext } from "./DQLParser.js";
 import { ValueContext } from "./DQLParser.js";
@@ -104,15 +105,25 @@ export class DQLParserListener implements ParseTreeListener {
      */
     exitTermSearch?: (ctx: TermSearchContext) => void;
     /**
-     * Enter a parse tree produced by `DQLParser.termOrExpression`.
+     * Enter a parse tree produced by `DQLParser.groupExpression`.
      * @param ctx the parse tree
      */
-    enterTermOrExpression?: (ctx: TermOrExpressionContext) => void;
+    enterGroupExpression?: (ctx: GroupExpressionContext) => void;
     /**
-     * Exit a parse tree produced by `DQLParser.termOrExpression`.
+     * Exit a parse tree produced by `DQLParser.groupExpression`.
      * @param ctx the parse tree
      */
-    exitTermOrExpression?: (ctx: TermOrExpressionContext) => void;
+    exitGroupExpression?: (ctx: GroupExpressionContext) => void;
+    /**
+     * Enter a parse tree produced by `DQLParser.groupContent`.
+     * @param ctx the parse tree
+     */
+    enterGroupContent?: (ctx: GroupContentContext) => void;
+    /**
+     * Exit a parse tree produced by `DQLParser.groupContent`.
+     * @param ctx the parse tree
+     */
+    exitGroupContent?: (ctx: GroupContentContext) => void;
     /**
      * Enter a parse tree produced by `DQLParser.field`.
      * @param ctx the parse tree

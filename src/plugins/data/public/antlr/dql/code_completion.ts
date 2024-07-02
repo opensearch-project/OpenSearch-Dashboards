@@ -36,20 +36,28 @@ export const getSuggestions = async ({
   // find token index
   const cursorIndex =
     findCursorTokenIndex(tokenStream, { line: 1, column: selectionStart }, DQLParser.WS) ?? 0;
-  // gets candidates at specified index
+
   const core = new CodeCompletionCore(parser);
 
+  // specify preferred rules to appear in candidate collection
   core.preferredRules = new Set([DQLParser.RULE_field]);
 
+  // gets candidates at specified token index
   const candidates = core.collectCandidates(cursorIndex);
+  candidates.tokens.forEach((_, k) => {
+    console.log('token candidate names', parser.vocabulary.getSymbolicName(k));
+  });
 
   let completions = [];
 
+  // check to see if field rule is a candidate. if so, suggest field names
   if (candidates.rules.has(DQLParser.RULE_field)) {
     completions.push(...findFieldSuggestions(indexPatterns));
   }
 
+  // suggest other candidates, mainly keywords
   [...candidates.tokens.keys()].forEach((token: number) => {
+    // ignore identifier, already handled with field rule
     if (token === DQLParser.IDENTIFIER) {
       return;
     }

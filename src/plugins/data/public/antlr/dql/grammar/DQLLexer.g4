@@ -18,14 +18,9 @@ RPAREN: ')';
 DOT: '.';
 
 // Literals
-PHRASE: '"' (ESC | ~["\\])* '"';
+PHRASE: '"' (~["\\])* '"';
 NUMBER: '-'? [0-9]+ ('.' [0-9]+)?;
-DATESTRING:
-	'"' [0-9] [0-9] [0-9] [0-9] '-' [0-9] [0-9] '-' [0-9] [0-9] '"';
 IDENTIFIER: [a-zA-Z_*][a-zA-Z0-9_*]*;
 
 // SKIP
 WS: [ \t\r\n]+ -> channel(HIDDEN);
-
-// Fragments
-fragment ESC: '\\' .;

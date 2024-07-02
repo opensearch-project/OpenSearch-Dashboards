@@ -4,7 +4,7 @@ options {
 	tokenVocab = DQLLexer;
 }
 
-query: orExpression;
+query: orExpression EOF;
 orExpression: andExpression (OR andExpression)*;
 andExpression: notExpression (AND notExpression)*;
 notExpression: NOT notExpression | primaryExpression;
@@ -16,8 +16,10 @@ primaryExpression:
 comparisonExpression: field comparisonOperator rangeValue;
 fieldExpression: field EQ value;
 termSearch: IDENTIFIER;
-termOrExpression: LPAREN termSearch (OR termSearch)* RPAREN;
-field: IDENTIFIER (DOT IDENTIFIER)*;
-rangeValue: NUMBER | DATESTRING;
-value: PHRASE | NUMBER | termSearch | termOrExpression;
+groupExpression:
+	LPAREN groupContent ((OR | AND) (NOT?) groupContent)* RPAREN;
+groupContent: groupExpression | termSearch;
+field: IDENTIFIER;
+rangeValue: NUMBER | PHRASE;
+value: PHRASE | NUMBER | termSearch | groupExpression;
 comparisonOperator: GT | LT | GE | LE;

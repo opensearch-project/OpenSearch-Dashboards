@@ -11,7 +11,8 @@ import { PrimaryExpressionContext } from "./DQLParser.js";
 import { ComparisonExpressionContext } from "./DQLParser.js";
 import { FieldExpressionContext } from "./DQLParser.js";
 import { TermSearchContext } from "./DQLParser.js";
-import { TermOrExpressionContext } from "./DQLParser.js";
+import { GroupExpressionContext } from "./DQLParser.js";
+import { GroupContentContext } from "./DQLParser.js";
 import { FieldContext } from "./DQLParser.js";
 import { RangeValueContext } from "./DQLParser.js";
 import { ValueContext } from "./DQLParser.js";
@@ -75,11 +76,17 @@ export class DQLParserVisitor<Result> extends AbstractParseTreeVisitor<Result> {
      */
     visitTermSearch?: (ctx: TermSearchContext) => Result;
     /**
-     * Visit a parse tree produced by `DQLParser.termOrExpression`.
+     * Visit a parse tree produced by `DQLParser.groupExpression`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitTermOrExpression?: (ctx: TermOrExpressionContext) => Result;
+    visitGroupExpression?: (ctx: GroupExpressionContext) => Result;
+    /**
+     * Visit a parse tree produced by `DQLParser.groupContent`.
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    visitGroupContent?: (ctx: GroupContentContext) => Result;
     /**
      * Visit a parse tree produced by `DQLParser.field`.
      * @param ctx the parse tree
