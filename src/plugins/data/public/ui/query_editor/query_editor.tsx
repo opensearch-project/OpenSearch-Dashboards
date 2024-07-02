@@ -30,7 +30,7 @@ import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
 
-const LANGUAGE_ID = 'SQL';
+const LANGUAGE_ID = 'kuery';
 monaco.languages.register({ id: LANGUAGE_ID });
 
 export interface QueryEditorProps {
@@ -257,10 +257,14 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
-    // this.fetchIndexPatterns().then(this.updateSuggestions);
+    this.fetchIndexPatterns();
   }
 
   public componentDidUpdate(prevProps: Props) {
+    if (prevProps.indexPatterns !== this.props.indexPatterns) {
+      this.fetchIndexPatterns();
+    }
+
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });
