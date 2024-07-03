@@ -72,6 +72,7 @@ import {
   RightNavigationButton,
   RightNavigationButtonProps,
   ChromeRegistrationNavLink,
+  ChromeNavGroupUpdater,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -116,6 +117,7 @@ export {
   WorkspaceAttribute,
   ChromeNavGroup,
   NavGroupType,
+  NavGroupStatus,
 } from '../types';
 
 export {
@@ -369,6 +371,7 @@ export {
   RightNavigationButton,
   RightNavigationButtonProps,
   ChromeRegistrationNavLink,
+  ChromeNavGroupUpdater,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
