@@ -44,6 +44,7 @@ describe('HeaderBreadcrumbs', () => {
         prependCurrentNavgroupToBreadcrumbs={jest.fn()}
         appTitle$={new BehaviorSubject('')}
         breadcrumbs$={breadcrumbs$}
+        appId$={new BehaviorSubject(undefined)}
       />
     );
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();

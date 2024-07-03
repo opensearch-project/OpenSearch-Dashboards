@@ -109,7 +109,7 @@ export interface StartDeps {
   overlays: OverlayStart;
 }
 
-export type CollapsibleNavHeaderRender = () => JSX.Element | null;
+type CollapsibleNavHeaderRender = () => JSX.Element | null;
 
 /** @internal */
 export class ChromeService {
@@ -299,9 +299,7 @@ export class ChromeService {
           survey={injectedMetadata.getSurvey()}
           collapsibleNavHeaderRender={this.collapsibleNavHeaderRender}
           sidecarConfig$={sidecarConfig$}
-          navGroupsMap$={navGroup.getNavGroupsMap$()}
           navGroupEnabled={navGroup.getNavGroupEnabled()}
-          onNavGroupSelected={navGroup.setCurrentNavGroup}
           currentNavgroup$={navGroup.getCurrentNavGroup$()}
           prependCurrentNavgroupToBreadcrumbs={navGroup.prependCurrentNavgroupToBreadcrumbs}
         />

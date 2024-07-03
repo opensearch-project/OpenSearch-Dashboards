@@ -96,9 +96,7 @@ export interface HeaderProps {
   logos: Logos;
   survey: string | undefined;
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
-  navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
   navGroupEnabled: boolean;
-  onNavGroupSelected: (groupId: string | undefined) => void;
   currentNavgroup$: Observable<ChromeNavGroup | undefined>;
   prependCurrentNavgroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => ChromeBreadcrumb[];
 }
@@ -115,7 +113,6 @@ export function Header({
   logos,
   collapsibleNavHeaderRender,
   navGroupEnabled,
-  onNavGroupSelected,
   prependCurrentNavgroupToBreadcrumbs,
   ...observables
 }: HeaderProps) {
@@ -232,6 +229,7 @@ export function Header({
               breadcrumbs$={observables.breadcrumbs$}
               currentNavgroup$={observables.currentNavgroup$}
               navgroupEnabled={navGroupEnabled}
+              appId$={application.currentAppId$}
               prependCurrentNavgroupToBreadcrumbs={prependCurrentNavgroupToBreadcrumbs}
             />
 

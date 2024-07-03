@@ -1,2 +1,0 @@
-feat:
-- 1/ Add current nav group into chrome service  2/ prepend current nav group into breadcrumbs ([#7130](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7130))

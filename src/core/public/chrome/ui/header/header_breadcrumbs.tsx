@@ -40,8 +40,12 @@ interface Props {
   appTitle$: Observable<string>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   navgroupEnabled: boolean;
+  appId$: Observable<string | undefined>;
   currentNavgroup$: Observable<ChromeNavGroup | undefined>;
-  prependCurrentNavgroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => ChromeBreadcrumb[];
+  prependCurrentNavgroupToBreadcrumbs: (
+    breadcrumbs: ChromeBreadcrumb[],
+    appId?: string
+  ) => ChromeBreadcrumb[];
 }
 
 export function HeaderBreadcrumbs({
@@ -50,6 +54,7 @@ export function HeaderBreadcrumbs({
   navgroupEnabled,
   currentNavgroup$,
   prependCurrentNavgroupToBreadcrumbs,
+  appId$,
 }: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
@@ -60,8 +65,9 @@ export function HeaderBreadcrumbs({
   }
 
   const currentNavgroup = useObservable(currentNavgroup$, undefined);
+  const appId = useObservable(appId$, undefined);
   if (navgroupEnabled && currentNavgroup) {
-    crumbs = prependCurrentNavgroupToBreadcrumbs(crumbs);
+    crumbs = prependCurrentNavgroupToBreadcrumbs(crumbs, appId);
   }
 
   crumbs = crumbs.map((breadcrumb, i) => ({

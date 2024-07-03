@@ -69,9 +69,13 @@ export interface ChromeNavGroupServiceStartContract {
   /**
    * prepend Home & NavGroup into current breadcrumbs
    * @param breadcrumbs current breadcrumbs
+   * @param appId current application id
    * @returns new prepend breadcrumbs
    */
-  prependCurrentNavgroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => ChromeBreadcrumb[];
+  prependCurrentNavgroupToBreadcrumbs: (
+    breadcrumbs: ChromeBreadcrumb[],
+    appId?: string
+  ) => ChromeBreadcrumb[];
 }
 
 /** @internal */
@@ -225,11 +229,11 @@ export class ChromeNavGroupService {
         }
       },
 
-      prependCurrentNavgroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => {
+      prependCurrentNavgroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[], appId?: string) => {
         const navGroupId = this.currentNavGroup$.getValue()?.id;
         const homeTitle = i18n.translate('core.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
         // home page will not have nav group information
-        const isHome = breadcrumbs && breadcrumbs.length === 1 && breadcrumbs[0].text === homeTitle;
+        const isHome = appId === 'home';
 
         if (this.navGroupEnabled && navGroupId && !isHome) {
           const currentNavGroup = this.navGroupsMap$.getValue()[navGroupId];
