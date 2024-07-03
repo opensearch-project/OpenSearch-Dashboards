@@ -7,6 +7,7 @@ import {
   validateWorkspaceForm,
   convertPermissionSettingsToPermissions,
   convertPermissionsToPermissionSettings,
+  getNumberOfChanges,
 } from './utils';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import { WorkspacePermissionItemType } from './constants';
@@ -258,7 +259,41 @@ describe('validateWorkspaceForm', () => {
     });
   });
 
-  it('should return empty object for valid for data', () => {
+  it('should return error if owner is missing in permission settings', () => {
+    expect(
+      validateWorkspaceForm(
+        {
+          name: 'test',
+        },
+        true
+      ).permissionSettings?.overall
+    ).toEqual({
+      code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
+      message: 'Permission setting missing',
+    });
+
+    expect(
+      validateWorkspaceForm(
+        {
+          name: 'test',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              modes: [WorkspacePermissionMode.LibraryRead],
+              userId: 'foo',
+            },
+          ],
+        },
+        true
+      ).permissionSettings?.overall
+    ).toEqual({
+      code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
+      message: 'Permission setting missing',
+    });
+  });
+
+  it('should return empty object for valid form data', () => {
     expect(
       validateWorkspaceForm(
         {
@@ -276,5 +311,166 @@ describe('validateWorkspaceForm', () => {
         false
       )
     ).toEqual({});
+  });
+});
+
+describe('getNumberOfChanges', () => {
+  it('should return consistent name changes count', () => {
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+        },
+        {
+          name: 'foo',
+        }
+      )
+    ).toEqual(0);
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo1',
+        },
+        {
+          name: 'foo',
+        }
+      )
+    ).toEqual(1);
+  });
+  it('should return consistent description changes count', () => {
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          description: 'bar',
+        },
+        {
+          name: 'foo',
+          description: 'bar',
+        }
+      )
+    ).toEqual(0);
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+        },
+        {
+          name: 'foo',
+          description: 'bar',
+        }
+      )
+    ).toEqual(1);
+  });
+  it('should return consistent features changes count', () => {
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          features: ['bar'],
+        },
+        {
+          name: 'foo',
+          features: ['bar'],
+        }
+      )
+    ).toEqual(0);
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          features: [],
+        },
+        {
+          name: 'foo',
+          features: ['bar'],
+        }
+      )
+    ).toEqual(1);
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          features: ['bar'],
+        },
+        {
+          name: 'foo',
+          features: [],
+        }
+      )
+    ).toEqual(1);
+  });
+  it('should return consistent permission settings changes count', () => {
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              userId: 'user-1',
+              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
+            },
+          ],
+        },
+        {
+          name: 'foo',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              userId: 'user-1',
+              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
+            },
+          ],
+        }
+      )
+    ).toEqual(0);
+    // for remove permission setting
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              userId: 'user-1',
+              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
+            },
+            {
+              id: 1,
+              type: WorkspacePermissionItemType.Group,
+              group: 'group-1',
+              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
+            },
+          ],
+        },
+        {
+          name: 'foo',
+          /**
+           * These include three changes:
+           * 1.Remove permission setting#0
+           * 2.Modify permission setting#1
+           * 3.Add permission setting#2
+           */
+          permissionSettings: [
+            {
+              id: 1,
+              type: WorkspacePermissionItemType.Group,
+              group: 'group-1',
+              modes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.LibraryWrite],
+            },
+            {
+              id: 2,
+              type: WorkspacePermissionItemType.User,
+              userId: 'user-1',
+              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
+            },
+          ],
+        }
+      )
+    ).toEqual(3);
   });
 });
