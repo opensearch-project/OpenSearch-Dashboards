@@ -74,6 +74,7 @@ export const QueryAssistInput: React.FC<QueryAssistInputProps> = (props) => {
     <EuiOutsideClickDetector onOutsideClick={() => setIsSuggestionsVisible(false)}>
       <div>
         <EuiFieldText
+          data-test-subj="query-assist-input-field-text"
           inputRef={props.inputRef}
           value={value}
           disabled={props.isDisabled}

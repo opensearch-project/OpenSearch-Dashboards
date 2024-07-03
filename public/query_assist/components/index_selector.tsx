@@ -31,7 +31,7 @@ export const IndexSelector: React.FC<IndexSelectorProps> = (props) => {
 
   return (
     <EuiComboBox
-      style={{ width: 300 }}
+      style={{ width: 500 }}
       placeholder="Select an index"
       isClearable={false}
       prepend={<EuiText>Index</EuiText>}
