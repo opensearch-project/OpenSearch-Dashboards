@@ -34,7 +34,7 @@ export interface QueryEditorExtensionDependencies {
 
 export interface QueryEditorExtensionConfig {
   /**
-   * The id for the search bar extension.
+   * The id for the query editor extension.
    */
   id: string;
   /**
@@ -42,22 +42,22 @@ export interface QueryEditorExtensionConfig {
    */
   order: number;
   /**
-   * A function that determines if the search bar extension is enabled and should be rendered on UI.
+   * A function that determines if the query editor extension is enabled and should be rendered on UI.
    * @returns whether the extension is enabled.
    */
   isEnabled$: (dependencies: QueryEditorExtensionDependencies) => Observable<boolean>;
   /**
-   * A function that returns the search bar extension component. The component
+   * A function that returns the query editor extension component. The component
    * will be displayed on top of the query editor in the search bar.
    * @param dependencies - The dependencies required for the extension.
-   * @returns The component the search bar extension.
+   * @returns The component the query editor extension.
    */
   getComponent?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
   /**
-   * A function that returns the search bar extension banner. The banner is a
+   * A function that returns the query editor extension banner. The banner is a
    * component that will be displayed on top of the search bar.
    * @param dependencies - The dependencies required for the extension.
-   * @returns The component the search bar extension.
+   * @returns The component the query editor extension.
    */
   getBanner?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
 }
