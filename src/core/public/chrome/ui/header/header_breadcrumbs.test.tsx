@@ -44,7 +44,6 @@ describe('HeaderBreadcrumbs', () => {
         prependCurrentNavgroupToBreadcrumbs={jest.fn()}
         appTitle$={new BehaviorSubject('')}
         breadcrumbs$={breadcrumbs$}
-        appId$={new BehaviorSubject(undefined)}
       />
     );
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
@@ -56,5 +55,40 @@ describe('HeaderBreadcrumbs', () => {
     act(() => breadcrumbs$.next([]));
     wrapper.update();
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
+  });
+
+  it('prepend current nav group into existing breadcrumbs when nav group is enabled', () => {
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
+    const currentNavgroup$ = new BehaviorSubject({
+      id: 'analytics',
+      title: 'Analytics',
+      description: '',
+    });
+    const wrapper = mount(
+      <HeaderBreadcrumbs
+        navgroupEnabled={true}
+        currentNavgroup$={currentNavgroup$}
+        prependCurrentNavgroupToBreadcrumbs={(breadcrumbs) => [
+          { text: currentNavgroup$.getValue().title },
+          ...breadcrumbs,
+        ]}
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+      />
+    );
+    const breadcrumbs = wrapper.find('.euiBreadcrumb');
+    expect(breadcrumbs).toHaveLength(2);
+    expect(breadcrumbs.at(0).text()).toBe('Analytics');
+    expect(breadcrumbs.at(1).text()).toBe('First');
+
+    act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
+    wrapper.update();
+    expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
+    expect(wrapper.find('.euiBreadcrumb')).toHaveLength(3);
+
+    act(() => breadcrumbs$.next([]));
+    wrapper.update();
+    expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
+    expect(wrapper.find('.euiBreadcrumb')).toHaveLength(1);
   });
 });

@@ -5,7 +5,11 @@
 
 import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
-import { ChromeNavGroupService, ChromeRegistrationNavLink } from './nav_group_service';
+import {
+  ChromeNavGroupService,
+  ChromeRegistrationNavLink,
+  CURRENT_NAV_GROUP_ID,
+} from './nav_group_service';
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 import { NavLinksService } from '../nav_links';
 import { applicationServiceMock, httpServiceMock } from '../../mocks';
@@ -81,6 +85,31 @@ mockedGetNavLinks.mockReturnValue(
     },
   ])
 );
+
+interface LooseObject {
+  [key: string]: any;
+}
+
+// Mock sessionStorage
+const sessionStorageMock = (() => {
+  let store = {} as LooseObject;
+  return {
+    getItem(key: string) {
+      return store[key] || null;
+    },
+    setItem(key: string, value: string) {
+      store[key] = value.toString();
+    },
+    removeItem(key: string) {
+      delete store[key];
+    },
+    clear() {
+      store = {};
+    },
+  };
+})();
+
+Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
 
 describe('ChromeNavGroupService#setup()', () => {
   it('should be able to `addNavLinksToGroup`', async () => {
@@ -225,6 +254,96 @@ describe('ChromeNavGroupService#start()', () => {
     chromeNavGroupService.stop();
     navGroupEnabled$.next(true);
     expect(chromeNavGroupServiceStart.getNavGroupEnabled()).toBe(false);
+  });
+
+  it('should able to set current nav group', async () => {
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    const navGroupEnabled$ = new Rx.BehaviorSubject(true);
+    uiSettings.get$.mockImplementation(() => navGroupEnabled$);
+
+    const chromeNavGroupService = new ChromeNavGroupService();
+    const chromeNavGroupServiceSetup = chromeNavGroupService.setup({ uiSettings });
+
+    chromeNavGroupServiceSetup.addNavLinksToGroup(
+      {
+        id: 'foo',
+        title: 'foo title',
+        description: 'foo description',
+      },
+      [mockedNavLinkFoo]
+    );
+
+    const chromeNavGroupServiceStart = await chromeNavGroupService.start({
+      navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
+    });
+
+    // set an existing nav group id
+    chromeNavGroupServiceStart.setCurrentNavGroup('foo');
+
+    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toEqual('foo');
+
+    let currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    expect(currentNavGroup?.id).toEqual('foo');
+    expect(currentNavGroup?.title).toEqual('foo title');
+
+    // set a invalid nav group id
+    chromeNavGroupServiceStart.setCurrentNavGroup('bar');
+    currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toBeFalsy();
+    expect(currentNavGroup).toBeUndefined();
+
+    // reset current nav group
+    chromeNavGroupServiceStart.setCurrentNavGroup(undefined);
+    currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toBeFalsy();
+    expect(currentNavGroup).toBeUndefined();
+  });
+
+  it('shoud able to prepend current nav group into breadcrumbs', async () => {
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    const navGroupEnabled$ = new Rx.BehaviorSubject(true);
+    uiSettings.get$.mockImplementation(() => navGroupEnabled$);
+
+    const chromeNavGroupService = new ChromeNavGroupService();
+    const chromeNavGroupServiceSetup = chromeNavGroupService.setup({ uiSettings });
+
+    chromeNavGroupServiceSetup.addNavLinksToGroup(
+      {
+        id: 'foo',
+        title: 'Foo title',
+        description: 'Foo description',
+      },
+      [mockedNavLinkFoo]
+    );
+
+    const chromeNavGroupServiceStart = await chromeNavGroupService.start({
+      navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
+    });
+
+    chromeNavGroupServiceStart.setCurrentNavGroup('foo');
+
+    const existingBreadcrumbs = [{ text: 'First' }];
+    const newBreadcrumbs = chromeNavGroupServiceStart.prependCurrentNavGroupToBreadcrumbs(
+      existingBreadcrumbs
+    );
+    expect(newBreadcrumbs.length).toEqual(3);
+    expect(newBreadcrumbs[0].text).toEqual('Home');
+    expect(newBreadcrumbs[1].text).toEqual('Foo title');
+    expect(newBreadcrumbs[2].text).toEqual('First');
   });
 });
 

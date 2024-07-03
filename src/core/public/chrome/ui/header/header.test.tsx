@@ -80,7 +80,6 @@ function mockProps() {
     navGroupsMap$: new BehaviorSubject({}),
     navGroupEnabled: false,
     currentNavgroup$: new BehaviorSubject(undefined),
-    onNavGroupSelected: jest.fn(),
     prependCurrentNavgroupToBreadcrumbs: jest.fn(),
   };
 }

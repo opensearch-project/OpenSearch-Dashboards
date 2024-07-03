@@ -301,7 +301,7 @@ export class ChromeService {
           sidecarConfig$={sidecarConfig$}
           navGroupEnabled={navGroup.getNavGroupEnabled()}
           currentNavgroup$={navGroup.getCurrentNavGroup$()}
-          prependCurrentNavgroupToBreadcrumbs={navGroup.prependCurrentNavgroupToBreadcrumbs}
+          prependCurrentNavgroupToBreadcrumbs={navGroup.prependCurrentNavGroupToBreadcrumbs}
         />
       ),
 

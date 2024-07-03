@@ -12,7 +12,6 @@ import {
 } from 'opensearch-dashboards/public';
 import { map, switchMap, takeUntil } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
-import _ from 'lodash';
 import { IUiSettingsClient } from '../../ui_settings';
 import {
   flattenLinksOrCategories,
@@ -22,7 +21,7 @@ import {
 import { ChromeNavLinks } from '../nav_links';
 import { InternalApplicationStart } from '../../application';
 
-const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
+export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
 /** @public */
 export interface ChromeRegistrationNavLink {
@@ -72,7 +71,7 @@ export interface ChromeNavGroupServiceStartContract {
    * @param appId current application id
    * @returns new prepend breadcrumbs
    */
-  prependCurrentNavgroupToBreadcrumbs: (
+  prependCurrentNavGroupToBreadcrumbs: (
     breadcrumbs: ChromeBreadcrumb[],
     appId?: string
   ) => ChromeBreadcrumb[];
@@ -213,39 +212,47 @@ export class ChromeNavGroupService {
       currentNavGroupId ? this.navGroupsMap$.getValue()[currentNavGroupId] : undefined
     );
 
+    const setCurrentNavGroup = (navGroupId: string | undefined) => {
+      const navGroup = navGroupId ? this.navGroupsMap$.getValue()[navGroupId] : undefined;
+      if (navGroup) {
+        this.currentNavGroup$.next(navGroup);
+        sessionStorage.setItem(CURRENT_NAV_GROUP_ID, navGroup.id);
+      } else {
+        this.currentNavGroup$.next(undefined);
+        sessionStorage.removeItem(CURRENT_NAV_GROUP_ID);
+      }
+    };
+
+    // erase current nav group when switch to home page
+    application.currentAppId$.subscribe((appId) => {
+      if (appId === 'home') {
+        setCurrentNavGroup(undefined);
+      }
+    });
+
     return {
       getNavGroupsMap$: () => this.getSortedNavGroupsMap$(),
       getNavGroupEnabled: () => this.navGroupEnabled,
 
       getCurrentNavGroup$: () => this.currentNavGroup$,
-      setCurrentNavGroup: (navGroupId: string | undefined) => {
-        const navGroup = navGroupId ? this.navGroupsMap$.getValue()[navGroupId] : undefined;
-        if (navGroup) {
-          this.currentNavGroup$.next(navGroup);
-          sessionStorage.setItem(CURRENT_NAV_GROUP_ID, navGroup.id);
-        } else {
-          this.currentNavGroup$.next(undefined);
-          sessionStorage.removeItem(CURRENT_NAV_GROUP_ID);
-        }
-      },
+      setCurrentNavGroup,
 
-      prependCurrentNavgroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[], appId?: string) => {
+      prependCurrentNavGroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[], appId?: string) => {
         const navGroupId = this.currentNavGroup$.getValue()?.id;
         const homeTitle = i18n.translate('core.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
         // home page will not have nav group information
-        const isHome = appId === 'home';
 
-        if (this.navGroupEnabled && navGroupId && !isHome) {
+        if (this.navGroupEnabled && navGroupId) {
           const currentNavGroup = this.navGroupsMap$.getValue()[navGroupId];
 
           // breadcrumb order is home > navgroup > application, navgroup will be second one
           const navGroupInBreadcrumbs =
             breadcrumbs.length > 1 && breadcrumbs[1]?.text === currentNavGroup.title;
           if (!navGroupInBreadcrumbs) {
-            const navgroupBreadcrumb: ChromeBreadcrumb = {
+            const navGroupBreadcrumb: ChromeBreadcrumb = {
               text: currentNavGroup.title,
               onClick: () => {
-                if (currentNavGroup.navLinks) {
+                if (currentNavGroup.navLinks && currentNavGroup.navLinks.length) {
                   const orderedLinks = this.sortNavGroupNavLinks(
                     currentNavGroup,
                     navLinks.getAll()
@@ -260,7 +267,7 @@ export class ChromeNavGroupService {
                 application.navigateToApp('home');
               },
             };
-            return [homeBreadcrumb, navgroupBreadcrumb, ...breadcrumbs];
+            return [homeBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
           }
         }
         return breadcrumbs;

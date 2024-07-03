@@ -57,7 +57,6 @@ export const renderApp = async (
     .filter(({ id }) => navLinks.find(({ category, hidden }) => !hidden && category?.id === id));
 
   chrome.setBreadcrumbs([{ text: homeTitle }]);
-  chrome.navGroup.setCurrentNavGroup(undefined);
 
   // dispatch synthetic hash change event to update hash history objects
   // this is necessary because hash updates triggered by using popState won't trigger this event naturally.

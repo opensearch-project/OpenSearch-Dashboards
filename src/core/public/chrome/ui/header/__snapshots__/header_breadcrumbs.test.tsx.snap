@@ -1,5 +1,45 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`HeaderBreadcrumbs prepend current nav group into existing breadcrumbs when nav group is enabled 1`] = `
+Array [
+  <span
+    aria-current="false"
+    className="euiBreadcrumb"
+    data-test-subj="breadcrumb first"
+    title="Analytics"
+  >
+    Analytics
+  </span>,
+  <span
+    aria-current="false"
+    className="euiBreadcrumb"
+    data-test-subj="breadcrumb last"
+    title="First"
+  >
+    First
+  </span>,
+  <span
+    aria-current="page"
+    className="euiBreadcrumb euiBreadcrumb--last"
+    data-test-subj="breadcrumb"
+    title="Second"
+  >
+    Second
+  </span>,
+]
+`;
+
+exports[`HeaderBreadcrumbs prepend current nav group into existing breadcrumbs when nav group is enabled 2`] = `
+<span
+  aria-current="page"
+  className="euiBreadcrumb euiBreadcrumb--last"
+  data-test-subj="breadcrumb first"
+  title="Analytics"
+>
+  Analytics
+</span>
+`;
+
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = `
 <span
   aria-current="page"

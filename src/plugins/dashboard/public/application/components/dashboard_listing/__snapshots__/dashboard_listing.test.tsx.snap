@@ -223,7 +223,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
-                "prependNavgroupToBreadcrumbs": [MockFunction],
+                "prependCurrentNavGroupToBreadcrumbs": [MockFunction],
                 "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
@@ -2876,7 +2876,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
-                "prependNavgroupToBreadcrumbs": [MockFunction],
+                "prependCurrentNavGroupToBreadcrumbs": [MockFunction],
                 "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
@@ -6260,7 +6260,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
-                "prependNavgroupToBreadcrumbs": [MockFunction],
+                "prependCurrentNavGroupToBreadcrumbs": [MockFunction],
                 "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
@@ -7767,7 +7767,7 @@ exports[`dashboard listing renders table rows 1`] = `
                 "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
-                "prependNavgroupToBreadcrumbs": [MockFunction],
+                "prependCurrentNavGroupToBreadcrumbs": [MockFunction],
                 "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
@@ -11111,7 +11111,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
-                "prependNavgroupToBreadcrumbs": [MockFunction],
+                "prependCurrentNavGroupToBreadcrumbs": [MockFunction],
                 "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {

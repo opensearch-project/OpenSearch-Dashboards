@@ -229,7 +229,6 @@ export function Header({
               breadcrumbs$={observables.breadcrumbs$}
               currentNavgroup$={observables.currentNavgroup$}
               navgroupEnabled={navGroupEnabled}
-              appId$={application.currentAppId$}
               prependCurrentNavgroupToBreadcrumbs={prependCurrentNavgroupToBreadcrumbs}
             />
 
