@@ -69,9 +69,9 @@ export const updateDashboardAdminStateForRequest = (
     updateWorkspaceState(request, { isDashboardAdmin: true });
     return;
   }
-
+  // If groups/users are not configured or [], login defaults to OSD Admin
   if (!configGroups.length && !configUsers.length) {
-    updateWorkspaceState(request, { isDashboardAdmin: false });
+    updateWorkspaceState(request, { isDashboardAdmin: true });
     return;
   }
   const groupMatchAny = groups.some((group) => configGroups.includes(group));

@@ -129,7 +129,7 @@ describe('workspace utils', () => {
     const configGroups: string[] = [];
     const configUsers: string[] = [];
     updateDashboardAdminStateForRequest(mockRequest, groups, users, configGroups, configUsers);
-    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(false);
+    expect(getWorkspaceState(mockRequest)?.isDashboardAdmin).toBe(true);
   });
 
   it('should get correct admin config when admin config is enabled ', async () => {
