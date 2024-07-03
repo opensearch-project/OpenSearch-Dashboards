@@ -271,7 +271,7 @@ export interface App<HistoryLocationState = unknown> {
 
   /**
    * The description of the application.
-   * Will be displayed in landing page or getting started cards to give more about the feature.
+   * Will be displayed in landing page or getting started cards to give more information about the feature.
    */
   description?: string;
 }
