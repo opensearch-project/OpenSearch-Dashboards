@@ -269,6 +269,16 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         true
       );
     });
+
+    it('should return 0 saved object when not workspace type and no workspaces provided', async () => {
+      const result = await permittedSavedObjectedClient.find({
+        type: 'dashboard',
+        perPage: 999,
+        page: 1,
+      });
+
+      expect(result).toEqual({ page: 1, per_page: 999, saved_objects: [], total: 0 });
+    });
   });
 
   describe('create', () => {

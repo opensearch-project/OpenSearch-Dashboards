@@ -27,6 +27,7 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
   SavedObjectsDeleteByWorkspaceOptions,
+  SavedObjectsFindResponse,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import {
@@ -513,15 +514,13 @@ export class WorkspaceSavedObjectsClientWrapper {
            */
           options.workspaces = permittedWorkspaces;
         } else {
-          /**
-           * If no workspaces present, find all the docs that
-           * ACL matches read / write / user passed permission
-           */
-          options.ACLSearchParams.permissionModes = getDefaultValuesForEmpty(
-            options.ACLSearchParams.permissionModes,
-            [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write]
-          );
-          options.ACLSearchParams.principals = principals;
+          // Non OSD admin users should not see the legacy saved objects if they can not access any workspace.
+          return {
+            page: options.page,
+            per_page: options.perPage,
+            total: 0,
+            saved_objects: [],
+          } as SavedObjectsFindResponse<T>;
         }
       }
 

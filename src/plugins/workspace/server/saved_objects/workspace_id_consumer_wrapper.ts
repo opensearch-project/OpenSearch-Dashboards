@@ -75,14 +75,6 @@ export class WorkspaceIdConsumerWrapper {
       delete: wrapperOptions.client.delete,
       find: (options: SavedObjectsFindOptions) => {
         const findOptions = this.formatWorkspaceIdParams(wrapperOptions.request, options);
-        if (this.isWorkspaceType(findOptions.type)) {
-          return wrapperOptions.client.find(findOptions);
-        }
-
-        // if workspace is enabled, we always find by workspace
-        if (!findOptions.workspaces || findOptions.workspaces.length === 0) {
-          findOptions.workspaces = [''];
-        }
         return wrapperOptions.client.find(findOptions);
       },
       bulkGet: wrapperOptions.client.bulkGet,

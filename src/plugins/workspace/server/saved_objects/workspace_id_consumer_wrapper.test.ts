@@ -130,7 +130,6 @@ describe('WorkspaceIdConsumerWrapper', () => {
       // empty workspace array will add ''
       expect(mockedClient.find).toBeCalledWith({
         type: ['dashboard', 'visualization'],
-        workspaces: [''],
       });
     });
   });
