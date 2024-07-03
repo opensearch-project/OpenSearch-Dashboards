@@ -5,11 +5,13 @@
 
 import { BehaviorSubject, Observable, from } from 'rxjs';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { API } from '../../../common';
 import { Connection, ConnectionsServiceDeps } from '../../types';
 
 export class ConnectionsService {
   protected http!: ConnectionsServiceDeps['http'];
+  protected savedObjects!: CoreStart['savedObjects'];
   private uiService$ = new BehaviorSubject<DataPublicPluginStart['ui'] | undefined>(undefined);
   private isDataSourceEnabled = false;
   private isDataSourceEnabled$ = new BehaviorSubject<boolean>(this.isDataSourceEnabled);
@@ -21,10 +23,15 @@ export class ConnectionsService {
   constructor(deps: ConnectionsServiceDeps) {
     deps.startServices.then(([coreStart, depsStart]) => {
       this.http = deps.http;
+      this.savedObjects = coreStart.savedObjects;
       this.uiService$.next(depsStart.data.ui);
       this.setIsDataSourceEnabled$(depsStart.dataSource?.dataSourceEnabled || false);
     });
   }
+
+  getSavedObjects = () => {
+    return this.savedObjects;
+  };
 
   getIsDataSourceEnabled = () => {
     return this.isDataSourceEnabled;

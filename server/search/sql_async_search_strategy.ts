@@ -80,7 +80,7 @@ export const sqlAsyncSearchStrategyProvider = (
             fields: asyncResponse?.data?.schema || [],
           };
           const dataFrame = createDataFrame(partial);
-          dataFrame.fields.forEach((field, index) => {
+          dataFrame.fields?.forEach((field, index) => {
             field.values = asyncResponse?.data.datarows.map((row: any) => row[index]);
           });
 

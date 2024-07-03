@@ -159,6 +159,7 @@ export class QueryEnhancementsPlugin
       ui: {
         queryEditorExtension: createDataSourceConnectionExtension(
           this.connectionsService,
+          core.notifications.toasts,
           this.config
         ),
       },

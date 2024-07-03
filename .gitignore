@@ -2,3 +2,4 @@
 /target
 /coverage/
 .eslintcache
+/node_modules

@@ -6,23 +6,19 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiPortal } from '@elastic/eui';
 import { combineLatest } from 'rxjs';
-import { DataPublicPluginStart, IDataPluginServices } from '../../../../../src/plugins/data/public';
+import { ToastsSetup } from 'opensearch-dashboards/public';
+import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
 import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
-import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { DataSourceSelector } from '../../../../../src/plugins/data_source_management/public';
 import { ConnectionsService } from '../services';
 
 interface ConnectionsProps {
   dependencies: QueryEditorExtensionDependencies;
+  toasts: ToastsSetup;
   connectionsService: ConnectionsService;
 }
 
-export const ConnectionsBar: React.FC<ConnectionsProps> = ({ connectionsService }) => {
-  const { services } = useOpenSearchDashboards<IDataPluginServices>();
-  const {
-    savedObjects,
-    notifications: { toasts },
-  } = services;
+export const ConnectionsBar: React.FC<ConnectionsProps> = ({ connectionsService, toasts }) => {
   const [isDataSourceEnabled, setIsDataSourceEnabled] = useState<boolean>(false);
   const [uiService, setUiService] = useState<DataPublicPluginStart['ui'] | undefined>(undefined);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -95,7 +91,7 @@ export const ConnectionsBar: React.FC<ConnectionsProps> = ({ connectionsService 
     >
       <div className="dataSourceSelect">
         <DataSourceSelector
-          savedObjectsClient={savedObjects.client}
+          savedObjectsClient={connectionsService.getSavedObjects().client}
           notifications={toasts}
           disabled={false}
           fullWidth={false}
