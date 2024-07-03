@@ -308,6 +308,7 @@ export const getNavActions = (
 
     // If there are no changes, do not show the discard window
     if (!willLoseChanges) {
+      overlays.closeFlyout();
       stateContainer.transitions.set('viewMode', newMode);
       return;
     }
@@ -348,6 +349,8 @@ export const getNavActions = (
           queryService.timefilter.timefilter.setRefreshInterval(dashboard.refreshInterval);
         }
       }
+
+      overlays.closeFlyout();
 
       // Set the isDirty flag back to false since we discard all the changes
       dashboard.setIsDirty(false);
