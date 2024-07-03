@@ -9,9 +9,10 @@ import { IDataPluginServices, PersistedLog } from '../../../../../src/plugins/da
 import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
 import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
 import { QueryAssistParameters } from '../../../common/query_assist';
+import { ConnectionsService } from '../../data_source_connection';
 import { getStorage } from '../../services';
 import { useGenerateQuery } from '../hooks';
-import { getMdsDataSourceId, getPersistedLog, ProhibitedQueryError } from '../utils';
+import { getPersistedLog, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
 import { IndexSelector } from './index_selector';
 import { QueryAssistInput } from './query_assist_input';
@@ -19,6 +20,7 @@ import { QueryAssistSubmitButton } from './submit_button';
 
 interface QueryAssistInputProps {
   dependencies: QueryEditorExtensionDependencies;
+  connectionsService: ConnectionsService;
 }
 
 export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
@@ -37,11 +39,13 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const previousQuestionRef = useRef<string>();
 
   useEffect(() => {
-    // TODO need proper way to get dataSourceId when discover index pattern selector is removed
-    getMdsDataSourceId(services.data.indexPatterns, props.dependencies.indexPatterns?.at(0)).then(
-      (id) => (dataSourceIdRef.current = id)
-    );
-  }, [props.dependencies.indexPatterns, services.data.indexPatterns]);
+    const subscription = props.connectionsService
+      .getSelectedConnection$()
+      .subscribe((connection) => {
+        dataSourceIdRef.current = connection?.id;
+      });
+    return () => subscription.unsubscribe();
+  }, [props.connectionsService]);
 
   const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
