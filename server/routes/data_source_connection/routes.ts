@@ -42,7 +42,7 @@ export function registerDataSourceConnectionsRoutes(router: IRouter) {
         'data-source',
         request.params.dataSourceId
       );
-      return response.ok({ body: { dataSource: resp } });
+      return response.ok({ body: resp });
     }
   );
 }
