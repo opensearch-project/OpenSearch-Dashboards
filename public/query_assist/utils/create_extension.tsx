@@ -6,7 +6,7 @@
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
 import { of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, switchMap, map } from 'rxjs/operators';
 import { QueryEditorExtensionConfig } from '../../../../../src/plugins/data/public/ui/query_editor';
 import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
 import { API } from '../../../common';
@@ -25,6 +25,7 @@ const getAvailableLanguages$ = (
   http: HttpSetup
 ) =>
   connectionsService.getSelectedConnection$().pipe(
+    distinctUntilChanged(),
     switchMap(async (connection) => {
       const dataSourceId = connection?.id;
       const cached = availableLanguagesByDataSource.get(dataSourceId);
