@@ -102,8 +102,6 @@ export {
   DEFAULT_APP_CATEGORIES,
   WORKSPACE_TYPE,
   cleanWorkspaceId,
-  PUBLIC_WORKSPACE_ID,
-  PUBLIC_WORKSPACE_NAME,
   DEFAULT_NAV_GROUPS,
 } from '../utils';
 export {
