@@ -134,16 +134,6 @@ function getClauseForType(
  *  Gets the clause that will filter for the workspace.
  */
 function getClauseForWorkspace(workspace: string) {
-  if (workspace === '*') {
-    return {
-      bool: {
-        must: {
-          match_all: {},
-        },
-      },
-    };
-  }
-
   return {
     bool: {
       must: [{ term: { workspaces: workspace } }],
@@ -311,28 +301,7 @@ export function getQueryParams({
   if (ACLSearchParamsShouldClause.length) {
     bool.filter.push({
       bool: {
-        should: [
-          /**
-           * Return those objects without workspaces field and permissions field to keep find API backward compatible
-           */
-          {
-            bool: {
-              must_not: [
-                {
-                  exists: {
-                    field: 'workspaces',
-                  },
-                },
-                {
-                  exists: {
-                    field: 'permissions',
-                  },
-                },
-              ],
-            },
-          },
-          ...ACLSearchParamsShouldClause,
-        ],
+        should: ACLSearchParamsShouldClause,
       },
     });
   }

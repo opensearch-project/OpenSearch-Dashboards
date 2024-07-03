@@ -662,46 +662,32 @@ describe('#getQueryParams', () => {
           workspaces: ['foo'],
           workspacesSearchOperator: 'OR',
         });
-        expect(result.query.bool.filter[1]).toEqual({
-          bool: {
-            should: [
-              {
-                bool: {
-                  must_not: [
-                    {
-                      exists: {
-                        field: 'workspaces',
-                      },
-                    },
-                    {
-                      exists: {
-                        field: 'permissions',
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                bool: {
-                  minimum_should_match: 1,
-                  should: [
-                    {
-                      bool: {
-                        must: [
-                          {
-                            term: {
-                              workspaces: 'foo',
+        expect(result.query.bool.filter[1]).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "should": Array [
+                Object {
+                  "bool": Object {
+                    "minimum_should_match": 1,
+                    "should": Array [
+                      Object {
+                        "bool": Object {
+                          "must": Array [
+                            Object {
+                              "term": Object {
+                                "workspaces": "foo",
+                              },
                             },
-                          },
-                        ],
+                          ],
+                        },
                       },
-                    },
-                  ],
+                    ],
+                  },
                 },
-              },
-            ],
-          },
-        });
+              ],
+            },
+          }
+        `);
       });
 
       it('principals and permissionModes provided in ACLSearchParams', () => {
@@ -715,60 +701,50 @@ describe('#getQueryParams', () => {
             permissionModes: ['read'],
           },
         });
-        expect(result.query.bool.filter[1]).toEqual({
-          bool: {
-            should: [
-              {
-                bool: {
-                  must_not: [
-                    {
-                      exists: {
-                        field: 'workspaces',
+        expect(result.query.bool.filter[1]).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "should": Array [
+                Object {
+                  "bool": Object {
+                    "filter": Array [
+                      Object {
+                        "bool": Object {
+                          "should": Array [
+                            Object {
+                              "terms": Object {
+                                "permissions.read.users": Array [
+                                  "user-foo",
+                                ],
+                              },
+                            },
+                            Object {
+                              "term": Object {
+                                "permissions.read.users": "*",
+                              },
+                            },
+                            Object {
+                              "terms": Object {
+                                "permissions.read.groups": Array [
+                                  "group-foo",
+                                ],
+                              },
+                            },
+                            Object {
+                              "term": Object {
+                                "permissions.read.groups": "*",
+                              },
+                            },
+                          ],
+                        },
                       },
-                    },
-                    {
-                      exists: {
-                        field: 'permissions',
-                      },
-                    },
-                  ],
+                    ],
+                  },
                 },
-              },
-              {
-                bool: {
-                  filter: [
-                    {
-                      bool: {
-                        should: [
-                          {
-                            terms: {
-                              'permissions.read.users': ['user-foo'],
-                            },
-                          },
-                          {
-                            term: {
-                              'permissions.read.users': '*',
-                            },
-                          },
-                          {
-                            terms: {
-                              'permissions.read.groups': ['group-foo'],
-                            },
-                          },
-                          {
-                            term: {
-                              'permissions.read.groups': '*',
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
-                },
-              },
-            ],
-          },
-        });
+              ],
+            },
+          }
+        `);
       });
     });
   });
