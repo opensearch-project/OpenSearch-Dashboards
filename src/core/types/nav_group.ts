@@ -16,6 +16,11 @@ export enum NavGroupType {
   SYSTEM = 'system',
 }
 
+export enum NavGroupStatus {
+  Visible,
+  Hidden,
+}
+
 /** @public */
 export interface ChromeNavGroup {
   id: string;
@@ -24,4 +29,6 @@ export interface ChromeNavGroup {
   order?: number;
   icon?: EuiIconType;
   type?: NavGroupType;
+
+  status?: NavGroupStatus;
 }
