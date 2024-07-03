@@ -359,7 +359,10 @@ describe('nav group updater', () => {
         id: 'foo',
       },
     ]);
-    const navGroupStart = await navGroup.start({ navLinks: mockedNavLinkService });
+    const navGroupStart = await navGroup.start({
+      navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
+    });
 
     expect(await navGroupStart.getNavGroupsMap$().pipe(first()).toPromise()).toEqual({
       dataAdministration: expect.not.objectContaining({
@@ -393,7 +396,10 @@ describe('nav group updater', () => {
       status: 2,
     }));
     const unregister = navGroupSetup.registerNavGroupUpdater(appUpdater$);
-    const navGroupStart = await navGroup.start({ navLinks: mockedNavLinkService });
+    const navGroupStart = await navGroup.start({
+      navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
+    });
     expect(await navGroupStart.getNavGroupsMap$().pipe(first()).toPromise()).toEqual({
       dataAdministration: expect.objectContaining({
         status: 2,

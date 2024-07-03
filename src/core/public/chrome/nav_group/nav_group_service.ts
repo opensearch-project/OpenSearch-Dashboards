@@ -20,6 +20,7 @@ import {
 } from '../utils';
 import { ChromeNavLinks } from '../nav_links';
 import { InternalApplicationStart } from '../../application';
+import { NavGroupStatus } from '../../../../core/types';
 
 export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
@@ -210,7 +211,7 @@ export class ChromeNavGroupService {
 
     const setCurrentNavGroup = (navGroupId: string | undefined) => {
       const navGroup = navGroupId ? this.navGroupsMap$.getValue()[navGroupId] : undefined;
-      if (navGroup) {
+      if (navGroup && navGroup.status !== NavGroupStatus.Hidden) {
         this.currentNavGroup$.next(navGroup);
         sessionStorage.setItem(CURRENT_NAV_GROUP_ID, navGroup.id);
       } else {
