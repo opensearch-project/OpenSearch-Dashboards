@@ -9,4 +9,5 @@ export {
   ChromeNavGroupServiceStartContract,
   ChromeRegistrationNavLink,
   NavGroupItemInMap,
+  ChromeNavGroupUpdater,
 } from './nav_group_service';
