@@ -6,6 +6,7 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
+import { Observable } from 'rxjs';
 import { IIndexPattern } from '../../../../common';
 import { DataSource } from '../../../data_sources/datasource';
 
@@ -44,7 +45,7 @@ export interface QueryEditorExtensionConfig {
    * A function that determines if the search bar extension is enabled and should be rendered on UI.
    * @returns whether the extension is enabled.
    */
-  isEnabled: (dependencies: QueryEditorExtensionDependencies) => Promise<boolean>;
+  isEnabled$: (dependencies: QueryEditorExtensionDependencies) => Observable<boolean>;
   /**
    * A function that returns the search bar extension component. The component
    * will be displayed on top of the query editor in the search bar.
@@ -92,9 +93,10 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
   }, []);
 
   useEffect(() => {
-    props.config.isEnabled(props.dependencies).then((enabled) => {
+    const subscription = props.config.isEnabled$(props.dependencies).subscribe((enabled) => {
       if (isMounted.current) setIsEnabled(enabled);
     });
+    return () => subscription.unsubscribe();
   }, [props.dependencies, props.config]);
 
   if (!isEnabled) return null;
