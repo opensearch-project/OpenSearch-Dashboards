@@ -127,7 +127,6 @@ describe('WorkspaceIdConsumerWrapper', () => {
       await mockedWrapperClient.find({
         type: ['dashboard', 'visualization'],
       });
-      // empty workspace array will add ''
       expect(mockedClient.find).toBeCalledWith({
         type: ['dashboard', 'visualization'],
       });
