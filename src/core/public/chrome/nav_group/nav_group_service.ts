@@ -6,7 +6,6 @@
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import {
   AppCategory,
-  ApplicationStart,
   ChromeBreadcrumb,
   ChromeNavGroup,
   ChromeNavLink,
@@ -20,6 +19,7 @@ import {
   getOrderedLinksOrCategories,
 } from '../utils';
 import { ChromeNavLinks } from '../nav_links';
+import { InternalApplicationStart } from '../../application';
 
 export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
@@ -199,7 +199,7 @@ export class ChromeNavGroupService {
     application,
   }: {
     navLinks: ChromeNavLinks;
-    application: ApplicationStart;
+    application: InternalApplicationStart;
   }): Promise<ChromeNavGroupServiceStartContract> {
     this.navLinks$ = navLinks.getNavLinks$();
 
