@@ -6,6 +6,7 @@
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import {
   AppCategory,
+  ApplicationStart,
   ChromeBreadcrumb,
   ChromeNavGroup,
   ChromeNavLink,
@@ -19,7 +20,6 @@ import {
   getOrderedLinksOrCategories,
 } from '../utils';
 import { ChromeNavLinks } from '../nav_links';
-import { InternalApplicationStart } from '../../application';
 
 export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
@@ -68,13 +68,9 @@ export interface ChromeNavGroupServiceStartContract {
   /**
    * prepend Home & NavGroup into current breadcrumbs
    * @param breadcrumbs current breadcrumbs
-   * @param appId current application id
    * @returns new prepend breadcrumbs
    */
-  prependCurrentNavGroupToBreadcrumbs: (
-    breadcrumbs: ChromeBreadcrumb[],
-    appId?: string
-  ) => ChromeBreadcrumb[];
+  prependCurrentNavGroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => ChromeBreadcrumb[];
 }
 
 /** @internal */
@@ -203,7 +199,7 @@ export class ChromeNavGroupService {
     application,
   }: {
     navLinks: ChromeNavLinks;
-    application: InternalApplicationStart;
+    application: ApplicationStart;
   }): Promise<ChromeNavGroupServiceStartContract> {
     this.navLinks$ = navLinks.getNavLinks$();
 
@@ -237,7 +233,7 @@ export class ChromeNavGroupService {
       getCurrentNavGroup$: () => this.currentNavGroup$,
       setCurrentNavGroup,
 
-      prependCurrentNavGroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[], appId?: string) => {
+      prependCurrentNavGroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => {
         const navGroupId = this.currentNavGroup$.getValue()?.id;
         const homeTitle = i18n.translate('core.breadcrumbs.homeTitle', { defaultMessage: 'Home' });
         // home page will not have nav group information
