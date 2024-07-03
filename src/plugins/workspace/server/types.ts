@@ -13,6 +13,7 @@ import {
   SavedObjectsServiceStart,
   Permissions,
 } from '../../../core/server';
+import { DataSource } from '../common/types';
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
@@ -51,13 +52,14 @@ export interface IWorkspaceClientImpl {
   /**
    * Create a workspace
    * @param requestDetail {@link IRequestDetail}
-   * @param payload {@link WorkspaceAttribute}
-   * @returns a Promise with a new-created id for the workspace
+   * @param payload - An object of type {@link WorkspaceAttributeWithPermission} excluding the 'id' property, and also containing an optional array of data sources of type {@link DataSource} excluding the 'title' property.
    * @public
    */
   create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+      dataSources?: Array<Omit<DataSource, 'title'>>;
+    }
   ): Promise<IResponse<{ id: WorkspaceAttribute['id'] }>>;
   /**
    * List workspaces
@@ -88,14 +90,16 @@ export interface IWorkspaceClientImpl {
    * Update the detail of a given workspace
    * @param requestDetail {@link IRequestDetail}
    * @param id workspace id
-   * @param payload {@link WorkspaceAttribute}
+   * @param payload - An object of type {@link WorkspaceAttributeWithPermission} excluding the 'id' property, and also containing an optional array of data sources of type {@link DataSource} excluding the 'title' property.
    * @returns a Promise with a boolean result indicating if the update operation successed.
    * @public
    */
   update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>>
+    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>> & {
+      dataSources?: Array<Omit<DataSource, 'title'>>;
+    }
   ): Promise<IResponse<boolean>>;
   /**
    * Delete a given workspace

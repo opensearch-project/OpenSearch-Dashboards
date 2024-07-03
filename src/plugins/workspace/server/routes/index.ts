@@ -32,7 +32,6 @@ const workspacePermissions = schema.recordOf(
 
 const dataSources = schema.arrayOf(
   schema.object({
-    title: schema.string(),
     id: schema.string(),
   })
 );
@@ -148,7 +147,7 @@ export function registerRoutes({
       const { attributes, settings } = req.body;
       const principals = permissionControlClient?.getPrincipalsFromRequest(req);
       const createPayload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
-        dataSources?: DataSource[];
+        dataSources?: Array<Omit<DataSource, 'title'>>;
       } = attributes;
 
       if (isPermissionControlEnabled) {

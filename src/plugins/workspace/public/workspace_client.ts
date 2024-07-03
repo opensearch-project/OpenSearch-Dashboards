@@ -187,7 +187,7 @@ export class WorkspaceClient {
   public async create(
     attributes: Omit<WorkspaceAttribute, 'id'>,
     settings: {
-      dataSources?: DataSource[];
+      dataSources?: Array<Omit<DataSource, 'title'>>;
       permissions?: SavedObjectPermissions;
     }
   ): Promise<IResponse<Pick<WorkspaceAttributeWithPermission, 'id'>>> {
@@ -277,7 +277,7 @@ export class WorkspaceClient {
     id: string,
     attributes: Partial<WorkspaceAttribute>,
     settings: {
-      dataSources?: DataSource[];
+      dataSources?: Array<Omit<DataSource, 'title'>>;
       permissions?: SavedObjectPermissions;
     }
   ): Promise<IResponse<boolean>> {
