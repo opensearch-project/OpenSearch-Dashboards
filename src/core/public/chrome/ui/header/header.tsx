@@ -44,7 +44,6 @@ import classnames from 'classnames';
 import React, { createRef, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { ChromeNavGroup } from 'opensearch-dashboards/public';
 import { LoadingIndicator } from '../';
 import {
   ChromeBadge,
@@ -67,6 +66,7 @@ import { HeaderActionMenu } from './header_action_menu';
 import { HeaderLogo } from './header_logo';
 import type { Logos } from '../../../../common/types';
 import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
+import { NavGroupItemInMap } from '../../nav_group';
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
@@ -97,8 +97,7 @@ export interface HeaderProps {
   survey: string | undefined;
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
   navGroupEnabled: boolean;
-  currentNavgroup$: Observable<ChromeNavGroup | undefined>;
-  prependCurrentNavgroupToBreadcrumbs: (breadcrumbs: ChromeBreadcrumb[]) => ChromeBreadcrumb[];
+  currentNavgroup$: Observable<NavGroupItemInMap | undefined>;
 }
 
 export function Header({
@@ -113,7 +112,6 @@ export function Header({
   logos,
   collapsibleNavHeaderRender,
   navGroupEnabled,
-  prependCurrentNavgroupToBreadcrumbs,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -228,8 +226,8 @@ export function Header({
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
               currentNavgroup$={observables.currentNavgroup$}
-              navgroupEnabled={navGroupEnabled}
-              prependCurrentNavgroupToBreadcrumbs={prependCurrentNavgroupToBreadcrumbs}
+              navGroupEnabled={navGroupEnabled}
+              navigateToApp={application.navigateToApp}
             />
 
             <EuiHeaderSectionItem border="none">

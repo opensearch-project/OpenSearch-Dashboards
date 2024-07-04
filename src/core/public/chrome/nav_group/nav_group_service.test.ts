@@ -312,7 +312,7 @@ describe('ChromeNavGroupService#start()', () => {
     expect(currentNavGroup).toBeUndefined();
   });
 
-  it('shoud able to prepend current nav group into breadcrumbs', async () => {
+  it('should reset current nav group if app not belongs to any nav group', async () => {
     const uiSettings = uiSettingsServiceMock.createSetupContract();
     const navGroupEnabled$ = new Rx.BehaviorSubject(true);
     uiSettings.get$.mockImplementation(() => navGroupEnabled$);
@@ -323,10 +323,10 @@ describe('ChromeNavGroupService#start()', () => {
     chromeNavGroupServiceSetup.addNavLinksToGroup(
       {
         id: 'foo',
-        title: 'Foo title',
-        description: 'Foo description',
+        title: 'foo title',
+        description: 'foo description',
       },
-      [mockedNavLinkFoo]
+      [{ id: 'foo-app1' }]
     );
 
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
@@ -334,16 +334,29 @@ describe('ChromeNavGroupService#start()', () => {
       application: mockedApplicationService,
     });
 
+    // set an existing nav group id
     chromeNavGroupServiceStart.setCurrentNavGroup('foo');
 
-    const existingBreadcrumbs = [{ text: 'First' }];
-    const newBreadcrumbs = chromeNavGroupServiceStart.prependCurrentNavGroupToBreadcrumbs(
-      existingBreadcrumbs
-    );
-    expect(newBreadcrumbs.length).toEqual(3);
-    expect(newBreadcrumbs[0].text).toEqual('Home');
-    expect(newBreadcrumbs[1].text).toEqual('Foo title');
-    expect(newBreadcrumbs[2].text).toEqual('First');
+    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toEqual('foo');
+
+    let currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    expect(currentNavGroup?.id).toEqual('foo');
+
+    // navigate to app don't belongs to any nav group
+    mockedApplicationService.navigateToApp('bar-app');
+
+    currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    // verify current nav group been reset
+    expect(currentNavGroup).toBeFalsy();
+    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toBeFalsy();
   });
 });
 

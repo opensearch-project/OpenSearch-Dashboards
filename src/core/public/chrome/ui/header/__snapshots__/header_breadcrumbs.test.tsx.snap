@@ -2,42 +2,203 @@
 
 exports[`HeaderBreadcrumbs prepend current nav group into existing breadcrumbs when nav group is enabled 1`] = `
 Array [
-  <span
-    aria-current="false"
-    className="euiBreadcrumb"
-    data-test-subj="breadcrumb first"
-    title="Analytics"
+  <div
+    className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first"
   >
-    Analytics
-  </span>,
-  <span
-    aria-current="false"
-    className="euiBreadcrumb"
-    data-test-subj="breadcrumb last"
-    title="First"
+    <EuiInnerText>
+      <EuiLink
+        className="euiBreadcrumb"
+        color="subdued"
+        data-test-subj="breadcrumb first"
+        onClick={[Function]}
+        title="Home"
+      >
+        <button
+          className="euiLink euiLink--subdued euiBreadcrumb"
+          data-test-subj="breadcrumb first"
+          disabled={false}
+          onClick={[Function]}
+          title="Home"
+          type="button"
+        >
+          Home
+        </button>
+      </EuiLink>
+    </EuiInnerText>
+  </div>,
+  <div
+    className="euiBreadcrumbWrapper"
   >
-    First
-  </span>,
-  <span
-    aria-current="page"
-    className="euiBreadcrumb euiBreadcrumb--last"
-    data-test-subj="breadcrumb"
-    title="Second"
+    <EuiInnerText>
+      <EuiLink
+        className="euiBreadcrumb"
+        color="subdued"
+        data-test-subj="breadcrumb"
+        onClick={[Function]}
+        title="Analytics"
+      >
+        <button
+          className="euiLink euiLink--subdued euiBreadcrumb"
+          data-test-subj="breadcrumb"
+          disabled={false}
+          onClick={[Function]}
+          title="Analytics"
+          type="button"
+        >
+          Analytics
+        </button>
+      </EuiLink>
+    </EuiInnerText>
+  </div>,
+  <div
+    className="euiBreadcrumbWrapper euiBreadcrumbWrapper--last"
   >
-    Second
-  </span>,
+    <EuiInnerText>
+      <span
+        aria-current="page"
+        className="euiBreadcrumb euiBreadcrumb--last"
+        data-test-subj="breadcrumb last"
+        title="First"
+      >
+        First
+      </span>
+    </EuiInnerText>
+  </div>,
 ]
 `;
 
 exports[`HeaderBreadcrumbs prepend current nav group into existing breadcrumbs when nav group is enabled 2`] = `
-<span
-  aria-current="page"
-  className="euiBreadcrumb euiBreadcrumb--last"
-  data-test-subj="breadcrumb first"
-  title="Analytics"
->
-  Analytics
-</span>
+Array [
+  <div
+    className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first"
+  >
+    <EuiInnerText>
+      <EuiLink
+        className="euiBreadcrumb"
+        color="subdued"
+        data-test-subj="breadcrumb first"
+        onClick={[Function]}
+        title="Home"
+      >
+        <button
+          className="euiLink euiLink--subdued euiBreadcrumb"
+          data-test-subj="breadcrumb first"
+          disabled={false}
+          onClick={[Function]}
+          title="Home"
+          type="button"
+        >
+          Home
+        </button>
+      </EuiLink>
+    </EuiInnerText>
+  </div>,
+  <div
+    className="euiBreadcrumbWrapper"
+  >
+    <EuiInnerText>
+      <EuiLink
+        className="euiBreadcrumb"
+        color="subdued"
+        data-test-subj="breadcrumb"
+        onClick={[Function]}
+        title="Analytics"
+      >
+        <button
+          className="euiLink euiLink--subdued euiBreadcrumb"
+          data-test-subj="breadcrumb"
+          disabled={false}
+          onClick={[Function]}
+          title="Analytics"
+          type="button"
+        >
+          Analytics
+        </button>
+      </EuiLink>
+    </EuiInnerText>
+  </div>,
+  <div
+    className="euiBreadcrumbWrapper"
+  >
+    <EuiInnerText>
+      <span
+        aria-current="false"
+        className="euiBreadcrumb"
+        data-test-subj="breadcrumb"
+        title="First"
+      >
+        First
+      </span>
+    </EuiInnerText>
+  </div>,
+  <div
+    className="euiBreadcrumbWrapper euiBreadcrumbWrapper--last"
+  >
+    <EuiInnerText>
+      <span
+        aria-current="page"
+        className="euiBreadcrumb euiBreadcrumb--last"
+        data-test-subj="breadcrumb last"
+        title="Second"
+      >
+        Second
+      </span>
+    </EuiInnerText>
+  </div>,
+]
+`;
+
+exports[`HeaderBreadcrumbs prepend current nav group into existing breadcrumbs when nav group is enabled 3`] = `
+Array [
+  <div
+    className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first"
+  >
+    <EuiInnerText>
+      <EuiLink
+        className="euiBreadcrumb"
+        color="subdued"
+        data-test-subj="breadcrumb first"
+        onClick={[Function]}
+        title="Home"
+      >
+        <button
+          className="euiLink euiLink--subdued euiBreadcrumb"
+          data-test-subj="breadcrumb first"
+          disabled={false}
+          onClick={[Function]}
+          title="Home"
+          type="button"
+        >
+          Home
+        </button>
+      </EuiLink>
+    </EuiInnerText>
+  </div>,
+  <div
+    className="euiBreadcrumbWrapper euiBreadcrumbWrapper--last"
+  >
+    <EuiInnerText>
+      <EuiLink
+        className="euiBreadcrumb euiBreadcrumb--last"
+        color="text"
+        data-test-subj="breadcrumb last"
+        onClick={[Function]}
+        title="Analytics"
+      >
+        <button
+          className="euiLink euiLink--text euiBreadcrumb euiBreadcrumb--last"
+          data-test-subj="breadcrumb last"
+          disabled={false}
+          onClick={[Function]}
+          title="Analytics"
+          type="button"
+        >
+          Analytics
+        </button>
+      </EuiLink>
+    </EuiInnerText>
+  </div>,
+]
 `;
 
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = `

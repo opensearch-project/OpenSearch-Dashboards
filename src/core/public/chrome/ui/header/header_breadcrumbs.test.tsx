@@ -39,11 +39,11 @@ describe('HeaderBreadcrumbs', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
     const wrapper = mount(
       <HeaderBreadcrumbs
-        navgroupEnabled={false}
-        currentNavgroup$={new BehaviorSubject(undefined)}
-        prependCurrentNavgroupToBreadcrumbs={jest.fn()}
         appTitle$={new BehaviorSubject('')}
         breadcrumbs$={breadcrumbs$}
+        navGroupEnabled={false}
+        currentNavgroup$={new BehaviorSubject(undefined)}
+        navigateToApp={jest.fn()}
       />
     );
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
@@ -63,32 +63,31 @@ describe('HeaderBreadcrumbs', () => {
       id: 'analytics',
       title: 'Analytics',
       description: '',
+      navLinks: [],
     });
     const wrapper = mount(
       <HeaderBreadcrumbs
-        navgroupEnabled={true}
-        currentNavgroup$={currentNavgroup$}
-        prependCurrentNavgroupToBreadcrumbs={(breadcrumbs) => [
-          { text: currentNavgroup$.getValue().title },
-          ...breadcrumbs,
-        ]}
         appTitle$={new BehaviorSubject('')}
         breadcrumbs$={breadcrumbs$}
+        navGroupEnabled={true}
+        currentNavgroup$={currentNavgroup$}
+        navigateToApp={jest.fn()}
       />
     );
-    const breadcrumbs = wrapper.find('.euiBreadcrumb');
-    expect(breadcrumbs).toHaveLength(2);
-    expect(breadcrumbs.at(0).text()).toBe('Analytics');
-    expect(breadcrumbs.at(1).text()).toBe('First');
+    const breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
+    expect(breadcrumbs).toHaveLength(3);
+    expect(breadcrumbs.at(0).text()).toBe('Home');
+    expect(breadcrumbs.at(1).text()).toBe('Analytics');
+    expect(breadcrumbs.at(2).text()).toBe('First');
 
     act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
     wrapper.update();
-    expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
-    expect(wrapper.find('.euiBreadcrumb')).toHaveLength(3);
+    expect(wrapper.find('.euiBreadcrumbWrapper')).toMatchSnapshot();
+    expect(wrapper.find('.euiBreadcrumbWrapper')).toHaveLength(4);
 
     act(() => breadcrumbs$.next([]));
     wrapper.update();
-    expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
-    expect(wrapper.find('.euiBreadcrumb')).toHaveLength(1);
+    expect(wrapper.find('.euiBreadcrumbWrapper')).toMatchSnapshot();
+    expect(wrapper.find('.euiBreadcrumbWrapper')).toHaveLength(2);
   });
 });

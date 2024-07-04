@@ -78,7 +78,6 @@ const createStartContractMock = () => {
     navGroup: {
       getNavGroupsMap$: jest.fn(() => new BehaviorSubject({})),
       getNavGroupEnabled: jest.fn(),
-      prependCurrentNavGroupToBreadcrumbs: jest.fn(),
       getCurrentNavGroup$: jest.fn(() => new BehaviorSubject(undefined)),
       setCurrentNavGroup: jest.fn(),
     },
