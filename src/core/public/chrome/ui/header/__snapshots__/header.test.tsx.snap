@@ -1789,17 +1789,6 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
   navGroupEnabled={false}
-  navGroupsMap$={
-    BehaviorSubject {
-      "_isScalar": false,
-      "_value": Object {},
-      "closed": false,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [],
-      "thrownError": null,
-    }
-  }
   navLinks$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1933,7 +1922,6 @@ exports[`Header handles visibility and lock changes 1`] = `
   onIsLockedUpdate={[Function]}
   opensearchDashboardsDocLink="/docs"
   opensearchDashboardsVersion="1.0.0"
-  prependCurrentNavgroupToBreadcrumbs={[MockFunction]}
   recentlyAccessed$={
     BehaviorSubject {
       "_isScalar": false,
@@ -4052,8 +4040,8 @@ exports[`Header handles visibility and lock changes 1`] = `
                 "thrownError": null,
               }
             }
-            navgroupEnabled={false}
-            prependCurrentNavgroupToBreadcrumbs={[MockFunction]}
+            navGroupEnabled={false}
+            navigateToApp={[MockFunction]}
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
@@ -8552,17 +8540,6 @@ exports[`Header renders condensed header 1`] = `
     }
   }
   navGroupEnabled={false}
-  navGroupsMap$={
-    BehaviorSubject {
-      "_isScalar": false,
-      "_value": Object {},
-      "closed": false,
-      "hasError": false,
-      "isStopped": false,
-      "observers": Array [],
-      "thrownError": null,
-    }
-  }
   navLinks$={
     BehaviorSubject {
       "_isScalar": false,
@@ -8652,7 +8629,6 @@ exports[`Header renders condensed header 1`] = `
   onIsLockedUpdate={[Function]}
   opensearchDashboardsDocLink="/docs"
   opensearchDashboardsVersion="1.0.0"
-  prependCurrentNavgroupToBreadcrumbs={[MockFunction]}
   recentlyAccessed$={
     BehaviorSubject {
       "_isScalar": false,
@@ -9704,14 +9680,14 @@ exports[`Header renders condensed header 1`] = `
                 "thrownError": null,
               }
             }
-            navgroupEnabled={false}
-            prependCurrentNavgroupToBreadcrumbs={[MockFunction]}
+            navGroupEnabled={false}
+            navigateToApp={[MockFunction]}
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
                 Array [
                   Object {
-                    "data-test-subj": "breadcrumb first",
+                    "data-test-subj": "breadcrumb first last",
                     "text": "test",
                   },
                 ]
@@ -9723,7 +9699,7 @@ exports[`Header renders condensed header 1`] = `
                 breadcrumbs={
                   Array [
                     Object {
-                      "data-test-subj": "breadcrumb first",
+                      "data-test-subj": "breadcrumb first last",
                       "text": "test",
                     },
                   ]
@@ -9748,7 +9724,7 @@ exports[`Header renders condensed header 1`] = `
                         <span
                           aria-current="page"
                           className="euiBreadcrumb euiBreadcrumb--last"
-                          data-test-subj="breadcrumb first"
+                          data-test-subj="breadcrumb first last"
                           title="test"
                         >
                           test

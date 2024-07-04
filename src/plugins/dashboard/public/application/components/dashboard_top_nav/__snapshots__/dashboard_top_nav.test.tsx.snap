@@ -211,7 +211,6 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
-                "prependCurrentNavGroupToBreadcrumbs": [MockFunction],
                 "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
@@ -1220,7 +1219,6 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
-                "prependCurrentNavGroupToBreadcrumbs": [MockFunction],
                 "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
@@ -2229,7 +2227,6 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
-                "prependCurrentNavGroupToBreadcrumbs": [MockFunction],
                 "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
@@ -3238,7 +3235,6 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
-                "prependCurrentNavGroupToBreadcrumbs": [MockFunction],
                 "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
@@ -4247,7 +4243,6 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
-                "prependCurrentNavGroupToBreadcrumbs": [MockFunction],
                 "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
@@ -5256,7 +5251,6 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
-                "prependCurrentNavGroupToBreadcrumbs": [MockFunction],
                 "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {

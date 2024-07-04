@@ -51,73 +51,6 @@ Array [
     </EuiInnerText>
   </div>,
   <div
-    className="euiBreadcrumbWrapper euiBreadcrumbWrapper--last"
-  >
-    <EuiInnerText>
-      <span
-        aria-current="page"
-        className="euiBreadcrumb euiBreadcrumb--last"
-        data-test-subj="breadcrumb last"
-        title="First"
-      >
-        First
-      </span>
-    </EuiInnerText>
-  </div>,
-]
-`;
-
-exports[`HeaderBreadcrumbs prepend current nav group into existing breadcrumbs when nav group is enabled 2`] = `
-Array [
-  <div
-    className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first"
-  >
-    <EuiInnerText>
-      <EuiLink
-        className="euiBreadcrumb"
-        color="subdued"
-        data-test-subj="breadcrumb first"
-        onClick={[Function]}
-        title="Home"
-      >
-        <button
-          className="euiLink euiLink--subdued euiBreadcrumb"
-          data-test-subj="breadcrumb first"
-          disabled={false}
-          onClick={[Function]}
-          title="Home"
-          type="button"
-        >
-          Home
-        </button>
-      </EuiLink>
-    </EuiInnerText>
-  </div>,
-  <div
-    className="euiBreadcrumbWrapper"
-  >
-    <EuiInnerText>
-      <EuiLink
-        className="euiBreadcrumb"
-        color="subdued"
-        data-test-subj="breadcrumb"
-        onClick={[Function]}
-        title="Analytics"
-      >
-        <button
-          className="euiLink euiLink--subdued euiBreadcrumb"
-          data-test-subj="breadcrumb"
-          disabled={false}
-          onClick={[Function]}
-          title="Analytics"
-          type="button"
-        >
-          Analytics
-        </button>
-      </EuiLink>
-    </EuiInnerText>
-  </div>,
-  <div
     className="euiBreadcrumbWrapper"
   >
     <EuiInnerText>
@@ -148,7 +81,7 @@ Array [
 ]
 `;
 
-exports[`HeaderBreadcrumbs prepend current nav group into existing breadcrumbs when nav group is enabled 3`] = `
+exports[`HeaderBreadcrumbs prepend current nav group into existing breadcrumbs when nav group is enabled 2`] = `
 Array [
   <div
     className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first"

@@ -219,7 +219,7 @@ export class ChromeNavGroupService {
       }
     });
 
-    const setCurrentNavGroupSorted$ = combineLatest([
+    const currentNavGroupSorted$ = combineLatest([
       this.getSortedNavGroupsMap$(),
       this.currentNavGroup$,
     ])
@@ -236,7 +236,7 @@ export class ChromeNavGroupService {
       getNavGroupsMap$: () => this.getSortedNavGroupsMap$(),
       getNavGroupEnabled: () => this.navGroupEnabled,
 
-      getCurrentNavGroup$: () => setCurrentNavGroupSorted$,
+      getCurrentNavGroup$: () => currentNavGroupSorted$,
       setCurrentNavGroup,
     };
   }
