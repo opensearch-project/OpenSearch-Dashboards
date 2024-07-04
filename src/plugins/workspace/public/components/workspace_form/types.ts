@@ -56,7 +56,7 @@ export interface WorkspaceFormError {
 }
 
 export type WorkspaceFormErrors = {
-  [key in keyof Omit<WorkspaceFormData, 'permissionSettings'>]?: WorkspaceFormError;
+  [key in keyof Omit<WorkspaceFormData, 'permissionSettings' | 'description'>]?: WorkspaceFormError;
 } & {
   permissionSettings?: {
     overall?: WorkspaceFormError;

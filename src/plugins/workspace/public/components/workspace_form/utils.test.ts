@@ -8,6 +8,7 @@ import {
   convertPermissionSettingsToPermissions,
   convertPermissionsToPermissionSettings,
   getNumberOfChanges,
+  getNumberOfErrors,
 } from './utils';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import { WorkspacePermissionItemType } from './constants';
@@ -472,5 +473,39 @@ describe('getNumberOfChanges', () => {
         }
       )
     ).toEqual(3);
+  });
+});
+
+describe('getNumberOfErrors', () => {
+  it('should return zero if errors is empty', () => {
+    expect(getNumberOfErrors({})).toEqual(0);
+  });
+  it('should return consistent name errors count', () => {
+    expect(
+      getNumberOfErrors({
+        name: {
+          code: WorkspaceFormErrorCode.WorkspaceNameMissing,
+          message: '',
+        },
+      })
+    ).toEqual(1);
+  });
+  it('should return consistent permission settings errors count', () => {
+    expect(
+      getNumberOfErrors({
+        permissionSettings: {
+          overall: {
+            code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
+            message: '',
+          },
+          fields: {
+            1: {
+              code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
+              message: '',
+            },
+          },
+        },
+      })
+    ).toEqual(2);
   });
 });

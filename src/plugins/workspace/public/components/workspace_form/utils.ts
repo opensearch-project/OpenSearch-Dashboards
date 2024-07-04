@@ -49,9 +49,6 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   if (formErrors.name) {
     numberOfErrors += 1;
   }
-  if (formErrors.description) {
-    numberOfErrors += 1;
-  }
   if (formErrors.permissionSettings?.fields) {
     numberOfErrors += Object.keys(formErrors.permissionSettings.fields).length;
   }

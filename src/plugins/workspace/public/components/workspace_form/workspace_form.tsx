@@ -93,8 +93,6 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
               Description - <i>optional</i>
             </>
           }
-          isInvalid={!!formErrors.description}
-          error={formErrors.description?.message}
         >
           <>
             <EuiText size="xs" color="subdued">
