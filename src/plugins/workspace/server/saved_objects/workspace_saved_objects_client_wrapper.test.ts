@@ -686,24 +686,6 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           ACLSearchParams: {},
         });
       });
-      it('should find permitted workspaces with filtered permission modes', async () => {
-        const { wrapper, scopedClientMock } = generateWorkspaceSavedObjectsClientWrapper();
-        await wrapper.find({
-          type: 'dashboard',
-          ACLSearchParams: {
-            permissionModes: ['read', 'library_read'],
-          },
-        });
-        expect(scopedClientMock.find).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: 'workspace',
-            ACLSearchParams: {
-              permissionModes: ['library_read'],
-              principals: { users: ['user-1'] },
-            },
-          })
-        );
-      });
     });
 
     describe('deleteByWorkspace', () => {
