@@ -184,6 +184,6 @@ export const WORKSPACE_USE_CASES = Object.freeze({
 });
 
 export const MAX_SUGGEST_WORKSPACE_PICKER_NUM = 3;
-export const MAX_WORKSPACE_PICKER_NUM = 5;
+export const MAX_WORKSPACE_PICKER_NUM = 3;
 export const MAX_WORKSPACE_NAME_LENGTH = 25;
 export const RECENT_WORKSPACES_KEY = 'recentWorkspaces';

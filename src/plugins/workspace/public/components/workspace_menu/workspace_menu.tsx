@@ -8,6 +8,7 @@ import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
 import {
+  EuiAvatar,
   EuiButton,
   EuiButtonEmpty,
   EuiContextMenu,
@@ -20,6 +21,7 @@ import {
   EuiPanel,
   EuiPopover,
   EuiPopoverFooter,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -35,7 +37,6 @@ import {
   WORKSPACE_OVERVIEW_APP_ID,
   MAX_WORKSPACE_PICKER_NUM,
   MAX_WORKSPACE_NAME_LENGTH,
-  MAX_SUGGEST_WORKSPACE_PICKER_NUM,
 } from '../../../common/constants';
 import { cleanWorkspaceId, formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
@@ -91,7 +92,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       .slice(0, MAX_WORKSPACE_PICKER_NUM);
   }, [workspaceList, searchValue, currentWorkspace]);
 
-  const suggestedWorkspaces = useMemo(() => {
+  const filteredRecentWorkspaces = useMemo(() => {
     const localStoreWorkspaces = getRecentWorkspaces();
     const recentWorkspacesList: WorkspaceObject[] = [];
 
@@ -103,10 +104,13 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     });
     return recentWorkspacesList
       .filter((workspace) => workspace.name.toLowerCase().includes(searchValue.toLowerCase()))
-      .slice(0, MAX_SUGGEST_WORKSPACE_PICKER_NUM);
+      .slice(0, MAX_WORKSPACE_PICKER_NUM);
   }, [searchValue, workspaceList]);
 
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
+  const currentWorkspaceUseCase = currentWorkspace?.features
+    ?.map(getUseCaseFromFeatureConfig)
+    .filter(Boolean)[0];
 
   const openPopover = () => {
     setPopover(!isPopoverOpen);
@@ -178,7 +182,15 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       name,
       key: workspace.id,
       'data-test-subj': `context-menu-item-${workspace.id}`,
-      icon: <EuiIcon type="stopFilled" color={workspace.color ?? 'primary'} />,
+      icon: (
+        <EuiAvatar
+          size="s"
+          type="space"
+          name={workspaceName}
+          color={workspace.color}
+          initialsLength={2}
+        />
+      ),
       ...(shouldShowUseCases && { panel: index }),
     };
   };
@@ -196,7 +208,13 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
         <EuiListGroupItem
           icon={
             currentWorkspace ? (
-              <EuiIcon type="stopFilled" color={currentWorkspace.color ?? 'primary'} />
+              <EuiAvatar
+                size="s"
+                type="space"
+                name={currentWorkspace.name}
+                color={currentWorkspace.color}
+                initialsLength={2}
+              />
             ) : (
               <EuiIcon type="spacesApp" />
             )
@@ -216,7 +234,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     </>
   );
 
-  const panels = [
+  const allWorkspacesPanels = [
     {
       id: 0,
       title: (
@@ -233,19 +251,19 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     ...useCasePanels,
   ];
 
-  const suggestWorkspacePanels = [
+  const recentWorkspacesPanels = [
     {
       id: 0,
       title: (
         <span className="custom-title">
           <FormattedMessage
-            id="core.ui.primaryNav.contextMenuTitle.suggestedWorkspaces"
-            defaultMessage="Suggested workspaces"
+            id="core.ui.primaryNav.contextMenuTitle.recentWorkspaces"
+            defaultMessage="Recent workspaces"
           />
         </span>
       ),
       width: 300,
-      items: getWorkspaceListItems(suggestedWorkspaces),
+      items: getWorkspaceListItems(filteredRecentWorkspaces),
     },
     ...useCasePanels,
   ];
@@ -260,6 +278,41 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       panelPaddingSize="none"
       anchorPosition="downCenter"
     >
+      {currentWorkspace ? (
+        <EuiPanel paddingSize="m" hasBorder={false} color="transparent">
+          <EuiFlexGroup
+            justifyContent="center"
+            alignItems="center"
+            direction="column"
+            gutterSize="s"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiAvatar
+                size="m"
+                type="space"
+                name={currentWorkspaceName}
+                color={currentWorkspace.color}
+                initialsLength={2}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{currentWorkspaceName}</EuiFlexItem>
+            <EuiFlexItem grow={false}>{currentWorkspaceUseCase}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                href={coreStart.application.getUrlForApp('management', {
+                  path: '/opensearch-dashboards/objects',
+                  absolute: false,
+                })}
+              >
+                <FormattedMessage
+                  id="core.ui.primaryNav.workspace.savedObjects"
+                  defaultMessage="View workspace saved objects"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      ) : null}
       <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
         <EuiFieldSearch
           placeholder={defaultSearchPlaceholder}
@@ -270,63 +323,62 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       </EuiPanel>
       <EuiContextMenu
         initialPanelId={0}
-        panels={suggestWorkspacePanels}
+        panels={recentWorkspacesPanels}
         size="s"
-        data-test-subj="context-menu-suggested-workspaces"
+        data-test-subj="context-menu-recent-workspaces"
       />
       <EuiContextMenu
         initialPanelId={0}
-        panels={panels}
+        panels={allWorkspacesPanels}
         size="s"
         data-test-subj="context-menu-all-workspaces"
       />
-      <EuiPopoverFooter paddingSize="s">
-        <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
-          <EuiFlexGroup alignItems="center" gutterSize="s">
+      <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
+        <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+          {hasPermissionToCreateWorkspace() && (
             <EuiFlexItem grow={false}>
-              {hasPermissionToCreateWorkspace() && (
-                <EuiButton
-                  fill
-                  iconType="plus"
-                  size="s"
-                  key={WORKSPACE_CREATE_APP_ID}
-                  onClick={() => {
-                    window.location.assign(
-                      cleanWorkspaceId(
-                        coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
-                          absolute: false,
-                        })
-                      )
-                    );
-                  }}
-                >
-                  <FormattedMessage
-                    id="core.ui.primaryNav.createWorkspace"
-                    defaultMessage="Create workspace"
-                  />
-                </EuiButton>
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
-              <EuiButtonEmpty
-                size="xs"
-                key={WORKSPACE_LIST_APP_ID}
+              <EuiButton
+                fill
+                iconType="plus"
+                size="s"
+                key={WORKSPACE_CREATE_APP_ID}
                 onClick={() => {
                   window.location.assign(
                     cleanWorkspaceId(
-                      coreStart.application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
+                      coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
                         absolute: false,
                       })
                     )
                   );
                 }}
               >
-                <FormattedMessage id="core.ui.primaryNav.allWorkspace" defaultMessage="View all" />
-              </EuiButtonEmpty>
+                <FormattedMessage
+                  id="core.ui.primaryNav.createWorkspace"
+                  defaultMessage="Create workspace"
+                />
+              </EuiButton>
             </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      </EuiPopoverFooter>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="xs"
+              flush="left"
+              key={WORKSPACE_LIST_APP_ID}
+              onClick={() => {
+                window.location.assign(
+                  cleanWorkspaceId(
+                    coreStart.application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
+                      absolute: false,
+                    })
+                  )
+                );
+              }}
+            >
+              <FormattedMessage id="core.ui.primaryNav.allWorkspace" defaultMessage="View all" />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     </EuiPopover>
   );
 };
