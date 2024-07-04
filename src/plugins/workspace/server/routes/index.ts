@@ -33,6 +33,7 @@ const workspacePermissions = schema.recordOf(
 const dataSources = schema.arrayOf(
   schema.object({
     id: schema.string(),
+    title: schema.maybe(schema.string()),
   })
 );
 
