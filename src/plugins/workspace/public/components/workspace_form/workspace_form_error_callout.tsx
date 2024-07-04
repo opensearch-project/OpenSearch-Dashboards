@@ -51,12 +51,9 @@ const WorkspaceFormErrorCalloutItem = ({
   errorKey,
   message,
 }: {
-  errorKey?: string;
-  message?: string;
+  errorKey: string;
+  message: string;
 }) => {
-  if (!errorKey || !message) {
-    return null;
-  }
   return (
     <li>
       {errorKey}&nbsp;{message}
@@ -82,20 +79,19 @@ export const WorkspaceFormErrorCallout = ({ errors }: WorkspaceFormErrorCalloutP
     }
 
     return (
-      <li>
-        {(errorCode === WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting ||
-          errorCode === WorkspaceFormErrorCode.PermissionUserIdMissing) &&
-          i18n.translate('workspace.form.errorCallout.userPermissionKey', {
-            defaultMessage: 'User:',
-          })}
-        {(errorCode === WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting ||
-          errorCode === WorkspaceFormErrorCode.PermissionUserGroupMissing) &&
-          i18n.translate('workspace.form.errorCallout.userGroupPermissionKey', {
-            defaultMessage: 'User Group:',
-          })}
-        &nbsp;
-        {getSuggestionFromErrorCode(findingError)}
-      </li>
+      <WorkspaceFormErrorCalloutItem
+        errorKey={
+          errorCode === WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting ||
+          errorCode === WorkspaceFormErrorCode.PermissionUserIdMissing
+            ? i18n.translate('workspace.form.errorCallout.userPermissionKey', {
+                defaultMessage: 'User:',
+              })
+            : i18n.translate('workspace.form.errorCallout.userGroupPermissionKey', {
+                defaultMessage: 'User Group:',
+              })
+        }
+        message={getSuggestionFromErrorCode(findingError)}
+      />
     );
   };
   return (

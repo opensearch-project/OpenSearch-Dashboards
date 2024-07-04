@@ -126,4 +126,36 @@ describe('WorkspaceFormErrorCallout', () => {
     expect(renderResult.getByText('User Group: Enter a unique user group.')).toBeInTheDocument();
     expect(renderResult.getAllByText('User Group: Enter a unique user group.')).toHaveLength(1);
   });
+
+  it('should render permission settings overall suggestions', () => {
+    const { renderResult } = setup({
+      errors: {
+        permissionSettings: {
+          overall: {
+            code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
+            message: '',
+          },
+        },
+      },
+    });
+
+    expect(
+      renderResult.getByText(
+        'Permission setting: Enter an owner at user or user group permission setting.'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('should render original message if code not recognized', () => {
+    const { renderResult } = setup({
+      errors: {
+        name: {
+          code: 'unknown' as any,
+          message: 'Original name error message',
+        },
+      },
+    });
+
+    expect(renderResult.getByText('Name: Original name error message.')).toBeInTheDocument();
+  });
 });
