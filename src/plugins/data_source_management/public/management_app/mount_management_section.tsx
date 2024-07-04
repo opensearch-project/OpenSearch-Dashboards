@@ -21,6 +21,7 @@ import { CreateDataSourcePanel } from '../components/data_source_creation_panel/
 import { DataSourceManagementContext } from '../types';
 import { AuthenticationMethodRegistry } from '../auth_registry';
 import { ConfigureDirectQueryDataSourceWithRouter } from '../components/direct_query_data_sources_components/direct_query_data_source_configuration/configure_direct_query_data_sources';
+import { DirectQueryDataConnectionDetail } from '../components/direct_query_data_sources_components/direct_query_connection_detail/direct_query_connection_detail';
 
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
@@ -74,6 +75,16 @@ export async function mountManagementSection(
             <EditDataSourceWithRouter />
           </Route>
         )}
+        <Route path={['/manage/:dataSourceName']}>
+          <DirectQueryDataConnectionDetail
+            featureFlagStatus={featureFlagStatus}
+            http={http}
+            notifications={notifications}
+            savedObjects={savedObjects}
+            uiSettings={uiSettings}
+            setBreadcrumbs={params.setBreadcrumbs}
+          />
+        </Route>
         <Route path={['/']}>
           <DataSourceHomePanel history={params.history} featureFlagStatus={featureFlagStatus} />
         </Route>

@@ -21,3 +21,9 @@ export const UrlToDatasourceType: { [key: string]: DirectQueryDatasourceType } =
   [PROMETHEUS_URL]: 'PROMETHEUS',
   [AMAZON_S3_URL]: 'S3GLUE',
 };
+
+export const DATACONNECTIONS_BASE = '/api/dataconnections';
+export const EDIT = '/edit';
+export const DATACONNECTIONS_UPDATE_STATUS = '/status';
+export const INTEGRATIONS_BASE = '/api/integrations';
+export const observabilityMetricsID = 'observability-metrics';
