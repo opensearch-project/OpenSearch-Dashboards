@@ -80,7 +80,7 @@ const TableCellUI = ({
       data-test-subj="docTableField"
       className="osdDocTableCell eui-textBreakAll eui-textBreakWord"
     >
-      <div className="osdDocTable__limitedHeight">{content}</div>
+      <div className="truncate-by-height">{content}</div>
     </td>
   );
 };
