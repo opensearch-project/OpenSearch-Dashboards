@@ -924,44 +924,6 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       );
     });
 
-    it('should throw permission error when get global data source with non dashboard admin', async () => {
-      let error;
-      try {
-        await permittedSavedObjectedClient.get(DATA_SOURCE_SAVED_OBJECT_TYPE, 'global-data-source');
-      } catch (e) {
-        error = e;
-      }
-      expect(SavedObjectsErrorHelpers.isForbiddenError(error)).toBe(true);
-    });
-
-    it('should return requested data source normally for non dashboard admin', async () => {
-      const dataSource = await permittedSavedObjectedClient.get(
-        DATA_SOURCE_SAVED_OBJECT_TYPE,
-        'data-source-in-workspace-1'
-      );
-      expect(dataSource).toEqual(
-        expect.objectContaining({
-          attributes: expect.objectContaining({
-            title: 'Data source in workspace 1',
-          }),
-        })
-      );
-    });
-
-    it('should return requested global data source for dashboard admin', async () => {
-      const dataSource = await dashboardAdminSavedObjectedClient.get(
-        DATA_SOURCE_SAVED_OBJECT_TYPE,
-        'global-data-source'
-      );
-      expect(dataSource).toEqual(
-        expect.objectContaining({
-          attributes: expect.objectContaining({
-            title: 'Global data source',
-          }),
-        })
-      );
-    });
-
     it('should filter out global data source for non dashboard admin', async () => {
       const dataSourcesResult = await permittedSavedObjectedClient.find({
         type: DATA_SOURCE_SAVED_OBJECT_TYPE,

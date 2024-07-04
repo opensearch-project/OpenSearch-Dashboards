@@ -150,17 +150,6 @@ export class WorkspaceSavedObjectsClientWrapper {
     validateAllWorkspaces = true
   ) {
     /**
-     * A data source saved object without workspaces attributes will be treated as a global data source.
-     * This kind of data source is not allowed for non dashboard admin. The dashboard admin will bypass this
-     * client wrapper, so denied all access to the global data source saved object here.
-     */
-    if (
-      savedObject.type === DATA_SOURCE_SAVED_OBJECT_TYPE &&
-      (!savedObject.workspaces || savedObject.workspaces.length === 0)
-    ) {
-      return false;
-    }
-    /**
      *
      * Checks if the provided saved object lacks both workspaces and permissions.
      * If a saved object lacks both attributes, it implies that the object is neither associated

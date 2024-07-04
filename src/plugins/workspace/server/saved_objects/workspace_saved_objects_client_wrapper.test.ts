@@ -904,43 +904,6 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
     });
 
     describe('data source', () => {
-      it('should throw permission error when accessing global data source with non dashboard admin', async () => {
-        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
-        let errorCatched;
-        try {
-          await wrapper.get(DATA_SOURCE_SAVED_OBJECT_TYPE, 'global-data-source');
-        } catch (e) {
-          errorCatched = e;
-        }
-        expect(errorCatched?.message).toEqual('Invalid saved objects permission');
-      });
-      it('should return global data source for dashboard admin', async () => {
-        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper(DASHBOARD_ADMIN);
-        const dataSource = await wrapper.get(DATA_SOURCE_SAVED_OBJECT_TYPE, 'global-data-source');
-        expect(dataSource).toEqual(
-          expect.objectContaining({
-            attributes: expect.objectContaining({
-              title: 'Global data source',
-            }),
-          })
-        );
-      });
-
-      it('should return workspace 1 data source for permitted user', async () => {
-        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
-        const dataSource = await wrapper.get(
-          DATA_SOURCE_SAVED_OBJECT_TYPE,
-          'workspace-1-data-source'
-        );
-        expect(dataSource).toEqual(
-          expect.objectContaining({
-            attributes: expect.objectContaining({
-              title: 'Workspace 1 data source',
-            }),
-          })
-        );
-      });
-
       it('should return all data sources for dashboard admin', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper(DASHBOARD_ADMIN);
         const result = await wrapper.find({ type: DATA_SOURCE_SAVED_OBJECT_TYPE });
@@ -998,7 +961,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       });
 
       it('should return empty data source list for not permitted workspace non dashboard admin', async () => {
-        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
         const result = await wrapper.find({
           type: DATA_SOURCE_SAVED_OBJECT_TYPE,
           workspaces: ['workspace-2'],
