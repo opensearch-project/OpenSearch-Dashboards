@@ -18,6 +18,8 @@ import {
   PublicAppInfo,
   ChromeBreadcrumb,
   WorkspaceAvailability,
+  ChromeNavGroupUpdater,
+  NavGroupStatus,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -33,7 +35,11 @@ import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_object
 import { ManagementSetup } from '../../../plugins/management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
-import { filterWorkspaceConfigurableApps, isAppAccessibleInWorkspace } from './utils';
+import {
+  filterWorkspaceConfigurableApps,
+  isAppAccessibleInWorkspace,
+  isNavGroupInFeatureConfigs,
+} from './utils';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -53,7 +59,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private currentWorkspaceIdSubscription?: Subscription;
   private managementCurrentWorkspaceIdSubscription?: Subscription;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
+  private navGroupUpdater$ = new BehaviorSubject<ChromeNavGroupUpdater>(() => undefined);
   private workspaceConfigurableApps$ = new BehaviorSubject<PublicAppInfo[]>([]);
+  private unregisterNavGroupUpdater?: () => void;
+
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
@@ -88,6 +97,17 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
            * If trying to access such app, an "Application Not Found" page will be displayed
            */
           return { status: AppStatus.inaccessible };
+        });
+
+        this.navGroupUpdater$.next((navGroup) => {
+          if (
+            currentWorkspace.features &&
+            !isNavGroupInFeatureConfigs(navGroup.id, currentWorkspace.features)
+          ) {
+            return {
+              status: NavGroupStatus.Hidden,
+            };
+          }
         });
       }
     });
@@ -166,6 +186,9 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
     core.application.registerAppUpdater(this.appUpdater$);
+    this.unregisterNavGroupUpdater = core.chrome.navGroup.registerNavGroupUpdater(
+      this.navGroupUpdater$
+    );
 
     //  Hide advance settings and dataSource menus and disable in setup
     if (management) {
@@ -331,5 +354,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.currentWorkspaceIdSubscription?.unsubscribe();
     this.managementCurrentWorkspaceIdSubscription?.unsubscribe();
     this.breadcrumbsSubscription?.unsubscribe();
+    this.unregisterNavGroupUpdater?.();
   }
 }

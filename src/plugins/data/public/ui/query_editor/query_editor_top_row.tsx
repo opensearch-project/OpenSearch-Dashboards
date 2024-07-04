@@ -14,7 +14,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { compact, isEqual } from 'lodash';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import {
   DataSource,
   IDataPluginServices,
@@ -38,6 +38,7 @@ const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 // @internal
 export interface QueryEditorTopRowProps {
   query?: Query;
+  dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
   settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -234,6 +235,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           dataSource={props.dataSource}
           prepend={props.prepend}
           query={parsedQuery}
+          dataSourceContainerRef={props.dataSourceContainerRef}
           containerRef={props.containerRef}
           settings={props.settings!}
           screenTitle={props.screenTitle}
