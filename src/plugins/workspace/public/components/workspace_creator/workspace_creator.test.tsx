@@ -25,7 +25,7 @@ const PublicAPPInfoMap = new Map([
 
 const dataSourcesList = [
   {
-    id: '1',
+    id: 'id1',
     title: 'ds1',
     // This is used for mocking saved object function
     get: () => {
@@ -312,12 +312,7 @@ describe('WorkspaceCreator', () => {
         name: 'test workspace name',
       }),
       {
-        dataSources: [
-          {
-            id: '1',
-            title: 'ds1',
-          },
-        ],
+        dataSources: ['id1'],
         permissions: undefined,
       }
     );

@@ -13,7 +13,6 @@ import {
   SavedObjectsServiceStart,
   Permissions,
 } from '../../../core/server';
-import { DataSource } from '../common/types';
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
@@ -52,13 +51,13 @@ export interface IWorkspaceClientImpl {
   /**
    * Create a workspace
    * @param requestDetail {@link IRequestDetail}
-   * @param payload - An object of type {@link WorkspaceAttributeWithPermission} excluding the 'id' property, and also containing an optional array of data sources of type {@link DataSource} excluding the 'title' property.
+   * @param payload - An object of type {@link WorkspaceAttributeWithPermission} excluding the 'id' property, and also containing an optional array of string.
    * @public
    */
   create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
-      dataSources?: Array<Omit<DataSource, 'title'>>;
+      dataSources?: string[];
     }
   ): Promise<IResponse<{ id: WorkspaceAttribute['id'] }>>;
   /**
@@ -90,7 +89,7 @@ export interface IWorkspaceClientImpl {
    * Update the detail of a given workspace
    * @param requestDetail {@link IRequestDetail}
    * @param id workspace id
-   * @param payload - An object of type {@link WorkspaceAttributeWithPermission} excluding the 'id' property, and also containing an optional array of data sources of type {@link DataSource} excluding the 'title' property.
+   * @param payload - An object of type {@link WorkspaceAttributeWithPermission} excluding the 'id' property, and also containing an optional array of string.
    * @returns a Promise with a boolean result indicating if the update operation successed.
    * @public
    */
@@ -98,7 +97,7 @@ export interface IWorkspaceClientImpl {
     requestDetail: IRequestDetail,
     id: string,
     payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>> & {
-      dataSources?: Array<Omit<DataSource, 'title'>>;
+      dataSources?: string[];
     }
   ): Promise<IResponse<boolean>>;
   /**

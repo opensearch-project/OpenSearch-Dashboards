@@ -44,14 +44,14 @@ const createWorkspacesSetupContractMockWithValue = () => {
 
 const dataSourcesList = [
   {
-    id: '1',
+    id: 'id1',
     title: 'ds1', // This is used for mocking saved object function
     get: () => {
       return 'ds1';
     },
   },
   {
-    id: '2',
+    id: 'id2',
     title: 'ds2',
     get: () => {
       return 'ds2';
@@ -238,12 +238,7 @@ describe('WorkspaceUpdater', () => {
             users: ['test user id'],
           },
         },
-        dataSources: [
-          {
-            id: '2',
-            title: 'ds2',
-          },
-        ],
+        dataSources: ['id2'],
       }
     );
     await waitFor(() => {

@@ -9,7 +9,6 @@ import { WorkspacePermissionMode } from '../../common/constants';
 import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { registerDuplicateRoute } from './duplicate';
-import { DataSource } from '../../common/types';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -30,16 +29,11 @@ const workspacePermissions = schema.recordOf(
   schema.recordOf(principalType, schema.arrayOf(schema.string()), {})
 );
 
-const dataSources = schema.arrayOf(
-  schema.object({
-    id: schema.string(),
-    title: schema.maybe(schema.string()),
-  })
-);
+const dataSourceIds = schema.arrayOf(schema.string());
 
 const settingsSchema = schema.object({
   permissions: schema.maybe(workspacePermissions),
-  dataSources: schema.maybe(dataSources),
+  dataSources: schema.maybe(dataSourceIds),
 });
 
 const workspaceOptionalAttributesSchema = {
@@ -148,7 +142,7 @@ export function registerRoutes({
       const { attributes, settings } = req.body;
       const principals = permissionControlClient?.getPrincipalsFromRequest(req);
       const createPayload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
-        dataSources?: Array<Omit<DataSource, 'title'>>;
+        dataSources?: string[];
       } = attributes;
 
       if (isPermissionControlEnabled) {

@@ -12,7 +12,6 @@ import {
   WorkspacesSetup,
 } from '../../../core/public';
 import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
-import { DataSource } from '../common/types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -187,7 +186,7 @@ export class WorkspaceClient {
   public async create(
     attributes: Omit<WorkspaceAttribute, 'id'>,
     settings: {
-      dataSources?: Array<Omit<DataSource, 'title'>>;
+      dataSources?: string[];
       permissions?: SavedObjectPermissions;
     }
   ): Promise<IResponse<Pick<WorkspaceAttributeWithPermission, 'id'>>> {
@@ -277,7 +276,7 @@ export class WorkspaceClient {
     id: string,
     attributes: Partial<WorkspaceAttribute>,
     settings: {
-      dataSources?: Array<Omit<DataSource, 'title'>>;
+      dataSources?: string[];
       permissions?: SavedObjectPermissions;
     }
   ): Promise<IResponse<boolean>> {

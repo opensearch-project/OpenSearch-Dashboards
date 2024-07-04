@@ -74,8 +74,11 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
 
       try {
         const { permissionSettings, selectedDataSources, ...attributes } = data;
+        const selectedDataSourceIds = (selectedDataSources ?? []).map((ds: DataSource) => {
+          return ds.id;
+        });
         result = await workspaceClient.update(currentWorkspace.id, attributes, {
-          dataSources: selectedDataSources,
+          dataSources: selectedDataSourceIds,
           permissions: convertPermissionSettingsToPermissions(permissionSettings),
         });
         if (result?.success) {

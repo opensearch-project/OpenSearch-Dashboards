@@ -16,6 +16,7 @@ import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
+import { DataSource } from '../../../common/types';
 
 export interface WorkspaceCreatorProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
@@ -35,8 +36,11 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
       let result;
       try {
         const { permissionSettings, selectedDataSources, ...attributes } = data;
+        const selectedDataSourceIds = (selectedDataSources ?? []).map((ds: DataSource) => {
+          return ds.id;
+        });
         result = await workspaceClient.create(attributes, {
-          dataSources: selectedDataSources,
+          dataSources: selectedDataSourceIds,
           permissions: convertPermissionSettingsToPermissions(permissionSettings),
         });
         if (result?.success) {

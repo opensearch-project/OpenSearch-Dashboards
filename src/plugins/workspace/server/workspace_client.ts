@@ -26,7 +26,6 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
 } from '../common/constants';
 import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../data_source/common';
-import { DataSource } from '../common/types';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -89,7 +88,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   public async create(
     requestDetail: IRequestDetail,
     payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
-      dataSources?: Array<Omit<DataSource, 'title'>>;
+      dataSources?: string[];
     }
   ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
@@ -109,8 +108,8 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
 
       if (dataSources) {
         const promises = [];
-        for (const ds of dataSources) {
-          promises.push(client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, ds.id, [id]));
+        for (const dataSourceId of dataSources) {
+          promises.push(client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id]));
         }
         await Promise.all(promises);
       }
@@ -188,7 +187,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
     requestDetail: IRequestDetail,
     id: string,
     payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>> & {
-      dataSources?: Array<Omit<DataSource, 'title'>>;
+      dataSources?: string[];
     }
   ): Promise<IResponse<boolean>> {
     const { permissions, dataSources: newDataSources, ...attributes } = payload;
@@ -211,22 +210,27 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
 
       if (newDataSources) {
         const originalSelectedDataSources = await getDataSourcesList(client, [id]);
-        const dataSourcesToBeRemoved = originalSelectedDataSources.filter(
-          (ds) => !newDataSources.find((item) => item.id === ds.id)
+        const originalSelectedDataSourceIds = originalSelectedDataSources.map((ds) => ds.id);
+        const dataSourcesToBeRemoved = originalSelectedDataSourceIds.filter(
+          (ds) => !newDataSources.find((item) => item === ds)
         );
         const dataSourcesToBeAdded = newDataSources.filter(
-          (ds) => !originalSelectedDataSources.find((item) => item.id === ds.id)
+          (ds) => !originalSelectedDataSourceIds.find((item) => item === ds)
         );
 
         const promises = [];
         if (dataSourcesToBeRemoved.length > 0) {
-          for (const ds of dataSourcesToBeRemoved) {
-            promises.push(client.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, ds.id, [id]));
+          for (const dataSourceId of dataSourcesToBeRemoved) {
+            promises.push(
+              client.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id])
+            );
           }
         }
         if (dataSourcesToBeAdded.length > 0) {
-          for (const ds of dataSourcesToBeAdded) {
-            promises.push(client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, ds.id, [id]));
+          for (const dataSourceId of dataSourcesToBeAdded) {
+            promises.push(
+              client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id])
+            );
           }
         }
         if (promises.length > 0) {

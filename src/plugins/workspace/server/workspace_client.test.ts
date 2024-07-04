@@ -76,12 +76,7 @@ describe('#WorkspaceClient', () => {
     await client.create(mockRequestDetail, {
       name: mockWorkspaceName,
       permissions: {},
-      dataSources: [
-        {
-          title: 'title1',
-          id: 'id1',
-        },
-      ],
+      dataSources: ['id1'],
     });
 
     expect(addToWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id1', [
@@ -97,16 +92,7 @@ describe('#WorkspaceClient', () => {
     await client.update(mockRequestDetail, mockWorkspaceId, {
       permissions: {},
       name: mockWorkspaceName,
-      dataSources: [
-        {
-          title: 'title1',
-          id: 'id1',
-        },
-        {
-          title: 'title2',
-          id: 'id2',
-        },
-      ],
+      dataSources: ['id1', 'id2'],
     });
 
     expect(addToWorkspaces).not.toHaveBeenCalled();
@@ -120,16 +106,7 @@ describe('#WorkspaceClient', () => {
     await client.update(mockRequestDetail, mockWorkspaceId, {
       permissions: {},
       name: 'workspace_name',
-      dataSources: [
-        {
-          title: 'title3',
-          id: 'id3',
-        },
-        {
-          title: 'title4',
-          id: 'id4',
-        },
-      ],
+      dataSources: ['id3', 'id4'],
     });
     expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id1', [
       mockWorkspaceId,
@@ -147,16 +124,7 @@ describe('#WorkspaceClient', () => {
     await client.update(mockRequestDetail, mockWorkspaceId, {
       permissions: {},
       name: mockWorkspaceName,
-      dataSources: [
-        {
-          title: 'title1',
-          id: 'id1',
-        },
-        {
-          title: 'title3',
-          id: 'id3',
-        },
-      ],
+      dataSources: ['id1', 'id3'],
     });
     expect(addToWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id3', [
       mockWorkspaceId,
