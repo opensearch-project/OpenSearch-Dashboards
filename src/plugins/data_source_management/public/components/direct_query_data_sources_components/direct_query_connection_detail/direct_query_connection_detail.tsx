@@ -12,6 +12,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import {
   HttpStart,
@@ -21,7 +24,7 @@ import {
 } from 'opensearch-dashboards/public';
 import { useParams } from 'react-router-dom';
 import { DATACONNECTIONS_BASE } from '../../../constants';
-import { DirectQueryDatasourceDetails } from '../../../types';
+import { DirectQueryDatasourceDetails, PrometheusProperties } from '../../../types';
 import { NoAccess } from './no_access_page';
 import { getManageDirectQueryDataSourceBreadcrumbs } from '../../breadcrumbs';
 
@@ -77,6 +80,81 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setBreadcrumbs, http]);
 
+  const S3DatasourceOverview = () => (
+    <EuiPanel>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Description</EuiText>
+              <EuiText size="s" className="overview-content">
+                {datasourceDetails.description || '-'}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Query Access</EuiText>
+              <EuiText size="s" className="overview-content">
+                {datasourceDetails.allowedRoles.length > 0
+                  ? `Restricted to ${datasourceDetails.allowedRoles.join(', ')}`
+                  : 'Admin only'}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+    </EuiPanel>
+  );
+
+  const PrometheusDatasourceOverview = () => (
+    <EuiPanel>
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Connection title</EuiText>
+              <EuiText size="s" className="overview-content">
+                {datasourceDetails.name || '-'}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Data source description</EuiText>
+              <EuiText size="s" className="overview-content">
+                {datasourceDetails.description || '-'}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={false}>
+              <EuiText className="overview-title">Prometheus URI</EuiText>
+              <EuiText size="s" className="overview-content">
+                {(datasourceDetails.properties as PrometheusProperties)['prometheus.uri'] || '-'}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer />
+    </EuiPanel>
+  );
+
+  const DatasourceOverview = () => {
+    switch (datasourceDetails.connector) {
+      case 'S3GLUE':
+        return <S3DatasourceOverview />;
+      case 'PROMETHEUS':
+        return <PrometheusDatasourceOverview />;
+      default:
+        return null;
+    }
+  };
+
   if (!hasAccess) {
     return <NoAccess />;
   }
@@ -95,6 +173,8 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
             </EuiFlexGroup>
           </EuiPageHeaderSection>
         </EuiPageHeader>
+        <DatasourceOverview />
+        <EuiSpacer />
       </EuiPageBody>
     </EuiPage>
   );
