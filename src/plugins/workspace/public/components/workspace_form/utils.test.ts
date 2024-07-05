@@ -313,6 +313,92 @@ describe('validateWorkspaceForm', () => {
       )
     ).toEqual({});
   });
+
+  it('should return error if selected data source id is null', () => {
+    expect(
+      validateWorkspaceForm(
+        {
+          name: 'test',
+          selectedDataSources: [
+            {
+              id: '',
+              title: 'title',
+            },
+          ],
+        },
+        false
+      ).selectedDataSources
+    ).toEqual({
+      0: { code: WorkspaceFormErrorCode.InvalidDataSource, message: 'Invalid data source' },
+    });
+  });
+
+  it('should return error if selected data source id is duplicated', () => {
+    expect(
+      validateWorkspaceForm(
+        {
+          name: 'test',
+          selectedDataSources: [
+            {
+              id: 'id',
+              title: 'title1',
+            },
+            {
+              id: 'id',
+              title: 'title2',
+            },
+          ],
+        },
+        false
+      ).selectedDataSources
+    ).toEqual({
+      '1': { code: WorkspaceFormErrorCode.InvalidDataSource, message: 'Duplicate data sources' },
+    });
+  });
+});
+
+describe('getNumberOfErrors', () => {
+  it('should calculate the error number of data sources form', () => {
+    expect(
+      getNumberOfErrors({
+        selectedDataSources: {
+          0: { code: WorkspaceFormErrorCode.InvalidDataSource, message: 'Invalid data source' },
+        },
+      })
+    ).toEqual(1);
+    expect(getNumberOfErrors({})).toEqual(0);
+  });
+  it('should return zero if errors is empty', () => {
+    expect(getNumberOfErrors({})).toEqual(0);
+  });
+  it('should return consistent name errors count', () => {
+    expect(
+      getNumberOfErrors({
+        name: {
+          code: WorkspaceFormErrorCode.WorkspaceNameMissing,
+          message: '',
+        },
+      })
+    ).toEqual(1);
+  });
+  it('should return consistent permission settings errors count', () => {
+    expect(
+      getNumberOfErrors({
+        permissionSettings: {
+          overall: {
+            code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
+            message: '',
+          },
+          fields: {
+            1: {
+              code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
+              message: '',
+            },
+          },
+        },
+      })
+    ).toEqual(2);
+  });
 });
 
 describe('getNumberOfChanges', () => {
@@ -473,39 +559,5 @@ describe('getNumberOfChanges', () => {
         }
       )
     ).toEqual(3);
-  });
-});
-
-describe('getNumberOfErrors', () => {
-  it('should return zero if errors is empty', () => {
-    expect(getNumberOfErrors({})).toEqual(0);
-  });
-  it('should return consistent name errors count', () => {
-    expect(
-      getNumberOfErrors({
-        name: {
-          code: WorkspaceFormErrorCode.WorkspaceNameMissing,
-          message: '',
-        },
-      })
-    ).toEqual(1);
-  });
-  it('should return consistent permission settings errors count', () => {
-    expect(
-      getNumberOfErrors({
-        permissionSettings: {
-          overall: {
-            code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-            message: '',
-          },
-          fields: {
-            1: {
-              code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
-              message: '',
-            },
-          },
-        },
-      })
-    ).toEqual(2);
   });
 });

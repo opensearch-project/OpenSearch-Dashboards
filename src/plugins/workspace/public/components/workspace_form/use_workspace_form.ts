@@ -12,7 +12,7 @@ import {
   getUseCaseFromFeatureConfig,
   isUseCaseFeatureConfig,
 } from '../../utils';
-
+import { DataSource } from '../../../common/types';
 import { WorkspaceFormProps, WorkspaceFormErrors, WorkspacePermissionSetting } from './types';
 import {
   appendDefaultFeatureIds,
@@ -53,6 +53,12 @@ export const useWorkspaceForm = ({
     Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
   >(initialPermissionSettingsRef.current);
 
+  const [selectedDataSources, setSelectedDataSources] = useState<DataSource[]>(
+    defaultValues?.selectedDataSources && defaultValues.selectedDataSources.length > 0
+      ? defaultValues.selectedDataSources
+      : []
+  );
+
   const [formErrors, setFormErrors] = useState<WorkspaceFormErrors>({});
   const numberOfErrors = useMemo(() => getNumberOfErrors(formErrors), [formErrors]);
   const formIdRef = useRef<string>();
@@ -62,6 +68,7 @@ export const useWorkspaceForm = ({
     features: featureConfigs,
     useCases: selectedUseCases,
     permissionSettings,
+    selectedDataSources,
   });
   const getFormDataRef = useRef(getFormData);
   getFormDataRef.current = getFormData;
@@ -114,6 +121,7 @@ export const useWorkspaceForm = ({
             (item.type === WorkspacePermissionItemType.User && !!item.userId) ||
             (item.type === WorkspacePermissionItemType.Group && !!item.group)
         ) as WorkspacePermissionSetting[],
+        selectedDataSources: currentFormData.selectedDataSources,
       });
     },
     [onSubmit, permissionEnabled]
@@ -138,6 +146,7 @@ export const useWorkspaceForm = ({
     handleUseCasesChange,
     handleNameInputChange,
     setPermissionSettings,
+    setSelectedDataSources,
     handleDescriptionChange,
   };
 };

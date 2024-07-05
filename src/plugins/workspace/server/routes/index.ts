@@ -30,6 +30,13 @@ const workspacePermissions = schema.recordOf(
   schema.recordOf(principalType, schema.arrayOf(schema.string()), {})
 );
 
+const dataSourceIds = schema.arrayOf(schema.string());
+
+const settingsSchema = schema.object({
+  permissions: schema.maybe(workspacePermissions),
+  dataSources: schema.maybe(dataSourceIds),
+});
+
 const workspaceOptionalAttributesSchema = {
   description: schema.maybe(schema.string()),
   features: schema.maybe(schema.arrayOf(schema.string())),
@@ -128,23 +135,29 @@ export function registerRoutes({
       validate: {
         body: schema.object({
           attributes: createWorkspaceAttributesSchema,
-          permissions: schema.maybe(workspacePermissions),
+          settings: settingsSchema,
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      const { attributes, permissions } = req.body;
+      const { attributes, settings } = req.body;
       const principals = permissionControlClient?.getPrincipalsFromRequest(req);
-      const createPayload: Omit<WorkspaceAttributeWithPermission, 'id'> = attributes;
+      const createPayload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+        dataSources?: string[];
+      } = attributes;
 
       if (isPermissionControlEnabled) {
-        createPayload.permissions = permissions;
+        createPayload.permissions = settings.permissions;
         if (!!principals?.users?.length) {
           const currentUserId = principals.users[0];
-          const acl = new ACL(transferCurrentUserInPermissions(currentUserId, permissions));
+          const acl = new ACL(
+            transferCurrentUserInPermissions(currentUserId, settings.permissions)
+          );
           createPayload.permissions = acl.getPermissions();
         }
       }
+
+      createPayload.dataSources = settings.dataSources;
 
       const result = await client.create(
         {
@@ -166,13 +179,13 @@ export function registerRoutes({
         }),
         body: schema.object({
           attributes: updateWorkspaceAttributesSchema,
-          permissions: schema.maybe(workspacePermissions),
+          settings: settingsSchema,
         }),
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
       const { id } = req.params;
-      const { attributes, permissions } = req.body;
+      const { attributes, settings } = req.body;
 
       const result = await client.update(
         {
@@ -183,7 +196,8 @@ export function registerRoutes({
         id,
         {
           ...attributes,
-          ...(isPermissionControlEnabled ? { permissions } : {}),
+          ...(isPermissionControlEnabled ? { permissions: settings.permissions } : {}),
+          ...{ dataSources: settings.dataSources },
         }
       );
       return res.ok({ body: result });

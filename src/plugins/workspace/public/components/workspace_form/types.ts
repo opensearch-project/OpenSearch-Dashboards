@@ -3,9 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ApplicationStart, PublicAppInfo } from '../../../../../core/public';
+import type {
+  ApplicationStart,
+  PublicAppInfo,
+  SavedObjectsStart,
+} from '../../../../../core/public';
 import type { WorkspacePermissionMode } from '../../../common/constants';
 import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
+import { DataSource } from '../../../common/types';
 
 export interface WorkspaceUserPermissionSetting {
   id: number;
@@ -30,6 +35,7 @@ export interface WorkspaceFormSubmitData {
   description?: string;
   features?: string[];
   permissionSettings?: WorkspacePermissionSetting[];
+  selectedDataSources?: DataSource[];
 }
 
 export interface WorkspaceFormData extends WorkspaceFormSubmitData {
@@ -48,6 +54,8 @@ export enum WorkspaceFormErrorCode {
   DuplicateUserIdPermissionSetting,
   DuplicateUserGroupPermissionSetting,
   PermissionSettingOwnerMissing,
+  InvalidDataSource,
+  DuplicateDataSource,
 }
 
 export interface WorkspaceFormError {
@@ -56,16 +64,21 @@ export interface WorkspaceFormError {
 }
 
 export type WorkspaceFormErrors = {
-  [key in keyof Omit<WorkspaceFormData, 'permissionSettings' | 'description'>]?: WorkspaceFormError;
+  [key in keyof Omit<
+    WorkspaceFormData,
+    'permissionSettings' | 'description' | 'selectedDataSources'
+  >]?: WorkspaceFormError;
 } & {
   permissionSettings?: {
     overall?: WorkspaceFormError;
     fields?: { [key: number]: WorkspaceFormError };
   };
+  selectedDataSources?: { [key: number]: WorkspaceFormError };
 };
 
 export interface WorkspaceFormProps {
   application: ApplicationStart;
+  savedObjects: SavedObjectsStart;
   onSubmit?: (formData: WorkspaceFormSubmitData) => void;
   defaultValues?: WorkspaceFormData;
   operationType: WorkspaceOperationType;

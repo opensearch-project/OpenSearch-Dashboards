@@ -151,7 +151,7 @@ describe('WorkspaceFormErrorCallout', () => {
       errors: {
         name: {
           code: 'unknown' as any,
-          message: 'Original name error message',
+          message: 'Original name error message.',
         },
       },
     });
