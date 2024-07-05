@@ -7,6 +7,7 @@ import { getWorkspaceState, updateWorkspaceState } from '../../../../core/server
 import { SavedObjectsErrorHelpers } from '../../../../core/server';
 import { WorkspaceSavedObjectsClientWrapper } from './workspace_saved_objects_client_wrapper';
 import { httpServerMock } from '../../../../core/server/mocks';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
 
 const DASHBOARD_ADMIN = 'dashnoard_admin';
 const NO_DASHBOARD_ADMIN = 'no_dashnoard_admin';
@@ -45,6 +46,17 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
       type: 'workspace',
       id: 'not-permitted-workspace',
       attributes: { name: 'Not permitted workspace' },
+    },
+    {
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      id: 'global-data-source',
+      attributes: { title: 'Global data source' },
+    },
+    {
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      id: 'workspace-1-data-source',
+      attributes: { title: 'Workspace 1 data source' },
+      workspaces: ['workspace-1'],
     },
   ];
   const clientMock = {
@@ -878,6 +890,46 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         await wrapper.deleteByWorkspace('not-permitted-workspace');
         expect(clientMock.deleteByWorkspace).toHaveBeenCalledWith('not-permitted-workspace');
         expect(permissionControlMock.validate).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('data source', () => {
+      it('should throw permission error when accessing global data source with non dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.get(DATA_SOURCE_SAVED_OBJECT_TYPE, 'global-data-source');
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid saved objects permission');
+      });
+
+      it('should return global data source for dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper(DASHBOARD_ADMIN);
+        const dataSource = await wrapper.get(DATA_SOURCE_SAVED_OBJECT_TYPE, 'global-data-source');
+        expect(dataSource).toEqual(
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              title: 'Global data source',
+            }),
+          })
+        );
+      });
+
+      it('should return workspace 1 data source for permitted user', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        const dataSource = await wrapper.get(
+          DATA_SOURCE_SAVED_OBJECT_TYPE,
+          'workspace-1-data-source'
+        );
+        expect(dataSource).toEqual(
+          expect.objectContaining({
+            attributes: expect.objectContaining({
+              title: 'Workspace 1 data source',
+            }),
+          })
+        );
       });
     });
   });
