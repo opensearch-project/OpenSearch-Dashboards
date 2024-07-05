@@ -381,11 +381,10 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
         ],
       });
 
-      const findAdvancedSettings = await osdTestServer.request
-        // TODO: Remove workspaces=* here, after public workspace logic been removed
-        .get(root, `/api/saved_objects/_find?type=${advancedSettings.type}&workspaces=*`)
+      const getAdvancedSettingsResult = await osdTestServer.request
+        .get(root, `/api/saved_objects/${advancedSettings.type}/${packageInfo.version}`)
         .expect(200);
-      expect(findAdvancedSettings.body.total).toEqual(1);
+      expect(getAdvancedSettingsResult.body.id).toBe(packageInfo.version);
     });
 
     it('checkConflicts when importing ndjson', async () => {
