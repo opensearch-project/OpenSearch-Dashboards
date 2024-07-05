@@ -15,6 +15,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTabbedContent,
 } from '@elastic/eui';
 import {
   HttpStart,
@@ -161,6 +162,25 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
     return <NoAccess />;
   }
 
+  const genericTabs = [
+    {
+      id: 'access_control',
+      name: 'Access control',
+      disabled: false,
+      content: (
+        <AccessControlTab
+          dataConnection={dataSourceName}
+          connector={datasourceDetails.connector}
+          properties={datasourceDetails.properties}
+          allowedRoles={datasourceDetails.allowedRoles}
+          key={JSON.stringify(datasourceDetails.allowedRoles)}
+        />
+      ),
+    },
+  ];
+
+  const tabs = [...genericTabs];
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -177,18 +197,25 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
         </EuiPageHeader>
         <DatasourceOverview />
         <EuiSpacer />
-        {datasourceDetails.status !== 'ACTIVE' && (
+        {datasourceDetails.status !== 'ACTIVE' ? (
           <InactiveDataConnectionCallout
             datasourceDetails={datasourceDetails}
             fetchSelectedDatasource={fetchSelectedDatasource}
           />
+        ) : (
+          <>
+            {/* <EuiAccordion
+              id="queryOrAccelerateAccordion"
+              buttonContent={'Get started'}
+              initialIsOpen={true}
+              paddingSize="m"
+            >
+              <QueryOrAccelerateData />
+            </EuiAccordion> */}
+            <EuiTabbedContent tabs={tabs} />
+          </>
         )}
-        <AccessControlTab
-          dataConnection={dataSourceName}
-          connector={datasourceDetails.connector}
-          properties={datasourceDetails.properties}
-          allowedRoles={datasourceDetails.allowedRoles}
-        />
+
         <EuiSpacer />
       </EuiPageBody>
     </EuiPage>
