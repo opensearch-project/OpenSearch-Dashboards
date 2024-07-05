@@ -9,13 +9,15 @@ import { useObservable } from 'react-use';
 import { Page } from '../services';
 import { SectionRender } from './section_render';
 import { EmbeddableStart } from '../../../embeddable/public';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 
 export interface Props {
   page: Page;
   embeddable: EmbeddableStart;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
-export const PageRender = ({ page, embeddable }: Props) => {
+export const PageRender = ({ page, embeddable, savedObjectsClient }: Props) => {
   console.log('page: ', page);
 
   const sections = useObservable(page.getSections$()) || [];
@@ -27,6 +29,7 @@ export const PageRender = ({ page, embeddable }: Props) => {
         <SectionRender
           embeddable={embeddable}
           section={section}
+          savedObjectsClient={savedObjectsClient}
           contents$={page.getContents$(section.id)}
         />
       ))}

@@ -35,8 +35,12 @@ export class Page {
   }
 
   addContent(sectionId: string, content: Content) {
-    if (this.contents.get(sectionId)) {
-      this.contents.get(sectionId)?.push(content);
+    const sectionContents = this.contents.get(sectionId);
+    if (sectionContents) {
+      if (content.kind === 'dashboard' && sectionContents.length > 0) {
+        throw new Error('Section type "dashboard" can only have one content type of "dashboard"');
+      }
+      sectionContents.push(content);
     } else {
       this.contents.set(sectionId, [content]);
     }

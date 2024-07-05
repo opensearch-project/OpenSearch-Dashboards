@@ -230,6 +230,12 @@ export class HomePublicPlugin
       kind: 'dashboard',
     });
     page.createSection({
+      id: 'some_dashboard',
+      order: 2000,
+      title: 'test dashboard',
+      kind: 'dashboard',
+    });
+    page.createSection({
       id: 'get_started',
       order: 1000,
       title: 'Define your path forward with OpenSearch',
@@ -358,6 +364,16 @@ export class HomePublicPlugin
               </div>
             )
           );
+        },
+      });
+
+      page.addContent('some_dashboard', {
+        id: 'dashboard_1',
+        kind: 'dashboard',
+        order: 0,
+        input: {
+          kind: 'static',
+          id: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
         },
       });
     }

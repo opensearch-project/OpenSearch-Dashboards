@@ -123,7 +123,9 @@ export function HomeApp({ directories, solutions }) {
 
   const homepage = <Homepage />;
 
-  const nextHome = <PageRender page={page} embeddable={embeddable} />;
+  const nextHome = (
+    <PageRender page={page} embeddable={embeddable} savedObjectsClient={savedObjectsClient} />
+  );
 
   return (
     <I18nProvider>

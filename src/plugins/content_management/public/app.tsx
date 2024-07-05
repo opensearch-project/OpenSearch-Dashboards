@@ -31,7 +31,11 @@ export const renderApp = (
         <Switch>
           {pages.map((page) => (
             <Route path={[`/${page.config.id}`]}>
-              <PageRender page={page} embeddable={depsStart.embeddable} />
+              <PageRender
+                page={page}
+                embeddable={depsStart.embeddable}
+                savedObjectsClient={coreStart.savedObjects.client}
+              />
             </Route>
           ))}
         </Switch>

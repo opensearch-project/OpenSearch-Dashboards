@@ -13,24 +13,28 @@ import { DashboardContainerInput } from '../../../dashboard/public';
 import { createCardSection, createDashboardSection } from './utils';
 import { CARD_CONTAINER } from './card_container/card_container';
 import { EuiTitle } from '@elastic/eui';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 
 interface Props {
   section: Section;
   contents$: BehaviorSubject<Content[]>;
   embeddable: EmbeddableStart;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 
 export interface CardInput extends EmbeddableInput {
   description: string;
 }
 
-const DashboardSection = ({ section, embeddable, contents$ }: Props) => {
+const DashboardSection = ({ section, embeddable, contents$, savedObjectsClient }: Props) => {
   const contents = useObservable(contents$);
   const [input, setInput] = useState<DashboardContainerInput>();
 
   useEffect(() => {
     if (section.kind === 'dashboard') {
-      createDashboardSection(section, contents ?? []).then((ds) => setInput(ds));
+      createDashboardSection(section, contents ?? [], { savedObjectsClient }).then((ds) =>
+        setInput(ds)
+      );
     }
   }, [section, contents]);
 
@@ -66,13 +70,13 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
   return null;
 };
 
-export const SectionRender = ({ section, embeddable, contents$ }: Props) => {
-  if (section.kind === 'dashboard') {
-    return <DashboardSection section={section} embeddable={embeddable} contents$={contents$} />;
+export const SectionRender = (props: Props) => {
+  if (props.section.kind === 'dashboard') {
+    return <DashboardSection {...props} />;
   }
 
-  if (section.kind === 'card') {
-    return <CardSection section={section} embeddable={embeddable} contents$={contents$} />;
+  if (props.section.kind === 'card') {
+    return <CardSection {...props} />;
   }
 
   return null;

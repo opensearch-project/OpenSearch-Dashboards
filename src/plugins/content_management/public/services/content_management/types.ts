@@ -40,6 +40,12 @@ export type Content =
       input: VisualizationInput;
     }
   | {
+      kind: 'dashboard';
+      id: string;
+      order: number;
+      input: VisualizationInput;
+    }
+  | {
       kind: 'custom';
       id: string;
       order: number;

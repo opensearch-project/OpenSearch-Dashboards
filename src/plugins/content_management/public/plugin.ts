@@ -68,7 +68,6 @@ export class ContentManagementPublicPlugin
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const [coreStart, depsStart] = await core.getStartServices();
-        console.log(depsStart);
         const { renderApp } = await import('./app');
         const pages = [...this.contentManagementService.pages.values()];
 
