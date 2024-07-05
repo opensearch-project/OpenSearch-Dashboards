@@ -105,7 +105,7 @@ export interface SavedObjectsBulkCreateObject<T = unknown> {
  * @public
  */
 export interface SavedObjectsBulkUpdateObject<T = unknown>
-  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references' | 'permissions'> {
+  extends Pick<SavedObjectsUpdateOptions, 'version' | 'references' | 'permissions' | 'workspaces'> {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */
@@ -189,6 +189,7 @@ export interface SavedObjectsUpdateOptions extends SavedObjectsBaseOptions {
   refresh?: MutatingOperationRefreshSetting;
   /** permission control describe by ACL object */
   permissions?: Permissions;
+  workspaces?: string[];
 }
 
 /**
@@ -461,6 +462,68 @@ export class SavedObjectsClient {
     options: SavedObjectsDeleteByWorkspaceOptions = {}
   ): Promise<any> => {
     return await this._repository.deleteByWorkspace(workspace, options);
+  };
+
+  /**
+   * Remove a saved object from workspaces
+   * @param type
+   * @param id
+   * @param workspaces
+   */
+  deleteFromWorkspaces = async <T = unknown>(type: string, id: string, workspaces: string[]) => {
+    if (!workspaces || workspaces.length === 0) {
+      throw new TypeError(`Workspaces is required.`);
+    }
+    const object = await this.get<T>(type, id);
+    const existingWorkspaces = object.workspaces ?? [];
+    const newWorkspaces = existingWorkspaces.filter((item) => {
+      return workspaces.indexOf(item) === -1;
+    });
+    if (newWorkspaces.length > 0) {
+      return await this.update<T>(type, id, object.attributes, {
+        workspaces: newWorkspaces,
+        version: object.version,
+      });
+    } else {
+      // If there is no workspaces assigned, will create object with overwrite to delete workspace property.
+      return await this.create(
+        type,
+        {
+          ...object.attributes,
+        },
+        {
+          id,
+          permissions: object.permissions,
+          overwrite: true,
+          version: object.version,
+        }
+      );
+    }
+  };
+
+  /**
+   * Add a saved object to workspaces
+   * @param type
+   * @param id
+   * @param workspaces
+   */
+  addToWorkspaces = async <T = unknown>(
+    type: string,
+    id: string,
+    workspaces: string[]
+  ): Promise<any> => {
+    if (!workspaces || workspaces.length === 0) {
+      throw new TypeError(`Workspaces is required.`);
+    }
+    const object = await this.get<T>(type, id);
+    const existingWorkspaces = object.workspaces ?? [];
+    const mergedWorkspaces = existingWorkspaces.concat(workspaces);
+    const nonDuplicatedWorkspaces = Array.from(new Set(mergedWorkspaces));
+
+    return await this.update<T>(type, id, object.attributes, {
+      workspaces: nonDuplicatedWorkspaces,
+      version: object.version,
+    });
   };
 
   /**

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
@@ -53,6 +53,15 @@ const WorkspaceOverviewPage = (props: any) => {
         applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
       },
       workspaces: workspacesService,
+      savedObjects: {
+        ...mockCoreStart.savedObjects,
+        client: {
+          ...mockCoreStart.savedObjects.client,
+          find: jest.fn().mockResolvedValue({
+            savedObjects: [],
+          }),
+        },
+      },
     },
   });
 
@@ -207,9 +216,11 @@ describe('WorkspaceOverview', () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
     const { getByText } = render(WorkspaceOverviewPage({ workspacesService: workspaceService }));
     fireEvent.click(getByText('Settings'));
-    expect(screen.queryByText('Enter Details')).not.toBeNull();
-    // title is hidden
-    expect(screen.queryByText('Update Workspace')).toBeNull();
+    await waitFor(() => {
+      expect(screen.queryByText('Enter Details')).not.toBeNull();
+      // title is hidden
+      expect(screen.queryByText('Update Workspace')).toBeNull();
+    });
   });
 
   it('default selected tab is overview', async () => {

@@ -91,6 +91,43 @@ describe('FlyoutService', () => {
       });
     });
   });
+
+  describe('closeFlyout()', () => {
+    it('resolves onClose on the previous ref', async () => {
+      const ref = flyouts.open(mountText('Flyout content'));
+      const onCloseComplete = jest.fn();
+      ref.onClose.then(onCloseComplete);
+      flyouts.close();
+      await ref.onClose;
+      expect(onCloseComplete).toBeCalledTimes(1);
+    });
+
+    it('can be called multiple times', async () => {
+      flyouts.open(mountText('Flyout content'));
+      expect(mockReactDomUnmount).not.toHaveBeenCalled();
+      flyouts.close();
+      expect(mockReactDomUnmount.mock.calls).toMatchSnapshot();
+      flyouts.close();
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
+    });
+
+    it("doesn't affect an inactive flyout", async () => {
+      const ref = flyouts.open(mountText('Flyout content'));
+      flyouts.close();
+      const onCloseComplete = jest.fn();
+      ref.onClose.then(onCloseComplete);
+      await ref.onClose;
+
+      mockReactDomUnmount.mockClear();
+      onCloseComplete.mockClear();
+
+      flyouts.close();
+      flyouts.close();
+      expect(mockReactDomUnmount).toBeCalledTimes(0);
+      expect(onCloseComplete).toBeCalledTimes(0);
+    });
+  });
+
   describe('FlyoutRef#close()', () => {
     it('resolves the onClose Promise', async () => {
       const ref = flyouts.open(mountText('Flyout content'));

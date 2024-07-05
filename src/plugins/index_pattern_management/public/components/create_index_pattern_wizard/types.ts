@@ -92,4 +92,6 @@ export interface DataSourceTableItem {
   sort: string;
   checked?: 'on' | 'off';
   label: string;
+  datasourceversion: string;
+  installedplugins: string[];
 }

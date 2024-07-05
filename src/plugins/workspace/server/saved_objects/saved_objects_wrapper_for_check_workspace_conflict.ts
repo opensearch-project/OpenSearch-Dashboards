@@ -50,11 +50,6 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
   private isConfigType(type: SavedObject['type']): boolean {
     return type === UI_SETTINGS_SAVED_OBJECTS_TYPE;
   }
-  private formatFindParams(options: SavedObjectsFindOptions): SavedObjectsFindOptions {
-    const isListingDataSource = this.isDataSourceType(options.type);
-    const { workspaces, ...otherOptions } = options;
-    return isListingDataSource ? otherOptions : options;
-  }
 
   /**
    * Workspace is a concept to manage saved objects and the `workspaces` field of each object indicates workspaces the object belongs to.
@@ -412,10 +407,7 @@ export class WorkspaceConflictSavedObjectsClientWrapper {
       bulkCreate: bulkCreateWithWorkspaceConflictCheck,
       checkConflicts: checkConflictWithWorkspaceConflictCheck,
       delete: wrapperOptions.client.delete,
-      find: (options: SavedObjectsFindOptions) =>
-        // TODO: The `formatFindParams` is a workaround for 2.14 to always list global data sources,
-        //       should remove this workaround in the upcoming release once readonly share is available.
-        wrapperOptions.client.find(this.formatFindParams(options)),
+      find: wrapperOptions.client.find,
       bulkGet: wrapperOptions.client.bulkGet,
       get: wrapperOptions.client.get,
       update: wrapperOptions.client.update,

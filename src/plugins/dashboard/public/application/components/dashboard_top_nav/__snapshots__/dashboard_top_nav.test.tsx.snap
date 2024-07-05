@@ -207,6 +207,10 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -715,6 +719,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -831,6 +836,7 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -1207,6 +1213,10 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -1715,6 +1725,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -1831,6 +1842,7 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -2207,6 +2219,10 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -2715,6 +2731,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -2831,6 +2848,7 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -3207,6 +3225,10 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -3715,6 +3737,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -3831,6 +3854,7 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -4207,6 +4231,10 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -4715,6 +4743,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -4831,6 +4860,7 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -5207,6 +5237,10 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -5715,6 +5749,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -5831,6 +5866,7 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
