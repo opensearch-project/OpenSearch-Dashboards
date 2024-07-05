@@ -1,0 +1,2 @@
+feat:
+- [Workspace] Restrict non dashboard admin access global data source ([#7180](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7180))
