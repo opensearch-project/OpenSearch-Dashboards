@@ -23,6 +23,7 @@ export const UrlToDatasourceType: { [key: string]: DirectQueryDatasourceType } =
 };
 
 export const DATACONNECTIONS_BASE = '/api/dataconnections';
+export const SECURITY_ROLES = '/api/v1/configuration/roles';
 export const EDIT = '/edit';
 export const DATACONNECTIONS_UPDATE_STATUS = '/status';
 export const INTEGRATIONS_BASE = '/api/integrations';

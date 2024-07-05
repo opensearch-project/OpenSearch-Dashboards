@@ -26,6 +26,8 @@ import { useParams } from 'react-router-dom';
 import { DATACONNECTIONS_BASE } from '../../../constants';
 import { DirectQueryDatasourceDetails, PrometheusProperties } from '../../../types';
 import { NoAccess } from './no_access_page';
+import { InactiveDataConnectionCallout } from './inactive_data_connection_callout';
+import { AccessControlTab } from './access_control_tab';
 import { getManageDirectQueryDataSourceBreadcrumbs } from '../../breadcrumbs';
 
 interface DirectQueryDataConnectionDetailProps {
@@ -174,6 +176,19 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
           </EuiPageHeaderSection>
         </EuiPageHeader>
         <DatasourceOverview />
+        <EuiSpacer />
+        {datasourceDetails.status !== 'ACTIVE' && (
+          <InactiveDataConnectionCallout
+            datasourceDetails={datasourceDetails}
+            fetchSelectedDatasource={fetchSelectedDatasource}
+          />
+        )}
+        <AccessControlTab
+          dataConnection={dataSourceName}
+          connector={datasourceDetails.connector}
+          properties={datasourceDetails.properties}
+          allowedRoles={datasourceDetails.allowedRoles}
+        />
         <EuiSpacer />
       </EuiPageBody>
     </EuiPage>
