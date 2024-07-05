@@ -20,11 +20,12 @@ import {
   WorkspaceAttributeWithPermission,
 } from './types';
 import { workspace } from './saved_objects';
-import { generateRandomId } from './utils';
+import { generateRandomId, getDataSourcesList } from './utils';
 import {
   WORKSPACE_ID_CONSUMER_WRAPPER_ID,
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
 } from '../common/constants';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../data_source/common';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -86,10 +87,12 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   public async create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+      dataSources?: string[];
+    }
   ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
-      const { permissions, ...attributes } = payload;
+      const { permissions, dataSources, ...attributes } = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const existingWorkspaceRes = await this.getScopedClientWithoutPermission(requestDetail)?.find(
@@ -102,6 +105,15 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
       }
+
+      if (dataSources) {
+        const promises = [];
+        for (const dataSourceId of dataSources) {
+          promises.push(client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id]));
+        }
+        await Promise.all(promises);
+      }
+
       const result = await client.create<Omit<WorkspaceAttribute, 'id'>>(
         WORKSPACE_TYPE,
         attributes,
@@ -110,6 +122,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           permissions,
         }
       );
+
       return {
         success: true,
         result: {
@@ -173,9 +186,11 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   public async update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>>
+    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>> & {
+      dataSources?: string[];
+    }
   ): Promise<IResponse<boolean>> {
-    const { permissions, ...attributes } = payload;
+    const { permissions, dataSources: newDataSources, ...attributes } = payload;
     try {
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
@@ -192,6 +207,37 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
         }
       }
+
+      if (newDataSources) {
+        const originalSelectedDataSources = await getDataSourcesList(client, [id]);
+        const originalSelectedDataSourceIds = originalSelectedDataSources.map((ds) => ds.id);
+        const dataSourcesToBeRemoved = originalSelectedDataSourceIds.filter(
+          (ds) => !newDataSources.find((item) => item === ds)
+        );
+        const dataSourcesToBeAdded = newDataSources.filter(
+          (ds) => !originalSelectedDataSourceIds.find((item) => item === ds)
+        );
+
+        const promises = [];
+        if (dataSourcesToBeRemoved.length > 0) {
+          for (const dataSourceId of dataSourcesToBeRemoved) {
+            promises.push(
+              client.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id])
+            );
+          }
+        }
+        if (dataSourcesToBeAdded.length > 0) {
+          for (const dataSourceId of dataSourcesToBeAdded) {
+            promises.push(
+              client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id])
+            );
+          }
+        }
+        if (promises.length > 0) {
+          await Promise.all(promises);
+        }
+      }
+
       await client.create<Omit<WorkspaceAttribute, 'id'>>(
         WORKSPACE_TYPE,
         { ...workspaceInDB.attributes, ...attributes },
