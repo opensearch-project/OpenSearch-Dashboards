@@ -18,7 +18,6 @@ import {
 import { httpServerMock } from '../../../../../../src/core/server/mocks';
 import * as utilsExports from '../../utils';
 import { updateWorkspaceState } from '../../../../../core/server/utils';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../../data_source/common';
 
 const repositoryKit = (() => {
   const savedObjects: Array<{ type: string; id: string }> = [];
@@ -78,9 +77,6 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
             permission: {
               enabled: true,
             },
-          },
-          data_source: {
-            enabled: true,
           },
           migrations: { skip: false },
         },

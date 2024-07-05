@@ -33,7 +33,6 @@ import {
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
   WorkspacePermissionMode,
 } from '../../common/constants';
-import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
 
 // Can't throw unauthorized for now, the page will be refreshed if unauthorized
 const generateWorkspacePermissionError = () =>
@@ -62,16 +61,6 @@ const generateOSDAdminPermissionError = () =>
       })
     )
   );
-
-const intersection = <T extends string>(...args: T[][]) => {
-  const occursCountMap: { [key: string]: number } = {};
-  for (let i = 0; i < args.length; i++) {
-    new Set(args[i]).forEach((key) => {
-      occursCountMap[key] = (occursCountMap[key] || 0) + 1;
-    });
-  }
-  return Object.keys(occursCountMap).filter((key) => occursCountMap[key] === args.length);
-};
 
 const getDefaultValuesForEmpty = <T>(values: T[] | undefined, defaultValues: T[]) => {
   return !values || values.length === 0 ? defaultValues : values;
@@ -455,18 +444,21 @@ export class WorkspaceSavedObjectsClientWrapper {
           principals,
         };
         options.workspacesSearchOperator = 'OR';
-      } else if (options.workspaces) {
-        options.workspaces = options.workspaces.filter((workspaceId) =>
-          permittedWorkspaceIds.includes(workspaceId)
-        );
-      } else if (options.ACLSearchParams) {
-        options.ACLSearchParams = {
-          permissionModes: getDefaultValuesForEmpty(options.ACLSearchParams.permissionModes, [
-            WorkspacePermissionMode.Read,
-            WorkspacePermissionMode.Write,
-          ]),
-          principals,
-        };
+      } else {
+        if (options.workspaces) {
+          options.workspaces = options.workspaces.filter((workspaceId) =>
+            permittedWorkspaceIds.includes(workspaceId)
+          );
+        }
+        if (options.ACLSearchParams) {
+          options.ACLSearchParams = {
+            permissionModes: getDefaultValuesForEmpty(options.ACLSearchParams.permissionModes, [
+              WorkspacePermissionMode.Read,
+              WorkspacePermissionMode.Write,
+            ]),
+            principals,
+          };
+        }
       }
       return await wrapperOptions.client.find<T>(options);
     };
