@@ -456,9 +456,9 @@ export class WorkspaceSavedObjectsClientWrapper {
         };
         options.workspacesSearchOperator = 'OR';
       } else if (options.workspaces) {
-        options.workspaces = options.workspaces
-          ? options.workspaces.filter((workspaceId) => permittedWorkspaceIds.includes(workspaceId))
-          : permittedWorkspaceIds;
+        options.workspaces = options.workspaces.filter((workspaceId) =>
+          permittedWorkspaceIds.includes(workspaceId)
+        );
       } else if (options.ACLSearchParams) {
         options.ACLSearchParams = {
           permissionModes: getDefaultValuesForEmpty(options.ACLSearchParams.permissionModes, [

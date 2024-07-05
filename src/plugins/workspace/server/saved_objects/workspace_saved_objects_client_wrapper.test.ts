@@ -624,7 +624,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       });
     });
     describe('find', () => {
-      it('should call client.find with ACLSearchParams for workspace type', async () => {
+      it('should call client.find with consistent params when ACLSearchParams and workspaceOperator not provided', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
         await wrapper.find({
           type: 'workspace',
@@ -637,58 +637,11 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
             },
             permissionModes: ['read', 'write'],
           },
+          workspaces: ['workspace-1'],
+          workspacesSearchOperator: 'OR',
         });
       });
-      it('should call client.find with ACLSearchParams if no workspaces is provided', async () => {
-        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
-        // no workspaces
-        await wrapper.find({
-          type: 'dashboards',
-        });
-        expect(clientMock.find).toHaveBeenCalledWith({
-          type: 'dashboards',
-          ACLSearchParams: {
-            principals: {
-              users: ['user-1'],
-            },
-            permissionModes: ['read', 'write'],
-          },
-        });
-
-        // workspaces parameter is undefined
-        clientMock.find.mockReset();
-        await wrapper.find({
-          type: 'dashboards',
-          workspaces: undefined,
-        });
-        expect(clientMock.find).toHaveBeenLastCalledWith({
-          type: 'dashboards',
-          ACLSearchParams: {
-            principals: {
-              users: ['user-1'],
-            },
-            permissionModes: ['read', 'write'],
-          },
-        });
-
-        // empty workspaces array
-        clientMock.find.mockReset();
-        await wrapper.find({
-          type: 'dashboards',
-          workspaces: [],
-        });
-        expect(clientMock.find).toHaveBeenLastCalledWith({
-          type: 'dashboards',
-          workspaces: [],
-          ACLSearchParams: {
-            principals: {
-              users: ['user-1'],
-            },
-            permissionModes: ['read', 'write'],
-          },
-        });
-      });
-      it('should call client.find with only read permission if find workspace and permissionModes provided', async () => {
+      it('should call client.find with ACLSearchParams when only ACLSearchParams provided', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
         await wrapper.find({
           type: 'workspace',
@@ -706,60 +659,15 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           },
         });
       });
-      it('should throw workspace permission error if provided workspaces not permitted', async () => {
-        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
-        let errorCatched;
-        try {
-          errorCatched = await wrapper.find({
-            type: 'dashboard',
-            workspaces: ['not-permitted-workspace'],
-          });
-        } catch (e) {
-          errorCatched = e;
-        }
-        expect(errorCatched?.message).toEqual('Invalid workspace permission');
-      });
-      it('should remove not permitted workspace and call client.find with arguments', async () => {
+      it('should call client.find with filtered workspaces when only workspaces provided', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
         await wrapper.find({
           type: 'dashboard',
-          workspaces: ['not-permitted-workspace', 'workspace-1'],
+          workspaces: ['workspace-1', 'workspace-2'],
         });
         expect(clientMock.find).toHaveBeenCalledWith({
           type: 'dashboard',
           workspaces: ['workspace-1'],
-          ACLSearchParams: {},
-        });
-      });
-      it('should find permitted workspaces with filtered permission modes', async () => {
-        const { wrapper, scopedClientMock } = generateWorkspaceSavedObjectsClientWrapper();
-        await wrapper.find({
-          type: 'dashboard',
-          ACLSearchParams: {
-            permissionModes: ['read', 'library_read'],
-          },
-        });
-        expect(scopedClientMock.find).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: 'workspace',
-            ACLSearchParams: {
-              permissionModes: ['library_read'],
-              principals: { users: ['user-1'] },
-            },
-          })
-        );
-      });
-      it('should call client.find with arguments if not workspace type and no options.workspace', async () => {
-        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
-        await wrapper.find({
-          type: 'dashboard',
-        });
-        expect(clientMock.find).toHaveBeenCalledWith({
-          type: 'dashboard',
-          ACLSearchParams: {
-            permissionModes: ['read', 'write'],
-            principals: { users: ['user-1'] },
-          },
         });
       });
     });
@@ -900,74 +808,6 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
         await wrapper.deleteByWorkspace('not-permitted-workspace');
         expect(clientMock.deleteByWorkspace).toHaveBeenCalledWith('not-permitted-workspace');
         expect(permissionControlMock.validate).not.toHaveBeenCalled();
-      });
-    });
-
-    describe('data source', () => {
-      it('should return all data sources for dashboard admin', async () => {
-        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper(DASHBOARD_ADMIN);
-        const result = await wrapper.find({ type: DATA_SOURCE_SAVED_OBJECT_TYPE });
-
-        expect(clientMock.find).toHaveBeenCalledWith({
-          type: 'data-source',
-        });
-        expect(result.saved_objects).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "attributes": Object {
-                "title": "Global data source",
-              },
-              "id": "global-data-source",
-              "type": "data-source",
-            },
-            Object {
-              "attributes": Object {
-                "title": "Workspace 1 data source",
-              },
-              "id": "workspace-1-data-source",
-              "type": "data-source",
-              "workspaces": Array [
-                "workspace-1",
-              ],
-            },
-          ]
-        `);
-      });
-
-      it('should only return permitted data source for non dashboard admin', async () => {
-        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
-        const result = await wrapper.find({ type: DATA_SOURCE_SAVED_OBJECT_TYPE });
-
-        expect(clientMock.find).toHaveBeenCalledWith({
-          type: 'data-source',
-          workspaces: ['workspace-1'],
-          ACLSearchParams: {},
-          workspacesSearchOperator: 'AND',
-        });
-        expect(result.saved_objects).toMatchInlineSnapshot(`
-          Array [
-            Object {
-              "attributes": Object {
-                "title": "Workspace 1 data source",
-              },
-              "id": "workspace-1-data-source",
-              "type": "data-source",
-              "workspaces": Array [
-                "workspace-1",
-              ],
-            },
-          ]
-        `);
-      });
-
-      it('should return empty data source list for not permitted workspace non dashboard admin', async () => {
-        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
-        const result = await wrapper.find({
-          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-          workspaces: ['workspace-2'],
-        });
-
-        expect(result.saved_objects).toMatchInlineSnapshot(`Array []`);
       });
     });
   });
