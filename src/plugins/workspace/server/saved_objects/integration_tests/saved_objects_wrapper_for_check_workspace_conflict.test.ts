@@ -382,7 +382,8 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
       });
 
       const findAdvancedSettings = await osdTestServer.request
-        .get(root, `/api/saved_objects/_find?type=${advancedSettings.type}`)
+        // TODO: Remove workspaces=* here, after public workspace logic been removed
+        .get(root, `/api/saved_objects/_find?type=${advancedSettings.type}&workspaces=*`)
         .expect(200);
       expect(findAdvancedSettings.body.total).toEqual(1);
     });
