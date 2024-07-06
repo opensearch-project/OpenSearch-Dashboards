@@ -95,44 +95,34 @@ export class InternalDynamicConfigurationClient implements IInternalDynamicConfi
     return await this.#client.listConfigs(options);
   }
 
-  /**
-   * TODO Implement this
-   */
   public async createConfig(
     createConfigProps: CreateConfigProps,
     options?: DynamicConfigurationClientOptions
   ) {
-    return Promise.reject('Not implemented yet');
+    // TODO Add validation logic
+    return await this.#client.createConfig(createConfigProps, options);
   }
 
-  /**
-   * TODO Implement this
-   */
   public async bulkCreateConfigs(
     bulkCreateConfigProps: BulkCreateConfigProps,
     options?: DynamicConfigurationClientOptions
   ) {
-    return Promise.reject('Not implemented yet');
+    // TODO Add validation logic
+    return await this.#client.bulkCreateConfigs(bulkCreateConfigProps, options);
   }
 
-  /**
-   * TODO Implement this
-   */
   public async deleteConfig(
     deleteConfigs: DeleteConfigProps,
     options?: DynamicConfigurationClientOptions
   ) {
-    return Promise.reject('Not implemented yet');
+    return await this.#client.deleteConfig(deleteConfigs, options);
   }
 
-  /**
-   * TODO Implement this
-   */
   public async bulkDeleteConfigs(
     bulkDeleteConfigProps: BulkDeleteConfigProps,
     options?: DynamicConfigurationClientOptions
   ) {
-    return Promise.reject('Not implemented yet');
+    return await this.#client.bulkDeleteConfigs(bulkDeleteConfigProps, options);
   }
 
   /**

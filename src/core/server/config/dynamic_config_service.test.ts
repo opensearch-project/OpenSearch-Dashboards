@@ -4,7 +4,7 @@
  */
 
 import { DynamicConfigService, IDynamicConfigService } from './dynamic_config_service';
-import { configServiceMock, httpServiceMock } from '../mocks';
+import { configServiceMock, httpServiceMock, opensearchServiceMock } from '../mocks';
 import { loggerMock } from '../logging/logger.mock';
 import { LoggerFactory } from '@osd/logging';
 import { schema, Type } from '@osd/config-schema';
@@ -15,6 +15,7 @@ import { ResponseToolkit } from '@hapi/hapi';
 
 describe('DynamicConfigService', () => {
   let dynamicConfigService: IDynamicConfigService;
+  const openSearchMock = opensearchServiceMock.createStart();
 
   beforeEach(() => {
     const loggerFactoryMock = {} as LoggerFactory;
@@ -39,7 +40,9 @@ describe('DynamicConfigService', () => {
       },
     });
 
-    const dynamicConfigServiceStart = await dynamicConfigService.start();
+    const dynamicConfigServiceStart = await dynamicConfigService.start({
+      opensearch: openSearchMock,
+    });
     expect(dynamicConfigServiceStart.getAsyncLocalStore).toBeDefined();
     expect(dynamicConfigServiceStart.getClient()).toBeDefined();
 

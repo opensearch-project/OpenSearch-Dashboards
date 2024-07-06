@@ -7,6 +7,7 @@ import _ from 'lodash';
 import { Logger } from '@osd/logging';
 import { Request } from 'hapi__hapi';
 import { ConfigIdentifier } from '../types';
+import { DYNAMIC_APP_CONFIG_INDEX_PREFIX } from './constants';
 
 /**
  * Given a configIdentifier:
@@ -53,4 +54,8 @@ export const createLocalStore = (logger: Logger, request: Request, headers: stri
       }
     })
   );
+};
+
+export const getDynamicConfigIndexName = (n: number) => {
+  return `${DYNAMIC_APP_CONFIG_INDEX_PREFIX}_${n}`;
 };

@@ -23,7 +23,7 @@ export class CspHandlerPlugin implements Plugin<CspHandlerPluginSetup, CspHandle
 
   public async setup(core: CoreSetup, { applicationConfig }: AppPluginSetupDependencies) {
     /**
-     * TODO Deprecate this plugin (right now it needs to be enabled for NeoDashboards to function)
+     * TODO Deprecate this plugin (right now it needs to be enabled for Dashboards plugin to function)
      */
     // core.http.registerOnPreResponse(
     //   createCspRulesPreResponseHandler(

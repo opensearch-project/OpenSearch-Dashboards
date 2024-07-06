@@ -3,17 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { IDynamicConfigurationClient, IInternalDynamicConfigurationClient } from '../types';
+
+const createApiResponse = <TResponse = Record<string, any>>(
+  opts: Partial<ApiResponse> = {}
+): ApiResponse<TResponse> => {
+  return {
+    body: {} as any,
+    statusCode: 200,
+    headers: {},
+    warnings: [],
+    meta: {} as any,
+    ...opts,
+  };
+};
 
 const createInternalDynamicConfigurationClientMock = (
   props: InternalDynamicConfigurationClientMockProps = {
     getConfig: {},
     bulkGetConfigs: new Map<string, Record<string, any>>(),
     listConfigs: new Map<string, Record<string, any>>(),
-    createConfig: '',
-    bulkCreateConfigs: '',
-    deleteConfig: '',
-    bulkDeleteConfigs: '',
   }
 ) => {
   const mocked: jest.Mocked<IInternalDynamicConfigurationClient> = {
@@ -28,10 +38,10 @@ const createInternalDynamicConfigurationClientMock = (
   mocked.getConfig.mockResolvedValue(props.getConfig);
   mocked.bulkGetConfigs.mockResolvedValue(props.bulkGetConfigs);
   mocked.listConfigs.mockResolvedValue(props.listConfigs);
-  mocked.createConfig.mockResolvedValue(props.createConfig);
-  mocked.bulkCreateConfigs.mockResolvedValue(props.bulkCreateConfigs);
-  mocked.deleteConfig.mockResolvedValue(props.deleteConfig);
-  mocked.bulkDeleteConfigs.mockResolvedValue(props.bulkDeleteConfigs);
+  mocked.createConfig.mockResolvedValue(createApiResponse(props.createConfig));
+  mocked.bulkCreateConfigs.mockResolvedValue(createApiResponse(props.bulkCreateConfigs));
+  mocked.deleteConfig.mockResolvedValue(createApiResponse(props.deleteConfig));
+  mocked.bulkDeleteConfigs.mockResolvedValue(createApiResponse(props.bulkDeleteConfigs));
   return mocked;
 };
 
@@ -47,7 +57,17 @@ const createDynamicConfigurationClientMock = (
     bulkGetConfigs: jest.fn(),
     listConfigs: jest.fn(),
   };
-  mocked.getConfig.mockResolvedValue(props.getConfig);
+  mocked.getConfig.mockImplementation((getConfigProps, options) => {
+    if (getConfigProps.name && getConfigProps.name === 'csp') {
+      return Promise.resolve({
+        rules: [],
+        strict: false,
+        warnLegacyBrowsers: false,
+      });
+    }
+
+    return Promise.resolve(props.getConfig);
+  });
   mocked.bulkGetConfigs.mockResolvedValue(props.bulkGetConfigs);
   mocked.listConfigs.mockResolvedValue(props.listConfigs);
   return mocked;
@@ -57,10 +77,10 @@ export interface InternalDynamicConfigurationClientMockProps {
   getConfig: Record<string, any>;
   bulkGetConfigs: Map<string, Record<string, any>>;
   listConfigs: Map<string, Record<string, any>>;
-  createConfig: string;
-  bulkCreateConfigs: string;
-  deleteConfig: string;
-  bulkDeleteConfigs: string;
+  createConfig?: Partial<ApiResponse>;
+  bulkCreateConfigs?: Partial<ApiResponse>;
+  deleteConfig?: Partial<ApiResponse>;
+  bulkDeleteConfigs?: Partial<ApiResponse>;
 }
 
 export type DynamicConfigurationClientMockProps = Pick<
@@ -70,8 +90,10 @@ export type DynamicConfigurationClientMockProps = Pick<
 
 export const internalDynamicConfigurationClientMock = {
   create: createInternalDynamicConfigurationClientMock,
+  createApiResponse,
 };
 
 export const dynamicConfigurationClientMock = {
   create: createDynamicConfigurationClientMock,
+  createApiResponse,
 };

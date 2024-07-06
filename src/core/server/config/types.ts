@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { ApiResponse } from '@opensearch-project/opensearch/.';
 import { ConfigPath } from '@osd/config';
 
 /**
@@ -35,30 +36,28 @@ export interface IInternalDynamicConfigurationClient {
   createConfig: (
     createConfigProps: CreateConfigProps,
     options?: DynamicConfigurationClientOptions
-  ) => Promise<string>;
+  ) => Promise<ApiResponse>;
   bulkCreateConfigs: (
     bulkCreateConfigProps: BulkCreateConfigProps,
     options?: DynamicConfigurationClientOptions
-  ) => Promise<string>;
+  ) => Promise<ApiResponse>;
   getConfig: (
     getConfigProps: GetConfigProps,
     options?: DynamicConfigurationClientOptions
-  ) => Promise<Record<string, any>>;
+  ) => Promise<ConfigObject>;
   bulkGetConfigs: (
     bulkGetConfigProps: BulkGetConfigProps,
     options?: DynamicConfigurationClientOptions
-  ) => Promise<Map<string, Record<string, any>>>;
-  listConfigs: (
-    options?: DynamicConfigurationClientOptions
-  ) => Promise<Map<string, Record<string, any>>>;
+  ) => Promise<Map<string, ConfigObject>>;
+  listConfigs: (options?: DynamicConfigurationClientOptions) => Promise<Map<string, ConfigObject>>;
   deleteConfig: (
     deleteConfigs: DeleteConfigProps,
     options?: DynamicConfigurationClientOptions
-  ) => Promise<string>;
+  ) => Promise<ApiResponse>;
   bulkDeleteConfigs: (
     bulkDeleteConfigs: BulkDeleteConfigProps,
     options?: DynamicConfigurationClientOptions
-  ) => Promise<string>;
+  ) => Promise<ApiResponse>;
 }
 
 export interface IDynamicConfigStoreClientFactory {
@@ -70,29 +69,25 @@ export interface IDynamicConfigStoreClientFactory {
  *
  * @interface
  */
-export interface IDynamicConfigStoreClient {
+export type IDynamicConfigStoreClient = Pick<
+  IInternalDynamicConfigurationClient,
+  'listConfigs' | 'bulkCreateConfigs' | 'createConfig' | 'bulkDeleteConfigs' | 'deleteConfig'
+> & {
   getConfig: (
     namespace: string,
     options?: DynamicConfigurationClientOptions
-  ) => Promise<Record<string, any> | undefined>;
+  ) => Promise<ConfigObject | undefined>;
   bulkGetConfigs: (
     namespaces: string[],
     options?: DynamicConfigurationClientOptions
-  ) => Promise<Map<string, Record<string, any>>>;
-  listConfigs: (
-    options?: DynamicConfigurationClientOptions
-  ) => Promise<Map<string, Record<string, any>>>;
-  /** TODO Add operations for
-   *    - create
-   *    - bulkCreate
-   *    - delete
-   *    - bulkDelete
-   */
-}
+  ) => Promise<Map<string, ConfigObject>>;
+};
 
 export interface DynamicConfigurationClientOptions {
   asyncLocalStorageContext: AsyncLocalStorageContext;
 }
+
+export type ConfigObject = Record<string, any>;
 
 /**
  * Provides the necessary context needed when a request first hits the http server
@@ -125,7 +120,7 @@ export type ConfigBlob = ConfigIdentifier & {
   /**
    * The new config blob to override the old config in the config store. This will update the entire config blob for a configIdentifier
    */
-  updatedConfig: Record<string, unknown>;
+  updatedConfig: ConfigObject;
 };
 
 export interface CreateConfigProps {

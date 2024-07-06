@@ -7,11 +7,14 @@ import { ConfigPath, Env, IConfigService } from '@osd/config';
 import { Type } from '@osd/config-schema';
 import { PublicMethodsOf } from '@osd/utility-types';
 import { AsyncLocalStorage } from 'async_hooks';
+import { first } from 'rxjs/operators';
+import { Observable } from 'rxjs';
 import { InternalHttpServiceSetup } from '../http';
 import { CoreService } from '../../types';
 import {
   AsyncLocalStorageContext,
   ConfigIdentifier,
+  IDynamicConfigStoreClient,
   IDynamicConfigStoreClientFactory,
   InternalDynamicConfigServiceSetup,
   InternalDynamicConfigServiceStart,
@@ -20,10 +23,17 @@ import { InternalDynamicConfigurationClient } from './service/internal_dynamic_c
 import { Logger, LoggerFactory } from '../logging';
 import { createLocalStore, pathToString } from './utils/utils';
 import { DynamicConfigurationClient } from './service/dynamic_configuration_client';
-import { OpenSearchDynamicConfigStoreFactory } from './service/opensearch_config_store_factory';
+import { OpenSearchDynamicConfigStoreFactory } from './service/config_store_client/opensearch_config_store_factory';
+import { InternalOpenSearchServiceStart } from '../opensearch';
+import { DynamicConfigServiceConfigType } from './dynamic_config_service_config';
+import { DummyDynamicConfigStoreFactory } from './service/config_store_client/dummy_config_store_factory';
 
 export interface RegisterHTTPSetupDeps {
   http: InternalHttpServiceSetup;
+}
+
+export interface StartDeps {
+  opensearch: InternalOpenSearchServiceStart;
 }
 
 export type IDynamicConfigService = PublicMethodsOf<DynamicConfigService>;
@@ -35,6 +45,7 @@ export class DynamicConfigService
   readonly #envService: Env;
   readonly #logger: Logger;
   readonly #schemas = new Map<string, Type<unknown>>();
+  readonly #config$: Observable<DynamicConfigServiceConfigType>;
   readonly #asyncLocalStorage: AsyncLocalStorage<
     AsyncLocalStorageContext
   > = new AsyncLocalStorage();
@@ -43,7 +54,6 @@ export class DynamicConfigService
   #started = false;
   #startPromiseResolver?: (startServices: InternalDynamicConfigServiceStart) => void;
   readonly #startPromise: Promise<InternalDynamicConfigServiceStart>;
-  readonly #defaultDynamicConfigStoreClientFactory = new OpenSearchDynamicConfigStoreFactory();
 
   constructor(configService: IConfigService, envService: Env, logger: LoggerFactory) {
     this.#configService = configService;
@@ -52,6 +62,9 @@ export class DynamicConfigService
     this.#startPromise = new Promise<InternalDynamicConfigServiceStart>(
       (resolve) => (this.#startPromiseResolver = resolve)
     );
+    this.#config$ = configService
+      .atPath<DynamicConfigServiceConfigType>('dynamic_config_service')
+      .pipe(first());
   }
   public async setup(): Promise<InternalDynamicConfigServiceSetup> {
     return {
@@ -79,12 +92,28 @@ export class DynamicConfigService
     };
   }
 
-  public async start(): Promise<InternalDynamicConfigServiceStart> {
+  public async start({ opensearch }: StartDeps): Promise<InternalDynamicConfigServiceStart> {
     this.#logger.info('initiating start()');
-    // TODO Provide a default implementation of the client
-    const configStoreClient = this.#configStoreClientFactory
-      ? this.#configStoreClientFactory.create()
-      : this.#defaultDynamicConfigStoreClientFactory.create();
+    const config = await this.#config$.pipe(first()).toPromise();
+    let configStoreClient: IDynamicConfigStoreClient;
+
+    if (!config.enabled) {
+      const dummyDynamicConfigStoreClientFactory = new DummyDynamicConfigStoreFactory();
+      configStoreClient = dummyDynamicConfigStoreClientFactory.create();
+    } else {
+      if (this.#configStoreClientFactory) {
+        configStoreClient = this.#configStoreClientFactory.create();
+      } else {
+        const defaultDynamicConfigStoreClientFactory = new OpenSearchDynamicConfigStoreFactory(
+          opensearch
+        );
+        const defaultConfigStoreClient = defaultDynamicConfigStoreClientFactory.create();
+        if (!config.skipMigrations) {
+          await defaultConfigStoreClient.createDynamicConfigIndex();
+        }
+        configStoreClient = defaultConfigStoreClient;
+      }
+    }
 
     // Create the clients
     const internalClient = new InternalDynamicConfigurationClient({
