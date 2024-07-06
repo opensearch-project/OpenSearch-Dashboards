@@ -61,6 +61,7 @@ const DEFAULTS_SETTINGS = {
   logging: { silent: true },
   plugins: {},
   migrations: { skip: true },
+  dynamic_config_service: { enabled: false },
 };
 
 const DEFAULT_SETTINGS_WITH_CORE_PLUGINS = {

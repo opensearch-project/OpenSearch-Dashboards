@@ -11,25 +11,38 @@ import { Env } from '@osd/config';
 import _ from 'lodash';
 import { schema, Type } from '@osd/config-schema';
 import { IDynamicConfigStoreClient } from 'opensearch-dashboards/server';
+import { ApiResponse } from '@opensearch-project/opensearch/.';
 
-describe('InternalDynamicConfigDDBClient', () => {
+describe('InternalDynamicConfigStoreClient', () => {
   const existingConfigServiceMock = configServiceMock.create();
 
   interface CreateConfigStoreClientMockProps {
     getConfigReturnValue?: Record<string, any>;
     bulkGetConfigsReturnValue?: Map<string, Record<string, any>>;
     listConfigsReturnValue?: Map<string, Record<string, any>>;
+    createConfigReturnValue?: ApiResponse<string>;
+    bulkCreateConfigsReturnValue?: ApiResponse<string>;
+    deleteConfigReturnValue?: ApiResponse<string>;
+    bulkDeleteConfigsReturnValue?: ApiResponse<string>;
   }
 
   const createConfigStoreClientMock = ({
     getConfigReturnValue,
     bulkGetConfigsReturnValue,
     listConfigsReturnValue,
+    createConfigReturnValue,
+    bulkCreateConfigsReturnValue,
+    deleteConfigReturnValue,
+    bulkDeleteConfigsReturnValue,
   }: CreateConfigStoreClientMockProps): IDynamicConfigStoreClient => {
     return {
       getConfig: jest.fn().mockResolvedValue(getConfigReturnValue),
       bulkGetConfigs: jest.fn().mockResolvedValue(bulkGetConfigsReturnValue),
       listConfigs: jest.fn().mockResolvedValue(listConfigsReturnValue),
+      createConfig: jest.fn().mockResolvedValue(createConfigReturnValue),
+      bulkCreateConfigs: jest.fn().mockResolvedValue(bulkCreateConfigsReturnValue),
+      deleteConfig: jest.fn().mockResolvedValue(deleteConfigReturnValue),
+      bulkDeleteConfigs: jest.fn().mockResolvedValue(bulkDeleteConfigsReturnValue),
     };
   };
 

@@ -64,6 +64,7 @@ import { config as opensearchDashboardsConfig } from './opensearch_dashboards_co
 import { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects';
 import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
+import { config as dynamicConfigServiceConfig } from './config';
 import { ContextService } from './context';
 import { RequestHandlerContext } from '.';
 import { InternalCoreSetup, InternalCoreStart, ServiceConfigDescriptor } from './internal_types';
@@ -268,11 +269,13 @@ export class Server {
     this.log.debug('starting server');
     const startTransaction = apm.startTransaction('server_start', 'opensearch_dashboards_platform');
 
-    const dynamicConfigServiceStart = await this.dynamicConfigService.start();
     const auditTrailStart = this.auditTrail.start();
 
     const opensearchStart = await this.opensearch.start({
       auditTrail: auditTrailStart,
+    });
+    const dynamicConfigServiceStart = await this.dynamicConfigService.start({
+      opensearch: opensearchStart,
     });
     const soStartSpan = startTransaction?.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await this.savedObjects.start({
@@ -368,6 +371,7 @@ export class Server {
       opsConfig,
       statusConfig,
       pidConfig,
+      dynamicConfigServiceConfig,
     ];
 
     this.configService.addDeprecationProvider(rootConfigPath, coreDeprecationProvider);
