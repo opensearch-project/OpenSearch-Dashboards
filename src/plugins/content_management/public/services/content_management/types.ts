@@ -37,13 +37,13 @@ export type Content =
       kind: 'visualization';
       id: string;
       order: number;
-      input: VisualizationInput;
+      input: SavedObjectInput;
     }
   | {
       kind: 'dashboard';
       id: string;
       order: number;
-      input: VisualizationInput;
+      input: SavedObjectInput;
     }
   | {
       kind: 'custom';
@@ -59,7 +59,7 @@ export type Content =
       onClick?: () => void;
     };
 
-export type VisualizationInput =
+export type SavedObjectInput =
   | {
       kind: 'static';
       /**
