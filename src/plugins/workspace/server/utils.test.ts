@@ -16,7 +16,7 @@ import {
   getPrincipalsFromRequest,
   updateDashboardAdminStateForRequest,
   getDataSourcesList,
-  checkAndSetDefaultDataSources,
+  checkAndSetDefaultDataSource,
 } from './utils';
 import { getWorkspaceState } from '../../../core/server/utils';
 import { Observable, of } from 'rxjs';
@@ -186,7 +186,7 @@ describe('workspace utils', () => {
     const uiSettings = uiSettingsServiceMock.createStartContract();
     const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     const dataSources = ['id1', 'id2'];
-    await checkAndSetDefaultDataSources(uiSettingsClient, dataSources, false);
+    await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, false);
     expect(uiSettingsClient.set).toHaveBeenCalledWith(
       DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
       dataSources[0]
@@ -199,7 +199,7 @@ describe('workspace utils', () => {
     const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     const dataSources = ['id1', 'id2'];
     uiSettingsClient.get = jest.fn().mockResolvedValue(dataSources[0]);
-    await checkAndSetDefaultDataSources(uiSettingsClient, dataSources, true);
+    await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, true);
     expect(uiSettingsClient.set).not.toBeCalled();
   });
 
@@ -209,7 +209,7 @@ describe('workspace utils', () => {
     const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     const dataSources = ['id1', 'id2'];
     uiSettingsClient.get = jest.fn().mockResolvedValue('');
-    await checkAndSetDefaultDataSources(uiSettingsClient, dataSources, true);
+    await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, true);
     expect(uiSettingsClient.set).toHaveBeenCalledWith(
       DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
       dataSources[0]

@@ -116,7 +116,7 @@ export const getDataSourcesList = (client: SavedObjectsClientContract, workspace
     });
 };
 
-export const checkAndSetDefaultDataSources = async (
+export const checkAndSetDefaultDataSource = async (
   uiSettingsClient: IUiSettingsClient,
   dataSources: string[],
   isNeededCheck: boolean
@@ -128,8 +128,7 @@ export const checkAndSetDefaultDataSources = async (
     } else {
       // Update will check if default DS still exists.
       const defaultDSId = (await uiSettingsClient.get(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)) ?? '';
-      const isDefaultDSExist = dataSources.indexOf(defaultDSId) > -1;
-      if (!isDefaultDSExist) {
+      if (!dataSources.includes(defaultDSId)) {
         await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
       }
     }

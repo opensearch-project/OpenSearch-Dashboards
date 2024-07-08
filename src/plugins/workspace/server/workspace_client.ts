@@ -22,7 +22,7 @@ import {
   WorkspaceAttributeWithPermission,
 } from './types';
 import { workspace } from './saved_objects';
-import { generateRandomId, getDataSourcesList, checkAndSetDefaultDataSources } from './utils';
+import { generateRandomId, getDataSourcesList, checkAndSetDefaultDataSource } from './utils';
 import {
   WORKSPACE_ID_CONSUMER_WRAPPER_ID,
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
@@ -133,7 +133,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         });
         // Set first data source as default after creating workspace
         const uiSettingsClient = this.uiSettings.asScopedToClient(client);
-        await checkAndSetDefaultDataSources(uiSettingsClient, dataSources, false);
+        await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, false);
         // Reset workspace state
         updateWorkspaceState(requestDetail.request, {
           requestWorkspaceId: rawState.requestWorkspaceId,
@@ -268,7 +268,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
 
       if (newDataSources && this.uiSettings && client) {
         const uiSettingsClient = this.uiSettings.asScopedToClient(client);
-        checkAndSetDefaultDataSources(uiSettingsClient, newDataSources, true);
+        checkAndSetDefaultDataSource(uiSettingsClient, newDataSources, true);
       }
 
       return {
