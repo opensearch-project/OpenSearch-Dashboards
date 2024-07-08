@@ -1,6 +1,30 @@
 # CHANGELOG
 Inspired from [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
+## [Unreleased](https://github.com/opensearch-project/OpenSearch-Dashboards/compare/1.3.17...1.3)
+
+### 💥 Breaking Changes
+
+### Deprecations
+
+### 🛡   Security
+
+### 📈 Features/Enhancements
+
+### 🐛 Bug Fixes
+
+### 🚞 Infrastructure
+
+### 📝 Documentation
+
+### 🛠   Maintenance
+
+- [Version] Increment version to 1.3.18 ([#7191](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7191))
+
+### 🪛  Refactoring
+
+### 🔩 Tests
+
 ## [1.3.17 - 2024-06-06](https://github.com/opensearch-project/OpenSearch-Dashboards/releases/tag/1.3.17)
 
 ### 💥 Breaking Changes
