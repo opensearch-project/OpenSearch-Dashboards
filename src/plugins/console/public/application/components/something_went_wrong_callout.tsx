@@ -52,7 +52,7 @@ export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error, onB
         defaultMessage: 'Cannot load Console',
       })}
     >
-      <EuiText>
+      <EuiText size="s">
         <p>
           <FormattedMessage
             id="console.loadingError.message"

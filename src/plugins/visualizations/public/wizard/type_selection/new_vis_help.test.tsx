@@ -48,6 +48,7 @@ describe('NewVisHelp', () => {
                 buttonText: 'Do it now!',
                 description: 'Look at this fancy new thing!!!',
               },
+
               title: 'Test title',
               stage: 'production',
             },
@@ -56,7 +57,9 @@ describe('NewVisHelp', () => {
         />
       )
     ).toMatchInlineSnapshot(`
-      <EuiText>
+      <EuiText
+        size="s"
+      >
         <p>
           <FormattedMessage
             defaultMessage="Start creating your visualization by selecting a type for that visualization."

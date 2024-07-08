@@ -55,6 +55,7 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -738,12 +739,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           }
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
-          <p>
-            <FormattedMessage
-              id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-              defaultMessage="This action will delete the following saved objects:"
-            />
-          </p>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+                defaultMessage="This action will delete the following saved objects:"
+              />
+            </p>
+          </EuiText>
           <EuiInMemoryTable
             items={selectedSavedObjects}
             columns={[
