@@ -20,8 +20,6 @@ import {
   EuiListGroupItem,
   EuiPanel,
   EuiPopover,
-  EuiPopoverFooter,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -44,20 +42,6 @@ import { getRecentWorkspaces, getUseCaseFromFeatureConfig } from '../../utils';
 
 interface Props {
   coreStart: CoreStart;
-}
-
-/**
- * Return maximum five workspaces, the current selected workspace
- * will be on the top of the list.
- */
-function getFilteredWorkspaceList(
-  workspaceList: WorkspaceObject[],
-  currentWorkspace: WorkspaceObject | null
-): WorkspaceObject[] {
-  return [
-    ...(currentWorkspace ? [currentWorkspace] : []),
-    ...workspaceList.filter((workspace) => workspace.id !== currentWorkspace?.id),
-  ];
 }
 
 export const WorkspaceMenu = ({ coreStart }: Props) => {
@@ -87,23 +71,15 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   };
 
   const filteredWorkspaceList = useMemo(() => {
-    return getFilteredWorkspaceList(workspaceList, currentWorkspace)
+    return workspaceList
       .filter((workspace) => workspace.name.toLowerCase().includes(searchValue.toLowerCase()))
       .slice(0, MAX_WORKSPACE_PICKER_NUM);
-  }, [workspaceList, searchValue, currentWorkspace]);
+  }, [workspaceList, searchValue]);
 
   const filteredRecentWorkspaces = useMemo(() => {
-    const localStoreWorkspaces = getRecentWorkspaces();
-    const recentWorkspacesList: WorkspaceObject[] = [];
-
-    localStoreWorkspaces.forEach((workspaceId) => {
-      const workspace = workspaceList.find((ws) => ws.id === workspaceId);
-      if (workspace) {
-        recentWorkspacesList.push(workspace);
-      }
-    });
-    return recentWorkspacesList
-      .filter((workspace) => workspace.name.toLowerCase().includes(searchValue.toLowerCase()))
+    return getRecentWorkspaces()
+      .map((workspaceId) => workspaceList.find((ws) => ws.id === workspaceId) as WorkspaceObject)
+      .filter((workspace) => workspace?.name.toLowerCase().includes(searchValue.toLowerCase()))
       .slice(0, MAX_WORKSPACE_PICKER_NUM);
   }, [searchValue, workspaceList]);
 
@@ -295,14 +271,29 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
                 initialsLength={2}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>{currentWorkspaceName}</EuiFlexItem>
-            <EuiFlexItem grow={false}>{currentWorkspaceUseCase}</EuiFlexItem>
+            <EuiFlexItem grow={false} data-test-subj="context-menu-current-workspace-name">
+              {currentWorkspaceName}
+            </EuiFlexItem>
+            <EuiFlexItem grow={false} data-test-subj="context-menu-current-use-case">
+              {currentWorkspaceUseCase}
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
-                href={coreStart.application.getUrlForApp('management', {
-                  path: '/opensearch-dashboards/objects',
-                  absolute: false,
-                })}
+                key={'objects'}
+                onClick={() => {
+                  window.location.assign(
+                    formatUrlWithWorkspaceId(
+                      coreStart.application.getUrlForApp(
+                        'management/opensearch-dashboards/objects',
+                        {
+                          absolute: false,
+                        }
+                      ),
+                      currentWorkspace.id,
+                      coreStart.http.basePath
+                    )
+                  );
+                }}
               >
                 <FormattedMessage
                   id="core.ui.primaryNav.workspace.savedObjects"
