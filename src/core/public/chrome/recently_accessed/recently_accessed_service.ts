@@ -41,6 +41,8 @@ export interface ChromeRecentlyAccessedHistoryItem {
   label: string;
   id: string;
   workspaceId?: string;
+  type?: string;
+  updatedAt?: number;
 }
 
 interface StartDeps {
@@ -59,15 +61,32 @@ export class RecentlyAccessedService {
 
     return {
       /** Adds a new item to the history. */
-      add: (link: string, label: string, id: string) => {
+      add: (
+        link: string,
+        label: string,
+        id: string,
+        extraProps?: { type?: string; updatedAt?: number }
+      ) => {
         const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
-
-        history.add({
-          link,
-          label,
-          id,
-          ...(currentWorkspaceId && { workspaceId: currentWorkspaceId }),
-        });
+        if (extraProps) {
+          const type = extraProps!.type;
+          const updatedAt = extraProps!.updatedAt;
+          history.add({
+            link,
+            label,
+            id,
+            ...(currentWorkspaceId && { workspaceId: currentWorkspaceId }),
+            type,
+            updatedAt,
+          });
+        } else {
+          history.add({
+            link,
+            label,
+            id,
+            ...(currentWorkspaceId && { workspaceId: currentWorkspaceId }),
+          });
+        }
       },
 
       /** Gets the current array of history items. */
@@ -95,8 +114,15 @@ export interface ChromeRecentlyAccessed {
    * @param link a relative URL to the resource (not including the {@link HttpStart.basePath | `http.basePath`})
    * @param label the label to display in the UI
    * @param id a unique string used to de-duplicate the recently accessed list.
+   * @param type the item type
+   * @param updatedAt the time that the item is last updated at
    */
-  add(link: string, label: string, id: string): void;
+  add(
+    link: string,
+    label: string,
+    id: string,
+    extraProps?: { type?: string; updatedAt?: number }
+  ): void;
 
   /**
    * Gets an Array of the current recently accessed history.

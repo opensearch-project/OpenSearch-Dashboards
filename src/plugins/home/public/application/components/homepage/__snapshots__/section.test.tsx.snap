@@ -1,0 +1,206 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Home page sections is rendered with title and header component 1`] = `
+<Section
+  headerComponent={
+    <EuiLink
+      className="section-links"
+      href="https"
+      target="_blank"
+    >
+      See all documentation
+    </EuiLink>
+  }
+  render={
+    [MockFunction] {
+      "calls": Array [
+        Array [
+          <div
+            style="display: contents;"
+          />,
+        ],
+      ],
+      "results": Array [
+        Object {
+          "type": "return",
+          "value": undefined,
+        },
+      ],
+    }
+  }
+  title="Section title"
+>
+  <EuiPanel
+    color="transparent"
+    data-test-subj="homepageSection"
+    hasBorder={false}
+    hasShadow={false}
+  >
+    <div
+      className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiPanel--noBorder"
+      data-test-subj="homepageSection"
+    >
+      <EuiFlexGroup
+        alignItems="center"
+        direction="row"
+        gutterSize="s"
+        responsive={false}
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+        >
+          <EuiFlexItem
+            grow={true}
+          >
+            <div
+              className="euiFlexItem"
+            >
+              <EuiTitle
+                size="m"
+              >
+                <h2
+                  className="euiTitle euiTitle--medium"
+                >
+                  Section title
+                </h2>
+              </EuiTitle>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiLink
+                className="section-links"
+                href="https"
+                target="_blank"
+              >
+                <a
+                  className="euiLink euiLink--primary section-links"
+                  href="https"
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  See all documentation
+                  <EuiIcon
+                    aria-label="External link"
+                    className="euiLink__externalIcon"
+                    size="s"
+                    type="popout"
+                  >
+                    <span
+                      aria-label="External link"
+                      className="euiLink__externalIcon"
+                      data-euiicon-type="popout"
+                      size="s"
+                    />
+                  </EuiIcon>
+                  <EuiScreenReaderOnly>
+                    <span
+                      className="euiScreenReaderOnly"
+                    >
+                      <EuiI18n
+                        default="(opens in a new tab or window)"
+                        token="euiLink.newTarget.screenReaderOnlyText"
+                      >
+                        (opens in a new tab or window)
+                      </EuiI18n>
+                    </span>
+                  </EuiScreenReaderOnly>
+                </a>
+              </EuiLink>
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem
+            grow={false}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              <EuiButtonIcon
+                aria-label="Collapse section"
+                color="text"
+                iconSize="m"
+                iconType="arrowDown"
+                onClick={[Function]}
+                size="s"
+              >
+                <button
+                  aria-label="Collapse section"
+                  className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--small"
+                  disabled={false}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <EuiIcon
+                    aria-hidden="true"
+                    className="euiButtonIcon__icon"
+                    color="inherit"
+                    size="m"
+                    type="arrowDown"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                      size="m"
+                    />
+                  </EuiIcon>
+                </button>
+              </EuiButtonIcon>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+      <EuiFlexGroup
+        data-test-subj="homepageSectionContent"
+        direction="row"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+          data-test-subj="homepageSectionContent"
+        >
+          <EuiFlexItem
+            grow={3}
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrow3"
+            >
+              <LazyRender
+                render={
+                  [MockFunction] {
+                    "calls": Array [
+                      Array [
+                        <div
+                          style="display: contents;"
+                        />,
+                      ],
+                    ],
+                    "results": Array [
+                      Object {
+                        "type": "return",
+                        "value": undefined,
+                      },
+                    ],
+                  }
+                }
+              >
+                <div
+                  style={
+                    Object {
+                      "display": "contents",
+                    }
+                  }
+                />
+              </LazyRender>
+            </div>
+          </EuiFlexItem>
+        </div>
+      </EuiFlexGroup>
+    </div>
+  </EuiPanel>
+</Section>
+`;

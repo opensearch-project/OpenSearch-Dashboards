@@ -170,6 +170,7 @@ const Content = () => {
               defaultMessage: 'Loading homepage',
             })}
             size="xl"
+            data-test-subj="loading"
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -187,6 +188,7 @@ const Content = () => {
         telemetry={telemetry}
         branding={getBranding()}
         logos={logos}
+        data-test-subj="welcome"
       />
     );
   }
@@ -196,10 +198,12 @@ const Content = () => {
   return (
     <>
       {hero && <HeroSection render={hero.render} />}
-      {sections?.map(({ render, title, description, links }, i) => (
-        <Section key={i} title={title} description={description} links={links} render={render} />
+      {sections?.map(({ render, title, headerComponent }, i) => (
+        <>
+          <Section key={i} title={title} render={render} headerComponent={headerComponent} />
+          <EuiHorizontalRule />
+        </>
       ))}
-      <EuiHorizontalRule />
       <Footer />
     </>
   );
@@ -252,7 +256,7 @@ export const Homepage = () => {
 
   return (
     <EuiPageTemplate
-      restrictWidth={1400}
+      restrictWidth={1680}
       pageHeader={{
         pageTitle: <span data-test-subj="dashboardCustomTitle">{title}</span>,
         rightSideItems: sideItems,

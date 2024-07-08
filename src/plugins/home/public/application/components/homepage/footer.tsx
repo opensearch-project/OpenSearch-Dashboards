@@ -68,38 +68,6 @@ export const Footer: React.FC = () => {
   return (
     <EuiFlexGroup direction="row" wrap>
       {isAdvancedSettingsEnabled && <EuiFlexItem grow={false}>{defaultRouteButton}</EuiFlexItem>}
-
-      <EuiFlexItem grow={false}>
-        <RedirectAppLinks application={application}>
-          <EuiButtonEmpty
-            flush="both"
-            href={getUrlForApp('home', { path: '#/feature_directory' })}
-            iconType="apps"
-            size="xs"
-          >
-            <FormattedMessage
-              id="home.footer.appDirectoryButtonLabel"
-              defaultMessage="View app directory"
-            />
-          </EuiButtonEmpty>
-        </RedirectAppLinks>
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <RedirectAppLinks application={application}>
-          <EuiButtonEmpty
-            flush="both"
-            href={getUrlForApp('opensearch_dashboards_overview')}
-            iconType="visualizeApp"
-            size="xs"
-          >
-            <FormattedMessage
-              id="home.footer.visualizeAndAnalyze"
-              defaultMessage="Visualize & Analyze"
-            />
-          </EuiButtonEmpty>
-        </RedirectAppLinks>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

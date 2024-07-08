@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Recent work section renders empty recent work 1`] = `
+<element>
+  <div
+    class="empty-recent-work"
+  >
+    <h2>
+      No recent work
+    </h2>
+    <p>
+      Recent work will appear here.
+    </p>
+  </div>
+</element>
+`;
+
+exports[`Recent work section renders non-empty recent work sections with visualization and dashboard saved object 1`] = `
+<element>
+  <div>
+    <div
+      class="euiFlexGrid euiFlexGrid--gutterLarge euiFlexGrid--fourths euiFlexGrid--responsive"
+    >
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--horizontal euiCard--isClickable"
+        >
+          <div
+            class="euiCard__content"
+          >
+            <span
+              class="euiTitle euiTitle--xsmall euiCard__title"
+              id="generated-idTitle"
+            >
+              <button
+                aria-describedby=" generated-idDescription"
+                class="euiCard__titleButton"
+              >
+                label1
+              </button>
+            </span>
+            <div
+              class="euiText euiText--small euiCard__description"
+              id="generated-idDescription"
+            >
+              <p>
+                <span
+                  class="recent-work-title-icon"
+                  data-euiicon-type="visualizeApp"
+                />
+                Visualization
+                <br />
+                Last updated a few seconds ago
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--horizontal euiCard--isClickable"
+        >
+          <div
+            class="euiCard__content"
+          >
+            <span
+              class="euiTitle euiTitle--xsmall euiCard__title"
+              id="generated-idTitle"
+            >
+              <button
+                aria-describedby=" generated-idDescription"
+                class="euiCard__titleButton"
+              >
+                label2
+              </button>
+            </span>
+            <div
+              class="euiText euiText--small euiCard__description"
+              id="generated-idDescription"
+            >
+              <p>
+                <span
+                  class="recent-work-title-icon"
+                  data-euiicon-type="dashboardApp"
+                />
+                Dashboard
+                <br />
+                Last updated a few seconds ago
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</element>
+`;
