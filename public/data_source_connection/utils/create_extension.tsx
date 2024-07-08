@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { of } from 'rxjs';
 import { QueryEditorExtensionConfig } from '../../../../../src/plugins/data/public/ui/query_editor';
 import { ConfigSchema } from '../../../common/config';
 import { ConnectionsBar } from '../components';
@@ -16,8 +17,8 @@ export const createDataSourceConnectionExtension = (
   return {
     id: 'data-source-connection',
     order: 2000,
-    isEnabled: async (dependencies) => {
-      return true;
+    isEnabled$: (dependencies) => {
+      return of(true);
     },
     getComponent: (dependencies) => {
       return <ConnectionsBar dependencies={dependencies} connectionsService={connectionsService} />;
