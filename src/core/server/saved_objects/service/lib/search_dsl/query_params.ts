@@ -286,53 +286,32 @@ export function getQueryParams({
     }
   }
 
-  if (workspaces?.length) {
-    if (workspacesSearchOperator === 'OR') {
-      ACLSearchParamsShouldClause.push({
-        bool: {
-          should: workspaces.map((workspace) => {
-            return getClauseForWorkspace(workspace);
-          }),
-          minimum_should_match: 1,
-        },
-      });
-    } else {
-      bool.filter.push({
-        bool: {
-          should: workspaces.map((workspace) => {
-            return getClauseForWorkspace(workspace);
-          }),
-          minimum_should_match: 1,
-        },
-      });
+  if (workspaces) {
+    const conditions =
+      workspacesSearchOperator === 'OR' ? ACLSearchParamsShouldClause : bool.filter;
+
+    switch (workspaces.length) {
+      case 0:
+        conditions.push({
+          match_none: {},
+        });
+        break;
+      default:
+        conditions.push({
+          bool: {
+            should: workspaces.map((workspace) => {
+              return getClauseForWorkspace(workspace);
+            }),
+            minimum_should_match: 1,
+          },
+        });
     }
   }
 
   if (ACLSearchParamsShouldClause.length) {
     bool.filter.push({
       bool: {
-        should: [
-          /**
-           * Return those objects without workspaces field and permissions field to keep find API backward compatible
-           */
-          {
-            bool: {
-              must_not: [
-                {
-                  exists: {
-                    field: 'workspaces',
-                  },
-                },
-                {
-                  exists: {
-                    field: 'permissions',
-                  },
-                },
-              ],
-            },
-          },
-          ...ACLSearchParamsShouldClause,
-        ],
+        should: ACLSearchParamsShouldClause,
       },
     });
   }
