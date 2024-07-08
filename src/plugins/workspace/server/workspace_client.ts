@@ -10,6 +10,7 @@ import {
   CoreSetup,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
+  UiSettingsServiceStart,
 } from '../../../core/server';
 import { WORKSPACE_TYPE } from '../../../core/server';
 import {
@@ -20,7 +21,7 @@ import {
   WorkspaceAttributeWithPermission,
 } from './types';
 import { workspace } from './saved_objects';
-import { generateRandomId, getDataSourcesList } from './utils';
+import { generateRandomId, getDataSourcesList, checkAndSetDefaultDataSources } from './utils';
 import {
   WORKSPACE_ID_CONSUMER_WRAPPER_ID,
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
@@ -36,6 +37,7 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
 export class WorkspaceClient implements IWorkspaceClientImpl {
   private setupDep: CoreSetup;
   private savedObjects?: SavedObjectsServiceStart;
+  private uiSettings?: UiSettingsServiceStart;
 
   constructor(core: CoreSetup) {
     this.setupDep = core;
@@ -122,6 +124,11 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           permissions,
         }
       );
+      if (dataSources && this.uiSettings && client) {
+        // Set first data source as default after creating workspace
+        const uiSettingsClient = this.uiSettings.asScopedToClient(client);
+        checkAndSetDefaultDataSources(uiSettingsClient, dataSources, false);
+      }
 
       return {
         success: true,
@@ -248,6 +255,12 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           version: workspaceInDB.version,
         }
       );
+
+      if (newDataSources && this.uiSettings && client) {
+        const uiSettingsClient = this.uiSettings.asScopedToClient(client);
+        checkAndSetDefaultDataSources(uiSettingsClient, newDataSources, true);
+      }
+
       return {
         success: true,
         result: true,
@@ -291,6 +304,9 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   public setSavedObjects(savedObjects: SavedObjectsServiceStart) {
     this.savedObjects = savedObjects;
+  }
+  public setUiSettings(uiSettings: UiSettingsServiceStart) {
+    this.uiSettings = uiSettings;
   }
   public async destroy(): Promise<IResponse<boolean>> {
     return {

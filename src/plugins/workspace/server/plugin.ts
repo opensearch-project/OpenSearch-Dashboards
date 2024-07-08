@@ -22,6 +22,8 @@ import {
   PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
   WORKSPACE_UI_SETTINGS_CLIENT_WRAPPER_ID,
   PRIORITY_FOR_WORKSPACE_UI_SETTINGS_WRAPPER,
+  WORKSPACE_DATA_SOURCE_OPERATION_WRAPPER_ID,
+  PRIORITY_FOR_WORKSPACE_DATA_SOURCE_OPERATION_WRAPPER,
 } from '../common/constants';
 import { IWorkspaceClientImpl, WorkspacePluginSetup, WorkspacePluginStart } from './types';
 import { WorkspaceClient } from './workspace_client';
@@ -41,6 +43,7 @@ import {
 import { getOSDAdminConfigFromYMLConfig, updateDashboardAdminStateForRequest } from './utils';
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
 import { WorkspaceUiSettingsClientWrapper } from './saved_objects/workspace_ui_settings_client_wrapper';
+import { WorkspaceDataSourceOperationWrapper } from './saved_objects/workspace_data_source_operation_wrapper';
 
 export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePluginStart> {
   private readonly logger: Logger;
@@ -50,6 +53,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
   private readonly globalConfig$: Observable<SharedGlobalConfig>;
   private workspaceSavedObjectsClientWrapper?: WorkspaceSavedObjectsClientWrapper;
   private workspaceUiSettingsClientWrapper?: WorkspaceUiSettingsClientWrapper;
+  private workspaceDataSourceOperationWrapper?: WorkspaceDataSourceOperationWrapper;
 
   private proxyWorkspaceTrafficToRealHandler(setupDeps: CoreSetup) {
     /**
@@ -140,6 +144,14 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       new WorkspaceIdConsumerWrapper().wrapperFactory
     );
 
+    this.workspaceDataSourceOperationWrapper = new WorkspaceDataSourceOperationWrapper();
+
+    core.savedObjects.addClientWrapper(
+      PRIORITY_FOR_WORKSPACE_DATA_SOURCE_OPERATION_WRAPPER,
+      WORKSPACE_DATA_SOURCE_OPERATION_WRAPPER_ID,
+      this.workspaceDataSourceOperationWrapper.wrapperFactory
+    );
+
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
     this.logger.info('Workspace permission control enabled:' + isPermissionControlEnabled);
     if (isPermissionControlEnabled) this.setupPermission(core);
@@ -176,6 +188,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     this.logger.debug('Starting Workspace service');
     this.permissionControl?.setup(core.savedObjects.getScopedClient, core.http.auth);
     this.client?.setSavedObjects(core.savedObjects);
+    this.client?.setUiSettings(core.uiSettings);
     this.workspaceConflictControl?.setSerializer(core.savedObjects.createSerializer());
     this.workspaceSavedObjectsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
     this.workspaceUiSettingsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
