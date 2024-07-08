@@ -4,21 +4,18 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiLink } from '@elastic/eui';
-import { mount } from 'enzyme';
 import { Homepage } from './homepage';
 import {
   HomeOpenSearchDashboardsServices,
   setServices,
 } from '../../opensearch_dashboards_services';
-import { createHomeServicesMock } from '../../../mocks';
 import { SectionTypeService } from '../../../services';
 import { BehaviorSubject } from 'rxjs';
 import { HeroSection, Section } from '../../../services/section_type/section_type';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { act } from 'react-dom/test-utils';
-import { Welcome } from '../welcome';
+import { homePluginMock } from '../../../mocks/mocks';
 
 let services: HomeOpenSearchDashboardsServices;
 const mockErrors = new BehaviorSubject<unknown | undefined>(undefined);
@@ -53,7 +50,7 @@ jest.mock('../../../services', () => {
 
 describe('Home page', () => {
   beforeAll(() => {
-    services = createHomeServicesMock();
+    services = homePluginMock.createStartContract();
   });
 
   it('renders the loading spinner if home page is still being loaded', async () => {

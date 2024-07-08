@@ -8,9 +8,10 @@ import {
   HomeOpenSearchDashboardsServices,
   setServices,
 } from '../../../opensearch_dashboards_services';
-import { createHomeServicesMock } from 'src/plugins/home/public/mocks';
+
 import { BehaviorSubject } from 'rxjs';
 import { ChromeRecentlyAccessedHistoryItem } from 'opensearch-dashboards/public';
+import { homePluginMock } from 'src/plugins/home/public/mocks/mocks';
 
 let mockElement: HTMLElement;
 let services: HomeOpenSearchDashboardsServices;
@@ -18,7 +19,7 @@ let services: HomeOpenSearchDashboardsServices;
 describe('Recent work section', () => {
   beforeAll(() => {
     mockElement = document.createElement('element');
-    services = createHomeServicesMock();
+    services = homePluginMock.createStartContract();
   });
 
   it('renders empty recent work', async () => {

@@ -29,11 +29,11 @@
  */
 
 import { coreMock } from '../../../core/public/mocks';
-import { homePluginMock } from '../../home/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
 import { dataPluginMock } from '../../data/public/mocks';
 import { uiActionsPluginMock } from '../../ui_actions/public/mocks';
 import { SavedObjectsManagementPlugin } from './plugin';
+import { homePluginMock } from '../../home/public/mocks/mocks';
 
 describe('SavedObjectsManagementPlugin', () => {
   let plugin: SavedObjectsManagementPlugin;

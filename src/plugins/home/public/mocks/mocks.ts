@@ -3,14 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
-import { HomeOpenSearchDashboardsServices } from './application/opensearch_dashboards_services';
-import { injectedMetadataServiceMock } from '../../../core/public/mocks';
-import { featureCatalogueRegistryMock } from './services/feature_catalogue/feature_catalogue_registry.mock';
-import { environmentServiceMock } from './services/environment/environment.mock';
-import { configSchema } from '../config';
-import { tutorialServiceMock } from './services/tutorials/tutorial_service.mock';
-import { sectionTypeServiceMock } from './services/section_type/section_type.mock';
+import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../../core/public/mocks';
+import { HomeOpenSearchDashboardsServices } from '../application/opensearch_dashboards_services';
+import { injectedMetadataServiceMock } from '../../../../core/public/mocks';
+import { featureCatalogueRegistryMock } from '../services/feature_catalogue/feature_catalogue_registry.mock';
+import { environmentServiceMock } from '../services/environment/environment.mock';
+import { tutorialServiceMock } from '../services/tutorials/tutorial_service.mock';
+import { sectionTypeServiceMock } from '../services/section_type/section_type.mock';
 
 const createSetupContract = () => ({
   featureCatalogue: featureCatalogueRegistryMock.createSetup(),

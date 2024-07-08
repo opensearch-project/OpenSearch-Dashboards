@@ -4,11 +4,11 @@
  */
 
 import { learnBasicsSection } from './learn_basics';
-import { createHomeServicesMock } from 'src/plugins/home/public/mocks';
 import {
   HomeOpenSearchDashboardsServices,
   setServices,
 } from '../../../opensearch_dashboards_services';
+import { homePluginMock } from 'src/plugins/home/public/mocks/mocks';
 
 let mockElement: HTMLElement;
 let services: HomeOpenSearchDashboardsServices;
@@ -16,7 +16,7 @@ let services: HomeOpenSearchDashboardsServices;
 describe('Learn basics section', () => {
   beforeAll(() => {
     mockElement = document.createElement('element');
-    services = createHomeServicesMock();
+    services = homePluginMock.createStartContract();
   });
 
   it('is rendered', () => {
