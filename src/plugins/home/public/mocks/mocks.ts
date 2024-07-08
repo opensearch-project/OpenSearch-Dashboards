@@ -10,6 +10,7 @@ import { featureCatalogueRegistryMock } from '../services/feature_catalogue/feat
 import { environmentServiceMock } from '../services/environment/environment.mock';
 import { tutorialServiceMock } from '../services/tutorials/tutorial_service.mock';
 import { sectionTypeServiceMock } from '../services/section_type/section_type.mock';
+import { configSchema } from '../../config';
 
 const createSetupContract = () => ({
   featureCatalogue: featureCatalogueRegistryMock.createSetup(),

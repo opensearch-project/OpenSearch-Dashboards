@@ -5,7 +5,6 @@
 
 import { coreMock } from '../../../../core/public/mocks';
 import { urlForwardingPluginMock } from '../../../url_forwarding/public/mocks';
-import { homePluginMock } from '../mocks';
 import {
   EnvironmentService,
   FeatureCatalogueRegistry,
@@ -13,11 +12,13 @@ import {
   TutorialService,
 } from '../services';
 import { telemetryPluginMock } from '../../../telemetry/public/mocks';
+import { homePluginMock } from '../mocks/mocks';
+import { configSchema } from '../../config';
 
 export const getMockedServices = () => {
   const coreMocks = coreMock.createStart();
   const urlForwarding = urlForwardingPluginMock.createStartContract();
-  const homePlugin = homePluginMock.createSetupContract();
+  const homePlugin = homePluginMock.createStartContract();
   return {
     ...coreMocks,
     ...homePlugin,
@@ -40,7 +41,7 @@ export const getMockedServices = () => {
     addBasePath: jest.fn(),
     environmentService: new EnvironmentService(),
     tutorialService: new TutorialService(),
-    homeConfig: homePlugin.config,
+    homeConfig: configSchema.validate({}),
     featureCatalogue: new FeatureCatalogueRegistry(),
     sectionTypes: new SectionTypeService(),
   };
