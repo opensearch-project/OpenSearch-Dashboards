@@ -656,38 +656,36 @@ describe('#getQueryParams', () => {
         expect(result.query.bool.filter[1]).toEqual(undefined);
       });
 
-      it('workspacesSearchOperator prvided as "OR"', () => {
+      it('workspacesSearchOperator provided as "OR"', () => {
         const result: Result = getQueryParams({
           registry,
           workspaces: ['foo'],
           workspacesSearchOperator: 'OR',
         });
-        expect(result.query.bool.filter[1]).toMatchInlineSnapshot(`
-          Object {
-            "bool": Object {
-              "should": Array [
-                Object {
-                  "bool": Object {
-                    "minimum_should_match": 1,
-                    "should": Array [
-                      Object {
-                        "bool": Object {
-                          "must": Array [
-                            Object {
-                              "term": Object {
-                                "workspaces": "foo",
-                              },
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                bool: {
+                  minimum_should_match: 1,
+                  should: [
+                    {
+                      bool: {
+                        must: [
+                          {
+                            term: {
+                              workspaces: 'foo',
                             },
-                          ],
-                        },
+                          },
+                        ],
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
-              ],
-            },
-          }
-        `);
+              },
+            ],
+          },
+        });
       });
 
       it('principals and permissionModes provided in ACLSearchParams', () => {
@@ -701,50 +699,74 @@ describe('#getQueryParams', () => {
             permissionModes: ['read'],
           },
         });
-        expect(result.query.bool.filter[1]).toMatchInlineSnapshot(`
-          Object {
-            "bool": Object {
-              "should": Array [
-                Object {
-                  "bool": Object {
-                    "filter": Array [
-                      Object {
-                        "bool": Object {
-                          "should": Array [
-                            Object {
-                              "terms": Object {
-                                "permissions.read.users": Array [
-                                  "user-foo",
-                                ],
-                              },
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                bool: {
+                  filter: [
+                    {
+                      bool: {
+                        should: [
+                          {
+                            terms: {
+                              'permissions.read.users': ['user-foo'],
                             },
-                            Object {
-                              "term": Object {
-                                "permissions.read.users": "*",
-                              },
+                          },
+                          {
+                            term: {
+                              'permissions.read.users': '*',
                             },
-                            Object {
-                              "terms": Object {
-                                "permissions.read.groups": Array [
-                                  "group-foo",
-                                ],
-                              },
+                          },
+                          {
+                            terms: {
+                              'permissions.read.groups': ['group-foo'],
                             },
-                            Object {
-                              "term": Object {
-                                "permissions.read.groups": "*",
-                              },
+                          },
+                          {
+                            term: {
+                              'permissions.read.groups': '*',
                             },
-                          ],
-                        },
+                          },
+                        ],
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
-              ],
-            },
-          }
-        `);
+              },
+            ],
+          },
+        });
+      });
+    });
+
+    describe('when using empty workspace search', () => {
+      it('workspacesSearchOperator provided as "OR"', () => {
+        const result: Result = getQueryParams({
+          registry,
+          workspaces: [],
+          workspacesSearchOperator: 'OR',
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                match_none: {},
+              },
+            ],
+          },
+        });
+      });
+
+      it('workspacesSearchOperator provided as "AND"', () => {
+        const result: Result = getQueryParams({
+          registry,
+          workspaces: [],
+          workspacesSearchOperator: 'AND',
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          match_none: {},
+        });
       });
     });
   });

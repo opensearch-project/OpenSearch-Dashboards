@@ -276,25 +276,25 @@ export function getQueryParams({
     }
   }
 
-  if (workspaces?.length) {
-    if (workspacesSearchOperator === 'OR') {
-      ACLSearchParamsShouldClause.push({
-        bool: {
-          should: workspaces.map((workspace) => {
-            return getClauseForWorkspace(workspace);
-          }),
-          minimum_should_match: 1,
-        },
-      });
-    } else {
-      bool.filter.push({
-        bool: {
-          should: workspaces.map((workspace) => {
-            return getClauseForWorkspace(workspace);
-          }),
-          minimum_should_match: 1,
-        },
-      });
+  if (workspaces) {
+    const conditions =
+      workspacesSearchOperator === 'OR' ? ACLSearchParamsShouldClause : bool.filter;
+
+    switch (workspaces.length) {
+      case 0:
+        conditions.push({
+          match_none: {},
+        });
+        break;
+      default:
+        conditions.push({
+          bool: {
+            should: workspaces.map((workspace) => {
+              return getClauseForWorkspace(workspace);
+            }),
+            minimum_should_match: 1,
+          },
+        });
     }
   }
 

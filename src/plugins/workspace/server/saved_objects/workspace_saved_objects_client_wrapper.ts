@@ -63,16 +63,6 @@ const generateOSDAdminPermissionError = () =>
     )
   );
 
-const intersection = <T extends string>(...args: T[][]) => {
-  const occursCountMap: { [key: string]: number } = {};
-  for (let i = 0; i < args.length; i++) {
-    new Set(args[i]).forEach((key) => {
-      occursCountMap[key] = (occursCountMap[key] || 0) + 1;
-    });
-  }
-  return Object.keys(occursCountMap).filter((key) => occursCountMap[key] === args.length);
-};
-
 const getDefaultValuesForEmpty = <T>(values: T[] | undefined, defaultValues: T[]) => {
   return !values || values.length === 0 ? defaultValues : values;
 };
@@ -141,16 +131,6 @@ export class WorkspaceSavedObjectsClientWrapper {
     }
     return false;
   };
-
-  /**
-   * check if the type include workspace
-   * Workspace permission check is totally different from object permission check.
-   * @param type
-   * @returns
-   */
-  private isRelatedToWorkspace(type: string | string[]): boolean {
-    return type === WORKSPACE_TYPE || (Array.isArray(type) && type.includes(WORKSPACE_TYPE));
-  }
 
   private async validateWorkspacesAndSavedObjectsPermissions(
     savedObject: Pick<SavedObject, 'id' | 'type' | 'workspaces' | 'permissions'>,
@@ -440,102 +420,47 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsFindOptions
     ) => {
       const principals = this.permissionControl.getPrincipalsFromRequest(wrapperOptions.request);
-      if (!options.ACLSearchParams) {
-        options.ACLSearchParams = {};
-      }
+      const permittedWorkspaceIds = (
+        await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).find({
+          type: WORKSPACE_TYPE,
+          perPage: 999,
+          ACLSearchParams: {
+            principals,
+            permissionModes: [
+              WorkspacePermissionMode.LibraryRead,
+              WorkspacePermissionMode.LibraryWrite,
+            ],
+          },
+          // By declaring workspaces as null,
+          // workspaces won't be appended automatically into the options.
+          // or workspaces can not be found because workspace object do not have `workspaces` field.
+          workspaces: null,
+        })
+      ).saved_objects.map((item) => item.id);
 
-      if (this.isRelatedToWorkspace(options.type)) {
-        /**
-         *
-         * This case is for finding workspace saved objects, will use passed permissionModes
-         * and override passed principals from request to get all readable workspaces.
-         *
-         */
-        options.ACLSearchParams.permissionModes = getDefaultValuesForEmpty(
-          options.ACLSearchParams.permissionModes,
-          [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write]
-        );
-        options.ACLSearchParams.principals = principals;
+      if (!options.workspaces && !options.ACLSearchParams) {
+        options.workspaces = permittedWorkspaceIds;
+        options.ACLSearchParams = {
+          permissionModes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write],
+          principals,
+        };
+        options.workspacesSearchOperator = 'OR';
       } else {
-        // Non OSD admin users should not see the legacy saved objects if they can not access any workspace.
-        if (!options.workspaces || options.workspaces.length === 0) {
-          return {
-            page: options.page,
-            per_page: options.perPage,
-            total: 0,
-            saved_objects: [],
-          } as SavedObjectsFindResponse<T>;
+        if (options.workspaces) {
+          options.workspaces = options.workspaces.filter((workspaceId) =>
+            permittedWorkspaceIds.includes(workspaceId)
+          );
         }
-
-        /**
-         * Workspace is a hidden type so that we need to
-         * initialize a new saved objects client with workspace enabled to retrieve all the workspaces with permission.
-         */
-        const permittedWorkspaceIds = (
-          await this.getWorkspaceTypeEnabledClient(wrapperOptions.request).find({
-            type: WORKSPACE_TYPE,
-            perPage: 999,
-            ACLSearchParams: {
-              principals,
-              /**
-               * The permitted workspace ids will be passed to the options.workspaces
-               * or options.ACLSearchParams.workspaces. These two were indicated the saved
-               * objects data inner specific workspaces. We use Library related permission here.
-               * For outside passed permission modes, it may contains other permissions. Add a intersection
-               * here to make sure only Library related permission modes will be used.
-               */
-              permissionModes: getDefaultValuesForEmpty(
-                options.ACLSearchParams.permissionModes
-                  ? intersection(options.ACLSearchParams.permissionModes, [
-                      WorkspacePermissionMode.LibraryRead,
-                      WorkspacePermissionMode.LibraryWrite,
-                    ])
-                  : [],
-                [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.LibraryWrite]
-              ),
-            },
-            // By declaring workspaces as null,
-            // workspaces won't be appended automatically into the options.
-            // or workspaces can not be found because workspace object do not have `workspaces` field.
-            workspaces: null,
-          })
-        ).saved_objects.map((item) => item.id);
-
-        if (options.workspaces && options.workspaces.length > 0) {
-          const permittedWorkspaces = options.workspaces.filter((item) =>
-            permittedWorkspaceIds.includes(item)
-          );
-          if (!permittedWorkspaces.length) {
-            /**
-             * If user does not have any one workspace access
-             * deny the request
-             */
-            throw SavedObjectsErrorHelpers.decorateNotAuthorizedError(
-              new Error(
-                i18n.translate('workspace.permission.invalidate', {
-                  defaultMessage: 'Invalid workspace permission',
-                })
-              )
-            );
-          }
-
-          /**
-           * Overwrite the options.workspaces when user has access on partial workspaces.
-           */
-          options.workspaces = permittedWorkspaces;
-        } else {
-          /**
-           * If no workspaces present, find all the docs that
-           * ACL matches read / write / user passed permission
-           */
-          options.ACLSearchParams.permissionModes = getDefaultValuesForEmpty(
-            options.ACLSearchParams.permissionModes,
-            [WorkspacePermissionMode.Read, WorkspacePermissionMode.Write]
-          );
-          options.ACLSearchParams.principals = principals;
+        if (options.ACLSearchParams) {
+          options.ACLSearchParams = {
+            permissionModes: getDefaultValuesForEmpty(options.ACLSearchParams.permissionModes, [
+              WorkspacePermissionMode.Read,
+              WorkspacePermissionMode.Write,
+            ]),
+            principals,
+          };
         }
       }
-
       return await wrapperOptions.client.find<T>(options);
     };
 

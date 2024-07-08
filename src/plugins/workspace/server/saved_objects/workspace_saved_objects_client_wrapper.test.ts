@@ -7,6 +7,7 @@ import { getWorkspaceState, updateWorkspaceState } from '../../../../core/server
 import { SavedObjectsErrorHelpers } from '../../../../core/server';
 import { WorkspaceSavedObjectsClientWrapper } from './workspace_saved_objects_client_wrapper';
 import { httpServerMock } from '../../../../core/server/mocks';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
 
 const DASHBOARD_ADMIN = 'dashnoard_admin';
 const NO_DASHBOARD_ADMIN = 'no_dashnoard_admin';
@@ -46,6 +47,17 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
       id: 'not-permitted-workspace',
       attributes: { name: 'Not permitted workspace' },
     },
+    {
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      id: 'global-data-source',
+      attributes: { title: 'Global data source' },
+    },
+    {
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      id: 'workspace-1-data-source',
+      attributes: { title: 'Workspace 1 data source' },
+      workspaces: ['workspace-1'],
+    },
   ];
   const clientMock = {
     get: jest.fn().mockImplementation(async (type, id) => {
@@ -77,7 +89,17 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
         ),
       };
     }),
-    find: jest.fn(),
+    find: jest.fn().mockImplementation(({ type, workspaces }) => {
+      const savedObjects = savedObjectsStore.filter(
+        (item) =>
+          item.type === type &&
+          (!workspaces || item.workspaces?.some((workspaceId) => workspaces.includes(workspaceId)))
+      );
+      return {
+        saved_objects: savedObjects,
+        total: savedObjects.length,
+      };
+    }),
     deleteByWorkspace: jest.fn(),
   };
   const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
@@ -602,7 +624,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       });
     });
     describe('find', () => {
-      it('should call client.find with ACLSearchParams for workspace type', async () => {
+      it('should call client.find with consistent params when ACLSearchParams and workspaceOperator not provided', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
         await wrapper.find({
           type: 'workspace',
@@ -615,35 +637,11 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
             },
             permissionModes: ['read', 'write'],
           },
+          workspaces: ['workspace-1'],
+          workspacesSearchOperator: 'OR',
         });
       });
-      it('should return 0 save object if not workspace type and no workspaces is provided', async () => {
-        let result;
-        const returnValue = { page: undefined, per_page: undefined, saved_objects: [], total: 0 };
-        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
-        // no workspaces
-        result = await wrapper.find({
-          type: 'dashboards',
-        });
-        expect(result).toEqual(returnValue);
-
-        // workspaces parameter is undefined
-        clientMock.find.mockReset();
-        result = await wrapper.find({
-          type: 'dashboards',
-          workspaces: undefined,
-        });
-        expect(result).toEqual(returnValue);
-
-        // empty workspaces array
-        clientMock.find.mockReset();
-        result = await wrapper.find({
-          type: 'dashboards',
-          workspaces: [],
-        });
-        expect(result).toEqual(returnValue);
-      });
-      it('should call client.find with only read permission if find workspace and permissionModes provided', async () => {
+      it('should call client.find with ACLSearchParams when only ACLSearchParams provided', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
         await wrapper.find({
           type: 'workspace',
@@ -661,29 +659,15 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           },
         });
       });
-      it('should throw workspace permission error if provided workspaces not permitted', async () => {
-        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
-        let errorCatched;
-        try {
-          errorCatched = await wrapper.find({
-            type: 'dashboard',
-            workspaces: ['not-permitted-workspace'],
-          });
-        } catch (e) {
-          errorCatched = e;
-        }
-        expect(errorCatched?.message).toEqual('Invalid workspace permission');
-      });
-      it('should remove not permitted workspace and call client.find with arguments', async () => {
+      it('should call client.find with filtered workspaces when only workspaces provided', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
         await wrapper.find({
           type: 'dashboard',
-          workspaces: ['not-permitted-workspace', 'workspace-1'],
+          workspaces: ['workspace-1', 'workspace-2'],
         });
         expect(clientMock.find).toHaveBeenCalledWith({
           type: 'dashboard',
           workspaces: ['workspace-1'],
-          ACLSearchParams: {},
         });
       });
     });

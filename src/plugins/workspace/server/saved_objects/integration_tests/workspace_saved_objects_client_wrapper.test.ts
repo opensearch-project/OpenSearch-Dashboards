@@ -241,20 +241,20 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
   });
 
   describe('find', () => {
-    it('should throw not authorized error when user not permitted', async () => {
-      let error;
-      try {
-        await notPermittedSavedObjectedClient.find({
-          type: 'dashboard',
-          workspaces: ['workspace-1'],
-          perPage: 999,
-          page: 1,
-        });
-      } catch (e) {
-        error = e;
-      }
+    it('should return empty result if user not permitted', async () => {
+      const result = await notPermittedSavedObjectedClient.find({
+        type: 'dashboard',
+        workspaces: ['workspace-1'],
+        perPage: 999,
+        page: 1,
+      });
 
-      expect(SavedObjectsErrorHelpers.isNotAuthorizedError(error)).toBe(true);
+      expect(result).toEqual({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 999,
+      });
     });
 
     it('should return consistent inner workspace data when user permitted', async () => {
@@ -270,14 +270,34 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       );
     });
 
-    it('should return 0 saved object when not workspace type and no workspaces provided', async () => {
+    it('should return consistent result when workspaces and ACLSearchParams not provided', async () => {
       const result = await permittedSavedObjectedClient.find({
         type: 'dashboard',
         perPage: 999,
         page: 1,
       });
 
-      expect(result).toEqual({ page: 1, per_page: 999, saved_objects: [], total: 0 });
+      expect(result.saved_objects).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'inner-workspace-dashboard-1' }),
+          expect.objectContaining({ id: 'acl-controlled-dashboard-2' }),
+        ])
+      );
+    });
+
+    it('should return acl controled dashboards when only ACLSearchParams provided', async () => {
+      const result = await permittedSavedObjectedClient.find({
+        type: 'dashboard',
+        perPage: 999,
+        page: 1,
+        ACLSearchParams: {
+          permissionModes: ['read', 'write'],
+        },
+      });
+
+      expect(result.saved_objects).toEqual(
+        expect.arrayContaining([expect.objectContaining({ id: 'acl-controlled-dashboard-2' })])
+      );
     });
   });
 

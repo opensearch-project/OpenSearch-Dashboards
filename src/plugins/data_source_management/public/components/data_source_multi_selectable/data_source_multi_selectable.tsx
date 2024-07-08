@@ -83,6 +83,8 @@ export class DataSourceMultiSelectable extends React.Component<
         'id',
         'title',
         'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
       ]);
 
       if (fetchedDataSources?.length) {
