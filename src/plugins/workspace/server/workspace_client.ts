@@ -13,7 +13,7 @@ import {
   UiSettingsServiceStart,
   WORKSPACE_TYPE,
 } from '../../../core/server';
-import { updateWorkspaceState } from '../../../core/server/utils';
+import { updateWorkspaceState, getWorkspaceState } from '../../../core/server/utils';
 import {
   IWorkspaceClientImpl,
   WorkspaceFindOptions,
@@ -126,6 +126,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         }
       );
       if (dataSources && this.uiSettings && client) {
+        const rawState = getWorkspaceState(requestDetail.request);
         // This is for setting in workspace environment, otherwise uiSettings can't set workspace level value.
         updateWorkspaceState(requestDetail.request, {
           requestWorkspaceId: id,
@@ -133,6 +134,10 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         // Set first data source as default after creating workspace
         const uiSettingsClient = this.uiSettings.asScopedToClient(client);
         await checkAndSetDefaultDataSources(uiSettingsClient, dataSources, false);
+        // Reset workspace state
+        updateWorkspaceState(requestDetail.request, {
+          requestWorkspaceId: rawState.requestWorkspaceId,
+        });
       }
 
       return {

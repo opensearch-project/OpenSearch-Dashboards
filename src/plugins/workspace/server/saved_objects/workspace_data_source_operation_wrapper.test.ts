@@ -81,13 +81,7 @@ describe('WorkspaceDataSourceOperationWrapper', () => {
 
     const { wrappedClient } = createWrappedClient();
 
-    const result = await wrappedClient.create(
-      'index-pattern',
-      {},
-      {
-        overwrite: true,
-      }
-    );
+    const result = await wrappedClient.create('index-pattern', {});
     expect(result).toEqual({
       id: 'id',
       type: '',
@@ -104,20 +98,38 @@ describe('WorkspaceDataSourceOperationWrapper', () => {
     const { wrappedClient } = createWrappedClient();
 
     expect(() =>
-      wrappedClient.bulkCreate(
-        [
-          {
-            type: 'index-pattern',
-            attributes: {},
-          },
-          {
-            type: DATA_SOURCE_SAVED_OBJECT_TYPE,
-            attributes: {},
-          },
-        ],
-        {}
-      )
+      wrappedClient.bulkCreate([
+        {
+          type: 'index-pattern',
+          attributes: {},
+        },
+        {
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          attributes: {},
+        },
+      ])
     ).toThrowError();
+  });
+
+  it('should not limit bulkCreate when not including data source type', async () => {
+    jest
+      .spyOn(utils, 'getWorkspaceState')
+      .mockReturnValue({ requestWorkspaceId: 'workspace-id', isDashboardAdmin: true });
+
+    const { wrappedClient } = createWrappedClient();
+
+    expect(() =>
+      wrappedClient.bulkCreate([
+        {
+          type: 'index-pattern',
+          attributes: {},
+        },
+        {
+          type: 'index-pattern',
+          attributes: {},
+        },
+      ])
+    ).not.toThrowError();
   });
 
   it('should not allow delete includes data source type', async () => {
@@ -127,7 +139,17 @@ describe('WorkspaceDataSourceOperationWrapper', () => {
 
     const { wrappedClient } = createWrappedClient();
 
-    expect(() => wrappedClient.delete(DATA_SOURCE_SAVED_OBJECT_TYPE, '', {})).toThrowError();
+    expect(() => wrappedClient.delete(DATA_SOURCE_SAVED_OBJECT_TYPE, '')).toThrowError();
+  });
+
+  it('should not limit delete when not including data source type', async () => {
+    jest
+      .spyOn(utils, 'getWorkspaceState')
+      .mockReturnValue({ requestWorkspaceId: 'workspace-id', isDashboardAdmin: true });
+
+    const { wrappedClient } = createWrappedClient();
+
+    expect(() => wrappedClient.delete('index-pattern', '')).not.toThrowError();
   });
 
   it('should not allow non dashboard admin update data source in workspace', async () => {
@@ -140,7 +162,33 @@ describe('WorkspaceDataSourceOperationWrapper', () => {
     expect(() => wrappedClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, '', {})).toThrowError();
   });
 
-  it('should not non dashboard admin bulkUpdate data source in workspace', async () => {
+  it('should allow dashboard admin update data source in workspace', async () => {
+    jest
+      .spyOn(utils, 'getWorkspaceState')
+      .mockReturnValue({ requestWorkspaceId: 'workspace-id', isDashboardAdmin: true });
+
+    const { wrappedClient } = createWrappedClient();
+
+    expect(() =>
+      wrappedClient.update(DATA_SOURCE_SAVED_OBJECT_TYPE, '', {}, { workspaces: ['id1'] })
+    ).not.toThrowError();
+  });
+
+  it('should not limit user update other type objects in workspace', async () => {
+    jest
+      .spyOn(utils, 'getWorkspaceState')
+      .mockReturnValue({ requestWorkspaceId: 'workspace-id', isDashboardAdmin: false });
+
+    const { wrappedClient } = createWrappedClient();
+
+    expect(() =>
+      wrappedClient.update('index-pattern', '', {
+        workspaces: ['id1'],
+      })
+    ).not.toThrowError();
+  });
+
+  it('should not allow non dashboard admin bulkUpdate data source in workspace', async () => {
     jest
       .spyOn(utils, 'getWorkspaceState')
       .mockReturnValue({ requestWorkspaceId: 'workspace-id', isDashboardAdmin: true });
@@ -164,5 +212,31 @@ describe('WorkspaceDataSourceOperationWrapper', () => {
         {}
       )
     ).toThrowError();
+  });
+
+  it('should not limit user bulkUpdate other type objects in workspace', async () => {
+    jest
+      .spyOn(utils, 'getWorkspaceState')
+      .mockReturnValue({ requestWorkspaceId: 'workspace-id', isDashboardAdmin: true });
+
+    const { wrappedClient } = createWrappedClient();
+
+    expect(() =>
+      wrappedClient.bulkUpdate(
+        [
+          {
+            type: 'index-pattern',
+            attributes: {},
+            id: '',
+          },
+          {
+            type: 'index-pattern',
+            attributes: {},
+            id: '',
+          },
+        ],
+        {}
+      )
+    ).not.toThrowError();
   });
 });
