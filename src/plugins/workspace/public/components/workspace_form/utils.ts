@@ -351,7 +351,7 @@ export const validateWorkspaceForm = (
         };
       } else if (isSelectedDataSourcesDuplicated(selectedDataSources.slice(0, i), row)) {
         dataSourcesErrors[i] = {
-          code: WorkspaceFormErrorCode.InvalidDataSource,
+          code: WorkspaceFormErrorCode.DuplicateDataSource,
           message: i18n.translate('workspace.form.permission.invalidate.group', {
             defaultMessage: 'Duplicate data sources',
           }),
@@ -373,11 +373,12 @@ export const generateNextPermissionSettingsId = (permissionSettings: Array<{ id:
 
 /**
  *
- * Generate permission settings state with provided permission settings,
- * If no permission settings provided, it will return current user with read permission and
- * an empty user group permission setting.
- * If permission settings provided, it will return original permission settings when user group permission settings exists.
- * It will return permission setting with an empty user group permission setting when user group permission settings not exists.
+ * Generate permission settings state with provided operation type and  permission settings,
+ * It will always return current user as an Owner and an empty user group permission settings
+ * when operation type is create or no users and groups in provided permission settings.
+ * It will append current user to result permission settings if no user in provided permission settings.
+ * It will append an empty permission group to result permission settings if no user group in provided permission settings.
+ * It will always return original permission settings if both user or user group in provided permission settings.
  *
  * @param operationType
  * @param permissionSettings

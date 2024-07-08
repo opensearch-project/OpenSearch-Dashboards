@@ -21,7 +21,7 @@ import {
 } from './constants';
 import { getPermissionModeId } from './utils';
 
-export const permissionModeOptions = [
+const permissionModeOptions = [
   {
     id: PermissionModeId.Read,
     label: (
