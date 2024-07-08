@@ -48,8 +48,7 @@ const CreateButton = (props: CreateButtonProps) => {
   const renderCreateMenuDropDown = () => {
     const button = (
       <EuiButton
-        iconType="arrowDown"
-        iconSide="right"
+        iconType="plus"
         onClick={onMenuButtonClick}
         fill
         data-test-subj="createMenuDropdown"
