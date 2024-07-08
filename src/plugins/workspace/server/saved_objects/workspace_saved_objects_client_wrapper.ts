@@ -27,7 +27,6 @@ import {
   SavedObjectsServiceStart,
   SavedObjectsClientContract,
   SavedObjectsDeleteByWorkspaceOptions,
-  SavedObjectsFindResponse,
 } from '../../../../core/server';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import {
