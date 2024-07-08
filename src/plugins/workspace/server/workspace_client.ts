@@ -11,8 +11,9 @@ import {
   WorkspaceAttribute,
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
+  WORKSPACE_TYPE,
 } from '../../../core/server';
-import { WORKSPACE_TYPE } from '../../../core/server';
+import { updateWorkspaceState } from '../../../core/server/utils';
 import {
   IWorkspaceClientImpl,
   WorkspaceFindOptions,
@@ -125,9 +126,13 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         }
       );
       if (dataSources && this.uiSettings && client) {
+        // This is for setting in workspace environment, otherwise uiSettings can't set workspace level value.
+        updateWorkspaceState(requestDetail.request, {
+          requestWorkspaceId: id,
+        });
         // Set first data source as default after creating workspace
         const uiSettingsClient = this.uiSettings.asScopedToClient(client);
-        checkAndSetDefaultDataSources(uiSettingsClient, dataSources, false);
+        await checkAndSetDefaultDataSources(uiSettingsClient, dataSources, false);
       }
 
       return {

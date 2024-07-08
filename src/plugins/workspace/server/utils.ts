@@ -124,13 +124,13 @@ export const checkAndSetDefaultDataSources = async (
   if (dataSources?.length > 0) {
     if (!isNeededCheck) {
       // Create# Will set first data source as default data source.
-      uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
+      await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
     } else {
       // Update will check if default DS still exists.
       const defaultDSId = (await uiSettingsClient.get(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)) ?? '';
       const isDefaultDSExist = dataSources.indexOf(defaultDSId) > -1;
       if (!isDefaultDSExist) {
-        uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
+        await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
       }
     }
   }
