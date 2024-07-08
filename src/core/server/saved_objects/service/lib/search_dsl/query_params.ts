@@ -134,16 +134,6 @@ function getClauseForType(
  *  Gets the clause that will filter for the workspace.
  */
 function getClauseForWorkspace(workspace: string) {
-  if (workspace === '*') {
-    return {
-      bool: {
-        must: {
-          match_all: {},
-        },
-      },
-    };
-  }
-
   return {
     bool: {
       must: [{ term: { workspaces: workspace } }],

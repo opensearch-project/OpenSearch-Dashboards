@@ -12,8 +12,6 @@ import {
   SavedObjectsCheckConflictsObject,
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
-  PUBLIC_WORKSPACE_ID,
-  WORKSPACE_TYPE,
 } from '../../../../core/server';
 
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
@@ -39,14 +37,6 @@ export class WorkspaceIdConsumerWrapper {
       ...(others as T),
       ...(finalWorkspaces.length ? { workspaces: finalWorkspaces } : {}),
     };
-  }
-
-  private isWorkspaceType(type: SavedObjectsFindOptions['type']): boolean {
-    if (Array.isArray(type)) {
-      return type.every((item) => item === WORKSPACE_TYPE);
-    }
-
-    return type === WORKSPACE_TYPE;
   }
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
@@ -76,32 +66,9 @@ export class WorkspaceIdConsumerWrapper {
         ),
       delete: wrapperOptions.client.delete,
       find: (options: SavedObjectsFindOptions) => {
-        const findOptions = this.formatWorkspaceIdParams(wrapperOptions.request, options);
-        if (this.isWorkspaceType(findOptions.type)) {
-          return wrapperOptions.client.find(findOptions);
-        }
-
-        // if workspace is enabled, we always find by workspace
-        if (!findOptions.workspaces || findOptions.workspaces.length === 0) {
-          findOptions.workspaces = [PUBLIC_WORKSPACE_ID];
-        }
-
-        // `PUBLIC_WORKSPACE_ID` includes both saved objects without any workspace and with `PUBLIC_WORKSPACE_ID` workspace
-        const index = findOptions.workspaces
-          ? findOptions.workspaces.indexOf(PUBLIC_WORKSPACE_ID)
-          : -1;
-        if (!findOptions.workspacesSearchOperator && findOptions.workspaces && index !== -1) {
-          findOptions.workspacesSearchOperator = 'OR';
-          // remove this deletion logic when public workspace becomes to real
-          if (this.isPermissionControlEnabled) {
-            // remove public workspace to make sure we can pass permission control validation, more details in `WorkspaceSavedObjectsClientWrapper`
-            findOptions.workspaces.splice(index, 1);
-          }
-        }
-        if (findOptions.workspaces && findOptions.workspaces.length === 0) {
-          delete findOptions.workspaces;
-        }
-        return wrapperOptions.client.find(findOptions);
+        return wrapperOptions.client.find(
+          this.formatWorkspaceIdParams(wrapperOptions.request, options)
+        );
       },
       bulkGet: wrapperOptions.client.bulkGet,
       get: wrapperOptions.client.get,
@@ -113,5 +80,5 @@ export class WorkspaceIdConsumerWrapper {
     };
   };
 
-  constructor(private isPermissionControlEnabled?: boolean) {}
+  constructor() {}
 }
