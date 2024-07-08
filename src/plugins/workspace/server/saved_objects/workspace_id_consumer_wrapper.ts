@@ -12,7 +12,6 @@ import {
   SavedObjectsCheckConflictsObject,
   OpenSearchDashboardsRequest,
   SavedObjectsFindOptions,
-  WORKSPACE_TYPE,
 } from '../../../../core/server';
 
 type WorkspaceOptions = Pick<SavedObjectsBaseOptions, 'workspaces'> | undefined;
@@ -38,14 +37,6 @@ export class WorkspaceIdConsumerWrapper {
       ...(others as T),
       ...(finalWorkspaces.length ? { workspaces: finalWorkspaces } : {}),
     };
-  }
-
-  private isWorkspaceType(type: SavedObjectsFindOptions['type']): boolean {
-    if (Array.isArray(type)) {
-      return type.every((item) => item === WORKSPACE_TYPE);
-    }
-
-    return type === WORKSPACE_TYPE;
   }
 
   public wrapperFactory: SavedObjectsClientWrapperFactory = (wrapperOptions) => {
@@ -75,8 +66,9 @@ export class WorkspaceIdConsumerWrapper {
         ),
       delete: wrapperOptions.client.delete,
       find: (options: SavedObjectsFindOptions) => {
-        const findOptions = this.formatWorkspaceIdParams(wrapperOptions.request, options);
-        return wrapperOptions.client.find(findOptions);
+        return wrapperOptions.client.find(
+          this.formatWorkspaceIdParams(wrapperOptions.request, options)
+        );
       },
       bulkGet: wrapperOptions.client.bulkGet,
       get: wrapperOptions.client.get,
