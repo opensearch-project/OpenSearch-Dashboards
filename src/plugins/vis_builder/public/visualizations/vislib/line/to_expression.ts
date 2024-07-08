@@ -13,17 +13,21 @@ import { LineOptionsDefaults } from './line_vis_type';
 import { getAggExpressionFunctions } from '../../common/expression_helpers';
 import { VislibRootState, getValueAxes, getPipelineParams } from '../common';
 import { createVis } from '../common/create_vis';
+import { buildPipeline } from '../../../../../visualizations/public';
+import { buildVegaSpec } from '../../vega/build_vega_spec';
+import { executeExpression } from '../../vega/utils/expression_helper';
 
 export const toExpression = async (
   { style: styleState, visualization }: VislibRootState<LineOptionsDefaults>,
-  searchContext: IExpressionLoaderParams['searchContext']
+  searchContext: IExpressionLoaderParams['searchContext'],
+  useVega: boolean
 ) => {
-  const { aggConfigs, expressionFns, indexPattern } = await getAggExpressionFunctions(
-    visualization
-  );
+  const { expressionFns, aggConfigs, indexPattern } = useVega
+    ? await getAggExpressionFunctions(visualization, styleState, useVega, searchContext)
+    : await getAggExpressionFunctions(visualization);
   const { addLegend, addTooltip, legendPosition, type } = styleState;
 
-  const vis = await createVis(type, aggConfigs, indexPattern, searchContext?.timeRange);
+  const vis = await createVis(type, aggConfigs, indexPattern, searchContext);
 
   const params = getPipelineParams();
   const dimensions = await buildVislibDimensions(vis, params);
@@ -39,10 +43,34 @@ export const toExpression = async (
     valueAxes,
   };
 
-  const vislib = buildExpressionFunction<any>('vislib', {
-    type,
-    visConfig: JSON.stringify(visConfig),
-  });
+  if (useVega === true) {
+    const rawDataFn = buildExpressionFunction('rawData', {});
+    const dataExpression = buildExpression([...expressionFns, rawDataFn]).toString();
 
-  return buildExpression([...expressionFns, vislib]).toString();
+    // Execute the expression to get the raw data
+    const rawData = await executeExpression(dataExpression, searchContext);
+
+    const vegaSpec = buildVegaSpec(rawData, visConfig, visualization, styleState);
+
+    const visVega = await createVis('vega', aggConfigs, indexPattern, searchContext);
+    visVega.params = {
+      spec: JSON.stringify(vegaSpec),
+    };
+
+    const vegaExpression = await buildPipeline(visVega, {
+      timefilter: params.timefilter,
+      timeRange: params.timeRange,
+      abortSignal: undefined,
+      visLayers: undefined,
+      visAugmenterConfig: undefined,
+    });
+
+    return vegaExpression;
+  } else {
+    const vislib = buildExpressionFunction<any>('vislib', {
+      type,
+      visConfig: JSON.stringify(visConfig),
+    });
+    return buildExpression([...expressionFns, vislib]).toString();
+  }
 };

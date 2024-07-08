@@ -8,7 +8,7 @@ import { SavedObject, SavedObjectsStart } from '../../saved_objects/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import { DashboardStart } from '../../dashboard/public';
 import { VisualizationsSetup } from '../../visualizations/public';
-import { ExpressionsStart } from '../../expressions/public';
+import { ExpressionsStart, ExpressionsPublicPlugin } from '../../expressions/public';
 import { NavigationPublicPluginStart } from '../../navigation/public';
 import { DataPublicPluginStart } from '../../data/public';
 import { TypeServiceSetup, TypeServiceStart } from './services/type_service';
@@ -28,6 +28,7 @@ export interface VisBuilderPluginSetupDependencies {
   embeddable: EmbeddableSetup;
   visualizations: VisualizationsSetup;
   data: DataPublicPluginSetup;
+  expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
 }
 export interface VisBuilderPluginStartDependencies {
   embeddable: EmbeddableStart;
