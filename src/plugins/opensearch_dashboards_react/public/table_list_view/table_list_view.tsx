@@ -505,7 +505,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         <EuiButton
           onClick={this.props.createItem}
           data-test-subj="newItemButton"
-          iconType="plusInCircle"
+          iconType="plus"
           fill
         >
           <FormattedMessage

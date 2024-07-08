@@ -229,7 +229,7 @@ function DateRangesParamEditor({
         <EuiSpacer size="s" />
         <EuiFlexItem>
           <EuiButtonEmpty
-            iconType="plusInCircleFilled"
+            iconType="plus"
             onClick={onAddRange}
             size="xs"
             data-test-subj="visEditorAddDateRange"

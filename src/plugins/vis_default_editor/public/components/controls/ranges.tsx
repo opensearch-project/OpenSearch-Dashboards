@@ -265,7 +265,7 @@ function RangesParamEditor({
         <EuiFlexItem>
           <EuiButtonEmpty
             data-test-subj={`${dataTestSubj}__addRangeButton`}
-            iconType="plusInCircleFilled"
+            iconType="plus"
             onClick={onAddRange}
             size="xs"
           >

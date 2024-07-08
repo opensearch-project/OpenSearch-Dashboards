@@ -80,7 +80,7 @@ export function AddDeleteButtons(props: AddDeleteButtonsProps) {
           <EuiButtonIcon
             data-test-subj={`${testSubj}AddBtn`}
             aria-label={props.addTooltip}
-            iconType="plusInCircle"
+            iconType="plus"
             onClick={props.onAdd}
           />
         </EuiToolTip>

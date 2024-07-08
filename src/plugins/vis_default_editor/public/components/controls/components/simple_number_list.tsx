@@ -136,7 +136,7 @@ function SimpleNumberList({
         ))}
         <EuiSpacer size="s" />
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
+          <EuiButtonEmpty iconType="plus" onClick={onAdd} size="xs">
             <FormattedMessage
               id="visDefaultEditor.controls.includeExclude.addUnitButtonLabel"
               defaultMessage="Add value"

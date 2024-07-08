@@ -81,7 +81,7 @@ const CreateButton = (props: CreateButtonProps) => {
         <EuiButton
           href={provider.createUrl}
           data-test-subj="newItemButton"
-          iconType="plusInCircle"
+          iconType="plus"
           fill
         >
           <FormattedMessage id="dashboard.listing.createButtonText" defaultMessage="Create" />
