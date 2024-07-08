@@ -214,6 +214,7 @@ export const DiscoverField = ({
             isOpen={infoIsOpen}
             closePopover={() => setOpen(false)}
             anchorPosition="rightUp"
+            panelPaddingSize="s"
             button={
               <EuiButtonIcon
                 iconType="inspect"
