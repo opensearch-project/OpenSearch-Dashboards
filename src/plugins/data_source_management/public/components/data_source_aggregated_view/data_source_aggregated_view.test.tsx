@@ -127,7 +127,7 @@ describe('DataSourceAggregatedView: read all view (displayAllCompatibleDataSourc
       // Renders normally
       expect(component).toMatchSnapshot();
       expect(client.find).toBeCalledWith({
-        fields: ['id', 'title', 'auth.type'],
+        fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
         perPage: 10000,
         type: 'data-source',
       });
@@ -247,7 +247,7 @@ describe('DataSourceAggregatedView: read active view (displayAllCompatibleDataSo
       // Should render normally
       expect(component).toMatchSnapshot();
       expect(client.find).toBeCalledWith({
-        fields: ['id', 'title', 'auth.type'],
+        fields: ['id', 'title', 'auth.type', 'dataSourceVersion', 'installedPlugins'],
         perPage: 10000,
         type: 'data-source',
       });
