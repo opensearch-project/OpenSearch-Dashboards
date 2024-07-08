@@ -656,7 +656,7 @@ describe('#getQueryParams', () => {
         expect(result.query.bool.filter[1]).toEqual(undefined);
       });
 
-      it('workspacesSearchOperator prvided as "OR"', () => {
+      it('workspacesSearchOperator provided as "OR"', () => {
         const result: Result = getQueryParams({
           registry,
           workspaces: ['foo'],
@@ -665,22 +665,6 @@ describe('#getQueryParams', () => {
         expect(result.query.bool.filter[1]).toEqual({
           bool: {
             should: [
-              {
-                bool: {
-                  must_not: [
-                    {
-                      exists: {
-                        field: 'workspaces',
-                      },
-                    },
-                    {
-                      exists: {
-                        field: 'permissions',
-                      },
-                    },
-                  ],
-                },
-              },
               {
                 bool: {
                   minimum_should_match: 1,
@@ -720,22 +704,6 @@ describe('#getQueryParams', () => {
             should: [
               {
                 bool: {
-                  must_not: [
-                    {
-                      exists: {
-                        field: 'workspaces',
-                      },
-                    },
-                    {
-                      exists: {
-                        field: 'permissions',
-                      },
-                    },
-                  ],
-                },
-              },
-              {
-                bool: {
                   filter: [
                     {
                       bool: {
@@ -768,6 +736,36 @@ describe('#getQueryParams', () => {
               },
             ],
           },
+        });
+      });
+    });
+
+    describe('when using empty workspace search', () => {
+      it('workspacesSearchOperator provided as "OR"', () => {
+        const result: Result = getQueryParams({
+          registry,
+          workspaces: [],
+          workspacesSearchOperator: 'OR',
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          bool: {
+            should: [
+              {
+                match_none: {},
+              },
+            ],
+          },
+        });
+      });
+
+      it('workspacesSearchOperator provided as "AND"', () => {
+        const result: Result = getQueryParams({
+          registry,
+          workspaces: [],
+          workspacesSearchOperator: 'AND',
+        });
+        expect(result.query.bool.filter[1]).toEqual({
+          match_none: {},
         });
       });
     });

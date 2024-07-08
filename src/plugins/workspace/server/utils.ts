@@ -13,6 +13,7 @@ import {
   Principals,
   PrincipalType,
   SharedGlobalConfig,
+  SavedObjectsClientContract,
 } from '../../../core/server';
 import { AuthInfo } from './types';
 import { updateWorkspaceState } from '../../../core/server/utils';
@@ -67,9 +68,9 @@ export const updateDashboardAdminStateForRequest = (
     updateWorkspaceState(request, { isDashboardAdmin: true });
     return;
   }
-
+  // If groups/users are not configured or [], login defaults to OSD Admin
   if (!configGroups.length && !configUsers.length) {
-    updateWorkspaceState(request, { isDashboardAdmin: false });
+    updateWorkspaceState(request, { isDashboardAdmin: true });
     return;
   }
   const groupMatchAny = groups.some((group) => configGroups.includes(group));
@@ -88,4 +89,27 @@ export const getOSDAdminConfigFromYMLConfig = async (
   const usersResult = (globalConfig.opensearchDashboards?.dashboardAdmin?.users || []) as string[];
 
   return [groupsResult, usersResult];
+};
+
+export const getDataSourcesList = (client: SavedObjectsClientContract, workspaces: string[]) => {
+  return client
+    .find({
+      type: 'data-source',
+      fields: ['id', 'title'],
+      perPage: 10000,
+      workspaces,
+    })
+    .then((response) => {
+      const objects = response?.saved_objects;
+      if (objects) {
+        return objects.map((source) => {
+          const id = source.id;
+          return {
+            id,
+          };
+        });
+      } else {
+        return [];
+      }
+    });
 };

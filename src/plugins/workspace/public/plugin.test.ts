@@ -189,4 +189,38 @@ describe('Workspace plugin', () => {
     workspacePlugin.start(startMock);
     expect(startMock.chrome.setBreadcrumbs).not.toHaveBeenCalled();
   });
+
+  it('#start should call navGroupUpdater$.next after currentWorkspace set', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+
+    expect(setupMock.chrome.navGroup.registerNavGroupUpdater).toHaveBeenCalled();
+    const navGroupUpdater$ = setupMock.chrome.navGroup.registerNavGroupUpdater.mock.calls[0][0];
+
+    expect(navGroupUpdater$).toBeTruthy();
+    jest.spyOn(navGroupUpdater$, 'next');
+
+    expect(navGroupUpdater$.next).not.toHaveBeenCalled();
+    workspacePlugin.start(coreStart);
+
+    waitFor(() => {
+      expect(navGroupUpdater$.next).toHaveBeenCalled();
+    });
+  });
+
+  it('#stop should call unregisterNavGroupUpdater', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const unregisterNavGroupUpdater = jest.fn();
+    setupMock.chrome.navGroup.registerNavGroupUpdater.mockReturnValueOnce(
+      unregisterNavGroupUpdater
+    );
+    await workspacePlugin.setup(setupMock, {});
+
+    workspacePlugin.stop();
+
+    expect(unregisterNavGroupUpdater).toHaveBeenCalled();
+  });
 });
