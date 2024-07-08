@@ -352,7 +352,7 @@ describe('validateWorkspaceForm', () => {
         false
       ).selectedDataSources
     ).toEqual({
-      '1': { code: WorkspaceFormErrorCode.InvalidDataSource, message: 'Duplicate data sources' },
+      '1': { code: WorkspaceFormErrorCode.DuplicateDataSource, message: 'Duplicate data sources' },
     });
   });
 });
