@@ -316,8 +316,8 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
     it('bulk create with disallowed types in workspace', async () => {
       await clearFooAndBar();
 
-      // bulkCreate operation includes data sources should throw error
-      await osdTestServer.request
+      // import advanced settings and data sources should throw error
+      const createResultFoo = await osdTestServer.request
         .post(root, `/w/${createdFooWorkspace.id}/api/saved_objects/_bulk_create`)
         .send([
           {
@@ -329,7 +329,21 @@ describe('saved_objects_wrapper_for_check_workspace_conflict integration test', 
             id: packageInfo.version,
           },
         ])
-        .expect(500);
+        .expect(200);
+      expect(createResultFoo.body.saved_objects[0].error).toEqual(
+        expect.objectContaining({
+          message:
+            "Unsupported type in workspace: 'data-source' is not allowed to be imported in workspace.",
+          statusCode: 400,
+        })
+      );
+      expect(createResultFoo.body.saved_objects[1].error).toEqual(
+        expect.objectContaining({
+          message:
+            "Unsupported type in workspace: 'config' is not allowed to be imported in workspace.",
+          statusCode: 400,
+        })
+      );
 
       // Data source should not be created
       await osdTestServer.request

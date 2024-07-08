@@ -132,5 +132,8 @@ export const checkAndSetDefaultDataSource = async (
         await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
       }
     }
+  } else {
+    // If there is no data source left, clear workspace level default data source.
+    await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, undefined);
   }
 };
