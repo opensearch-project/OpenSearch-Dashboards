@@ -157,7 +157,6 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       workspaces: {
         enabled: true,
         permissionEnabled: isPermissionControlEnabled,
-        isDashboardAdmin: false,
       },
       dashboards: { isDashboardAdmin: false },
     }));

@@ -21,7 +21,8 @@ describe('<WorkspaceMenu />', () => {
       management: {},
       catalogue: {},
       savedObjectsManagement: {},
-      workspaces: { isDashboardAdmin: true, permissionEnabled: true },
+      workspaces: { permissionEnabled: true },
+      dashboards: { isDashboardAdmin: true },
     };
 
     coreStartMock.workspaces.initialized$.next(true);

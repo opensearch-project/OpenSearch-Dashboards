@@ -51,7 +51,8 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   );
 
   const hasPermissionToCreateWorkspace = () => {
-    const { permissionEnabled, isDashboardAdmin } = coreStart.application.capabilities.workspaces;
+    const { permissionEnabled } = coreStart.application.capabilities.workspaces;
+    const { isDashboardAdmin } = coreStart.application.capabilities.dashboards;
     return !permissionEnabled || isDashboardAdmin;
   };
 
