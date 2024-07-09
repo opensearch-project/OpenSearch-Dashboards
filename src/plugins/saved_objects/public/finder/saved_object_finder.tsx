@@ -515,6 +515,7 @@ class SavedObjectFinderUi extends React.Component<
               ).getIconForSavedObject(item.savedObject);
               return (
                 <EuiListGroupItem
+                  size="s"
                   key={item.id}
                   iconType={iconType}
                   label={item.title}
