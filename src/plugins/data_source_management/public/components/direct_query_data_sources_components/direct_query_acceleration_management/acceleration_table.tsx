@@ -25,6 +25,7 @@ import {
 } from '../../../../framework/types';
 import { CatalogCacheManager } from '../../../../framework/catlog_cache/cache_manager';
 import { isCatalogCacheFetching } from '../../../../framework/utils/shared';
+import { getAccelerationName } from './acceleration_utils';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -146,7 +147,20 @@ export const AccelerationTable = ({
       name: 'Name',
       sortable: true,
       render: (indexName: string, acceleration: CachedAcceleration) => {
-        return <EuiLink>{indexName}</EuiLink>;
+        const displayName = getAccelerationName(acceleration);
+        return (
+          <EuiLink
+            onClick={() => {
+              // renderAccelerationDetailsFlyout({
+              //   acceleration,
+              //   dataSourceName,
+              //   handleRefresh,
+              // });
+            }}
+          >
+            {displayName}
+          </EuiLink>
+        );
       },
     },
     {
