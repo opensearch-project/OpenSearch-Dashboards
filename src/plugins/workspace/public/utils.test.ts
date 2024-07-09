@@ -10,8 +10,12 @@ import {
   isAppAccessibleInWorkspace,
   isFeatureIdInsideUseCase,
   isNavGroupInFeatureConfigs,
+  getDataSourcesList,
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
+import { coreMock } from '../../../core/public/mocks';
+
+const startMock = coreMock.createStart();
 
 describe('workspace utils: featureMatchesConfig', () => {
   it('feature configured with `*` should match any features', () => {
@@ -291,5 +295,33 @@ describe('workspace utils: isNavGroupInFeatureConfigs', () => {
     expect(
       isNavGroupInFeatureConfigs('observability', ['use-case-observability', 'use-case-search'])
     ).toBe(true);
+  });
+});
+
+describe('workspace utils: getDataSourcesList', () => {
+  const mockedSavedObjectClient = startMock.savedObjects.client;
+
+  it('should return result when passed saved object client', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'id1',
+          get: () => {
+            return 'title1';
+          },
+        },
+      ],
+    });
+    expect(await getDataSourcesList(mockedSavedObjectClient, [])).toStrictEqual([
+      {
+        id: 'id1',
+        title: 'title1',
+      },
+    ]);
+  });
+
+  it('should return empty array if no saved objects responded', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({});
+    expect(await getDataSourcesList(mockedSavedObjectClient, [])).toStrictEqual([]);
   });
 });
