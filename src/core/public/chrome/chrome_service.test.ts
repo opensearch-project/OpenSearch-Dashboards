@@ -41,7 +41,7 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
-import { overlayServiceMock } from '../mocks';
+import { overlayServiceMock, workspacesServiceMock } from '../mocks';
 
 class FakeApp implements App {
   public title = `${this.id} App`;
@@ -69,6 +69,7 @@ function defaultStartDeps(availableApps?: App[]) {
     notifications: notificationServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
+    workspaces: workspacesServiceMock.createStartContract(),
   };
 
   if (availableApps) {
