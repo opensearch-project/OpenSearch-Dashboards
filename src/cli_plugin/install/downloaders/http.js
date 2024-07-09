@@ -31,36 +31,14 @@
 import { createWriteStream } from 'fs';
 
 import Wreck from '@hapi/wreck';
-import HttpProxyAgent from 'http-proxy-agent';
-import HttpsProxyAgent from 'https-proxy-agent';
-import { getProxyForUrl } from 'proxy-from-env';
+import { ProxyAgent } from 'proxy-agent';
 
 import { Progress } from '../progress';
 
-function getProxyAgent(sourceUrl, logger) {
-  const proxy = getProxyForUrl(sourceUrl);
-
-  if (!proxy) {
-    return null;
-  }
-
-  logger.log(`Picked up proxy ${proxy} from environment variable.`);
-
-  if (/^https/.test(sourceUrl)) {
-    return new HttpsProxyAgent(proxy);
-  } else {
-    return new HttpProxyAgent(proxy);
-  }
-}
 
 async function sendRequest({ sourceUrl, timeout }, logger) {
   const maxRedirects = 11; //Because this one goes to 11.
-  const reqOptions = { timeout, redirects: maxRedirects };
-  const proxyAgent = getProxyAgent(sourceUrl, logger);
-
-  if (proxyAgent) {
-    reqOptions.agent = proxyAgent;
-  }
+  const reqOptions = { timeout, redirects: maxRedirects, agent: new ProxyAgent() };
 
   try {
     const promise = Wreck.request('GET', sourceUrl, reqOptions);
