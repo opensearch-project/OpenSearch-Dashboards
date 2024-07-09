@@ -25,7 +25,7 @@ import {
 } from '../../../../framework/types';
 import { CatalogCacheManager } from '../../../../framework/catlog_cache/cache_manager';
 import { isCatalogCacheFetching } from '../../../../framework/utils/shared';
-import { getAccelerationName } from './acceleration_utils';
+import { AccelerationStatus, getAccelerationName } from './acceleration_utils';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -167,7 +167,7 @@ export const AccelerationTable = ({
       field: 'status',
       name: 'Status',
       sortable: true,
-      render: (status: string) => <EuiText>{status}</EuiText>,
+      render: (status: string) => <AccelerationStatus status={status} />,
     },
     {
       field: 'type',
