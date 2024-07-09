@@ -30,6 +30,8 @@ import { NoAccess } from './no_access_page';
 import { InactiveDataConnectionCallout } from './inactive_data_connection_callout';
 import { AccessControlTab } from './access_control_tab';
 import { getManageDirectQueryDataSourceBreadcrumbs } from '../../breadcrumbs';
+import { useLoadAccelerationsToCache } from '../../../../framework/catlog_cache/cache_loader';
+import { AccelerationTable } from '../direct_query_acceleration_management/acceleration_table';
 
 interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;
@@ -58,6 +60,17 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
     status: 'ACTIVE',
   });
   const [hasAccess, setHasAccess] = useState(true);
+
+  // Cache loader hook
+  const {
+    loadStatus: accelerationsLoadStatus,
+    startLoading: startLoadingAccelerations,
+  } = useLoadAccelerationsToCache(http, notifications);
+
+  const cacheLoadingHooks = {
+    accelerationsLoadStatus,
+    startLoadingAccelerations,
+  };
 
   const fetchSelectedDatasource = () => {
     http
@@ -179,7 +192,24 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
     },
   ];
 
-  const tabs = [...genericTabs];
+  const conditionalTabs =
+    datasourceDetails.connector === 'S3GLUE'
+      ? [
+          {
+            id: 'acceleration_table',
+            name: 'Accelerations',
+            disabled: false,
+            content: (
+              <AccelerationTable
+                dataSourceName={dataSourceName}
+                cacheLoadingHooks={cacheLoadingHooks}
+              />
+            ),
+          },
+        ]
+      : [];
+
+  const tabs = [...conditionalTabs, ...genericTabs];
 
   return (
     <EuiPage>
