@@ -32,7 +32,7 @@ import './inspector_panel.scss';
 import { i18n } from '@osd/i18n';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutHeader, EuiFlyoutBody, EuiText } from '@elastic/eui';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
@@ -122,9 +122,9 @@ export class InspectorPanel extends Component<InspectorPanelProps, InspectorPane
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={true}>
-              <EuiTitle size="s">
-                <h1>{title}</h1>
-              </EuiTitle>
+              <EuiText size="s">
+                <h2>{title}</h2>
+              </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <InspectorViewChooser

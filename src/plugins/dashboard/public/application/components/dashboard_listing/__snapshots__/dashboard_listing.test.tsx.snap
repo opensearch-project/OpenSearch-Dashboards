@@ -1097,15 +1097,19 @@ exports[`dashboard listing hideWriteControls 1`] = `
               <EuiEmptyPrompt
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Looks like you don't have any dashboards."
-                      id="dashboard.listing.noItemsMessage"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Looks like you don't have any dashboards."
+                        id="dashboard.listing.noItemsMessage"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -2338,15 +2342,19 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -3579,15 +3587,19 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -4820,15 +4832,19 @@ exports[`dashboard listing renders table rows 1`] = `
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -6061,15 +6077,19 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }

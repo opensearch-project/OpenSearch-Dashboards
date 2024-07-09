@@ -40,7 +40,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,
   EuiFlyoutBody,
-  EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { SavedObjectFinderUi } from '../../../../../saved_objects/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -63,14 +63,14 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
   return (
     <EuiFlyout ownFocus onClose={onClose} data-test-subj="loadSearchForm">
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiText size="s">
           <h2>
             <FormattedMessage
               id="discover.topNav.openSearchPanel.openSearchTitle"
               defaultMessage="OpenSearch"
             />
           </h2>
-        </EuiTitle>
+        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <SavedObjectFinderUi

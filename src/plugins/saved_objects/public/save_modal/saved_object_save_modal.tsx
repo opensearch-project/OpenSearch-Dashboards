@@ -106,11 +106,15 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="savedObjects.saveModal.saveTitle"
-              defaultMessage="Save {objectType}"
-              values={{ objectType: this.props.objectType }}
-            />
+            <EuiText size="s">
+              <h2>
+                <FormattedMessage
+                  id="savedObjects.saveModal.saveTitle"
+                  defaultMessage="Save {objectType}"
+                  values={{ objectType: this.props.objectType }}
+                />
+              </h2>
+            </EuiText>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
