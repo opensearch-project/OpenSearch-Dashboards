@@ -43,57 +43,11 @@ describe('<WorkspaceMenu />', () => {
     ]);
 
     render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/select a workspace/i));
+    fireEvent.click(screen.getByText(/workspaces/i));
 
+    expect(screen.getByText(/all workspaces/i)).toBeInTheDocument();
     expect(screen.getByText(/workspace 1/i)).toBeInTheDocument();
     expect(screen.getByText(/workspace 2/i)).toBeInTheDocument();
-  });
-
-  it('should display a list of use cases in the dropdown', async () => {
-    const originalLocation = window.location;
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
-
-    coreStartMock.workspaces.workspaceList$.next([
-      {
-        id: 'workspace-1',
-        name: 'workspace 1',
-        features: [
-          'use-case-observability',
-          'use-case-security-analytics',
-          'use-case-analytics',
-          'use-case-search',
-        ],
-      },
-    ]);
-
-    render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/select a workspace/i));
-
-    const rightArrowButton = screen
-      .getByTestId('context-menu-item-workspace-1')
-      .querySelector('.euiContextMenu__icon')!;
-    expect(rightArrowButton).toBeInTheDocument();
-
-    fireEvent.click(rightArrowButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/observability/i)).toBeInTheDocument();
-      expect(screen.getByText(/security-analytics/i)).toBeInTheDocument();
-    });
-
-    fireEvent.click(screen.getByText(/observability/i));
-
-    expect(window.location.assign).toHaveBeenCalledWith(
-      'https://test.com/w/workspace-1/app/workspace_overview'
-    );
-
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    });
   });
 
   it('should display a list of recent workspaces in the dropdown', () => {
@@ -104,29 +58,11 @@ describe('<WorkspaceMenu />', () => {
     ]);
 
     render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/select a workspace/i));
+    fireEvent.click(screen.getByText(/workspaces/i));
 
     expect(screen.getByText(/recent workspaces/i)).toBeInTheDocument();
     expect(screen.getByTestId('context-menu-recent-workspaces')).toHaveTextContent(/workspace 1/i);
     localStorage.clear();
-  });
-
-  it('should search a workspace in the dropdown', () => {
-    coreStartMock.workspaces.workspaceList$.next([
-      { id: 'workspace-1', name: 'workspace 1' },
-      { id: 'workspace-2', name: 'workspace 2' },
-    ]);
-
-    render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/select a workspace/i));
-    const searchField = screen.getByPlaceholderText(/find a workspace/i);
-
-    expect(searchField).toBeInTheDocument();
-
-    fireEvent.change(searchField, { target: { value: 'workspace 1' } });
-
-    expect(screen.getByText('workspace 1')).toBeInTheDocument();
-    expect(screen.queryByText('workspace 2')).not.toBeInTheDocument();
   });
 
   it('should display current workspace name and use case', () => {
@@ -141,10 +77,10 @@ describe('<WorkspaceMenu />', () => {
 
   it('should close the workspace dropdown list', async () => {
     render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/select a workspace/i));
+    fireEvent.click(screen.getByText(/workspaces/i));
 
     expect(screen.getByText(/all workspaces/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByText(/select a workspace/i));
+    fireEvent.click(screen.getByTestId('current-workspace-button'));
     await waitFor(() => {
       expect(screen.queryByText(/all workspaces/i)).not.toBeInTheDocument();
     });
@@ -164,7 +100,7 @@ describe('<WorkspaceMenu />', () => {
     });
 
     render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/select a workspace/i));
+    fireEvent.click(screen.getByText(/workspaces/i));
     fireEvent.click(screen.getByText(/workspace 1/i));
 
     expect(window.location.assign).toHaveBeenCalledWith(
@@ -206,7 +142,7 @@ describe('<WorkspaceMenu />', () => {
     });
 
     render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/select a workspace/i));
+    fireEvent.click(screen.getByText(/workspaces/i));
     fireEvent.click(screen.getByText(/create workspace/i));
     expect(window.location.assign).toHaveBeenCalledWith('https://test.com/app/workspace_create');
 
@@ -224,7 +160,7 @@ describe('<WorkspaceMenu />', () => {
     });
 
     render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/select a workspace/i));
+    fireEvent.click(screen.getByText(/workspaces/i));
     fireEvent.click(screen.getByText(/View all/i));
     expect(window.location.assign).toHaveBeenCalledWith('https://test.com/app/workspace_list');
 

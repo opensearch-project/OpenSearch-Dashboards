@@ -12,7 +12,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -20,13 +19,8 @@ import {
   EuiListGroupItem,
   EuiPanel,
   EuiPopover,
-  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
 
 import { truncate } from 'lodash';
 import {
@@ -48,20 +42,11 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const workspaceList = useObservable(coreStart.workspaces.workspaceList$, []);
-  const [searchValue, setSearchValue] = useState<string>('');
-  const useCasePanels: EuiContextMenuPanelDescriptor[] = [];
 
   const defaultHeaderName = i18n.translate(
     'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
     {
-      defaultMessage: 'Select a workspace',
-    }
-  );
-
-  const defaultSearchPlaceholder = i18n.translate(
-    'core.ui.primaryNav.workspacePickerMenu.defaultSearchPlaceholder',
-    {
-      defaultMessage: 'Find a workspace',
+      defaultMessage: 'Workspaces',
     }
   );
 
@@ -71,17 +56,15 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   };
 
   const filteredWorkspaceList = useMemo(() => {
-    return workspaceList
-      .filter((workspace) => workspace.name.toLowerCase().includes(searchValue.toLowerCase()))
-      .slice(0, MAX_WORKSPACE_PICKER_NUM);
-  }, [workspaceList, searchValue]);
+    return workspaceList.slice(0, MAX_WORKSPACE_PICKER_NUM);
+  }, [workspaceList]);
 
   const filteredRecentWorkspaces = useMemo(() => {
     return getRecentWorkspaces()
-      .map((workspaceId) => workspaceList.find((ws) => ws.id === workspaceId) as WorkspaceObject)
-      .filter((workspace) => workspace?.name.toLowerCase().includes(searchValue.toLowerCase()))
+      .map((workspaceId) => workspaceList.find((ws) => ws.id === workspaceId))
+      .filter((workspace): workspace is WorkspaceObject => workspace !== undefined)
       .slice(0, MAX_WORKSPACE_PICKER_NUM);
-  }, [searchValue, workspaceList]);
+  }, [workspaceList]);
 
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
   const currentWorkspaceUseCase = currentWorkspace?.features
@@ -96,41 +79,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     setPopover(false);
   };
 
-  const workspaceUseCaseToItem = (
-    workspace: WorkspaceObject,
-    index: number,
-    workspaceURL: string
-  ) => {
-    const useCases = workspace.features?.map(getUseCaseFromFeatureConfig).filter(Boolean) || [];
-    // If the workspace has only one use case, do not show the use case menu.
-    if (useCases.length <= 1) {
-      return false;
-    }
-    const useCaseMenuItems = useCases.map((useCase) => {
-      return {
-        name: <EuiText> {useCase}</EuiText>,
-        onClick: () => {
-          window.location.assign(workspaceURL);
-        },
-        'data-test-subj': `context-menu-item-${workspace.id}-${useCase}`,
-        icon: <EuiIcon type="bolt" />,
-      };
-    });
-
-    useCasePanels.push({
-      id: index,
-      title: (
-        <span className="custom-title">
-          {truncate(workspace.name, { length: MAX_WORKSPACE_NAME_LENGTH })}
-        </span>
-      ),
-      width: 300,
-      items: useCaseMenuItems,
-    });
-    return true;
-  };
-
-  const workspaceToItem = (workspace: WorkspaceObject, index: number) => {
+  const workspaceToItem = (workspace: WorkspaceObject) => {
     const workspaceURL = formatUrlWithWorkspaceId(
       coreStart.application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
         absolute: false,
@@ -139,23 +88,10 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       coreStart.http.basePath
     );
 
-    const shouldShowUseCases = workspaceUseCaseToItem(workspace, index, workspaceURL);
     const workspaceName = truncate(workspace.name, { length: MAX_WORKSPACE_NAME_LENGTH });
-    const name = shouldShowUseCases ? (
-      <EuiText> {workspaceName}</EuiText>
-    ) : (
-      <EuiText
-        onClick={(e) => {
-          e.stopPropagation();
-          window.location.assign(workspaceURL);
-        }}
-      >
-        {workspaceName}
-      </EuiText>
-    );
 
     return {
-      name,
+      name: workspaceName,
       key: workspace.id,
       'data-test-subj': `context-menu-item-${workspace.id}`,
       icon: (
@@ -167,14 +103,14 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
           initialsLength={2}
         />
       ),
-      ...(shouldShowUseCases && { panel: index }),
+      onClick: () => {
+        window.location.assign(workspaceURL);
+      },
     };
   };
 
   const getWorkspaceListItems = (panelsWorkspaceList: WorkspaceObject[]) => {
-    const workspaceListItems: EuiContextMenuPanelItemDescriptor[] = panelsWorkspaceList.map(
-      (workspace, index) => workspaceToItem(workspace, index + 1)
-    );
+    const workspaceListItems = panelsWorkspaceList.map((workspace) => workspaceToItem(workspace));
     return workspaceListItems;
   };
 
@@ -205,6 +141,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
             'aria-label': 'Show workspace dropdown selector',
             alwaysShow: true,
           }}
+          data-test-subj="current-workspace-button"
         />
       </EuiListGroup>
     </>
@@ -224,7 +161,6 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       width: 300,
       items: getWorkspaceListItems(filteredWorkspaceList),
     },
-    ...useCasePanels,
   ];
 
   const recentWorkspacesPanels = [
@@ -241,7 +177,6 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       width: 300,
       items: getWorkspaceListItems(filteredRecentWorkspaces),
     },
-    ...useCasePanels,
   ];
 
   return (
@@ -254,63 +189,52 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       panelPaddingSize="none"
       anchorPosition="downCenter"
     >
-      {currentWorkspace ? (
-        <EuiPanel paddingSize="m" hasBorder={false} color="transparent">
-          <EuiFlexGroup
-            justifyContent="center"
-            alignItems="center"
-            direction="column"
-            gutterSize="s"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiAvatar
-                size="m"
-                type="space"
-                name={currentWorkspaceName}
-                color={currentWorkspace.color}
-                initialsLength={2}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} data-test-subj="context-menu-current-workspace-name">
-              {currentWorkspaceName}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false} data-test-subj="context-menu-current-use-case">
-              {currentWorkspaceUseCase}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                key={'objects'}
-                onClick={() => {
-                  window.location.assign(
-                    formatUrlWithWorkspaceId(
-                      coreStart.application.getUrlForApp(
-                        'management/opensearch-dashboards/objects',
-                        {
-                          absolute: false,
-                        }
-                      ),
-                      currentWorkspace.id,
-                      coreStart.http.basePath
-                    )
-                  );
-                }}
-              >
-                <FormattedMessage
-                  id="core.ui.primaryNav.workspace.savedObjects"
-                  defaultMessage="View workspace saved objects"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiPanel>
-      ) : null}
-      <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
-        <EuiFieldSearch
-          placeholder={defaultSearchPlaceholder}
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          fullWidth
-        />
+      <EuiPanel paddingSize="m" hasBorder={false} color="transparent">
+        <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiAvatar
+              size="m"
+              type="space"
+              name={currentWorkspace ? currentWorkspaceName : 'WS'}
+              color={currentWorkspace?.color}
+              initialsLength={2}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false} data-test-subj="context-menu-current-workspace-name">
+            {currentWorkspaceName}
+          </EuiFlexItem>
+          {currentWorkspace ? (
+            <>
+              <EuiFlexItem grow={false} data-test-subj="context-menu-current-use-case">
+                {currentWorkspaceUseCase}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  key={'objects'}
+                  onClick={() => {
+                    window.location.assign(
+                      formatUrlWithWorkspaceId(
+                        coreStart.application.getUrlForApp(
+                          'management/opensearch-dashboards/objects',
+                          {
+                            absolute: false,
+                          }
+                        ),
+                        currentWorkspace.id,
+                        coreStart.http.basePath
+                      )
+                    );
+                  }}
+                >
+                  <FormattedMessage
+                    id="core.ui.primaryNav.workspace.savedObjects"
+                    defaultMessage="View workspace saved objects"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </>
+          ) : null}
+        </EuiFlexGroup>
       </EuiPanel>
       <EuiContextMenu
         initialPanelId={0}
