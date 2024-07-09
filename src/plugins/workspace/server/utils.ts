@@ -119,10 +119,10 @@ export const getDataSourcesList = (client: SavedObjectsClientContract, workspace
 export const checkAndSetDefaultDataSource = async (
   uiSettingsClient: IUiSettingsClient,
   dataSources: string[],
-  isNeededCheck: boolean
+  needCheck: boolean
 ) => {
   if (dataSources?.length > 0) {
-    if (!isNeededCheck) {
+    if (!needCheck) {
       // Create# Will set first data source as default data source.
       await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
     } else {

@@ -12,6 +12,7 @@ import {
   SavedObjectsServiceStart,
   UiSettingsServiceStart,
   WORKSPACE_TYPE,
+  Logger,
 } from '../../../core/server';
 import { updateWorkspaceState, getWorkspaceState } from '../../../core/server/utils';
 import {
@@ -37,11 +38,13 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
 
 export class WorkspaceClient implements IWorkspaceClientImpl {
   private setupDep: CoreSetup;
+  private logger: Logger;
   private savedObjects?: SavedObjectsServiceStart;
   private uiSettings?: UiSettingsServiceStart;
 
-  constructor(core: CoreSetup) {
+  constructor(core: CoreSetup, logger: Logger) {
     this.setupDep = core;
+    this.logger = logger;
   }
 
   private getScopedClientWithoutPermission(
@@ -133,11 +136,16 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         });
         // Set first data source as default after creating workspace
         const uiSettingsClient = this.uiSettings.asScopedToClient(client);
-        await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, false);
-        // Reset workspace state
-        updateWorkspaceState(requestDetail.request, {
-          requestWorkspaceId: rawState.requestWorkspaceId,
-        });
+        try {
+          await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, false);
+        } catch (e) {
+          this.logger.error('Set default data source error');
+        } finally {
+          // Reset workspace state
+          updateWorkspaceState(requestDetail.request, {
+            requestWorkspaceId: rawState.requestWorkspaceId,
+          });
+        }
       }
 
       return {

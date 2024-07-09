@@ -215,4 +215,17 @@ describe('workspace utils', () => {
       dataSources[0]
     );
   });
+
+  it('should clear default data source if there is no new data source', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    const uiSettings = uiSettingsServiceMock.createStartContract();
+    const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+    const dataSources: string[] = [];
+    uiSettingsClient.get = jest.fn().mockResolvedValue('');
+    await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, true);
+    expect(uiSettingsClient.set).toHaveBeenCalledWith(
+      DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+      undefined
+    );
+  });
 });
