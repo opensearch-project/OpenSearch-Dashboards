@@ -55,7 +55,7 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
       <Fragment>
         <EuiSpacer size="xl" />
 
-        <EuiText>
+        <EuiText size="s">
           <h2 data-test-subj="discoverNoResultsTimefilter">
             <FormattedMessage
               id="discover.noResults.expandYourTimeRangeTitle"
@@ -83,7 +83,7 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
       {
         description: <EuiCode>200</EuiCode>,
         title: (
-          <EuiText>
+          <EuiText size="s">
             <strong>
               <FormattedMessage
                 id="discover.noResults.searchExamples.anyField200StatusCodeExampleTitle"
@@ -96,7 +96,7 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
       {
         description: <EuiCode>status:200</EuiCode>,
         title: (
-          <EuiText>
+          <EuiText size="s">
             <strong>
               <FormattedMessage
                 id="discover.noResults.searchExamples.statusField200StatusCodeExampleTitle"
@@ -109,7 +109,7 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
       {
         description: <EuiCode>status:[400 TO 499]</EuiCode>,
         title: (
-          <EuiText>
+          <EuiText size="s">
             <strong>
               <FormattedMessage
                 id="discover.noResults.searchExamples.400to499StatusCodeExampleTitle"
@@ -122,7 +122,7 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
       {
         description: <EuiCode>status:[400 TO 499] AND extension:PHP</EuiCode>,
         title: (
-          <EuiText>
+          <EuiText size="s">
             <strong>
               <FormattedMessage
                 id="discover.noResults.searchExamples.400to499StatusCodeWithPhpExtensionExampleTitle"
@@ -135,7 +135,7 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
       {
         description: <EuiCode>status:[400 TO 499] AND (extension:php OR extension:html)</EuiCode>,
         title: (
-          <EuiText>
+          <EuiText size="s">
             <strong>
               <FormattedMessage
                 id="discover.noResults.searchExamples.400to499StatusCodeWithPhpOrHtmlExtensionExampleTitle"
@@ -151,7 +151,7 @@ export const DiscoverNoResults = ({ timeFieldName, queryLanguage }: Props) => {
       <Fragment>
         <EuiSpacer size="xl" />
 
-        <EuiText>
+        <EuiText size="s">
           <h3>
             <FormattedMessage
               id="discover.noResults.searchExamples.refineYourQueryTitle"

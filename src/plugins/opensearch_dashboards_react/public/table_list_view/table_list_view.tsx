@@ -46,6 +46,7 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiBasicTableColumn,
+  EuiText,
 } from '@elastic/eui';
 import { HttpFetchError, ToastsStart } from 'opensearch-dashboards/public';
 import { toMountPoint } from '../util';
@@ -279,13 +280,15 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         confirmButtonText={deleteButton}
         defaultFocusedButton="cancel"
       >
-        <p>
-          <FormattedMessage
-            id="opensearch-dashboards-react.tableListView.listing.deleteConfirmModalDescription"
-            defaultMessage="You can't recover deleted {entityNamePlural}."
-            values={{ entityNamePlural: this.props.entityNamePlural }}
-          />
-        </p>
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="opensearch-dashboards-react.tableListView.listing.deleteConfirmModalDescription"
+              defaultMessage="You can't recover deleted {entityNamePlural}."
+              values={{ entityNamePlural: this.props.entityNamePlural }}
+            />
+          </p>
+        </EuiText>
       </EuiConfirmModal>
     );
   }

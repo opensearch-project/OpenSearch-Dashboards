@@ -136,22 +136,24 @@ export class DashboardCloneModal extends React.Component<Props, State> {
           color="warning"
           data-test-subj="titleDupicateWarnMsg"
         >
-          <p>
-            <FormattedMessage
-              id="dashboard.topNav.cloneModal.dashboardExistsDescription"
-              defaultMessage="Click {confirmClone} to clone the dashboard with the duplicate title."
-              values={{
-                confirmClone: (
-                  <strong>
-                    <FormattedMessage
-                      id="dashboard.topNav.cloneModal.confirmCloneDescription"
-                      defaultMessage="Confirm Clone"
-                    />
-                  </strong>
-                ),
-              }}
-            />
-          </p>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="dashboard.topNav.cloneModal.dashboardExistsDescription"
+                defaultMessage="Click {confirmClone} to clone the dashboard with the duplicate title."
+                values={{
+                  confirmClone: (
+                    <strong>
+                      <FormattedMessage
+                        id="dashboard.topNav.cloneModal.confirmCloneDescription"
+                        defaultMessage="Confirm Clone"
+                      />
+                    </strong>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
         </EuiCallOut>
       </Fragment>
     );
@@ -174,7 +176,7 @@ export class DashboardCloneModal extends React.Component<Props, State> {
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiText>
+          <EuiText size="s">
             <p>
               <FormattedMessage
                 id="dashboard.topNav.cloneModal.enterNewNameForDashboardDescription"

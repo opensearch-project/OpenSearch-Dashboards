@@ -391,7 +391,7 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                           class="euiSpacer euiSpacer--m"
                         />
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           <p>
                             Start creating your visualization by selecting a type for that visualization.
@@ -1016,9 +1016,11 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                                 ]
                               }
                             >
-                              <EuiText>
+                              <EuiText
+                                size="s"
+                              >
                                 <div
-                                  className="euiText euiText--medium"
+                                  className="euiText euiText--small"
                                 >
                                   <p>
                                     <FormattedMessage
@@ -1493,7 +1495,7 @@ exports[`NewVisModal should render as expected 1`] = `
                           class="euiSpacer euiSpacer--m"
                         />
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           <p>
                             Start creating your visualization by selecting a type for that visualization.
@@ -2066,9 +2068,11 @@ exports[`NewVisModal should render as expected 1`] = `
                                 ]
                               }
                             >
-                              <EuiText>
+                              <EuiText
+                                size="s"
+                              >
                                 <div
-                                  className="euiText euiText--medium"
+                                  className="euiText euiText--small"
                                 >
                                   <p>
                                     <FormattedMessage

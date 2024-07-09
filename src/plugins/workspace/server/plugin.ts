@@ -30,6 +30,7 @@ import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import {
   cleanWorkspaceId,
   getWorkspaceIdFromUrl,
+  getWorkspaceState,
   updateWorkspaceState,
 } from '../../../core/server/utils';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
@@ -136,7 +137,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     core.savedObjects.addClientWrapper(
       PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
       WORKSPACE_ID_CONSUMER_WRAPPER_ID,
-      new WorkspaceIdConsumerWrapper(isPermissionControlEnabled).wrapperFactory
+      new WorkspaceIdConsumerWrapper().wrapperFactory
     );
 
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
@@ -157,7 +158,14 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
         enabled: true,
         permissionEnabled: isPermissionControlEnabled,
       },
+      dashboards: { isDashboardAdmin: false },
     }));
+    // Dynamically update capabilities based on the auth information from request.
+    core.capabilities.registerSwitcher((request) => {
+      // If the value is undefined/true, the user is dashboard admin.
+      const isDashboardAdmin = getWorkspaceState(request).isDashboardAdmin !== false;
+      return { dashboards: { isDashboardAdmin } };
+    });
 
     return {
       client: this.client,

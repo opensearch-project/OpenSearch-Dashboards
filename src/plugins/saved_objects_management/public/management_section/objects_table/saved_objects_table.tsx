@@ -55,6 +55,7 @@ import {
   EuiFormRow,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -70,7 +71,6 @@ import {
   WorkspaceAttribute,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
-import { PUBLIC_WORKSPACE_ID, PUBLIC_WORKSPACE_NAME } from '../../../../../core/public';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
 import { IndexPatternsContract } from '../../../../data/public';
 import {
@@ -195,7 +195,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       // application home
       if (!currentWorkspaceId) {
         // public workspace is virtual at this moment
-        return availableWorkspaces?.map((ws) => ws.id).concat(PUBLIC_WORKSPACE_ID);
+        return availableWorkspaces?.map((ws) => ws.id);
       } else {
         return [currentWorkspaceId];
       }
@@ -205,7 +205,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   private get workspaceNameIdLookup() {
     const { availableWorkspaces } = this.state;
     const workspaceNameIdMap = new Map<string, string>();
-    workspaceNameIdMap.set(PUBLIC_WORKSPACE_NAME, PUBLIC_WORKSPACE_ID);
     // workspace name is unique across the system
     availableWorkspaces?.forEach((workspace) => {
       workspaceNameIdMap.set(workspace.name, workspace.id);
@@ -740,12 +739,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           }
           defaultFocusedButton={EUI_MODAL_CONFIRM_BUTTON}
         >
-          <p>
-            <FormattedMessage
-              id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-              defaultMessage="This action will delete the following saved objects:"
-            />
-          </p>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+                defaultMessage="This action will delete the following saved objects:"
+              />
+            </p>
+          </EuiText>
           <EuiInMemoryTable
             items={selectedSavedObjects}
             columns={[
@@ -956,8 +957,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     // Add workspace filter
     if (workspaceEnabled && availableWorkspaces?.length) {
       const wsCounts = savedObjectCounts.workspaces || {};
-      const publicWorkspaceExists =
-        availableWorkspaces.findIndex((workspace) => workspace.id === PUBLIC_WORKSPACE_ID) > -1;
       const wsFilterOptions = availableWorkspaces
         .filter((ws) => {
           return this.workspaceIdQuery?.includes(ws.id);
@@ -969,15 +968,6 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             view: `${ws.name} (${wsCounts[ws.id] || 0})`,
           };
         });
-
-      // add public workspace option only if we don't have it as real workspace
-      if (!currentWorkspaceId && !publicWorkspaceExists) {
-        wsFilterOptions.push({
-          name: PUBLIC_WORKSPACE_NAME,
-          value: PUBLIC_WORKSPACE_NAME,
-          view: `${PUBLIC_WORKSPACE_NAME} (${wsCounts[PUBLIC_WORKSPACE_ID] || 0})`,
-        });
-      }
 
       filters.push({
         type: 'field_value_selection',
