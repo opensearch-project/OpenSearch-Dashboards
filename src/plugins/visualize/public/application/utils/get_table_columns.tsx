@@ -30,7 +30,15 @@
 
 import React from 'react';
 import { History } from 'history';
-import { EuiBetaBadge, EuiButton, EuiEmptyPrompt, EuiIcon, EuiLink, EuiBadge } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiIcon,
+  EuiLink,
+  EuiBadge,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
@@ -175,12 +183,14 @@ export const getNoItemsMessage = (createItem: () => void) => (
       </h1>
     }
     body={
-      <p>
-        <FormattedMessage
-          id="visualize.listing.createNew.description"
-          defaultMessage="You can create different visualizations based on your data."
-        />
-      </p>
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="visualize.listing.createNew.description"
+            defaultMessage="You can create different visualizations based on your data."
+          />
+        </p>
+      </EuiText>
     }
     actions={
       <EuiButton
