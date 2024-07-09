@@ -30,7 +30,6 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, SavedObjectsFindOptions } from 'src/core/server';
-import { PUBLIC_WORKSPACE_ID } from '../../../../core/server';
 import { findAll } from '../lib';
 
 export const registerScrollForCountRoute = (router: IRouter) => {
@@ -92,7 +91,7 @@ export const registerScrollForCountRoute = (router: IRouter) => {
           });
         }
         if (requestHasWorkspaces) {
-          const resultWorkspaces = result.workspaces || [PUBLIC_WORKSPACE_ID];
+          const resultWorkspaces = result.workspaces || [];
           resultWorkspaces.forEach((ws) => {
             counts.workspaces[ws] = counts.workspaces[ws] || 0;
             counts.workspaces[ws]++;
