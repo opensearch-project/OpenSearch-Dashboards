@@ -26,10 +26,16 @@ import {
 import { CatalogCacheManager } from '../../../../framework/catlog_cache/cache_manager';
 import { isCatalogCacheFetching } from '../../../../framework/utils/shared';
 import { AccelerationStatus, getAccelerationName } from './acceleration_utils';
+import { AccelerationActionOverlay } from './acceleration_action_overlay';
 
 interface AccelerationTableProps {
   dataSourceName: string;
   cacheLoadingHooks: any;
+}
+
+interface ModalState {
+  actionType: string | null;
+  selectedItem: CachedAcceleration | null;
 }
 
 export const AccelerationTable = ({
@@ -45,6 +51,10 @@ export const AccelerationTable = ({
     startLoadingAccelerations,
   } = cacheLoadingHooks;
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [modalState, setModalState] = useState<ModalState>({
+    actionType: null,
+    selectedItem: null,
+  });
 
   useEffect(() => {
     const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
@@ -141,6 +151,63 @@ export const AccelerationTable = ({
     return <EuiEmptyPrompt icon={<EuiLoadingSpinner size="xl" />} body={<BodyText />} />;
   };
 
+  const tableActions = [
+    {
+      name: 'Query Data',
+      description: 'Query in Observability Logs',
+      icon: 'discoverApp',
+      type: 'icon',
+      onClick: (acc: CachedAcceleration) => {
+        // onDiscoverIconClick(acc, dataSourceName);
+      },
+    },
+    {
+      name: 'Sync',
+      description: 'Manual Sync Data',
+      icon: 'inputOutput',
+      onClick: (item: CachedAcceleration) => handleActionClick('sync', item),
+      enabled: (item: CachedAcceleration) => !item.autoRefresh && item.status === 'active',
+    },
+    {
+      name: 'Delete',
+      description: 'Delete acceleration',
+      icon: 'trash',
+      onClick: (item: CachedAcceleration) => handleActionClick('delete', item),
+      enabled: (item: CachedAcceleration) => item.status !== 'deleted',
+    },
+    {
+      name: 'Vacuum',
+      description: 'Vacuum acceleration',
+      icon: 'broom',
+      onClick: (item: CachedAcceleration) => handleActionClick('vacuum', item),
+      enabled: (item: CachedAcceleration) => item.status === 'deleted',
+    },
+  ];
+
+  const handleActionClick = (
+    actionType: ModalState['actionType'],
+    acceleration: CachedAcceleration
+  ) => {
+    setModalState({
+      actionType,
+      selectedItem: acceleration,
+    });
+  };
+
+  const handleModalClose = () => {
+    setModalState({
+      actionType: null,
+      selectedItem: null,
+    });
+  };
+
+  const handleConfirm = () => {
+    if (!modalState.selectedItem || !modalState.actionType) return;
+
+    // performOperation(modalState.selectedItem, modalState.actionType);
+    handleModalClose();
+  };
+
   const accelerationTableColumns = [
     {
       field: 'indexName',
@@ -206,6 +273,10 @@ export const AccelerationTable = ({
         return flintIndexName || '-';
       },
     },
+    {
+      name: 'Actions',
+      actions: tableActions,
+    },
   ] as Array<EuiTableFieldDataColumnType<any>>;
 
   const pagination = {
@@ -237,6 +308,18 @@ export const AccelerationTable = ({
           />
         )}
       </EuiPanel>
+      {(modalState.actionType === 'delete' ||
+        modalState.actionType === 'vacuum' ||
+        modalState.actionType === 'sync') && (
+        <AccelerationActionOverlay
+          isVisible={!!modalState.actionType}
+          actionType={modalState.actionType}
+          acceleration={modalState.selectedItem}
+          dataSourceName={dataSourceName}
+          onCancel={handleModalClose}
+          onConfirm={handleConfirm}
+        />
+      )}
     </>
   );
 };
