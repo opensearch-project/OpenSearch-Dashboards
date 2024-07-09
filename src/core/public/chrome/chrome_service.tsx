@@ -48,7 +48,7 @@ import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
 import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
-import { Branding } from '../';
+import { Branding, WorkspacesStart } from '../';
 import { getLogos } from '../../common';
 import type { Logos } from '../../common/types';
 import { OverlayStart } from '../overlays';
@@ -107,6 +107,7 @@ export interface StartDeps {
   notifications: NotificationsStart;
   uiSettings: IUiSettingsClient;
   overlays: OverlayStart;
+  workspaces: WorkspacesStart;
 }
 
 type CollapsibleNavHeaderRender = () => JSX.Element | null;
@@ -181,6 +182,7 @@ export class ChromeService {
     notifications,
     uiSettings,
     overlays,
+    workspaces,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
 
@@ -196,7 +198,7 @@ export class ChromeService {
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
-    const recentlyAccessed = await this.recentlyAccessed.start({ http });
+    const recentlyAccessed = await this.recentlyAccessed.start({ http, workspaces });
     const docTitle = this.docTitle.start({ document: window.document });
     const navGroup = await this.navGroup.start({ navLinks, application });
 

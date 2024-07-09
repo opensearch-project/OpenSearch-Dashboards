@@ -59,6 +59,7 @@ const createApp = (props: Partial<App>): App => {
   return {
     id: 'some-id',
     title: 'some-title',
+    description: 'some-description',
     mount: () => () => undefined,
     ...props,
   };
@@ -153,6 +154,7 @@ describe('#setup()', () => {
           id: 'app2',
           navLinkStatus: AppNavLinkStatus.visible,
           status: AppStatus.accessible,
+          description: 'some-description',
         })
       );
     });
