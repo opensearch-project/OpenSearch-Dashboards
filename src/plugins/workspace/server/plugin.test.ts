@@ -33,7 +33,6 @@ describe('Workspace server plugin', () => {
         },
         "workspaces": Object {
           "enabled": true,
-          "isDashboardAdmin": false,
           "permissionEnabled": true,
         },
       }
