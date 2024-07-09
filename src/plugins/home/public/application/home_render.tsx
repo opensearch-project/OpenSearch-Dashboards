@@ -1,4 +1,10 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React from 'react';
+
 import { CoreStart } from 'opensearch-dashboards/public';
 import { Page } from '../../../content_management/public/services';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';

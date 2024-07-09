@@ -4,6 +4,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+
 import { Content, Section } from '../services';
 import { ViewMode } from '../../../embeddable/public';
 import { DashboardContainerInput, SavedObjectDashboard } from '../../../dashboard/public';
@@ -158,6 +159,9 @@ export const createDashboardSection = async (
     }
   });
 
+  /**
+   * TODO: the input should be hooked with query input
+   */
   const input: DashboardContainerInput = {
     viewMode: ViewMode.VIEW,
     panels: panels,

@@ -4,6 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
+
 import { EmbeddableFactoryDefinition, IContainer } from '../../../embeddable/public';
 import {
   CUSTOM_CONTENT_EMBEDDABLE,

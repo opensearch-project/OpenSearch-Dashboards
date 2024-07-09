@@ -1,4 +1,10 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import React from 'react';
+import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 
 import {
   IContainer,
@@ -7,7 +13,6 @@ import {
   ContainerOutput,
   EmbeddableStart,
 } from '../../../../embeddable/public';
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 
 interface Props {
   embeddable: IContainer;

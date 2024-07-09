@@ -41,7 +41,6 @@ export const renderApp = (
   { params, pages, coreStart, depsStart }: Props,
   element: AppMountParameters['element']
 ) => {
-  console.log('pages: ', pages);
   ReactDOM.render(
     <I18nProvider>
       <Router history={params.history}>

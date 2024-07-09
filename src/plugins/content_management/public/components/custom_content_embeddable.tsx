@@ -5,6 +5,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+
 import { Embeddable, EmbeddableInput, IContainer } from '../../../embeddable/public';
 
 export const CUSTOM_CONTENT_EMBEDDABLE = 'custom_content_embeddable';
