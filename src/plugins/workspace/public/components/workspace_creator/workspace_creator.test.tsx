@@ -182,11 +182,18 @@ describe('WorkspaceCreator', () => {
     fireEvent.input(descriptionInput, {
       target: { value: 'test workspace description' },
     });
+    const colorSelector = getByTestId(
+      'euiColorPickerAnchor workspaceForm-workspaceDetails-colorPicker'
+    );
+    fireEvent.input(colorSelector, {
+      target: { value: '#000000' },
+    });
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'test workspace name',
+        color: '#000000',
         description: 'test workspace description',
         features: expect.arrayContaining(['use-case-observability']),
       }),

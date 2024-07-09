@@ -4,7 +4,12 @@
  */
 
 import { useCallback, useState, FormEventHandler, useRef, useMemo } from 'react';
-import { htmlIdGenerator, EuiFieldTextProps, EuiTextAreaProps } from '@elastic/eui';
+import {
+  htmlIdGenerator,
+  EuiFieldTextProps,
+  EuiTextAreaProps,
+  EuiColorPickerProps,
+} from '@elastic/eui';
 
 import { useApplications } from '../../hooks';
 import {
@@ -37,6 +42,7 @@ export const useWorkspaceForm = ({
   const applications = useApplications(application);
   const [name, setName] = useState(defaultValues?.name);
   const [description, setDescription] = useState(defaultValues?.description);
+  const [color, setColor] = useState(defaultValues?.color);
   const defaultValuesRef = useRef(defaultValues);
   const initialPermissionSettingsRef = useRef(
     generatePermissionSettingsState(operationType, defaultValues?.permissionSettings)
@@ -67,6 +73,7 @@ export const useWorkspaceForm = ({
     description,
     features: featureConfigs,
     useCases: selectedUseCases,
+    color,
     permissionSettings,
     selectedDataSources,
   });
@@ -115,6 +122,7 @@ export const useWorkspaceForm = ({
       onSubmit?.({
         name: currentFormData.name!,
         description: currentFormData.description,
+        color: currentFormData.color,
         features: currentFormData.features,
         permissionSettings: currentFormData.permissionSettings.filter(
           (item) =>
@@ -135,6 +143,10 @@ export const useWorkspaceForm = ({
     setDescription(e.target.value);
   }, []);
 
+  const handleColorChange = useCallback<Required<EuiColorPickerProps>['onChange']>((text) => {
+    setColor(text);
+  }, []);
+
   return {
     formId: formIdRef.current,
     formData,
@@ -143,6 +155,7 @@ export const useWorkspaceForm = ({
     numberOfErrors,
     numberOfChanges,
     handleFormSubmit,
+    handleColorChange,
     handleUseCasesChange,
     handleNameInputChange,
     setPermissionSettings,

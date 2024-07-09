@@ -203,6 +203,12 @@ describe('WorkspaceUpdater', () => {
     fireEvent.input(descriptionInput, {
       target: { value: 'test workspace description' },
     });
+    const colorSelector = getByTestId(
+      'euiColorPickerAnchor workspaceForm-workspaceDetails-colorPicker'
+    );
+    fireEvent.input(colorSelector, {
+      target: { value: '#000000' },
+    });
 
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspaceUseCase-analytics'));
@@ -224,6 +230,7 @@ describe('WorkspaceUpdater', () => {
       expect.any(String),
       expect.objectContaining({
         name: 'test workspace name',
+        color: '#000000',
         description: 'test workspace description',
         features: expect.arrayContaining(['use-case-analytics']),
       }),
