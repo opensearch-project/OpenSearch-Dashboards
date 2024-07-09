@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { SavedObjectsStart } from '../../../core/public';
 import {
   App,
   AppCategory,
@@ -44,6 +45,9 @@ export const isFeatureIdInsideUseCase = (featureId: string, featureConfig: strin
   }
   return false;
 };
+
+export const isNavGroupInFeatureConfigs = (navGroupId: string, featureConfigs: string[]) =>
+  featureConfigs.includes(getUseCaseFeatureConfig(navGroupId));
 
 /**
  * Checks if a given feature matches the provided feature configuration.
@@ -191,4 +195,29 @@ export const addRecentWorkspace = (newWorkspace: string) => {
   const updatedWorkspaces = [newWorkspace, ...workspaces.filter((ws) => ws !== newWorkspace)];
   localStorage.setItem(RECENT_WORKSPACES_KEY, JSON.stringify(updatedWorkspaces));
   return updatedWorkspaces;
+};
+
+export const getDataSourcesList = (client: SavedObjectsStart['client'], workspaces: string[]) => {
+  return client
+    .find({
+      type: 'data-source',
+      fields: ['id', 'title'],
+      perPage: 10000,
+      workspaces,
+    })
+    .then((response) => {
+      const objects = response?.savedObjects;
+      if (objects) {
+        return objects.map((source) => {
+          const id = source.id;
+          const title = source.get('title');
+          return {
+            id,
+            title,
+          };
+        });
+      } else {
+        return [];
+      }
+    });
 };

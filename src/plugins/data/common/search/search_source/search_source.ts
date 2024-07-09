@@ -87,7 +87,15 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import { filterDocvalueFields } from './filter_docvalue_fields';
 import { fieldWildcardFilter } from '../../../../opensearch_dashboards_utils/common';
 import { IIndexPattern } from '../../index_patterns';
-import { DATA_FRAME_TYPES, IDataFrame, IDataFrameResponse, convertResult } from '../../data_frames';
+import {
+  DATA_FRAME_TYPES,
+  IDataFrame,
+  IDataFrameResponse,
+  convertResult,
+  createDataFrame,
+  getRawQueryString,
+  parseRawQueryString,
+} from '../../data_frames';
 import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
 import { ISearchSource, SearchSourceOptions, SearchSourceFields } from './types';
@@ -123,7 +131,7 @@ export const searchSourceRequiredUiSettings = [
   UI_SETTINGS.QUERY_STRING_OPTIONS,
   UI_SETTINGS.SEARCH_INCLUDE_FROZEN,
   UI_SETTINGS.SORT_OPTIONS,
-  UI_SETTINGS.DATAFRAME_HYDRATION_STRATEGY,
+  UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY,
 ];
 
 export interface SearchSourceDependencies extends FetchHandlers {
@@ -306,6 +314,23 @@ export class SearchSource {
   }
 
   /**
+   * Create and set the data frame of this SearchSource
+   *
+   * @async
+   * @return {undefined|IDataFrame}
+   */
+  async createDataFrame(searchRequest: SearchRequest) {
+    const rawQueryString = this.getRawQueryStringFromRequest(searchRequest);
+    const dataFrame = createDataFrame({
+      name: searchRequest.index.title || searchRequest.index,
+      fields: [],
+      ...(rawQueryString && { meta: { queryConfig: parseRawQueryString(rawQueryString) } }),
+    });
+    await this.setDataFrame(dataFrame);
+    return this.getDataFrame();
+  }
+
+  /**
    * Clear the data frame of this SearchSource
    */
   destroyDataFrame() {
@@ -401,6 +426,10 @@ export class SearchSource {
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
+    if (!this.getDataFrame()) {
+      await this.createDataFrame(searchRequest);
+    }
+
     const params = getExternalSearchParamsFromRequest(searchRequest, {
       getConfig,
       getDataFrame: this.getDataFrame.bind(this),
@@ -442,6 +471,10 @@ export class SearchSource {
 
   private isUnsupportedRequest(request: SearchRequest): boolean {
     return request.body!.query.hasOwnProperty('type') && request.body!.query.type === 'unsupported';
+  }
+
+  private getRawQueryStringFromRequest(request: SearchRequest): string | undefined {
+    return getRawQueryString({ params: request });
   }
 
   /**

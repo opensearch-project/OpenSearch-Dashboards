@@ -137,7 +137,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     core.savedObjects.addClientWrapper(
       PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
       WORKSPACE_ID_CONSUMER_WRAPPER_ID,
-      new WorkspaceIdConsumerWrapper(isPermissionControlEnabled).wrapperFactory
+      new WorkspaceIdConsumerWrapper().wrapperFactory
     );
 
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
@@ -159,10 +159,13 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
         permissionEnabled: isPermissionControlEnabled,
         isDashboardAdmin: false,
       },
+      dashboards: { isDashboardAdmin: false },
     }));
+    // Dynamically update capabilities based on the auth information from request.
     core.capabilities.registerSwitcher((request) => {
-      const isDashboardAdmin = getWorkspaceState(request).isDashboardAdmin || false;
-      return { workspaces: { isDashboardAdmin } };
+      // If the value is undefined/true, the user is dashboard admin.
+      const isDashboardAdmin = getWorkspaceState(request).isDashboardAdmin !== false;
+      return { dashboards: { isDashboardAdmin } };
     });
 
     return {

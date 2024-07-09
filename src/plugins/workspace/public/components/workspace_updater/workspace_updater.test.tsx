@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
-import { fireEvent, render, waitFor } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
 import { WorkspaceUpdater as WorkspaceCreatorComponent } from './workspace_updater';
 import { coreMock, workspacesServiceMock } from '../../../../../core/public/mocks';
@@ -42,7 +42,26 @@ const createWorkspacesSetupContractMockWithValue = () => {
   };
 };
 
+const dataSourcesList = [
+  {
+    id: 'id1',
+    title: 'ds1', // This is used for mocking saved object function
+    get: () => {
+      return 'ds1';
+    },
+  },
+  {
+    id: 'id2',
+    title: 'ds2',
+    get: () => {
+      return 'ds2';
+    },
+  },
+];
+
 const mockCoreStart = coreMock.createStart();
+
+const renderCompleted = () => expect(screen.queryByText('Enter Details')).not.toBeNull();
 
 const WorkspaceUpdater = (props: any) => {
   const workspacesService = props.workspacesService || createWorkspacesSetupContractMockWithValue();
@@ -73,6 +92,15 @@ const WorkspaceUpdater = (props: any) => {
       workspaceClient: {
         ...mockCoreStart.workspaces,
         update: workspaceClientUpdate,
+      },
+      savedObjects: {
+        ...mockCoreStart.savedObjects,
+        client: {
+          ...mockCoreStart.savedObjects.client,
+          find: jest.fn().mockResolvedValue({
+            savedObjects: dataSourcesList,
+          }),
+        },
       },
     },
   });
@@ -128,6 +156,9 @@ describe('WorkspaceUpdater', () => {
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
       />
     );
+
+    await waitFor(renderCompleted);
+
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: '~' },
@@ -141,6 +172,8 @@ describe('WorkspaceUpdater', () => {
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
       />
     );
+    await waitFor(renderCompleted);
+
     fireEvent.click(getByTestId('workspaceForm-bottomBar-cancelButton'));
     await findByText('Discard changes?');
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
@@ -148,11 +181,13 @@ describe('WorkspaceUpdater', () => {
   });
 
   it('update workspace successfully', async () => {
-    const { getByTestId, getByText, getAllByText } = render(
+    const { getByTestId, getAllByText, getAllByTestId, getAllByLabelText } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
       />
     );
+    await waitFor(renderCompleted);
+
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
@@ -176,10 +211,14 @@ describe('WorkspaceUpdater', () => {
     fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-user-addNew'));
     const userIdInput = getAllByText('Select')[0];
     fireEvent.click(userIdInput);
-    fireEvent.input(getByTestId('comboBoxSearchInput'), {
+    fireEvent.input(getAllByTestId('comboBoxSearchInput')[0], {
       target: { value: 'test user id' },
     });
-    fireEvent.blur(getByTestId('comboBoxSearchInput'));
+    fireEvent.blur(getAllByTestId('comboBoxSearchInput')[0]);
+
+    await act(() => {
+      fireEvent.click(getAllByLabelText('Delete data source')[0]);
+    });
 
     fireEvent.click(getByTestId('workspaceForm-bottomBar-updateButton'));
     expect(workspaceClientUpdate).toHaveBeenCalledWith(
@@ -191,12 +230,15 @@ describe('WorkspaceUpdater', () => {
         features: expect.arrayContaining(['use-case-analytics']),
       }),
       {
-        read: {
-          users: ['test user id'],
+        permissions: {
+          read: {
+            users: ['test user id'],
+          },
+          library_read: {
+            users: ['test user id'],
+          },
         },
-        library_read: {
-          users: ['test user id'],
-        },
+        dataSources: ['id2'],
       }
     );
     await waitFor(() => {
@@ -215,6 +257,8 @@ describe('WorkspaceUpdater', () => {
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
       />
     );
+    await waitFor(renderCompleted);
+
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
@@ -236,6 +280,8 @@ describe('WorkspaceUpdater', () => {
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
       />
     );
+    await waitFor(renderCompleted);
+
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
@@ -256,6 +302,8 @@ describe('WorkspaceUpdater', () => {
         workspaceService={mockedWorkspacesService}
       />
     );
+
+    await waitFor(renderCompleted);
 
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {

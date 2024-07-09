@@ -41,7 +41,7 @@ import { notificationServiceMock } from '../notifications/notifications_service.
 import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { ChromeService } from './chrome_service';
 import { getAppInfo } from '../application/utils';
-import { overlayServiceMock } from '../mocks';
+import { overlayServiceMock, workspacesServiceMock } from '../mocks';
 
 class FakeApp implements App {
   public title: string;
@@ -72,6 +72,7 @@ function defaultStartDeps(availableApps?: App[]) {
     notifications: notificationServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     overlays: overlayServiceMock.createStartContract(),
+    workspaces: workspacesServiceMock.createStartContract(),
   };
 
   if (availableApps) {
@@ -89,6 +90,8 @@ async function start({
   startDeps = defaultStartDeps(),
 }: { options?: any; cspConfigMock?: any; startDeps?: ReturnType<typeof defaultStartDeps> } = {}) {
   const service = new ChromeService(options);
+
+  service.setup({ uiSettings: startDeps.uiSettings });
 
   if (cspConfigMock) {
     startDeps.injectedMetadata.getCspConfig.mockReturnValue(cspConfigMock);
@@ -119,8 +122,9 @@ describe('setup', () => {
     const customHeaderMock = React.createElement('TestCustomNavHeader');
     const renderMock = jest.fn().mockReturnValue(customHeaderMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup();
+    const chromeSetup = chrome.setup({ uiSettings });
     chromeSetup.registerCollapsibleNavHeader(renderMock);
 
     const chromeStart = await chrome.start(defaultStartDeps());
@@ -135,8 +139,9 @@ describe('setup', () => {
     const customHeaderMock = React.createElement('TestCustomNavHeader');
     const renderMock = jest.fn().mockReturnValue(customHeaderMock);
     const chrome = new ChromeService({ browserSupportsCsp: true });
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
 
-    const chromeSetup = chrome.setup();
+    const chromeSetup = chrome.setup({ uiSettings });
     // call 1st time
     chromeSetup.registerCollapsibleNavHeader(renderMock);
     // call 2nd time

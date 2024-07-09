@@ -15,6 +15,44 @@
   // overflow: auto;
 }
 
+.osdQueryEditor__languageWrapper {
+  :first-child {
+    box-shadow: none !important;
+    height: 100%;
+    border-radius: 0;
+  }
+}
+
+.osdQueryEditor__dataSourceWrapper {
+  .dataSourceSelect {
+    border-bottom: $euiBorderThin !important;
+
+    :first-child {
+      box-shadow: none !important;
+      height: 100%;
+      border-radius: 0;
+    }
+
+    div:is([class$="--group"]) {
+      padding: 0 !important;
+    }
+  }
+}
+
+.osdQueryEditor__dataSetWrapper {
+  .dataExplorerDSSelect {
+    border-bottom: $euiBorderThin !important;
+
+    div:is([class$="--group"]) {
+      padding: 0 !important;
+    }
+
+    .sourceRefreshText {
+      max-height: 40px;
+    }
+  }
+}
+
 @include euiBreakpoint("xs", "s") {
   .osdQueryEditor--withDatePicker {
     > :first-child {

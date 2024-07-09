@@ -50,3 +50,4 @@ export { ChromeRecentlyAccessed, ChromeRecentlyAccessedHistoryItem } from './rec
 export { ChromeNavControl, ChromeNavControls } from './nav_controls';
 export { ChromeDocTitle } from './doc_title';
 export { RightNavigationOrder } from './constants';
+export { ChromeRegistrationNavLink, ChromeNavGroupUpdater } from './nav_group';

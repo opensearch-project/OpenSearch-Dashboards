@@ -337,7 +337,11 @@
 
 # Set the value to true to enable workspace feature
 # Please note, workspace will not work with multi-tenancy. To enable workspace feature, you need to disable multi-tenancy first with `opensearch_security.multitenancy.enabled: false`
+# Please uncomment below uiSettings to enable new home/navigation experience when workspace is enabled
 # workspace.enabled: false
+# uiSettings:
+#   overrides:
+#     "home:useNewHomePage": true
 
 # Optional settings to specify saved object types to be deleted during migration.
 # This feature can help address compatibility issues that may arise during the migration of saved objects, such as types defined by legacy applications.

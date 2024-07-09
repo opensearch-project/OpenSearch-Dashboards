@@ -51,13 +51,14 @@ export interface IWorkspaceClientImpl {
   /**
    * Create a workspace
    * @param requestDetail {@link IRequestDetail}
-   * @param payload {@link WorkspaceAttribute}
-   * @returns a Promise with a new-created id for the workspace
+   * @param payload - An object of type {@link WorkspaceAttributeWithPermission} excluding the 'id' property, and also containing an optional array of string.
    * @public
    */
   create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+      dataSources?: string[];
+    }
   ): Promise<IResponse<{ id: WorkspaceAttribute['id'] }>>;
   /**
    * List workspaces
@@ -88,14 +89,16 @@ export interface IWorkspaceClientImpl {
    * Update the detail of a given workspace
    * @param requestDetail {@link IRequestDetail}
    * @param id workspace id
-   * @param payload {@link WorkspaceAttribute}
+   * @param payload - An object of type {@link WorkspaceAttributeWithPermission} excluding the 'id' property, and also containing an optional array of string.
    * @returns a Promise with a boolean result indicating if the update operation successed.
    * @public
    */
   update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>>
+    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>> & {
+      dataSources?: string[];
+    }
   ): Promise<IResponse<boolean>>;
   /**
    * Delete a given workspace

@@ -2,44 +2,43 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-
 import dateMath from '@elastic/datemath';
-import classNames from 'classnames';
-import React, { useRef, useState } from 'react';
-
 import {
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
-  EuiFieldText,
+  EuiSuperUpdateButton,
+  OnRefreshProps,
   prettyDuration,
 } from '@elastic/eui';
-// @ts-ignore
-import { EuiSuperUpdateButton, OnRefreshProps } from '@elastic/eui';
-import { isEqual, compact } from 'lodash';
+import classNames from 'classnames';
+import { compact, isEqual } from 'lodash';
+import React, { useState } from 'react';
 import {
+  DataSource,
   IDataPluginServices,
   IIndexPattern,
-  TimeRange,
-  TimeHistoryContract,
   Query,
-  DataSource,
+  TimeHistoryContract,
+  TimeRange,
 } from '../..';
 import {
   useOpenSearchDashboards,
   withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
-import QueryEditorUI from './query_editor';
 import { UI_SETTINGS } from '../../../common';
-import { PersistedLog, fromUser, getQueryLog } from '../../query';
-import { NoDataPopover } from './no_data_popover';
+import { fromUser, getQueryLog, PersistedLog } from '../../query';
 import { Settings } from '../types';
+import { NoDataPopover } from './no_data_popover';
+import QueryEditorUI from './query_editor';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
 // @internal
 export interface QueryEditorTopRowProps {
   query?: Query;
+  dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
   settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -72,7 +71,6 @@ export interface QueryEditorTopRowProps {
 export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
-  const queryEditorHeaderRef = useRef<HTMLDivElement | null>(null);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName } = opensearchDashboards.services;
@@ -234,8 +232,10 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
+          dataSource={props.dataSource}
           prepend={props.prepend}
           query={parsedQuery}
+          dataSourceContainerRef={props.dataSourceContainerRef}
           containerRef={props.containerRef}
           settings={props.settings!}
           screenTitle={props.screenTitle}
@@ -244,8 +244,9 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           onSubmit={onInputSubmit}
           getQueryStringInitialValue={getQueryStringInitialValue}
           persistedLog={persistedLog}
+          className="osdQueryEditor"
           dataTestSubj={props.dataTestSubj}
-          queryEditorHeaderRef={queryEditorHeaderRef}
+          queryLanguage={queryLanguage}
         />
       </EuiFlexItem>
     );

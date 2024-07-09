@@ -6,13 +6,13 @@
 import { OnPostAuthHandler, OnPreRoutingHandler } from 'src/core/server';
 import { coreMock, httpServerMock } from '../../../core/server/mocks';
 import { WorkspacePlugin } from './plugin';
-import { getWorkspaceState } from '../../../core/server/utils';
+import { getWorkspaceState, updateWorkspaceState } from '../../../core/server/utils';
 import * as utilsExports from './utils';
 
 describe('Workspace server plugin', () => {
   it('#setup', async () => {
     let value;
-    const capalities = {} as any;
+    const capabilities = {} as any;
     const setupMock = coreMock.createSetup();
     const initializerContextConfigMock = coreMock.createPluginInitializerContext({
       enabled: true,
@@ -21,13 +21,16 @@ describe('Workspace server plugin', () => {
 
     setupMock.capabilities.registerProvider.mockImplementationOnce((fn) => (value = fn()));
     setupMock.capabilities.registerSwitcher.mockImplementationOnce((fn) => {
-      return fn(request, capalities);
+      return fn(request, capabilities);
     });
 
     const workspacePlugin = new WorkspacePlugin(initializerContextConfigMock);
     await workspacePlugin.setup(setupMock);
     expect(value).toMatchInlineSnapshot(`
       Object {
+        "dashboards": Object {
+          "isDashboardAdmin": false,
+        },
         "workspaces": Object {
           "enabled": true,
           "isDashboardAdmin": false,
@@ -36,6 +39,23 @@ describe('Workspace server plugin', () => {
       }
     `);
     expect(setupMock.savedObjects.addClientWrapper).toBeCalledTimes(4);
+
+    let registerSwitcher;
+    let result;
+    updateWorkspaceState(request, { isDashboardAdmin: false });
+    registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
+    result = registerSwitcher(request, capabilities);
+    expect(result).toEqual({ dashboards: { isDashboardAdmin: false } });
+
+    updateWorkspaceState(request, { isDashboardAdmin: true });
+    registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
+    result = registerSwitcher(request, capabilities);
+    expect(result).toEqual({ dashboards: { isDashboardAdmin: true } });
+
+    updateWorkspaceState(request, { isDashboardAdmin: undefined });
+    registerSwitcher = setupMock.capabilities.registerSwitcher.mock.calls[0][0];
+    result = registerSwitcher(request, capabilities);
+    expect(result).toEqual({ dashboards: { isDashboardAdmin: true } });
   });
 
   it('#proxyWorkspaceTrafficToRealHandler', async () => {
