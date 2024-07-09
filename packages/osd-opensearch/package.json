@@ -22,14 +22,15 @@
     "getopts": "^2.2.5",
     "glob": "^7.1.7",
     "node-fetch": "^2.6.7",
+    "proxy-agent": "^6.4.0",
     "simple-git": "^3.16.0",
     "tar-fs": "^2.1.0",
     "tree-kill": "^1.2.2",
     "yauzl": "^2.10.0"
   },
   "devDependencies": {
-    "@osd/babel-preset": "1.0.0",
     "@babel/cli": "^7.22.9",
+    "@osd/babel-preset": "1.0.0",
     "del": "^6.1.1"
   }
 }

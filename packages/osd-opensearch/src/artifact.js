@@ -36,6 +36,7 @@ const { pipeline, Transform } = require('stream');
 const chalk = require('chalk');
 const { createHash } = require('crypto');
 const path = require('path');
+const { ProxyAgent } = require('proxy-agent');
 
 const asyncPipeline = promisify(pipeline);
 const SUPPORTED_PLATFORMS = ['linux', 'windows', 'darwin'];
@@ -98,7 +99,10 @@ async function fetchSnapshotManifest(url, log) {
   log.info('Downloading snapshot manifest from %s', chalk.bold(url));
 
   const abc = new AbortController();
-  const resp = await retry(log, async () => await fetch(url, { signal: abc.signal }));
+  const resp = await retry(
+    log,
+    async () => await fetch(url, { signal: abc.signal, agent: new ProxyAgent() })
+  );
   const json = await resp.text();
 
   return { abc, resp, json };
@@ -110,7 +114,8 @@ async function verifySnapshotUrl(url, log) {
   const abc = new AbortController();
   const resp = await retry(
     log,
-    async () => await fetch(url, { signal: abc.signal }, { method: 'HEAD' })
+    async () =>
+      await fetch(url, { signal: abc.signal, agent: new ProxyAgent() }, { method: 'HEAD' })
   );
 
   return { abc, resp };
@@ -365,6 +370,7 @@ exports.Artifact = class Artifact {
     const abc = new AbortController();
     const resp = await fetch(url, {
       signal: abc.signal,
+      agent: new ProxyAgent(),
       headers: {
         'If-None-Match': etag,
       },
@@ -439,6 +445,7 @@ exports.Artifact = class Artifact {
     const abc = new AbortController();
     const resp = await fetch(this.getChecksumUrl(), {
       signal: abc.signal,
+      agent: new ProxyAgent(),
     });
 
     if (!resp.ok) {
