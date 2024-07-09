@@ -136,7 +136,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.managementCurrentWorkspaceIdSubscription = currentWorkspaceId$.subscribe(
       (currentWorkspaceId) => {
         if (currentWorkspaceId) {
-          ['settings'].forEach((appId) =>
+          ['settings', 'dataSources'].forEach((appId) =>
             management.sections.section.opensearchDashboards.getApp(appId)?.disable()
           );
         }
