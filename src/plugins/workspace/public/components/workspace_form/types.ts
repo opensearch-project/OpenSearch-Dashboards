@@ -11,6 +11,7 @@ import type {
 import type { WorkspacePermissionMode } from '../../../common/constants';
 import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 import { DataSource } from '../../../common/types';
+import { WorkspaceUseCase } from '../../types';
 
 export type WorkspacePermissionSetting =
   | {
@@ -56,4 +57,5 @@ export interface WorkspaceFormProps {
   workspaceConfigurableApps?: PublicAppInfo[];
   permissionEnabled?: boolean;
   permissionLastAdminItemDeletable?: boolean;
+  availableUseCases?: WorkspaceUseCase[];
 }

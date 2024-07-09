@@ -31,7 +31,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     defaultValues,
     operationType,
     permissionEnabled,
-    workspaceConfigurableApps,
+    availableUseCases,
     permissionLastAdminItemDeletable,
   } = props;
   const {
@@ -150,7 +150,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           fullWidth
         >
           <WorkspaceUseCase
-            configurableApps={workspaceConfigurableApps}
+            availableUseCases={availableUseCases}
             value={formData.useCases}
             onChange={handleUseCasesChange}
           />

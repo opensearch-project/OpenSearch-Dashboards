@@ -17,9 +17,11 @@ import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
 import { DataSource } from '../../../common/types';
+import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceCreatorProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
 export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
@@ -30,6 +32,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     props.workspaceConfigurableApps$ ?? of(undefined)
   );
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
+  const availableUseCases = useObservable(props.registeredUseCases$);
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
@@ -105,6 +108,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               workspaceConfigurableApps={workspaceConfigurableApps}
               permissionEnabled={isPermissionEnabled}
               permissionLastAdminItemDeletable
+              availableUseCases={availableUseCases}
             />
           )}
         </EuiPageContent>

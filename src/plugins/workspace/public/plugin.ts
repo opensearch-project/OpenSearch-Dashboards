@@ -20,6 +20,7 @@ import {
   WorkspaceAvailability,
   ChromeNavGroupUpdater,
   NavGroupStatus,
+  NavGroupType,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -27,9 +28,10 @@ import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_UPDATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
+  WORKSPACE_USE_CASES,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
-import { Services } from './types';
+import { Services, WorkspaceUseCase } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { ManagementSetup } from '../../../plugins/management/public';
@@ -44,7 +46,7 @@ import {
 type WorkspaceAppType = (
   params: AppMountParameters,
   services: Services,
-  props: Record<string, any>
+  props: Record<string, any> & { registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]> }
 ) => () => void;
 
 interface WorkspacePluginSetupDeps {
@@ -62,6 +64,8 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private navGroupUpdater$ = new BehaviorSubject<ChromeNavGroupUpdater>(() => undefined);
   private workspaceConfigurableApps$ = new BehaviorSubject<PublicAppInfo[]>([]);
   private unregisterNavGroupUpdater?: () => void;
+  private registeredUseCases$ = new BehaviorSubject<WorkspaceUseCase[]>([]);
+  private registeredUseCasesUpdaterSubscription?: Subscription;
 
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
@@ -71,6 +75,11 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         }
       });
     }
+  }
+
+  private isAppBelongSystematicUseCase(appId: string) {
+    const systematicUseCases = this.registeredUseCases$.getValue();
+    return systematicUseCases.some(({ features }) => features.includes(appId));
   }
 
   /**
@@ -92,6 +101,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
             return;
           }
 
+          if (this.isAppBelongSystematicUseCase(app.id)) {
+            return;
+          }
+
           /**
            * Change the app to `inaccessible` if it is not configured in the workspace
            * If trying to access such app, an "Application Not Found" page will be displayed
@@ -101,6 +114,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
         this.navGroupUpdater$.next((navGroup) => {
           if (
+            navGroup.type !== NavGroupType.SYSTEM &&
             currentWorkspace.features &&
             !isNavGroupInFeatureConfigs(navGroup.id, currentWorkspace.features)
           ) {
@@ -246,6 +260,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
       return renderApp(params, services, {
         workspaceConfigurableApps$: this.workspaceConfigurableApps$,
+        registeredUseCases$: this.registeredUseCases$,
       });
     };
 
@@ -346,6 +361,42 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
     this.addWorkspaceToBreadcrumbs(core);
 
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      this.registeredUseCasesUpdaterSubscription = core.chrome.navGroup
+        .getNavGroupsMap$()
+        .subscribe((navGroupsMap) => {
+          this.registeredUseCases$.next(
+            Object.values(navGroupsMap)
+              .filter((navGroupItem) => navGroupItem.type !== NavGroupType.SYSTEM)
+              .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+              .map(({ id, title, description, navLinks, type }) => ({
+                id,
+                title,
+                description,
+                features: navLinks.map((item) => item.id),
+                systematic: type === NavGroupType.SYSTEM,
+              }))
+          );
+        });
+    } else {
+      this.registeredUseCasesUpdaterSubscription = this.workspaceConfigurableApps$.subscribe(
+        (configurableApps) => {
+          const configurableAppsId = configurableApps.map((app) => app.id);
+
+          this.registeredUseCases$.next(
+            [
+              WORKSPACE_USE_CASES.observability,
+              WORKSPACE_USE_CASES['security-analytics'],
+              WORKSPACE_USE_CASES.analytics,
+              WORKSPACE_USE_CASES.search,
+            ].filter((useCase) => {
+              return useCase.features.some((featureId) => configurableAppsId.includes(featureId));
+            })
+          );
+        }
+      );
+    }
+
     return {};
   }
 
@@ -355,5 +406,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.managementCurrentWorkspaceIdSubscription?.unsubscribe();
     this.breadcrumbsSubscription?.unsubscribe();
     this.unregisterNavGroupUpdater?.();
+    this.registeredUseCasesUpdaterSubscription?.unsubscribe();
   }
 }

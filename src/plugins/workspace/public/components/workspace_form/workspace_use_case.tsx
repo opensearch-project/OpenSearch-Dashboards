@@ -3,19 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { PublicAppInfo } from 'opensearch-dashboards/public';
+import React, { useCallback } from 'react';
 import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
-import { WORKSPACE_USE_CASES } from '../../../common/constants';
 import './workspace_use_case.scss';
-
-const ALL_USE_CASES = [
-  WORKSPACE_USE_CASES.observability,
-  WORKSPACE_USE_CASES['security-analytics'],
-  WORKSPACE_USE_CASES.analytics,
-  WORKSPACE_USE_CASES.search,
-];
+import { WorkspaceUseCase as WorkspaceUseCaseObject } from '../../types';
 
 interface WorkspaceUseCaseCardProps {
   id: string;
@@ -54,22 +46,16 @@ const WorkspaceUseCaseCard = ({
 };
 
 export interface WorkspaceUseCaseProps {
-  configurableApps?: PublicAppInfo[];
   value: string[];
   onChange: (newValue: string[]) => void;
+  availableUseCases?: WorkspaceUseCaseObject[];
 }
 
-export const WorkspaceUseCase = ({ configurableApps, value, onChange }: WorkspaceUseCaseProps) => {
-  const availableUseCases = useMemo(() => {
-    if (!configurableApps) {
-      return [];
-    }
-    const configurableAppsId = configurableApps.map((app) => app.id);
-    return ALL_USE_CASES.filter((useCase) => {
-      return useCase.features.some((featureId) => configurableAppsId.includes(featureId));
-    });
-  }, [configurableApps]);
-
+export const WorkspaceUseCase = ({
+  availableUseCases = [],
+  value,
+  onChange,
+}: WorkspaceUseCaseProps) => {
   const handleCardChange = useCallback(
     (id: string) => {
       if (!value.includes(id)) {
