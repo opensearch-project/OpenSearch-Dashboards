@@ -54,6 +54,7 @@ export type Content =
   | {
       kind: 'card';
       id: string;
+      order: number;
       title: string;
       description: string;
       onClick?: () => void;

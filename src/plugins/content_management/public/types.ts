@@ -3,9 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
 
-import { ContentManagementService } from './services';
+import { ContentManagementService, Page } from './services';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 
 export interface ContentManagementPluginSetup {
@@ -14,6 +15,7 @@ export interface ContentManagementPluginSetup {
 }
 export interface ContentManagementPluginStart {
   getPage: ContentManagementService['getPage'];
+  renderPage: (page: Page) => React.ReactNode;
 }
 
 export type ContentManagementPluginStartDependencies = {

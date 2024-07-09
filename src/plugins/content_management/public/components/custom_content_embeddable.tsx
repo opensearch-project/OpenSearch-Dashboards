@@ -7,11 +7,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Embeddable, EmbeddableInput, IContainer } from '../../../embeddable/public';
 
-export const CUSTOM_CONTENT_RENDER = 'custom_content_render';
+export const CUSTOM_CONTENT_EMBEDDABLE = 'custom_content_embeddable';
 export type CustomContentEmbeddableInput = EmbeddableInput & { render: () => React.ReactElement };
 
 export class CustomContentEmbeddable extends Embeddable<CustomContentEmbeddableInput> {
-  public readonly type = CUSTOM_CONTENT_RENDER;
+  public readonly type = CUSTOM_CONTENT_EMBEDDABLE;
   private node: HTMLElement | null = null;
 
   constructor(initialInput: CustomContentEmbeddableInput, parent?: IContainer) {

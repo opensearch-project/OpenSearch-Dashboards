@@ -41,6 +41,8 @@ export class Page {
         throw new Error('Section type "dashboard" can only have one content type of "dashboard"');
       }
       sectionContents.push(content);
+      // sort content by order
+      sectionContents.sort((a, b) => a.order - b.order);
     } else {
       this.contents.set(sectionId, [content]);
     }
@@ -55,16 +57,10 @@ export class Page {
     }
   }
 
-  /**
-   * TODO: sort content by content.order
-   */
   getContents(sectionId: string) {
     return this.contents.get(sectionId);
   }
 
-  /**
-   * TODO: sort content by content.order
-   */
   getContents$(sectionId: string) {
     return this.contentObservables.get(sectionId) ?? this.NO_CONTENT$;
   }

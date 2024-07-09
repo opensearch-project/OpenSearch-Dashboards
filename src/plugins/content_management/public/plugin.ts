@@ -11,21 +11,21 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '../../../core/public';
-import { i18n } from '@osd/i18n';
 
-import { ContentManagementService } from './services';
+import { ContentManagementService, Page } from './services';
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginSetupDependencies,
   ContentManagementPluginStart,
   ContentManagementPluginStartDependencies,
 } from './types';
-import { CUSTOM_CONTENT_RENDER } from './components/custom_content_embeddable';
+import { CUSTOM_CONTENT_EMBEDDABLE } from './components/custom_content_embeddable';
 import { CustomContentEmbeddableFactoryDefinition } from './components/custom_content_embeddable_factory';
-import { CARD_CONTAINER, CardContainer } from './components/card_container/card_container';
+import { CARD_CONTAINER } from './components/card_container/card_container';
 import { CardContainerFactoryDefinition } from './components/card_container/card_container_factory';
 import { CARD_EMBEDDABLE } from './components/card_container/card_embeddable';
 import { CardEmbeddableFactoryDefinition } from './components/card_container/card_embeddable_factory';
+import { renderPage } from './app';
 
 export class ContentManagementPublicPlugin
   implements
@@ -46,7 +46,7 @@ export class ContentManagementPublicPlugin
     this.contentManagementService.setup();
 
     deps.embeddable.registerEmbeddableFactory(
-      CUSTOM_CONTENT_RENDER,
+      CUSTOM_CONTENT_EMBEDDABLE,
       new CustomContentEmbeddableFactoryDefinition()
     );
 
@@ -89,10 +89,16 @@ export class ContentManagementPublicPlugin
     };
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, depsStart: ContentManagementPluginStartDependencies) {
     this.contentManagementService.start();
     return {
       getPage: this.contentManagementService.getPage,
+      renderPage: (page: Page) =>
+        renderPage({
+          page,
+          embeddable: depsStart.embeddable,
+          savedObjectsClient: core.savedObjects.client,
+        }),
     };
   }
 }

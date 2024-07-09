@@ -7,7 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Content, Section } from '../services';
 import { ViewMode } from '../../../embeddable/public';
 import { DashboardContainerInput, SavedObjectDashboard } from '../../../dashboard/public';
-import { CUSTOM_CONTENT_RENDER } from './custom_content_embeddable';
+import { CUSTOM_CONTENT_EMBEDDABLE } from './custom_content_embeddable';
 import { CardContainerInput } from './card_container/card_container';
 import { CARD_EMBEDDABLE } from './card_container/card_embeddable';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
@@ -146,7 +146,7 @@ export const createDashboardSection = async (
       }
 
       if (content.kind === 'custom') {
-        config.type = CUSTOM_CONTENT_RENDER;
+        config.type = CUSTOM_CONTENT_EMBEDDABLE;
         config.explicitInput.render = content.render;
       }
 

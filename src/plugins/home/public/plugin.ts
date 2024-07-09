@@ -37,7 +37,6 @@ import {
 } from 'opensearch-dashboards/public';
 import { i18n } from '@osd/i18n';
 import { first } from 'rxjs/operators';
-import React from 'react';
 
 import { Branding } from 'src/core/types';
 import {
@@ -70,9 +69,8 @@ import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
 } from '../../content_management/public';
-import { renderHomeCard } from './application/card_render';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
-import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { initHome } from './application/home_render';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -261,121 +259,7 @@ export class HomePublicPlugin
 
     const page = contentManagement.getPage('home');
     if (page) {
-      page.addContent('service_cards', {
-        id: 'vis_1',
-        order: 0,
-        kind: 'visualization',
-        input: {
-          kind: 'dynamic',
-          get: () => {
-            return new Promise((resolve) => {
-              setTimeout(() => {
-                resolve('4b3ec120-b892-11e8-a6d9-e546fe2bba5f');
-              }, 500);
-            });
-          },
-        },
-      });
-      page.addContent('service_cards', {
-        id: 'vis_2',
-        order: 10,
-        kind: 'visualization',
-        input: {
-          kind: 'dynamic',
-          get: () => {
-            return new Promise((resolve) => {
-              setTimeout(() => {
-                resolve('4b3ec120-b892-11e8-a6d9-e546fe2bba5f');
-              }, 500);
-            });
-          },
-        },
-      });
-      page.addContent('service_cards', {
-        id: 'vis_3',
-        order: 20,
-        kind: 'visualization',
-        input: {
-          kind: 'static',
-          id: '4b3ec120-b892-11e8-a6d9-e546fe2bba5f',
-        },
-      });
-      page.addContent('service_cards', {
-        id: 'vis_4',
-        order: 30,
-        kind: 'custom',
-        render: renderHomeCard,
-      });
-      page.addContent('get_started', {
-        id: 'get_started_1',
-        kind: 'card',
-        description: 'description 1',
-        title: 'title 1',
-        onClick: () => {
-          const modal = core.overlays.openModal(
-            toMountPoint(
-              <div>
-                test <button onClick={() => modal.close()}>close</button>
-              </div>
-            )
-          );
-        },
-      });
-      page.addContent('get_started', {
-        id: 'get_started_2',
-        kind: 'card',
-        description: 'description 2',
-        title: 'title 2',
-        onClick: () => {
-          const modal = core.overlays.openModal(
-            toMountPoint(
-              <div>
-                test <button onClick={() => modal.close()}>close</button>
-              </div>
-            )
-          );
-        },
-      });
-      page.addContent('get_started', {
-        id: 'get_started_3',
-        kind: 'card',
-        description: 'description 3',
-        title: 'title 3',
-        onClick: () => {
-          const modal = core.overlays.openModal(
-            toMountPoint(
-              <div>
-                test <button onClick={() => modal.close()}>close</button>
-              </div>
-            )
-          );
-        },
-      });
-      page.addContent('get_started', {
-        id: 'get_started_4',
-        kind: 'card',
-        description: 'description 4',
-        title: 'title 4',
-        onClick: () => {
-          const modal = core.overlays.openModal(
-            toMountPoint(
-              <div>
-                test <button onClick={() => modal.close()}>close</button>
-              </div>
-            )
-          );
-        },
-      });
-
-      page.addContent('some_dashboard', {
-        id: 'dashboard_1',
-        kind: 'dashboard',
-        order: 0,
-        input: {
-          kind: 'static',
-          id: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',
-        },
-      });
+      initHome(page, core);
     }
 
     this.featuresCatalogueRegistry.start({ capabilities });

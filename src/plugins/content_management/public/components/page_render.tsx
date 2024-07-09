@@ -18,10 +18,7 @@ export interface Props {
 }
 
 export const PageRender = ({ page, embeddable, savedObjectsClient }: Props) => {
-  console.log('page: ', page);
-
   const sections = useObservable(page.getSections$()) || [];
-  console.log('sections: ', sections);
 
   return (
     <div className="contentManagement-page" style={{ margin: '10px 20px' }}>

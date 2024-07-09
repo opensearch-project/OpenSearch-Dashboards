@@ -90,7 +90,6 @@ export function HomeApp({ directories, solutions }) {
     telemetry,
     uiSettings,
     contentManagement,
-    embeddable,
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
@@ -123,9 +122,7 @@ export function HomeApp({ directories, solutions }) {
 
   const homepage = <Homepage />;
 
-  const nextHome = (
-    <PageRender page={page} embeddable={embeddable} savedObjectsClient={savedObjectsClient} />
-  );
+  const nextHome = contentManagement.renderPage(page);
 
   return (
     <I18nProvider>

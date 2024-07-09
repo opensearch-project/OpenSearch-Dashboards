@@ -8,10 +8,15 @@ import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { I18nProvider } from '@osd/i18n/react';
 
-import { AppMountParameters, CoreStart } from 'opensearch-dashboards/public';
+import {
+  AppMountParameters,
+  CoreStart,
+  SavedObjectsClientContract,
+} from 'opensearch-dashboards/public';
 import { PageRender } from './components/page_render';
 import { Page } from './services';
 import { ContentManagementPluginStartDependencies } from './types';
+import { EmbeddableStart } from '../../embeddable/public';
 
 interface Props {
   params: AppMountParameters;
@@ -19,6 +24,18 @@ interface Props {
   coreStart: CoreStart;
   depsStart: ContentManagementPluginStartDependencies;
 }
+
+export const renderPage = ({
+  page,
+  embeddable,
+  savedObjectsClient,
+}: {
+  page: Page;
+  embeddable: EmbeddableStart;
+  savedObjectsClient: SavedObjectsClientContract;
+}) => {
+  return <PageRender page={page} embeddable={embeddable} savedObjectsClient={savedObjectsClient} />;
+};
 
 export const renderApp = (
   { params, pages, coreStart, depsStart }: Props,
@@ -31,11 +48,11 @@ export const renderApp = (
         <Switch>
           {pages.map((page) => (
             <Route path={[`/${page.config.id}`]}>
-              <PageRender
-                page={page}
-                embeddable={depsStart.embeddable}
-                savedObjectsClient={coreStart.savedObjects.client}
-              />
+              {renderPage({
+                page,
+                embeddable: depsStart.embeddable,
+                savedObjectsClient: coreStart.savedObjects.client,
+              })}
             </Route>
           ))}
         </Switch>
