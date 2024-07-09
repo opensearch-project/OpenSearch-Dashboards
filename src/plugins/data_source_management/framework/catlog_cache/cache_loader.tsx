@@ -4,7 +4,6 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { ASYNC_POLLING_INTERVAL, SPARK_HIVE_TABLE_REGEX, SPARK_PARTITION_INFO } from '../constants';
 import {
   AsyncPollingResult,
@@ -27,6 +26,8 @@ import {
 import { usePolling } from '../utils/use_polling';
 import { SQLService } from '../requests/sql';
 import { CatalogCacheManager } from './cache_manager';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { DataSourceManagementContext } from '../../public/types';
 
 export const updateDatabasesToCache = (
   dataSourceName: string,
@@ -282,11 +283,11 @@ export const createLoadQuery = (
   return query;
 };
 
-export const useLoadToCache = (
-  loadCacheType: LoadCacheType,
-  http: HttpStart,
-  notifications: NotificationsStart
-) => {
+export const useLoadToCache = (loadCacheType: LoadCacheType) => {
+  const {
+    http,
+    notifications: { toasts },
+  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const sqlService = new SQLService(http);
   const [currentDataSourceName, setCurrentDataSourceName] = useState('');
   const [currentDatabaseName, setCurrentDatabaseName] = useState<string | undefined>('');
@@ -361,7 +362,7 @@ export const useLoadToCache = (
           'The query failed to execute and the operation could not be complete.',
           e.body?.message
         );
-        notifications.toasts.addError(formattedError, {
+        toasts.addError(formattedError, {
           title: 'Query Failed',
         });
         // eslint-disable-next-line no-console
@@ -395,7 +396,7 @@ export const useLoadToCache = (
         'The query failed to execute and the operation could not be complete.',
         error
       );
-      notifications.toasts.addError(formattedError, {
+      toasts.addError(formattedError, {
         title: 'Query Failed',
       });
     } else {
@@ -410,41 +411,29 @@ export const useLoadToCache = (
     currentDatabaseName,
     currentTableName,
     loadCacheType,
-    notifications.toasts,
+    toasts,
     stopLoading,
   ]);
 
   return { loadStatus, startLoading, stopLoading };
 };
 
-export const useLoadDatabasesToCache = (http: HttpStart, notifications: NotificationsStart) => {
-  const { loadStatus, startLoading, stopLoading } = useLoadToCache(
-    'databases',
-    http,
-    notifications
-  );
+export const useLoadDatabasesToCache = () => {
+  const { loadStatus, startLoading, stopLoading } = useLoadToCache('databases');
   return { loadStatus, startLoading, stopLoading };
 };
 
-export const useLoadTablesToCache = (http: HttpStart, notifications: NotificationsStart) => {
-  const { loadStatus, startLoading, stopLoading } = useLoadToCache('tables', http, notifications);
+export const useLoadTablesToCache = () => {
+  const { loadStatus, startLoading, stopLoading } = useLoadToCache('tables');
   return { loadStatus, startLoading, stopLoading };
 };
 
-export const useLoadTableColumnsToCache = (http: HttpStart, notifications: NotificationsStart) => {
-  const { loadStatus, startLoading, stopLoading } = useLoadToCache(
-    'tableColumns',
-    http,
-    notifications
-  );
+export const useLoadTableColumnsToCache = () => {
+  const { loadStatus, startLoading, stopLoading } = useLoadToCache('tableColumns');
   return { loadStatus, startLoading, stopLoading };
 };
 
-export const useLoadAccelerationsToCache = (http: HttpStart, notifications: NotificationsStart) => {
-  const { loadStatus, startLoading, stopLoading } = useLoadToCache(
-    'accelerations',
-    http,
-    notifications
-  );
+export const useLoadAccelerationsToCache = () => {
+  const { loadStatus, startLoading, stopLoading } = useLoadToCache('accelerations');
   return { loadStatus, startLoading, stopLoading };
 };

@@ -25,8 +25,14 @@ import {
 } from '../../../../framework/types';
 import { CatalogCacheManager } from '../../../../framework/catlog_cache/cache_manager';
 import { isCatalogCacheFetching } from '../../../../framework/utils/shared';
-import { AccelerationStatus, getAccelerationName } from './acceleration_utils';
+import {
+  ACC_LOADING_MSG,
+  AccelerationActionType,
+  AccelerationStatus,
+  getAccelerationName,
+} from './acceleration_utils';
 import { AccelerationActionOverlay } from './acceleration_action_overlay';
+import { useAccelerationOperation } from './acceleration_operation';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -34,7 +40,7 @@ interface AccelerationTableProps {
 }
 
 interface ModalState {
-  actionType: string | null;
+  actionType: AccelerationActionType | null;
   selectedItem: CachedAcceleration | null;
 }
 
@@ -55,6 +61,7 @@ export const AccelerationTable = ({
     actionType: null,
     selectedItem: null,
   });
+  const { performOperation, operationSuccess } = useAccelerationOperation(dataSourceName);
 
   useEffect(() => {
     const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
@@ -84,14 +91,16 @@ export const AccelerationTable = ({
     if (accelerationsLoadStatus === DirectQueryLoadingStatus.FAILED) {
       setIsRefreshing(false);
     }
-  }, [accelerationsLoadStatus, dataSourceName]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accelerationsLoadStatus]);
 
   const handleRefresh = useCallback(() => {
     if (!isCatalogCacheFetching(accelerationsLoadStatus)) {
       setIsRefreshing(true);
       startLoadingAccelerations({ dataSourceName });
     }
-  }, [accelerationsLoadStatus, dataSourceName, startLoadingAccelerations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accelerationsLoadStatus]);
 
   const RefreshButton = () => {
     return (
@@ -106,6 +115,13 @@ export const AccelerationTable = ({
       </EuiButton>
     );
   };
+
+  useEffect(() => {
+    if (operationSuccess) {
+      handleRefresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [operationSuccess]);
 
   const displayUpdatedTime = updatedTime ? new Date(updatedTime).toLocaleString() : '';
 
@@ -144,7 +160,7 @@ export const AccelerationTable = ({
   const AccelerationLoading = () => {
     const BodyText = () => (
       <>
-        <p>Loading accelerations...</p>
+        <p>{ACC_LOADING_MSG}</p>
       </>
     );
 
@@ -158,7 +174,7 @@ export const AccelerationTable = ({
       icon: 'discoverApp',
       type: 'icon',
       onClick: (acc: CachedAcceleration) => {
-        // onDiscoverIconClick(acc, dataSourceName);
+        // TODO: onDiscoverIconClick(acc, dataSourceName);
       },
     },
     {
@@ -204,7 +220,7 @@ export const AccelerationTable = ({
   const handleConfirm = () => {
     if (!modalState.selectedItem || !modalState.actionType) return;
 
-    // performOperation(modalState.selectedItem, modalState.actionType);
+    performOperation(modalState.selectedItem, modalState.actionType);
     handleModalClose();
   };
 
