@@ -33,7 +33,7 @@ import rison from 'rison-node';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
-  EuiButton,
+  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -101,8 +101,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiButton
-              fill
+            <EuiButtonEmpty
               onClick={onClose}
               href={addBasePath(
                 `/app/management/opensearch-dashboards/objects?_a=${rison.encode({
@@ -114,7 +113,7 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
                 id="discover.topNav.openSearchPanel.manageSearchesButtonLabel"
                 defaultMessage="Manage searches"
               />
-            </EuiButton>
+            </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
