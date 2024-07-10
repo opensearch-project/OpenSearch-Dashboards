@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiEmptyPrompt, EuiFlexItem, EuiIcon, EuiPanel } from '@elastic/eui';
+import { EuiDroppable, EuiEmptyPrompt, EuiFlexItem, EuiIcon, EuiPanel } from '@elastic/eui';
 import React, { useState, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
@@ -19,6 +19,7 @@ import fields_bg from '../../assets/fields_bg.svg';
 
 import './workspace.scss';
 import { handleVisEvent } from '../utils/handle_vis_event';
+import { CANVAS_ID } from './data_tab/constants';
 
 export const WorkspaceUI = () => {
   const {
@@ -113,35 +114,42 @@ export const WorkspaceUI = () => {
             onEvent={(event) => handleVisEvent(event, uiActions, indexPattern?.timeFieldName)}
           />
         ) : (
-          <EuiFlexItem className="vbWorkspace__empty" data-test-subj="emptyWorkspace">
-            <EuiEmptyPrompt
-              title={
-                <h2>
-                  {i18n.translate('visBuilder.workSpace.empty.title', {
-                    defaultMessage: 'Add a field to start',
-                  })}
-                </h2>
-              }
-              body={
-                <>
-                  <p>
-                    {i18n.translate('visBuilder.workSpace.empty.description', {
-                      defaultMessage:
-                        'Drag a field to the configuration panel to generate a visualization.',
+          <EuiDroppable
+            droppableId={CANVAS_ID}
+            isDropDisabled={expression ? true : false}
+            data-test-subj="canvas-droppable"
+            grow={true}
+          >
+            <EuiFlexItem className="vbWorkspace__empty" data-test-subj="emptyWorkspace">
+              <EuiEmptyPrompt
+                title={
+                  <h2>
+                    {i18n.translate('visBuilder.workSpace.empty.title', {
+                      defaultMessage: 'Add a field to start',
                     })}
-                  </p>
-                  <div className="vbWorkspace__container">
-                    <EuiIcon className="vbWorkspace__fieldSvg" type={fields_bg} size="original" />
-                    <EuiIcon
-                      className="vbWorkspace__handFieldSvg"
-                      type={hand_field}
-                      size="original"
-                    />
-                  </div>
-                </>
-              }
-            />
-          </EuiFlexItem>
+                  </h2>
+                }
+                body={
+                  <>
+                    <p>
+                      {i18n.translate('visBuilder.workSpace.empty.description', {
+                        defaultMessage:
+                          'Drag a field to the configuration panel to generate a visualization.',
+                      })}
+                    </p>
+                    <div className="vbWorkspace__container">
+                      <EuiIcon className="vbWorkspace__fieldSvg" type={fields_bg} size="original" />
+                      <EuiIcon
+                        className="vbWorkspace__handFieldSvg"
+                        type={hand_field}
+                        size="original"
+                      />
+                    </div>
+                  </>
+                }
+              />
+            </EuiFlexItem>
+          </EuiDroppable>
         )}
       </EuiPanel>
     </section>

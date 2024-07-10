@@ -44,7 +44,7 @@ export function addFieldToConfiguration({
 
   const destinationFields = activeSchemaFields[destinationSchemaName];
 
-  if (!combine && destination && destinationFields.length >= destinationSchema?.max) {
+  if (!combine && destination && destinationFields.length > destinationSchema?.max) {
     // Can't Add additional Fields
     return;
   }

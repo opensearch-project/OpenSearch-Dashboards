@@ -53,6 +53,7 @@ const DropboxComponent = ({
   isValidDropTarget,
   canDrop,
   dropProps,
+  isDragging,
 }: DropboxProps) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const [closing, setClosing] = useState<boolean | string>(false);
@@ -109,28 +110,33 @@ const DropboxComponent = ({
             </EuiDraggable>
           ))}
         </EuiDroppable>
-        {fields.length < limit && (
-          <EuiPanel
-            data-test-subj={`dropBoxAddField-${dropboxId}`}
-            className={`dropBox__field dropBox__dropTarget ${
-              isValidDropTarget ? 'validField' : ''
-            } ${canDrop ? 'canDrop' : ''}`}
-            {...(isValidDropTarget && dropProps)}
-          >
-            <EuiText size="s">
-              {i18n.translate('visBuilder.dropbox.addField.title', {
-                defaultMessage: 'Click or drop to add',
-              })}
-            </EuiText>
-            <EuiButtonIcon
-              iconType="plusInCircle"
-              aria-label="clear-field"
-              iconSize="s"
-              onClick={() => onAddField()}
-              data-test-subj="dropBoxAddBtn"
-            />
-          </EuiPanel>
-        )}
+        <EuiDroppable droppableId={`AddPanel_${dropboxId}`}>
+          {(provided, snapshot) => (
+            <div ref={provided.innerRef} {...provided.droppableProps}>
+              {fields.length < limit && (
+                <EuiPanel
+                  data-test-subj={`dropBoxAddField-${dropboxId}`}
+                  className={`dropBox__field dropBox__dropTarget ${
+                    isDragging ? 'validField' : ''
+                  } ${snapshot.isDraggingOver ? 'canDrop' : ''}`}
+                >
+                  <EuiText size="s">
+                    {i18n.translate('visBuilder.dropbox.addField.title', {
+                      defaultMessage: 'Click or drop to add',
+                    })}
+                  </EuiText>
+                  <EuiButtonIcon
+                    iconType="plusInCircle"
+                    aria-label="clear-field"
+                    iconSize="s"
+                    onClick={() => onAddField()}
+                    data-test-subj="dropBoxAddBtn"
+                  />
+                </EuiPanel>
+              )}
+            </div>
+          )}
+        </EuiDroppable>
       </div>
     </EuiFormRow>
   );
