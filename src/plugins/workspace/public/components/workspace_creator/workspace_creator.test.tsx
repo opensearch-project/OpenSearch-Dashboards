@@ -54,6 +54,9 @@ const WorkspaceCreator = (props: any) => {
           workspaces: {
             permissionEnabled: true,
           },
+          dashboards: {
+            isDashboardAdmin: true,
+          },
         },
         navigateToApp,
         getUrlForApp: jest.fn(() => '/app/workspace_overview'),
