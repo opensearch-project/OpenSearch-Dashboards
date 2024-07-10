@@ -39,7 +39,7 @@ describe('WorkspaceForm', () => {
     expect(getByText('Select Data Sources')).toBeInTheDocument();
   });
 
-  it('should disable data source panel for non dashboard admin', () => {
+  it('should not display data source panel for non dashboard admin', () => {
     const { queryByText } = setup(false);
 
     expect(queryByText('Select Data Sources')).not.toBeInTheDocument();
