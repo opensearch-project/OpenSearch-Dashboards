@@ -23,6 +23,23 @@ import { AuthenticationMethodRegistry } from '../auth_registry';
 import { ConfigureDirectQueryDataSourceWithRouter } from '../components/direct_query_data_sources_components/direct_query_data_source_configuration/configure_direct_query_data_sources';
 import { DirectQueryDataConnectionDetail } from '../components/direct_query_data_sources_components/direct_query_connection_detail/direct_query_connection_detail';
 
+import { createGetterSetter } from '../../../../../src/plugins/opensearch_dashboards_utils/public';
+import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
+import { RenderAccelerationDetailsFlyoutParams } from '../../framework/types';
+import { AccelerationDetailsFlyout } from '../components/direct_query_data_sources_components/direct_query_acceleration_management/acceleration_details_flyout';
+
+export const [
+  getRenderAccelerationDetailsFlyout,
+  setRenderAccelerationDetailsFlyout,
+] = createGetterSetter<
+  ({
+    acceleration,
+    dataSourceName,
+    handleRefresh,
+    dataSourceMDSId,
+  }: RenderAccelerationDetailsFlyoutParams) => void
+>('renderAccelerationDetailsFlyout');
+
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
 }
@@ -106,6 +123,27 @@ export async function mountManagementSection(
     </OpenSearchDashboardsContextProvider>,
     params.element
   );
+
+  const renderAccelerationDetailsFlyout = ({
+    acceleration,
+    dataSourceName,
+    handleRefresh,
+    dataSourceMDSId,
+  }: RenderAccelerationDetailsFlyoutParams) => {
+    const accelerationDetailsFlyout = overlays.openFlyout(
+      toMountPoint(
+        <AccelerationDetailsFlyout
+          acceleration={acceleration}
+          dataSourceName={dataSourceName}
+          resetFlyout={() => accelerationDetailsFlyout.close()}
+          handleRefresh={handleRefresh}
+          dataSourceMDSId={dataSourceMDSId}
+          notifications={notifications} // pass the notifications service
+        />
+      )
+    );
+  };
+  setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
 
   return () => {
     chrome.docTitle.reset();

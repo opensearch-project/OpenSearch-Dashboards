@@ -35,6 +35,7 @@ import {
 } from './acceleration_utils';
 import { AccelerationActionOverlay } from './acceleration_action_overlay';
 import { useAccelerationOperation } from './acceleration_operation';
+import { getRenderAccelerationDetailsFlyout } from '../../../management_app/mount_management_section';
 
 interface AccelerationTableProps {
   dataSourceName: string;
@@ -236,11 +237,11 @@ export const AccelerationTable = ({
         return (
           <EuiLink
             onClick={() => {
-              // renderAccelerationDetailsFlyout({
-              //   acceleration,
-              //   dataSourceName,
-              //   handleRefresh,
-              // });
+              renderAccelerationDetailsFlyout({
+                acceleration,
+                dataSourceName,
+                handleRefresh,
+              });
             }}
           >
             {displayName}
@@ -308,6 +309,9 @@ export const AccelerationTable = ({
       direction: 'asc',
     },
   };
+
+  const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
+  // const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
   return (
     <>

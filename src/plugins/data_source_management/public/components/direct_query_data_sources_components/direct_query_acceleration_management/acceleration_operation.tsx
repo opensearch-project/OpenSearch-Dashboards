@@ -15,9 +15,7 @@ import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_re
 import { DataSourceManagementContext } from '../../../../public/types';
 
 export const useAccelerationOperation = (dataSource: string) => {
-  const {
-    notifications: { toasts },
-  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
+  const { notifications } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const { startLoading, stopLoading, loadStatus } = useDirectQuery();
   const [isOperating, setIsOperating] = useState(false);
   const [operationSuccess, setOperationSuccess] = useState(false);
@@ -54,18 +52,18 @@ export const useAccelerationOperation = (dataSource: string) => {
 
     if (loadStatus === DirectQueryLoadingStatus.SCHEDULED && operationType !== 'sync') {
       setIsOperating(true);
-      toasts.addSuccess(operationInProgressMessage);
+      notifications.toasts.addSuccess(operationInProgressMessage);
     } else if (loadStatus === DirectQueryLoadingStatus.SUCCESS && operationType !== 'sync') {
       setIsOperating(false);
       setAccelerationToOperate(null);
       setOperationSuccess(true);
-      toasts.addSuccess(operationSuccessMessage);
+      notifications.toasts.addSuccess(operationSuccessMessage);
     } else if (loadStatus === DirectQueryLoadingStatus.FAILED && operationType !== 'sync') {
       setIsOperating(false);
       setOperationSuccess(false);
-      toasts.addDanger(operationFailureMessage);
+      notifications.toasts.addDanger(operationFailureMessage);
     } else if (operationType === 'sync' && loadStatus === DirectQueryLoadingStatus.SCHEDULED) {
-      toasts.addSuccess(operationInProgressMessage);
+      notifications.toasts.addSuccess(operationInProgressMessage);
       stopLoading();
     }
 

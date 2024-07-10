@@ -15,10 +15,7 @@ import { DataSourceManagementContext } from '../../public/types';
 
 // todo: to use the search strategy from core
 export const useDirectQuery = () => {
-  const {
-    http,
-    notifications: { toasts },
-  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
+  const { http, notifications } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const sqlService = new SQLService(http);
   const [loadStatus, setLoadStatus] = useState<DirectQueryLoadingStatus>(
     DirectQueryLoadingStatus.SCHEDULED
@@ -65,7 +62,7 @@ export const useDirectQuery = () => {
           'The query failed to execute and the operation could not be complete.',
           e.body?.message
         );
-        toasts.addError(formattedError, {
+        notifications.toasts.addError(formattedError, {
           title: 'Query Failed',
         });
         // eslint-disable-next-line no-console
@@ -90,13 +87,14 @@ export const useDirectQuery = () => {
         'The query failed to execute and the operation could not be complete.',
         error
       );
-      toasts.addError(formattedError, {
+      notifications.toasts.addError(formattedError, {
         title: 'Query Failed',
       });
     } else {
       setLoadStatus(status);
     }
-  }, [pollingResult, pollingError, toasts, stopLoading]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pollingResult, pollingError, stopLoading]);
 
   return { loadStatus, startLoading, stopLoading, pollingResult };
 };
