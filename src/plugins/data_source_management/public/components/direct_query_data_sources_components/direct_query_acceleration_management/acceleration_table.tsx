@@ -27,6 +27,8 @@ import { CatalogCacheManager } from '../../../../framework/catlog_cache/cache_ma
 import { isCatalogCacheFetching } from '../../../../framework/utils/shared';
 import {
   ACC_LOADING_MSG,
+  ACC_PANEL_DESC,
+  ACC_PANEL_TITLE,
   AccelerationActionType,
   AccelerationStatus,
   getAccelerationName,
@@ -131,8 +133,8 @@ export const AccelerationTable = ({
         <EuiFlexGroup direction="row" alignItems="center">
           <EuiFlexItem>
             <EuiText>
-              <h2 className="panel-title">Accelerations</h2>
-              Accelerations improve query performance.
+              <h2 className="panel-title">{ACC_PANEL_TITLE}</h2>
+              {ACC_PANEL_DESC}
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
