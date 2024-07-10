@@ -6,9 +6,11 @@
 import { ApiResponse } from '@opensearch-project/opensearch';
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { RequestHandlerContext } from 'src/core/server';
-import { CoreRouteHandlerContext } from '../../../../../core/server/core_route_handler_context';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { CoreRouteHandlerContext } from 'src/core/server/core_route_handler_context';
 import { coreMock, httpServerMock } from '../../../../../core/server/mocks';
-import { loggerMock } from '../../../../../src/core/server/logging/logger.mock';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
+import { loggerMock } from 'src/core/server/logging/logger.mock';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
 
 describe('Agents helper functions', () => {

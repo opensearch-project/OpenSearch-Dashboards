@@ -7,13 +7,14 @@ import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
 import { of } from 'rxjs';
 import { distinctUntilChanged, switchMap, map } from 'rxjs/operators';
-import { QueryEditorExtensionConfig } from '../../../../../src/plugins/data/public/ui/query_editor';
-import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
+import {
+  QueryEditorExtensionConfig,
+  QueryEditorExtensionDependencies,
+} from '../../../../data/public';
 import { API } from '../../../common';
 import { ConfigSchema } from '../../../common/config';
 import { ConnectionsService } from '../../data_source_connection';
-import { QueryAssistBar } from '../components';
-import { QueryAssistBanner } from '../components/query_assist_banner';
+import { QueryAssistBar, QueryAssistBanner } from '../components';
 
 /**
  * @returns observable list of query assist agent configured languages in the

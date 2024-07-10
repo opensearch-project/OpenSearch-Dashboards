@@ -9,12 +9,9 @@ import {
   IRouter,
   Logger,
   ResponseError,
-} from '../../../core/server';
-import {
-  IDataFrameResponse,
-  IOpenSearchDashboardsSearchRequest,
-} from '../../../../src/plugins/data/common';
-import { ISearchStrategy } from '../../../../src/plugins/data/server';
+} from '../../../../core/server';
+import { IDataFrameResponse, IOpenSearchDashboardsSearchRequest } from '../../../data/common';
+import { ISearchStrategy } from '../../../data/server';
 import { API, SEARCH_STRATEGY } from '../../common';
 import { registerQueryAssistRoutes } from './query_assist';
 import { registerDataSourceConnectionsRoutes } from './data_source_connection';

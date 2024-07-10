@@ -7,9 +7,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EuiPortal } from '@elastic/eui';
 import { combineLatest } from 'rxjs';
 import { ToastsSetup } from 'opensearch-dashboards/public';
-import { DataPublicPluginStart } from '../../../../../src/plugins/data/public';
-import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
-import { DataSourceSelector } from '../../../../../src/plugins/data_source_management/public';
+import { DataPublicPluginStart } from '../../../../data/public';
+import { QueryEditorExtensionDependencies } from '../../../../data/public';
+import { DataSourceSelector } from '../../../../data_source_management/public';
 import { ConnectionsService } from '../services';
 
 interface ConnectionsProps {

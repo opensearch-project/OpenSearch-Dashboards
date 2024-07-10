@@ -4,3 +4,4 @@
  */
 
 export { QueryAssistBar } from './query_assist_bar';
+export { QueryAssistBanner } from './query_assist_banner';

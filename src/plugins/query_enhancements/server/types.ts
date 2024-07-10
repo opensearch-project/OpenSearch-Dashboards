@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { DataPluginSetup } from 'src/plugins/data/server/plugin';
-import { DataSourcePluginSetup } from '../../../src/plugins/data_source/server';
-import { Logger } from '../../../src/core/server';
+import { PluginSetup } from 'src/plugins/data/server';
+import { DataSourcePluginSetup } from '../../data_source/server';
+import { Logger } from '../../../core/server';
 import { ConfigSchema } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -14,7 +14,7 @@ export interface QueryEnhancementsPluginSetup {}
 export interface QueryEnhancementsPluginStart {}
 
 export interface QueryEnhancementsPluginSetupDependencies {
-  data: DataPluginSetup;
+  data: PluginSetup;
   dataSource?: DataSourcePluginSetup;
 }
 
@@ -51,7 +51,7 @@ export interface FacetRequest {
   };
 }
 
-declare module '../../../src/core/server' {
+declare module '../../../core/server' {
   interface RequestHandlerContext {
     query_assist: {
       logger: Logger;

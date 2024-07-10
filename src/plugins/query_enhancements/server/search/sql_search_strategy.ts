@@ -5,7 +5,7 @@
 
 import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
-import { ISearchStrategy, SearchUsage } from '../../../../src/plugins/data/server';
+import { ISearchStrategy, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
   IDataFrameError,
@@ -13,7 +13,7 @@ import {
   IOpenSearchDashboardsSearchRequest,
   PartialDataFrame,
   createDataFrame,
-} from '../../../../src/plugins/data/common';
+} from '../../../data/common';
 import { Facet } from '../utils';
 
 export const sqlSearchStrategyProvider = (

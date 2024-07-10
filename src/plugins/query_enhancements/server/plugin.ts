@@ -12,7 +12,7 @@ import {
   Plugin,
   PluginInitializerContext,
   SharedGlobalConfig,
-} from '../../../src/core/server';
+} from '../../../core/server';
 import { SEARCH_STRATEGY } from '../common';
 import { ConfigSchema } from '../common/config';
 import { defineRoutes } from './routes';

@@ -6,11 +6,7 @@
 import { first } from 'rxjs/operators';
 import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
-import {
-  ISearchStrategy,
-  getDefaultSearchParams,
-  SearchUsage,
-} from '../../../../src/plugins/data/server';
+import { ISearchStrategy, getDefaultSearchParams, SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
   IDataFrameError,
@@ -18,7 +14,7 @@ import {
   IDataFrameWithAggs,
   IOpenSearchDashboardsSearchRequest,
   createDataFrame,
-} from '../../../../src/plugins/data/common';
+} from '../../../data/common';
 import { getFields } from '../../common/utils';
 import { Facet } from '../utils';
 

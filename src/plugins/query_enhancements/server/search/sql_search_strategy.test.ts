@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { sqlSearchStrategyProvider } from './sql_search_strategy';
 import { Observable, of } from 'rxjs';
 import {
@@ -6,13 +11,13 @@ import {
   ILegacyClusterClient,
   RequestHandlerContext,
 } from 'opensearch-dashboards/server';
-import { SearchUsage } from '../../../../src/plugins/data/server';
+import { SearchUsage } from '../../../data/server';
 import {
   DATA_FRAME_TYPES,
   IDataFrameError,
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,
-} from '../../../../src/plugins/data/common';
+} from '../../../data/common';
 import * as facet from '../utils/facet';
 
 describe('sqlSearchStrategyProvider', () => {

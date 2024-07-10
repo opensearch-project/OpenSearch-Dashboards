@@ -6,7 +6,7 @@
 import React from 'react';
 import { of } from 'rxjs';
 import { ToastsSetup } from 'opensearch-dashboards/public';
-import { QueryEditorExtensionConfig } from '../../../../../src/plugins/data/public/ui/query_editor';
+import { QueryEditorExtensionConfig } from '../../../../data/public';
 import { ConfigSchema } from '../../../common/config';
 import { ConnectionsBar } from '../components';
 import { ConnectionsService } from '../services';

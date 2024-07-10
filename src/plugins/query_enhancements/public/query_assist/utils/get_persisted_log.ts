@@ -4,7 +4,7 @@
  */
 
 import { IUiSettingsClient } from 'opensearch-dashboards/public';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/common';
+import { UI_SETTINGS } from '../../../../data/common';
 import { PersistedLog } from '../../../../data/public';
 import { IStorageWrapper } from '../../../../opensearch_dashboards_utils/public';
 

@@ -5,6 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from 'opensearch-dashboards/server';
+// eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { isResponseError } from '../../..../../../../../core/server/opensearch/client/errors';
 import { API, ERROR_DETAILS } from '../../../common';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
