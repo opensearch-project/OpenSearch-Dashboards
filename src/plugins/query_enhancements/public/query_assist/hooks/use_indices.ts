@@ -5,8 +5,8 @@
 
 import { CatIndicesResponse } from '@opensearch-project/opensearch/api/types';
 import { Reducer, useEffect, useReducer, useState } from 'react';
-import { IDataPluginServices } from '../../../../../src/plugins/data/public';
-import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
+import { IDataPluginServices } from '../../../../data/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
 interface State<T> {
   data?: T;

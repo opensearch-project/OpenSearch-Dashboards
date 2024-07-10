@@ -4,8 +4,8 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { IDataPluginServices } from '../../../../../src/plugins/data/public';
-import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
+import { IDataPluginServices } from '../../../../data/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { API } from '../../../common';
 import { QueryAssistParameters, QueryAssistResponse } from '../../../common/query_assist';
 import { formatError } from '../utils';

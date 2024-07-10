@@ -9,7 +9,7 @@ import {
   IRouter,
   Logger,
   ResponseError,
-} from '../../../../src/core/server';
+} from '../../../core/server';
 import {
   IDataFrameResponse,
   IOpenSearchDashboardsSearchRequest,

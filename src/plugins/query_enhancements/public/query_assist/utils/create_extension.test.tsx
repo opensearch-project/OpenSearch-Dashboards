@@ -6,8 +6,8 @@
 import { firstValueFrom } from '@osd/std';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { IIndexPattern } from '../../../../../src/plugins/data/public';
+import { coreMock } from '../../../../../core/public/mocks';
+import { IIndexPattern } from '../../../../data/public';
 import { ConfigSchema } from '../../../common/config';
 import { ConnectionsService } from '../../data_source_connection';
 import { Connection } from '../../types';

@@ -5,7 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from 'opensearch-dashboards/server';
-import { DataSourceAttributes } from '../../../../../src/plugins/data_source/common/data_sources';
+import { DataSourceAttributes } from '../../../../data_source/common/data_sources';
 import { API } from '../../../common';
 
 export function registerDataSourceConnectionsRoutes(router: IRouter) {

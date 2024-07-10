@@ -6,7 +6,7 @@
 import { I18nProvider } from '@osd/i18n/react';
 import { fireEvent, render } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
-import { SuggestionsComponentProps } from '../../../../../src/plugins/data/public/ui/typeahead/suggestions_component';
+import { SuggestionsComponentProps } from '../../../../data/public/ui/typeahead/suggestions_component';
 import { QueryAssistInput } from './query_assist_input';
 
 jest.mock('../../services', () => ({

@@ -5,7 +5,7 @@
 
 import { EuiFieldText, EuiIcon, EuiOutsideClickDetector, EuiPortal } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import { PersistedLog, QuerySuggestionTypes } from '../../../../../src/plugins/data/public';
+import { PersistedLog, QuerySuggestionTypes } from '../../../../data/public';
 import assistantMark from '../../assets/query_assist_mark.svg';
 import { getData } from '../../services';
 

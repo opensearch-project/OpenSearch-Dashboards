@@ -1,3 +1,8 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { trimEnd } from 'lodash';
 import { BehaviorSubject, Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
@@ -10,12 +15,8 @@ import {
   ISearchOptions,
   SearchInterceptor,
   SearchInterceptorDeps,
-} from '../../../../src/plugins/data/public';
-import {
-  getRawDataFrame,
-  getRawQueryString,
-  IDataFrameResponse,
-} from '../../../../src/plugins/data/common';
+} from '../../../data/public';
+import { getRawDataFrame, getRawQueryString, IDataFrameResponse } from '../../../data/common';
 import {
   API,
   DataFramePolling,

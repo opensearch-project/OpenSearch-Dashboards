@@ -15,7 +15,7 @@ import {
   formatTimePickerDate,
   getUniqueValuesForRawAggs,
   updateDataFrameMeta,
-} from '../../../../src/plugins/data/common';
+} from '../../../data/common';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -23,7 +23,7 @@ import {
   ISearchOptions,
   SearchInterceptor,
   SearchInterceptorDeps,
-} from '../../../../src/plugins/data/public';
+} from '../../../data/public';
 import {
   formatDate,
   SEARCH_STRATEGY,

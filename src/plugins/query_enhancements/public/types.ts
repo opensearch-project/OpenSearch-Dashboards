@@ -4,8 +4,8 @@
  */
 
 import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
-import { DataPublicPluginSetup, DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataSourcePluginStart } from 'src/plugins/data_source/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryEnhancementsPluginSetup {}

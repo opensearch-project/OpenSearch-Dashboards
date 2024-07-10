@@ -7,7 +7,7 @@ import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { concatMap } from 'rxjs/operators';
-import { getRawDataFrame, getRawQueryString } from '../../../../src/plugins/data/common';
+import { getRawDataFrame, getRawQueryString } from '../../../data/common';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -15,7 +15,7 @@ import {
   ISearchOptions,
   SearchInterceptor,
   SearchInterceptorDeps,
-} from '../../../../src/plugins/data/public';
+} from '../../../data/public';
 import { API, FetchDataFrameContext, SEARCH_STRATEGY, fetchDataFrame } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 import { ConnectionsService } from '../data_source_connection';

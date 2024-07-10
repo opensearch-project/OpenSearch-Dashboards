@@ -4,8 +4,8 @@
  */
 
 import { act, renderHook } from '@testing-library/react-hooks/dom';
-import { coreMock } from '../../../../../src/core/public/mocks';
-import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
+import { coreMock } from '../../../../../core/public/mocks';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { useGenerateQuery } from './use_generate';
 
 const coreSetup = coreMock.createSetup();

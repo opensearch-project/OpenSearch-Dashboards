@@ -6,8 +6,8 @@
 import { ApiResponse } from '@opensearch-project/opensearch';
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
 import { RequestHandlerContext } from 'src/core/server';
-import { CoreRouteHandlerContext } from '../../../../../src/core/server/core_route_handler_context';
-import { coreMock, httpServerMock } from '../../../../../src/core/server/mocks';
+import { CoreRouteHandlerContext } from '../../../../../core/server/core_route_handler_context';
+import { coreMock, httpServerMock } from '../../../../../core/server/mocks';
 import { loggerMock } from '../../../../../src/core/server/logging/logger.mock';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
 

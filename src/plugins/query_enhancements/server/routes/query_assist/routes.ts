@@ -5,7 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from 'opensearch-dashboards/server';
-import { isResponseError } from '../../../../../src/core/server/opensearch/client/errors';
+import { isResponseError } from '../../..../../../../../core/server/opensearch/client/errors';
 import { API, ERROR_DETAILS } from '../../../common';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
 import { createResponseBody } from './createResponse';

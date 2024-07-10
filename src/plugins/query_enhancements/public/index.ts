@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PluginInitializerContext } from '../../../src/core/public';
+import { PluginInitializerContext } from '../../../core/public';
 import './index.scss';
 import { QueryEnhancementsPlugin } from './plugin';
 

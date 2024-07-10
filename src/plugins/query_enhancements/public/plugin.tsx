@@ -4,8 +4,8 @@
  */
 
 import moment from 'moment';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../src/core/public';
-import { IStorageWrapper, Storage } from '../../../src/plugins/opensearch_dashboards_utils/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
+import { IStorageWrapper, Storage } from '../../opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../common/config';
 import { ConnectionsService, createDataSourceConnectionExtension } from './data_source_connection';
 import { createQueryAssistExtension } from './query_assist';

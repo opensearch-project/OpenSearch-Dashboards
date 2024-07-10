@@ -5,9 +5,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
 import React, { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { IDataPluginServices, PersistedLog } from '../../../../../src/plugins/data/public';
-import { QueryEditorExtensionDependencies } from '../../../../../src/plugins/data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
-import { useOpenSearchDashboards } from '../../../../../src/plugins/opensearch_dashboards_react/public';
+import { IDataPluginServices, PersistedLog } from '../../../../data/public';
+import { QueryEditorExtensionDependencies } from '../../../../data/public/ui/query_editor/query_editor_extensions/query_editor_extension';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { QueryAssistParameters } from '../../../common/query_assist';
 import { ConnectionsService } from '../../data_source_connection';
 import { getStorage } from '../../services';
