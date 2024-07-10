@@ -42,6 +42,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const workspaceList = useObservable(coreStart.workspaces.workspaceList$, []);
+  const isDashboardAdmin = !!coreStart.application.capabilities.dashboards;
 
   const defaultHeaderName = i18n.translate(
     'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
@@ -49,12 +50,6 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       defaultMessage: 'Workspaces',
     }
   );
-
-  const hasPermissionToCreateWorkspace = () => {
-    const { permissionEnabled } = coreStart.application.capabilities.workspaces;
-    const { isDashboardAdmin } = coreStart.application.capabilities.dashboards;
-    return !permissionEnabled || isDashboardAdmin;
-  };
 
   const filteredWorkspaceList = useMemo(() => {
     return workspaceList.slice(0, MAX_WORKSPACE_PICKER_NUM);
@@ -192,20 +187,21 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     >
       <EuiPanel paddingSize="m" hasBorder={false} color="transparent">
         <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiAvatar
-              size="m"
-              type="space"
-              name={currentWorkspace ? currentWorkspaceName : 'WS'}
-              color={currentWorkspace?.color}
-              initialsLength={2}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj="context-menu-current-workspace-name">
-            {currentWorkspaceName}
-          </EuiFlexItem>
           {currentWorkspace ? (
             <>
+              <EuiFlexItem grow={false}>
+                <EuiAvatar
+                  size="m"
+                  type="space"
+                  name={currentWorkspaceName}
+                  color={currentWorkspace?.color}
+                  initialsLength={2}
+                />
+                <EuiIcon type="spacesApp" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} data-test-subj="context-menu-current-workspace-name">
+                {currentWorkspaceName}
+              </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="context-menu-current-use-case">
                 {currentWorkspaceUseCase}
               </EuiFlexItem>
@@ -234,7 +230,16 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
                 </EuiButton>
               </EuiFlexItem>
             </>
-          ) : null}
+          ) : (
+            <>
+              <EuiFlexItem grow={false}>
+                <EuiAvatar size="m" color="plain" name="Plain color" iconType="spacesApp" />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false} data-test-subj="context-menu-current-workspace-name">
+                {currentWorkspaceName}
+              </EuiFlexItem>
+            </>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
       <EuiContextMenu
@@ -251,7 +256,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
       />
       <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-          {hasPermissionToCreateWorkspace() && (
+          {isDashboardAdmin && (
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
