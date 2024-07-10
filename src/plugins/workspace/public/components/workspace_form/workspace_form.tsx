@@ -189,7 +189,8 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         </EuiPanel>
       )}
       <EuiSpacer />
-      {/* SelectDataSourcePanel is only enabled for dashboard admin */}
+
+      {/* SelectDataSourcePanel is only visible for dashboard admin */}
       {isDashboardAdmin && (
         <EuiPanel>
           <EuiTitle size="s">
