@@ -30,11 +30,17 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
   featureFlagStatus,
   ...props
 }) => {
-  const { setBreadcrumbs, notifications, http, savedObjects, uiSettings } = useOpenSearchDashboards<
-    DataSourceManagementContext
-  >().services;
+  const {
+    setBreadcrumbs,
+    notifications,
+    http,
+    savedObjects,
+    uiSettings,
+    application,
+  } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   const [selectedTabId, setSelectedTabId] = useState('manageDirectQueryDataSources');
+  const canEditDataSource = !!application.capabilities?.dataSource?.canEdit;
 
   useEffect(() => {
     setBreadcrumbs(getListBreadcrumbs());
@@ -80,9 +86,11 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
               <EuiFlexItem grow={false}>
                 <DataSourceHeader history={props.history} />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <CreateButton history={props.history} dataTestSubj="createDataSourceButton" />
-              </EuiFlexItem>
+              {canEditDataSource ? (
+                <EuiFlexItem grow={false}>
+                  <CreateButton history={props.history} dataTestSubj="createDataSourceButton" />
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiPageHeader>
         </EuiFlexItem>

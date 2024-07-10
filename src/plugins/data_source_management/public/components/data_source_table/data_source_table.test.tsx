@@ -24,7 +24,10 @@ const tableColumnHeaderButtonIdentifier = 'EuiTableHeaderCell .euiTableHeaderBut
 const emptyStateIdentifier = '[data-test-subj="datasourceTableEmptyState"]';
 
 describe('DataSourceTable', () => {
-  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  const mockedContext = {
+    ...mockManagementPlugin.createDataSourceManagementContext(),
+    application: { capabilities: { dataSource: { canEdit: true } } },
+  };
   const uiSettings = mockedContext.uiSettings;
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;

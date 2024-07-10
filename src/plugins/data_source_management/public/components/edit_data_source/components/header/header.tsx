@@ -29,6 +29,7 @@ export const Header = ({
   onClickSetDefault,
   dataSourceName,
   isDefault,
+  canEditDataSource,
 }: {
   showDeleteIcon: boolean;
   isFormValid: boolean;
@@ -37,6 +38,7 @@ export const Header = ({
   onClickSetDefault: () => void;
   dataSourceName: string;
   isDefault: boolean;
+  canEditDataSource: boolean;
 }) => {
   /* State Variables */
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -175,11 +177,13 @@ export const Header = ({
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
           {/* Test default button */}
-          <EuiFlexItem grow={false}>{renderDefaultIcon()}</EuiFlexItem>
+          {canEditDataSource ? <EuiFlexItem grow={false}>{renderDefaultIcon()}</EuiFlexItem> : null}
           {/* Test connection button */}
           <EuiFlexItem grow={false}>{renderTestConnectionButton()}</EuiFlexItem>
           {/* Delete icon button */}
-          <EuiFlexItem grow={false}>{showDeleteIcon ? renderDeleteButton() : null}</EuiFlexItem>
+          {canEditDataSource ? (
+            <EuiFlexItem grow={false}>{showDeleteIcon ? renderDeleteButton() : null}</EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

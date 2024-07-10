@@ -34,6 +34,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
             dataSourceName={dataSourceName}
             onClickSetDefault={mockFn}
             isDefault={false}
+            canEditDataSource={true}
           />
         ),
         {
@@ -87,6 +88,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
             dataSourceName={dataSourceName}
             onClickSetDefault={mockFn}
             isDefault={false}
+            canEditDataSource={true}
           />
         ),
         {
@@ -116,6 +118,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
             dataSourceName={dataSourceName}
             onClickSetDefault={onClickSetDefault}
             isDefault={isDefaultDataSourceState}
+            canEditDataSource={true}
           />
         ),
         {
@@ -152,6 +155,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
             dataSourceName={dataSourceName}
             onClickSetDefault={onClickSetDefault}
             isDefault={isDefaultDataSourceState}
+            canEditDataSource={true}
           />
         ),
         {

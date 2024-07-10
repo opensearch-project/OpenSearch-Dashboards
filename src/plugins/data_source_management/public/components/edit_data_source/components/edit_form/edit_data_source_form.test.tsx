@@ -90,6 +90,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             onSetDefaultDataSource={mockFn}
             handleTestConnection={mockFn}
             displayToastMessage={mockFn}
+            canEditDataSource={true}
           />
         ),
         {
@@ -261,6 +262,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             handleSubmit={mockFn}
             handleTestConnection={mockFn}
             displayToastMessage={mockFn}
+            canEditDataSource={true}
           />
         ),
         {
@@ -373,6 +375,7 @@ describe('Datasource Management: Edit Datasource Form', () => {
             onSetDefaultDataSource={mockFn}
             handleTestConnection={mockFn}
             displayToastMessage={mockFn}
+            canEditDataSource={true}
           />
         ),
         {
@@ -593,6 +596,7 @@ describe('With Registered Authentication', () => {
           onSetDefaultDataSource={jest.fn()}
           handleTestConnection={jest.fn()}
           displayToastMessage={jest.fn()}
+          canEditDataSource={true}
         />
       ),
       {
@@ -634,6 +638,7 @@ describe('With Registered Authentication', () => {
           onSetDefaultDataSource={jest.fn()}
           handleTestConnection={jest.fn()}
           displayToastMessage={jest.fn()}
+          canEditDataSource={true}
         />
       ),
       {
