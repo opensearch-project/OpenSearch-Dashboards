@@ -56,6 +56,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
   const disabledUserOrGroupInputIdsRef = useRef(
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []
   );
+  const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin ?? false;
 
   return (
     <EuiForm id={formId} onSubmit={handleFormSubmit} component="form">
@@ -188,22 +189,25 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         </EuiPanel>
       )}
       <EuiSpacer />
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h2>
-            {i18n.translate('workspace.form.selectDataSource.title', {
-              defaultMessage: 'Associate data source',
-            })}
-          </h2>
-        </EuiTitle>
-        <SelectDataSourcePanel
-          errors={formErrors.selectedDataSources}
-          onChange={setSelectedDataSources}
-          savedObjects={savedObjects}
-          selectedDataSources={formData.selectedDataSources}
-          data-test-subj={`workspaceForm-dataSourcePanel`}
-        />
-      </EuiPanel>
+      {/* SelectDataSourcePanel is only enabled for dashboard admin */}
+      {isDashboardAdmin && (
+        <EuiPanel>
+          <EuiTitle size="s">
+            <h2>
+              {i18n.translate('workspace.form.selectDataSource.title', {
+                defaultMessage: 'Associate data source',
+              })}
+            </h2>
+          </EuiTitle>
+          <SelectDataSourcePanel
+            errors={formErrors.selectedDataSources}
+            onChange={setSelectedDataSources}
+            savedObjects={savedObjects}
+            selectedDataSources={formData.selectedDataSources}
+            data-test-subj={`workspaceForm-dataSourcePanel`}
+          />
+        </EuiPanel>
+      )}
       <EuiSpacer />
       {operationType === WorkspaceOperationType.Create && (
         <WorkspaceCreateActionPanel formId={formId} application={application} />
