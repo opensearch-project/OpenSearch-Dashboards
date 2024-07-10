@@ -110,7 +110,7 @@ export interface StartDeps {
   workspaces: WorkspacesStart;
 }
 
-type CollapsibleNavHeaderRender = () => JSX.Element | null;
+export type CollapsibleNavHeaderRender = () => JSX.Element | null;
 
 /** @internal */
 export class ChromeService {
@@ -303,6 +303,7 @@ export class ChromeService {
           sidecarConfig$={sidecarConfig$}
           navGroupEnabled={navGroup.getNavGroupEnabled()}
           currentNavgroup$={navGroup.getCurrentNavGroup$()}
+          navGroupsMap$={navGroup.getNavGroupsMap$()}
         />
       ),
 

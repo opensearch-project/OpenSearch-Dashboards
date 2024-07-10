@@ -1,0 +1,33 @@
+.context-nav-wrapper {
+  background-color: $ouiCollapsibleNavBackgroundColor;
+
+  .full-width {
+    width: 100%;
+  }
+
+  .no-padding {
+    padding: 0;
+  }
+
+  .no-hover {
+    &:hover {
+      text-decoration: none;
+    }
+  }
+
+  .wrapper {
+    overflow-y: auto;
+  }
+
+  .second-navigation {
+    border-left: $euiBorderThin;
+  }
+
+  .padding-horizontal {
+    padding-left: $ouiSize;
+  }
+
+  .no-margin-top {
+    margin-top: $ouiSize / 4;
+  }
+}
