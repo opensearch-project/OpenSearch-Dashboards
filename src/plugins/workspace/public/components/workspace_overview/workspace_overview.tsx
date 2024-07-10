@@ -29,11 +29,13 @@ import { getStartCards } from './all_get_started_cards';
 import { isAppAccessibleInWorkspace } from '../../utils';
 import { WorkspaceOverviewCard } from './getting_start_card';
 import { WorkspaceOverviewGettingStartModal } from './getting_start_modal';
+import { WorkspaceUseCase } from '../../types';
 
 export const IS_WORKSPACE_OVERVIEW_COLLAPSED_KEY = 'workspace:overview_collapsed';
 
 export interface WorkspaceOverviewProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
 export const WorkspaceOverview = (props: WorkspaceOverviewProps) => {
@@ -43,6 +45,7 @@ export const WorkspaceOverview = (props: WorkspaceOverviewProps) => {
 
   const currentWorkspace = useObservable(workspaces.currentWorkspace$);
   const currentWorkspaceId = useObservable(workspaces.currentWorkspaceId$);
+  const useCases = useObservable(props.registeredUseCases$, []);
 
   // workspace level setting
   const workspaceOverviewCollapsedKey = `${IS_WORKSPACE_OVERVIEW_COLLAPSED_KEY}_${
@@ -62,9 +65,9 @@ export const WorkspaceOverview = (props: WorkspaceOverviewProps) => {
   const availableCards = useMemo(() => {
     if (!currentWorkspace) return [];
     return getStartCards.filter(
-      (card) => !card.id || isAppAccessibleInWorkspace(card as App, currentWorkspace)
+      (card) => !card.id || isAppAccessibleInWorkspace(card as App, currentWorkspace, useCases)
     );
-  }, [currentWorkspace]);
+  }, [currentWorkspace, useCases]);
 
   if (!currentWorkspace) {
     return null;

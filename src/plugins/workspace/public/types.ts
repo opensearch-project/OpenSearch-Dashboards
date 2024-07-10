@@ -14,4 +14,5 @@ export interface WorkspaceUseCase {
   description: string;
   features: string[];
   systematic?: boolean;
+  order?: number;
 }

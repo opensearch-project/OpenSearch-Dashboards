@@ -28,7 +28,6 @@ import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_UPDATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
-  WORKSPACE_USE_CASES,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
@@ -42,6 +41,7 @@ import {
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
+import { UseCaseService } from './services/use_case_service';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -66,6 +66,8 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private unregisterNavGroupUpdater?: () => void;
   private registeredUseCases$ = new BehaviorSubject<WorkspaceUseCase[]>([]);
   private registeredUseCasesUpdaterSubscription?: Subscription;
+  private workspaceAndUseCasesCombineSubscription?: Subscription;
+  private useCase = new UseCaseService();
 
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
@@ -77,41 +79,45 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     }
   }
 
-  private isAppBelongSystematicUseCase(appId: string) {
-    const systematicUseCases = this.registeredUseCases$.getValue();
-    return systematicUseCases.some(({ features }) => features.includes(appId));
-  }
-
   /**
    * Filter nav links by the current workspace, once the current workspace change, the nav links(left nav bar)
    * should also be updated according to the configured features of the current workspace
    */
   private filterNavLinks = (core: CoreStart) => {
     const currentWorkspace$ = core.workspaces.currentWorkspace$;
-    this.currentWorkspaceSubscription?.unsubscribe();
 
-    this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
+    this.workspaceAndUseCasesCombineSubscription?.unsubscribe();
+    this.workspaceAndUseCasesCombineSubscription = combineLatest([
+      currentWorkspace$,
+      this.registeredUseCases$,
+    ]).subscribe(([currentWorkspace, registeredUseCases]) => {
       if (currentWorkspace) {
         this.appUpdater$.next((app) => {
-          if (isAppAccessibleInWorkspace(app, currentWorkspace)) {
+          if (isAppAccessibleInWorkspace(app, currentWorkspace, registeredUseCases)) {
             return;
           }
-
           if (app.status === AppStatus.inaccessible) {
             return;
           }
-
-          if (this.isAppBelongSystematicUseCase(app.id)) {
+          if (
+            registeredUseCases.some(
+              (useCase) => useCase.systematic && useCase.features.includes(app.id)
+            )
+          ) {
             return;
           }
-
           /**
            * Change the app to `inaccessible` if it is not configured in the workspace
            * If trying to access such app, an "Application Not Found" page will be displayed
            */
           return { status: AppStatus.inaccessible };
         });
+      }
+    });
 
+    this.currentWorkspaceSubscription?.unsubscribe();
+    this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
+      if (currentWorkspace) {
         this.navGroupUpdater$.next((navGroup) => {
           if (
             navGroup.type !== NavGroupType.SYSTEM &&
@@ -361,41 +367,16 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
     this.addWorkspaceToBreadcrumbs(core);
 
-    if (core.chrome.navGroup.getNavGroupEnabled()) {
-      this.registeredUseCasesUpdaterSubscription = core.chrome.navGroup
-        .getNavGroupsMap$()
-        .subscribe((navGroupsMap) => {
-          this.registeredUseCases$.next(
-            Object.values(navGroupsMap)
-              .filter((navGroupItem) => navGroupItem.type !== NavGroupType.SYSTEM)
-              .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-              .map(({ id, title, description, navLinks, type }) => ({
-                id,
-                title,
-                description,
-                features: navLinks.map((item) => item.id),
-                systematic: type === NavGroupType.SYSTEM,
-              }))
-          );
-        });
-    } else {
-      this.registeredUseCasesUpdaterSubscription = this.workspaceConfigurableApps$.subscribe(
-        (configurableApps) => {
-          const configurableAppsId = configurableApps.map((app) => app.id);
+    const useCaseStart = this.useCase.start({
+      chrome: core.chrome,
+      workspaceConfigurableApps$: this.workspaceConfigurableApps$,
+    });
 
-          this.registeredUseCases$.next(
-            [
-              WORKSPACE_USE_CASES.observability,
-              WORKSPACE_USE_CASES['security-analytics'],
-              WORKSPACE_USE_CASES.analytics,
-              WORKSPACE_USE_CASES.search,
-            ].filter((useCase) => {
-              return useCase.features.some((featureId) => configurableAppsId.includes(featureId));
-            })
-          );
-        }
-      );
-    }
+    this.registeredUseCasesUpdaterSubscription = useCaseStart
+      .getRegisteredUseCases$()
+      .subscribe((registeredUseCases) => {
+        this.registeredUseCases$.next(registeredUseCases);
+      });
 
     return {};
   }
@@ -407,5 +388,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.breadcrumbsSubscription?.unsubscribe();
     this.unregisterNavGroupUpdater?.();
     this.registeredUseCasesUpdaterSubscription?.unsubscribe();
+    this.workspaceAndUseCasesCombineSubscription?.unsubscribe();
   }
 }

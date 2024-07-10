@@ -69,17 +69,19 @@ export const WorkspaceUseCase = ({
 
   return (
     <EuiFlexGroup>
-      {availableUseCases.map(({ id, title, description }) => (
-        <EuiFlexItem key={id}>
-          <WorkspaceUseCaseCard
-            id={id}
-            title={title}
-            description={description}
-            checked={value.includes(id)}
-            onChange={handleCardChange}
-          />
-        </EuiFlexItem>
-      ))}
+      {availableUseCases
+        .filter((item) => !item.systematic)
+        .map(({ id, title, description }) => (
+          <EuiFlexItem key={id}>
+            <WorkspaceUseCaseCard
+              id={id}
+              title={title}
+              description={description}
+              checked={value.includes(id)}
+              onChange={handleCardChange}
+            />
+          </EuiFlexItem>
+        ))}
     </EuiFlexGroup>
   );
 };

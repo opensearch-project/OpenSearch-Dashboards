@@ -23,9 +23,11 @@ import {
 } from '../workspace_form';
 import { getDataSourcesList } from '../../utils';
 import { DataSource } from '../../../common/types';
+import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceUpdaterProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
   hideTitle?: boolean;
   maxWidth?: number | string;
 }
@@ -58,6 +60,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   const workspaceConfigurableApps = useObservable(
     props.workspaceConfigurableApps$ ?? of(undefined)
   );
+  const availableUseCases = useObservable(props.registeredUseCases$);
   const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<FormDataFromWorkspace>();
 
   const handleWorkspaceFormSubmit = useCallback(
@@ -156,6 +159,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
               permissionEnabled={isPermissionEnabled}
               permissionLastAdminItemDeletable={false}
               savedObjects={savedObjects}
+              availableUseCases={availableUseCases}
             />
           )}
         </EuiPageContent>
