@@ -134,7 +134,7 @@ const DropboxComponent = ({
                 })}
               </EuiText>
               <EuiButtonIcon
-                iconType="plus"
+                iconType="plusInCircle"
                 aria-label="clear-field"
                 iconSize="s"
                 onClick={() => onAddField()}

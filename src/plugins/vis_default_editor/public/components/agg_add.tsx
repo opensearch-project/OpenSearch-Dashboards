@@ -70,7 +70,7 @@ function DefaultEditorAggAdd({
   const addButton = (
     <EuiButtonEmpty
       size="xs"
-      iconType="plus"
+      iconType="plusInCircleFilled"
       data-test-subj={`visEditorAdd_${groupName}`}
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
     >

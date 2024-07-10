@@ -135,7 +135,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
         <EuiFlexItem grow={false}>
           <EuiToolTip position="bottom" content={addButtonTooltip}>
             <EuiButtonIcon
-              iconType="plus"
+              iconType="plusInCircleFilled"
               onClick={addValueAxis}
               aria-label={addButtonTooltip}
               data-test-subj="visualizeAddYAxisButton"

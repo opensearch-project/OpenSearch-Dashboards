@@ -124,7 +124,7 @@ function FiltersParamEditor({ agg, value = [], setValue }: AggParamEditorProps<F
         />
       ))}
       <EuiButton
-        iconType="plus"
+        iconType="plusInCircle"
         fill={true}
         fullWidth={true}
         onClick={onAddFilter}

@@ -152,7 +152,7 @@ export const DiscoverField = ({
         })}
       >
         <EuiButtonIcon
-          iconType="plus"
+          iconType="plusInCircleFilled"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
               ev.currentTarget.focus();
