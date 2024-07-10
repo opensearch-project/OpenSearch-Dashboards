@@ -289,6 +289,12 @@ export default class QueryEditorUI extends Component<Props, State> {
     const headerClassName = classNames('osdQueryEditorHeader', this.props.headerClassName);
     const bannerClassName = classNames('osdQueryEditorBanner', this.props.bannerClassName);
 
+    console.log('this.state.isDataSourcesVisible', this.state.isDataSourcesVisible);
+    console.log('this.state.isDataSetsVisible', this.state.isDataSetsVisible);
+
+    console.log('this.props.dataSourceContainerRef', this.props.dataSourceContainerRef);
+    console.log('this.props.containerRef', this.props.containerRef);
+
     return (
       <div className={className}>
         <div ref={this.bannerRef} className={bannerClassName} />

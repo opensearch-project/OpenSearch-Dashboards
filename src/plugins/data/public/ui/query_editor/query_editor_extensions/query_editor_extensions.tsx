@@ -24,6 +24,8 @@ const QueryEditorExtensions: React.FC<QueryEditorExtensionsProps> = React.memo((
     return Object.values(configMap).sort((a, b) => a.order - b.order);
   }, [configMap]);
 
+  console.log('sortedConfigs', sortedConfigs);
+
   return (
     <>
       {sortedConfigs.map((config) => (

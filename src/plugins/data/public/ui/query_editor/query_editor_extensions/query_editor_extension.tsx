@@ -99,6 +99,10 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
     return () => subscription.unsubscribe();
   }, [props.dependencies, props.config]);
 
+  console.log('isEnabled', isEnabled);
+  console.log('props.config', props.config);
+  console.log('banner', props.bannerContainer, banner);
+  console.log('component', props.componentContainer, component);
   if (!isEnabled) return null;
 
   return (
