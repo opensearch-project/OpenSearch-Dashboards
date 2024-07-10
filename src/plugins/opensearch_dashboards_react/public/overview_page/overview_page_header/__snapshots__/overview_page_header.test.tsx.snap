@@ -14,15 +14,15 @@ exports[`OverviewPageHeader  renders with the toolbar by default 1`] = `
           responsive={false}
         >
           <EuiFlexItem>
-            <EuiTitle
-              size="m"
+            <EuiText
+              size="s"
             >
               <h1
                 id="osdOverviewPageHeader__title"
               >
                 Page Title
               </h1>
-            </EuiTitle>
+            </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

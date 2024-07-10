@@ -234,9 +234,13 @@ export function SaveQueryForm({
     <EuiModal onClose={onClose} initialFocus="[name=title]">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
-            defaultMessage: 'Save query',
-          })}
+          <EuiText size="s">
+            <h2>
+              {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
+                defaultMessage: 'Save query',
+              })}
+            </h2>
+          </EuiText>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 
