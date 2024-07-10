@@ -8,8 +8,14 @@ import {
   featureMatchesConfig,
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
+  isFeatureIdInsideUseCase,
+  isNavGroupInFeatureConfigs,
+  getDataSourcesList,
 } from './utils';
 import { WorkspaceAvailability } from '../../../core/public';
+import { coreMock } from '../../../core/public/mocks';
+
+const startMock = coreMock.createStart();
 
 describe('workspace utils: featureMatchesConfig', () => {
   it('feature configured with `*` should match any features', () => {
@@ -95,6 +101,14 @@ describe('workspace utils: featureMatchesConfig', () => {
     expect(match({ id: 'integrations', category: { id: 'management', label: 'Management' } })).toBe(
       true
     );
+  });
+
+  it('should match features include by any use cases', () => {
+    const match = featureMatchesConfig(['use-case-observability', 'use-case-analytics']);
+    expect(match({ id: 'dashboards' })).toBe(true);
+    expect(match({ id: 'observability-traces' })).toBe(true);
+    expect(match({ id: 'alerting' })).toBe(true);
+    expect(match({ id: 'not-in-any-use-case' })).toBe(false);
   });
 });
 
@@ -259,5 +273,55 @@ describe('workspace utils: filterWorkspaceConfigurableApps', () => {
     expect(filteredApps.length).toEqual(2);
     expect(filteredApps[0].id).toEqual('dashboards');
     expect(filteredApps[1].id).toEqual('management');
+  });
+});
+
+describe('workspace utils: isFeatureIdInsideUseCase', () => {
+  it('should return false for invalid use case', () => {
+    expect(isFeatureIdInsideUseCase('discover', 'use-case-invalid')).toBe(false);
+  });
+});
+
+describe('workspace utils: isNavGroupInFeatureConfigs', () => {
+  it('should return false if nav group not in feature configs', () => {
+    expect(
+      isNavGroupInFeatureConfigs('dataAdministration', [
+        'use-case-observability',
+        'use-case-search',
+      ])
+    ).toBe(false);
+  });
+  it('should return true if nav group in feature configs', () => {
+    expect(
+      isNavGroupInFeatureConfigs('observability', ['use-case-observability', 'use-case-search'])
+    ).toBe(true);
+  });
+});
+
+describe('workspace utils: getDataSourcesList', () => {
+  const mockedSavedObjectClient = startMock.savedObjects.client;
+
+  it('should return result when passed saved object client', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({
+      savedObjects: [
+        {
+          id: 'id1',
+          get: () => {
+            return 'title1';
+          },
+        },
+      ],
+    });
+    expect(await getDataSourcesList(mockedSavedObjectClient, [])).toStrictEqual([
+      {
+        id: 'id1',
+        title: 'title1',
+      },
+    ]);
+  });
+
+  it('should return empty array if no saved objects responded', async () => {
+    mockedSavedObjectClient.find = jest.fn().mockResolvedValue({});
+    expect(await getDataSourcesList(mockedSavedObjectClient, [])).toStrictEqual([]);
   });
 });

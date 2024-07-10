@@ -70,10 +70,11 @@ const first = (stream, map) =>
   });
 
 exports.Cluster = class Cluster {
-  constructor({ log = defaultLog, ssl = false, security = false } = {}) {
+  constructor({ log = defaultLog, ssl = false, security = false, sql = false } = {}) {
     this._log = log;
     this._ssl = ssl;
     this._security = security;
+    this._sql = sql;
     this._caCertPromise = ssl ? readFile(CA_CERT_PATH) : undefined;
   }
 
@@ -221,6 +222,28 @@ exports.Cluster = class Cluster {
     if (pluginPath) {
       await chmodAsync(pluginPath, '755');
       await execa(OPENSEARCH_SECURITY_INSTALL, ['-y', '-i', '-s'], { cwd: installPath });
+    }
+  }
+
+  /**
+   * Setups cluster with SQL/PPL plugins
+   *
+   * @param {string} installPath
+   * @property {String} version - version of OpenSearch
+   */
+  async setupSql(installPath, version) {
+    await this.installSqlPlugin(installPath, version, 'opensearch-sql');
+    await this.installSqlPlugin(installPath, version, 'opensearch-observability');
+  }
+
+  async installSqlPlugin(installPath, version, id) {
+    this._log.info(`Setting up: ${id}`);
+    try {
+      const pluginUrl = generateEnginePluginUrl(version, id);
+      await this.installOpenSearchPlugins(installPath, pluginUrl);
+      this._log.info(`Completed setup: ${id}`);
+    } catch (ex) {
+      this._log.warning(`Failed to setup: ${id}`);
     }
   }
 

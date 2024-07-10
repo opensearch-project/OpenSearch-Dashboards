@@ -219,6 +219,10 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -275,6 +279,24 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
+              },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
               },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
@@ -457,6 +479,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -465,6 +488,12 @@ exports[`dashboard listing hideWriteControls 1`] = `
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -475,6 +504,10 @@ exports[`dashboard listing hideWriteControls 1`] = `
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "container$": Observable {
+                  "_isScalar": false,
+                },
               },
             },
             "docLinks": Object {
@@ -794,6 +827,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -924,6 +958,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -1364,6 +1399,10 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -1420,6 +1459,24 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
+              },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
               },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
@@ -1602,6 +1659,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -1610,6 +1668,12 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -1620,6 +1684,10 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "container$": Observable {
+                  "_isScalar": false,
+                },
               },
             },
             "docLinks": Object {
@@ -1939,6 +2007,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -2069,6 +2138,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -2570,6 +2640,10 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -2626,6 +2700,24 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
+              },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
               },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
@@ -2808,6 +2900,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -2816,6 +2909,12 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -2826,6 +2925,10 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "container$": Observable {
+                  "_isScalar": false,
+                },
               },
             },
             "docLinks": Object {
@@ -3145,6 +3248,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -3275,6 +3379,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -3776,6 +3881,10 @@ exports[`dashboard listing renders table rows 1`] = `
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -3832,6 +3941,24 @@ exports[`dashboard listing renders table rows 1`] = `
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
+              },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
               },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
@@ -4014,6 +4141,7 @@ exports[`dashboard listing renders table rows 1`] = `
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -4022,6 +4150,12 @@ exports[`dashboard listing renders table rows 1`] = `
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -4032,6 +4166,10 @@ exports[`dashboard listing renders table rows 1`] = `
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "container$": Observable {
+                  "_isScalar": false,
+                },
               },
             },
             "docLinks": Object {
@@ -4351,6 +4489,7 @@ exports[`dashboard listing renders table rows 1`] = `
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -4481,6 +4620,7 @@ exports[`dashboard listing renders table rows 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -4982,6 +5122,10 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -5038,6 +5182,24 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "getQuerySuggestions": [MockFunction],
                 "getValueSuggestions": [MockFunction],
                 "hasQuerySuggestions": [MockFunction],
+              },
+              "dataSources": Object {
+                "dataSourceFactory": DataSourceFactory {
+                  "dataSourceClasses": Object {},
+                },
+                "dataSourceService": DataSourceService {
+                  "dataSourceFetchers": Object {},
+                  "dataSources": Object {},
+                  "dataSourcesSubject": BehaviorSubject {
+                    "_isScalar": false,
+                    "_value": Object {},
+                    "closed": false,
+                    "hasError": false,
+                    "isStopped": false,
+                    "observers": Array [],
+                    "thrownError": null,
+                  },
+                },
               },
               "fieldFormats": Object {
                 "deserialize": [MockFunction],
@@ -5220,6 +5382,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 },
               },
               "search": Object {
+                "__enhance": [MockFunction],
                 "aggs": Object {
                   "calculateAutoTimeExpression": [Function],
                   "createAggConfigs": [MockFunction],
@@ -5228,6 +5391,12 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                     "getAll": [Function],
                   },
                 },
+                "df": Object {
+                  "clear": [MockFunction],
+                  "get": [MockFunction],
+                  "set": [MockFunction],
+                },
+                "getDefaultSearchInterceptor": [MockFunction],
                 "search": [MockFunction],
                 "searchSource": Object {
                   "create": [MockFunction],
@@ -5238,6 +5407,10 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               "ui": Object {
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
+                "Settings": undefined,
+                "container$": Observable {
+                  "_isScalar": false,
+                },
               },
             },
             "docLinks": Object {
@@ -5557,6 +5730,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -5687,6 +5861,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],

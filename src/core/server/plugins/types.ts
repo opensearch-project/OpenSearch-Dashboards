@@ -200,6 +200,18 @@ export interface PluginManifest {
    * @deprecated
    */
   readonly extraPublicDirs?: string[];
+
+  /**
+   * Specifies the supported version range when adding OpenSearch cluster as data sources.
+   * Value will be following semver as a range for example ">= 1.3.0"
+   */
+  readonly supportedOSDataSourceVersions?: string;
+
+  /**
+   * Specifies the required backend plugins that **must be** installed and enabled on the data source for this plugin to function properly
+   * when adding OpenSearch cluster as data sources.
+   */
+  readonly requiredOSDataSourcePlugins?: readonly PluginName[];
 }
 
 /**
@@ -292,6 +304,8 @@ export const SharedGlobalConfigKeys = {
     'configIndex',
     'autocompleteTerminateAfter',
     'autocompleteTimeout',
+    'dashboardAdmin',
+    'futureNavigation',
   ] as const,
   opensearch: ['shardTimeout', 'requestTimeout', 'pingTimeout'] as const,
   path: ['data'] as const,

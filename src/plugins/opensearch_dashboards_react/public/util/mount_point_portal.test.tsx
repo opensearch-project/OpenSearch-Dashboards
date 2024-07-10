@@ -216,6 +216,8 @@ describe('MountPointPortal', () => {
 
     await refresh();
 
-    expect(portalTarget.innerHTML).toBe('<p>Error rendering portal content</p>');
+    expect(portalTarget.innerHTML).toBe(
+      '<div class="euiText euiText--small"><p>Error rendering portal content</p></div>'
+    );
   });
 });

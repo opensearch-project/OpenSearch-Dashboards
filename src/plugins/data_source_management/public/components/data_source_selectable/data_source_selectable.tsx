@@ -24,6 +24,9 @@ import {
   getFilteredDataSources,
   handleDataSourceFetchError,
   handleNoAvailableDataSourceError,
+  generateComponentId,
+  getDataSourceSelection,
+  getDefaultDataSourceId,
 } from '../utils';
 import { LocalCluster } from '../data_source_selector/data_source_selector';
 import { SavedObject } from '../../../../../core/public';
@@ -54,8 +57,10 @@ interface DataSourceSelectableProps {
 interface DataSourceSelectableState extends DataSourceBaseState {
   dataSourceOptions: DataSourceOption[];
   isPopoverOpen: boolean;
-  selectedOption?: DataSourceOption[];
   defaultDataSource: string | null;
+  incompatibleDataSourcesExist: boolean;
+  selectedOption?: DataSourceOption[];
+  componentId: string;
 }
 
 export class DataSourceSelectable extends React.Component<
@@ -74,6 +79,8 @@ export class DataSourceSelectable extends React.Component<
       defaultDataSource: null,
       showEmptyState: false,
       showError: false,
+      incompatibleDataSourcesExist: false,
+      componentId: generateComponentId(),
     };
 
     this.onChange.bind(this);
@@ -81,6 +88,7 @@ export class DataSourceSelectable extends React.Component<
 
   componentWillUnmount() {
     this._isMounted = false;
+    getDataSourceSelection().remove(this.state.componentId);
   }
 
   onClick() {
@@ -89,6 +97,11 @@ export class DataSourceSelectable extends React.Component<
 
   closePopover() {
     this.setState({ ...this.state, isPopoverOpen: false });
+  }
+
+  onSelectedDataSources(dataSources: DataSourceOption[]) {
+    getDataSourceSelection().selectDataSource(this.state.componentId, dataSources);
+    this.props.onSelectedDataSources(dataSources);
   }
 
   // Update the checked status of the selected data source.
@@ -117,7 +130,7 @@ export class DataSourceSelectable extends React.Component<
         selectedOption: [],
         defaultDataSource,
       });
-      this.props.onSelectedDataSources([]);
+      this.onSelectedDataSources([]);
       return;
     }
     const updatedDataSourceOptions: DataSourceOption[] = this.getUpdatedDataSourceOptions(
@@ -130,7 +143,7 @@ export class DataSourceSelectable extends React.Component<
       selectedOption: [{ id, label: dsOption.label }],
       defaultDataSource,
     });
-    this.props.onSelectedDataSources([{ id, label: dsOption.label }]);
+    this.onSelectedDataSources([{ id, label: dsOption.label }]);
   }
 
   handleDefaultDataSource(dataSourceOptions: DataSourceOption[], defaultDataSource: string | null) {
@@ -144,7 +157,7 @@ export class DataSourceSelectable extends React.Component<
     // no active option, show warning
     if (selectedDataSource.length === 0) {
       this.props.notifications.addWarning('No connected data source available.');
-      this.props.onSelectedDataSources([]);
+      this.onSelectedDataSources([]);
       return;
     }
 
@@ -160,7 +173,7 @@ export class DataSourceSelectable extends React.Component<
       defaultDataSource,
     });
 
-    this.props.onSelectedDataSources(selectedDataSource);
+    this.onSelectedDataSources(selectedDataSource);
   }
 
   async componentDidMount() {
@@ -171,6 +184,8 @@ export class DataSourceSelectable extends React.Component<
         'id',
         'title',
         'auth.type',
+        'dataSourceVersion',
+        'installedPlugins',
       ]);
 
       const dataSourceOptions: DataSourceOption[] = getFilteredDataSources(
@@ -187,16 +202,17 @@ export class DataSourceSelectable extends React.Component<
       }
 
       if (dataSourceOptions.length === 0) {
-        handleNoAvailableDataSourceError(
-          this.onEmptyState.bind(this),
-          this.props.notifications,
-          this.props.application,
-          this.props.onSelectedDataSources
-        );
+        handleNoAvailableDataSourceError({
+          changeState: this.onEmptyState.bind(this, !!fetchedDataSources?.length),
+          notifications: this.props.notifications,
+          application: this.props.application,
+          callback: this.onSelectedDataSources.bind(this),
+          incompatibleDataSourcesExist: !!fetchedDataSources?.length,
+        });
         return;
       }
 
-      const defaultDataSource = this.props.uiSettings?.get('defaultDataSource', null) ?? null;
+      const defaultDataSource = getDefaultDataSourceId(this.props.uiSettings) ?? null;
 
       if (this.props.selectedOption?.length) {
         this.handleSelectedOption(dataSourceOptions, defaultDataSource);
@@ -209,13 +225,13 @@ export class DataSourceSelectable extends React.Component<
       handleDataSourceFetchError(
         this.onError.bind(this),
         this.props.notifications,
-        this.props.onSelectedDataSources
+        this.onSelectedDataSources.bind(this)
       );
     }
   }
 
-  onEmptyState() {
-    this.setState({ showEmptyState: true });
+  onEmptyState(incompatibleDataSourcesExist: boolean) {
+    this.setState({ showEmptyState: true, incompatibleDataSourcesExist });
   }
 
   onError() {
@@ -234,15 +250,18 @@ export class DataSourceSelectable extends React.Component<
         isPopoverOpen: false,
       });
 
-      this.props.onSelectedDataSources([
-        { id: selectedDataSource.id!, label: selectedDataSource.label },
-      ]);
+      this.onSelectedDataSources([{ id: selectedDataSource.id!, label: selectedDataSource.label }]);
     }
   }
 
   render() {
     if (this.state.showEmptyState) {
-      return <NoDataSource application={this.props.application} />;
+      return (
+        <NoDataSource
+          application={this.props.application}
+          incompatibleDataSourcesExist={this.state.incompatibleDataSourcesExist}
+        />
+      );
     }
 
     if (this.state.showError) {

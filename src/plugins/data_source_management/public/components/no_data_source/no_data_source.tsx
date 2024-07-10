@@ -20,12 +20,22 @@ import { FormattedMessage } from 'react-intl';
 import { DataSourceDropDownHeader } from '../drop_down_header';
 import { DSM_APP_ID } from '../../plugin';
 import { EmptyIcon } from '../custom_database_icon';
+import {
+  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
+  CONNECT_DATASOURCES_MESSAGE,
+  NO_COMPATIBLE_DATASOURCES_MESSAGE,
+  NO_DATASOURCES_CONNECTED_MESSAGE,
+} from '../constants';
 
 interface DataSourceDropDownHeaderProps {
+  incompatibleDataSourcesExist: boolean;
   application?: ApplicationStart;
 }
 
-export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({ application }) => {
+export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
+  application,
+  incompatibleDataSourcesExist,
+}) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
   const button = (
     <EuiButtonIcon
@@ -63,7 +73,11 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({ applicat
         {
           <FormattedMessage
             id="dataSourcesManagement.dataSourceEmptyMenu.noData"
-            defaultMessage="No data sources connected yet."
+            defaultMessage={
+              incompatibleDataSourcesExist
+                ? NO_COMPATIBLE_DATASOURCES_MESSAGE
+                : NO_DATASOURCES_CONNECTED_MESSAGE
+            }
           />
         }
       </EuiText>
@@ -72,7 +86,11 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({ applicat
         {
           <FormattedMessage
             id="dataSourcesManagement.dataSourceEmptyMenu.connect"
-            defaultMessage="Connect your data sources to get started."
+            defaultMessage={
+              incompatibleDataSourcesExist
+                ? ADD_COMPATIBLE_DATASOURCES_MESSAGE
+                : CONNECT_DATASOURCES_MESSAGE
+            }
           />
         }
       </EuiText>

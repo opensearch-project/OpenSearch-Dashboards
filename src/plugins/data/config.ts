@@ -31,6 +31,12 @@
 import { schema, TypeOf } from '@osd/config-schema';
 
 export const configSchema = schema.object({
+  enhancements: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+    supportedAppNames: schema.arrayOf(schema.string(), {
+      defaultValue: ['discover'],
+    }),
+  }),
   autocomplete: schema.object({
     querySuggestions: schema.object({
       enabled: schema.boolean({ defaultValue: true }),

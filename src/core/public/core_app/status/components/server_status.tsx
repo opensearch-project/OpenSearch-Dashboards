@@ -62,7 +62,7 @@ export const ServerStatus: FunctionComponent<ServerStateProps> = ({ name, server
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiText>
+      <EuiText size="s">
         <p>{name}</p>
       </EuiText>
     </EuiFlexItem>

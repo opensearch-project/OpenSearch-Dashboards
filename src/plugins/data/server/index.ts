@@ -133,11 +133,13 @@ export { IFieldFormatsRegistry, FieldFormatsGetConfigFn, FieldFormatConfig } fro
  * Index patterns:
  */
 
-import { isNestedField, isFilterable } from '../common';
+import { isNestedField, isFilterable, setOverrides, getOverrides } from '../common';
 
 export const indexPatterns = {
   isFilterable,
   isNestedField,
+  setOverrides,
+  getOverrides,
 };
 
 export {
@@ -145,7 +147,6 @@ export {
   FieldDescriptor as IndexPatternFieldDescriptor,
   shouldReadFieldFromDocValues, // used only in logstash_fields fixture
   FieldDescriptor,
-  decideClient,
 } from './index_patterns';
 
 export {
@@ -272,6 +273,8 @@ export const search = {
 export {
   // osd field types
   castOpenSearchToOsdFieldTypeName,
+  getOsdFieldOverrides,
+  setOsdFieldOverrides,
   // query
   Filter,
   getTime,
@@ -300,6 +303,7 @@ export {
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
+    enhancements: true,
     autocomplete: true,
     search: true,
   },

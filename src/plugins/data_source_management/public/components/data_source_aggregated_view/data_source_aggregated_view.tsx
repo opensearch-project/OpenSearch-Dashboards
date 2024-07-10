@@ -16,6 +16,9 @@ import {
   getDataSourcesWithFields,
   handleDataSourceFetchError,
   handleNoAvailableDataSourceError,
+  generateComponentId,
+  getDataSourceSelection,
+  getDefaultDataSourceId,
 } from '../utils';
 import { SavedObject } from '../../../../../core/public';
 import { DataSourceAttributes } from '../../types';
@@ -45,6 +48,8 @@ interface DataSourceAggregatedViewState extends DataSourceBaseState {
   allDataSourcesIdToTitleMap: Map<string, any>;
   switchChecked: boolean;
   defaultDataSource: string | null;
+  incompatibleDataSourcesExist: boolean;
+  componentId: string;
 }
 
 interface DataSourceOptionDisplay extends DataSourceOption {
@@ -68,11 +73,14 @@ export class DataSourceAggregatedView extends React.Component<
       showError: false,
       switchChecked: false,
       defaultDataSource: null,
+      incompatibleDataSourcesExist: false,
+      componentId: generateComponentId(),
     };
   }
 
   componentWillUnmount() {
     this._isMounted = false;
+    getDataSourceSelection().remove(this.state.componentId);
   }
 
   onDataSourcesClick() {
@@ -89,7 +97,13 @@ export class DataSourceAggregatedView extends React.Component<
 
   async componentDidMount() {
     this._isMounted = true;
-    getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
+    getDataSourcesWithFields(this.props.savedObjectsClient, [
+      'id',
+      'title',
+      'auth.type',
+      'dataSourceVersion',
+      'installedPlugins',
+    ])
       .then((fetchedDataSources) => {
         const allDataSourcesIdToTitleMap = new Map();
 
@@ -113,18 +127,19 @@ export class DataSourceAggregatedView extends React.Component<
         }
 
         if (allDataSourcesIdToTitleMap.size === 0) {
-          handleNoAvailableDataSourceError(
-            this.onEmptyState.bind(this),
-            this.props.notifications,
-            this.props.application
-          );
+          handleNoAvailableDataSourceError({
+            changeState: this.onEmptyState.bind(this, !!fetchedDataSources?.length),
+            notifications: this.props.notifications,
+            application: this.props.application,
+            incompatibleDataSourcesExist: !!fetchedDataSources?.length,
+          });
           return;
         }
 
         this.setState({
           ...this.state,
           allDataSourcesIdToTitleMap,
-          defaultDataSource: this.props.uiSettings?.get('defaultDataSource', null) ?? null,
+          defaultDataSource: getDefaultDataSourceId(this.props.uiSettings) ?? null,
           showEmptyState: allDataSourcesIdToTitleMap.size === 0,
         });
       })
@@ -133,8 +148,8 @@ export class DataSourceAggregatedView extends React.Component<
       });
   }
 
-  onEmptyState() {
-    this.setState({ showEmptyState: true });
+  onEmptyState(incompatibleDataSourcesExist: boolean) {
+    this.setState({ showEmptyState: true, incompatibleDataSourcesExist });
   }
 
   onError() {
@@ -143,7 +158,12 @@ export class DataSourceAggregatedView extends React.Component<
 
   render() {
     if (this.state.showEmptyState) {
-      return <NoDataSource application={this.props.application} />;
+      return (
+        <NoDataSource
+          application={this.props.application}
+          incompatibleDataSourcesExist={this.state.incompatibleDataSourcesExist}
+        />
+      );
     }
     if (this.state.showError) {
       return <DataSourceErrorMenu application={this.props.application} />;
@@ -180,7 +200,11 @@ export class DataSourceAggregatedView extends React.Component<
       });
     }
 
-    const numSelectedItems = items.filter((item) => item.checked === 'on').length;
+    const selectedItems = items.filter((item) => item.checked === 'on');
+    // For read-only cases, also need to set default selected result.
+    getDataSourceSelection().selectDataSource(this.state.componentId, selectedItems);
+
+    const numSelectedItems = selectedItems.length;
 
     const titleComponent = (
       <DataSourceDropDownHeader
@@ -225,7 +249,11 @@ export class DataSourceAggregatedView extends React.Component<
                   options={items}
                   renderOption={(option) => (
                     <DataSourceItem
-                      className={'dataSourceAggregatedView'}
+                      className={
+                        this.props.displayAllCompatibleDataSources
+                          ? 'dataSourceAggregatedView'
+                          : 'dataSourceListAllActive'
+                      }
                       option={option}
                       defaultDataSource={this.state.defaultDataSource}
                     />

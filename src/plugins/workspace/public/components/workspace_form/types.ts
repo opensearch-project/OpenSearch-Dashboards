@@ -3,9 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ApplicationStart, PublicAppInfo } from '../../../../../core/public';
+import type {
+  ApplicationStart,
+  PublicAppInfo,
+  SavedObjectsStart,
+} from '../../../../../core/public';
 import type { WorkspacePermissionMode } from '../../../common/constants';
 import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
+import { DataSource } from '../../../common/types';
 
 export type WorkspacePermissionSetting =
   | {
@@ -27,6 +32,7 @@ export interface WorkspaceFormSubmitData {
   features?: string[];
   color?: string;
   permissionSettings?: WorkspacePermissionSetting[];
+  selectedDataSources?: DataSource[];
 }
 
 export interface WorkspaceFormData extends WorkspaceFormSubmitData {
@@ -34,24 +40,16 @@ export interface WorkspaceFormData extends WorkspaceFormSubmitData {
   reserved?: boolean;
 }
 
-export interface WorkspaceFeature {
-  id: string;
-  name: string;
-}
-
-export interface WorkspaceFeatureGroup {
-  name: string;
-  features: WorkspaceFeature[];
-}
-
 export type WorkspaceFormErrors = {
-  [key in keyof Omit<WorkspaceFormData, 'permissionSettings'>]?: string;
+  [key in keyof Omit<WorkspaceFormData, 'permissionSettings' | 'selectedDataSources'>]?: string;
 } & {
   permissionSettings?: { [key: number]: string };
+  selectedDataSources?: { [key: number]: string };
 };
 
 export interface WorkspaceFormProps {
   application: ApplicationStart;
+  savedObjects: SavedObjectsStart;
   onSubmit?: (formData: WorkspaceFormSubmitData) => void;
   defaultValues?: WorkspaceFormData;
   operationType?: WorkspaceOperationType;

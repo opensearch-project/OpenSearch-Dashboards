@@ -11,9 +11,14 @@ import { DSM_APP_ID } from '../../plugin';
 export const getManageDataSourceButton = (application?: ApplicationStart) => {
   return (
     <>
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+      <EuiFlexGroup
+        data-test-subj="manageDataSourceButtonContainer"
+        justifyContent="flexEnd"
+        gutterSize="s"
+      >
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="manageDataSourceButton"
             size="s"
             onClick={() =>
               application?.navigateToApp('management', {

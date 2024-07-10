@@ -16,7 +16,9 @@ exports[`renders DashboardCloneModal 1`] = `
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
-    <EuiText>
+    <EuiText
+      size="s"
+    >
       <p>
         <FormattedMessage
           defaultMessage="Please enter a new name for your dashboard."

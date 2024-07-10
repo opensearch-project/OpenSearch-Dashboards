@@ -20,6 +20,7 @@ import { IndexPatternField, opensearchFilters } from '../../../../../data/public
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { popularizeField } from '../../helpers/popularize_field';
+import { getDataSet } from '../../helpers/get_data_set';
 import { buildColumns } from '../../utils/columns';
 
 // eslint-disable-next-line import/no-default-export
@@ -31,13 +32,18 @@ export default function DiscoverPanel(props: ViewProps) {
     },
     capabilities,
     indexPatterns,
+    application,
   } = services;
   const { data$, indexPattern } = useDiscoverContext();
   const [fetchState, setFetchState] = useState<SearchData>(data$.getValue());
 
-  const { columns } = useSelector((state) => ({
-    columns: state.discover.columns,
-  }));
+  const { columns } = useSelector((state) => {
+    const stateColumns = state.discover.columns;
+    // check if state columns is not undefined, otherwise use buildColumns
+    return {
+      columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
+    };
+  });
 
   const prevColumns = useRef(columns);
   const dispatch = useDispatch();
@@ -47,6 +53,7 @@ export default function DiscoverPanel(props: ViewProps) {
     if (columns !== prevColumns.current) {
       let updatedColumns = buildColumns(columns);
       if (
+        columns &&
         timeFieldname &&
         !prevColumns.current.includes(timeFieldname) &&
         columns.includes(timeFieldname)
@@ -86,14 +93,30 @@ export default function DiscoverPanel(props: ViewProps) {
     [filterManager, indexPattern]
   );
 
+  const onCreateIndexPattern = useCallback(async () => {
+    if (!fetchState.title) return;
+    if (fetchState.title === indexPattern?.title) return;
+    application?.navigateToApp('management', {
+      path: `opensearch-dashboards/indexPatterns/create?id=${fetchState.title}`,
+    });
+  }, [application, fetchState.title, indexPattern?.title]);
+
+  const onNormalize = useCallback(async () => {
+    if (!fetchState.title) return;
+    if (fetchState.title === indexPattern?.title) return;
+    const dataSet = getDataSet(indexPattern, fetchState, indexPatterns);
+    await indexPatterns.refreshFields(dataSet!, true);
+  }, [fetchState, indexPattern, indexPatterns]);
+
   return (
     <DiscoverSidebar
       columns={columns || []}
       fieldCounts={fetchState.fieldCounts || {}}
       hits={fetchState.rows || []}
       onAddField={(fieldName, index) => {
-        if (indexPattern && capabilities.discover?.save) {
-          popularizeField(indexPattern, fieldName, indexPatterns);
+        const dataSet = getDataSet(indexPattern, fetchState, indexPatterns);
+        if (dataSet && capabilities.discover?.save) {
+          popularizeField(dataSet, fieldName, indexPatterns);
         }
 
         dispatch(
@@ -104,8 +127,9 @@ export default function DiscoverPanel(props: ViewProps) {
         );
       }}
       onRemoveField={(fieldName) => {
-        if (indexPattern && capabilities.discover?.save) {
-          popularizeField(indexPattern, fieldName, indexPatterns);
+        const dataSet = getDataSet(indexPattern, fetchState, indexPatterns);
+        if (dataSet && capabilities.discover?.save) {
+          popularizeField(dataSet, fieldName, indexPatterns);
         }
 
         dispatch(removeColumn(fieldName));
@@ -118,7 +142,9 @@ export default function DiscoverPanel(props: ViewProps) {
           })
         );
       }}
-      selectedIndexPattern={indexPattern}
+      selectedIndexPattern={getDataSet(indexPattern, fetchState, indexPatterns)}
+      onCreateIndexPattern={onCreateIndexPattern}
+      onNormalize={onNormalize}
       onAddFilter={onAddFilter}
     />
   );

@@ -80,6 +80,8 @@ export function pluginInitializerContextConfigMock<T>(config: T) {
       configIndex: '.opensearch_dashboards_config_tests',
       autocompleteTerminateAfter: duration(100000),
       autocompleteTimeout: duration(1000),
+      dashboardAdmin: { groups: [], users: [] },
+      futureNavigation: false,
     },
     opensearch: {
       shardTimeout: duration('30s'),

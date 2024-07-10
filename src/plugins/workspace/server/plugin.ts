@@ -30,6 +30,7 @@ import { WorkspaceSavedObjectsClientWrapper } from './saved_objects';
 import {
   cleanWorkspaceId,
   getWorkspaceIdFromUrl,
+  getWorkspaceState,
   updateWorkspaceState,
 } from '../../../core/server/utils';
 import { WorkspaceConflictSavedObjectsClientWrapper } from './saved_objects/saved_objects_wrapper_for_check_workspace_conflict';
@@ -37,6 +38,7 @@ import {
   SavedObjectsPermissionControl,
   SavedObjectsPermissionControlContract,
 } from './permission_control/client';
+import { getOSDAdminConfigFromYMLConfig, updateDashboardAdminStateForRequest } from './utils';
 import { WorkspaceIdConsumerWrapper } from './saved_objects/workspace_id_consumer_wrapper';
 import { WorkspaceUiSettingsClientWrapper } from './saved_objects/workspace_ui_settings_client_wrapper';
 
@@ -69,6 +71,36 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       }
       return toolkit.next();
     });
+  }
+
+  private setupPermission(core: CoreSetup) {
+    this.permissionControl = new SavedObjectsPermissionControl(this.logger);
+
+    core.http.registerOnPostAuth(async (request, response, toolkit) => {
+      let groups: string[];
+      let users: string[];
+
+      // There may be calls to saved objects client before user get authenticated, need to add a try catch here as `getPrincipalsFromRequest` will throw error when user is not authenticated.
+      try {
+        ({ groups = [], users = [] } = this.permissionControl!.getPrincipalsFromRequest(request));
+      } catch (e) {
+        return toolkit.next();
+      }
+
+      const [configGroups, configUsers] = await getOSDAdminConfigFromYMLConfig(this.globalConfig$);
+      updateDashboardAdminStateForRequest(request, groups, users, configGroups, configUsers);
+      return toolkit.next();
+    });
+
+    this.workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
+      this.permissionControl
+    );
+
+    core.savedObjects.addClientWrapper(
+      PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
+      WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
+      this.workspaceSavedObjectsClientWrapper.wrapperFactory
+    );
   }
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -105,24 +137,12 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     core.savedObjects.addClientWrapper(
       PRIORITY_FOR_WORKSPACE_ID_CONSUMER_WRAPPER,
       WORKSPACE_ID_CONSUMER_WRAPPER_ID,
-      new WorkspaceIdConsumerWrapper(isPermissionControlEnabled).wrapperFactory
+      new WorkspaceIdConsumerWrapper().wrapperFactory
     );
 
     const maxImportExportSize = core.savedObjects.getImportExportObjectLimit();
     this.logger.info('Workspace permission control enabled:' + isPermissionControlEnabled);
-    if (isPermissionControlEnabled) {
-      this.permissionControl = new SavedObjectsPermissionControl(this.logger);
-
-      this.workspaceSavedObjectsClientWrapper = new WorkspaceSavedObjectsClientWrapper(
-        this.permissionControl
-      );
-
-      core.savedObjects.addClientWrapper(
-        PRIORITY_FOR_PERMISSION_CONTROL_WRAPPER,
-        WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
-        this.workspaceSavedObjectsClientWrapper.wrapperFactory
-      );
-    }
+    if (isPermissionControlEnabled) this.setupPermission(core);
 
     registerRoutes({
       http: core.http,
@@ -138,7 +158,14 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
         enabled: true,
         permissionEnabled: isPermissionControlEnabled,
       },
+      dashboards: { isDashboardAdmin: false },
     }));
+    // Dynamically update capabilities based on the auth information from request.
+    core.capabilities.registerSwitcher((request) => {
+      // If the value is undefined/true, the user is dashboard admin.
+      const isDashboardAdmin = getWorkspaceState(request).isDashboardAdmin !== false;
+      return { dashboards: { isDashboardAdmin } };
+    });
 
     return {
       client: this.client,

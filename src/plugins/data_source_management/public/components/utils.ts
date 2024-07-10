@@ -13,6 +13,7 @@ import {
   CoreStart,
 } from 'src/core/public';
 import { deepFreeze } from '@osd/std';
+import uuid from 'uuid';
 import {
   DataSourceAttributes,
   DataSourceTableItem,
@@ -25,12 +26,24 @@ import { DataSourceGroupLabelOption } from './data_source_menu/types';
 import { createGetterSetter } from '../../../opensearch_dashboards_utils/public';
 import { toMountPoint } from '../../../opensearch_dashboards_react/public';
 import { getManageDataSourceButton, getReloadButton } from './toast_button';
+import {
+  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
+  CONNECT_DATASOURCES_MESSAGE,
+  NO_COMPATIBLE_DATASOURCES_MESSAGE,
+  NO_DATASOURCES_CONNECTED_MESSAGE,
+  DEFAULT_DATA_SOURCE_UI_SETTINGS_ID,
+} from './constants';
+import {
+  DataSourceSelectionService,
+  defaultDataSourceSelection,
+} from '../service/data_source_selection_service';
+import { DataSourceError } from '../types';
 
 export async function getDataSources(savedObjectsClient: SavedObjectsClientContract) {
   return savedObjectsClient
     .find({
       type: 'data-source',
-      fields: ['id', 'description', 'title'],
+      fields: ['id', 'description', 'title', 'dataSourceVersion', 'installedPlugins'],
       perPage: 10000,
     })
     .then(
@@ -39,12 +52,16 @@ export async function getDataSources(savedObjectsClient: SavedObjectsClientContr
           const id = source.id;
           const title = source.get('title');
           const description = source.get('description');
+          const datasourceversion = source.get('dataSourceVersion');
+          const installedplugins = source.get('installedPlugins');
 
           return {
             id,
             title,
             description,
             sort: `${title}`,
+            datasourceversion,
+            installedplugins,
           };
         }) || []
     );
@@ -67,7 +84,7 @@ export async function handleSetDefaultDatasource(
   savedObjectsClient: SavedObjectsClientContract,
   uiSettings: IUiSettingsClient
 ) {
-  if (uiSettings.get('defaultDataSource', null) === null) {
+  if (!getDefaultDataSourceId(uiSettings)) {
     return await setFirstDataSourceAsDefault(savedObjectsClient, uiSettings, false);
   }
 }
@@ -78,27 +95,34 @@ export async function setFirstDataSourceAsDefault(
   exists: boolean
 ) {
   if (exists) {
-    uiSettings.remove('defaultDataSource');
+    uiSettings.remove(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID);
   }
   const listOfDataSources: DataSourceTableItem[] = await getDataSources(savedObjectsClient);
   if (Array.isArray(listOfDataSources) && listOfDataSources.length >= 1) {
     const datasourceId = listOfDataSources[0].id;
-    return await uiSettings.set('defaultDataSource', datasourceId);
+    return await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, datasourceId);
   }
 }
 
-export function handleNoAvailableDataSourceError(
-  changeState: () => void,
-  notifications: ToastsStart,
-  application?: ApplicationStart,
-  callback?: (ds: DataSourceOption[]) => void
-) {
+export interface HandleNoAvailableDataSourceErrorProps {
+  changeState: () => void;
+  notifications: ToastsStart;
+  incompatibleDataSourcesExist: boolean;
+  application?: ApplicationStart;
+  callback?: (ds: DataSourceOption[]) => void;
+}
+
+export function handleNoAvailableDataSourceError(props: HandleNoAvailableDataSourceErrorProps) {
+  const { changeState, notifications, application, callback, incompatibleDataSourcesExist } = props;
+
+  const defaultMessage = incompatibleDataSourcesExist
+    ? `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`
+    : `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
+
   changeState();
   if (callback) callback([]);
   notifications.add({
-    title: i18n.translate('dataSource.noAvailableDataSourceError', {
-      defaultMessage: 'No data sources connected yet. Connect your data sources to get started.',
-    }),
+    title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
     text: toMountPoint(getManageDataSourceButton(application)),
     color: 'warning',
   });
@@ -115,6 +139,16 @@ export function getFilteredDataSources(
       label: ds.attributes?.title || '',
     }))
     .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
+}
+
+export function getDefaultDataSourceId(uiSettings?: IUiSettingsClient) {
+  if (!uiSettings) return null;
+  return uiSettings.get<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, null);
+}
+
+export function getDefaultDataSourceId$(uiSettings?: IUiSettingsClient) {
+  if (!uiSettings) return null;
+  return uiSettings.get$<string | null>(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, null);
 }
 
 export function getDefaultDataSource(
@@ -157,7 +191,11 @@ export async function getDataSourceById(
   const response = await savedObjectsClient.get('data-source', id);
 
   if (!response || response.error) {
-    throw new Error('Unable to find data source');
+    const statusCode = response.error?.statusCode;
+    if (statusCode === 404) {
+      throw new DataSourceError({ statusCode, body: 'Unable to find data source' });
+    }
+    throw new DataSourceError({ statusCode, body: response.error?.message });
   }
 
   const attributes: any = response?.attributes || {};
@@ -328,3 +366,41 @@ export interface HideLocalCluster {
 export const [getHideLocalCluster, setHideLocalCluster] = createGetterSetter<HideLocalCluster>(
   'HideLocalCluster'
 );
+
+// This will maintain an unified data source selection instance among components and export it to other plugin.
+const [getDataSourceSelectionInstance, setDataSourceSelection] = createGetterSetter<
+  DataSourceSelectionService
+>('DataSourceSelectionService');
+
+const getDataSourceSelection = () => {
+  try {
+    // Usually set will be executed in the setup of DSM.
+    return getDataSourceSelectionInstance();
+  } catch (e) {
+    // Since createGetterSetter doesn't support default value and will throw error if not found.
+    // As dataSourceSelection isn't main part of data selector, will use a default to fallback safely.
+    return defaultDataSourceSelection;
+  }
+};
+export { getDataSourceSelection, setDataSourceSelection };
+
+export const generateComponentId = () => {
+  return uuid.v4();
+};
+
+export const formatError = (name: string, message: string, details: string) => {
+  return {
+    name,
+    message,
+    body: {
+      attributes: {
+        error: {
+          caused_by: {
+            type: '',
+            reason: details,
+          },
+        },
+      },
+    },
+  };
+};

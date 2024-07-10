@@ -645,7 +645,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />
             <EuiSpacer size="m" />
-            <EuiText>
+            <EuiText size="s">
               <p>{loadingMessage}</p>
             </EuiText>
           </EuiFlexItem>

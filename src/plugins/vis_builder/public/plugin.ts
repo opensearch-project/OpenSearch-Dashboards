@@ -163,6 +163,7 @@ export class VisBuilderPlugin
           embeddable: pluginsStart.embeddable,
           dashboard: pluginsStart.dashboard,
           uiActions: pluginsStart.uiActions,
+          capabilities: coreStart.application.capabilities,
         };
 
         // Instantiate the store
@@ -192,7 +193,6 @@ export class VisBuilderPlugin
         defaultMessage: 'Create visualizations using the new VisBuilder',
       }),
       icon: 'visBuilder',
-      stage: 'experimental',
       aliasApp: PLUGIN_ID,
       aliasPath: '#/',
       appExtensions: {
@@ -205,7 +205,6 @@ export class VisBuilderPlugin
             icon: 'visBuilder',
             id,
             savedObjectType: VISBUILDER_SAVED_OBJECT,
-            stage: 'experimental',
             title: attributes?.title,
             typeTitle: VIS_BUILDER_CHART_TYPE,
             updated_at: updatedAt,

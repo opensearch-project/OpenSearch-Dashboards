@@ -9,6 +9,7 @@
  * GitHub history for details.
  */
 
+import { i18n } from '@osd/i18n';
 import React, { useState, useCallback } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import dompurify from 'dompurify';
@@ -47,13 +48,15 @@ const TableRowUI = ({
   ]);
 
   const tableRow = (
-    <tr key={row._id}>
+    <tr key={row._id} className={row.isAnchor ? 'osdDocTable__row--highlight' : ''}>
       <td data-test-subj="docTableExpandToggleColumn" className="osdDocTableCell__toggleDetails">
         <EuiButtonIcon
           color="text"
           onClick={handleExpanding}
           iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
-          aria-label="Next"
+          aria-label={i18n.translate('discover.defaultTable.docTableExpandToggleColumnLabel', {
+            defaultMessage: `Toggle row details`,
+          })}
           data-test-subj="docTableExpandToggleColumn"
         />
       </td>
@@ -141,7 +144,6 @@ const TableRowUI = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <h4
-              data-test-subj="docTableRowDetailsTitle"
               className="euiTitle euiTitle--xsmall"
               i18n-id="discover.docTable.tableRow.detailHeading"
               i18n-default-message="Expanded document"

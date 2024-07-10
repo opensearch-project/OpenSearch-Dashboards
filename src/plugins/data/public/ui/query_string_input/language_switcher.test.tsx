@@ -36,7 +36,7 @@ import { mountWithIntl } from 'test_utils/enzyme_helpers';
 import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 const startMock = coreMock.createStart();
 
-describe('LanguageSwitcher', () => {
+describe('QueryLanguageSwitcher', () => {
   function wrapInContext(testProps: any) {
     const services = {
       uiSettings: startMock.uiSettings,

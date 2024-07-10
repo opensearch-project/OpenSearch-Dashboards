@@ -18,11 +18,13 @@ import {
   testConnection,
   updateDataSourceById,
   setFirstDataSourceAsDefault,
+  getDefaultDataSourceId,
 } from '../utils';
 import { getEditBreadcrumbs } from '../breadcrumbs';
 import { EditDataSourceForm } from './components/edit_form/edit_data_source_form';
 import { LoadingMask } from '../loading_mask';
 import { AuthType, DataSourceAttributes } from '../../types';
+import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../constants';
 
 const defaultDataSource: DataSourceAttributes = {
   title: '',
@@ -86,10 +88,10 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
   };
 
   const handleSetDefault = async () => {
-    await uiSettings.set('defaultDataSource', dataSourceID);
+    await uiSettings.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSourceID);
   };
 
-  const isDefaultDataSource = uiSettings.get('defaultDataSource', null) === dataSourceID;
+  const isDefaultDataSource = getDefaultDataSourceId(uiSettings) === dataSourceID;
 
   /* Handle submit - create data source*/
   const handleSubmit = async (attributes: DataSourceAttributes) => {
@@ -126,7 +128,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
 
   const setDefaultDataSource = async () => {
     try {
-      if (uiSettings.get('defaultDataSource') === dataSourceID) {
+      if (getDefaultDataSourceId(uiSettings) === dataSourceID) {
         await setFirstDataSourceAsDefault(savedObjects.client, uiSettings, true);
       }
     } catch (e) {

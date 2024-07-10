@@ -157,7 +157,9 @@ export function SaveQueryForm({
   const saveQueryForm = (
     <EuiForm isInvalid={hasErrors} error={formErrors} data-test-subj="saveQueryForm">
       <EuiFormRow>
-        <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
+        <EuiText size="s" color="subdued">
+          {savedQueryDescriptionText}
+        </EuiText>
       </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('data.search.searchBar.savedQueryNameLabelText', {

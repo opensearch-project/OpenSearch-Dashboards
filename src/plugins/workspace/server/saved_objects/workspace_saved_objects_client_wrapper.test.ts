@@ -3,10 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { getWorkspaceState, updateWorkspaceState } from '../../../../core/server/utils';
 import { SavedObjectsErrorHelpers } from '../../../../core/server';
 import { WorkspaceSavedObjectsClientWrapper } from './workspace_saved_objects_client_wrapper';
+import { httpServerMock } from '../../../../core/server/mocks';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../../data_source/common';
 
-const generateWorkspaceSavedObjectsClientWrapper = () => {
+const DASHBOARD_ADMIN = 'dashnoard_admin';
+const NO_DASHBOARD_ADMIN = 'no_dashnoard_admin';
+
+const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) => {
   const savedObjectsStore = [
     {
       type: 'dashboard',
@@ -41,6 +47,17 @@ const generateWorkspaceSavedObjectsClientWrapper = () => {
       id: 'not-permitted-workspace',
       attributes: { name: 'Not permitted workspace' },
     },
+    {
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      id: 'global-data-source',
+      attributes: { title: 'Global data source' },
+    },
+    {
+      type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+      id: 'workspace-1-data-source',
+      attributes: { title: 'Workspace 1 data source' },
+      workspaces: ['workspace-1'],
+    },
   ];
   const clientMock = {
     get: jest.fn().mockImplementation(async (type, id) => {
@@ -72,10 +89,21 @@ const generateWorkspaceSavedObjectsClientWrapper = () => {
         ),
       };
     }),
-    find: jest.fn(),
+    find: jest.fn().mockImplementation(({ type, workspaces }) => {
+      const savedObjects = savedObjectsStore.filter(
+        (item) =>
+          item.type === type &&
+          (!workspaces || item.workspaces?.some((workspaceId) => workspaces.includes(workspaceId)))
+      );
+      return {
+        saved_objects: savedObjects,
+        total: savedObjects.length,
+      };
+    }),
     deleteByWorkspace: jest.fn(),
   };
-  const requestMock = {};
+  const requestMock = httpServerMock.createOpenSearchDashboardsRequest();
+  if (role === DASHBOARD_ADMIN) updateWorkspaceState(requestMock, { isDashboardAdmin: true });
   const wrapperOptions = {
     client: clientMock,
     request: requestMock,
@@ -91,8 +119,11 @@ const generateWorkspaceSavedObjectsClientWrapper = () => {
     }),
     validateSavedObjectsACL: jest.fn(),
     batchValidate: jest.fn(),
-    getPrincipalsFromRequest: jest.fn().mockImplementation(() => ({ users: ['user-1'] })),
+    getPrincipalsFromRequest: jest.fn().mockImplementation(() => {
+      return { users: ['user-1'] };
+    }),
   };
+
   const wrapper = new WorkspaceSavedObjectsClientWrapper(permissionControlMock);
   const scopedClientMock = {
     find: jest.fn().mockImplementation(async () => ({
@@ -343,6 +374,30 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           workspaces: ['workspace-1'],
         });
       });
+      it('should throw permission error when user bulkCreate workspace and is not dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.bulkCreate([{ type: 'workspace', attributes: {} }]);
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+
+        try {
+          await wrapper.bulkCreate([{ type: 'workspace', id: 'test', attributes: {} }]);
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+
+        try {
+          await wrapper.bulkCreate([{ type: 'workspace', attributes: {} }], { overwrite: true });
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+      });
     });
 
     describe('create', () => {
@@ -416,6 +471,30 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
             overwrite: true,
           }
         );
+      });
+      it('should throw permission error when user create a workspace and is not dashboard admin', async () => {
+        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
+        let errorCatched;
+        try {
+          await wrapper.create('workspace', { name: 'test' }, { overwrite: true });
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+
+        try {
+          await wrapper.create('workspace', { name: 'test' }, { id: 'test' });
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
+
+        try {
+          await wrapper.create('workspace', { name: 'test' }, {});
+        } catch (e) {
+          errorCatched = e;
+        }
+        expect(errorCatched?.message).toEqual('Invalid permission, please contact OSD admin');
       });
     });
     describe('get', () => {
@@ -545,7 +624,7 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
       });
     });
     describe('find', () => {
-      it('should call client.find with ACLSearchParams for workspace type', async () => {
+      it('should call client.find with consistent params when ACLSearchParams and workspaceOperator not provided', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
         await wrapper.find({
           type: 'workspace',
@@ -558,58 +637,11 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
             },
             permissionModes: ['read', 'write'],
           },
+          workspaces: ['workspace-1'],
+          workspacesSearchOperator: 'OR',
         });
       });
-      it('should call client.find with ACLSearchParams if no workspaces is provided', async () => {
-        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
-        // no workspaces
-        await wrapper.find({
-          type: 'dashboards',
-        });
-        expect(clientMock.find).toHaveBeenCalledWith({
-          type: 'dashboards',
-          ACLSearchParams: {
-            principals: {
-              users: ['user-1'],
-            },
-            permissionModes: ['read', 'write'],
-          },
-        });
-
-        // workspaces parameter is undefined
-        clientMock.find.mockReset();
-        await wrapper.find({
-          type: 'dashboards',
-          workspaces: undefined,
-        });
-        expect(clientMock.find).toHaveBeenLastCalledWith({
-          type: 'dashboards',
-          ACLSearchParams: {
-            principals: {
-              users: ['user-1'],
-            },
-            permissionModes: ['read', 'write'],
-          },
-        });
-
-        // empty workspaces array
-        clientMock.find.mockReset();
-        await wrapper.find({
-          type: 'dashboards',
-          workspaces: [],
-        });
-        expect(clientMock.find).toHaveBeenLastCalledWith({
-          type: 'dashboards',
-          workspaces: [],
-          ACLSearchParams: {
-            principals: {
-              users: ['user-1'],
-            },
-            permissionModes: ['read', 'write'],
-          },
-        });
-      });
-      it('should call client.find with only read permission if find workspace and permissionModes provided', async () => {
+      it('should call client.find with ACLSearchParams when only ACLSearchParams provided', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
         await wrapper.find({
           type: 'workspace',
@@ -627,60 +659,15 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           },
         });
       });
-      it('should throw workspace permission error if provided workspaces not permitted', async () => {
-        const { wrapper } = generateWorkspaceSavedObjectsClientWrapper();
-        let errorCatched;
-        try {
-          errorCatched = await wrapper.find({
-            type: 'dashboard',
-            workspaces: ['not-permitted-workspace'],
-          });
-        } catch (e) {
-          errorCatched = e;
-        }
-        expect(errorCatched?.message).toEqual('Invalid workspace permission');
-      });
-      it('should remove not permitted workspace and call client.find with arguments', async () => {
+      it('should call client.find with filtered workspaces when only workspaces provided', async () => {
         const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
         await wrapper.find({
           type: 'dashboard',
-          workspaces: ['not-permitted-workspace', 'workspace-1'],
+          workspaces: ['workspace-1', 'workspace-2'],
         });
         expect(clientMock.find).toHaveBeenCalledWith({
           type: 'dashboard',
           workspaces: ['workspace-1'],
-          ACLSearchParams: {},
-        });
-      });
-      it('should find permitted workspaces with filtered permission modes', async () => {
-        const { wrapper, scopedClientMock } = generateWorkspaceSavedObjectsClientWrapper();
-        await wrapper.find({
-          type: 'dashboard',
-          ACLSearchParams: {
-            permissionModes: ['read', 'library_read'],
-          },
-        });
-        expect(scopedClientMock.find).toHaveBeenCalledWith(
-          expect.objectContaining({
-            type: 'workspace',
-            ACLSearchParams: {
-              permissionModes: ['library_read'],
-              principals: { users: ['user-1'] },
-            },
-          })
-        );
-      });
-      it('should call client.find with arguments if not workspace type and no options.workspace', async () => {
-        const { wrapper, clientMock } = generateWorkspaceSavedObjectsClientWrapper();
-        await wrapper.find({
-          type: 'dashboard',
-        });
-        expect(clientMock.find).toHaveBeenCalledWith({
-          type: 'dashboard',
-          ACLSearchParams: {
-            permissionModes: ['read', 'write'],
-            principals: { users: ['user-1'] },
-          },
         });
       });
     });
@@ -711,6 +698,116 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
 
         await wrapper.deleteByWorkspace('workspace-1', {});
         expect(clientMock.deleteByWorkspace).toHaveBeenCalledWith('workspace-1', {});
+      });
+    });
+
+    describe('Dashboard admin', () => {
+      const {
+        wrapper,
+        clientMock,
+        permissionControlMock,
+        requestMock,
+      } = generateWorkspaceSavedObjectsClientWrapper(DASHBOARD_ADMIN);
+      expect(getWorkspaceState(requestMock)).toEqual({
+        isDashboardAdmin: true,
+      });
+      it('should bypass permission check for call client.delete', async () => {
+        const deleteArgs = ['dashboard', 'not-permitted-dashboard'] as const;
+        await wrapper.delete(...deleteArgs);
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
+        expect(clientMock.delete).toHaveBeenCalledWith(...deleteArgs);
+      });
+      it('should bypass permission check for call client.update', async () => {
+        const updateArgs = [
+          'dashboard',
+          'not-permitted-dashboard',
+          {
+            bar: 'for',
+          },
+        ] as const;
+        await wrapper.update(...updateArgs);
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
+        expect(clientMock.update).toHaveBeenCalledWith(...updateArgs);
+      });
+      it('should bypass permission check for call client.bulkUpdate', async () => {
+        const bulkUpdateArgs = [
+          { type: 'dashboard', id: 'not-permitted-dashboard', attributes: { bar: 'baz' } },
+        ];
+        await wrapper.bulkUpdate(bulkUpdateArgs);
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
+        expect(clientMock.bulkUpdate).toHaveBeenCalledWith(bulkUpdateArgs);
+      });
+      it('should bypass permission check for call client.bulkCreate', async () => {
+        const objectsToBulkCreate = [
+          { type: 'dashboard', id: 'not-permitted-dashboard', attributes: { bar: 'baz' } },
+        ];
+        await wrapper.bulkCreate(objectsToBulkCreate, {
+          overwrite: true,
+          workspaces: ['not-permitted-workspace'],
+        });
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
+        expect(clientMock.bulkCreate).toHaveBeenCalledWith(objectsToBulkCreate, {
+          overwrite: true,
+          workspaces: ['not-permitted-workspace'],
+        });
+      });
+      it('should bypass permission check for call client.create', async () => {
+        await wrapper.create(
+          'dashboard',
+          { foo: 'bar' },
+          {
+            id: 'not-permitted-dashboard',
+            overwrite: true,
+          }
+        );
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
+        expect(clientMock.create).toHaveBeenCalledWith(
+          'dashboard',
+          { foo: 'bar' },
+          {
+            id: 'not-permitted-dashboard',
+            overwrite: true,
+          }
+        );
+      });
+      it('should bypass permission check for call client.get and return result with arguments', async () => {
+        const getArgs = ['dashboard', 'not-permitted-dashboard'] as const;
+        const result = await wrapper.get(...getArgs);
+        expect(clientMock.get).toHaveBeenCalledWith(...getArgs);
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
+        expect(result.id).toBe('not-permitted-dashboard');
+      });
+      it('should bypass permission check for call client.bulkGet and return result with arguments', async () => {
+        const bulkGetArgs = [
+          {
+            type: 'dashboard',
+            id: 'foo',
+          },
+          {
+            type: 'dashboard',
+            id: 'not-permitted-dashboard',
+          },
+        ];
+        const result = await wrapper.bulkGet(bulkGetArgs);
+        expect(clientMock.bulkGet).toHaveBeenCalledWith(bulkGetArgs);
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
+        expect(result.saved_objects.length).toBe(2);
+      });
+      it('should bypass permission check for call client.find with arguments', async () => {
+        await wrapper.find({
+          type: 'dashboard',
+          workspaces: ['workspace-1', 'not-permitted-workspace'],
+        });
+        expect(clientMock.find).toHaveBeenCalledWith({
+          type: 'dashboard',
+          workspaces: ['workspace-1', 'not-permitted-workspace'],
+        });
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
+      });
+      it('should bypass permission check for call client.deleteByWorkspace', async () => {
+        await wrapper.deleteByWorkspace('not-permitted-workspace');
+        expect(clientMock.deleteByWorkspace).toHaveBeenCalledWith('not-permitted-workspace');
+        expect(permissionControlMock.validate).not.toHaveBeenCalled();
       });
     });
   });

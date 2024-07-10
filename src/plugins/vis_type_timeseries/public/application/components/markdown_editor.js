@@ -136,7 +136,7 @@ export class MarkdownEditor extends Component {
           />
         </div>
         <div className="tvbMarkdownEditor__variables">
-          <EuiText>
+          <EuiText size="s">
             <p>
               <FormattedMessage
                 id="visTypeTimeseries.markdownEditor.howToUseVariablesInMarkdownDescription"
@@ -196,7 +196,7 @@ export class MarkdownEditor extends Component {
 
           <EuiSpacer />
 
-          <EuiText>
+          <EuiText size="s">
             <p>
               <FormattedMessage
                 id="visTypeTimeseries.markdownEditor.howToAccessEntireTreeDescription"

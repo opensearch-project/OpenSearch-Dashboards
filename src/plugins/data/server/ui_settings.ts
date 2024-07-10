@@ -55,6 +55,21 @@ const requestPreferenceOptionLabels = {
   }),
 };
 
+const dataFrameHydrationStrategyOptionLabels = {
+  perSource: i18n.translate('data.advancedSettings.dataFrameHydrationStrategyPerSourceText', {
+    defaultMessage: 'On data source change',
+  }),
+  perQuery: i18n.translate('data.advancedSettings.dataFrameHydrationStrategyPerQueryText', {
+    defaultMessage: 'Per query',
+  }),
+  perResponse: i18n.translate('data.advancedSettings.dataFrameHydrationStrategyPerResponseText', {
+    defaultMessage: 'Per response',
+  }),
+  advanced: i18n.translate('data.advancedSettings.dataFrameHydrationStrategyAdvancedText', {
+    defaultMessage: 'Advanced',
+  }),
+};
+
 // We add the `en` key manually here, since that's not a real numeral locale, but the
 // default fallback in case the locale is not found.
 const numeralLanguageIds = [
@@ -689,6 +704,75 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           'Set this property to false to prevent the filter editor from suggesting values for fields.',
       }),
       schema: schema.boolean(),
+    },
+    [UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED]: {
+      name: i18n.translate('data.advancedSettings.query.enhancements.enableTitle', {
+        defaultMessage: 'Enable query enhancements',
+      }),
+      value: false,
+      description: i18n.translate('data.advancedSettings.query.enhancements.enableText', {
+        defaultMessage: `
+          <strong>Experimental</strong>:
+          Allows users to query data using enhancements where available. If disabled,
+          only querying and querying languages that are considered production-ready are available to the user.`,
+      }),
+      category: ['search'],
+      schema: schema.boolean(),
+    },
+    [UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY]: {
+      name: i18n.translate('data.advancedSettings.query.dataFrameHydrationStrategyTitle', {
+        defaultMessage: 'Data frame hydration strategy',
+      }),
+      value: 'perSource',
+      options: ['perSource', 'perQuery'],
+      optionLabels: dataFrameHydrationStrategyOptionLabels,
+      type: 'select',
+      description: i18n.translate('data.advancedSettings.dataFrameHydrationStrategyText', {
+        defaultMessage: `Allows you to set how often the data frame schema is updated.
+          <ul>
+            <li><strong>{perSource}:</strong> hydrates the schema when the data source changes.
+              For example, any time the index pattern is change the data frame schema is hydrated.</li>
+            <li><strong>{perQuery}:</strong> hydrates the schema per query to the data source.
+              Could be expensive, but ensures the schema of the data frame fits the result set.</li>
+            <li><strong>{perResponse}:</strong> hydrates the schema if the data source returns a schema.
+              <strong>Not Implemented</strong>.</li>
+            <li><strong>{advanced}:</strong> hydrates the schema in intervals. If the schema hasn't changed the interval increases.
+              If the schema has changed the interval resets. <strong>Not Implemented</strong>.</li>
+          </ul>
+          <strong>Experimental</strong>: Requires query enhancements enabled.`,
+        values: {
+          perSource: dataFrameHydrationStrategyOptionLabels.perSource,
+          perQuery: dataFrameHydrationStrategyOptionLabels.perQuery,
+          perResponse: dataFrameHydrationStrategyOptionLabels.perResponse,
+          advanced: dataFrameHydrationStrategyOptionLabels.advanced,
+        },
+      }),
+      category: ['search'],
+      schema: schema.string(),
+    },
+    [UI_SETTINGS.QUERY_DATA_SOURCE_READONLY]: {
+      name: i18n.translate('data.advancedSettings.query.dataSource.readOnlyTitle', {
+        defaultMessage: 'Read-only data source in query editor',
+      }),
+      value: true,
+      description: i18n.translate('data.advancedSettings.query.dataSource.readOnlyText', {
+        defaultMessage:
+          'When enabled, the search bar prevents modifying the data source in the query input. ' +
+          '<strong>Experimental</strong>: Requires query enhancements enabled.',
+      }),
+      category: ['search'],
+      schema: schema.boolean(),
+    },
+    [UI_SETTINGS.SEARCH_QUERY_LANGUAGE_BLOCKLIST]: {
+      name: i18n.translate('data.advancedSettings.searchQueryLanguageBlocklistTitle', {
+        defaultMessage: 'Additional query languages blocklist',
+      }),
+      value: ['none'],
+      description: i18n.translate('data.advancedSettings.searchQueryLanguageBlocklistText', {
+        defaultMessage: `Additional languages that are blocked from being used in the query editor. 
+         <strong>Note</strong>: DQL and Lucene will not be blocked even if set.`,
+      }),
+      schema: schema.arrayOf(schema.string()),
     },
   };
 }

@@ -51,13 +51,16 @@ import {
   SectionTypeServiceSetup,
 } from './services';
 import { ConfigSchema } from '../config';
-import { setServices } from './application/opensearch_dashboards_services';
+import {
+  HomeOpenSearchDashboardsServices,
+  setServices,
+} from './application/opensearch_dashboards_services';
 import { DataPublicPluginStart } from '../../data/public';
 import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
-import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
+import { PLUGIN_ID, HOME_APP_BASE_PATH, IMPORT_SAMPLE_DATA_APP_ID } from '../common/constants';
 import { DataSourcePluginStart } from '../../data_source/public';
 import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
 import { learnBasicsSection } from './application/components/homepage/sections/learn_basics';
@@ -93,42 +96,49 @@ export class HomePublicPlugin
     core: CoreSetup<HomePluginStartDependencies>,
     { urlForwarding, usageCollection }: HomePluginSetupDependencies
   ): HomePublicPluginSetup {
+    const setCommonService = async (
+      homeOpenSearchDashboardsServices?: Partial<HomeOpenSearchDashboardsServices>
+    ) => {
+      const trackUiMetric = usageCollection
+        ? usageCollection.reportUiStats.bind(usageCollection, 'OpenSearch_Dashboards_home')
+        : () => {};
+      const [
+        coreStart,
+        { telemetry, data, urlForwarding: urlForwardingStart, dataSource },
+      ] = await core.getStartServices();
+      setServices({
+        trackUiMetric,
+        opensearchDashboardsVersion: this.initializerContext.env.packageInfo.version,
+        http: coreStart.http,
+        toastNotifications: core.notifications.toasts,
+        banners: coreStart.overlays.banners,
+        docLinks: coreStart.docLinks,
+        savedObjectsClient: coreStart.savedObjects.client,
+        chrome: coreStart.chrome,
+        application: coreStart.application,
+        telemetry,
+        uiSettings: core.uiSettings,
+        addBasePath: core.http.basePath.prepend,
+        getBasePath: core.http.basePath.get,
+        indexPatternService: data.indexPatterns,
+        environmentService: this.environmentService,
+        urlForwarding: urlForwardingStart,
+        homeConfig: this.initializerContext.config.get(),
+        tutorialService: this.tutorialService,
+        featureCatalogue: this.featuresCatalogueRegistry,
+        injectedMetadata: coreStart.injectedMetadata,
+        dataSource,
+        sectionTypes: this.sectionTypeService,
+        ...homeOpenSearchDashboardsServices,
+      });
+    };
     core.application.register({
       id: PLUGIN_ID,
       title: 'Home',
       navLinkStatus: AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
-        const trackUiMetric = usageCollection
-          ? usageCollection.reportUiStats.bind(usageCollection, 'OpenSearch_Dashboards_home')
-          : () => {};
-        const [
-          coreStart,
-          { telemetry, data, urlForwarding: urlForwardingStart, dataSource },
-        ] = await core.getStartServices();
-        setServices({
-          trackUiMetric,
-          opensearchDashboardsVersion: this.initializerContext.env.packageInfo.version,
-          http: coreStart.http,
-          toastNotifications: core.notifications.toasts,
-          banners: coreStart.overlays.banners,
-          docLinks: coreStart.docLinks,
-          savedObjectsClient: coreStart.savedObjects.client,
-          chrome: coreStart.chrome,
-          application: coreStart.application,
-          telemetry,
-          uiSettings: core.uiSettings,
-          addBasePath: core.http.basePath.prepend,
-          getBasePath: core.http.basePath.get,
-          indexPatternService: data.indexPatterns,
-          environmentService: this.environmentService,
-          urlForwarding: urlForwardingStart,
-          homeConfig: this.initializerContext.config.get(),
-          tutorialService: this.tutorialService,
-          featureCatalogue: this.featuresCatalogueRegistry,
-          injectedMetadata: coreStart.injectedMetadata,
-          dataSource,
-          sectionTypes: this.sectionTypeService,
-        });
+        const [coreStart] = await core.getStartServices();
+        setCommonService();
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
         );
@@ -136,6 +146,26 @@ export class HomePublicPlugin
         return await renderApp(params.element, coreStart, params.history);
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+    });
+
+    // Register import sample data as a standalone app so that it is available inside workspace.
+    core.application.register({
+      id: IMPORT_SAMPLE_DATA_APP_ID,
+      title: i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
+        defaultMessage: 'Add sample data',
+      }),
+      navLinkStatus: AppNavLinkStatus.hidden,
+      mount: async (params: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
+        setCommonService();
+        coreStart.chrome.docTitle.change(
+          i18n.translate('home.tutorialDirectory.featureCatalogueTitle', {
+            defaultMessage: 'Add sample data',
+          })
+        );
+        const { renderImportSampleDataApp } = await import('./application');
+        return await renderImportSampleDataApp(params.element, coreStart);
+      },
     });
     urlForwarding.forwardApp('home', 'home');
 

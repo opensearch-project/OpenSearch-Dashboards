@@ -96,6 +96,7 @@ export const SavedQueryListItem = ({
   return (
     <Fragment>
       <EuiListGroupItem
+        size="s"
         className={classes}
         key={savedQuery.id}
         data-test-subj={`saved-query-list-item ${selectButtonDataTestSubj} ${

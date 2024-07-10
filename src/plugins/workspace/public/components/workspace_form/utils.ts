@@ -5,26 +5,17 @@
 
 import { i18n } from '@osd/i18n';
 
-import { PublicAppInfo } from '../../../../../core/public';
 import type { SavedObjectPermissions } from '../../../../../core/types';
 import { DEFAULT_SELECTED_FEATURES_IDS, WorkspacePermissionMode } from '../../../common/constants';
+import { isUseCaseFeatureConfig } from '../../utils';
 import {
   optionIdToWorkspacePermissionModesMap,
   PermissionModeId,
   WorkspacePermissionItemType,
 } from './constants';
 
-import {
-  WorkspaceFeature,
-  WorkspaceFeatureGroup,
-  WorkspaceFormErrors,
-  WorkspaceFormSubmitData,
-  WorkspacePermissionSetting,
-} from './types';
-
-export const isWorkspaceFeatureGroup = (
-  featureOrGroup: WorkspaceFeature | WorkspaceFeatureGroup
-): featureOrGroup is WorkspaceFeatureGroup => 'features' in featureOrGroup;
+import { WorkspaceFormErrors, WorkspaceFormSubmitData, WorkspacePermissionSetting } from './types';
+import { DataSource } from '../../../common/types';
 
 export const appendDefaultFeatureIds = (ids: string[]) => {
   // concat default checked ids and unique the result
@@ -51,56 +42,13 @@ export const getNumberOfErrors = (formErrors: WorkspaceFormErrors) => {
   if (formErrors.permissionSettings) {
     numberOfErrors += Object.keys(formErrors.permissionSettings).length;
   }
+  if (formErrors.selectedDataSources) {
+    numberOfErrors += Object.keys(formErrors.selectedDataSources).length;
+  }
+  if (formErrors.features) {
+    numberOfErrors += 1;
+  }
   return numberOfErrors;
-};
-
-export const convertApplicationsToFeaturesOrGroups = (
-  applications: Array<
-    Pick<PublicAppInfo, 'id' | 'title' | 'category' | 'navLinkStatus' | 'chromeless'>
-  >
-) => {
-  const UNDEFINED = 'undefined';
-
-  /**
-   *
-   * Convert applications to features map, the map use category label as
-   * map key and group all same category applications in one array after
-   * transfer application to feature.
-   *
-   **/
-  const categoryLabel2Features = applications.reduce<{
-    [key: string]: WorkspaceFeature[];
-  }>((previousValue, application) => {
-    const label = application.category?.label || UNDEFINED;
-
-    return {
-      ...previousValue,
-      [label]: [...(previousValue[label] || []), { id: application.id, name: application.title }],
-    };
-  }, {});
-
-  /**
-   *
-   * Iterate all keys of categoryLabel2Features map, convert map to features or groups array.
-   * Features with category label will be converted to feature groups. Features without "undefined"
-   * category label will be converted to single features. Then append them to the result array.
-   *
-   **/
-  return Object.keys(categoryLabel2Features).reduce<
-    Array<WorkspaceFeature | WorkspaceFeatureGroup>
-  >((previousValue, categoryLabel) => {
-    const features = categoryLabel2Features[categoryLabel];
-    if (categoryLabel === UNDEFINED) {
-      return [...previousValue, ...features];
-    }
-    return [
-      ...previousValue,
-      {
-        name: categoryLabel,
-        features,
-      },
-    ];
-  }, []);
 };
 
 export const isUserOrGroupPermissionSettingDuplicated = (
@@ -235,6 +183,11 @@ export const convertPermissionsToPermissionSettings = (permissions: SavedObjectP
   return finalPermissionSettings;
 };
 
+export const isSelectedDataSourcesDuplicated = (
+  selectedDataSources: DataSource[],
+  row: DataSource
+) => selectedDataSources.some((ds) => ds.id === row.id);
+
 export const validateWorkspaceForm = (
   formData: Omit<Partial<WorkspaceFormSubmitData>, 'permissionSettings'> & {
     permissionSettings?: Array<
@@ -243,7 +196,7 @@ export const validateWorkspaceForm = (
   }
 ) => {
   const formErrors: WorkspaceFormErrors = {};
-  const { name, description, permissionSettings } = formData;
+  const { name, permissionSettings, features, selectedDataSources } = formData;
   if (name) {
     if (!isValidFormTextInput(name)) {
       formErrors.name = i18n.translate('workspace.form.detail.name.invalid', {
@@ -255,9 +208,9 @@ export const validateWorkspaceForm = (
       defaultMessage: "Name can't be empty.",
     });
   }
-  if (description && !isValidFormTextInput(description)) {
-    formErrors.description = i18n.translate('workspace.form.detail.description.invalid', {
-      defaultMessage: 'Invalid workspace description',
+  if (!features || !features.some((featureConfig) => isUseCaseFeatureConfig(featureConfig))) {
+    formErrors.features = i18n.translate('workspace.form.features.empty', {
+      defaultMessage: 'Use case is required. Select a use case.',
     });
   }
   if (permissionSettings) {
@@ -308,6 +261,24 @@ export const validateWorkspaceForm = (
     }
     if (Object.keys(permissionSettingsErrors).length > 0) {
       formErrors.permissionSettings = permissionSettingsErrors;
+    }
+  }
+  if (selectedDataSources) {
+    const dataSourcesErrors: { [key: number]: string } = {};
+    for (let i = 0; i < selectedDataSources.length; i++) {
+      const row = selectedDataSources[i];
+      if (!row.id) {
+        dataSourcesErrors[i] = i18n.translate('workspace.form.dataSource.invalid', {
+          defaultMessage: 'Invalid data source',
+        });
+      } else if (isSelectedDataSourcesDuplicated(selectedDataSources.slice(0, i), row)) {
+        dataSourcesErrors[i] = i18n.translate('workspace.form.permission.invalidate.group', {
+          defaultMessage: 'Duplicate data sources',
+        });
+      }
+    }
+    if (Object.keys(dataSourcesErrors).length > 0) {
+      formErrors.selectedDataSources = dataSourcesErrors;
     }
   }
   return formErrors;

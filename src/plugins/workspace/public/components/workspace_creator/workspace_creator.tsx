@@ -16,6 +16,7 @@ import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
+import { DataSource } from '../../../common/types';
 
 export interface WorkspaceCreatorProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
@@ -23,7 +24,7 @@ export interface WorkspaceCreatorProps {
 
 export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const {
-    services: { application, notifications, http, workspaceClient },
+    services: { application, notifications, http, workspaceClient, savedObjects },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
   const workspaceConfigurableApps = useObservable(
     props.workspaceConfigurableApps$ ?? of(undefined)
@@ -34,11 +35,14 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     async (data: WorkspaceFormSubmitData) => {
       let result;
       try {
-        const { permissionSettings, ...attributes } = data;
-        result = await workspaceClient.create(
-          attributes,
-          convertPermissionSettingsToPermissions(permissionSettings)
-        );
+        const { permissionSettings, selectedDataSources, ...attributes } = data;
+        const selectedDataSourceIds = (selectedDataSources ?? []).map((ds: DataSource) => {
+          return ds.id;
+        });
+        result = await workspaceClient.create(attributes, {
+          dataSources: selectedDataSourceIds,
+          permissions: convertPermissionSettingsToPermissions(permissionSettings),
+        });
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.create.success', {
@@ -78,7 +82,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   return (
     <EuiPage paddingSize="none">
       <EuiPageBody>
-        <EuiPageHeader restrictWidth pageTitle="Create Workspace" />
+        <EuiPageHeader restrictWidth pageTitle="Create a workspace" />
         <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"
@@ -92,9 +96,10 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
            **/
           style={{ width: '100%', maxWidth: 1000 }}
         >
-          {application && (
+          {application && savedObjects && (
             <WorkspaceForm
               application={application}
+              savedObjects={savedObjects}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
               workspaceConfigurableApps={workspaceConfigurableApps}

@@ -60,4 +60,8 @@ export const UI_SETTINGS = {
   INDEXPATTERN_PLACEHOLDER: 'indexPattern:placeholder',
   FILTERS_PINNED_BY_DEFAULT: 'filters:pinnedByDefault',
   FILTERS_EDITOR_SUGGEST_VALUES: 'filterEditor:suggestValues',
+  QUERY_ENHANCEMENTS_ENABLED: 'query:enhancements:enabled',
+  QUERY_DATAFRAME_HYDRATION_STRATEGY: 'query:dataframe:hydrationStrategy',
+  QUERY_DATA_SOURCE_READONLY: 'query:dataSource:readOnly',
+  SEARCH_QUERY_LANGUAGE_BLOCKLIST: 'search:queryLanguageBlocklist',
 } as const;

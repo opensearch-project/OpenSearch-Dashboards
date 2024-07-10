@@ -3,105 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AppNavLinkStatus, DEFAULT_APP_CATEGORIES } from '../../../../../core/public';
 import {
   validateWorkspaceForm,
-  convertApplicationsToFeaturesOrGroups,
   convertPermissionSettingsToPermissions,
   convertPermissionsToPermissionSettings,
+  getNumberOfErrors,
 } from './utils';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import { WorkspacePermissionItemType } from './constants';
-
-describe('convertApplicationsToFeaturesOrGroups', () => {
-  it('should group same category applications in same feature group', () => {
-    expect(
-      convertApplicationsToFeaturesOrGroups([
-        {
-          id: 'foo',
-          title: 'Foo',
-          navLinkStatus: AppNavLinkStatus.visible,
-          category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-        },
-        {
-          id: 'bar',
-          title: 'Bar',
-          navLinkStatus: AppNavLinkStatus.visible,
-          category: DEFAULT_APP_CATEGORIES.opensearchDashboards,
-        },
-        {
-          id: 'baz',
-          title: 'Baz',
-          navLinkStatus: AppNavLinkStatus.visible,
-          category: DEFAULT_APP_CATEGORIES.observability,
-        },
-      ])
-    ).toEqual([
-      {
-        name: 'OpenSearch Dashboards',
-        features: [
-          {
-            id: 'foo',
-            name: 'Foo',
-          },
-          {
-            id: 'bar',
-            name: 'Bar',
-          },
-        ],
-      },
-      {
-        name: 'Observability',
-        features: [
-          {
-            id: 'baz',
-            name: 'Baz',
-          },
-        ],
-      },
-    ]);
-  });
-  it('should return features if application without category', () => {
-    expect(
-      convertApplicationsToFeaturesOrGroups([
-        {
-          id: 'foo',
-          title: 'Foo',
-          navLinkStatus: AppNavLinkStatus.visible,
-        },
-        {
-          id: 'baz',
-          title: 'Baz',
-          navLinkStatus: AppNavLinkStatus.visible,
-          category: DEFAULT_APP_CATEGORIES.observability,
-        },
-        {
-          id: 'bar',
-          title: 'Bar',
-          navLinkStatus: AppNavLinkStatus.visible,
-        },
-      ])
-    ).toEqual([
-      {
-        id: 'foo',
-        name: 'Foo',
-      },
-      {
-        id: 'bar',
-        name: 'Bar',
-      },
-      {
-        name: 'Observability',
-        features: [
-          {
-            id: 'baz',
-            name: 'Baz',
-          },
-        ],
-      },
-    ]);
-  });
-});
 
 describe('convertPermissionSettingsToPermissions', () => {
   it('should return undefined if permission items not provided', () => {
@@ -250,10 +159,8 @@ describe('validateWorkspaceForm', () => {
   it('should return error if name is invalid', () => {
     expect(validateWorkspaceForm({ name: '~' }).name).toEqual('Invalid workspace name');
   });
-  it('should return error if description is invalid', () => {
-    expect(validateWorkspaceForm({ description: '~' }).description).toEqual(
-      'Invalid workspace description'
-    );
+  it('should return error if use case is empty', () => {
+    expect(validateWorkspaceForm({}).features).toEqual('Use case is required. Select a use case.');
   });
   it('should return error if permission setting type is invalid', () => {
     expect(
@@ -355,7 +262,53 @@ describe('validateWorkspaceForm', () => {
             group: 'foo',
           },
         ],
+        features: ['use-case-observability'],
       })
     ).toEqual({});
+  });
+
+  it('should return error if selected data source id is null', () => {
+    expect(
+      validateWorkspaceForm({
+        name: 'test',
+        selectedDataSources: [
+          {
+            id: '',
+            title: 'title',
+          },
+        ],
+      }).selectedDataSources
+    ).toEqual({ 0: 'Invalid data source' });
+  });
+
+  it('should return error if selected data source id is duplicated', () => {
+    expect(
+      validateWorkspaceForm({
+        name: 'test',
+        selectedDataSources: [
+          {
+            id: 'id',
+            title: 'title1',
+          },
+          {
+            id: 'id',
+            title: 'title2',
+          },
+        ],
+      }).selectedDataSources
+    ).toEqual({ '1': 'Duplicate data sources' });
+  });
+});
+
+describe('getNumberOfErrors', () => {
+  it('should calculate the error number of data sources form', () => {
+    expect(
+      getNumberOfErrors({
+        selectedDataSources: {
+          '0': 'Invalid data source',
+        },
+      })
+    ).toEqual(1);
+    expect(getNumberOfErrors({})).toEqual(0);
   });
 });

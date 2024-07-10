@@ -30,7 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { toMountPoint } from '../../../../opensearch_dashboards_react/public';
@@ -62,7 +62,9 @@ export const onUnsupportedTimePattern = (
     title: warningTitle,
     text: toMountPoint(
       <div>
-        <p>{warningText}</p>
+        <EuiText size="s">
+          <p>{warningText}</p>
+        </EuiText>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton

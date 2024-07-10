@@ -180,6 +180,10 @@ const DefaultDiscoverTableUI = ({
     if (tableElement) {
       // Load the first batch of rows and adjust the columns to the contents
       tableElement.style.tableLayout = 'auto';
+      // To prevent influencing the auto-sizing, unset the widths from a previous render
+      tableElement.querySelectorAll('thead > tr > th:not(:first-child)').forEach((th) => {
+        (th as HTMLTableCellElement).style.width = 'unset';
+      });
 
       tableLayoutRequestFrameRef.current = requestAnimationFrame(() => {
         if (tableElement) {
@@ -188,14 +192,11 @@ const DefaultDiscoverTableUI = ({
            *   1) prevent columns from changing size when more rows are added, and
            *   2) speed of rendering time of subsequently added rows.
            *
-           * First cell is skipped because it has a dimention set already, and the last cell is skipped to allow it to
-           * grow as much as the table needs.
+           * First cell is skipped because it has a fixed dimension set already.
            */
-          tableElement
-            .querySelectorAll('thead > tr > th:not(:first-child):not(:last-child)')
-            .forEach((th) => {
-              (th as HTMLTableCellElement).style.width = th.getBoundingClientRect().width + 'px';
-            });
+          tableElement.querySelectorAll('thead > tr > th:not(:first-child)').forEach((th) => {
+            (th as HTMLTableCellElement).style.width = th.getBoundingClientRect().width + 'px';
+          });
 
           tableElement.style.tableLayout = 'fixed';
         }

@@ -21,6 +21,7 @@
     padding: calc($euiSizeS - ($euiSizeXS / 2)) $euiSizeS $euiSizeS $euiSizeS;
     background-color: $euiColorLightShade;
     border-radius: $euiBorderRadius;
+    overflow-x: hidden;
   }
 
   &__field {

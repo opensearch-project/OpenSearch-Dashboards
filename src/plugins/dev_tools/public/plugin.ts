@@ -138,19 +138,22 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
     if (this.getSortedDevTools().length === 0) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     } else {
-      // Register right navigation for dev tool only when console is enabled.
-      core.chrome.navControls.registerRight({
-        order: RightNavigationOrder.DevTool,
-        mount: toMountPoint(
-          React.createElement(RightNavigationButton, {
-            appId: this.id,
-            iconType: 'consoleApp',
-            title: this.title,
-            application: core.application,
-            http: core.http,
-          })
-        ),
-      });
+      // Register right navigation for dev tool only when console and futureNavigation are both enabled.
+      const topRightNavigationEnabled = core.application.capabilities?.dev_tools?.futureNavigation;
+      if (topRightNavigationEnabled) {
+        core.chrome.navControls.registerRight({
+          order: RightNavigationOrder.DevTool,
+          mount: toMountPoint(
+            React.createElement(RightNavigationButton, {
+              appId: this.id,
+              iconType: 'consoleApp',
+              title: this.title,
+              application: core.application,
+              http: core.http,
+            })
+          ),
+        });
+      }
     }
   }
 

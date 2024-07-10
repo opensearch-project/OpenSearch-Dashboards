@@ -20,6 +20,10 @@ import {
   getDefaultDataSource,
   handleDataSourceFetchError,
   handleNoAvailableDataSourceError,
+  getDataSourceSelection,
+  setDataSourceSelection,
+  getDefaultDataSourceId,
+  getDefaultDataSourceId$,
 } from './utils';
 import { coreMock, notificationServiceMock } from '../../../../core/public/mocks';
 import {
@@ -34,7 +38,8 @@ import {
   getSingleDataSourceResponse,
   getDataSource,
   getDataSourceOptions,
-  getDataSourceByIdWithError,
+  getDataSourceByIdWithNotFoundError,
+  getDataSourceByIdWithNetworkError,
 } from '../mocks';
 import {
   AuthType,
@@ -42,10 +47,22 @@ import {
   sigV4AuthMethod,
   usernamePasswordAuthMethod,
 } from '../types';
-import { HttpStart, SavedObject } from 'opensearch-dashboards/public';
+import { HttpStart, IToasts, SavedObject } from 'opensearch-dashboards/public';
+import { i18n } from '@osd/i18n';
 import { AuthenticationMethod, AuthenticationMethodRegistry } from '../auth_registry';
 import { deepEqual } from 'assert';
 import { DataSourceAttributes } from 'src/plugins/data_source/common/data_sources';
+import {
+  ADD_COMPATIBLE_DATASOURCES_MESSAGE,
+  CONNECT_DATASOURCES_MESSAGE,
+  NO_COMPATIBLE_DATASOURCES_MESSAGE,
+  NO_DATASOURCES_CONNECTED_MESSAGE,
+} from './constants';
+import {
+  DataSourceSelectionService,
+  defaultDataSourceSelection,
+} from '../service/data_source_selection_service';
+import { Observable, of } from 'rxjs';
 
 const { savedObjects } = coreMock.createStart();
 const { uiSettings } = coreMock.createStart();
@@ -84,13 +101,40 @@ describe('DataSourceManagement: Utils.ts', () => {
   });
 
   describe('Handle no available data source error', () => {
-    const { toasts } = notificationServiceMock.createStartContract();
+    let toasts: IToasts;
+    const noDataSourcesConnectedMessage = `${NO_DATASOURCES_CONNECTED_MESSAGE} ${CONNECT_DATASOURCES_MESSAGE}`;
+    const noCompatibleDataSourcesMessage = `${NO_COMPATIBLE_DATASOURCES_MESSAGE} ${ADD_COMPATIBLE_DATASOURCES_MESSAGE}`;
 
-    test('should  send warning when data source is not available', () => {
-      const changeState = jest.fn();
-      handleNoAvailableDataSourceError(changeState, toasts);
-      expect(toasts.add).toBeCalledTimes(1);
+    beforeEach(() => {
+      toasts = notificationServiceMock.createStartContract().toasts;
     });
+
+    test.each([
+      {
+        incompatibleDataSourcesExist: false,
+        defaultMessage: noDataSourcesConnectedMessage,
+      },
+      {
+        incompatibleDataSourcesExist: true,
+        defaultMessage: noCompatibleDataSourcesMessage,
+      },
+    ])(
+      'should send warning when data source is not available',
+      ({ incompatibleDataSourcesExist, defaultMessage }) => {
+        const changeState = jest.fn();
+        handleNoAvailableDataSourceError({
+          changeState,
+          notifications: toasts,
+          incompatibleDataSourcesExist,
+        });
+        expect(toasts.add).toBeCalledTimes(1);
+        expect(toasts.add).toBeCalledWith(
+          expect.objectContaining({
+            title: i18n.translate('dataSource.noAvailableDataSourceError', { defaultMessage }),
+          })
+        );
+      }
+    );
   });
 
   describe('Get data source by ID', () => {
@@ -123,12 +167,28 @@ describe('DataSourceManagement: Utils.ts', () => {
         expect(e).toBeTruthy();
       }
     });
-    test('failure: gets error when response contains error', async () => {
+    test('failure: gets error when response contains not found error', async () => {
       try {
-        mockResponseForSavedObjectsCalls(savedObjects.client, 'get', getDataSourceByIdWithError);
+        mockResponseForSavedObjectsCalls(
+          savedObjects.client,
+          'get',
+          getDataSourceByIdWithNotFoundError
+        );
         await getDataSourceById('alpha-test', savedObjects.client);
       } catch (e) {
-        expect(e).toBeTruthy();
+        expect(e.statusCode).toBe(404);
+      }
+    });
+    test('failure: gets error when response contains other error', async () => {
+      try {
+        mockResponseForSavedObjectsCalls(
+          savedObjects.client,
+          'get',
+          getDataSourceByIdWithNetworkError
+        );
+        await getDataSourceById('alpha-test', savedObjects.client);
+      } catch (e) {
+        expect(e.statusCode).toBe(500);
       }
     });
   });
@@ -322,6 +382,12 @@ describe('DataSourceManagement: Utils.ts', () => {
     });
     test('should set default datasource when it does not have default datasource ', async () => {
       mockUiSettingsCalls(uiSettings, 'get', null);
+      mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
+      await handleSetDefaultDatasource(savedObjects.client, uiSettings);
+      expect(uiSettings.set).toHaveBeenCalled();
+    });
+    test('should set default datasource when returned default datasource id is empty string', async () => {
+      mockUiSettingsCalls(uiSettings, 'get', '');
       mockResponseForSavedObjectsCalls(savedObjects.client, 'find', getDataSourcesResponse);
       await handleSetDefaultDatasource(savedObjects.client, uiSettings);
       expect(uiSettings.set).toHaveBeenCalled();
@@ -602,6 +668,49 @@ describe('DataSourceManagement: Utils.ts', () => {
       mockUiSettingsCalls(uiSettings, 'get', null);
       const result = getDefaultDataSource(getDataSourceOptions, LocalCluster, uiSettings, true);
       expect(result).toEqual([{ id: '1', label: 'DataSource 1' }]);
+    });
+  });
+
+  describe('getDataSourceSelection and setDataSourceSelection', () => {
+    it('should not throw error and return default fallback dataSourceSelection  if value is not set', () => {
+      const result = getDataSourceSelection();
+      expect(result).toEqual(defaultDataSourceSelection);
+    });
+
+    it('should return value normally if value is set', () => {
+      const dataSourceSelection = new DataSourceSelectionService();
+      setDataSourceSelection(dataSourceSelection);
+      const result = getDataSourceSelection();
+      expect(result).toEqual(dataSourceSelection);
+    });
+  });
+  describe('getDefaultDataSourceId', () => {
+    it('should return null if uiSettings is not passed', () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'id-1');
+      const result = getDefaultDataSourceId();
+      expect(result).toEqual(null);
+    });
+
+    it('should return string value normally', () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'id-1');
+      const result = getDefaultDataSourceId(uiSettings);
+      expect(result).toEqual('id-1');
+    });
+  });
+
+  describe('getDefaultDataSourceId$', () => {
+    it('should return null if uiSettings is not passed', () => {
+      mockUiSettingsCalls(uiSettings, 'get', 'id-1');
+      const result = getDefaultDataSourceId$();
+      expect(result).toEqual(null);
+    });
+
+    it('should return observable value normally', () => {
+      const id$ = of('id-1');
+      mockUiSettingsCalls(uiSettings, 'get$', id$);
+      const result$ = getDefaultDataSourceId$(uiSettings);
+      expect(result$).toBeInstanceOf(Observable);
+      expect(result$).toEqual(id$);
     });
   });
 });

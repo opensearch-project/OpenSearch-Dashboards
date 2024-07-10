@@ -64,7 +64,6 @@ import {
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
 import { WorkspaceObject } from 'opensearch-dashboards/public';
-import { PUBLIC_WORKSPACE_NAME, PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
 import { TableProps } from './components/table';
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
@@ -413,10 +412,17 @@ describe('SavedObjectsTable', () => {
     });
 
     it('should export all, accounting for the current workspace criteria', async () => {
-      const component = shallowRender();
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      const component = shallowRender({ workspaces });
 
       component.instance().onQueryChange({
-        query: Query.parse(`test workspaces:("${PUBLIC_WORKSPACE_NAME}")`),
+        query: Query.parse(`test workspaces:("foo")`),
       });
 
       // Ensure all promises resolve
@@ -435,7 +441,7 @@ describe('SavedObjectsTable', () => {
         allowedTypes,
         'test*',
         true,
-        [PUBLIC_WORKSPACE_ID]
+        ['workspace1']
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -596,6 +602,9 @@ describe('SavedObjectsTable', () => {
 
       // Set some as selected
       component.instance().onSelectionChanged(mockSelectedSavedObjects);
+      await component.instance().onDelete();
+      component.update();
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
 
       await component.instance().delete();
 
@@ -612,6 +621,53 @@ describe('SavedObjectsTable', () => {
         { force: true }
       );
       expect(component.state('selectedSavedObjects').length).toBe(0);
+      expect(notifications.toasts.addDanger).not.toHaveBeenCalled();
+      expect(component.state('isDeleting')).toBe(false);
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(false);
+    });
+
+    it('should show error toast when failing to delete saved objects', async () => {
+      const mockSelectedSavedObjects = [
+        { id: '1', type: 'index-pattern' },
+      ] as SavedObjectWithMetadata[];
+
+      const mockSavedObjects = mockSelectedSavedObjects.map((obj) => ({
+        id: obj.id,
+        type: obj.type,
+        source: {},
+      }));
+
+      const mockSavedObjectsClient = {
+        ...defaultProps.savedObjectsClient,
+        bulkGet: jest.fn().mockImplementation(() => ({
+          savedObjects: mockSavedObjects,
+        })),
+        delete: jest.fn().mockImplementation(() => {
+          throw new Error('Unable to delete saved objects');
+        }),
+      };
+
+      const component = shallowRender({ savedObjectsClient: mockSavedObjectsClient });
+
+      // Ensure all promises resolve
+      await new Promise((resolve) => process.nextTick(resolve));
+      // Ensure the state changes are reflected
+      component.update();
+
+      // Set some as selected
+      component.instance().onSelectionChanged(mockSelectedSavedObjects);
+      await component.instance().onDelete();
+      component.update();
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
+      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+
+      await component.instance().delete();
+      component.update();
+      expect(notifications.toasts.addDanger).toHaveBeenCalled();
+      // If user fail to delete the saved objects, the delete modal will continue to display
+      expect(component.state('isShowingDeleteConfirmModal')).toBe(true);
+      expect(component.find('EuiConfirmModal')).toMatchSnapshot();
+      expect(component.state('isDeleting')).toBe(false);
     });
   });
 
@@ -658,10 +714,9 @@ describe('SavedObjectsTable', () => {
       expect(filters.length).toBe(2);
       expect(filters[0].field).toBe('type');
       expect(filters[1].field).toBe('workspaces');
-      expect(filters[1].options.length).toBe(3);
+      expect(filters[1].options.length).toBe(2);
       expect(filters[1].options[0].value).toBe('foo');
       expect(filters[1].options[1].value).toBe('bar');
-      expect(filters[1].options[2].value).toBe(PUBLIC_WORKSPACE_NAME);
     });
 
     it('workspace filter only include current workspaces when in a workspace', async () => {
@@ -797,7 +852,7 @@ describe('SavedObjectsTable', () => {
         expect(findObjectsMock).toBeCalledWith(
           http,
           expect.objectContaining({
-            workspaces: expect.arrayContaining(['workspace1', 'workspace2', PUBLIC_WORKSPACE_ID]),
+            workspaces: expect.arrayContaining(['workspace1', 'workspace2']),
           })
         );
       });

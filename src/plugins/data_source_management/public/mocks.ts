@@ -267,6 +267,22 @@ export const mockDataSourceAttributesWithAuth = {
   },
 };
 
+export const mockDataSourceAttributesWithSigV4Auth = {
+  id: 'test',
+  title: 'create-test-ds',
+  description: 'jest testing',
+  endpoint: 'https://test.com',
+  auth: {
+    type: AuthType.SigV4,
+    credentials: {
+      accessKey: 'test123',
+      secretKey: 'test123',
+      region: 'us-east-1',
+      service: 'es',
+    },
+  },
+};
+
 export const mockDataSourceAttributesWithNoAuth = {
   id: 'test123',
   title: 'create-test-ds123',
@@ -315,12 +331,22 @@ export const getDataSourceByIdWithoutCredential = {
   references: [],
 };
 
-export const getDataSourceByIdWithError = {
+export const getDataSourceByIdWithNotFoundError = {
   attributes: {
     ...getDataSourceByIdWithCredential.attributes,
     Error: {
       statusCode: 404,
       errorMessage: 'Unable to find data source',
+    },
+  },
+  references: [],
+};
+export const getDataSourceByIdWithNetworkError = {
+  attributes: {
+    ...getDataSourceByIdWithCredential.attributes,
+    Error: {
+      statusCode: 500,
+      errorMessage: 'Internal server error',
     },
   },
   references: [],
@@ -345,7 +371,7 @@ export const mockErrorResponseForSavedObjectsCalls = (
 
 export const mockUiSettingsCalls = (
   uiSettings: IUiSettingsClient,
-  uiSettingsMethodName: 'get' | 'set',
+  uiSettingsMethodName: 'get' | 'set' | 'get$',
   response: any
 ) => {
   (uiSettings[uiSettingsMethodName] as jest.Mock).mockReturnValue(response);

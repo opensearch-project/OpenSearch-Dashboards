@@ -169,6 +169,39 @@ const getVegaMDSVisualizationObj = (id: string, dataSourceId: string) => ({
     },
   ],
 });
+
+const getTimelineVisualizationObj = (id: string, dataSourceId: string) => ({
+  type: 'visualization',
+  id: dataSourceId ? `${dataSourceId}_${id}` : id,
+  attributes: {
+    title: 'some-other-title',
+    visState:
+      '{"title":"some-other-title","type":"timelion","params":{"expression":".es(index=old-datasource-title, timefield=@timestamp)"},"aggs":[]}',
+  },
+  references: [],
+});
+
+const getTimelineVisualizationObjWithMultipleQueries = (id: string, dataSourceId: string) => ({
+  type: 'visualization',
+  id: dataSourceId ? `${dataSourceId}_${id}` : id,
+  attributes: {
+    title: 'some-other-title',
+    visState:
+      '{"title":"some-other-title","type":"timelion","params":{"expression":".es(index=old-datasource-title, timefield=@timestamp, data_source_name=\\"aos 211\\"), .elasticsearch(index=old-datasource-title, timefield=@timestamp)"},"aggs":[]}',
+  },
+  references: [],
+});
+
+const getTimelineVisualizationObjWithDataSourceName = (id: string, dataSourceId: string) => ({
+  type: 'visualization',
+  id: dataSourceId ? `${dataSourceId}_${id}` : id,
+  attributes: {
+    title: 'some-other-title',
+    visState:
+      '{"title":"some-other-title","type":"timelion","params":{"expression":".es(index=old-datasource-title, timefield=@timestamp, data_source_name=ds1)"},"aggs":[]}',
+  },
+  references: [],
+});
 // non-multi-namespace types shouldn't have origin IDs, but we include test cases to ensure it's handled gracefully
 // non-multi-namespace types by definition cannot result in an unresolvable conflict, so we don't include test cases for those
 const importId3 = 'id-foo';
@@ -571,7 +604,7 @@ describe('#createSavedObjects', () => {
     expect(results).toEqual(expectedResultsWithDataSource);
   };
 
-  const testVegaVisualizationsWithDataSources = async (params: {
+  const testVegaTimelineVisualizationsWithDataSources = async (params: {
     objects: SavedObject[];
     expectedFilteredObjects: Array<Record<string, unknown>>;
     dataSourceId?: string;
@@ -673,7 +706,7 @@ describe('#createSavedObjects', () => {
           ],
         },
       ];
-      await testVegaVisualizationsWithDataSources({
+      await testVegaTimelineVisualizationsWithDataSources({
         objects,
         expectedFilteredObjects,
         dataSourceId: 'some-datasource-id',
@@ -699,7 +732,82 @@ describe('#createSavedObjects', () => {
           },
         },
       ];
-      await testVegaVisualizationsWithDataSources({
+      await testVegaTimelineVisualizationsWithDataSources({
+        objects,
+        expectedFilteredObjects,
+        dataSourceId: 'some-datasource-id',
+        dataSourceTitle: 'dataSourceName',
+      });
+    });
+  });
+
+  describe('with a data source for timeline saved objects', () => {
+    test('can attach a data source name to the timeline expression', async () => {
+      const objects = [getTimelineVisualizationObj('some-timeline-id', 'some-datasource-id')];
+      const expectedObject = getTimelineVisualizationObj('some-timeline-id', 'some-datasource-id');
+      const expectedFilteredObjects = [
+        {
+          ...expectedObject,
+          attributes: {
+            title: 'some-other-title_dataSourceName',
+            visState:
+              '{"title":"some-other-title","type":"timelion","params":{"expression":".es(index=old-datasource-title, timefield=@timestamp, data_source_name=\\"dataSourceName\\")"},"aggs":[]}',
+          },
+        },
+      ];
+      await testVegaTimelineVisualizationsWithDataSources({
+        objects,
+        expectedFilteredObjects,
+        dataSourceId: 'some-datasource-id',
+        dataSourceTitle: 'dataSourceName',
+      });
+    });
+
+    test('will not update the data source name in the timeline expression if no local cluster queries', async () => {
+      const objects = [
+        getTimelineVisualizationObjWithDataSourceName('some-timeline-id', 'old-datasource-id'),
+      ];
+      const expectedObject = getTimelineVisualizationObjWithDataSourceName(
+        'some-timeline-id',
+        'old-datasource-id'
+      );
+      const expectedFilteredObjects = [
+        {
+          ...expectedObject,
+          attributes: {
+            title: 'some-other-title_dataSourceName',
+            visState:
+              '{"title":"some-other-title","type":"timelion","params":{"expression":".es(index=old-datasource-title, timefield=@timestamp, data_source_name=ds1)"},"aggs":[]}',
+          },
+        },
+      ];
+      await testVegaTimelineVisualizationsWithDataSources({
+        objects,
+        expectedFilteredObjects,
+        dataSourceId: 'some-datasource-id',
+        dataSourceTitle: 'dataSourceName',
+      });
+    });
+
+    test('When muliple opensearch query exists in expression, we can add data source name to the queries that missing data source name.', async () => {
+      const objects = [
+        getTimelineVisualizationObjWithMultipleQueries('some-timeline-id', 'some-datasource-id'),
+      ];
+      const expectedObject = getTimelineVisualizationObjWithMultipleQueries(
+        'some-timeline-id',
+        'some-datasource-id'
+      );
+      const expectedFilteredObjects = [
+        {
+          ...expectedObject,
+          attributes: {
+            title: 'some-other-title_dataSourceName',
+            visState:
+              '{"title":"some-other-title","type":"timelion","params":{"expression":".es(index=old-datasource-title, timefield=@timestamp, data_source_name=\\"aos 211\\"), .elasticsearch(index=old-datasource-title, timefield=@timestamp, data_source_name=\\"dataSourceName\\")"},"aggs":[]}',
+          },
+        },
+      ];
+      await testVegaTimelineVisualizationsWithDataSources({
         objects,
         expectedFilteredObjects,
         dataSourceId: 'some-datasource-id',

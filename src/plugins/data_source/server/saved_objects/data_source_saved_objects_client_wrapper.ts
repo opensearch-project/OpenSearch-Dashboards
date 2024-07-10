@@ -4,7 +4,6 @@
  */
 
 import {
-  OpenSearchClient,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkResponse,
   SavedObjectsBulkUpdateObject,
@@ -27,9 +26,6 @@ import {
 import { EncryptionContext, CryptographyServiceSetup } from '../cryptography_service';
 import { isValidURL } from '../util/endpoint_validator';
 import { IAuthenticationMethodRegistry } from '../auth_registry';
-import { DataSourceServiceSetup } from '../data_source_service';
-import { CustomApiSchemaRegistry } from '../schema_registry';
-import { DataSourceConnectionValidator } from '../routes/data_source_connection_validator';
 import { DATA_SOURCE_TITLE_LENGTH_LIMIT } from '../util/constants';
 
 /**
@@ -144,11 +140,9 @@ export class DataSourceSavedObjectsClientWrapper {
   };
 
   constructor(
-    private dataSourcesService: DataSourceServiceSetup,
     private cryptography: CryptographyServiceSetup,
     private logger: Logger,
     private authRegistryPromise: Promise<IAuthenticationMethodRegistry>,
-    private customApiSchemaRegistryPromise: Promise<CustomApiSchemaRegistry>,
     private endpointBlockedIps?: string[]
   ) {}
 
@@ -259,10 +253,17 @@ export class DataSourceSavedObjectsClientWrapper {
 
   private async validateAttributes<T = unknown>(attributes: T) {
     const { title, endpoint, auth } = attributes;
-
     this.validateTitle(title);
-    await this.validateEndpoint(endpoint, attributes as DataSourceAttributes);
+    this.validateEndpoint(endpoint);
     await this.validateAuth(auth);
+  }
+
+  private validateEndpoint(endpoint: string) {
+    if (!isValidURL(endpoint, this.endpointBlockedIps)) {
+      throw SavedObjectsErrorHelpers.createBadRequestError(
+        '"endpoint" attribute is not valid or allowed'
+      );
+    }
   }
 
   private validateTitle(title: string) {
@@ -275,31 +276,6 @@ export class DataSourceSavedObjectsClientWrapper {
     if (title.length > DATA_SOURCE_TITLE_LENGTH_LIMIT) {
       throw SavedObjectsErrorHelpers.createBadRequestError(
         `"title" attribute is limited to ${DATA_SOURCE_TITLE_LENGTH_LIMIT} characters`
-      );
-    }
-  }
-
-  private async validateEndpoint(endpoint: string, attributes: DataSourceAttributes) {
-    if (!isValidURL(endpoint, this.endpointBlockedIps)) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        '"endpoint" attribute is not valid or allowed'
-      );
-    }
-    try {
-      const dataSourceClient: OpenSearchClient = await this.dataSourcesService.getDataSourceClient({
-        savedObjects: {} as any,
-        cryptography: this.cryptography,
-        testClientDataSourceAttr: attributes as DataSourceAttributes,
-        authRegistry: await this.authRegistryPromise,
-        customApiSchemaRegistryPromise: this.customApiSchemaRegistryPromise,
-      });
-
-      const dataSourceValidator = new DataSourceConnectionValidator(dataSourceClient, attributes);
-
-      await dataSourceValidator.validate();
-    } catch (err: any) {
-      throw SavedObjectsErrorHelpers.createBadRequestError(
-        `endpoint is not valid OpenSearch endpoint`
       );
     }
   }

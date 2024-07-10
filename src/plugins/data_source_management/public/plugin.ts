@@ -21,20 +21,31 @@ import { noAuthCredentialAuthMethod, sigV4AuthMethod, usernamePasswordAuthMethod
 import { DataSourceSelectorProps } from './components/data_source_selector/data_source_selector';
 import { createDataSourceMenu } from './components/data_source_menu/create_data_source_menu';
 import { DataSourceMenuProps } from './components/data_source_menu';
-import { setApplication, setHideLocalCluster, setUiSettings } from './components/utils';
+import {
+  setApplication,
+  setHideLocalCluster,
+  setUiSettings,
+  setDataSourceSelection,
+  getDefaultDataSourceId,
+  getDefaultDataSourceId$,
+} from './components/utils';
+import { DataSourceSelectionService } from './service/data_source_selection_service';
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
   indexPatternManagement: IndexPatternManagementSetup;
-  dataSource: DataSourcePluginSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 export interface DataSourceManagementPluginSetup {
   registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
   ui: {
-    DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
+    DataSourceSelector: React.ComponentType<DataSourceSelectorProps> | null;
     getDataSourceMenu: <T>() => React.ComponentType<DataSourceMenuProps<T>>;
   };
+  dataSourceSelection: DataSourceSelectionService;
+  getDefaultDataSourceId: typeof getDefaultDataSourceId;
+  getDefaultDataSourceId$: typeof getDefaultDataSourceId$;
 }
 
 export interface DataSourceManagementPluginStart {
@@ -53,6 +64,7 @@ export class DataSourceManagementPlugin
     > {
   private started = false;
   private authMethodsRegistry = new AuthenticationMethodRegistry();
+  private dataSourceSelection = new DataSourceSelectionService();
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
@@ -72,6 +84,8 @@ export class DataSourceManagementPlugin
     const column = new DataSourceColumn(savedObjectPromise);
     indexPatternManagement.columns.register(column);
 
+    const featureFlagStatus = !!dataSource;
+
     opensearchDashboardsSection.registerApp({
       id: DSM_APP_ID,
       title: PLUGIN_NAME,
@@ -79,9 +93,19 @@ export class DataSourceManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params, this.authMethodsRegistry);
+        return mountManagementSection(
+          core.getStartServices,
+          params,
+          this.authMethodsRegistry,
+          featureFlagStatus
+        );
       },
     });
+
+    // when the feature flag is disabled, we don't need to register any of the mds components
+    if (!featureFlagStatus) {
+      return undefined;
+    }
 
     const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
       if (this.started) {
@@ -104,13 +128,19 @@ export class DataSourceManagementPlugin
 
     setHideLocalCluster({ enabled: dataSource.hideLocalCluster });
     setUiSettings(uiSettings);
+    // This instance will be got in each data source selector component.
+    setDataSourceSelection(this.dataSourceSelection);
 
     return {
       registerAuthenticationMethod,
+      // Other plugins can get this instance from setupDeps and use to get selected data sources.
+      dataSourceSelection: this.dataSourceSelection,
       ui: {
         DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
         getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
       },
+      getDefaultDataSourceId,
+      getDefaultDataSourceId$,
     };
   }
 
