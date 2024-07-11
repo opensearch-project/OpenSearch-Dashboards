@@ -5,13 +5,16 @@
 
 import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
+import { first } from 'rxjs/operators';
 import { ChromeBreadcrumb } from 'opensearch-dashboards/public';
+
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
 import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
 import { WorkspacePlugin } from './plugin';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
+import { UseCaseService } from './services/use_case_service';
 
 describe('Workspace plugin', () => {
   const getSetupMock = () => ({
@@ -210,6 +213,41 @@ describe('Workspace plugin', () => {
     });
   });
 
+  it('#start should not update systematic use case features after currentWorkspace set', async () => {
+    const registeredUseCases$ = new BehaviorSubject([
+      {
+        id: 'foo',
+        title: 'Foo',
+        features: ['system-feature'],
+        systematic: true,
+      },
+    ]);
+    jest.spyOn(UseCaseService.prototype, 'start').mockImplementationOnce(() => ({
+      getRegisteredUseCases$: jest.fn(() => registeredUseCases$),
+    }));
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+    const workspaceObject = {
+      id: 'foo',
+      name: 'bar',
+      features: ['baz'],
+    };
+    coreStart.workspaces.currentWorkspace$.next(workspaceObject);
+
+    const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
+
+    workspacePlugin.start(coreStart);
+
+    // Wait for filterNav been executed
+    await new Promise(setImmediate);
+
+    const appUpdater = await appUpdater$.pipe(first()).toPromise();
+
+    expect(appUpdater({ id: 'system-feature' })).toBeUndefined();
+  });
+
   it('#stop should call unregisterNavGroupUpdater', async () => {
     const workspacePlugin = new WorkspacePlugin();
     const setupMock = getSetupMock();
@@ -222,5 +260,45 @@ describe('Workspace plugin', () => {
     workspacePlugin.stop();
 
     expect(unregisterNavGroupUpdater).toHaveBeenCalled();
+  });
+
+  it('#stop should not call appUpdater$.next anymore', async () => {
+    const registeredUseCases$ = new BehaviorSubject([
+      {
+        id: 'foo',
+        title: 'Foo',
+        features: ['system-feature'],
+        systematic: true,
+      },
+    ]);
+    jest.spyOn(UseCaseService.prototype, 'start').mockImplementationOnce(() => ({
+      getRegisteredUseCases$: jest.fn(() => registeredUseCases$),
+    }));
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+    const workspaceObject = {
+      id: 'foo',
+      name: 'bar',
+      features: ['baz'],
+    };
+    coreStart.workspaces.currentWorkspace$.next(workspaceObject);
+
+    const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
+    const appUpdaterChangeMock = jest.fn();
+    appUpdater$.subscribe(appUpdaterChangeMock);
+
+    workspacePlugin.start(coreStart);
+
+    // Wait for filterNav been executed
+    await new Promise(setImmediate);
+
+    expect(appUpdaterChangeMock).toHaveBeenCalledTimes(2);
+
+    workspacePlugin.stop();
+
+    registeredUseCases$.next([]);
+    expect(appUpdaterChangeMock).toHaveBeenCalledTimes(2);
   });
 });
