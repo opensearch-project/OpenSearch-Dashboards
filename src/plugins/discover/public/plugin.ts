@@ -294,31 +294,39 @@ export class DiscoverPlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: PLUGIN_ID,
-        category: DEFAULT_APP_CATEGORIES.investigate,
-        order: 200,
+        category: undefined,
+        order: 300,
       },
     ]);
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
         id: PLUGIN_ID,
-        category: DEFAULT_APP_CATEGORIES.investigate,
-        order: 100,
+        category: undefined,
+        order: 300,
       },
     ]);
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
       {
         id: PLUGIN_ID,
-        category: DEFAULT_APP_CATEGORIES.investigate,
-        order: 100,
+        category: undefined,
+        order: 200,
       },
     ]);
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
       {
         id: PLUGIN_ID,
-        category: DEFAULT_APP_CATEGORIES.analyzeSearch,
+        category: undefined,
+        order: 200,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: PLUGIN_ID,
+        category: undefined,
         order: 200,
       },
     ]);

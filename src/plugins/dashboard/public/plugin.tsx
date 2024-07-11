@@ -456,29 +456,36 @@ export class DashboardPlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: app.id,
-        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
-        order: 100,
+        order: 300,
+        category: undefined,
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
         id: app.id,
-        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
-        order: 100,
+        order: 300,
+        category: undefined,
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
       {
         id: app.id,
-        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
-        order: 100,
+        order: 300,
+        category: undefined,
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
       {
         id: app.id,
-        category: DEFAULT_APP_CATEGORIES.analyzeSearch,
         order: 300,
+        category: undefined,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: app.id,
+        order: 300,
+        category: undefined,
       },
     ]);
 

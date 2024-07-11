@@ -46,7 +46,7 @@ import {
 } from './service';
 
 import { ManagementSetup } from '../../management/public';
-import { DEFAULT_NAV_GROUPS, AppStatus } from '../../../core/public';
+import { DEFAULT_NAV_GROUPS, AppStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -146,10 +146,38 @@ export class IndexPatternManagementPlugin
       },
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
       {
         id: IPM_APP_ID,
-        order: 200,
+        category: DEFAULT_APP_CATEGORIES.manage,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
+      {
+        id: IPM_APP_ID,
+        category: DEFAULT_APP_CATEGORIES.manage,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: IPM_APP_ID,
+        category: DEFAULT_APP_CATEGORIES.manage,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+      {
+        id: IPM_APP_ID,
+        category: DEFAULT_APP_CATEGORIES.manage,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
+      {
+        id: IPM_APP_ID,
+        category: DEFAULT_APP_CATEGORIES.manage,
       },
     ]);
 
