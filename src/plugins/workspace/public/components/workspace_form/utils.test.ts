@@ -158,7 +158,7 @@ describe('validateWorkspaceForm', () => {
   it('should return error if name is empty', () => {
     expect(validateWorkspaceForm({}, false).name).toEqual({
       code: WorkspaceFormErrorCode.WorkspaceNameMissing,
-      message: "Name can't be empty.",
+      message: 'Name is required. Enter a name.',
     });
   });
   it('should return error if name is invalid', () => {
@@ -270,7 +270,7 @@ describe('validateWorkspaceForm', () => {
       ).permissionSettings?.overall
     ).toEqual({
       code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-      message: 'Permission setting missing',
+      message: 'Add a workspace owner.',
     });
 
     expect(
@@ -290,7 +290,7 @@ describe('validateWorkspaceForm', () => {
       ).permissionSettings?.overall
     ).toEqual({
       code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-      message: 'Permission setting missing',
+      message: 'Add a workspace owner.',
     });
   });
 

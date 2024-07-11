@@ -140,9 +140,7 @@ describe('WorkspaceFormErrorCallout', () => {
     });
 
     expect(
-      renderResult.getByText(
-        'Permission setting: Enter an owner at user or user group permission setting.'
-      )
+      renderResult.getByText('Manage access and permissions: Add a workspace owner.')
     ).toBeInTheDocument();
   });
 

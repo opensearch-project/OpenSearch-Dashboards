@@ -183,4 +183,4 @@ export const WORKSPACE_USE_CASES = Object.freeze({
   },
 });
 
-export const CURRENT_USER_PLACEHOLDER = '%current_user%';
+export const CURRENT_USER_PLACEHOLDER = '%me%';

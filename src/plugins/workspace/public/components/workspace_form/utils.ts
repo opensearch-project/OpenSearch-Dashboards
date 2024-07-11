@@ -236,15 +236,15 @@ const validatePermissionSetting = (
     Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
   >
 ) => {
-  const permissionSettingMissingError = {
+  const permissionSettingOwnerMissingError = {
     code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
-    message: i18n.translate('workspace.form.permission.setting.missing', {
-      defaultMessage: 'Permission setting missing',
+    message: i18n.translate('workspace.form.permission.setting.owner.missing', {
+      defaultMessage: 'Add a workspace owner.',
     }),
   };
   if (!permissionSettings) {
     return {
-      overall: permissionSettingMissingError,
+      overall: permissionSettingOwnerMissingError,
     };
   }
 
@@ -283,12 +283,11 @@ const validatePermissionSetting = (
       }
     }
   }
-
   return {
     ...(!permissionSettings.some(
       (setting) => setting.modes && getPermissionModeId(setting.modes) === PermissionModeId.Owner
     )
-      ? { overall: permissionSettingMissingError }
+      ? { overall: permissionSettingOwnerMissingError }
       : {}),
     ...(Object.keys(permissionSettingsErrors).length > 0
       ? { fields: permissionSettingsErrors }
@@ -323,7 +322,7 @@ export const validateWorkspaceForm = (
     formErrors.name = {
       code: WorkspaceFormErrorCode.WorkspaceNameMissing,
       message: i18n.translate('workspace.form.detail.name.empty', {
-        defaultMessage: "Name can't be empty.",
+        defaultMessage: 'Name is required. Enter a name.',
       }),
     };
   }

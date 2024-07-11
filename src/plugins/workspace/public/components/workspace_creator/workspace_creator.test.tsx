@@ -200,8 +200,8 @@ describe('WorkspaceCreator', () => {
       {
         dataSources: [],
         permissions: {
-          library_write: { users: ['%current_user%'] },
-          write: { users: ['%current_user%'] },
+          library_write: { users: ['%me%'] },
+          write: { users: ['%me%'] },
         },
       }
     );
@@ -274,10 +274,10 @@ describe('WorkspaceCreator', () => {
         dataSources: [],
         permissions: {
           write: {
-            users: ['%current_user%'],
+            users: ['%me%'],
           },
           library_write: {
-            users: ['%current_user%'],
+            users: ['%me%'],
           },
         },
       }
@@ -315,10 +315,10 @@ describe('WorkspaceCreator', () => {
         dataSources: ['id1'],
         permissions: {
           library_write: {
-            users: ['%current_user%'],
+            users: ['%me%'],
           },
           write: {
-            users: ['%current_user%'],
+            users: ['%me%'],
           },
         },
       }

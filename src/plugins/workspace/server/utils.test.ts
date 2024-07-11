@@ -163,10 +163,10 @@ describe('workspace utils', () => {
     expect(
       transferCurrentUserInPermissions('foo', {
         library_write: {
-          users: ['%current_user%', 'bar'],
+          users: ['%me%', 'bar'],
         },
         write: {
-          users: ['%current_user%'],
+          users: ['%me%'],
         },
         read: {
           users: ['bar'],

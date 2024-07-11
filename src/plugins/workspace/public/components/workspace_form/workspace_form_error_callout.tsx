@@ -40,7 +40,7 @@ const getSuggestionFromErrorCode = (error: WorkspaceFormError) => {
       });
     case WorkspaceFormErrorCode.PermissionSettingOwnerMissing:
       return i18n.translate('workspace.form.errorCallout.permissionSettingOwnerMissing', {
-        defaultMessage: 'Enter an owner at user or user group permission setting.',
+        defaultMessage: 'Add a workspace owner.',
       });
     default:
       return error.message;
@@ -124,8 +124,8 @@ export const WorkspaceFormErrorCallout = ({ errors }: WorkspaceFormErrorCalloutP
           )}
           {errors.permissionSettings?.overall && (
             <WorkspaceFormErrorCalloutItem
-              errorKey={i18n.translate('workspace.form.errorCallout.useCaseKey', {
-                defaultMessage: 'Permission setting:',
+              errorKey={i18n.translate('workspace.form.errorCallout.accessAndPermissionsKey', {
+                defaultMessage: 'Manage access and permissions:',
               })}
               message={getSuggestionFromErrorCode(errors.permissionSettings.overall)}
             />
