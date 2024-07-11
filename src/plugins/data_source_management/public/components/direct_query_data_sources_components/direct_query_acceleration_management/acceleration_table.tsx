@@ -40,6 +40,8 @@ import { getRenderAccelerationDetailsFlyout } from '../../../management_app/moun
 interface AccelerationTableProps {
   dataSourceName: string;
   cacheLoadingHooks: any;
+  http: any;
+  notifications: any;
 }
 
 interface ModalState {
@@ -50,6 +52,8 @@ interface ModalState {
 export const AccelerationTable = ({
   dataSourceName,
   cacheLoadingHooks,
+  http,
+  notifications,
 }: AccelerationTableProps) => {
   const [accelerations, setAccelerations] = useState<CachedAcceleration[]>([]);
   const [updatedTime, setUpdatedTime] = useState<string>();
@@ -64,7 +68,11 @@ export const AccelerationTable = ({
     actionType: null,
     selectedItem: null,
   });
-  const { performOperation, operationSuccess } = useAccelerationOperation(dataSourceName);
+  const { performOperation, operationSuccess } = useAccelerationOperation(
+    dataSourceName,
+    http,
+    notifications
+  );
 
   useEffect(() => {
     const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(

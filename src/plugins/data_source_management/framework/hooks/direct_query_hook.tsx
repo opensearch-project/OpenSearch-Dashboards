@@ -4,18 +4,16 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
+import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { ASYNC_POLLING_INTERVAL } from '../constants';
 import { DirectQueryLoadingStatus, DirectQueryRequest } from '../types';
 import { getAsyncSessionId, setAsyncSessionId } from '../utils/query_session_utils';
 import { get as getObjValue, formatError } from '../utils/shared';
 import { usePolling } from '../utils/use_polling';
 import { SQLService } from '../requests/sql';
-import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { DataSourceManagementContext } from '../../public/types';
 
 // todo: to use the search strategy from core
-export const useDirectQuery = () => {
-  const { http, notifications } = useOpenSearchDashboards<DataSourceManagementContext>().services;
+export const useDirectQuery = (http: HttpStart, notifications: NotificationsStart) => {
   const sqlService = new SQLService(http);
   const [loadStatus, setLoadStatus] = useState<DirectQueryLoadingStatus>(
     DirectQueryLoadingStatus.SCHEDULED

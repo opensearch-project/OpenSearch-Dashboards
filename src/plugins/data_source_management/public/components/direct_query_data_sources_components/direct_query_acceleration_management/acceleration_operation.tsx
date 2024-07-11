@@ -4,6 +4,7 @@
  */
 
 import { useEffect, useState } from 'react';
+import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { CachedAcceleration, DirectQueryLoadingStatus } from '../../../../framework/types';
 import { useDirectQuery } from '../../../../framework/hooks/direct_query_hook';
 import {
@@ -11,12 +12,13 @@ import {
   generateAccelerationOperationQuery,
   getAccelerationName,
 } from './acceleration_utils';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { DataSourceManagementContext } from '../../../../public/types';
 
-export const useAccelerationOperation = (dataSource: string) => {
-  const { notifications } = useOpenSearchDashboards<DataSourceManagementContext>().services;
-  const { startLoading, stopLoading, loadStatus } = useDirectQuery();
+export const useAccelerationOperation = (
+  dataSource: string,
+  http: HttpStart,
+  notifications: NotificationsStart
+) => {
+  const { startLoading, stopLoading, loadStatus } = useDirectQuery(http, notifications);
   const [isOperating, setIsOperating] = useState(false);
   const [operationSuccess, setOperationSuccess] = useState(false);
   const [accelerationToOperate, setAccelerationToOperate] = useState<CachedAcceleration | null>(

@@ -139,6 +139,7 @@ export async function mountManagementSection(
           handleRefresh={handleRefresh}
           dataSourceMDSId={dataSourceMDSId}
           http={http}
+          notifications={notifications}
         />
       )
     );

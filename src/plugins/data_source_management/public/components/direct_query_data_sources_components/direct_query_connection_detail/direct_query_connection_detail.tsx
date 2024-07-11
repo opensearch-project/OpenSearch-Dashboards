@@ -203,6 +203,8 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
               <AccelerationTable
                 dataSourceName={dataSourceName}
                 cacheLoadingHooks={cacheLoadingHooks}
+                http={http}
+                notifications={notifications}
               />
             ),
           },
