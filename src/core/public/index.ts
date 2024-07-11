@@ -106,6 +106,7 @@ export {
   PUBLIC_WORKSPACE_ID,
   PUBLIC_WORKSPACE_NAME,
   DEFAULT_NAV_GROUPS,
+  ALL_USE_CASE_ID,
 } from '../utils';
 export {
   AppCategory,

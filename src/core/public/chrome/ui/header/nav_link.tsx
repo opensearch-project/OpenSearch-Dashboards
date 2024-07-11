@@ -52,7 +52,7 @@ interface Props {
   appId?: string;
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
-  onClick?: Function;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   navigateToApp: CoreStart['application']['navigateToApp'];
   externalLink?: boolean;
 }
@@ -78,7 +78,7 @@ export function createEuiListItem({
     /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       if (!isModifiedOrPrevented(event)) {
-        onClick();
+        onClick(event);
       }
 
       if (
