@@ -51,7 +51,7 @@ import {
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSwitch,
   EuiSwitchEvent,
   EuiToolTip,
@@ -387,7 +387,7 @@ export class Field extends PureComponent<FieldProps> {
         }
       case 'select':
         return (
-          <EuiSelect
+          <EuiCompressedSelect
             {...a11yProps}
             value={currentValue}
             options={(options as string[]).map((option) => {

@@ -17,7 +17,7 @@ import {
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSpacer,
 } from '@elastic/eui';
 import { CoreStart } from 'opensearch-dashboards/public';
@@ -134,7 +134,7 @@ export const HeaderUserThemeMenu = () => {
   const appearanceContent = (
     <div style={{ maxWidth: 300 }}>
       <EuiCompressedFormRow label="Theme version" helpText={`Default: ${defaultTheme}`}>
-        <EuiSelect options={themeOptions} value={theme} onChange={onThemeChange} />
+        <EuiCompressedSelect options={themeOptions} value={theme} onChange={onThemeChange} />
       </EuiCompressedFormRow>
       <EuiCompressedFormRow
         label="Screen mode"
@@ -145,7 +145,11 @@ export const HeaderUserThemeMenu = () => {
           })?.text
         }`}
       >
-        <EuiSelect options={screenModeOptions} value={screenMode} onChange={onScreenModeChange} />
+        <EuiCompressedSelect
+          options={screenModeOptions}
+          value={screenMode}
+          onChange={onScreenModeChange}
+        />
       </EuiCompressedFormRow>
       <EuiFlexGroup>
         <EuiFlexItem>

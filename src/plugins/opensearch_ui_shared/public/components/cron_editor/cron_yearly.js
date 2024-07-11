@@ -33,7 +33,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
-import { EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow, EuiCompressedSelect } from '@elastic/eui';
 
 export const CronYearly = ({
   minute,
@@ -57,7 +57,7 @@ export const CronYearly = ({
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
     >
-      <EuiSelect
+      <EuiCompressedSelect
         options={monthOptions}
         value={month}
         onChange={(e) => onChange({ month: e.target.value })}
@@ -79,7 +79,7 @@ export const CronYearly = ({
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
     >
-      <EuiSelect
+      <EuiCompressedSelect
         options={dateOptions}
         value={date}
         onChange={(e) => onChange({ date: e.target.value })}
@@ -103,7 +103,7 @@ export const CronYearly = ({
     >
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiSelect
+          <EuiCompressedSelect
             options={hourOptions}
             value={hour}
             aria-label={i18n.translate('opensearchUi.cronEditor.cronYearly.hourSelectLabel', {
@@ -119,7 +119,7 @@ export const CronYearly = ({
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiSelect
+          <EuiCompressedSelect
             options={minuteOptions}
             value={minute}
             aria-label={i18n.translate('opensearchUi.cronEditor.cronYearly.minuteSelectLabel', {

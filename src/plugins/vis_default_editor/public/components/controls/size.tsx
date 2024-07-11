@@ -30,7 +30,7 @@
 
 import React, { useEffect } from 'react';
 import { isUndefined } from 'lodash';
-import { EuiFormRow, EuiCompressedFieldNumber } from '@elastic/eui';
+import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import { AggParamEditorProps } from '../agg_param_props';
@@ -68,7 +68,7 @@ function SizeParamEditor({
       isInvalid={showValidation ? !isValid : false}
       display={'rowCompressed'}
     >
-      <EuiCompressedFieldNumber
+      <EuiFieldNumber
         value={isUndefined(value) ? '' : value}
         onChange={(ev) => setValue(ev.target.value === '' ? '' : parseFloat(ev.target.value))}
         fullWidth={true}

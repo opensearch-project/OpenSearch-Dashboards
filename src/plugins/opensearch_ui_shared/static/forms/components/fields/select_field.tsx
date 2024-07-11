@@ -29,7 +29,7 @@
  */
 
 import React, { ReactNode, OptionHTMLAttributes } from 'react';
-import { EuiCompressedFormRow, EuiSelect } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedSelect } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -58,7 +58,7 @@ export const SelectField = ({ field, euiFieldProps, ...rest }: Props) => {
       data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
     >
-      <EuiSelect
+      <EuiCompressedSelect
         fullWidth
         value={field.value as string}
         onChange={(e) => {

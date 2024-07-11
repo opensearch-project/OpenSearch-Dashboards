@@ -33,7 +33,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
-import { EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow, EuiCompressedSelect } from '@elastic/eui';
 
 export const CronDaily = ({ minute, minuteOptions, hour, hourOptions, onChange }) => (
   <Fragment>
@@ -49,7 +49,7 @@ export const CronDaily = ({ minute, minuteOptions, hour, hourOptions, onChange }
     >
       <EuiFlexGroup gutterSize="xs">
         <EuiFlexItem grow={false}>
-          <EuiSelect
+          <EuiCompressedSelect
             options={hourOptions}
             value={hour}
             aria-label={i18n.translate('opensearchUi.cronEditor.cronDaily.hourSelectLabel', {
@@ -65,7 +65,7 @@ export const CronDaily = ({ minute, minuteOptions, hour, hourOptions, onChange }
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiSelect
+          <EuiCompressedSelect
             options={minuteOptions}
             value={minute}
             aria-label={i18n.translate('opensearchUi.cronEditor.cronDaily.minuteSelectLabel', {

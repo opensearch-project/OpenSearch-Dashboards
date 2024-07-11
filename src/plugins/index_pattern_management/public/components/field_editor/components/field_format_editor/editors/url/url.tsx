@@ -34,7 +34,7 @@ import {
   EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiLink,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSwitch,
   EuiCompressedFieldNumber,
 } from '@elastic/eui';
@@ -203,7 +203,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
             <FormattedMessage id="indexPatternManagement.url.typeLabel" defaultMessage="Type" />
           }
         >
-          <EuiSelect
+          <EuiCompressedSelect
             data-test-subj="urlEditorType"
             value={formatParams.type}
             options={format.type.urlTypes.map((type: UrlType) => {

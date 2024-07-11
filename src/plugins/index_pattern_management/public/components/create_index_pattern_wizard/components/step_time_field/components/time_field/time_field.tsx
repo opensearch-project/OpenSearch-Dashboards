@@ -35,7 +35,7 @@ import {
   EuiCompressedFormRow,
   EuiSpacer,
   EuiLink,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiText,
   EuiLoadingSpinner,
 } from '@elastic/eui';
@@ -95,7 +95,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
           }
         >
           {isLoading ? (
-            <EuiSelect
+            <EuiCompressedSelect
               name="timeField"
               data-test-subj="createIndexPatternTimeFieldSelect"
               options={[
@@ -112,7 +112,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
               disabled={true}
             />
           ) : (
-            <EuiSelect
+            <EuiCompressedSelect
               name="timeField"
               data-test-subj="createIndexPatternTimeFieldSelect"
               options={timeFieldOptions}

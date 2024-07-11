@@ -104,8 +104,8 @@ export interface TestBed<T = string> {
       isAsync?: boolean
     ) => Promise<void> | void;
     /**
-     * Set the value of a <EuiSelect /> or a mocked <EuiSuperSelect />
-     * For the <EuiSuperSelect /> you need to mock it like this
+     * Set the value of a <EuiCompressedSelect /> or a mocked <EuiCompressedSuperSelect />
+     * For the <EuiCompressedSuperSelect /> you need to mock it like this
      *
      ```typescript
     jest.mock('@elastic/eui', () => {
@@ -113,7 +113,7 @@ export interface TestBed<T = string> {
 
       return {
         ...original,
-        EuiSuperSelect: (props: any) => (
+        EuiCompressedSuperSelect: (props: any) => (
           <input
             data-test-subj={props['data-test-subj'] || 'mockSuperSelect'}
             value={props.valueOfSelected}

@@ -34,7 +34,7 @@ import { padStart } from 'lodash';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
-import { EuiSelect, EuiCompressedFormRow } from '@elastic/eui';
+import { EuiCompressedSelect, EuiCompressedFormRow } from '@elastic/eui';
 
 import {
   getOrdinalValue,
@@ -365,7 +365,7 @@ export class CronEditor extends Component {
           }
           fullWidth
         >
-          <EuiSelect
+          <EuiCompressedSelect
             options={UNITS}
             value={frequency}
             onChange={(e) => this.onChangeFrequency(e.target.value)}

@@ -37,7 +37,7 @@ import {
   EuiTabbedContentTab,
   EuiSpacer,
   EuiCompressedFieldSearch,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSelectOption,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -141,7 +141,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
           </EuiFlexItem>
           {type === TAB_INDEXED_FIELDS && indexedFieldTypes.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiSelect
+              <EuiCompressedSelect
                 options={indexedFieldTypes}
                 value={indexedFieldTypeFilter}
                 onChange={(e) => setIndexedFieldTypeFilter(e.target.value)}
@@ -152,7 +152,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
           )}
           {type === TAB_SCRIPTED_FIELDS && scriptedFieldLanguages.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiSelect
+              <EuiCompressedSelect
                 options={scriptedFieldLanguages}
                 value={scriptedFieldLanguageFilter}
                 onChange={(e) => setScriptedFieldLanguageFilter(e.target.value)}

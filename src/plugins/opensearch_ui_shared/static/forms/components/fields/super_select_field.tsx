@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { EuiCompressedFormRow, EuiSuperSelect, EuiSuperSelectProps } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedSuperSelect, EuiSuperSelectProps } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -56,7 +56,7 @@ export const SuperSelectField = ({ field, euiFieldProps = { options: [] }, ...re
       data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
     >
-      <EuiSuperSelect
+      <EuiCompressedSuperSelect
         fullWidth
         valueOfSelected={field.value as string}
         onChange={(value) => {

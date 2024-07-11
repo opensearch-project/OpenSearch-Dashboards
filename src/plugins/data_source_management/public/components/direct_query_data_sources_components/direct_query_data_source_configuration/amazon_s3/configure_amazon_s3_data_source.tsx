@@ -14,7 +14,7 @@ import {
   EuiCompressedFormRow,
   EuiCompressedFieldText,
   EuiTextArea,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiCallOut,
 } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
@@ -203,7 +203,7 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
             <EuiText size="xs">
               <p>Authentication settings to access the index store.</p>
             </EuiText>
-            <EuiSelect
+            <EuiCompressedSelect
               id="selectAuthMethod"
               options={authOptions}
               value={currentAuthMethod}

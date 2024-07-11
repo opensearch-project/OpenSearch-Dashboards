@@ -33,7 +33,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
-import { EuiCompressedFormRow, EuiSelect } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedSelect } from '@elastic/eui';
 
 export const CronHourly = ({ minute, minuteOptions, onChange }) => (
   <Fragment>
@@ -47,7 +47,7 @@ export const CronHourly = ({ minute, minuteOptions, onChange }) => (
       fullWidth
       data-test-subj="cronFrequencyConfiguration"
     >
-      <EuiSelect
+      <EuiCompressedSelect
         options={minuteOptions}
         value={minute}
         onChange={(e) => onChange({ minute: e.target.value })}

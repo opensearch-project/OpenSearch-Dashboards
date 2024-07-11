@@ -43,7 +43,7 @@ import {
   EuiCompressedFormRow,
   EuiFilePicker,
   EuiInMemoryTable,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -578,7 +578,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           });
 
           return (
-            <EuiSelect
+            <EuiCompressedSelect
               data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={(e) => this.onIndexChanged(id, e)}
               options={options}

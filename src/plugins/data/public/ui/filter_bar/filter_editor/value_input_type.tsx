@@ -28,7 +28,11 @@
  * under the License.
  */
 
-import { EuiCompressedFieldNumber, EuiCompressedFieldText, EuiSelect } from '@elastic/eui';
+import {
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
+  EuiCompressedSelect,
+} from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
@@ -110,7 +114,7 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'boolean':
         inputElement = (
-          <EuiSelect
+          <EuiCompressedSelect
             fullWidth={this.props.fullWidth}
             options={[
               { value: undefined, text: this.props.placeholder },

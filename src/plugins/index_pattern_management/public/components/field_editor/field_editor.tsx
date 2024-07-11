@@ -47,7 +47,7 @@ import {
   EuiCompressedFormRow,
   EuiIcon,
   EuiLink,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSpacer,
   EuiText,
   EUI_MODAL_CONFIRM_BUTTON,
@@ -390,7 +390,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           ) : null
         }
       >
-        <EuiSelect
+        <EuiCompressedSelect
           value={spec.lang}
           options={scriptingLangs.map((lang) => {
             return { value: lang, text: lang };
@@ -411,7 +411,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       <EuiCompressedFormRow
         label={i18n.translate('indexPatternManagement.typeLabel', { defaultMessage: 'Type' })}
       >
-        <EuiSelect
+        <EuiCompressedSelect
           value={spec.type}
           disabled={!spec.scripted}
           options={fieldTypes.map((type) => {
@@ -511,7 +511,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             />
           }
         >
-          <EuiSelect
+          <EuiCompressedSelect
             value={fieldFormatId}
             options={fieldTypeFormats.map((fmt) => {
               return { value: fmt.id || '', text: fmt.title };

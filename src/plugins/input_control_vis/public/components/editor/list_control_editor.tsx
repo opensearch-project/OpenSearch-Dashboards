@@ -31,7 +31,12 @@
 import React, { PureComponent, ComponentType } from 'react';
 
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiCompressedFormRow, EuiCompressedFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
+import {
+  EuiCompressedFormRow,
+  EuiCompressedFieldNumber,
+  EuiSwitch,
+  EuiCompressedSelect,
+} from '@elastic/eui';
 
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
@@ -58,7 +63,7 @@ interface ListControlEditorProps {
     value: ControlParamsOptions[T]
   ) => void;
   handleParentChange: (controlIndex: number, parent: string) => void;
-  parentCandidates: React.ComponentProps<typeof EuiSelect>['options'];
+  parentCandidates: React.ComponentProps<typeof EuiCompressedSelect>['options'];
   deps: InputControlVisDependencies;
 }
 
@@ -175,7 +180,7 @@ export class ListControlEditor extends PureComponent<
           }
           key="parentSelect"
         >
-          <EuiSelect
+          <EuiCompressedSelect
             options={parentCandidatesOptions}
             value={this.props.controlParams.parent}
             onChange={(event) => {

@@ -16,7 +16,7 @@ import {
   EuiForm,
   EuiCompressedFormRow,
   EuiPageContent,
-  EuiSuperSelect,
+  EuiCompressedSuperSelect,
   EuiSpacer,
   EuiText,
   EuiSuperSelectOption,
@@ -487,7 +487,7 @@ export class CreateDataSourceForm extends React.Component<
                 defaultMessage: 'Service Name',
               })}
             >
-              <EuiSuperSelect
+              <EuiCompressedSuperSelect
                 options={sigV4ServiceOptions}
                 valueOfSelected={this.state.auth.credentials.service}
                 onChange={(value) => this.onChangeSigV4ServiceName(value)}
@@ -668,7 +668,7 @@ export class CreateDataSourceForm extends React.Component<
             {/* Credential source */}
             <EuiSpacer size="l" />
             <EuiCompressedFormRow>
-              <EuiSuperSelect
+              <EuiCompressedSuperSelect
                 options={this.authOptions}
                 valueOfSelected={this.state.auth.type}
                 onChange={(value) => this.onChangeAuthType(value)}

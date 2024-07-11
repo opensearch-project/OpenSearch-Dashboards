@@ -37,7 +37,7 @@ import {
   EuiFlexItem,
   EuiCompressedFormRow,
   EuiPanel,
-  EuiSelect,
+  EuiCompressedSelect,
 } from '@elastic/eui';
 
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public';
@@ -182,7 +182,7 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiCompressedFormRow id="selectControlType">
-                <EuiSelect
+                <EuiCompressedSelect
                   data-test-subj="selectControlType"
                   options={[
                     {
