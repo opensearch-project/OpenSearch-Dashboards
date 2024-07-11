@@ -9,12 +9,14 @@ import { WorkspaceOverviewProps } from './workspace_overview';
 
 export const WorkspaceOverviewSettings = ({
   workspaceConfigurableApps$,
+  registeredUseCases$,
 }: WorkspaceOverviewProps) => {
   return (
     <WorkspaceUpdater
       hideTitle={true}
       maxWidth="100%"
       workspaceConfigurableApps$={workspaceConfigurableApps$}
+      registeredUseCases$={registeredUseCases$}
     />
   );
 };

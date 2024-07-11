@@ -48,14 +48,10 @@ const WorkspaceUseCaseCard = ({
 export interface WorkspaceUseCaseProps {
   value: string[];
   onChange: (newValue: string[]) => void;
-  availableUseCases?: WorkspaceUseCaseObject[];
+  availableUseCases: WorkspaceUseCaseObject[];
 }
 
-export const WorkspaceUseCase = ({
-  availableUseCases = [],
-  value,
-  onChange,
-}: WorkspaceUseCaseProps) => {
+export const WorkspaceUseCase = ({ availableUseCases, value, onChange }: WorkspaceUseCaseProps) => {
   const handleCardChange = useCallback(
     (id: string) => {
       if (!value.includes(id)) {

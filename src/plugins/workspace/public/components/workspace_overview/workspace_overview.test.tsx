@@ -9,7 +9,12 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { BehaviorSubject } from 'rxjs';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
-import { IS_WORKSPACE_OVERVIEW_COLLAPSED_KEY, WorkspaceOverview } from './workspace_overview';
+import {
+  IS_WORKSPACE_OVERVIEW_COLLAPSED_KEY,
+  WorkspaceOverview,
+  WorkspaceOverviewProps,
+} from './workspace_overview';
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
 
 // all applications
 const PublicAPPInfoMap = new Map([
@@ -43,7 +48,13 @@ const createWorkspacesSetupContractMockWithValue = (workspace?: WorkspaceObject)
   };
 };
 
-const WorkspaceOverviewPage = (props: any) => {
+const WorkspaceOverviewPage = (
+  props: Partial<
+    WorkspaceOverviewProps & {
+      workspacesService: ReturnType<typeof createWorkspacesSetupContractMockWithValue>;
+    }
+  >
+) => {
   const workspacesService = props.workspacesService || createWorkspacesSetupContractMockWithValue();
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
@@ -64,10 +75,16 @@ const WorkspaceOverviewPage = (props: any) => {
       },
     },
   });
+  const registeredUseCases$ = new BehaviorSubject([
+    WORKSPACE_USE_CASES.observability,
+    WORKSPACE_USE_CASES['security-analytics'],
+    WORKSPACE_USE_CASES.analytics,
+    WORKSPACE_USE_CASES.search,
+  ]);
 
   return (
     <Provider>
-      <WorkspaceOverview {...props} />
+      <WorkspaceOverview {...props} registeredUseCases$={registeredUseCases$} />
     </Provider>
   );
 };

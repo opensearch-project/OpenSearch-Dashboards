@@ -32,7 +32,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     props.workspaceConfigurableApps$ ?? of(undefined)
   );
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
-  const availableUseCases = useObservable(props.registeredUseCases$);
+  const availableUseCases = useObservable(props.registeredUseCases$, []);
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {

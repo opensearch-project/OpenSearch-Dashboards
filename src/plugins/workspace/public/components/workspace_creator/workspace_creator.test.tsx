@@ -7,9 +7,13 @@ import React from 'react';
 import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { fireEvent, render, waitFor, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import { WorkspaceCreator as WorkspaceCreatorComponent } from './workspace_creator';
+import {
+  WorkspaceCreator as WorkspaceCreatorComponent,
+  WorkspaceCreatorProps,
+} from './workspace_creator';
 import { coreMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
 
 const workspaceClientCreate = jest
   .fn()
@@ -43,7 +47,7 @@ const dataSourcesList = [
 
 const mockCoreStart = coreMock.createStart();
 
-const WorkspaceCreator = (props: any) => {
+const WorkspaceCreator = (props: Partial<WorkspaceCreatorProps>) => {
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
@@ -82,10 +86,16 @@ const WorkspaceCreator = (props: any) => {
       },
     },
   });
+  const registeredUseCases$ = new BehaviorSubject([
+    WORKSPACE_USE_CASES.observability,
+    WORKSPACE_USE_CASES['security-analytics'],
+    WORKSPACE_USE_CASES.analytics,
+    WORKSPACE_USE_CASES.search,
+  ]);
 
   return (
     <Provider>
-      <WorkspaceCreatorComponent {...props} />
+      <WorkspaceCreatorComponent {...props} registeredUseCases$={registeredUseCases$} />
     </Provider>
   );
 };

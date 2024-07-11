@@ -57,5 +57,5 @@ export interface WorkspaceFormProps {
   workspaceConfigurableApps?: PublicAppInfo[];
   permissionEnabled?: boolean;
   permissionLastAdminItemDeletable?: boolean;
-  availableUseCases?: WorkspaceUseCase[];
+  availableUseCases: WorkspaceUseCase[];
 }

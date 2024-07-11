@@ -60,7 +60,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   const workspaceConfigurableApps = useObservable(
     props.workspaceConfigurableApps$ ?? of(undefined)
   );
-  const availableUseCases = useObservable(props.registeredUseCases$);
+  const availableUseCases = useObservable(props.registeredUseCases$, []);
   const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<FormDataFromWorkspace>();
 
   const handleWorkspaceFormSubmit = useCallback(

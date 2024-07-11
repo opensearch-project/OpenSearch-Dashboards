@@ -7,9 +7,13 @@ import React from 'react';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import { WorkspaceUpdater as WorkspaceCreatorComponent } from './workspace_updater';
+import {
+  WorkspaceUpdater as WorkspaceCreatorComponent,
+  WorkspaceUpdaterProps,
+} from './workspace_updater';
 import { coreMock, workspacesServiceMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
 
 const workspaceClientUpdate = jest.fn().mockReturnValue({ result: true, success: true });
 
@@ -63,7 +67,11 @@ const mockCoreStart = coreMock.createStart();
 
 const renderCompleted = () => expect(screen.queryByText('Enter Details')).not.toBeNull();
 
-const WorkspaceUpdater = (props: any) => {
+const WorkspaceUpdater = (
+  props: WorkspaceUpdaterProps & {
+    workspacesService?: ReturnType<typeof createWorkspacesSetupContractMockWithValue>;
+  }
+) => {
   const workspacesService = props.workspacesService || createWorkspacesSetupContractMockWithValue();
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
@@ -104,10 +112,16 @@ const WorkspaceUpdater = (props: any) => {
       },
     },
   });
+  const registeredUseCases$ = new BehaviorSubject([
+    WORKSPACE_USE_CASES.observability,
+    WORKSPACE_USE_CASES['security-analytics'],
+    WORKSPACE_USE_CASES.analytics,
+    WORKSPACE_USE_CASES.search,
+  ]);
 
   return (
     <Provider>
-      <WorkspaceCreatorComponent {...props} />
+      <WorkspaceCreatorComponent {...props} registeredUseCases$={registeredUseCases$} />
     </Provider>
   );
 };

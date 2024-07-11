@@ -45,7 +45,7 @@ export const WorkspaceOverview = (props: WorkspaceOverviewProps) => {
 
   const currentWorkspace = useObservable(workspaces.currentWorkspace$);
   const currentWorkspaceId = useObservable(workspaces.currentWorkspaceId$);
-  const useCases = useObservable(props.registeredUseCases$, []);
+  const availableUseCases = useObservable(props.registeredUseCases$, []);
 
   // workspace level setting
   const workspaceOverviewCollapsedKey = `${IS_WORKSPACE_OVERVIEW_COLLAPSED_KEY}_${
@@ -65,9 +65,10 @@ export const WorkspaceOverview = (props: WorkspaceOverviewProps) => {
   const availableCards = useMemo(() => {
     if (!currentWorkspace) return [];
     return getStartCards.filter(
-      (card) => !card.id || isAppAccessibleInWorkspace(card as App, currentWorkspace, useCases)
+      (card) =>
+        !card.id || isAppAccessibleInWorkspace(card as App, currentWorkspace, availableUseCases)
     );
-  }, [currentWorkspace, useCases]);
+  }, [currentWorkspace, availableUseCases]);
 
   if (!currentWorkspace) {
     return null;

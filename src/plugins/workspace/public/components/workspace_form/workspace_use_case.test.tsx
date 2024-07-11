@@ -6,14 +6,23 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { WorkspaceUseCase, WorkspaceUseCaseProps } from './workspace_use_case';
+import { WORKSPACE_USE_CASES } from 'src/plugins/workspace/common/constants';
 
 const setup = (options?: Partial<WorkspaceUseCaseProps>) => {
   const onChangeMock = jest.fn();
   const renderResult = render(
     <WorkspaceUseCase
-      configurableApps={[
+      availableUseCases={[
+        WORKSPACE_USE_CASES.observability,
+        WORKSPACE_USE_CASES['security-analytics'],
+        WORKSPACE_USE_CASES.analytics,
+        WORKSPACE_USE_CASES.search,
         {
-          id: 'discover',
+          id: 'system-use-case',
+          title: 'System use case',
+          description: 'System use case description',
+          features: [],
+          systematic: true,
         },
       ]}
       value={[]}
