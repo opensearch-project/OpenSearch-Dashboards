@@ -175,12 +175,14 @@ export const getNoItemsMessage = (createItem: () => void) => (
   <EuiEmptyPrompt
     iconType="visualizeApp"
     title={
-      <h1 id="visualizeListingHeading">
-        <FormattedMessage
-          id="visualize.listing.createNew.title"
-          defaultMessage="Create your first visualization"
-        />
-      </h1>
+      <EuiText size="s">
+        <h1 id="visualizeListingHeading">
+          <FormattedMessage
+            id="visualize.listing.createNew.title"
+            defaultMessage="Create your first visualization"
+          />
+        </h1>
+      </EuiText>
     }
     body={
       <EuiText size="s">

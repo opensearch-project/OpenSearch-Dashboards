@@ -9,7 +9,9 @@ exports[`Header should render normally 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiTitle>
+      <EuiText
+        size="s"
+      >
         <h1>
           <FormattedMessage
             defaultMessage="Saved Objects"
@@ -17,7 +19,7 @@ exports[`Header should render normally 1`] = `
             values={Object {}}
           />
         </h1>
-      </EuiTitle>
+      </EuiText>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}

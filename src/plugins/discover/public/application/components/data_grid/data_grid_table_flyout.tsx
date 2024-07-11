@@ -11,7 +11,7 @@ import {
   EuiFlyoutBody,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DocViewer } from '../doc_viewer/doc_viewer';
@@ -43,11 +43,11 @@ export function DataGridFlyout({
   return (
     <EuiFlyout onClose={onClose} size="m" data-test-subj="documentDetailFlyOut" ownFocus={false}>
       <EuiFlyoutHeader>
-        <EuiTitle>
+        <EuiText size="s">
           <h2>
             <FormattedMessage id="discover.docView.flyoutTitle" defaultMessage="Document Details" />
           </h2>
-        </EuiTitle>
+        </EuiText>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
