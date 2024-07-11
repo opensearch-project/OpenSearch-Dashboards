@@ -41,7 +41,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFieldText,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiFormLabel,
   EuiCompressedFormRow,
   EuiSpacer,
@@ -115,7 +115,7 @@ const StandardSiblingAggUi = (props) => {
             <FormattedMessage id="visTypeTimeseries.stdSibling.modeLabel" defaultMessage="Mode" />
           }
         >
-          <EuiComboBox
+          <EuiCompressedComboBox
             options={modeOptions}
             selectedOptions={selectedModeOption ? [selectedModeOption] : []}
             onChange={handleSelectChange('mode')}

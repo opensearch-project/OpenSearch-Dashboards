@@ -41,7 +41,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiSpacer,
   EuiCompressedFormRow,
   EuiCompressedFieldNumber,
@@ -179,7 +179,7 @@ export const MovingAverageAgg = (props) => {
               defaultMessage: 'Model',
             })}
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               placeholder={i18n.translate(
                 'visTypeTimeseries.movingAverage.model.selectPlaceholder',
@@ -298,7 +298,7 @@ export const MovingAverageAgg = (props) => {
                       defaultMessage: 'Multiplicative',
                     })}
                   >
-                    <EuiComboBox
+                    <EuiCompressedComboBox
                       placeholder={i18n.translate(
                         'visTypeTimeseries.movingAverage.multiplicative.selectPlaceholder',
                         {

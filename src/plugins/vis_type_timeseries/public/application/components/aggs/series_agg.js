@@ -39,7 +39,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiTitle,
   EuiCompressedFormRow,
   EuiSpacer,
@@ -181,7 +181,7 @@ function SeriesAggUi(props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               options={functionOptions}
               selectedOptions={selectedFunctionOption ? [selectedFunctionOption] : []}
               onChange={handleSelectChange('function')}

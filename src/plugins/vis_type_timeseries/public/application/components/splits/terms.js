@@ -43,7 +43,7 @@ import {
   EuiFlexItem,
   EuiCompressedFormRow,
   EuiCompressedFieldNumber,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiCompressedFieldText,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
@@ -240,7 +240,7 @@ export const SplitByTermsUI = ({
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={dirOptions}
               selectedOptions={selectedDirectionOption ? [selectedDirectionOption] : []}

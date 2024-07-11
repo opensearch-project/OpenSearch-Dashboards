@@ -39,7 +39,7 @@ import { YesNo } from '../../yes_no';
 import { ColorRules } from '../../color_rules';
 import {
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFieldText,
@@ -245,7 +245,7 @@ class TableSeriesConfigUI extends Component {
               }
               fullWidth
             >
-              <EuiComboBox
+              <EuiCompressedComboBox
                 options={functionOptions}
                 selectedOptions={selectedAggFuncOption ? [selectedAggFuncOption] : []}
                 onChange={handleSelectChange('aggregate_function')}

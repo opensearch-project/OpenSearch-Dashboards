@@ -36,7 +36,7 @@ import { collectionActions } from './lib/collection_actions';
 import { ColorPicker } from './color_picker';
 import {
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiCompressedFieldNumber,
   EuiFormLabel,
   EuiFlexGroup,
@@ -175,7 +175,7 @@ class ColorRulesUI extends Component {
           </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiComboBox
+          <EuiCompressedComboBox
             id={htmlId('ifMetricIs')}
             options={operatorOptions}
             selectedOptions={selectedOperatorOption ? [selectedOperatorOption] : []}

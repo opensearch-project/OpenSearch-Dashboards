@@ -44,7 +44,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiLink,
-  EuiComboBox,
+  EuiCompressedComboBox,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -154,7 +154,7 @@ export const PositiveRateAgg = (props) => {
             }
             fullWidth
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               placeholder={i18n.translate('visTypeTimeseries.positiveRate.unitSelectPlaceholder', {
                 defaultMessage: 'Select scale...',
               })}

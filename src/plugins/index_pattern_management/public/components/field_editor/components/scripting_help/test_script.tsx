@@ -35,7 +35,7 @@ import React, { Component, Fragment } from 'react';
 import {
   EuiSmallButton,
   EuiCodeBlock,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiCompressedFormRow,
   EuiText,
   EuiSpacer,
@@ -238,7 +238,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
           })}
           fullWidth
         >
-          <EuiComboBox
+          <EuiCompressedComboBox
             placeholder={i18n.translate('indexPatternManagement.testScript.fieldsPlaceholder', {
               defaultMessage: 'Select...',
             })}

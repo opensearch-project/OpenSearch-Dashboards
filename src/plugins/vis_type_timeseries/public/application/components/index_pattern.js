@@ -37,7 +37,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiText,
 } from '@elastic/eui';
 import { FieldSelect } from './aggs/field_select';
@@ -146,7 +146,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 defaultMessage: 'Data timerange mode',
               })}
             >
-              <EuiComboBox
+              <EuiCompressedComboBox
                 isClearable={false}
                 placeholder={i18n.translate(
                   'visTypeTimeseries.indexPattern.timeRange.selectTimeRange',

@@ -41,7 +41,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiSpacer,
@@ -170,7 +170,7 @@ const StandardDeviationAggUi = (props) => {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               options={modeOptions}
               selectedOptions={selectedModeOption ? [selectedModeOption] : []}
               onChange={handleSelectChange('mode')}

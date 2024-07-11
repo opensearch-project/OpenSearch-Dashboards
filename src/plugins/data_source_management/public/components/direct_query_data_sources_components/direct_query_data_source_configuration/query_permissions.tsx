@@ -4,7 +4,7 @@
  */
 
 import {
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
@@ -52,7 +52,7 @@ export const QueryPermissionsConfiguration = (props: PermissionsConfigurationPro
               : undefined
           }
         >
-          <EuiComboBox
+          <EuiCompressedComboBox
             placeholder="Select one or more options"
             options={roles}
             selectedOptions={selectedRoles}

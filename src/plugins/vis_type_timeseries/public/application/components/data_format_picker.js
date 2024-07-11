@@ -33,7 +33,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import {
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
@@ -179,7 +179,7 @@ class DataFormatPickerUI extends Component {
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiCompressedFormRow id={htmlId('date')} label={this.props.label}>
-              <EuiComboBox
+              <EuiCompressedComboBox
                 isClearable={false}
                 options={options}
                 selectedOptions={selectedOption ? [selectedOption] : []}
@@ -198,7 +198,7 @@ class DataFormatPickerUI extends Component {
                 />
               }
             >
-              <EuiComboBox
+              <EuiCompressedComboBox
                 isClearable={false}
                 options={durationInputOptions}
                 selectedOptions={selectedFrom ? [selectedFrom] : []}
@@ -217,7 +217,7 @@ class DataFormatPickerUI extends Component {
                 />
               }
             >
-              <EuiComboBox
+              <EuiCompressedComboBox
                 isClearable={false}
                 options={durationOutputOptions}
                 selectedOptions={selectedTo ? [selectedTo] : []}
@@ -289,7 +289,7 @@ class DataFormatPickerUI extends Component {
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiCompressedFormRow label={this.props.label}>
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={options}
               selectedOptions={selectedOption ? [selectedOption] : []}

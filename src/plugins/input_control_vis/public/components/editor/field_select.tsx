@@ -32,7 +32,7 @@ import _ from 'lodash';
 import React, { Component } from 'react';
 
 import { injectI18n, FormattedMessage, InjectedIntlProps } from '@osd/i18n/react';
-import { EuiCompressedFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { IIndexPattern, IFieldType } from '../../../../data/public';
 
@@ -172,7 +172,7 @@ class FieldSelectUi extends Component<FieldSelectUiProps, FieldSelectUiState> {
           />
         }
       >
-        <EuiComboBox
+        <EuiCompressedComboBox
           placeholder={intl.formatMessage({
             id: 'inputControl.editor.fieldSelect.selectFieldPlaceholder',
             defaultMessage: 'Select field...',

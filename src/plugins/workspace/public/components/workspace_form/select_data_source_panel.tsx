@@ -11,7 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiFormLabel,
 } from '@elastic/eui';
@@ -103,7 +103,7 @@ export const SelectDataSourcePanel = ({
         >
           <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
             <EuiFlexItem style={{ maxWidth: 400 }}>
-              <EuiComboBox
+              <EuiCompressedComboBox
                 data-test-subj="workspaceForm-select-dataSource-comboBox"
                 singleSelection
                 options={dataSourcesOptions}

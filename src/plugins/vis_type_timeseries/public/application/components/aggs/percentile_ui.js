@@ -39,7 +39,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiCompressedFieldNumber,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
@@ -125,7 +125,7 @@ class PercentilesUi extends Component {
             </EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               id={htmlId('mode')}
               options={modeOptions}

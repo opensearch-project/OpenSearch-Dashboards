@@ -41,7 +41,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiSpacer,
   EuiCompressedFormRow,
 } from '@elastic/eui';
@@ -227,7 +227,7 @@ const TopHitAggUi = (props) => {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               placeholder={i18n.translate(
                 'visTypeTimeseries.topHit.aggregateWith.selectPlaceholder',
@@ -268,7 +268,7 @@ const TopHitAggUi = (props) => {
               <FormattedMessage id="visTypeTimeseries.topHit.orderLabel" defaultMessage="Order" />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               placeholder={i18n.translate('visTypeTimeseries.topHit.order.selectPlaceholder', {
                 defaultMessage: 'Select...',

@@ -40,7 +40,7 @@ import { MarkdownEditor } from '../markdown_editor';
 import less from 'less/lib/less-browser';
 import {
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiTabs,
   EuiTab,
   EuiPanel,
@@ -268,7 +268,7 @@ class MarkdownPanelConfigUi extends Component {
                 </EuiFormLabel>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiComboBox
+                <EuiCompressedComboBox
                   id={htmlId('valign')}
                   isClearable={false}
                   options={alignOptions}

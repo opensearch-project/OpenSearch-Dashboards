@@ -39,7 +39,7 @@ import { ColorPicker } from '../color_picker';
 import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiTabs,
   EuiTab,
   EuiPanel,
@@ -303,7 +303,7 @@ class TimeseriesPanelConfigUi extends Component {
                     />
                   }
                 >
-                  <EuiComboBox
+                  <EuiCompressedComboBox
                     isClearable={false}
                     options={positionOptions}
                     selectedOptions={selectedPositionOption ? [selectedPositionOption] : []}
@@ -322,7 +322,7 @@ class TimeseriesPanelConfigUi extends Component {
                     />
                   }
                 >
-                  <EuiComboBox
+                  <EuiCompressedComboBox
                     isClearable={false}
                     options={scaleOptions}
                     selectedOptions={selectedAxisScaleOption ? [selectedAxisScaleOption] : []}
@@ -375,7 +375,7 @@ class TimeseriesPanelConfigUi extends Component {
                 </EuiFormLabel>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiComboBox
+                <EuiCompressedComboBox
                   isClearable={false}
                   id={htmlId('legendPos')}
                   options={legendPositionOptions}
@@ -404,7 +404,7 @@ class TimeseriesPanelConfigUi extends Component {
                 </EuiFormLabel>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiComboBox
+                <EuiCompressedComboBox
                   isClearable={false}
                   id={htmlId('tooltipMode')}
                   options={tooltipModeOptions}

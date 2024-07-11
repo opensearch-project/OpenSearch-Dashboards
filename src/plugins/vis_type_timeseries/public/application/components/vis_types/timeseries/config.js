@@ -37,7 +37,7 @@ import { createTextHandler } from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
 import {
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFieldText,
@@ -190,7 +190,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={chartTypeOptions}
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
@@ -209,7 +209,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={stackedOptions}
               selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
@@ -293,7 +293,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={chartTypeOptions}
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
@@ -312,7 +312,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={stackedOptions}
               selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
@@ -471,7 +471,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={splitColorOptions}
               selectedOptions={selectedSplitColorOption ? [selectedSplitColorOption] : []}
@@ -550,7 +550,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               isDisabled={disableSeparateYaxis}
               options={positionOptions}

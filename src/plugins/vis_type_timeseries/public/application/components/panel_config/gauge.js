@@ -40,7 +40,7 @@ import uuid from 'uuid';
 import { YesNo } from '../yes_no';
 import {
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiTabs,
   EuiTab,
   EuiPanel,
@@ -238,7 +238,7 @@ class GaugePanelConfigUi extends Component {
                     />
                   }
                 >
-                  <EuiComboBox
+                  <EuiCompressedComboBox
                     isClearable={false}
                     options={styleOptions}
                     selectedOptions={selectedGaugeStyleOption ? [selectedGaugeStyleOption] : []}
