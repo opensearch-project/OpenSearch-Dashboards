@@ -44,7 +44,7 @@ import {
   EuiDescribedFormGroup,
   EuiCompressedFieldNumber,
   EuiCompressedFieldText,
-  EuiFilePicker,
+  EuiCompressedFilePicker,
   EuiCompressedFormRow,
   EuiIconTip,
   EuiImage,
@@ -100,7 +100,7 @@ export const getEditableValue = (
 };
 
 export class Field extends PureComponent<FieldProps> {
-  private changeImageForm = React.createRef<EuiFilePicker>();
+  private changeImageForm = React.createRef<EuiCompressedFilePicker>();
 
   getDisplayedDefaultValue(
     type: UiSettingsType,
@@ -374,7 +374,7 @@ export class Field extends PureComponent<FieldProps> {
           return <EuiImage {...a11yProps} allowFullScreen url={value as string} alt={name} />;
         } else {
           return (
-            <EuiFilePicker
+            <EuiCompressedFilePicker
               disabled={loading || isOverridden || !enableSaving}
               onChange={this.onImageChange}
               accept=".jpg,.jpeg,.png"

@@ -11,7 +11,7 @@ import {
   EuiFlyoutFooter,
   EuiCallOut,
   EuiSpacer,
-  EuiFilePicker,
+  EuiCompressedFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -140,7 +140,7 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
             />
           }
         >
-          <EuiFilePicker
+          <EuiCompressedFilePicker
             accept=".ndjson, .json"
             name="queryFileImport"
             fullWidth

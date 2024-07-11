@@ -41,7 +41,7 @@ import {
   EuiTitle,
   EuiForm,
   EuiCompressedFormRow,
-  EuiFilePicker,
+  EuiCompressedFilePicker,
   EuiInMemoryTable,
   EuiCompressedSelect,
   EuiFlexGroup,
@@ -774,7 +774,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             />
           }
         >
-          <EuiFilePicker
+          <EuiCompressedFilePicker
             accept=".ndjson, .json"
             fullWidth
             initialPromptText={
