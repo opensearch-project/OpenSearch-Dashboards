@@ -380,10 +380,15 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     >
       {renderQueryEditor()}
       <EuiFlexItem>
-        <EuiFlexGroup responsive={false} gutterSize="none">
-          <EuiFlexItem grow={false}>{props.filterBar}</EuiFlexItem>
-          <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
-          <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
+        <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
+          {isQueryEditorCollapsed && <EuiFlexItem grow={false}>{props.filterBar}</EuiFlexItem>}
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup>
+              <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
