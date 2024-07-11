@@ -49,6 +49,7 @@ interface StatefulSearchBarDeps {
   storage: IStorageWrapper;
   settings: Settings;
   setDataSourceContainerRef: (ref: HTMLDivElement | null) => void;
+  setDataSourceFooterRef: (ref: HTMLDivElement | null) => void;
   setContainerRef: (ref: HTMLDivElement | null) => void;
 }
 
@@ -140,6 +141,7 @@ export function createSearchBar({
   data,
   settings,
   setDataSourceContainerRef,
+  setDataSourceFooterRef,
   setContainerRef,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
@@ -179,6 +181,12 @@ export function createSearchBar({
     const dataSourceContainerRef = useCallback((node) => {
       if (node) {
         setDataSourceContainerRef(node);
+      }
+    }, []);
+
+    const dataSourceFooterRef = useCallback((node) => {
+      if (node) {
+        setDataSourceFooterRef(node);
       }
     }, []);
 
@@ -229,6 +237,7 @@ export function createSearchBar({
           query={query}
           settings={settings}
           dataSourceContainerRef={dataSourceContainerRef}
+          dataSourceFooterRef={dataSourceFooterRef}
           containerRef={containerRef}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}

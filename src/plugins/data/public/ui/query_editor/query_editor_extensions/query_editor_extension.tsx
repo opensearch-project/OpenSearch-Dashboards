@@ -15,6 +15,7 @@ interface QueryEditorExtensionProps {
   dependencies: QueryEditorExtensionDependencies;
   componentContainer: Element;
   bannerContainer: Element;
+  footerContainer: Element;
 }
 
 export interface QueryEditorExtensionDependencies {
@@ -60,8 +61,9 @@ export interface QueryEditorExtensionConfig {
    * @returns The component the query editor extension.
    */
   getBanner?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
-}
 
+  getFooter?: (dependencies: QueryEditorExtensionDependencies) => React.ReactElement | null;
+}
 const QueryEditorExtensionPortal: React.FC<{ container: Element }> = (props) => {
   if (!props.children) return null;
 
@@ -85,6 +87,11 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
     props.dependencies,
   ]);
 
+  const footer = useMemo(() => props.config.getFooter?.(props.dependencies), [
+    props.config,
+    props.dependencies,
+  ]);
+
   useEffect(() => {
     isMounted.current = true;
     return () => {
@@ -103,6 +110,7 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
   console.log('props.config', props.config);
   console.log('banner', props.bannerContainer, banner);
   console.log('component', props.componentContainer, component);
+  console.log('footer', props.footerContainer, component);
   if (!isEnabled) return null;
 
   return (
@@ -112,6 +120,9 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
       </QueryEditorExtensionPortal>
       <QueryEditorExtensionPortal container={props.componentContainer}>
         {component}
+      </QueryEditorExtensionPortal>
+      <QueryEditorExtensionPortal container={props.footerContainer}>
+        {footer}
       </QueryEditorExtensionPortal>
     </>
   );

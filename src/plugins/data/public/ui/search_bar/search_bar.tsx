@@ -81,6 +81,7 @@ export interface SearchBarOwnProps {
   query?: Query;
   settings?: Settings;
   dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
+  dataSourceFooterRef?: React.RefCallback<HTMLDivElement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
@@ -492,6 +493,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         <QueryEditorTopRow
           timeHistory={this.props.timeHistory}
           dataSourceContainerRef={this.props.dataSourceContainerRef}
+          dataSourceFooterRef={this.props.dataSourceFooterRef}
           containerRef={this.props.containerRef}
           settings={this.props.settings}
           query={this.state.query}

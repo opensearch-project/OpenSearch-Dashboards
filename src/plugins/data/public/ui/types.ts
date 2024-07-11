@@ -68,5 +68,6 @@ export interface IUiStart {
   SuggestionsComponent: React.ComponentType<SuggestionsComponentProps>;
   Settings: Settings;
   dataSourceContainer$: Observable<HTMLDivElement | null>;
+  dataSourceFooter$: Observable<HTMLDivElement | null>;
   container$: Observable<HTMLDivElement | null>;
 }

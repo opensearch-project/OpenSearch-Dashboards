@@ -39,6 +39,7 @@ const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 export interface QueryEditorTopRowProps {
   query?: Query;
   dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
+  dataSourceFooterRef?: React.RefCallback<HTMLDivElement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
   settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -237,6 +238,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           prepend={props.prepend}
           query={parsedQuery}
           dataSourceContainerRef={props.dataSourceContainerRef}
+          dataSourceFooterRef={props.dataSourceFooterRef}
           containerRef={props.containerRef}
           settings={props.settings!}
           screenTitle={props.screenTitle}

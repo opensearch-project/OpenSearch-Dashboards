@@ -28,6 +28,7 @@ export interface QueryEditorProps {
   dataSource?: DataSource;
   query: Query;
   dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
+  dataSourceFooterRef?: React.RefCallback<HTMLDivElement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
   disableAutoFocus?: boolean;
@@ -49,6 +50,7 @@ export interface QueryEditorProps {
   queryLanguage?: string;
   headerClassName?: string;
   bannerClassName?: string;
+  footerClassName?: string;
   isCollapsed: boolean;
   onToggleCollapsed: () => void;
 }
@@ -99,6 +101,7 @@ export default class QueryEditorUI extends Component<Props, State> {
   private componentIsUnmounting = false;
   private headerRef: RefObject<HTMLDivElement> = createRef();
   private bannerRef: RefObject<HTMLDivElement> = createRef();
+  private footerRef: RefObject<HTMLDivElement> = createRef();
   private extensionMap = this.props.settings?.getQueryEditorExtensionMap();
 
   private getQueryString = () => {
@@ -129,10 +132,15 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   private renderQueryEditorExtensions() {
+    console.log('i am here!', this.headerRef.current);
+    console.log('i am here!', this.bannerRef.current);
+    console.log('i am here!', this.footerRef.current);
+
     if (
       !(
         this.headerRef.current &&
         this.bannerRef.current &&
+        this.footerRef.current &&
         this.props.queryLanguage &&
         this.extensionMap &&
         Object.keys(this.extensionMap).length > 0
@@ -146,6 +154,7 @@ export default class QueryEditorUI extends Component<Props, State> {
         configMap={this.extensionMap}
         componentContainer={this.headerRef.current}
         bannerContainer={this.bannerRef.current}
+        footerContainer={this.footerRef.current}
         indexPatterns={this.props.indexPatterns}
         dataSource={this.props.dataSource}
       />
@@ -292,17 +301,18 @@ export default class QueryEditorUI extends Component<Props, State> {
     const className = classNames(this.props.className);
     const headerClassName = classNames('osdQueryEditorHeader', this.props.headerClassName);
     const bannerClassName = classNames('osdQueryEditorBanner', this.props.bannerClassName);
+    const footerClassName = classNames('osdQueryEditorFooter', this.props.footerClassName);
 
     const useQueryEditor =
       this.props.query.language === 'SQLAsync' ||
       this.props.query.language === 'SQL' ||
       this.props.query.language === 'PPL';
 
-    console.log('this.state.isDataSourcesVisible', this.state.isDataSourcesVisible);
-    console.log('this.state.isDataSetsVisible', this.state.isDataSetsVisible);
+    // console.log('this.state.isDataSourcesVisible', this.state.isDataSourcesVisible);
+    // console.log('this.state.isDataSetsVisible', this.state.isDataSetsVisible);
 
-    console.log('this.props.dataSourceContainerRef', this.props.dataSourceContainerRef);
-    console.log('this.props.containerRef', this.props.containerRef);
+    // console.log('this.props.dataSourceContainerRef', this.props.dataSourceContainerRef);
+    // console.log('this.props.containerRef', this.props.containerRef);
 
     return (
       <div className={className}>
@@ -349,25 +359,29 @@ export default class QueryEditorUI extends Component<Props, State> {
           <EuiFlexItem onClick={this.onClickInput} grow={true}>
             <div ref={this.headerRef} className={headerClassName} />
             {this.props.isCollapsed && useQueryEditor && (
-              <CodeEditor
-                height={70}
-                languageId="opensearchql"
-                value={this.getQueryString()}
-                onChange={this.onInputChange}
-                options={{
-                  lineNumbers: 'on',
-                  lineHeight: 24,
-                  fontSize: 14,
-                  fontFamily: 'Roboto Mono',
-                  minimap: {
-                    enabled: false,
-                  },
-                  scrollBeyondLastLine: false,
-                  wordWrap: 'on',
-                  wrappingIndent: 'indent',
-                }}
-              />
+              <>
+                <CodeEditor
+                  height={70}
+                  languageId="opensearchql"
+                  value={this.getQueryString()}
+                  onChange={this.onInputChange}
+                  options={{
+                    lineNumbers: 'on',
+                    lineHeight: 24,
+                    fontSize: 14,
+                    fontFamily: 'Roboto Mono',
+                    minimap: {
+                      enabled: false,
+                    },
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    wrappingIndent: 'indent',
+                  }}
+                />
+                <div ref={this.props.dataSourceFooterRef} />
+              </>
             )}
+            <div ref={this.footerRef} className={footerClassName} />
           </EuiFlexItem>
         </EuiFlexGroup>
         {this.renderQueryEditorExtensions()}

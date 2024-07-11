@@ -30,6 +30,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
   private queryEnhancements: Map<string, QueryEnhancement> = new Map();
   private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig> = {};
   private dataSourceContainer$ = new BehaviorSubject<HTMLDivElement | null>(null);
+  private dataSourceFooter$ = new BehaviorSubject<HTMLDivElement | null>(null);
   private container$ = new BehaviorSubject<HTMLDivElement | null>(null);
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
@@ -67,6 +68,10 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       this.dataSourceContainer$.next(ref);
     };
 
+    const setDataSourceFooterRef = (ref: HTMLDivElement | null) => {
+      this.dataSourceFooter$.next(ref);
+    };
+
     const setContainerRef = (ref: HTMLDivElement | null) => {
       this.container$.next(ref);
     };
@@ -77,6 +82,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       storage,
       settings: Settings,
       setDataSourceContainerRef,
+      setDataSourceFooterRef,
       setContainerRef,
     });
 
@@ -86,6 +92,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       SuggestionsComponent,
       Settings,
       dataSourceContainer$: this.dataSourceContainer$,
+      dataSourceFooter$: this.dataSourceFooter$,
       container$: this.container$,
     };
   }
