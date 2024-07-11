@@ -23,11 +23,13 @@ export interface QueryEnhancementsPluginStartDependencies {
 }
 
 export interface Connection {
-  id: string;
-  title: string;
-  endpoint?: string;
-  installedPlugins?: string[];
-  auth?: any;
+  dataSource: {
+    id: string;
+    title: string;
+    endpoint?: string;
+    installedPlugins?: string[];
+    auth?: any;
+  };
 }
 
 export interface ConnectionsServiceDeps {

@@ -71,9 +71,10 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
       ...dataFrame.meta,
       queryConfig: {
         ...dataFrame.meta.queryConfig,
-        ...(this.connectionsService.getSelectedConnection() && {
-          dataSourceId: this.connectionsService.getSelectedConnection()?.id,
-        }),
+        ...(this.connectionsService.getSelectedConnection() &&
+          this.connectionsService.getSelectedConnection()?.dataSource && {
+            dataSourceId: this.connectionsService.getSelectedConnection()?.dataSource.id,
+          }),
       },
     };
 

@@ -3,12 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EuiPortal } from '@elastic/eui';
-import { combineLatest } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 import { ToastsSetup } from 'opensearch-dashboards/public';
-import { DataPublicPluginStart } from '../../../../data/public';
-import { QueryEditorExtensionDependencies } from '../../../../data/public';
+import { DataPublicPluginStart, QueryEditorExtensionDependencies } from '../../../../data/public';
 import { DataSourceSelector } from '../../../../data_source_management/public';
 import { ConnectionsService } from '../services';
 
@@ -24,64 +23,51 @@ export const ConnectionsBar: React.FC<ConnectionsProps> = ({ connectionsService,
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const subscription = combineLatest([
-      connectionsService.getUiService(),
-      connectionsService.getIsDataSourceEnabled$(),
-    ]).subscribe(([service, enabled]) => {
-      setUiService(service);
-      setIsDataSourceEnabled(enabled);
-    });
+    const uiServiceSubscription = connectionsService.getUiService().subscribe(setUiService);
+    const dataSourceEnabledSubscription = connectionsService
+      .getIsDataSourceEnabled$()
+      .subscribe(setIsDataSourceEnabled);
 
     return () => {
-      subscription.unsubscribe();
+      uiServiceSubscription.unsubscribe();
+      dataSourceEnabledSubscription.unsubscribe();
     };
   }, [connectionsService]);
 
-  const setContainerRef = useCallback((uiContainerRef) => {
-    if (uiContainerRef && containerRef.current) {
-      uiContainerRef.append(containerRef.current);
-    }
-  }, []);
-
   useEffect(() => {
-    if (!uiService || !isDataSourceEnabled) return;
+    if (!uiService || !isDataSourceEnabled || !containerRef.current) return;
     const subscriptions = uiService.dataSourceContainer$.subscribe((container) => {
-      if (container === null) return;
-      setContainerRef(container);
+      if (container && containerRef.current) {
+        container.append(containerRef.current);
+      }
     });
 
-    return () => {
-      subscriptions.unsubscribe();
-    };
-  }, [
-    uiService,
-    uiService?.dataSourceContainer$,
-    containerRef,
-    setContainerRef,
-    isDataSourceEnabled,
-  ]);
+    return () => subscriptions.unsubscribe();
+  }, [uiService, isDataSourceEnabled]);
 
   useEffect(() => {
-    const subscriptions = connectionsService.getSelectedConnection$().subscribe((connection) => {
+    const selectedConnectionSubscription = connectionsService
+      .getSelectedConnection$()
+      .pipe(distinctUntilChanged())
+      .subscribe((connection) => {
+        if (connection) {
+          // Assuming setSelectedConnection$ is meant to update some state or perform an action outside this component
+          connectionsService.setSelectedConnection$(connection);
+        }
+      });
+
+    return () => selectedConnectionSubscription.unsubscribe();
+  }, [connectionsService]);
+
+  const handleSelectedConnection = (id: string | undefined) => {
+    if (!id) {
+      connectionsService.setSelectedConnection$(undefined);
+      return;
+    }
+    connectionsService.getConnectionById(id).subscribe((connection) => {
       connectionsService.setSelectedConnection$(connection);
     });
-    return () => {
-      subscriptions.unsubscribe();
-    };
-  }, [connectionsService]);
-
-  const handleSelectedConnection = useCallback(
-    (id: string | undefined) => {
-      if (!id) {
-        connectionsService.setSelectedConnection$(undefined);
-        return;
-      }
-      connectionsService.getConnectionById(id).subscribe((connection) => {
-        connectionsService.setSelectedConnection$(connection);
-      });
-    },
-    [connectionsService]
-  );
+  };
 
   return (
     <EuiPortal
