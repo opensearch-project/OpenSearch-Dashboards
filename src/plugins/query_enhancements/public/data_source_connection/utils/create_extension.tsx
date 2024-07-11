@@ -4,7 +4,6 @@
  */
 
 import React from 'react';
-import { of } from 'rxjs';
 import { ToastsSetup } from 'opensearch-dashboards/public';
 import { QueryEditorExtensionConfig } from '../../../../data/public';
 import { ConfigSchema } from '../../../common/config';
@@ -20,7 +19,7 @@ export const createDataSourceConnectionExtension = (
     id: 'data-source-connection',
     order: 2000,
     isEnabled$: (dependencies) => {
-      return of(true);
+      return connectionsService.getIsDataSourceEnabled$();
     },
     getComponent: (dependencies) => {
       return (
