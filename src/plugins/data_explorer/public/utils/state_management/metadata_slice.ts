@@ -59,6 +59,9 @@ export const slice = createSlice({
     setIndexPattern: (state, action: PayloadAction<string>) => {
       state.indexPattern = action.payload;
     },
+    setDataset: (state, action: PayloadAction<DataSet>) => {
+      state.dataset = action.payload;
+    },
     setOriginatingApp: (state, action: PayloadAction<string | undefined>) => {
       state.originatingApp = action.payload;
     },
@@ -72,4 +75,4 @@ export const slice = createSlice({
 });
 
 export const { reducer } = slice;
-export const { setIndexPattern, setOriginatingApp, setView, setState } = slice.actions;
+export const { setIndexPattern, setDataset, setOriginatingApp, setView, setState } = slice.actions;
