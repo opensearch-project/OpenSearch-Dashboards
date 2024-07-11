@@ -9,6 +9,7 @@ import { QueryEditorExtensionConfig } from '../../../../data/public';
 import { ConfigSchema } from '../../../common/config';
 import { ConnectionsBar } from '../components';
 import { ConnectionsService } from '../services';
+import { of } from 'rxjs';
 
 export const createDataSourceConnectionExtension = (
   connectionsService: ConnectionsService,
@@ -19,7 +20,7 @@ export const createDataSourceConnectionExtension = (
     id: 'data-source-connection',
     order: 2000,
     isEnabled$: (dependencies) => {
-      return connectionsService.getIsDataSourceEnabled$();
+      return of(false);
     },
     getComponent: (dependencies) => {
       return (

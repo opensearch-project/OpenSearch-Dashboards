@@ -294,6 +294,11 @@ export default class QueryEditorUI extends Component<Props, State> {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" className={`${className}__wrapper`}>
               <EuiFlexItem grow={false}>{this.props.prepend}</EuiFlexItem>
+              {this.state.isDataSetsVisible && (
+                <EuiFlexItem grow={false} className={`${className}__dataSetWrapper`}>
+                  <div ref={this.props.containerRef} />
+                </EuiFlexItem>
+              )}
               {this.state.isDataSourcesVisible && (
                 <EuiFlexItem grow={false} className={`${className}__dataSourceWrapper`}>
                   <div ref={this.props.dataSourceContainerRef} />
@@ -307,11 +312,6 @@ export default class QueryEditorUI extends Component<Props, State> {
                   appName={this.services.appName}
                 />
               </EuiFlexItem>
-              {this.state.isDataSetsVisible && (
-                <EuiFlexItem grow={false} className={`${className}__dataSetWrapper`}>
-                  <div ref={this.props.containerRef} />
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem onClick={this.onClickInput} grow={true}>
