@@ -105,7 +105,9 @@ export const IndexPatternSelectable = ({
   }, [dataSources, setIndexPatternOptionList]);
 
   const handleSourceChange = useCallback(
-    (selectedOptions: any) => handleSourceSelection(selectedOptions),
+    (selectedOptions: any) => {
+      handleSourceSelection(selectedOptions);
+    },
     [handleSourceSelection]
   );
 

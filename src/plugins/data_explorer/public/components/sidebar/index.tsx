@@ -228,7 +228,9 @@ export const Sidebar: FC = ({ children }) => {
             <DataSetNavigator
               indexPatternSelectable={indexPatternSelectable}
               dataConnectionsRef={connectionsRef.current}
-            />
+            >
+              {selectedSources}
+            </DataSetNavigator>
             {/* {indexPatternSelectable} */}
           </EuiPortal>
         )}
