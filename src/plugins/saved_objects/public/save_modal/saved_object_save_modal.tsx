@@ -31,7 +31,7 @@
 import {
   htmlIdGenerator,
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiCallOut,
   EuiFieldText,
   EuiForm,
@@ -158,12 +158,12 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
+          <EuiSmallButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
             <FormattedMessage
               id="savedObjects.saveModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
 
           {this.renderConfirmButton()}
         </EuiModalFooter>

@@ -14,7 +14,7 @@ import {
   EuiSmallButtonIcon,
   EuiConfirmModal,
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -58,7 +58,7 @@ export const Header = ({
 
   const renderDefaultIcon = () => {
     return (
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         onClick={() => {
           onClickSetDefault();
           setIsDefaultDataSourceState(!isDefaultDataSourceState);
@@ -69,7 +69,7 @@ export const Header = ({
         data-test-subj="editSetDefaultDataSource"
       >
         {isDefaultDataSourceState ? 'Default' : 'Set as default'}
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     );
   };
 

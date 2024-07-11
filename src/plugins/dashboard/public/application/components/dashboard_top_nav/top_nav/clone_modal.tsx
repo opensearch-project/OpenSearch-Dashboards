@@ -34,7 +34,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 
 import {
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiFieldText,
   EuiModal,
   EuiModalBody,
@@ -206,12 +206,12 @@ export class DashboardCloneModal extends React.Component<Props, State> {
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="cloneCancelButton" onClick={this.props.onClose}>
+          <EuiSmallButtonEmpty data-test-subj="cloneCancelButton" onClick={this.props.onClose}>
             <FormattedMessage
               id="dashboard.topNav.cloneModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
 
           <EuiSmallButton
             fill

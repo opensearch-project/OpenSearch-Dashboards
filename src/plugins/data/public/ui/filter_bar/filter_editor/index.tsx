@@ -30,6 +30,7 @@
 
 import {
   EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiButtonEmpty,
   // @ts-ignore
   EuiCodeEditor,
@@ -194,7 +195,7 @@ class FilterEditorUI extends Component<Props, State> {
                 </EuiSmallButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
+                <EuiSmallButtonEmpty
                   flush="right"
                   onClick={this.props.onCancel}
                   data-test-subj="cancelSaveFilter"
@@ -203,7 +204,7 @@ class FilterEditorUI extends Component<Props, State> {
                     id="data.filter.filterEditor.cancelButtonLabel"
                     defaultMessage="Cancel"
                   />
-                </EuiButtonEmpty>
+                </EuiSmallButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem />
             </EuiFlexGroup>

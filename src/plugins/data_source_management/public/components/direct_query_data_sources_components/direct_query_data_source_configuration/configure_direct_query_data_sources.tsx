@@ -12,7 +12,7 @@ import {
   EuiSteps,
   EuiPageSideBar,
   EuiBottomBar,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiSmallButton,
 } from '@elastic/eui';
 import React, { useEffect, useState, useCallback } from 'react';
@@ -311,7 +311,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
       <EuiBottomBar data-test-subj="reviewSaveOrCancel">
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+            <EuiSmallButtonEmpty
               onClick={() => {
                 history.push('/create');
               }}
@@ -321,7 +321,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
               data-test-subj="cancelButton"
             >
               Cancel
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSmallButton

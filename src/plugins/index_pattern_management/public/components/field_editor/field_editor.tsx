@@ -34,7 +34,7 @@ import { intersection, union, get } from 'lodash';
 import {
   EuiBasicTable,
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiCallOut,
   EuiCode,
   EuiCodeEditor,
@@ -717,23 +717,23 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             </EuiSmallButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={redirectAway} data-test-subj="fieldCancelButton">
+            <EuiSmallButtonEmpty onClick={redirectAway} data-test-subj="fieldCancelButton">
               <FormattedMessage
                 id="indexPatternManagement.actions.cancelButton"
                 defaultMessage="Cancel"
               />
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
           {!isCreating && spec.scripted ? (
             <EuiFlexItem>
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty color="danger" onClick={this.showDeleteModal}>
+                  <EuiSmallButtonEmpty color="danger" onClick={this.showDeleteModal}>
                     <FormattedMessage
                       id="indexPatternManagement.actions.deleteButton"
                       defaultMessage="Delete"
                     />
-                  </EuiButtonEmpty>
+                  </EuiSmallButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

@@ -40,7 +40,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalFooter,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiCallOut,
 } from '@elastic/eui';
 import { SearchResponse } from 'elasticsearch';
@@ -121,12 +121,12 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
       <EuiModalFooter>
         <EuiCopy textToCopy={responseJSON}>
           {(copy) => (
-            <EuiButtonEmpty onClick={copy}>
+            <EuiSmallButtonEmpty onClick={copy}>
               <FormattedMessage
                 id="data.search.searchSource.fetch.shardsFailedModal.copyToClipboard"
                 defaultMessage="Copy response to clipboard"
               />
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           )}
         </EuiCopy>
         <EuiSmallButton onClick={() => onClose()} fill data-test-sub="closeShardFailureModal">

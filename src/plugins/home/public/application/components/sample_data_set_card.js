@@ -33,7 +33,7 @@ import PropTypes from 'prop-types';
 import {
   EuiCard,
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
@@ -79,7 +79,7 @@ export class SampleDataSetCard extends React.Component {
         return (
           <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
+              <EuiSmallButtonEmpty
                 isLoading={this.props.isProcessing}
                 onClick={this.uninstall}
                 color="danger"
@@ -112,7 +112,7 @@ export class SampleDataSetCard extends React.Component {
                     defaultMessage="Remove"
                   />
                 )}
-              </EuiButtonEmpty>
+              </EuiSmallButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SampleDataViewDataButton

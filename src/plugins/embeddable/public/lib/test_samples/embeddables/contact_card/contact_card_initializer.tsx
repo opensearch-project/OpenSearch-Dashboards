@@ -37,7 +37,7 @@ import {
   EuiModalBody,
   EuiSmallButton,
   EuiModalFooter,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
@@ -86,7 +86,7 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={this.props.onCancel}>Cancel</EuiButtonEmpty>
+          <EuiSmallButtonEmpty onClick={this.props.onCancel}>Cancel</EuiSmallButtonEmpty>
 
           <EuiSmallButton
             isDisabled={!this.state.firstName}

@@ -6,7 +6,7 @@
 import {
   EuiBottomBar,
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -54,7 +54,7 @@ export const WorkspaceBottomBar = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="m">
-              <EuiButtonEmpty
+              <EuiSmallButtonEmpty
                 color="ghost"
                 onClick={showCancelModal}
                 data-test-subj="workspaceForm-bottomBar-cancelButton"
@@ -62,7 +62,7 @@ export const WorkspaceBottomBar = ({
                 {i18n.translate('workspace.form.bottomBar.cancel', {
                   defaultMessage: 'Cancel',
                 })}
-              </EuiButtonEmpty>
+              </EuiSmallButtonEmpty>
               <EuiSpacer />
               <EuiSmallButton
                 form={formId}

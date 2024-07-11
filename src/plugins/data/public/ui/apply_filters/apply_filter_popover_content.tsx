@@ -30,7 +30,7 @@
 
 import {
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiForm,
   EuiFormRow,
   EuiModalBody,
@@ -110,12 +110,12 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
         <EuiModalBody>{form}</EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={this.props.onCancel}>
+          <EuiSmallButtonEmpty onClick={this.props.onCancel}>
             <FormattedMessage
               id="data.filter.applyFiltersPopup.cancelButtonLabel"
               defaultMessage="Cancel"
             />
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
           <EuiSmallButton onClick={this.onSubmit} data-test-subj="applyFiltersPopoverButton" fill>
             <FormattedMessage
               id="data.filter.applyFiltersPopup.saveButtonLabel"

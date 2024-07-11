@@ -35,7 +35,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 
 import {
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiFieldNumber,
   EuiFormRow,
   EuiCheckboxGroup,
@@ -265,9 +265,9 @@ export function DevToolsSettingsModal(props: Props) {
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="settingsCancelButton" onClick={props.onClose}>
+        <EuiSmallButtonEmpty data-test-subj="settingsCancelButton" onClick={props.onClose}>
           <FormattedMessage id="console.settingsPage.cancelButtonLabel" defaultMessage="Cancel" />
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
 
         <EuiSmallButton fill data-test-subj="settings-save-button" onClick={saveSettings}>
           <FormattedMessage id="console.settingsPage.saveButtonLabel" defaultMessage="Save" />

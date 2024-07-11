@@ -8,7 +8,7 @@ import {
   EuiOverlayMask,
   EuiModal,
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -65,7 +65,7 @@ export const DeleteModal = ({
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onCancel}>Cancel</EuiButtonEmpty>
+          <EuiSmallButtonEmpty onClick={onCancel}>Cancel</EuiSmallButtonEmpty>
           <EuiSmallButton
             onClick={() => onConfirm()}
             color="danger"

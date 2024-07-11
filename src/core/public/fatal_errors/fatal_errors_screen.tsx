@@ -30,7 +30,7 @@
 
 import {
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiCallOut,
   EuiCodeBlock,
   EuiEmptyPrompt,
@@ -136,12 +136,12 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
                     defaultMessage="Clear your session"
                   />
                 </EuiSmallButton>,
-                <EuiButtonEmpty onClick={this.onClickGoBack} data-test-subj="goBack">
+                <EuiSmallButtonEmpty onClick={this.onClickGoBack} data-test-subj="goBack">
                   <FormattedMessage
                     id="core.fatalErrors.goBackButtonLabel"
                     defaultMessage="Go back"
                   />
-                </EuiButtonEmpty>,
+                </EuiSmallButtonEmpty>,
               ]}
             />
             {this.state.errors.map((error, i) => (

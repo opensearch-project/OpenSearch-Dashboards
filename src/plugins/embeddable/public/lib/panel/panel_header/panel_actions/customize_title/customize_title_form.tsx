@@ -30,7 +30,7 @@
 
 import React, { ChangeEvent } from 'react';
 
-import { EuiButtonEmpty, EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiSmallButtonEmpty, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
@@ -75,12 +75,12 @@ export function CustomizeTitleForm({
         />
       </EuiFormRow>
 
-      <EuiButtonEmpty data-test-subj="resetCustomEmbeddablePanelTitle" onClick={onReset}>
+      <EuiSmallButtonEmpty data-test-subj="resetCustomEmbeddablePanelTitle" onClick={onReset}>
         <FormattedMessage
           id="embeddableApi.customizeTitle.optionsMenuForm.resetCustomDashboardButtonLabel"
           defaultMessage="Reset title"
         />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     </div>
   );
 }

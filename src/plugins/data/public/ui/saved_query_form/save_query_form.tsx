@@ -30,7 +30,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiModal,
   EuiSmallButton,
   EuiModalHeader,
@@ -247,11 +247,11 @@ export function SaveQueryForm({
       <EuiModalBody>{saveQueryForm}</EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} data-test-subj="savedQueryFormCancelButton">
+        <EuiSmallButtonEmpty onClick={onClose} data-test-subj="savedQueryFormCancelButton">
           {i18n.translate('data.search.searchBar.savedQueryFormCancelButtonText', {
             defaultMessage: 'Cancel',
           })}
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
 
         <EuiSmallButton
           onClick={onClickSave}

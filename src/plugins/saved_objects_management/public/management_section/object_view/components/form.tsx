@@ -34,7 +34,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSmallButton,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
 import { set } from '@elastic/safer-lodash-set';
@@ -124,7 +124,7 @@ export class Form extends Component<FormProps, FormState> {
           )}
 
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+            <EuiSmallButtonEmpty
               aria-label={i18n.translate('savedObjectsManagement.view.cancelButtonAriaLabel', {
                 defaultMessage: 'Cancel',
               })}
@@ -135,7 +135,7 @@ export class Form extends Component<FormProps, FormState> {
                 id="savedObjectsManagement.view.cancelButtonLabel"
                 defaultMessage="Cancel"
               />
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiForm>

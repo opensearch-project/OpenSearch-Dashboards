@@ -39,7 +39,7 @@ import {
   EuiTitle,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiSmallButton,
 } from '@elastic/eui';
 
@@ -210,21 +210,21 @@ export function ConsoleHistory({ close }: Props) {
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="danger" onClick={() => clear()}>
+            <EuiSmallButtonEmpty color="danger" onClick={() => clear()}>
               {i18n.translate('console.historyPage.clearHistoryButtonLabel', {
                 defaultMessage: 'Clear',
               })}
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="primary" onClick={() => close()}>
+                <EuiSmallButtonEmpty color="primary" onClick={() => close()}>
                   {i18n.translate('console.historyPage.closehistoryButtonLabel', {
                     defaultMessage: 'Close',
                   })}
-                </EuiButtonEmpty>
+                </EuiSmallButtonEmpty>
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>

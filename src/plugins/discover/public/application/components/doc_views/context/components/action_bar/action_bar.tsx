@@ -32,7 +32,7 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import {
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
@@ -117,7 +117,7 @@ export function ActionBar({
         {isSuccessor && showWarning && <EuiSpacer size="s" />}
         <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+            <EuiSmallButtonEmpty
               data-test-subj={`${type}LoadMoreButton`}
               iconType={isSuccessor ? 'arrowDown' : 'arrowUp'}
               isDisabled={isDisabled}
@@ -132,7 +132,7 @@ export function ActionBar({
               flush="right"
             >
               <FormattedMessage id="discover.context.loadButtonLabel" defaultMessage="Load" />
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow>
