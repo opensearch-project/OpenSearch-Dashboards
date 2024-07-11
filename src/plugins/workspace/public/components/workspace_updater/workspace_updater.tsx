@@ -6,7 +6,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { BehaviorSubject, of } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -26,7 +25,6 @@ import { DataSource } from '../../../common/types';
 import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceUpdaterProps {
-  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
   hideTitle?: boolean;
   maxWidth?: number | string;
@@ -57,9 +55,6 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
-  const workspaceConfigurableApps = useObservable(
-    props.workspaceConfigurableApps$ ?? of(undefined)
-  );
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<FormDataFromWorkspace>();
 
@@ -155,7 +150,6 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
               defaultValues={currentWorkspaceFormData}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Update}
-              workspaceConfigurableApps={workspaceConfigurableApps}
               permissionEnabled={isPermissionEnabled}
               permissionLastAdminItemDeletable={false}
               savedObjects={savedObjects}

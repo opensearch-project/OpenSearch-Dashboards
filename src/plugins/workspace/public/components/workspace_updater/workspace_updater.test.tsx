@@ -68,7 +68,7 @@ const mockCoreStart = coreMock.createStart();
 const renderCompleted = () => expect(screen.queryByText('Enter Details')).not.toBeNull();
 
 const WorkspaceUpdater = (
-  props: WorkspaceUpdaterProps & {
+  props: Partial<WorkspaceUpdaterProps> & {
     workspacesService?: ReturnType<typeof createWorkspacesSetupContractMockWithValue>;
   }
 ) => {
@@ -155,21 +155,12 @@ describe('WorkspaceUpdater', () => {
 
   it('cannot render when the name of the current workspace is empty', async () => {
     const mockedWorkspacesService = workspacesServiceMock.createSetupContract();
-    const { container } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        workspacesService={mockedWorkspacesService}
-      />
-    );
+    const { container } = render(<WorkspaceUpdater workspacesService={mockedWorkspacesService} />);
     expect(container).toMatchInlineSnapshot(`<div />`);
   });
 
   it('cannot update workspace with invalid name', async () => {
-    const { getByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-      />
-    );
+    const { getByTestId } = render(<WorkspaceUpdater />);
 
     await waitFor(renderCompleted);
 
@@ -181,11 +172,7 @@ describe('WorkspaceUpdater', () => {
   });
 
   it('cancel update workspace', async () => {
-    const { findByText, getByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-      />
-    );
+    const { findByText, getByTestId } = render(<WorkspaceUpdater />);
     await waitFor(renderCompleted);
 
     fireEvent.click(getByTestId('workspaceForm-bottomBar-cancelButton'));
@@ -196,9 +183,7 @@ describe('WorkspaceUpdater', () => {
 
   it('update workspace successfully', async () => {
     const { getByTestId, getAllByText, getAllByTestId, getAllByLabelText } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-      />
+      <WorkspaceUpdater />
     );
     await waitFor(renderCompleted);
 
@@ -266,11 +251,7 @@ describe('WorkspaceUpdater', () => {
 
   it('should show danger toasts after update workspace failed', async () => {
     workspaceClientUpdate.mockReturnValue({ result: false, success: false });
-    const { getByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-      />
-    );
+    const { getByTestId } = render(<WorkspaceUpdater />);
     await waitFor(renderCompleted);
 
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
@@ -289,11 +270,7 @@ describe('WorkspaceUpdater', () => {
     workspaceClientUpdate.mockImplementation(() => {
       throw new Error('update workspace failed');
     });
-    const { getByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-      />
-    );
+    const { getByTestId } = render(<WorkspaceUpdater />);
     await waitFor(renderCompleted);
 
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
@@ -310,12 +287,7 @@ describe('WorkspaceUpdater', () => {
 
   it('should show danger toasts when currentWorkspace is missing after click update button', async () => {
     const mockedWorkspacesService = workspacesServiceMock.createSetupContract();
-    const { getByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        workspaceService={mockedWorkspacesService}
-      />
-    );
+    const { getByTestId } = render(<WorkspaceUpdater workspaceService={mockedWorkspacesService} />);
 
     await waitFor(renderCompleted);
 

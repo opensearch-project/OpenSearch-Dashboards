@@ -34,7 +34,6 @@ import { WorkspaceUseCase } from '../../types';
 export const IS_WORKSPACE_OVERVIEW_COLLAPSED_KEY = 'workspace:overview_collapsed';
 
 export interface WorkspaceOverviewProps {
-  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 

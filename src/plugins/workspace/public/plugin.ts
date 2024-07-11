@@ -6,7 +6,7 @@
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { first } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import {
   Plugin,
   CoreStart,
@@ -134,16 +134,12 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   };
 
   /**
-   * Initiate an observable with the value of all applications which can be configured by workspace
+   * Return an observable with the value of all applications which can be configured by workspace
    */
-  private setWorkspaceConfigurableApps = async (core: CoreStart) => {
-    const allApps = await new Promise<PublicAppInfo[]>((resolve) => {
-      core.application.applications$.pipe(first()).subscribe((apps) => {
-        resolve([...apps.values()]);
-      });
-    });
-    const availableApps = filterWorkspaceConfigurableApps(allApps);
-    this.workspaceConfigurableApps$.next(availableApps);
+  private getWorkspaceConfigurableApps$ = (core: CoreStart) => {
+    return core.application.applications$.pipe(
+      map((apps) => filterWorkspaceConfigurableApps([...apps.values()]))
+    );
   };
 
   /**
@@ -360,16 +356,11 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
 
-    this.setWorkspaceConfigurableApps(core).then(() => {
-      // filter the nav links based on the current workspace
-      this.filterNavLinks(core);
-    });
-
     this.addWorkspaceToBreadcrumbs(core);
 
     const useCaseStart = this.useCase.start({
       chrome: core.chrome,
-      workspaceConfigurableApps$: this.workspaceConfigurableApps$,
+      workspaceConfigurableApps$: this.getWorkspaceConfigurableApps$(core),
     });
 
     this.registeredUseCasesUpdaterSubscription = useCaseStart
@@ -377,6 +368,8 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       .subscribe((registeredUseCases) => {
         this.registeredUseCases$.next(registeredUseCases);
       });
+
+    this.filterNavLinks(core);
 
     return {};
   }

@@ -7,9 +7,8 @@ import React, { useCallback } from 'react';
 import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
 import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
@@ -20,7 +19,6 @@ import { DataSource } from '../../../common/types';
 import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceCreatorProps {
-  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
@@ -28,9 +26,6 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const {
     services: { application, notifications, http, workspaceClient, savedObjects },
   } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
-  const workspaceConfigurableApps = useObservable(
-    props.workspaceConfigurableApps$ ?? of(undefined)
-  );
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
   const availableUseCases = useObservable(props.registeredUseCases$, []);
 
@@ -105,7 +100,6 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               savedObjects={savedObjects}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
-              workspaceConfigurableApps={workspaceConfigurableApps}
               permissionEnabled={isPermissionEnabled}
               permissionLastAdminItemDeletable
               availableUseCases={availableUseCases}

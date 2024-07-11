@@ -54,7 +54,6 @@ export interface WorkspaceFormProps {
   onSubmit?: (formData: WorkspaceFormSubmitData) => void;
   defaultValues?: WorkspaceFormData;
   operationType?: WorkspaceOperationType;
-  workspaceConfigurableApps?: PublicAppInfo[];
   permissionEnabled?: boolean;
   permissionLastAdminItemDeletable?: boolean;
   availableUseCases: WorkspaceUseCase[];

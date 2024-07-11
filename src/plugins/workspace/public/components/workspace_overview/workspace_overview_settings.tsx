@@ -7,16 +7,8 @@ import React from 'react';
 import { WorkspaceUpdater } from '../workspace_updater';
 import { WorkspaceOverviewProps } from './workspace_overview';
 
-export const WorkspaceOverviewSettings = ({
-  workspaceConfigurableApps$,
-  registeredUseCases$,
-}: WorkspaceOverviewProps) => {
+export const WorkspaceOverviewSettings = ({ registeredUseCases$ }: WorkspaceOverviewProps) => {
   return (
-    <WorkspaceUpdater
-      hideTitle={true}
-      maxWidth="100%"
-      workspaceConfigurableApps$={workspaceConfigurableApps$}
-      registeredUseCases$={registeredUseCases$}
-    />
+    <WorkspaceUpdater hideTitle={true} maxWidth="100%" registeredUseCases$={registeredUseCases$} />
   );
 };
