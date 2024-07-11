@@ -60,7 +60,7 @@ export function HitsCounter({ hits, showResetButton, onResetQuery }: HitsCounter
         alignItems="center"
       >
         <EuiFlexItem grow={false}>
-          <EuiText>
+          <EuiText size="s">
             <strong data-test-subj="discoverQueryHits">{formatNumWithCommas(hits)}</strong>{' '}
             <FormattedMessage
               id="discover.hitsPluralTitle"

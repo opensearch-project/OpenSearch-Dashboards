@@ -105,7 +105,7 @@ export class TablePanelConfig extends Component {
         <div>
           <div className="tvbPanelConfig__container">
             <EuiPanel>
-              <EuiText>
+              <EuiText size="s">
                 <p>
                   <FormattedMessage
                     id="visTypeTimeseries.table.dataTab.defineFieldDescription"

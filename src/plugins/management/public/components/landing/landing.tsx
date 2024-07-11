@@ -65,7 +65,7 @@ export const ManagementLandingPage = ({ setBreadcrumbs }: ManagementLandingPageP
               />
             </h1>
           </EuiTitle>
-          <EuiText>
+          <EuiText size="s">
             <FormattedMessage
               id="management.landing.subhead"
               defaultMessage="Manage your index patterns, saved objects, OpenSearch Dashboards settings, and more."

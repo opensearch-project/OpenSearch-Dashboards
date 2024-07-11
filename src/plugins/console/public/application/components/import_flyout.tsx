@@ -121,7 +121,7 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
           <EuiFlexItem grow={false}>
             <EuiLoadingSpinner size="xl" />
             <EuiSpacer size="m" />
-            <EuiText>
+            <EuiText size="s">
               <p>{loadingMessage}</p>
             </EuiText>
           </EuiFlexItem>

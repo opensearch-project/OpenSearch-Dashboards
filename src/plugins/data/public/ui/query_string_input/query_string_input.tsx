@@ -42,6 +42,7 @@ import {
   EuiLink,
   htmlIdGenerator,
   EuiPortal,
+  EuiText,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
@@ -399,24 +400,29 @@ export default class QueryStringInputUI extends Component<Props, State> {
           }),
           text: toMountPoint(
             <div>
-              <p>
-                <FormattedMessage
-                  id="data.query.queryBar.DQLNestedQuerySyntaxInfoText"
-                  defaultMessage="It looks like you're querying on a nested field.
+              <EuiText size="s">
+                <p>
+                  <FormattedMessage
+                    id="data.query.queryBar.DQLNestedQuerySyntaxInfoText"
+                    defaultMessage="It looks like you're querying on a nested field.
                   You can construct DQL syntax for nested queries in different ways, depending on the results you want.
                   Learn more in our {link}."
-                  values={{
-                    link: (
-                      <EuiLink href={docLinks.links.opensearchDashboards.dql.base} target="_blank">
-                        <FormattedMessage
-                          id="data.query.queryBar.DQLNestedQuerySyntaxInfoDocLinkText"
-                          defaultMessage="docs"
-                        />
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
+                    values={{
+                      link: (
+                        <EuiLink
+                          href={docLinks.links.opensearchDashboards.dql.base}
+                          target="_blank"
+                        >
+                          <FormattedMessage
+                            id="data.query.queryBar.DQLNestedQuerySyntaxInfoDocLinkText"
+                            defaultMessage="docs"
+                          />
+                        </EuiLink>
+                      ),
+                    }}
+                  />
+                </p>
+              </EuiText>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiButton size="s" onClick={() => onDQLNestedQuerySyntaxInfoOptOut(toast)}>
