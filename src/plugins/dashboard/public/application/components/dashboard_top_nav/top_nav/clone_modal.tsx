@@ -168,10 +168,14 @@ export class DashboardCloneModal extends React.Component<Props, State> {
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
-              defaultMessage="Clone dashboard"
-            />
+            <EuiText size="s">
+              <h2>
+                <FormattedMessage
+                  id="dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
+                  defaultMessage="Clone dashboard"
+                />
+              </h2>
+            </EuiText>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 

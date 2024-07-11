@@ -9,8 +9,8 @@ exports[`render 1`] = `
   <EuiFlyoutHeader
     hasBorder={true}
   >
-    <EuiTitle
-      size="m"
+    <EuiText
+      size="s"
     >
       <h2>
         <FormattedMessage
@@ -19,7 +19,7 @@ exports[`render 1`] = `
           values={Object {}}
         />
       </h2>
-    </EuiTitle>
+    </EuiText>
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <SavedObjectFinderUi

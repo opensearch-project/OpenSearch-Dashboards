@@ -34,7 +34,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiTitle,
+  EuiText,
   IconType,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -101,9 +101,9 @@ export const OverviewPageHeader: FC<Props> = ({
               )}
 
               <EuiFlexItem>
-                <EuiTitle size="m">
+                <EuiText size="s">
                   <h1 id="osdOverviewPageHeader__title">{title}</h1>
-                </EuiTitle>
+                </EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
