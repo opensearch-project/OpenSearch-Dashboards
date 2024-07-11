@@ -73,6 +73,7 @@ function consolidate(
       result.push(dataSourceOption);
     });
   });
+  console.log('result:', result);
 
   return result;
 }

@@ -8,7 +8,15 @@ import React, { useState } from 'react';
 import { EuiButton, EuiContextMenu, EuiPopover } from '@elastic/eui';
 // import { DataSourceSelectable } from '../../data_sources/datasource_selector'
 
-export const DataSetNavigator = ({ indexPatternSelectable, dataConnectionsRef }) => {
+interface DataSetNavigatorProps {
+  indexPatternSelectable: any;
+  dataConnectionsRef: HTMLDivElement | null;
+}
+
+export const DataSetNavigator = ({
+  indexPatternSelectable,
+  dataConnectionsRef,
+}: DataSetNavigatorProps) => {
   const [isDataSetNavigatorOpen, setIsDataSetNavigatorOpen] = useState(false);
 
   const onButtonClick = () => setIsDataSetNavigatorOpen((isOpen) => !isOpen);
@@ -41,7 +49,7 @@ export const DataSetNavigator = ({ indexPatternSelectable, dataConnectionsRef })
     {
       id: 2,
       title: 'Clusters',
-      content: <div>{dataConnectionsRef?.current}</div>,
+      content: <div>{dataConnectionsRef?.[0]}</div>
     },
   ];
 
