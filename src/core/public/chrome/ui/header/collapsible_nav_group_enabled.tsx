@@ -5,38 +5,34 @@
 
 import './collapsible_nav_group_enabled.scss';
 import {
-  EuiCollapsibleNavGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
-  EuiListGroup,
-  EuiListGroupItem,
-  EuiShowFor,
   EuiFlyout,
-  EuiButtonIcon,
-  EuiFlexGroup,
   EuiSideNavItemType,
   EuiSideNav,
+  EuiPanel,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { sortBy } from 'lodash';
-import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { ChromeNavLink } from '../..';
-import { ChromeNavGroup, NavGroupType } from '../../../../types';
+import { ChromeNavGroup } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
 import { createEuiListItem } from './nav_link';
 import type { Logos } from '../../../../common/types';
 import { CollapsibleNavHeaderRender } from '../../chrome_service';
-import { NavGroupItemInMap } from '../../nav_group';
+import { ChromeRegistrationNavLink, NavGroupItemInMap } from '../../nav_group';
 import {
   fulfillRegistrationLinksToChromeNavLinks,
   getOrderedLinksOrCategories,
   LinkItem,
   LinkItemType,
 } from '../../utils';
+import { ALL_USE_CASE_ID } from '../../../../../core/utils';
+import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 
 interface Props {
   appId$: InternalApplicationStart['currentAppId$'];
@@ -62,31 +58,57 @@ interface NavGroupsProps {
   style?: React.CSSProperties;
   appId?: string;
   navigateToApp: InternalApplicationStart['navigateToApp'];
-  onClick: () => void;
+  onNavItemClick: (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    navItem: ChromeNavLink
+  ) => void;
 }
 
-function NavGroups({ navLinks, suffix, style, appId, navigateToApp, onClick }: NavGroupsProps) {
-  const createNavItem = ({ link }: { link: ChromeNavLink }) => {
+const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
+  defaultMessage: 'See all...',
+});
+
+function NavGroups({
+  navLinks,
+  suffix,
+  style,
+  appId,
+  navigateToApp,
+  onNavItemClick,
+}: NavGroupsProps) {
+  const createNavItem = ({ link }: { link: ChromeNavLink }): EuiSideNavItemType<{}> => {
     const euiListItem = createEuiListItem({
       link,
       appId,
       dataTestSubj: 'collapsibleNavAppLink',
       navigateToApp,
-      onClick,
+      onClick: (event) => {
+        onNavItemClick(event, link);
+      },
     });
 
     return {
       id: link.id,
-      name: <div className="padding-horizontal">{link.title}</div>,
+      name: <EuiText>{link.title}</EuiText>,
       onClick: euiListItem.onClick,
       href: euiListItem.href,
-      className: 'no-margin-top',
-      isSelected: euiListItem.isActive,
+      emphasize: euiListItem.isActive,
+      className: 'nav-link-item',
+      buttonClassName: 'nav-link-item-btn',
     };
   };
-  const orderedLinksOrCategories = getOrderedLinksOrCategories(navLinks);
   const createSideNavItem = (navLink: LinkItem): EuiSideNavItemType<{}> => {
     if (navLink.itemType === LinkItemType.LINK) {
+      if (navLink.link.title === titleForSeeAll) {
+        const navItem = createNavItem({
+          link: navLink.link,
+        });
+
+        return {
+          ...navItem,
+        };
+      }
+
       return createNavItem({
         link: navLink.link,
       });
@@ -102,18 +124,19 @@ function NavGroups({ navLinks, suffix, style, appId, navigateToApp, onClick }: N
     if (navLink.itemType === LinkItemType.CATEGORY) {
       return {
         id: navLink.category?.id ?? '',
-        name: <div className="padding-horizontal">{navLink.category?.label ?? ''}</div>,
+        name: <div className="nav-link-item">{navLink.category?.label ?? ''}</div>,
         items: navLink.links?.map((link) => createSideNavItem(link)),
       };
     }
 
     return {} as EuiSideNavItemType<{}>;
   };
+  const orderedLinksOrCategories = getOrderedLinksOrCategories(navLinks);
   const sideNavItems = orderedLinksOrCategories
     .map((navLink) => createSideNavItem(navLink))
     .filter((item): item is EuiSideNavItemType<{}> => !!item);
   return (
-    <EuiFlexItem className="eui-yScroll" style={style}>
+    <EuiFlexItem style={style}>
       <EuiSideNav items={sideNavItems} />
       {suffix}
     </EuiFlexItem>
@@ -135,90 +158,20 @@ export function CollapsibleNavGroupEnabled({
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
-  const customNavLink = useObservable(observables.customNavLink$, undefined);
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
-  const lockRef = useRef<HTMLButtonElement>(null);
 
   const [focusGroup, setFocusGroup] = useState<ChromeNavGroup | undefined>(undefined);
 
-  const [shouldShrinkSecondNavigation, setShouldShrinkSecondNavigation] = useState(false);
-
-  useEffect(() => {
-    if (!focusGroup && appId) {
-      const orderedGroups = sortBy(Object.values(navGroupsMap), (group) => group.order);
-      const findMatchedGroup = orderedGroups.find(
-        (group) => !!group.navLinks.find((navLink) => navLink.id === appId)
-      );
-      setFocusGroup(findMatchedGroup);
-    }
-  }, [appId, navGroupsMap, focusGroup]);
-
-  const secondNavigation = focusGroup ? (
-    <>
-      {shouldShrinkSecondNavigation ? (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <EuiButtonIcon
-            color="text"
-            iconType="menuRight"
-            onClick={() => setShouldShrinkSecondNavigation(false)}
-          />
-        </div>
-      ) : null}
-      {!shouldShrinkSecondNavigation && (
-        <>
-          <div className="euiCollapsibleNavGroup euiCollapsibleNavGroup--light euiCollapsibleNavGroup--withHeading">
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem>
-                <h3 className="euiAccordion__triggerWrapper euiCollapsibleNavGroup__title">
-                  {focusGroup.title}
-                </h3>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  color="text"
-                  iconType="menuLeft"
-                  aria-label="shrink"
-                  onClick={() => setShouldShrinkSecondNavigation(true)}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </div>
-          <NavGroups
-            navLinks={fulfillRegistrationLinksToChromeNavLinks(
-              navGroupsMap[focusGroup.id]?.navLinks || [],
-              navLinks
-            )}
-            appId={appId}
-            navigateToApp={navigateToApp}
-            onClick={closeNav}
-          />
-        </>
-      )}
-    </>
-  ) : null;
-
-  const secondNavigationWidth = useMemo(() => {
-    if (shouldShrinkSecondNavigation) {
-      return 48;
-    }
-
-    return 320;
-  }, [shouldShrinkSecondNavigation]);
-
-  const flyoutSize = useMemo(() => {
-    if (focusGroup) {
-      return 320 + secondNavigationWidth;
-    }
-
-    return 320;
-  }, [focusGroup, secondNavigationWidth]);
+  // useEffect(() => {
+  //   if (!focusGroup && appId) {
+  //     const orderedGroups = sortBy(Object.values(navGroupsMap), (group) => group.order);
+  //     const findMatchedGroup = orderedGroups.find(
+  //       (group) => !!group.navLinks.find((navLink) => navLink.id === appId)
+  //     );
+  //     setFocusGroup(findMatchedGroup);
+  //   }
+  // }, [appId, navGroupsMap, focusGroup]);
 
   const onGroupClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
@@ -243,183 +196,110 @@ export function CollapsibleNavGroupEnabled({
     }
   };
 
-  const allLinksWithNavGroup = Object.values(navGroupsMap).reduce(
-    (total, navGroup) => [...total, ...navGroup.navLinks.map((navLink) => navLink.id)],
-    [] as string[]
-  );
+  const navLinksForRender: ChromeNavLink[] = useMemo(() => {
+    if (focusGroup) {
+      return fulfillRegistrationLinksToChromeNavLinks(
+        navGroupsMap[focusGroup.id].navLinks || [],
+        navLinks
+      );
+    }
+
+    const navLinksForAll: ChromeRegistrationNavLink[] = [];
+    navGroupsMap[ALL_USE_CASE_ID]?.navLinks.forEach((navLink) => {
+      navLinksForAll.push(navLink);
+    });
+
+    Object.values(navGroupsMap)
+      .filter((group) => !group.type)
+      .forEach((group) => {
+        const categoryInfo = {
+          id: group.id,
+          label: group.title,
+          order: group.order,
+        };
+        const linksForAllUseCaseWithinNavGroup = group.navLinks
+          .filter((navLink) => navLink.showInAllNavGroup)
+          .map((navLink) => ({
+            ...navLink,
+            category: categoryInfo,
+          }));
+
+        navLinksForAll.push(...linksForAllUseCaseWithinNavGroup);
+
+        if (linksForAllUseCaseWithinNavGroup.length) {
+          navLinksForAll.push({
+            id: group.navLinks[0].id,
+            title: titleForSeeAll,
+            order: Number.MAX_SAFE_INTEGER,
+            category: categoryInfo,
+          });
+        }
+      });
+
+    return fulfillRegistrationLinksToChromeNavLinks(navLinksForAll, navLinks);
+  }, [navLinks, navGroupsMap, focusGroup]);
+
+  const width = useMemo(() => {
+    if (!isNavOpen) {
+      return 50;
+    }
+
+    return 270;
+  }, [isNavOpen]);
 
   return (
-    <>
-      {isNavOpen || isLocked ? (
-        <EuiFlyout
-          data-test-subj="collapsibleNav"
-          id={id}
-          side="left"
-          aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
-            defaultMessage: 'Primary',
-          })}
-          type={isLocked ? 'push' : 'overlay'}
-          onClose={closeNav}
-          outsideClickCloses={false}
-          className="context-nav-wrapper"
-          size={flyoutSize}
-          closeButtonPosition="outside"
-          hideCloseButton={isLocked}
-        >
-          <div style={{ display: 'flex', height: '100%' }}>
-            <div style={{ width: 320 }}>
-              {customNavLink && (
-                <Fragment>
-                  <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-                    <EuiCollapsibleNavGroup
-                      background="light"
-                      className="eui-yScroll"
-                      style={{ maxHeight: '40vh' }}
-                    >
-                      <EuiListGroup
-                        listItems={[
-                          createEuiListItem({
-                            link: customNavLink,
-                            basePath,
-                            navigateToApp,
-                            dataTestSubj: 'collapsibleNavCustomNavLink',
-                            onClick: closeNav,
-                            externalLink: true,
-                          }),
-                        ]}
-                        maxWidth="none"
-                        color="text"
-                        gutterSize="none"
-                        size="s"
-                      />
-                    </EuiCollapsibleNavGroup>
-                  </EuiFlexItem>
-
-                  <EuiHorizontalRule margin="none" />
-                </Fragment>
-              )}
-
-              <NavGroups
-                navLinks={navLinks.filter((link) => !allLinksWithNavGroup.includes(link.id))}
-                suffix={
-                  <div>
-                    <EuiCollapsibleNavGroup>
-                      <EuiListGroup flush>
-                        {sortBy(
-                          Object.values(navGroupsMap).filter(
-                            (item) => item.type === NavGroupType.SYSTEM
-                          ),
-                          (navGroup) => navGroup.order
-                        ).map((group) => {
-                          return (
-                            <EuiListGroupItem
-                              key={group.id}
-                              label={group.title}
-                              isActive={group.id === focusGroup?.id}
-                              onClick={(e) => {
-                                if (focusGroup?.id === group.id) {
-                                  setFocusGroup(undefined);
-                                } else {
-                                  onGroupClick(e, group);
-                                }
-                              }}
-                            />
-                          );
-                        })}
-                      </EuiListGroup>
-                    </EuiCollapsibleNavGroup>
-                    {collapsibleNavHeaderRender && collapsibleNavHeaderRender()}
-                    <EuiCollapsibleNavGroup>
-                      <EuiListGroup flush>
-                        {sortBy(
-                          Object.values(navGroupsMap).filter((item) => !item.type),
-                          (navGroup) => navGroup.order
-                        ).map((group) => {
-                          return (
-                            <EuiListGroupItem
-                              key={group.id}
-                              label={group.title}
-                              isActive={group.id === focusGroup?.id}
-                              onClick={(e) => {
-                                if (focusGroup?.id === group.id) {
-                                  setFocusGroup(undefined);
-                                } else {
-                                  onGroupClick(e, group);
-                                }
-                              }}
-                            />
-                          );
-                        })}
-                      </EuiListGroup>
-                    </EuiCollapsibleNavGroup>
-                    {/* Docking button only for larger screens that can support it*/}
-                    <EuiShowFor sizes={['l', 'xl']}>
-                      <EuiCollapsibleNavGroup>
-                        <EuiListGroup flush>
-                          <EuiListGroupItem
-                            data-test-subj="collapsible-nav-lock"
-                            buttonRef={lockRef}
-                            size="xs"
-                            color="subdued"
-                            label={
-                              isLocked
-                                ? i18n.translate('core.ui.primaryNavSection.undockLabel', {
-                                    defaultMessage: 'Undock navigation',
-                                  })
-                                : i18n.translate('core.ui.primaryNavSection.dockLabel', {
-                                    defaultMessage: 'Dock navigation',
-                                  })
-                            }
-                            aria-label={
-                              isLocked
-                                ? i18n.translate('core.ui.primaryNavSection.undockAriaLabel', {
-                                    defaultMessage: 'Undock primary navigation',
-                                  })
-                                : i18n.translate('core.ui.primaryNavSection.dockAriaLabel', {
-                                    defaultMessage: 'Dock primary navigation',
-                                  })
-                            }
-                            onClick={() => {
-                              onIsLockedUpdate(!isLocked);
-                              if (lockRef.current) {
-                                lockRef.current.focus();
-                              }
-                            }}
-                            iconType={isLocked ? 'lock' : 'lockOpen'}
-                          />
-                        </EuiListGroup>
-                      </EuiCollapsibleNavGroup>
-                    </EuiShowFor>
-                  </div>
-                }
-                navigateToApp={navigateToApp}
-                onClick={closeNav}
-                appId={appId}
-              />
-            </div>
-            {secondNavigation && (
-              <div
-                className="second-navigation"
-                style={{ width: secondNavigationWidth, overflowY: 'auto', overflowX: 'hidden' }}
-              >
-                {secondNavigation}
-              </div>
+    <EuiFlyout
+      data-test-subj="collapsibleNav"
+      id={id}
+      side="left"
+      aria-label={i18n.translate('core.ui.primaryNav.screenReaderLabel', {
+        defaultMessage: 'Primary',
+      })}
+      type="push"
+      onClose={closeNav}
+      outsideClickCloses={false}
+      className="context-nav-wrapper"
+      size={width}
+      closeButtonPosition="outside"
+      hideCloseButton
+      paddingSize="none"
+    >
+      <div className="eui-fullHeight">
+        <div className="eui-yScroll">
+          <EuiPanel
+            hasBorder={false}
+            borderRadius="none"
+            paddingSize={!isNavOpen ? 's' : 'l'}
+            style={{ minHeight: '100%' }}
+          >
+            {!isNavOpen ? null : (
+              <>
+                <CollapsibleNavTop
+                  navLinks={navLinks}
+                  navGroupsMap={navGroupsMap}
+                  navigateToApp={navigateToApp}
+                  logos={logos}
+                  onClickBack={() => setFocusGroup(undefined)}
+                  focusGroup={focusGroup}
+                  shouldShrinkNavigation={!isNavOpen}
+                  onClickShrink={closeNav}
+                />
+                <NavGroups
+                  navLinks={navLinksForRender}
+                  navigateToApp={navigateToApp}
+                  onNavItemClick={(event, navItem) => {
+                    if (navItem.title === titleForSeeAll && navItem.category?.id) {
+                      const navGroup = navGroupsMap[navItem.category.id];
+                      onGroupClick(event, navGroup);
+                    }
+                  }}
+                  appId={appId}
+                />
+              </>
             )}
-          </div>
-        </EuiFlyout>
-      ) : null}
-      {secondNavigation && !isLocked ? (
-        <EuiFlyout
-          className="context-nav-wrapper"
-          type="push"
-          onClose={() => {}}
-          size={secondNavigationWidth}
-          side="left"
-          hideCloseButton
-        >
-          {secondNavigation}
-        </EuiFlyout>
-      ) : null}
-    </>
+          </EuiPanel>
+        </div>
+      </div>
+    </EuiFlyout>
   );
 }

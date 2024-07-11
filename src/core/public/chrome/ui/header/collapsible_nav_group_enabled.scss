@@ -1,33 +1,15 @@
 .context-nav-wrapper {
-  background-color: $ouiCollapsibleNavBackgroundColor;
+  border: none !important;
 
-  .full-width {
-    width: 100%;
-  }
+  .nav-link-item {
+    padding: $ouiSize / 4 $ouiSize;
+    border-radius: $ouiSize;
+    box-shadow: none;
+    margin-bottom: 0;
+    margin-top: 0;
 
-  .no-padding {
-    padding: 0;
-  }
-
-  .no-hover {
-    &:hover {
-      text-decoration: none;
+    .nav-link-item-btn {
+      margin-bottom: 0;
     }
-  }
-
-  .wrapper {
-    overflow-y: auto;
-  }
-
-  .second-navigation {
-    border-left: $euiBorderThin;
-  }
-
-  .padding-horizontal {
-    padding-left: $ouiSize;
-  }
-
-  .no-margin-top {
-    margin-top: $ouiSize / 4;
   }
 }
