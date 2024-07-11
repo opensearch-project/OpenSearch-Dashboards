@@ -15,6 +15,10 @@
   // overflow: auto;
 }
 
+.osdQueryEditorFooterHide {
+  display: "none" 
+}
+
 .osdQueryEditor__languageWrapper {
   :first-child {
     box-shadow: none !important;

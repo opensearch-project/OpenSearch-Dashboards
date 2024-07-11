@@ -359,30 +359,30 @@ export default class QueryEditorUI extends Component<Props, State> {
           <EuiFlexItem onClick={this.onClickInput} grow={true}>
             <div ref={this.headerRef} className={headerClassName} />
             {this.state.isCollapsed && useQueryEditor && (
-              <>
-                <CodeEditor
-                  height={70}
-                  languageId="opensearchql"
-                  value={this.getQueryString()}
-                  onChange={this.onInputChange}
-                  options={{
-                    lineNumbers: 'on',
-                    lineHeight: 24,
-                    fontSize: 14,
-                    fontFamily: 'Roboto Mono',
-                    minimap: {
-                      enabled: false,
-                    },
-                    scrollBeyondLastLine: false,
-                    wordWrap: 'on',
-                    wrappingIndent: 'indent',
-                  }}
-                />
-              </>
+              <CodeEditor
+                height={70}
+                languageId="opensearchql"
+                value={this.getQueryString()}
+                onChange={this.onInputChange}
+                options={{
+                  lineNumbers: 'on',
+                  lineHeight: 24,
+                  fontSize: 14,
+                  fontFamily: 'Roboto Mono',
+                  minimap: {
+                    enabled: false,
+                  },
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  wrappingIndent: 'indent',
+                }}
+              />
             )}
-            {this.state.isCollapsed && useQueryEditor && (
-              <div ref={this.footerRef} className={footerClassName} />
-            )}
+
+            <div
+              ref={this.footerRef}
+              className={this.state.isCollapsed ? footerClassName : 'osdQueryEditorFooterHide'}
+            />
           </EuiFlexItem>
           {this.state.isCollapsed && <EuiFlexItem grow={false}>{this.props.filterBar}</EuiFlexItem>}
         </EuiFlexGroup>
