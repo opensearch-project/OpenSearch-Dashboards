@@ -6,11 +6,12 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { applicationServiceMock } from '../../../../../core/public/mocks';
-import { WorkspaceOperationType } from './constants';
+import { WorkspacePermissionMode } from '../../../common/constants';
+import { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 import { WorkspaceFormData, WorkspaceFormErrorCode } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 
-const setup = (defaultValues?: WorkspaceFormData) => {
+const setup = (defaultValues?: WorkspaceFormData, permissionEnabled = false) => {
   const onSubmitMock = jest.fn();
   const renderResult = renderHook(useWorkspaceForm, {
     initialProps: {
@@ -18,6 +19,7 @@ const setup = (defaultValues?: WorkspaceFormData) => {
       defaultValues,
       onSubmit: onSubmitMock,
       operationType: WorkspaceOperationType.Create,
+      permissionEnabled,
     },
   });
   return {
@@ -62,6 +64,46 @@ describe('useWorkspaceForm', () => {
         features: {
           code: WorkspaceFormErrorCode.UseCaseMissing,
           message: 'Use case is required. Select a use case.',
+        },
+      })
+    );
+    expect(onSubmitMock).not.toHaveBeenCalled();
+  });
+  it('should return "Add workspace owner." and not call onSubmit', async () => {
+    const { renderResult, onSubmitMock } = setup(
+      {
+        id: 'foo',
+        name: 'test-workspace-name',
+      },
+      true
+    );
+    expect(renderResult.result.current.formErrors).toEqual({});
+
+    act(() => {
+      renderResult.result.current.setPermissionSettings([
+        {
+          id: 0,
+          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+          type: WorkspacePermissionItemType.User,
+        },
+        {
+          id: 1,
+          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+          type: WorkspacePermissionItemType.Group,
+        },
+      ]);
+    });
+    act(() => {
+      renderResult.result.current.handleFormSubmit({ preventDefault: jest.fn() });
+    });
+
+    expect(renderResult.result.current.formErrors).toEqual(
+      expect.objectContaining({
+        permissionSettings: {
+          overall: {
+            code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
+            message: 'Add a workspace owner.',
+          },
         },
       })
     );

@@ -110,6 +110,11 @@ export const useWorkspaceForm = ({
     (e) => {
       e.preventDefault();
       const currentFormData = getFormDataRef.current();
+      currentFormData.permissionSettings = currentFormData.permissionSettings.filter(
+        (item) =>
+          (item.type === WorkspacePermissionItemType.User && !!item.userId) ||
+          (item.type === WorkspacePermissionItemType.Group && !!item.group)
+      );
       const currentFormErrors: WorkspaceFormErrors = validateWorkspaceForm(
         currentFormData,
         !!permissionEnabled
@@ -124,11 +129,7 @@ export const useWorkspaceForm = ({
         description: currentFormData.description,
         color: currentFormData.color,
         features: currentFormData.features,
-        permissionSettings: currentFormData.permissionSettings.filter(
-          (item) =>
-            (item.type === WorkspacePermissionItemType.User && !!item.userId) ||
-            (item.type === WorkspacePermissionItemType.Group && !!item.group)
-        ) as WorkspacePermissionSetting[],
+        permissionSettings: currentFormData.permissionSettings as WorkspacePermissionSetting[],
         selectedDataSources: currentFormData.selectedDataSources,
       });
     },
