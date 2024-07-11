@@ -219,6 +219,10 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -823,6 +827,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -953,6 +958,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -1091,15 +1097,19 @@ exports[`dashboard listing hideWriteControls 1`] = `
               <EuiEmptyPrompt
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Looks like you don't have any dashboards."
-                      id="dashboard.listing.noItemsMessage"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Looks like you don't have any dashboards."
+                        id="dashboard.listing.noItemsMessage"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -1393,6 +1403,10 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -1997,6 +2011,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -2127,6 +2142,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -2284,7 +2300,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                   <EuiButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -2326,15 +2342,19 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -2628,6 +2648,10 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -3232,6 +3256,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -3362,6 +3387,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -3519,7 +3545,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                   <EuiButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -3561,15 +3587,19 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -3863,6 +3893,10 @@ exports[`dashboard listing renders table rows 1`] = `
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -4467,6 +4501,7 @@ exports[`dashboard listing renders table rows 1`] = `
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -4597,6 +4632,7 @@ exports[`dashboard listing renders table rows 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -4754,7 +4790,7 @@ exports[`dashboard listing renders table rows 1`] = `
                   <EuiButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -4796,15 +4832,19 @@ exports[`dashboard listing renders table rows 1`] = `
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -5098,6 +5138,10 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "registerLeft": [MockFunction],
                 "registerRight": [MockFunction],
               },
+              "navGroup": Object {
+                "getNavGroupEnabled": [MockFunction],
+                "getNavGroupsMap$": [MockFunction],
+              },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
                 "get": [MockFunction],
@@ -5702,6 +5746,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                   "browser": "https://opensearch.org/docs/mocked-test-branch/dashboards/browser-compatibility",
                   "dataSource": Object {
                     "guide": "https://opensearch.org/docs/mocked-test-branch/dashboards/discover/multi-data-sources/",
+                    "s3DataSource": "https://opensearch.org/docs/mocked-test-branch/dashboards/management/S3-data-source/",
                   },
                   "devTools": "https://opensearch.org/docs/mocked-test-branch/dashboards/dev-tools/index-dev/",
                   "dql": Object {
@@ -5832,6 +5877,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "remove": [MockFunction],
                 "replace": [MockFunction],
               },
+              "closeFlyout": [MockFunction],
               "openConfirm": [MockFunction],
               "openFlyout": [MockFunction],
               "openModal": [MockFunction],
@@ -5989,7 +6035,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                   <EuiButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -6031,15 +6077,19 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }

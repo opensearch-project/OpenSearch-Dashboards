@@ -97,7 +97,13 @@ export class DataSourceAggregatedView extends React.Component<
 
   async componentDidMount() {
     this._isMounted = true;
-    getDataSourcesWithFields(this.props.savedObjectsClient, ['id', 'title', 'auth.type'])
+    getDataSourcesWithFields(this.props.savedObjectsClient, [
+      'id',
+      'title',
+      'auth.type',
+      'dataSourceVersion',
+      'installedPlugins',
+    ])
       .then((fetchedDataSources) => {
         const allDataSourcesIdToTitleMap = new Map();
 

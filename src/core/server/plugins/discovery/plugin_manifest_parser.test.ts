@@ -354,6 +354,8 @@ describe('requiredEnginePlugins', () => {
       requiredBundles: [],
       server: true,
       ui: false,
+      supportedOSDataSourceVersions: '',
+      requiredOSDataSourcePlugins: [],
     });
   });
 });
@@ -416,6 +418,8 @@ test('set defaults for all missing optional fields', async () => {
     requiredBundles: [],
     server: true,
     ui: false,
+    supportedOSDataSourceVersions: '',
+    requiredOSDataSourcePlugins: [],
   });
 });
 
@@ -434,6 +438,11 @@ test('return all set optional fields as they are in manifest', async () => {
           'test-opensearch-plugin-2': '>=1.0.0',
         },
         ui: true,
+        supportedOSDataSourceVersions: '>=1.0.0',
+        requiredOSDataSourcePlugins: [
+          'some-required-data-source-plugin-1',
+          'some-required-data-source-plugin-2',
+        ],
       })
     )
   );
@@ -452,6 +461,11 @@ test('return all set optional fields as they are in manifest', async () => {
     },
     server: false,
     ui: true,
+    supportedOSDataSourceVersions: '>=1.0.0',
+    requiredOSDataSourcePlugins: [
+      'some-required-data-source-plugin-1',
+      'some-required-data-source-plugin-2',
+    ],
   });
 });
 
@@ -481,6 +495,8 @@ test('return manifest when plugin expected OpenSearch Dashboards version matches
     requiredBundles: [],
     server: true,
     ui: false,
+    supportedOSDataSourceVersions: '',
+    requiredOSDataSourcePlugins: [],
   });
 });
 
@@ -509,5 +525,7 @@ test('return manifest when plugin expected OpenSearch Dashboards version is `ope
     requiredBundles: [],
     server: true,
     ui: true,
+    supportedOSDataSourceVersions: '',
+    requiredOSDataSourcePlugins: [],
   });
 });

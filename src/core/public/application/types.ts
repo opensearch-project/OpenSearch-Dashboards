@@ -268,6 +268,12 @@ export interface App<HistoryLocationState = unknown> {
    * indicating the application is available within or out of workspace.
    */
   workspaceAvailability?: WorkspaceAvailability;
+
+  /**
+   * The description of the application.
+   * Will be displayed in landing page or getting started cards to give more information about the feature.
+   */
+  description?: string;
 }
 
 /**

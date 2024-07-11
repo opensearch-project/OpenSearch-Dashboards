@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateDataSourcePanel renders correctly 1`] = `
+<EuiPanel>
+  <EuiFlexGroup
+    direction="column"
+  >
+    <EuiFlexItem>
+      <EuiPageHeader>
+        <CreateDataSourcePanelHeader />
+      </EuiPageHeader>
+    </EuiFlexItem>
+    <EuiFlexItem>
+      <CreateDataSourceCardView
+        featureFlagStatus={true}
+        history={
+          Object {
+            "push": [MockFunction],
+          }
+        }
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;

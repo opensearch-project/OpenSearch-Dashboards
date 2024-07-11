@@ -484,7 +484,7 @@ exports[`create button with props renders single button when one provider given 
         data-test-subj="newItemButton"
         fill={true}
         href="createUrl"
-        iconType="plusInCircle"
+        iconType="plus"
       >
         <EuiButtonDisplay
           baseClassName="euiButton"
@@ -492,7 +492,7 @@ exports[`create button with props renders single button when one provider given 
           element="a"
           fill={true}
           href="createUrl"
-          iconType="plusInCircle"
+          iconType="plus"
           isDisabled={false}
           rel="noreferrer"
         >
@@ -511,7 +511,7 @@ exports[`create button with props renders single button when one provider given 
             <EuiButtonContent
               className="euiButton__content"
               iconSide="left"
-              iconType="plusInCircle"
+              iconType="plus"
               textProps={
                 Object {
                   "className": "euiButton__text",
@@ -525,12 +525,12 @@ exports[`create button with props renders single button when one provider given 
                   className="euiButtonContent__icon"
                   color="inherit"
                   size="m"
-                  type="plusInCircle"
+                  type="plus"
                 >
                   <span
                     className="euiButtonContent__icon"
                     color="inherit"
-                    data-euiicon-type="plusInCircle"
+                    data-euiicon-type="plus"
                     size="m"
                   />
                 </EuiIcon>

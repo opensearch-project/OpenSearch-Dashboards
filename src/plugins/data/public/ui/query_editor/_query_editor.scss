@@ -24,6 +24,22 @@
 }
 
 .osdQueryEditor__dataSourceWrapper {
+  .dataSourceSelect {
+    border-bottom: $euiBorderThin !important;
+
+    :first-child {
+      box-shadow: none !important;
+      height: 100%;
+      border-radius: 0;
+    }
+
+    div:is([class$="--group"]) {
+      padding: 0 !important;
+    }
+  }
+}
+
+.osdQueryEditor__dataSetWrapper {
   .dataExplorerDSSelect {
     border-bottom: $euiBorderThin !important;
 

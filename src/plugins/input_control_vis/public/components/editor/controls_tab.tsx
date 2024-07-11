@@ -212,7 +212,6 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
             <EuiFlexItem grow={false}>
               <EuiFormRow id="addControl">
                 <EuiButton
-                  fill
                   onClick={this.handleAddControl}
                   iconType="plusInCircle"
                   data-test-subj="inputControlEditorAddBtn"

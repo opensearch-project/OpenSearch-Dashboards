@@ -130,7 +130,6 @@ export class InputControlVis extends Component<InputControlVisProps> {
       <EuiFlexGroup wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiButton
-            fill
             onClick={this.handleSubmit}
             disabled={!this.props.hasChanges()}
             data-test-subj="inputControlSubmitBtn"

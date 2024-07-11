@@ -126,7 +126,6 @@ export class UrlPanelContent extends Component<Props, State> {
           <EuiCopy textToCopy={this.state.url || ''} anchorClassName="eui-displayBlock">
             {(copy: () => void) => (
               <EuiButton
-                fill
                 fullWidth
                 onClick={copy}
                 disabled={this.state.isCreatingShortUrl || this.state.url === ''}

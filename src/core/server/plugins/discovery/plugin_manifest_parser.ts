@@ -68,6 +68,8 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     server: true,
     extraPublicDirs: true,
     requiredBundles: true,
+    supportedOSDataSourceVersions: true,
+    requiredOSDataSourcePlugins: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -245,6 +247,13 @@ export async function parseManifest(
     ui: includesUiPlugin,
     server: includesServerPlugin,
     extraPublicDirs: manifest.extraPublicDirs,
+    supportedOSDataSourceVersions:
+      manifest.supportedOSDataSourceVersions !== undefined
+        ? manifest.supportedOSDataSourceVersions
+        : '',
+    requiredOSDataSourcePlugins: Array.isArray(manifest.requiredOSDataSourcePlugins)
+      ? manifest.requiredOSDataSourcePlugins
+      : [],
   };
 }
 
