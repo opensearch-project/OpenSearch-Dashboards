@@ -30,7 +30,7 @@
 
 import React, { Fragment, useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiCompressedFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedSwitch } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
 import { OnSaveProps, SaveModalState, SavedObjectSaveModal } from '.';
@@ -79,7 +79,7 @@ export function SavedObjectSaveModalOrigin(props: OriginSaveModalProps) {
       return (
         <Fragment>
           <EuiCompressedFormRow>
-            <EuiSwitch
+            <EuiCompressedSwitch
               data-test-subj="returnToOriginModeSwitch"
               checked={returnToOriginMode}
               onChange={(event) => {

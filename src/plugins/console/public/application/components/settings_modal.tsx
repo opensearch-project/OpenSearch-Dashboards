@@ -44,7 +44,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSwitch,
+  EuiCompressedSwitch,
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
@@ -137,7 +137,7 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          <EuiSwitch
+          <EuiCompressedSwitch
             checked={polling}
             data-test-subj="autocompletePolling"
             id="autocompletePolling"
@@ -204,7 +204,7 @@ export function DevToolsSettingsModal(props: Props) {
         </EuiCompressedFormRow>
 
         <EuiCompressedFormRow>
-          <EuiSwitch
+          <EuiCompressedSwitch
             checked={wrapMode}
             data-test-subj="settingsWrapLines"
             id="wrapLines"
@@ -226,7 +226,7 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          <EuiSwitch
+          <EuiCompressedSwitch
             checked={tripleQuotes}
             data-test-subj="tripleQuotes"
             id="tripleQuotes"

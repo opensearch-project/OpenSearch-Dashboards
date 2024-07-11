@@ -41,7 +41,7 @@ import {
   EuiCompressedFormRow,
   EuiCompressedFieldText,
   EuiSwitchEvent,
-  EuiSwitch,
+  EuiCompressedSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
@@ -121,7 +121,7 @@ export const Header: React.FC<HeaderProps> = ({
                 )}
             {showSystemIndices ? (
               <EuiCompressedFormRow>
-                <EuiSwitch
+                <EuiCompressedSwitch
                   label={
                     <FormattedMessage
                       id="indexPatternManagement.createIndexPattern.includeSystemIndicesToggleSwitchLabel"

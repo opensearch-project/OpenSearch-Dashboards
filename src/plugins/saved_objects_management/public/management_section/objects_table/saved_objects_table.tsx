@@ -44,7 +44,7 @@ import {
   EuiCompressedCheckboxGroup,
   EuiToolTip,
   EuiPageContent,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiModal,
   EuiModalHeader,
   EuiModalBody,
@@ -853,7 +853,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             />
           </EuiCompressedFormRow>
           <EuiSpacer size="m" />
-          <EuiSwitch
+          <EuiCompressedSwitch
             name="includeReferencesDeep"
             label={
               <FormattedMessage

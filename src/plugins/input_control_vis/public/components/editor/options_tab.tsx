@@ -30,7 +30,7 @@
 
 import React, { PureComponent } from 'react';
 
-import { EuiForm, EuiCompressedFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiForm, EuiCompressedFormRow, EuiCompressedSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiSwitchEvent } from '@elastic/eui';
 
@@ -65,7 +65,7 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
     return (
       <EuiForm>
         <EuiCompressedFormRow id="updateFiltersOnChange">
-          <EuiSwitch
+          <EuiCompressedSwitch
             label={
               <FormattedMessage
                 id="inputControl.editor.optionsTab.updateFilterLabel"
@@ -79,7 +79,7 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
         </EuiCompressedFormRow>
 
         <EuiCompressedFormRow id="useTimeFilter">
-          <EuiSwitch
+          <EuiCompressedSwitch
             label={
               <FormattedMessage
                 id="inputControl.editor.optionsTab.useTimeFilterLabel"
@@ -93,7 +93,7 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
         </EuiCompressedFormRow>
 
         <EuiCompressedFormRow id="pinFilters">
-          <EuiSwitch
+          <EuiCompressedSwitch
             label={
               <FormattedMessage
                 id="inputControl.editor.optionsTab.pinFiltersLabel"

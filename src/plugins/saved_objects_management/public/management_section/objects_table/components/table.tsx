@@ -41,7 +41,7 @@ import {
   EuiToolTip,
   EuiFormErrorText,
   EuiPopover,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiCompressedFormRow,
   EuiText,
   EuiTableFieldDataColumnType,
@@ -410,7 +410,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                   />
                 }
               >
-                <EuiSwitch
+                <EuiCompressedSwitch
                   name="includeReferencesDeep"
                   label={
                     <FormattedMessage

@@ -52,7 +52,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiCompressedSelect,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
@@ -327,7 +327,7 @@ export class Field extends PureComponent<FieldProps> {
     switch (type) {
       case 'boolean':
         return (
-          <EuiSwitch
+          <EuiCompressedSwitch
             label={
               !!currentValue ? (
                 <FormattedMessage id="advancedSettings.field.onLabel" defaultMessage="On" />

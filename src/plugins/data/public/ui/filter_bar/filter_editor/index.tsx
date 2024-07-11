@@ -41,7 +41,7 @@ import {
   EuiCompressedFormRow,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiSwitchEvent,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -148,7 +148,7 @@ class FilterEditorUI extends Component<Props, State> {
 
             <EuiSpacer size="m" />
 
-            <EuiSwitch
+            <EuiCompressedSwitch
               id="filterEditorCustomLabelSwitch"
               data-test-subj="createCustomLabel"
               label={this.props.intl.formatMessage({

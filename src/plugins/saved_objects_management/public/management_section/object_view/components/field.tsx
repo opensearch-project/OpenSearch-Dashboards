@@ -33,7 +33,7 @@ import {
   EuiCompressedFieldNumber,
   EuiCompressedFieldText,
   EuiCompressedFormRow,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiCodeEditor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -109,7 +109,7 @@ export class Field extends PureComponent<FieldProps> {
         );
       case 'boolean':
         return (
-          <EuiSwitch
+          <EuiCompressedSwitch
             name={name}
             id={this.fieldId}
             label={

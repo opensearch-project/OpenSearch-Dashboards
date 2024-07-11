@@ -42,7 +42,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiSwitchEvent,
   EuiTextArea,
 } from '@elastic/eui';
@@ -322,7 +322,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
     return (
       <>
-        <EuiSwitch
+        <EuiCompressedSwitch
           data-test-subj="saveAsNewCheckbox"
           checked={this.state.copyOnSave}
           onChange={this.onCopyOnSaveChange}

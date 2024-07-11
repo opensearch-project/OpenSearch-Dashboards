@@ -35,7 +35,7 @@ import {
   EuiCompressedFieldNumber,
   EuiCompressedFormRow,
   EuiCompressedSelect,
-  EuiSwitch,
+  EuiCompressedSwitch,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
@@ -187,7 +187,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
               />
             </EuiCompressedFormRow>
             <EuiCompressedFormRow>
-              <EuiSwitch
+              <EuiCompressedSwitch
                 label={
                   <FormattedMessage
                     id="indexPatternManagement.duration.showSuffixLabel"

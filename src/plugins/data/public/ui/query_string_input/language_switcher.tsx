@@ -37,7 +37,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiText,
   PopoverAnchorPosition,
 } from '@elastic/eui';
@@ -123,7 +123,7 @@ export function QueryLanguageSwitcher(props: Props) {
 
         <EuiForm>
           <EuiCompressedFormRow label={dqlFullName}>
-            <EuiSwitch
+            <EuiCompressedSwitch
               id="queryEnhancementOptIn"
               name="popswitch"
               label={

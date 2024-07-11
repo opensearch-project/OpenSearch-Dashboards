@@ -34,7 +34,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import {
   EuiCompressedFormRow,
   EuiCompressedFieldNumber,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiCompressedSelect,
 } from '@elastic/eui';
 
@@ -202,7 +202,7 @@ export class ListControlEditor extends PureComponent<
           />
         }
       >
-        <EuiSwitch
+        <EuiCompressedSwitch
           label={
             <FormattedMessage
               id="inputControl.editor.listControl.multiselectLabel"
@@ -239,7 +239,7 @@ export class ListControlEditor extends PureComponent<
         key="dynamicOptions"
         helpText={dynamicOptionsHelpText}
       >
-        <EuiSwitch
+        <EuiCompressedSwitch
           label={
             <FormattedMessage
               id="inputControl.editor.listControl.dynamicOptionsLabel"

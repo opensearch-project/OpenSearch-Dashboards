@@ -35,7 +35,7 @@ import {
   EuiCompressedFormRow,
   EuiLink,
   EuiCompressedSelect,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiCompressedFieldNumber,
 } from '@elastic/eui';
 
@@ -227,7 +227,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
               />
             }
           >
-            <EuiSwitch
+            <EuiCompressedSwitch
               label={
                 formatParams.openLinkInCurrentTab ? (
                   <FormattedMessage id="indexPatternManagement.url.offLabel" defaultMessage="Off" />

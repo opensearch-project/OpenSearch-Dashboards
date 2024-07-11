@@ -30,7 +30,7 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiCompressedFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiTextArea, EuiCompressedSwitch } from '@elastic/eui';
 
 import { SavedObjectSaveModal } from '../../../../../../saved_objects/public';
 
@@ -133,7 +133,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
             />
           }
         >
-          <EuiSwitch
+          <EuiCompressedSwitch
             data-test-subj="storeTimeWithDashboard"
             checked={this.state.timeRestore}
             onChange={this.onTimeRestoreChange}

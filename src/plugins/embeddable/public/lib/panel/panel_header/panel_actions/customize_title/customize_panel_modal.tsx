@@ -34,7 +34,7 @@ import {
   EuiCompressedFormRow,
   EuiCompressedFieldText,
   EuiSmallButton,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiSmallButtonEmpty,
   EuiModalHeader,
   EuiModalFooter,
@@ -96,7 +96,7 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
 
         <EuiModalBody>
           <EuiCompressedFormRow>
-            <EuiSwitch
+            <EuiCompressedSwitch
               checked={!this.state.hideTitle}
               data-test-subj="customizePanelHideTitle"
               id="hideTitle"

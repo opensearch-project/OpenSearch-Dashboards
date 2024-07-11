@@ -138,9 +138,9 @@ export interface TestBed<T = string> {
      */
     selectCheckBox: (checkboxTestSubject: T, isChecked?: boolean) => void;
     /**
-     * Toggle the EuiSwitch
+     * Toggle the EuiCompressedSwitch
      *
-     * @param switchTestSubject The test subject of the EuiSwitch (can be a nested path. e.g. "myForm.mySwitch").
+     * @param switchTestSubject The test subject of the EuiCompressedSwitch (can be a nested path. e.g. "myForm.mySwitch").
      */
     toggleEuiSwitch: (switchTestSubject: T, isChecked?: boolean) => void;
     /**

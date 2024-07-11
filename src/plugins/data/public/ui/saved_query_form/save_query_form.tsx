@@ -40,7 +40,7 @@ import {
   EuiForm,
   EuiCompressedFormRow,
   EuiCompressedFieldText,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -198,7 +198,7 @@ export function SaveQueryForm({
       </EuiCompressedFormRow>
       {showFilterOption && (
         <EuiCompressedFormRow>
-          <EuiSwitch
+          <EuiCompressedSwitch
             name="shouldIncludeFilters"
             label={i18n.translate('data.search.searchBar.savedQueryIncludeFiltersLabelText', {
               defaultMessage: 'Include filters',
@@ -214,7 +214,7 @@ export function SaveQueryForm({
 
       {showTimeFilterOption && (
         <EuiCompressedFormRow>
-          <EuiSwitch
+          <EuiCompressedSwitch
             name="shouldIncludeTimefilter"
             label={i18n.translate('data.search.searchBar.savedQueryIncludeTimeFilterLabelText', {
               defaultMessage: 'Include time filter',

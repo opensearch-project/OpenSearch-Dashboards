@@ -38,7 +38,7 @@ import {
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelect,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiSwitchEvent,
   EuiForm,
   EuiFormRow,
@@ -292,7 +292,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
             </EuiPopoverTitle>
             {selectionPanel}
             <EuiPopoverFooter>
-              <EuiSwitch
+              <EuiCompressedSwitch
                 label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
                   defaultMessage: 'Hide missing fields',
                 })}
