@@ -385,12 +385,6 @@ export default class QueryEditorUI extends Component<Props, State> {
                   isCollapsed={!this.state.isCollapsed}
                 />
               </EuiFlexItem>
-              {this.state.isDataSourcesVisible && (
-                <EuiFlexItem grow={2} className={`${className}__dataSourceWrapper`}>
-                  <div ref={this.props.dataSourceContainerRef} />
-                </EuiFlexItem>
-              )}
-
               {this.state.isDataSetsVisible && (
                 <EuiFlexItem grow={2} className={`${className}__dataSetWrapper`}>
                   <div ref={this.props.containerRef} />
