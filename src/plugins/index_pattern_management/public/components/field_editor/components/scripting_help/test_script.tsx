@@ -33,7 +33,7 @@ import './test_script.scss';
 import React, { Component, Fragment } from 'react';
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiCodeBlock,
   EuiComboBox,
   EuiFormRow,
@@ -260,7 +260,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
             onQuerySubmit={this.previewScript}
             indexPatterns={[this.props.indexPattern]}
             customSubmitButton={
-              <EuiButton
+              <EuiSmallButton
                 disabled={this.props.script ? false : true}
                 isLoading={this.state.isLoading}
                 data-test-subj="runScriptButton"
@@ -269,7 +269,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
                   id="indexPatternManagement.testScript.submitButtonLabel"
                   defaultMessage="Run script"
                 />
-              </EuiButton>
+              </EuiSmallButton>
             }
           />
         </div>

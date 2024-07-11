@@ -35,7 +35,7 @@ import {
   EuiCodeBlock,
   EuiTabbedContent,
   EuiCopy,
-  EuiButton,
+  EuiSmallButton,
   EuiModalBody,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -129,13 +129,13 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
             </EuiButtonEmpty>
           )}
         </EuiCopy>
-        <EuiButton onClick={() => onClose()} fill data-test-sub="closeShardFailureModal">
+        <EuiSmallButton onClick={() => onClose()} fill data-test-sub="closeShardFailureModal">
           <FormattedMessage
             id="data.search.searchSource.fetch.shardsFailedModal.close"
             defaultMessage="Close"
             description="Closing the Modal"
           />
-        </EuiButton>
+        </EuiSmallButton>
       </EuiModalFooter>
     </React.Fragment>
   );

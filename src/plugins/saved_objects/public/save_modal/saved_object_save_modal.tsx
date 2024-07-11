@@ -30,7 +30,7 @@
 
 import {
   htmlIdGenerator,
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiFieldText,
@@ -266,7 +266,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     }
 
     return (
-      <EuiButton
+      <EuiSmallButton
         fill
         data-test-subj="confirmSaveSavedObjectButton"
         isLoading={isLoading}
@@ -275,7 +275,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         form="savedObjectSaveModalForm"
       >
         {confirmLabel}
-      </EuiButton>
+      </EuiSmallButton>
     );
   };
 

@@ -7,7 +7,7 @@ import React, { ChangeEvent, SyntheticEvent, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -161,9 +161,9 @@ export const HeaderUserThemeMenu = () => {
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace>
             {/* TODO: disable submit until changes */}
-            <EuiButton fill onClick={onAppearanceSubmit} type="submit">
+            <EuiSmallButton fill onClick={onAppearanceSubmit} type="submit">
               Apply
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

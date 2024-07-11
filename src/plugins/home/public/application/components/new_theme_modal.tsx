@@ -5,7 +5,7 @@
 
 import React, { FC } from 'react';
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiImage,
@@ -91,9 +91,9 @@ export const NewThemeModal: FC<Props> = ({ addBasePath, onClose }) => {
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton onClick={onClose} fill>
+        <EuiSmallButton onClick={onClose} fill>
           <FormattedMessage id="home.newThemeModal.dismissButtonLabel" defaultMessage="Dismiss" />
-        </EuiButton>
+        </EuiSmallButton>
       </EuiModalFooter>
     </EuiModal>
   );

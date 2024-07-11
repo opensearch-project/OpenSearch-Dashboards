@@ -33,7 +33,7 @@ import { intersection, union, get } from 'lodash';
 
 import {
   EuiBasicTable,
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiCallOut,
   EuiCode,
@@ -696,7 +696,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
       <EuiFormRow>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               fill
               onClick={this.saveField}
               isDisabled={this.isSavingDisabled()}
@@ -714,7 +714,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
                   defaultMessage="Save field"
                 />
               )}
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty onClick={redirectAway} data-test-subj="fieldCancelButton">

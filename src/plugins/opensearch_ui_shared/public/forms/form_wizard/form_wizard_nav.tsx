@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSmallButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 interface Props {
   activeStepIndex: number;
@@ -103,7 +103,7 @@ export const FormWizardNav = ({
 
           {/* Next button */}
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               fill
               iconType={isLastStep ? 'check' : 'arrowRight'}
               onClick={onNext}
@@ -113,7 +113,7 @@ export const FormWizardNav = ({
               isLoading={isSaving}
             >
               {nextButtonLabel}
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

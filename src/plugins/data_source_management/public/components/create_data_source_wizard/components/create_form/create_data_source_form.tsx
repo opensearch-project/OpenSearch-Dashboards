@@ -6,6 +6,7 @@
 import React from 'react';
 import {
   EuiBottomBar,
+  EuiSmallButton,
   EuiButton,
   EuiButtonEmpty,
   EuiFieldPassword,
@@ -685,7 +686,7 @@ export class CreateDataSourceForm extends React.Component<
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
                   {/* Test Connection button*/}
-                  <EuiButton
+                  <EuiSmallButton
                     type="submit"
                     fill={false}
                     disabled={!this.isFormValid()}
@@ -696,7 +697,7 @@ export class CreateDataSourceForm extends React.Component<
                       id="dataSourcesManagement.createDataSource.testConnectionButton"
                       defaultMessage="Test connection"
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFormRow>

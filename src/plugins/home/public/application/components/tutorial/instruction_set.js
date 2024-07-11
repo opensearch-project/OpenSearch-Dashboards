@@ -41,7 +41,7 @@ import {
   EuiSteps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButton,
+  EuiSmallButton,
   EuiCallOut,
   EuiButtonEmpty,
   EuiTitle,
@@ -159,7 +159,7 @@ class InstructionSetUi extends React.Component {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               onClick={onStatusCheck}
               isLoading={statusCheckState === StatusCheckStates.FETCHING}
             >
@@ -169,7 +169,7 @@ class InstructionSetUi extends React.Component {
                   defaultMessage="Check status"
                 />
               )}
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
 

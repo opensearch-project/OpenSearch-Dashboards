@@ -30,7 +30,7 @@
 
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { Fragment } from 'react';
-import { EuiText, EuiButton } from '@elastic/eui';
+import { EuiText, EuiSmallButton } from '@elastic/eui';
 import { VisTypeAlias } from '../../vis_types';
 
 interface Props {
@@ -52,7 +52,7 @@ export function NewVisHelp(props: Props) {
           <p>
             <strong>{t.promotion!.description}</strong>
           </p>
-          <EuiButton
+          <EuiSmallButton
             onClick={() => props.onPromotionClicked(t)}
             fill
             size="s"
@@ -60,7 +60,7 @@ export function NewVisHelp(props: Props) {
             iconSide="right"
           >
             {t.promotion!.buttonText}
-          </EuiButton>
+          </EuiSmallButton>
         </Fragment>
       ))}
     </EuiText>

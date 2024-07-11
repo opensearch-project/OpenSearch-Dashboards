@@ -32,6 +32,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import {
+  EuiSmallButton,
   EuiButton,
   EuiCallOut,
   EuiCodeBlock,
@@ -107,12 +108,12 @@ function showErrorDialog({
             )}
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton onClick={() => modal.close()} fill>
+            <EuiSmallButton onClick={() => modal.close()} fill>
               <FormattedMessage
                 id="core.notifications.errorToast.closeModal"
                 defaultMessage="Close"
               />
-            </EuiButton>
+            </EuiSmallButton>
           </EuiModalFooter>
         </I18nContext>
       </React.Fragment>

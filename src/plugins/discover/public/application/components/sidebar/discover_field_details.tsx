@@ -29,7 +29,14 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { EuiLink, EuiIconTip, EuiText, EuiPopoverFooter, EuiButton, EuiSpacer } from '@elastic/eui';
+import {
+  EuiLink,
+  EuiIconTip,
+  EuiText,
+  EuiPopoverFooter,
+  EuiSmallButton,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { DiscoverFieldBucket } from './discover_field_bucket';
 import { getWarnings } from './lib/get_warnings';
@@ -107,7 +114,7 @@ export function DiscoverFieldDetails({
           <div data-test-subj={`fieldVisualizeLink`}>
             <EuiSpacer size="xs" />
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiButton
+            <EuiSmallButton
               onClick={(e) => handleVisualizeLinkClick(e)}
               href={visualizeLink}
               size="s"
@@ -118,7 +125,7 @@ export function DiscoverFieldDetails({
                 id="discover.fieldChooser.detailViews.visualizeLinkText"
                 defaultMessage="Visualize"
               />
-            </EuiButton>
+            </EuiSmallButton>
             {warnings.length > 0 && (
               <EuiIconTip type="alert" color="warning" content={warnings.join(' ')} />
             )}

@@ -18,7 +18,7 @@ import {
   EuiFormRow,
   EuiLoadingSpinner,
   EuiText,
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import moment from 'moment';
@@ -255,7 +255,7 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiSmallButton
             disabled={!file}
             onClick={() => importFile(false)}
             size="s"
@@ -267,7 +267,7 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
               id="console.importFlyout.import.confirmButtonLabel"
               defaultMessage="Import"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     );

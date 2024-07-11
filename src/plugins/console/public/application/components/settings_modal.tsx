@@ -34,7 +34,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiFieldNumber,
   EuiFormRow,
@@ -151,7 +151,7 @@ export function DevToolsSettingsModal(props: Props) {
           />
         </EuiFormRow>
 
-        <EuiButton
+        <EuiSmallButton
           data-test-subj="autocompletePolling"
           id="autocompletePolling"
           onClick={() => {
@@ -167,7 +167,7 @@ export function DevToolsSettingsModal(props: Props) {
             defaultMessage="Refresh autocomplete suggestions"
             id="console.settingsPage.refreshButtonLabel"
           />
-        </EuiButton>
+        </EuiSmallButton>
       </Fragment>
     ) : undefined;
 
@@ -269,9 +269,9 @@ export function DevToolsSettingsModal(props: Props) {
           <FormattedMessage id="console.settingsPage.cancelButtonLabel" defaultMessage="Cancel" />
         </EuiButtonEmpty>
 
-        <EuiButton fill data-test-subj="settings-save-button" onClick={saveSettings}>
+        <EuiSmallButton fill data-test-subj="settings-save-button" onClick={saveSettings}>
           <FormattedMessage id="console.settingsPage.saveButtonLabel" defaultMessage="Save" />
-        </EuiButton>
+        </EuiSmallButton>
       </EuiModalFooter>
     </EuiModal>
   );

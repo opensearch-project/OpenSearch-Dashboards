@@ -35,7 +35,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
-  EuiButton,
+  EuiSmallButton,
   EuiModalFooter,
   EuiButtonEmpty,
 } from '@elastic/eui';
@@ -78,7 +78,7 @@ export class GetMessageModal extends Component<Props, State> {
         <EuiModalFooter>
           <EuiButtonEmpty onClick={this.props.onCancel}>Cancel</EuiButtonEmpty>
 
-          <EuiButton
+          <EuiSmallButton
             isDisabled={!this.state.message}
             onClick={() => {
               if (this.state.message) {
@@ -88,7 +88,7 @@ export class GetMessageModal extends Component<Props, State> {
             fill
           >
             Done
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </React.Fragment>
     );

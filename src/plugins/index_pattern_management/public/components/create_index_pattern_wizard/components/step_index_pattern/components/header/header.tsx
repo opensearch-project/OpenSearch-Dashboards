@@ -36,7 +36,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiButton,
+  EuiSmallButton,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
@@ -139,7 +139,7 @@ export const Header: React.FC<HeaderProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace>
-            <EuiButton
+            <EuiSmallButton
               fill
               iconSide="right"
               iconType="arrowRight"
@@ -151,7 +151,7 @@ export const Header: React.FC<HeaderProps> = ({
                 id="indexPatternManagement.createIndexPattern.step.nextStepButton"
                 defaultMessage="Next step"
               />
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

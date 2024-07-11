@@ -32,7 +32,7 @@ import React, { PureComponent } from 'react';
 import { injectI18n, FormattedMessage, InjectedIntlProps } from '@osd/i18n/react';
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -211,7 +211,7 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFormRow id="addControl">
-                <EuiButton
+                <EuiSmallButton
                   onClick={this.handleAddControl}
                   iconType="plusInCircle"
                   data-test-subj="inputControlEditorAddBtn"
@@ -224,7 +224,7 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
                     id="inputControl.editor.controlsTab.addButtonLabel"
                     defaultMessage="Add"
                   />
-                </EuiButton>
+                </EuiSmallButton>
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>

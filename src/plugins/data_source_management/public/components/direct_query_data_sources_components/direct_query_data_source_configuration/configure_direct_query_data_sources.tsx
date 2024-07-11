@@ -13,7 +13,7 @@ import {
   EuiPageSideBar,
   EuiBottomBar,
   EuiButtonEmpty,
-  EuiButton,
+  EuiSmallButton,
 } from '@elastic/eui';
 import React, { useEffect, useState, useCallback } from 'react';
 import { RouteComponentProps, useParams, withRouter } from 'react-router-dom';
@@ -324,7 +324,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               onClick={() => setPage('configure')}
               color="ghost"
               size="s"
@@ -332,10 +332,10 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
               data-test-subj="previousButton"
             >
               Previous
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               onClick={() => (page === 'review' ? createDatasource() : setPage('review'))}
               size="s"
               iconType="arrowRight"
@@ -345,7 +345,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
               {page === 'configure'
                 ? `Review Configuration`
                 : `Connect to ${DatasourceTypeToDisplayName[type]}`}
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>

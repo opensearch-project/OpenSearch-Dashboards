@@ -35,7 +35,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
-  EuiButton,
+  EuiSmallButton,
   EuiModalFooter,
   EuiButtonEmpty,
 } from '@elastic/eui';
@@ -88,7 +88,7 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
         <EuiModalFooter>
           <EuiButtonEmpty onClick={this.props.onCancel}>Cancel</EuiButtonEmpty>
 
-          <EuiButton
+          <EuiSmallButton
             isDisabled={!this.state.firstName}
             onClick={() => {
               if (this.state.firstName) {
@@ -101,7 +101,7 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
             fill
           >
             Create
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </div>
     );

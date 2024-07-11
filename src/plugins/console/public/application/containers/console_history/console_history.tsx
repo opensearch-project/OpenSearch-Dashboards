@@ -40,7 +40,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonEmpty,
-  EuiButton,
+  EuiSmallButton,
 } from '@elastic/eui';
 
 import { useServicesContext } from '../../contexts';
@@ -228,7 +228,7 @@ export function ConsoleHistory({ close }: Props) {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButton
+                <EuiSmallButton
                   color="primary"
                   disabled={!selectedReq}
                   onClick={() => restoreRequestFromHistory(selectedReq.current)}
@@ -236,7 +236,7 @@ export function ConsoleHistory({ close }: Props) {
                   {i18n.translate('console.historyPage.applyHistoryButtonLabel', {
                     defaultMessage: 'Apply',
                   })}
-                </EuiButton>
+                </EuiSmallButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

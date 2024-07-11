@@ -32,7 +32,7 @@ import React from 'react';
 import { EuiCard, EuiFlexItem, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
 
 import { Subscription } from 'rxjs';
-import { EuiButton } from '@elastic/eui';
+import { EuiSmallButton } from '@elastic/eui';
 import * as Rx from 'rxjs';
 import { UiActionsStart } from '../../../../../../ui_actions/public';
 import { ContactCardEmbeddable, CONTACT_USER_TRIGGER } from './contact_card_embeddable';
@@ -98,9 +98,9 @@ export class ContactCardEmbeddableComponent extends React.Component<Props, State
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
         <EuiFormRow label="">
-          <EuiButton
+          <EuiSmallButton
             onClick={this.emitContactTrigger}
-          >{`Contact ${this.state.firstName}`}</EuiButton>
+          >{`Contact ${this.state.firstName}`}</EuiSmallButton>
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>

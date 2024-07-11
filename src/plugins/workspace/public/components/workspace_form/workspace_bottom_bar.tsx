@@ -5,7 +5,7 @@
 
 import {
   EuiBottomBar,
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -64,7 +64,7 @@ export const WorkspaceBottomBar = ({
                 })}
               </EuiButtonEmpty>
               <EuiSpacer />
-              <EuiButton
+              <EuiSmallButton
                 form={formId}
                 type="submit"
                 fill
@@ -74,7 +74,7 @@ export const WorkspaceBottomBar = ({
                 {i18n.translate('workspace.form.bottomBar.saveChanges', {
                   defaultMessage: 'Save changes',
                 })}
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

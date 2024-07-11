@@ -5,7 +5,7 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiFieldPassword,
   EuiForm,
@@ -174,7 +174,7 @@ export const UpdatePasswordModal = ({
               />
             }
           </EuiButtonEmpty>
-          <EuiButton
+          <EuiSmallButton
             type="submit"
             data-test-subj="updateStoredPasswordConfirmBtn"
             onClick={onClickUpdatePassword}
@@ -184,7 +184,7 @@ export const UpdatePasswordModal = ({
             {i18n.translate('dataSourcesManagement.editDataSource.updateStoredPassword', {
               defaultMessage: 'Update stored password',
             })}
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     );

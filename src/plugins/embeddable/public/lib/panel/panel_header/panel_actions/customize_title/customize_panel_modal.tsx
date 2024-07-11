@@ -33,7 +33,7 @@ import React, { Component } from 'react';
 import {
   EuiFormRow,
   EuiFieldText,
-  EuiButton,
+  EuiSmallButton,
   EuiSwitch,
   EuiButtonEmpty,
   EuiModalHeader,
@@ -154,12 +154,12 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
             />
           </EuiButtonEmpty>
 
-          <EuiButton data-test-subj="saveNewTitleButton" onClick={this.save} fill>
+          <EuiSmallButton data-test-subj="saveNewTitleButton" onClick={this.save} fill>
             <FormattedMessage
               id="embeddableApi.customizePanel.modal.saveButtonTitle"
               defaultMessage="Save"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </React.Fragment>
     );

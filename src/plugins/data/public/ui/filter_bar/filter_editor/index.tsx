@@ -29,7 +29,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   // @ts-ignore
   EuiCodeEditor,
@@ -181,7 +181,7 @@ class FilterEditorUI extends Component<Props, State> {
 
             <EuiFlexGroup direction="rowReverse" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButton
+                <EuiSmallButton
                   fill
                   onClick={this.onSubmit}
                   isDisabled={!this.isFilterValid()}
@@ -191,7 +191,7 @@ class FilterEditorUI extends Component<Props, State> {
                     id="data.filter.filterEditor.saveButtonLabel"
                     defaultMessage="Save"
                   />
-                </EuiButton>
+                </EuiSmallButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty

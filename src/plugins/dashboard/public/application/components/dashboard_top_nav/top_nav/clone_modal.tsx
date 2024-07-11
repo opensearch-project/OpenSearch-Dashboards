@@ -33,7 +33,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiFieldText,
   EuiModal,
@@ -213,7 +213,7 @@ export class DashboardCloneModal extends React.Component<Props, State> {
             />
           </EuiButtonEmpty>
 
-          <EuiButton
+          <EuiSmallButton
             fill
             data-test-subj="cloneConfirmButton"
             onClick={this.cloneDashboard}
@@ -223,7 +223,7 @@ export class DashboardCloneModal extends React.Component<Props, State> {
               id="dashboard.topNav.cloneModal.confirmButtonLabel"
               defaultMessage="Confirm Clone"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     );

@@ -34,7 +34,7 @@ import moment from 'moment';
 import {
   EuiSearchBar,
   EuiBasicTable,
-  EuiButton,
+  EuiSmallButton,
   EuiIcon,
   EuiLink,
   EuiSpacer,
@@ -353,7 +353,7 @@ export class Table extends PureComponent<TableProps, TableState> {
     }
 
     const button = (
-      <EuiButton
+      <EuiSmallButton
         iconType="arrowDown"
         iconSide="right"
         onClick={this.toggleExportPopoverVisibility}
@@ -363,7 +363,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
           defaultMessage="Export"
         />
-      </EuiButton>
+      </EuiSmallButton>
     );
 
     const activeActionContents = this.state.activeAction?.render() ?? null;
@@ -376,7 +376,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           filters={filters as any}
           onChange={this.onChange}
           toolsRight={[
-            <EuiButton
+            <EuiSmallButton
               key="deleteSO"
               iconType="trash"
               color="danger"
@@ -395,7 +395,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                 id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
                 defaultMessage="Delete"
               />
-            </EuiButton>,
+            </EuiSmallButton>,
             <EuiPopover
               key="exportSOOptions"
               button={button}
@@ -423,12 +423,17 @@ export class Table extends PureComponent<TableProps, TableState> {
                 />
               </EuiFormRow>
               <EuiFormRow>
-                <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
+                <EuiSmallButton
+                  key="exportSO"
+                  iconType="exportAction"
+                  onClick={this.onExportClick}
+                  fill
+                >
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                     defaultMessage="Export"
                   />
-                </EuiButton>
+                </EuiSmallButton>
               </EuiFormRow>
             </EuiPopover>,
           ]}

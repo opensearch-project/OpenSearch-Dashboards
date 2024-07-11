@@ -29,7 +29,7 @@
  */
 
 import React, { Component } from 'react';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSmallButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { CONTROL_TYPES } from '../../editor_utils';
 import { ListControl } from '../../control/list_control_factory';
@@ -129,7 +129,7 @@ export class InputControlVis extends Component<InputControlVisProps> {
     return (
       <EuiFlexGroup wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiSmallButton
             onClick={this.handleSubmit}
             disabled={!this.props.hasChanges()}
             data-test-subj="inputControlSubmitBtn"
@@ -138,7 +138,7 @@ export class InputControlVis extends Component<InputControlVisProps> {
               id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
               defaultMessage="Apply changes"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

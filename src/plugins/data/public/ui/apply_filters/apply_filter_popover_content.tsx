@@ -29,7 +29,7 @@
  */
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiForm,
   EuiFormRow,
@@ -116,12 +116,12 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
-          <EuiButton onClick={this.onSubmit} data-test-subj="applyFiltersPopoverButton" fill>
+          <EuiSmallButton onClick={this.onSubmit} data-test-subj="applyFiltersPopoverButton" fill>
             <FormattedMessage
               id="data.filter.applyFiltersPopup.saveButtonLabel"
               defaultMessage="Apply"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </React.Fragment>
     );

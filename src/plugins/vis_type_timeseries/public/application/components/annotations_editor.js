@@ -50,7 +50,7 @@ import {
   EuiSpacer,
   EuiFieldText,
   EuiTitle,
-  EuiButton,
+  EuiSmallButton,
   EuiCode,
   EuiText,
 } from '@elastic/eui';
@@ -315,12 +315,12 @@ export class AnnotationsEditor extends Component {
               defaultMessage="Click the button below to create an annotation data source."
             />
           </p>
-          <EuiButton fill onClick={handleAdd}>
+          <EuiSmallButton fill onClick={handleAdd}>
             <FormattedMessage
               id="visTypeTimeseries.annotationsEditor.addDataSourceButtonLabel"
               defaultMessage="Add data source"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiText>
       );
     } else {

@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiSmallButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspaceFormError, WorkspacePermissionSetting } from './types';
 import {
@@ -137,7 +137,7 @@ const UserOrGroupSection = ({
           </EuiFormRow>
         </React.Fragment>
       ))}
-      <EuiButton
+      <EuiSmallButton
         fullWidth={false}
         onClick={handleAddNewOne}
         data-test-subj={`workspaceForm-permissionSettingPanel-${type}-addNew`}
@@ -150,7 +150,7 @@ const UserOrGroupSection = ({
           : i18n.translate('workspace.form.permissionSettingPanel.addUserGroup', {
               defaultMessage: 'Add user group',
             })}
-      </EuiButton>
+      </EuiSmallButton>
     </div>
   );
 };

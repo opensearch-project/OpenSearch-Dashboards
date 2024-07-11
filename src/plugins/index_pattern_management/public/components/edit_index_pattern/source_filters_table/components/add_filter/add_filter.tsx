@@ -32,7 +32,7 @@ import React, { useState, useCallback } from 'react';
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiSmallButton } from '@elastic/eui';
 
 interface AddFilterProps {
   onAddFilter: (filter: string) => void;
@@ -65,12 +65,12 @@ export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton isDisabled={filter.length === 0} onClick={onAddButtonClick}>
+        <EuiSmallButton isDisabled={filter.length === 0} onClick={onAddButtonClick}>
           <FormattedMessage
             id="indexPatternManagement.editIndexPattern.source.addButtonLabel"
             defaultMessage="Add"
           />
-        </EuiButton>
+        </EuiSmallButton>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

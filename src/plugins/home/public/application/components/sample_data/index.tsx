@@ -38,7 +38,7 @@ import React from 'react';
 import {
   // @ts-ignore
   EuiCard,
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -72,9 +72,9 @@ export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
       }
       footer={
         <footer>
-          <EuiButton fill className="homWelcome__footerAction" onClick={onConfirm}>
+          <EuiSmallButton fill className="homWelcome__footerAction" onClick={onConfirm}>
             <FormattedMessage id="home.tryButtonLabel" defaultMessage="Add data" />
-          </EuiButton>
+          </EuiSmallButton>
           <EuiButtonEmpty
             className="homWelcome__footerAction"
             onClick={onDecline}
