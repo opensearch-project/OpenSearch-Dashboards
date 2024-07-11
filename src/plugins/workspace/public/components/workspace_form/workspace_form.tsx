@@ -192,7 +192,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         <EuiTitle size="s">
           <h2>
             {i18n.translate('workspace.form.selectDataSource.title', {
-              defaultMessage: 'Select Data Sources',
+              defaultMessage: 'Associate data source',
             })}
           </h2>
         </EuiTitle>
