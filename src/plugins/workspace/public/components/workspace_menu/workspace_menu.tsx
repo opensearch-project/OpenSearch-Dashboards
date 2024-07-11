@@ -7,7 +7,7 @@ import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
 import { useObservable } from 'react-use';
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
@@ -158,7 +158,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
         <EuiText size="s">{currentWorkspaceName}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           iconType="cross"
           onClick={closePopover}
           aria-label="close workspace dropdown"

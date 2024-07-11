@@ -40,7 +40,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldText,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { Aggs } from '../../aggs/aggs';
@@ -135,7 +135,7 @@ function MarkdownSeriesUi(props) {
     <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}

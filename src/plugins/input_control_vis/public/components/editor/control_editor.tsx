@@ -33,7 +33,7 @@ import { injectI18n, FormattedMessage, InjectedIntlProps } from '@osd/i18n/react
 
 import {
   EuiAccordion,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -152,7 +152,7 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
   renderEditorButtons() {
     return (
       <div>
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           aria-label={this.props.intl.formatMessage({
             id: 'inputControl.editor.controlEditor.moveControlUpAriaLabel',
             defaultMessage: 'Move control up',
@@ -162,7 +162,7 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
           iconType="sortUp"
           data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
         />
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           aria-label={this.props.intl.formatMessage({
             id: 'inputControl.editor.controlEditor.moveControlDownAriaLabel',
             defaultMessage: 'Move control down',
@@ -172,7 +172,7 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
           iconType="sortDown"
           data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
         />
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           aria-label={this.props.intl.formatMessage({
             id: 'inputControl.editor.controlEditor.removeControlAriaLabel',
             defaultMessage: 'Remove control',

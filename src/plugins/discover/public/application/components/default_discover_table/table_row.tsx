@@ -11,7 +11,7 @@
 
 import { i18n } from '@osd/i18n';
 import React, { useState, useCallback } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
+import { EuiSmallButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import dompurify from 'dompurify';
 import { TableCell } from './table_cell';
 import { DocViewerLinks } from '../doc_viewer_links/doc_viewer_links';
@@ -50,7 +50,7 @@ const TableRowUI = ({
   const tableRow = (
     <tr key={row._id} className={row.isAnchor ? 'osdDocTable__row--highlight' : ''}>
       <td data-test-subj="docTableExpandToggleColumn" className="osdDocTableCell__toggleDetails">
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           color="text"
           onClick={handleExpanding}
           iconType={isExpanded ? 'arrowDown' : 'arrowRight'}

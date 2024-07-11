@@ -39,7 +39,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldText,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@osd/i18n/react';
@@ -124,7 +124,7 @@ function TableSeriesUI(props) {
     <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}

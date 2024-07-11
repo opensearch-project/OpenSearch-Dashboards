@@ -13,7 +13,7 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { FormattedMessage } from 'react-intl';
@@ -38,7 +38,7 @@ export const NoDataSource: React.FC<DataSourceDropDownHeaderProps> = ({
 }) => {
   const [showPopover, setShowPopover] = useState<boolean>(false);
   const button = (
-    <EuiButtonIcon
+    <EuiSmallButtonIcon
       className="euiHeaderLink"
       data-test-subj="dataSourceEmptyMenuHeaderLink"
       aria-label={i18n.translate('dataSourceEmpty.dataSourceEmptyMenuHeaderLink', {

@@ -41,7 +41,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldText,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
@@ -148,7 +148,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
     <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}

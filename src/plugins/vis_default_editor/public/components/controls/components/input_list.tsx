@@ -31,7 +31,7 @@
 import React, { useState, useEffect, Fragment, useCallback } from 'react';
 import { isEmpty, isEqual, mapValues, omitBy, pick } from 'lodash';
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -206,7 +206,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             {config.renderInputRow(item, index, onChangeValue)}
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 aria-label={config.getRemoveBtnAriaLabel(item)}
                 title={config.getRemoveBtnAriaLabel(item)}
                 disabled={models.length === 1}

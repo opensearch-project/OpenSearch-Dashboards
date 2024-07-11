@@ -11,7 +11,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiToolTip,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiConfirmModal,
   EuiSmallButton,
   EuiButtonEmpty,
@@ -81,7 +81,7 @@ export const Header = ({
             defaultMessage: 'Delete this Data Source',
           })}
         >
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             color="danger"
             data-test-subj="editDatasourceDeleteIcon"
             onClick={() => {
