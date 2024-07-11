@@ -4,7 +4,7 @@ options {
 	tokenVocab = DQLLexer;
 }
 
-query: orExpression EOF;
+query: orExpression;
 orExpression: andExpression (OR andExpression)*;
 andExpression: notExpression (AND notExpression)*;
 notExpression: NOT notExpression | primaryExpression;
