@@ -71,6 +71,7 @@ export interface QueryEditorTopRowProps {
 export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
+  const [isQueryEditorCollapsed, setIsQueryEditorCollapsed] = useState(false);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName } = opensearchDashboards.services;
@@ -247,6 +248,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           className="osdQueryEditor"
           dataTestSubj={props.dataTestSubj}
           queryLanguage={queryLanguage}
+          isCollapsed={isQueryEditorCollapsed}
+          onToggleCollapsed={() => setIsQueryEditorCollapsed(!isQueryEditorCollapsed)}
         />
       </EuiFlexItem>
     );

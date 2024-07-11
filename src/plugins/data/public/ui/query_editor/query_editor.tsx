@@ -20,6 +20,8 @@ import { DataSettings } from '../types';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
+import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
+import { CollapsedQueryBarInput } from './collapsed_query_bar';
 
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -47,6 +49,8 @@ export interface QueryEditorProps {
   queryLanguage?: string;
   headerClassName?: string;
   bannerClassName?: string;
+  isCollapsed: boolean;
+  onToggleCollapsed: () => void;
 }
 
 interface Props extends QueryEditorProps {
@@ -289,6 +293,11 @@ export default class QueryEditorUI extends Component<Props, State> {
     const headerClassName = classNames('osdQueryEditorHeader', this.props.headerClassName);
     const bannerClassName = classNames('osdQueryEditorBanner', this.props.bannerClassName);
 
+    const useQueryEditor =
+      this.props.query.language === 'SQLAsync' ||
+      this.props.query.language === 'SQL' ||
+      this.props.query.language === 'PPL';
+
     console.log('this.state.isDataSourcesVisible', this.state.isDataSourcesVisible);
     console.log('this.state.isDataSetsVisible', this.state.isDataSetsVisible);
 
@@ -301,6 +310,12 @@ export default class QueryEditorUI extends Component<Props, State> {
         <EuiFlexGroup gutterSize="xs" direction="column">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" className={`${className}__wrapper`}>
+              <EuiFlexItem grow={false}>
+                <QueryEditorBtnCollapse
+                  onClick={this.props.onToggleCollapsed}
+                  isCollapsed={this.props.isCollapsed}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>{this.props.prepend}</EuiFlexItem>
               {this.state.isDataSourcesVisible && (
                 <EuiFlexItem grow={false} className={`${className}__dataSourceWrapper`}>
@@ -320,28 +335,39 @@ export default class QueryEditorUI extends Component<Props, State> {
                   <div ref={this.props.containerRef} />
                 </EuiFlexItem>
               )}
+              {(!this.props.isCollapsed || !useQueryEditor) && (
+                <EuiFlexItem>
+                  <CollapsedQueryBarInput
+                    initialValue={this.getQueryString()}
+                    onChange={this.onInputChange}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
+
           <EuiFlexItem onClick={this.onClickInput} grow={true}>
             <div ref={this.headerRef} className={headerClassName} />
-            <CodeEditor
-              height={70}
-              languageId="opensearchql"
-              value={this.getQueryString()}
-              onChange={this.onInputChange}
-              options={{
-                lineNumbers: 'on',
-                lineHeight: 24,
-                fontSize: 14,
-                fontFamily: 'Roboto Mono',
-                minimap: {
-                  enabled: false,
-                },
-                scrollBeyondLastLine: false,
-                wordWrap: 'on',
-                wrappingIndent: 'indent',
-              }}
-            />
+            {this.props.isCollapsed && useQueryEditor && (
+              <CodeEditor
+                height={70}
+                languageId="opensearchql"
+                value={this.getQueryString()}
+                onChange={this.onInputChange}
+                options={{
+                  lineNumbers: 'on',
+                  lineHeight: 24,
+                  fontSize: 14,
+                  fontFamily: 'Roboto Mono',
+                  minimap: {
+                    enabled: false,
+                  },
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  wrappingIndent: 'indent',
+                }}
+              />
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
         {this.renderQueryEditorExtensions()}
