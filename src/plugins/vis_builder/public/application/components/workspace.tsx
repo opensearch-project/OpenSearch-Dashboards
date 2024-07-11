@@ -4,7 +4,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { EuiEmptyPrompt, EuiFlexItem, EuiIcon, EuiPanel } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
 import React, { useState, useMemo, useEffect, useLayoutEffect } from 'react';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { IExpressionLoaderParams } from '../../../../expressions/public';
@@ -124,12 +124,14 @@ export const WorkspaceUI = () => {
               }
               body={
                 <>
-                  <p>
-                    {i18n.translate('visBuilder.workSpace.empty.description', {
-                      defaultMessage:
-                        'Drag a field to the configuration panel to generate a visualization.',
-                    })}
-                  </p>
+                  <EuiText size="s">
+                    <p>
+                      {i18n.translate('visBuilder.workSpace.empty.description', {
+                        defaultMessage:
+                          'Drag a field to the configuration panel to generate a visualization.',
+                      })}
+                    </p>
+                  </EuiText>
                   <div className="vbWorkspace__container">
                     <EuiIcon className="vbWorkspace__fieldSvg" type={fields_bg} size="original" />
                     <EuiIcon

@@ -61,7 +61,7 @@ export function WelcomePanel(props: Props) {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText>
+        <EuiText size="s">
           <h4>
             <FormattedMessage
               id="console.welcomePage.quickIntroTitle"

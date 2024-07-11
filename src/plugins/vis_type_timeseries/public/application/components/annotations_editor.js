@@ -308,7 +308,7 @@ export class AnnotationsEditor extends Component {
     if (!model.annotations || !model.annotations.length) {
       const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
       content = (
-        <EuiText textAlign="center">
+        <EuiText size="s" textAlign="center">
           <p>
             <FormattedMessage
               id="visTypeTimeseries.annotationsEditor.howToCreateAnnotationDataSourceDescription"
