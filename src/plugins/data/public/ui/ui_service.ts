@@ -68,10 +68,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       this.dataSourceContainer$.next(ref);
     };
 
-    const setDataSourceFooterRef = (ref: HTMLDivElement | null) => {
-      this.dataSourceFooter$.next(ref);
-    };
-
     const setContainerRef = (ref: HTMLDivElement | null) => {
       this.container$.next(ref);
     };
@@ -82,7 +78,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       storage,
       settings: Settings,
       setDataSourceContainerRef,
-      setDataSourceFooterRef,
       setContainerRef,
     });
 

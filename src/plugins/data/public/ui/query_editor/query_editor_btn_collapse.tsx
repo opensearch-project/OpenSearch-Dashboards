@@ -28,7 +28,7 @@ export function QueryEditorBtnCollapse({ onClick, isCollapsed }: Props) {
         aria-expanded={!isCollapsed}
         aria-label={label}
         data-test-subj="queryEditorCollapseBtn"
-        onClick={() => onClick()}
+        onClick={onClick}
         iconType={!isCollapsed ? 'arrowRight' : 'arrowDown'}
         iconSize={'s'}
       />

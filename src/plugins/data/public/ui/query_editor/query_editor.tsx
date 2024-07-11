@@ -28,7 +28,6 @@ export interface QueryEditorProps {
   dataSource?: DataSource;
   query: Query;
   dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
-  dataSourceFooterRef?: React.RefCallback<HTMLDivElement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
   disableAutoFocus?: boolean;
@@ -51,8 +50,7 @@ export interface QueryEditorProps {
   headerClassName?: string;
   bannerClassName?: string;
   footerClassName?: string;
-  isCollapsed: boolean;
-  onToggleCollapsed: () => void;
+  filterBar?: any;
 }
 
 interface Props extends QueryEditorProps {
@@ -66,6 +64,7 @@ interface State {
   index: number | null;
   suggestions: QuerySuggestion[];
   indexPatterns: IIndexPattern[];
+  isCollapsed: boolean;
 }
 
 const KEY_CODES = {
@@ -91,6 +90,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     index: null,
     suggestions: [],
     indexPatterns: [],
+    isCollapsed: true,
   };
 
   public inputRef: HTMLElement | null = null;
@@ -322,8 +322,8 @@ export default class QueryEditorUI extends Component<Props, State> {
             <EuiFlexGroup gutterSize="xs" alignItems="center" className={`${className}__wrapper`}>
               <EuiFlexItem grow={false}>
                 <QueryEditorBtnCollapse
-                  onClick={this.props.onToggleCollapsed}
-                  isCollapsed={this.props.isCollapsed}
+                  onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}
+                  isCollapsed={this.state.isCollapsed}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>{this.props.prepend}</EuiFlexItem>
@@ -345,7 +345,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                   <div ref={this.props.containerRef} />
                 </EuiFlexItem>
               )}
-              {(!this.props.isCollapsed || !useQueryEditor) && (
+              {(!this.state.isCollapsed || !useQueryEditor) && (
                 <EuiFlexItem>
                   <CollapsedQueryBarInput
                     initialValue={this.getQueryString()}
@@ -358,7 +358,7 @@ export default class QueryEditorUI extends Component<Props, State> {
 
           <EuiFlexItem onClick={this.onClickInput} grow={true}>
             <div ref={this.headerRef} className={headerClassName} />
-            {this.props.isCollapsed && useQueryEditor && (
+            {this.state.isCollapsed && useQueryEditor && (
               <>
                 <CodeEditor
                   height={70}
@@ -378,11 +378,13 @@ export default class QueryEditorUI extends Component<Props, State> {
                     wrappingIndent: 'indent',
                   }}
                 />
-                <div ref={this.props.dataSourceFooterRef} />
               </>
             )}
-            <div ref={this.footerRef} className={footerClassName} />
+            {this.state.isCollapsed && useQueryEditor && (
+              <div ref={this.footerRef} className={footerClassName} />
+            )}
           </EuiFlexItem>
+          {this.state.isCollapsed && <EuiFlexItem grow={false}>{this.props.filterBar}</EuiFlexItem>}
         </EuiFlexGroup>
         {this.renderQueryEditorExtensions()}
       </div>

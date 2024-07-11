@@ -39,7 +39,6 @@ const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 export interface QueryEditorTopRowProps {
   query?: Query;
   dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
-  dataSourceFooterRef?: React.RefCallback<HTMLDivElement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
   settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -72,7 +71,6 @@ export interface QueryEditorTopRowProps {
 export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
-  const [isQueryEditorCollapsed, setIsQueryEditorCollapsed] = useState(false);
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName } = opensearchDashboards.services;
@@ -238,7 +236,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           prepend={props.prepend}
           query={parsedQuery}
           dataSourceContainerRef={props.dataSourceContainerRef}
-          dataSourceFooterRef={props.dataSourceFooterRef}
           containerRef={props.containerRef}
           settings={props.settings!}
           screenTitle={props.screenTitle}
@@ -250,8 +247,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           className="osdQueryEditor"
           dataTestSubj={props.dataTestSubj}
           queryLanguage={queryLanguage}
-          isCollapsed={isQueryEditorCollapsed}
-          onToggleCollapsed={() => setIsQueryEditorCollapsed(!isQueryEditorCollapsed)}
+          filterBar={props.filterBar}
         />
       </EuiFlexItem>
     );
@@ -383,14 +379,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       {renderQueryEditor()}
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
-          {isQueryEditorCollapsed && <EuiFlexItem grow={false}>{props.filterBar}</EuiFlexItem>}
-
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
-              <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
