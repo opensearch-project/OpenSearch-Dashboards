@@ -16,7 +16,12 @@ import {
 import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
-import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
+import {
+  setIndexPattern,
+  setDataset,
+  useTypedDispatch,
+  useTypedSelector,
+} from '../../utils/state_management';
 import './index.scss';
 
 export const Sidebar: FC = ({ children }) => {
@@ -69,9 +74,7 @@ export const Sidebar: FC = ({ children }) => {
 
     const connectionsSubscriptions = ui.dataSourceContainer$.subscribe((container) => {
       if (container === null) return;
-      if (connectionsRef.current) {
-        setConnectionsRef(container);
-      }
+      connectionsRef.current = container;
     });
 
     return () => {
@@ -84,7 +87,6 @@ export const Sidebar: FC = ({ children }) => {
     setContainerRef,
     ui.dataSourceContainer$,
     connectionsRef,
-    setConnectionsRef,
     isEnhancementsEnabled,
   ]);
 
@@ -153,6 +155,12 @@ export const Sidebar: FC = ({ children }) => {
       }
       setSelectedSources(selectedDataSources);
       dispatch(setIndexPattern(selectedDataSources[0].value));
+      dispatch(
+        setDataset({
+          id: selectedDataSources[0].value,
+          datasource: { ref: selectedDataSources[0].ds.getId() },
+        })
+      );
     },
     [dispatch, redirectToLogExplorer, setSelectedSources]
   );
@@ -199,7 +207,7 @@ export const Sidebar: FC = ({ children }) => {
   const dataSetNavigator = (
     <DataSetNavigator
       indexPatternSelectable={indexPatternSelectable}
-      dataConnectionsRef={connectionsRef.current}
+      dataConnectionsRef={connectionsRef}
     />
   );
 
@@ -217,7 +225,10 @@ export const Sidebar: FC = ({ children }) => {
               containerRef.current = node;
             }}
           >
-            {dataSetNavigator}
+            <DataSetNavigator
+              indexPatternSelectable={indexPatternSelectable}
+              dataConnectionsRef={connectionsRef.current}
+            />
             {/* {indexPatternSelectable} */}
           </EuiPortal>
         )}
