@@ -37,7 +37,7 @@ import {
   EuiSmallButton,
   EuiSmallButtonEmpty,
   EuiFieldNumber,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiCheckboxGroup,
   EuiModal,
   EuiModalBody,
@@ -122,7 +122,7 @@ export function DevToolsSettingsModal(props: Props) {
   const pollingFields =
     fields || indices || templates ? (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="console.settingsPage.refreshingDataLabel"
@@ -149,7 +149,7 @@ export function DevToolsSettingsModal(props: Props) {
             }
             onChange={(e) => setPolling(e.target.checked)}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         <EuiSmallButton
           data-test-subj="autocompletePolling"
@@ -184,7 +184,7 @@ export function DevToolsSettingsModal(props: Props) {
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage id="console.settingsPage.fontSizeLabel" defaultMessage="Font Size" />
           }
@@ -201,9 +201,9 @@ export function DevToolsSettingsModal(props: Props) {
               setFontSize(val);
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow>
+        <EuiCompressedFormRow>
           <EuiSwitch
             checked={wrapMode}
             data-test-subj="settingsWrapLines"
@@ -216,9 +216,9 @@ export function DevToolsSettingsModal(props: Props) {
             }
             onChange={(e) => setWrapMode(e.target.checked)}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="console.settingsPage.jsonSyntaxLabel"
@@ -238,9 +238,9 @@ export function DevToolsSettingsModal(props: Props) {
             }
             onChange={(e) => setTripleQuotes(e.target.checked)}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow
+        <EuiCompressedFormRow
           labelType="legend"
           label={
             <FormattedMessage
@@ -259,7 +259,7 @@ export function DevToolsSettingsModal(props: Props) {
               onAutocompleteChange(e as AutocompleteOptions);
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         {pollingFields}
       </EuiModalBody>

@@ -46,7 +46,7 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
   EuiTitle,
@@ -160,7 +160,7 @@ class MarkdownPanelConfigUi extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true}>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('panelFilter')}
                   label={
                     <FormattedMessage
@@ -180,7 +180,7 @@ class MarkdownPanelConfigUi extends Component {
                     onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>

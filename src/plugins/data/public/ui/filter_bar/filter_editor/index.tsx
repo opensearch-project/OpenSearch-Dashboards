@@ -38,7 +38,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
@@ -162,7 +162,7 @@ class FilterEditorUI extends Component<Props, State> {
             {this.state.useCustomLabel && (
               <div>
                 <EuiSpacer size="m" />
-                <EuiFormRow
+                <EuiCompressedFormRow
                   fullWidth={true}
                   label={this.props.intl.formatMessage({
                     id: 'data.filter.filterEditor.createCustomLabelInputLabel',
@@ -174,7 +174,7 @@ class FilterEditorUI extends Component<Props, State> {
                     value={`${this.state.customLabel}`}
                     onChange={this.onCustomLabelChange}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </div>
             )}
 
@@ -232,7 +232,7 @@ class FilterEditorUI extends Component<Props, State> {
     return (
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             label={this.props.intl.formatMessage({
               id: 'data.filter.filterEditor.indexPatternSelectLabel',
               defaultMessage: 'Index Pattern',
@@ -251,7 +251,7 @@ class FilterEditorUI extends Component<Props, State> {
               isClearable={false}
               data-test-subj="filterIndexPatternsSelect"
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -277,7 +277,7 @@ class FilterEditorUI extends Component<Props, State> {
     const fields = selectedIndexPattern ? getFilterableFields(selectedIndexPattern) : [];
 
     return (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={this.props.intl.formatMessage({
           id: 'data.filter.filterEditor.fieldSelectLabel',
           defaultMessage: 'Field',
@@ -300,7 +300,7 @@ class FilterEditorUI extends Component<Props, State> {
           className="globalFilterEditor__fieldInput"
           data-test-subj="filterFieldSuggestionList"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 
@@ -308,7 +308,7 @@ class FilterEditorUI extends Component<Props, State> {
     const { selectedField, selectedOperator } = this.state;
     const operators = selectedField ? getOperatorOptions(selectedField) : [];
     return (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={this.props.intl.formatMessage({
           id: 'data.filter.filterEditor.operatorSelectLabel',
           defaultMessage: 'Operator',
@@ -335,13 +335,13 @@ class FilterEditorUI extends Component<Props, State> {
           isClearable={false}
           data-test-subj="filterOperatorList"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 
   private renderCustomEditor() {
     return (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={i18n.translate('data.filter.filterEditor.queryDslLabel', {
           defaultMessage: 'OpenSearch Query DSL',
         })}
@@ -354,7 +354,7 @@ class FilterEditorUI extends Component<Props, State> {
           width="100%"
           height="250px"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 

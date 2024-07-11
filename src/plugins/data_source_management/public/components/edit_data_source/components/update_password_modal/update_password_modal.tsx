@@ -9,7 +9,7 @@ import {
   EuiSmallButtonEmpty,
   EuiFieldPassword,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -85,7 +85,7 @@ export const UpdatePasswordModal = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiFormRow>
+          <EuiCompressedFormRow>
             <EuiText size="m" style={{ fontWeight: 300 }}>
               {
                 <FormattedMessage
@@ -94,12 +94,12 @@ export const UpdatePasswordModal = ({
                 />
               }
             </EuiText>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer size="m" />
 
           <EuiForm data-test-subj="data-source-update-password">
             {/* Username */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.editDataSource.username', {
                 defaultMessage: 'Username',
               })}
@@ -107,9 +107,9 @@ export const UpdatePasswordModal = ({
               <EuiText size="s" data-test-subj="data-source-update-password-username">
                 {username}
               </EuiText>
-            </EuiFormRow>
+            </EuiCompressedFormRow>
             {/* updated Password */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.editDataSource.newPassword', {
                 defaultMessage: 'Updated password',
               })}
@@ -132,9 +132,9 @@ export const UpdatePasswordModal = ({
                 onBlur={validateNewPassword}
                 disabled={!canManageDataSource}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
             {/* Password */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.editDataSource.confirmNewPassword', {
                 defaultMessage: 'Confirm Updated password',
               })}
@@ -158,7 +158,7 @@ export const UpdatePasswordModal = ({
                 onBlur={validateConfirmNewPassword}
                 disabled={!canManageDataSource}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 

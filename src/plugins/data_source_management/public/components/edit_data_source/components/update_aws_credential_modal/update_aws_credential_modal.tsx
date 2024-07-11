@@ -9,7 +9,7 @@ import {
   EuiSmallButtonEmpty,
   EuiFieldPassword,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -80,7 +80,7 @@ export const UpdateAwsCredentialModal = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiFormRow>
+          <EuiCompressedFormRow>
             <EuiText size="m" style={{ fontWeight: 300 }}>
               {
                 <FormattedMessage
@@ -89,12 +89,12 @@ export const UpdateAwsCredentialModal = ({
                 />
               }
             </EuiText>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer size="m" />
 
           <EuiForm data-test-subj="data-source-update-aws-credential">
             {/* Service Name */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.editDataSource.serviceName', {
                 defaultMessage: 'Service Name',
               })}
@@ -102,9 +102,9 @@ export const UpdateAwsCredentialModal = ({
               <EuiText size="s" data-test-subj="data-source-update-credential-service-name">
                 {sigV4ServiceOptions.find((option) => option.value === service)?.text}
               </EuiText>
-            </EuiFormRow>
+            </EuiCompressedFormRow>
             {/* Region */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.editDataSource.region', {
                 defaultMessage: 'Region',
               })}
@@ -112,10 +112,10 @@ export const UpdateAwsCredentialModal = ({
               <EuiText size="s" data-test-subj="data-source-update-credential-region">
                 {region}
               </EuiText>
-            </EuiFormRow>
+            </EuiCompressedFormRow>
 
             {/* updated access key */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.editDataSource.newAccessKey', {
                 defaultMessage: 'Updated access key',
               })}
@@ -138,10 +138,10 @@ export const UpdateAwsCredentialModal = ({
                 onBlur={validateNewAccessKey}
                 disabled={!canManageDataSource}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
 
             {/* updated secret key */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.editDataSource.newSecretKey', {
                 defaultMessage: 'Updated secret key',
               })}
@@ -164,7 +164,7 @@ export const UpdateAwsCredentialModal = ({
                 onBlur={validateNewSecretKey}
                 disabled={!canManageDataSource}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 

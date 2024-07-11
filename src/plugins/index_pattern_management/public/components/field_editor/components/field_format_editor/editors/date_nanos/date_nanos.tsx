@@ -30,7 +30,7 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiCode, EuiFieldText, EuiFormRow, EuiIcon, EuiLink } from '@elastic/eui';
+import { EuiCode, EuiFieldText, EuiCompressedFormRow, EuiIcon, EuiLink } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { DefaultFormatEditor, defaultState } from '../default';
@@ -59,7 +59,7 @@ export class DateNanosFormatEditor extends DefaultFormatEditor<DateNanosFormatEd
 
     return (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.date.momentLabel"
@@ -93,7 +93,7 @@ export class DateNanosFormatEditor extends DefaultFormatEditor<DateNanosFormatEd
             }}
             isInvalid={!!error}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         <FormatEditorSamples samples={samples} />
       </Fragment>
     );

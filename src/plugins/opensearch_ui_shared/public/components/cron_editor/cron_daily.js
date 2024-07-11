@@ -33,11 +33,11 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow, EuiSelect } from '@elastic/eui';
 
 export const CronDaily = ({ minute, minuteOptions, hour, hourOptions, onChange }) => (
   <Fragment>
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={
         <FormattedMessage
           id="opensearchUi.cronEditor.cronDaily.fieldTimeLabel"
@@ -78,7 +78,7 @@ export const CronDaily = ({ minute, minuteOptions, hour, hourOptions, onChange }
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   </Fragment>
 );
 

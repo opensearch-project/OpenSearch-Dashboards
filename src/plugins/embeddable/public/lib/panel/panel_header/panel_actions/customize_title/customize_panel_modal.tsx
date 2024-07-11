@@ -31,7 +31,7 @@
 import React, { Component } from 'react';
 
 import {
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFieldText,
   EuiSmallButton,
   EuiSwitch,
@@ -95,7 +95,7 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiFormRow>
+          <EuiCompressedFormRow>
             <EuiSwitch
               checked={!this.state.hideTitle}
               data-test-subj="customizePanelHideTitle"
@@ -108,8 +108,8 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
               }
               onChange={this.onHideTitleToggle}
             />
-          </EuiFormRow>
-          <EuiFormRow
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow
             label={i18n.translate(
               'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleFormRowLabel',
               {
@@ -144,7 +144,7 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
                 </EuiSmallButtonEmpty>
               }
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiModalBody>
         <EuiModalFooter>
           <EuiSmallButtonEmpty onClick={() => this.props.cancel()}>

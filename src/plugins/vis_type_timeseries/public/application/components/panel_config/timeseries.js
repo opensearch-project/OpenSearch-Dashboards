@@ -45,7 +45,7 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
   EuiFieldText,
@@ -210,7 +210,7 @@ class TimeseriesPanelConfigUi extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true}>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('panelFilter')}
                   label={
                     <FormattedMessage
@@ -228,7 +228,7 @@ class TimeseriesPanelConfigUi extends Component {
                     onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
@@ -262,7 +262,7 @@ class TimeseriesPanelConfigUi extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true} alignItems="center">
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('axisMin')}
                   label={
                     <FormattedMessage
@@ -272,10 +272,10 @@ class TimeseriesPanelConfigUi extends Component {
                   }
                 >
                   <EuiFieldText onChange={handleTextChange('axis_min')} value={model.axis_min} />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('axisMax')}
                   label={
                     <FormattedMessage
@@ -285,10 +285,10 @@ class TimeseriesPanelConfigUi extends Component {
                   }
                 >
                   <EuiFieldText onChange={handleTextChange('axis_max')} value={model.axis_max} />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('axisPos')}
                   label={
                     <FormattedMessage
@@ -304,10 +304,10 @@ class TimeseriesPanelConfigUi extends Component {
                     onChange={handleSelectChange('axis_position')}
                     singleSelection={{ asPlainText: true }}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('axisScale')}
                   label={
                     <FormattedMessage
@@ -323,7 +323,7 @@ class TimeseriesPanelConfigUi extends Component {
                     onChange={handleSelectChange('axis_scale')}
                     singleSelection={{ asPlainText: true }}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
 

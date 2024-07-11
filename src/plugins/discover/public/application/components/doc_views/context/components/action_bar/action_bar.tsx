@@ -36,6 +36,7 @@ import {
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCompressedFormRow,
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
@@ -135,7 +136,7 @@ export function ActionBar({
             </EuiSmallButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow>
+            <EuiCompressedFormRow>
               <EuiFieldNumber
                 aria-label={
                   isSuccessor
@@ -162,10 +163,10 @@ export function ActionBar({
                 type="number"
                 value={newDocCount >= 0 ? newDocCount : ''}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow display={'center'}>
+            <EuiFormRow display="centerCompressed">
               {isSuccessor ? (
                 <FormattedMessage
                   id="discover.context.olderDocumentsDescription"

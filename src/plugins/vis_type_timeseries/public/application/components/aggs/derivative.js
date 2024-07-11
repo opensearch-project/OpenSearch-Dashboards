@@ -42,7 +42,7 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiFieldText,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -87,7 +87,7 @@ export const DerivativeAgg = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('metric')}
             label={
               <FormattedMessage
@@ -104,10 +104,10 @@ export const DerivativeAgg = (props) => {
               value={model.field}
               fullWidth
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('units')}
             label={
               <FormattedMessage
@@ -119,7 +119,7 @@ export const DerivativeAgg = (props) => {
             fullWidth
           >
             <EuiFieldText onChange={handleTextChange('unit')} value={model.unit} fullWidth />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

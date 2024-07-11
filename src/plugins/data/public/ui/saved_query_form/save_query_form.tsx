@@ -38,7 +38,7 @@ import {
   EuiModalBody,
   EuiModalFooter,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFieldText,
   EuiSwitch,
   EuiText,
@@ -156,12 +156,12 @@ export function SaveQueryForm({
 
   const saveQueryForm = (
     <EuiForm isInvalid={hasErrors} error={formErrors} data-test-subj="saveQueryForm">
-      <EuiFormRow>
+      <EuiCompressedFormRow>
         <EuiText size="s" color="subdued">
           {savedQueryDescriptionText}
         </EuiText>
-      </EuiFormRow>
-      <EuiFormRow
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
         label={i18n.translate('data.search.searchBar.savedQueryNameLabelText', {
           defaultMessage: 'Name',
         })}
@@ -180,9 +180,9 @@ export function SaveQueryForm({
           isInvalid={hasErrors}
           onBlur={autoTrim}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
 
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={i18n.translate('data.search.searchBar.savedQueryDescriptionLabelText', {
           defaultMessage: 'Description',
         })}
@@ -195,9 +195,9 @@ export function SaveQueryForm({
           }}
           data-test-subj="saveQueryFormDescription"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
       {showFilterOption && (
-        <EuiFormRow>
+        <EuiCompressedFormRow>
           <EuiSwitch
             name="shouldIncludeFilters"
             label={i18n.translate('data.search.searchBar.savedQueryIncludeFiltersLabelText', {
@@ -209,11 +209,11 @@ export function SaveQueryForm({
             }}
             data-test-subj="saveQueryFormIncludeFiltersOption"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       )}
 
       {showTimeFilterOption && (
-        <EuiFormRow>
+        <EuiCompressedFormRow>
           <EuiSwitch
             name="shouldIncludeTimefilter"
             label={i18n.translate('data.search.searchBar.savedQueryIncludeTimeFilterLabelText', {
@@ -225,7 +225,7 @@ export function SaveQueryForm({
             }}
             data-test-subj="saveQueryFormIncludeTimeFilterOption"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       )}
     </EuiForm>
   );

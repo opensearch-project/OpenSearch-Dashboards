@@ -36,7 +36,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiComboBox,
   EuiText,
 } from '@elastic/eui';
@@ -140,7 +140,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
       {!isTimeSeries && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('timeRange')}
               label={i18n.translate('visTypeTimeseries.indexPattern.timeRange.label', {
                 defaultMessage: 'Data timerange mode',
@@ -160,7 +160,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 singleSelection={{ asPlainText: true }}
                 isDisabled={disabled}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
             <EuiText size="xs" style={{ margin: 0 }}>
               {i18n.translate('visTypeTimeseries.indexPattern.timeRange.hint', {
                 defaultMessage: `This setting controls the timespan used for matching documents.
@@ -174,7 +174,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
       {!!mdsEnabled && (
         <EuiFlexGroup>
           <EuiFlexItem>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('dataSource')}
               label={i18n.translate('visTypeTimeseries.indexPattern.dataSourceLabel', {
                 defaultMessage: 'Data source',
@@ -192,13 +192,13 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 removePrepend={true}
                 isClearable={false}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('indexPattern')}
             label={i18n.translate('visTypeTimeseries.indexPatternLabel', {
               defaultMessage: 'Index name',
@@ -221,10 +221,10 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
               onChange={handleTextChange(indexPatternName, '*')}
               value={model[indexPatternName]}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('timeField')}
             label={i18n.translate('visTypeTimeseries.indexPattern.timeFieldLabel', {
               defaultMessage: 'Time field',
@@ -240,10 +240,10 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
               fields={fields}
               placeholder={isDefaultIndexPatternUsed ? model.default_timefield : undefined}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             isInvalid={!intervalValidation.isValid}
             error={intervalValidation.errorMessage}
             id={htmlId('interval')}
@@ -264,10 +264,10 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
               value={model[intervalName]}
               placeholder={AUTO_INTERVAL}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('dropLastBucket')}
             label={i18n.translate('visTypeTimeseries.indexPattern.dropLastBucketLabel', {
               defaultMessage: 'Drop last bucket?',
@@ -280,7 +280,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
               onChange={onChange}
               disabled={disabled || isEntireTimeRangeActive(model, isTimeSeries)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

@@ -32,7 +32,7 @@ import { i18n } from '@osd/i18n';
 import {
   EuiButtonEmpty,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
@@ -122,7 +122,7 @@ export function QueryLanguageSwitcher(props: Props) {
         <EuiSpacer size="m" />
 
         <EuiForm>
-          <EuiFormRow label={dqlFullName}>
+          <EuiCompressedFormRow label={dqlFullName}>
             <EuiSwitch
               id="queryEnhancementOptIn"
               name="popswitch"
@@ -140,7 +140,7 @@ export function QueryLanguageSwitcher(props: Props) {
               }}
               data-test-subj="languageToggle"
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiForm>
       </div>
     </EuiPopover>

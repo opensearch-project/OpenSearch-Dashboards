@@ -30,7 +30,13 @@
 
 import React from 'react';
 
-import { EuiForm, EuiFormRow, EuiFieldText, EuiSmallButtonEmpty, EuiSpacer } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiCompressedFormRow,
+  EuiFieldText,
+  EuiSmallButtonEmpty,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -68,7 +74,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
     <EuiSpacer size="xs" />
     {isVisible ? (
       <EuiForm>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.createIndexPattern.stepTime.options.patternHeader"
@@ -95,7 +101,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
               }
             )}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiForm>
     ) : null}
   </div>

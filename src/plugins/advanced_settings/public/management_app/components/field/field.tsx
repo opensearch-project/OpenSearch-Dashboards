@@ -45,7 +45,7 @@ import {
   EuiFieldNumber,
   EuiFieldText,
   EuiFilePicker,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiIconTip,
   EuiImage,
   EuiLink,
@@ -704,7 +704,7 @@ export class Field extends PureComponent<FieldProps> {
         description={this.renderDescription(setting)}
         fullWidth
       >
-        <EuiFormRow
+        <EuiCompressedFormRow
           isInvalid={isInvalid}
           error={error}
           label={this.renderLabel(setting)}
@@ -727,7 +727,7 @@ export class Field extends PureComponent<FieldProps> {
               </EuiScreenReaderOnly>
             )}
           </>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiDescribedFormGroup>
     );
   }

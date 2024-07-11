@@ -6,7 +6,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiSmallButton,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
@@ -95,7 +95,7 @@ export const SelectDataSourcePanel = ({
       </EuiFormLabel>
       <EuiSpacer size="s" />
       {selectedDataSources.map(({ id, title }, index) => (
-        <EuiFormRow
+        <EuiCompressedFormRow
           key={index}
           isInvalid={!!errors?.[index]}
           error={errors?.[index]?.message}
@@ -133,7 +133,7 @@ export const SelectDataSourcePanel = ({
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       ))}
 
       <EuiSmallButton

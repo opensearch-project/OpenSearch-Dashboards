@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFormRow, EuiFieldText, EuiFieldPassword } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiFieldText, EuiFieldPassword } from '@elastic/eui';
 import { useState } from 'react';
 import React from 'react';
 import { AuthMethod } from '../../constants';
@@ -45,28 +45,28 @@ export const AuthDetails = (props: AuthDetailProps) => {
     case 'basicauth':
       return (
         <>
-          <EuiFormRow label="Username">
+          <EuiCompressedFormRow label="Username">
             <EuiFieldText
               placeholder={'Username'}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onBlur={(e) => setUsernameForRequest(e.target.value)}
             />
-          </EuiFormRow>
-          <EuiFormRow label="Password">
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow label="Password">
             <EuiFieldPassword
               type={'dual'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onBlur={(e) => setPasswordForRequest(e.target.value)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </>
       );
     case 'awssigv4':
       return (
         <>
-          <EuiFormRow label="Auth Region">
+          <EuiCompressedFormRow label="Auth Region">
             <EuiFieldText
               placeholder="us-west-2"
               value={region}
@@ -77,23 +77,23 @@ export const AuthDetails = (props: AuthDetailProps) => {
                 setRegion(e.target.value);
               }}
             />
-          </EuiFormRow>
-          <EuiFormRow label="Access Key">
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow label="Access Key">
             <EuiFieldText
               placeholder={'Access key placeholder'}
               value={accessKey}
               onChange={(e) => setAccessKey(e.target.value)}
               onBlur={(e) => setAccessKeyForRequest(e.target.value)}
             />
-          </EuiFormRow>
-          <EuiFormRow label="Secret Key">
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow label="Secret Key">
             <EuiFieldPassword
               type={'dual'}
               value={secretKey}
               onChange={(e) => setSecretKey(e.target.value)}
               onBlur={(e) => setSecretKeyForRequest(e.target.value)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </>
       );
     default:

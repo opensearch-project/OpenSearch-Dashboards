@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiFieldText } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -44,7 +44,7 @@ export const TextField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={field.label}
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
@@ -62,6 +62,6 @@ export const TextField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
         data-test-subj="input"
         {...euiFieldProps}
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };

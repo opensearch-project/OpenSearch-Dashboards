@@ -11,7 +11,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiLink,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFieldText,
   EuiTextArea,
   EuiSelect,
@@ -115,7 +115,7 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
           setErrorForForm={setError}
           setNameForRequest={setNameForRequest}
         />
-        <EuiFormRow label="Description - Optional">
+        <EuiCompressedFormRow label="Description - Optional">
           <EuiTextArea
             placeholder="Describe data source"
             value={details}
@@ -126,7 +126,7 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
               setDetails(e.target.value);
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         <EuiSpacer />
 
         <EuiText>
@@ -134,7 +134,7 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
         </EuiText>
         <EuiSpacer size="m" />
 
-        <EuiFormRow label="Authentication Method">
+        <EuiCompressedFormRow label="Authentication Method">
           <>
             <EuiText size="xs">
               <p>
@@ -144,9 +144,9 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
             </EuiText>
             <EuiFieldText data-test-subj="authentication-method" value="IAM role" disabled />
           </>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow label="AWS Glue Data Catalog authentication ARN">
+        <EuiCompressedFormRow label="AWS Glue Data Catalog authentication ARN">
           <>
             <EuiText size="xs">
               <p>This should be the IAM role ARN</p>
@@ -163,7 +163,7 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
               }}
             />
           </>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         <EuiSpacer />
 
@@ -172,7 +172,7 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
         </EuiText>
         <EuiSpacer size="m" />
 
-        <EuiFormRow label="AWS Glue Data Catalog index store URI">
+        <EuiCompressedFormRow label="AWS Glue Data Catalog index store URI">
           <>
             <EuiText size="xs">
               <p>
@@ -192,9 +192,9 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
               }}
             />
           </>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow label="AWS Glue Data Catalog index store authentication">
+        <EuiCompressedFormRow label="AWS Glue Data Catalog index store authentication">
           <>
             <EuiText size="xs">
               <p>Authentication settings to access the index store.</p>
@@ -208,7 +208,7 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
               }}
             />
           </>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         <AuthDetails
           currentUsername={currentUsername}
           setUsernameForRequest={setUsernameForRequest}

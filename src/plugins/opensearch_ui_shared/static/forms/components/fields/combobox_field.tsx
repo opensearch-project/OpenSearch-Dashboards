@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { FieldHook, VALIDATION_TYPES, FieldValidateResponse } from '../../hook_form_lib';
 
@@ -91,7 +91,7 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
   };
 
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={field.label}
       labelAppend={field.labelAppend}
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
@@ -114,6 +114,6 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
         data-test-subj="input"
         {...euiFieldProps}
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };

@@ -35,7 +35,7 @@ import {
   EuiCallOut,
   EuiFieldText,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -132,7 +132,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
             {this.renderCopyOnSave()}
 
-            <EuiFormRow
+            <EuiCompressedFormRow
               fullWidth
               label={
                 <FormattedMessage id="savedObjects.saveModal.titleLabel" defaultMessage="Title" />
@@ -147,7 +147,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
                 isInvalid={(!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0}
                 aria-describedby={this.state.hasTitleDuplicate ? duplicateWarningId : undefined}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
 
             {this.renderViewDescription()}
 
@@ -177,7 +177,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     }
 
     return (
-      <EuiFormRow
+      <EuiCompressedFormRow
         fullWidth
         label={
           <FormattedMessage
@@ -191,7 +191,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
           value={this.state.visualizationDescription}
           onChange={this.onDescriptionChange}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   };
 

@@ -43,7 +43,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldText,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiCode,
   EuiHorizontalRule,
   EuiFormLabel,
@@ -148,7 +148,7 @@ class TableSeriesConfigUI extends Component {
             <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('template')}
               label={
                 <FormattedMessage
@@ -172,7 +172,7 @@ class TableSeriesConfigUI extends Component {
                 value={model.value_template}
                 fullWidth
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -180,7 +180,7 @@ class TableSeriesConfigUI extends Component {
 
         <EuiFlexGroup responsive={false} wrap={true}>
           <EuiFlexItem grow={true}>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('filterInput')}
               label={
                 <FormattedMessage
@@ -201,7 +201,7 @@ class TableSeriesConfigUI extends Component {
                 onChange={(filter) => this.props.onChange({ filter })}
                 indexPatterns={[this.props.indexPatternForQuery]}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormLabel>
@@ -219,7 +219,7 @@ class TableSeriesConfigUI extends Component {
 
         <EuiFlexGroup responsive={false} wrap={true}>
           <EuiFlexItem grow={true}>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('field')}
               label={
                 <FormattedMessage id="visTypeTimeseries.table.fieldLabel" defaultMessage="Field" />
@@ -232,10 +232,10 @@ class TableSeriesConfigUI extends Component {
                 onChange={handleSelectChange('aggregate_by')}
                 fullWidth
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={true}>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('aggregateFunctionInput')}
               label={
                 <FormattedMessage
@@ -252,7 +252,7 @@ class TableSeriesConfigUI extends Component {
                 singleSelection={{ asPlainText: true }}
                 fullWidth
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
 

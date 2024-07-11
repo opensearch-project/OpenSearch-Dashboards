@@ -43,7 +43,7 @@ import {
   EuiFormLabel,
   EuiComboBox,
   EuiSpacer,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -153,7 +153,7 @@ export const MovingAverageAgg = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('metric')}
             label={i18n.translate('visTypeTimeseries.movingAverage.metricLabel', {
               defaultMessage: 'Metric',
@@ -165,7 +165,7 @@ export const MovingAverageAgg = (props) => {
               metric={model}
               value={model.field}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -173,7 +173,7 @@ export const MovingAverageAgg = (props) => {
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('model_type')}
             label={i18n.translate('visTypeTimeseries.movingAverage.modelLabel', {
               defaultMessage: 'Model',
@@ -192,10 +192,10 @@ export const MovingAverageAgg = (props) => {
               onChange={handleSelectChange('model_type')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('windowSize')}
             label={i18n.translate('visTypeTimeseries.movingAverage.windowSizeLabel', {
               defaultMessage: 'Window Size',
@@ -217,7 +217,7 @@ export const MovingAverageAgg = (props) => {
               onChange={handleNumberChange('window')}
               value={model.window}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -230,7 +230,7 @@ export const MovingAverageAgg = (props) => {
           <EuiFlexGroup gutterSize="s">
             {
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('alpha')}
                   label={i18n.translate('visTypeTimeseries.movingAverage.alpha', {
                     defaultMessage: 'Alpha',
@@ -241,13 +241,13 @@ export const MovingAverageAgg = (props) => {
                     onChange={handleNumberChange('alpha')}
                     value={model.alpha}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
             }
             {(model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_DOUBLE ||
               model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE) && (
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('beta')}
                   label={i18n.translate('visTypeTimeseries.movingAverage.beta', {
                     defaultMessage: 'Beta',
@@ -258,13 +258,13 @@ export const MovingAverageAgg = (props) => {
                     onChange={handleNumberChange('beta')}
                     value={model.beta}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
             )}
             {model.model_type === MODEL_TYPES.WEIGHTED_EXPONENTIAL_TRIPLE && (
               <Fragment>
                 <EuiFlexItem>
-                  <EuiFormRow
+                  <EuiCompressedFormRow
                     id={htmlId('gamma')}
                     label={i18n.translate('visTypeTimeseries.movingAverage.gamma', {
                       defaultMessage: 'Gamma',
@@ -275,10 +275,10 @@ export const MovingAverageAgg = (props) => {
                       onChange={handleNumberChange('gamma')}
                       value={model.gamma}
                     />
-                  </EuiFormRow>
+                  </EuiCompressedFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFormRow
+                  <EuiCompressedFormRow
                     id={htmlId('period')}
                     label={i18n.translate('visTypeTimeseries.movingAverage.period', {
                       defaultMessage: 'Period',
@@ -289,10 +289,10 @@ export const MovingAverageAgg = (props) => {
                       onChange={handleNumberChange('period')}
                       value={model.period}
                     />
-                  </EuiFormRow>
+                  </EuiCompressedFormRow>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFormRow
+                  <EuiCompressedFormRow
                     id={htmlId('multiplicative')}
                     label={i18n.translate('visTypeTimeseries.movingAverage.multiplicative', {
                       defaultMessage: 'Multiplicative',
@@ -310,7 +310,7 @@ export const MovingAverageAgg = (props) => {
                       onChange={handleSelectChange('multiplicative')}
                       singleSelection={{ asPlainText: true }}
                     />
-                  </EuiFormRow>
+                  </EuiCompressedFormRow>
                 </EuiFlexItem>
               </Fragment>
             )}

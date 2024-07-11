@@ -33,7 +33,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow, EuiSelect } from '@elastic/eui';
 
 export const CronMonthly = ({
   minute,
@@ -45,7 +45,7 @@ export const CronMonthly = ({
   onChange,
 }) => (
   <Fragment>
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={
         <FormattedMessage
           id="opensearchUi.cronEditor.cronMonthly.fieldDateLabel"
@@ -65,9 +65,9 @@ export const CronMonthly = ({
         })}
         data-test-subj="cronFrequencyMonthlyDateSelect"
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
 
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={
         <FormattedMessage
           id="opensearchUi.cronEditor.cronMonthly.fieldTimeLabel"
@@ -108,7 +108,7 @@ export const CronMonthly = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   </Fragment>
 );
 

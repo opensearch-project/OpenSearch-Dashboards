@@ -30,7 +30,7 @@
 
 import React, { PureComponent } from 'react';
 
-import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiForm, EuiCompressedFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiSwitchEvent } from '@elastic/eui';
 
@@ -64,7 +64,7 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
   render() {
     return (
       <EuiForm>
-        <EuiFormRow id="updateFiltersOnChange">
+        <EuiCompressedFormRow id="updateFiltersOnChange">
           <EuiSwitch
             label={
               <FormattedMessage
@@ -76,9 +76,9 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
             onChange={this.handleUpdateFiltersChange}
             data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow id="useTimeFilter">
+        <EuiCompressedFormRow id="useTimeFilter">
           <EuiSwitch
             label={
               <FormattedMessage
@@ -90,9 +90,9 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
             onChange={this.handleUseTimeFilter}
             data-test-subj="inputControlEditorUseTimeFilterCheckbox"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow id="pinFilters">
+        <EuiCompressedFormRow id="pinFilters">
           <EuiSwitch
             label={
               <FormattedMessage
@@ -104,7 +104,7 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
             onChange={this.handlePinFilters}
             data-test-subj="inputControlEditorPinFiltersCheckbox"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiForm>
     );
   }

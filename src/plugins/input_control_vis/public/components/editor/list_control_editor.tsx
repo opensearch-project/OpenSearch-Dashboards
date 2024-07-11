@@ -31,7 +31,7 @@
 import React, { PureComponent, ComponentType } from 'react';
 
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
@@ -159,7 +159,7 @@ export class ListControlEditor extends PureComponent<
     if (this.props.parentCandidates && this.props.parentCandidates.length > 0) {
       const parentCandidatesOptions = [{ value: '', text: '' }, ...this.props.parentCandidates];
       options.push(
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={`parentSelect-${this.props.controlIndex}`}
           label={
             <FormattedMessage
@@ -182,12 +182,12 @@ export class ListControlEditor extends PureComponent<
               this.props.handleParentChange(this.props.controlIndex, event.target.value);
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       );
     }
 
     options.push(
-      <EuiFormRow
+      <EuiCompressedFormRow
         id={`multiselect-${this.props.controlIndex}`}
         key="multiselect"
         helpText={
@@ -214,7 +214,7 @@ export class ListControlEditor extends PureComponent<
           }}
           data-test-subj="listControlMultiselectInput"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
 
     const dynamicOptionsHelpText = this.state.isStringField ? (
@@ -229,7 +229,7 @@ export class ListControlEditor extends PureComponent<
       />
     );
     options.push(
-      <EuiFormRow
+      <EuiCompressedFormRow
         id={`dynamicOptions-${this.props.controlIndex}`}
         key="dynamicOptions"
         helpText={dynamicOptionsHelpText}
@@ -252,13 +252,13 @@ export class ListControlEditor extends PureComponent<
           disabled={this.state.isStringField ? false : true}
           data-test-subj="listControlDynamicOptionsSwitch"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
 
     // size is not used when dynamic options is set
     if (!this.props.controlParams.options.dynamicOptions || !this.state.isStringField) {
       options.push(
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={`size-${this.props.controlIndex}`}
           label={
             <FormattedMessage
@@ -286,7 +286,7 @@ export class ListControlEditor extends PureComponent<
             }}
             data-test-subj="listControlSizeInput"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       );
     }
 

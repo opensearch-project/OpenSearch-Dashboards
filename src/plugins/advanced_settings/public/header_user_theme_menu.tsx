@@ -11,7 +11,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiLink,
@@ -133,10 +133,10 @@ export const HeaderUserThemeMenu = () => {
   // TODO: fix focus behavior
   const appearanceContent = (
     <div style={{ maxWidth: 300 }}>
-      <EuiFormRow label="Theme version" helpText={`Default: ${defaultTheme}`}>
+      <EuiCompressedFormRow label="Theme version" helpText={`Default: ${defaultTheme}`}>
         <EuiSelect options={themeOptions} value={theme} onChange={onThemeChange} />
-      </EuiFormRow>
-      <EuiFormRow
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
         label="Screen mode"
         helpText={`Default: ${
           screenModeOptions.find((t) => {
@@ -146,25 +146,25 @@ export const HeaderUserThemeMenu = () => {
         }`}
       >
         <EuiSelect options={screenModeOptions} value={screenMode} onChange={onScreenModeChange} />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow hasEmptyLabelSpace>
+          <EuiCompressedFormRow hasEmptyLabelSpace>
             <EuiLink
               target="_blank"
               href="https://forum.opensearch.org/t/feedback-on-dark-mode-experience/15725"
             >
               Theme feedback
             </EuiLink>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
+          <EuiCompressedFormRow hasEmptyLabelSpace>
             {/* TODO: disable submit until changes */}
             <EuiSmallButton fill onClick={onAppearanceSubmit} type="submit">
               Apply
             </EuiSmallButton>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

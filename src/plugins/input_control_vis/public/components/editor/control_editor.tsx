@@ -36,7 +36,7 @@ import {
   EuiSmallButtonIcon,
   EuiFieldText,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
@@ -132,7 +132,7 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
     const labelId = `controlLabel${this.props.controlIndex}`;
     return (
       <EuiForm>
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={labelId}
           label={
             <FormattedMessage
@@ -142,7 +142,7 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
           }
         >
           <EuiFieldText value={this.props.controlParams.label} onChange={this.changeLabel} />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         {controlEditor}
       </EuiForm>

@@ -32,7 +32,7 @@ import React from 'react';
 
 import {
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
   EuiLink,
   EuiSelect,
@@ -72,7 +72,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
           </p>
         </EuiText>
         <EuiSpacer />
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.createIndexPattern.stepTime.fieldLabel"
@@ -122,7 +122,7 @@ export const TimeField: React.FC<TimeFieldProps> = ({
               onChange={onTimeFieldChanged}
             />
           )}
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </>
     ) : (
       <EuiText>

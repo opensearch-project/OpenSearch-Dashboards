@@ -32,7 +32,7 @@ import {
   EuiSmallButton,
   EuiSmallButtonEmpty,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
@@ -85,13 +85,13 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
     const form = (
       <EuiForm>
         {mappedFilters.map((filter, i) => (
-          <EuiFormRow key={i}>
+          <EuiCompressedFormRow key={i}>
             <EuiSwitch
               label={this.getLabel(filter)}
               checked={this.isFilterSelected(i)}
               onChange={() => this.toggleFilterSelected(i)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         ))}
       </EuiForm>
     );

@@ -11,7 +11,7 @@ import {
   EuiSmallButtonEmpty,
   EuiFieldText,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
@@ -52,7 +52,9 @@ export const DeleteModal = ({
           <EuiText>The action cannot be undone.</EuiText>
           <EuiSpacer />
           <EuiForm>
-            <EuiFormRow label={`To confirm deletion, enter "${deletePrompt}" in the text field`}>
+            <EuiCompressedFormRow
+              label={`To confirm deletion, enter "${deletePrompt}" in the text field`}
+            >
               <EuiFieldText
                 name="input"
                 placeholder={deletePrompt}
@@ -60,7 +62,7 @@ export const DeleteModal = ({
                 onChange={(e) => onChange(e)}
                 data-test-subj="popoverModal__deleteTextInput"
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 

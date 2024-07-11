@@ -44,7 +44,7 @@ import {
   EuiFormLabel,
   EuiTextArea,
   EuiLink,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiCode,
   EuiSpacer,
 } from '@elastic/eui';
@@ -114,7 +114,7 @@ export function MathAgg(props) {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id="mathExpressionInput"
             label={
               <FormattedMessage
@@ -160,7 +160,7 @@ export function MathAgg(props) {
               fullWidth
               value={model.script}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

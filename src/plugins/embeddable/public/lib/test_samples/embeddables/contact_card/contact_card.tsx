@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiFlexItem, EuiFlexGroup, EuiFormRow } from '@elastic/eui';
+import { EuiCard, EuiFlexItem, EuiFlexGroup, EuiCompressedFormRow } from '@elastic/eui';
 
 import { Subscription } from 'rxjs';
 import { EuiSmallButton } from '@elastic/eui';
@@ -97,11 +97,11 @@ export class ContactCardEmbeddableComponent extends React.Component<Props, State
   getCardFooterContent = () => (
     <EuiFlexGroup justifyContent="flexEnd">
       <EuiFlexItem grow={false}>
-        <EuiFormRow label="">
+        <EuiCompressedFormRow label="">
           <EuiSmallButton
             onClick={this.emitContactTrigger}
           >{`Contact ${this.state.firstName}`}</EuiSmallButton>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

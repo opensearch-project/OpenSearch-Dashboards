@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiHorizontalRule,
   EuiPanel,
   EuiSuperSelect,
@@ -713,7 +713,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           }
         >
           {/* Title */}
-          <EuiFormRow
+          <EuiCompressedFormRow
             label={i18n.translate('dataSourcesManagement.editDataSource.title', {
               defaultMessage: 'Title',
             })}
@@ -732,9 +732,9 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               onBlur={this.validateTitle}
               disabled={!this.props.canManageDataSource}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           {/* Description */}
-          <EuiFormRow
+          <EuiCompressedFormRow
             label={this.renderFieldLabelAsOptional(
               'dataSourceManagement.editDataSource.description',
               'Description'
@@ -753,7 +753,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               onChange={this.onChangeDescription}
               disabled={!this.props.canManageDataSource}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiDescribedFormGroup>
       </EuiPanel>
     );
@@ -776,7 +776,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
 
         <EuiHorizontalRule margin="m" />
         {/* Endpoint */}
-        <EuiFormRow
+        <EuiCompressedFormRow
           fullWidth={true}
           label={i18n.translate('dataSourcesManagement.editDataSource.endpointURL', {
             defaultMessage: 'Endpoint URL',
@@ -790,7 +790,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             aria-disabled={true}
             data-test-subj="editDatasourceEndpointField"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiPanel>
     );
   };
@@ -835,7 +835,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <>
         {/* Auth type select */}
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={i18n.translate('dataSourcesManagement.editDataSource.credential', {
             defaultMessage: 'Credential',
           })}
@@ -848,7 +848,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             name="Credential"
             data-test-subj="editDataSourceSelectAuthType"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         <EuiSpacer />
         {this.renderSelectedAuthType(this.state.auth.type)}
@@ -872,7 +872,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
   renderSigV4ContentFields = () => {
     return (
       <>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={i18n.translate('dataSourcesManagement.createDataSource.region', {
             defaultMessage: 'Region',
           })}
@@ -894,8 +894,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             data-test-subj="editDataSourceFormRegionField"
             name="dataSourceRegion"
           />
-        </EuiFormRow>
-        <EuiFormRow
+        </EuiCompressedFormRow>
+        <EuiCompressedFormRow
           label={i18n.translate('dataSourcesManagement.createDataSource.serviceName', {
             defaultMessage: 'Service Name',
           })}
@@ -908,8 +908,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             name="ServiceName"
             data-test-subj="editDataSourceFormSigV4ServiceTypeSelect"
           />
-        </EuiFormRow>
-        <EuiFormRow
+        </EuiCompressedFormRow>
+        <EuiCompressedFormRow
           label={i18n.translate('dataSourcesManagement.createDataSource.accessKey', {
             defaultMessage: 'Access Key',
           })}
@@ -937,8 +937,8 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             data-test-subj="editDataSourceFormAccessKeyField"
             name="dataSourceAccessKey"
           />
-        </EuiFormRow>
-        <EuiFormRow
+        </EuiCompressedFormRow>
+        <EuiCompressedFormRow
           label={i18n.translate('dataSourcesManagement.createDataSource.secretKey', {
             defaultMessage: 'Secret Key',
           })}
@@ -966,7 +966,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             data-test-subj="editDataSourceFormSecretKeyField"
             name="dataSourceSecretKey"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         <EuiSpacer />
         {this.props.existingDataSource.auth.type === AuthType.SigV4
           ? this.renderUpdateAwsCredentialModal()
@@ -979,7 +979,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
     return (
       <>
         {/* Username */}
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={i18n.translate('dataSourcesManagement.editDataSource.username', {
             defaultMessage: 'Username',
           })}
@@ -1000,10 +1000,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             onBlur={this.validateUsername}
             disabled={!this.props.canManageDataSource}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         {/* Password */}
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={i18n.translate('dataSourcesManagement.editDataSource.password', {
             defaultMessage: 'Password',
           })}
@@ -1039,7 +1039,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               <EuiFlexItem>{this.renderUpdatePasswordModal()}</EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </>
     );
   };

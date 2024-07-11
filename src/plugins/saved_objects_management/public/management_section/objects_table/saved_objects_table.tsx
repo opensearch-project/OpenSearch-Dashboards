@@ -52,7 +52,7 @@ import {
   EuiSmallButtonEmpty,
   EuiSmallButton,
   EuiModalHeaderTitle,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -826,7 +826,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <EuiFormRow
+          <EuiCompressedFormRow
             label={
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalDescription"
@@ -851,7 +851,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
                 });
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer size="m" />
           <EuiSwitch
             name="includeReferencesDeep"

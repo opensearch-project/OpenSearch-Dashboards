@@ -33,7 +33,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow, EuiSelect } from '@elastic/eui';
 
 export const CronYearly = ({
   minute,
@@ -47,7 +47,7 @@ export const CronYearly = ({
   onChange,
 }) => (
   <Fragment>
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={
         <FormattedMessage
           id="opensearchUi.cronEditor.cronYearly.fieldMonthLabel"
@@ -67,9 +67,9 @@ export const CronYearly = ({
         })}
         data-test-subj="cronFrequencyYearlyMonthSelect"
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
 
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={
         <FormattedMessage
           id="opensearchUi.cronEditor.cronYearly.fieldDateLabel"
@@ -89,9 +89,9 @@ export const CronYearly = ({
         })}
         data-test-subj="cronFrequencyYearlyDateSelect"
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
 
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={
         <FormattedMessage
           id="opensearchUi.cronEditor.cronYearly.fieldTimeLabel"
@@ -132,7 +132,7 @@ export const CronYearly = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   </Fragment>
 );
 

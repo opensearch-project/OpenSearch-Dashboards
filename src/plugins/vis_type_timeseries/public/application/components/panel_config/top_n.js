@@ -44,7 +44,7 @@ import {
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
   EuiFieldText,
@@ -108,7 +108,7 @@ export class TopNPanelConfig extends Component {
               </span>
             </EuiTitle>
             <EuiSpacer size="m" />
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('itemUrl')}
               label={
                 <FormattedMessage
@@ -130,7 +130,7 @@ export class TopNPanelConfig extends Component {
                 onChange={handleTextChange('drilldown_url')}
                 value={model.drilldown_url}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
 
             <EuiHorizontalRule />
 
@@ -144,7 +144,7 @@ export class TopNPanelConfig extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true}>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('panelFilter')}
                   label={
                     <FormattedMessage
@@ -164,7 +164,7 @@ export class TopNPanelConfig extends Component {
                     onChange={(filter) => this.props.onChange({ filter })}
                     indexPatterns={[model.index_pattern || model.default_index_pattern]}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>

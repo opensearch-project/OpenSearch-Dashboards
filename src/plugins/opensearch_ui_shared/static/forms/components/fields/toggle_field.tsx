@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -52,7 +52,7 @@ export const ToggleField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
   };
 
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
       isInvalid={isInvalid}
@@ -67,6 +67,6 @@ export const ToggleField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
         data-test-subj="input"
         {...euiFieldProps}
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };

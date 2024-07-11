@@ -38,7 +38,7 @@ import {
   EuiSpacer,
   EuiSmallButton,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFieldText,
   EuiSwitchEvent,
   EuiSwitch,
@@ -120,7 +120,7 @@ export const Header: React.FC<HeaderProps> = ({
                   onQueryChanged
                 )}
             {showSystemIndices ? (
-              <EuiFormRow>
+              <EuiCompressedFormRow>
                 <EuiSwitch
                   label={
                     <FormattedMessage
@@ -133,12 +133,12 @@ export const Header: React.FC<HeaderProps> = ({
                   onChange={onChangeIncludingSystemIndices}
                   data-test-subj="showSystemAndHiddenIndices"
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             ) : null}
           </EuiForm>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
+          <EuiCompressedFormRow hasEmptyLabelSpace>
             <EuiSmallButton
               fill
               iconSide="right"
@@ -152,7 +152,7 @@ export const Header: React.FC<HeaderProps> = ({
                 defaultMessage="Next step"
               />
             </EuiSmallButton>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
@@ -167,7 +167,7 @@ const renderIndexPatternInput = (
   onQueryChanged: (e: React.ChangeEvent<HTMLInputElement>) => void
 ) => {
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       fullWidth
       label={
         <FormattedMessage
@@ -206,7 +206,7 @@ const renderIndexPatternInput = (
         data-test-subj="createIndexPatternNameInput"
         fullWidth
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };
 
@@ -221,7 +221,7 @@ const renderDataSourceAndIndexPatternInput = (
   return (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={2}>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.createIndexPattern.step.dataSourceLabel"
@@ -244,7 +244,7 @@ const renderDataSourceAndIndexPatternInput = (
             disabled={true}
             data-test-subj="createIndexPatternDataSourceName"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiFlexItem>
       <div className="dataSourceIndexPatternDot"> {`.`} </div>
       <EuiFlexItem grow={7}>

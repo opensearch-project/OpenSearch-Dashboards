@@ -30,7 +30,7 @@
 
 import React, { Component, Fragment, ComponentType } from 'react';
 
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
@@ -105,7 +105,7 @@ export class RangeControlEditor extends Component<
           controlIndex={this.props.controlIndex}
         />
 
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={stepSizeId}
           label={
             <FormattedMessage
@@ -125,9 +125,9 @@ export class RangeControlEditor extends Component<
             }}
             data-test-subj={`rangeControlSizeInput${this.props.controlIndex}`}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={decimalPlacesId}
           label={
             <FormattedMessage
@@ -148,7 +148,7 @@ export class RangeControlEditor extends Component<
             }}
             data-test-subj={`rangeControlDecimalPlacesInput${this.props.controlIndex}`}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </Fragment>
     );
   }

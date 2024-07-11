@@ -32,7 +32,7 @@ import React, { Fragment } from 'react';
 
 import {
   EuiFieldText,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiLink,
   EuiSelect,
   EuiSwitch,
@@ -154,7 +154,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
     const height = this.sanitizeNumericValue(this.props.formatParams.height);
     return (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage id="indexPatternManagement.url.widthLabel" defaultMessage="Width" />
           }
@@ -166,8 +166,8 @@ export class UrlFormatEditor extends DefaultFormatEditor<
               this.onChange({ width: e.target.value });
             }}
           />
-        </EuiFormRow>
-        <EuiFormRow
+        </EuiCompressedFormRow>
+        <EuiCompressedFormRow
           label={
             <FormattedMessage id="indexPatternManagement.url.heightLabel" defaultMessage="Height" />
           }
@@ -179,7 +179,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
               this.onChange({ height: e.target.value });
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </Fragment>
     );
   };
@@ -198,7 +198,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           isVisible={this.state.showUrlTemplateHelp}
           onClose={this.hideUrlTemplateHelp}
         />
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage id="indexPatternManagement.url.typeLabel" defaultMessage="Type" />
           }
@@ -216,10 +216,10 @@ export class UrlFormatEditor extends DefaultFormatEditor<
               this.onTypeChange(e.target.value);
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         {formatParams.type === 'a' ? (
-          <EuiFormRow
+          <EuiCompressedFormRow
             label={
               <FormattedMessage
                 id="indexPatternManagement.url.openTabLabel"
@@ -240,10 +240,10 @@ export class UrlFormatEditor extends DefaultFormatEditor<
                 this.onChange({ openLinkInCurrentTab: !e.target.checked });
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         ) : null}
 
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.url.urlTemplateLabel"
@@ -268,9 +268,9 @@ export class UrlFormatEditor extends DefaultFormatEditor<
               this.onChange({ urlTemplate: e.target.value });
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.url.labelTemplateLabel"
@@ -295,7 +295,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
               this.onChange({ labelTemplate: e.target.value });
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         {formatParams.type === 'img' && this.renderWidthHeightParameters()}
 

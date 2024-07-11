@@ -34,7 +34,7 @@ import { padStart } from 'lodash';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
-import { EuiSelect, EuiFormRow } from '@elastic/eui';
+import { EuiSelect, EuiCompressedFormRow } from '@elastic/eui';
 
 import {
   getOrdinalValue,
@@ -356,7 +356,7 @@ export class CronEditor extends Component {
 
     return (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="opensearchUi.cronEditor.fieldFrequencyLabel"
@@ -375,7 +375,7 @@ export class CronEditor extends Component {
             })}
             data-test-subj="cronFrequencySelect"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         {this.renderForm()}
       </Fragment>

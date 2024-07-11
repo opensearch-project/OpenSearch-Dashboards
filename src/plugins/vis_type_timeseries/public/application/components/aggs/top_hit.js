@@ -43,7 +43,7 @@ import {
   EuiFormLabel,
   EuiComboBox,
   EuiSpacer,
-  EuiFormRow,
+  EuiCompressedFormRow,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { OSD_FIELD_TYPES } from '../../../../../../plugins/data/public';
@@ -178,7 +178,7 @@ const TopHitAggUi = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('field')}
             label={
               <FormattedMessage id="visTypeTimeseries.topHit.fieldLabel" defaultMessage="Field" />
@@ -192,7 +192,7 @@ const TopHitAggUi = (props) => {
               value={model.field}
               onChange={handleSelectChange('field')}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -200,7 +200,7 @@ const TopHitAggUi = (props) => {
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('size')}
             label={
               <FormattedMessage id="visTypeTimeseries.topHit.sizeLabel" defaultMessage="Size" />
@@ -215,10 +215,10 @@ const TopHitAggUi = (props) => {
               value={model.size}
               onChange={handleTextChange('size')}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('agg_with')}
             label={
               <FormattedMessage
@@ -240,10 +240,10 @@ const TopHitAggUi = (props) => {
               onChange={handleSelectChange('agg_with')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('order_by')}
             label={
               <FormattedMessage
@@ -259,10 +259,10 @@ const TopHitAggUi = (props) => {
               indexPattern={indexPattern}
               fields={fields}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('order')}
             label={
               <FormattedMessage id="visTypeTimeseries.topHit.orderLabel" defaultMessage="Order" />
@@ -278,7 +278,7 @@ const TopHitAggUi = (props) => {
               onChange={handleSelectChange('order')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

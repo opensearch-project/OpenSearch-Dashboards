@@ -15,7 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiLoadingSpinner,
   EuiText,
   EuiButton,
@@ -131,7 +131,7 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
 
     return (
       <EuiForm>
-        <EuiFormRow
+        <EuiCompressedFormRow
           fullWidth
           label={
             <FormattedMessage
@@ -153,13 +153,13 @@ export const ImportFlyout = ({ close, refresh }: ImportFlyoutProps) => {
             onChange={setImportFile}
             data-test-subj="queryFilePicker"
           />
-        </EuiFormRow>
-        <EuiFormRow fullWidth>
+        </EuiCompressedFormRow>
+        <EuiCompressedFormRow fullWidth>
           <ImportModeControl
             initialValues={importMode}
             updateSelection={(newValues: ImportMode) => setImportMode(newValues)}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiForm>
     );
   };

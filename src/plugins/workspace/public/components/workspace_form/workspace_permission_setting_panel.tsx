@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { EuiSmallButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiSmallButton, EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspaceFormError, WorkspacePermissionSetting } from './types';
 import {
@@ -124,7 +124,7 @@ const UserOrGroupSection = ({
       <EuiSpacer size="xs" />
       {permissionSettings.map((item, index) => (
         <React.Fragment key={item.id}>
-          <EuiFormRow fullWidth isInvalid={!!errors?.[item.id]} error={errors?.[item.id]?.message}>
+          <EuiCompressedFormRow fullWidth isInvalid={!!errors?.[item.id]} error={errors?.[item.id]?.message}>
             <WorkspacePermissionSettingInput
               {...item}
               type={type}
@@ -134,7 +134,7 @@ const UserOrGroupSection = ({
               onGroupOrUserIdChange={handleGroupOrUserIdChange}
               onPermissionModesChange={handlePermissionModesChange}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </React.Fragment>
       ))}
       <EuiSmallButton

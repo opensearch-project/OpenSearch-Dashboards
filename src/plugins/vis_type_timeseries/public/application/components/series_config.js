@@ -40,7 +40,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldText,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiCode,
   EuiHorizontalRule,
   EuiFormLabel,
@@ -67,7 +67,7 @@ export const SeriesConfig = (props) => {
 
       <EuiHorizontalRule margin="s" />
 
-      <EuiFormRow
+      <EuiCompressedFormRow
         id={htmlId('series_filter')}
         label={
           <FormattedMessage
@@ -88,13 +88,13 @@ export const SeriesConfig = (props) => {
           onChange={(filter) => props.onChange({ filter })}
           indexPatterns={[seriesIndexPattern]}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
 
       <EuiHorizontalRule margin="s" />
 
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('template')}
             label={
               <FormattedMessage
@@ -118,10 +118,10 @@ export const SeriesConfig = (props) => {
               value={model.value_template}
               fullWidth
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('offsetSeries')}
             label={
               <FormattedMessage
@@ -136,7 +136,7 @@ export const SeriesConfig = (props) => {
               onChange={handleTextChange('offset_time')}
               value={model.offset_time}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 

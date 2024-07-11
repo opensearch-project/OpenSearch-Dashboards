@@ -29,7 +29,13 @@
  */
 
 import React, { PureComponent } from 'react';
-import { EuiFieldNumber, EuiFieldText, EuiFormRow, EuiSwitch, EuiCodeEditor } from '@elastic/eui';
+import {
+  EuiFieldNumber,
+  EuiFieldText,
+  EuiCompressedFormRow,
+  EuiSwitch,
+  EuiCodeEditor,
+} from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { FieldState, FieldType } from '../../types';
 
@@ -47,9 +53,9 @@ export class Field extends PureComponent<FieldProps> {
     const { name } = this.props;
 
     return (
-      <EuiFormRow fullWidth={true} label={name}>
+      <EuiCompressedFormRow fullWidth={true} label={name}>
         {this.renderField()}
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 

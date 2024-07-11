@@ -31,7 +31,7 @@
 import React, { Component } from 'react';
 import { i18n } from '@osd/i18n';
 
-import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiForm, EuiCompressedFormRow, EuiSwitch } from '@elastic/eui';
 
 interface Props {
   useMargins: boolean;
@@ -70,7 +70,7 @@ export class OptionsMenu extends Component<Props, State> {
   render() {
     return (
       <EuiForm data-test-subj="dashboardOptionsMenu">
-        <EuiFormRow>
+        <EuiCompressedFormRow>
           <EuiSwitch
             label={i18n.translate('dashboard.topNav.options.useMarginsBetweenPanelsSwitchLabel', {
               defaultMessage: 'Use margins between panels',
@@ -79,9 +79,9 @@ export class OptionsMenu extends Component<Props, State> {
             onChange={this.handleUseMarginsChange}
             data-test-subj="dashboardMarginsCheckbox"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow>
+        <EuiCompressedFormRow>
           <EuiSwitch
             label={i18n.translate('dashboard.topNav.options.hideAllPanelTitlesSwitchLabel', {
               defaultMessage: 'Show panel titles',
@@ -90,7 +90,7 @@ export class OptionsMenu extends Component<Props, State> {
             onChange={this.handleHidePanelTitlesChange}
             data-test-subj="dashboardPanelTitlesCheckbox"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiForm>
     );
   }

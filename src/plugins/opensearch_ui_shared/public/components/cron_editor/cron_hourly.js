@@ -33,11 +33,11 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiSelect } from '@elastic/eui';
 
 export const CronHourly = ({ minute, minuteOptions, onChange }) => (
   <Fragment>
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={
         <FormattedMessage
           id="opensearchUi.cronEditor.cronHourly.fieldTimeLabel"
@@ -57,7 +57,7 @@ export const CronHourly = ({ minute, minuteOptions, onChange }) => (
         })}
         data-test-subj="cronFrequencyHourlyMinuteSelect"
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   </Fragment>
 );
 

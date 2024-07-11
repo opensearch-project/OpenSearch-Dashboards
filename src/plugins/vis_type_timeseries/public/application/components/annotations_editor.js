@@ -45,7 +45,7 @@ import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
   EuiFieldText,
@@ -127,7 +127,7 @@ export class AnnotationsEditor extends Component {
           <EuiFlexItem className="tvbAggRow__children">
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('indexPattern')}
                   label={
                     <FormattedMessage
@@ -146,10 +146,10 @@ export class AnnotationsEditor extends Component {
                     value={model.index_pattern}
                     fullWidth
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('timeField')}
                   label={
                     <FormattedMessage
@@ -167,7 +167,7 @@ export class AnnotationsEditor extends Component {
                     fields={this.props.fields}
                     fullWidth
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
 
@@ -175,7 +175,7 @@ export class AnnotationsEditor extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('queryString')}
                   label={
                     <FormattedMessage
@@ -193,7 +193,7 @@ export class AnnotationsEditor extends Component {
                     onChange={(query) => this.handleQueryChange(model, query)}
                     indexPatterns={[model.index_pattern]}
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiFormLabel>
@@ -229,7 +229,7 @@ export class AnnotationsEditor extends Component {
 
             <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('icon')}
                   label={
                     <FormattedMessage
@@ -239,10 +239,10 @@ export class AnnotationsEditor extends Component {
                   }
                 >
                   <IconSelect value={model.icon} onChange={this.handleChange(model, 'icon')} />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('fields')}
                   label={
                     <FormattedMessage
@@ -257,10 +257,10 @@ export class AnnotationsEditor extends Component {
                     value={model.fields}
                     fullWidth
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiFormRow
+                <EuiCompressedFormRow
                   id={htmlId('rowTemplate')}
                   label={
                     <FormattedMessage
@@ -284,7 +284,7 @@ export class AnnotationsEditor extends Component {
                     value={model.template}
                     fullWidth
                   />
-                </EuiFormRow>
+                </EuiCompressedFormRow>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

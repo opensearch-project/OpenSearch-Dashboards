@@ -44,7 +44,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiIcon,
   EuiLink,
   EuiSelect,
@@ -295,7 +295,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const isInvalid = !spec.name || !spec.name.trim();
 
     return isCreating ? (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={i18n.translate('indexPatternManagement.nameLabel', { defaultMessage: 'Name' })}
         helpText={
           this.isDuplicateName() ? (
@@ -341,7 +341,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
           }}
           isInvalid={isInvalid}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     ) : null;
   }
 
@@ -349,7 +349,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { spec, scriptingLangs, isDeprecatedLang } = this.state;
 
     return spec.scripted ? (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={i18n.translate('indexPatternManagement.languageLabel', {
           defaultMessage: 'Language',
         })}
@@ -400,7 +400,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             this.onLangChange(e.target.value);
           }}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     ) : null;
   }
 
@@ -408,7 +408,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { spec, fieldTypes } = this.state;
 
     return (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={i18n.translate('indexPatternManagement.typeLabel', { defaultMessage: 'Type' })}
       >
         <EuiSelect
@@ -422,7 +422,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             this.onTypeChange(e.target.value as OSD_FIELD_TYPES);
           }}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 
@@ -501,7 +501,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     return (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={label}
           helpText={
             <FormattedMessage
@@ -521,7 +521,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
               this.onFormatChange(e.target.value);
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         {fieldFormatId ? (
           <FieldFormatEditor
             fieldType={spec.type}
@@ -541,7 +541,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { spec } = this.state;
 
     return (
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={i18n.translate('indexPatternManagement.popularityLabel', {
           defaultMessage: 'Popularity',
           description:
@@ -555,7 +555,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             this.onFieldChange('count', e.target.value ? Number(e.target.value) : '');
           }}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 
@@ -585,7 +585,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     return spec.scripted ? (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           fullWidth
           label={i18n.translate('indexPatternManagement.scriptLabel', { defaultMessage: 'Script' })}
           isInvalid={isInvalid}
@@ -599,9 +599,9 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             width="100%"
             height="300px"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow>
+        <EuiCompressedFormRow>
           <Fragment>
             <EuiText>
               <FormattedMessage
@@ -618,7 +618,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
               />
             </EuiLink>
           </Fragment>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </Fragment>
     ) : null;
   }
@@ -693,7 +693,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     const { redirectAway } = this.props.services;
 
     return (
-      <EuiFormRow>
+      <EuiCompressedFormRow>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiSmallButton
@@ -739,7 +739,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 

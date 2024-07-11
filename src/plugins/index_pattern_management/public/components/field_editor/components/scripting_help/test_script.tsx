@@ -36,7 +36,7 @@ import {
   EuiSmallButton,
   EuiCodeBlock,
   EuiComboBox,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiText,
   EuiSpacer,
   EuiTitle,
@@ -232,7 +232,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     return (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={i18n.translate('indexPatternManagement.testScript.fieldsLabel', {
             defaultMessage: 'Additional fields',
           })}
@@ -248,7 +248,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
             data-test-subj="additionalFieldsSelect"
             fullWidth
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         <div className="testScript__searchBar">
           <this.context.services.data.ui.SearchBar

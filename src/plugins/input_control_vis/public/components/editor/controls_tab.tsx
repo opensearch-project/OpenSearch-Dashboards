@@ -35,7 +35,7 @@ import {
   EuiSmallButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPanel,
   EuiSelect,
 } from '@elastic/eui';
@@ -181,7 +181,7 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
         <EuiPanel grow={false}>
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiFormRow id="selectControlType">
+              <EuiCompressedFormRow id="selectControlType">
                 <EuiSelect
                   data-test-subj="selectControlType"
                   options={[
@@ -207,10 +207,10 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
                     defaultMessage: 'Select control type',
                   })}
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFormRow id="addControl">
+              <EuiCompressedFormRow id="addControl">
                 <EuiSmallButton
                   onClick={this.handleAddControl}
                   iconType="plusInCircle"
@@ -225,7 +225,7 @@ class ControlsTabUi extends PureComponent<ControlsTabUiProps, ControlsTabUiState
                     defaultMessage="Add"
                   />
                 </EuiSmallButton>
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>

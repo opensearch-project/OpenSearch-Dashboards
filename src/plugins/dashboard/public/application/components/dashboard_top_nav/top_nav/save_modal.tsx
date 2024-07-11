@@ -30,7 +30,7 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiTextArea, EuiSwitch } from '@elastic/eui';
 
 import { SavedObjectSaveModal } from '../../../../../../saved_objects/public';
 
@@ -110,7 +110,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
   renderDashboardSaveOptions() {
     return (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="dashboard.topNav.saveModal.descriptionFormRowLabel"
@@ -123,9 +123,9 @@ export class DashboardSaveModal extends React.Component<Props, State> {
             value={this.state.description}
             onChange={this.onDescriptionChange}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow
+        <EuiCompressedFormRow
           helpText={
             <FormattedMessage
               id="dashboard.topNav.saveModal.storeTimeWithDashboardFormRowHelpText"
@@ -144,7 +144,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
               />
             }
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </Fragment>
     );
   }

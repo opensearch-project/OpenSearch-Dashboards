@@ -8,7 +8,7 @@ import {
   EuiSmallButtonIcon,
   EuiDraggable,
   EuiDroppable,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
@@ -72,7 +72,7 @@ const DropboxComponent = ({
   );
 
   return (
-    <EuiFormRow label={boxLabel} className="dropBox" fullWidth>
+    <EuiCompressedFormRow label={boxLabel} className="dropBox" fullWidth>
       <div className="dropBox__container">
         <EuiDroppable
           className="dropBox__droppable"
@@ -132,7 +132,7 @@ const DropboxComponent = ({
           </EuiPanel>
         )}
       </div>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };
 

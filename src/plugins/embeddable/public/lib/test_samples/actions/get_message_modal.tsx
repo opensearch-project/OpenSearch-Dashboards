@@ -30,7 +30,7 @@
 
 import {
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFieldText,
   EuiModalHeader,
   EuiModalHeaderTitle,
@@ -65,13 +65,13 @@ export class GetMessageModal extends Component<Props, State> {
 
         <EuiModalBody>
           <EuiForm>
-            <EuiFormRow label="Message">
+            <EuiCompressedFormRow label="Message">
               <EuiFieldText
                 name="popfirst"
                 value={this.state.message}
                 onChange={(e) => this.setState({ message: e.target.value })}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 

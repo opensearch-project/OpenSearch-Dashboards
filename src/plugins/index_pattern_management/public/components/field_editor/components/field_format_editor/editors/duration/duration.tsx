@@ -31,7 +31,7 @@
 import React, { Fragment } from 'react';
 import { DurationFormat } from 'src/plugins/data/common';
 
-import { EuiFieldNumber, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
+import { EuiFieldNumber, EuiCompressedFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -110,7 +110,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
 
     return (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.duration.inputFormatLabel"
@@ -133,8 +133,8 @@ export class DurationFormatEditor extends DefaultFormatEditor<
             }}
             isInvalid={!!error}
           />
-        </EuiFormRow>
-        <EuiFormRow
+        </EuiCompressedFormRow>
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.duration.outputFormatLabel"
@@ -156,10 +156,10 @@ export class DurationFormatEditor extends DefaultFormatEditor<
             }}
             isInvalid={!!error}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         {!(format as DurationFormat).isHuman() ? (
           <>
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={
                 <FormattedMessage
                   id="indexPatternManagement.duration.decimalPlacesLabel"
@@ -180,8 +180,8 @@ export class DurationFormatEditor extends DefaultFormatEditor<
                 }}
                 isInvalid={!!error}
               />
-            </EuiFormRow>
-            <EuiFormRow>
+            </EuiCompressedFormRow>
+            <EuiCompressedFormRow>
               <EuiSwitch
                 label={
                   <FormattedMessage
@@ -194,7 +194,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
                   this.onChange({ showSuffix: !formatParams.showSuffix });
                 }}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </>
         ) : null}
         <FormatEditorSamples samples={samples} />

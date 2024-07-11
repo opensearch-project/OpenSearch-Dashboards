@@ -42,7 +42,7 @@ import {
   EuiFormErrorText,
   EuiPopover,
   EuiSwitch,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiText,
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
@@ -402,7 +402,7 @@ export class Table extends PureComponent<TableProps, TableState> {
               isOpen={this.state.isExportPopoverOpen}
               closePopover={this.closeExportPopover}
             >
-              <EuiFormRow
+              <EuiCompressedFormRow
                 label={
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
@@ -421,8 +421,8 @@ export class Table extends PureComponent<TableProps, TableState> {
                   checked={this.state.isIncludeReferencesDeepChecked}
                   onChange={this.toggleIsIncludeReferencesDeepChecked}
                 />
-              </EuiFormRow>
-              <EuiFormRow>
+              </EuiCompressedFormRow>
+              <EuiCompressedFormRow>
                 <EuiSmallButton
                   key="exportSO"
                   iconType="exportAction"
@@ -434,7 +434,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                     defaultMessage="Export"
                   />
                 </EuiSmallButton>
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </EuiPopover>,
           ]}
         />
