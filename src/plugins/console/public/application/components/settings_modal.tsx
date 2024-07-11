@@ -38,7 +38,7 @@ import {
   EuiSmallButtonEmpty,
   EuiCompressedFieldNumber,
   EuiCompressedFormRow,
-  EuiCheckboxGroup,
+  EuiCompressedCheckboxGroup,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -249,7 +249,7 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          <EuiCheckboxGroup
+          <EuiCompressedCheckboxGroup
             options={autoCompleteCheckboxes.map((opts) => {
               const { stateSetter, ...rest } = opts;
               return rest;

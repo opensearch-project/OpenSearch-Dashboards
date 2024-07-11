@@ -41,7 +41,7 @@ import {
   EuiLoadingSpinner,
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
-  EuiCheckboxGroup,
+  EuiCompressedCheckboxGroup,
   EuiToolTip,
   EuiPageContent,
   EuiSwitch,
@@ -835,7 +835,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             }
             labelType="legend"
           >
-            <EuiCheckboxGroup
+            <EuiCompressedCheckboxGroup
               options={exportAllOptions}
               idToSelectedMap={exportAllSelectedOptions}
               onChange={(optionId) => {
