@@ -2294,7 +2294,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                   <EuiButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -3534,7 +3534,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                   <EuiButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -4774,7 +4774,7 @@ exports[`dashboard listing renders table rows 1`] = `
                   <EuiButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -6014,7 +6014,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                   <EuiButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
