@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiCompressedFormRow, EuiFieldText, EuiFieldPassword } from '@elastic/eui';
+import {
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
+  EuiCompressedFieldPassword,
+} from '@elastic/eui';
 import { useState } from 'react';
 import React from 'react';
 import { AuthMethod } from '../../constants';
@@ -46,7 +50,7 @@ export const AuthDetails = (props: AuthDetailProps) => {
       return (
         <>
           <EuiCompressedFormRow label="Username">
-            <EuiFieldText
+            <EuiCompressedFieldText
               placeholder={'Username'}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -54,7 +58,7 @@ export const AuthDetails = (props: AuthDetailProps) => {
             />
           </EuiCompressedFormRow>
           <EuiCompressedFormRow label="Password">
-            <EuiFieldPassword
+            <EuiCompressedFieldPassword
               type={'dual'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -67,7 +71,7 @@ export const AuthDetails = (props: AuthDetailProps) => {
       return (
         <>
           <EuiCompressedFormRow label="Auth Region">
-            <EuiFieldText
+            <EuiCompressedFieldText
               placeholder="us-west-2"
               value={region}
               onBlur={(e) => {
@@ -79,7 +83,7 @@ export const AuthDetails = (props: AuthDetailProps) => {
             />
           </EuiCompressedFormRow>
           <EuiCompressedFormRow label="Access Key">
-            <EuiFieldText
+            <EuiCompressedFieldText
               placeholder={'Access key placeholder'}
               value={accessKey}
               onChange={(e) => setAccessKey(e.target.value)}
@@ -87,7 +91,7 @@ export const AuthDetails = (props: AuthDetailProps) => {
             />
           </EuiCompressedFormRow>
           <EuiCompressedFormRow label="Secret Key">
-            <EuiFieldPassword
+            <EuiCompressedFieldPassword
               type={'dual'}
               value={secretKey}
               onChange={(e) => setSecretKey(e.target.value)}

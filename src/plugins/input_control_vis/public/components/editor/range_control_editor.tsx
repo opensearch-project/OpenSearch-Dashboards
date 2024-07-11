@@ -30,7 +30,7 @@
 
 import React, { Component, Fragment, ComponentType } from 'react';
 
-import { EuiCompressedFormRow, EuiFieldNumber } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedFieldNumber } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
@@ -114,7 +114,7 @@ export class RangeControlEditor extends Component<
             />
           }
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             value={this.props.controlParams.options.step}
             onChange={(event) => {
               this.props.handleOptionsChange(
@@ -136,7 +136,7 @@ export class RangeControlEditor extends Component<
             />
           }
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             min={0}
             value={this.props.controlParams.options.decimalPlaces}
             onChange={(event) => {

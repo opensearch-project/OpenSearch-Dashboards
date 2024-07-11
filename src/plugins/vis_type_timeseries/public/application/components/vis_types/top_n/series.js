@@ -40,7 +40,7 @@ import {
   EuiTab,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { createTextHandler } from '../../lib/create_text_handler';
@@ -153,7 +153,7 @@ export const TopNSeries = injectI18n(function (props) {
         <EuiFlexItem grow={false}>{colorPicker}</EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth
             onChange={handleChange('label')}
             placeholder={intl.formatMessage({

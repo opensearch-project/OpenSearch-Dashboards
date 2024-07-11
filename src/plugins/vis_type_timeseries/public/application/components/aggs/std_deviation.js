@@ -42,7 +42,7 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiComboBox,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
@@ -157,7 +157,7 @@ const StandardDeviationAggUi = (props) => {
               />
             }
           >
-            <EuiFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
+            <EuiCompressedFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
           </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>

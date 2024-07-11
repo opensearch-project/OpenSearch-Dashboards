@@ -40,7 +40,7 @@ import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiComboBox,
   EuiFormLabel,
   EuiCompressedFormRow,
@@ -68,7 +68,7 @@ const StandardSiblingAggUi = (props) => {
             <FormattedMessage id="visTypeTimeseries.stdSibling.sigmaLabel" defaultMessage="Sigma" />
           }
         >
-          <EuiFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
+          <EuiCompressedFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
         </EuiCompressedFormRow>
       </EuiFlexItem>
     );

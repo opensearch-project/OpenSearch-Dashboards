@@ -36,7 +36,7 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
   EuiSpacer,
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiSelect,
   EuiSelectOption,
 } from '@elastic/eui';
@@ -130,7 +130,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
       return (
         <EuiFlexGroup>
           <EuiFlexItem grow={true}>
-            <EuiFieldSearch
+            <EuiCompressedFieldSearch
               fullWidth
               placeholder={filterPlaceholder}
               value={fieldFilter}

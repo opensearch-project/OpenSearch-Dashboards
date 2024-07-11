@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import {
   EuiSmallButton,
   EuiSmallButtonEmpty,
-  EuiFieldPassword,
+  EuiCompressedFieldPassword,
   EuiForm,
   EuiCompressedFormRow,
   EuiModal,
@@ -121,7 +121,7 @@ export const UpdateAwsCredentialModal = ({
               })}
               isInvalid={!isNewAccessKeyValid}
             >
-              <EuiFieldPassword
+              <EuiCompressedFieldPassword
                 name="updatedAccessKey"
                 data-test-subj="updateStoredAwsCredentialUpdatedAccessKeyField"
                 placeholder={i18n.translate(
@@ -147,7 +147,7 @@ export const UpdateAwsCredentialModal = ({
               })}
               isInvalid={!isNewSecretKeyValid}
             >
-              <EuiFieldPassword
+              <EuiCompressedFieldPassword
                 name="updatedSecretKey"
                 data-test-subj="updateStoredAwsCredentialUpdatedSecretKeyField"
                 placeholder={i18n.translate(

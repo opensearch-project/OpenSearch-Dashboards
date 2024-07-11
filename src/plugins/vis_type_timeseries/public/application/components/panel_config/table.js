@@ -47,7 +47,7 @@ import {
   EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiTitle,
   EuiHorizontalRule,
   EuiCode,
@@ -146,7 +146,7 @@ export class TablePanelConfig extends Component {
                     }
                     fullWidth
                   >
-                    <EuiFieldText
+                    <EuiCompressedFieldText
                       data-test-subj="columnLabelName"
                       onChange={handleTextChange('pivot_label')}
                       value={model.pivot_label}
@@ -219,7 +219,7 @@ export class TablePanelConfig extends Component {
                 </span>
               }
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 onChange={handleTextChange('drilldown_url')}
                 value={model.drilldown_url}
               />

@@ -33,7 +33,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import {
   EuiSmallButtonEmpty,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
@@ -137,7 +137,7 @@ export function ActionBar({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiCompressedFormRow>
-              <EuiFieldNumber
+              <EuiCompressedFieldNumber
                 aria-label={
                   isSuccessor
                     ? i18n.translate('discover.context.olderDocumentsAriaLabel', {

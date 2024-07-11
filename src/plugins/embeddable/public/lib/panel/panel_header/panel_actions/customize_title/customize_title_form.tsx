@@ -30,7 +30,7 @@
 
 import React, { ChangeEvent } from 'react';
 
-import { EuiSmallButtonEmpty, EuiFieldText, EuiCompressedFormRow } from '@elastic/eui';
+import { EuiSmallButtonEmpty, EuiCompressedFieldText, EuiCompressedFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
@@ -59,7 +59,7 @@ export function CustomizeTitleForm({
           }
         )}
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           id="panelTitleInput"
           data-test-subj="customEmbeddablePanelTitleInput"
           name="min"

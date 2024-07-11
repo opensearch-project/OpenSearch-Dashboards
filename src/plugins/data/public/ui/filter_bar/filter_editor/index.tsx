@@ -34,7 +34,7 @@ import {
   EuiButtonEmpty,
   // @ts-ignore
   EuiCodeEditor,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -169,7 +169,7 @@ class FilterEditorUI extends Component<Props, State> {
                     defaultMessage: 'Custom label',
                   })}
                 >
-                  <EuiFieldText
+                  <EuiCompressedFieldText
                     fullWidth={true}
                     value={`${this.state.customLabel}`}
                     onChange={this.onCustomLabelChange}

@@ -40,7 +40,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
@@ -97,7 +97,7 @@ export const Static = (props) => {
               />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               onChange={handleTextChange('value')}
               value={model.value === '' ? '' : Number(model.value)}
               step={0.1}

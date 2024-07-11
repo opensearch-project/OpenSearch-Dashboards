@@ -30,7 +30,12 @@
 
 import React, { ChangeEvent } from 'react';
 
-import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow } from '@elastic/eui';
+import {
+  EuiCompressedFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCompressedFormRow,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { isUndefined } from 'lodash';
 
@@ -91,7 +96,7 @@ function ExtendedBoundsParamEditor({
     >
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             value={isUndefined(value.min) ? '' : value.min}
             onChange={(ev) => handleChange(ev, 'min')}
             onBlur={setTouched}
@@ -103,7 +108,7 @@ function ExtendedBoundsParamEditor({
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             value={isUndefined(value.max) ? '' : value.max}
             onChange={(ev) => handleChange(ev, 'max')}
             onBlur={setTouched}

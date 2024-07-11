@@ -30,7 +30,7 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiFieldNumber, EuiCompressedFormRow } from '@elastic/eui';
+import { EuiCompressedFieldNumber, EuiCompressedFormRow } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { DefaultFormatEditor, defaultState } from '../default';
@@ -66,7 +66,7 @@ export class TruncateFormatEditor extends DefaultFormatEditor<TruncateFormatEdit
           isInvalid={!!error}
           error={error}
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             defaultValue={formatParams.fieldLength}
             min={1}
             onChange={(e) => {

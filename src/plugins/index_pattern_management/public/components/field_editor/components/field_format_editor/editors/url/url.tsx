@@ -31,12 +31,12 @@
 import React, { Fragment } from 'react';
 
 import {
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiLink,
   EuiSelect,
   EuiSwitch,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
@@ -159,7 +159,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
             <FormattedMessage id="indexPatternManagement.url.widthLabel" defaultMessage="Width" />
           }
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             data-test-subj="urlEditorWidth"
             value={width}
             onChange={(e) => {
@@ -172,7 +172,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
             <FormattedMessage id="indexPatternManagement.url.heightLabel" defaultMessage="Height" />
           }
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             data-test-subj="urlEditorHeight"
             value={height}
             onChange={(e) => {
@@ -261,7 +261,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           isInvalid={!!error}
           error={error}
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="urlEditorUrlTemplate"
             value={formatParams.urlTemplate || ''}
             onChange={(e) => {
@@ -288,7 +288,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           isInvalid={!!error}
           error={error}
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="urlEditorLabelTemplate"
             value={formatParams.labelTemplate || ''}
             onChange={(e) => {

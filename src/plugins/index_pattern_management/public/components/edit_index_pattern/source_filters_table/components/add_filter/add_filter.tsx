@@ -32,7 +32,7 @@ import React, { useState, useCallback } from 'react';
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldText, EuiSmallButton } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCompressedFieldText, EuiSmallButton } from '@elastic/eui';
 
 interface AddFilterProps {
   onAddFilter: (filter: string) => void;
@@ -57,7 +57,7 @@ export const AddFilter = ({ onAddFilter }: AddFilterProps) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem grow={10}>
-        <EuiFieldText
+        <EuiCompressedFieldText
           fullWidth
           value={filter}
           onChange={(e) => setFilter(e.target.value.trim())}

@@ -40,7 +40,7 @@ import {
   EuiTab,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { Split } from '../../split';
@@ -163,7 +163,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
         <EuiFlexItem grow={false}>{colorPicker}</EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth
             onChange={handleChange('label')}
             placeholder={intl.formatMessage({

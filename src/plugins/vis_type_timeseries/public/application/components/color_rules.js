@@ -37,7 +37,7 @@ import { ColorPicker } from './color_picker';
 import {
   htmlIdGenerator,
   EuiComboBox,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiFormLabel,
   EuiFlexGroup,
   EuiFlexItem,
@@ -187,7 +187,7 @@ class ColorRulesUI extends Component {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             aria-label={intl.formatMessage({
               id: 'visTypeTimeseries.colorRules.valueAriaLabel',
               defaultMessage: 'Value',

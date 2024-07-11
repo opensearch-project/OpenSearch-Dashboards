@@ -31,7 +31,7 @@
 import {
   EuiForm,
   EuiCompressedFormRow,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
@@ -67,7 +67,7 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
         <EuiModalBody>
           <EuiForm>
             <EuiCompressedFormRow label="First name">
-              <EuiFieldText
+              <EuiCompressedFieldText
                 name="popfirst"
                 value={this.state.firstName}
                 onChange={(e) => this.setState({ firstName: e.target.value })}
@@ -75,7 +75,7 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
             </EuiCompressedFormRow>
 
             <EuiCompressedFormRow label="Last name">
-              <EuiFieldText
+              <EuiCompressedFieldText
                 name="popfirst"
                 value={this.state.lastName}
                 placeholder="optional"

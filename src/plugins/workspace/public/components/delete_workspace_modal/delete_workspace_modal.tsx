@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import {
   EuiSmallButton,
   EuiSmallButtonEmpty,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -85,7 +85,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           <EuiText color="subdued">
             To confirm your action, type <b>delete</b>.
           </EuiText>
-          <EuiFieldText
+          <EuiCompressedFieldText
             placeholder="delete"
             fullWidth
             value={value}

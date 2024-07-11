@@ -33,7 +33,7 @@ import React from 'react';
 import {
   EuiForm,
   EuiCompressedFormRow,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiSmallButtonEmpty,
   EuiSpacer,
 } from '@elastic/eui';
@@ -89,7 +89,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
             />
           }
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             name="indexPatternId"
             data-test-subj="createIndexPatternIdInput"
             value={indexPatternId}

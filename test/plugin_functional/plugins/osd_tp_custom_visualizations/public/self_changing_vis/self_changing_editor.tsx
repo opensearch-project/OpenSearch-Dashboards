@@ -30,7 +30,7 @@
 
 import React from 'react';
 
-import { EuiFieldNumber, EuiCompressedFormRow } from '@elastic/eui';
+import { EuiCompressedFieldNumber, EuiCompressedFormRow } from '@elastic/eui';
 import { VisOptionsProps } from 'src/plugins/vis_default_editor/public/vis_options_props';
 
 interface CounterParams {
@@ -45,7 +45,7 @@ export class SelfChangingEditor extends React.Component<VisOptionsProps<CounterP
   render() {
     return (
       <EuiCompressedFormRow label="Counter">
-        <EuiFieldNumber
+        <EuiCompressedFieldNumber
           value={this.props.stateParams.counter}
           onChange={this.onCounterChange}
           step={1}

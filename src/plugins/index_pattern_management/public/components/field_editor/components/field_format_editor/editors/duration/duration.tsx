@@ -31,7 +31,7 @@
 import React, { Fragment } from 'react';
 import { DurationFormat } from 'src/plugins/data/common';
 
-import { EuiFieldNumber, EuiCompressedFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
+import { EuiCompressedFieldNumber, EuiCompressedFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
@@ -169,7 +169,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
               isInvalid={!!error}
               error={hasDecimalError ? error : null}
             >
-              <EuiFieldNumber
+              <EuiCompressedFieldNumber
                 value={formatParams.outputPrecision}
                 min={0}
                 max={20}

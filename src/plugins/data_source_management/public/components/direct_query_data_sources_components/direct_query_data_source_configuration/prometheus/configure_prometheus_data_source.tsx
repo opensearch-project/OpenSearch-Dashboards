@@ -10,10 +10,10 @@ import {
   EuiText,
   EuiLink,
   EuiCompressedFormRow,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiTextArea,
   EuiSelect,
-  EuiFieldPassword,
+  EuiCompressedFieldPassword,
   EuiForm,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -135,7 +135,7 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
               <EuiText size="xs">
                 <p>Enter the Prometheus URI endpoint.</p>
               </EuiText>
-              <EuiFieldText
+              <EuiCompressedFieldText
                 data-test-subj="Prometheus-URI"
                 placeholder="Prometheus URI"
                 value={store}

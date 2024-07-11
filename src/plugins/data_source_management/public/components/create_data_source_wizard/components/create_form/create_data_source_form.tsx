@@ -9,8 +9,8 @@ import {
   EuiSmallButton,
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldPassword,
-  EuiFieldText,
+  EuiCompressedFieldPassword,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -419,7 +419,7 @@ export class CreateDataSourceForm extends React.Component<
               isInvalid={!!this.state.formErrorsByField.createCredential.username.length}
               error={this.state.formErrorsByField.createCredential.username}
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 placeholder={i18n.translate(
                   'dataSourcesManagement.createDataSource.usernamePlaceholder',
                   {
@@ -440,7 +440,7 @@ export class CreateDataSourceForm extends React.Component<
               isInvalid={!!this.state.formErrorsByField.createCredential.password.length}
               error={this.state.formErrorsByField.createCredential.password}
             >
-              <EuiFieldPassword
+              <EuiCompressedFieldPassword
                 isInvalid={!!this.state.formErrorsByField.createCredential.password.length}
                 placeholder={i18n.translate(
                   'dataSourcesManagement.createDataSource.passwordPlaceholder',
@@ -468,7 +468,7 @@ export class CreateDataSourceForm extends React.Component<
               isInvalid={!!this.state.formErrorsByField.awsCredential.region.length}
               error={this.state.formErrorsByField.awsCredential.region}
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 placeholder={i18n.translate(
                   'dataSourcesManagement.createDataSource.regionPlaceholder',
                   {
@@ -502,7 +502,7 @@ export class CreateDataSourceForm extends React.Component<
               isInvalid={!!this.state.formErrorsByField.awsCredential.accessKey.length}
               error={this.state.formErrorsByField.awsCredential.accessKey}
             >
-              <EuiFieldPassword
+              <EuiCompressedFieldPassword
                 isInvalid={!!this.state.formErrorsByField.awsCredential.accessKey.length}
                 placeholder={i18n.translate(
                   'dataSourcesManagement.createDataSource.accessKeyPlaceholder',
@@ -525,7 +525,7 @@ export class CreateDataSourceForm extends React.Component<
               isInvalid={!!this.state.formErrorsByField.awsCredential.secretKey.length}
               error={this.state.formErrorsByField.awsCredential.secretKey}
             >
-              <EuiFieldPassword
+              <EuiCompressedFieldPassword
                 isInvalid={!!this.state.formErrorsByField.awsCredential.secretKey.length}
                 placeholder={i18n.translate(
                   'dataSourcesManagement.createDataSource.secretKeyPlaceholder',
@@ -571,7 +571,7 @@ export class CreateDataSourceForm extends React.Component<
               isInvalid={!!this.state.formErrorsByField.title.length}
               error={this.state.formErrorsByField.title}
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 name="dataSourceTitle"
                 value={this.state.title || ''}
                 placeholder={i18n.translate(
@@ -594,7 +594,7 @@ export class CreateDataSourceForm extends React.Component<
                 'Description'
               )}
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 name="dataSourceDescription"
                 value={this.state.description || ''}
                 placeholder={i18n.translate(
@@ -616,7 +616,7 @@ export class CreateDataSourceForm extends React.Component<
               isInvalid={!!this.state.formErrorsByField.endpoint.length}
               error={this.state.formErrorsByField.endpoint}
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 name="endpoint"
                 value={this.state.endpoint || ''}
                 placeholder={i18n.translate(

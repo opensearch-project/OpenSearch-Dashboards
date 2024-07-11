@@ -48,7 +48,7 @@ import {
   EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiTitle,
   EuiSmallButton,
   EuiCode,
@@ -141,7 +141,7 @@ export class AnnotationsEditor extends Component {
                   })}
                   fullWidth
                 >
-                  <EuiFieldText
+                  <EuiCompressedFieldText
                     onChange={this.handleChange(model, 'index_pattern')}
                     value={model.index_pattern}
                     fullWidth
@@ -252,7 +252,7 @@ export class AnnotationsEditor extends Component {
                   }
                   fullWidth
                 >
-                  <EuiFieldText
+                  <EuiCompressedFieldText
                     onChange={this.handleChange(model, 'fields')}
                     value={model.fields}
                     fullWidth
@@ -279,7 +279,7 @@ export class AnnotationsEditor extends Component {
                   }
                   fullWidth
                 >
-                  <EuiFieldText
+                  <EuiCompressedFieldText
                     onChange={this.handleChange(model, 'template')}
                     value={model.template}
                     fullWidth

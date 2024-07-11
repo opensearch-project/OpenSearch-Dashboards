@@ -39,7 +39,7 @@ import {
   EuiModalFooter,
   EuiForm,
   EuiCompressedFormRow,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
@@ -171,7 +171,7 @@ export function SaveQueryForm({
         })}
         isInvalid={hasErrors}
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           disabled={!!savedQuery}
           value={title}
           name="title"
@@ -187,7 +187,7 @@ export function SaveQueryForm({
           defaultMessage: 'Description',
         })}
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           value={description}
           name="description"
           onChange={(event) => {

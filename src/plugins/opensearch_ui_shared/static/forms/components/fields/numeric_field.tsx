@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { EuiCompressedFormRow, EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -53,7 +53,7 @@ export const NumericField = ({ field, euiFieldProps = {}, ...rest }: Props) => {
       data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
     >
-      <EuiFieldNumber
+      <EuiCompressedFieldNumber
         isInvalid={isInvalid}
         value={field.value as EuiFieldNumberProps['value']}
         onChange={field.onChange}

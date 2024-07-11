@@ -37,7 +37,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiLink,
 } from '@elastic/eui';
 import { durationOutputOptions, durationInputOptions, isDuration } from './lib/durations';
@@ -238,7 +238,7 @@ class DataFormatPickerUI extends Component {
                   />
                 }
               >
-                <EuiFieldText
+                <EuiCompressedFieldText
                   defaultValue={decimals}
                   inputRef={(el) => (this.decimals = el)}
                   placeholder={DEFAULT_OUTPUT_PRECISION}
@@ -276,7 +276,7 @@ class DataFormatPickerUI extends Component {
               </span>
             }
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               defaultValue={value}
               inputRef={(el) => (this.custom = el)}
               onChange={this.handleCustomChange}

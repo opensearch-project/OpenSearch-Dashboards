@@ -32,7 +32,7 @@ import React, { useState } from 'react';
 import {
   EuiForm,
   EuiSmallButtonIcon,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiFormRow,
   EuiSpacer,
@@ -150,7 +150,7 @@ function FilterRow({
           fullWidth={true}
           display={'rowCompressed'}
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             value={customLabel}
             placeholder={i18n.translate('visDefaultEditor.controls.filters.labelPlaceholder', {
               defaultMessage: 'Label',

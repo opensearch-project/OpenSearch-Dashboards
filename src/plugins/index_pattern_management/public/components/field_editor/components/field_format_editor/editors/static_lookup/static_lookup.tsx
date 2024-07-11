@@ -33,7 +33,7 @@ import React, { Fragment } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
@@ -108,7 +108,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
         ),
         render: (value: number, item: StaticLookupItem) => {
           return (
-            <EuiFieldText
+            <EuiCompressedFieldText
               value={value || ''}
               onChange={(e) => {
                 this.onLookupChange(
@@ -132,7 +132,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
         ),
         render: (value: number, item: StaticLookupItem) => {
           return (
-            <EuiFieldText
+            <EuiCompressedFieldText
               value={value || ''}
               onChange={(e) => {
                 this.onLookupChange(
@@ -191,7 +191,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
             />
           }
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             value={formatParams.unknownKeyValue || ''}
             placeholder={i18n.translate(
               'indexPatternManagement.staticLookup.leaveBlankPlaceholder',

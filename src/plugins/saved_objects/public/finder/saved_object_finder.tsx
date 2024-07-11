@@ -36,7 +36,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -376,7 +376,7 @@ class SavedObjectFinderUi extends React.Component<
     return (
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={true}>
-          <EuiFieldSearch
+          <EuiCompressedFieldSearch
             placeholder={i18n.translate('savedObjects.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}

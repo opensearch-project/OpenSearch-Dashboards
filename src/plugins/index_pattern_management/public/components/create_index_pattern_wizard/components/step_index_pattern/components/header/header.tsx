@@ -39,7 +39,7 @@ import {
   EuiSmallButton,
   EuiForm,
   EuiCompressedFormRow,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiSwitchEvent,
   EuiSwitch,
 } from '@elastic/eui';
@@ -192,7 +192,7 @@ const renderIndexPatternInput = (
         </>
       }
     >
-      <EuiFieldText
+      <EuiCompressedFieldText
         name="indexPattern"
         placeholder={i18n.translate(
           'indexPatternManagement.createIndexPattern.step.indexPatternPlaceholder',
@@ -231,7 +231,7 @@ const renderDataSourceAndIndexPatternInput = (
           isInvalid={isInputInvalid}
           error={errors}
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             name="dataSource"
             placeholder={i18n.translate(
               'indexPatternManagement.createIndexPattern.step.dataSourcePlaceholder',

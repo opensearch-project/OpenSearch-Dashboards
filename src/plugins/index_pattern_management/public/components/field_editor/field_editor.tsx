@@ -39,8 +39,8 @@ import {
   EuiCode,
   EuiCodeEditor,
   EuiConfirmModal,
-  EuiFieldNumber,
-  EuiFieldText,
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -330,7 +330,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             : null
         }
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           value={spec.name || ''}
           placeholder={i18n.translate('indexPatternManagement.namePlaceholder', {
             defaultMessage: 'New scripted field',
@@ -548,7 +548,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             '"Popularity" refers to OpenSearch Dashboards\'s measurement how popular a field is (i.e. how commonly it is used).',
         })}
       >
-        <EuiFieldNumber
+        <EuiCompressedFieldNumber
           value={spec.count}
           data-test-subj="editorFieldCount"
           onChange={(e) => {

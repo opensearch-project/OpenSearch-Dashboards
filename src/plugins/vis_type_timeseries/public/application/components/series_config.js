@@ -39,7 +39,7 @@ import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiCode,
   EuiHorizontalRule,
@@ -113,7 +113,7 @@ export const SeriesConfig = (props) => {
             }
             fullWidth
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
               fullWidth
@@ -131,7 +131,7 @@ export const SeriesConfig = (props) => {
               />
             }
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               data-test-subj="offsetTimeSeries"
               onChange={handleTextChange('offset_time')}
               value={model.offset_time}

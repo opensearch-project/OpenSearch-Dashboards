@@ -30,8 +30,8 @@
 
 import React, { PureComponent } from 'react';
 import {
-  EuiFieldNumber,
-  EuiFieldText,
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiSwitch,
   EuiCodeEditor,
@@ -98,7 +98,7 @@ export class Field extends PureComponent<FieldProps> {
     switch (type) {
       case 'number':
         return (
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             name={name}
             id={this.fieldId}
             value={currentValue}
@@ -154,7 +154,7 @@ export class Field extends PureComponent<FieldProps> {
         );
       default:
         return (
-          <EuiFieldText
+          <EuiCompressedFieldText
             id={this.fieldId}
             name={name}
             value={currentValue}

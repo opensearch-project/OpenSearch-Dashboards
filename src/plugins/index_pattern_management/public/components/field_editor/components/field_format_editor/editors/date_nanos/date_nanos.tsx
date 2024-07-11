@@ -30,7 +30,13 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiCode, EuiFieldText, EuiCompressedFormRow, EuiIcon, EuiLink } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
+  EuiIcon,
+  EuiLink,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { DefaultFormatEditor, defaultState } from '../default';
@@ -84,7 +90,7 @@ export class DateNanosFormatEditor extends DefaultFormatEditor<DateNanosFormatEd
             </span>
           }
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="dateEditorPattern"
             value={formatParams.pattern}
             placeholder={defaultPattern}

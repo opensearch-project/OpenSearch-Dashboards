@@ -35,7 +35,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import {
   EuiSmallButton,
   EuiSmallButtonEmpty,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -191,7 +191,7 @@ export class DashboardCloneModal extends React.Component<Props, State> {
 
           <EuiSpacer />
 
-          <EuiFieldText
+          <EuiCompressedFieldText
             autoFocus
             aria-label={i18n.translate('dashboard.cloneModal.cloneDashboardTitleAriaLabel', {
               defaultMessage: 'Cloned Dashboard Title',

@@ -42,7 +42,7 @@ import {
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiCode,
   EuiHorizontalRule,
@@ -167,7 +167,7 @@ class TableSeriesConfigUI extends Component {
               }
               fullWidth
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 onChange={handleTextChange('value_template')}
                 value={model.value_template}
                 fullWidth

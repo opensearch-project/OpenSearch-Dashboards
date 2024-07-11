@@ -33,7 +33,7 @@ import {
   EuiSmallButton,
   EuiSmallButtonEmpty,
   EuiCallOut,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiForm,
   EuiCompressedFormRow,
   EuiModal,
@@ -138,7 +138,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
                 <FormattedMessage id="savedObjects.saveModal.titleLabel" defaultMessage="Title" />
               }
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 fullWidth
                 autoFocus
                 data-test-subj="savedObjectTitle"

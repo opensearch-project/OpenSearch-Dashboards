@@ -32,7 +32,7 @@ import React, { Fragment, useCallback, useState, useEffect } from 'react';
 import {
   htmlIdGenerator,
   EuiSmallButtonIcon,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiFlexItem,
   EuiFlexGroup,
   EuiFormErrorText,
@@ -203,7 +203,7 @@ function RangesParamEditor({
             <Fragment key={id}>
               <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                 <EuiFlexItem>
-                  <EuiFieldNumber
+                  <EuiCompressedFieldNumber
                     aria-label={i18n.translate('visDefaultEditor.controls.ranges.fromLabel', {
                       defaultMessage: 'From',
                     })}
@@ -225,7 +225,7 @@ function RangesParamEditor({
                   <EuiIcon type="sortRight" color="subdued" />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFieldNumber
+                  <EuiCompressedFieldNumber
                     aria-label={i18n.translate('visDefaultEditor.controls.ranges.toLabel', {
                       defaultMessage: 'To',
                     })}

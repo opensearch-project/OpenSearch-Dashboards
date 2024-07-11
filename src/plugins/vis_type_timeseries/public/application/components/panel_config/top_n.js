@@ -47,7 +47,7 @@ import {
   EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiTitle,
   EuiHorizontalRule,
   EuiCode,
@@ -126,7 +126,7 @@ export class TopNPanelConfig extends Component {
                 </span>
               }
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 onChange={handleTextChange('drilldown_url')}
                 value={model.drilldown_url}
               />

@@ -48,7 +48,7 @@ import {
   EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
@@ -271,7 +271,10 @@ class TimeseriesPanelConfigUi extends Component {
                     />
                   }
                 >
-                  <EuiFieldText onChange={handleTextChange('axis_min')} value={model.axis_min} />
+                  <EuiCompressedFieldText
+                    onChange={handleTextChange('axis_min')}
+                    value={model.axis_min}
+                  />
                 </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>
@@ -284,7 +287,10 @@ class TimeseriesPanelConfigUi extends Component {
                     />
                   }
                 >
-                  <EuiFieldText onChange={handleTextChange('axis_max')} value={model.axis_max} />
+                  <EuiCompressedFieldText
+                    onChange={handleTextChange('axis_max')}
+                    value={model.axis_max}
+                  />
                 </EuiCompressedFormRow>
               </EuiFlexItem>
               <EuiFlexItem>

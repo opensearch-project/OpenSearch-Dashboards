@@ -38,7 +38,7 @@ import {
   EuiTab,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { createTextHandler } from '../../lib/create_text_handler';
@@ -137,7 +137,7 @@ function TableSeriesUI(props) {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth
             aria-label={intl.formatMessage({
               id: 'visTypeTimeseries.table.labelAriaLabel',

@@ -34,7 +34,7 @@ import { injectI18n, FormattedMessage, InjectedIntlProps } from '@osd/i18n/react
 import {
   EuiAccordion,
   EuiSmallButtonIcon,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiForm,
   EuiCompressedFormRow,
   EuiPanel,
@@ -141,7 +141,10 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
             />
           }
         >
-          <EuiFieldText value={this.props.controlParams.label} onChange={this.changeLabel} />
+          <EuiCompressedFieldText
+            value={this.props.controlParams.label}
+            onChange={this.changeLabel}
+          />
         </EuiCompressedFormRow>
 
         {controlEditor}

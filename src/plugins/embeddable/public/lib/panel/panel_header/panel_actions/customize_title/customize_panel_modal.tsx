@@ -32,7 +32,7 @@ import React, { Component } from 'react';
 
 import {
   EuiCompressedFormRow,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiSmallButton,
   EuiSwitch,
   EuiSmallButtonEmpty,
@@ -117,7 +117,7 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
               }
             )}
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               id="panelTitleInput"
               data-test-subj="customEmbeddablePanelTitleInput"
               name="min"

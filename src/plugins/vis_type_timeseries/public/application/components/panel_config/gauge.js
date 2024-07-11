@@ -49,7 +49,7 @@ import {
   EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiTitle,
   EuiHorizontalRule,
 } from '@elastic/eui';
@@ -257,7 +257,7 @@ class GaugePanelConfigUi extends Component {
                     />
                   }
                 >
-                  <EuiFieldNumber
+                  <EuiCompressedFieldNumber
                     onChange={handleTextChange('gauge_inner_width')}
                     value={Number(model.gauge_inner_width)}
                   />
@@ -273,7 +273,7 @@ class GaugePanelConfigUi extends Component {
                     />
                   }
                 >
-                  <EuiFieldNumber
+                  <EuiCompressedFieldNumber
                     onChange={handleTextChange('gauge_width')}
                     value={Number(model.gauge_width)}
                   />

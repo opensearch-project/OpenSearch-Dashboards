@@ -31,7 +31,7 @@
 import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -244,7 +244,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     <EuiFlexGroup responsive={false} gutterSize="xs">
       <EuiFlexItem>
         <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
-          <EuiFieldSearch
+          <EuiCompressedFieldSearch
             aria-label={searchPlaceholder}
             data-test-subj="fieldFilterSearchInput"
             fullWidth

@@ -42,8 +42,8 @@ import {
   EuiScreenReaderOnly,
   EuiCodeEditor,
   EuiDescribedFormGroup,
-  EuiFieldNumber,
-  EuiFieldText,
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
   EuiFilePicker,
   EuiCompressedFormRow,
   EuiIconTip,
@@ -405,7 +405,7 @@ export class Field extends PureComponent<FieldProps> {
         );
       case 'number':
         return (
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             {...a11yProps}
             value={currentValue}
             onChange={this.onFieldChangeEvent}
@@ -417,7 +417,7 @@ export class Field extends PureComponent<FieldProps> {
         );
       default:
         return (
-          <EuiFieldText
+          <EuiCompressedFieldText
             {...a11yProps}
             value={currentValue}
             onChange={this.onFieldChangeEvent}

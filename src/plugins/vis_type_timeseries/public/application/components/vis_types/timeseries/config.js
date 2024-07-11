@@ -40,11 +40,11 @@ import {
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiCode,
   EuiHorizontalRule,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiFormLabel,
   EuiSpacer,
 } from '@elastic/eui';
@@ -228,7 +228,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               step={0.1}
               onChange={handleTextChange('fill')}
               value={Number(model.fill)}
@@ -245,7 +245,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               onChange={handleTextChange('line_width')}
               value={Number(model.line_width)}
             />
@@ -261,7 +261,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               onChange={handleTextChange('point_size')}
               value={Number(model.point_size)}
             />
@@ -331,7 +331,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               step={0.1}
               onChange={handleTextChange('fill')}
               value={Number(model.fill)}
@@ -348,7 +348,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               onChange={handleTextChange('line_width')}
               value={Number(model.line_width)}
             />
@@ -391,7 +391,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             }
             fullWidth
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
               fullWidth
@@ -444,7 +444,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               data-test-subj="offsetTimeSeries"
               onChange={handleTextChange('offset_time')}
               value={model.offset_time}

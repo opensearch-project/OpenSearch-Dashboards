@@ -30,7 +30,13 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiCode, EuiFieldText, EuiCompressedFormRow, EuiIcon, EuiLink } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
+  EuiIcon,
+  EuiLink,
+} from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { DefaultFormatEditor, defaultState } from '../default';
@@ -78,7 +84,7 @@ export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorPa
           isInvalid={!!error}
           error={error}
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             value={formatParams.pattern}
             placeholder={defaultPattern}
             onChange={(e) => {

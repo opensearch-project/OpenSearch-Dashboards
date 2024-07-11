@@ -42,9 +42,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiComboBox,
-  EuiFieldText,
+  EuiCompressedFieldText,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 import { FIELD_TYPES } from '../../../../../../plugins/vis_type_timeseries/common/field_types';
@@ -167,7 +167,7 @@ export const SplitByTermsUI = ({
                 />
               }
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 value={model.terms_include}
                 onChange={handleTextChange('terms_include')}
               />
@@ -183,7 +183,7 @@ export const SplitByTermsUI = ({
                 />
               }
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 value={model.terms_exclude}
                 onChange={handleTextChange('terms_exclude')}
               />
@@ -200,7 +200,7 @@ export const SplitByTermsUI = ({
               <FormattedMessage id="visTypeTimeseries.splits.terms.topLabel" defaultMessage="Top" />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               placeholder={intl.formatMessage({
                 id: 'visTypeTimeseries.splits.terms.sizePlaceholder',
                 defaultMessage: 'Size',

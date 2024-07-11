@@ -44,7 +44,7 @@ import {
   EuiComboBox,
   EuiSpacer,
   EuiCompressedFormRow,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { MODEL_TYPES } from '../../../../common/model_options';
@@ -236,7 +236,7 @@ export const MovingAverageAgg = (props) => {
                     defaultMessage: 'Alpha',
                   })}
                 >
-                  <EuiFieldNumber
+                  <EuiCompressedFieldNumber
                     step={0.1}
                     onChange={handleNumberChange('alpha')}
                     value={model.alpha}
@@ -253,7 +253,7 @@ export const MovingAverageAgg = (props) => {
                     defaultMessage: 'Beta',
                   })}
                 >
-                  <EuiFieldNumber
+                  <EuiCompressedFieldNumber
                     step={0.1}
                     onChange={handleNumberChange('beta')}
                     value={model.beta}
@@ -270,7 +270,7 @@ export const MovingAverageAgg = (props) => {
                       defaultMessage: 'Gamma',
                     })}
                   >
-                    <EuiFieldNumber
+                    <EuiCompressedFieldNumber
                       step={0.1}
                       onChange={handleNumberChange('gamma')}
                       value={model.gamma}
@@ -284,7 +284,7 @@ export const MovingAverageAgg = (props) => {
                       defaultMessage: 'Period',
                     })}
                   >
-                    <EuiFieldNumber
+                    <EuiCompressedFieldNumber
                       step={1}
                       onChange={handleNumberChange('period')}
                       value={model.period}

@@ -31,7 +31,7 @@
 import React, { PureComponent, ComponentType } from 'react';
 
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiCompressedFormRow, EuiFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedFieldNumber, EuiSwitch, EuiSelect } from '@elastic/eui';
 
 import { IndexPatternSelectFormRow } from './index_pattern_select_form_row';
 import { FieldSelect } from './field_select';
@@ -274,7 +274,7 @@ export class ListControlEditor extends PureComponent<
             />
           }
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             min={1}
             value={this.props.controlParams.options.size}
             onChange={(event) => {

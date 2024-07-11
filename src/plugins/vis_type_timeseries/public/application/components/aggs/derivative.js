@@ -41,7 +41,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
@@ -118,7 +118,11 @@ export const DerivativeAgg = (props) => {
             }
             fullWidth
           >
-            <EuiFieldText onChange={handleTextChange('unit')} value={model.unit} fullWidth />
+            <EuiCompressedFieldText
+              onChange={handleTextChange('unit')}
+              value={model.unit}
+              fullWidth
+            />
           </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -36,7 +36,7 @@ import { FormattedMessage } from '@osd/i18n/react';
 import {
   EuiSmallButton,
   EuiSmallButtonEmpty,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiCompressedFormRow,
   EuiCheckboxGroup,
   EuiModal,
@@ -189,7 +189,7 @@ export function DevToolsSettingsModal(props: Props) {
             <FormattedMessage id="console.settingsPage.fontSizeLabel" defaultMessage="Font Size" />
           }
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             autoFocus
             data-test-subj="setting-font-size-input"
             value={fontSize}

@@ -40,7 +40,7 @@ import {
   EuiFlexItem,
   EuiFormLabel,
   EuiComboBox,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
 
@@ -65,7 +65,7 @@ class PercentilesUi extends Component {
 
     const percentileFieldNumber = (
       <EuiFlexItem grow={false}>
-        <EuiFieldNumber
+        <EuiCompressedFieldNumber
           aria-label={intl.formatMessage({
             id: 'visTypeTimeseries.percentile.percentileAriaLabel',
             defaultMessage: 'Percentile',
@@ -144,7 +144,7 @@ class PercentilesUi extends Component {
             </EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem style={optionsStyle} grow={false}>
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               id={htmlId('fillTo')}
               min={0}
               max={100}
@@ -163,7 +163,7 @@ class PercentilesUi extends Component {
             </EuiFormLabel>
           </EuiFlexItem>
           <EuiFlexItem style={optionsStyle} grow={false}>
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               id={htmlId('shade')}
               style={optionsStyle}
               step={0.1}

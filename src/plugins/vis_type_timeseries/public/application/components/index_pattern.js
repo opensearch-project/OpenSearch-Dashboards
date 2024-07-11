@@ -33,7 +33,7 @@ import PropTypes from 'prop-types';
 import React, { useContext } from 'react';
 import {
   htmlIdGenerator,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiCompressedFormRow,
@@ -214,7 +214,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                   })
             }
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               data-test-subj="metricsIndexPatternInput"
               disabled={disabled}
               placeholder={model.default_index_pattern}
@@ -256,7 +256,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 'auto, 1m, 1d, 7d, 1y, >=1m are required values and must not be translated.',
             })}
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               data-test-subj="metricsIndexPatternInterval"
               isInvalid={!intervalValidation.isValid}
               disabled={disabled || isEntireTimeRangeActive(model, isTimeSeries)}
