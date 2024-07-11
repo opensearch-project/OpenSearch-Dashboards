@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { EuiCompressedFormRow, EuiRadioGroup } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedRadioGroup } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -53,7 +53,7 @@ export const RadioGroupField = ({ field, euiFieldProps = {}, ...rest }: Props) =
       data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
     >
-      <EuiRadioGroup
+      <EuiCompressedRadioGroup
         idSelected={field.value as string}
         options={[]}
         onChange={field.setValue}
