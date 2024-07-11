@@ -44,7 +44,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiTextArea,
+  EuiCompressedTextArea,
   EuiCompressedFormRow,
   EuiCode,
   EuiSpacer,
@@ -138,7 +138,11 @@ export function CalculationAgg(props) {
               </div>
             }
           >
-            <EuiTextArea onChange={handleTextChange('script')} value={model.script} fullWidth />
+            <EuiCompressedTextArea
+              onChange={handleTextChange('script')}
+              value={model.script}
+              fullWidth
+            />
           </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -13,7 +13,7 @@ import {
   EuiLink,
   EuiCompressedFormRow,
   EuiCompressedFieldText,
-  EuiTextArea,
+  EuiCompressedTextArea,
   EuiCompressedSelect,
   EuiCallOut,
 } from '@elastic/eui';
@@ -116,7 +116,7 @@ export const ConfigureS3DatasourcePanel: React.FC<ConfigureS3DatasourceProps> = 
           setNameForRequest={setNameForRequest}
         />
         <EuiCompressedFormRow label="Description - Optional">
-          <EuiTextArea
+          <EuiCompressedTextArea
             placeholder="Describe data source"
             value={details}
             onBlur={(e) => {

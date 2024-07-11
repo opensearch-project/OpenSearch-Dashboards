@@ -11,7 +11,7 @@ import {
   EuiLink,
   EuiCompressedFormRow,
   EuiCompressedFieldText,
-  EuiTextArea,
+  EuiCompressedTextArea,
   EuiCompressedSelect,
   EuiCompressedFieldPassword,
   EuiForm,
@@ -111,7 +111,7 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
             setErrorForForm={setError}
           />
           <EuiCompressedFormRow label="Description - Optional">
-            <EuiTextArea
+            <EuiCompressedTextArea
               data-test-subj="data-source-description"
               placeholder="Placeholder"
               value={details}

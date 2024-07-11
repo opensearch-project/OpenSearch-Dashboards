@@ -42,7 +42,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiTextArea,
+  EuiCompressedTextArea,
   EuiLink,
   EuiCompressedFormRow,
   EuiCode,
@@ -154,7 +154,7 @@ export function MathAgg(props) {
               />
             }
           >
-            <EuiTextArea
+            <EuiCompressedTextArea
               data-test-subj="mathExpression"
               onChange={handleTextChange('script')}
               fullWidth

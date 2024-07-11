@@ -44,7 +44,7 @@ import {
   EuiSpacer,
   EuiCompressedSwitch,
   EuiSwitchEvent,
-  EuiTextArea,
+  EuiCompressedTextArea,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
@@ -186,7 +186,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
           />
         }
       >
-        <EuiTextArea
+        <EuiCompressedTextArea
           data-test-subj="viewDescription"
           value={this.state.visualizationDescription}
           onChange={this.onDescriptionChange}

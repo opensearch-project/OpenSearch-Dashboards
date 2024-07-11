@@ -30,7 +30,7 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiCompressedFormRow, EuiTextArea, EuiCompressedSwitch } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedTextArea, EuiCompressedSwitch } from '@elastic/eui';
 
 import { SavedObjectSaveModal } from '../../../../../../saved_objects/public';
 
@@ -118,7 +118,7 @@ export class DashboardSaveModal extends React.Component<Props, State> {
             />
           }
         >
-          <EuiTextArea
+          <EuiCompressedTextArea
             data-test-subj="dashboardDescription"
             value={this.state.description}
             onChange={this.onDescriptionChange}

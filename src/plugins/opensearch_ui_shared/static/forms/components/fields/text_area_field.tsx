@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { EuiCompressedFormRow, EuiTextArea } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedTextArea } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -53,7 +53,7 @@ export const TextAreaField = ({ field, euiFieldProps = {}, ...rest }: Props) => 
       data-test-subj={rest['data-test-subj']}
       describedByIds={rest.idAria ? [rest.idAria] : undefined}
     >
-      <EuiTextArea
+      <EuiCompressedTextArea
         isInvalid={isInvalid}
         value={field.value as string}
         onChange={field.onChange}
