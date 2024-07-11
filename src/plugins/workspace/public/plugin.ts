@@ -15,7 +15,6 @@ import {
   AppNavLinkStatus,
   AppUpdater,
   AppStatus,
-  PublicAppInfo,
   ChromeBreadcrumb,
   WorkspaceAvailability,
   ChromeNavGroupUpdater,
@@ -62,7 +61,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private managementCurrentWorkspaceIdSubscription?: Subscription;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
   private navGroupUpdater$ = new BehaviorSubject<ChromeNavGroupUpdater>(() => undefined);
-  private workspaceConfigurableApps$ = new BehaviorSubject<PublicAppInfo[]>([]);
   private unregisterNavGroupUpdater?: () => void;
   private registeredUseCases$ = new BehaviorSubject<WorkspaceUseCase[]>([]);
   private registeredUseCasesUpdaterSubscription?: Subscription;
@@ -261,7 +259,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       };
 
       return renderApp(params, services, {
-        workspaceConfigurableApps$: this.workspaceConfigurableApps$,
         registeredUseCases$: this.registeredUseCases$,
       });
     };
