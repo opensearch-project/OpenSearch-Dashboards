@@ -7,10 +7,14 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { WorkspaceForm } from './workspace_form';
 import { coreMock } from '../../../../../core/public/mocks';
+import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 
 const mockCoreStart = coreMock.createStart();
 
-const setup = (isDashboardAdmin = true) => {
+const setup = (
+  isDashboardAdmin: boolean,
+  dataSourceManagement: DataSourceManagementPluginSetup | undefined
+) => {
   const application = {
     ...mockCoreStart.application,
     capabilities: {
@@ -29,18 +33,32 @@ const setup = (isDashboardAdmin = true) => {
       }),
     },
   };
-  return render(<WorkspaceForm application={application} savedObjects={savedObjects} />);
+
+  return render(
+    <WorkspaceForm
+      application={application}
+      savedObjects={savedObjects}
+      dataSourceManagement={dataSourceManagement}
+    />
+  );
 };
 
+const mockDataSourceManagementSetup = ({} as unknown) as DataSourceManagementPluginSetup;
+
 describe('WorkspaceForm', () => {
-  it('should enable data source panel for dashboard admin', () => {
-    const { getByText } = setup(true);
+  it('should enable data source panel for dashboard admin and when data source is enabled', () => {
+    const { getByText } = setup(true, mockDataSourceManagementSetup);
 
     expect(getByText('Select Data Sources')).toBeInTheDocument();
   });
 
   it('should not display data source panel for non dashboard admin', () => {
-    const { queryByText } = setup(false);
+    const { queryByText } = setup(false, mockDataSourceManagementSetup);
+
+    expect(queryByText('Select Data Sources')).not.toBeInTheDocument();
+  });
+  it('should not display data source panel when data source is disabled', () => {
+    const { queryByText } = setup(true, undefined);
 
     expect(queryByText('Select Data Sources')).not.toBeInTheDocument();
   });

@@ -35,6 +35,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     operationType,
     permissionEnabled,
     workspaceConfigurableApps,
+    dataSourceManagement: isDataSourceEnabled,
   } = props;
   const {
     formId,
@@ -190,8 +191,8 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
       )}
       <EuiSpacer />
 
-      {/* SelectDataSourcePanel is only visible for dashboard admin */}
-      {isDashboardAdmin && (
+      {/* SelectDataSourcePanel is only visible for dashboard admin and when data source is enabled*/}
+      {isDashboardAdmin && isDataSourceEnabled && (
         <EuiPanel>
           <EuiTitle size="s">
             <h2>

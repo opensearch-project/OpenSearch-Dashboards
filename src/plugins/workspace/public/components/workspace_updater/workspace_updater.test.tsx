@@ -111,6 +111,7 @@ const WorkspaceUpdater = (props: any) => {
           }),
         },
       },
+      dataSourceManagement: {},
     },
   });
 

@@ -83,6 +83,7 @@ const WorkspaceCreator = (props: any, isDashboardAdmin = false) => {
           }),
         },
       },
+      dataSourceManagement: {},
     },
   });
 
