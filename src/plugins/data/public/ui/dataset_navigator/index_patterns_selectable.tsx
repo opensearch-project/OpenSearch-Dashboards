@@ -116,6 +116,7 @@ export const IndexPatternSelectable = ({
     <div>
       <EuiSelectable
         searchable
+        searchProps={{ placeholder: 'Search' }}
         options={indexPatternOptionList}
         onChange={(newOptions) => {
           setIndexPatternOptionList(newOptions);
