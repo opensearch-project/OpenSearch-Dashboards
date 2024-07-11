@@ -24,6 +24,7 @@ export interface DataSourceOption {
   value: string;
   type: string;
   ds: DataSource;
+  checked?: boolean;
 }
 
 export interface DataSourceSelectableProps extends Pick<EuiComboBoxProps<unknown>, 'fullWidth'> {
