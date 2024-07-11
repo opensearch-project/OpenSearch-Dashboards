@@ -38,24 +38,44 @@ export interface AccelerationDetailsFlyoutProps {
   resetFlyout: () => void;
   handleRefresh?: () => void;
   dataSourceMDSId?: string;
+  http: HttpStart;
 }
 
 const fetchFields = async (http: HttpStart, index: string) => {
-  return http.get('/api/dsl/indices.getFieldMapping', {
-    query: { index },
-  });
+  return http
+    .get(`/api/dsl/indices.getFieldMapping`, {
+      query: {
+        index,
+      },
+    })
+    .then((result) => {
+      return result;
+    });
 };
 
 const fetchSettings = async (http: HttpStart, index: string) => {
-  return http.get('/api/dsl/indices.getFieldSettings', {
-    query: { index },
-  });
+  return http
+    .get(`/api/dsl/indices.getFieldSettings`, {
+      query: {
+        index,
+      },
+    })
+    .then((result) => {
+      return result;
+    });
 };
 
 const fetchIndices = async (http: HttpStart, index: string = '') => {
-  return http.get('/api/dsl/cat.indices', {
-    query: { format: 'json', index },
-  });
+  return http
+    .get(`/api/dsl/cat.indices`, {
+      query: {
+        format: 'json',
+        index,
+      },
+    })
+    .then((result) => {
+      return result;
+    });
 };
 
 const handleDetailsFetchingPromise = (
@@ -68,8 +88,8 @@ const handleDetailsFetchingPromise = (
 };
 
 export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps) => {
-  const { http } = useOpenSearchDashboards<DataSourceManagementContext>().services;
-  const { dataSourceName, acceleration, resetFlyout, handleRefresh } = props;
+  // const { http } = useOpenSearchDashboards<DataSourceManagementContext>().services;
+  const { dataSourceName, acceleration, resetFlyout, handleRefresh, http } = props;
   const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
   const tabsMap: { [key: string]: any } = {

@@ -138,7 +138,7 @@ export async function mountManagementSection(
           resetFlyout={() => accelerationDetailsFlyout.close()}
           handleRefresh={handleRefresh}
           dataSourceMDSId={dataSourceMDSId}
-          notifications={notifications} // pass the notifications service
+          http={http}
         />
       )
     );
