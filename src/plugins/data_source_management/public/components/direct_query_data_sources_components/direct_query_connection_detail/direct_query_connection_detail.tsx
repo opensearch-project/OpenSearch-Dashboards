@@ -76,8 +76,12 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   };
 
   const fetchSelectedDatasource = () => {
+    const endpoint = featureFlagStatus
+      ? `${DATACONNECTIONS_BASE}/${dataSourceName}/dataSourceMDSId=${dataSourceMDSId}`
+      : `${DATACONNECTIONS_BASE}/${dataSourceName}`;
+
     http
-      .get(`${DATACONNECTIONS_BASE}/${dataSourceName}`)
+      .get(endpoint)
       .then((data) => {
         setDatasourceDetails({
           allowedRoles: data.allowedRoles,
