@@ -11,13 +11,14 @@ import {
   EuiSideNav,
   EuiPanel,
   EuiText,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { ChromeNavLink } from '../..';
-import { ChromeNavGroup } from '../../../../types';
+import { ChromeNavGroup, NavGroupStatus } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
@@ -106,6 +107,7 @@ function NavGroups({
 
         return {
           ...navItem,
+          name: <EuiLink>{navItem.name}</EuiLink>,
         };
       }
 
@@ -200,6 +202,17 @@ export function CollapsibleNavGroupEnabled({
     if (focusGroup) {
       return fulfillRegistrationLinksToChromeNavLinks(
         navGroupsMap[focusGroup.id].navLinks || [],
+        navLinks
+      );
+    }
+
+    const visibleUseCases = Object.values(navGroupsMap).filter(
+      (group) => group.type === undefined && group.status !== NavGroupStatus.Hidden
+    );
+
+    if (visibleUseCases.length === 1) {
+      return fulfillRegistrationLinksToChromeNavLinks(
+        navGroupsMap[visibleUseCases[0].id].navLinks || [],
         navLinks
       );
     }
