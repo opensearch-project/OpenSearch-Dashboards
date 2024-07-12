@@ -5781,7 +5781,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                         id="headerHelpMenu"
                         isOpen={false}
                         ownFocus={true}
-                        panelPaddingSize="m"
+                        panelPaddingSize="s"
                         repositionOnScroll={true}
                       >
                         <div
@@ -11320,7 +11320,7 @@ exports[`Header renders condensed header 1`] = `
                         id="headerHelpMenu"
                         isOpen={false}
                         ownFocus={true}
-                        panelPaddingSize="m"
+                        panelPaddingSize="s"
                         repositionOnScroll={true}
                       >
                         <div
