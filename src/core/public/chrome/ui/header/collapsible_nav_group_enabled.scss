@@ -23,7 +23,11 @@
   }
 
   .bottom-container {
-    padding: $euiSize;
+    padding: $ouiSize;
     display: flex;
+  }
+
+  .nav-controls-padding {
+    padding: $ouiSize;
   }
 }

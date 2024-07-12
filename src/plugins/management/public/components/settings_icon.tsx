@@ -47,8 +47,9 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
       button={<EuiButtonIcon iconType="managementApp" onClick={() => setPopover(true)} />}
       isOpen={isPopoverOpen}
       closePopover={() => setPopover(false)}
+      ownFocus={false}
     >
-      <EuiContextMenuPanel size="s" items={items} />
+      <EuiContextMenuPanel hasFocus={false} size="s" items={items} />
     </EuiPopover>
   );
 }

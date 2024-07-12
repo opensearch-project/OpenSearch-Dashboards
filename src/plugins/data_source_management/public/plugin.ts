@@ -137,7 +137,11 @@ export class DataSourceManagementPlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.dataAdministration, [
       {
         id: DSM_APP_ID,
-        order: 200,
+        category: {
+          id: DSM_APP_ID,
+          label: PLUGIN_NAME,
+          order: 200,
+        },
       },
     ]);
 

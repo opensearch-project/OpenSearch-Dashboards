@@ -18,6 +18,7 @@ import { i18n } from '@osd/i18n';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
+import classNames from 'classnames';
 import { ChromeNavControl, ChromeNavLink } from '../..';
 import { NavGroupStatus } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
@@ -324,7 +325,10 @@ export function CollapsibleNavGroupEnabled({
         </div>
         <EuiHorizontalRule margin="none" />
         <div className="bottom-container" style={{ flexDirection: isNavOpen ? 'row' : 'column' }}>
-          <HeaderNavControls navControls$={observables.navControlsLeftBottom$} />
+          <HeaderNavControls
+            navControls$={observables.navControlsLeftBottom$}
+            className={classNames({ 'nav-controls-padding': isNavOpen })}
+          />
         </div>
       </div>
     </EuiFlyout>
