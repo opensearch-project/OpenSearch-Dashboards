@@ -51,7 +51,6 @@ import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
 import { createEuiListItem, createRecentNavLink, isModifiedOrPrevented } from './nav_link';
 import type { Logos } from '../../../../common/types';
-import { CollapsibleNavHeaderRender } from '../../chrome_service';
 
 function getAllCategories(allCategorizedLinks: Record<string, ChromeNavLink[]>) {
   const allCategories = {} as Record<string, AppCategory | undefined>;
@@ -90,7 +89,7 @@ function setIsCategoryOpen(id: string, isOpen: boolean, storage: Storage) {
 interface Props {
   appId$: InternalApplicationStart['currentAppId$'];
   basePath: HttpStart['basePath'];
-  collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
+  collapsibleNavHeaderRender?: () => JSX.Element | null;
   id: string;
   isLocked: boolean;
   isNavOpen: boolean;

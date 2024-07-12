@@ -136,7 +136,6 @@ export class HomePublicPlugin
     core.application.register({
       id: PLUGIN_ID,
       title: 'Home',
-      order: 100,
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? undefined
         : AppNavLinkStatus.hidden,

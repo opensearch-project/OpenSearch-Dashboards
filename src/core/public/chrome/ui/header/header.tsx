@@ -54,11 +54,7 @@ import {
 } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import {
-  ChromeHelpExtension,
-  ChromeBranding,
-  CollapsibleNavHeaderRender,
-} from '../../chrome_service';
+import { ChromeHelpExtension, ChromeBranding } from '../../chrome_service';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -78,7 +74,7 @@ export interface HeaderProps {
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
+  collapsibleNavHeaderRender?: () => JSX.Element | null;
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;
