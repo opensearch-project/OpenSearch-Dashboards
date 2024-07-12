@@ -29,7 +29,7 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
@@ -61,6 +61,7 @@ import {
 } from './services';
 import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
+import { DEFAULT_NAV_GROUPS, AppStatus } from '../../../core/public';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -150,6 +151,40 @@ export class SavedObjectsManagementPlugin
         });
       },
     });
+
+    core.application.register({
+      id: 'objects',
+      title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
+        defaultMessage: 'Saved objects',
+      }),
+      status: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
+      mount: async (params: AppMountParameters) => {
+        const { mountManagementSection } = await import('./management_section');
+        const [coreStart] = await core.getStartServices();
+
+        return mountManagementSection({
+          core,
+          serviceRegistry: this.serviceRegistry,
+          mountParams: {
+            ...params,
+            basePath: core.http.basePath.get(),
+            setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+            wrapInPage: true,
+          },
+          dataSourceEnabled: !!dataSource,
+          dataSourceManagement,
+        });
+      },
+    });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: 'objects',
+        order: 300,
+      },
+    ]);
 
     // sets up the context mappings and registers any triggers/actions for the plugin
     bootstrap(uiActions);
