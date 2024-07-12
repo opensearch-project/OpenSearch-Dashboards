@@ -187,7 +187,13 @@ describe('WorkspaceCreator', () => {
         description: 'test workspace description',
         features: expect.arrayContaining(['use-case-observability']),
       }),
-      { dataSources: [], permissions: undefined }
+      {
+        dataSources: [],
+        permissions: {
+          library_write: { users: ['%me%'] },
+          write: { users: ['%me%'] },
+        },
+      }
     );
     await waitFor(() => {
       expect(notificationToastsAddSuccess).toHaveBeenCalled();
@@ -230,19 +236,13 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with customized permissions', async () => {
-    const { getByTestId, getAllByText } = render(<WorkspaceCreator />);
+    const { getByTestId } = render(<WorkspaceCreator />);
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },
     });
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-user-addNew'));
-    const userIdInput = getAllByText('Select')[0];
-    fireEvent.click(userIdInput);
-    fireEvent.input(getByTestId('comboBoxSearchInput'), {
-      target: { value: 'test user id' },
-    });
-    fireEvent.blur(getByTestId('comboBoxSearchInput'));
     fireEvent.click(getByTestId('workspaceForm-bottomBar-createButton'));
     expect(workspaceClientCreate).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -251,11 +251,11 @@ describe('WorkspaceCreator', () => {
       {
         dataSources: [],
         permissions: {
-          read: {
-            users: ['test user id'],
+          write: {
+            users: ['%me%'],
           },
-          library_read: {
-            users: ['test user id'],
+          library_write: {
+            users: ['%me%'],
           },
         },
       }
@@ -287,7 +287,14 @@ describe('WorkspaceCreator', () => {
       }),
       {
         dataSources: ['id1'],
-        permissions: undefined,
+        permissions: {
+          library_write: {
+            users: ['%me%'],
+          },
+          write: {
+            users: ['%me%'],
+          },
+        },
       }
     );
     await waitFor(() => {

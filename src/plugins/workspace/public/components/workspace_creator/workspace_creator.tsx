@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
@@ -78,21 +78,15 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   );
 
   return (
-    <EuiPage paddingSize="none">
+    <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader restrictWidth pageTitle="Create a workspace" />
-        <EuiSpacer />
+        <EuiPageHeader pageTitle="Create a workspace" />
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}
-          /**
-           * Since above EuiPageHeader has a maxWidth: 1000 style,
-           * add maxWidth: 1000 below to align with the above page header
-           **/
-          style={{ width: '100%', maxWidth: 1000 }}
         >
           {application && savedObjects && (
             <WorkspaceForm

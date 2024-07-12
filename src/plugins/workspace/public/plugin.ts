@@ -353,8 +353,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
 
-    this.addWorkspaceToBreadcrumbs(core);
-
     const useCaseStart = this.useCase.start({
       chrome: core.chrome,
       workspaceConfigurableApps$: this.getWorkspaceConfigurableApps$(core),
@@ -367,6 +365,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       });
 
     this.filterNavLinks(core);
+
+    if (!core.chrome.navGroup.getNavGroupEnabled()) {
+      this.addWorkspaceToBreadcrumbs(core);
+    }
 
     return {};
   }

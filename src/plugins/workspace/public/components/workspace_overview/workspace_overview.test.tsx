@@ -234,7 +234,7 @@ describe('WorkspaceOverview', () => {
     const { getByText } = render(WorkspaceOverviewPage({ workspacesService: workspaceService }));
     fireEvent.click(getByText('Settings'));
     await waitFor(() => {
-      expect(screen.queryByText('Enter Details')).not.toBeNull();
+      expect(screen.queryByText('Enter details')).not.toBeNull();
       // title is hidden
       expect(screen.queryByText('Update Workspace')).toBeNull();
     });

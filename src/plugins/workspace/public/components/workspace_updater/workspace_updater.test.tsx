@@ -7,13 +7,14 @@ import React from 'react';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import {
-  WorkspaceUpdater as WorkspaceCreatorComponent,
-  WorkspaceUpdaterProps,
-} from './workspace_updater';
+
 import { coreMock, workspacesServiceMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import {
+  WorkspaceUpdater as WorkspaceUpdaterComponent,
+  WorkspaceUpdaterProps,
+} from './workspace_updater';
 
 const workspaceClientUpdate = jest.fn().mockReturnValue({ result: true, success: true });
 
@@ -26,14 +27,20 @@ const PublicAPPInfoMap = new Map([
 ]);
 const createWorkspacesSetupContractMockWithValue = () => {
   const currentWorkspaceId$ = new BehaviorSubject<string>('abljlsds');
-  const currentWorkspace: WorkspaceObject = {
+  const currentWorkspace = {
     id: 'abljlsds',
     name: 'test1',
     description: 'test1',
     features: ['use-case-observability'],
-    color: '',
-    icon: '',
     reserved: false,
+    permissions: {
+      library_write: {
+        users: ['foo'],
+      },
+      write: {
+        users: ['foo'],
+      },
+    },
   };
   const workspaceList$ = new BehaviorSubject<WorkspaceObject[]>([currentWorkspace]);
   const currentWorkspace$ = new BehaviorSubject<WorkspaceObject | null>(currentWorkspace);
@@ -65,7 +72,7 @@ const dataSourcesList = [
 
 const mockCoreStart = coreMock.createStart();
 
-const renderCompleted = () => expect(screen.queryByText('Enter Details')).not.toBeNull();
+const renderCompleted = () => expect(screen.queryByText('Enter details')).not.toBeNull();
 
 const WorkspaceUpdater = (
   props: Partial<WorkspaceUpdaterProps> & {
@@ -121,7 +128,7 @@ const WorkspaceUpdater = (
 
   return (
     <Provider>
-      <WorkspaceCreatorComponent {...props} registeredUseCases$={registeredUseCases$} />
+      <WorkspaceUpdaterComponent {...props} registeredUseCases$={registeredUseCases$} />
     </Provider>
   );
 };
@@ -182,9 +189,7 @@ describe('WorkspaceUpdater', () => {
   });
 
   it('update workspace successfully', async () => {
-    const { getByTestId, getAllByText, getAllByTestId, getAllByLabelText } = render(
-      <WorkspaceUpdater />
-    );
+    const { getByTestId, getAllByTestId, getAllByLabelText } = render(<WorkspaceUpdater />);
     await waitFor(renderCompleted);
 
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
@@ -196,7 +201,6 @@ describe('WorkspaceUpdater', () => {
     fireEvent.input(descriptionInput, {
       target: { value: 'test workspace description' },
     });
-
     const colorSelector = getByTestId(
       'euiColorPickerAnchor workspaceForm-workspaceDetails-colorPicker'
     );
@@ -207,13 +211,13 @@ describe('WorkspaceUpdater', () => {
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspaceUseCase-analytics'));
 
-    fireEvent.click(getByTestId('workspaceForm-permissionSettingPanel-user-addNew'));
-    const userIdInput = getAllByText('Select')[0];
+    const userIdInput = getAllByTestId('comboBoxSearchInput')[0];
     fireEvent.click(userIdInput);
-    fireEvent.input(getAllByTestId('comboBoxSearchInput')[0], {
+
+    fireEvent.input(userIdInput, {
       target: { value: 'test user id' },
     });
-    fireEvent.blur(getAllByTestId('comboBoxSearchInput')[0]);
+    fireEvent.blur(userIdInput);
 
     await act(() => {
       fireEvent.click(getAllByLabelText('Delete data source')[0]);
@@ -230,10 +234,10 @@ describe('WorkspaceUpdater', () => {
       }),
       {
         permissions: {
-          read: {
+          library_write: {
             users: ['test user id'],
           },
-          library_read: {
+          write: {
             users: ['test user id'],
           },
         },
