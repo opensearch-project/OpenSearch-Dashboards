@@ -45,7 +45,7 @@ import {
   EuiButtonGroup,
   EuiOutsideClickDetector,
   EuiPanel,
-  EuiFilterButton,
+  EuiSmallFilterButton,
   EuiFilterGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -267,7 +267,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
               setPopoverOpen(false);
             }}
             button={
-              <EuiFilterButton
+              <EuiSmallFilterButton
                 iconType="filter"
                 iconSide="left"
                 hasActiveFilters={activeFiltersCount > 0}
@@ -282,7 +282,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
                   id="discover.fieldChooser.fieldFilterFacetButtonLabel"
                   defaultMessage="Filter by type"
                 />
-              </EuiFilterButton>
+              </EuiSmallFilterButton>
             }
           >
             <EuiPopoverTitle>
