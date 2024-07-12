@@ -9,6 +9,7 @@ import { WorkspacePermissionMode } from '../../common/constants';
 import { IWorkspaceClientImpl, WorkspaceAttributeWithPermission } from '../types';
 import { SavedObjectsPermissionControlContract } from '../permission_control/client';
 import { registerDuplicateRoute } from './duplicate';
+import { transferCurrentUserInPermissions } from '../utils';
 
 export const WORKSPACES_API_BASE_URL = '/api/workspaces';
 
@@ -147,16 +148,10 @@ export function registerRoutes({
 
       if (isPermissionControlEnabled) {
         createPayload.permissions = settings.permissions;
-        // Assign workspace owner to current user
         if (!!principals?.users?.length) {
-          const acl = new ACL(settings.permissions);
           const currentUserId = principals.users[0];
-          [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite].forEach(
-            (permissionMode) => {
-              if (!acl.hasPermission([permissionMode], { users: [currentUserId] })) {
-                acl.addPermission([permissionMode], { users: [currentUserId] });
-              }
-            }
+          const acl = new ACL(
+            transferCurrentUserInPermissions(currentUserId, settings.permissions)
           );
           createPayload.permissions = acl.getPermissions();
         }
