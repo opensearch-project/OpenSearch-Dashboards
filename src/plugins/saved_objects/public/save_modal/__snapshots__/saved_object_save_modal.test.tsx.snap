@@ -8,15 +8,21 @@ exports[`SavedObjectSaveModal should render matching snapshot 1`] = `
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
-        defaultMessage="Save {objectType}"
-        id="savedObjects.saveModal.saveTitle"
-        values={
-          Object {
-            "objectType": "visualization",
-          }
-        }
-      />
+      <EuiText
+        size="s"
+      >
+        <h2>
+          <FormattedMessage
+            defaultMessage="Save {objectType}"
+            id="savedObjects.saveModal.saveTitle"
+            values={
+              Object {
+                "objectType": "visualization",
+              }
+            }
+          />
+        </h2>
+      </EuiText>
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>

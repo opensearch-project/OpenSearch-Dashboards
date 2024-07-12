@@ -5,7 +5,6 @@
 
 import { updateWorkspaceState } from '../../../../core/server/utils';
 import { SavedObject } from '../../../../core/public';
-import { PUBLIC_WORKSPACE_ID } from '../../../../core/server';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceIdConsumerWrapper } from './workspace_id_consumer_wrapper';
 
@@ -116,69 +115,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
       });
     });
 
-    it(`Should set workspacesSearchOperator to OR when search with public workspace`, async () => {
-      await wrapperClient.find({
-        type: 'dashboard',
-        workspaces: [PUBLIC_WORKSPACE_ID],
-      });
-      expect(mockedClient.find).toBeCalledWith({
-        type: 'dashboard',
-        workspaces: [PUBLIC_WORKSPACE_ID],
-        workspacesSearchOperator: 'OR',
-      });
-    });
-
-    it(`Should set workspace as pubic when workspace is not specified`, async () => {
-      const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
-      updateWorkspaceState(mockRequest, {});
-      const mockedWrapperClient = wrapperInstance.wrapperFactory({
-        client: mockedClient,
-        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
-        request: mockRequest,
-      });
-      await mockedWrapperClient.find({
-        type: ['dashboard', 'visualization'],
-      });
-      expect(mockedClient.find).toBeCalledWith({
-        type: ['dashboard', 'visualization'],
-        workspaces: [PUBLIC_WORKSPACE_ID],
-        workspacesSearchOperator: 'OR',
-      });
-    });
-
-    it(`Should remove public workspace when permission control is enabled`, async () => {
-      const consumer = new WorkspaceIdConsumerWrapper(true);
-      const client = consumer.wrapperFactory({
-        client: mockedClient,
-        typeRegistry: requestHandlerContext.savedObjects.typeRegistry,
-        request: workspaceEnabledMockRequest,
-      });
-      await client.find({
-        type: 'dashboard',
-        workspaces: ['bar', PUBLIC_WORKSPACE_ID],
-      });
-      expect(mockedClient.find).toBeCalledWith({
-        type: 'dashboard',
-        workspaces: ['bar'],
-        workspacesSearchOperator: 'OR',
-      });
-    });
-
-    it(`Should not override workspacesSearchOperator when workspacesSearchOperator is specified`, async () => {
-      await wrapperClient.find({
-        type: 'dashboard',
-        workspaces: [PUBLIC_WORKSPACE_ID],
-        workspacesSearchOperator: 'AND',
-      });
-      expect(mockedClient.find).toBeCalledWith({
-        type: 'dashboard',
-        workspaces: [PUBLIC_WORKSPACE_ID],
-        workspacesSearchOperator: 'AND',
-      });
-    });
-
-    it(`Should not pass a empty workspace array`, async () => {
-      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper(true);
+    it(`Should pass a empty workspace array`, async () => {
+      const workspaceIdConsumerWrapper = new WorkspaceIdConsumerWrapper();
       const mockRequest = httpServerMock.createOpenSearchDashboardsRequest();
       updateWorkspaceState(mockRequest, {});
       const mockedWrapperClient = workspaceIdConsumerWrapper.wrapperFactory({
@@ -189,10 +127,8 @@ describe('WorkspaceIdConsumerWrapper', () => {
       await mockedWrapperClient.find({
         type: ['dashboard', 'visualization'],
       });
-      // empty workspace array will get deleted
       expect(mockedClient.find).toBeCalledWith({
         type: ['dashboard', 'visualization'],
-        workspacesSearchOperator: 'OR',
       });
     });
   });

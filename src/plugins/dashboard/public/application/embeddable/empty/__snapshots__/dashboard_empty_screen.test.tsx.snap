@@ -321,10 +321,10 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                         </figure>
                       </EuiImage>
                       <EuiText
-                        size="m"
+                        size="s"
                       >
                         <div
-                          className="euiText euiText--medium"
+                          className="euiText euiText--small"
                         >
                           <p
                             style={
@@ -339,10 +339,10 @@ exports[`DashboardEmptyScreen renders correctly with readonly mode 1`] = `
                       </EuiText>
                       <EuiText
                         color="subdued"
-                        size="m"
+                        size="s"
                       >
                         <div
-                          className="euiText euiText--medium"
+                          className="euiText euiText--small"
                         >
                           <EuiTextColor
                             color="subdued"
@@ -625,10 +625,10 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
         >
           <EuiText
             color="subdued"
-            size="m"
+            size="s"
           >
             <div
-              className="euiText euiText--medium"
+              className="euiText euiText--small"
             >
               <EuiTextColor
                 color="subdued"
@@ -677,7 +677,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
               aria-label="Create new visualization button"
               data-test-subj="addVisualizationButton"
               iconSide="left"
-              iconType="plusInCircle"
+              iconType="plus"
               size="s"
             >
               <EuiButtonDisplay
@@ -687,7 +687,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                 disabled={false}
                 element="button"
                 iconSide="left"
-                iconType="plusInCircle"
+                iconType="plus"
                 isDisabled={false}
                 size="s"
                 type="button"
@@ -707,7 +707,7 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                   <EuiButtonContent
                     className="euiButton__content"
                     iconSide="left"
-                    iconType="plusInCircle"
+                    iconType="plus"
                     textProps={
                       Object {
                         "className": "euiButton__text",
@@ -721,12 +721,12 @@ exports[`DashboardEmptyScreen renders correctly with visualize paragraph 1`] = `
                         className="euiButtonContent__icon"
                         color="inherit"
                         size="m"
-                        type="plusInCircle"
+                        type="plus"
                       >
                         <span
                           className="euiButtonContent__icon"
                           color="inherit"
-                          data-euiicon-type="plusInCircle"
+                          data-euiicon-type="plus"
                           size="m"
                         />
                       </EuiIcon>
@@ -1054,10 +1054,10 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                         </figure>
                       </EuiImage>
                       <EuiText
-                        size="m"
+                        size="s"
                       >
                         <div
-                          className="euiText euiText--medium"
+                          className="euiText euiText--small"
                         >
                           <p
                             style={
@@ -1082,10 +1082,10 @@ exports[`DashboardEmptyScreen renders correctly without visualize paragraph 1`] 
                       >
                         <EuiText
                           color="subdued"
-                          size="m"
+                          size="s"
                         >
                           <div
-                            className="euiText euiText--medium"
+                            className="euiText euiText--small"
                           >
                             <EuiTextColor
                               color="subdued"

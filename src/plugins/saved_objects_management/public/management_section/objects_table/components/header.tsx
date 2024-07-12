@@ -31,7 +31,6 @@
 import React, { Fragment } from 'react';
 import {
   EuiSpacer,
-  EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -54,14 +53,14 @@ export const Header = ({
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
       <EuiFlexItem grow={false}>
-        <EuiTitle>
+        <EuiText size="s">
           <h1>
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.header.savedObjectsTitle"
               defaultMessage="Saved Objects"
             />
           </h1>
-        </EuiTitle>
+        </EuiText>
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>

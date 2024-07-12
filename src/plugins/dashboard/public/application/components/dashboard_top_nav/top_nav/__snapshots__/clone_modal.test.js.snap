@@ -8,15 +8,23 @@ exports[`renders DashboardCloneModal 1`] = `
 >
   <EuiModalHeader>
     <EuiModalHeaderTitle>
-      <FormattedMessage
-        defaultMessage="Clone dashboard"
-        id="dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
-        values={Object {}}
-      />
+      <EuiText
+        size="s"
+      >
+        <h2>
+          <FormattedMessage
+            defaultMessage="Clone dashboard"
+            id="dashboard.topNav.cloneModal.cloneDashboardModalHeaderTitle"
+            values={Object {}}
+          />
+        </h2>
+      </EuiText>
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
-    <EuiText>
+    <EuiText
+      size="s"
+    >
       <p>
         <FormattedMessage
           defaultMessage="Please enter a new name for your dashboard."

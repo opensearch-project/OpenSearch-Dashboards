@@ -5,7 +5,7 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiButton, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 
 export const getNoItemsMessage = (
@@ -18,12 +18,14 @@ export const getNoItemsMessage = (
       <EuiEmptyPrompt
         iconType="dashboardApp"
         title={
-          <h1 id="dashboardListingHeading">
-            <FormattedMessage
-              id="dashboard.listing.noItemsMessage"
-              defaultMessage="Looks like you don't have any dashboards."
-            />
-          </h1>
+          <EuiText size="s">
+            <h1 id="dashboardListingHeading">
+              <FormattedMessage
+                id="dashboard.listing.noItemsMessage"
+                defaultMessage="Looks like you don't have any dashboards."
+              />
+            </h1>
+          </EuiText>
         }
       />
     );
@@ -33,12 +35,14 @@ export const getNoItemsMessage = (
     <EuiEmptyPrompt
       iconType="dashboardApp"
       title={
-        <h1 id="dashboardListingHeading">
-          <FormattedMessage
-            id="dashboard.listing.createNewDashboard.title"
-            defaultMessage="Create your first dashboard"
-          />
-        </h1>
+        <EuiText size="s">
+          <h1 id="dashboardListingHeading">
+            <FormattedMessage
+              id="dashboard.listing.createNewDashboard.title"
+              defaultMessage="Create your first dashboard"
+            />
+          </h1>
+        </EuiText>
       }
       body={
         <Fragment>
@@ -76,7 +80,7 @@ export const getNoItemsMessage = (
         <EuiButton
           onClick={createItem}
           fill
-          iconType="plusInCircle"
+          iconType="plus"
           data-test-subj="createDashboardPromptButton"
         >
           <FormattedMessage

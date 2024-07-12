@@ -4,12 +4,18 @@
  */
 
 import { AuthStatus } from '../../../core/server';
-import { httpServerMock, httpServiceMock } from '../../../core/server/mocks';
+import {
+  httpServerMock,
+  httpServiceMock,
+  savedObjectsClientMock,
+} from '../../../core/server/mocks';
 import {
   generateRandomId,
   getOSDAdminConfigFromYMLConfig,
   getPrincipalsFromRequest,
   updateDashboardAdminStateForRequest,
+  transferCurrentUserInPermissions,
+  getDataSourcesList,
 } from './utils';
 import { getWorkspaceState } from '../../../core/server/utils';
 import { Observable, of } from 'rxjs';
@@ -150,5 +156,53 @@ describe('workspace utils', () => {
     const [groups, users] = await getOSDAdminConfigFromYMLConfig(globalConfig$);
     expect(groups).toEqual([]);
     expect(users).toEqual([]);
+  });
+
+  it('should transfer current user placeholder in permissions', () => {
+    expect(transferCurrentUserInPermissions('foo', undefined)).toBeUndefined();
+    expect(
+      transferCurrentUserInPermissions('foo', {
+        library_write: {
+          users: ['%me%', 'bar'],
+        },
+        write: {
+          users: ['%me%'],
+        },
+        read: {
+          users: ['bar'],
+        },
+      })
+    ).toEqual({
+      library_write: {
+        users: ['foo', 'bar'],
+      },
+      write: {
+        users: ['foo'],
+      },
+      read: {
+        users: ['bar'],
+      },
+    });
+  });
+
+  it('should return dataSources list when passed savedObject client', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    const dataSources = [
+      {
+        id: 'ds-1',
+      },
+    ];
+    savedObjectsClient.find = jest.fn().mockResolvedValue({
+      saved_objects: dataSources,
+    });
+    const result = await getDataSourcesList(savedObjectsClient, []);
+    expect(result).toEqual(dataSources);
+  });
+
+  it('should return empty array when finding no saved objects', async () => {
+    const savedObjectsClient = savedObjectsClientMock.create();
+    savedObjectsClient.find = jest.fn().mockResolvedValue({});
+    const result = await getDataSourcesList(savedObjectsClient, []);
+    expect(result).toEqual([]);
   });
 });

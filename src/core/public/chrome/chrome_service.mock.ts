@@ -78,6 +78,8 @@ const createStartContractMock = () => {
     navGroup: {
       getNavGroupsMap$: jest.fn(() => new BehaviorSubject({})),
       getNavGroupEnabled: jest.fn(),
+      getCurrentNavGroup$: jest.fn(() => new BehaviorSubject(undefined)),
+      setCurrentNavGroup: jest.fn(),
     },
     setAppTitle: jest.fn(),
     setIsVisible: jest.fn(),

@@ -102,8 +102,9 @@ export interface HeaderProps {
   logos: Logos;
   survey: string | undefined;
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
-  navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
   navGroupEnabled: boolean;
+  currentNavgroup$: Observable<NavGroupItemInMap | undefined>;
+  navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
 }
 
 export function Header({
@@ -231,6 +232,9 @@ export function Header({
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
+              currentNavgroup$={observables.currentNavgroup$}
+              navGroupEnabled={navGroupEnabled}
+              navigateToApp={application.navigateToApp}
             />
 
             <EuiHeaderSectionItem border="none">
