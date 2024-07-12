@@ -12,11 +12,11 @@ export const CARD_CONTAINER = 'CARD_CONTAINER';
 
 export type CardContainerInput = ContainerInput<{ description: string; onClick?: () => void }>;
 
-export class CardContainer extends Container<{}, ContainerInput> {
+export class CardContainer extends Container<{}, CardContainerInput> {
   public readonly type = CARD_CONTAINER;
   private node?: HTMLElement;
 
-  constructor(input: ContainerInput, private embeddableServices: EmbeddableStart) {
+  constructor(input: CardContainerInput, private embeddableServices: EmbeddableStart) {
     super(input, { embeddableLoaded: {} }, embeddableServices.getEmbeddableFactory);
   }
 

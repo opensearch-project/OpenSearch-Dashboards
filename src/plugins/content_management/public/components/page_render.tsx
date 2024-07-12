@@ -24,6 +24,7 @@ export const PageRender = ({ page, embeddable, savedObjectsClient }: Props) => {
     <div className="contentManagement-page" style={{ margin: '10px 20px' }}>
       {sections.map((section) => (
         <SectionRender
+          key={section.id}
           embeddable={embeddable}
           section={section}
           savedObjectsClient={savedObjectsClient}

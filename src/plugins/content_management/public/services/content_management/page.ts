@@ -58,7 +58,7 @@ export class Page {
   }
 
   getContents(sectionId: string) {
-    return this.contents.get(sectionId);
+    return this.contents.get(sectionId) ?? [];
   }
 
   getContents$(sectionId: string) {

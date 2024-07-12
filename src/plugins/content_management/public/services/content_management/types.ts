@@ -16,7 +16,7 @@ export type Section =
       order: number;
       title?: string;
       description?: string;
-      render?: (contents: Map<string, Content>) => React.ReactNode;
+      render: (contents: Content[]) => JSX.Element;
     }
   | {
       kind: 'dashboard';
@@ -49,7 +49,7 @@ export type Content =
       kind: 'custom';
       id: string;
       order: number;
-      render: () => React.ReactElement;
+      render: () => JSX.Element;
     }
   | {
       kind: 'card';

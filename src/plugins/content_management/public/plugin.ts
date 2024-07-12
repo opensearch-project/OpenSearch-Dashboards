@@ -85,7 +85,6 @@ export class ContentManagementPublicPlugin
 
     return {
       registerPage: this.contentManagementService.registerPage,
-      getPage: this.contentManagementService.getPage,
     };
   }
 

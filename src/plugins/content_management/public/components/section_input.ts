@@ -15,7 +15,7 @@ import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 
-export const createCardSection = (
+export const createCardInput = (
   section: Section,
   contents: Content[]
 ): CardContainerInput | null => {
@@ -54,7 +54,7 @@ export const createCardSection = (
   return input;
 };
 
-export const createDashboardSection = async (
+export const createDashboardInput = async (
   section: Section,
   contents: Content[],
   services: { savedObjectsClient: SavedObjectsClientContract }
@@ -63,6 +63,7 @@ export const createDashboardSection = async (
     throw new Error(`function does not support section.type: ${section.kind}`);
   }
 
+  // TODO: support different panel size
   const panels: DashboardContainerInput['panels'] = {};
   let x = 0;
   let y = 0;

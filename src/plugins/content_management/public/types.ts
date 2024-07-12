@@ -11,7 +11,6 @@ import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 
 export interface ContentManagementPluginSetup {
   registerPage: ContentManagementService['registerPage'];
-  getPage: ContentManagementService['getPage'];
 }
 export interface ContentManagementPluginStart {
   getPage: ContentManagementService['getPage'];

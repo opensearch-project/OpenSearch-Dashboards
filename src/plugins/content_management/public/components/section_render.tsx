@@ -10,7 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { Content, Section } from '../services';
 import { EmbeddableInput, EmbeddableRenderer, EmbeddableStart } from '../../../embeddable/public';
 import { DashboardContainerInput } from '../../../dashboard/public';
-import { createCardSection, createDashboardSection } from './utils';
+import { createCardInput, createDashboardInput } from './section_input';
 import { CARD_CONTAINER } from './card_container/card_container';
 import { EuiTitle } from '@elastic/eui';
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
@@ -32,7 +32,7 @@ const DashboardSection = ({ section, embeddable, contents$, savedObjectsClient }
 
   useEffect(() => {
     if (section.kind === 'dashboard') {
-      createDashboardSection(section, contents ?? [], { savedObjectsClient }).then((ds) =>
+      createDashboardInput(section, contents ?? [], { savedObjectsClient }).then((ds) =>
         setInput(ds)
       );
     }
@@ -51,7 +51,7 @@ const DashboardSection = ({ section, embeddable, contents$, savedObjectsClient }
 const CardSection = ({ section, embeddable, contents$ }: Props) => {
   const contents = useObservable(contents$);
   const input = useMemo(() => {
-    return createCardSection(section, contents ?? []);
+    return createCardInput(section, contents ?? []);
   }, [section, contents]);
 
   const factory = embeddable.getEmbeddableFactory(CARD_CONTAINER);
@@ -70,6 +70,16 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
   return null;
 };
 
+const CustomSection = ({ section, contents$ }: Props) => {
+  const contents = useObservable(contents$);
+
+  if (section.kind === 'custom' && contents) {
+    return section.render(contents);
+  }
+
+  return null;
+};
+
 export const SectionRender = (props: Props) => {
   if (props.section.kind === 'dashboard') {
     return <DashboardSection {...props} />;
@@ -77,6 +87,10 @@ export const SectionRender = (props: Props) => {
 
   if (props.section.kind === 'card') {
     return <CardSection {...props} />;
+  }
+
+  if (props.section.kind === 'custom') {
+    return <CustomSection {...props} />;
   }
 
   return null;
