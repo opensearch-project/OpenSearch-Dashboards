@@ -71,7 +71,7 @@ import { HeaderLogo } from './header_logo';
 import type { Logos } from '../../../../common/types';
 import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
 import { CollapsibleNavGroupEnabled } from './collapsible_nav_group_enabled';
-import { NavGroupItemInMap } from '../../nav_group';
+import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
@@ -103,8 +103,9 @@ export interface HeaderProps {
   survey: string | undefined;
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
   navGroupEnabled: boolean;
-  currentNavgroup$: Observable<NavGroupItemInMap | undefined>;
+  currentNavGroup$: Observable<NavGroupItemInMap | undefined>;
   navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
+  setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
 }
 
 export function Header({
@@ -119,6 +120,7 @@ export function Header({
   logos,
   collapsibleNavHeaderRender,
   navGroupEnabled,
+  setCurrentNavGroup,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -232,7 +234,7 @@ export function Header({
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
-              currentNavgroup$={observables.currentNavgroup$}
+              currentNavgroup$={observables.currentNavGroup$}
               navGroupEnabled={navGroupEnabled}
               navigateToApp={application.navigateToApp}
             />
@@ -289,6 +291,8 @@ export function Header({
             logos={logos}
             navGroupsMap$={observables.navGroupsMap$}
             navControlsLeftBottom$={observables.navControlsLeftBottom$}
+            currentNavGroup$={observables.currentNavGroup$}
+            setCurrentNavGroup={setCurrentNavGroup}
           />
         ) : (
           <CollapsibleNav

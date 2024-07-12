@@ -303,8 +303,9 @@ export class ChromeService {
           collapsibleNavHeaderRender={this.collapsibleNavHeaderRender}
           sidecarConfig$={sidecarConfig$}
           navGroupEnabled={navGroup.getNavGroupEnabled()}
-          currentNavgroup$={navGroup.getCurrentNavGroup$()}
+          currentNavGroup$={navGroup.getCurrentNavGroup$()}
           navGroupsMap$={navGroup.getNavGroupsMap$()}
+          setCurrentNavGroup={navGroup.setCurrentNavGroup}
         />
       ),
 

@@ -15,18 +15,22 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import { ChromeNavControl, ChromeNavLink } from '../..';
-import { ChromeNavGroup, NavGroupStatus } from '../../../../types';
+import { NavGroupStatus } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
 import { createEuiListItem } from './nav_link';
 import type { Logos } from '../../../../common/types';
 import { CollapsibleNavHeaderRender } from '../../chrome_service';
-import { ChromeRegistrationNavLink, NavGroupItemInMap } from '../../nav_group';
+import {
+  ChromeNavGroupServiceStartContract,
+  ChromeRegistrationNavLink,
+  NavGroupItemInMap,
+} from '../../nav_group';
 import {
   fulfillRegistrationLinksToChromeNavLinks,
   getOrderedLinksOrCategories,
@@ -54,6 +58,8 @@ interface Props {
   logos: Logos;
   navGroupsMap$: Rx.Observable<Record<string, NavGroupItemInMap>>;
   navControlsLeftBottom$: Rx.Observable<readonly ChromeNavControl[]>;
+  currentNavGroup$: Rx.Observable<NavGroupItemInMap | undefined>;
+  setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
 }
 
 interface NavGroupsProps {
@@ -160,13 +166,13 @@ export function CollapsibleNavGroupEnabled({
   navigateToApp,
   navigateToUrl,
   logos,
+  setCurrentNavGroup,
   ...observables
 }: Props) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
-
-  const [focusGroup, setFocusGroup] = useState<ChromeNavGroup | undefined>(undefined);
+  const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
 
   // useEffect(() => {
   //   if (!focusGroup && appId) {
@@ -180,13 +186,13 @@ export function CollapsibleNavGroupEnabled({
 
   const onGroupClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    group: ChromeNavGroup
+    group: NavGroupItemInMap
   ) => {
     const fulfilledLinks = fulfillRegistrationLinksToChromeNavLinks(
       navGroupsMap[group.id]?.navLinks,
       navLinks
     );
-    setFocusGroup(group);
+    setCurrentNavGroup(group.id);
 
     // the `navGroupsMap[group.id]?.navLinks` has already been sorted
     const firstLink = fulfilledLinks[0];
@@ -202,9 +208,9 @@ export function CollapsibleNavGroupEnabled({
   };
 
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
-    if (focusGroup) {
+    if (currentNavGroup) {
       return fulfillRegistrationLinksToChromeNavLinks(
-        navGroupsMap[focusGroup.id].navLinks || [],
+        navGroupsMap[currentNavGroup.id].navLinks || [],
         navLinks
       );
     }
@@ -253,7 +259,7 @@ export function CollapsibleNavGroupEnabled({
       });
 
     return fulfillRegistrationLinksToChromeNavLinks(navLinksForAll, navLinks);
-  }, [navLinks, navGroupsMap, focusGroup]);
+  }, [navLinks, navGroupsMap, currentNavGroup]);
 
   const width = useMemo(() => {
     if (!isNavOpen) {
@@ -296,8 +302,8 @@ export function CollapsibleNavGroupEnabled({
                   navGroupsMap={navGroupsMap}
                   navigateToApp={navigateToApp}
                   logos={logos}
-                  onClickBack={() => setFocusGroup(undefined)}
-                  focusGroup={focusGroup}
+                  onClickBack={() => setCurrentNavGroup(undefined)}
+                  currentNavgroup={currentNavGroup}
                   shouldShrinkNavigation={!isNavOpen}
                   onClickShrink={closeNav}
                 />

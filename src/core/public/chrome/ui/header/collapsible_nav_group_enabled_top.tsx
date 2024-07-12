@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { ChromeNavGroup, Logos } from 'opensearch-dashboards/public';
+import { Logos } from 'opensearch-dashboards/public';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -22,7 +22,7 @@ import { ChromeNavLink } from '../../nav_links';
 export interface CollapsibleNavTopProps {
   navLinks: ChromeNavLink[];
   navGroupsMap: Record<string, NavGroupItemInMap>;
-  focusGroup?: ChromeNavGroup;
+  currentNavgroup?: NavGroupItemInMap;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   logos: Logos;
   onClickBack?: () => void;
@@ -33,7 +33,7 @@ export interface CollapsibleNavTopProps {
 export const CollapsibleNavTop = ({
   navLinks,
   navGroupsMap,
-  focusGroup,
+  currentNavgroup,
   navigateToApp,
   logos,
   onClickBack,
@@ -46,8 +46,8 @@ export const CollapsibleNavTop = ({
     () =>
       !shouldShrinkNavigation &&
       Object.values(navGroupsMap).filter((item) => !item.type).length > 1 &&
-      focusGroup,
-    [navGroupsMap, focusGroup, shouldShrinkNavigation]
+      currentNavgroup,
+    [navGroupsMap, currentNavgroup, shouldShrinkNavigation]
   );
 
   const shouldShowHomeLink = useMemo(() => {
