@@ -3,6 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/**
+ * This is just a demo of how to use content management plugin
+ * TODO: these changes should be removed  before merge to main
+ */
+
 import React from 'react';
 
 import { CoreStart } from 'opensearch-dashboards/public';
