@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import React from 'react';
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { ManagementSetup, ManagementStart } from './types';
@@ -50,6 +51,8 @@ import {
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { SettingsIcon } from './components/settings_icon';
 
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -118,6 +121,17 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           status: AppStatus.inaccessible,
           navLinkStatus: AppNavLinkStatus.hidden,
         };
+      });
+    }
+
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.chrome.navControls.registerLeftBottom({
+        order: 3,
+        mount: toMountPoint(
+          React.createElement(SettingsIcon, {
+            core,
+          })
+        ),
       });
     }
 

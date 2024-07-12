@@ -93,6 +93,7 @@ export interface HeaderProps {
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
   navControlsExpandedCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsExpandedRight$: Observable<readonly ChromeNavControl[]>;
+  navControlsLeftBottom$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -283,6 +284,7 @@ export function Header({
             customNavLink$={observables.customNavLink$}
             logos={logos}
             navGroupsMap$={observables.navGroupsMap$}
+            navControlsLeftBottom$={observables.navControlsLeftBottom$}
           />
         ) : (
           <CollapsibleNav

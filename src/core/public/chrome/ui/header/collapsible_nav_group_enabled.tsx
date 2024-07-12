@@ -12,12 +12,13 @@ import {
   EuiPanel,
   EuiText,
   EuiLink,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
-import { ChromeNavLink } from '../..';
+import { ChromeNavControl, ChromeNavLink } from '../..';
 import { ChromeNavGroup, NavGroupStatus } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
@@ -34,6 +35,7 @@ import {
 } from '../../utils';
 import { ALL_USE_CASE_ID } from '../../../../../core/utils';
 import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
+import { HeaderNavControls } from './header_nav_controls';
 
 interface Props {
   appId$: InternalApplicationStart['currentAppId$'];
@@ -51,6 +53,7 @@ interface Props {
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
   logos: Logos;
   navGroupsMap$: Rx.Observable<Record<string, NavGroupItemInMap>>;
+  navControlsLeftBottom$: Rx.Observable<readonly ChromeNavControl[]>;
 }
 
 interface NavGroupsProps {
@@ -277,13 +280,14 @@ export function CollapsibleNavGroupEnabled({
       hideCloseButton
       paddingSize="none"
     >
-      <div className="eui-fullHeight">
-        <div className="eui-yScroll">
+      <div className="eui-fullHeight left-navigation-wrapper">
+        <div className="eui-yScroll scrollable-container">
           <EuiPanel
             hasBorder={false}
             borderRadius="none"
             paddingSize={!isNavOpen ? 's' : 'l'}
             style={{ minHeight: '100%' }}
+            hasShadow={false}
           >
             {!isNavOpen ? null : (
               <>
@@ -311,6 +315,10 @@ export function CollapsibleNavGroupEnabled({
               </>
             )}
           </EuiPanel>
+        </div>
+        <EuiHorizontalRule margin="none" />
+        <div className="bottom-container" style={{ flexDirection: isNavOpen ? 'row' : 'column' }}>
+          <HeaderNavControls navControls$={observables.navControlsLeftBottom$} />
         </div>
       </div>
     </EuiFlyout>
