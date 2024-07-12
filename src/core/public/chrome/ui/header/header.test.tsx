@@ -78,8 +78,10 @@ function mockProps() {
       paddingSize: 640,
     }),
     navGroupEnabled: false,
-    currentNavgroup$: new BehaviorSubject(undefined),
+    currentNavGroup$: new BehaviorSubject(undefined),
     navGroupsMap$: new BehaviorSubject({}),
+    navControlsLeftBottom$: new BehaviorSubject([]),
+    setCurrentNavGroup: jest.fn(() => {}),
   };
 }
 

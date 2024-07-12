@@ -4,7 +4,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { ChromeNavGroup, Logos } from 'opensearch-dashboards/public';
+import { Logos } from 'opensearch-dashboards/public';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
