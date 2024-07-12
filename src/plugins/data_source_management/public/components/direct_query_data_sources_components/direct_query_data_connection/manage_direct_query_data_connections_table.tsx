@@ -193,7 +193,9 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
           <EuiFlexItem grow={false}>
             <EuiLink
               data-test-subj={`${record.name}DataConnectionsLink`}
-              onClick={() => history.push(`/manage/${record.name}`)}
+              onClick={() =>
+                history.push(`/manage/${record.name}?dataSourceMDSId=${selectedDataSourceId}`)
+              }
             >
               {truncate(record.name, 100)}
             </EuiLink>

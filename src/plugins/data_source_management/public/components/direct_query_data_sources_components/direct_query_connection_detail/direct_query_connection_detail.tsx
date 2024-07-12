@@ -23,7 +23,7 @@ import {
   NotificationsStart,
   SavedObjectsStart,
 } from 'opensearch-dashboards/public';
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { DATACONNECTIONS_BASE } from '../../../constants';
 import { DirectQueryDatasourceDetails, PrometheusProperties } from '../../../types';
 import { NoAccess } from './no_access_page';
@@ -51,6 +51,9 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   setBreadcrumbs,
 }) => {
   const { dataSourceName } = useParams<{ dataSourceName: string }>();
+  const { search } = useLocation();
+  const queryParams = new URLSearchParams(search);
+  const dataSourceMDSId = queryParams.get('dataSourceMDSId');
   const [datasourceDetails, setDatasourceDetails] = useState<DirectQueryDatasourceDetails>({
     allowedRoles: [],
     name: '',
