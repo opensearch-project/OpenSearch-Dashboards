@@ -16,6 +16,7 @@
   .left-navigation-wrapper {
     display: flex;
     flex-direction: column;
+    border-right: $ouiBorderThin;
   }
 
   .scrollable-container {
@@ -23,7 +24,7 @@
   }
 
   .bottom-container {
-    padding: $ouiSize;
+    padding: 0 $ouiSize;
     display: flex;
   }
 
