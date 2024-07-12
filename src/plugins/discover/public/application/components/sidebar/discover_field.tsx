@@ -134,13 +134,14 @@ export const DiscoverField = ({
   }
 
   const fieldName = (
-    <span
-      data-test-subj={`field-${field.name}`}
-      title={field.name}
-      className="dscSidebarField__name eui-textBreakWord"
-    >
-      {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
-    </span>
+    <EuiToolTip delay="long" content={field.name}>
+      <span
+        data-test-subj={`field-${field.name}`}
+        className="dscSidebarField__name eui-textBreakWord"
+      >
+        {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
+      </span>
+    </EuiToolTip>
   );
 
   let actionButton;

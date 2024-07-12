@@ -19,6 +19,7 @@ import {
   EuiPopoverTitle,
   EuiCompressedSelect,
   EuiSpacer,
+  EuiToolTip,
 } from '@elastic/eui';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards, useUiSetting$ } from '../../opensearch_dashboards_react/public';
@@ -111,22 +112,24 @@ export const HeaderUserThemeMenu = () => {
   };
 
   const button = (
-    <EuiHeaderSectionItemButton
-      aria-expanded="false"
-      aria-haspopup="true"
-      aria-label={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonAriaLabel', {
-        defaultMessage: 'Appearance menu',
+    <EuiToolTip
+      content={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonTitle', {
+        defaultMessage: 'Appearance',
       })}
-      onClick={onButtonClick}
+      delay="long"
+      position="bottom"
     >
-      <EuiIcon
-        type="color"
-        size="m"
-        title={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonTitle', {
-          defaultMessage: 'Appearance',
+      <EuiHeaderSectionItemButton
+        aria-expanded="false"
+        aria-haspopup="true"
+        aria-label={i18n.translate('advancedSettings.headerGlobalNav.themeMenuButtonAriaLabel', {
+          defaultMessage: 'Appearance menu',
         })}
-      />
-    </EuiHeaderSectionItemButton>
+        onClick={onButtonClick}
+      >
+        <EuiIcon type="color" size="m" />
+      </EuiHeaderSectionItemButton>
+    </EuiToolTip>
   );
 
   // TODO: make i18n, check all translation ids
