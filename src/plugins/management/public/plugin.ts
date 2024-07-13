@@ -94,11 +94,20 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       },
     });
 
-    const settingsLandingPageId = 'settings_landing_page';
+    const settingsLandingPageId = 'settings_landing';
 
     const settingsLandingPageTitle = i18n.translate('management.settings.landingPage.title', {
       defaultMessage: 'Settings and setup',
     });
+
+    const dataAdministrationLandingPageId = 'data_administration_landing';
+
+    const dataAdministrationPageTitle = i18n.translate(
+      'management.dataAdministration.landingPage.title',
+      {
+        defaultMessage: 'Data administration',
+      }
+    );
 
     core.application.register({
       id: settingsLandingPageId,
@@ -108,7 +117,37 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         ? AppStatus.accessible
         : AppStatus.inaccessible,
       mount: async (params: AppMountParameters) => {
-        const { renderApp } = await import('./settings_landing_application');
+        const { renderApp } = await import('./landing_page_application');
+        const [coreStart] = await core.getStartServices();
+        const navGroupMap = await coreStart.chrome.navGroup
+          .getNavGroupsMap$()
+          .pipe(first())
+          .toPromise();
+        const navLinks = navGroupMap[DEFAULT_NAV_GROUPS.settingsAndSetup.id]?.navLinks;
+        const fulfilledNavLink = fulfillRegistrationLinksToChromeNavLinks(
+          navLinks || [],
+          coreStart.chrome.navLinks.getAll()
+        );
+
+        return renderApp({
+          mountElement: params.element,
+          props: {
+            navigateToApp: coreStart.application.navigateToApp,
+            navLinks: fulfilledNavLink,
+          },
+        });
+      },
+    });
+
+    core.application.register({
+      id: dataAdministrationLandingPageId,
+      title: dataAdministrationPageTitle,
+      order: 100,
+      status: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
+      mount: async (params: AppMountParameters) => {
+        const { renderApp } = await import('./landing_page_application');
         const [coreStart] = await core.getStartServices();
         const navGroupMap = await coreStart.chrome.navGroup
           .getNavGroupsMap$()
@@ -121,9 +160,9 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         );
 
         return renderApp({
-          params,
+          mountElement: params.element,
           props: {
-            coreStart,
+            navigateToApp: coreStart.application.navigateToApp,
             navLinks: fulfilledNavLink,
           },
         });

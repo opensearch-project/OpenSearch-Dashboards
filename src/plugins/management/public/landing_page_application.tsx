@@ -9,14 +9,14 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters } from 'opensearch-dashboards/public';
 import { FeatureCards, FeatureCardsProps } from './components/feature_cards/feature_cards';
 
-export const renderApp = async ({
-  params,
+export const renderApp = ({
+  mountElement,
   props,
 }: {
-  params: AppMountParameters;
+  mountElement: AppMountParameters['element'];
   props: FeatureCardsProps;
 }) => {
-  ReactDOM.render(<FeatureCards {...props} />, params.element);
+  ReactDOM.render(<FeatureCards {...props} />, mountElement);
 
-  return () => ReactDOM.unmountComponentAtNode(params.element);
+  return () => ReactDOM.unmountComponentAtNode(mountElement);
 };

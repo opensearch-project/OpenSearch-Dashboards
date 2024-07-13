@@ -16,10 +16,10 @@ import React, { useMemo } from 'react';
 
 export interface FeatureCardsProps {
   navLinks: ChromeNavLink[];
-  coreStart: CoreStart;
+  navigateToApp: CoreStart['application']['navigateToApp'];
 }
 
-export const FeatureCards = ({ navLinks, coreStart }: FeatureCardsProps) => {
+export const FeatureCards = ({ navLinks, navigateToApp }: FeatureCardsProps) => {
   const itemsPerRow = 4;
   const groupedCardForDisplay = useMemo(() => {
     const grouped: Array<{ category?: AppCategory; navLinks: ChromeNavLink[][] }> = [];
@@ -38,6 +38,9 @@ export const FeatureCards = ({ navLinks, coreStart }: FeatureCardsProps) => {
     });
     return grouped;
   }, [itemsPerRow, navLinks]);
+  if (!navLinks.length) {
+    return null;
+  }
   return (
     <EuiPageContent>
       {groupedCardForDisplay.map((group) => (
@@ -50,19 +53,24 @@ export const FeatureCards = ({ navLinks, coreStart }: FeatureCardsProps) => {
           <EuiSpacer />
           {group.navLinks.map((row, rowIndex) => {
             return (
-              <EuiFlexGroup key={rowIndex}>
+              <EuiFlexGroup data-test-subj={`landingPageRow_${rowIndex}`} key={rowIndex}>
                 {Array.from({ length: itemsPerRow }).map((item, itemIndexInRow) => {
                   const link = row[itemIndexInRow];
                   const content = link ? (
                     <EuiCard
+                      data-test-subj={`landingPageFeature_${link.id}`}
                       textAlign="left"
-                      key={link.id}
                       title={link.title}
                       description={link.description || link.title}
-                      onClick={() => coreStart.application.navigateToApp(link.id)}
+                      onClick={() => navigateToApp(link.id)}
+                      titleSize="xs"
                     />
                   ) : null;
-                  return <EuiFlexItem grow={1}>{content}</EuiFlexItem>;
+                  return (
+                    <EuiFlexItem key={link?.id || itemIndexInRow} grow={1}>
+                      {content}
+                    </EuiFlexItem>
+                  );
                 })}
               </EuiFlexGroup>
             );
