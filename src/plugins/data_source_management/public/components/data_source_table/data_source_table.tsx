@@ -146,7 +146,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
         }
       ) => (
         <>
-          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `edit/${index.id}`)}>
+          <EuiButtonEmpty size="xs" {...reactRouterNavigate(history, `${index.id}`)}>
             {name}
           </EuiButtonEmpty>
           {index.id === getDefaultDataSourceId(uiSettings) ? (
