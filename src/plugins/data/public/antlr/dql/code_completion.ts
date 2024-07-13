@@ -1,14 +1,53 @@
-import { CharStream, CommonTokenStream } from 'antlr4ng';
+import { CharStream, CommonTokenStream, TokenStream, Trees } from 'antlr4ng';
 import { DQLLexer } from './generated/DQLLexer';
-import { DQLParser, FieldContext } from './generated/DQLParser';
-import { DQLParserVisitor } from './generated/DQLParserVisitor';
+import { DQLParser } from './generated/DQLParser';
 import { CodeCompletionCore } from 'antlr4-c3';
-import { findCursorTokenIndex } from '../opensearch_sql/cursor';
-import { QuerySuggestion, QuerySuggestionField } from '../../autocomplete';
+import { getTokenPosition } from '../opensearch_sql/cursor';
+import { IndexPatternField } from '../../index_patterns';
+import { CursorPosition } from '../opensearch_sql/types';
+
+// const validField = (idxPatField: IndexPatternField) => {
+//   return idxPatField.aggregatable ||
+// }
+
+const findCursorIndex = (
+  tokenStream: TokenStream,
+  cursor: CursorPosition,
+  whitespaceToken: number,
+  actualIndex?: boolean
+): number | undefined => {
+  const cursorCol = cursor.column - 1;
+
+  for (let i = 0; i < tokenStream.size; i++) {
+    const token = tokenStream.get(i);
+    console.log('token:', token);
+    const { startLine, endColumn, endLine } = getTokenPosition(token, whitespaceToken);
+
+    // endColumn makes sense only if startLine === endLine
+    if (endLine > cursor.line || (startLine === cursor.line && endColumn > cursorCol)) {
+      if (actualIndex) {
+        return i;
+      }
+
+      if (tokenStream.get(i).type === whitespaceToken) {
+        return i + 1;
+      }
+      return i;
+    }
+  }
+
+  return undefined;
+};
 
 const findFieldSuggestions = (indexPatterns) => {
+  // console.log(
+  //   indexPatterns[0].fields
+  //     .getAll()
+  //     .filter((idxPatField: IndexPatternField) => !idxPatField.subType)
+  // );
   const fieldNames: string[] = indexPatterns[0].fields
-    .filter((idxField: { readFromDocValues: boolean }) => idxField.readFromDocValues)
+    .getAll()
+    .filter((idxField: IndexPatternField) => !idxField.subType)
     .map((idxField: { displayName: string }) => {
       return idxField.displayName;
     });
@@ -31,11 +70,13 @@ export const getSuggestions = async ({
   const lexer = new DQLLexer(inputStream);
   const tokenStream = new CommonTokenStream(lexer);
   const parser = new DQLParser(tokenStream);
-  const tree = parser.query();
+  const tree = parser.query(); // used to check if parsing is happening properly
 
   // find token index
   const cursorIndex =
-    findCursorTokenIndex(tokenStream, { line: 1, column: selectionStart }, DQLParser.WS) ?? 0;
+    findCursorIndex(tokenStream, { line: 1, column: selectionStart }, DQLParser.WS) ?? 0;
+
+  console.log('cursor index:', cursorIndex);
 
   const core = new CodeCompletionCore(parser);
 
@@ -59,6 +100,7 @@ export const getSuggestions = async ({
 
   // gets candidates at specified token index
   const candidates = core.collectCandidates(cursorIndex);
+  console.log('candidates', candidates);
 
   let completions = [];
 
@@ -77,6 +119,8 @@ export const getSuggestions = async ({
     const tokenSymbolName = parser.vocabulary.getSymbolicName(token)?.toLowerCase();
     completions.push({ text: tokenSymbolName, type: 'function' });
   });
+
+  console.log('completions', completions);
 
   return completions;
 };
