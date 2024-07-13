@@ -40,6 +40,7 @@ export interface AccelerationDetailsFlyoutProps {
   dataSourceMDSId?: string;
   http: HttpStart;
   notifications: any;
+  featureFlagStatus: boolean;
 }
 
 const fetchFields = async (http: HttpStart, index: string) => {
@@ -90,7 +91,15 @@ const handleDetailsFetchingPromise = (
 
 export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps) => {
   // const { http } = useOpenSearchDashboards<DataSourceManagementContext>().services;
-  const { dataSourceName, acceleration, resetFlyout, handleRefresh, http, notifications } = props;
+  const {
+    dataSourceName,
+    acceleration,
+    resetFlyout,
+    handleRefresh,
+    http,
+    notifications,
+    featureFlagStatus,
+  } = props;
   const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
   const tabsMap: { [key: string]: any } = {
@@ -99,7 +108,6 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   };
   const [operationType, setOperationType] = useState<AccelerationActionType | null>(null);
   const [showConfirmationOverlay, setShowConfirmationOverlay] = useState(false);
-
   const { performOperation, operationSuccess } = useAccelerationOperation(
     props.dataSourceName,
     http,

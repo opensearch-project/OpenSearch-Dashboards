@@ -42,6 +42,8 @@ interface AccelerationTableProps {
   cacheLoadingHooks: any;
   http: any;
   notifications: any;
+  featureFlagStatus: boolean;
+  dataSourceMDSId?: string;
 }
 
 interface ModalState {
@@ -54,6 +56,8 @@ export const AccelerationTable = ({
   cacheLoadingHooks,
   http,
   notifications,
+  featureFlagStatus,
+  dataSourceMDSId,
 }: AccelerationTableProps) => {
   const [accelerations, setAccelerations] = useState<CachedAcceleration[]>([]);
   const [updatedTime, setUpdatedTime] = useState<string>();
@@ -68,10 +72,13 @@ export const AccelerationTable = ({
     actionType: null,
     selectedItem: null,
   });
-  const { performOperation, operationSuccess } = useAccelerationOperation(
+
+  const { performOperation, isOperating, operationSuccess } = useAccelerationOperation(
     dataSourceName,
     http,
-    notifications
+    notifications,
+    featureFlagStatus,
+    dataSourceMDSId
   );
 
   useEffect(() => {
@@ -249,6 +256,7 @@ export const AccelerationTable = ({
                 acceleration,
                 dataSourceName,
                 handleRefresh,
+                dataSourceMDSId: featureFlagStatus ? dataSourceMDSId : undefined,
               });
             }}
           >

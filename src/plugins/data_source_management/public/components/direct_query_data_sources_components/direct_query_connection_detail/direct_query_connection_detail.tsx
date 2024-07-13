@@ -77,7 +77,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
 
   const fetchSelectedDatasource = () => {
     const endpoint = featureFlagStatus
-      ? `${DATACONNECTIONS_BASE}/${dataSourceName}/dataSourceMDSId=${dataSourceMDSId}`
+      ? `${DATACONNECTIONS_BASE}/${dataSourceName}/dataSourceMDSId=${dataSourceMDSId || ''}`
       : `${DATACONNECTIONS_BASE}/${dataSourceName}`;
 
     http
@@ -212,6 +212,8 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
                 cacheLoadingHooks={cacheLoadingHooks}
                 http={http}
                 notifications={notifications}
+                featureFlagStatus={featureFlagStatus}
+                dataSourceMDSId={featureFlagStatus ? dataSourceMDSId ?? undefined : undefined}
               />
             ),
           },

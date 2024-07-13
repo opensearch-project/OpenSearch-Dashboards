@@ -16,7 +16,9 @@ import {
 export const useAccelerationOperation = (
   dataSource: string,
   http: HttpStart,
-  notifications: NotificationsStart
+  notifications: NotificationsStart,
+  featureFlagStatus: boolean,
+  dataSourceMDSId?: string
 ) => {
   const { startLoading, stopLoading, loadStatus } = useDirectQuery(http, notifications);
   const [isOperating, setIsOperating] = useState(false);
@@ -96,7 +98,7 @@ export const useAccelerationOperation = (
 
     setIsOperating(true);
     setAccelerationToOperate(acceleration);
-    startLoading(requestPayload);
+    startLoading(requestPayload, featureFlagStatus ? dataSourceMDSId : undefined);
   };
 
   return { performOperation, isOperating, operationSuccess };

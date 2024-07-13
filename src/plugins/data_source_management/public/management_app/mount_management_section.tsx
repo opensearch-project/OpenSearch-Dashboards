@@ -133,6 +133,7 @@ export async function mountManagementSection(
     const accelerationDetailsFlyout = overlays.openFlyout(
       toMountPoint(
         <AccelerationDetailsFlyout
+          featureFlagStatus={featureFlagStatus}
           acceleration={acceleration}
           dataSourceName={dataSourceName}
           resetFlyout={() => accelerationDetailsFlyout.close()}
