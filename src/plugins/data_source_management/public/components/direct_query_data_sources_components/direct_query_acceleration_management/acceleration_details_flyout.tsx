@@ -88,7 +88,6 @@ const handleDetailsFetchingPromise = (
 };
 
 export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps) => {
-  // const { http } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const {
     dataSourceName,
     acceleration,
@@ -97,6 +96,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     http,
     notifications,
     featureFlagStatus,
+    dataSourceMDSId,
   } = props;
   const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
@@ -116,7 +116,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
   const onConfirmOperation = () => {
     if (operationType && props.acceleration) {
-      performOperation(props.acceleration, operationType, featureFlagStatus);
+      performOperation(props.acceleration, operationType, featureFlagStatus, dataSourceMDSId);
       setShowConfirmationOverlay(false);
     }
   };

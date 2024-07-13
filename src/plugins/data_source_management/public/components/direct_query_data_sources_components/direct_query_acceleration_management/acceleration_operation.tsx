@@ -17,8 +17,6 @@ export const useAccelerationOperation = (
   dataSource: string,
   http: HttpStart,
   notifications: NotificationsStart
-  // featureFlagStatus: boolean,
-  // dataSourceMDSId?: string
 ) => {
   const { startLoading, stopLoading, loadStatus } = useDirectQuery(http, notifications);
   const [isOperating, setIsOperating] = useState(false);
