@@ -27,8 +27,6 @@ import {
   getAccelerationName,
   onDiscoverIconClick,
 } from './acceleration_utils';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
-import { DataSourceManagementContext } from '../../../../public/types';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { OpenSearchDashboardsResponse } from '../../../../../../core/server/http/router';
 
@@ -118,7 +116,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
   const onConfirmOperation = () => {
     if (operationType && props.acceleration) {
-      performOperation(props.acceleration, operationType);
+      performOperation(props.acceleration, operationType, featureFlagStatus);
       setShowConfirmationOverlay(false);
     }
   };
