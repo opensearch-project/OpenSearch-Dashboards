@@ -30,6 +30,7 @@
 
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
+import { first } from 'rxjs/operators';
 import { ManagementSetup, ManagementStart } from './types';
 import { HomePublicPluginSetup } from '../../home/public';
 import {
@@ -42,6 +43,7 @@ import {
   AppUpdater,
   AppStatus,
   AppNavLinkStatus,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -50,6 +52,7 @@ import {
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
+import { fulfillRegistrationLinksToChromeNavLinks } from '../../../core/public';
 
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -87,6 +90,42 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           sections: getSectionsServiceStartPrivate(),
           opensearchDashboardsVersion,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+        });
+      },
+    });
+
+    const settingsLandingPageId = 'settings_landing_page';
+
+    const settingsLandingPageTitle = i18n.translate('management.settings.landingPage.title', {
+      defaultMessage: 'Settings and setup',
+    });
+
+    core.application.register({
+      id: settingsLandingPageId,
+      title: settingsLandingPageTitle,
+      order: 100,
+      status: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
+      mount: async (params: AppMountParameters) => {
+        const { renderApp } = await import('./settings_landing_application');
+        const [coreStart] = await core.getStartServices();
+        const navGroupMap = await coreStart.chrome.navGroup
+          .getNavGroupsMap$()
+          .pipe(first())
+          .toPromise();
+        const navLinks = navGroupMap[DEFAULT_NAV_GROUPS.dataAdministration.id]?.navLinks;
+        const fulfilledNavLink = fulfillRegistrationLinksToChromeNavLinks(
+          navLinks || [],
+          coreStart.chrome.navLinks.getAll()
+        );
+
+        return renderApp({
+          params,
+          props: {
+            coreStart,
+            navLinks: fulfilledNavLink,
+          },
         });
       },
     });
