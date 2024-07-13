@@ -73,7 +73,7 @@ export const AccelerationTable = ({
     selectedItem: null,
   });
 
-  const { performOperation, isOperating, operationSuccess } = useAccelerationOperation(
+  const { performOperation, operationSuccess } = useAccelerationOperation(
     dataSourceName,
     http,
     notifications,
