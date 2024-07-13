@@ -46,13 +46,24 @@ const tokenDictionary: TokenDictionary = {
 function getIgnoredTokens(): number[] {
   const tokens = [];
 
-  const firstOperatorIndex = OpenSearchSQLParser.ABS;
+  const firstOperatorIndex = OpenSearchSQLParser.SLASH;
   const lastOperatorIndex = OpenSearchSQLParser.ERROR_RECOGNITION;
   for (let i = firstOperatorIndex; i <= lastOperatorIndex; i++) {
     // We actually want Star to appear in autocomplete
-    if (i !== OpenSearchSQLParser.STAR) {
-      tokens.push(i);
-    }
+    tokens.push(i);
+  }
+
+  // Ignoring functions for now, need custom logic for them later
+  const firstFunctionIndex = OpenSearchSQLParser.AVG;
+  const lastFunctionIndex = OpenSearchSQLParser.TRIM;
+  for (let i = firstFunctionIndex; i <= lastFunctionIndex; i++) {
+    tokens.push(i);
+  }
+
+  const firstCommonFunctionIndex = OpenSearchSQLParser.ABS;
+  const lastCommonFunctionIndex = OpenSearchSQLParser.MATCH_BOOL_PREFIX;
+  for (let i = firstCommonFunctionIndex; i <= lastCommonFunctionIndex; i++) {
+    tokens.push(i);
   }
 
   tokens.push(OpenSearchSQLParser.EOF);
@@ -146,14 +157,9 @@ function processVisitedRules(
   let shouldSuggestColumnAliases = false;
   let suggestValuesForColumn: string | undefined;
 
-  console.log('tokenStream: ', tokenStream);
+  console.log('rules: ', rules);
 
   for (const [ruleId, rule] of rules) {
-    console.log('ruleId: ', ruleId, ' rule: ', rule);
-    if (!isStartingToWriteRule(cursorTokenIndex, rule)) {
-      continue;
-    }
-
     switch (ruleId) {
       case OpenSearchSQLParser.RULE_tableName: {
         if (
@@ -172,6 +178,7 @@ function processVisitedRules(
       }
       case OpenSearchSQLParser.RULE_aggregateFunction: {
         suggestAggregateFunctions = true;
+        shouldSuggestColumns = true;
         break;
       }
       case OpenSearchSQLParser.RULE_scalarFunctionName: {

@@ -210,18 +210,22 @@ export const parseQuery = <
 
   const suggestKeywords: KeywordSuggestion[] = [];
   const { tokens, rules } = core.collectCandidates(cursorTokenIndex, context);
+  console.log(
+    'core.collectCandidates(cursorTokenIndex, context): ',
+    core.collectCandidates(cursorTokenIndex, context)
+  );
+  console.log('tokens: ', tokens, ' rules: ', rules);
+  console.log('getTokenTypeMap: ', parser.getTokenTypeMap());
   tokens.forEach((_, tokenType) => {
     // Literal keyword names are quoted
     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
-    // ClickHouse Parser does not give out literal names
-    const name = literalName || parser.vocabulary.getSymbolicName(tokenType);
 
-    if (!name) {
-      throw new Error(`Could not get name for token ${tokenType}`);
+    if (!literalName) {
+      throw new Error(`Could not get literal name for token ${tokenType}`);
     }
 
     suggestKeywords.push({
-      value: name,
+      value: literalName,
     });
   });
 
