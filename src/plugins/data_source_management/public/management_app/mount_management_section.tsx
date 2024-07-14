@@ -23,40 +23,6 @@ import { AuthenticationMethodRegistry } from '../auth_registry';
 import { ConfigureDirectQueryDataSourceWithRouter } from '../components/direct_query_data_sources_components/direct_query_data_source_configuration/configure_direct_query_data_sources';
 import { DirectQueryDataConnectionDetail } from '../components/direct_query_data_sources_components/direct_query_connection_detail/direct_query_connection_detail';
 
-import { createGetterSetter } from '../../../../../src/plugins/opensearch_dashboards_utils/public';
-import { toMountPoint } from '../../../../../src/plugins/opensearch_dashboards_react/public';
-import {
-  RenderAccelerationDetailsFlyoutParams,
-  RenderAccelerationFlyoutParams,
-} from '../../framework/types';
-import { AccelerationDetailsFlyout } from '../components/direct_query_data_sources_components/direct_query_acceleration_management/acceleration_details_flyout';
-import { CreateAcceleration } from '../components/direct_query_data_sources_components/direct_query_acceleration_creation/create/create_acceleration';
-
-export const [
-  getRenderAccelerationDetailsFlyout,
-  setRenderAccelerationDetailsFlyout,
-] = createGetterSetter<
-  ({
-    acceleration,
-    dataSourceName,
-    handleRefresh,
-    dataSourceMDSId,
-  }: RenderAccelerationDetailsFlyoutParams) => void
->('renderAccelerationDetailsFlyout');
-
-export const [
-  getRenderCreateAccelerationFlyout,
-  setRenderCreateAccelerationFlyout,
-] = createGetterSetter<
-  ({
-    dataSourceName,
-    dataSourceMDSId,
-    databaseName,
-    tableName,
-    handleRefresh,
-  }: RenderAccelerationFlyoutParams) => void
->('renderCreateAccelerationFlyout');
-
 export interface DataSourceManagementStartDependencies {
   data: DataPublicPluginStart;
 }
@@ -140,53 +106,6 @@ export async function mountManagementSection(
     </OpenSearchDashboardsContextProvider>,
     params.element
   );
-
-  const renderAccelerationDetailsFlyout = ({
-    acceleration,
-    dataSourceName,
-    handleRefresh,
-    dataSourceMDSId,
-  }: RenderAccelerationDetailsFlyoutParams) => {
-    const accelerationDetailsFlyout = overlays.openFlyout(
-      toMountPoint(
-        <AccelerationDetailsFlyout
-          featureFlagStatus={featureFlagStatus}
-          acceleration={acceleration}
-          dataSourceName={dataSourceName}
-          resetFlyout={() => accelerationDetailsFlyout.close()}
-          handleRefresh={handleRefresh}
-          dataSourceMDSId={dataSourceMDSId}
-          http={http}
-          notifications={notifications}
-        />
-      )
-    );
-  };
-  setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
-
-  const renderCreateAccelerationFlyout = ({
-    dataSourceName,
-    databaseName,
-    tableName,
-    handleRefresh,
-    dataSourceMDSId,
-  }: RenderAccelerationFlyoutParams) => {
-    const createAccelerationFlyout = overlays.openFlyout(
-      toMountPoint(
-        <CreateAcceleration
-          selectedDatasource={dataSourceName}
-          resetFlyout={() => createAccelerationFlyout.close()}
-          databaseName={databaseName}
-          tableName={tableName}
-          refreshHandler={handleRefresh}
-          dataSourceMDSId={dataSourceMDSId}
-          http={http}
-          notifications={notifications}
-        />
-      )
-    );
-  };
-  setRenderCreateAccelerationFlyout(renderCreateAccelerationFlyout);
 
   return () => {
     chrome.docTitle.reset();

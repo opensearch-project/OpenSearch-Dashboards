@@ -35,7 +35,7 @@ import { AccessControlTab } from './access_control_tab';
 import { getManageDirectQueryDataSourceBreadcrumbs } from '../../breadcrumbs';
 import { useLoadAccelerationsToCache } from '../../../../framework/catlog_cache/cache_loader';
 import { AccelerationTable } from '../direct_query_acceleration_management/acceleration_table';
-import { getRenderCreateAccelerationFlyout } from '../../../management_app/mount_management_section';
+import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 
 interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;

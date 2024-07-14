@@ -35,7 +35,7 @@ import {
 } from './acceleration_utils';
 import { AccelerationActionOverlay } from './acceleration_action_overlay';
 import { useAccelerationOperation } from './acceleration_operation';
-import { getRenderAccelerationDetailsFlyout } from '../../../management_app/mount_management_section';
+import { getRenderAccelerationDetailsFlyout } from '../../../plugin';
 
 interface AccelerationTableProps {
   dataSourceName: string;

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import {
   AppMountParameters,
@@ -10,6 +11,7 @@ import {
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   DEFAULT_NAV_GROUPS,
+  MountPoint,
   Plugin,
 } from '../../../core/public';
 
@@ -38,6 +40,28 @@ import {
 } from './components/utils';
 import { DataSourceSelectionService } from './service/data_source_selection_service';
 import { catalogRequestIntercept } from '../framework/catlog_cache/cache_intercept';
+import { createGetterSetter } from '../../../../src/plugins/opensearch_dashboards_utils/public';
+import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
+import {
+  RenderAccelerationDetailsFlyoutParams,
+  RenderAccelerationFlyoutParams,
+} from '../framework/types';
+import { AccelerationDetailsFlyout } from './components/direct_query_data_sources_components/direct_query_acceleration_management/acceleration_details_flyout';
+import { CreateAcceleration } from './components/direct_query_data_sources_components/direct_query_acceleration_creation/create/create_acceleration';
+
+export const [
+  getRenderAccelerationDetailsFlyout,
+  setRenderAccelerationDetailsFlyout,
+] = createGetterSetter<(params: RenderAccelerationDetailsFlyoutParams) => void>(
+  'renderAccelerationDetailsFlyout'
+);
+
+export const [
+  getRenderCreateAccelerationFlyout,
+  setRenderCreateAccelerationFlyout,
+] = createGetterSetter<(params: RenderAccelerationFlyoutParams) => void>(
+  'renderCreateAccelerationFlyout'
+);
 
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
@@ -72,6 +96,7 @@ export class DataSourceManagementPlugin
   private started = false;
   private authMethodsRegistry = new AuthenticationMethodRegistry();
   private dataSourceSelection = new DataSourceSelectionService();
+  private featureFlagStatus: boolean = false; // Add this line
 
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
@@ -91,7 +116,7 @@ export class DataSourceManagementPlugin
     const column = new DataSourceColumn(savedObjectPromise);
     indexPatternManagement.columns.register(column);
 
-    const featureFlagStatus = !!dataSource;
+    this.featureFlagStatus = !!dataSource; // Store featureFlagStatus here
 
     opensearchDashboardsSection.registerApp({
       id: DSM_APP_ID,
@@ -104,13 +129,13 @@ export class DataSourceManagementPlugin
           core.getStartServices,
           params,
           this.authMethodsRegistry,
-          featureFlagStatus
+          this.featureFlagStatus // Use the stored featureFlagStatus
         );
       },
     });
 
     // when the feature flag is disabled, we don't need to register any of the mds components
-    if (!featureFlagStatus) {
+    if (!this.featureFlagStatus) {
       return undefined;
     }
 
@@ -201,17 +226,17 @@ export class DataSourceManagementPlugin
       this.authMethodsRegistry.registerAuthenticationMethod(authMethod);
     };
 
-    if (dataSource.noAuthenticationTypeEnabled) {
+    if (dataSource!.noAuthenticationTypeEnabled) {
       registerAuthenticationMethod(noAuthCredentialAuthMethod);
     }
-    if (dataSource.usernamePasswordAuthEnabled) {
+    if (dataSource!.usernamePasswordAuthEnabled) {
       registerAuthenticationMethod(usernamePasswordAuthMethod);
     }
-    if (dataSource.awsSigV4AuthEnabled) {
+    if (dataSource!.awsSigV4AuthEnabled) {
       registerAuthenticationMethod(sigV4AuthMethod);
     }
 
-    setHideLocalCluster({ enabled: dataSource.hideLocalCluster });
+    setHideLocalCluster({ enabled: dataSource!.hideLocalCluster });
     setUiSettings(uiSettings);
     // This instance will be got in each data source selector component.
     setDataSourceSelection(this.dataSourceSelection);
@@ -221,7 +246,7 @@ export class DataSourceManagementPlugin
       // Other plugins can get this instance from setupDeps and use to get selected data sources.
       dataSourceSelection: this.dataSourceSelection,
       ui: {
-        DataSourceSelector: createDataSourceSelector(uiSettings, dataSource),
+        DataSourceSelector: createDataSourceSelector(uiSettings, dataSource!),
         getDataSourceMenu: <T>() => createDataSourceMenu<T>(),
       },
       getDefaultDataSourceId,
@@ -235,6 +260,54 @@ export class DataSourceManagementPlugin
     core.http.intercept({
       request: catalogRequestIntercept(),
     });
+
+    const renderAccelerationDetailsFlyout = ({
+      acceleration,
+      dataSourceName,
+      handleRefresh,
+      dataSourceMDSId,
+    }: RenderAccelerationDetailsFlyoutParams) => {
+      const accelerationDetailsFlyout = core.overlays.openFlyout(
+        toMountPoint(
+          React.createElement(AccelerationDetailsFlyout, {
+            featureFlagStatus: this.featureFlagStatus, // Use the stored featureFlagStatus
+            acceleration,
+            dataSourceName,
+            resetFlyout: () => accelerationDetailsFlyout.close(),
+            handleRefresh,
+            dataSourceMDSId,
+            http: core.http,
+            notifications: core.notifications,
+          })
+        ) as MountPoint
+      );
+    };
+    setRenderAccelerationDetailsFlyout(renderAccelerationDetailsFlyout);
+
+    const renderCreateAccelerationFlyout = ({
+      dataSourceName,
+      databaseName,
+      tableName,
+      handleRefresh,
+      dataSourceMDSId,
+    }: RenderAccelerationFlyoutParams) => {
+      const createAccelerationFlyout = core.overlays.openFlyout(
+        toMountPoint(
+          React.createElement(CreateAcceleration, {
+            selectedDatasource: dataSourceName,
+            resetFlyout: () => createAccelerationFlyout.close(),
+            databaseName,
+            tableName,
+            refreshHandler: handleRefresh,
+            dataSourceMDSId,
+            http: core.http,
+            notifications: core.notifications,
+          })
+        ) as MountPoint
+      );
+    };
+    setRenderCreateAccelerationFlyout(renderCreateAccelerationFlyout);
+
     return {
       getAuthenticationMethodRegistry: () => this.authMethodsRegistry,
     };
