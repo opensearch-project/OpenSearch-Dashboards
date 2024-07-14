@@ -5,7 +5,7 @@
 
 import { EuiButtonIcon, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { NotificationsStart } from 'opensearch-dashboards/public';
+import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { DirectQueryLoadingStatus } from '../../../../../../framework/types';
 import {
   useLoadAccelerationsToCache,
@@ -23,6 +23,7 @@ interface SelectorLoadDatabasesProps {
     dataTable: boolean;
   };
   notifications: NotificationsStart;
+  http: HttpStart;
   setLoadingComboBoxes: React.Dispatch<
     React.SetStateAction<{
       dataSource: boolean;
@@ -43,6 +44,7 @@ export const SelectorLoadObjects = ({
   tableFieldsLoading,
   dataSourceMDSId,
   notifications,
+  http,
 }: SelectorLoadDatabasesProps) => {
   const [isLoading, setIsLoading] = useState({
     tableStatus: false,
@@ -53,12 +55,12 @@ export const SelectorLoadObjects = ({
     loadStatus: loadTablesStatus,
     startLoading: startLoadingTables,
     stopLoading: stopLoadingTables,
-  } = useLoadTablesToCache();
+  } = useLoadTablesToCache(http, notifications);
   const {
     loadStatus: loadAccelerationsStatus,
     startLoading: startLoadingAccelerations,
     stopLoading: stopLoadingAccelerations,
-  } = useLoadAccelerationsToCache();
+  } = useLoadAccelerationsToCache(http, notifications);
 
   const onClickRefreshDatabases = () => {
     if (databaseName === '') {

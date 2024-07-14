@@ -240,6 +240,8 @@ export const AccelerationDataSourceSelector = ({
                   setLoadingComboBoxes={setLoadingComboBoxes}
                   tableFieldsLoading={tableFieldsLoading}
                   dataSourceMDSId={dataSourceMDSId}
+                  http={http}
+                  notifications={notifications}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -290,6 +292,8 @@ export const AccelerationDataSourceSelector = ({
                   setLoadingComboBoxes={setLoadingComboBoxes}
                   tableFieldsLoading={tableFieldsLoading}
                   dataSourceMDSId={dataSourceMDSId}
+                  notifications={notifications}
+                  http={http}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

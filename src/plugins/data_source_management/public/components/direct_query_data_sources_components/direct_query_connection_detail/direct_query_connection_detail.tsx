@@ -72,7 +72,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const {
     loadStatus: accelerationsLoadStatus,
     startLoading: startLoadingAccelerations,
-  } = useLoadAccelerationsToCache();
+  } = useLoadAccelerationsToCache(http, notifications);
 
   const cacheLoadingHooks = {
     accelerationsLoadStatus,
