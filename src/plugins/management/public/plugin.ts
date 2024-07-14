@@ -140,6 +140,8 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           props: {
             navigateToApp: coreStart.application.navigateToApp,
             navLinks: fulfilledNavLink,
+            pageTitle: settingsLandingPageTitle,
+            getStartedCards: [],
           },
         });
       },
@@ -170,6 +172,8 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           props: {
             navigateToApp: coreStart.application.navigateToApp,
             navLinks: fulfilledNavLink,
+            pageTitle: settingsLandingPageTitle,
+            getStartedCards: [],
           },
         });
       },
