@@ -4,9 +4,9 @@
  */
 
 import { CharStream, CommonTokenStream, Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
-
 import { CursorPosition, LexerConstructor, ParserConstructor } from './types';
 import { getCursorIndex } from './cursor';
+import { CaseInsensitiveCharStream } from '../case_insensitive_char_stream';
 
 const spaceSymbols = '(\\s|\r\n|\n|\r)+';
 const explainRegex = new RegExp(`^(${spaceSymbols})?explain${spaceSymbols}$`);
@@ -51,7 +51,9 @@ export function createParser<L extends LexerType, P extends ParserType>(
   Parser: ParserConstructor<P>,
   query: string
 ): P {
-  const parser = new Parser(new CommonTokenStream(new Lexer(CharStream.fromString(query))));
+  const parser = new Parser(
+    new CommonTokenStream(new Lexer(new CaseInsensitiveCharStream(CharStream.fromString(query))))
+  );
   parser.removeErrorListeners();
   return parser;
 }
