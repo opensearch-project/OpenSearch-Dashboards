@@ -16,6 +16,9 @@ import {
   EuiSpacer,
   EuiText,
   EuiTabbedContent,
+  EuiIcon,
+  EuiCard,
+  EuiAccordion,
 } from '@elastic/eui';
 import {
   HttpStart,
@@ -32,6 +35,7 @@ import { AccessControlTab } from './access_control_tab';
 import { getManageDirectQueryDataSourceBreadcrumbs } from '../../breadcrumbs';
 import { useLoadAccelerationsToCache } from '../../../../framework/catlog_cache/cache_loader';
 import { AccelerationTable } from '../direct_query_acceleration_management/acceleration_table';
+import { getRenderCreateAccelerationFlyout } from '../../../management_app/mount_management_section';
 
 interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;
@@ -102,6 +106,77 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
     fetchSelectedDatasource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setBreadcrumbs, http]);
+
+  // const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
+
+  const DefaultDatasourceCards = () => {
+    return (
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="integrationGeneral" />}
+            title={'Configure Integrations'}
+            description="Connect to common application log types using integrations"
+            // onClick={onclickIntegrationsCard}
+            // selectable={{
+            //   onClick: onclickIntegrationsCard,
+            //   isDisabled: false,
+            //   children: 'Add Integrations',
+            // }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="bolt" />}
+            title={'Accelerate performance'}
+            description="Accelerate query performance through OpenSearch indexing"
+            onClick={() => renderCreateAccelerationFlyout({ dataSourceName })}
+            selectable={{
+              onClick: () => renderCreateAccelerationFlyout({ dataSourceName }),
+              isDisabled: false,
+              children: 'Accelerate Performance',
+            }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiCard
+            icon={<EuiIcon size="xxl" type="discoverApp" />}
+            title={'Query data'}
+            description="Uncover insights from your data or better understand it"
+            // onClick={onclickDiscoverCard}
+            // selectable={{
+            //   onClick: onclickDiscoverCard,
+            //   isDisabled: false,
+            //   children: 'Query in Observability Logs',
+            // }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
+
+  const QueryOrAccelerateData = () => {
+    switch (datasourceDetails.connector) {
+      case 'S3GLUE':
+        return <DefaultDatasourceCards />;
+      case 'PROMETHEUS':
+        // Prometheus does not have acceleration or integrations, and should go to metrics analytics
+        return (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiCard
+                icon={<EuiIcon size="xxl" type="discoverApp" />}
+                title={'Query data'}
+                description="Query your data in Metrics Analytics."
+                // onClick={() => application!.navigateToApp(observabilityMetricsID)}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      default:
+        return <DefaultDatasourceCards />;
+    }
+  };
 
   const S3DatasourceOverview = () => (
     <EuiPanel>
@@ -222,6 +297,8 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
 
   const tabs = [...conditionalTabs, ...genericTabs];
 
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
+
   return (
     <EuiPage>
       <EuiPageBody>
@@ -245,14 +322,14 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
           />
         ) : (
           <>
-            {/* <EuiAccordion
+            <EuiAccordion
               id="queryOrAccelerateAccordion"
               buttonContent={'Get started'}
               initialIsOpen={true}
               paddingSize="m"
             >
               <QueryOrAccelerateData />
-            </EuiAccordion> */}
+            </EuiAccordion>
             <EuiTabbedContent tabs={tabs} />
           </>
         )}

@@ -270,7 +270,7 @@ export interface StartLoadingParams {
 }
 
 export interface RenderAccelerationFlyoutParams {
-  dataSource: string;
+  dataSourceName: string;
   dataSourceMDSId?: string;
   databaseName?: string;
   tableName?: string;

@@ -91,7 +91,7 @@ export const CreateAccelerationFlyoutButton = ({
 }: {
   dataSourceName: string;
   renderCreateAccelerationFlyout: ({
-    dataSource,
+    dataSourceName,
     databaseName,
     tableName,
     handleRefresh,
@@ -104,7 +104,7 @@ export const CreateAccelerationFlyoutButton = ({
       <EuiButton
         onClick={() =>
           renderCreateAccelerationFlyout({
-            dataSource: dataSourceName,
+            dataSourceName,
             handleRefresh,
           })
         }
