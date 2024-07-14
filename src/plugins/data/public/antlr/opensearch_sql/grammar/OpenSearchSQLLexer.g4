@@ -32,6 +32,10 @@ lexer grammar OpenSearchSQLLexer;
 
 channels { SQLCOMMENT, ERRORCHANNEL }
 
+options {
+    caseInsensitive = true;
+}
+
 
 // SKIP
 
