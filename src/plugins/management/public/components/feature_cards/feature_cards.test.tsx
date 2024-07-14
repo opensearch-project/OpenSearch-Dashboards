@@ -84,13 +84,20 @@ const navLinks: ChromeNavLink[] = [
 
 describe('<FeatureCards />', () => {
   it('render with empty navLinks', () => {
-    const { container } = render(<FeatureCards navLinks={[]} navigateToApp={jest.fn()} />);
+    const { container } = render(
+      <FeatureCards getStartedCards={[]} pageTitle="" navLinks={[]} navigateToApp={jest.fn()} />
+    );
     expect(container).toMatchSnapshot();
   });
 
   it('render with complex navLinks', () => {
     const { container, getAllByTestId } = render(
-      <FeatureCards navLinks={navLinks} navigateToApp={jest.fn()} />
+      <FeatureCards
+        getStartedCards={[]}
+        pageTitle=""
+        navLinks={navLinks}
+        navigateToApp={jest.fn()}
+      />
     );
     expect(container).toMatchSnapshot();
     expect(getAllByTestId('landingPageRow_1').length).toEqual(2);
@@ -99,7 +106,12 @@ describe('<FeatureCards />', () => {
   it('click item', () => {
     const mockedNavigateToApp = jest.fn();
     const { getByTestId } = render(
-      <FeatureCards navLinks={navLinks} navigateToApp={mockedNavigateToApp} />
+      <FeatureCards
+        getStartedCards={[]}
+        pageTitle=""
+        navLinks={navLinks}
+        navigateToApp={mockedNavigateToApp}
+      />
     );
     fireEvent.click(getByTestId('landingPageFeature_1'));
     expect(mockedNavigateToApp).toBeCalledWith('1');
