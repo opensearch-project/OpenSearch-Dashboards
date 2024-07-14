@@ -58,7 +58,7 @@ export const PreviewSQLDefinition = ({
   };
 
   const checkIfSQLWorkbenchPluginIsInstalled = () => {
-    fetch('../api/status', {
+    fetch('/api/status', {
       headers: {
         'Content-Type': 'application/json',
         'osd-xsrf': 'true',
