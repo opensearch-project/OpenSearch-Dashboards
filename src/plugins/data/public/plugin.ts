@@ -58,6 +58,7 @@ import {
 } from './index_patterns';
 import {
   setFieldFormats,
+  setHttp,
   setIndexPatterns,
   setNotifications,
   setOverlays,
@@ -191,6 +192,7 @@ export class DataPublicPlugin
     setNotifications(notifications);
     setOverlays(overlays);
     setUiSettings(uiSettings);
+    setHttp(http);
 
     const fieldFormats = this.fieldFormatsService.start();
     setFieldFormats(fieldFormats);
