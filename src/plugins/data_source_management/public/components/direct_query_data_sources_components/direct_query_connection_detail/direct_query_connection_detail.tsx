@@ -125,7 +125,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setBreadcrumbs, http]);
 
-  // const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
   const DefaultDatasourceCards = () => {
     return (
@@ -148,9 +148,19 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
             icon={<EuiIcon size="xxl" type="bolt" />}
             title={'Accelerate performance'}
             description="Accelerate query performance through OpenSearch indexing"
-            onClick={() => renderCreateAccelerationFlyout({ dataSourceName })}
+            onClick={() =>
+              renderCreateAccelerationFlyout({
+                dataSourceName,
+                dataSourceMDSId: featureFlagStatus && dataSourceMDSId ? dataSourceMDSId : undefined,
+              })
+            }
             selectable={{
-              onClick: () => renderCreateAccelerationFlyout({ dataSourceName }),
+              onClick: () =>
+                renderCreateAccelerationFlyout({
+                  dataSourceName,
+                  dataSourceMDSId:
+                    featureFlagStatus && dataSourceMDSId ? dataSourceMDSId : undefined,
+                }),
               isDisabled: false,
               children: 'Accelerate Performance',
             }}
@@ -314,8 +324,6 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
       : [];
 
   const tabs = [...conditionalTabs, ...genericTabs];
-
-  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
   return (
     <EuiPage>
