@@ -298,6 +298,8 @@ export default class QueryEditorUI extends Component<Props, State> {
         return monaco.languages.CompletionItemKind.Field;
       case 'value':
         return monaco.languages.CompletionItemKind.Value;
+      case 'keyword':
+        return monaco.languages.CompletionItemKind.Keyword;
       default:
         return monaco.languages.CompletionItemKind.Text;
     }
