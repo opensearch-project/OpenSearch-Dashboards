@@ -137,7 +137,6 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
         {!props.hideTitle ? <EuiPageHeader pageTitle="Update Workspace" /> : null}
         <EuiPageContent
           verticalPosition="center"
-          horizontalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}

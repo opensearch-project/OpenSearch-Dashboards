@@ -83,7 +83,6 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         <EuiPageHeader pageTitle="Create a workspace" />
         <EuiPageContent
           verticalPosition="center"
-          horizontalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}
