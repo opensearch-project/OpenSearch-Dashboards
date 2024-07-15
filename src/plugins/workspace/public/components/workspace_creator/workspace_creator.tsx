@@ -95,7 +95,6 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
               permissionEnabled={isPermissionEnabled}
-              permissionLastAdminItemDeletable
               availableUseCases={availableUseCases}
             />
           )}
