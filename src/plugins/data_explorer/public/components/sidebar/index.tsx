@@ -6,13 +6,7 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiPageSideBar, EuiPortal, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import {
-  DataSource,
-  DataSourceGroup,
-  DataSourceSelectable,
-  DataSetNavigator,
-  IndexPatternSelectable,
-} from '../../../../data/public';
+import { DataSource, DataSourceGroup, DataSetNavigator } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
@@ -181,33 +175,13 @@ export const Sidebar: FC = ({ children }) => {
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
 
-  const dataSourceSelector = (
-    <DataSourceSelectable
-      dataSources={activeDataSources}
-      dataSourceOptionList={dataSourceOptionList}
-      setDataSourceOptionList={setDataSourceOptionList}
-      onDataSourceSelect={handleSourceSelection}
-      selectedSources={selectedSources}
-      onGetDataSetError={handleGetDataSetError}
-      onRefresh={memorizedReload}
-      fullWidth
-    />
-  );
-
-  const indexPatternSelectable = (
-    <IndexPatternSelectable
+  const dataSetNavigator = (
+    <DataSetNavigator
       dataSources={activeDataSources}
       indexPatternOptionList={indexPatternOptionList}
       selectedSources={selectedSources}
       setIndexPatternOptionList={setIndexPatternOptionList}
       handleSourceSelection={handleSourceSelection}
-    />
-  );
-
-  const dataSetNavigator = (
-    <DataSetNavigator
-      indexPatternSelectable={indexPatternSelectable}
-      dataConnectionsRef={connectionsRef}
     />
   );
 
@@ -225,13 +199,7 @@ export const Sidebar: FC = ({ children }) => {
               containerRef.current = node;
             }}
           >
-            <DataSetNavigator
-              indexPatternSelectable={indexPatternSelectable}
-              dataConnectionsRef={connectionsRef.current}
-            >
-              {selectedSources}
-            </DataSetNavigator>
-            {/* {indexPatternSelectable} */}
+            {dataSetNavigator}
           </EuiPortal>
         )}
         {!isEnhancementsEnabled && (
