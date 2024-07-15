@@ -33,7 +33,6 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import {
-  EuiTitle,
   EuiInMemoryTable,
   EuiPage,
   EuiPageBody,
@@ -525,9 +524,9 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
+            <EuiText size="s">
               <h1 id={this.props.headingId}>{this.props.tableListTitle}</h1>
-            </EuiTitle>
+            </EuiText>
           </EuiFlexItem>
 
           {this.props.createButton || defaultCreateButton}
