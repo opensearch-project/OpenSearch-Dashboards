@@ -20,6 +20,7 @@ import {
   WorkspaceAvailability,
   ChromeNavGroupUpdater,
   NavGroupStatus,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -318,13 +319,25 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     core.application.register({
       id: WORKSPACE_LIST_APP_ID,
       title: '',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      // nav link should be visible when nav group enabled
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: WORKSPACE_LIST_APP_ID,
+        title: i18n.translate('workspace.settingsAndSetup.workspaceSettings', {
+          defaultMessage: 'workspace settings',
+        }),
+      },
+    ]);
 
     /**
      * register workspace column into saved objects table
