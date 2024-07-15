@@ -85,4 +85,5 @@ export interface WorkspaceFormProps {
   operationType: WorkspaceOperationType;
   workspaceConfigurableApps?: PublicAppInfo[];
   permissionEnabled?: boolean;
+  tab?: string;
 }

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { i18n } from '@osd/i18n';
 import { WorkspacePermissionMode } from '../../../common/constants';
 
 export enum WorkspaceOperationType {
@@ -31,3 +32,25 @@ export const optionIdToWorkspacePermissionModesMap: {
   ],
   [PermissionModeId.Owner]: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
 };
+
+export const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
+  defaultMessage: 'Enter details',
+});
+
+export const workspaceUseCaseTitle = i18n.translate('workspace.form.workspaceUseCase.title', {
+  defaultMessage: 'Choose one or more focus areas',
+});
+
+export const selectDataSourceTitle = i18n.translate('workspace.form.selectDataSource.title', {
+  defaultMessage: 'Associate data source',
+});
+
+export const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
+  defaultMessage: 'Manage access and permissions',
+});
+
+export enum DetailTab {
+  Settings = 'settings',
+  Collaborators = 'collaborators',
+  Overview = 'overview',
+}

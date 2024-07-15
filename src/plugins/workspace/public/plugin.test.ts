@@ -9,7 +9,7 @@ import { ChromeBreadcrumb } from 'opensearch-dashboards/public';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
 import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
 import { WorkspacePlugin } from './plugin';
-import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
+import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
 
@@ -137,7 +137,7 @@ describe('Workspace plugin', () => {
       management: managementPluginMock.createSetupContract(),
     });
     currentAppIdSubscriber?.next(WORKSPACE_FATAL_ERROR_APP_ID);
-    expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_OVERVIEW_APP_ID);
+    expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_DETAIL_APP_ID);
     windowSpy.mockRestore();
   });
 
