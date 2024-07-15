@@ -96,6 +96,7 @@ export interface SearchBarOwnProps {
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   indicateNoData?: boolean;
+  queryEditorComponent?: HTMLDivElement;
 }
 
 export type SearchBarProps = SearchBarOwnProps & SearchBarInjectedDeps;

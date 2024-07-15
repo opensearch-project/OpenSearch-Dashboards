@@ -27,6 +27,7 @@ export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
   dataSource?: DataSource;
   query: Query;
+  container?: HTMLDivElement;
   dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
