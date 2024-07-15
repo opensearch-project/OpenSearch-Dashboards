@@ -7,6 +7,7 @@ import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { CursorPosition } from '../opensearch_sql/types';
 import { getHttp } from '../../services';
 import { DQLParserListener } from './generated/DQLParserListener';
+import { QuerySuggestionGetFnArgs } from '../../autocomplete';
 
 const findCursorIndex = (
   tokenStream: TokenStream,
@@ -66,8 +67,8 @@ export const getSuggestions = async ({
   query,
   language,
   indexPatterns,
-}) => {
-  const currentIndexPattern: IndexPattern = indexPatterns[0];
+}: QuerySuggestionGetFnArgs) => {
+  const currentIndexPattern = indexPatterns[0] as IndexPattern;
 
   const inputStream = CharStream.fromString(query);
   const lexer = new DQLLexer(inputStream);
