@@ -80,7 +80,7 @@ export const DataSetNavigator = ({
     ).then((dataSetResults) => {
       setIndexPatternOptionList(consolidateIndexPatternList(dataSetResults, selectedSources));
     });
-  }, [dataSources, selectedSources, setIndexPatternOptionList]);
+  }, [dataSources, setIndexPatternOptionList]);
 
   const indexPatternSelectable = (
     <IndexPatternSelectable
