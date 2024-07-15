@@ -33,7 +33,11 @@ import { NoAccess } from './no_access_page';
 import { InactiveDataConnectionCallout } from './inactive_data_connection_callout';
 import { AccessControlTab } from './access_control_tab';
 import { getManageDirectQueryDataSourceBreadcrumbs } from '../../breadcrumbs';
-import { useLoadAccelerationsToCache } from '../../../../framework/catlog_cache/cache_loader';
+import {
+  useLoadAccelerationsToCache,
+  useLoadDatabasesToCache,
+  useLoadTablesToCache,
+} from '../../../../framework/catlog_cache/cache_loader';
 import { AccelerationTable } from '../direct_query_acceleration_management/acceleration_table';
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 
@@ -70,11 +74,25 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
 
   // Cache loader hook
   const {
+    loadStatus: databasesLoadStatus,
+    startLoading: startLoadingDatabases,
+  } = useLoadDatabasesToCache(http, notifications);
+
+  const { loadStatus: tablesLoadStatus, startLoading: startLoadingTables } = useLoadTablesToCache(
+    http,
+    notifications
+  );
+
+  const {
     loadStatus: accelerationsLoadStatus,
     startLoading: startLoadingAccelerations,
   } = useLoadAccelerationsToCache(http, notifications);
 
   const cacheLoadingHooks = {
+    databasesLoadStatus,
+    startLoadingDatabases,
+    tablesLoadStatus,
+    startLoadingTables,
     accelerationsLoadStatus,
     startLoadingAccelerations,
   };
