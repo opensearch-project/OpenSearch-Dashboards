@@ -171,4 +171,18 @@ describe('Header', () => {
 
     expect(component).toMatchSnapshot();
   });
+
+  it('renders new header when feature flag is turned on', () => {
+    const branding = {
+      useExpandedHeader: false,
+    };
+    const props = {
+      ...mockProps(),
+      branding,
+    };
+
+    const component = mountWithIntl(<Header {...props} navGroupEnabled />);
+
+    expect(component.find('CollapsibleNavGroupEnabled').exists()).toBeTruthy();
+  });
 });

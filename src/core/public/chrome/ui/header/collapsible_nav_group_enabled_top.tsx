@@ -94,6 +94,7 @@ export const CollapsibleNavTop = ({
             iconType={shouldShrinkNavigation ? 'menu' : 'menuLeft'}
             color="text"
             display={shouldShrinkNavigation ? 'empty' : 'base'}
+            aria-label="shrink-button"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

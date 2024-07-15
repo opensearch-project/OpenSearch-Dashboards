@@ -268,7 +268,6 @@ export function Header({
         {navGroupEnabled ? (
           <CollapsibleNavGroupEnabled
             appId$={application.currentAppId$}
-            collapsibleNavHeaderRender={collapsibleNavHeaderRender}
             id={navId}
             isLocked={isLocked}
             navLinks$={observables.navLinks$}

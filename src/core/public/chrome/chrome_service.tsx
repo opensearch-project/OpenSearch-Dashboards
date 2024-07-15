@@ -110,7 +110,7 @@ export interface StartDeps {
   workspaces: WorkspacesStart;
 }
 
-export type CollapsibleNavHeaderRender = () => JSX.Element | null;
+type CollapsibleNavHeaderRender = () => JSX.Element | null;
 
 /** @internal */
 export class ChromeService {

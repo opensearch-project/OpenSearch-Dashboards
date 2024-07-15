@@ -44,7 +44,13 @@ export function SettingsIcon({ core }: { core: CoreStart }) {
   return (
     <EuiPopover
       id="popoverForSettingsIcon"
-      button={<EuiButtonIcon iconType="managementApp" onClick={() => setPopover(true)} />}
+      button={
+        <EuiButtonIcon
+          aria-label="show-apps"
+          iconType="managementApp"
+          onClick={() => setPopover(true)}
+        />
+      }
       isOpen={isPopoverOpen}
       closePopover={() => setPopover(false)}
       ownFocus={false}

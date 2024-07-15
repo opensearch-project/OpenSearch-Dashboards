@@ -11,7 +11,6 @@ import {
   EuiSideNav,
   EuiPanel,
   EuiText,
-  EuiLink,
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -26,7 +25,6 @@ import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
 import { createEuiListItem } from './nav_link';
 import type { Logos } from '../../../../common/types';
-import { CollapsibleNavHeaderRender } from '../../chrome_service';
 import {
   ChromeNavGroupServiceStartContract,
   ChromeRegistrationNavLink,
@@ -42,10 +40,9 @@ import { ALL_USE_CASE_ID } from '../../../../../core/utils';
 import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 import { HeaderNavControls } from './header_nav_controls';
 
-interface Props {
+export interface CollapsibleNavGroupEnabledProps {
   appId$: InternalApplicationStart['currentAppId$'];
   basePath: HttpStart['basePath'];
-  collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
   id: string;
   isLocked: boolean;
   isNavOpen: boolean;
@@ -79,7 +76,7 @@ const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
   defaultMessage: 'See all...',
 });
 
-function NavGroups({
+export function NavGroups({
   navLinks,
   suffix,
   style,
@@ -91,7 +88,7 @@ function NavGroups({
     const euiListItem = createEuiListItem({
       link,
       appId,
-      dataTestSubj: 'collapsibleNavAppLink',
+      dataTestSubj: `collapsibleNavAppLink-${link.id}`,
       navigateToApp,
       onClick: (event) => {
         onNavItemClick(event, link);
@@ -99,13 +96,15 @@ function NavGroups({
     });
 
     return {
-      id: link.id,
+      id: `${link.id}-${link.title}`,
       name: <EuiText>{link.title}</EuiText>,
       onClick: euiListItem.onClick,
       href: euiListItem.href,
       emphasize: euiListItem.isActive,
       className: 'nav-link-item',
       buttonClassName: 'nav-link-item-btn',
+      'data-test-subj': euiListItem['data-test-subj'],
+      'aria-label': link.title,
     };
   };
   const createSideNavItem = (navLink: LinkItem): EuiSideNavItemType<{}> => {
@@ -117,7 +116,7 @@ function NavGroups({
 
         return {
           ...navItem,
-          name: <EuiLink>{navItem.name}</EuiLink>,
+          name: <EuiText color="success">{navItem.name}</EuiText>,
         };
       }
 
@@ -129,6 +128,7 @@ function NavGroups({
     if (navLink.itemType === LinkItemType.PARENT_LINK && navLink.link) {
       return {
         ...createNavItem({ link: navLink.link }),
+        forceOpen: true,
         items: navLink.links.map((subNavLink) => createSideNavItem(subNavLink)),
       };
     }
@@ -138,6 +138,7 @@ function NavGroups({
         id: navLink.category?.id ?? '',
         name: <div className="nav-link-item">{navLink.category?.label ?? ''}</div>,
         items: navLink.links?.map((link) => createSideNavItem(link)),
+        'aria-label': navLink.category?.label,
       };
     }
 
@@ -157,7 +158,6 @@ function NavGroups({
 
 export function CollapsibleNavGroupEnabled({
   basePath,
-  collapsibleNavHeaderRender,
   id,
   isLocked,
   isNavOpen,
@@ -169,21 +169,11 @@ export function CollapsibleNavGroupEnabled({
   logos,
   setCurrentNavGroup,
   ...observables
-}: Props) {
+}: CollapsibleNavGroupEnabledProps) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
-
-  // useEffect(() => {
-  //   if (!focusGroup && appId) {
-  //     const orderedGroups = sortBy(Object.values(navGroupsMap), (group) => group.order);
-  //     const findMatchedGroup = orderedGroups.find(
-  //       (group) => !!group.navLinks.find((navLink) => navLink.id === appId)
-  //     );
-  //     setFocusGroup(findMatchedGroup);
-  //   }
-  // }, [appId, navGroupsMap, focusGroup]);
 
   const onGroupClick = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>,

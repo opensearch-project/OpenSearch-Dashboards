@@ -304,7 +304,7 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
-  currentNavgroup$={
+  currentNavGroup$={
     BehaviorSubject {
       "_isScalar": false,
       "_value": undefined,
@@ -1739,6 +1739,17 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  navControlsLeftBottom$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsRight$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1988,6 +1999,7 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  setCurrentNavGroup={[MockFunction]}
   sidecarConfig$={
     BehaviorSubject {
       "_isScalar": false,
@@ -7184,7 +7196,7 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
-  currentNavgroup$={
+  currentNavGroup$={
     BehaviorSubject {
       "_isScalar": false,
       "_value": undefined,
@@ -8501,6 +8513,17 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  navControlsLeftBottom$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsRight$={
     BehaviorSubject {
       "_isScalar": false,
@@ -8700,6 +8723,7 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  setCurrentNavGroup={[MockFunction]}
   sidecarConfig$={
     BehaviorSubject {
       "_isScalar": false,
