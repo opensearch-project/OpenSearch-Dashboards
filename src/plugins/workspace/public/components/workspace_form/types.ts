@@ -12,19 +12,23 @@ import type { WorkspacePermissionMode } from '../../../common/constants';
 import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 import { DataSource } from '../../../common/types';
 
+export interface WorkspaceUserPermissionSetting {
+  id: number;
+  type: WorkspacePermissionItemType.User;
+  userId: string;
+  modes: WorkspacePermissionMode[];
+}
+
+export interface WorkspaceUserGroupPermissionSetting {
+  id: number;
+  type: WorkspacePermissionItemType.Group;
+  group: string;
+  modes: WorkspacePermissionMode[];
+}
+
 export type WorkspacePermissionSetting =
-  | {
-      id: number;
-      type: WorkspacePermissionItemType.User;
-      userId: string;
-      modes: WorkspacePermissionMode[];
-    }
-  | {
-      id: number;
-      type: WorkspacePermissionItemType.Group;
-      group: string;
-      modes: WorkspacePermissionMode[];
-    };
+  | WorkspaceUserPermissionSetting
+  | WorkspaceUserGroupPermissionSetting;
 
 export interface WorkspaceFormSubmitData {
   name: string;
@@ -40,11 +44,37 @@ export interface WorkspaceFormData extends WorkspaceFormSubmitData {
   reserved?: boolean;
 }
 
+export enum WorkspaceFormErrorCode {
+  InvalidWorkspaceName,
+  WorkspaceNameMissing,
+  UseCaseMissing,
+  InvalidPermissionType,
+  InvalidPermissionModes,
+  PermissionUserIdMissing,
+  PermissionUserGroupMissing,
+  DuplicateUserIdPermissionSetting,
+  DuplicateUserGroupPermissionSetting,
+  PermissionSettingOwnerMissing,
+  InvalidDataSource,
+  DuplicateDataSource,
+}
+
+export interface WorkspaceFormError {
+  message: string;
+  code: WorkspaceFormErrorCode;
+}
+
 export type WorkspaceFormErrors = {
-  [key in keyof Omit<WorkspaceFormData, 'permissionSettings' | 'selectedDataSources'>]?: string;
+  [key in keyof Omit<
+    WorkspaceFormData,
+    'permissionSettings' | 'description' | 'selectedDataSources'
+  >]?: WorkspaceFormError;
 } & {
-  permissionSettings?: { [key: number]: string };
-  selectedDataSources?: { [key: number]: string };
+  permissionSettings?: {
+    overall?: WorkspaceFormError;
+    fields?: { [key: number]: WorkspaceFormError };
+  };
+  selectedDataSources?: { [key: number]: WorkspaceFormError };
 };
 
 export interface WorkspaceFormProps {
@@ -52,8 +82,7 @@ export interface WorkspaceFormProps {
   savedObjects: SavedObjectsStart;
   onSubmit?: (formData: WorkspaceFormSubmitData) => void;
   defaultValues?: WorkspaceFormData;
-  operationType?: WorkspaceOperationType;
+  operationType: WorkspaceOperationType;
   workspaceConfigurableApps?: PublicAppInfo[];
   permissionEnabled?: boolean;
-  permissionLastAdminItemDeletable?: boolean;
 }

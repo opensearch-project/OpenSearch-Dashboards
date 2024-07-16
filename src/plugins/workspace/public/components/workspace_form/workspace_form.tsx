@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   EuiPanel,
   EuiSpacer,
@@ -12,8 +12,8 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiText,
-  EuiColorPicker,
   EuiTextArea,
+  EuiColorPicker,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -22,6 +22,9 @@ import { WorkspaceFormProps } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 import { WorkspaceUseCase } from './workspace_use_case';
+import { WorkspaceOperationType } from './constants';
+import { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
+import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
 import { SelectDataSourcePanel } from './select_data_source_panel';
 
 export const WorkspaceForm = (props: WorkspaceFormProps) => {
@@ -32,13 +35,13 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     operationType,
     permissionEnabled,
     workspaceConfigurableApps,
-    permissionLastAdminItemDeletable,
   } = props;
   const {
     formId,
     formData,
     formErrors,
     numberOfErrors,
+    numberOfChanges,
     handleFormSubmit,
     handleColorChange,
     handleUseCasesChange,
@@ -48,11 +51,21 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     handleDescriptionChange,
   } = useWorkspaceForm(props);
   const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
-    defaultMessage: 'Enter Details',
+    defaultMessage: 'Enter details',
   });
+  const disabledUserOrGroupInputIdsRef = useRef(
+    defaultValues?.permissionSettings?.map((item) => item.id) ?? []
+  );
 
   return (
     <EuiForm id={formId} onSubmit={handleFormSubmit} component="form">
+      {numberOfErrors > 0 && (
+        <>
+          <WorkspaceFormErrorCallout errors={formErrors} />
+          <EuiSpacer />
+        </>
+      )}
+
       <EuiPanel>
         <EuiTitle size="s">
           <h2>{workspaceDetailsTitle}</h2>
@@ -67,7 +80,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
               'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
           })}
           isInvalid={!!formErrors.name}
-          error={formErrors.name}
+          error={formErrors.name?.message}
         >
           <EuiFieldText
             value={formData.name}
@@ -85,8 +98,6 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
               Description - <i>optional</i>
             </>
           }
-          isInvalid={!!formErrors.description}
-          error={formErrors.description}
         >
           <>
             <EuiText size="xs" color="subdued">
@@ -114,7 +125,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
             defaultMessage: 'Color',
           })}
           isInvalid={!!formErrors.color}
-          error={formErrors.color}
+          error={formErrors.color?.message}
         >
           <div>
             <EuiText size="xs" color="subdued">
@@ -146,7 +157,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
             defaultMessage: 'Use case',
           })}
           isInvalid={!!formErrors.features}
-          error={formErrors.features}
+          error={formErrors.features?.message}
           fullWidth
         >
           <WorkspaceUseCase
@@ -166,11 +177,12 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
               })}
             </h2>
           </EuiTitle>
+          <EuiSpacer size="m" />
           <WorkspacePermissionSettingPanel
-            errors={formErrors.permissionSettings}
+            errors={formErrors.permissionSettings?.fields}
             onChange={setPermissionSettings}
             permissionSettings={formData.permissionSettings}
-            lastAdminItemDeletable={!!permissionLastAdminItemDeletable}
+            disabledUserOrGroupInputIds={disabledUserOrGroupInputIdsRef.current}
             data-test-subj={`workspaceForm-permissionSettingPanel`}
           />
         </EuiPanel>
@@ -180,7 +192,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         <EuiTitle size="s">
           <h2>
             {i18n.translate('workspace.form.selectDataSource.title', {
-              defaultMessage: 'Select Data Sources',
+              defaultMessage: 'Associate data source',
             })}
           </h2>
         </EuiTitle>
@@ -193,12 +205,16 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         />
       </EuiPanel>
       <EuiSpacer />
-      <WorkspaceBottomBar
-        operationType={operationType}
-        formId={formId}
-        application={application}
-        numberOfErrors={numberOfErrors}
-      />
+      {operationType === WorkspaceOperationType.Create && (
+        <WorkspaceCreateActionPanel formId={formId} application={application} />
+      )}
+      {operationType === WorkspaceOperationType.Update && (
+        <WorkspaceBottomBar
+          formId={formId}
+          application={application}
+          numberOfChanges={numberOfChanges}
+        />
+      )}
     </EuiForm>
   );
 };
