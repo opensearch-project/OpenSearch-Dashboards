@@ -19,9 +19,10 @@ import { i18n } from '@osd/i18n';
 import { SavedObjectsStart } from '../../../../../core/public';
 import { getDataSourcesList } from '../../utils';
 import { DataSource } from '../../../common/types';
+import { WorkspaceFormError } from './types';
 
 export interface SelectDataSourcePanelProps {
-  errors?: { [key: number]: string };
+  errors?: { [key: number]: WorkspaceFormError };
   savedObjects: SavedObjectsStart;
   selectedDataSources: DataSource[];
   onChange: (value: DataSource[]) => void;
@@ -96,7 +97,7 @@ export const SelectDataSourcePanel = ({
       </EuiText>
       <EuiSpacer size="s" />
       {selectedDataSources.map(({ id, title }, index) => (
-        <EuiFormRow key={index} isInvalid={!!errors?.[index]} error={errors?.[index]}>
+        <EuiFormRow key={index} isInvalid={!!errors?.[index]} error={errors?.[index].message}>
           <EuiFlexGroup gutterSize="l">
             <EuiFlexItem grow={false}>
               <EuiComboBox

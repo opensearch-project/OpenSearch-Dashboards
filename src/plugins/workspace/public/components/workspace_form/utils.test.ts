@@ -7,10 +7,12 @@ import {
   validateWorkspaceForm,
   convertPermissionSettingsToPermissions,
   convertPermissionsToPermissionSettings,
+  getNumberOfChanges,
   getNumberOfErrors,
 } from './utils';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import { WorkspacePermissionItemType } from './constants';
+import { WorkspaceFormErrorCode } from './types';
 
 describe('convertPermissionSettingsToPermissions', () => {
   it('should return undefined if permission items not provided', () => {
@@ -89,15 +91,15 @@ describe('convertPermissionsToPermissionSettings', () => {
     ).toEqual([
       {
         id: 0,
-        type: WorkspacePermissionItemType.User,
-        userId: 'foo',
-        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
-      },
-      {
-        id: 1,
         type: WorkspacePermissionItemType.Group,
         group: 'bar',
         modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+      },
+      {
+        id: 1,
+        type: WorkspacePermissionItemType.User,
+        userId: 'foo',
+        modes: [WorkspacePermissionMode.LibraryRead, WorkspacePermissionMode.Read],
       },
     ]);
   });
@@ -154,149 +156,204 @@ describe('convertPermissionsToPermissionSettings', () => {
 
 describe('validateWorkspaceForm', () => {
   it('should return error if name is empty', () => {
-    expect(validateWorkspaceForm({}).name).toEqual("Name can't be empty.");
+    expect(validateWorkspaceForm({}, false).name).toEqual({
+      code: WorkspaceFormErrorCode.WorkspaceNameMissing,
+      message: 'Name is required. Enter a name.',
+    });
   });
   it('should return error if name is invalid', () => {
-    expect(validateWorkspaceForm({ name: '~' }).name).toEqual('Invalid workspace name');
+    expect(validateWorkspaceForm({ name: '~' }, false).name).toEqual({
+      code: WorkspaceFormErrorCode.InvalidWorkspaceName,
+      message: 'Name is invalid. Enter a valid name.',
+    });
   });
   it('should return error if use case is empty', () => {
-    expect(validateWorkspaceForm({}).features).toEqual('Use case is required. Select a use case.');
+    expect(validateWorkspaceForm({}, false).features).toEqual({
+      code: WorkspaceFormErrorCode.UseCaseMissing,
+      message: 'Use case is required. Select a use case.',
+    });
   });
   it('should return error if permission setting type is invalid', () => {
     expect(
-      validateWorkspaceForm({
-        name: 'test',
-        permissionSettings: [{ id: 0 }],
-      }).permissionSettings
-    ).toEqual({ 0: 'Invalid type' });
+      validateWorkspaceForm(
+        {
+          name: 'test',
+          permissionSettings: [{ id: 0 }],
+        },
+        true
+      ).permissionSettings?.fields
+    ).toEqual({
+      0: { code: WorkspaceFormErrorCode.InvalidPermissionType, message: 'Invalid type' },
+    });
   });
   it('should return error if permission setting modes is invalid', () => {
     expect(
-      validateWorkspaceForm({
-        name: 'test',
-        permissionSettings: [{ id: 0, type: WorkspacePermissionItemType.User, modes: [] }],
-      }).permissionSettings
-    ).toEqual({ 0: 'Invalid permission modes' });
-  });
-  it('should return error if permission setting user id is invalid', () => {
-    expect(
-      validateWorkspaceForm({
-        name: 'test',
-        permissionSettings: [
-          {
-            id: 0,
-            type: WorkspacePermissionItemType.User,
-            modes: [WorkspacePermissionMode.LibraryRead],
-            userId: '',
-          },
-        ],
-      }).permissionSettings
-    ).toEqual({ 0: 'Invalid user id' });
-  });
-  it('should return error if permission setting group is invalid', () => {
-    expect(
-      validateWorkspaceForm({
-        name: 'test',
-        permissionSettings: [
-          {
-            id: 0,
-            type: WorkspacePermissionItemType.Group,
-            modes: [WorkspacePermissionMode.LibraryRead],
-            group: '',
-          },
-        ],
-      }).permissionSettings
-    ).toEqual({ 0: 'Invalid user group' });
+      validateWorkspaceForm(
+        {
+          name: 'test',
+          permissionSettings: [{ id: 0, type: WorkspacePermissionItemType.User, modes: [] }],
+        },
+        true
+      ).permissionSettings?.fields
+    ).toEqual({
+      0: {
+        code: WorkspaceFormErrorCode.InvalidPermissionModes,
+        message: 'Invalid permission modes',
+      },
+    });
   });
 
   it('should return error if permission setting is duplicate', () => {
     expect(
-      validateWorkspaceForm({
-        name: 'test',
-        permissionSettings: [
-          {
-            id: 0,
-            type: WorkspacePermissionItemType.User,
-            modes: [WorkspacePermissionMode.LibraryRead],
-            userId: 'foo',
-          },
-          {
-            id: 1,
-            type: WorkspacePermissionItemType.User,
-            modes: [WorkspacePermissionMode.LibraryRead],
-            userId: 'foo',
-          },
-        ],
-      }).permissionSettings
-    ).toEqual({ 1: 'Duplicate permission setting' });
+      validateWorkspaceForm(
+        {
+          name: 'test',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              modes: [WorkspacePermissionMode.LibraryRead],
+              userId: 'foo',
+            },
+            {
+              id: 1,
+              type: WorkspacePermissionItemType.User,
+              modes: [WorkspacePermissionMode.LibraryRead],
+              userId: 'foo',
+            },
+          ],
+        },
+        true
+      ).permissionSettings?.fields
+    ).toEqual({
+      1: {
+        code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
+        message: 'User must be unique. Enter a unique user.',
+      },
+    });
     expect(
-      validateWorkspaceForm({
-        name: 'test',
-        permissionSettings: [
-          {
-            id: 0,
-            type: WorkspacePermissionItemType.Group,
-            modes: [WorkspacePermissionMode.LibraryRead],
-            group: 'foo',
-          },
-          {
-            id: 1,
-            type: WorkspacePermissionItemType.Group,
-            modes: [WorkspacePermissionMode.LibraryRead],
-            group: 'foo',
-          },
-        ],
-      }).permissionSettings
-    ).toEqual({ 1: 'Duplicate permission setting' });
+      validateWorkspaceForm(
+        {
+          name: 'test',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.Group,
+              modes: [WorkspacePermissionMode.LibraryRead],
+              group: 'foo',
+            },
+            {
+              id: 1,
+              type: WorkspacePermissionItemType.Group,
+              modes: [WorkspacePermissionMode.LibraryRead],
+              group: 'foo',
+            },
+          ],
+        },
+        true
+      ).permissionSettings?.fields
+    ).toEqual({
+      1: {
+        code: WorkspaceFormErrorCode.DuplicateUserGroupPermissionSetting,
+        message: 'User group must be unique. Enter a unique user group.',
+      },
+    });
   });
 
-  it('should return empty object for valid for data', () => {
+  it('should return error if owner is missing in permission settings', () => {
     expect(
-      validateWorkspaceForm({
-        name: 'test',
-        permissionSettings: [
-          {
-            id: 0,
-            type: WorkspacePermissionItemType.Group,
-            modes: [WorkspacePermissionMode.LibraryRead],
-            group: 'foo',
-          },
-        ],
-        features: ['use-case-observability'],
-      })
+      validateWorkspaceForm(
+        {
+          name: 'test',
+        },
+        true
+      ).permissionSettings?.overall
+    ).toEqual({
+      code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
+      message: 'Add a workspace owner.',
+    });
+
+    expect(
+      validateWorkspaceForm(
+        {
+          name: 'test',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              modes: [WorkspacePermissionMode.LibraryRead],
+              userId: 'foo',
+            },
+          ],
+        },
+        true
+      ).permissionSettings?.overall
+    ).toEqual({
+      code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
+      message: 'Add a workspace owner.',
+    });
+  });
+
+  it('should return empty object for valid form data', () => {
+    expect(
+      validateWorkspaceForm(
+        {
+          name: 'test',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.Group,
+              modes: [WorkspacePermissionMode.LibraryRead],
+              group: 'foo',
+            },
+          ],
+          features: ['use-case-observability'],
+        },
+        false
+      )
     ).toEqual({});
   });
 
   it('should return error if selected data source id is null', () => {
     expect(
-      validateWorkspaceForm({
-        name: 'test',
-        selectedDataSources: [
-          {
-            id: '',
-            title: 'title',
-          },
-        ],
-      }).selectedDataSources
-    ).toEqual({ 0: 'Invalid data source' });
+      validateWorkspaceForm(
+        {
+          name: 'test',
+          selectedDataSources: [
+            {
+              id: '',
+              title: 'title',
+            },
+          ],
+        },
+        false
+      ).selectedDataSources
+    ).toEqual({
+      0: { code: WorkspaceFormErrorCode.InvalidDataSource, message: 'Invalid data source' },
+    });
   });
 
   it('should return error if selected data source id is duplicated', () => {
     expect(
-      validateWorkspaceForm({
-        name: 'test',
-        selectedDataSources: [
-          {
-            id: 'id',
-            title: 'title1',
-          },
-          {
-            id: 'id',
-            title: 'title2',
-          },
-        ],
-      }).selectedDataSources
-    ).toEqual({ '1': 'Duplicate data sources' });
+      validateWorkspaceForm(
+        {
+          name: 'test',
+          selectedDataSources: [
+            {
+              id: 'id',
+              title: 'title1',
+            },
+            {
+              id: 'id',
+              title: 'title2',
+            },
+          ],
+        },
+        false
+      ).selectedDataSources
+    ).toEqual({
+      '1': { code: WorkspaceFormErrorCode.DuplicateDataSource, message: 'Duplicate data sources' },
+    });
   });
 });
 
@@ -305,10 +362,202 @@ describe('getNumberOfErrors', () => {
     expect(
       getNumberOfErrors({
         selectedDataSources: {
-          '0': 'Invalid data source',
+          0: { code: WorkspaceFormErrorCode.InvalidDataSource, message: 'Invalid data source' },
         },
       })
     ).toEqual(1);
     expect(getNumberOfErrors({})).toEqual(0);
+  });
+  it('should return zero if errors is empty', () => {
+    expect(getNumberOfErrors({})).toEqual(0);
+  });
+  it('should return consistent name errors count', () => {
+    expect(
+      getNumberOfErrors({
+        name: {
+          code: WorkspaceFormErrorCode.WorkspaceNameMissing,
+          message: '',
+        },
+      })
+    ).toEqual(1);
+  });
+  it('should return consistent permission settings errors count', () => {
+    expect(
+      getNumberOfErrors({
+        permissionSettings: {
+          overall: {
+            code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
+            message: '',
+          },
+          fields: {
+            1: {
+              code: WorkspaceFormErrorCode.DuplicateUserIdPermissionSetting,
+              message: '',
+            },
+          },
+        },
+      })
+    ).toEqual(2);
+  });
+});
+
+describe('getNumberOfChanges', () => {
+  it('should return consistent name changes count', () => {
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+        },
+        {
+          name: 'foo',
+        }
+      )
+    ).toEqual(0);
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo1',
+        },
+        {
+          name: 'foo',
+        }
+      )
+    ).toEqual(1);
+  });
+  it('should return consistent description changes count', () => {
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          description: 'bar',
+        },
+        {
+          name: 'foo',
+          description: 'bar',
+        }
+      )
+    ).toEqual(0);
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+        },
+        {
+          name: 'foo',
+          description: 'bar',
+        }
+      )
+    ).toEqual(1);
+  });
+  it('should return consistent features changes count', () => {
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          features: ['bar'],
+        },
+        {
+          name: 'foo',
+          features: ['bar'],
+        }
+      )
+    ).toEqual(0);
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          features: [],
+        },
+        {
+          name: 'foo',
+          features: ['bar'],
+        }
+      )
+    ).toEqual(1);
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          features: ['bar'],
+        },
+        {
+          name: 'foo',
+          features: [],
+        }
+      )
+    ).toEqual(1);
+  });
+  it('should return consistent permission settings changes count', () => {
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              userId: 'user-1',
+              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
+            },
+          ],
+        },
+        {
+          name: 'foo',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              userId: 'user-1',
+              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
+            },
+          ],
+        }
+      )
+    ).toEqual(0);
+    // for remove permission setting
+    expect(
+      getNumberOfChanges(
+        {
+          name: 'foo',
+          permissionSettings: [
+            {
+              id: 0,
+              type: WorkspacePermissionItemType.User,
+              userId: 'user-1',
+              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
+            },
+            {
+              id: 1,
+              type: WorkspacePermissionItemType.Group,
+              group: 'group-1',
+              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
+            },
+          ],
+        },
+        {
+          name: 'foo',
+          /**
+           * These include three changes:
+           * 1.Remove permission setting#0
+           * 2.Modify permission setting#1
+           * 3.Add permission setting#2
+           */
+          permissionSettings: [
+            {
+              id: 1,
+              type: WorkspacePermissionItemType.Group,
+              group: 'group-1',
+              modes: [WorkspacePermissionMode.Read, WorkspacePermissionMode.LibraryWrite],
+            },
+            {
+              id: 2,
+              type: WorkspacePermissionItemType.User,
+              userId: 'user-1',
+              modes: [WorkspacePermissionMode.Write, WorkspacePermissionMode.LibraryWrite],
+            },
+          ],
+        }
+      )
+    ).toEqual(3);
   });
 });

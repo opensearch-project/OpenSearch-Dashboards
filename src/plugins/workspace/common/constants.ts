@@ -182,3 +182,5 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     ] as string[],
   },
 });
+
+export const CURRENT_USER_PLACEHOLDER = '%me%';

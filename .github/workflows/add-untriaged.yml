@@ -17,30 +17,58 @@ jobs:
             const repoOwner = context.repo.owner;
             const repoName = context.repo.repo;
             let isCollaborator = false;
+            
+            console.log(`Checking collaborator status for ${issueAuthor} in ${repoOwner}/${repoName}`);
+            
             try {
-              // Attempt to fetch user's permission level
-              await github.rest.repos.getCollaboratorPermissionLevel({
+              const { data: permissionLevel } = await github.rest.repos.getCollaboratorPermissionLevel({
                 owner: repoOwner,
                 repo: repoName,
                 username: issueAuthor,
               });
-
-              // If no error is thrown, the user is a collaborator
-              isCollaborator = true;
+              
+              console.log(`Permission level for ${issueAuthor}: ${permissionLevel.permission}`);
+              
+              if (permissionLevel.permission !== 'none') {
+                isCollaborator = true;
+                console.log(`${issueAuthor} is a collaborator with ${permissionLevel.permission} permission.`);
+              } else {
+                console.log(`${issueAuthor} has 'none' permission, considered as non-collaborator.`);
+              }
             } catch (error) {
-              // Error thrown indicates the user is not a collaborator,
-              // or does not have explicit permission set.
-              console.log(`${issueAuthor} is not a collaborator.`);
+              if (error.status === 404) {
+                console.log(`${issueAuthor} is not a collaborator (404 error).`);
+              } else {
+                console.error(`Error checking collaborator status: ${error.message}`);
+                core.setFailed(`Error checking collaborator status: ${error.message}`);
+                return;
+              }
             }
+            
             core.setOutput('is_collaborator', isCollaborator.toString());
+            console.log(`Set output is_collaborator to: ${isCollaborator.toString()}`);
+
+      - name: Debug outputs
+        run: |
+          echo "Is collaborator: ${{ steps.check-collaborator.outputs.is_collaborator }}"
+          echo "Issue author: ${{ github.event.issue.user.login }}"
+          echo "Repo: ${{ github.repository }}"
+
       - name: Apply label if not a collaborator
         if: steps.check-collaborator.outputs.is_collaborator == 'false'
         uses: actions/github-script@v6
         with:
           script: |
-            github.rest.issues.addLabels({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              labels: ['untriaged']
-            })
+            console.log('Attempting to add "untriaged" label');
+            try {
+              await github.rest.issues.addLabels({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                labels: ['untriaged']
+              });
+              console.log('Successfully added "untriaged" label');
+            } catch (error) {
+              console.error(`Error adding label: ${error.message}`);
+              core.setFailed(`Error adding label: ${error.message}`);
+            }

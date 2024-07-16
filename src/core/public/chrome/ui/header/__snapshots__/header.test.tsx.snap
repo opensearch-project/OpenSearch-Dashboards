@@ -304,6 +304,55 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  currentNavgroup$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
   customNavLink$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1739,6 +1788,7 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  navGroupEnabled={false}
   navLinks$={
     BehaviorSubject {
       "_isScalar": false,
@@ -3941,6 +3991,57 @@ exports[`Header handles visibility and lock changes 1`] = `
                 "thrownError": null,
               }
             }
+            currentNavgroup$={
+              BehaviorSubject {
+                "_isScalar": false,
+                "_value": undefined,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [
+                  Subscriber {
+                    "_parentOrParents": null,
+                    "_subscriptions": Array [
+                      SubjectSubscription {
+                        "_parentOrParents": [Circular],
+                        "_subscriptions": null,
+                        "closed": false,
+                        "subject": [Circular],
+                        "subscriber": [Circular],
+                      },
+                    ],
+                    "closed": false,
+                    "destination": SafeSubscriber {
+                      "_complete": undefined,
+                      "_context": [Circular],
+                      "_error": undefined,
+                      "_next": [Function],
+                      "_parentOrParents": null,
+                      "_parentSubscriber": [Circular],
+                      "_subscriptions": null,
+                      "closed": false,
+                      "destination": Object {
+                        "closed": true,
+                        "complete": [Function],
+                        "error": [Function],
+                        "next": [Function],
+                      },
+                      "isStopped": false,
+                      "syncErrorThrowable": false,
+                      "syncErrorThrown": false,
+                      "syncErrorValue": null,
+                    },
+                    "isStopped": false,
+                    "syncErrorThrowable": true,
+                    "syncErrorThrown": false,
+                    "syncErrorValue": null,
+                  },
+                ],
+                "thrownError": null,
+              }
+            }
+            navGroupEnabled={false}
+            navigateToApp={[MockFunction]}
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
@@ -5781,7 +5882,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                         id="headerHelpMenu"
                         isOpen={false}
                         ownFocus={true}
-                        panelPaddingSize="m"
+                        panelPaddingSize="s"
                         repositionOnScroll={true}
                       >
                         <div
@@ -7027,6 +7128,55 @@ exports[`Header renders condensed header 1`] = `
     BehaviorSubject {
       "_isScalar": false,
       "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  currentNavgroup$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -8389,6 +8539,7 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  navGroupEnabled={false}
   navLinks$={
     BehaviorSubject {
       "_isScalar": false,
@@ -9480,12 +9631,63 @@ exports[`Header renders condensed header 1`] = `
                 "thrownError": null,
               }
             }
+            currentNavgroup$={
+              BehaviorSubject {
+                "_isScalar": false,
+                "_value": undefined,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [
+                  Subscriber {
+                    "_parentOrParents": null,
+                    "_subscriptions": Array [
+                      SubjectSubscription {
+                        "_parentOrParents": [Circular],
+                        "_subscriptions": null,
+                        "closed": false,
+                        "subject": [Circular],
+                        "subscriber": [Circular],
+                      },
+                    ],
+                    "closed": false,
+                    "destination": SafeSubscriber {
+                      "_complete": undefined,
+                      "_context": [Circular],
+                      "_error": undefined,
+                      "_next": [Function],
+                      "_parentOrParents": null,
+                      "_parentSubscriber": [Circular],
+                      "_subscriptions": null,
+                      "closed": false,
+                      "destination": Object {
+                        "closed": true,
+                        "complete": [Function],
+                        "error": [Function],
+                        "next": [Function],
+                      },
+                      "isStopped": false,
+                      "syncErrorThrowable": false,
+                      "syncErrorThrown": false,
+                      "syncErrorValue": null,
+                    },
+                    "isStopped": false,
+                    "syncErrorThrowable": true,
+                    "syncErrorThrown": false,
+                    "syncErrorValue": null,
+                  },
+                ],
+                "thrownError": null,
+              }
+            }
+            navGroupEnabled={false}
+            navigateToApp={[MockFunction]}
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
                 Array [
                   Object {
-                    "data-test-subj": "breadcrumb first",
+                    "data-test-subj": "breadcrumb first last",
                     "text": "test",
                   },
                 ]
@@ -9497,7 +9699,7 @@ exports[`Header renders condensed header 1`] = `
                 breadcrumbs={
                   Array [
                     Object {
-                      "data-test-subj": "breadcrumb first",
+                      "data-test-subj": "breadcrumb first last",
                       "text": "test",
                     },
                   ]
@@ -9522,7 +9724,7 @@ exports[`Header renders condensed header 1`] = `
                         <span
                           aria-current="page"
                           className="euiBreadcrumb euiBreadcrumb--last"
-                          data-test-subj="breadcrumb first"
+                          data-test-subj="breadcrumb first last"
                           title="test"
                         >
                           test
@@ -11320,7 +11522,7 @@ exports[`Header renders condensed header 1`] = `
                         id="headerHelpMenu"
                         isOpen={false}
                         ownFocus={true}
-                        panelPaddingSize="m"
+                        panelPaddingSize="s"
                         repositionOnScroll={true}
                       >
                         <div

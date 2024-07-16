@@ -6,16 +6,20 @@
 import { renderHook, act } from '@testing-library/react-hooks';
 
 import { applicationServiceMock } from '../../../../../core/public/mocks';
-import { WorkspaceFormData } from './types';
+import { WorkspacePermissionMode } from '../../../common/constants';
+import { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
+import { WorkspaceFormData, WorkspaceFormErrorCode } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
 
-const setup = (defaultValues?: WorkspaceFormData) => {
+const setup = (defaultValues?: WorkspaceFormData, permissionEnabled = false) => {
   const onSubmitMock = jest.fn();
   const renderResult = renderHook(useWorkspaceForm, {
     initialProps: {
       application: applicationServiceMock.createStartContract(),
       defaultValues,
       onSubmit: onSubmitMock,
+      operationType: WorkspaceOperationType.Create,
+      permissionEnabled,
     },
   });
   return {
@@ -25,7 +29,7 @@ const setup = (defaultValues?: WorkspaceFormData) => {
 };
 
 describe('useWorkspaceForm', () => {
-  it('should return "Invalid workspace name" and not call onSubmit when invalid name', async () => {
+  it('should return invalid workspace name error and not call onSubmit when invalid name', async () => {
     const { renderResult, onSubmitMock } = setup({
       id: 'foo',
       name: '~',
@@ -37,7 +41,10 @@ describe('useWorkspaceForm', () => {
     });
     expect(renderResult.result.current.formErrors).toEqual(
       expect.objectContaining({
-        name: 'Invalid workspace name',
+        name: {
+          code: WorkspaceFormErrorCode.InvalidWorkspaceName,
+          message: 'Name is invalid. Enter a valid name.',
+        },
       })
     );
     expect(onSubmitMock).not.toHaveBeenCalled();
@@ -54,7 +61,50 @@ describe('useWorkspaceForm', () => {
     });
     expect(renderResult.result.current.formErrors).toEqual(
       expect.objectContaining({
-        features: 'Use case is required. Select a use case.',
+        features: {
+          code: WorkspaceFormErrorCode.UseCaseMissing,
+          message: 'Use case is required. Select a use case.',
+        },
+      })
+    );
+    expect(onSubmitMock).not.toHaveBeenCalled();
+  });
+  it('should return "Add workspace owner." and not call onSubmit', async () => {
+    const { renderResult, onSubmitMock } = setup(
+      {
+        id: 'foo',
+        name: 'test-workspace-name',
+      },
+      true
+    );
+    expect(renderResult.result.current.formErrors).toEqual({});
+
+    act(() => {
+      renderResult.result.current.setPermissionSettings([
+        {
+          id: 0,
+          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+          type: WorkspacePermissionItemType.User,
+        },
+        {
+          id: 1,
+          modes: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+          type: WorkspacePermissionItemType.Group,
+        },
+      ]);
+    });
+    act(() => {
+      renderResult.result.current.handleFormSubmit({ preventDefault: jest.fn() });
+    });
+
+    expect(renderResult.result.current.formErrors).toEqual(
+      expect.objectContaining({
+        permissionSettings: {
+          overall: {
+            code: WorkspaceFormErrorCode.PermissionSettingOwnerMissing,
+            message: 'Add a workspace owner.',
+          },
+        },
       })
     );
     expect(onSubmitMock).not.toHaveBeenCalled();

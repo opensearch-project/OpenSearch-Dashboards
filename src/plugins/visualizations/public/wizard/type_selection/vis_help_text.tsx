@@ -47,7 +47,7 @@ export const VisHelpText = ({ name, title, description, highlightMsg }: VisHelpT
       </EuiTitle>
       <EuiSpacer size="s" />
       <div id={`visTypeDescription-${name}`}>
-        <EuiText>
+        <EuiText size="s">
           {highlightMsg && (
             <p>
               <em>{highlightMsg}</em>

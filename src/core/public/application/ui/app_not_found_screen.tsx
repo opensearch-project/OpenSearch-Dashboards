@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent, EuiText } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 
@@ -48,12 +48,14 @@ export const AppNotFound = () => (
             </h2>
           }
           body={
-            <p>
-              <FormattedMessage
-                id="core.application.appNotFound.pageDescription"
-                defaultMessage="No application was found at this URL. Try going back or choosing an app from the menu."
-              />
-            </p>
+            <EuiText size="s">
+              <p>
+                <FormattedMessage
+                  id="core.application.appNotFound.pageDescription"
+                  defaultMessage="No application was found at this URL. Try going back or choosing an app from the menu."
+                />
+              </p>
+            </EuiText>
           }
         />
       </EuiPageContent>

@@ -1,5 +1,139 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`HeaderBreadcrumbs prepend current nav group into existing breadcrumbs when nav group is enabled 1`] = `
+Array [
+  <div
+    className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first"
+  >
+    <EuiInnerText>
+      <EuiLink
+        className="euiBreadcrumb"
+        color="subdued"
+        data-test-subj="breadcrumb first"
+        onClick={[Function]}
+        title="Home"
+      >
+        <button
+          className="euiLink euiLink--subdued euiBreadcrumb"
+          data-test-subj="breadcrumb first"
+          disabled={false}
+          onClick={[Function]}
+          title="Home"
+          type="button"
+        >
+          Home
+        </button>
+      </EuiLink>
+    </EuiInnerText>
+  </div>,
+  <div
+    className="euiBreadcrumbWrapper"
+  >
+    <EuiInnerText>
+      <EuiLink
+        className="euiBreadcrumb"
+        color="subdued"
+        data-test-subj="breadcrumb"
+        onClick={[Function]}
+        title="Analytics"
+      >
+        <button
+          className="euiLink euiLink--subdued euiBreadcrumb"
+          data-test-subj="breadcrumb"
+          disabled={false}
+          onClick={[Function]}
+          title="Analytics"
+          type="button"
+        >
+          Analytics
+        </button>
+      </EuiLink>
+    </EuiInnerText>
+  </div>,
+  <div
+    className="euiBreadcrumbWrapper"
+  >
+    <EuiInnerText>
+      <span
+        aria-current="false"
+        className="euiBreadcrumb"
+        data-test-subj="breadcrumb"
+        title="First"
+      >
+        First
+      </span>
+    </EuiInnerText>
+  </div>,
+  <div
+    className="euiBreadcrumbWrapper euiBreadcrumbWrapper--last"
+  >
+    <EuiInnerText>
+      <span
+        aria-current="page"
+        className="euiBreadcrumb euiBreadcrumb--last"
+        data-test-subj="breadcrumb last"
+        title="Second"
+      >
+        Second
+      </span>
+    </EuiInnerText>
+  </div>,
+]
+`;
+
+exports[`HeaderBreadcrumbs prepend current nav group into existing breadcrumbs when nav group is enabled 2`] = `
+Array [
+  <div
+    className="euiBreadcrumbWrapper euiBreadcrumbWrapper--first"
+  >
+    <EuiInnerText>
+      <EuiLink
+        className="euiBreadcrumb"
+        color="subdued"
+        data-test-subj="breadcrumb first"
+        onClick={[Function]}
+        title="Home"
+      >
+        <button
+          className="euiLink euiLink--subdued euiBreadcrumb"
+          data-test-subj="breadcrumb first"
+          disabled={false}
+          onClick={[Function]}
+          title="Home"
+          type="button"
+        >
+          Home
+        </button>
+      </EuiLink>
+    </EuiInnerText>
+  </div>,
+  <div
+    className="euiBreadcrumbWrapper euiBreadcrumbWrapper--last"
+  >
+    <EuiInnerText>
+      <EuiLink
+        className="euiBreadcrumb euiBreadcrumb--last"
+        color="text"
+        data-test-subj="breadcrumb last"
+        onClick={[Function]}
+        title="Analytics"
+      >
+        <button
+          className="euiLink euiLink--text euiBreadcrumb euiBreadcrumb--last"
+          data-test-subj="breadcrumb last"
+          disabled={false}
+          onClick={[Function]}
+          title="Analytics"
+          type="button"
+        >
+          Analytics
+        </button>
+      </EuiLink>
+    </EuiInnerText>
+  </div>,
+]
+`;
+
 exports[`HeaderBreadcrumbs renders updates to the breadcrumbs$ observable 1`] = `
 <span
   aria-current="page"

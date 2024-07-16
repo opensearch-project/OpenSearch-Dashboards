@@ -5,7 +5,11 @@
 
 import * as Rx from 'rxjs';
 import { first } from 'rxjs/operators';
-import { ChromeNavGroupService, ChromeRegistrationNavLink } from './nav_group_service';
+import {
+  ChromeNavGroupService,
+  ChromeRegistrationNavLink,
+  CURRENT_NAV_GROUP_ID,
+} from './nav_group_service';
 import { uiSettingsServiceMock } from '../../ui_settings/ui_settings_service.mock';
 import { NavLinksService } from '../nav_links';
 import { applicationServiceMock, httpServiceMock } from '../../mocks';
@@ -82,6 +86,31 @@ mockedGetNavLinks.mockReturnValue(
   ])
 );
 
+interface LooseObject {
+  [key: string]: any;
+}
+
+// Mock sessionStorage
+const sessionStorageMock = (() => {
+  let store = {} as LooseObject;
+  return {
+    getItem(key: string) {
+      return store[key] || null;
+    },
+    setItem(key: string, value: string) {
+      store[key] = value.toString();
+    },
+    removeItem(key: string) {
+      delete store[key];
+    },
+    clear() {
+      store = {};
+    },
+  };
+})();
+
+Object.defineProperty(window, 'sessionStorage', { value: sessionStorageMock });
+
 describe('ChromeNavGroupService#setup()', () => {
   it('should be able to `addNavLinksToGroup`', async () => {
     const warnMock = jest.fn();
@@ -94,6 +123,7 @@ describe('ChromeNavGroupService#setup()', () => {
     chromeNavGroupServiceSetup.addNavLinksToGroup(mockedGroupBar, [mockedGroupBar]);
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
     });
     const groupsMap = await chromeNavGroupServiceStart.getNavGroupsMap$().pipe(first()).toPromise();
     expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(2);
@@ -116,6 +146,7 @@ describe('ChromeNavGroupService#setup()', () => {
     chromeNavGroupServiceSetup.addNavLinksToGroup(mockedGroupBar, [mockedGroupBar]);
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
     });
     const groupsMap = await chromeNavGroupServiceStart.getNavGroupsMap$().pipe(first()).toPromise();
     expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(1);
@@ -172,7 +203,10 @@ describe('ChromeNavGroupService#start()', () => {
     ]);
     chromeNavGroupServiceSetup.addNavLinksToGroup(mockedGroupBar, [mockedNavLinkBar]);
 
-    const chromeStart = await chromeNavGroupService.start({ navLinks: mockedNavLinkService });
+    const chromeStart = await chromeNavGroupService.start({
+      navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
+    });
 
     const groupsMap = await chromeStart.getNavGroupsMap$().pipe(first()).toPromise();
 
@@ -196,6 +230,7 @@ describe('ChromeNavGroupService#start()', () => {
     chromeNavGroupService.setup({ uiSettings });
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
     });
 
     expect(chromeNavGroupServiceStart.getNavGroupEnabled()).toBe(true);
@@ -210,6 +245,7 @@ describe('ChromeNavGroupService#start()', () => {
     chromeNavGroupService.setup({ uiSettings });
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
     });
 
     navGroupEnabled$.next(false);
@@ -218,6 +254,109 @@ describe('ChromeNavGroupService#start()', () => {
     chromeNavGroupService.stop();
     navGroupEnabled$.next(true);
     expect(chromeNavGroupServiceStart.getNavGroupEnabled()).toBe(false);
+  });
+
+  it('should able to set current nav group', async () => {
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    const navGroupEnabled$ = new Rx.BehaviorSubject(true);
+    uiSettings.get$.mockImplementation(() => navGroupEnabled$);
+
+    const chromeNavGroupService = new ChromeNavGroupService();
+    const chromeNavGroupServiceSetup = chromeNavGroupService.setup({ uiSettings });
+
+    chromeNavGroupServiceSetup.addNavLinksToGroup(
+      {
+        id: 'foo',
+        title: 'foo title',
+        description: 'foo description',
+      },
+      [mockedNavLinkFoo]
+    );
+
+    const chromeNavGroupServiceStart = await chromeNavGroupService.start({
+      navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
+    });
+
+    // set an existing nav group id
+    chromeNavGroupServiceStart.setCurrentNavGroup('foo');
+
+    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toEqual('foo');
+
+    let currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    expect(currentNavGroup?.id).toEqual('foo');
+    expect(currentNavGroup?.title).toEqual('foo title');
+
+    // set a invalid nav group id
+    chromeNavGroupServiceStart.setCurrentNavGroup('bar');
+    currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toBeFalsy();
+    expect(currentNavGroup).toBeUndefined();
+
+    // reset current nav group
+    chromeNavGroupServiceStart.setCurrentNavGroup(undefined);
+    currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toBeFalsy();
+    expect(currentNavGroup).toBeUndefined();
+  });
+
+  it('should reset current nav group if app not belongs to any nav group', async () => {
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    const navGroupEnabled$ = new Rx.BehaviorSubject(true);
+    uiSettings.get$.mockImplementation(() => navGroupEnabled$);
+
+    const chromeNavGroupService = new ChromeNavGroupService();
+    const chromeNavGroupServiceSetup = chromeNavGroupService.setup({ uiSettings });
+
+    chromeNavGroupServiceSetup.addNavLinksToGroup(
+      {
+        id: 'foo',
+        title: 'foo title',
+        description: 'foo description',
+      },
+      [{ id: 'foo-app1' }]
+    );
+
+    const chromeNavGroupServiceStart = await chromeNavGroupService.start({
+      navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
+    });
+
+    // set an existing nav group id
+    chromeNavGroupServiceStart.setCurrentNavGroup('foo');
+
+    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toEqual('foo');
+
+    let currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    expect(currentNavGroup?.id).toEqual('foo');
+
+    // navigate to app don't belongs to any nav group
+    mockedApplicationService.navigateToApp('bar-app');
+
+    currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    // verify current nav group been reset
+    expect(currentNavGroup).toBeFalsy();
+    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toBeFalsy();
   });
 });
 
@@ -233,7 +372,10 @@ describe('nav group updater', () => {
         id: 'foo',
       },
     ]);
-    const navGroupStart = await navGroup.start({ navLinks: mockedNavLinkService });
+    const navGroupStart = await navGroup.start({
+      navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
+    });
 
     expect(await navGroupStart.getNavGroupsMap$().pipe(first()).toPromise()).toEqual({
       dataAdministration: expect.not.objectContaining({
@@ -267,7 +409,10 @@ describe('nav group updater', () => {
       status: 2,
     }));
     const unregister = navGroupSetup.registerNavGroupUpdater(appUpdater$);
-    const navGroupStart = await navGroup.start({ navLinks: mockedNavLinkService });
+    const navGroupStart = await navGroup.start({
+      navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
+    });
     expect(await navGroupStart.getNavGroupsMap$().pipe(first()).toPromise()).toEqual({
       dataAdministration: expect.objectContaining({
         status: 2,
