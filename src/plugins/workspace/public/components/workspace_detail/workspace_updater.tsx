@@ -23,10 +23,11 @@ import {
 } from '../workspace_form';
 import { getDataSourcesList } from '../../utils';
 import { DataSource } from '../../../common/types';
+import { DetailTab } from '../workspace_form/constants';
 
 export interface WorkspaceUpdaterProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
-  detailTab?: string;
+  detailTab?: DetailTab;
 }
 
 function getFormDataFromWorkspace(

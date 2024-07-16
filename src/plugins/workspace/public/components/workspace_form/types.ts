@@ -9,7 +9,7 @@ import type {
   SavedObjectsStart,
 } from '../../../../../core/public';
 import type { WorkspacePermissionMode } from '../../../common/constants';
-import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
+import type { DetailTab, WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 import { DataSource } from '../../../common/types';
 
 export interface WorkspaceUserPermissionSetting {
@@ -85,5 +85,5 @@ export interface WorkspaceFormProps {
   operationType: WorkspaceOperationType;
   workspaceConfigurableApps?: PublicAppInfo[];
   permissionEnabled?: boolean;
-  detailTab?: string;
+  detailTab?: DetailTab;
 }

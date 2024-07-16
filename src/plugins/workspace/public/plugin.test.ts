@@ -30,7 +30,7 @@ describe('Workspace plugin', () => {
       savedObjectsManagement: savedObjectManagementSetupMock,
       management: managementPluginMock.createSetupContract(),
     });
-    expect(setupMock.application.register).toBeCalledTimes(5);
+    expect(setupMock.application.register).toBeCalledTimes(4);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(savedObjectManagementSetupMock.columns.register).toBeCalledTimes(1);
   });
@@ -43,7 +43,7 @@ describe('Workspace plugin', () => {
     workspacePlugin.start(coreStart);
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
-    expect(setupMock.application.register).toBeCalledTimes(5);
+    expect(setupMock.application.register).toBeCalledTimes(4);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
   });
@@ -80,7 +80,7 @@ describe('Workspace plugin', () => {
     await workspacePlugin.setup(setupMock, {
       management: managementPluginMock.createSetupContract(),
     });
-    expect(setupMock.application.register).toBeCalledTimes(5);
+    expect(setupMock.application.register).toBeCalledTimes(4);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
     expect(setupMock.getStartServices).toBeCalledTimes(1);
@@ -150,7 +150,7 @@ describe('Workspace plugin', () => {
     expect(setupMock.chrome.registerCollapsibleNavHeader).toBeCalledTimes(1);
   });
 
-  it('#start add workspace overview page to breadcrumbs when start', async () => {
+  it('#start add workspace detail page to breadcrumbs when start', async () => {
     const startMock = coreMock.createStart();
     const workspaceObject = {
       id: 'foo',
@@ -173,7 +173,7 @@ describe('Workspace plugin', () => {
     );
   });
 
-  it('#start do not add workspace overview page to breadcrumbs when already exists', async () => {
+  it('#start do not add workspace detail page to breadcrumbs when already exists', async () => {
     const startMock = coreMock.createStart();
     const workspaceObject = {
       id: 'foo',
