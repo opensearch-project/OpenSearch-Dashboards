@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsStart } from '../../../core/public';
+import { PersistedLog, SavedObjectsStart } from '../../../core/public';
 import {
   App,
   AppCategory,
@@ -180,21 +180,6 @@ export const filterWorkspaceConfigurableApps = (applications: PublicAppInfo[]) =
   );
 
   return visibleApplications;
-};
-
-// Get recently accessed workspaces from the browser local storage.
-export const getRecentWorkspaces = (): string[] => {
-  const storedWorkspaces = localStorage.getItem(RECENT_WORKSPACES_KEY);
-  return storedWorkspaces ? JSON.parse(storedWorkspaces) : [];
-};
-
-// Set recently accessed workspace in the browser local storage.
-export const addRecentWorkspace = (newWorkspace: string) => {
-  const workspaces = getRecentWorkspaces();
-  // Put the latest visited workspace at the front.
-  const updatedWorkspaces = [newWorkspace, ...workspaces.filter((ws) => ws !== newWorkspace)];
-  localStorage.setItem(RECENT_WORKSPACES_KEY, JSON.stringify(updatedWorkspaces));
-  return updatedWorkspaces;
 };
 
 export const getDataSourcesList = (client: SavedObjectsStart['client'], workspaces: string[]) => {

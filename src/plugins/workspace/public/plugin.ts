@@ -36,11 +36,11 @@ import { ManagementSetup } from '../../../plugins/management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import {
-  addRecentWorkspace,
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
+import { recentWorkspaceManager } from './recent_workspace_manager';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -235,7 +235,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
             currentAppIdSubscription.unsubscribe();
           });
           // Add workspace id to recent workspaces.
-          addRecentWorkspace(workspaceId);
+          recentWorkspaceManager.addRecentWorkspace(workspaceId);
         })();
       }
     }
