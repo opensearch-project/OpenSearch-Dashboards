@@ -11,7 +11,7 @@ import { useGenerateQuery } from './use_generate';
 const coreSetup = coreMock.createSetup();
 const mockHttp = coreSetup.http;
 
-jest.mock('../../../../../src/plugins/opensearch_dashboards_react/public', () => ({
+jest.mock('../../../../opensearch_dashboards_react/public', () => ({
   useOpenSearchDashboards: jest.fn(),
   withOpenSearchDashboards: jest.fn((component: React.Component) => component),
 }));
