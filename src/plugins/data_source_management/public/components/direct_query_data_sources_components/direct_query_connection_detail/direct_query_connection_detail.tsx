@@ -42,6 +42,7 @@ import {
 import { AccelerationTable } from '../direct_query_acceleration_management/acceleration_table';
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import { AssociatedObjectsTab } from '../direct_query_associated_object_management/associated_objects_tab';
+import { redirectToExplorerS3 } from '../direct_query_associated_object_management/utils/associated_objects_tab_utils';
 
 interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;
@@ -71,6 +72,10 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
     status: 'ACTIVE',
   });
   const [hasAccess, setHasAccess] = useState(true);
+
+  const onclickDiscoverCard = () => {
+    redirectToExplorerS3(dataSourceName, application);
+  };
 
   // Cache loader hook
   const {
@@ -173,12 +178,12 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
             icon={<EuiIcon size="xxl" type="discoverApp" />}
             title={'Query data'}
             description="Uncover insights from your data or better understand it"
-            // onClick={onclickDiscoverCard}
-            // selectable={{
-            //   onClick: onclickDiscoverCard,
-            //   isDisabled: false,
-            //   children: 'Query in Observability Logs',
-            // }}
+            onClick={onclickDiscoverCard}
+            selectable={{
+              onClick: onclickDiscoverCard,
+              isDisabled: false,
+              children: 'Query in Observability Logs',
+            }}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
