@@ -11,6 +11,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useEffect, useState } from 'react';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import { ACCELERATION_INDEX_TYPES, DATA_SOURCE_TYPES } from '../../../../framework/constants';
 import { AssociatedObject, CachedAcceleration } from '../../../../framework/types';
 import {
@@ -32,6 +33,7 @@ interface AssociatedObjectsTableProps {
   associatedObjects: AssociatedObject[];
   cachedAccelerations: CachedAcceleration[];
   handleRefresh: () => void;
+  application: ApplicationStart;
 }
 
 interface FilterOption {
@@ -47,7 +49,13 @@ interface AssociatedTableFilter {
 }
 
 export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
-  const { datasourceName, associatedObjects, cachedAccelerations, handleRefresh } = props;
+  const {
+    datasourceName,
+    associatedObjects,
+    cachedAccelerations,
+    handleRefresh,
+    application,
+  } = props;
   const [accelerationFilterOptions, setAccelerationFilterOptions] = useState<FilterOption[]>([]);
   const [filteredObjects, setFilteredObjects] = useState<AssociatedObject[]>([]);
 
@@ -173,13 +181,14 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
               const acceleration = cachedAccelerations.find(
                 (acc) => getAccelerationName(acc) === asscObj.name
               );
-              redirectToExplorerOSIdx(acceleration!.flintIndexName);
+              redirectToExplorerOSIdx(acceleration!.flintIndexName, application);
             } else if (asscObj.type === 'table' || asscObj.type === 'skipping') {
               redirectToExplorerWithDataSrc(
                 asscObj.datasource,
                 DATA_SOURCE_TYPES.S3Glue,
                 asscObj.database,
-                asscObj.tableName
+                asscObj.tableName,
+                application
               );
             }
           },

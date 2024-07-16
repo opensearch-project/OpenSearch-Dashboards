@@ -27,7 +27,6 @@ import {
   DatasourceDetails,
   DirectQueryLoadingStatus,
 } from '../../../../framework/types';
-// import { useToast } from '../../../../../../public/components/common/toast';
 import { CatalogCacheManager } from '../../../../framework/catlog_cache/cache_manager';
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import {
@@ -55,6 +54,7 @@ export interface AssociatedObjectsTabProps {
   http: HttpStart;
   notifications: NotificationsStart;
   application: ApplicationStart;
+  dataSourceMDSId?: string;
 }
 
 export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props) => {
@@ -66,6 +66,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     notifications,
     application,
     http,
+    dataSourceMDSId,
   } = props;
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [lastUpdated, setLastUpdated] = useState(new Date().toLocaleString());
@@ -77,7 +78,6 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   const [isFirstTimeLoading, setIsFirstTimeLoading] = useState<boolean>(true);
   const [databasesLoadFailed, setDatabasesLoadFailed] = useState<boolean>(false);
   const [associatedObjectsLoadFailed, setAssociatedObjectsLoadFailed] = useState<boolean>(false);
-
   const {
     databasesLoadStatus,
     startLoadingDatabases,
@@ -420,6 +420,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                             associatedObjects={associatedObjects}
                             cachedAccelerations={cachedAccelerations}
                             handleRefresh={onRefreshButtonClick}
+                            application={application}
                           />
                         ) : (
                           <AssociatedObjectsTabEmpty cacheType="tables" />
