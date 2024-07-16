@@ -12,6 +12,7 @@ import {
   WorkspaceAttribute,
   SavedObjectsServiceStart,
   Permissions,
+  UiSettingsServiceStart,
 } from '../../../core/server';
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
@@ -48,6 +49,13 @@ export interface IWorkspaceClientImpl {
    * @public
    */
   setSavedObjects(savedObjects: SavedObjectsServiceStart): void;
+  /**
+   * Set ui settings client that will be used inside the workspace client.
+   * @param uiSettings {@link UiSettingsServiceStart}
+   * @returns void
+   * @public
+   */
+  setUiSettings(uiSettings: UiSettingsServiceStart): void;
   /**
    * Create a workspace
    * @param requestDetail {@link IRequestDetail}
