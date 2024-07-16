@@ -22,7 +22,7 @@ import { ChromeNavLink } from '../../nav_links';
 export interface CollapsibleNavTopProps {
   navLinks: ChromeNavLink[];
   navGroupsMap: Record<string, NavGroupItemInMap>;
-  currentNavgroup?: NavGroupItemInMap;
+  currentNavGroup?: NavGroupItemInMap;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   logos: Logos;
   onClickBack?: () => void;
@@ -33,7 +33,7 @@ export interface CollapsibleNavTopProps {
 export const CollapsibleNavTop = ({
   navLinks,
   navGroupsMap,
-  currentNavgroup,
+  currentNavGroup,
   navigateToApp,
   logos,
   onClickBack,
@@ -46,8 +46,8 @@ export const CollapsibleNavTop = ({
     () =>
       !shouldShrinkNavigation &&
       Object.values(navGroupsMap).filter((item) => !item.type).length > 1 &&
-      currentNavgroup,
-    [navGroupsMap, currentNavgroup, shouldShrinkNavigation]
+      currentNavGroup,
+    [navGroupsMap, currentNavGroup, shouldShrinkNavigation]
   );
 
   const shouldShowHomeLink = useMemo(() => {
@@ -56,31 +56,42 @@ export const CollapsibleNavTop = ({
     return !shouldShowBackButton;
   }, [shouldShowBackButton, homeLink, shouldShrinkNavigation]);
 
+  const homeLinkProps = useMemo(() => {
+    if (shouldShowHomeLink) {
+      const propsForHomeIcon = createEuiListItem({
+        link: homeLink as ChromeNavLink,
+        appId: 'home',
+        dataTestSubj: 'collapsibleNavHome',
+        navigateToApp,
+      });
+      return {
+        'data-test-subj': propsForHomeIcon['data-test-subj'],
+        onClick: propsForHomeIcon.onClick,
+        href: propsForHomeIcon.href,
+      };
+    }
+
+    return {};
+  }, [shouldShowHomeLink, homeLink, navigateToApp]);
+
   return (
     <div className="side-naivgation-top">
       <EuiSpacer size="s" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         {shouldShowHomeLink ? (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="l"
-              onClick={(e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-                const propsForEui = createEuiListItem({
-                  link: homeLink as ChromeNavLink,
-                  appId: 'home',
-                  dataTestSubj: 'collapsibleNavAppLink',
-                  navigateToApp,
-                });
-                propsForEui.onClick(e);
-              }}
-            >
+            <EuiButtonEmpty size="l" {...homeLinkProps}>
               <EuiIcon type={logos.Mark.url} size="l" />
             </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
         {shouldShowBackButton ? (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="l" onClick={onClickBack}>
+            <EuiButtonEmpty
+              size="l"
+              onClick={onClickBack}
+              data-test-subj="collapsibleNavBackButton"
+            >
               <EuiIcon type="arrowLeft" />
               {i18n.translate('core.ui.primaryNav.backButtonLabel', {
                 defaultMessage: 'Back',
@@ -95,6 +106,7 @@ export const CollapsibleNavTop = ({
             color="text"
             display={shouldShrinkNavigation ? 'empty' : 'base'}
             aria-label="shrink-button"
+            data-test-subj="collapsibleNavShrinkButton"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -218,10 +218,23 @@ export function CollapsibleNavGroupEnabled({
     }
 
     const navLinksForAll: ChromeRegistrationNavLink[] = [];
+
+    // Append all the links that do not have use case info to keep backward compatible
+    const linkIdsWithUseGroupInfo = Object.values(navGroupsMap).reduce((total, navGroup) => {
+      return [...total, ...navGroup.navLinks.map((navLink) => navLink.id)];
+    }, [] as string[]);
+    navLinks
+      .filter((link) => !linkIdsWithUseGroupInfo.includes(link.id))
+      .forEach((navLink) => {
+        navLinksForAll.push(navLink);
+      });
+
+    // Append all the links registered to all use case
     navGroupsMap[ALL_USE_CASE_ID]?.navLinks.forEach((navLink) => {
       navLinksForAll.push(navLink);
     });
 
+    // Append use case section into left navigation
     Object.values(navGroupsMap)
       .filter((group) => !group.type)
       .forEach((group) => {
@@ -294,7 +307,7 @@ export function CollapsibleNavGroupEnabled({
                   navigateToApp={navigateToApp}
                   logos={logos}
                   onClickBack={() => setCurrentNavGroup(undefined)}
-                  currentNavgroup={currentNavGroup}
+                  currentNavGroup={currentNavGroup}
                   shouldShrinkNavigation={!isNavOpen}
                   onClickShrink={closeNav}
                 />
