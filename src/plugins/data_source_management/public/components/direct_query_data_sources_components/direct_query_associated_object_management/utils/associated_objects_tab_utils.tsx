@@ -4,7 +4,8 @@
  */
 
 // import { coreRefs } from '../../../../../../framework/core_refs';
-import { DirectQueryLoadingStatus } from '../../../../../../../common/types/explorer';
+import { ApplicationStart } from 'opensearch-dashboards/public';
+import { DirectQueryLoadingStatus } from '../../../../../framework/types';
 import {
   DATA_SOURCE_TYPES,
   DEFAULT_DATA_SOURCE_NAME,
@@ -59,42 +60,49 @@ export const isCatalogCacheFetching = (...statuses: DirectQueryLoadingStatus[]) 
   );
 };
 
-// export const redirectToExplorerWithDataSrc = (
-//   datasourceName: string,
-//   datasourceType: string,
-//   databaseName: string,
-//   tableName: string
-// ) => {
-//   const queryIndex = `${datasourceName}.${databaseName}.${tableName}`;
-//   redirectToExplorerWithQuery(datasourceName, datasourceType, queryIndex);
-// };
+export const redirectToExplorerWithDataSrc = (
+  datasourceName: string,
+  datasourceType: string,
+  databaseName: string,
+  tableName: string,
+  application: ApplicationStart
+) => {
+  const queryIndex = `${datasourceName}.${databaseName}.${tableName}`;
+  redirectToExplorerWithQuery(datasourceName, datasourceType, queryIndex, application);
+};
 
-// export const redirectToExplorerOSIdx = (indexName: string) => {
-//   redirectToExplorerWithQuery(DEFAULT_DATA_SOURCE_NAME, DEFAULT_DATA_SOURCE_TYPE, indexName);
-// };
+export const redirectToExplorerOSIdx = (indexName: string, application: ApplicationStart) => {
+  redirectToExplorerWithQuery(
+    DEFAULT_DATA_SOURCE_NAME,
+    DEFAULT_DATA_SOURCE_TYPE,
+    indexName,
+    application
+  );
+};
 
-// export const redirectToExplorerS3 = (datasourceName: string) => {
-//   coreRefs?.application!.navigateToApp(observabilityLogsID, {
-//     path: `#/explorer`,
-//     state: {
-//       datasourceName,
-//       datasourceType: DATA_SOURCE_TYPES.S3Glue,
-//     },
-//   });
-// };
+export const redirectToExplorerS3 = (datasourceName: string, application: ApplicationStart) => {
+  application.navigateToApp(observabilityLogsID, {
+    path: `#/explorer`,
+    state: {
+      datasourceName,
+      datasourceType: DATA_SOURCE_TYPES.S3Glue,
+    },
+  });
+};
 
-// const redirectToExplorerWithQuery = (
-//   datasourceName: string,
-//   datasourceType: string,
-//   queriedIndex: string
-// ) => {
-//   // navigate to explorer
-//   coreRefs?.application!.navigateToApp(observabilityLogsID, {
-//     path: `#/explorer`,
-//     state: {
-//       datasourceName,
-//       datasourceType,
-//       queryToRun: `source = ${queriedIndex} | head 10`,
-//     },
-//   });
-// };
+const redirectToExplorerWithQuery = (
+  datasourceName: string,
+  datasourceType: string,
+  queriedIndex: string,
+  application: ApplicationStart
+) => {
+  // navigate to explorer
+  application.navigateToApp(observabilityLogsID, {
+    path: `#/explorer`,
+    state: {
+      datasourceName,
+      datasourceType,
+      queryToRun: `source = ${queriedIndex} | head 10`,
+    },
+  });
+};

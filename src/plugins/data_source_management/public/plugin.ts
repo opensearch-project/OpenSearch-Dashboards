@@ -45,9 +45,11 @@ import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_reac
 import {
   RenderAccelerationDetailsFlyoutParams,
   RenderAccelerationFlyoutParams,
+  RenderAssociatedObjectsDetailsFlyoutParams,
 } from '../framework/types';
 import { AccelerationDetailsFlyout } from './components/direct_query_data_sources_components/direct_query_acceleration_management/acceleration_details_flyout';
 import { CreateAcceleration } from './components/direct_query_data_sources_components/direct_query_acceleration_creation/create/create_acceleration';
+import { AssociatedObjectsDetailsFlyout } from './components/direct_query_data_sources_components/direct_query_associated_object_management/associated_objects_details_flyout';
 
 export const [
   getRenderAccelerationDetailsFlyout,
@@ -61,6 +63,12 @@ export const [
   setRenderCreateAccelerationFlyout,
 ] = createGetterSetter<(params: RenderAccelerationFlyoutParams) => void>(
   'renderCreateAccelerationFlyout'
+);
+export const [
+  getRenderAssociatedObjectsDetailsFlyout,
+  setRenderAssociatedObjectsDetailsFlyout,
+] = createGetterSetter<(params: RenderAssociatedObjectsDetailsFlyoutParams) => void>(
+  'renderAssociatedObjectsDetailsFlyout'
 );
 
 export interface DataSourceManagementSetupDependencies {
@@ -307,6 +315,29 @@ export class DataSourceManagementPlugin
       );
     };
     setRenderCreateAccelerationFlyout(renderCreateAccelerationFlyout);
+
+    const renderAssociatedObjectsDetailsFlyout = ({
+      tableDetail,
+      dataSourceName,
+      handleRefresh,
+      dataSourceMDSId,
+    }: RenderAssociatedObjectsDetailsFlyoutParams) => {
+      const associatedObjectsDetailsFlyout = core.overlays.openFlyout(
+        toMountPoint(
+          React.createElement(AssociatedObjectsDetailsFlyout, {
+            tableDetail,
+            datasourceName: dataSourceName,
+            resetFlyout: () => associatedObjectsDetailsFlyout.close(),
+            handleRefresh,
+            dataSourceMDSId,
+            http: core.http,
+            notifications: core.notifications,
+            application: core.application,
+          })
+        ) as MountPoint
+      );
+    };
+    setRenderAssociatedObjectsDetailsFlyout(renderAssociatedObjectsDetailsFlyout);
 
     return {
       getAuthenticationMethodRegistry: () => this.authMethodsRegistry,

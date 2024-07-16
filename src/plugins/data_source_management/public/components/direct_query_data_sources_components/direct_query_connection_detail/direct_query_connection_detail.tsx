@@ -21,12 +21,14 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 import {
+  ApplicationStart,
   HttpStart,
   IUiSettingsClient,
   NotificationsStart,
   SavedObjectsStart,
 } from 'opensearch-dashboards/public';
 import { useLocation, useParams } from 'react-router-dom';
+import { ap } from 'fp-ts/lib/Apply';
 import { DATACONNECTIONS_BASE } from '../../../constants';
 import { DirectQueryDatasourceDetails, PrometheusProperties } from '../../../types';
 import { NoAccess } from './no_access_page';
@@ -40,6 +42,7 @@ import {
 } from '../../../../framework/catlog_cache/cache_loader';
 import { AccelerationTable } from '../direct_query_acceleration_management/acceleration_table';
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
+import { AssociatedObjectsTab } from '../direct_query_associated_object_management/associated_objects_tab';
 
 interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;
@@ -47,6 +50,7 @@ interface DirectQueryDataConnectionDetailProps {
   notifications: NotificationsStart;
   savedObjects: SavedObjectsStart;
   uiSettings: IUiSettingsClient;
+  application: ApplicationStart;
   setBreadcrumbs: (breadcrumbs: any) => void;
 }
 
@@ -54,6 +58,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   featureFlagStatus,
   http,
   notifications,
+  application,
   savedObjects,
   uiSettings,
   setBreadcrumbs,
@@ -82,6 +87,8 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
     http,
     notifications
   );
+
+  const [selectedDatabase, setSelectedDatabase] = useState<string>('');
 
   const {
     loadStatus: accelerationsLoadStatus,
@@ -305,6 +312,22 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const conditionalTabs =
     datasourceDetails.connector === 'S3GLUE'
       ? [
+          {
+            id: 'associated_objects',
+            name: 'Associated Objects',
+            disabled: false,
+            content: (
+              <AssociatedObjectsTab
+                datasource={datasourceDetails}
+                cacheLoadingHooks={cacheLoadingHooks}
+                selectedDatabase={selectedDatabase}
+                setSelectedDatabase={setSelectedDatabase}
+                http={http}
+                notifications={notifications}
+                application={application}
+              />
+            ),
+          },
           {
             id: 'acceleration_table',
             name: 'Accelerations',
