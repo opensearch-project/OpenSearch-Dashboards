@@ -105,6 +105,7 @@ export {
   WORKSPACE_TYPE,
   cleanWorkspaceId,
   DEFAULT_NAV_GROUPS,
+  ALL_USE_CASE_ID,
 } from '../utils';
 export {
   AppCategory,
