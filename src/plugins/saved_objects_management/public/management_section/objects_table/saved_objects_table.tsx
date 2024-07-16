@@ -187,15 +187,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   private get workspaceIdQuery() {
-    const { availableWorkspaces, currentWorkspaceId, workspaceEnabled } = this.state;
+    const { currentWorkspaceId, workspaceEnabled } = this.state;
     // workspace is turned off
     if (!workspaceEnabled) {
       return undefined;
     } else {
-      // application home
+      // not in any workspace
       if (!currentWorkspaceId) {
-        // public workspace is virtual at this moment
-        return availableWorkspaces?.map((ws) => ws.id);
+        return undefined;
       } else {
         return [currentWorkspaceId];
       }
@@ -250,6 +249,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       typesToInclude: filteredTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
+      availiableWorkspaces: this.state.availableWorkspaces?.map((ws) => ws.id),
     });
 
     if (availableNamespaces.length) {
@@ -286,6 +286,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       typesToInclude: allowedTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
+      availiableWorkspaces: this.state.availableWorkspaces?.map((ws) => ws.id),
     });
 
     if (availableNamespaces.length) {
@@ -958,9 +959,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     if (workspaceEnabled && availableWorkspaces?.length) {
       const wsCounts = savedObjectCounts.workspaces || {};
       const wsFilterOptions = availableWorkspaces
-        .filter((ws) => {
-          return this.workspaceIdQuery?.includes(ws.id);
-        })
+        .filter((ws) => (currentWorkspaceId ? currentWorkspaceId === ws.id : true))
         .map((ws) => {
           return {
             name: ws.name,

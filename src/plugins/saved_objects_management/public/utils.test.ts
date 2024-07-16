@@ -17,4 +17,28 @@ describe('Utils', () => {
     const obj = formatWorkspaceIdParams({ foo: 'bar', workspaces: ['foo'] });
     expect(obj).toEqual({ foo: 'bar', workspaces: ['foo'] });
   });
+
+  it('formatWorkspaceIdParams with availiableWorkspaces exists', async () => {
+    const obj = formatWorkspaceIdParams({ foo: 'bar', availiableWorkspaces: ['foo'] });
+    expect(obj).toEqual({ foo: 'bar', availiableWorkspaces: ['foo'] });
+  });
+
+  it('formatWorkspaceIdParams with availiableWorkspaces is empty array', async () => {
+    const obj = formatWorkspaceIdParams({ foo: 'bar', availiableWorkspaces: [] });
+    expect(obj).toEqual({ foo: 'bar' });
+  });
+
+  it('formatWorkspaceIdParams with availiableWorkspaces is null/undefined', async () => {
+    const obj = formatWorkspaceIdParams({ foo: 'bar', availiableWorkspaces: null });
+    expect(obj).toEqual({ foo: 'bar' });
+  });
+
+  it('formatWorkspaceIdParams with both workspaces and availiableWorkspaces are not empty', async () => {
+    const obj = formatWorkspaceIdParams({
+      foo: 'bar',
+      availiableWorkspaces: ['foo', 'bar'],
+      workspaces: ['foo'],
+    });
+    expect(obj).toEqual({ foo: 'bar', availiableWorkspaces: ['foo', 'bar'], workspaces: ['foo'] });
+  });
 });
