@@ -36,7 +36,6 @@ import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
-import { CollapsedQueryBarInput } from './collapsed_query_bar';
 
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -218,6 +217,13 @@ export default class QueryEditorUI extends Component<Props, State> {
     this.setState({ lineCount: currentLineCount });
   };
 
+  private onSingleLineInputChange = (value: string) => {
+    // Replace new lines with an empty string to prevent multi-line input
+    this.onQueryStringChange(value.replace(/[\r\n]+/gm, ''));
+
+    this.setState({ lineCount: undefined });
+  };
+
   private onClickInput = (event: React.MouseEvent<HTMLTextAreaElement>) => {
     if (event.target instanceof HTMLTextAreaElement) {
       this.onQueryStringChange(event.target.value);
@@ -362,26 +368,57 @@ export default class QueryEditorUI extends Component<Props, State> {
                   isCollapsed={this.state.isCollapsed}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{this.props.prepend}</EuiFlexItem>
               {this.state.isDataSourcesVisible && (
-                <EuiFlexItem grow={false} className={`${className}__dataSourceWrapper`}>
+                <EuiFlexItem grow={2} className={`${className}__dataSourceWrapper`}>
                   <div ref={this.props.dataSourceContainerRef} />
                 </EuiFlexItem>
               )}
 
               {this.state.isDataSetsVisible && (
-                <EuiFlexItem grow={false} className={`${className}__dataSetWrapper`}>
+                <EuiFlexItem grow={2} className={`${className}__dataSetWrapper`}>
                   <div ref={this.props.containerRef} />
                 </EuiFlexItem>
               )}
               {(!this.state.isCollapsed || !useQueryEditor) && (
-                <EuiFlexItem>
-                  <CollapsedQueryBarInput
+                <EuiFlexItem grow={10}>
+                  {/* <CollapsedQueryBarInput
                     initialValue={this.getQueryString()}
                     onChange={this.onInputChange}
+                  /> */}
+
+                  <CodeEditor
+                    height={24} // Adjusted to match lineHeight for a single line
+                    languageId="opensearchql"
+                    value={this.getQueryString()}
+                    onChange={this.onSingleLineInputChange}
+                    editorDidMount={this.editorDidMount}
+                    options={{
+                      lineNumbers: 'off', // Disabled line numbers
+                      lineHeight: 24,
+                      fontSize: 14,
+                      fontFamily: 'Roboto Mono',
+                      minimap: {
+                        enabled: false,
+                      },
+                      scrollBeyondLastLine: false,
+                      wordWrap: 'off', // Disabled word wrapping
+                      wrappingIndent: 'none', // No indent since wrapping is off
+                    }}
                   />
                 </EuiFlexItem>
               )}
+              {!useQueryEditor && (
+                <EuiFlexItem grow={false}>
+                  <QueryLanguageSelector
+                    languageSelectorContainerRef={this.props.languageSelectorContainerRef}
+                    language={this.props.query.language}
+                    anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+                    onSelectLanguage={this.onSelectLanguage}
+                    appName={this.services.appName}
+                  />
+                </EuiFlexItem>
+              )}
+              <EuiFlexItem grow={1}>{this.props.prepend}</EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
 
@@ -411,11 +448,11 @@ export default class QueryEditorUI extends Component<Props, State> {
 
             <div
               ref={this.footerRef}
-              // className={
-              //   this.state.isCollapsed && useQueryEditor
-              //     ? footerClassName
-              //     : 'osdQueryEditorFooterHide'
-              // }
+              className={
+                this.state.isCollapsed && useQueryEditor
+                  ? footerClassName
+                  : 'osdQueryEditorFooterHide'
+              }
             >
               <EuiForm>
                 <EuiFormRow fullWidth>

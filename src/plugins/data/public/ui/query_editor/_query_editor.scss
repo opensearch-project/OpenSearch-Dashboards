@@ -46,6 +46,7 @@
 .osdQueryEditor__dataSetWrapper {
   .dataExplorerDSSelect {
     border-bottom: $euiBorderThin !important;
+    max-width: 375px;
 
     div:is([class$="--group"]) {
       padding: 0 !important;

@@ -378,11 +378,11 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       direction="column"
       justifyContent="flexEnd"
     >
+      <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
       {renderQueryEditor()}
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
           <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
-          <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

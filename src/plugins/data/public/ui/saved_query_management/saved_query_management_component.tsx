@@ -182,7 +182,6 @@ export function SavedQueryManagementComponent({
       data-test-subj="saved-query-management-popover-button"
     >
       <EuiIcon type="save" className="euiQuickSelectPopover__buttonText" />
-      <EuiIcon type="arrowDown" />
     </EuiButtonEmpty>
   );
 
