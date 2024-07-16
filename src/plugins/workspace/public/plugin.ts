@@ -319,7 +319,11 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     core.application.register({
       id: WORKSPACE_LIST_APP_ID,
       title: '',
-      // nav link should be visible when nav group enabled
+      /**
+       * Nav link status should be visible when nav group enabled.
+       * The page should be refreshed and all applications need to register again
+       * after nav group enabled changed.
+       */
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
