@@ -41,9 +41,19 @@ export interface AccelerationDetailsFlyoutProps {
   featureFlagStatus: boolean;
 }
 
-const fetchFields = async (http: HttpStart, index: string) => {
+const fetchFields = async (
+  http: HttpStart,
+  index: string,
+  featureFlagStatus: boolean,
+  dataSourceMDSId?: string
+) => {
+  const endpoint =
+    featureFlagStatus && dataSourceMDSId
+      ? `/api/dsl/indices.getFieldMapping/dataSourceMDSId=${dataSourceMDSId}`
+      : `/api/dsl/indices.getFieldMapping`;
+
   return http
-    .get(`/api/dsl/indices.getFieldMapping`, {
+    .get(endpoint, {
       query: {
         index,
       },
@@ -53,9 +63,19 @@ const fetchFields = async (http: HttpStart, index: string) => {
     });
 };
 
-const fetchSettings = async (http: HttpStart, index: string) => {
+const fetchSettings = async (
+  http: HttpStart,
+  index: string,
+  featureFlagStatus: boolean,
+  dataSourceMDSId?: string
+) => {
+  const endpoint =
+    featureFlagStatus && dataSourceMDSId
+      ? `/api/dsl/indices.getFieldSettings/dataSourceMDSId=${dataSourceMDSId}`
+      : `/api/dsl/indices.getFieldSettings`;
+
   return http
-    .get(`/api/dsl/indices.getFieldSettings`, {
+    .get(endpoint, {
       query: {
         index,
       },
@@ -65,9 +85,19 @@ const fetchSettings = async (http: HttpStart, index: string) => {
     });
 };
 
-const fetchIndices = async (http: HttpStart, index: string = '') => {
+const fetchIndices = async (
+  http: HttpStart,
+  index: string = '',
+  featureFlagStatus: boolean,
+  dataSourceMDSId?: string
+) => {
+  const endpoint =
+    featureFlagStatus && dataSourceMDSId
+      ? `/api/dsl/cat.indices/dataSourceMDSId=${dataSourceMDSId}`
+      : `/api/dsl/cat.indices`;
+
   return http
-    .get(`/api/dsl/cat.indices`, {
+    .get(endpoint, {
       query: {
         format: 'json',
         index,
@@ -154,9 +184,18 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
   const getAccDetail = (selectedIndex: string) => {
     Promise.all([
-      handleDetailsFetchingPromise(fetchFields(http, selectedIndex), 'getMappings'),
-      handleDetailsFetchingPromise(fetchSettings(http, selectedIndex), 'getSettings'),
-      handleDetailsFetchingPromise(fetchIndices(http, selectedIndex), 'getIndexInfo'),
+      handleDetailsFetchingPromise(
+        fetchFields(http, selectedIndex, featureFlagStatus, dataSourceMDSId),
+        'getMappings'
+      ),
+      handleDetailsFetchingPromise(
+        fetchSettings(http, selectedIndex, featureFlagStatus, dataSourceMDSId),
+        'getSettings'
+      ),
+      handleDetailsFetchingPromise(
+        fetchIndices(http, selectedIndex, featureFlagStatus, dataSourceMDSId),
+        'getIndexInfo'
+      ),
     ])
       .then((results) => {
         updateMapping(results[0]);
