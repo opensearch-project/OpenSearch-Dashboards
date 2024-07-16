@@ -82,7 +82,7 @@ export const ScriptingHelpFlyout: React.FC<ScriptingHelpFlyoutProps> = ({
   return isVisible ? (
     <EuiFlyout onClose={onClose} data-test-subj="scriptedFieldsHelpFlyout">
       <EuiFlyoutBody>
-        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} size="s" />
       </EuiFlyoutBody>
     </EuiFlyout>
   ) : null;
