@@ -1,0 +1,2 @@
+feat:
+- Add datasource readonly feature flag and disable certain routes ([#7256](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7256))
