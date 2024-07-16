@@ -7,6 +7,7 @@ import React from 'react';
 import { withOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import type { QueryEditorTopRowProps } from './query_editor_top_row';
 import type { QueryEditorProps } from './query_editor';
+import { QueryLanguageSelectorProps } from './language_selector';
 
 const Fallback = () => <div />;
 
@@ -26,3 +27,10 @@ export const QueryEditor = (props: QueryEditorProps) => (
 export type { QueryEditorProps };
 
 export { QueryEditorExtensions, QueryEditorExtensionConfig } from './query_editor_extensions';
+
+const LazyQueryLanguageSelector = React.lazy(() => import('./language_selector'));
+export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => (
+  <React.Suspense fallback={<Fallback />}>
+    <LazyQueryLanguageSelector {...props} />
+  </React.Suspense>
+);

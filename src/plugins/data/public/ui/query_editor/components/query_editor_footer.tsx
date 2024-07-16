@@ -76,16 +76,18 @@ export const QueryEditorFooter = (props: Props) => {
   uiService.Settings.setUserQueryLanguage(props.language);
 
   return (
-    <EuiComboBox
-      fullWidth
-      className="languageSelector"
-      data-test-subj="languageSelector"
-      options={languageOptions}
-      selectedOptions={[selectedLanguage]}
-      onChange={handleLanguageChange}
-      singleSelection={{ asPlainText: true }}
-      isClearable={false}
-      async
-    />
+    <div>
+      <EuiComboBox
+        fullWidth
+        className="languageSelector"
+        data-test-subj="languageSelector"
+        options={languageOptions}
+        selectedOptions={[selectedLanguage]}
+        onChange={handleLanguageChange}
+        singleSelection={{ asPlainText: true }}
+        isClearable={false}
+        async
+      />
+    </div>
   );
 };

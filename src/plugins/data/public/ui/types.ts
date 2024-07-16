@@ -10,6 +10,7 @@ import { StatefulSearchBarProps } from './search_bar';
 import { QueryEditorExtensionConfig } from './query_editor/query_editor_extensions';
 import { Settings } from './settings';
 import { SuggestionsComponentProps } from './typeahead/suggestions_component';
+import { QueryLanguageSelectorProps } from './query_editor/language_selector';
 
 export * from './settings';
 
@@ -66,6 +67,8 @@ export interface IUiStart {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
   SuggestionsComponent: React.ComponentType<SuggestionsComponentProps>;
+  QueryLanguageSelector: React.ComponentType<QueryLanguageSelectorProps>;
+  languageSelectorContainer$: Observable<HTMLDivElement | null>;
   Settings: Settings;
   dataSourceContainer$: Observable<HTMLDivElement | null>;
   dataSourceFooter$: Observable<HTMLDivElement | null>;

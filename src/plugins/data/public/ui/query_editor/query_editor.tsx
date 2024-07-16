@@ -3,12 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator, PopoverAnchorPosition } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
+  htmlIdGenerator,
+  PopoverAnchorPosition,
+} from '@elastic/eui';
 import classNames from 'classnames';
-import { isEqual } from 'lodash';
-import React, { Component, createRef, RefObject } from 'react';
+import { debounce, isEqual } from 'lodash';
+import React, { Component, createRef, RefObject, useRef } from 'react';
+import { monaco } from 'packages/osd-monaco/target';
 import { Settings } from '..';
-import { DataSource, IDataPluginServices, IIndexPattern, Query, TimeRange } from '../..';
+import {
+  DataSource,
+  IDataPluginServices,
+  IFieldType,
+  IIndexPattern,
+  Query,
+  TimeRange,
+} from '../..';
 import {
   CodeEditor,
   OpenSearchDashboardsReactContextValue,
@@ -30,6 +45,7 @@ export interface QueryEditorProps {
   container?: HTMLDivElement;
   dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
   containerRef?: React.RefCallback<HTMLDivElement>;
+  languageSelectorContainerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -66,6 +82,8 @@ interface State {
   suggestions: QuerySuggestion[];
   indexPatterns: IIndexPattern[];
   isCollapsed: boolean;
+  timeStamp: IFieldType | null;
+  lineCount: number | undefined;
 }
 
 const KEY_CODES = {
@@ -92,9 +110,11 @@ export default class QueryEditorUI extends Component<Props, State> {
     suggestions: [],
     indexPatterns: [],
     isCollapsed: true,
+    timeStamp: null,
+    lineCount: undefined,
   };
 
-  public inputRef: HTMLElement | null = null;
+  public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
@@ -103,6 +123,7 @@ export default class QueryEditorUI extends Component<Props, State> {
   private headerRef: RefObject<HTMLDivElement> = createRef();
   private bannerRef: RefObject<HTMLDivElement> = createRef();
   private footerRef: RefObject<HTMLDivElement> = createRef();
+  //private codeEditorRef: RefObject<HTMLDivElement> = createRef();
   private extensionMap = this.props.settings?.getQueryEditorExtensionMap();
 
   private getQueryString = () => {
@@ -189,6 +210,12 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   private onInputChange = (value: string) => {
     this.onQueryStringChange(value);
+
+    if (!this.inputRef) return;
+
+    const currentLineCount = this.inputRef.getModel()?.getLineCount();
+    if (this.state.lineCount === currentLineCount) return;
+    this.setState({ lineCount: currentLineCount });
   };
 
   private onClickInput = (event: React.MouseEvent<HTMLTextAreaElement>) => {
@@ -273,7 +300,8 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
-    // this.fetchIndexPatterns().then(this.updateSuggestions);
+    //this.fetchIndexPatterns();
+    //this.fetchIndexPatterns().then(this.updateTimeStampField);
     this.initDataSourcesVisibility();
     this.initDataSetsVisibility();
   }
@@ -298,6 +326,11 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
+  editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
+    this.setState({ lineCount: editor.getModel()?.getLineCount() });
+    this.inputRef = editor;
+  };
+
   public render() {
     const className = classNames(this.props.className);
     const headerClassName = classNames('osdQueryEditorHeader', this.props.headerClassName);
@@ -314,6 +347,8 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     // console.log('this.props.dataSourceContainerRef', this.props.dataSourceContainerRef);
     // console.log('this.props.containerRef', this.props.containerRef);
+    console.log('index patterns', this.props.indexPatterns);
+    console.log('timestamp', this.state.indexPatterns[0]?.timeFieldName);
 
     return (
       <div className={className}>
@@ -333,14 +368,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                   <div ref={this.props.dataSourceContainerRef} />
                 </EuiFlexItem>
               )}
-              <EuiFlexItem grow={false} className={`${className}__languageWrapper`}>
-                <QueryLanguageSelector
-                  language={this.props.query.language}
-                  anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-                  onSelectLanguage={this.onSelectLanguage}
-                  appName={this.services.appName}
-                />
-              </EuiFlexItem>
+
               {this.state.isDataSetsVisible && (
                 <EuiFlexItem grow={false} className={`${className}__dataSetWrapper`}>
                   <div ref={this.props.containerRef} />
@@ -365,6 +393,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                 languageId="opensearchql"
                 value={this.getQueryString()}
                 onChange={this.onInputChange}
+                editorDidMount={this.editorDidMount}
                 options={{
                   lineNumbers: 'on',
                   lineHeight: 24,
@@ -379,14 +408,37 @@ export default class QueryEditorUI extends Component<Props, State> {
                 }}
               />
             )}
+
             <div
               ref={this.footerRef}
-              className={
-                this.state.isCollapsed && useQueryEditor
-                  ? footerClassName
-                  : 'osdQueryEditorFooterHide'
-              }
-            />
+              // className={
+              //   this.state.isCollapsed && useQueryEditor
+              //     ? footerClassName
+              //     : 'osdQueryEditorFooterHide'
+              // }
+            >
+              <EuiForm>
+                <EuiFormRow fullWidth>
+                  <EuiFlexGroup gutterSize="s" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <QueryLanguageSelector
+                        languageSelectorContainerRef={this.props.languageSelectorContainerRef}
+                        language={this.props.query.language}
+                        anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+                        onSelectLanguage={this.onSelectLanguage}
+                        appName={this.services.appName}
+                      />
+                    </EuiFlexItem>
+
+                    <EuiFlexItem grow={false}>{this.state.lineCount}</EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {typeof this.props.indexPatterns[0] !== 'string' &&
+                        this.props.indexPatterns[0].timeFieldName}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFormRow>
+              </EuiForm>
+            </div>
           </EuiFlexItem>
 
           {this.state.isCollapsed && <EuiFlexItem grow={false}>{this.props.filterBar}</EuiFlexItem>}

@@ -50,6 +50,7 @@ interface StatefulSearchBarDeps {
   settings: Settings;
   setDataSourceContainerRef: (ref: HTMLDivElement | null) => void;
   setContainerRef: (ref: HTMLDivElement | null) => void;
+  setLanguageSelectorContainerRef: (ref: HTMLDivElement | undefined) => void;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -142,6 +143,7 @@ export function createSearchBar({
   settings,
   setDataSourceContainerRef,
   setContainerRef,
+  setLanguageSelectorContainerRef,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -180,6 +182,12 @@ export function createSearchBar({
     const dataSourceContainerRef = useCallback((node) => {
       if (node) {
         setDataSourceContainerRef(node);
+      }
+    }, []);
+
+    const languageSelectorContainerRef = useCallback((node) => {
+      if (node) {
+        setLanguageSelectorContainerRef(node);
       }
     }, []);
 
@@ -231,6 +239,7 @@ export function createSearchBar({
           settings={settings}
           dataSourceContainerRef={dataSourceContainerRef}
           containerRef={containerRef}
+          languageSelectorContainerRef={languageSelectorContainerRef}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}
