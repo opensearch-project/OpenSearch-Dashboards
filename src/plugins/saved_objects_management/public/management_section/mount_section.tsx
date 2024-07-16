@@ -69,6 +69,11 @@ export const mountManagementSection = async ({
   if (allowedObjectTypes === undefined) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
+  // Restrict user to edit data source in the saved object management page according the editMode.
+  const showDataSource = !!coreStart.application.capabilities?.dataSource?.canEdit;
+  allowedObjectTypes = showDataSource
+    ? allowedObjectTypes
+    : allowedObjectTypes.filter((type) => type !== 'data-source');
 
   coreStart.chrome.docTitle.change(title);
 
