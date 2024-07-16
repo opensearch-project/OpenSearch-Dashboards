@@ -1995,6 +1995,43 @@ exports[`Header handles visibility and lock changes 1`] = `
           "syncErrorThrown": false,
           "syncErrorValue": null,
         },
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
       ],
       "thrownError": null,
     }
@@ -2053,6 +2090,55 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
   survey="/"
+  workspaceList$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -3907,6 +3993,266 @@ exports[`Header handles visibility and lock changes 1`] = `
                       </EuiButtonEmpty>
                     </EuiHeaderSectionItemButton>
                   </HomeLoader>
+                </div>
+              </EuiHeaderSectionItem>
+              <EuiHeaderSectionItem
+                border="right"
+              >
+                <div
+                  className="euiHeaderSectionItem euiHeaderSectionItem--borderRight"
+                >
+                  <RecentItems
+                    navigateToUrl={[MockFunction]}
+                    recentlyAccessed$={
+                      BehaviorSubject {
+                        "_isScalar": false,
+                        "_value": Array [
+                          Object {
+                            "id": "dashboard",
+                            "label": "dashboard",
+                            "link": "",
+                          },
+                        ],
+                        "closed": false,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [
+                          Subscriber {
+                            "_parentOrParents": null,
+                            "_subscriptions": Array [
+                              SubjectSubscription {
+                                "_parentOrParents": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "subject": [Circular],
+                                "subscriber": [Circular],
+                              },
+                            ],
+                            "closed": false,
+                            "destination": SafeSubscriber {
+                              "_complete": undefined,
+                              "_context": [Circular],
+                              "_error": undefined,
+                              "_next": [Function],
+                              "_parentOrParents": null,
+                              "_parentSubscriber": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "destination": Object {
+                                "closed": true,
+                                "complete": [Function],
+                                "error": [Function],
+                                "next": [Function],
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": false,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": true,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                          Subscriber {
+                            "_parentOrParents": null,
+                            "_subscriptions": Array [
+                              SubjectSubscription {
+                                "_parentOrParents": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "subject": [Circular],
+                                "subscriber": [Circular],
+                              },
+                            ],
+                            "closed": false,
+                            "destination": SafeSubscriber {
+                              "_complete": undefined,
+                              "_context": [Circular],
+                              "_error": undefined,
+                              "_next": [Function],
+                              "_parentOrParents": null,
+                              "_parentSubscriber": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "destination": Object {
+                                "closed": true,
+                                "complete": [Function],
+                                "error": [Function],
+                                "next": [Function],
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": false,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": true,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                        ],
+                        "thrownError": null,
+                      }
+                    }
+                    workspaceList$={
+                      BehaviorSubject {
+                        "_isScalar": false,
+                        "_value": Array [],
+                        "closed": false,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [
+                          Subscriber {
+                            "_parentOrParents": null,
+                            "_subscriptions": Array [
+                              SubjectSubscription {
+                                "_parentOrParents": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "subject": [Circular],
+                                "subscriber": [Circular],
+                              },
+                            ],
+                            "closed": false,
+                            "destination": SafeSubscriber {
+                              "_complete": undefined,
+                              "_context": [Circular],
+                              "_error": undefined,
+                              "_next": [Function],
+                              "_parentOrParents": null,
+                              "_parentSubscriber": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "destination": Object {
+                                "closed": true,
+                                "complete": [Function],
+                                "error": [Function],
+                                "next": [Function],
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": false,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": true,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                        ],
+                        "thrownError": null,
+                      }
+                    }
+                  >
+                    <EuiPopover
+                      anchorPosition="downCenter"
+                      button={
+                        <EuiHeaderSectionItemButton
+                          data-test-subj="recentItemsSectionButton"
+                          onClick={[Function]}
+                        >
+                          <EuiIcon
+                            size="m"
+                            type="clock"
+                          />
+                        </EuiHeaderSectionItemButton>
+                      }
+                      closePopover={[Function]}
+                      display="inlineBlock"
+                      hasArrow={true}
+                      isOpen={false}
+                      ownFocus={true}
+                      panelPaddingSize="m"
+                      repositionOnScroll={true}
+                    >
+                      <div
+                        className="euiPopover euiPopover--anchorDownCenter"
+                      >
+                        <div
+                          className="euiPopover__anchor"
+                        >
+                          <EuiHeaderSectionItemButton
+                            data-test-subj="recentItemsSectionButton"
+                            onClick={[Function]}
+                          >
+                            <EuiButtonEmpty
+                              buttonRef={
+                                Object {
+                                  "current": <button
+                                    class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                    data-test-subj="recentItemsSectionButton"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        class="euiButtonEmpty__text"
+                                      >
+                                        <span
+                                          class="euiHeaderSectionItemButton__content"
+                                        >
+                                          <span
+                                            data-euiicon-type="clock"
+                                          />
+                                        </span>
+                                      </span>
+                                    </span>
+                                  </button>,
+                                }
+                              }
+                              className="euiHeaderSectionItemButton"
+                              color="text"
+                              data-test-subj="recentItemsSectionButton"
+                              onClick={[Function]}
+                            >
+                              <button
+                                className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                data-test-subj="recentItemsSectionButton"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <EuiButtonContent
+                                  className="euiButtonEmpty__content"
+                                  iconSide="left"
+                                  iconSize="m"
+                                  textProps={
+                                    Object {
+                                      "className": "euiButtonEmpty__text",
+                                    }
+                                  }
+                                >
+                                  <span
+                                    className="euiButtonContent euiButtonEmpty__content"
+                                  >
+                                    <span
+                                      className="euiButtonEmpty__text"
+                                    >
+                                      <span
+                                        className="euiHeaderSectionItemButton__content"
+                                      >
+                                        <EuiIcon
+                                          size="m"
+                                          type="clock"
+                                        >
+                                          <span
+                                            data-euiicon-type="clock"
+                                            size="m"
+                                          />
+                                        </EuiIcon>
+                                      </span>
+                                    </span>
+                                  </span>
+                                </EuiButtonContent>
+                              </button>
+                            </EuiButtonEmpty>
+                          </EuiHeaderSectionItemButton>
+                        </div>
+                      </div>
+                    </EuiPopover>
+                  </RecentItems>
                 </div>
               </EuiHeaderSectionItem>
             </div>
@@ -6387,6 +6733,43 @@ exports[`Header handles visibility and lock changes 1`] = `
               "syncErrorThrown": false,
               "syncErrorValue": null,
             },
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
           ],
           "thrownError": null,
         }
@@ -8719,11 +9102,47 @@ exports[`Header renders condensed header 1`] = `
           "syncErrorThrown": false,
           "syncErrorValue": null,
         },
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
       ],
       "thrownError": null,
     }
   }
-  setCurrentNavGroup={[MockFunction]}
   sidecarConfig$={
     BehaviorSubject {
       "_isScalar": false,
@@ -8776,7 +9195,106 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  setCurrentNavGroup={[MockFunction]}
+  sidecarConfig$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
   survey="/"
+  workspaceList$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -9574,6 +10092,260 @@ exports[`Header renders condensed header 1`] = `
                       </EuiButtonEmpty>
                     </EuiHeaderSectionItemButton>
                   </HomeLoader>
+                </div>
+              </EuiHeaderSectionItem>
+              <EuiHeaderSectionItem
+                border="right"
+              >
+                <div
+                  className="euiHeaderSectionItem euiHeaderSectionItem--borderRight"
+                >
+                  <RecentItems
+                    navigateToUrl={[MockFunction]}
+                    recentlyAccessed$={
+                      BehaviorSubject {
+                        "_isScalar": false,
+                        "_value": Array [],
+                        "closed": false,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [
+                          Subscriber {
+                            "_parentOrParents": null,
+                            "_subscriptions": Array [
+                              SubjectSubscription {
+                                "_parentOrParents": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "subject": [Circular],
+                                "subscriber": [Circular],
+                              },
+                            ],
+                            "closed": false,
+                            "destination": SafeSubscriber {
+                              "_complete": undefined,
+                              "_context": [Circular],
+                              "_error": undefined,
+                              "_next": [Function],
+                              "_parentOrParents": null,
+                              "_parentSubscriber": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "destination": Object {
+                                "closed": true,
+                                "complete": [Function],
+                                "error": [Function],
+                                "next": [Function],
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": false,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": true,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                          Subscriber {
+                            "_parentOrParents": null,
+                            "_subscriptions": Array [
+                              SubjectSubscription {
+                                "_parentOrParents": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "subject": [Circular],
+                                "subscriber": [Circular],
+                              },
+                            ],
+                            "closed": false,
+                            "destination": SafeSubscriber {
+                              "_complete": undefined,
+                              "_context": [Circular],
+                              "_error": undefined,
+                              "_next": [Function],
+                              "_parentOrParents": null,
+                              "_parentSubscriber": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "destination": Object {
+                                "closed": true,
+                                "complete": [Function],
+                                "error": [Function],
+                                "next": [Function],
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": false,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": true,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                        ],
+                        "thrownError": null,
+                      }
+                    }
+                    workspaceList$={
+                      BehaviorSubject {
+                        "_isScalar": false,
+                        "_value": Array [],
+                        "closed": false,
+                        "hasError": false,
+                        "isStopped": false,
+                        "observers": Array [
+                          Subscriber {
+                            "_parentOrParents": null,
+                            "_subscriptions": Array [
+                              SubjectSubscription {
+                                "_parentOrParents": [Circular],
+                                "_subscriptions": null,
+                                "closed": false,
+                                "subject": [Circular],
+                                "subscriber": [Circular],
+                              },
+                            ],
+                            "closed": false,
+                            "destination": SafeSubscriber {
+                              "_complete": undefined,
+                              "_context": [Circular],
+                              "_error": undefined,
+                              "_next": [Function],
+                              "_parentOrParents": null,
+                              "_parentSubscriber": [Circular],
+                              "_subscriptions": null,
+                              "closed": false,
+                              "destination": Object {
+                                "closed": true,
+                                "complete": [Function],
+                                "error": [Function],
+                                "next": [Function],
+                              },
+                              "isStopped": false,
+                              "syncErrorThrowable": false,
+                              "syncErrorThrown": false,
+                              "syncErrorValue": null,
+                            },
+                            "isStopped": false,
+                            "syncErrorThrowable": true,
+                            "syncErrorThrown": false,
+                            "syncErrorValue": null,
+                          },
+                        ],
+                        "thrownError": null,
+                      }
+                    }
+                  >
+                    <EuiPopover
+                      anchorPosition="downCenter"
+                      button={
+                        <EuiHeaderSectionItemButton
+                          data-test-subj="recentItemsSectionButton"
+                          onClick={[Function]}
+                        >
+                          <EuiIcon
+                            size="m"
+                            type="clock"
+                          />
+                        </EuiHeaderSectionItemButton>
+                      }
+                      closePopover={[Function]}
+                      display="inlineBlock"
+                      hasArrow={true}
+                      isOpen={false}
+                      ownFocus={true}
+                      panelPaddingSize="m"
+                      repositionOnScroll={true}
+                    >
+                      <div
+                        className="euiPopover euiPopover--anchorDownCenter"
+                      >
+                        <div
+                          className="euiPopover__anchor"
+                        >
+                          <EuiHeaderSectionItemButton
+                            data-test-subj="recentItemsSectionButton"
+                            onClick={[Function]}
+                          >
+                            <EuiButtonEmpty
+                              buttonRef={
+                                Object {
+                                  "current": <button
+                                    class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                    data-test-subj="recentItemsSectionButton"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        class="euiButtonEmpty__text"
+                                      >
+                                        <span
+                                          class="euiHeaderSectionItemButton__content"
+                                        >
+                                          <span
+                                            data-euiicon-type="clock"
+                                          />
+                                        </span>
+                                      </span>
+                                    </span>
+                                  </button>,
+                                }
+                              }
+                              className="euiHeaderSectionItemButton"
+                              color="text"
+                              data-test-subj="recentItemsSectionButton"
+                              onClick={[Function]}
+                            >
+                              <button
+                                className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                data-test-subj="recentItemsSectionButton"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <EuiButtonContent
+                                  className="euiButtonEmpty__content"
+                                  iconSide="left"
+                                  iconSize="m"
+                                  textProps={
+                                    Object {
+                                      "className": "euiButtonEmpty__text",
+                                    }
+                                  }
+                                >
+                                  <span
+                                    className="euiButtonContent euiButtonEmpty__content"
+                                  >
+                                    <span
+                                      className="euiButtonEmpty__text"
+                                    >
+                                      <span
+                                        className="euiHeaderSectionItemButton__content"
+                                      >
+                                        <EuiIcon
+                                          size="m"
+                                          type="clock"
+                                        >
+                                          <span
+                                            data-euiicon-type="clock"
+                                            size="m"
+                                          />
+                                        </EuiIcon>
+                                      </span>
+                                    </span>
+                                  </span>
+                                </EuiButtonContent>
+                              </button>
+                            </EuiButtonEmpty>
+                          </EuiHeaderSectionItemButton>
+                        </div>
+                      </div>
+                    </EuiPopover>
+                  </RecentItems>
                 </div>
               </EuiHeaderSectionItem>
             </div>
@@ -11958,6 +12730,43 @@ exports[`Header renders condensed header 1`] = `
           "hasError": false,
           "isStopped": false,
           "observers": Array [
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
             Subscriber {
               "_parentOrParents": null,
               "_subscriptions": Array [
