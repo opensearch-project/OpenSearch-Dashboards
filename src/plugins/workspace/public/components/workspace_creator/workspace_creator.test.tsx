@@ -47,7 +47,10 @@ const dataSourcesList = [
 
 const mockCoreStart = coreMock.createStart();
 
-const WorkspaceCreator = (props: Partial<WorkspaceCreatorProps>, isDashboardAdmin = false) => {
+const WorkspaceCreator = ({
+  isDashboardAdmin = false,
+  ...props
+}: Partial<WorkspaceCreatorProps & { isDashboardAdmin: boolean }>) => {
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
