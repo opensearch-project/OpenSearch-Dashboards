@@ -379,12 +379,16 @@ export default class QueryEditorUI extends Component<Props, State> {
                 }}
               />
             )}
-
             <div
               ref={this.footerRef}
-              className={this.state.isCollapsed ? footerClassName : 'osdQueryEditorFooterHide'}
+              className={
+                this.state.isCollapsed && useQueryEditor
+                  ? footerClassName
+                  : 'osdQueryEditorFooterHide'
+              }
             />
           </EuiFlexItem>
+
           {this.state.isCollapsed && <EuiFlexItem grow={false}>{this.props.filterBar}</EuiFlexItem>}
         </EuiFlexGroup>
         {this.renderQueryEditorExtensions()}
