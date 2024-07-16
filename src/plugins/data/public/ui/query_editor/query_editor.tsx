@@ -306,10 +306,11 @@ export default class QueryEditorUI extends Component<Props, State> {
   provideCompletionItems = async (model: monaco.editor.ITextModel, position: monaco.Position) => {
     const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
       query: this.getQueryString(),
-      selectionStart: position.column - 1,
-      selectionEnd: position.column - 1,
+      selectionStart: model.getOffsetAt(position),
+      selectionEnd: model.getOffsetAt(position),
       language: this.props.query.language,
       indexPatterns: this.state.indexPatterns,
+      position,
     });
 
     return {
@@ -317,7 +318,6 @@ export default class QueryEditorUI extends Component<Props, State> {
         ? suggestions.map((s) => ({
             label: s.text,
             kind: this.getCodeEditorSuggestionsType(s.type),
-            // kind: monaco.languages.CompletionItemKind.Text,
             insertText: s.text,
           }))
         : [],

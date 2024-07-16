@@ -48,16 +48,16 @@ const getSymbolSuggestionType = (field: string) => {
   return 'text';
 };
 
-export const getSuggestions = async ({ selectionStart, selectionEnd, query }) => {
+export const getSuggestions = async ({ position, query }) => {
   const { api } = getUiSettings();
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
-    line: 1,
-    column: selectionStart + 1,
+    line: position.lineNumber,
+    column: position.column,
   });
 
-  console.log('built in suggestions: ', suggestions);
-
   const finalSuggestions = [];
+
+  console.log('enriched suggestions: ', suggestions);
 
   // fetch columns and values
   if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
@@ -117,7 +117,7 @@ export const getSuggestions = async ({ selectionStart, selectionEnd, query }) =>
     finalSuggestions.push(
       ...suggestions.suggestKeywords!.map((sk) => ({
         text: sk.value,
-        type: getSymbolSuggestionType(sk.value),
+        type: 'keyword',
       }))
     );
   }
@@ -201,7 +201,9 @@ export const parseQuery = <
   const core = new CodeCompletionCore(parser);
   core.ignoredTokens = ignoredTokens;
   core.preferredRules = rulesToVisit;
+  console.log('cursor: ', cursor);
   const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, tokenDictionary.SPACE);
+  console.log('cursorTokenIndex: ', cursorTokenIndex);
   if (cursorTokenIndex === undefined) {
     throw new Error(
       `Could not find cursor token index for line: ${cursor.line}, column: ${cursor.column}`
@@ -210,12 +212,12 @@ export const parseQuery = <
 
   const suggestKeywords: KeywordSuggestion[] = [];
   const { tokens, rules } = core.collectCandidates(cursorTokenIndex, context);
-  console.log(
-    'core.collectCandidates(cursorTokenIndex, context): ',
-    core.collectCandidates(cursorTokenIndex, context)
-  );
+  // console.log(
+  //   'core.collectCandidates(cursorTokenIndex, context): ',
+  //   core.collectCandidates(cursorTokenIndex, context)
+  // );
   console.log('tokens: ', tokens, ' rules: ', rules);
-  console.log('getTokenTypeMap: ', parser.getTokenTypeMap());
+  // console.log('getTokenTypeMap: ', parser.getTokenTypeMap());
   tokens.forEach((_, tokenType) => {
     // Literal keyword names are quoted
     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');

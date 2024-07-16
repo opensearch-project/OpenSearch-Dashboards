@@ -157,9 +157,11 @@ function processVisitedRules(
   let shouldSuggestColumnAliases = false;
   let suggestValuesForColumn: string | undefined;
 
-  console.log('rules: ', rules);
-
   for (const [ruleId, rule] of rules) {
+    if (!isStartingToWriteRule(cursorTokenIndex, rule)) {
+      continue;
+    }
+
     switch (ruleId) {
       case OpenSearchSQLParser.RULE_tableName: {
         if (
