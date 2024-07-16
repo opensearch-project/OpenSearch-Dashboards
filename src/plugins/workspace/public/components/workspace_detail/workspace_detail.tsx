@@ -45,7 +45,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
     </EuiFlexGroup>
   );
 
-  const tabs = [
+  const detailTabs = [
     {
       id: DetailTab.Overview,
       name: i18n.translate('workspace.overview.tabTitle', {
@@ -61,7 +61,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
       content: (
         <WorkspaceUpdater
           workspaceConfigurableApps$={props.workspaceConfigurableApps$}
-          tab={DetailTab.Settings}
+          detailTab={DetailTab.Settings}
         />
       ),
     },
@@ -75,7 +75,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             content: (
               <WorkspaceUpdater
                 workspaceConfigurableApps$={props.workspaceConfigurableApps$}
-                tab={DetailTab.Collaborators}
+                detailTab={DetailTab.Collaborators}
               />
             ),
           },
@@ -92,8 +92,8 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
         <EuiPageBody>
           <EuiTabbedContent
             data-test-subj="workspaceTabs"
-            tabs={tabs}
-            initialSelectedTab={tabs[0]}
+            tabs={detailTabs}
+            initialSelectedTab={detailTabs[0]}
             autoFocus="selected"
           />
         </EuiPageBody>

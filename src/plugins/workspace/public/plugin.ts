@@ -278,7 +278,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
      */
     core.application.register({
       id: WORKSPACE_DETAIL_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceOverview', {
+      title: i18n.translate('workspace.settings.workspaceDetail', {
         defaultMessage: 'Workspace Detail',
       }),
       navLinkStatus: AppNavLinkStatus.hidden,

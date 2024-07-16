@@ -26,7 +26,7 @@ import { DataSource } from '../../../common/types';
 
 export interface WorkspaceUpdaterProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
-  tab?: string;
+  detailTab?: string;
 }
 
 function getFormDataFromWorkspace(
@@ -151,7 +151,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
               operationType={WorkspaceOperationType.Update}
               workspaceConfigurableApps={workspaceConfigurableApps}
               savedObjects={savedObjects}
-              tab={props.tab}
+              detailTab={props.detailTab}
             />
           )}
         </EuiPageContent>

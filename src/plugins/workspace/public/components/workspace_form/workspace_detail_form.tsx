@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import './workspace_detail_form.scss';
 import React, { useRef } from 'react';
-import { EuiPanel, EuiSpacer, EuiForm, EuiDescribedFormGroup } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiForm, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
 import { WorkspaceFormProps } from './types';
@@ -24,9 +25,25 @@ import {
 import { WorkspaceCreateActionPanel } from './workspace_create_action_panel';
 import { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
 
+interface FormGroupProps {
+  title: string;
+  children: React.ReactNode;
+}
+
+const FormGroup = ({ title, children }: FormGroupProps) => (
+  <EuiFlexGroup>
+    <EuiFlexItem grow={false} className="workspace-detail-form-group">
+      <EuiTitle size="xs">
+        <h3>{title}</h3>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem>{children}</EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
   const {
-    tab,
+    detailTab,
     application,
     savedObjects,
     defaultValues,
@@ -61,8 +78,8 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
         </>
       )}
       <EuiPanel>
-        {tab === DetailTab.Collaborators && (
-          <EuiDescribedFormGroup title={<h3>{usersAndPermissionsTitle}</h3>}>
+        {detailTab === DetailTab.Collaborators && (
+          <FormGroup title={usersAndPermissionsTitle}>
             <WorkspacePermissionSettingPanel
               errors={formErrors.permissionSettings?.fields}
               onChange={setPermissionSettings}
@@ -70,11 +87,11 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
               disabledUserOrGroupInputIds={disabledUserOrGroupInputIdsRef.current}
               data-test-subj={`workspaceForm-permissionSettingPanel`}
             />
-          </EuiDescribedFormGroup>
+          </FormGroup>
         )}
-        {tab === DetailTab.Settings && (
+        {detailTab === DetailTab.Settings && (
           <>
-            <EuiDescribedFormGroup title={<h3>{workspaceDetailsTitle}</h3>}>
+            <FormGroup title={workspaceDetailsTitle}>
               <EnterDetailsPanel
                 formErrors={formErrors}
                 name={formData.name}
@@ -85,24 +102,26 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
                 handleDescriptionChange={handleDescriptionChange}
                 handleColorChange={handleColorChange}
               />
-            </EuiDescribedFormGroup>
-            <EuiDescribedFormGroup title={<h3>{workspaceUseCaseTitle}</h3>}>
+            </FormGroup>
+
+            <FormGroup title={workspaceUseCaseTitle}>
               <WorkspaceUseCase
                 configurableApps={workspaceConfigurableApps}
                 value={formData.useCases}
                 onChange={handleUseCasesChange}
                 formErrors={formErrors}
               />
-            </EuiDescribedFormGroup>
-            <EuiDescribedFormGroup title={<h3>{selectDataSourceTitle}</h3>}>
+            </FormGroup>
+
+            <FormGroup title={selectDataSourceTitle}>
               <SelectDataSourcePanel
                 errors={formErrors.selectedDataSources}
                 onChange={setSelectedDataSources}
                 savedObjects={savedObjects}
                 selectedDataSources={formData.selectedDataSources}
-                data-test-subj={`workspaceForm-dataSourcePanel`}
+                data-test-subj="workspaceForm-dataSourcePanel"
               />
-            </EuiDescribedFormGroup>
+            </FormGroup>
           </>
         )}
       </EuiPanel>

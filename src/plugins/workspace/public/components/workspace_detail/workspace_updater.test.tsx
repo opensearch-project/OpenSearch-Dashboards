@@ -152,7 +152,7 @@ describe('WorkspaceUpdater', () => {
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
         workspacesService={mockedWorkspacesService}
-        tab={DetailTab.Settings}
+        detailTab={DetailTab.Settings}
       />
     );
     expect(container).toMatchInlineSnapshot(`<div />`);
@@ -162,7 +162,7 @@ describe('WorkspaceUpdater', () => {
     const { getByTestId } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        tab={DetailTab.Settings}
+        detailTab={DetailTab.Settings}
       />
     );
 
@@ -179,7 +179,7 @@ describe('WorkspaceUpdater', () => {
     const { findByText, getByTestId } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        tab={DetailTab.Settings}
+        detailTab={DetailTab.Settings}
       />
     );
     await waitFor(renderCompleted);
@@ -194,7 +194,7 @@ describe('WorkspaceUpdater', () => {
     const { getByTestId, getAllByLabelText } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        tab={DetailTab.Settings}
+        detailTab={DetailTab.Settings}
       />
     );
     await waitFor(renderCompleted);
@@ -256,7 +256,7 @@ describe('WorkspaceUpdater', () => {
     const { getByTestId, getAllByTestId } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        tab={DetailTab.Collaborators}
+        detailTab={DetailTab.Collaborators}
       />
     );
     await waitFor(() => expect(screen.queryByText('Manage access and permissions')).not.toBeNull());
@@ -303,7 +303,7 @@ describe('WorkspaceUpdater', () => {
     const { getByTestId } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        tab={DetailTab.Settings}
+        detailTab={DetailTab.Settings}
       />
     );
     await waitFor(renderCompleted);
@@ -327,7 +327,7 @@ describe('WorkspaceUpdater', () => {
     const { getByTestId } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        tab={DetailTab.Settings}
+        detailTab={DetailTab.Settings}
       />
     );
     await waitFor(renderCompleted);
@@ -350,7 +350,7 @@ describe('WorkspaceUpdater', () => {
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
         workspaceService={mockedWorkspacesService}
-        tab={DetailTab.Settings}
+        detailTab={DetailTab.Settings}
       />
     );
 
