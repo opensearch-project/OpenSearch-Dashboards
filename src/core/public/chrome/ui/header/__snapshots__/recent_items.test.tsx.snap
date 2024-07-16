@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Recent items should render base element normally 1`] = `
+<body>
+  <div>
+    <div
+      class="euiPopover euiPopover--anchorDownCenter"
+    >
+      <div
+        class="euiPopover__anchor"
+      >
+        <button
+          class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+          data-test-subj="recentItemsSectionButton"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              class="euiButtonEmpty__text"
+            >
+              <span
+                class="euiHeaderSectionItemButton__content"
+              >
+                <span
+                  data-euiicon-type="clock"
+                />
+              </span>
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</body>
+`;

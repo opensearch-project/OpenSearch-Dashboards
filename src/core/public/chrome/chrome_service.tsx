@@ -306,6 +306,7 @@ export class ChromeService {
           currentNavGroup$={navGroup.getCurrentNavGroup$()}
           navGroupsMap$={navGroup.getNavGroupsMap$()}
           setCurrentNavGroup={navGroup.setCurrentNavGroup}
+          workspaceList$={workspaces.workspaceList$}
         />
       ),
 
