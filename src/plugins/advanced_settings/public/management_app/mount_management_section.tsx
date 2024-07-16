@@ -36,7 +36,7 @@ import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
-import { EuiPage } from '@elastic/eui';
+import { EuiPageContent } from '@elastic/eui';
 import { AdvancedSettings } from './advanced_settings';
 import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
@@ -89,7 +89,15 @@ export async function mountManagementSection(
   );
 
   ReactDOM.render(
-    <I18nProvider>{params.wrapInPage ? <EuiPage>{content}</EuiPage> : content}</I18nProvider>,
+    <I18nProvider>
+      {params.wrapInPage ? (
+        <EuiPageContent hasShadow={false} hasBorder={false} color="transparent">
+          {content}
+        </EuiPageContent>
+      ) : (
+        content
+      )}
+    </I18nProvider>,
     params.element
   );
   return () => {

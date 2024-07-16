@@ -33,7 +33,7 @@ import ReactDOM from 'react-dom';
 import { Router, Switch, Route } from 'react-router-dom';
 import { I18nProvider } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
-import { EuiLoadingSpinner, EuiPage } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiPageContent } from '@elastic/eui';
 import { CoreSetup } from 'src/core/public';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { ManagementAppMountParams } from '../../../management/public';
@@ -123,7 +123,15 @@ export const mountManagementSection = async ({
   );
 
   ReactDOM.render(
-    <I18nProvider>{mountParams.wrapInPage ? <EuiPage>{content}</EuiPage> : content}</I18nProvider>,
+    <I18nProvider>
+      {mountParams.wrapInPage ? (
+        <EuiPageContent hasShadow={false} hasBorder={false} color="transparent">
+          {content}
+        </EuiPageContent>
+      ) : (
+        content
+      )}
+    </I18nProvider>,
     element
   );
 

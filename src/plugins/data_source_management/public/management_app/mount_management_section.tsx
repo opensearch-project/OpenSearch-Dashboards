@@ -10,7 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
-import { EuiPage } from '@elastic/eui';
+import { EuiPageContent } from '@elastic/eui';
 import { ManagementAppMountParams } from '../../../management/public';
 
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
@@ -77,7 +77,15 @@ export async function mountManagementSection(
 
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>
-      <I18nProvider>{params.wrapInPage ? <EuiPage>{content}</EuiPage> : content}</I18nProvider>
+      <I18nProvider>
+        {params.wrapInPage ? (
+          <EuiPageContent hasShadow={false} hasBorder={false} color="transparent">
+            {content}
+          </EuiPageContent>
+        ) : (
+          content
+        )}
+      </I18nProvider>
     </OpenSearchDashboardsContextProvider>,
     params.element
   );
