@@ -296,6 +296,7 @@ export function Tabs({ indexPattern, saveIndexPattern, fields, history, location
         setSelectedTabId(tab.id);
         syncingStateFunc.setCurrentTab(tab.id);
       }}
+      size="s"
     />
   );
 }
