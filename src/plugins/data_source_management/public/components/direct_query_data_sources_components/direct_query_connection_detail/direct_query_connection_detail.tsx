@@ -28,7 +28,6 @@ import {
   SavedObjectsStart,
 } from 'opensearch-dashboards/public';
 import { useLocation, useParams } from 'react-router-dom';
-import { ap } from 'fp-ts/lib/Apply';
 import { DATACONNECTIONS_BASE } from '../../../constants';
 import { DirectQueryDatasourceDetails, PrometheusProperties } from '../../../types';
 import { NoAccess } from './no_access_page';
@@ -48,8 +47,6 @@ interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;
   http: HttpStart;
   notifications: NotificationsStart;
-  savedObjects: SavedObjectsStart;
-  uiSettings: IUiSettingsClient;
   application: ApplicationStart;
   setBreadcrumbs: (breadcrumbs: any) => void;
 }
@@ -59,8 +56,6 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   http,
   notifications,
   application,
-  savedObjects,
-  uiSettings,
   setBreadcrumbs,
 }) => {
   const { dataSourceName } = useParams<{ dataSourceName: string }>();
@@ -203,7 +198,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
                 icon={<EuiIcon size="xxl" type="discoverApp" />}
                 title={'Query data'}
                 description="Query your data in Metrics Analytics."
-                // onClick={() => application!.navigateToApp(observabilityMetricsID)}
+                onClick={() => application.navigateToApp('observability-metrics')}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -325,6 +320,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
                 http={http}
                 notifications={notifications}
                 application={application}
+                dataSourceMDSId={featureFlagStatus ? dataSourceMDSId ?? undefined : undefined}
               />
             ),
           },

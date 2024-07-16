@@ -34,6 +34,7 @@ interface AssociatedObjectsTableProps {
   cachedAccelerations: CachedAcceleration[];
   handleRefresh: () => void;
   application: ApplicationStart;
+  dataSourceMDSId?: string;
 }
 
 interface FilterOption {
@@ -55,6 +56,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
     cachedAccelerations,
     handleRefresh,
     application,
+    dataSourceMDSId,
   } = props;
   const [accelerationFilterOptions, setAccelerationFilterOptions] = useState<FilterOption[]>([]);
   const [filteredObjects, setFilteredObjects] = useState<AssociatedObject[]>([]);
@@ -75,6 +77,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
                 tableDetail: item,
                 dataSourceName: datasourceName,
                 handleRefresh,
+                dataSourceMDSId,
               });
             } else {
               const acceleration = cachedAccelerations.find((acc) => acc.indexName === item.id);
@@ -82,6 +85,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
                 renderAccelerationDetailsFlyout({
                   acceleration,
                   dataSourceName: datasourceName,
+                  dataSourceMDSId,
                 });
               }
             }
@@ -121,6 +125,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
                     acceleration: accelerations[0],
                     dataSourceName: datasourceName,
                     handleRefresh,
+                    dataSourceMDSId,
                   })
                 }
               >
@@ -135,6 +140,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
                   tableDetail: obj,
                   dataSourceName: datasourceName,
                   handleRefresh,
+                  dataSourceMDSId,
                 })
               }
             >
@@ -149,6 +155,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
                   tableDetail: accelerations,
                   dataSourceName: datasourceName,
                   handleRefresh,
+                  dataSourceMDSId,
                 })
               }
             >
@@ -212,6 +219,7 @@ export const AssociatedObjectsTable = (props: AssociatedObjectsTableProps) => {
               databaseName: item.database,
               tableName: item.tableName,
               handleRefresh,
+              dataSourceMDSId,
             }),
         },
       ],

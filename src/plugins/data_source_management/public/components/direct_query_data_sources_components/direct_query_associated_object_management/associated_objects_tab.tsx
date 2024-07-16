@@ -421,6 +421,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
                             cachedAccelerations={cachedAccelerations}
                             handleRefresh={onRefreshButtonClick}
                             application={application}
+                            dataSourceMDSId={dataSourceMDSId}
                           />
                         ) : (
                           <AssociatedObjectsTabEmpty cacheType="tables" />
