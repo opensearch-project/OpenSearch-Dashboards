@@ -29,6 +29,11 @@ interface ConfigMapEntry {
   configBlob: ConfigBlob;
 }
 
+/**
+ * This is the default client DAO when "dynamic_config_service.enabled: true" and no plugin has registered a DAO factory.
+ * This client will fetch configs from .opensearch_dashboards_config alias.
+ * The alias is important as it will always point to the latest "version" of the config index
+ */
 export class OpenSearchConfigStoreClient implements IDynamicConfigStoreClient {
   readonly #openSearchClient: OpenSearchClient;
   readonly #cache: Map<string, ConfigObject | undefined> = new Map();
