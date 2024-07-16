@@ -14,7 +14,9 @@ import {
 import { dynamicConfigurationClientMock } from '../configuration_client.mock';
 
 /**
- * Config store client that returns nothing, which will cause the dynamic config service to return static configs only.
+ * The DummyConfigStoreClient is the client DAO that will used when dynamic config service is "disabled".
+ * The client will return nothing, which will cause the dynamic config service to return static configs only.
+ * It is important to note that the DynamicConfigService will always exist as it's a core service.
  */
 export class DummyConfigStoreClient implements IDynamicConfigStoreClient {
   public async listConfigs(options?: DynamicConfigurationClientOptions | undefined) {
