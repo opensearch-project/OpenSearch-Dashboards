@@ -49,6 +49,7 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
     defaultValues,
     operationType,
     workspaceConfigurableApps,
+    dataSourceManagement: isDataSourceEnabled,
   } = props;
   const {
     formId,
@@ -64,6 +65,8 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
     setSelectedDataSources,
     handleDescriptionChange,
   } = useWorkspaceForm(props);
+
+  const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin ?? false;
 
   const disabledUserOrGroupInputIdsRef = useRef(
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []
@@ -113,15 +116,17 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
               />
             </FormGroup>
 
-            <FormGroup title={selectDataSourceTitle}>
-              <SelectDataSourcePanel
-                errors={formErrors.selectedDataSources}
-                onChange={setSelectedDataSources}
-                savedObjects={savedObjects}
-                selectedDataSources={formData.selectedDataSources}
-                data-test-subj="workspaceForm-dataSourcePanel"
-              />
-            </FormGroup>
+            {isDashboardAdmin && isDataSourceEnabled && (
+              <FormGroup title={selectDataSourceTitle}>
+                <SelectDataSourcePanel
+                  errors={formErrors.selectedDataSources}
+                  onChange={setSelectedDataSources}
+                  savedObjects={savedObjects}
+                  selectedDataSources={formData.selectedDataSources}
+                  data-test-subj="workspaceForm-dataSourcePanel"
+                />
+              </FormGroup>
+            )}
           </>
         )}
       </EuiPanel>
