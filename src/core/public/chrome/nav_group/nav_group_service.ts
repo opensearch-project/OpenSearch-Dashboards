@@ -25,6 +25,11 @@ export interface ChromeRegistrationNavLink {
    * link with parentNavLinkId field will be displayed as nested items in navigation.
    */
   parentNavLinkId?: string;
+
+  /**
+   * If the nav link should be shown in 'all' nav group
+   */
+  showInAllNavGroup?: boolean;
 }
 
 export type NavGroupItemInMap = ChromeNavGroup & {
