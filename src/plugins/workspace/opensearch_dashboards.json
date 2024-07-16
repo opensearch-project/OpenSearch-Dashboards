@@ -7,6 +7,6 @@
     "savedObjects",
     "opensearchDashboardsReact"
   ],
-  "optionalPlugins": ["savedObjectsManagement","management"],
+  "optionalPlugins": ["savedObjectsManagement","management","dataSourceManagement"],
   "requiredBundles": ["opensearchDashboardsReact"]
 }

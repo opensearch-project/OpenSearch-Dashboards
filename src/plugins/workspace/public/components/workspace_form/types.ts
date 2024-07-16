@@ -11,6 +11,7 @@ import type {
 import type { WorkspacePermissionMode } from '../../../common/constants';
 import type { DetailTab, WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 import { DataSource } from '../../../common/types';
+import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 
 export interface WorkspaceUserPermissionSetting {
   id: number;
@@ -86,4 +87,5 @@ export interface WorkspaceFormProps {
   workspaceConfigurableApps?: PublicAppInfo[];
   permissionEnabled?: boolean;
   detailTab?: DetailTab;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }

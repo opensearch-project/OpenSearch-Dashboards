@@ -113,7 +113,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     const globalConfig = await this.globalConfig$.pipe(first()).toPromise();
     const isPermissionControlEnabled = globalConfig.savedObjects.permission.enabled === true;
 
-    this.client = new WorkspaceClient(core);
+    this.client = new WorkspaceClient(core, this.logger);
 
     await this.client.setup(core);
 
@@ -176,6 +176,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     this.logger.debug('Starting Workspace service');
     this.permissionControl?.setup(core.savedObjects.getScopedClient, core.http.auth);
     this.client?.setSavedObjects(core.savedObjects);
+    this.client?.setUiSettings(core.uiSettings);
     this.workspaceConflictControl?.setSerializer(core.savedObjects.createSerializer());
     this.workspaceSavedObjectsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);
     this.workspaceUiSettingsClientWrapper?.setScopedClient(core.savedObjects.getScopedClient);

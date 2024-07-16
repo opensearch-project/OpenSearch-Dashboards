@@ -24,6 +24,7 @@ import {
 import { getDataSourcesList } from '../../utils';
 import { DataSource } from '../../../common/types';
 import { DetailTab } from '../workspace_form/constants';
+import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 
 export interface WorkspaceUpdaterProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
@@ -50,8 +51,19 @@ type FormDataFromWorkspace = ReturnType<typeof getFormDataFromWorkspace> & {
 
 export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   const {
-    services: { application, workspaces, notifications, http, workspaceClient, savedObjects },
-  } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
+    services: {
+      application,
+      workspaces,
+      notifications,
+      http,
+      workspaceClient,
+      savedObjects,
+      dataSourceManagement,
+    },
+  } = useOpenSearchDashboards<{
+    workspaceClient: WorkspaceClient;
+    dataSourceManagement?: DataSourceManagementPluginSetup;
+  }>();
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const workspaceConfigurableApps = useObservable(
@@ -153,6 +165,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
               workspaceConfigurableApps={workspaceConfigurableApps}
               savedObjects={savedObjects}
               detailTab={props.detailTab}
+              dataSourceManagement={dataSourceManagement}
             />
           )}
         </EuiPageContent>

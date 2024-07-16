@@ -15,9 +15,11 @@ import {
   SharedGlobalConfig,
   Permissions,
   SavedObjectsClientContract,
+  IUiSettingsClient,
 } from '../../../core/server';
 import { AuthInfo } from './types';
 import { updateWorkspaceState } from '../../../core/server/utils';
+import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
 import { CURRENT_USER_PLACEHOLDER } from '../common/constants';
 
 /**
@@ -135,4 +137,26 @@ export const getDataSourcesList = (client: SavedObjectsClientContract, workspace
         return [];
       }
     });
+};
+
+export const checkAndSetDefaultDataSource = async (
+  uiSettingsClient: IUiSettingsClient,
+  dataSources: string[],
+  needCheck: boolean
+) => {
+  if (dataSources?.length > 0) {
+    if (!needCheck) {
+      // Create# Will set first data source as default data source.
+      await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
+    } else {
+      // Update will check if default DS still exists.
+      const defaultDSId = (await uiSettingsClient.get(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)) ?? '';
+      if (!dataSources.includes(defaultDSId)) {
+        await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
+      }
+    }
+  } else {
+    // If there is no data source left, clear workspace level default data source.
+    await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, undefined);
+  }
 };
