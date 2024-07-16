@@ -5,9 +5,9 @@
 
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import React from 'react';
-import { DATACONNECTIONS_BASE, DATACONNECTIONS_UPDATE_STATUS, EDIT } from '../../../constants';
-import { DataSourceManagementContext, DirectQueryDatasourceDetails } from '../../../types';
-import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
+import { DATACONNECTIONS_BASE, DATACONNECTIONS_UPDATE_STATUS, EDIT } from '../../../../constants';
+import { DataSourceManagementContext, DirectQueryDatasourceDetails } from '../../../../types';
+import { useOpenSearchDashboards } from '../../../../../../opensearch_dashboards_react/public';
 
 interface InactiveDataConnectionCalloutProps {
   datasourceDetails: DirectQueryDatasourceDetails;

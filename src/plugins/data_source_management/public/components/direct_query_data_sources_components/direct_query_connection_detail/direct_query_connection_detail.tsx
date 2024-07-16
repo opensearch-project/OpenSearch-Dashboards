@@ -30,8 +30,8 @@ import {
 import { useLocation, useParams } from 'react-router-dom';
 import { DATACONNECTIONS_BASE } from '../../../constants';
 import { DirectQueryDatasourceDetails, PrometheusProperties } from '../../../types';
-import { NoAccess } from './no_access_page';
-import { InactiveDataConnectionCallout } from './inactive_data_connection_callout';
+import { NoAccess } from './utils/no_access_page';
+import { InactiveDataConnectionCallout } from './utils/inactive_data_connection_callout';
 import { AccessControlTab } from './access_control_tab';
 import { getManageDirectQueryDataSourceBreadcrumbs } from '../../breadcrumbs';
 import {

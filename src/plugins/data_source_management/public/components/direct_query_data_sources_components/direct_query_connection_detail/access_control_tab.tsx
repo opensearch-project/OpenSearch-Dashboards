@@ -13,12 +13,12 @@ import {
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { EuiPanel } from '@elastic/eui';
-import { ConnectionManagementCallout } from './connection_management_callout';
+import { ConnectionManagementCallout } from './utils/connection_management_callout';
 import { DataSourceManagementContext, Role } from '../../../types';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { QueryPermissionsConfiguration } from '../direct_query_data_source_configuration/query_permissions';
 import { DATACONNECTIONS_BASE, EDIT, SECURITY_ROLES } from '../../../constants';
-import { SaveOrCancel } from './save_or_cancel';
+import { SaveOrCancel } from './utils/save_or_cancel';
 
 interface AccessControlTabProps {
   dataConnection: string;
