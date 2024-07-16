@@ -22,6 +22,7 @@ export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
   const dispatch = useTypedDispatch();
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
+  const [selectedCluster, setSelectedCluster] = useState<any>();
   const [indexPatternOptionList, setIndexPatternOptionList] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
@@ -34,6 +35,7 @@ export const Sidebar: FC = ({ children }) => {
       data: { indexPatterns, dataSources, ui },
       notifications: { toasts },
       application,
+      savedObjects,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
@@ -177,6 +179,7 @@ export const Sidebar: FC = ({ children }) => {
 
   const dataSetNavigator = (
     <DataSetNavigator
+      savedObjectsClient={savedObjects.client}
       dataSources={activeDataSources}
       indexPatternOptionList={indexPatternOptionList}
       selectedSources={selectedSources}
