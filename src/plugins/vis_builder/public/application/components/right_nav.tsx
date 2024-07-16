@@ -10,6 +10,7 @@ import {
   EuiIcon,
   IconType,
   EuiConfirmModal,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -103,12 +104,14 @@ export const RightNavUI = () => {
           maxWidth="300px"
           data-test-subj="confirmVisChangeModal"
         >
-          <p>
-            <FormattedMessage
-              id="visBuilder.rightNav.changeVisType.modalDescription"
-              defaultMessage="Certain field configurations may be lost when changing visualization types and you may need to reconfigure those fields. Do you want to continue?"
-            />
-          </p>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="visBuilder.rightNav.changeVisType.modalDescription"
+                defaultMessage="Certain field configurations may be lost when changing visualization types and you may need to reconfigure those fields. Do you want to continue?"
+              />
+            </p>
+          </EuiText>
         </EuiConfirmModal>
       )}
     </section>

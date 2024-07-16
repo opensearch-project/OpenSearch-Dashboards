@@ -220,8 +220,10 @@ exports[`dashboard listing hideWriteControls 1`] = `
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -1097,15 +1099,19 @@ exports[`dashboard listing hideWriteControls 1`] = `
               <EuiEmptyPrompt
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Looks like you don't have any dashboards."
-                      id="dashboard.listing.noItemsMessage"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Looks like you don't have any dashboards."
+                        id="dashboard.listing.noItemsMessage"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -1400,8 +1406,10 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -2296,7 +2304,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                   <EuiButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -2338,15 +2346,19 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -2641,8 +2653,10 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3537,7 +3551,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                   <EuiButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -3579,15 +3593,19 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -3882,8 +3900,10 @@ exports[`dashboard listing renders table rows 1`] = `
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -4778,7 +4798,7 @@ exports[`dashboard listing renders table rows 1`] = `
                   <EuiButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -4820,15 +4840,19 @@ exports[`dashboard listing renders table rows 1`] = `
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }
@@ -5123,8 +5147,10 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -6019,7 +6045,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                   <EuiButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
-                    iconType="plusInCircle"
+                    iconType="plus"
                     onClick={[Function]}
                   >
                     <FormattedMessage
@@ -6061,15 +6087,19 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                 }
                 iconType="dashboardApp"
                 title={
-                  <h1
-                    id="dashboardListingHeading"
+                  <EuiText
+                    size="s"
                   >
-                    <FormattedMessage
-                      defaultMessage="Create your first dashboard"
-                      id="dashboard.listing.createNewDashboard.title"
-                      values={Object {}}
-                    />
-                  </h1>
+                    <h1
+                      id="dashboardListingHeading"
+                    >
+                      <FormattedMessage
+                        defaultMessage="Create your first dashboard"
+                        id="dashboard.listing.createNewDashboard.title"
+                        values={Object {}}
+                      />
+                    </h1>
+                  </EuiText>
                 }
               />
             }

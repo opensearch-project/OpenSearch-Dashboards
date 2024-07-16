@@ -177,6 +177,7 @@ export const HeaderUserThemeMenu = () => {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       anchorPosition="downLeft"
+      panelPaddingSize="s"
     >
       <EuiPopoverTitle>
         <h2>

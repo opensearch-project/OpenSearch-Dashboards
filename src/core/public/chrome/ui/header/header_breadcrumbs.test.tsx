@@ -38,7 +38,13 @@ describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
     const wrapper = mount(
-      <HeaderBreadcrumbs appTitle$={new BehaviorSubject('')} breadcrumbs$={breadcrumbs$} />
+      <HeaderBreadcrumbs
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+        navGroupEnabled={false}
+        currentNavgroup$={new BehaviorSubject(undefined)}
+        navigateToApp={jest.fn()}
+      />
     );
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
 
@@ -49,5 +55,39 @@ describe('HeaderBreadcrumbs', () => {
     act(() => breadcrumbs$.next([]));
     wrapper.update();
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
+  });
+
+  it('prepend current nav group into existing breadcrumbs when nav group is enabled', () => {
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
+    const currentNavgroup$ = new BehaviorSubject({
+      id: 'analytics',
+      title: 'Analytics',
+      description: '',
+      navLinks: [],
+    });
+    const wrapper = mount(
+      <HeaderBreadcrumbs
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+        navGroupEnabled={true}
+        currentNavgroup$={currentNavgroup$}
+        navigateToApp={jest.fn()}
+      />
+    );
+    const breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
+    expect(breadcrumbs).toHaveLength(3);
+    expect(breadcrumbs.at(0).text()).toBe('Home');
+    expect(breadcrumbs.at(1).text()).toBe('Analytics');
+    expect(breadcrumbs.at(2).text()).toBe('First');
+
+    act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
+    wrapper.update();
+    expect(wrapper.find('.euiBreadcrumbWrapper')).toMatchSnapshot();
+    expect(wrapper.find('.euiBreadcrumbWrapper')).toHaveLength(4);
+
+    act(() => breadcrumbs$.next([]));
+    wrapper.update();
+    expect(wrapper.find('.euiBreadcrumbWrapper')).toMatchSnapshot();
+    expect(wrapper.find('.euiBreadcrumbWrapper')).toHaveLength(2);
   });
 });

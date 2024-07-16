@@ -93,7 +93,11 @@ export class EmbeddableRoot extends React.Component<Props> {
       <React.Fragment>
         <div ref={this.root} />
         {this.props.loading && <EuiLoadingSpinner data-test-subj="embedSpinner" />}
-        {this.props.error && <EuiText data-test-subj="embedError">{this.props.error}</EuiText>}
+        {this.props.error && (
+          <EuiText size="s" data-test-subj="embedError">
+            {this.props.error}
+          </EuiText>
+        )}
       </React.Fragment>
     );
   }

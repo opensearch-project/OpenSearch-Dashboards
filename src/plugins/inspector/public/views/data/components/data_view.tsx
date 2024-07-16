@@ -158,7 +158,7 @@ export class DataViewComponent extends Component<DataViewComponentProps, DataVie
           <EuiPanel className="eui-textCenter">
             <EuiLoadingChart size="m" />
             <EuiSpacer size="s" />
-            <EuiText>
+            <EuiText size="s">
               <p>
                 <FormattedMessage
                   id="inspector.data.gatheringDataLabel"

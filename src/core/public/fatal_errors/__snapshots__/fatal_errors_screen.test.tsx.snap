@@ -43,13 +43,17 @@ exports[`FatalErrorsScreen rendering render matches snapshot 1`] = `
           ]
         }
         body={
-          <p>
-            <FormattedMessage
-              defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or clear your session data."
-              id="core.fatalErrors.tryRefreshingPageDescription"
-              values={Object {}}
-            />
-          </p>
+          <EuiText
+            size="s"
+          >
+            <p>
+              <FormattedMessage
+                defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or clear your session data."
+                id="core.fatalErrors.tryRefreshingPageDescription"
+                values={Object {}}
+              />
+            </p>
+          </EuiText>
         }
         iconColor="danger"
         iconType="alert"

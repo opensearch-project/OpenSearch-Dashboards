@@ -157,7 +157,9 @@ export function SaveQueryForm({
   const saveQueryForm = (
     <EuiForm isInvalid={hasErrors} error={formErrors} data-test-subj="saveQueryForm">
       <EuiFormRow>
-        <EuiText color="subdued">{savedQueryDescriptionText}</EuiText>
+        <EuiText size="s" color="subdued">
+          {savedQueryDescriptionText}
+        </EuiText>
       </EuiFormRow>
       <EuiFormRow
         label={i18n.translate('data.search.searchBar.savedQueryNameLabelText', {
@@ -232,9 +234,13 @@ export function SaveQueryForm({
     <EuiModal onClose={onClose} initialFocus="[name=title]">
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
-            defaultMessage: 'Save query',
-          })}
+          <EuiText size="s">
+            <h2>
+              {i18n.translate('data.search.searchBar.savedQueryFormTitle', {
+                defaultMessage: 'Save query',
+              })}
+            </h2>
+          </EuiText>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
 

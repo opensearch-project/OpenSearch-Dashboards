@@ -37,6 +37,7 @@ import {
   EuiPage,
   EuiPageBody,
   EuiPageContent,
+  EuiText,
 } from '@elastic/eui';
 import React from 'react';
 import * as Rx from 'rxjs';
@@ -113,13 +114,15 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
                 </h2>
               }
               body={
-                <p>
-                  <FormattedMessage
-                    id="core.fatalErrors.tryRefreshingPageDescription"
-                    defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="core.fatalErrors.tryRefreshingPageDescription"
+                      defaultMessage="Try refreshing the page. If that doesn't work, go back to the previous page or
                     clear your session data."
-                  />
-                </p>
+                    />
+                  </p>
+                </EuiText>
               }
               actions={[
                 <EuiButton
