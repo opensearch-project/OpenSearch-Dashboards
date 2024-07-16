@@ -14,17 +14,10 @@ interface QueryEditorExtensionsProps extends QueryEditorExtensionDependencies {
   configMap?: Record<string, QueryEditorExtensionConfig>;
   componentContainer: Element;
   bannerContainer: Element;
-  footerContainer: Element;
 }
 
 const QueryEditorExtensions: React.FC<QueryEditorExtensionsProps> = React.memo((props) => {
-  const {
-    configMap,
-    componentContainer,
-    bannerContainer,
-    footerContainer,
-    ...dependencies
-  } = props;
+  const { configMap, componentContainer, bannerContainer, ...dependencies } = props;
 
   const sortedConfigs = useMemo(() => {
     if (!configMap || Object.keys(configMap).length === 0) return [];
@@ -40,7 +33,6 @@ const QueryEditorExtensions: React.FC<QueryEditorExtensionsProps> = React.memo((
           dependencies={dependencies}
           componentContainer={componentContainer}
           bannerContainer={bannerContainer}
-          footerContainer={footerContainer}
         />
       ))}
     </>

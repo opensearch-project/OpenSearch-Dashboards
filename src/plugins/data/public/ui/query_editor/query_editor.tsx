@@ -161,7 +161,6 @@ export default class QueryEditorUI extends Component<Props, State> {
       !(
         this.headerRef.current &&
         this.bannerRef.current &&
-        this.footerRef.current &&
         this.props.queryLanguage &&
         this.extensionMap &&
         Object.keys(this.extensionMap).length > 0
@@ -175,7 +174,6 @@ export default class QueryEditorUI extends Component<Props, State> {
         configMap={this.extensionMap}
         componentContainer={this.headerRef.current}
         bannerContainer={this.bannerRef.current}
-        footerContainer={this.footerRef.current}
         indexPatterns={this.props.indexPatterns}
         dataSource={this.props.dataSource}
       />
@@ -447,7 +445,6 @@ export default class QueryEditorUI extends Component<Props, State> {
             )}
 
             <div
-              ref={this.footerRef}
               className={
                 this.state.isCollapsed && useQueryEditor
                   ? footerClassName

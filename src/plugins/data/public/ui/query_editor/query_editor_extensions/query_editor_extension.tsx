@@ -15,7 +15,6 @@ interface QueryEditorExtensionProps {
   dependencies: QueryEditorExtensionDependencies;
   componentContainer: Element;
   bannerContainer: Element;
-  footerContainer: Element;
 }
 
 export interface QueryEditorExtensionDependencies {
@@ -110,7 +109,6 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
   console.log('props.config', props.config);
   console.log('banner', props.bannerContainer, banner);
   console.log('component', props.componentContainer, component);
-  console.log('footer', props.footerContainer, component);
   if (!isEnabled) return null;
 
   return (
@@ -120,9 +118,6 @@ export const QueryEditorExtension: React.FC<QueryEditorExtensionProps> = (props)
       </QueryEditorExtensionPortal>
       <QueryEditorExtensionPortal container={props.componentContainer}>
         {component}
-      </QueryEditorExtensionPortal>
-      <QueryEditorExtensionPortal container={props.footerContainer}>
-        {footer}
       </QueryEditorExtensionPortal>
     </>
   );
