@@ -49,17 +49,17 @@ describe('WorkspaceForm', () => {
   it('should enable data source panel for dashboard admin and when data source is enabled', () => {
     const { getByText } = setup(true, mockDataSourceManagementSetup);
 
-    expect(getByText('Select Data Sources')).toBeInTheDocument();
+    expect(getByText('Associate data source')).toBeInTheDocument();
   });
 
   it('should not display data source panel for non dashboard admin', () => {
     const { queryByText } = setup(false, mockDataSourceManagementSetup);
 
-    expect(queryByText('Select Data Sources')).not.toBeInTheDocument();
+    expect(queryByText('Associate data source')).not.toBeInTheDocument();
   });
   it('should not display data source panel when data source is disabled', () => {
     const { queryByText } = setup(true, undefined);
 
-    expect(queryByText('Select Data Sources')).not.toBeInTheDocument();
+    expect(queryByText('Associate data source')).not.toBeInTheDocument();
   });
 });
