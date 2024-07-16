@@ -12,6 +12,7 @@ export const config: PluginConfigDescriptor<DataSourcePluginConfigType> = {
     enabled: true,
     hideLocalCluster: true,
     authTypes: true,
+    readOnly: true,
   },
   schema: configSchema,
 };

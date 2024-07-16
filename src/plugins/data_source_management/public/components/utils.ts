@@ -363,9 +363,17 @@ export interface HideLocalCluster {
   enabled: boolean;
 }
 
+export interface DataSourceReadOnly {
+  readOnly: boolean;
+}
+
 export const [getHideLocalCluster, setHideLocalCluster] = createGetterSetter<HideLocalCluster>(
   'HideLocalCluster'
 );
+
+export const [getDataSourceReadOnly, setDataSourceReadOnly] = createGetterSetter<
+  DataSourceReadOnly
+>('DataSourceReadOnly');
 
 // This will maintain an unified data source selection instance among components and export it to other plugin.
 const [getDataSourceSelectionInstance, setDataSourceSelection] = createGetterSetter<

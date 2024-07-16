@@ -392,6 +392,7 @@ export const testDataSourceManagementPlugin = (
     indexPatternManagement: indexPatternManagementPluginMock.createSetupContract(),
     dataSource: {
       dataSourceEnabled: true,
+      dataSourceReadOnly: true,
       hideLocalCluster: true,
       noAuthenticationTypeEnabled: true,
       usernamePasswordAuthEnabled: true,
@@ -418,6 +419,7 @@ export const createAuthenticationMethod = (
 
 export const mockDataSourcePluginSetupWithShowLocalCluster: DataSourcePluginSetup = {
   dataSourceEnabled: true,
+  dataSourceReadOnly: false,
   hideLocalCluster: false,
   noAuthenticationTypeEnabled: true,
   usernamePasswordAuthEnabled: true,

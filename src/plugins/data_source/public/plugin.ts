@@ -21,6 +21,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     const config = this.initializerContext.config.get();
     return {
       dataSourceEnabled: config.enabled,
+      dataSourceReadOnly: config.readOnly,
       hideLocalCluster: config.hideLocalCluster,
       noAuthenticationTypeEnabled: config.authTypes.NoAuthentication.enabled,
       usernamePasswordAuthEnabled: config.authTypes.UsernamePassword.enabled,
@@ -32,6 +33,7 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
     const config = this.initializerContext.config.get();
     return {
       dataSourceEnabled: config.enabled,
+      dataSourceReadOnly: config.readOnly,
       hideLocalCluster: config.hideLocalCluster,
       noAuthenticationTypeEnabled: config.authTypes.NoAuthentication.enabled,
       usernamePasswordAuthEnabled: config.authTypes.UsernamePassword.enabled,

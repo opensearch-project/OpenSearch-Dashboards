@@ -26,8 +26,10 @@ import {
   setHideLocalCluster,
   setUiSettings,
   setDataSourceSelection,
+  setDataSourceReadOnly,
   getDefaultDataSourceId,
   getDefaultDataSourceId$,
+  getDataSourceReadOnly,
 } from './components/utils';
 import { DataSourceSelectionService } from './service/data_source_selection_service';
 
@@ -85,6 +87,9 @@ export class DataSourceManagementPlugin
     indexPatternManagement.columns.register(column);
 
     const featureFlagStatus = !!dataSource;
+    setDataSourceReadOnly({
+      readOnly: featureFlagStatus ? dataSource.dataSourceReadOnly : false,
+    });
 
     opensearchDashboardsSection.registerApp({
       id: DSM_APP_ID,
@@ -97,7 +102,8 @@ export class DataSourceManagementPlugin
           core.getStartServices,
           params,
           this.authMethodsRegistry,
-          featureFlagStatus
+          featureFlagStatus,
+          getDataSourceReadOnly().readOnly
         );
       },
     });

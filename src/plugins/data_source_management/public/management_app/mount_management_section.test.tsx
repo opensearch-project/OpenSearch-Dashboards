@@ -67,7 +67,13 @@ const mockAuthMethodsRegistry: AuthenticationMethodRegistry = {} as Authenticati
 
 describe('mountManagementSection', () => {
   it('renders routes correctly with feature flag enabled', async () => {
-    await mountManagementSection(mockStartServices, mockParams, mockAuthMethodsRegistry, true);
+    await mountManagementSection(
+      mockStartServices,
+      mockParams,
+      mockAuthMethodsRegistry,
+      true,
+      false
+    );
     const wrapper = shallow(
       <OpenSearchDashboardsContextProvider services={{}}>
         <I18nProvider>
@@ -96,7 +102,13 @@ describe('mountManagementSection', () => {
   });
 
   it('renders routes correctly with feature flag disabled', async () => {
-    await mountManagementSection(mockStartServices, mockParams, mockAuthMethodsRegistry, false);
+    await mountManagementSection(
+      mockStartServices,
+      mockParams,
+      mockAuthMethodsRegistry,
+      false,
+      false
+    );
     const wrapper = shallow(
       <OpenSearchDashboardsContextProvider services={{}}>
         <I18nProvider>
@@ -118,5 +130,35 @@ describe('mountManagementSection', () => {
     wrapper.find(Route).forEach((route) => {
       expect(route.prop('path')).not.toEqual(['/:id']);
     });
+  });
+
+  it('renders routes correctly with feature flag enabled and readonly enabled', async () => {
+    await mountManagementSection(
+      mockStartServices,
+      mockParams,
+      mockAuthMethodsRegistry,
+      true,
+      true
+    );
+    const wrapper = shallow(
+      <OpenSearchDashboardsContextProvider services={{}}>
+        <I18nProvider>
+          <Router history={mockParams.history}>
+            <Switch>
+              <Route path={['/create']} />
+              <Route path={['/configure/OpenSearch']} />
+              <Route
+                path={['/configure/:type']}
+                component={ConfigureDirectQueryDataSourceWithRouter}
+              />
+              <Route path={['/:id']} component={EditDataSourceWithRouter} />
+              <Route path={['/']} component={DataSourceHomePanel} />
+            </Switch>
+          </Router>
+        </I18nProvider>
+      </OpenSearchDashboardsContextProvider>
+    );
+
+    expect(wrapper.find(Route)).toHaveLength(5);
   });
 });

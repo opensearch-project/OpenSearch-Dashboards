@@ -29,7 +29,8 @@ export async function mountManagementSection(
   getStartServices: StartServicesAccessor<DataSourceManagementStartDependencies>,
   params: ManagementAppMountParams,
   authMethodsRegistry: AuthenticationMethodRegistry,
-  featureFlagStatus: boolean
+  featureFlagStatus: boolean,
+  dataSourceReadOnly: boolean
 ) {
   const [
     { chrome, application, savedObjects, uiSettings, notifications, overlays, http, docLinks },
@@ -54,11 +55,13 @@ export async function mountManagementSection(
         <Router history={params.history}>
           <Switch>
             <Route path={['/create']}>
-              <CreateDataSourcePanel {...params} featureFlagStatus={featureFlagStatus} />
+              {dataSourceReadOnly ? null : (
+                <CreateDataSourcePanel {...params} featureFlagStatus={featureFlagStatus} />
+              )}
             </Route>
             {featureFlagStatus && (
               <Route path={['/configure/OpenSearch']}>
-                <CreateDataSourceWizardWithRouter />
+                {dataSourceReadOnly ? null : <CreateDataSourceWizardWithRouter />}
               </Route>
             )}
             <Route path={['/configure/:type']}>

@@ -5,6 +5,7 @@
 
 export interface DataSourcePluginSetup {
   dataSourceEnabled: boolean;
+  dataSourceReadOnly: boolean;
   hideLocalCluster: boolean;
   noAuthenticationTypeEnabled: boolean;
   usernamePasswordAuthEnabled: boolean;
@@ -13,6 +14,7 @@ export interface DataSourcePluginSetup {
 
 export interface DataSourcePluginStart {
   dataSourceEnabled: boolean;
+  dataSourceReadOnly: boolean;
   hideLocalCluster: boolean;
   noAuthenticationTypeEnabled: boolean;
   usernamePasswordAuthEnabled: boolean;
