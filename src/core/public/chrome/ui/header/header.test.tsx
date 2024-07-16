@@ -77,6 +77,8 @@ function mockProps() {
       dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
       paddingSize: 640,
     }),
+    navGroupEnabled: false,
+    currentNavgroup$: new BehaviorSubject(undefined),
   };
 }
 

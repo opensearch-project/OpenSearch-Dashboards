@@ -201,7 +201,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http, workspaces });
     const docTitle = this.docTitle.start({ document: window.document });
-    const navGroup = await this.navGroup.start({ navLinks });
+    const navGroup = await this.navGroup.start({ navLinks, application });
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -300,8 +300,10 @@ export class ChromeService {
           branding={injectedMetadata.getBranding()}
           logos={logos}
           survey={injectedMetadata.getSurvey()}
-          sidecarConfig$={sidecarConfig$}
           collapsibleNavHeaderRender={this.collapsibleNavHeaderRender}
+          sidecarConfig$={sidecarConfig$}
+          navGroupEnabled={navGroup.getNavGroupEnabled()}
+          currentNavgroup$={navGroup.getCurrentNavGroup$()}
         />
       ),
 

@@ -208,8 +208,10 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -1213,8 +1215,10 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -2218,8 +2222,10 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3223,8 +3229,10 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -4228,8 +4236,10 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -5233,8 +5243,10 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],

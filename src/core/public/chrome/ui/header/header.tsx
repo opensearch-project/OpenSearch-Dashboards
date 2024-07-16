@@ -66,6 +66,7 @@ import { HeaderActionMenu } from './header_action_menu';
 import { HeaderLogo } from './header_logo';
 import type { Logos } from '../../../../common/types';
 import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
+import { NavGroupItemInMap } from '../../nav_group';
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
@@ -95,6 +96,8 @@ export interface HeaderProps {
   logos: Logos;
   survey: string | undefined;
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
+  navGroupEnabled: boolean;
+  currentNavgroup$: Observable<NavGroupItemInMap | undefined>;
 }
 
 export function Header({
@@ -108,6 +111,7 @@ export function Header({
   survey,
   logos,
   collapsibleNavHeaderRender,
+  navGroupEnabled,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -221,6 +225,9 @@ export function Header({
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
+              currentNavgroup$={observables.currentNavgroup$}
+              navGroupEnabled={navGroupEnabled}
+              navigateToApp={application.navigateToApp}
             />
 
             <EuiHeaderSectionItem border="none">
