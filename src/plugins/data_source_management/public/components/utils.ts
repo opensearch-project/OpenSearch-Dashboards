@@ -132,6 +132,7 @@ export function getFilteredDataSources(
   dataSources: Array<SavedObject<DataSourceAttributes>>,
   filter = (ds: SavedObject<DataSourceAttributes>) => true
 ): DataSourceOption[] {
+  console.log('dataSources:', dataSources);
   return dataSources
     .filter((ds) => filter!(ds))
     .map((ds) => ({

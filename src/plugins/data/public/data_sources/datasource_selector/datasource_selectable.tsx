@@ -20,8 +20,6 @@ const getAndFormatDataSetFromDataSource = async (
   ds: DataSource
 ): Promise<DataSetWithDataSource<IndexPatternOption[]>> => {
   const { dataSets } = await ds.getDataSet();
-  console.log('ds:', ds);
-  console.log('dataSets:', dataSets);
   return { ds, list: dataSets } as DataSetWithDataSource<IndexPatternOption[]>;
 };
 
