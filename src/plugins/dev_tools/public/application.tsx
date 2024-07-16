@@ -131,7 +131,7 @@ function DevToolsWrapper({
 
   return (
     <main className="devApp">
-      <EuiTabs className="devAppTabs">
+      <EuiTabs size="s" className="devAppTabs">
         {devTools.map((currentDevTool) => (
           <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
             <EuiTab

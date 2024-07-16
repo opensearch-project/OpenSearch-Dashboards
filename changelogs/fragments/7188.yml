@@ -1,0 +1,2 @@
+feat:
+- Support workspace level default data source ([#7188](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7188))

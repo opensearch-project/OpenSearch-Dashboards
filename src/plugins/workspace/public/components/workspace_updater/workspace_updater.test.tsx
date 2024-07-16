@@ -81,6 +81,9 @@ const WorkspaceUpdater = (props: any) => {
           workspaces: {
             permissionEnabled: true,
           },
+          dashboards: {
+            isDashboardAdmin: true,
+          },
         },
         navigateToApp,
         getUrlForApp: jest.fn(() => '/app/workspace_overview'),
@@ -108,6 +111,7 @@ const WorkspaceUpdater = (props: any) => {
           }),
         },
       },
+      dataSourceManagement: {},
     },
   });
 
