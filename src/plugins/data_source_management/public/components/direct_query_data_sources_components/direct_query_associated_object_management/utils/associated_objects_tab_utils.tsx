@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// import { coreRefs } from '../../../../../../framework/core_refs';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import { DirectQueryLoadingStatus } from '../../../../../framework/types';
 import {
@@ -37,16 +36,6 @@ export const ACCE_NO_DATA_TITLE = 'You have no accelerations';
 export const ACCE_NO_DATA_DESCRIPTION = 'Accelerate query performing through OpenSearch Indexing';
 
 export const CREATE_ACCELERATION_DESCRIPTION = 'Create Acceleration';
-
-// export const onAccelerateButtonClick = (tableDetail: any) => {
-//   // TODO: create acceleration of this table
-//   console.log('accelerating', tableDetail.name);
-// };
-
-// export const onDeleteButtonClick = (tableDetail: any) => {
-//   // TODO: delete table
-//   console.log('deleting', tableDetail.name);
-// };
 
 const catalogCacheFetchingStatus = [
   DirectQueryLoadingStatus.RUNNING,

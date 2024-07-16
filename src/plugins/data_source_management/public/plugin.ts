@@ -104,8 +104,7 @@ export class DataSourceManagementPlugin
   private started = false;
   private authMethodsRegistry = new AuthenticationMethodRegistry();
   private dataSourceSelection = new DataSourceSelectionService();
-  private featureFlagStatus: boolean = false; // Add this line
-
+  private featureFlagStatus: boolean = false;
   public setup(
     core: CoreSetup<DataSourceManagementPluginStart>,
     { management, indexPatternManagement, dataSource }: DataSourceManagementSetupDependencies
@@ -124,7 +123,7 @@ export class DataSourceManagementPlugin
     const column = new DataSourceColumn(savedObjectPromise);
     indexPatternManagement.columns.register(column);
 
-    this.featureFlagStatus = !!dataSource; // Store featureFlagStatus here
+    this.featureFlagStatus = !!dataSource;
 
     opensearchDashboardsSection.registerApp({
       id: DSM_APP_ID,
@@ -137,7 +136,7 @@ export class DataSourceManagementPlugin
           core.getStartServices,
           params,
           this.authMethodsRegistry,
-          this.featureFlagStatus // Use the stored featureFlagStatus
+          this.featureFlagStatus
         );
       },
     });
