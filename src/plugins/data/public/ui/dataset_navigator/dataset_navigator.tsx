@@ -5,7 +5,12 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiContextMenu,
+  EuiContextMenuPanelDescriptor,
+  EuiPopover,
+} from '@elastic/eui';
 import {
   DataSetWithDataSource,
   DataSource,
@@ -13,6 +18,8 @@ import {
 } from '../../data_sources/datasource';
 import { DataSourceOption } from '../../data_sources/datasource_selector/types';
 import { IndexPatternSelectable } from './index_pattern_selectable';
+import { SavedObjectsClientContract, SimpleSavedObject } from 'opensearch-dashboards/public';
+import { DataSourceAttributes } from '../../../../data_source_management/public/types';
 
 const getAndFormatIndexPatternsFromDataSource = async (
   ds: DataSource
@@ -52,7 +59,15 @@ const consolidateIndexPatternList = (
   return result;
 };
 
+const getClusters = async (savedObjectsClient: SavedObjectsClientContract) => {
+  return await savedObjectsClient.find<DataSourceAttributes>({
+    type: 'data-source',
+    perPage: 10000,
+  });
+};
+
 interface DataSetNavigatorProps {
+  savedObjectsClient: SavedObjectsClientContract;
   dataSources: DataSource[];
   indexPatternOptionList: any;
   selectedSources: DataSourceOption[];
@@ -61,6 +76,7 @@ interface DataSetNavigatorProps {
 }
 
 export const DataSetNavigator = ({
+  savedObjectsClient,
   dataSources,
   indexPatternOptionList,
   selectedSources,
@@ -68,41 +84,10 @@ export const DataSetNavigator = ({
   handleSourceSelection,
 }: DataSetNavigatorProps) => {
   const [isDataSetNavigatorOpen, setIsDataSetNavigatorOpen] = useState(false);
-
-  const onButtonClick = () => setIsDataSetNavigatorOpen((isOpen) => !isOpen);
-  const closePopover = () => setIsDataSetNavigatorOpen(false);
-
-  useEffect(() => {
-    Promise.all(
-      getAllIndexPatterns(
-        dataSources.filter((ds) => ds.getMetadata().ui.selector.displayDatasetsAsSource)
-      )
-    ).then((dataSetResults) => {
-      setIndexPatternOptionList(consolidateIndexPatternList(dataSetResults, selectedSources));
-    });
-  }, [dataSources, setIndexPatternOptionList]);
-
-  const indexPatternSelectable = (
-    <IndexPatternSelectable
-      indexPatternOptionList={indexPatternOptionList}
-      setIndexPatternOptionList={setIndexPatternOptionList}
-      handleSourceSelection={handleSourceSelection}
-    />
-  );
-
-  const dataSetButton = (
-    <EuiButtonEmpty
-      className="dataExplorerDSSelect"
-      color="text"
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={onButtonClick}
-    >
-      {selectedSources.length > 0 ? selectedSources[0].label : 'Datasets'}
-    </EuiButtonEmpty>
-  );
-
-  const dataSetNavigatorPanels = [
+  const [clusterList, setClusterList] = useState<SimpleSavedObject<DataSourceAttributes>[]>([]);
+  const [dataSetNavigatorPanels, setDataSetNavigatorPanels] = useState<
+    EuiContextMenuPanelDescriptor[]
+  >([
     {
       id: 0,
       title: 'DATA SETS',
@@ -117,20 +102,75 @@ export const DataSetNavigator = ({
         },
         {
           name: '...',
+          panel: 2,
+          onClick: () => console.log('clicked ..')
         },
       ],
     },
     {
       id: 1,
       title: 'Index Patterns',
-      content: <div>{indexPatternSelectable}</div>,
+      content: (
+        <IndexPatternSelectable
+          indexPatternOptionList={indexPatternOptionList}
+          setIndexPatternOptionList={setIndexPatternOptionList}
+          handleSourceSelection={handleSourceSelection}
+        />
+      ),
     },
     {
       id: 2,
       title: 'Clusters',
       content: <div />,
     },
-  ];
+  ]);
+
+  const onButtonClick = () => setIsDataSetNavigatorOpen((isOpen) => !isOpen);
+  const closePopover = () => setIsDataSetNavigatorOpen(false);
+
+  useEffect(() => {
+    Promise.all(
+      getAllIndexPatterns(
+        dataSources.filter((ds) => ds.getMetadata().ui.selector.displayDatasetsAsSource)
+      )
+    ).then((dataSetResults) => {
+      setIndexPatternOptionList(consolidateIndexPatternList(dataSetResults, selectedSources));
+    });
+  }, [dataSources, setIndexPatternOptionList]);
+
+  useEffect(() => {
+    Promise.all([getClusters(savedObjectsClient)]).then((res) => {
+      setClusterList(res.length > 0 ? res?.[0].savedObjects : []);
+    });
+  }, [savedObjectsClient]);
+
+  useEffect(() => {
+    console.log('cluster list:', clusterList);
+  }, [clusterList]);
+
+  // useEffect(() => {
+  //   setDataSetNavigatorPanels((prevPanels: EuiContextMenuPanelDescriptor[]) => 
+  //     prevPanels.map(panel => {
+  //       const initialItems = panel.items?.filter(item => item?.panel === 1);
+  //       const clusterPanels = clusterList.map((cluster) => ({
+  //         name: cluster.attributes.title,
+  //       }))
+  //       return panel;
+  //     })
+  //   )
+  // }, [clusterList])
+
+  const dataSetButton = (
+    <EuiButtonEmpty
+      className="dataExplorerDSSelect"
+      color="text"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={onButtonClick}
+    >
+      {selectedSources.length > 0 ? selectedSources[0].label : 'Datasets'}
+    </EuiButtonEmpty>
+  );
 
   return (
     <EuiPopover
