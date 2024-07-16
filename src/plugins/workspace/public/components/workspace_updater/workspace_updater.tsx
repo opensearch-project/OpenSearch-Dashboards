@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
@@ -23,6 +23,7 @@ import {
 } from '../workspace_form';
 import { getDataSourcesList } from '../../utils';
 import { DataSource } from '../../../common/types';
+import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 
 export interface WorkspaceUpdaterProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
@@ -50,8 +51,19 @@ type FormDataFromWorkspace = ReturnType<typeof getFormDataFromWorkspace> & {
 
 export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   const {
-    services: { application, workspaces, notifications, http, workspaceClient, savedObjects },
-  } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
+    services: {
+      application,
+      workspaces,
+      notifications,
+      http,
+      workspaceClient,
+      savedObjects,
+      dataSourceManagement,
+    },
+  } = useOpenSearchDashboards<{
+    workspaceClient: WorkspaceClient;
+    dataSourceManagement?: DataSourceManagementPluginSetup;
+  }>();
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
@@ -134,17 +146,15 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   }
 
   return (
-    <EuiPage paddingSize="none">
+    <EuiPage>
       <EuiPageBody>
-        {!props.hideTitle ? <EuiPageHeader restrictWidth pageTitle="Update Workspace" /> : null}
-        <EuiSpacer />
+        {!props.hideTitle ? <EuiPageHeader pageTitle="Update Workspace" /> : null}
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}
-          style={{ width: '100%', maxWidth: props.maxWidth ? props.maxWidth : 1000 }}
         >
           {application && savedObjects && (
             <WorkspaceForm
@@ -154,8 +164,8 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
               operationType={WorkspaceOperationType.Update}
               workspaceConfigurableApps={workspaceConfigurableApps}
               permissionEnabled={isPermissionEnabled}
-              permissionLastAdminItemDeletable={false}
               savedObjects={savedObjects}
+              dataSourceManagement={dataSourceManagement}
             />
           )}
         </EuiPageContent>

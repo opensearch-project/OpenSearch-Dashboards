@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { BehaviorSubject, of } from 'rxjs';
@@ -17,6 +17,7 @@ import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
 import { DataSource } from '../../../common/types';
+import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 
 export interface WorkspaceCreatorProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
@@ -24,8 +25,18 @@ export interface WorkspaceCreatorProps {
 
 export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const {
-    services: { application, notifications, http, workspaceClient, savedObjects },
-  } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
+    services: {
+      application,
+      notifications,
+      http,
+      workspaceClient,
+      savedObjects,
+      dataSourceManagement,
+    },
+  } = useOpenSearchDashboards<{
+    workspaceClient: WorkspaceClient;
+    dataSourceManagement?: DataSourceManagementPluginSetup;
+  }>();
   const workspaceConfigurableApps = useObservable(
     props.workspaceConfigurableApps$ ?? of(undefined)
   );
@@ -80,21 +91,15 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   );
 
   return (
-    <EuiPage paddingSize="none">
+    <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader restrictWidth pageTitle="Create a workspace" />
-        <EuiSpacer />
+        <EuiPageHeader pageTitle="Create a workspace" />
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}
-          /**
-           * Since above EuiPageHeader has a maxWidth: 1000 style,
-           * add maxWidth: 1000 below to align with the above page header
-           **/
-          style={{ width: '100%', maxWidth: 1000 }}
         >
           {application && savedObjects && (
             <WorkspaceForm
@@ -105,6 +110,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               workspaceConfigurableApps={workspaceConfigurableApps}
               permissionEnabled={isPermissionEnabled}
               permissionLastAdminItemDeletable
+              dataSourceManagement={dataSourceManagement}
             />
           )}
         </EuiPageContent>

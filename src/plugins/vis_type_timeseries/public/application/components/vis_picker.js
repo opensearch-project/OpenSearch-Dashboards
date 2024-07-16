@@ -111,7 +111,7 @@ export const VisPicker = injectI18n(function (props) {
     );
   });
 
-  return <EuiTabs>{tabs}</EuiTabs>;
+  return <EuiTabs size="s">{tabs}</EuiTabs>;
 });
 
 VisPicker.propTypes = {

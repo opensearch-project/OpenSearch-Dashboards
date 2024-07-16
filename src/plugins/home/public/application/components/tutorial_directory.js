@@ -301,7 +301,7 @@ class TutorialDirectoryUi extends React.Component {
         {this.renderHeader()}
         <EuiSpacer size="m" />
         {this.renderDataSourceSelector()}
-        <EuiTabs>{this.renderTabs()}</EuiTabs>
+        <EuiTabs size="s">{this.renderTabs()}</EuiTabs>
         <EuiSpacer />
         {this.renderTabContent()}
       </EuiPageBody>

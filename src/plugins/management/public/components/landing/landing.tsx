@@ -31,14 +31,7 @@
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 
-import {
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiPageContent,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiHorizontalRule, EuiIcon, EuiPageContent, EuiSpacer, EuiText } from '@elastic/eui';
 import { useMount } from 'react-use';
 
 interface ManagementLandingPageProps {
@@ -57,14 +50,14 @@ export const ManagementLandingPage = ({ setBreadcrumbs }: ManagementLandingPageP
         <div className="eui-textCenter">
           <EuiIcon type="managementApp" size="xxl" />
           <EuiSpacer />
-          <EuiTitle>
+          <EuiText size="s">
             <h1>
               <FormattedMessage
                 id="management.landing.header"
                 defaultMessage="Welcome to Dashboards Management"
               />
             </h1>
-          </EuiTitle>
+          </EuiText>
           <EuiText size="s">
             <FormattedMessage
               id="management.landing.subhead"

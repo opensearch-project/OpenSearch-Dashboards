@@ -76,7 +76,7 @@ export class CreateButton extends Component<Props, State> {
           data-test-subj="createIndexPatternButton"
           fill={true}
           onClick={options[0].onClick}
-          iconType="plusInCircle"
+          iconType="plus"
         >
           {children}
         </EuiButton>

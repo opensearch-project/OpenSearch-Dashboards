@@ -351,6 +351,7 @@ class HeaderHelpMenuUI extends Component<Props, State> {
         isOpen={this.state.isOpen}
         ownFocus
         repositionOnScroll
+        panelPaddingSize="s"
       >
         <EuiPopoverTitle>
           <EuiFlexGroup responsive={false}>
