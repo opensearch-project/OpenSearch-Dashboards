@@ -344,7 +344,9 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       this.filterNavLinks(core);
     });
 
-    this.addWorkspaceToBreadcrumbs(core);
+    if (!core.chrome.navGroup.getNavGroupEnabled()) {
+      this.addWorkspaceToBreadcrumbs(core);
+    }
 
     return {};
   }

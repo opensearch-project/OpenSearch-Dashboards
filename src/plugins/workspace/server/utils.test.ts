@@ -14,6 +14,7 @@ import {
   getOSDAdminConfigFromYMLConfig,
   getPrincipalsFromRequest,
   updateDashboardAdminStateForRequest,
+  transferCurrentUserInPermissions,
   getDataSourcesList,
 } from './utils';
 import { getWorkspaceState } from '../../../core/server/utils';
@@ -155,6 +156,33 @@ describe('workspace utils', () => {
     const [groups, users] = await getOSDAdminConfigFromYMLConfig(globalConfig$);
     expect(groups).toEqual([]);
     expect(users).toEqual([]);
+  });
+
+  it('should transfer current user placeholder in permissions', () => {
+    expect(transferCurrentUserInPermissions('foo', undefined)).toBeUndefined();
+    expect(
+      transferCurrentUserInPermissions('foo', {
+        library_write: {
+          users: ['%me%', 'bar'],
+        },
+        write: {
+          users: ['%me%'],
+        },
+        read: {
+          users: ['bar'],
+        },
+      })
+    ).toEqual({
+      library_write: {
+        users: ['foo', 'bar'],
+      },
+      write: {
+        users: ['foo'],
+      },
+      read: {
+        users: ['bar'],
+      },
+    });
   });
 
   it('should return dataSources list when passed savedObject client', async () => {

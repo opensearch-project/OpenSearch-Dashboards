@@ -78,12 +78,7 @@ const CreateButton = (props: CreateButtonProps) => {
     const provider: DashboardProvider = Object.values(props.dashboardProviders!)[0];
     return (
       <EuiFlexItem grow={false}>
-        <EuiButton
-          href={provider.createUrl}
-          data-test-subj="newItemButton"
-          iconType="plusInCircle"
-          fill
-        >
+        <EuiButton href={provider.createUrl} data-test-subj="newItemButton" iconType="plus" fill>
           <FormattedMessage id="dashboard.listing.createButtonText" defaultMessage="Create" />
           &nbsp;{provider.createLinkText}
         </EuiButton>

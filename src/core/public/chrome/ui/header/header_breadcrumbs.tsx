@@ -31,16 +31,65 @@
 import { EuiHeaderBreadcrumbs } from '@elastic/eui';
 import classNames from 'classnames';
 import React from 'react';
+import { i18n } from '@osd/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
+import { ApplicationStart } from 'src/core/public/application';
 import { ChromeBreadcrumb } from '../../chrome_service';
+import { NavGroupItemInMap } from '../../nav_group';
 
 interface Props {
   appTitle$: Observable<string>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  navGroupEnabled: boolean;
+  currentNavgroup$: Observable<NavGroupItemInMap | undefined>;
+  navigateToApp: ApplicationStart['navigateToApp'];
 }
 
-export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
+/**
+ * prepend current nav group into existing breadcrumbs and return new breadcrumbs, the new breadcrumbs will looks like
+ * Home > Search > Visusalization
+ * @param breadcrumbs existing breadcrumbs
+ * @param currentNavGroup current nav group object
+ * @param navigateToApp
+ * @returns new breadcrumbs array
+ */
+function prependCurrentNavGroupToBreadcrumbs(
+  breadcrumbs: ChromeBreadcrumb[],
+  currentNavGroup: NavGroupItemInMap,
+  navigateToApp: ApplicationStart['navigateToApp']
+) {
+  // breadcrumb order is home > navgroup > application, navgroup will be second one
+  const navGroupInBreadcrumbs =
+    breadcrumbs.length > 1 && breadcrumbs[1]?.text === currentNavGroup.title;
+  if (!navGroupInBreadcrumbs) {
+    const navGroupBreadcrumb: ChromeBreadcrumb = {
+      text: currentNavGroup.title,
+      onClick: () => {
+        if (currentNavGroup.navLinks && currentNavGroup.navLinks.length) {
+          navigateToApp(currentNavGroup.navLinks[0].id);
+        }
+      },
+    };
+    const homeBreadcrumb: ChromeBreadcrumb = {
+      text: i18n.translate('core.breadcrumbs.homeTitle', { defaultMessage: 'Home' }),
+      onClick: () => {
+        navigateToApp('home');
+      },
+    };
+    return [homeBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+  }
+
+  return breadcrumbs;
+}
+
+export function HeaderBreadcrumbs({
+  appTitle$,
+  breadcrumbs$,
+  navGroupEnabled,
+  currentNavgroup$,
+  navigateToApp,
+}: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
   let crumbs = breadcrumbs;
@@ -49,13 +98,18 @@ export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$ }: Props) {
     crumbs = [{ text: appTitle }];
   }
 
+  const currentNavgroup = useObservable(currentNavgroup$, undefined);
+  if (navGroupEnabled && currentNavgroup) {
+    crumbs = prependCurrentNavGroupToBreadcrumbs(crumbs, currentNavgroup, navigateToApp);
+  }
+
   crumbs = crumbs.map((breadcrumb, i) => ({
     ...breadcrumb,
     'data-test-subj': classNames(
       'breadcrumb',
       breadcrumb['data-test-subj'],
       i === 0 && 'first',
-      i === breadcrumbs.length - 1 && 'last'
+      i === crumbs.length - 1 && 'last'
     ),
   }));
 

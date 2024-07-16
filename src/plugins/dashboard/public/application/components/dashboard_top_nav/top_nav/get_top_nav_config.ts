@@ -181,7 +181,7 @@ function getAddConfig(action: NavAction) {
 function getCreateNewConfig(action: NavAction) {
   return {
     emphasize: true,
-    iconType: 'plusInCircleFilled',
+    iconType: 'plus',
     id: 'addNew',
     label: i18n.translate('dashboard.topNave.addNewButtonAriaLabel', {
       defaultMessage: 'Create new',

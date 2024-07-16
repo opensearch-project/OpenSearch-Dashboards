@@ -13,6 +13,10 @@ import {
   getOrderedLinksOrCategories,
 } from '../utils';
 import { ChromeNavLinks } from '../nav_links';
+import { InternalApplicationStart } from '../../application';
+import { NavGroupStatus } from '../../../../core/types';
+
+export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
 /** @public */
 export interface ChromeRegistrationNavLink {
@@ -25,6 +29,11 @@ export interface ChromeRegistrationNavLink {
    * link with parentNavLinkId field will be displayed as nested items in navigation.
    */
   parentNavLinkId?: string;
+
+  /**
+   * If the nav link should be shown in 'all' nav group
+   */
+  showInAllNavGroup?: boolean;
 }
 
 export type NavGroupItemInMap = ChromeNavGroup & {
@@ -45,6 +54,16 @@ export interface ChromeNavGroupServiceSetupContract {
 export interface ChromeNavGroupServiceStartContract {
   getNavGroupsMap$: () => Observable<Record<string, NavGroupItemInMap>>;
   getNavGroupEnabled: ChromeNavGroupServiceSetupContract['getNavGroupEnabled'];
+  /**
+   * Get an observable of the current selected nav group
+   */
+  getCurrentNavGroup$: () => Observable<NavGroupItemInMap | undefined>;
+
+  /**
+   * Set current selected nav group
+   * @param navGroupId The id of the nav group to be set as current
+   */
+  setCurrentNavGroup: (navGroupId: string | undefined) => void;
 }
 
 /** @internal */
@@ -55,6 +74,8 @@ export class ChromeNavGroupService {
   private navGroupEnabled: boolean = false;
   private navGroupEnabledUiSettingsSubscription: Subscription | undefined;
   private navGroupUpdaters$$ = new BehaviorSubject<Array<Observable<ChromeNavGroupUpdater>>>([]);
+  private currentNavGroup$ = new BehaviorSubject<ChromeNavGroup | undefined>(undefined);
+
   private addNavLinkToGroup(
     currentGroupsMap: Record<string, NavGroupItemInMap>,
     navGroup: ChromeNavGroup,
@@ -81,6 +102,18 @@ export class ChromeNavGroupService {
 
     return currentGroupsMap;
   }
+
+  private sortNavGroupNavLinks(
+    navGroup: NavGroupItemInMap,
+    allVaildNavLinks: Array<Readonly<ChromeNavLink>>
+  ) {
+    return flattenLinksOrCategories(
+      getOrderedLinksOrCategories(
+        fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, allVaildNavLinks)
+      )
+    );
+  }
+
   private getSortedNavGroupsMap$() {
     return combineLatest([this.getUpdatedNavGroupsMap$(), this.navLinks$])
       .pipe(takeUntil(this.stop$))
@@ -88,12 +121,9 @@ export class ChromeNavGroupService {
         map(([navGroupsMap, navLinks]) => {
           return Object.keys(navGroupsMap).reduce((sortedNavGroupsMap, navGroupId) => {
             const navGroup = navGroupsMap[navGroupId];
-            const sortedNavLinks = getOrderedLinksOrCategories(
-              fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, navLinks)
-            );
             sortedNavGroupsMap[navGroupId] = {
               ...navGroup,
-              navLinks: flattenLinksOrCategories(sortedNavLinks),
+              navLinks: this.sortNavGroupNavLinks(navGroup, navLinks),
             };
             return sortedNavGroupsMap;
           }, {} as Record<string, NavGroupItemInMap>);
@@ -159,15 +189,63 @@ export class ChromeNavGroupService {
   }
   async start({
     navLinks,
+    application,
   }: {
     navLinks: ChromeNavLinks;
+    application: InternalApplicationStart;
   }): Promise<ChromeNavGroupServiceStartContract> {
     this.navLinks$ = navLinks.getNavLinks$();
+
+    const currentNavGroupId = sessionStorage.getItem(CURRENT_NAV_GROUP_ID);
+    this.currentNavGroup$ = new BehaviorSubject<ChromeNavGroup | undefined>(
+      currentNavGroupId ? this.navGroupsMap$.getValue()[currentNavGroupId] : undefined
+    );
+
+    const setCurrentNavGroup = (navGroupId: string | undefined) => {
+      const navGroup = navGroupId ? this.navGroupsMap$.getValue()[navGroupId] : undefined;
+      if (navGroup && navGroup.status !== NavGroupStatus.Hidden) {
+        this.currentNavGroup$.next(navGroup);
+        sessionStorage.setItem(CURRENT_NAV_GROUP_ID, navGroup.id);
+      } else {
+        this.currentNavGroup$.next(undefined);
+        sessionStorage.removeItem(CURRENT_NAV_GROUP_ID);
+      }
+    };
+
+    // erase current nav group when switch app don't belongs to any nav group
+    application.currentAppId$.subscribe((appId) => {
+      const navGroupMap = this.navGroupsMap$.getValue();
+      const appIdsWithNavGroup = Object.values(navGroupMap).flatMap(({ navLinks: links }) =>
+        links.map(({ id }) => id)
+      );
+
+      if (appId && !appIdsWithNavGroup.includes(appId)) {
+        setCurrentNavGroup(undefined);
+      }
+    });
+
+    const currentNavGroupSorted$ = combineLatest([
+      this.getSortedNavGroupsMap$(),
+      this.currentNavGroup$,
+    ])
+      .pipe(takeUntil(this.stop$))
+      .pipe(
+        map(([navGroupsMapSorted, currentNavGroup]) => {
+          if (currentNavGroup) {
+            return navGroupsMapSorted[currentNavGroup.id];
+          }
+        })
+      );
+
     return {
       getNavGroupsMap$: () => this.getSortedNavGroupsMap$(),
       getNavGroupEnabled: () => this.navGroupEnabled,
+
+      getCurrentNavGroup$: () => currentNavGroupSorted$,
+      setCurrentNavGroup,
     };
   }
+
   async stop() {
     this.stop$.next();
     this.navGroupEnabledUiSettingsSubscription?.unsubscribe();

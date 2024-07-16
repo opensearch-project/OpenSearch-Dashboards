@@ -16,6 +16,7 @@ exports[`ScriptingHelpFlyout should render normally 1`] = `
           "name": "Syntax",
         }
       }
+      size="s"
       tabs={
         Array [
           Object {
@@ -57,6 +58,7 @@ exports[`ScriptingHelpFlyout should render nothing if not visible 1`] = `
           "name": "Syntax",
         }
       }
+      size="s"
       tabs={
         Array [
           Object {
