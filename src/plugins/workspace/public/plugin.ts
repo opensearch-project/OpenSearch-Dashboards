@@ -19,6 +19,7 @@ import {
   WorkspaceAvailability,
   ChromeNavGroupUpdater,
   NavGroupStatus,
+  DEFAULT_NAV_GROUPS,
   NavGroupType,
 } from '../../../core/public';
 import {
@@ -35,6 +36,7 @@ import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_object
 import { ManagementSetup } from '../../../plugins/management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
+import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
 import {
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
@@ -51,6 +53,7 @@ type WorkspaceAppType = (
 interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
   management?: ManagementSetup;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
@@ -195,7 +198,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
   public async setup(
     core: CoreSetup,
-    { savedObjectsManagement, management }: WorkspacePluginSetupDeps
+    { savedObjectsManagement, management, dataSourceManagement }: WorkspacePluginSetupDeps
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
@@ -256,6 +259,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       const services = {
         ...coreStart,
         workspaceClient,
+        dataSourceManagement,
       };
 
       return renderApp(params, services, {
@@ -332,13 +336,29 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     core.application.register({
       id: WORKSPACE_LIST_APP_ID,
       title: '',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      /**
+       * Nav link status should be visible when nav group enabled.
+       * The page should be refreshed and all applications need to register again
+       * after nav group enabled changed.
+       */
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: WORKSPACE_LIST_APP_ID,
+        title: i18n.translate('workspace.settingsAndSetup.workspaceSettings', {
+          defaultMessage: 'workspace settings',
+        }),
+      },
+    ]);
 
     /**
      * register workspace column into saved objects table

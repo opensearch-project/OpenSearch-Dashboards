@@ -47,7 +47,7 @@ const dataSourcesList = [
 
 const mockCoreStart = coreMock.createStart();
 
-const WorkspaceCreator = (props: Partial<WorkspaceCreatorProps>) => {
+const WorkspaceCreator = (props: Partial<WorkspaceCreatorProps>, isDashboardAdmin = false) => {
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
@@ -57,6 +57,9 @@ const WorkspaceCreator = (props: Partial<WorkspaceCreatorProps>) => {
           ...mockCoreStart.application.capabilities,
           workspaces: {
             permissionEnabled: true,
+          },
+          dashboards: {
+            isDashboardAdmin,
           },
         },
         navigateToApp,
@@ -84,6 +87,7 @@ const WorkspaceCreator = (props: Partial<WorkspaceCreatorProps>) => {
           }),
         },
       },
+      dataSourceManagement: {},
     },
   });
   const registeredUseCases$ = new BehaviorSubject([
@@ -267,7 +271,9 @@ describe('WorkspaceCreator', () => {
   });
 
   it('create workspace with customized selected dataSources', async () => {
-    const { getByTestId, getByTitle, getByText } = render(<WorkspaceCreator />);
+    const { getByTestId, getByTitle, getByText } = render(
+      <WorkspaceCreator isDashboardAdmin={true} />
+    );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
     fireEvent.input(nameInput, {
       target: { value: 'test workspace name' },

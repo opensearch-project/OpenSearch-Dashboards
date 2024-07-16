@@ -90,6 +90,9 @@ const WorkspaceUpdater = (
           workspaces: {
             permissionEnabled: true,
           },
+          dashboards: {
+            isDashboardAdmin: true,
+          },
         },
         navigateToApp,
         getUrlForApp: jest.fn(() => '/app/workspace_overview'),
@@ -117,6 +120,7 @@ const WorkspaceUpdater = (
           }),
         },
       },
+      dataSourceManagement: {},
     },
   });
   const registeredUseCases$ = new BehaviorSubject([

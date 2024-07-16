@@ -5,8 +5,12 @@
 
 import { CoreStart } from '../../../core/public';
 import { WorkspaceClient } from './workspace_client';
+import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
 
-export type Services = CoreStart & { workspaceClient: WorkspaceClient };
+export type Services = CoreStart & {
+  workspaceClient: WorkspaceClient;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
+};
 
 export interface WorkspaceUseCase {
   id: string;

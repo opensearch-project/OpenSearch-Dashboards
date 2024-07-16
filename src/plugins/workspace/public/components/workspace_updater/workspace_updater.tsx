@@ -22,6 +22,7 @@ import {
 } from '../workspace_form';
 import { getDataSourcesList } from '../../utils';
 import { DataSource } from '../../../common/types';
+import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceUpdaterProps {
@@ -50,8 +51,19 @@ type FormDataFromWorkspace = ReturnType<typeof getFormDataFromWorkspace> & {
 
 export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   const {
-    services: { application, workspaces, notifications, http, workspaceClient, savedObjects },
-  } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
+    services: {
+      application,
+      workspaces,
+      notifications,
+      http,
+      workspaceClient,
+      savedObjects,
+      dataSourceManagement,
+    },
+  } = useOpenSearchDashboards<{
+    workspaceClient: WorkspaceClient;
+    dataSourceManagement?: DataSourceManagementPluginSetup;
+  }>();
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
@@ -149,6 +161,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
               operationType={WorkspaceOperationType.Update}
               permissionEnabled={isPermissionEnabled}
               savedObjects={savedObjects}
+              dataSourceManagement={dataSourceManagement}
               availableUseCases={availableUseCases}
             />
           )}

@@ -8,7 +8,12 @@ import { waitFor } from '@testing-library/dom';
 import { first } from 'rxjs/operators';
 
 import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
-import { ChromeBreadcrumb, NavGroupStatus } from '../../../core/public';
+import {
+  ChromeBreadcrumb,
+  NavGroupStatus,
+  DEFAULT_NAV_GROUPS,
+  AppNavLinkStatus,
+} from '../../../core/public';
 import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
@@ -151,6 +156,29 @@ describe('Workspace plugin', () => {
       management: managementPluginMock.createSetupContract(),
     });
     expect(setupMock.chrome.registerCollapsibleNavHeader).toBeCalledTimes(1);
+  });
+
+  it('#setup should register workspace list with a visible application and register to settingsAndSetup nav group', async () => {
+    const setupMock = coreMock.createSetup();
+    setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {});
+
+    expect(setupMock.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'workspace_list',
+        navLinkStatus: AppNavLinkStatus.visible,
+      })
+    );
+    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
+      DEFAULT_NAV_GROUPS.settingsAndSetup,
+      expect.arrayContaining([
+        {
+          id: 'workspace_list',
+          title: 'workspace settings',
+        },
+      ])
+    );
   });
 
   it('#start add workspace overview page to breadcrumbs when start', async () => {

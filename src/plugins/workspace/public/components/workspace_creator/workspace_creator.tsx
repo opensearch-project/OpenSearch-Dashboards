@@ -16,6 +16,7 @@ import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
 import { DataSource } from '../../../common/types';
+import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceCreatorProps {
@@ -24,8 +25,18 @@ export interface WorkspaceCreatorProps {
 
 export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const {
-    services: { application, notifications, http, workspaceClient, savedObjects },
-  } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
+    services: {
+      application,
+      notifications,
+      http,
+      workspaceClient,
+      savedObjects,
+      dataSourceManagement,
+    },
+  } = useOpenSearchDashboards<{
+    workspaceClient: WorkspaceClient;
+    dataSourceManagement?: DataSourceManagementPluginSetup;
+  }>();
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
   const availableUseCases = useObservable(props.registeredUseCases$, []);
 
@@ -94,6 +105,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
               permissionEnabled={isPermissionEnabled}
+              dataSourceManagement={dataSourceManagement}
               availableUseCases={availableUseCases}
             />
           )}
