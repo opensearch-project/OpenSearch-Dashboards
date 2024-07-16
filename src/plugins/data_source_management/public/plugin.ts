@@ -52,7 +52,6 @@ export interface DataSourceManagementPluginStart {
   getAuthenticationMethodRegistry: () => IAuthenticationMethodRegistry;
 }
 
-// src/plugins/workspace/public/plugin.ts Workspace depends on this ID and hard code to avoid adding dependency on DSM bundle.
 export const DSM_APP_ID = 'dataSources';
 
 export class DataSourceManagementPlugin
