@@ -147,7 +147,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
         ),
       });
     }
-    if (this.getSortedDevTools().length === 0) {
+    if (this.getSortedDevTools().length === 0 || core.chrome.navGroup.getNavGroupEnabled()) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     } else {
       // Register right navigation for dev tool only when console and futureNavigation are both enabled.

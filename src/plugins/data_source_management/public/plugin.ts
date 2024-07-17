@@ -6,9 +6,9 @@
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import {
   AppMountParameters,
-  AppStatus,
   CoreSetup,
   CoreStart,
+  DEFAULT_APP_CATEGORIES,
   DEFAULT_NAV_GROUPS,
   Plugin,
 } from '../../../core/public';
@@ -108,46 +108,83 @@ export class DataSourceManagementPlugin
       },
     });
 
-    core.application.register({
-      id: DSM_APP_ID,
-      title: PLUGIN_NAME,
-      order: 100,
-      status: core.chrome.navGroup.getNavGroupEnabled()
-        ? AppStatus.accessible
-        : AppStatus.inaccessible,
-      mount: async (params: AppMountParameters) => {
-        const { mountManagementSection } = await import('./management_app');
-        const [coreStart] = await core.getStartServices();
+    // when the feature flag is disabled, we don't need to register any of the mds components
+    if (!featureFlagStatus) {
+      return undefined;
+    }
 
-        return mountManagementSection(
-          core.getStartServices,
-          {
-            ...params,
-            basePath: core.http.basePath.get(),
-            setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
-            wrapInPage: true,
-          },
-          this.authMethodsRegistry,
-          featureFlagStatus
-        );
-      },
-    });
+    /**
+     * The data sources features in observability has the same name as `DSM_APP_ID`
+     * Add a suffix to avoid duplication
+     */
+    const DSM_APP_ID_FOR_STANDARD_APPLICATION = `${DSM_APP_ID}_core`;
+
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.application.register({
+        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
+        title: PLUGIN_NAME,
+        order: 100,
+        mount: async (params: AppMountParameters) => {
+          const { mountManagementSection } = await import('./management_app');
+          const [coreStart] = await core.getStartServices();
+
+          return mountManagementSection(
+            core.getStartServices,
+            {
+              ...params,
+              basePath: core.http.basePath.get(),
+              setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+              wrapInPage: true,
+            },
+            this.authMethodsRegistry,
+            featureFlagStatus
+          );
+        },
+      });
+    }
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.dataAdministration, [
       {
-        id: DSM_APP_ID,
+        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
         category: {
-          id: DSM_APP_ID,
+          id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
           label: PLUGIN_NAME,
           order: 200,
         },
       },
     ]);
 
-    // when the feature flag is disabled, we don't need to register any of the mds components
-    if (!featureFlagStatus) {
-      return undefined;
-    }
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 100,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+      {
+        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 100,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
+      {
+        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 100,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
+      {
+        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 100,
+      },
+    ]);
 
     const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
       if (this.started) {

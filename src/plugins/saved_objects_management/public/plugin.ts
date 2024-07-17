@@ -61,7 +61,7 @@ import {
 } from './services';
 import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
-import { DEFAULT_NAV_GROUPS, AppStatus } from '../../../core/public';
+import { DEFAULT_NAV_GROUPS, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -152,36 +152,67 @@ export class SavedObjectsManagementPlugin
       },
     });
 
-    core.application.register({
-      id: 'objects',
-      title: i18n.translate('savedObjectsManagement.managementSectionLabel', {
-        defaultMessage: 'Saved objects',
-      }),
-      status: core.chrome.navGroup.getNavGroupEnabled()
-        ? AppStatus.accessible
-        : AppStatus.inaccessible,
-      mount: async (params: AppMountParameters) => {
-        const { mountManagementSection } = await import('./management_section');
-        const [coreStart] = await core.getStartServices();
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.application.register({
+        id: 'objects',
+        title: i18n.translate('savedObjectsManagement.assets.label', {
+          defaultMessage: 'Assets',
+        }),
+        mount: async (params: AppMountParameters) => {
+          const { mountManagementSection } = await import('./management_section');
+          const [coreStart] = await core.getStartServices();
 
-        return mountManagementSection({
-          core,
-          serviceRegistry: this.serviceRegistry,
-          mountParams: {
-            ...params,
-            basePath: core.http.basePath.get(),
-            setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
-            wrapInPage: true,
-          },
-          dataSourceEnabled: !!dataSource,
-          dataSourceManagement,
-        });
-      },
-    });
+          return mountManagementSection({
+            core,
+            serviceRegistry: this.serviceRegistry,
+            mountParams: {
+              ...params,
+              basePath: core.http.basePath.get(),
+              setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+              wrapInPage: true,
+            },
+            dataSourceEnabled: !!dataSource,
+            dataSourceManagement,
+          });
+        },
+      });
+    }
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
         id: 'objects',
+        order: 300,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: 'objects',
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 300,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+      {
+        id: 'objects',
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 300,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
+      {
+        id: 'objects',
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 300,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
+      {
+        id: 'objects',
+        category: DEFAULT_APP_CATEGORIES.manage,
         order: 300,
       },
     ]);

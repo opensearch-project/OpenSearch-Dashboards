@@ -82,9 +82,9 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       icon: '/ui/logos/opensearch_mark.svg',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: this.appUpdater,
-      status: core.chrome.navGroup.getNavGroupEnabled()
-        ? AppStatus.inaccessible
-        : AppStatus.accessible,
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.hidden
+        : AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
@@ -118,7 +118,13 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       .getSectionsEnabled()
       .some((section) => section.getAppsEnabled().length > 0);
 
-    if (!this.hasAnyEnabledApps) {
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      this.appUpdater.next(() => {
+        return {
+          navLinkStatus: AppNavLinkStatus.hidden,
+        };
+      });
+    } else if (!this.hasAnyEnabledApps) {
       this.appUpdater.next(() => {
         return {
           status: AppStatus.inaccessible,
