@@ -81,7 +81,7 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     order: 1000,
   },
   dashboardAndReport: {
-    id: 'dashboardAndReport',
+    id: 'visualizeAndReport',
     label: i18n.translate('core.ui.visualizeAndReport.label', {
       defaultMessage: 'Visualize and report',
     }),
