@@ -78,7 +78,10 @@ function mockProps() {
       paddingSize: 640,
     }),
     navGroupEnabled: false,
-    currentNavgroup$: new BehaviorSubject(undefined),
+    currentNavGroup$: new BehaviorSubject(undefined),
+    navGroupsMap$: new BehaviorSubject({}),
+    navControlsLeftBottom$: new BehaviorSubject([]),
+    setCurrentNavGroup: jest.fn(() => {}),
   };
 }
 
@@ -167,5 +170,19 @@ describe('Header', () => {
     expect(component.find('HeaderHelpMenuUI').exists()).toBeTruthy();
 
     expect(component).toMatchSnapshot();
+  });
+
+  it('renders new header when feature flag is turned on', () => {
+    const branding = {
+      useExpandedHeader: false,
+    };
+    const props = {
+      ...mockProps(),
+      branding,
+    };
+
+    const component = mountWithIntl(<Header {...props} navGroupEnabled />);
+
+    expect(component.find('CollapsibleNavGroupEnabled').exists()).toBeTruthy();
   });
 });
