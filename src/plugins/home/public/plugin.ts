@@ -65,17 +65,27 @@ import { DataSourcePluginStart } from '../../data_source/public';
 import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
 import { learnBasicsSection } from './application/components/homepage/sections/learn_basics';
 import { DEFAULT_NAV_GROUPS } from '../../../core/public';
+import {
+  ContentManagementPluginSetup,
+  ContentManagementPluginStart,
+} from '../../content_management/public';
+import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
+import { initHome } from './application/home_render';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
   telemetry?: TelemetryPluginStart;
   urlForwarding: UrlForwardingStart;
   dataSource?: DataSourcePluginStart;
+  contentManagement: ContentManagementPluginStart;
+  embeddable: EmbeddableStart;
 }
 
 export interface HomePluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
+  contentManagement: ContentManagementPluginSetup;
+  embeddable: EmbeddableSetup;
 }
 
 export class HomePublicPlugin
@@ -95,7 +105,7 @@ export class HomePublicPlugin
 
   public setup(
     core: CoreSetup<HomePluginStartDependencies>,
-    { urlForwarding, usageCollection }: HomePluginSetupDependencies
+    { urlForwarding, usageCollection, contentManagement }: HomePluginSetupDependencies
   ): HomePublicPluginSetup {
     const setCommonService = async (
       homeOpenSearchDashboardsServices?: Partial<HomeOpenSearchDashboardsServices>
@@ -105,7 +115,14 @@ export class HomePublicPlugin
         : () => {};
       const [
         coreStart,
-        { telemetry, data, urlForwarding: urlForwardingStart, dataSource },
+        {
+          telemetry,
+          data,
+          urlForwarding: urlForwardingStart,
+          dataSource,
+          embeddable,
+          contentManagement: contentManagementStart,
+        },
       ] = await core.getStartServices();
       setServices({
         trackUiMetric,
@@ -124,6 +141,8 @@ export class HomePublicPlugin
         indexPatternService: data.indexPatterns,
         environmentService: this.environmentService,
         urlForwarding: urlForwardingStart,
+        contentManagement: contentManagementStart,
+        embeddable: embeddable,
         homeConfig: this.initializerContext.config.get(),
         tutorialService: this.tutorialService,
         featureCatalogue: this.featuresCatalogueRegistry,
@@ -133,6 +152,7 @@ export class HomePublicPlugin
         ...homeOpenSearchDashboardsServices,
       });
     };
+
     core.application.register({
       id: PLUGIN_ID,
       title: 'Home',
@@ -201,6 +221,25 @@ export class HomePublicPlugin
     sectionTypes.registerSection(workWithDataSection);
     sectionTypes.registerSection(learnBasicsSection);
 
+    const page = contentManagement.registerPage({ id: 'home', title: 'Home' });
+    page.createSection({
+      id: 'service_cards',
+      order: 3000,
+      kind: 'dashboard',
+    });
+    page.createSection({
+      id: 'some_dashboard',
+      order: 2000,
+      title: 'test dashboard',
+      kind: 'dashboard',
+    });
+    page.createSection({
+      id: 'get_started',
+      order: 1000,
+      title: 'Define your path forward with OpenSearch',
+      kind: 'card',
+    });
+
     return {
       featureCatalogue,
       environment: { ...this.environmentService.setup() },
@@ -209,11 +248,19 @@ export class HomePublicPlugin
     };
   }
 
-  public start(core: CoreStart, { data, urlForwarding }: HomePluginStartDependencies) {
+  public start(
+    core: CoreStart,
+    { data, urlForwarding, contentManagement }: HomePluginStartDependencies
+  ) {
     const {
       application: { capabilities, currentAppId$ },
       http,
     } = core;
+
+    const page = contentManagement.getPage('home');
+    if (page) {
+      initHome(page, core);
+    }
 
     this.featuresCatalogueRegistry.start({ capabilities });
     this.sectionTypeService.start({ core, data });
