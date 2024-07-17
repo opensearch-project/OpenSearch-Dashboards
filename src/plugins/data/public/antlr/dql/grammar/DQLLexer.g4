@@ -15,12 +15,11 @@ EQ: ':';
 // Delimiters
 LPAREN: '(';
 RPAREN: ')';
-DOT: '.';
 
 // Literals
 PHRASE: '"' (~["\\])* '"';
 NUMBER: '-'? [0-9]+ ('.' [0-9]+)?;
-IDENTIFIER: [a-zA-Z_*][a-zA-Z0-9_*]*;
+IDENTIFIER: [a-zA-Z_*][a-zA-Z0-9_.*]*;
 
 // SKIP
 WS: [ \t\r\n]+ -> channel(HIDDEN);
