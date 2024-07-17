@@ -131,9 +131,9 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           .toPromise();
         const navLinks = navGroupMap[DEFAULT_NAV_GROUPS.settingsAndSetup.id]?.navLinks;
         const fulfilledNavLink = fulfillRegistrationLinksToChromeNavLinks(
-          (navLinks || []).filter((navLink) => navLink.id !== settingsLandingPageId),
+          navLinks || [],
           coreStart.chrome.navLinks.getAll()
-        );
+        ).filter((navLink) => navLink.id !== settingsLandingPageId && !navLink.hidden);
 
         return renderApp({
           mountElement: params.element,
@@ -163,9 +163,9 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           .toPromise();
         const navLinks = navGroupMap[DEFAULT_NAV_GROUPS.dataAdministration.id]?.navLinks;
         const fulfilledNavLink = fulfillRegistrationLinksToChromeNavLinks(
-          (navLinks || []).filter((navLink) => navLink.id !== dataAdministrationLandingPageId),
+          navLinks || [],
           coreStart.chrome.navLinks.getAll()
-        );
+        ).filter((navLink) => navLink.id !== dataAdministrationLandingPageId && !navLink.hidden);
 
         return renderApp({
           mountElement: params.element,

@@ -43,6 +43,8 @@ export const FeatureCards = ({
   const itemsPerRow = 4;
   const groupedCardForDisplay = useMemo(() => {
     const grouped: Array<{ category?: AppCategory; navLinks: ChromeNavLink[][] }> = [];
+    // The navLinks has already been sorted based on link / category's order,
+    // so it is safe to group the links here.
     navLinks.forEach((link) => {
       let lastGroup = grouped.length ? grouped[grouped.length - 1] : undefined;
       if (!lastGroup || lastGroup.category !== link.category) {
