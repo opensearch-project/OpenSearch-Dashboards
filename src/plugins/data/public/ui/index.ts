@@ -39,5 +39,13 @@ export {
 export { IndexPatternSelectProps } from './index_pattern_select';
 export { FilterLabel } from './filter_bar';
 export { QueryStringInput, QueryStringInputProps } from './query_string_input';
+export {
+  QueryEditorTopRow,
+  QueryEditor,
+  QueryEditorProps,
+  QueryEditorExtensions,
+  QueryEditorExtensionDependencies,
+  QueryEditorExtensionConfig,
+} from './query_editor';
 export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
 export { SuggestionsComponent } from './typeahead';
