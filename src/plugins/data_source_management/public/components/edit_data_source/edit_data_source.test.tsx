@@ -30,7 +30,7 @@ const notFoundIdentifier = '[data-test-subj="dataSourceNotFound"]';
 describe('Datasource Management: Edit Datasource Wizard', () => {
   const mockedContext = {
     ...mockManagementPlugin.createDataSourceManagementContext(),
-    application: { capabilities: { dataSource: { canEdit: true } } },
+    application: { capabilities: { dataSource: { canManage: true } } },
   };
   const uiSettings = mockedContext.uiSettings;
   mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(

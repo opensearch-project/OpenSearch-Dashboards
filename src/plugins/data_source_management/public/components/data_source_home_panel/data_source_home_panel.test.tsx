@@ -41,7 +41,7 @@ describe('DataSourceHomePanel', () => {
       http: {},
       savedObjects: {},
       uiSettings: {},
-      application: { capabilities: { dataSource: { canEdit: true } } },
+      application: { capabilities: { dataSource: { canManage: true } } },
     },
   };
 

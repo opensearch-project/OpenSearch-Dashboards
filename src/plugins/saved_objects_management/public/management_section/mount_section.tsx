@@ -69,8 +69,8 @@ export const mountManagementSection = async ({
   if (allowedObjectTypes === undefined) {
     allowedObjectTypes = await getAllowedTypes(coreStart.http);
   }
-  // Restrict user to edit data source in the saved object management page according the editMode.
-  const showDataSource = !!coreStart.application.capabilities?.dataSource?.canEdit;
+  // Restrict user to manage data source in the saved object management page according the manageableBy flag.
+  const showDataSource = !!coreStart.application.capabilities?.dataSource?.canManage;
   allowedObjectTypes = showDataSource
     ? allowedObjectTypes
     : allowedObjectTypes.filter((type) => type !== 'data-source');

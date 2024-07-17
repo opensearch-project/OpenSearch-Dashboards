@@ -56,7 +56,7 @@ export interface EditDataSourceProps {
   onDeleteDataSource?: () => Promise<void>;
   onSetDefaultDataSource: () => Promise<void>;
   displayToastMessage: (info: ToastMessageItem) => void;
-  canEditDataSource: boolean;
+  canManageDataSource: boolean;
 }
 export interface EditDataSourceState {
   formErrorsByField: CreateEditDataSourceValidation;
@@ -645,7 +645,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         onClickTestConnection={this.onClickTestConnection}
         onClickSetDefault={this.setDefaultDataSource}
         isDefault={this.props.isDefault}
-        canEditDataSource={this.props.canEditDataSource}
+        canManageDataSource={this.props.canManageDataSource}
       />
     );
   };
@@ -1121,7 +1121,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {this.props.canEditDataSource ? (
+          {this.props.canManageDataSource ? (
             <EuiFlexItem grow={false}>
               <EuiButton
                 className="mgtAdvancedSettingsForm__button"

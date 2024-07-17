@@ -35,7 +35,7 @@ import { Header } from './header';
 
 describe('Intro component', () => {
   const mountHeader = (props: {
-    canEdit: boolean;
+    canManage: boolean;
     canDelete: boolean;
     canViewInApp: boolean;
     type: string;
@@ -50,7 +50,7 @@ describe('Intro component', () => {
 
   const defaultProps = {
     type: 'search',
-    canEdit: true,
+    canManage: true,
     canDelete: true,
     canViewInApp: true,
     viewUrl: '/some-url',
@@ -64,16 +64,16 @@ describe('Intro component', () => {
     expect(mounted).toMatchSnapshot();
   });
 
-  it('displays correct title depending on canEdit', () => {
+  it('displays correct title depending on canManage', () => {
     let mounted = mountHeader({
       ...defaultProps,
-      canEdit: true,
+      canManage: true,
     });
     expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"Edit search"`);
 
     mounted = mountHeader({
       ...defaultProps,
-      canEdit: false,
+      canManage: false,
     });
     expect(mounted.find('h1').text()).toMatchInlineSnapshot(`"View search"`);
   });

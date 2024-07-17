@@ -33,7 +33,7 @@ import { registerTestConnectionRoute } from './routes/test_connection';
 import { registerFetchDataSourceMetaDataRoute } from './routes/fetch_data_source_metadata';
 import { AuthenticationMethodRegistry, IAuthenticationMethodRegistry } from './auth_registry';
 import { CustomApiSchemaRegistry } from './schema_registry';
-import { EditMode } from '../common/data_sources';
+import { ManageableBy } from '../common/data_sources';
 import { getWorkspaceState } from '../../../../src/core/server/utils';
 
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
@@ -83,24 +83,23 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       dataSourceSavedObjectsClientWrapper.wrapperFactory
     );
 
-    const { editMode } = config;
+    const { manageableBy } = config;
     core.capabilities.registerProvider(() => ({
       dataSource: {
-        canEdit: false,
-        canAssign: false,
+        canManage: false,
       },
     }));
 
     core.capabilities.registerSwitcher((request) => {
       const { requestWorkspaceId, isDashboardAdmin } = getWorkspaceState(request);
-      // User can not edit data source in the workspace.
-      const canEdit =
-        (editMode === EditMode.None && !requestWorkspaceId) ||
-        (editMode === EditMode.AdminOnly && isDashboardAdmin !== false && !requestWorkspaceId);
-      // Only OSD admin user can assign data source in the workspace.
-      const canAssign = !!requestWorkspaceId && isDashboardAdmin !== false;
+      // User can not manage data source in the workspace.
+      const canManage =
+        (manageableBy === ManageableBy.All && !requestWorkspaceId) ||
+        (manageableBy === ManageableBy.DashboardAdmin &&
+          isDashboardAdmin !== false &&
+          !requestWorkspaceId);
 
-      return { dataSource: { canEdit, canAssign } };
+      return { dataSource: { canManage } };
     });
 
     core.logging.configure(

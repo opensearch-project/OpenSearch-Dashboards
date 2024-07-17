@@ -163,7 +163,7 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
             handleSubmit={handleSubmit}
             displayToastMessage={handleDisplayToastMessage}
             handleTestConnection={handleTestConnection}
-            canEditDataSource={!!application.capabilities?.dataSource?.canEdit}
+            canManageDataSource={!!application.capabilities?.dataSource?.canManage}
           />
         ) : null}
         {isLoading || !dataSource?.endpoint ? <LoadingMask /> : null}

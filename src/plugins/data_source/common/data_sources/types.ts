@@ -61,8 +61,8 @@ export enum DataSourceEngineType {
   NA = 'No Engine Type Available',
 }
 
-export enum EditMode {
-  ReadOnly = 'read_only',
-  AdminOnly = 'admin_only',
+export enum ManageableBy {
+  All = 'all',
+  DashboardAdmin = 'dashboard_admin',
   None = 'none',
 }

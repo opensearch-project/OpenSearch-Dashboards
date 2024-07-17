@@ -34,7 +34,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
             dataSourceName={dataSourceName}
             onClickSetDefault={mockFn}
             isDefault={false}
-            canEditDataSource={true}
+            canManageDataSource={true}
           />
         ),
         {
@@ -88,7 +88,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
             dataSourceName={dataSourceName}
             onClickSetDefault={mockFn}
             isDefault={false}
-            canEditDataSource={true}
+            canManageDataSource={true}
           />
         ),
         {
@@ -118,7 +118,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
             dataSourceName={dataSourceName}
             onClickSetDefault={onClickSetDefault}
             isDefault={isDefaultDataSourceState}
-            canEditDataSource={true}
+            canManageDataSource={true}
           />
         ),
         {
@@ -155,7 +155,7 @@ describe('Datasource Management: Edit Datasource Header', () => {
             dataSourceName={dataSourceName}
             onClickSetDefault={onClickSetDefault}
             isDefault={isDefaultDataSourceState}
-            canEditDataSource={true}
+            canManageDataSource={true}
           />
         ),
         {
@@ -176,6 +176,37 @@ describe('Datasource Management: Edit Datasource Header', () => {
       expect(component.find(setDefaultButtonIdentifier).first().prop('iconType')).toBe(
         'starFilled'
       );
+    });
+  });
+  describe('should not manage data source', () => {
+    beforeEach(() => {
+      component = mount(
+        wrapWithIntl(
+          <Header
+            isFormValid={true}
+            showDeleteIcon={true}
+            onClickDeleteIcon={mockFn}
+            onClickTestConnection={mockFn}
+            dataSourceName={dataSourceName}
+            onClickSetDefault={mockFn}
+            isDefault={false}
+            canManageDataSource={false}
+          />
+        ),
+        {
+          wrappingComponent: OpenSearchDashboardsContextProvider,
+          wrappingComponentProps: {
+            services: mockedContext,
+          },
+        }
+      );
+    });
+    test('should not show delete', () => {
+      expect(component.find(headerTitleIdentifier).last().text()).toBe(dataSourceName);
+      expect(component.find(deleteIconIdentifier).exists()).toBe(false);
+    });
+    test('should not show default icon', () => {
+      expect(component.find(setDefaultButtonIdentifier).exists()).toBe(false);
     });
   });
 });

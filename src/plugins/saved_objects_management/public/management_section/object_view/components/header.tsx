@@ -40,7 +40,7 @@ import {
 import { FormattedMessage } from '@osd/i18n/react';
 
 interface HeaderProps {
-  canEdit: boolean;
+  canManage: boolean;
   canDelete: boolean;
   canViewInApp: boolean;
   type: string;
@@ -49,7 +49,7 @@ interface HeaderProps {
 }
 
 export const Header = ({
-  canEdit,
+  canManage,
   canDelete,
   canViewInApp,
   type,
@@ -60,7 +60,7 @@ export const Header = ({
     <EuiPageContentHeader>
       <EuiPageContentHeaderSection>
         <EuiText size="s">
-          {canEdit ? (
+          {canManage ? (
             <h1>
               <FormattedMessage
                 id="savedObjectsManagement.view.editItemTitle"

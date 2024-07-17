@@ -101,7 +101,7 @@ export class SavedObjectEdition extends Component<
     } = this.props;
     const { type } = this.state;
     const { object } = this.state;
-    const { edit: canEdit, delete: canDelete } = capabilities.savedObjectsManagement as Record<
+    const { edit: canManage, delete: canDelete } = capabilities.savedObjectsManagement as Record<
       string,
       boolean
     >;
@@ -111,7 +111,7 @@ export class SavedObjectEdition extends Component<
     return (
       <EuiPageContent horizontalPosition="center" data-test-subj="savedObjectsEdit">
         <Header
-          canEdit={canEdit}
+          canManage={canManage}
           canDelete={canDelete}
           canViewInApp={canView}
           type={type}
@@ -124,7 +124,7 @@ export class SavedObjectEdition extends Component<
             <NotFoundErrors type={notFoundType} />
           </>
         )}
-        {canEdit && (
+        {canManage && (
           <>
             <EuiSpacer size="s" />
             <Intro />
@@ -137,7 +137,7 @@ export class SavedObjectEdition extends Component<
               object={object}
               savedObjectsClient={savedObjectsClient}
               service={service}
-              editionEnabled={canEdit}
+              editionEnabled={canManage}
               onSave={this.saveChanges}
             />
           </>

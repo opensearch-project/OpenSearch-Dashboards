@@ -59,9 +59,9 @@ export const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
   }),
-  editMode: schema.oneOf(
-    [schema.literal('read_only'), schema.literal('admin_only'), schema.literal('none')],
-    { defaultValue: 'none' }
+  manageableBy: schema.oneOf(
+    [schema.literal('all'), schema.literal('dashboard_admin'), schema.literal('none')],
+    { defaultValue: 'all' }
   ),
 });
 

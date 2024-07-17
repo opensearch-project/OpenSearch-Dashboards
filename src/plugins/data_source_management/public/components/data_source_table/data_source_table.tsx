@@ -62,7 +62,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = React.useState(false);
-  const canEditDataSource = !!application.capabilities?.dataSource?.canEdit;
+  const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
@@ -113,7 +113,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   };
 
   const renderToolsRight = () => {
-    return canEditDataSource ? (
+    return canManageDataSource ? (
       <EuiFlexItem key="delete" grow={false}>
         {renderDeleteButton()}
       </EuiFlexItem>
@@ -325,7 +325,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
             />
           </EuiText>
           <EuiSpacer />
-          {canEditDataSource ? createButtonEmptyState : null}
+          {canManageDataSource ? createButtonEmptyState : null}
         </EuiPanel>
         <EuiSpacer size="l" />
       </>
