@@ -14,12 +14,12 @@ primaryExpression:
 	| fieldExpression
 	| termSearch;
 comparisonExpression: field comparisonOperator rangeValue;
-fieldExpression: field EQ value;
+fieldExpression: field EQ (value | groupExpression);
 termSearch: IDENTIFIER;
 groupExpression:
 	LPAREN groupContent ((OR | AND) (NOT?) groupContent)* RPAREN;
-groupContent: groupExpression | termSearch;
+groupContent: groupExpression | value;
 field: IDENTIFIER;
 rangeValue: NUMBER | PHRASE;
-value: PHRASE | NUMBER | termSearch | groupExpression;
+value: PHRASE | NUMBER | termSearch;
 comparisonOperator: GT | LT | GE | LE;
