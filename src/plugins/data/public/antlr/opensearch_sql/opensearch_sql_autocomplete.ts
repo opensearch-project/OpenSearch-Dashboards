@@ -14,7 +14,7 @@ import {
   ProcessVisitedRulesResult,
   TableOrViewSuggestion,
   OpenSearchSqlAutocompleteResult,
-} from './types';
+} from '../shared/types';
 import { OpenSearchSQLLexer } from './generated/OpenSearchSQLLexer';
 import {
   TableFilterContext,
@@ -29,7 +29,7 @@ import {
   getContextSuggestions,
   getPreviousToken,
 } from './table';
-import { isStartingToWriteRule } from './cursor';
+import { isStartingToWriteRule } from '../shared/cursor';
 import { shouldSuggestTemplates } from './parse';
 
 const tokenDictionary: TokenDictionary = {

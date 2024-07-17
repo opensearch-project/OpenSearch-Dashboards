@@ -10,17 +10,9 @@
  */
 
 import { stringify } from '@osd/std';
-import {
-  CharStream,
-  CommonTokenStream,
-  Lexer as LexerType,
-  ParserRuleContext,
-  Parser as ParserType,
-  Token,
-} from 'antlr4ng';
+import { monaco } from 'packages/osd-monaco/target';
+import { Lexer as LexerType, ParserRuleContext, Parser as ParserType } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
-import { OpenSearchSQLLexer } from './generated/OpenSearchSQLLexer';
-import { OpenSearchSQLParser } from './generated/OpenSearchSQLParser';
 import {
   AutocompleteResultBase,
   CursorPosition,
@@ -30,25 +22,21 @@ import {
   LexerConstructor,
   OpenSearchSqlAutocompleteResult,
   ParserConstructor,
-} from './types';
+} from '../shared/types';
 import { TokenDictionary } from './table';
 import { createParser } from './parse';
 import { SqlErrorListener } from './sql_error_listerner';
-import { findCursorTokenIndex } from './cursor';
+import { findCursorTokenIndex } from '../shared/cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { getUiSettings } from '../../services';
 import { SQL_SYMBOLS } from './constants';
 
-const getSymbolSuggestionType = (field: string) => {
-  if (SQL_SYMBOLS.KEY_WORDS.includes(field)) {
-    return 'keyword';
-  } else if (SQL_SYMBOLS.FUNCTIONS.includes(field)) {
-    return 'function';
-  }
-  return 'text';
-};
+export interface SuggestionParams {
+  position: monaco.Position;
+  query: string;
+}
 
-export const getSuggestions = async ({ position, query }) => {
+export const getSuggestions = async ({ position, query }: SuggestionParams) => {
   const { api } = getUiSettings();
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
     line: position.lineNumber,
@@ -56,8 +44,6 @@ export const getSuggestions = async ({ position, query }) => {
   });
 
   const finalSuggestions = [];
-
-  console.log('enriched suggestions: ', suggestions);
 
   // fetch columns and values
   if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
@@ -100,19 +86,17 @@ export const getSuggestions = async ({ position, query }) => {
     }
   }
 
-  if (suggestions.suggestScalarFunctions) {
-    // finalSuggestions.push(
-    //   ...suggestions.suggestFunctions.map((sf) => ({
-    //     text: sf.value,
-    //     description: sf.description,
-    //   }))
-    // );
-  }
-
-  // fetch functions
+  // fill in agregate functions
   if ('suggestAggregateFunctions' in suggestions && suggestions.suggestAggregateFunctions) {
+    finalSuggestions.push(
+      ...SQL_SYMBOLS.AGREGATE_FUNCTIONS.map((af) => ({
+        text: af,
+        type: 'function',
+      }))
+    );
   }
 
+  // fill in sql keywords
   if ('suggestKeywords' in suggestions && (suggestions.suggestKeywords?.length ?? 0) > 0) {
     finalSuggestions.push(
       ...suggestions.suggestKeywords!.map((sk) => ({
@@ -201,9 +185,7 @@ export const parseQuery = <
   const core = new CodeCompletionCore(parser);
   core.ignoredTokens = ignoredTokens;
   core.preferredRules = rulesToVisit;
-  console.log('cursor: ', cursor);
   const cursorTokenIndex = findCursorTokenIndex(tokenStream, cursor, tokenDictionary.SPACE);
-  console.log('cursorTokenIndex: ', cursorTokenIndex);
   if (cursorTokenIndex === undefined) {
     throw new Error(
       `Could not find cursor token index for line: ${cursor.line}, column: ${cursor.column}`
@@ -212,12 +194,6 @@ export const parseQuery = <
 
   const suggestKeywords: KeywordSuggestion[] = [];
   const { tokens, rules } = core.collectCandidates(cursorTokenIndex, context);
-  // console.log(
-  //   'core.collectCandidates(cursorTokenIndex, context): ',
-  //   core.collectCandidates(cursorTokenIndex, context)
-  // );
-  console.log('tokens: ', tokens, ' rules: ', rules);
-  // console.log('getTokenTypeMap: ', parser.getTokenTypeMap());
   tokens.forEach((_, tokenType) => {
     // Literal keyword names are quoted
     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');

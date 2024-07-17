@@ -14,7 +14,7 @@ import {
   Lexer as LexerType,
   Parser as ParserType,
 } from 'antlr4ng';
-import { TableQueryPosition, TokenDictionary } from './table';
+import { TableQueryPosition, TokenDictionary } from '../opensearch_sql/table';
 
 export interface AutocompleteResultBase {
   errors: ParserSyntaxError[];

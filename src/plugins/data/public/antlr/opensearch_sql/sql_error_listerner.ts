@@ -5,7 +5,7 @@
 
 import { ANTLRErrorListener, ATNSimulator, Recognizer, Token } from 'antlr4ng';
 
-import { TokenPosition, getTokenPosition } from './cursor';
+import { TokenPosition, getTokenPosition } from '../shared/cursor';
 
 interface ParserSyntaxError extends TokenPosition {
   message: string;

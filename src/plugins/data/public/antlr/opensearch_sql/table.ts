@@ -14,17 +14,14 @@ import {
   ParserConstructor,
   SymbolTableVisitor,
   TableContextSuggestion,
-} from './types';
-import { findCursorTokenIndex } from './cursor';
+} from '../shared/types';
+import { findCursorTokenIndex } from '../shared/cursor';
 
 export interface TokenDictionary {
   SPACE: number;
   FROM: number;
   OPENING_BRACKET: number;
   CLOSING_BRACKET: number;
-  // ALTER: number;
-  // INSERT: number;
-  // UPDATE: number;
   JOIN: number;
   SEMICOLON: number;
   SELECT: number;
@@ -156,38 +153,6 @@ export function getTableQueryPosition(
     if (token.type === dictionary.SEMICOLON) {
       return undefined;
     }
-
-    // if (token.type === dictionary.ALTER) {
-    //   // If we find another ALTER before, it means that this is ALTER COLUMN
-    //   // and we don't want to exit here
-    //   const hasPreviousAlter = Boolean(
-    //     getPreviousToken(tokenStream, dictionary, currentIndex, dictionary.ALTER)
-    //   );
-
-    //   if (!hasPreviousAlter) {
-    //     return {
-    //       start: token.start,
-    //       end,
-    //       type: 'alter',
-    //     };
-    //   }
-    // }
-
-    // if (token.type === dictionary.INSERT) {
-    //   return {
-    //     start: token.start,
-    //     end,
-    //     type: 'insert',
-    //   };
-    // }
-
-    // if (token.type === dictionary.UPDATE) {
-    //   return {
-    //     start: token.start,
-    //     end,
-    //     type: 'update',
-    //   };
-    // }
 
     currentIndex--;
   }

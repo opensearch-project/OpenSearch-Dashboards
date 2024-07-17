@@ -6,7 +6,7 @@
 /* eslint-disable max-classes-per-file */
 
 import * as c3 from 'antlr4-c3';
-import { ColumnAliasSuggestion, SymbolTableVisitor, Table } from './types';
+import { ColumnAliasSuggestion, SymbolTableVisitor, Table } from '../shared/types';
 
 export class TableSymbol extends c3.TypedSymbol {
   name: string;

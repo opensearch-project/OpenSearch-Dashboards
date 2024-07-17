@@ -4,9 +4,8 @@
  */
 
 import { CharStream, CommonTokenStream, Lexer as LexerType, Parser as ParserType } from 'antlr4ng';
-import { CursorPosition, LexerConstructor, ParserConstructor } from './types';
-import { getCursorIndex } from './cursor';
-
+import { CursorPosition, LexerConstructor, ParserConstructor } from '../shared/types';
+import { getCursorIndex } from '../shared/cursor';
 const spaceSymbols = '(\\s|\r\n|\n|\r)+';
 const explainRegex = new RegExp(`^(${spaceSymbols})?explain${spaceSymbols}$`);
 const multipleKeywordsRegex = new RegExp(`^(${spaceSymbols})?\\S+${spaceSymbols}`);

@@ -5,7 +5,7 @@
 
 import { Token, TokenStream } from 'antlr4ng';
 import { ICandidateRule } from 'antlr4-c3';
-import { CursorPosition } from './types';
+import { CursorPosition } from '../shared/types';
 
 export interface TokenPosition {
   startLine: number;
