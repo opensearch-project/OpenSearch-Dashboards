@@ -18,4 +18,4 @@ export const CONNECT_DATASOURCES_MESSAGE = 'Connect your data sources to get sta
 export const NO_COMPATIBLE_DATASOURCES_MESSAGE = 'No compatible data sources are available.';
 export const ADD_COMPATIBLE_DATASOURCES_MESSAGE = 'Add a compatible data source.';
 
-export const DEFAULT_DATA_SOURCE_UI_SETTINGS_ID = 'defaultDataSource';
+export { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../common';
