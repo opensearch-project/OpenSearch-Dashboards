@@ -123,6 +123,7 @@ export function NavGroups({
         return {
           ...navItem,
           name: <EuiText color="success">{navItem.name}</EuiText>,
+          emphasize: false,
         };
       }
 
