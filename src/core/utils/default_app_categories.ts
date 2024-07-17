@@ -81,9 +81,16 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     order: 1000,
   },
   dashboardAndReport: {
-    id: 'dashboardAndReport',
-    label: i18n.translate('core.ui.dashboardAndReport.label', {
-      defaultMessage: 'Dashboard and report',
+    id: 'visualizeAndReport',
+    label: i18n.translate('core.ui.visualizeAndReport.label', {
+      defaultMessage: 'Visualize and report',
+    }),
+    order: 2000,
+  },
+  visualizeAndReport: {
+    id: 'visualizeAndReport',
+    label: i18n.translate('core.ui.visualizeAndReport.label', {
+      defaultMessage: 'Visualize and report',
     }),
     order: 2000,
   },
@@ -94,9 +101,16 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     }),
     order: 4000,
   },
+  detect: {
+    id: 'detect',
+    label: i18n.translate('core.ui.detect.label', {
+      defaultMessage: 'Detect',
+    }),
+    order: 3000,
+  },
   manage: {
     id: 'manage',
-    label: i18n.translate('core.ui.manageNavList.label', {
+    label: i18n.translate('core.ui.manageNav.label', {
       defaultMessage: 'Manage',
     }),
     order: 7000,

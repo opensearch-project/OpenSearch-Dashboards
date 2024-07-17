@@ -145,6 +145,7 @@ export class RequestSelector extends Component<RequestSelectorProps, RequestSele
         <EuiContextMenuPanel
           items={this.props.requests.map(this.renderRequestDropdownItem)}
           data-test-subj="inspectorRequestChooserMenuPanel"
+          size="s"
         />
       </EuiPopover>
     );
