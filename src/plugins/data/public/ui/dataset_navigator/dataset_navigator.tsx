@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiContextMenu,
+  EuiContextMenuItem,
   EuiContextMenuPanelDescriptor,
   EuiPopover,
 } from '@elastic/eui';
@@ -18,8 +19,15 @@ import {
 } from '../../data_sources/datasource';
 import { DataSourceOption } from '../../data_sources/datasource_selector/types';
 import { IndexPatternSelectable } from './index_pattern_selectable';
-import { SavedObjectsClientContract, SimpleSavedObject } from 'opensearch-dashboards/public';
+import {
+  HttpSetup,
+  SavedObjectsClientContract,
+  SimpleSavedObject,
+} from 'opensearch-dashboards/public';
 import { DataSourceAttributes } from '../../../../data_source_management/public/types';
+import { ISearchStart } from '../../search/types';
+import { map, scan } from 'rxjs/operators';
+import { IndexPatternsContract } from '../..';
 
 const getAndFormatIndexPatternsFromDataSource = async (
   ds: DataSource
@@ -55,6 +63,7 @@ const consolidateIndexPatternList = (
       result.push(dataSourceOption);
     });
   });
+  console.log('results:', result);
 
   return result;
 };
@@ -66,64 +75,97 @@ const getClusters = async (savedObjectsClient: SavedObjectsClientContract) => {
   });
 };
 
+export const searchResponseToArray = (showAllIndices: boolean) => (response) => {
+  const { rawResponse } = response;
+  if (!rawResponse.aggregations) {
+    return [];
+  } else {
+    return rawResponse.aggregations.indices.buckets
+      .map((bucket: { key: string }) => {
+        return bucket.key;
+      })
+      .filter((indexName: string) => {
+        if (showAllIndices) {
+          return true;
+        } else {
+          return !indexName.startsWith('.');
+        }
+      })
+      .map((indexName: string) => {
+        return {
+          name: indexName,
+          // item: {},
+        };
+      });
+  }
+};
+
+const buildSearchRequest = (showAllIndices: boolean, pattern: string, dataSourceId?: string) => {
+  const request = {
+    params: {
+      ignoreUnavailable: true,
+      expand_wildcards: showAllIndices ? 'all' : 'open',
+      index: pattern,
+      body: {
+        size: 0, // no hits
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: 100,
+            },
+          },
+        },
+      },
+    },
+    dataSourceId: dataSourceId,
+  };
+
+  return request;
+};
+
+const getIndices = async (search: ISearchStart, dataSourceId: string) => {
+  const request = buildSearchRequest(true, '*', dataSourceId);
+  return search
+    .search(request)
+    .pipe(map(searchResponseToArray(true)))
+    .pipe(scan((accumulator = [], value) => accumulator.join(value)))
+    .toPromise()
+    .catch(() => []);
+};
+
 interface DataSetNavigatorProps {
+  http: HttpSetup;
+  search: ISearchStart;
   savedObjectsClient: SavedObjectsClientContract;
+  indexPatterns: IndexPatternsContract;
   dataSources: DataSource[];
   indexPatternOptionList: any;
   selectedSources: DataSourceOption[];
+  selectedCluster: any;
   setIndexPatternOptionList: any;
+  setSelectedCluster: any;
   handleSourceSelection: any;
 }
 
 export const DataSetNavigator = ({
+  http,
+  search,
   savedObjectsClient,
+  indexPatterns,
   dataSources,
   indexPatternOptionList,
   selectedSources,
+  selectedCluster,
   setIndexPatternOptionList,
+  setSelectedCluster,
   handleSourceSelection,
 }: DataSetNavigatorProps) => {
   const [isDataSetNavigatorOpen, setIsDataSetNavigatorOpen] = useState(false);
   const [clusterList, setClusterList] = useState<SimpleSavedObject<DataSourceAttributes>[]>([]);
-  const [dataSetNavigatorPanels, setDataSetNavigatorPanels] = useState<
-    EuiContextMenuPanelDescriptor[]
-  >([
-    {
-      id: 0,
-      title: 'DATA SETS',
-      items: [
-        {
-          name: 'Index Patterns',
-          panel: 1,
-        },
-        {
-          name: 'Connected Data Sources',
-          panel: 2,
-        },
-        {
-          name: '...',
-          panel: 2,
-          onClick: () => console.log('clicked ..')
-        },
-      ],
-    },
-    {
-      id: 1,
-      title: 'Index Patterns',
-      content: (
-        <IndexPatternSelectable
-          indexPatternOptionList={indexPatternOptionList}
-          setIndexPatternOptionList={setIndexPatternOptionList}
-          handleSourceSelection={handleSourceSelection}
-        />
-      ),
-    },
-    {
-      id: 2,
-      title: 'Clusters',
-      content: <div />,
-    },
-  ]);
+  const [indexList, setIndexList] = useState<any[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState<string>('');
+  const [selectedField, setSelectedField] = useState<string>('');
 
   const onButtonClick = () => setIsDataSetNavigatorOpen((isOpen) => !isOpen);
   const closePopover = () => setIsDataSetNavigatorOpen(false);
@@ -145,20 +187,53 @@ export const DataSetNavigator = ({
   }, [savedObjectsClient]);
 
   useEffect(() => {
-    console.log('cluster list:', clusterList);
-  }, [clusterList]);
+    if (selectedCluster) {
+      // Get all indexes
+      Promise.all([getIndices(search, selectedCluster.id)]).then((res) => {
+        if (res && res.length > 0) {
+          console.log('res', Object.values(res?.[0]));
+          setIndexList(
+            Object.values(res?.[0]).map((index: any) => ({
+              ...index,
+              // panel: 4,
+              onClick: async () => {
+                setSelectedIndex(index.name);
+                const existingIndexPattern = indexPatterns.getByTitle(index.name, true);
+                const dataSet = await indexPatterns.create(
+                  { id: index.name, title: index.name },
+                  !existingIndexPattern?.id
+                );
+                // save to cache by title because the id is not unique for temporary index pattern created
+                indexPatterns.saveToCache(dataSet.title, dataSet);
+                handleSourceSelection([
+                  {
+                    type: 'indexPattern',
+                    name: 'OpenSearch Default',
+                    ds: selectedCluster,
+                    key: index.name,
+                    label: index.name,
+                    value: index.name,
+                  },
+                ]);
+              },
+            }))
+          );
+        }
+      });
+      // Update panels related to cluster
+    }
+  }, [selectedCluster, setIndexList, setSelectedIndex]);
 
-  // useEffect(() => {
-  //   setDataSetNavigatorPanels((prevPanels: EuiContextMenuPanelDescriptor[]) => 
-  //     prevPanels.map(panel => {
-  //       const initialItems = panel.items?.filter(item => item?.panel === 1);
-  //       const clusterPanels = clusterList.map((cluster) => ({
-  //         name: cluster.attributes.title,
-  //       }))
-  //       return panel;
-  //     })
-  //   )
-  // }, [clusterList])
+  useEffect(() => {
+    if (selectedIndex) {
+      Promise.all([
+        indexPatterns.getFieldsForWildcard({
+          pattern: selectedIndex,
+          dataSourceId: selectedCluster.id,
+        }),
+      ]).then((res) => console.log(res));
+    }
+  }, [selectedIndex]);
 
   const dataSetButton = (
     <EuiButtonEmpty
@@ -179,7 +254,64 @@ export const DataSetNavigator = ({
       closePopover={closePopover}
       anchorPosition="downLeft"
     >
-      <EuiContextMenu initialPanelId={0} panels={dataSetNavigatorPanels} />
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            title: 'DATA SETS',
+            items: [
+              {
+                name: 'Index Patterns',
+                panel: 1,
+              },
+              // Use spread operator with conditional mapping
+              ...(clusterList
+                ? clusterList.map((cluster) => ({
+                    name: cluster.attributes.title,
+                    panel: 2,
+                    onClick: () => {
+                      setSelectedCluster(cluster);
+                    },
+                  }))
+                : []),
+            ],
+          },
+          {
+            id: 1,
+            title: 'Index Patterns',
+            content: (
+              <IndexPatternSelectable
+                indexPatternOptionList={indexPatternOptionList}
+                setIndexPatternOptionList={setIndexPatternOptionList}
+                handleSourceSelection={handleSourceSelection}
+              />
+            ),
+          },
+          {
+            id: 2,
+            title: selectedCluster ? selectedCluster.attributes.title : 'Cluster',
+            items: [
+              {
+                name: 'Indexes',
+                panel: 3,
+              },
+              {
+                name: 'Connected Data Sources',
+              },
+            ],
+          },
+          {
+            id: 3,
+            title: selectedCluster ? selectedCluster.attributes.title : 'Cluster',
+            items: indexList,
+          },
+          {
+            id: 4,
+            title: 'clicked',
+          },
+        ]}
+      />
     </EuiPopover>
   );
 };

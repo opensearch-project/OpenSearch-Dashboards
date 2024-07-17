@@ -24,6 +24,8 @@ export const IndexPatternSelectable = ({
     [handleSourceSelection]
   );
 
+  console.log('option list:', indexPatternOptionList);
+
   return (
     <div>
       <EuiSelectable

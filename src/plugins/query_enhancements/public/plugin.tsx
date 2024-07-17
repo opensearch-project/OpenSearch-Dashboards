@@ -89,7 +89,7 @@ export class QueryEnhancementsPlugin
               initialTo: moment().add(2, 'days').toISOString(),
             },
             showFilterBar: false,
-            showDataSetsSelector: false,
+            showDataSetsSelector: true,
             showDataSourcesSelector: true,
           },
           fields: {
@@ -109,7 +109,7 @@ export class QueryEnhancementsPlugin
           searchBar: {
             showDatePicker: false,
             showFilterBar: false,
-            showDataSetsSelector: false,
+            showDataSetsSelector: true,
             showDataSourcesSelector: true,
             queryStringInput: { initialValue: 'SELECT * FROM <data_source>' },
           },

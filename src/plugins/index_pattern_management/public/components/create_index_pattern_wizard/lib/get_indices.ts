@@ -122,6 +122,7 @@ export const getIndicesViaResolve = async ({
       query,
     })
     .then((response) => {
+      console.log('response in get indices:', response);
       if (!response) {
         return [];
       } else {
