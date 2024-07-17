@@ -3,7 +3,7 @@
 exports[`Intro component renders correctly 1`] = `
 <Header
   canDelete={true}
-  canManage={true}
+  canEdit={true}
   canViewInApp={true}
   onDeleteClick={[Function]}
   type="search"
