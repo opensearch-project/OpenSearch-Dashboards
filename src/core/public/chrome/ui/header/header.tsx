@@ -229,13 +229,16 @@ export function Header({
                   loadingCount$={observables.loadingCount$}
                 />
               </EuiHeaderSectionItem>
-              <EuiHeaderSectionItem border="right">
-                <RecentItems
-                  recentlyAccessed$={observables.recentlyAccessed$}
-                  workspaceList$={observables.workspaceList$}
-                  navigateToUrl={application.navigateToUrl}
-                />
-              </EuiHeaderSectionItem>
+              {/* Only display recent items when navGroup is enabled */}
+              {navGroupEnabled && (
+                <EuiHeaderSectionItem border="right">
+                  <RecentItems
+                    recentlyAccessed$={observables.recentlyAccessed$}
+                    workspaceList$={observables.workspaceList$}
+                    navigateToUrl={application.navigateToUrl}
+                  />
+                </EuiHeaderSectionItem>
+              )}
             </EuiHeaderSection>
 
             <HeaderBreadcrumbs
