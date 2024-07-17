@@ -19,7 +19,6 @@ const findCursorIndex = (
 
   for (let i = 0; i < tokenStream.size; i++) {
     const token = tokenStream.get(i);
-    // console.log('token:', token);
     const { startLine, endColumn, endLine } = getTokenPosition(token, whitespaceToken);
 
     // endColumn makes sense only if startLine === endLine
@@ -41,7 +40,7 @@ const findCursorIndex = (
 const findFieldSuggestions = (indexPattern: IndexPattern) => {
   const fieldNames: string[] = indexPattern.fields
     .getAll()
-    .filter((idxField: IndexPatternField) => !idxField.subType)
+    .filter((idxField: IndexPatternField) => !idxField.subType) // filter removed .keyword fields
     .map((idxField: { displayName: string }) => {
       return idxField.displayName;
     });
@@ -61,6 +60,24 @@ const findValuesFromField = async (indexTitle: string, fieldName: string) => {
   });
 };
 
+// listener for parsing the current query
+class FieldListener extends DQLParserListener {
+  lastField: string | undefined;
+
+  constructor() {
+    super();
+    this.lastField;
+  }
+
+  public enterField = (ctx: FieldContext) => {
+    this.lastField = ctx.start?.text;
+  };
+
+  getLastField() {
+    return this.lastField;
+  }
+}
+
 export const getSuggestions = async ({
   selectionStart,
   selectionEnd,
@@ -74,25 +91,6 @@ export const getSuggestions = async ({
   const lexer = new DQLLexer(inputStream);
   const tokenStream = new CommonTokenStream(lexer);
   const parser = new DQLParser(tokenStream);
-  // const tree = parser.query(); // used to check if parsing is happening properly
-
-  // listener for parsing the current query
-  class FieldListener extends DQLParserListener {
-    lastField: string | undefined;
-
-    constructor() {
-      super();
-      this.lastField;
-    }
-
-    public enterField = (ctx: FieldContext) => {
-      this.lastField = ctx.start?.text;
-    };
-
-    getLastField() {
-      return this.lastField;
-    }
-  }
 
   const listener = new FieldListener();
   parser.addParseListener(listener);
@@ -101,8 +99,6 @@ export const getSuggestions = async ({
   // find token index
   const cursorIndex =
     findCursorIndex(tokenStream, { line: 1, column: selectionStart }, DQLParser.WS) ?? 0;
-
-  // console.log('cursor index:', cursorIndex);
 
   const core = new CodeCompletionCore(parser);
 
@@ -113,7 +109,6 @@ export const getSuggestions = async ({
   core.ignoredTokens = new Set([
     DQLParser.LPAREN,
     DQLParser.RPAREN,
-    DQLParser.DOT,
     DQLParser.EQ,
     DQLParser.GE,
     DQLParser.GT,
@@ -124,7 +119,6 @@ export const getSuggestions = async ({
 
   // gets candidates at specified token index
   const candidates = core.collectCandidates(cursorIndex);
-  // console.log('candidates', candidates);
 
   let completions = [];
 
@@ -133,9 +127,24 @@ export const getSuggestions = async ({
     completions.push(...findFieldSuggestions(currentIndexPattern));
   }
 
+  // find suggested values for the last found field
   const lastField = listener.getLastField();
   if (!!lastField && candidates.tokens.has(DQLParser.PHRASE)) {
-    const values = await findValuesFromField(currentIndexPattern.title, lastField);
+    // check to see if last field is within index and if it can suggest values, first check
+    // if .keyword appended field exists because that has values
+    const matchedField =
+      currentIndexPattern.fields.getAll().find((idxField: IndexPatternField) => {
+        // check to see if the field matches another field with .keyword appended
+        if (idxField.displayName === `${lastField}.keyword`) return idxField;
+      }) ||
+      currentIndexPattern.fields.getAll().find((idxField: IndexPatternField) => {
+        // if the display name matches, return
+        if (idxField.displayName === lastField) return idxField;
+      });
+    if (!matchedField || !matchedField.aggregatable || matchedField.type !== 'string') return;
+
+    // ask api for suggestions
+    const values = await findValuesFromField(currentIndexPattern.title, matchedField.displayName);
     console.log(values);
     completions.push(
       ...values.map((val: any) => {
@@ -154,8 +163,6 @@ export const getSuggestions = async ({
     const tokenSymbolName = parser.vocabulary.getSymbolicName(token)?.toLowerCase();
     completions.push({ text: tokenSymbolName, type: 'keyword' });
   });
-
-  // console.log('completions', completions);
 
   return completions;
 };
