@@ -1,6 +1,6 @@
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { DQLLexer } from './generated/DQLLexer';
-import { DQLParser, FieldContext } from './generated/DQLParser';
+import { DQLParser, FieldContext, ValueContext } from './generated/DQLParser';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { getTokenPosition } from '../opensearch_sql/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
@@ -52,17 +52,18 @@ const findFieldSuggestions = (indexPattern: IndexPattern) => {
   return fieldSuggestions;
 };
 
-const findValuesFromField = async (indexTitle: string, fieldName: string) => {
+const findValuesFromField = async (indexTitle: string, fieldName: string, currentValue: string) => {
   const http = getHttp();
   return await http.fetch(`/api/opensearch-dashboards/suggestions/values/${indexTitle}`, {
     method: 'POST',
-    body: JSON.stringify({ query: '', field: fieldName, boolFilter: [] }),
+    body: JSON.stringify({ query: currentValue, field: fieldName, boolFilter: [] }),
   });
 };
 
 // listener for parsing the current query
 class FieldListener extends DQLParserListener {
   lastField: string | undefined;
+  lastValue: string | undefined;
 
   constructor() {
     super();
@@ -73,8 +74,12 @@ class FieldListener extends DQLParserListener {
     this.lastField = ctx.start?.text;
   };
 
-  getLastField() {
-    return this.lastField;
+  public enterValue = (ctx: ValueContext) => {
+    this.lastValue = ctx.start?.text;
+  };
+
+  getLastFieldValue() {
+    return { field: this.lastField, value: this.lastValue };
   }
 }
 
@@ -128,7 +133,7 @@ export const getSuggestions = async ({
   }
 
   // find suggested values for the last found field
-  const lastField = listener.getLastField();
+  const { field: lastField, value: lastValue } = listener.getLastFieldValue();
   if (!!lastField && candidates.tokens.has(DQLParser.PHRASE)) {
     // check to see if last field is within index and if it can suggest values, first check
     // if .keyword appended field exists because that has values
@@ -144,7 +149,11 @@ export const getSuggestions = async ({
     if (!matchedField || !matchedField.aggregatable || matchedField.type !== 'string') return;
 
     // ask api for suggestions
-    const values = await findValuesFromField(currentIndexPattern.title, matchedField.displayName);
+    const values = await findValuesFromField(
+      currentIndexPattern.title,
+      matchedField.displayName,
+      lastValue ?? ''
+    );
     console.log(values);
     completions.push(
       ...values.map((val: any) => {
