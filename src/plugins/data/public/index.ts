@@ -437,6 +437,12 @@ export {
   IndexPatternSelectProps,
   QueryStringInput,
   QueryStringInputProps,
+  QueryEditor,
+  QueryEditorExtensionConfig,
+  QueryEditorExtensions,
+  QueryEditorExtensionDependencies,
+  QueryEditorProps,
+  QueryEditorTopRow,
   // for BWC, keeping the old name
   IUiStart as DataPublicPluginStartUi,
 } from './ui';

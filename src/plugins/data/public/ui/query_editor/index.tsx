@@ -25,4 +25,8 @@ export const QueryEditor = (props: QueryEditorProps) => (
 );
 export type { QueryEditorProps };
 
-export { QueryEditorExtensions, QueryEditorExtensionConfig } from './query_editor_extensions';
+export {
+  QueryEditorExtensions,
+  QueryEditorExtensionDependencies,
+  QueryEditorExtensionConfig,
+} from './query_editor_extensions';
