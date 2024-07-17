@@ -4,15 +4,14 @@
  */
 
 import React from 'react';
-import { WorkspaceList } from './index';
-import { coreMock } from '../../../../../core/public/mocks';
+import { BehaviorSubject, of } from 'rxjs';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
+import { coreMock } from '../../../../../core/public/mocks';
 import { switchWorkspace, navigateToWorkspaceUpdatePage } from '../utils/workspace';
-
-import { of } from 'rxjs';
-
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import { WorkspaceList } from './index';
 
 jest.mock('../utils/workspace');
 
@@ -43,7 +42,9 @@ function getWrapWorkspaceListInContext(
   return (
     <I18nProvider>
       <OpenSearchDashboardsContextProvider services={services}>
-        <WorkspaceList />
+        <WorkspaceList
+          registeredUseCases$={new BehaviorSubject([WORKSPACE_USE_CASES.observability])}
+        />
       </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
@@ -51,15 +52,24 @@ function getWrapWorkspaceListInContext(
 
 describe('WorkspaceList', () => {
   it('should render title and table normally', () => {
-    const { getByText, getByRole, container } = render(<WorkspaceList />);
+    const { getByText, getByRole, container } = render(
+      <WorkspaceList
+        registeredUseCases$={new BehaviorSubject([WORKSPACE_USE_CASES.observability])}
+      />
+    );
     expect(getByText('Workspaces')).toBeInTheDocument();
     expect(getByRole('table')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
   it('should render data in table based on workspace list data', async () => {
     const { getByText } = render(getWrapWorkspaceListInContext());
+
+    // should display workspace names
     expect(getByText('name1')).toBeInTheDocument();
     expect(getByText('name2')).toBeInTheDocument();
+
+    // should display use case
+    expect(getByText('Observability')).toBeInTheDocument();
   });
   it('should be able to apply debounce search after input', async () => {
     const list = [
