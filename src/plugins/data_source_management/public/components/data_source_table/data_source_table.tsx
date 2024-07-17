@@ -57,6 +57,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     savedObjects,
     notifications: { toasts },
     uiSettings,
+    application,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   /* Component state variables */
@@ -65,6 +66,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = React.useState(false);
+  const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
@@ -118,11 +120,11 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   };
 
   const renderToolsRight = () => {
-    return (
+    return canManageDataSource ? (
       <EuiFlexItem key="delete" grow={false}>
         {renderDeleteButton()}
       </EuiFlexItem>
-    );
+    ) : null;
   };
 
   const search = {
@@ -372,7 +374,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
             }
           </EuiText>
           <EuiSpacer />
-          {createButtonEmptyState}
+          {canManageDataSource ? createButtonEmptyState : null}
         </EuiPanel>
         <EuiSpacer size="l" />
       </>

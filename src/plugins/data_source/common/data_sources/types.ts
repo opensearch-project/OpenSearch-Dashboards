@@ -60,3 +60,9 @@ export enum DataSourceEngineType {
   Elasticsearch = 'Elasticsearch',
   NA = 'No Engine Type Available',
 }
+
+export enum ManageableBy {
+  All = 'all',
+  DashboardAdmin = 'dashboard_admin',
+  None = 'none',
+}

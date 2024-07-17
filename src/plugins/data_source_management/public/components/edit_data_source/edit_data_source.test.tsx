@@ -28,7 +28,10 @@ const formIdentifier = 'EditDataSourceForm';
 const notFoundIdentifier = '[data-test-subj="dataSourceNotFound"]';
 
 describe('Datasource Management: Edit Datasource Wizard', () => {
-  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
+  const mockedContext = {
+    ...mockManagementPlugin.createDataSourceManagementContext(),
+    application: { capabilities: { dataSource: { canManage: true } } },
+  };
   const uiSettings = mockedContext.uiSettings;
   mockedContext.authenticationMethodRegistry.registerAuthenticationMethod(
     noAuthCredentialAuthMethod
