@@ -84,7 +84,13 @@ export function NavGroups({
   navigateToApp,
   onNavItemClick,
 }: NavGroupsProps) {
-  const createNavItem = ({ link }: { link: ChromeNavLink }): EuiSideNavItemType<{}> => {
+  const createNavItem = ({
+    link,
+    className,
+  }: {
+    link: ChromeNavLink;
+    className?: string;
+  }): EuiSideNavItemType<{}> => {
     const euiListItem = createEuiListItem({
       link,
       appId,
@@ -97,17 +103,17 @@ export function NavGroups({
 
     return {
       id: `${link.id}-${link.title}`,
-      name: <EuiText>{link.title}</EuiText>,
+      name: <EuiText size="s">{link.title}</EuiText>,
       onClick: euiListItem.onClick,
       href: euiListItem.href,
       emphasize: euiListItem.isActive,
-      className: 'nav-link-item',
+      className: `nav-link-item ${className || ''}`,
       buttonClassName: 'nav-link-item-btn',
       'data-test-subj': euiListItem['data-test-subj'],
       'aria-label': link.title,
     };
   };
-  const createSideNavItem = (navLink: LinkItem): EuiSideNavItemType<{}> => {
+  const createSideNavItem = (navLink: LinkItem, className?: string): EuiSideNavItemType<{}> => {
     if (navLink.itemType === LinkItemType.LINK) {
       if (navLink.link.title === titleForSeeAll) {
         const navItem = createNavItem({
@@ -122,6 +128,7 @@ export function NavGroups({
 
       return createNavItem({
         link: navLink.link,
+        className,
       });
     }
 
@@ -129,7 +136,7 @@ export function NavGroups({
       return {
         ...createNavItem({ link: navLink.link }),
         forceOpen: true,
-        items: navLink.links.map((subNavLink) => createSideNavItem(subNavLink)),
+        items: navLink.links.map((subNavLink) => createSideNavItem(subNavLink, 'nav-nested-item')),
       };
     }
 
