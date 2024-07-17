@@ -5,12 +5,13 @@
 
 import { EuiButton, EuiHealth } from '@elastic/eui';
 import React from 'react';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import { DATA_SOURCE_TYPES } from '../../../../framework/constants';
 import { CachedAcceleration, RenderAccelerationFlyoutParams } from '../../../../framework/types';
-// import {
-//   redirectToExplorerOSIdx,
-//   redirectToExplorerWithDataSrc,
-// } from '../../associated_objects/utils/associated_objects_tab_utils';
+import {
+  redirectToExplorerOSIdx,
+  redirectToExplorerWithDataSrc,
+} from '../direct_query_associated_object_management/utils/associated_objects_tab_utils';
 export const ACC_PANEL_TITLE = 'Accelerations';
 export const ACC_PANEL_DESC =
   'Accelerations optimize query performance by indexing external data into OpenSearch.';
@@ -163,17 +164,22 @@ export const AccelerationHealth = ({ health }: { health: string }) => {
   return <EuiHealth color={color}>{label}</EuiHealth>;
 };
 
-export const onDiscoverIconClick = (acceleration: CachedAcceleration, dataSourceName: string) => {
+export const onDiscoverIconClick = (
+  acceleration: CachedAcceleration,
+  dataSourceName: string,
+  application: ApplicationStart
+) => {
   // boolean determining whether its a skipping index table or mv/ci
   if (acceleration.type === undefined) return;
   if (acceleration.type === 'skipping') {
-    // redirectToExplorerWithDataSrc(
-    //   dataSourceName,
-    //   DATA_SOURCE_TYPES.S3Glue,
-    //   acceleration.database,
-    //   acceleration.table
-    // );
+    redirectToExplorerWithDataSrc(
+      dataSourceName,
+      DATA_SOURCE_TYPES.S3Glue,
+      acceleration.database,
+      acceleration.table,
+      application
+    );
   } else {
-    // redirectToExplorerOSIdx(acceleration.flintIndexName);
+    redirectToExplorerOSIdx(acceleration.flintIndexName, application);
   }
 };

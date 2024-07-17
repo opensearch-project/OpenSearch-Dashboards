@@ -33,6 +33,7 @@ import {
   AccelerationActionType,
   AccelerationStatus,
   getAccelerationName,
+  onDiscoverIconClick,
 } from './acceleration_utils';
 import { AccelerationActionOverlay } from './acceleration_action_overlay';
 import { useAccelerationOperation } from './acceleration_operation';
@@ -196,7 +197,7 @@ export const AccelerationTable = ({
       icon: 'discoverApp',
       type: 'icon',
       onClick: (acc: CachedAcceleration) => {
-        // TODO: onDiscoverIconClick(acc, dataSourceName);
+        onDiscoverIconClick(acc, dataSourceName, application);
       },
     },
     {
