@@ -1,6 +1,11 @@
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { DQLLexer } from './generated/DQLLexer';
-import { DQLParser, FieldContext, ValueContext } from './generated/DQLParser';
+import {
+  DQLParser,
+  FieldContext,
+  ValueContext,
+  FieldExpressionContext,
+} from './generated/DQLParser';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { getTokenPosition } from '../opensearch_sql/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
@@ -8,6 +13,7 @@ import { CursorPosition } from '../opensearch_sql/types';
 import { getHttp } from '../../services';
 import { DQLParserListener } from './generated/DQLParserListener';
 import { QuerySuggestionGetFnArgs } from '../../autocomplete';
+import { DQLParserVisitor } from './generated/DQLParserVisitor';
 
 const findCursorIndex = (
   tokenStream: TokenStream,
@@ -52,7 +58,11 @@ const findFieldSuggestions = (indexPattern: IndexPattern) => {
   return fieldSuggestions;
 };
 
-const findValuesFromField = async (indexTitle: string, fieldName: string, currentValue: string) => {
+const getFieldSuggestedValues = async (
+  indexTitle: string,
+  fieldName: string,
+  currentValue: string
+) => {
   const http = getHttp();
   return await http.fetch(`/api/opensearch-dashboards/suggestions/values/${indexTitle}`, {
     method: 'POST',
@@ -60,27 +70,35 @@ const findValuesFromField = async (indexTitle: string, fieldName: string, curren
   });
 };
 
-// listener for parsing the current query
-class FieldListener extends DQLParserListener {
-  lastField: string | undefined;
-  lastValue: string | undefined;
+const findValueSuggestions = async (index: IndexPattern, field: string, value: string) => {
+  // check to see if last field is within index and if it can suggest values, first check
+  // if .keyword appended field exists because that has values
+  const matchedField =
+    index.fields.getAll().find((idxField: IndexPatternField) => {
+      // check to see if the field matches another field with .keyword appended
+      if (idxField.displayName === `${field}.keyword`) return idxField;
+    }) ||
+    index.fields.getAll().find((idxField: IndexPatternField) => {
+      // if the display name matches, return
+      if (idxField.displayName === field) return idxField;
+    });
 
-  constructor() {
-    super();
-    this.lastField;
+  if (matchedField?.type === 'boolean') {
+    return ['true', 'false'];
   }
 
-  public enterField = (ctx: FieldContext) => {
-    this.lastField = ctx.start?.text;
-  };
+  if (!matchedField || !matchedField.aggregatable || matchedField.type !== 'string') return;
 
-  public enterValue = (ctx: ValueContext) => {
-    this.lastValue = ctx.start?.text;
-  };
+  // ask api for suggestions
+  return await getFieldSuggestedValues(index.title, matchedField.displayName, value);
+};
 
-  getLastFieldValue() {
-    return { field: this.lastField, value: this.lastValue };
-  }
+// visitor for parsing the current query
+class QueryVisitor extends DQLParserVisitor<{ field: string; value: string }> {
+  public visitFieldExpression = (ctx: FieldExpressionContext) => {
+    console.log('value:', ctx);
+    return { field: ctx.field().getText(), value: ctx.value()?.getText() ?? '' };
+  };
 }
 
 export const getSuggestions = async ({
@@ -96,10 +114,9 @@ export const getSuggestions = async ({
   const lexer = new DQLLexer(inputStream);
   const tokenStream = new CommonTokenStream(lexer);
   const parser = new DQLParser(tokenStream);
+  const tree = parser.query();
 
-  const listener = new FieldListener();
-  parser.addParseListener(listener);
-  parser.query();
+  const visitor = new QueryVisitor();
 
   // find token index
   const cursorIndex =
@@ -133,28 +150,11 @@ export const getSuggestions = async ({
   }
 
   // find suggested values for the last found field
-  const { field: lastField, value: lastValue } = listener.getLastFieldValue();
+  const { field: lastField = '', value: lastValue = '' } = visitor.visit(tree) ?? {};
+  // console.log('lastField: ', lastField);
+  console.log('lastValue: ', lastValue);
   if (!!lastField && candidates.tokens.has(DQLParser.PHRASE)) {
-    // check to see if last field is within index and if it can suggest values, first check
-    // if .keyword appended field exists because that has values
-    const matchedField =
-      currentIndexPattern.fields.getAll().find((idxField: IndexPatternField) => {
-        // check to see if the field matches another field with .keyword appended
-        if (idxField.displayName === `${lastField}.keyword`) return idxField;
-      }) ||
-      currentIndexPattern.fields.getAll().find((idxField: IndexPatternField) => {
-        // if the display name matches, return
-        if (idxField.displayName === lastField) return idxField;
-      });
-    if (!matchedField || !matchedField.aggregatable || matchedField.type !== 'string') return;
-
-    // ask api for suggestions
-    const values = await findValuesFromField(
-      currentIndexPattern.title,
-      matchedField.displayName,
-      lastValue ?? ''
-    );
-    console.log(values);
+    const values = await findValueSuggestions(currentIndexPattern, lastField, lastValue ?? '');
     completions.push(
       ...values.map((val: any) => {
         return { text: val, type: 'value' };
