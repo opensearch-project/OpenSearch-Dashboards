@@ -58,7 +58,7 @@ export class SearchAPI {
     public readonly inspectorAdapters?: VegaInspectorAdapters
   ) {}
 
-  async search(searchRequests: SearchRequest[]) {
+  async search(searchRequests: SearchRequest[], options?: { strategy?: string }) {
     const { search } = this.dependencies.search;
     const requestResponders: any = {};
 
@@ -87,8 +87,13 @@ export class SearchAPI {
               ? { params, dataSourceId }
               : { params };
 
-          return search(searchApiParams, { abortSignal: this.abortSignal }).pipe(
-            tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
+          return search(searchApiParams, {
+            abortSignal: this.abortSignal,
+            strategy: options?.strategy,
+          }).pipe(
+            tap((data) =>
+              this.inspectSearchResult(data, requestResponders[requestId], options?.strategy)
+            ),
             map((data) => ({
               name: requestId,
               rawResponse: data.rawResponse,
@@ -137,12 +142,17 @@ export class SearchAPI {
 
   private inspectSearchResult(
     response: IOpenSearchSearchResponse,
-    requestResponder: RequestResponder
+    requestResponder: RequestResponder,
+    strategy?: string
   ) {
     if (requestResponder) {
-      requestResponder
-        .stats(dataPluginSearch.getResponseInspectorStats(response.rawResponse))
-        .ok({ json: response.rawResponse });
+      if (!strategy) {
+        requestResponder
+          .stats(dataPluginSearch.getResponseInspectorStats(response.rawResponse))
+          .ok({ json: response.rawResponse });
+      } else {
+        requestResponder.ok({ json: response.rawResponse });
+      }
     }
   }
 }
