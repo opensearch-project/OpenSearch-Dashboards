@@ -15,7 +15,7 @@ primaryExpression:
 	| termSearch;
 comparisonExpression: field comparisonOperator rangeValue;
 fieldExpression: field EQ (value | groupExpression);
-termSearch: IDENTIFIER;
+termSearch: IDENTIFIER (IDENTIFIER)*;
 groupExpression:
 	LPAREN groupContent ((OR | AND) (NOT?) groupContent)* RPAREN;
 groupContent: groupExpression | value;
