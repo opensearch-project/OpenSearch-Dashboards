@@ -18,6 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
+import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import {
   CachedAcceleration,
   CachedDataSourceStatus,
@@ -43,8 +44,9 @@ import {
 interface AccelerationTableProps {
   dataSourceName: string;
   cacheLoadingHooks: any;
-  http: any;
-  notifications: any;
+  http: HttpStart;
+  notifications: NotificationsStart;
+  application: ApplicationStart;
   featureFlagStatus: boolean;
   dataSourceMDSId?: string;
 }
@@ -61,6 +63,7 @@ export const AccelerationTable = ({
   notifications,
   featureFlagStatus,
   dataSourceMDSId,
+  application,
 }: AccelerationTableProps) => {
   const [accelerations, setAccelerations] = useState<CachedAcceleration[]>([]);
   const [updatedTime, setUpdatedTime] = useState<string>();

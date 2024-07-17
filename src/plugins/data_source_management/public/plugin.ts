@@ -285,6 +285,7 @@ export class DataSourceManagementPlugin
             dataSourceMDSId,
             http: core.http,
             notifications: core.notifications,
+            application: core.application,
           })
         ) as MountPoint
       );

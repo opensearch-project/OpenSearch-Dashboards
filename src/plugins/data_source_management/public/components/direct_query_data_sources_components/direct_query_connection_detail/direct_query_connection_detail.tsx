@@ -341,6 +341,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
                 notifications={notifications}
                 featureFlagStatus={featureFlagStatus}
                 dataSourceMDSId={featureFlagStatus ? dataSourceMDSId ?? undefined : undefined}
+                application={application}
               />
             ),
           },

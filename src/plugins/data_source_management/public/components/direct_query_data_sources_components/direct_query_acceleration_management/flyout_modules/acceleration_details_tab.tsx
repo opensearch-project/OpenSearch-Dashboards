@@ -14,8 +14,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
+import { ApplicationStart } from 'opensearch-dashboards/public';
 import { AccelerationHealth, AccelerationStatus } from '../acceleration_utils';
-import { observabilityDataConnectionsID } from '../../../../../framework/utils/shared';
 
 interface AccelerationDetailsTabProps {
   acceleration: {
@@ -32,6 +32,9 @@ interface AccelerationDetailsTabProps {
   indexInfo: any;
   dataSourceName: string;
   resetFlyout: () => void;
+  application: ApplicationStart;
+  featureFlagStatus: boolean;
+  dataSourceMDSId?: string;
 }
 
 export const AccelerationDetailsTab = ({
@@ -41,6 +44,9 @@ export const AccelerationDetailsTab = ({
   indexInfo,
   dataSourceName,
   resetFlyout,
+  application,
+  featureFlagStatus,
+  dataSourceMDSId,
 }: AccelerationDetailsTabProps) => {
   const isSkippingIndex =
     mappings?.data?.[acceleration.flintIndexName]?.mappings?._meta?.kind === 'skipping';
@@ -103,10 +109,14 @@ export const AccelerationDetailsTab = ({
           description={
             <EuiLink
               onClick={() => {
-                // coreRefs?.application!.navigateToApp(observabilityDataConnectionsID, {
-                //   path: `#/manage/${dataSourceName}`,
-                //   replace: true,
-                // });
+                const path =
+                  featureFlagStatus && dataSourceMDSId
+                    ? `/opensearch-dashboards/dataSources/manage/${dataSourceName}?dataSourceMDSId=${dataSourceMDSId}`
+                    : `/opensearch-dashboards/dataSources/manage/${dataSourceName}`;
+                application.navigateToApp('management', {
+                  path,
+                  replace: true,
+                });
                 resetFlyout();
               }}
             >

@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { HttpStart } from 'opensearch-dashboards/public';
+import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { CachedAcceleration } from '../../../../framework/types';
 import { AccelerationActionOverlay } from './acceleration_action_overlay';
 import { useAccelerationOperation } from './acceleration_operation';
@@ -37,7 +37,8 @@ export interface AccelerationDetailsFlyoutProps {
   handleRefresh?: () => void;
   dataSourceMDSId?: string;
   http: HttpStart;
-  notifications: any;
+  notifications: NotificationsStart;
+  application: ApplicationStart;
   featureFlagStatus: boolean;
 }
 
@@ -127,6 +128,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     notifications,
     featureFlagStatus,
     dataSourceMDSId,
+    application,
   } = props;
   const { flintIndexName } = acceleration;
   const [selectedTab, setSelectedTab] = useState('details');
@@ -297,7 +299,17 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
 
     switch (tab) {
       case 'details':
-        propsForTab = { acceleration, settings, mappings, indexInfo, dataSourceName, resetFlyout };
+        propsForTab = {
+          acceleration,
+          settings,
+          mappings,
+          indexInfo,
+          dataSourceName,
+          resetFlyout,
+          application,
+          featureFlagStatus,
+          dataSourceMDSId,
+        };
         break;
       case 'schema':
         propsForTab = { mappings, indexInfo };
