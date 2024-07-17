@@ -31,7 +31,6 @@
 import { SearchResponse } from 'elasticsearch';
 import { Search } from '@opensearch-project/opensearch/api/requestParams';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
-import { OpenSearchDashboardsRequest } from '../../../../../../src/core/server';
 
 export const OPENSEARCH_SEARCH_STRATEGY = 'opensearch';
 export const OPENSEARCH_SEARCH_WITH_LONG_NUMERALS_STRATEGY = 'opensearch-with-long-numerals';
@@ -60,7 +59,6 @@ export interface IOpenSearchSearchRequest
   indexType?: string;
   language?: string;
   dataSourceId?: string;
-  rawRequest?: OpenSearchDashboardsRequest;
 }
 
 export type IOpenSearchSearchResponse<Source = any> = IOpenSearchDashboardsSearchResponse<
