@@ -36,6 +36,7 @@ import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_object
 import { ManagementSetup } from '../../../plugins/management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
+import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
 import {
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
@@ -51,6 +52,7 @@ type WorkspaceAppType = (
 interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
   management?: ManagementSetup;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
@@ -182,7 +184,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
   public async setup(
     core: CoreSetup,
-    { savedObjectsManagement, management }: WorkspacePluginSetupDeps
+    { savedObjectsManagement, management, dataSourceManagement }: WorkspacePluginSetupDeps
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
@@ -243,6 +245,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       const services = {
         ...coreStart,
         workspaceClient,
+        dataSourceManagement,
       };
 
       return renderApp(params, services, {
