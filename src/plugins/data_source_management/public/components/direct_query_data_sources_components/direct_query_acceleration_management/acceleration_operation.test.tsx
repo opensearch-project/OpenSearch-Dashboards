@@ -44,7 +44,8 @@ describe('useAccelerationOperation', () => {
     mockUseDirectQuery.mockReturnValue({
       startLoading,
       stopLoading,
-      loadStatus: DirectQueryLoadingStatus.IDLE,
+      loadStatus: DirectQueryLoadingStatus.WAITING,
+      pollingResult: {},
     });
   });
 
@@ -74,6 +75,7 @@ describe('useAccelerationOperation', () => {
       startLoading,
       stopLoading,
       loadStatus: DirectQueryLoadingStatus.SUCCESS,
+      pollingResult: {},
     });
 
     const { result } = renderHook(() =>
@@ -96,6 +98,7 @@ describe('useAccelerationOperation', () => {
       startLoading,
       stopLoading,
       loadStatus: DirectQueryLoadingStatus.FAILED,
+      pollingResult: {},
     });
 
     const { result } = renderHook(() =>
