@@ -180,4 +180,20 @@ describe('#WorkspaceClient', () => {
 
     expect(mockCheckAndSetDefaultDataSource).toHaveBeenCalledWith(uiSettingsClient, ['id1'], true);
   });
+
+  it('delete# should unassign data source before deleting related saved objects', async () => {
+    const client = new WorkspaceClient(coreSetup, logger);
+    await client.setup(coreSetup);
+    client?.setSavedObjects(savedObjects);
+    client?.setUiSettings(uiSettings);
+
+    await client.delete(mockRequestDetail, mockWorkspaceId);
+
+    expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id1', [
+      mockWorkspaceId,
+    ]);
+    expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id2', [
+      mockWorkspaceId,
+    ]);
+  });
 });
