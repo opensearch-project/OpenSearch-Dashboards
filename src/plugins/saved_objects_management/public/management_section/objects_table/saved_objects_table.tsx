@@ -249,7 +249,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       typesToInclude: filteredTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
-      availiableWorkspaces: this.state.availableWorkspaces?.map((ws) => ws.id),
+      availableWorkspaces: this.state.availableWorkspaces?.map((ws) => ws.id),
     });
 
     if (availableNamespaces.length) {
@@ -286,7 +286,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       typesToInclude: allowedTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
-      availiableWorkspaces: this.state.availableWorkspaces?.map((ws) => ws.id),
+      availableWorkspaces: this.state.availableWorkspaces?.map((ws) => ws.id),
     });
 
     if (availableNamespaces.length) {

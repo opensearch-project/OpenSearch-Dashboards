@@ -4,10 +4,10 @@
  */
 
 export function formatWorkspaceIdParams<
-  T extends { workspaces?: string[] | null; availiableWorkspaces?: string[] | null }
->(obj: T): T | Omit<T, 'workspaces' | 'availiableWorkspaces'> {
-  const { workspaces, availiableWorkspaces, ...others } = obj;
-  if (workspaces || (availiableWorkspaces && availiableWorkspaces.length)) {
+  T extends { workspaces?: string[] | null; availableWorkspaces?: string[] | null }
+>(obj: T): T | Omit<T, 'workspaces' | 'availableWorkspaces'> {
+  const { workspaces, availableWorkspaces, ...others } = obj;
+  if (workspaces || (availableWorkspaces && availableWorkspaces.length)) {
     return obj;
   }
   return others;

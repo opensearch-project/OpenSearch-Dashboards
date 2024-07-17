@@ -18,27 +18,27 @@ describe('Utils', () => {
     expect(obj).toEqual({ foo: 'bar', workspaces: ['foo'] });
   });
 
-  it('formatWorkspaceIdParams with availiableWorkspaces exists', async () => {
-    const obj = formatWorkspaceIdParams({ foo: 'bar', availiableWorkspaces: ['foo'] });
-    expect(obj).toEqual({ foo: 'bar', availiableWorkspaces: ['foo'] });
+  it('formatWorkspaceIdParams with availableWorkspaces exists', async () => {
+    const obj = formatWorkspaceIdParams({ foo: 'bar', availableWorkspaces: ['foo'] });
+    expect(obj).toEqual({ foo: 'bar', availableWorkspaces: ['foo'] });
   });
 
-  it('formatWorkspaceIdParams with availiableWorkspaces is empty array', async () => {
-    const obj = formatWorkspaceIdParams({ foo: 'bar', availiableWorkspaces: [] });
+  it('formatWorkspaceIdParams with availableWorkspaces is empty array', async () => {
+    const obj = formatWorkspaceIdParams({ foo: 'bar', availableWorkspaces: [] });
     expect(obj).toEqual({ foo: 'bar' });
   });
 
-  it('formatWorkspaceIdParams with availiableWorkspaces is null/undefined', async () => {
-    const obj = formatWorkspaceIdParams({ foo: 'bar', availiableWorkspaces: null });
+  it('formatWorkspaceIdParams with availableWorkspaces is null/undefined', async () => {
+    const obj = formatWorkspaceIdParams({ foo: 'bar', availableWorkspaces: null });
     expect(obj).toEqual({ foo: 'bar' });
   });
 
-  it('formatWorkspaceIdParams with both workspaces and availiableWorkspaces are not empty', async () => {
+  it('formatWorkspaceIdParams with both workspaces and availableWorkspaces are not empty', async () => {
     const obj = formatWorkspaceIdParams({
       foo: 'bar',
-      availiableWorkspaces: ['foo', 'bar'],
+      availableWorkspaces: ['foo', 'bar'],
       workspaces: ['foo'],
     });
-    expect(obj).toEqual({ foo: 'bar', availiableWorkspaces: ['foo', 'bar'], workspaces: ['foo'] });
+    expect(obj).toEqual({ foo: 'bar', availableWorkspaces: ['foo', 'bar'], workspaces: ['foo'] });
   });
 });
