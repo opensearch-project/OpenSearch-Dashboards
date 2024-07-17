@@ -33,7 +33,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                 id="euiSideNavContent_generated-id"
               >
                 <div
-                  class="euiSideNavItem euiSideNavItem--root nav-link-item"
+                  class="euiSideNavItem euiSideNavItem--root nav-link-item "
                 >
                   <button
                     aria-label="link-in-all"
@@ -49,7 +49,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                         title="link-in-all"
                       >
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           link-in-all
                         </div>
@@ -83,7 +83,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                     class="euiSideNavItem__items"
                   >
                     <div
-                      class="euiSideNavItem euiSideNavItem--trunk nav-link-item"
+                      class="euiSideNavItem euiSideNavItem--trunk nav-link-item "
                     >
                       <button
                         aria-label="link-in-observability"
@@ -99,7 +99,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                             title="link-in-observability"
                           >
                             <div
-                              class="euiText euiText--medium"
+                              class="euiText euiText--small"
                             >
                               link-in-observability
                             </div>
@@ -108,7 +108,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       </button>
                     </div>
                     <div
-                      class="euiSideNavItem euiSideNavItem--trunk nav-link-item"
+                      class="euiSideNavItem euiSideNavItem--trunk nav-link-item "
                     >
                       <button
                         aria-label="See all..."
@@ -130,7 +130,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                                 class="euiTextColor euiTextColor--success"
                               >
                                 <div
-                                  class="euiText euiText--medium"
+                                  class="euiText euiText--small"
                                 >
                                   See all...
                                 </div>
@@ -168,7 +168,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                     class="euiSideNavItem__items"
                   >
                     <div
-                      class="euiSideNavItem euiSideNavItem--trunk nav-link-item"
+                      class="euiSideNavItem euiSideNavItem--trunk nav-link-item "
                     >
                       <button
                         aria-label="link-in-analytics"
@@ -184,7 +184,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                             title="link-in-analytics"
                           >
                             <div
-                              class="euiText euiText--medium"
+                              class="euiText euiText--small"
                             >
                               link-in-analytics
                             </div>
@@ -193,7 +193,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       </button>
                     </div>
                     <div
-                      class="euiSideNavItem euiSideNavItem--trunk nav-link-item"
+                      class="euiSideNavItem euiSideNavItem--trunk nav-link-item "
                     >
                       <button
                         aria-label="See all..."
@@ -215,7 +215,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                                 class="euiTextColor euiTextColor--success"
                               >
                                 <div
-                                  class="euiText euiText--medium"
+                                  class="euiText euiText--small"
                                 >
                                   See all...
                                 </div>
@@ -307,7 +307,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
                 id="euiSideNavContent_generated-id"
               >
                 <div
-                  class="euiSideNavItem euiSideNavItem--root nav-link-item"
+                  class="euiSideNavItem euiSideNavItem--root nav-link-item "
                 >
                   <button
                     aria-label="link-in-analytics"
@@ -323,7 +323,7 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
                         title="link-in-analytics"
                       >
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           link-in-analytics
                         </div>
@@ -361,7 +361,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
         id="euiSideNavContent_generated-id"
       >
         <div
-          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems nav-link-item"
+          class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems nav-link-item "
         >
           <button
             aria-label="pure link"
@@ -377,7 +377,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                 title="pure link"
               >
                 <div
-                  class="euiText euiText--medium"
+                  class="euiText euiText--small"
                 >
                   pure link
                 </div>
@@ -388,7 +388,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
             class="euiSideNavItem__items"
           >
             <div
-              class="euiSideNavItem euiSideNavItem--trunk nav-link-item"
+              class="euiSideNavItem euiSideNavItem--trunk nav-link-item nav-nested-item"
             >
               <button
                 aria-label="subLink"
@@ -404,7 +404,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="subLink"
                   >
                     <div
-                      class="euiText euiText--medium"
+                      class="euiText euiText--small"
                     >
                       subLink
                     </div>
@@ -440,7 +440,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
             class="euiSideNavItem__items"
           >
             <div
-              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item"
+              class="euiSideNavItem euiSideNavItem--trunk euiSideNavItem--hasChildItems nav-link-item "
             >
               <button
                 aria-label="link-in-category"
@@ -456,7 +456,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="link-in-category"
                   >
                     <div
-                      class="euiText euiText--medium"
+                      class="euiText euiText--small"
                     >
                       link-in-category
                     </div>
@@ -467,7 +467,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                 class="euiSideNavItem__items"
               >
                 <div
-                  class="euiSideNavItem euiSideNavItem--branch nav-link-item"
+                  class="euiSideNavItem euiSideNavItem--branch nav-link-item nav-nested-item"
                 >
                   <button
                     aria-label="sub-link-in-category"
@@ -483,7 +483,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                         title="sub-link-in-category"
                       >
                         <div
-                          class="euiText euiText--medium"
+                          class="euiText euiText--small"
                         >
                           sub-link-in-category
                         </div>
@@ -494,7 +494,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
               </div>
             </div>
             <div
-              class="euiSideNavItem euiSideNavItem--trunk nav-link-item"
+              class="euiSideNavItem euiSideNavItem--trunk nav-link-item "
             >
               <button
                 aria-label="link-in-category-2"
@@ -510,7 +510,7 @@ exports[`<NavGroups /> should render correctly 1`] = `
                     title="link-in-category-2"
                   >
                     <div
-                      class="euiText euiText--medium"
+                      class="euiText euiText--small"
                     >
                       link-in-category-2
                     </div>
