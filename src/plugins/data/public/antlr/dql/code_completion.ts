@@ -96,8 +96,24 @@ const findValueSuggestions = async (index: IndexPattern, field: string, value: s
 // visitor for parsing the current query
 class QueryVisitor extends DQLParserVisitor<{ field: string; value: string }> {
   public visitFieldExpression = (ctx: FieldExpressionContext) => {
-    console.log('value:', ctx);
-    return { field: ctx.field().getText(), value: ctx.value()?.getText() ?? '' };
+    let foundValue = '';
+
+    if (ctx.value()?.PHRASE()) {
+      const strippedPhrase = ctx
+        .value()
+        ?.PHRASE()
+        ?.getText()
+        .replace(/^["']|["']$/g, '');
+      if (strippedPhrase) foundValue = strippedPhrase;
+    }
+    if (ctx.value()?.termSearch() || ctx.value()?.NUMBER()) {
+      const valueText = ctx.value()?.getText();
+      if (valueText) foundValue = valueText;
+    }
+    // if (ctx.groupExpression()) {
+    //   console.log('in a group');
+    // }
+    return { field: ctx.field().getText(), value: foundValue };
   };
 }
 
