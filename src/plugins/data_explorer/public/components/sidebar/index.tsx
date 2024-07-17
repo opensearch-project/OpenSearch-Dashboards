@@ -32,9 +32,10 @@ export const Sidebar: FC = ({ children }) => {
 
   const {
     services: {
-      data: { indexPatterns, dataSources, ui },
+      data: { indexPatterns, dataSources, ui, search },
       notifications: { toasts },
       application,
+      http,
       savedObjects,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
@@ -143,20 +144,21 @@ export const Sidebar: FC = ({ children }) => {
         setSelectedSources(selectedDataSources);
         return;
       }
+      console.log('selectedDataSources:', selectedDataSources);
       // Temporary redirection solution for 2.11, where clicking non-index-pattern data sources
       // will prompt users with modal explaining they are being redirected to Observability log explorer
-      if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
-        redirectToLogExplorer(selectedDataSources[0].label, selectedDataSources[0].type);
-        return;
-      }
+      // if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
+      //   redirectToLogExplorer(selectedDataSources[0].label, selectedDataSources[0].type);
+      //   return;
+      // }
       setSelectedSources(selectedDataSources);
       dispatch(setIndexPattern(selectedDataSources[0].value));
-      dispatch(
-        setDataset({
-          id: selectedDataSources[0].value,
-          datasource: { ref: selectedDataSources[0].ds.getId() },
-        })
-      );
+      // dispatch(
+      //   setDataset({
+      //     id: selectedDataSources[0].value,
+      //     datasource: { ref: selectedDataSources[0]?.ds?.getId() },
+      //   })
+      // );
     },
     [dispatch, redirectToLogExplorer, setSelectedSources]
   );
@@ -179,11 +181,16 @@ export const Sidebar: FC = ({ children }) => {
 
   const dataSetNavigator = (
     <DataSetNavigator
+      http={http}
+      search={search}
       savedObjectsClient={savedObjects.client}
+      indexPatterns={indexPatterns}
       dataSources={activeDataSources}
       indexPatternOptionList={indexPatternOptionList}
       selectedSources={selectedSources}
+      selectedCluster={selectedCluster}
       setIndexPatternOptionList={setIndexPatternOptionList}
+      setSelectedCluster={setSelectedCluster}
       handleSourceSelection={handleSourceSelection}
     />
   );
