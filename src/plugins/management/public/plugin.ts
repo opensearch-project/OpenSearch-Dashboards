@@ -113,9 +113,9 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       id: settingsLandingPageId,
       title: settingsLandingPageTitle,
       order: 100,
-      status: core.chrome.navGroup.getNavGroupEnabled()
-        ? AppStatus.accessible
-        : AppStatus.inaccessible,
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const { renderApp } = await import('./landing_page_application');
         const [coreStart] = await core.getStartServices();
@@ -125,7 +125,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           .toPromise();
         const navLinks = navGroupMap[DEFAULT_NAV_GROUPS.settingsAndSetup.id]?.navLinks;
         const fulfilledNavLink = fulfillRegistrationLinksToChromeNavLinks(
-          navLinks || [],
+          (navLinks || []).filter((navLink) => navLink.id !== settingsLandingPageId),
           coreStart.chrome.navLinks.getAll()
         );
 
@@ -145,9 +145,9 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       id: dataAdministrationLandingPageId,
       title: dataAdministrationPageTitle,
       order: 100,
-      status: core.chrome.navGroup.getNavGroupEnabled()
-        ? AppStatus.accessible
-        : AppStatus.inaccessible,
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
       mount: async (params: AppMountParameters) => {
         const { renderApp } = await import('./landing_page_application');
         const [coreStart] = await core.getStartServices();
@@ -157,7 +157,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           .toPromise();
         const navLinks = navGroupMap[DEFAULT_NAV_GROUPS.dataAdministration.id]?.navLinks;
         const fulfilledNavLink = fulfillRegistrationLinksToChromeNavLinks(
-          navLinks || [],
+          (navLinks || []).filter((navLink) => navLink.id !== dataAdministrationLandingPageId),
           coreStart.chrome.navLinks.getAll()
         );
 
@@ -166,12 +166,26 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
           props: {
             navigateToApp: coreStart.application.navigateToApp,
             navLinks: fulfilledNavLink,
-            pageTitle: settingsLandingPageTitle,
+            pageTitle: dataAdministrationPageTitle,
             getStartedCards: [],
           },
         });
       },
     });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: settingsLandingPageId,
+        order: 0,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.dataAdministration, [
+      {
+        id: dataAdministrationLandingPageId,
+        order: 0,
+      },
+    ]);
 
     managementOverview?.register({
       id: MANAGEMENT_APP_ID,
