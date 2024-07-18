@@ -5,12 +5,7 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import {
-  EuiSmallButton,
-  EuiEmptyPrompt,
-  EuiLink,
-  EuiText,
-} from '@elastic/eui';
+import { EuiSmallButton, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 
 export const getNoItemsMessage = (

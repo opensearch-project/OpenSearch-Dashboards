@@ -12,8 +12,8 @@ import {
   EuiSteps,
   EuiPageSideBar,
   EuiBottomBar,
-  EuiSmallButtonEmpty,
-  EuiSmallButton,
+  EuiButtonEmpty,
+  EuiButton,
 } from '@elastic/eui';
 import React, { useEffect, useState, useCallback } from 'react';
 import { RouteComponentProps, useParams, withRouter } from 'react-router-dom';
@@ -311,7 +311,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
       <EuiBottomBar data-test-subj="reviewSaveOrCancel">
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiSmallButtonEmpty
+            <EuiButtonEmpty
               onClick={() => {
                 history.push('/create');
               }}
@@ -321,10 +321,10 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
               data-test-subj="cancelButton"
             >
               Cancel
-            </EuiSmallButtonEmpty>
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSmallButton
+            <EuiButton
               onClick={() => setPage('configure')}
               color="ghost"
               size="s"
@@ -332,10 +332,10 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
               data-test-subj="previousButton"
             >
               Previous
-            </EuiSmallButton>
+            </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiSmallButton
+            <EuiButton
               onClick={() => (page === 'review' ? createDatasource() : setPage('review'))}
               size="s"
               iconType="arrowRight"
@@ -345,7 +345,7 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
               {page === 'configure'
                 ? `Review Configuration`
                 : `Connect to ${DatasourceTypeToDisplayName[type]}`}
-            </EuiSmallButton>
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>

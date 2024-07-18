@@ -100,7 +100,6 @@ export function OpenSearchPanel({ onClose, makeUrl }: Props) {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiSmallButtonEmpty
               onClick={onClose}
               href={addBasePath(

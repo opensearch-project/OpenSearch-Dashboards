@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 import {
-  EuiSmallButtonIcon,
+  EuiButtonIcon,
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
@@ -41,7 +41,7 @@ export const DataSourceErrorMenu = ({ application }: DataSourceErrorMenuProps) =
   );
 
   const iconButton = (
-    <EuiSmallButtonIcon
+    <EuiButtonIcon
       className="euiHeaderLink"
       data-test-subj="dataSourceErrorMenuHeaderLink"
       aria-label={i18n.translate('dataSourceError.dataSourceErrorMenuHeaderLink', {
