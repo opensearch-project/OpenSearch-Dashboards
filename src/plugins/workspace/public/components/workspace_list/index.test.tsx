@@ -8,7 +8,7 @@ import { WorkspaceList } from './index';
 import { coreMock } from '../../../../../core/public/mocks';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
-import { switchWorkspace, navigateToWorkspaceUpdatePage } from '../utils/workspace';
+import { navigateToWorkspaceDetail } from '../utils/workspace';
 
 import { of } from 'rxjs';
 
@@ -87,14 +87,14 @@ describe('WorkspaceList', () => {
     const { getByText } = render(getWrapWorkspaceListInContext());
     const nameLink = getByText('name1');
     fireEvent.click(nameLink);
-    expect(switchWorkspace).toBeCalled();
+    expect(navigateToWorkspaceDetail).toBeCalled();
   });
 
   it('should be able to update workspace after clicking name', async () => {
     const { getAllByTestId } = render(getWrapWorkspaceListInContext());
     const editIcon = getAllByTestId('workspace-list-edit-icon')[0];
     fireEvent.click(editIcon);
-    expect(navigateToWorkspaceUpdatePage).toBeCalled();
+    expect(navigateToWorkspaceDetail).toBeCalled();
   });
 
   it('should be able to call delete modal after clicking delete button', async () => {
