@@ -36,6 +36,7 @@ import { i18n } from '@osd/i18n';
 import { I18nProvider } from '@osd/i18n/react';
 import { StartServicesAccessor } from 'src/core/public';
 
+import { EuiPageContent } from '@elastic/eui';
 import { AdvancedSettings } from './advanced_settings';
 import { ManagementAppMountParams } from '../../../management/public';
 import { ComponentRegistry } from '../types';
@@ -59,7 +60,7 @@ const readOnlyBadge = {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor,
-  params: ManagementAppMountParams,
+  params: ManagementAppMountParams & { wrapInPage?: boolean },
   componentRegistry: ComponentRegistry['start']
 ) {
   params.setBreadcrumbs(crumb);
@@ -71,21 +72,31 @@ export async function mountManagementSection(
     chrome.setBadge(readOnlyBadge);
   }
 
+  const content = (
+    <Router history={params.history}>
+      <Switch>
+        <Route path={['/:query', '/']}>
+          <AdvancedSettings
+            enableSaving={canSave}
+            toasts={notifications.toasts}
+            dockLinks={docLinks.links}
+            uiSettings={uiSettings}
+            componentRegistry={componentRegistry}
+          />
+        </Route>
+      </Switch>
+    </Router>
+  );
+
   ReactDOM.render(
     <I18nProvider>
-      <Router history={params.history}>
-        <Switch>
-          <Route path={['/:query', '/']}>
-            <AdvancedSettings
-              enableSaving={canSave}
-              toasts={notifications.toasts}
-              dockLinks={docLinks.links}
-              uiSettings={uiSettings}
-              componentRegistry={componentRegistry}
-            />
-          </Route>
-        </Switch>
-      </Router>
+      {params.wrapInPage ? (
+        <EuiPageContent hasShadow={false} hasBorder={false} color="transparent">
+          {content}
+        </EuiPageContent>
+      ) : (
+        content
+      )}
     </I18nProvider>,
     params.element
   );

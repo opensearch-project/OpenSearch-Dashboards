@@ -108,4 +108,11 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     }),
     order: 3000,
   },
+  manage: {
+    id: 'manage',
+    label: i18n.translate('core.ui.manageNav.label', {
+      defaultMessage: 'Manage',
+    }),
+    order: 7000,
+  },
 });
