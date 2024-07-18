@@ -28,19 +28,18 @@ export class DQLParser extends antlr.Parser {
     public static readonly WS = 14;
     public static readonly RULE_query = 0;
     public static readonly RULE_operatorExpression = 1;
-    public static readonly RULE_orExpression = 2;
-    public static readonly RULE_term = 3;
-    public static readonly RULE_andExpression = 4;
-    public static readonly RULE_primaryExpression = 5;
-    public static readonly RULE_comparisonExpression = 6;
-    public static readonly RULE_keyValueExpression = 7;
-    public static readonly RULE_tokenSearch = 8;
-    public static readonly RULE_groupExpression = 9;
-    public static readonly RULE_groupContent = 10;
-    public static readonly RULE_field = 11;
-    public static readonly RULE_rangeValue = 12;
-    public static readonly RULE_value = 13;
-    public static readonly RULE_comparisonOperator = 14;
+    public static readonly RULE_booleanOperator = 2;
+    public static readonly RULE_notExpression = 3;
+    public static readonly RULE_primaryExpression = 4;
+    public static readonly RULE_comparisonExpression = 5;
+    public static readonly RULE_keyValueExpression = 6;
+    public static readonly RULE_tokenSearch = 7;
+    public static readonly RULE_groupExpression = 8;
+    public static readonly RULE_groupContent = 9;
+    public static readonly RULE_field = 10;
+    public static readonly RULE_rangeValue = 11;
+    public static readonly RULE_value = 12;
+    public static readonly RULE_comparisonOperator = 13;
 
     public static readonly literalNames = [
         null, null, null, null, "'>'", "'<'", "'>='", "'<='", "':'", "'('", 
@@ -52,7 +51,7 @@ export class DQLParser extends antlr.Parser {
         "RPAREN", "PHRASE", "NUMBER", "ID", "WS"
     ];
     public static readonly ruleNames = [
-        "query", "operatorExpression", "orExpression", "term", "andExpression", 
+        "query", "operatorExpression", "booleanOperator", "notExpression", 
         "primaryExpression", "comparisonExpression", "keyValueExpression", 
         "tokenSearch", "groupExpression", "groupContent", "field", "rangeValue", 
         "value", "comparisonOperator",
@@ -76,23 +75,10 @@ export class DQLParser extends antlr.Parser {
         let localContext = new QueryContext(this.context, this.state);
         this.enterRule(localContext, 0, DQLParser.RULE_query);
         try {
-            this.state = 32;
-            this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 0, this.context) ) {
-            case 1:
-                this.enterOuterAlt(localContext, 1);
-                {
-                this.state = 30;
-                this.primaryExpression();
-                }
-                break;
-            case 2:
-                this.enterOuterAlt(localContext, 2);
-                {
-                this.state = 31;
-                this.operatorExpression();
-                }
-                break;
+            this.enterOuterAlt(localContext, 1);
+            {
+            this.state = 28;
+            this.operatorExpression();
             }
         }
         catch (re) {
@@ -111,61 +97,25 @@ export class DQLParser extends antlr.Parser {
     public operatorExpression(): OperatorExpressionContext {
         let localContext = new OperatorExpressionContext(this.context, this.state);
         this.enterRule(localContext, 2, DQLParser.RULE_operatorExpression);
+        let _la: number;
         try {
+            this.enterOuterAlt(localContext, 1);
+            {
+            this.state = 30;
+            this.notExpression();
             this.state = 36;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 1, this.context) ) {
-            case 1:
-                this.enterOuterAlt(localContext, 1);
-                {
-                this.state = 34;
-                this.andExpression();
-                }
-                break;
-            case 2:
-                this.enterOuterAlt(localContext, 2);
-                {
-                this.state = 35;
-                this.orExpression();
-                }
-                break;
-            }
-        }
-        catch (re) {
-            if (re instanceof antlr.RecognitionException) {
-                this.errorHandler.reportError(this, re);
-                this.errorHandler.recover(this, re);
-            } else {
-                throw re;
-            }
-        }
-        finally {
-            this.exitRule();
-        }
-        return localContext;
-    }
-    public orExpression(): OrExpressionContext {
-        let localContext = new OrExpressionContext(this.context, this.state);
-        this.enterRule(localContext, 4, DQLParser.RULE_orExpression);
-        let _la: number;
-        try {
-            this.enterOuterAlt(localContext, 1);
-            {
-            this.state = 38;
-            this.term();
-            this.state = 43;
-            this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
-            while (_la === 1) {
+            while (_la === 1 || _la === 2) {
                 {
                 {
-                this.state = 39;
-                this.match(DQLParser.OR);
-                this.state = 40;
-                this.term();
+                this.state = 31;
+                this.booleanOperator();
+                this.state = 32;
+                this.notExpression();
                 }
                 }
-                this.state = 45;
+                this.state = 38;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
@@ -184,27 +134,22 @@ export class DQLParser extends antlr.Parser {
         }
         return localContext;
     }
-    public term(): TermContext {
-        let localContext = new TermContext(this.context, this.state);
-        this.enterRule(localContext, 6, DQLParser.RULE_term);
+    public booleanOperator(): BooleanOperatorContext {
+        let localContext = new BooleanOperatorContext(this.context, this.state);
+        this.enterRule(localContext, 4, DQLParser.RULE_booleanOperator);
+        let _la: number;
         try {
-            this.state = 48;
-            this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 3, this.context) ) {
-            case 1:
-                this.enterOuterAlt(localContext, 1);
-                {
-                this.state = 46;
-                this.primaryExpression();
-                }
-                break;
-            case 2:
-                this.enterOuterAlt(localContext, 2);
-                {
-                this.state = 47;
-                this.andExpression();
-                }
-                break;
+            this.enterOuterAlt(localContext, 1);
+            {
+            this.state = 39;
+            _la = this.tokenStream.LA(1);
+            if(!(_la === 1 || _la === 2)) {
+            this.errorHandler.recoverInline(this);
+            }
+            else {
+                this.errorHandler.reportMatch(this);
+                this.consume();
+            }
             }
         }
         catch (re) {
@@ -220,31 +165,25 @@ export class DQLParser extends antlr.Parser {
         }
         return localContext;
     }
-    public andExpression(): AndExpressionContext {
-        let localContext = new AndExpressionContext(this.context, this.state);
-        this.enterRule(localContext, 8, DQLParser.RULE_andExpression);
+    public notExpression(): NotExpressionContext {
+        let localContext = new NotExpressionContext(this.context, this.state);
+        this.enterRule(localContext, 6, DQLParser.RULE_notExpression);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 50;
+            this.state = 42;
+            this.errorHandler.sync(this);
+            _la = this.tokenStream.LA(1);
+            if (_la === 3) {
+                {
+                this.state = 41;
+                this.match(DQLParser.NOT);
+                }
+            }
+
+            this.state = 44;
             this.primaryExpression();
-            this.state = 55;
-            this.errorHandler.sync(this);
-            _la = this.tokenStream.LA(1);
-            while (_la === 2) {
-                {
-                {
-                this.state = 51;
-                this.match(DQLParser.AND);
-                this.state = 52;
-                this.primaryExpression();
-                }
-                }
-                this.state = 57;
-                this.errorHandler.sync(this);
-                _la = this.tokenStream.LA(1);
-            }
             }
         }
         catch (re) {
@@ -262,49 +201,40 @@ export class DQLParser extends antlr.Parser {
     }
     public primaryExpression(): PrimaryExpressionContext {
         let localContext = new PrimaryExpressionContext(this.context, this.state);
-        this.enterRule(localContext, 10, DQLParser.RULE_primaryExpression);
+        this.enterRule(localContext, 8, DQLParser.RULE_primaryExpression);
         try {
-            this.state = 67;
+            this.state = 53;
             this.errorHandler.sync(this);
-            switch (this.interpreter.adaptivePredict(this.tokenStream, 5, this.context) ) {
+            switch (this.interpreter.adaptivePredict(this.tokenStream, 2, this.context) ) {
             case 1:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 58;
+                this.state = 46;
                 this.match(DQLParser.LPAREN);
-                this.state = 59;
+                this.state = 47;
                 this.query();
-                this.state = 60;
+                this.state = 48;
                 this.match(DQLParser.RPAREN);
                 }
                 break;
             case 2:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 62;
-                this.match(DQLParser.NOT);
-                this.state = 63;
-                this.primaryExpression();
+                this.state = 50;
+                this.comparisonExpression();
                 }
                 break;
             case 3:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 64;
-                this.comparisonExpression();
+                this.state = 51;
+                this.keyValueExpression();
                 }
                 break;
             case 4:
                 this.enterOuterAlt(localContext, 4);
                 {
-                this.state = 65;
-                this.keyValueExpression();
-                }
-                break;
-            case 5:
-                this.enterOuterAlt(localContext, 5);
-                {
-                this.state = 66;
+                this.state = 52;
                 this.tokenSearch();
                 }
                 break;
@@ -325,15 +255,15 @@ export class DQLParser extends antlr.Parser {
     }
     public comparisonExpression(): ComparisonExpressionContext {
         let localContext = new ComparisonExpressionContext(this.context, this.state);
-        this.enterRule(localContext, 12, DQLParser.RULE_comparisonExpression);
+        this.enterRule(localContext, 10, DQLParser.RULE_comparisonExpression);
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 69;
+            this.state = 55;
             this.field();
-            this.state = 70;
+            this.state = 56;
             this.comparisonOperator();
-            this.state = 71;
+            this.state = 57;
             this.rangeValue();
             }
         }
@@ -352,28 +282,28 @@ export class DQLParser extends antlr.Parser {
     }
     public keyValueExpression(): KeyValueExpressionContext {
         let localContext = new KeyValueExpressionContext(this.context, this.state);
-        this.enterRule(localContext, 14, DQLParser.RULE_keyValueExpression);
+        this.enterRule(localContext, 12, DQLParser.RULE_keyValueExpression);
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 73;
+            this.state = 59;
             this.field();
-            this.state = 74;
+            this.state = 60;
             this.match(DQLParser.EQ);
-            this.state = 77;
+            this.state = 63;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case DQLParser.PHRASE:
             case DQLParser.NUMBER:
             case DQLParser.ID:
                 {
-                this.state = 75;
+                this.state = 61;
                 this.value();
                 }
                 break;
             case DQLParser.LPAREN:
                 {
-                this.state = 76;
+                this.state = 62;
                 this.groupExpression();
                 }
                 break;
@@ -397,24 +327,24 @@ export class DQLParser extends antlr.Parser {
     }
     public tokenSearch(): TokenSearchContext {
         let localContext = new TokenSearchContext(this.context, this.state);
-        this.enterRule(localContext, 16, DQLParser.RULE_tokenSearch);
+        this.enterRule(localContext, 14, DQLParser.RULE_tokenSearch);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 79;
+            this.state = 65;
             this.match(DQLParser.ID);
-            this.state = 83;
+            this.state = 69;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 13) {
                 {
                 {
-                this.state = 80;
+                this.state = 66;
                 this.match(DQLParser.ID);
                 }
                 }
-                this.state = 85;
+                this.state = 71;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
@@ -435,22 +365,22 @@ export class DQLParser extends antlr.Parser {
     }
     public groupExpression(): GroupExpressionContext {
         let localContext = new GroupExpressionContext(this.context, this.state);
-        this.enterRule(localContext, 18, DQLParser.RULE_groupExpression);
+        this.enterRule(localContext, 16, DQLParser.RULE_groupExpression);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 86;
+            this.state = 72;
             this.match(DQLParser.LPAREN);
-            this.state = 87;
+            this.state = 73;
             this.groupContent();
-            this.state = 95;
+            this.state = 81;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 1 || _la === 2) {
                 {
                 {
-                this.state = 88;
+                this.state = 74;
                 _la = this.tokenStream.LA(1);
                 if(!(_la === 1 || _la === 2)) {
                 this.errorHandler.recoverInline(this);
@@ -460,26 +390,26 @@ export class DQLParser extends antlr.Parser {
                     this.consume();
                 }
                 {
-                this.state = 90;
+                this.state = 76;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
                 if (_la === 3) {
                     {
-                    this.state = 89;
+                    this.state = 75;
                     this.match(DQLParser.NOT);
                     }
                 }
 
                 }
-                this.state = 92;
+                this.state = 78;
                 this.groupContent();
                 }
                 }
-                this.state = 97;
+                this.state = 83;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
-            this.state = 98;
+            this.state = 84;
             this.match(DQLParser.RPAREN);
             }
         }
@@ -498,15 +428,15 @@ export class DQLParser extends antlr.Parser {
     }
     public groupContent(): GroupContentContext {
         let localContext = new GroupContentContext(this.context, this.state);
-        this.enterRule(localContext, 20, DQLParser.RULE_groupContent);
+        this.enterRule(localContext, 18, DQLParser.RULE_groupContent);
         try {
-            this.state = 102;
+            this.state = 88;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case DQLParser.LPAREN:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 100;
+                this.state = 86;
                 this.groupExpression();
                 }
                 break;
@@ -515,7 +445,7 @@ export class DQLParser extends antlr.Parser {
             case DQLParser.ID:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 101;
+                this.state = 87;
                 this.value();
                 }
                 break;
@@ -538,11 +468,11 @@ export class DQLParser extends antlr.Parser {
     }
     public field(): FieldContext {
         let localContext = new FieldContext(this.context, this.state);
-        this.enterRule(localContext, 22, DQLParser.RULE_field);
+        this.enterRule(localContext, 20, DQLParser.RULE_field);
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 104;
+            this.state = 90;
             this.match(DQLParser.ID);
             }
         }
@@ -561,12 +491,12 @@ export class DQLParser extends antlr.Parser {
     }
     public rangeValue(): RangeValueContext {
         let localContext = new RangeValueContext(this.context, this.state);
-        this.enterRule(localContext, 24, DQLParser.RULE_rangeValue);
+        this.enterRule(localContext, 22, DQLParser.RULE_rangeValue);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 106;
+            this.state = 92;
             _la = this.tokenStream.LA(1);
             if(!(_la === 11 || _la === 12)) {
             this.errorHandler.recoverInline(this);
@@ -592,29 +522,29 @@ export class DQLParser extends antlr.Parser {
     }
     public value(): ValueContext {
         let localContext = new ValueContext(this.context, this.state);
-        this.enterRule(localContext, 26, DQLParser.RULE_value);
+        this.enterRule(localContext, 24, DQLParser.RULE_value);
         try {
-            this.state = 111;
+            this.state = 97;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case DQLParser.PHRASE:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 108;
+                this.state = 94;
                 this.match(DQLParser.PHRASE);
                 }
                 break;
             case DQLParser.NUMBER:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 109;
+                this.state = 95;
                 this.match(DQLParser.NUMBER);
                 }
                 break;
             case DQLParser.ID:
                 this.enterOuterAlt(localContext, 3);
                 {
-                this.state = 110;
+                this.state = 96;
                 this.tokenSearch();
                 }
                 break;
@@ -637,12 +567,12 @@ export class DQLParser extends antlr.Parser {
     }
     public comparisonOperator(): ComparisonOperatorContext {
         let localContext = new ComparisonOperatorContext(this.context, this.state);
-        this.enterRule(localContext, 28, DQLParser.RULE_comparisonOperator);
+        this.enterRule(localContext, 26, DQLParser.RULE_comparisonOperator);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 113;
+            this.state = 99;
             _la = this.tokenStream.LA(1);
             if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 240) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -668,43 +598,37 @@ export class DQLParser extends antlr.Parser {
     }
 
     public static readonly _serializedATN: number[] = [
-        4,1,14,116,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        4,1,14,102,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
         6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,2,13,7,13,
-        2,14,7,14,1,0,1,0,3,0,33,8,0,1,1,1,1,3,1,37,8,1,1,2,1,2,1,2,5,2,
-        42,8,2,10,2,12,2,45,9,2,1,3,1,3,3,3,49,8,3,1,4,1,4,1,4,5,4,54,8,
-        4,10,4,12,4,57,9,4,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,1,5,3,5,68,8,
-        5,1,6,1,6,1,6,1,6,1,7,1,7,1,7,1,7,3,7,78,8,7,1,8,1,8,5,8,82,8,8,
-        10,8,12,8,85,9,8,1,9,1,9,1,9,1,9,3,9,91,8,9,1,9,5,9,94,8,9,10,9,
-        12,9,97,9,9,1,9,1,9,1,10,1,10,3,10,103,8,10,1,11,1,11,1,12,1,12,
-        1,13,1,13,1,13,3,13,112,8,13,1,14,1,14,1,14,0,0,15,0,2,4,6,8,10,
-        12,14,16,18,20,22,24,26,28,0,3,1,0,1,2,1,0,11,12,1,0,4,7,116,0,32,
-        1,0,0,0,2,36,1,0,0,0,4,38,1,0,0,0,6,48,1,0,0,0,8,50,1,0,0,0,10,67,
-        1,0,0,0,12,69,1,0,0,0,14,73,1,0,0,0,16,79,1,0,0,0,18,86,1,0,0,0,
-        20,102,1,0,0,0,22,104,1,0,0,0,24,106,1,0,0,0,26,111,1,0,0,0,28,113,
-        1,0,0,0,30,33,3,10,5,0,31,33,3,2,1,0,32,30,1,0,0,0,32,31,1,0,0,0,
-        33,1,1,0,0,0,34,37,3,8,4,0,35,37,3,4,2,0,36,34,1,0,0,0,36,35,1,0,
-        0,0,37,3,1,0,0,0,38,43,3,6,3,0,39,40,5,1,0,0,40,42,3,6,3,0,41,39,
-        1,0,0,0,42,45,1,0,0,0,43,41,1,0,0,0,43,44,1,0,0,0,44,5,1,0,0,0,45,
-        43,1,0,0,0,46,49,3,10,5,0,47,49,3,8,4,0,48,46,1,0,0,0,48,47,1,0,
-        0,0,49,7,1,0,0,0,50,55,3,10,5,0,51,52,5,2,0,0,52,54,3,10,5,0,53,
-        51,1,0,0,0,54,57,1,0,0,0,55,53,1,0,0,0,55,56,1,0,0,0,56,9,1,0,0,
-        0,57,55,1,0,0,0,58,59,5,9,0,0,59,60,3,0,0,0,60,61,5,10,0,0,61,68,
-        1,0,0,0,62,63,5,3,0,0,63,68,3,10,5,0,64,68,3,12,6,0,65,68,3,14,7,
-        0,66,68,3,16,8,0,67,58,1,0,0,0,67,62,1,0,0,0,67,64,1,0,0,0,67,65,
-        1,0,0,0,67,66,1,0,0,0,68,11,1,0,0,0,69,70,3,22,11,0,70,71,3,28,14,
-        0,71,72,3,24,12,0,72,13,1,0,0,0,73,74,3,22,11,0,74,77,5,8,0,0,75,
-        78,3,26,13,0,76,78,3,18,9,0,77,75,1,0,0,0,77,76,1,0,0,0,78,15,1,
-        0,0,0,79,83,5,13,0,0,80,82,5,13,0,0,81,80,1,0,0,0,82,85,1,0,0,0,
-        83,81,1,0,0,0,83,84,1,0,0,0,84,17,1,0,0,0,85,83,1,0,0,0,86,87,5,
-        9,0,0,87,95,3,20,10,0,88,90,7,0,0,0,89,91,5,3,0,0,90,89,1,0,0,0,
-        90,91,1,0,0,0,91,92,1,0,0,0,92,94,3,20,10,0,93,88,1,0,0,0,94,97,
-        1,0,0,0,95,93,1,0,0,0,95,96,1,0,0,0,96,98,1,0,0,0,97,95,1,0,0,0,
-        98,99,5,10,0,0,99,19,1,0,0,0,100,103,3,18,9,0,101,103,3,26,13,0,
-        102,100,1,0,0,0,102,101,1,0,0,0,103,21,1,0,0,0,104,105,5,13,0,0,
-        105,23,1,0,0,0,106,107,7,1,0,0,107,25,1,0,0,0,108,112,5,11,0,0,109,
-        112,5,12,0,0,110,112,3,16,8,0,111,108,1,0,0,0,111,109,1,0,0,0,111,
-        110,1,0,0,0,112,27,1,0,0,0,113,114,7,2,0,0,114,29,1,0,0,0,12,32,
-        36,43,48,55,67,77,83,90,95,102,111
+        1,0,1,0,1,1,1,1,1,1,1,1,5,1,35,8,1,10,1,12,1,38,9,1,1,2,1,2,1,3,
+        3,3,43,8,3,1,3,1,3,1,4,1,4,1,4,1,4,1,4,1,4,1,4,3,4,54,8,4,1,5,1,
+        5,1,5,1,5,1,6,1,6,1,6,1,6,3,6,64,8,6,1,7,1,7,5,7,68,8,7,10,7,12,
+        7,71,9,7,1,8,1,8,1,8,1,8,3,8,77,8,8,1,8,5,8,80,8,8,10,8,12,8,83,
+        9,8,1,8,1,8,1,9,1,9,3,9,89,8,9,1,10,1,10,1,11,1,11,1,12,1,12,1,12,
+        3,12,98,8,12,1,13,1,13,1,13,0,0,14,0,2,4,6,8,10,12,14,16,18,20,22,
+        24,26,0,3,1,0,1,2,1,0,11,12,1,0,4,7,99,0,28,1,0,0,0,2,30,1,0,0,0,
+        4,39,1,0,0,0,6,42,1,0,0,0,8,53,1,0,0,0,10,55,1,0,0,0,12,59,1,0,0,
+        0,14,65,1,0,0,0,16,72,1,0,0,0,18,88,1,0,0,0,20,90,1,0,0,0,22,92,
+        1,0,0,0,24,97,1,0,0,0,26,99,1,0,0,0,28,29,3,2,1,0,29,1,1,0,0,0,30,
+        36,3,6,3,0,31,32,3,4,2,0,32,33,3,6,3,0,33,35,1,0,0,0,34,31,1,0,0,
+        0,35,38,1,0,0,0,36,34,1,0,0,0,36,37,1,0,0,0,37,3,1,0,0,0,38,36,1,
+        0,0,0,39,40,7,0,0,0,40,5,1,0,0,0,41,43,5,3,0,0,42,41,1,0,0,0,42,
+        43,1,0,0,0,43,44,1,0,0,0,44,45,3,8,4,0,45,7,1,0,0,0,46,47,5,9,0,
+        0,47,48,3,0,0,0,48,49,5,10,0,0,49,54,1,0,0,0,50,54,3,10,5,0,51,54,
+        3,12,6,0,52,54,3,14,7,0,53,46,1,0,0,0,53,50,1,0,0,0,53,51,1,0,0,
+        0,53,52,1,0,0,0,54,9,1,0,0,0,55,56,3,20,10,0,56,57,3,26,13,0,57,
+        58,3,22,11,0,58,11,1,0,0,0,59,60,3,20,10,0,60,63,5,8,0,0,61,64,3,
+        24,12,0,62,64,3,16,8,0,63,61,1,0,0,0,63,62,1,0,0,0,64,13,1,0,0,0,
+        65,69,5,13,0,0,66,68,5,13,0,0,67,66,1,0,0,0,68,71,1,0,0,0,69,67,
+        1,0,0,0,69,70,1,0,0,0,70,15,1,0,0,0,71,69,1,0,0,0,72,73,5,9,0,0,
+        73,81,3,18,9,0,74,76,7,0,0,0,75,77,5,3,0,0,76,75,1,0,0,0,76,77,1,
+        0,0,0,77,78,1,0,0,0,78,80,3,18,9,0,79,74,1,0,0,0,80,83,1,0,0,0,81,
+        79,1,0,0,0,81,82,1,0,0,0,82,84,1,0,0,0,83,81,1,0,0,0,84,85,5,10,
+        0,0,85,17,1,0,0,0,86,89,3,16,8,0,87,89,3,24,12,0,88,86,1,0,0,0,88,
+        87,1,0,0,0,89,19,1,0,0,0,90,91,5,13,0,0,91,21,1,0,0,0,92,93,7,1,
+        0,0,93,23,1,0,0,0,94,98,5,11,0,0,95,98,5,12,0,0,96,98,3,14,7,0,97,
+        94,1,0,0,0,97,95,1,0,0,0,97,96,1,0,0,0,98,25,1,0,0,0,99,100,7,2,
+        0,0,100,27,1,0,0,0,9,36,42,53,63,69,76,81,88,97
     ];
 
     private static __ATN: antlr.ATN;
@@ -730,11 +654,8 @@ export class QueryContext extends antlr.ParserRuleContext {
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
         super(parent, invokingState);
     }
-    public primaryExpression(): PrimaryExpressionContext | null {
-        return this.getRuleContext(0, PrimaryExpressionContext);
-    }
-    public operatorExpression(): OperatorExpressionContext | null {
-        return this.getRuleContext(0, OperatorExpressionContext);
+    public operatorExpression(): OperatorExpressionContext {
+        return this.getRuleContext(0, OperatorExpressionContext)!;
     }
     public override get ruleIndex(): number {
         return DQLParser.RULE_query;
@@ -763,11 +684,23 @@ export class OperatorExpressionContext extends antlr.ParserRuleContext {
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
         super(parent, invokingState);
     }
-    public andExpression(): AndExpressionContext | null {
-        return this.getRuleContext(0, AndExpressionContext);
+    public notExpression(): NotExpressionContext[];
+    public notExpression(i: number): NotExpressionContext | null;
+    public notExpression(i?: number): NotExpressionContext[] | NotExpressionContext | null {
+        if (i === undefined) {
+            return this.getRuleContexts(NotExpressionContext);
+        }
+
+        return this.getRuleContext(i, NotExpressionContext);
     }
-    public orExpression(): OrExpressionContext | null {
-        return this.getRuleContext(0, OrExpressionContext);
+    public booleanOperator(): BooleanOperatorContext[];
+    public booleanOperator(i: number): BooleanOperatorContext | null;
+    public booleanOperator(i?: number): BooleanOperatorContext[] | BooleanOperatorContext | null {
+        if (i === undefined) {
+            return this.getRuleContexts(BooleanOperatorContext);
+        }
+
+        return this.getRuleContext(i, BooleanOperatorContext);
     }
     public override get ruleIndex(): number {
         return DQLParser.RULE_operatorExpression;
@@ -792,44 +725,32 @@ export class OperatorExpressionContext extends antlr.ParserRuleContext {
 }
 
 
-export class OrExpressionContext extends antlr.ParserRuleContext {
+export class BooleanOperatorContext extends antlr.ParserRuleContext {
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
         super(parent, invokingState);
     }
-    public term(): TermContext[];
-    public term(i: number): TermContext | null;
-    public term(i?: number): TermContext[] | TermContext | null {
-        if (i === undefined) {
-            return this.getRuleContexts(TermContext);
-        }
-
-        return this.getRuleContext(i, TermContext);
+    public OR(): antlr.TerminalNode | null {
+        return this.getToken(DQLParser.OR, 0);
     }
-    public OR(): antlr.TerminalNode[];
-    public OR(i: number): antlr.TerminalNode | null;
-    public OR(i?: number): antlr.TerminalNode | null | antlr.TerminalNode[] {
-    	if (i === undefined) {
-    		return this.getTokens(DQLParser.OR);
-    	} else {
-    		return this.getToken(DQLParser.OR, i);
-    	}
+    public AND(): antlr.TerminalNode | null {
+        return this.getToken(DQLParser.AND, 0);
     }
     public override get ruleIndex(): number {
-        return DQLParser.RULE_orExpression;
+        return DQLParser.RULE_booleanOperator;
     }
     public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterOrExpression) {
-             listener.enterOrExpression(this);
+        if(listener.enterBooleanOperator) {
+             listener.enterBooleanOperator(this);
         }
     }
     public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitOrExpression) {
-             listener.exitOrExpression(this);
+        if(listener.exitBooleanOperator) {
+             listener.exitBooleanOperator(this);
         }
     }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
-        if (visitor.visitOrExpression) {
-            return visitor.visitOrExpression(this);
+        if (visitor.visitBooleanOperator) {
+            return visitor.visitBooleanOperator(this);
         } else {
             return visitor.visitChildren(this);
         }
@@ -837,77 +758,32 @@ export class OrExpressionContext extends antlr.ParserRuleContext {
 }
 
 
-export class TermContext extends antlr.ParserRuleContext {
+export class NotExpressionContext extends antlr.ParserRuleContext {
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
         super(parent, invokingState);
     }
-    public primaryExpression(): PrimaryExpressionContext | null {
-        return this.getRuleContext(0, PrimaryExpressionContext);
+    public primaryExpression(): PrimaryExpressionContext {
+        return this.getRuleContext(0, PrimaryExpressionContext)!;
     }
-    public andExpression(): AndExpressionContext | null {
-        return this.getRuleContext(0, AndExpressionContext);
+    public NOT(): antlr.TerminalNode | null {
+        return this.getToken(DQLParser.NOT, 0);
     }
     public override get ruleIndex(): number {
-        return DQLParser.RULE_term;
+        return DQLParser.RULE_notExpression;
     }
     public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterTerm) {
-             listener.enterTerm(this);
+        if(listener.enterNotExpression) {
+             listener.enterNotExpression(this);
         }
     }
     public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitTerm) {
-             listener.exitTerm(this);
+        if(listener.exitNotExpression) {
+             listener.exitNotExpression(this);
         }
     }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
-        if (visitor.visitTerm) {
-            return visitor.visitTerm(this);
-        } else {
-            return visitor.visitChildren(this);
-        }
-    }
-}
-
-
-export class AndExpressionContext extends antlr.ParserRuleContext {
-    public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
-        super(parent, invokingState);
-    }
-    public primaryExpression(): PrimaryExpressionContext[];
-    public primaryExpression(i: number): PrimaryExpressionContext | null;
-    public primaryExpression(i?: number): PrimaryExpressionContext[] | PrimaryExpressionContext | null {
-        if (i === undefined) {
-            return this.getRuleContexts(PrimaryExpressionContext);
-        }
-
-        return this.getRuleContext(i, PrimaryExpressionContext);
-    }
-    public AND(): antlr.TerminalNode[];
-    public AND(i: number): antlr.TerminalNode | null;
-    public AND(i?: number): antlr.TerminalNode | null | antlr.TerminalNode[] {
-    	if (i === undefined) {
-    		return this.getTokens(DQLParser.AND);
-    	} else {
-    		return this.getToken(DQLParser.AND, i);
-    	}
-    }
-    public override get ruleIndex(): number {
-        return DQLParser.RULE_andExpression;
-    }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterAndExpression) {
-             listener.enterAndExpression(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitAndExpression) {
-             listener.exitAndExpression(this);
-        }
-    }
-    public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
-        if (visitor.visitAndExpression) {
-            return visitor.visitAndExpression(this);
+        if (visitor.visitNotExpression) {
+            return visitor.visitNotExpression(this);
         } else {
             return visitor.visitChildren(this);
         }
@@ -927,12 +803,6 @@ export class PrimaryExpressionContext extends antlr.ParserRuleContext {
     }
     public RPAREN(): antlr.TerminalNode | null {
         return this.getToken(DQLParser.RPAREN, 0);
-    }
-    public NOT(): antlr.TerminalNode | null {
-        return this.getToken(DQLParser.NOT, 0);
-    }
-    public primaryExpression(): PrimaryExpressionContext | null {
-        return this.getRuleContext(0, PrimaryExpressionContext);
     }
     public comparisonExpression(): ComparisonExpressionContext | null {
         return this.getRuleContext(0, ComparisonExpressionContext);
