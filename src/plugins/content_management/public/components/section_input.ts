@@ -30,7 +30,7 @@ export const createCardInput = (
     title: section.title ?? '',
     hidePanelTitles: true,
     viewMode: ViewMode.VIEW,
-    panels: panels,
+    panels,
   };
 
   contents.forEach((content) => {
@@ -154,6 +154,7 @@ export const createDashboardInput = async (
 
       panels[content.id] = config;
     } catch (e) {
+      // eslint-disable-next-line
       console.log(e);
     } finally {
       counter.next(counter.value - 1);
@@ -165,7 +166,7 @@ export const createDashboardInput = async (
    */
   const input: DashboardContainerInput = {
     viewMode: ViewMode.VIEW,
-    panels: panels,
+    panels,
     isFullScreenMode: false,
     filters: [],
     useMargins: true,

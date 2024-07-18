@@ -32,7 +32,6 @@ import React from 'react';
 import { I18nProvider } from '@osd/i18n/react';
 import PropTypes from 'prop-types';
 import { Home } from './legacy/home';
-import { Homepage } from './homepage';
 import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
@@ -117,8 +116,6 @@ export function HomeApp({ directories, solutions }) {
       telemetry={telemetry}
     />
   );
-
-  // const homepage = <Homepage />;
 
   const nextHome = contentManagement.renderPage(HOME_PAGE_ID);
 
