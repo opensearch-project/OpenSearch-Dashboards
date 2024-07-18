@@ -11,12 +11,10 @@ import {
   EuiAvatar,
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiListGroup,
-  EuiListGroupItem,
   EuiPanel,
   EuiPopover,
 } from '@elastic/eui';
@@ -44,7 +42,8 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const workspaceList = useObservable(coreStart.workspaces.workspaceList$, []);
   const isDashboardAdmin = !!coreStart.application.capabilities.dashboards;
-  const isNewNav = coreStart.uiSettings.isOverridden('home:useNewHomePage');
+  const navGroupsMap$ = useMemo(() => coreStart.chrome.navGroup.getNavGroupsMap$(), [coreStart]);
+  const navGroupsMap = useObservable(navGroupsMap$, null);
 
   const defaultHeaderName = i18n.translate(
     'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
@@ -104,11 +103,8 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
         />
       ),
       onClick: async () => {
-        const navGroupsMap = await coreStart.chrome.navGroup
-          .getNavGroupsMap$()
-          .pipe(first())
-          .toPromise();
-        window.location.assign(workspaceURL);
+        const url = navGroupsMap![getUseCase(workspace)!].navLinks[0].baseUrl;
+        window.location.assign(url);
       },
     };
   };
@@ -118,37 +114,23 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     return workspaceListItems;
   };
 
-  const currentWorkspaceButton = (
-    <>
-      <EuiListGroup style={{ width: 318 }} maxWidth={false}>
-        <EuiListGroupItem
-          icon={
-            currentWorkspace ? (
-              <EuiAvatar
-                size="s"
-                type="space"
-                name={currentWorkspace.name}
-                color={currentWorkspace.color}
-                initialsLength={2}
-              />
-            ) : (
-              <EuiIcon type="spacesApp" />
-            )
-          }
-          label={currentWorkspaceName}
-          onClick={openPopover}
-          extraAction={{
-            color: 'subdued',
-            onClick: openPopover,
-            iconType: isPopoverOpen ? 'arrowDown' : 'arrowRight',
-            iconSize: 's',
-            'aria-label': 'Show workspace dropdown selector',
-            alwaysShow: true,
-          }}
-          data-test-subj="current-workspace-button"
-        />
-      </EuiListGroup>
-    </>
+  const currentWorkspaceButton = currentWorkspace ? (
+    <EuiButtonEmpty flush="left" onClick={openPopover} data-test-subj="current-workspace-button">
+      <EuiAvatar
+        size="s"
+        type="space"
+        name={currentWorkspace.name}
+        color={currentWorkspace.color}
+        initialsLength={2}
+      />
+    </EuiButtonEmpty>
+  ) : (
+    <EuiButtonIcon
+      iconType="spacesApp"
+      onClick={openPopover}
+      aria-label="workspace-select-button"
+      data-test-subj="workspace-select-button"
+    />
   );
 
   const allWorkspacesPanels = [
@@ -219,7 +201,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
                   onClick={() => {
                     window.location.assign(
                       formatUrlWithWorkspaceId(
-                        coreStart.application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
+                        coreStart.application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
                           absolute: false,
                         }),
                         currentWorkspace.id,

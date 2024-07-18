@@ -42,6 +42,7 @@ import {
   isNavGroupInFeatureConfigs,
 } from './utils';
 import { recentWorkspaceManager } from './recent_workspace_manager';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -295,16 +296,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       },
     });
 
-    /**
-     * Register workspace dropdown selector on the top of left navigation menu
-     */
-    core.chrome.registerCollapsibleNavHeader(() => {
-      if (!this.coreStart) {
-        return null;
-      }
-      return React.createElement(WorkspaceMenu, { coreStart: this.coreStart });
-    });
-
     // workspace list
     core.application.register({
       id: WORKSPACE_LIST_APP_ID,
@@ -366,6 +357,14 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
     if (!core.chrome.navGroup.getNavGroupEnabled()) {
       this.addWorkspaceToBreadcrumbs(core);
+    } else {
+      /**
+       * Register workspace dropdown selector on the left navigation bottom
+       */
+      core.chrome.navControls.registerLeftBottom({
+        order: 2,
+        mount: toMountPoint(React.createElement(WorkspaceMenu, { coreStart: core })),
+      });
     }
 
     return {};
