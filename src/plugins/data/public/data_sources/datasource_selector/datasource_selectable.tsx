@@ -125,8 +125,6 @@ export const DataSourceSelectable = ({
   onRefresh,
   ...comboBoxProps
 }: DataSourceSelectableProps) => {
-  console.log('dataSources:', dataSources);
-  console.log('dataSources filter:', dataSources.filter((ds) => ds.getMetadata().ui.selector.displayDatasetsAsSource));
   // This effect gets data sets and prepares the datasource list for UI rendering.
   useEffect(() => {
     Promise.all(
@@ -151,7 +149,6 @@ export const DataSourceSelectable = ({
   );
 
   const memorizedDataSourceOptionList = useMemo(() => {
-    console.log('dataSourceOptionList:', dataSourceOptionList);
     return dataSourceOptionList.map((dsGroup: DataSourceGroup) => {
       return {
         ...dsGroup,
