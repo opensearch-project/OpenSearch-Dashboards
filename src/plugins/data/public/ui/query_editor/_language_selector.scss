@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 .languageSelector {
-  min-width: 140px;
+  min-width: 50px;
   border-bottom: $euiBorderThin !important;
+  height: 25px;
+  display: flex;
+  color: grey;
 }

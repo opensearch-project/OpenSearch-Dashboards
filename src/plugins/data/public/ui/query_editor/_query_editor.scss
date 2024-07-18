@@ -15,6 +15,10 @@
   // overflow: auto;
 }
 
+.osdQueryEditorFooterHide {
+  display: none;
+}
+
 .osdQueryEditor__languageWrapper {
   :first-child {
     box-shadow: none !important;
@@ -42,6 +46,7 @@
 .osdQueryEditor__dataSetWrapper {
   .dataExplorerDSSelect {
     border-bottom: $euiBorderThin !important;
+    max-width: 375px;
 
     div:is([class$="--group"]) {
       padding: 0 !important;

@@ -15,7 +15,7 @@ import { i18n } from '@osd/i18n';
 import React, { useState } from 'react';
 import { getUiService } from '../../services';
 
-export interface QueryLanguageSelectorProps {
+export interface QueryLanguageSelectorFooterProps {
   language: string;
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
@@ -31,7 +31,7 @@ const mapExternalLanguageToOptions = (language: string) => {
   };
 };
 
-export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
+export const QueryLanguageSelectorFooter = (props: QueryLanguageSelectorFooterProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = () => {
@@ -92,18 +92,23 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   // language selector at the footer of the query bar
   const button = (
     <EuiButtonEmpty
+      size="s"
+      iconType="arrowDown"
       iconSide="right"
       onClick={onButtonClick}
       style={{
-        fontSize: 'small',
-        height: '20px',
+        fontSize: 'smaller',
+        color: 'grey',
+        height: '9px',
+        paddingLeft: '0px',
+        paddingTop: '2px',
       }}
     >
-      {selectedLanguage.label}
+      {props.language}
     </EuiButtonEmpty>
   );
   const getIconType = (language: string) => {
-    return language === selectedLanguage.label ? 'check' : 'empty';
+    return language === props.language ? 'check' : 'empty';
   };
 
   const languageOptionsMenu = languageOptions.map((language) => {
@@ -122,7 +127,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   });
   return (
     <EuiPopover
-      id="languageSelector"
+      id="languageSelectorPopover"
       button={button}
       isOpen={isPopoverOpen}
       closePopover={closePopover}
@@ -136,4 +141,4 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
 
 // Needed for React.lazy
 // eslint-disable-next-line import/no-default-export
-export default QueryLanguageSelector;
+export default QueryLanguageSelectorFooter;
