@@ -25,12 +25,14 @@ export interface UpdatePasswordModalProps {
   username: string;
   handleUpdatePassword: (password: string) => void;
   closeUpdatePasswordModal: () => void;
+  canManageDataSource: boolean;
 }
 
 export const UpdatePasswordModal = ({
   username,
   handleUpdatePassword,
   closeUpdatePasswordModal,
+  canManageDataSource,
 }: UpdatePasswordModalProps) => {
   /* State Variables */
   const [newPassword, setNewPassword] = useState<string>('');
@@ -128,6 +130,7 @@ export const UpdatePasswordModal = ({
                 spellCheck={false}
                 onChange={(e) => setNewPassword(e.target.value)}
                 onBlur={validateNewPassword}
+                disabled={!canManageDataSource}
               />
             </EuiFormRow>
             {/* Password */}
@@ -153,6 +156,7 @@ export const UpdatePasswordModal = ({
                 spellCheck={false}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
                 onBlur={validateConfirmNewPassword}
+                disabled={!canManageDataSource}
               />
             </EuiFormRow>
           </EuiForm>
@@ -175,7 +179,7 @@ export const UpdatePasswordModal = ({
             data-test-subj="updateStoredPasswordConfirmBtn"
             onClick={onClickUpdatePassword}
             fill={isFormValid()}
-            disabled={!isFormValid()}
+            disabled={!isFormValid() || !canManageDataSource}
           >
             {i18n.translate('dataSourcesManagement.editDataSource.updateStoredPassword', {
               defaultMessage: 'Update stored password',
