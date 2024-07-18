@@ -16,30 +16,43 @@ import {
 import useObservable from 'react-use/lib/useObservable';
 import { ChromeRecentlyAccessedHistoryItem } from '../..';
 import { WorkspaceObject } from '../../../workspace';
+import { createRecentNavLink } from './nav_link';
+import { HttpStart } from '../../../http';
+import { ChromeNavLink } from '../../../';
 
 export interface Props {
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
   workspaceList$: Rx.Observable<WorkspaceObject[]>;
   navigateToUrl: (url: string) => Promise<void>;
+  basePath: HttpStart['basePath'];
+  navLinks$: Rx.Observable<ChromeNavLink[]>;
 }
 
-export const RecentItems = ({ recentlyAccessed$, workspaceList$, navigateToUrl }: Props) => {
+export const RecentItems = ({
+  recentlyAccessed$,
+  workspaceList$,
+  navigateToUrl,
+  navLinks$,
+  basePath,
+}: Props) => {
   const [isPopoverOpen, SetIsPopoverOpen] = useState(false);
 
   const recentlyAccessedItems = useObservable(recentlyAccessed$, []);
   const workspaceList = useObservable(workspaceList$, []);
+  const navLinks = useObservable(navLinks$, []).filter((link) => !link.hidden);
 
   const items = useMemo(() => {
     // Only display five most latest items
-    return recentlyAccessedItems.slice(0, 5).map(({ link, label, workspaceId }) => {
+    return recentlyAccessedItems.slice(0, 5).map((item) => {
       return {
-        link,
-        label,
-        workspaceId,
-        workspaceName: workspaceList.find((workspace) => workspace.id === workspaceId)?.name ?? '',
+        link: createRecentNavLink(item, navLinks, basePath, navigateToUrl).href,
+        label: item.label,
+        workspaceId: item.workspaceId,
+        workspaceName:
+          workspaceList.find((workspace) => workspace.id === item.workspaceId)?.name ?? '',
       };
     });
-  }, [recentlyAccessedItems, workspaceList]);
+  }, [recentlyAccessedItems, workspaceList, basePath, navLinks, navigateToUrl]);
 
   const handleItemClick = (link: string) => {
     navigateToUrl(link);
@@ -55,7 +68,7 @@ export const RecentItems = ({ recentlyAccessed$, workspaceList$, navigateToUrl }
           }}
           data-test-subj="recentItemsSectionButton"
         >
-          <EuiIcon type="clock" size="m" />
+          <EuiIcon type="recentlyViewedApp" size="m" />
         </EuiHeaderSectionItemButton>
       }
       isOpen={isPopoverOpen}
@@ -64,6 +77,7 @@ export const RecentItems = ({ recentlyAccessed$, workspaceList$, navigateToUrl }
       }}
       anchorPosition="downCenter"
       repositionOnScroll
+      initialFocus={false}
     >
       <EuiTitle size="xs">
         <h4>Recents</h4>

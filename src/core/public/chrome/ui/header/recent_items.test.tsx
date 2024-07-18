@@ -6,13 +6,23 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { RecentItems, Props } from './recent_items';
-import { applicationServiceMock } from '../../../mocks';
+import { applicationServiceMock, httpServiceMock } from '../../../mocks';
 import { BehaviorSubject } from 'rxjs';
+
+jest.mock('./nav_link', () => ({
+  createRecentNavLink: jest.fn().mockImplementation(() => {
+    return {
+      href: '/recent_nav_link',
+    };
+  }),
+}));
 
 const defaultMockProps = {
   navigateToUrl: applicationServiceMock.createStartContract().navigateToUrl,
   workspaceList$: new BehaviorSubject([]),
   recentlyAccessed$: new BehaviorSubject([]),
+  navLinks$: new BehaviorSubject([]),
+  basePath: httpServiceMock.createStartContract().basePath,
 };
 const setup = (props: Props) => {
   return render(<RecentItems {...props} />);
@@ -40,6 +50,7 @@ describe('Recent items', () => {
     ]);
 
     setup({
+      ...defaultMockProps,
       workspaceList$,
       recentlyAccessed$,
       navigateToUrl: defaultMockProps.navigateToUrl,
@@ -49,7 +60,7 @@ describe('Recent items', () => {
     expect(screen.getByText('(workspace_name)')).toBeInTheDocument();
   });
 
-  it('should call navigateToUrl with link when clicking item', () => {
+  it('should call navigateToUrl with link generated from createRecentNavLink when clicking item', () => {
     const workspaceList$ = new BehaviorSubject([]);
     const recentlyAccessed$ = new BehaviorSubject([
       {
@@ -60,6 +71,7 @@ describe('Recent items', () => {
     ]);
     const navigateToUrl = jest.fn();
     setup({
+      ...defaultMockProps,
       workspaceList$,
       recentlyAccessed$,
       navigateToUrl,
@@ -69,6 +81,6 @@ describe('Recent items', () => {
     const item = screen.getByText('item_label');
     expect(navigateToUrl).not.toHaveBeenCalled();
     fireEvent.click(item);
-    expect(navigateToUrl).toHaveBeenCalledWith('item_link');
+    expect(navigateToUrl).toHaveBeenCalledWith('/recent_nav_link');
   });
 });

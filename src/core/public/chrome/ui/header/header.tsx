@@ -236,6 +236,8 @@ export function Header({
                     recentlyAccessed$={observables.recentlyAccessed$}
                     workspaceList$={observables.workspaceList$}
                     navigateToUrl={application.navigateToUrl}
+                    navLinks$={observables.navLinks$}
+                    basePath={basePath}
                   />
                 </EuiHeaderSectionItem>
               )}
