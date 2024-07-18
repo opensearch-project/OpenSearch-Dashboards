@@ -13,6 +13,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
+<<<<<<< HEAD
 import React, { Component, createRef, RefObject } from 'react';
 import { monaco } from '@osd/monaco';
 import { Settings } from '..';
@@ -24,6 +25,11 @@ import {
   Query,
   TimeRange,
 } from '../..';
+=======
+import React, { Component, createRef, RefObject, useCallback } from 'react';
+import { DataSetNavigator, Settings } from '..';
+import { DataSource, IDataPluginServices, IIndexPattern, Query, TimeRange } from '../..';
+>>>>>>> 939a9cb0ac... refactor to query editor
 import {
   CodeEditor,
   OpenSearchDashboardsReactContextValue,
@@ -35,7 +41,17 @@ import { DataSettings } from '../types';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
+<<<<<<< HEAD
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
+=======
+import {
+  setIndexPattern,
+  setDataset,
+  useTypedDispatch,
+  useTypedSelector,
+} from '../../../../data_explorer/public/utils/state_management';
+
+>>>>>>> 939a9cb0ac... refactor to query editor
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
   dataSource?: DataSource;

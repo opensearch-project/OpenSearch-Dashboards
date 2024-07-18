@@ -6,7 +6,7 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiPageSideBar, EuiPortal, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { DataSource, DataSourceGroup, DataSetNavigator } from '../../../../data/public';
+import { DataSource, DataSourceGroup, DataSetNavigator, DataSourceSelectable } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
@@ -28,15 +28,12 @@ export const Sidebar: FC = ({ children }) => {
   const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
   const [isEnhancementsEnabled, setIsEnhancementsEnabled] = useState<boolean>(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const connectionsRef = useRef<HTMLDivElement | null>(null);
 
   const {
     services: {
-      data: { indexPatterns, dataSources, ui, search },
+      data: { indexPatterns, dataSources, ui },
       notifications: { toasts },
       application,
-      http,
-      savedObjects,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
@@ -56,10 +53,6 @@ export const Sidebar: FC = ({ children }) => {
     uiContainerRef.appendChild(containerRef.current);
   }, []);
 
-  const setConnectionsRef = useCallback((uiConnectionsRef) => {
-    uiConnectionsRef.appendChild(connectionsRef.current);
-  }, []);
-
   useEffect(() => {
     if (!isEnhancementsEnabled) return;
     const subscriptions = ui.container$.subscribe((container) => {
@@ -69,21 +62,14 @@ export const Sidebar: FC = ({ children }) => {
       }
     });
 
-    const connectionsSubscriptions = ui.dataSourceContainer$.subscribe((container) => {
-      if (container === null) return;
-      connectionsRef.current = container;
-    });
-
     return () => {
       subscriptions.unsubscribe();
-      connectionsSubscriptions.unsubscribe();
     };
   }, [
     ui.container$,
     containerRef,
     setContainerRef,
     ui.dataSourceContainer$,
-    connectionsRef,
     isEnhancementsEnabled,
   ]);
 
@@ -114,7 +100,7 @@ export const Sidebar: FC = ({ children }) => {
   useEffect(() => {
     if (indexPatternId) {
       const option = getMatchedOption(dataSourceOptionList, indexPatternId);
-      setSelectedSources(option ? [option] : []);
+      setSelectedSources((prev) => option ? [option] : prev);
     }
   }, [indexPatternId, activeDataSources, dataSourceOptionList]);
 
@@ -125,7 +111,7 @@ export const Sidebar: FC = ({ children }) => {
   useEffect(() => {
     if (indexPatternId) {
       const option = getMatchedIndexPattern(indexPatternOptionList, indexPatternId);
-      setSelectedSources(option ? [option] : []);
+      setSelectedSources((prev) => option ? [option] : prev);
     }
   }, [indexPatternId, activeDataSources, indexPatternOptionList]);
 
@@ -144,13 +130,6 @@ export const Sidebar: FC = ({ children }) => {
         setSelectedSources(selectedDataSources);
         return;
       }
-      console.log('selectedDataSources:', selectedDataSources);
-      // Temporary redirection solution for 2.11, where clicking non-index-pattern data sources
-      // will prompt users with modal explaining they are being redirected to Observability log explorer
-      // if (selectedDataSources[0]?.ds?.getType() !== 'DEFAULT_INDEX_PATTERNS') {
-      //   redirectToLogExplorer(selectedDataSources[0].label, selectedDataSources[0].type);
-      //   return;
-      // }
       setSelectedSources(selectedDataSources);
       dispatch(setIndexPattern(selectedDataSources[0].value));
       // dispatch(
@@ -179,19 +158,16 @@ export const Sidebar: FC = ({ children }) => {
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
 
-  const dataSetNavigator = (
-    <DataSetNavigator
-      http={http}
-      search={search}
-      savedObjectsClient={savedObjects.client}
-      indexPatterns={indexPatterns}
+  const dataSourceSelector = (
+    <DataSourceSelectable
       dataSources={activeDataSources}
-      indexPatternOptionList={indexPatternOptionList}
+      dataSourceOptionList={dataSourceOptionList}
+      setDataSourceOptionList={setDataSourceOptionList}
+      onDataSourceSelect={handleSourceSelection}
       selectedSources={selectedSources}
-      selectedCluster={selectedCluster}
-      setIndexPatternOptionList={setIndexPatternOptionList}
-      setSelectedCluster={setSelectedCluster}
-      handleSourceSelection={handleSourceSelection}
+      onGetDataSetError={handleGetDataSetError}
+      onRefresh={memorizedReload}
+      fullWidth
     />
   );
 
@@ -203,15 +179,6 @@ export const Sidebar: FC = ({ children }) => {
         borderRadius="none"
         color="transparent"
       >
-        {isEnhancementsEnabled && (
-          <EuiPortal
-            portalRef={(node) => {
-              containerRef.current = node;
-            }}
-          >
-            {dataSetNavigator}
-          </EuiPortal>
-        )}
         {!isEnhancementsEnabled && (
           <EuiSplitPanel.Inner
             paddingSize="s"
@@ -219,7 +186,7 @@ export const Sidebar: FC = ({ children }) => {
             color="transparent"
             className="deSidebar_dataSource"
           >
-            {dataSetNavigator}
+            {dataSourceSelector}
           </EuiSplitPanel.Inner>
         )}
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
