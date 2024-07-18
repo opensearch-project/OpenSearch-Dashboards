@@ -9,7 +9,7 @@ import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { SavedObjectsClientContract, SimpleSavedObject } from 'opensearch-dashboards/public';
 import { map, scan } from 'rxjs/operators';
 import { ISearchStart } from '../../search/types';
-import { IIndexPattern, IndexPatternsContract } from '../..';
+import { IIndexPattern } from '../..';
 import { getUiService, getIndexPatterns, getSearchService } from '../../services';
 
 const getClusters = async (savedObjectsClient: SavedObjectsClientContract) => {

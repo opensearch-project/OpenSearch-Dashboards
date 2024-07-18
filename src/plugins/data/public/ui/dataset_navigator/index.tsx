@@ -4,4 +4,3 @@
  */
 
 export { DataSetNavigator } from './dataset_navigator';
-export { IndexPatternSelectable } from './index_pattern_selectable';
