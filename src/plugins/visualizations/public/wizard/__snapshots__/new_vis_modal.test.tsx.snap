@@ -175,7 +175,13 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                     <div
                       class="euiModalHeader__title"
                     >
-                      New Visualization
+                      <div
+                        class="euiText euiText--small"
+                      >
+                        <h2>
+                          New Visualization
+                        </h2>
+                      </div>
                     </div>
                   </div>
                   <div
@@ -498,13 +504,23 @@ exports[`NewVisModal filter for visualization types should render as expected 1`
                         <div
                           className="euiModalHeader__title"
                         >
-                          <FormattedMessage
-                            defaultMessage="New Visualization"
-                            id="visualizations.newVisWizard.title"
-                            values={Object {}}
+                          <EuiText
+                            size="s"
                           >
-                            New Visualization
-                          </FormattedMessage>
+                            <div
+                              className="euiText euiText--small"
+                            >
+                              <h2>
+                                <FormattedMessage
+                                  defaultMessage="New Visualization"
+                                  id="visualizations.newVisWizard.title"
+                                  values={Object {}}
+                                >
+                                  New Visualization
+                                </FormattedMessage>
+                              </h2>
+                            </div>
+                          </EuiText>
                         </div>
                       </EuiModalHeaderTitle>
                     </div>
@@ -1296,7 +1312,13 @@ exports[`NewVisModal should render as expected 1`] = `
                     <div
                       class="euiModalHeader__title"
                     >
-                      New Visualization
+                      <div
+                        class="euiText euiText--small"
+                      >
+                        <h2>
+                          New Visualization
+                        </h2>
+                      </div>
                     </div>
                   </div>
                   <div
@@ -1602,13 +1624,23 @@ exports[`NewVisModal should render as expected 1`] = `
                         <div
                           className="euiModalHeader__title"
                         >
-                          <FormattedMessage
-                            defaultMessage="New Visualization"
-                            id="visualizations.newVisWizard.title"
-                            values={Object {}}
+                          <EuiText
+                            size="s"
                           >
-                            New Visualization
-                          </FormattedMessage>
+                            <div
+                              className="euiText euiText--small"
+                            >
+                              <h2>
+                                <FormattedMessage
+                                  defaultMessage="New Visualization"
+                                  id="visualizations.newVisWizard.title"
+                                  values={Object {}}
+                                >
+                                  New Visualization
+                                </FormattedMessage>
+                              </h2>
+                            </div>
+                          </EuiText>
                         </div>
                       </EuiModalHeaderTitle>
                     </div>

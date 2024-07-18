@@ -94,6 +94,7 @@ exports[`IndicesList should change pages 1`] = `
               </EuiContextMenuItem>,
             ]
           }
+          size="s"
         />
       </EuiPopover>
     </EuiFlexItem>
@@ -187,6 +188,7 @@ exports[`IndicesList should change per page 1`] = `
               </EuiContextMenuItem>,
             ]
           }
+          size="s"
         />
       </EuiPopover>
     </EuiFlexItem>
@@ -297,6 +299,7 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
               </EuiContextMenuItem>,
             ]
           }
+          size="s"
         />
       </EuiPopover>
     </EuiFlexItem>
@@ -398,6 +401,7 @@ exports[`IndicesList should render normally 1`] = `
               </EuiContextMenuItem>,
             ]
           }
+          size="s"
         />
       </EuiPopover>
     </EuiFlexItem>
@@ -563,6 +567,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
               </EuiContextMenuItem>,
             ]
           }
+          size="s"
         />
       </EuiPopover>
     </EuiFlexItem>
