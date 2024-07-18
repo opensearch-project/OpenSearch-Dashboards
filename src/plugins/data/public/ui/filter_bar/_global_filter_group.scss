@@ -32,7 +32,8 @@
 }
 
 .globalFilterGroup__branch {
-  line-height: 40px; // make the same size as add filter button + padding to vertically center (no obvious tokens available)
+  // make the same size as add filter button + padding to vertically center (no obvious tokens available)
+  line-height: 40px;
 }
 
 .globalFilterGroup__wrapper {
