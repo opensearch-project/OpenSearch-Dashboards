@@ -11,8 +11,10 @@
 import React from 'react';
 
 import { CoreStart } from 'opensearch-dashboards/public';
+import { EuiIcon } from '@elastic/eui';
 import { Page } from '../../../content_management/public/services';
-import { toMountPoint } from '../../../opensearch_dashboards_react/public';
+import { WORKSPACE_USE_CASES } from '../../../workspace/public';
+import { UseCaseFooter } from './components/use_case_footer';
 
 export const GET_STARTED_SECTION_ID = 'homepage_get_started';
 
@@ -22,72 +24,39 @@ export const GET_STARTED_SECTION_ID = 'homepage_get_started';
 const renderHomeCard = () => <div>Hello World!</div>;
 
 export const initHome = (page: Page, core: CoreStart) => {
+  const useCases = [
+    WORKSPACE_USE_CASES.analytics,
+    WORKSPACE_USE_CASES.observability,
+    WORKSPACE_USE_CASES.search,
+    WORKSPACE_USE_CASES['security-analytics'],
+  ];
+  const workspaceEnabled = core.application.capabilities.workspaces.enabled;
+
   /**
    * init get started section
    */
-  page.addContent('get_started', {
-    id: 'get_started_1',
-    kind: 'card',
-    order: 5000,
-    description: 'description 1',
-    title: 'title 1',
-    onClick: () => {
-      const modal = core.overlays.openModal(
-        toMountPoint(
-          <div>
-            test <button onClick={() => modal.close()}>close</button>
-          </div>
-        )
-      );
-    },
-  });
-  page.addContent('get_started', {
-    id: 'get_started_2',
-    kind: 'card',
-    order: 2000,
-    description: 'description 2',
-    title: 'title 2',
-    onClick: () => {
-      const modal = core.overlays.openModal(
-        toMountPoint(
-          <div>
-            test <button onClick={() => modal.close()}>close</button>
-          </div>
-        )
-      );
-    },
-  });
-  page.addContent('get_started', {
-    id: 'get_started_3',
-    kind: 'card',
-    order: 3000,
-    description: 'description 3',
-    title: 'title 3',
-    onClick: () => {
-      const modal = core.overlays.openModal(
-        toMountPoint(
-          <div>
-            test <button onClick={() => modal.close()}>close</button>
-          </div>
-        )
-      );
-    },
-  });
-  page.addContent('get_started', {
-    id: 'get_started_4',
-    kind: 'card',
-    order: 4000,
-    description: 'description 4',
-    title: 'title 4',
-    onClick: () => {
-      const modal = core.overlays.openModal(
-        toMountPoint(
-          <div>
-            test <button onClick={() => modal.close()}>close</button>
-          </div>
-        )
-      );
-    },
+  useCases.forEach((useCase, index) => {
+    page.addContent('get_started', {
+      id: useCase.id,
+      kind: 'card',
+      order: (index + 1) * 1000,
+      description: useCase.description,
+      title: useCase.title,
+      icon: <EuiIcon size="xl" type={'logoOpenSearch'} />,
+      footer: workspaceEnabled ? (
+        <UseCaseFooter
+          useCaseId={useCase.id}
+          useCaseTitle={useCase.title}
+          workspaceList={core.workspaces.workspaceList$.getValue()}
+          basePath={core.http.basePath}
+          isDashBoardAdmin={core.application.capabilities?.dashboards?.isDashboardAdmin !== false}
+          getUrl={core.application.getUrlForApp}
+          getCurrentNavGroup$={core.chrome.navGroup.getCurrentNavGroup$}
+        />
+      ) : (
+        <></>
+      ),
+    });
   });
 
   /**

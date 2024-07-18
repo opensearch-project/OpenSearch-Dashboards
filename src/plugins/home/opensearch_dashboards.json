@@ -5,5 +5,5 @@
   "ui": true,
   "requiredPlugins": ["data", "urlForwarding", "savedObjects", "contentManagement", "embeddable"],
   "optionalPlugins": ["usageCollection", "telemetry", "dataSource"],
-  "requiredBundles": ["opensearchDashboardsReact", "dataSourceManagement", "contentManagement"]
+  "requiredBundles": ["opensearchDashboardsReact", "dataSourceManagement", "contentManagement", "workspace"]
 }

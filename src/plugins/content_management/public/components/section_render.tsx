@@ -7,13 +7,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
 
+import { EuiButtonIcon, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { Content, Section } from '../services';
 import { EmbeddableInput, EmbeddableRenderer, EmbeddableStart } from '../../../embeddable/public';
 import { DashboardContainerInput } from '../../../dashboard/public';
 import { createCardInput, createDashboardInput } from './section_input';
 import { CARD_CONTAINER } from './card_container/card_container';
-import { EuiTitle } from '@elastic/eui';
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 
 interface Props {
   section: Section;
@@ -49,6 +49,10 @@ const DashboardSection = ({ section, embeddable, contents$, savedObjectsClient }
 };
 
 const CardSection = ({ section, embeddable, contents$ }: Props) => {
+  const [isCardVisible, setIsCardVisible] = useState(true);
+  const toggleCardVisibility = () => {
+    setIsCardVisible(!isCardVisible);
+  };
   const contents = useObservable(contents$);
   const input = useMemo(() => {
     return createCardInput(section, contents ?? []);
@@ -58,12 +62,24 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
 
   if (section.kind === 'card' && factory && input) {
     return (
-      <div style={{ padding: '0 8px' }}>
+      <EuiPanel style={{ margin: '0px 8px' }}>
         <EuiTitle size="s">
-          <h2>{section.title}</h2>
+          <h2>
+            <EuiButtonIcon
+              iconType={isCardVisible ? 'arrowDown' : 'arrowUp'}
+              onClick={toggleCardVisibility}
+              color="text"
+              aria-label={isCardVisible ? 'Show panel' : 'Hide panel'}
+            />
+            {section.title}
+          </h2>
         </EuiTitle>
-        <EmbeddableRenderer factory={factory} input={input} />
-      </div>
+        {isCardVisible && (
+          <>
+            <EuiSpacer size="m" /> <EmbeddableRenderer factory={factory} input={input} />
+          </>
+        )}
+      </EuiPanel>
     );
   }
 
