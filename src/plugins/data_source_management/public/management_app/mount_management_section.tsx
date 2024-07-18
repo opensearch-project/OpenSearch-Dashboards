@@ -49,20 +49,26 @@ export async function mountManagementSection(
     authenticationMethodRegistry: authMethodsRegistry,
   };
 
+  const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
+
   const content = (
     <Router history={params.history}>
       <Switch>
-        <Route path={['/create']}>
-          <CreateDataSourcePanel {...params} featureFlagStatus={featureFlagStatus} />
-        </Route>
-        {featureFlagStatus && (
+        {canManageDataSource && (
+          <Route path={['/create']}>
+            <CreateDataSourcePanel {...params} featureFlagStatus={featureFlagStatus} />
+          </Route>
+        )}
+        {featureFlagStatus && canManageDataSource && (
           <Route path={['/configure/OpenSearch']}>
             <CreateDataSourceWizardWithRouter />
           </Route>
         )}
-        <Route path={['/configure/:type']}>
-          <ConfigureDirectQueryDataSourceWithRouter notifications={notifications} />
-        </Route>
+        {canManageDataSource && (
+          <Route path={['/configure/:type']}>
+            <ConfigureDirectQueryDataSourceWithRouter notifications={notifications} />
+          </Route>
+        )}
         {featureFlagStatus && (
           <Route path={['/:id']}>
             <EditDataSourceWithRouter />
