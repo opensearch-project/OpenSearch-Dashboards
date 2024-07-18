@@ -9,7 +9,9 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { WorkspaceMenu } from './workspace_menu';
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from '../../../../../core/public';
-import { addRecentWorkspace } from '../../utils';
+import { of } from 'rxjs';
+import { IntlProvider } from 'react-intl';
+import { recentWorkspaceManager } from '../../recent_workspace_manager';
 
 describe('<WorkspaceMenu />', () => {
   let coreStartMock: CoreStart;
@@ -34,7 +36,6 @@ describe('<WorkspaceMenu />', () => {
   afterEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
-    localStorage.clear();
   });
 
   it('should display a list of workspaces in the dropdown', () => {
@@ -43,54 +44,86 @@ describe('<WorkspaceMenu />', () => {
       { id: 'workspace-2', name: 'workspace 2' },
     ]);
 
-    render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/workspaces/i));
+    render(
+      <IntlProvider locale="en">
+        <WorkspaceMenu coreStart={coreStartMock} />
+      </IntlProvider>
+    );
+    const selectButton = screen.getByTestId('workspace-select-button');
+    fireEvent.click(selectButton);
 
     expect(screen.getByText(/all workspaces/i)).toBeInTheDocument();
-    expect(screen.getByText(/workspace 1/i)).toBeInTheDocument();
-    expect(screen.getByText(/workspace 2/i)).toBeInTheDocument();
+    expect(screen.getByTestId('context-menu-item-all-workspace-1')).toBeInTheDocument();
+    expect(screen.getByTestId('context-menu-item-all-workspace-2')).toBeInTheDocument();
   });
 
   it('should display a list of recent workspaces in the dropdown', () => {
-    addRecentWorkspace('workspace-1');
+    jest.spyOn(recentWorkspaceManager, 'getRecentWorkspaces').mockReturnValue([
+      { id: 'workspace-1', timestamp: 1234567890 },
+      { id: 'workspace-2', timestamp: 1234567899 },
+    ]);
+
     coreStartMock.workspaces.workspaceList$.next([
       { id: 'workspace-1', name: 'workspace 1' },
       { id: 'workspace-2', name: 'workspace 2' },
     ]);
 
-    render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/workspaces/i));
+    render(
+      <IntlProvider locale="en">
+        <WorkspaceMenu coreStart={coreStartMock} />
+      </IntlProvider>
+    );
+    const selectButton = screen.getByTestId('workspace-select-button');
+    fireEvent.click(selectButton);
 
     expect(screen.getByText(/recent workspaces/i)).toBeInTheDocument();
-    expect(screen.getByTestId('context-menu-recent-workspaces')).toHaveTextContent(/workspace 1/i);
-    localStorage.clear();
+    expect(screen.getByTestId('context-menu-item-recent-workspace-1')).toBeInTheDocument();
+    expect(screen.getByTestId('context-menu-item-recent-workspace-2')).toBeInTheDocument();
   });
 
-  it('should display current workspace name and use case', () => {
-    coreStartMock.workspaces.currentWorkspace$.next({ id: 'workspace-1', name: 'workspace 1' });
-    render(<WorkspaceMenu coreStart={coreStartMock} />);
-    expect(screen.getByText(/workspace 1/i)).toBeInTheDocument();
+  it('should display current workspace name and use case name', () => {
+    coreStartMock.workspaces.currentWorkspace$.next({
+      id: 'workspace-1',
+      name: 'workspace 1',
+      features: ['use-case-observability'],
+    });
+    render(
+      <IntlProvider locale="en">
+        <WorkspaceMenu coreStart={coreStartMock} />
+      </IntlProvider>
+    );
 
-    fireEvent.click(screen.getByText(/workspace 1/i));
+    fireEvent.click(screen.getByTestId('current-workspace-button'));
     expect(screen.getByTestId('context-menu-current-workspace-name')).toBeInTheDocument();
     expect(screen.getByTestId('context-menu-current-use-case')).toBeInTheDocument();
+    expect(screen.getByText('observability')).toBeInTheDocument();
   });
 
   it('should close the workspace dropdown list', async () => {
-    render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/workspaces/i));
+    render(
+      <IntlProvider locale="en">
+        <WorkspaceMenu coreStart={coreStartMock} />
+      </IntlProvider>
+    );
+    fireEvent.click(screen.getByTestId('workspace-select-button'));
 
     expect(screen.getByText(/all workspaces/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('current-workspace-button'));
+    fireEvent.click(screen.getByTestId('workspace-select-button'));
     await waitFor(() => {
       expect(screen.queryByText(/all workspaces/i)).not.toBeInTheDocument();
     });
   });
 
   it('should navigate to the workspace', () => {
+    jest.spyOn(coreStartMock.chrome.navGroup, 'getNavGroupsMap$').mockImplementation(() => {
+      return of({
+        observability: {
+          navLinks: [{ id: 'dashboard', title: '', description: '' }],
+        },
+      });
+    });
     coreStartMock.workspaces.workspaceList$.next([
-      { id: 'workspace-1', name: 'workspace 1' },
-      { id: 'workspace-2', name: 'workspace 2' },
+      { id: 'workspace-1', name: 'workspace 1', features: ['use-case-observability'] },
     ]);
 
     const originalLocation = window.location;
@@ -100,12 +133,16 @@ describe('<WorkspaceMenu />', () => {
       },
     });
 
-    render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/workspaces/i));
+    render(
+      <IntlProvider locale="en">
+        <WorkspaceMenu coreStart={coreStartMock} />
+      </IntlProvider>
+    );
+    fireEvent.click(screen.getByTestId('workspace-select-button'));
     fireEvent.click(screen.getByText(/workspace 1/i));
 
     expect(window.location.assign).toHaveBeenCalledWith(
-      'https://test.com/w/workspace-1/app/workspace_detail'
+      'https://test.com/w/workspace-1/app/dashboard'
     );
 
     Object.defineProperty(window, 'location', {
@@ -113,7 +150,7 @@ describe('<WorkspaceMenu />', () => {
     });
   });
 
-  it('should navigate to current workspace saved objects page', () => {
+  it('should navigate to workspace management page', () => {
     coreStartMock.workspaces.currentWorkspace$.next({ id: 'workspace-1', name: 'workspace 1' });
     const originalLocation = window.location;
     Object.defineProperty(window, 'location', {
@@ -121,14 +158,39 @@ describe('<WorkspaceMenu />', () => {
         assign: jest.fn(),
       },
     });
-    render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/workspace 1/i));
-    expect(screen.getByText(/view workspace saved objects/i)).toBeInTheDocument();
-
-    fireEvent.click(screen.getByText(/view workspace saved objects/i));
-    expect(window.location.assign).toHaveBeenCalledWith(
-      'https://test.com/w/workspace-1/app/management/opensearch-dashboards/objects'
+    render(
+      <IntlProvider locale="en">
+        <WorkspaceMenu coreStart={coreStartMock} />
+      </IntlProvider>
     );
+    fireEvent.click(screen.getByTestId('current-workspace-button'));
+    const button = screen.getByText(/Manage workspace/i);
+    fireEvent.click(button);
+    expect(window.location.assign).toHaveBeenCalledWith(
+      'https://test.com/w/workspace-1/app/workspace_detail'
+    );
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+    });
+  });
+
+  it('should navigate to workspaces management page', () => {
+    const originalLocation = window.location;
+    Object.defineProperty(window, 'location', {
+      value: {
+        assign: jest.fn(),
+      },
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <WorkspaceMenu coreStart={coreStartMock} />
+      </IntlProvider>
+    );
+    fireEvent.click(screen.getByTestId('workspace-select-button'));
+    fireEvent.click(screen.getByText(/manage workspaces/i));
+    expect(window.location.assign).toHaveBeenCalledWith('https://test.com/app/workspace_list');
+
     Object.defineProperty(window, 'location', {
       value: originalLocation,
     });
@@ -142,8 +204,12 @@ describe('<WorkspaceMenu />', () => {
       },
     });
 
-    render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/workspaces/i));
+    render(
+      <IntlProvider locale="en">
+        <WorkspaceMenu coreStart={coreStartMock} />
+      </IntlProvider>
+    );
+    fireEvent.click(screen.getByTestId('workspace-select-button'));
     fireEvent.click(screen.getByText(/create workspace/i));
     expect(window.location.assign).toHaveBeenCalledWith('https://test.com/app/workspace_create');
 
@@ -160,8 +226,12 @@ describe('<WorkspaceMenu />', () => {
       },
     });
 
-    render(<WorkspaceMenu coreStart={coreStartMock} />);
-    fireEvent.click(screen.getByText(/workspaces/i));
+    render(
+      <IntlProvider locale="en">
+        <WorkspaceMenu coreStart={coreStartMock} />
+      </IntlProvider>
+    );
+    fireEvent.click(screen.getByTestId('workspace-select-button'));
     fireEvent.click(screen.getByText(/View all/i));
     expect(window.location.assign).toHaveBeenCalledWith('https://test.com/app/workspace_list');
 

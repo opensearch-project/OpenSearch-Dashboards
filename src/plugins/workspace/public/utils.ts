@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PersistedLog, SavedObjectsStart } from '../../../core/public';
+import { SavedObjectsStart } from '../../../core/public';
 import {
   App,
   AppCategory,
@@ -13,11 +13,7 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
-import {
-  DEFAULT_SELECTED_FEATURES_IDS,
-  RECENT_WORKSPACES_KEY,
-  WORKSPACE_USE_CASES,
-} from '../common/constants';
+import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_USE_CASES } from '../common/constants';
 
 const USE_CASE_PREFIX = 'use-case-';
 
@@ -26,7 +22,7 @@ export const getUseCaseFeatureConfig = (useCaseId: string) => `${USE_CASE_PREFIX
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
   featureConfig.startsWith(USE_CASE_PREFIX);
 
-type WorkspaceUseCaseId = keyof typeof WORKSPACE_USE_CASES;
+export type WorkspaceUseCaseId = keyof typeof WORKSPACE_USE_CASES;
 
 export const getUseCaseFromFeatureConfig = (featureConfig: string) => {
   if (isUseCaseFeatureConfig(featureConfig)) {

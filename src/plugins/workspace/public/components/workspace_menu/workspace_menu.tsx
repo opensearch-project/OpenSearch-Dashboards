@@ -5,7 +5,7 @@
 
 import './workspace_menu.scss';
 import { i18n } from '@osd/i18n';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useObservable } from 'react-use';
 import {
   EuiAvatar,
@@ -19,8 +19,8 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { first } from 'rxjs/operators';
 import { truncate } from 'lodash';
+import { Observable } from 'rxjs';
 import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
@@ -29,10 +29,16 @@ import {
   WORKSPACE_DETAIL_APP_ID,
 } from '../../../common/constants';
 import { cleanWorkspaceId, formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
-import { CoreStart, WorkspaceObject } from '../../../../../core/public';
-import { getUseCaseFromFeatureConfig } from '../../utils';
+import { CoreStart, NavGroupItemInMap, WorkspaceObject } from '../../../../../core/public';
+import { WorkspaceUseCaseId, getUseCaseFromFeatureConfig } from '../../utils';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 
+const defaultHeaderName = i18n.translate(
+  'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
+  {
+    defaultMessage: 'Workspaces',
+  }
+);
 interface Props {
   coreStart: CoreStart;
 }
@@ -42,15 +48,10 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const workspaceList = useObservable(coreStart.workspaces.workspaceList$, []);
   const isDashboardAdmin = !!coreStart.application.capabilities.dashboards;
-  const navGroupsMap$ = useMemo(() => coreStart.chrome.navGroup.getNavGroupsMap$(), [coreStart]);
-  const navGroupsMap = useObservable(navGroupsMap$, null);
-
-  const defaultHeaderName = i18n.translate(
-    'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
-    {
-      defaultMessage: 'Workspaces',
-    }
+  const navGroupsMapRef = useRef<Observable<Record<string, NavGroupItemInMap>>>(
+    coreStart.chrome.navGroup.getNavGroupsMap$()
   );
+  const navGroupsMap = useObservable(navGroupsMapRef.current, undefined);
 
   const filteredWorkspaceList = useMemo(() => {
     return workspaceList.slice(0, MAX_WORKSPACE_PICKER_NUM);
@@ -67,7 +68,9 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
 
   const getUseCase = (workspace: WorkspaceObject) => {
-    return workspace?.features?.map(getUseCaseFromFeatureConfig).filter(Boolean)[0];
+    return workspace?.features
+      ?.map(getUseCaseFromFeatureConfig)
+      .filter(Boolean)[0] as WorkspaceUseCaseId;
   };
 
   const openPopover = () => {
@@ -78,9 +81,10 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     setPopover(false);
   };
 
-  const workspaceToItem = (workspace: WorkspaceObject) => {
-    const workspaceURL = formatUrlWithWorkspaceId(
-      coreStart.application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
+  const workspaceToItem = (workspace: WorkspaceObject, itemType: string) => {
+    const appId = navGroupsMap![getUseCase(workspace)]?.navLinks[0].id;
+    const useCaseURL = formatUrlWithWorkspaceId(
+      coreStart.application.getUrlForApp(appId, {
         absolute: false,
       }),
       workspace.id,
@@ -92,7 +96,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
     return {
       name: workspaceName,
       key: workspace.id,
-      'data-test-subj': `context-menu-item-${workspace.id}`,
+      'data-test-subj': `context-menu-item-${itemType}-${workspace.id}`,
       icon: (
         <EuiAvatar
           size="s"
@@ -102,15 +106,16 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
           initialsLength={2}
         />
       ),
-      onClick: async () => {
-        const url = navGroupsMap![getUseCase(workspace)!].navLinks[0].baseUrl;
-        window.location.assign(url);
+      onClick: () => {
+        window.location.assign(useCaseURL);
       },
     };
   };
 
-  const getWorkspaceListItems = (panelsWorkspaceList: WorkspaceObject[]) => {
-    const workspaceListItems = panelsWorkspaceList.map((workspace) => workspaceToItem(workspace));
+  const getWorkspaceListItems = (panelsWorkspaceList: WorkspaceObject[], itemType: string) => {
+    const workspaceListItems = panelsWorkspaceList.map((workspace) =>
+      workspaceToItem(workspace, itemType)
+    );
     return workspaceListItems;
   };
 
@@ -145,7 +150,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
         </span>
       ),
       width: 280,
-      items: getWorkspaceListItems(filteredWorkspaceList),
+      items: getWorkspaceListItems(filteredWorkspaceList, 'all'),
     },
   ];
 
@@ -161,7 +166,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
         </span>
       ),
       width: 280,
-      items: getWorkspaceListItems(filteredRecentWorkspaces),
+      items: getWorkspaceListItems(filteredRecentWorkspaces, 'recent'),
     },
   ];
 
@@ -196,12 +201,11 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  key={'objects'}
                   color="text"
                   onClick={() => {
                     window.location.assign(
                       formatUrlWithWorkspaceId(
-                        coreStart.application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+                        coreStart.application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
                           absolute: false,
                         }),
                         currentWorkspace.id,
@@ -227,7 +231,6 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  key={'objects'}
                   color="text"
                   onClick={() => {
                     window.location.assign(
@@ -268,6 +271,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
               size="xs"
               flush="left"
               key={WORKSPACE_LIST_APP_ID}
+              data-test-subj="context-menu-view-all-button"
               onClick={() => {
                 window.location.assign(
                   cleanWorkspaceId(
@@ -288,6 +292,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
                 iconType="plus"
                 size="s"
                 key={WORKSPACE_CREATE_APP_ID}
+                data-test-subj="context-menu-create-workspace-button"
                 onClick={() => {
                   window.location.assign(
                     cleanWorkspaceId(

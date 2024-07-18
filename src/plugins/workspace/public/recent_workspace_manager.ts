@@ -7,12 +7,12 @@ import { PersistedLog } from '../../../core/public';
 
 const RECENT_WORKSPACES_KEY = 'recentWorkspaces';
 
-interface WorkspaceEntry {
+export interface WorkspaceEntry {
   id: string;
-  timestamp: number;
+  timestamp: string;
 }
 
-class RecentWorkspaceManager {
+export class RecentWorkspaceManager {
   private static instance: RecentWorkspaceManager;
   private recentWorkspaceLog: PersistedLog<WorkspaceEntry>;
 
@@ -41,7 +41,7 @@ class RecentWorkspaceManager {
   public addRecentWorkspace(newWorkspace: string): WorkspaceEntry[] {
     const newEntry: WorkspaceEntry = {
       id: newWorkspace,
-      timestamp: Date.now(),
+      timestamp: Date.now().toString(),
     };
     this.recentWorkspaceLog.add(newEntry);
     return this.getRecentWorkspaces();
