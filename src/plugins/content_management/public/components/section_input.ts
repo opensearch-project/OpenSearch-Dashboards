@@ -4,6 +4,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 
 import { Content, Section } from '../services';
 import { ViewMode } from '../../../embeddable/public';
@@ -11,7 +12,6 @@ import { DashboardContainerInput, SavedObjectDashboard } from '../../../dashboar
 import { CUSTOM_CONTENT_EMBEDDABLE } from './custom_content_embeddable';
 import { CardContainerInput } from './card_container/card_container';
 import { CARD_EMBEDDABLE } from './card_container/card_embeddable';
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 

@@ -42,7 +42,6 @@ import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../opensearch_dashboards_services';
 import { useMount } from 'react-use';
 import { USE_NEW_HOME_PAGE, HOME_PAGE_ID } from '../../../common/constants';
-import { PageRender } from '../../../../content_management/public';
 
 const RedirectToDefaultApp = () => {
   useMount(() => {
@@ -119,7 +118,7 @@ export function HomeApp({ directories, solutions }) {
     />
   );
 
-  const homepage = <Homepage />;
+  // const homepage = <Homepage />;
 
   const nextHome = contentManagement.renderPage(HOME_PAGE_ID);
 

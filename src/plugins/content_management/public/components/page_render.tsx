@@ -5,11 +5,11 @@
 
 import React from 'react';
 import { useObservable } from 'react-use';
+import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 
 import { Page } from '../services';
 import { SectionRender } from './section_render';
 import { EmbeddableStart } from '../../../embeddable/public';
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 
 export interface Props {
   page: Page;

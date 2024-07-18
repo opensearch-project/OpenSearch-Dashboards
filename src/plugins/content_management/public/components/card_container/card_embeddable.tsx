@@ -5,8 +5,9 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Embeddable, EmbeddableInput, IContainer } from '../../../../embeddable/public';
 import { EuiCard } from '@elastic/eui';
+
+import { Embeddable, EmbeddableInput, IContainer } from '../../../../embeddable/public';
 
 export const CARD_EMBEDDABLE = 'card_embeddable';
 export type CardEmbeddableInput = EmbeddableInput & { description: string; onClick?: () => void };

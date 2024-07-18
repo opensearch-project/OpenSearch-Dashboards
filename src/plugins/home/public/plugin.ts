@@ -147,7 +147,7 @@ export class HomePublicPlugin
         environmentService: this.environmentService,
         urlForwarding: urlForwardingStart,
         contentManagement: contentManagementStart,
-        embeddable: embeddable,
+        embeddable,
         homeConfig: this.initializerContext.config.get(),
         tutorialService: this.tutorialService,
         featureCatalogue: this.featuresCatalogueRegistry,

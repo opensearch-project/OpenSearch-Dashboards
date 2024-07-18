@@ -9,7 +9,7 @@ import { CardContainer } from './card_container';
 
 jest.mock('./card_list', () => {
   return {
-    CardList: jest.fn().mockReturnValue(<span id="mockCardList"></span>),
+    CardList: jest.fn().mockReturnValue(<span id="mockCardList" />),
   };
 });
 

@@ -17,12 +17,12 @@ export interface ContentManagementPluginStart {
   renderPage: (id: string) => React.ReactNode;
 }
 
-export type ContentManagementPluginStartDependencies = {
+export interface ContentManagementPluginStartDependencies {
   embeddable: EmbeddableStart;
-};
+}
 
-export type ContentManagementPluginSetupDependencies = {
+export interface ContentManagementPluginSetupDependencies {
   embeddable: EmbeddableSetup;
-};
+}
 
 export type ContentServices = CoreStart & ContentManagementPluginStartDependencies;
