@@ -4,9 +4,10 @@ import { ErrorNode, ParseTreeListener, ParserRuleContext, TerminalNode } from "a
 
 
 import { QueryContext } from "./DQLParser.js";
+import { OperatorExpressionContext } from "./DQLParser.js";
 import { OrExpressionContext } from "./DQLParser.js";
+import { OrTermContext } from "./DQLParser.js";
 import { AndExpressionContext } from "./DQLParser.js";
-import { NotExpressionContext } from "./DQLParser.js";
 import { PrimaryExpressionContext } from "./DQLParser.js";
 import { ComparisonExpressionContext } from "./DQLParser.js";
 import { FieldExpressionContext } from "./DQLParser.js";
@@ -35,6 +36,16 @@ export class DQLParserListener implements ParseTreeListener {
      */
     exitQuery?: (ctx: QueryContext) => void;
     /**
+     * Enter a parse tree produced by `DQLParser.operatorExpression`.
+     * @param ctx the parse tree
+     */
+    enterOperatorExpression?: (ctx: OperatorExpressionContext) => void;
+    /**
+     * Exit a parse tree produced by `DQLParser.operatorExpression`.
+     * @param ctx the parse tree
+     */
+    exitOperatorExpression?: (ctx: OperatorExpressionContext) => void;
+    /**
      * Enter a parse tree produced by `DQLParser.orExpression`.
      * @param ctx the parse tree
      */
@@ -45,6 +56,16 @@ export class DQLParserListener implements ParseTreeListener {
      */
     exitOrExpression?: (ctx: OrExpressionContext) => void;
     /**
+     * Enter a parse tree produced by `DQLParser.orTerm`.
+     * @param ctx the parse tree
+     */
+    enterOrTerm?: (ctx: OrTermContext) => void;
+    /**
+     * Exit a parse tree produced by `DQLParser.orTerm`.
+     * @param ctx the parse tree
+     */
+    exitOrTerm?: (ctx: OrTermContext) => void;
+    /**
      * Enter a parse tree produced by `DQLParser.andExpression`.
      * @param ctx the parse tree
      */
@@ -54,16 +75,6 @@ export class DQLParserListener implements ParseTreeListener {
      * @param ctx the parse tree
      */
     exitAndExpression?: (ctx: AndExpressionContext) => void;
-    /**
-     * Enter a parse tree produced by `DQLParser.notExpression`.
-     * @param ctx the parse tree
-     */
-    enterNotExpression?: (ctx: NotExpressionContext) => void;
-    /**
-     * Exit a parse tree produced by `DQLParser.notExpression`.
-     * @param ctx the parse tree
-     */
-    exitNotExpression?: (ctx: NotExpressionContext) => void;
     /**
      * Enter a parse tree produced by `DQLParser.primaryExpression`.
      * @param ctx the parse tree
