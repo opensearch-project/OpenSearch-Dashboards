@@ -39,15 +39,21 @@ export class Settings {
     this.isEnabled = true;
     this.setUserQueryEnhancementsEnabled(this.isEnabled);
     this.enhancedAppNames = this.isEnabled ? this.config.supportedAppNames : [];
+    this.setSelectedDataSet(this.getSelectedDataSet());
   }
 
   setSelectedDataSet = (dataSet: any) => {
+    this.storage.set('opensearchDashboards.userQueryDataSet', dataSet);
     this.selectedDataSet$.next(dataSet);
-  }
+  };
 
   getSelectedDataSet$ = () => {
     return this.selectedDataSet$.asObservable();
-  }
+  };
+
+  getSelectedDataSet = () => {
+    return this.storage.get('opensearchDashboards.userQueryDataSet');
+  };
 
   supportsEnhancementsEnabled(appName: string) {
     return this.enhancedAppNames.includes(appName);

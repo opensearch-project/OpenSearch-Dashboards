@@ -5,12 +5,11 @@
 
 import { useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { batch } from 'react-redux';
 import { IndexPattern } from '../../../../../data/public';
 import { updateDataSet, useSelector, updateIndexPattern } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
-import { Subscription } from 'rxjs';
-import { distinctUntilChanged, first } from 'rxjs/operators';
 
 /**
  * Custom hook to fetch and manage the index pattern based on the provided services.
@@ -30,7 +29,6 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const { data, toastNotifications, uiSettings: config, store } = services;
-  const subscription = new Subscription();
 
   useEffect(() => {
     let isMounted = true;
@@ -62,9 +60,11 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     };
 
     data.ui.Settings.getSelectedDataSet$().subscribe((dataSet) => {
-      console.log('subscribing to THIS');
       if (dataSet) {
-        store!.dispatch(updateDataSet(dataSet));
+        batch(() => {
+          store!.dispatch(updateDataSet(dataSet));
+          store!.dispatch(updateIndexPattern(dataSet.id));
+        });
         fetchIndexPatternDetails(dataSet.id);
       }
     });
@@ -81,13 +81,15 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
 
     return () => {
       isMounted = false;
-      subscription.unsubscribe();
     };
-  }, [indexPatternIdFromState, data.indexPatterns, toastNotifications, config, store, data.ui.Settings]);
-
-  useEffect(() => {
-
-  }, )
+  }, [
+    indexPatternIdFromState,
+    data.indexPatterns,
+    toastNotifications,
+    config,
+    store,
+    data.ui.Settings,
+  ]);
 
   return indexPattern;
 };

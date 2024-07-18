@@ -13,7 +13,6 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
-<<<<<<< HEAD
 import React, { Component, createRef, RefObject } from 'react';
 import { monaco } from '@osd/monaco';
 import { Settings } from '..';
@@ -25,11 +24,6 @@ import {
   Query,
   TimeRange,
 } from '../..';
-=======
-import React, { Component, createRef, RefObject, useCallback } from 'react';
-import { DataSetNavigator, Settings } from '..';
-import { DataSource, IDataPluginServices, IIndexPattern, Query, TimeRange } from '../..';
->>>>>>> 939a9cb0ac... refactor to query editor
 import {
   CodeEditor,
   OpenSearchDashboardsReactContextValue,
@@ -41,17 +35,8 @@ import { DataSettings } from '../types';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
-<<<<<<< HEAD
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
-=======
-import {
-  setIndexPattern,
-  setDataset,
-  useTypedDispatch,
-  useTypedSelector,
-} from '../../../../data_explorer/public/utils/state_management';
 
->>>>>>> 939a9cb0ac... refactor to query editor
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
   dataSource?: DataSource;
@@ -384,10 +369,13 @@ export default class QueryEditorUI extends Component<Props, State> {
     const className = classNames(this.props.className);
     const headerClassName = classNames('osdQueryEditorHeader', this.props.headerClassName);
     const bannerClassName = classNames('osdQueryEditorBanner', this.props.bannerClassName);
+<<<<<<< HEAD
     const footerClassName = classNames('osdQueryEditorFooter', this.props.footerClassName);
 
     const useQueryEditor =
       this.props.query.language !== 'kuery' && this.props.query.language !== 'lucene';
+=======
+>>>>>>> 0ae2098677... cleanup dataset dropdown
 
     return (
       <div className={className}>
