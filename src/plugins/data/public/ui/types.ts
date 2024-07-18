@@ -66,6 +66,9 @@ export interface IUiStart {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
   SuggestionsComponent: React.ComponentType<SuggestionsComponentProps>;
+  /**
+   * @experimental - Subject to change
+   */
   Settings: Settings;
   dataSourceContainer$: Observable<HTMLDivElement | null>;
   container$: Observable<HTMLDivElement | null>;
