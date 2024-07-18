@@ -28,6 +28,7 @@ export interface UpdateAwsCredentialModalProps {
   service: SigV4ServiceName;
   handleUpdateAwsCredential: (accessKey: string, secretKey: string) => void;
   closeUpdateAwsCredentialModal: () => void;
+  canManageDataSource: boolean;
 }
 
 export const UpdateAwsCredentialModal = ({
@@ -35,6 +36,7 @@ export const UpdateAwsCredentialModal = ({
   service,
   handleUpdateAwsCredential,
   closeUpdateAwsCredentialModal,
+  canManageDataSource,
 }: UpdateAwsCredentialModalProps) => {
   /* State Variables */
   const [newAccessKey, setNewAccessKey] = useState<string>('');
@@ -134,6 +136,7 @@ export const UpdateAwsCredentialModal = ({
                 spellCheck={false}
                 onChange={(e) => setNewAccessKey(e.target.value)}
                 onBlur={validateNewAccessKey}
+                disabled={!canManageDataSource}
               />
             </EuiFormRow>
 
@@ -159,6 +162,7 @@ export const UpdateAwsCredentialModal = ({
                 spellCheck={false}
                 onChange={(e) => setNewSecretKey(e.target.value)}
                 onBlur={validateNewSecretKey}
+                disabled={!canManageDataSource}
               />
             </EuiFormRow>
           </EuiForm>
