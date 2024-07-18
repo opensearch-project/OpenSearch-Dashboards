@@ -32,6 +32,7 @@ import {
   ACC_PANEL_TITLE,
   AccelerationActionType,
   AccelerationStatus,
+  CreateAccelerationFlyoutButton,
   getAccelerationName,
   onDiscoverIconClick,
 } from './acceleration_utils';
@@ -160,6 +161,14 @@ export const AccelerationTable = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup direction="rowReverse" alignItems="flexEnd">
+              <EuiFlexItem grow={false}>
+                <CreateAccelerationFlyoutButton
+                  dataSourceName={dataSourceName}
+                  renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
+                  handleRefresh={handleRefresh}
+                  dataSourceMDSId={featureFlagStatus ? dataSourceMDSId ?? undefined : undefined}
+                />
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <RefreshButton data-test-subj="refreshButton" />
               </EuiFlexItem>
@@ -337,7 +346,7 @@ export const AccelerationTable = ({
   };
 
   const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
-  // const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
   return (
     <>

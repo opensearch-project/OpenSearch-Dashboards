@@ -63,6 +63,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
   const dataSourceMDSId = queryParams.get('dataSourceMDSId');
+  const hookDataSourceMDSId = featureFlagStatus && dataSourceMDSId ? dataSourceMDSId : '';
   const [datasourceDetails, setDatasourceDetails] = useState<DirectQueryDatasourceDetails>({
     allowedRoles: [],
     name: '',
@@ -81,11 +82,12 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const {
     loadStatus: databasesLoadStatus,
     startLoading: startLoadingDatabases,
-  } = useLoadDatabasesToCache(http, notifications);
+  } = useLoadDatabasesToCache(http, notifications, hookDataSourceMDSId);
 
   const { loadStatus: tablesLoadStatus, startLoading: startLoadingTables } = useLoadTablesToCache(
     http,
-    notifications
+    notifications,
+    hookDataSourceMDSId
   );
 
   const [selectedDatabase, setSelectedDatabase] = useState<string>('');
@@ -93,7 +95,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const {
     loadStatus: accelerationsLoadStatus,
     startLoading: startLoadingAccelerations,
-  } = useLoadAccelerationsToCache(http, notifications);
+  } = useLoadAccelerationsToCache(http, notifications, hookDataSourceMDSId);
 
   const cacheLoadingHooks = {
     databasesLoadStatus,

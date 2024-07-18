@@ -89,6 +89,7 @@ export const CreateAccelerationFlyoutButton = ({
   dataSourceName,
   renderCreateAccelerationFlyout,
   handleRefresh,
+  dataSourceMDSId,
 }: {
   dataSourceName: string;
   renderCreateAccelerationFlyout: ({
@@ -99,21 +100,21 @@ export const CreateAccelerationFlyoutButton = ({
     dataSourceMDSId,
   }: RenderAccelerationFlyoutParams) => void;
   handleRefresh: () => void;
+  dataSourceMDSId?: string;
 }) => {
   return (
-    <>
-      <EuiButton
-        onClick={() =>
-          renderCreateAccelerationFlyout({
-            dataSourceName,
-            handleRefresh,
-          })
-        }
-        fill
-      >
-        Create acceleration
-      </EuiButton>
-    </>
+    <EuiButton
+      onClick={() =>
+        renderCreateAccelerationFlyout({
+          dataSourceName,
+          handleRefresh,
+          dataSourceMDSId,
+        })
+      }
+      fill
+    >
+      Create acceleration
+    </EuiButton>
   );
 };
 

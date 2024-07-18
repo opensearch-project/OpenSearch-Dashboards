@@ -51,16 +51,19 @@ export const SelectorLoadObjects = ({
     accelerationsStatus: false,
   });
   const isEitherLoading = isLoading.accelerationsStatus || isLoading.tableStatus;
+  if (dataSourceMDSId === undefined) {
+    dataSourceMDSId = '';
+  }
   const {
     loadStatus: loadTablesStatus,
     startLoading: startLoadingTables,
     stopLoading: stopLoadingTables,
-  } = useLoadTablesToCache(http, notifications);
+  } = useLoadTablesToCache(http, notifications, dataSourceMDSId);
   const {
     loadStatus: loadAccelerationsStatus,
     startLoading: startLoadingAccelerations,
     stopLoading: stopLoadingAccelerations,
-  } = useLoadAccelerationsToCache(http, notifications);
+  } = useLoadAccelerationsToCache(http, notifications, dataSourceMDSId);
 
   const onClickRefreshDatabases = () => {
     if (databaseName === '') {

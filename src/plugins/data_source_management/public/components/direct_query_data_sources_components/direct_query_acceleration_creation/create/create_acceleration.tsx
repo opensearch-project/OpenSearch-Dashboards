@@ -106,11 +106,14 @@ export const CreateAcceleration = ({
     },
   });
   const [tableFieldsLoading, setTableFieldsLoading] = useState(false);
+  if (dataSourceMDSId === undefined) {
+    dataSourceMDSId = '';
+  }
   const {
     loadStatus,
     startLoading,
     stopLoading: stopLoadingTableFields,
-  } = useLoadTableColumnsToCache(http, notifications);
+  } = useLoadTableColumnsToCache(http, notifications, dataSourceMDSId);
 
   const loadColumnsToAccelerationForm = (cachedTable: CachedTable) => {
     const idPrefix = htmlIdGenerator()();

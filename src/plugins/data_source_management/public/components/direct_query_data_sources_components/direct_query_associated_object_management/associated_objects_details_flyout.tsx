@@ -74,7 +74,14 @@ export const AssociatedObjectsDetailsFlyout = ({
   dataSourceMDSId,
   application,
 }: AssociatedObjectsFlyoutProps) => {
-  const { loadStatus, startLoading } = useLoadTableColumnsToCache(http, notifications);
+  if (dataSourceMDSId === undefined) {
+    dataSourceMDSId = '';
+  }
+  const { loadStatus, startLoading } = useLoadTableColumnsToCache(
+    http,
+    notifications,
+    dataSourceMDSId
+  );
   const [tableColumns, setTableColumns] = useState<CachedColumn[] | undefined>([]);
   const [schemaData, setSchemaData] = useState<any>([]);
 
@@ -107,6 +114,7 @@ export const AssociatedObjectsDetailsFlyout = ({
             databaseName: tableDetail.database,
             tableName: tableDetail.name,
             handleRefresh,
+            dataSourceMDSId,
           })
         }
       >
