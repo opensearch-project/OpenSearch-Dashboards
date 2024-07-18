@@ -75,8 +75,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName } = opensearchDashboards.services;
 
-  const isDataSourceReadOnly = uiSettings.get(UI_SETTINGS.QUERY_DATA_SOURCE_READONLY);
-
   const queryLanguage = props.query && props.query.language;
   const queryUiEnhancement =
     (queryLanguage &&
@@ -197,7 +195,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     return (
       !Array.isArray(props.indexPatterns!) ||
       compact(props.indexPatterns!).length === 0 ||
-      !isDataSourceReadOnly ||
       fromUser(query!.query).includes(
         typeof props.indexPatterns[0] === 'string'
           ? props.indexPatterns[0]
