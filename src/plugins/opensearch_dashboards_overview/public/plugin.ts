@@ -83,7 +83,12 @@ export class OpenSearchDashboardsOverviewPlugin
           if (!hasOpenSearchDashboardsApp) {
             return { status: AppStatus.inaccessible, navLinkStatus: AppNavLinkStatus.hidden };
           } else {
-            return { status: AppStatus.accessible, navLinkStatus: AppNavLinkStatus.default };
+            return {
+              status: AppStatus.accessible,
+              navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+                ? AppNavLinkStatus.hidden
+                : AppNavLinkStatus.default,
+            };
           }
         };
       })

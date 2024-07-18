@@ -202,9 +202,11 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -1209,9 +1211,11 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -2216,9 +2220,11 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -3223,9 +3229,11 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -4230,9 +4238,11 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
@@ -5237,9 +5247,11 @@ exports[`Dashboard top nav render with all components 1`] = `
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
