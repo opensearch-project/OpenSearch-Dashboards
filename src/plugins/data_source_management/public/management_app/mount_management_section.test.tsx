@@ -126,7 +126,7 @@ describe('mountManagementSection', () => {
       .mockResolvedValue([
         {
           chrome: { docTitle: { reset: jest.fn() } },
-          application: { capabilities: { dataSource: { canManage: true } } },
+          application: { capabilities: { dataSource: { canManage: false } } },
           savedObjects: {},
           uiSettings: {},
           notifications: {},
@@ -142,12 +142,6 @@ describe('mountManagementSection', () => {
         <I18nProvider>
           <Router history={mockParams.history}>
             <Switch>
-              <Route path={['/create']} />
-              <Route path={['/configure/OpenSearch']} />
-              <Route
-                path={['/configure/:type']}
-                component={ConfigureDirectQueryDataSourceWithRouter}
-              />
               <Route path={['/:id']} component={EditDataSourceWithRouter} />
               <Route path={['/']} component={DataSourceHomePanel} />
             </Switch>
@@ -156,6 +150,6 @@ describe('mountManagementSection', () => {
       </OpenSearchDashboardsContextProvider>
     );
 
-    expect(wrapper.find(Route)).toHaveLength(5);
+    expect(wrapper.find(Route)).toHaveLength(2);
   });
 });
