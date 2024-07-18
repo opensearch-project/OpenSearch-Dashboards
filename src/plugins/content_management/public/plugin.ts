@@ -12,7 +12,7 @@ import {
   PluginInitializerContext,
 } from '../../../core/public';
 
-import { ContentManagementService, Page } from './services';
+import { ContentManagementService } from './services';
 import {
   ContentManagementPluginSetup,
   ContentManagementPluginSetupDependencies,
@@ -91,13 +91,17 @@ export class ContentManagementPublicPlugin
   public start(core: CoreStart, depsStart: ContentManagementPluginStartDependencies) {
     this.contentManagementService.start();
     return {
-      getPage: this.contentManagementService.getPage,
-      renderPage: (page: Page) =>
-        renderPage({
-          page,
-          embeddable: depsStart.embeddable,
-          savedObjectsClient: core.savedObjects.client,
-        }),
+      registerContentProvider: this.contentManagementService.registerContentProvider,
+      renderPage: (id: string) => {
+        const page = this.contentManagementService.getPage(id);
+        if (page) {
+          return renderPage({
+            page,
+            embeddable: depsStart.embeddable,
+            savedObjectsClient: core.savedObjects.client,
+          });
+        }
+      },
     };
   }
 }

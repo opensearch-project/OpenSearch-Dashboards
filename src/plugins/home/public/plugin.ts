@@ -60,7 +60,12 @@ import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
-import { PLUGIN_ID, HOME_APP_BASE_PATH, IMPORT_SAMPLE_DATA_APP_ID } from '../common/constants';
+import {
+  PLUGIN_ID,
+  HOME_APP_BASE_PATH,
+  IMPORT_SAMPLE_DATA_APP_ID,
+  HOME_PAGE_ID,
+} from '../common/constants';
 import { DataSourcePluginStart } from '../../data_source/public';
 import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
 import { learnBasicsSection } from './application/components/homepage/sections/learn_basics';
@@ -221,23 +226,28 @@ export class HomePublicPlugin
     sectionTypes.registerSection(workWithDataSection);
     sectionTypes.registerSection(learnBasicsSection);
 
-    const page = contentManagement.registerPage({ id: 'home', title: 'Home' });
-    page.createSection({
-      id: 'service_cards',
-      order: 3000,
-      kind: 'dashboard',
-    });
-    page.createSection({
-      id: 'some_dashboard',
-      order: 2000,
-      title: 'test dashboard',
-      kind: 'dashboard',
-    });
-    page.createSection({
-      id: 'get_started',
-      order: 1000,
-      title: 'Define your path forward with OpenSearch',
-      kind: 'card',
+    contentManagement.registerPage({
+      id: HOME_PAGE_ID,
+      title: 'Home',
+      sections: [
+        {
+          id: 'service_cards',
+          order: 3000,
+          kind: 'dashboard',
+        },
+        {
+          id: 'some_dashboard',
+          order: 2000,
+          title: 'test dashboard',
+          kind: 'dashboard',
+        },
+        {
+          id: 'get_started',
+          order: 1000,
+          title: 'Define your path forward with OpenSearch',
+          kind: 'card',
+        },
+      ],
     });
 
     return {
@@ -257,10 +267,8 @@ export class HomePublicPlugin
       http,
     } = core;
 
-    const page = contentManagement.getPage('home');
-    if (page) {
-      initHome(page, core);
-    }
+    // initialize homepage
+    initHome(contentManagement, core);
 
     this.featuresCatalogueRegistry.start({ capabilities });
     this.sectionTypeService.start({ core, data });

@@ -7,6 +7,7 @@ export interface PageConfig {
   id: string;
   title?: string;
   description?: string;
+  sections?: Section[];
 }
 
 export type Section =
@@ -75,3 +76,9 @@ export type SavedObjectInput =
        */
       get: () => Promise<string>;
     };
+
+export interface ContentProvider {
+  id: string;
+  getContent: () => Content;
+  getTargetArea: () => string;
+}

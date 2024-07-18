@@ -41,7 +41,7 @@ import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../opensearch_dashboards_services';
 import { useMount } from 'react-use';
-import { USE_NEW_HOME_PAGE } from '../../../common/constants';
+import { USE_NEW_HOME_PAGE, HOME_PAGE_ID } from '../../../common/constants';
 import { PageRender } from '../../../../content_management/public';
 
 const RedirectToDefaultApp = () => {
@@ -93,7 +93,6 @@ export function HomeApp({ directories, solutions }) {
   } = getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
-  const page = contentManagement.getPage('home');
 
   const renderTutorial = (props) => {
     return (
@@ -122,7 +121,7 @@ export function HomeApp({ directories, solutions }) {
 
   const homepage = <Homepage />;
 
-  const nextHome = contentManagement.renderPage(page);
+  const nextHome = contentManagement.renderPage(HOME_PAGE_ID);
 
   return (
     <I18nProvider>

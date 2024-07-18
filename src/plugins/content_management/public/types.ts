@@ -6,15 +6,15 @@
 import React from 'react';
 import { CoreStart } from 'opensearch-dashboards/public';
 
-import { ContentManagementService, Page } from './services';
+import { ContentManagementService, ContentProvider } from './services';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 
 export interface ContentManagementPluginSetup {
   registerPage: ContentManagementService['registerPage'];
 }
 export interface ContentManagementPluginStart {
-  getPage: ContentManagementService['getPage'];
-  renderPage: (page: Page) => React.ReactNode;
+  registerContentProvider: (provider: ContentProvider) => void;
+  renderPage: (id: string) => React.ReactNode;
 }
 
 export type ContentManagementPluginStartDependencies = {
