@@ -1,0 +1,121 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`workspace list card render normally should show workspace list card correctly 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
+  >
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        class="euiFlexItem euiFlexItem--flexGrow3"
+      >
+        <h4
+          class="euiTitle euiTitle--medium"
+        >
+          Workspaces
+        </h4>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrow1"
+      >
+        <span
+          class="euiToolTipAnchor"
+        >
+          <span
+            aria-label="workspace list card descriptioni"
+            data-euiicon-type="iInCircle"
+          />
+        </span>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrow5"
+      >
+        <div
+          class="euiFormControlLayout"
+        >
+          <div
+            class="euiFormControlLayout__childrenWrapper"
+          >
+            <select
+              class="euiSelect"
+              data-test-subj="workspace_filter"
+            >
+              <option
+                value="viewed"
+              >
+                Recently viewed
+              </option>
+              <option
+                value="updated"
+              >
+                Recently updated
+              </option>
+            </select>
+            <div
+              class="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+            >
+              <span
+                class="euiFormControlLayoutCustomIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  class="euiFormControlLayoutCustomIcon__icon"
+                  data-euiicon-type="arrowDown"
+                />
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--l"
+    />
+    <ul
+      class="euiListGroup euiListGroup-flush euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
+      style="min-height: 300px;"
+    >
+      <div
+        class="euiEmptyPrompt"
+      >
+        <span
+          color="subdued"
+          data-euiicon-type="database"
+        />
+        <div
+          class="euiSpacer euiSpacer--m"
+        />
+        <p
+          class="euiTitle euiTitle--xsmall"
+        >
+          No Workspaces found
+        </p>
+        <span
+          class="euiTextColor euiTextColor--subdued"
+        >
+          <div
+            class="euiSpacer euiSpacer--m"
+          />
+          <div
+            class="euiText euiText--medium"
+          >
+            Workspaces you have recently viewed will appear here.
+          </div>
+        </span>
+      </div>
+    </ul>
+    <button
+      class="euiLink euiLink--primary"
+      type="button"
+    >
+      <div
+        class="euiText euiText--small"
+      >
+        View all
+      </div>
+    </button>
+  </div>
+</div>
+`;

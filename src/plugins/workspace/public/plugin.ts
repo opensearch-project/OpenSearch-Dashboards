@@ -34,6 +34,7 @@ import { Services, WorkspaceUseCase } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { ManagementSetup } from '../../../plugins/management/public';
+import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
@@ -46,6 +47,9 @@ import {
 import { recentWorkspaceManager } from './recent_workspace_manager';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { UseCaseService } from './services/use_case_service';
+import { recentWorkspaceManager } from './recent_workspace_manager';
+import { WorkspaceListCard } from './components/service_card';
+import { HOME_CONTENT_AREAS, HOME_PAGE_ID } from '../../home/public';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -59,7 +63,12 @@ interface WorkspacePluginSetupDeps {
   dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
-export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
+interface WorkspacePluginStartDeps {
+  contentManagement: ContentManagementPluginStart;
+}
+
+export class WorkspacePlugin
+  implements Plugin<{}, {}, WorkspacePluginSetupDeps, WorkspacePluginStartDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private breadcrumbsSubscription?: Subscription;
@@ -267,6 +276,9 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           // Add workspace id to recent workspaces.
           recentWorkspaceManager.addRecentWorkspace(workspaceId);
         })();
+
+        // Add workspace id to recent workspaces.
+        recentWorkspaceManager.addRecentWorkspace(workspaceId);
       }
     }
 
@@ -372,7 +384,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     return {};
   }
 
-  public start(core: CoreStart) {
+  public start(core: CoreStart, { contentManagement }: WorkspacePluginStartDeps) {
     this.coreStart = core;
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
@@ -407,7 +419,28 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       });
     }
 
+    // register workspace list in home page
+    this.registerWorkspaceListToHome(core, contentManagement);
+
     return {};
+  }
+
+  private registerWorkspaceListToHome(
+    core: CoreStart,
+    contentManagement: ContentManagementPluginStart
+  ) {
+    if (contentManagement) {
+      contentManagement.registerContentProvider({
+        id: HOME_PAGE_ID,
+        getContent: () => ({
+          id: 'workspace_list',
+          kind: 'custom',
+          order: 0,
+          render: () => React.createElement(WorkspaceListCard, { core }),
+        }),
+        getTargetArea: () => HOME_CONTENT_AREAS.SERVICE_CARDS,
+      });
+    }
   }
 
   public stop() {
