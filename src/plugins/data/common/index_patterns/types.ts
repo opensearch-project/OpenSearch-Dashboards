@@ -51,10 +51,6 @@ export interface IIndexPattern {
   ) => FieldFormat;
 }
 
-// export interface IDataSet {
-//   dataSetType: opensearch / s3 / index / indexpattern
-// }
-
 export interface IndexPatternAttributes {
   type: string;
   fields: string;
