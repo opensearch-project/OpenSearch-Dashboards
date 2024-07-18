@@ -19,7 +19,7 @@ exports[`AccelerationDetailsTab renders correctly 1`] = `
       title="Acceleration Type"
     />
     <DetailComponent
-      description="8/1/2021, 11:53:05 AM"
+      description="8/1/2021, 4:53:05 AM"
       title="Creation Date"
     />
   </EuiFlexGroup>

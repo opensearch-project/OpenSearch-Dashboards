@@ -71,6 +71,15 @@ describe('AccelerationDetailsTab', () => {
 
   const shallowComponent = (props = defaultProps) => shallow(<AccelerationDetailsTab {...props} />);
 
+  beforeAll(() => {
+    // Mock the Date.now() method to always return a specific timestamp
+    jest.spyOn(Date, 'now').mockImplementation(() => 1627819985000); // 2021-08-01T11:53:05.000Z
+  });
+
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   test('renders correctly', () => {
     const wrapper = shallowComponent();
     expect(wrapper).toMatchSnapshot();
