@@ -71,6 +71,7 @@ const buildSearchRequest = (showAllIndices: boolean, pattern: string, dataSource
 const getIndices = async (search: ISearchStart, dataSourceId: string) => {
   const request = buildSearchRequest(true, '*', dataSourceId);
   return search
+    .getDefaultSearchInterceptor()
     .search(request)
     .pipe(map(searchResponseToArray(true)))
     .pipe(scan((accumulator = [], value) => accumulator.join(value)))
