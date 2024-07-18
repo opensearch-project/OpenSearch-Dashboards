@@ -58,7 +58,6 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
           }
         });
     };
-
     data.ui.Settings.getSelectedDataSet$().subscribe((dataSet) => {
       if (dataSet) {
         batch(() => {

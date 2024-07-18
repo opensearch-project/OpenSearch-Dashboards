@@ -42,11 +42,17 @@ export class Settings {
     this.setSelectedDataSet(this.getSelectedDataSet());
   }
 
+  /**
+   * @experimental - Sets the dataset BehaviorSubject
+   */
   setSelectedDataSet = (dataSet: any) => {
     this.storage.set('opensearchDashboards.userQueryDataSet', dataSet);
     this.selectedDataSet$.next(dataSet);
   };
 
+  /**
+   * @experimental - Gets the dataset Observable
+   */
   getSelectedDataSet$ = () => {
     return this.selectedDataSet$.asObservable();
   };
