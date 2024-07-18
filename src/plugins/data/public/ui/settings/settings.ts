@@ -27,6 +27,7 @@ export class Settings {
   private isEnabled = false;
   private enabledQueryEnhancementsUpdated$ = new BehaviorSubject<boolean>(this.isEnabled);
   private enhancedAppNames: string[] = [];
+  private selectedDataSet$ = new BehaviorSubject<any>(null);
 
   constructor(
     private readonly config: ConfigSchema['enhancements'],
@@ -38,6 +39,14 @@ export class Settings {
     this.isEnabled = this.config.enabled;
     this.setUserQueryEnhancementsEnabled(this.isEnabled);
     this.enhancedAppNames = this.isEnabled ? this.config.supportedAppNames : [];
+  }
+
+  setSelectedDataSet = (dataSet: any) => {
+    this.selectedDataSet$.next(dataSet);
+  }
+
+  getSelectedDataSet$ = () => {
+    return this.selectedDataSet$.asObservable();
   }
 
   supportsEnhancementsEnabled(appName: string) {

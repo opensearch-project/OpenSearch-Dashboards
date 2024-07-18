@@ -6,8 +6,8 @@
 import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator, PopoverAnchorPosition } from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
-import React, { Component, createRef, RefObject } from 'react';
-import { Settings } from '..';
+import React, { Component, createRef, RefObject, useCallback } from 'react';
+import { DataSetNavigator, Settings } from '..';
 import { DataSource, IDataPluginServices, IIndexPattern, Query, TimeRange } from '../..';
 import {
   CodeEditor,
@@ -20,6 +20,12 @@ import { DataSettings } from '../types';
 import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
+import {
+  setIndexPattern,
+  setDataset,
+  useTypedDispatch,
+  useTypedSelector,
+} from '../../../../data_explorer/public/utils/state_management';
 
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -286,6 +292,22 @@ export default class QueryEditorUI extends Component<Props, State> {
     const className = classNames(this.props.className);
     const headerClassName = classNames('osdQueryEditorHeader', this.props.headerClassName);
     const bannerClassName = classNames('osdQueryEditorBanner', this.props.bannerClassName);
+    const a = () => {
+      return;
+    };
+
+    const d = (
+      <DataSetNavigator
+        http={this.services.http}
+        search={this.services.data.search}
+        savedObjectsClient={this.services.savedObjects.client}
+        indexPatterns={this.services.data.indexPatterns}
+        handleSourceSelection={a}
+      />
+    );
+
+    console.log('indexPatterns:', this.props.indexPatterns);
+    console.log(this.services.data.indexPatterns.getIdsWithTitle());
 
     return (
       <div className={className}>
@@ -294,7 +316,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" className={`${className}__wrapper`}>
               <EuiFlexItem grow={false}>{this.props.prepend}</EuiFlexItem>
-              {this.state.isDataSetsVisible && (
+              {/* {this.state.isDataSetsVisible && (
                 <EuiFlexItem grow={false} className={`${className}__dataSetWrapper`}>
                   <div ref={this.props.containerRef} />
                 </EuiFlexItem>
@@ -303,7 +325,8 @@ export default class QueryEditorUI extends Component<Props, State> {
                 <EuiFlexItem grow={false} className={`${className}__dataSourceWrapper`}>
                   <div ref={this.props.dataSourceContainerRef} />
                 </EuiFlexItem>
-              )}
+              )} */}
+              {d}
               <EuiFlexItem grow={false} className={`${className}__languageWrapper`}>
                 <QueryLanguageSelector
                   language={this.props.query.language}

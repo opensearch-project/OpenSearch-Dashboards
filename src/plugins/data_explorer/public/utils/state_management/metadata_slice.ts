@@ -40,6 +40,7 @@ export const getPreloadedState = async ({
       .getStateTransfer(scopedHistory)
       .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
   const defaultIndexPattern = await data.indexPatterns.getDefault();
+  data.ui.Settings.setSelectedDataSet({ id: defaultIndexPattern?.id, name: defaultIndexPattern?.title });
   const preloadedState: MetadataState = {
     ...initialState,
     originatingApp,
