@@ -20,7 +20,7 @@ import { i18n } from '@osd/i18n';
 import { debounce } from '../../../../../core/public';
 import { WorkspaceAttribute } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
-import { switchWorkspace, navigateToWorkspaceUpdatePage } from '../utils/workspace';
+import { navigateToWorkspaceDetail } from '../utils/workspace';
 
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_USE_CASES } from '../../../common/constants';
 
@@ -52,16 +52,7 @@ export const WorkspaceList = () => {
   const handleSwitchWorkspace = useCallback(
     (id: string) => {
       if (application && http) {
-        switchWorkspace({ application, http }, id);
-      }
-    },
-    [application, http]
-  );
-
-  const handleUpdateWorkspace = useCallback(
-    (id: string) => {
-      if (application && http) {
-        navigateToWorkspaceUpdatePage({ application, http }, id);
+        navigateToWorkspaceDetail({ application, http }, id);
       }
     },
     [application, http]
@@ -130,7 +121,7 @@ export const WorkspaceList = () => {
           icon: 'pencil',
           type: 'icon',
           description: 'Edit workspace',
-          onClick: ({ id }: WorkspaceAttribute) => handleUpdateWorkspace(id),
+          onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id),
           'data-test-subj': 'workspace-list-edit-icon',
         },
         {

@@ -6,9 +6,11 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { WorkspaceUseCase, WorkspaceUseCaseProps } from './workspace_use_case';
+import { WorkspaceFormErrors } from './types';
 
 const setup = (options?: Partial<WorkspaceUseCaseProps>) => {
   const onChangeMock = jest.fn();
+  const formErrors: WorkspaceFormErrors = {};
   const renderResult = render(
     <WorkspaceUseCase
       configurableApps={[
@@ -18,6 +20,7 @@ const setup = (options?: Partial<WorkspaceUseCaseProps>) => {
       ]}
       value={[]}
       onChange={onChangeMock}
+      formErrors={formErrors}
       {...options}
     />
   );

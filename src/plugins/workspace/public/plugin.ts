@@ -24,9 +24,8 @@ import {
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
-  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_DETAIL_APP_ID,
   WORKSPACE_CREATE_APP_ID,
-  WORKSPACE_UPDATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
@@ -148,7 +147,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   }
 
   /**
-   * Add workspace overview page to breadcrumbs
+   * Add workspace detail page to breadcrumbs
    * @param core CoreStart
    * @private
    */
@@ -165,7 +164,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           const workspaceBreadcrumb: ChromeBreadcrumb = {
             text: currentWorkspace.name,
             onClick: () => {
-              core.application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+              core.application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
             },
           };
           const homeBreadcrumb: ChromeBreadcrumb = {
@@ -232,7 +231,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           const [{ application }] = await core.getStartServices();
           const currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
             if (currentAppId === WORKSPACE_FATAL_ERROR_APP_ID) {
-              application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+              application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
             }
             currentAppIdSubscription.unsubscribe();
           });
@@ -279,32 +278,17 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     });
 
     /**
-     * register workspace overview page
+     * register workspace detail page
      */
     core.application.register({
-      id: WORKSPACE_OVERVIEW_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceOverview', {
-        defaultMessage: 'Workspace Overview',
+      id: WORKSPACE_DETAIL_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceDetail', {
+        defaultMessage: 'Workspace Detail',
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const { renderOverviewApp } = await import('./application');
-        return mountWorkspaceApp(params, renderOverviewApp);
-      },
-    });
-
-    /**
-     * register workspace update page
-     */
-    core.application.register({
-      id: WORKSPACE_UPDATE_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceUpdate', {
-        defaultMessage: 'Update Workspace',
-      }),
-      navLinkStatus: AppNavLinkStatus.hidden,
-      async mount(params: AppMountParameters) {
-        const { renderUpdaterApp } = await import('./application');
-        return mountWorkspaceApp(params, renderUpdaterApp);
+        const { renderDetailApp } = await import('./application');
+        return mountWorkspaceApp(params, renderDetailApp);
       },
     });
 
