@@ -12,11 +12,12 @@ import { BehaviorSubject, of } from 'rxjs';
 import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
-import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
+import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
 import { DataSource } from '../../../common/types';
+import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 
 export interface WorkspaceCreatorProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
@@ -24,8 +25,18 @@ export interface WorkspaceCreatorProps {
 
 export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const {
-    services: { application, notifications, http, workspaceClient, savedObjects },
-  } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
+    services: {
+      application,
+      notifications,
+      http,
+      workspaceClient,
+      savedObjects,
+      dataSourceManagement,
+    },
+  } = useOpenSearchDashboards<{
+    workspaceClient: WorkspaceClient;
+    dataSourceManagement?: DataSourceManagementPluginSetup;
+  }>();
   const workspaceConfigurableApps = useObservable(
     props.workspaceConfigurableApps$ ?? of(undefined)
   );
@@ -54,7 +65,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
             // Redirect page after one second, leave one second time to show create successful toast.
             window.setTimeout(() => {
               window.location.href = formatUrlWithWorkspaceId(
-                application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+                application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
                   absolute: true,
                 }),
                 newWorkspaceId,
@@ -99,6 +110,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               workspaceConfigurableApps={workspaceConfigurableApps}
               permissionEnabled={isPermissionEnabled}
               permissionLastAdminItemDeletable
+              dataSourceManagement={dataSourceManagement}
             />
           )}
         </EuiPageContent>

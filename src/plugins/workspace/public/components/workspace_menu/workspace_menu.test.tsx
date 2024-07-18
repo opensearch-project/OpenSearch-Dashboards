@@ -105,7 +105,7 @@ describe('<WorkspaceMenu />', () => {
     fireEvent.click(screen.getByText(/workspace 1/i));
 
     expect(window.location.assign).toHaveBeenCalledWith(
-      'https://test.com/w/workspace-1/app/workspace_overview'
+      'https://test.com/w/workspace-1/app/workspace_detail'
     );
 
     Object.defineProperty(window, 'location', {

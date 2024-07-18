@@ -20,12 +20,12 @@ import {
   WorkspaceAvailability,
   ChromeNavGroupUpdater,
   NavGroupStatus,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
-  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_DETAIL_APP_ID,
   WORKSPACE_CREATE_APP_ID,
-  WORKSPACE_UPDATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
@@ -35,6 +35,7 @@ import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_object
 import { ManagementSetup } from '../../../plugins/management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
+import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
 import {
   filterWorkspaceConfigurableApps,
   isAppAccessibleInWorkspace,
@@ -51,6 +52,7 @@ type WorkspaceAppType = (
 interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
   management?: ManagementSetup;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
@@ -146,7 +148,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   }
 
   /**
-   * Add workspace overview page to breadcrumbs
+   * Add workspace detail page to breadcrumbs
    * @param core CoreStart
    * @private
    */
@@ -163,7 +165,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           const workspaceBreadcrumb: ChromeBreadcrumb = {
             text: currentWorkspace.name,
             onClick: () => {
-              core.application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+              core.application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
             },
           };
           const homeBreadcrumb: ChromeBreadcrumb = {
@@ -182,7 +184,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
   public async setup(
     core: CoreSetup,
-    { savedObjectsManagement, management }: WorkspacePluginSetupDeps
+    { savedObjectsManagement, management, dataSourceManagement }: WorkspacePluginSetupDeps
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
@@ -230,7 +232,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           const [{ application }] = await core.getStartServices();
           const currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
             if (currentAppId === WORKSPACE_FATAL_ERROR_APP_ID) {
-              application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+              application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
             }
             currentAppIdSubscription.unsubscribe();
           });
@@ -245,6 +247,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       const services = {
         ...coreStart,
         workspaceClient,
+        dataSourceManagement,
       };
 
       return renderApp(params, services, {
@@ -278,32 +281,17 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     });
 
     /**
-     * register workspace overview page
+     * register workspace detail page
      */
     core.application.register({
-      id: WORKSPACE_OVERVIEW_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceOverview', {
-        defaultMessage: 'Workspace Overview',
+      id: WORKSPACE_DETAIL_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceDetail', {
+        defaultMessage: 'Workspace Detail',
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const { renderOverviewApp } = await import('./application');
-        return mountWorkspaceApp(params, renderOverviewApp);
-      },
-    });
-
-    /**
-     * register workspace update page
-     */
-    core.application.register({
-      id: WORKSPACE_UPDATE_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceUpdate', {
-        defaultMessage: 'Update Workspace',
-      }),
-      navLinkStatus: AppNavLinkStatus.hidden,
-      async mount(params: AppMountParameters) {
-        const { renderUpdaterApp } = await import('./application');
-        return mountWorkspaceApp(params, renderUpdaterApp);
+        const { renderDetailApp } = await import('./application');
+        return mountWorkspaceApp(params, renderDetailApp);
       },
     });
 
@@ -321,7 +309,14 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     core.application.register({
       id: WORKSPACE_LIST_APP_ID,
       title: '',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      /**
+       * Nav link status should be visible when nav group enabled.
+       * The page should be refreshed and all applications need to register again
+       * after nav group enabled changed.
+       */
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
@@ -329,10 +324,32 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: WORKSPACE_LIST_APP_ID,
+        title: i18n.translate('workspace.settingsAndSetup.workspaceSettings', {
+          defaultMessage: 'workspace settings',
+        }),
+      },
+    ]);
+
     /**
      * register workspace column into saved objects table
      */
     savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
+
+    /**
+     * Add workspace list to settings and setup group
+     */
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: WORKSPACE_LIST_APP_ID,
+        order: 150,
+        title: i18n.translate('workspace.settings.workspaceSettings', {
+          defaultMessage: 'Workspace settings',
+        }),
+      },
+    ]);
 
     return {};
   }

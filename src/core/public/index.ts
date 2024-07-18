@@ -74,6 +74,7 @@ import {
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,
   PersistedLog,
+  NavGroupItemInMap,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -375,6 +376,7 @@ export {
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,
   PersistedLog,
+  NavGroupItemInMap,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';

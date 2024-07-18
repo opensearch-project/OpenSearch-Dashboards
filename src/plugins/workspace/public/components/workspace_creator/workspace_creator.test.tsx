@@ -43,7 +43,7 @@ const dataSourcesList = [
 
 const mockCoreStart = coreMock.createStart();
 
-const WorkspaceCreator = (props: any) => {
+const WorkspaceCreator = (props: any, isDashboardAdmin = false) => {
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
     ...{
@@ -54,9 +54,12 @@ const WorkspaceCreator = (props: any) => {
           workspaces: {
             permissionEnabled: true,
           },
+          dashboards: {
+            isDashboardAdmin,
+          },
         },
         navigateToApp,
-        getUrlForApp: jest.fn(() => '/app/workspace_overview'),
+        getUrlForApp: jest.fn(() => '/app/workspace_detail'),
         applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
       },
       notifications: {
@@ -80,6 +83,7 @@ const WorkspaceCreator = (props: any) => {
           }),
         },
       },
+      dataSourceManagement: {},
     },
   });
 
@@ -292,6 +296,7 @@ describe('WorkspaceCreator', () => {
     const { getByTestId, getByTitle, getByText } = render(
       <WorkspaceCreator
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+        isDashboardAdmin={true}
       />
     );
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');

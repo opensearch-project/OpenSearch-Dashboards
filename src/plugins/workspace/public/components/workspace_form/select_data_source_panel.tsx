@@ -7,13 +7,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiFormRow,
-  EuiText,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiFormLabel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsStart } from '../../../../../core/public';
@@ -88,18 +88,21 @@ export const SelectDataSourcePanel = ({
 
   return (
     <div>
-      <EuiText>
-        <strong>
-          {i18n.translate('workspace.form.selectDataSource.subTitle', {
-            defaultMessage: 'Data source',
-          })}
-        </strong>
-      </EuiText>
+      <EuiFormLabel>
+        {i18n.translate('workspace.form.selectDataSource.subTitle', {
+          defaultMessage: 'Data source',
+        })}
+      </EuiFormLabel>
       <EuiSpacer size="s" />
       {selectedDataSources.map(({ id, title }, index) => (
-        <EuiFormRow key={index} isInvalid={!!errors?.[index]} error={errors?.[index].message}>
-          <EuiFlexGroup gutterSize="l">
-            <EuiFlexItem grow={false}>
+        <EuiFormRow
+          key={index}
+          isInvalid={!!errors?.[index]}
+          error={errors?.[index]?.message}
+          fullWidth
+        >
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
+            <EuiFlexItem style={{ maxWidth: 400 }}>
               <EuiComboBox
                 data-test-subj="workspaceForm-select-dataSource-comboBox"
                 singleSelection
@@ -116,10 +119,9 @@ export const SelectDataSourcePanel = ({
                 }
                 onChange={(selectedOptions) => handleSelect(selectedOptions, index)}
                 placeholder="Select"
-                style={{ width: 200 }}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem style={{ maxWidth: 332 }}>
               <EuiButtonIcon
                 color="danger"
                 aria-label="Delete data source"

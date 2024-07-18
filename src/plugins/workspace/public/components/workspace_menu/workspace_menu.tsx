@@ -26,9 +26,9 @@ import { truncate } from 'lodash';
 import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
-  WORKSPACE_OVERVIEW_APP_ID,
   MAX_WORKSPACE_PICKER_NUM,
   MAX_WORKSPACE_NAME_LENGTH,
+  WORKSPACE_DETAIL_APP_ID,
 } from '../../../common/constants';
 import { cleanWorkspaceId, formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
@@ -81,7 +81,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
 
   const workspaceToItem = (workspace: WorkspaceObject) => {
     const workspaceURL = formatUrlWithWorkspaceId(
-      coreStart.application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+      coreStart.application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
         absolute: false,
       }),
       workspace.id,
@@ -219,7 +219,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
                   onClick={() => {
                     window.location.assign(
                       formatUrlWithWorkspaceId(
-                        coreStart.application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+                        coreStart.application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
                           absolute: false,
                         }),
                         currentWorkspace.id,
