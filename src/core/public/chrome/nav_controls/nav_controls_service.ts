@@ -62,12 +62,16 @@ export interface ChromeNavControls {
   registerRight(navControl: ChromeNavControl): void;
   /** Register a nav control to be presented on the top-center side of the chrome header. */
   registerCenter(navControl: ChromeNavControl): void;
+  /** Register a nav control to be presented on the left-bottom side of the left navigation. */
+  registerLeftBottom(navControl: ChromeNavControl): void;
   /** @internal */
   getLeft$(): Observable<ChromeNavControl[]>;
   /** @internal */
   getRight$(): Observable<ChromeNavControl[]>;
   /** @internal */
   getCenter$(): Observable<ChromeNavControl[]>;
+  /** @internal */
+  getLeftBottom$(): Observable<ChromeNavControl[]>;
 }
 
 /** @internal */
@@ -82,6 +86,7 @@ export class NavControlsService {
     const navControlsExpandedCenter$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(
       new Set()
     );
+    const navControlsLeftBottom$ = new BehaviorSubject<ReadonlySet<ChromeNavControl>>(new Set());
 
     return {
       // In the future, registration should be moved to the setup phase. This
@@ -103,6 +108,11 @@ export class NavControlsService {
       registerExpandedCenter: (navControl: ChromeNavControl) =>
         navControlsExpandedCenter$.next(
           new Set([...navControlsExpandedCenter$.value.values(), navControl])
+        ),
+
+      registerLeftBottom: (navControl: ChromeNavControl) =>
+        navControlsLeftBottom$.next(
+          new Set([...navControlsLeftBottom$.value.values(), navControl])
         ),
 
       getLeft$: () =>
@@ -127,6 +137,11 @@ export class NavControlsService {
         ),
       getExpandedCenter$: () =>
         navControlsExpandedCenter$.pipe(
+          map((controls) => sortBy([...controls.values()], 'order')),
+          takeUntil(this.stop$)
+        ),
+      getLeftBottom$: () =>
+        navControlsLeftBottom$.pipe(
           map((controls) => sortBy([...controls.values()], 'order')),
           takeUntil(this.stop$)
         ),
