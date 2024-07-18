@@ -17,32 +17,32 @@ public class DQLParser extends Parser {
 		new PredictionContextCache();
 	public static final int
 		OR=1, AND=2, NOT=3, GT=4, LT=5, GE=6, LE=7, EQ=8, LPAREN=9, RPAREN=10, 
-		DOT=11, PHRASE=12, NUMBER=13, IDENTIFIER=14, WS=15;
+		PHRASE=11, NUMBER=12, IDENTIFIER=13, WS=14;
 	public static final int
-		RULE_query = 0, RULE_orExpression = 1, RULE_andExpression = 2, RULE_notExpression = 3, 
-		RULE_primaryExpression = 4, RULE_comparisonExpression = 5, RULE_fieldExpression = 6, 
-		RULE_termSearch = 7, RULE_groupExpression = 8, RULE_groupContent = 9, 
-		RULE_field = 10, RULE_rangeValue = 11, RULE_value = 12, RULE_comparisonOperator = 13;
+		RULE_query = 0, RULE_operatorExpression = 1, RULE_orExpression = 2, RULE_orTerm = 3, 
+		RULE_andExpression = 4, RULE_primaryExpression = 5, RULE_comparisonExpression = 6, 
+		RULE_fieldExpression = 7, RULE_termSearch = 8, RULE_groupExpression = 9, 
+		RULE_groupContent = 10, RULE_field = 11, RULE_rangeValue = 12, RULE_value = 13, 
+		RULE_comparisonOperator = 14;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"query", "orExpression", "andExpression", "notExpression", "primaryExpression", 
-			"comparisonExpression", "fieldExpression", "termSearch", "groupExpression", 
-			"groupContent", "field", "rangeValue", "value", "comparisonOperator"
+			"query", "operatorExpression", "orExpression", "orTerm", "andExpression", 
+			"primaryExpression", "comparisonExpression", "fieldExpression", "termSearch", 
+			"groupExpression", "groupContent", "field", "rangeValue", "value", "comparisonOperator"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
 
 	private static String[] makeLiteralNames() {
 		return new String[] {
-			null, null, null, null, "'>'", "'<'", "'>='", "'<='", "':'", "'('", "')'", 
-			"'.'"
+			null, null, null, null, "'>'", "'<'", "'>='", "'<='", "':'", "'('", "')'"
 		};
 	}
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
 			null, "OR", "AND", "NOT", "GT", "LT", "GE", "LE", "EQ", "LPAREN", "RPAREN", 
-			"DOT", "PHRASE", "NUMBER", "IDENTIFIER", "WS"
+			"PHRASE", "NUMBER", "IDENTIFIER", "WS"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -98,8 +98,11 @@ public class DQLParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class QueryContext extends ParserRuleContext {
-		public OrExpressionContext orExpression() {
-			return getRuleContext(OrExpressionContext.class,0);
+		public PrimaryExpressionContext primaryExpression() {
+			return getRuleContext(PrimaryExpressionContext.class,0);
+		}
+		public OperatorExpressionContext operatorExpression() {
+			return getRuleContext(OperatorExpressionContext.class,0);
 		}
 		public QueryContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -111,10 +114,71 @@ public class DQLParser extends Parser {
 		QueryContext _localctx = new QueryContext(_ctx, getState());
 		enterRule(_localctx, 0, RULE_query);
 		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(28);
-			orExpression();
+			setState(32);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,0,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(30);
+				primaryExpression();
+				}
+				break;
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(31);
+				operatorExpression();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class OperatorExpressionContext extends ParserRuleContext {
+		public AndExpressionContext andExpression() {
+			return getRuleContext(AndExpressionContext.class,0);
+		}
+		public OrExpressionContext orExpression() {
+			return getRuleContext(OrExpressionContext.class,0);
+		}
+		public OperatorExpressionContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_operatorExpression; }
+	}
+
+	public final OperatorExpressionContext operatorExpression() throws RecognitionException {
+		OperatorExpressionContext _localctx = new OperatorExpressionContext(_ctx, getState());
+		enterRule(_localctx, 2, RULE_operatorExpression);
+		try {
+			setState(36);
+			_errHandler.sync(this);
+			switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
+			case 1:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(34);
+				andExpression();
+				}
+				break;
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(35);
+				orExpression();
+				}
+				break;
 			}
 		}
 		catch (RecognitionException re) {
@@ -130,11 +194,11 @@ public class DQLParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class OrExpressionContext extends ParserRuleContext {
-		public List<AndExpressionContext> andExpression() {
-			return getRuleContexts(AndExpressionContext.class);
+		public List<OrTermContext> orTerm() {
+			return getRuleContexts(OrTermContext.class);
 		}
-		public AndExpressionContext andExpression(int i) {
-			return getRuleContext(AndExpressionContext.class,i);
+		public OrTermContext orTerm(int i) {
+			return getRuleContext(OrTermContext.class,i);
 		}
 		public List<TerminalNode> OR() { return getTokens(DQLParser.OR); }
 		public TerminalNode OR(int i) {
@@ -148,79 +212,23 @@ public class DQLParser extends Parser {
 
 	public final OrExpressionContext orExpression() throws RecognitionException {
 		OrExpressionContext _localctx = new OrExpressionContext(_ctx, getState());
-		enterRule(_localctx, 2, RULE_orExpression);
-		int _la;
-		try {
-			enterOuterAlt(_localctx, 1);
-			{
-			setState(30);
-			andExpression();
-			setState(35);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==OR) {
-				{
-				{
-				setState(31);
-				match(OR);
-				setState(32);
-				andExpression();
-				}
-				}
-				setState(37);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
-			}
-		}
-		catch (RecognitionException re) {
-			_localctx.exception = re;
-			_errHandler.reportError(this, re);
-			_errHandler.recover(this, re);
-		}
-		finally {
-			exitRule();
-		}
-		return _localctx;
-	}
-
-	@SuppressWarnings("CheckReturnValue")
-	public static class AndExpressionContext extends ParserRuleContext {
-		public List<NotExpressionContext> notExpression() {
-			return getRuleContexts(NotExpressionContext.class);
-		}
-		public NotExpressionContext notExpression(int i) {
-			return getRuleContext(NotExpressionContext.class,i);
-		}
-		public List<TerminalNode> AND() { return getTokens(DQLParser.AND); }
-		public TerminalNode AND(int i) {
-			return getToken(DQLParser.AND, i);
-		}
-		public AndExpressionContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_andExpression; }
-	}
-
-	public final AndExpressionContext andExpression() throws RecognitionException {
-		AndExpressionContext _localctx = new AndExpressionContext(_ctx, getState());
-		enterRule(_localctx, 4, RULE_andExpression);
+		enterRule(_localctx, 4, RULE_orExpression);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(38);
-			notExpression();
+			orTerm();
 			setState(43);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (_la==AND) {
+			while (_la==OR) {
 				{
 				{
 				setState(39);
-				match(AND);
+				match(OR);
 				setState(40);
-				notExpression();
+				orTerm();
 				}
 				}
 				setState(45);
@@ -241,46 +249,96 @@ public class DQLParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class NotExpressionContext extends ParserRuleContext {
-		public TerminalNode NOT() { return getToken(DQLParser.NOT, 0); }
-		public NotExpressionContext notExpression() {
-			return getRuleContext(NotExpressionContext.class,0);
-		}
+	public static class OrTermContext extends ParserRuleContext {
 		public PrimaryExpressionContext primaryExpression() {
 			return getRuleContext(PrimaryExpressionContext.class,0);
 		}
-		public NotExpressionContext(ParserRuleContext parent, int invokingState) {
+		public AndExpressionContext andExpression() {
+			return getRuleContext(AndExpressionContext.class,0);
+		}
+		public OrTermContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_notExpression; }
+		@Override public int getRuleIndex() { return RULE_orTerm; }
 	}
 
-	public final NotExpressionContext notExpression() throws RecognitionException {
-		NotExpressionContext _localctx = new NotExpressionContext(_ctx, getState());
-		enterRule(_localctx, 6, RULE_notExpression);
+	public final OrTermContext orTerm() throws RecognitionException {
+		OrTermContext _localctx = new OrTermContext(_ctx, getState());
+		enterRule(_localctx, 6, RULE_orTerm);
 		try {
-			setState(49);
+			setState(48);
 			_errHandler.sync(this);
-			switch (_input.LA(1)) {
-			case NOT:
+			switch ( getInterpreter().adaptivePredict(_input,3,_ctx) ) {
+			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(46);
-				match(NOT);
-				setState(47);
-				notExpression();
-				}
-				break;
-			case LPAREN:
-			case IDENTIFIER:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(48);
 				primaryExpression();
 				}
 				break;
-			default:
-				throw new NoViableAltException(this);
+			case 2:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(47);
+				andExpression();
+				}
+				break;
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	@SuppressWarnings("CheckReturnValue")
+	public static class AndExpressionContext extends ParserRuleContext {
+		public List<PrimaryExpressionContext> primaryExpression() {
+			return getRuleContexts(PrimaryExpressionContext.class);
+		}
+		public PrimaryExpressionContext primaryExpression(int i) {
+			return getRuleContext(PrimaryExpressionContext.class,i);
+		}
+		public List<TerminalNode> AND() { return getTokens(DQLParser.AND); }
+		public TerminalNode AND(int i) {
+			return getToken(DQLParser.AND, i);
+		}
+		public AndExpressionContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_andExpression; }
+	}
+
+	public final AndExpressionContext andExpression() throws RecognitionException {
+		AndExpressionContext _localctx = new AndExpressionContext(_ctx, getState());
+		enterRule(_localctx, 8, RULE_andExpression);
+		int _la;
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(50);
+			primaryExpression();
+			setState(55);
+			_errHandler.sync(this);
+			_la = _input.LA(1);
+			while (_la==AND) {
+				{
+				{
+				setState(51);
+				match(AND);
+				setState(52);
+				primaryExpression();
+				}
+				}
+				setState(57);
+				_errHandler.sync(this);
+				_la = _input.LA(1);
+			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -301,6 +359,10 @@ public class DQLParser extends Parser {
 			return getRuleContext(QueryContext.class,0);
 		}
 		public TerminalNode RPAREN() { return getToken(DQLParser.RPAREN, 0); }
+		public TerminalNode NOT() { return getToken(DQLParser.NOT, 0); }
+		public PrimaryExpressionContext primaryExpression() {
+			return getRuleContext(PrimaryExpressionContext.class,0);
+		}
 		public ComparisonExpressionContext comparisonExpression() {
 			return getRuleContext(ComparisonExpressionContext.class,0);
 		}
@@ -318,40 +380,49 @@ public class DQLParser extends Parser {
 
 	public final PrimaryExpressionContext primaryExpression() throws RecognitionException {
 		PrimaryExpressionContext _localctx = new PrimaryExpressionContext(_ctx, getState());
-		enterRule(_localctx, 8, RULE_primaryExpression);
+		enterRule(_localctx, 10, RULE_primaryExpression);
 		try {
-			setState(58);
+			setState(67);
 			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,3,_ctx) ) {
+			switch ( getInterpreter().adaptivePredict(_input,5,_ctx) ) {
 			case 1:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(51);
+				setState(58);
 				match(LPAREN);
-				setState(52);
+				setState(59);
 				query();
-				setState(53);
+				setState(60);
 				match(RPAREN);
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(55);
-				comparisonExpression();
+				setState(62);
+				match(NOT);
+				setState(63);
+				primaryExpression();
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(56);
-				fieldExpression();
+				setState(64);
+				comparisonExpression();
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
-				setState(57);
+				setState(65);
+				fieldExpression();
+				}
+				break;
+			case 5:
+				enterOuterAlt(_localctx, 5);
+				{
+				setState(66);
 				termSearch();
 				}
 				break;
@@ -387,15 +458,15 @@ public class DQLParser extends Parser {
 
 	public final ComparisonExpressionContext comparisonExpression() throws RecognitionException {
 		ComparisonExpressionContext _localctx = new ComparisonExpressionContext(_ctx, getState());
-		enterRule(_localctx, 10, RULE_comparisonExpression);
+		enterRule(_localctx, 12, RULE_comparisonExpression);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(60);
+			setState(69);
 			field();
-			setState(61);
+			setState(70);
 			comparisonOperator();
-			setState(62);
+			setState(71);
 			rangeValue();
 			}
 		}
@@ -430,28 +501,28 @@ public class DQLParser extends Parser {
 
 	public final FieldExpressionContext fieldExpression() throws RecognitionException {
 		FieldExpressionContext _localctx = new FieldExpressionContext(_ctx, getState());
-		enterRule(_localctx, 12, RULE_fieldExpression);
+		enterRule(_localctx, 14, RULE_fieldExpression);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(64);
+			setState(73);
 			field();
-			setState(65);
+			setState(74);
 			match(EQ);
-			setState(68);
+			setState(77);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case PHRASE:
 			case NUMBER:
 			case IDENTIFIER:
 				{
-				setState(66);
+				setState(75);
 				value();
 				}
 				break;
 			case LPAREN:
 				{
-				setState(67);
+				setState(76);
 				groupExpression();
 				}
 				break;
@@ -485,24 +556,24 @@ public class DQLParser extends Parser {
 
 	public final TermSearchContext termSearch() throws RecognitionException {
 		TermSearchContext _localctx = new TermSearchContext(_ctx, getState());
-		enterRule(_localctx, 14, RULE_termSearch);
+		enterRule(_localctx, 16, RULE_termSearch);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(70);
+			setState(79);
 			match(IDENTIFIER);
-			setState(74);
+			setState(83);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==IDENTIFIER) {
 				{
 				{
-				setState(71);
+				setState(80);
 				match(IDENTIFIER);
 				}
 				}
-				setState(76);
+				setState(85);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
@@ -549,22 +620,22 @@ public class DQLParser extends Parser {
 
 	public final GroupExpressionContext groupExpression() throws RecognitionException {
 		GroupExpressionContext _localctx = new GroupExpressionContext(_ctx, getState());
-		enterRule(_localctx, 16, RULE_groupExpression);
+		enterRule(_localctx, 18, RULE_groupExpression);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(77);
-			match(LPAREN);
-			setState(78);
-			groupContent();
 			setState(86);
+			match(LPAREN);
+			setState(87);
+			groupContent();
+			setState(95);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			while (_la==OR || _la==AND) {
 				{
 				{
-				setState(79);
+				setState(88);
 				_la = _input.LA(1);
 				if ( !(_la==OR || _la==AND) ) {
 				_errHandler.recoverInline(this);
@@ -575,26 +646,26 @@ public class DQLParser extends Parser {
 					consume();
 				}
 				{
-				setState(81);
+				setState(90);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 				if (_la==NOT) {
 					{
-					setState(80);
+					setState(89);
 					match(NOT);
 					}
 				}
 
 				}
-				setState(83);
+				setState(92);
 				groupContent();
 				}
 				}
-				setState(88);
+				setState(97);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			setState(89);
+			setState(98);
 			match(RPAREN);
 			}
 		}
@@ -625,15 +696,15 @@ public class DQLParser extends Parser {
 
 	public final GroupContentContext groupContent() throws RecognitionException {
 		GroupContentContext _localctx = new GroupContentContext(_ctx, getState());
-		enterRule(_localctx, 18, RULE_groupContent);
+		enterRule(_localctx, 20, RULE_groupContent);
 		try {
-			setState(93);
+			setState(102);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case LPAREN:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(91);
+				setState(100);
 				groupExpression();
 				}
 				break;
@@ -642,7 +713,7 @@ public class DQLParser extends Parser {
 			case IDENTIFIER:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(92);
+				setState(101);
 				value();
 				}
 				break;
@@ -672,11 +743,11 @@ public class DQLParser extends Parser {
 
 	public final FieldContext field() throws RecognitionException {
 		FieldContext _localctx = new FieldContext(_ctx, getState());
-		enterRule(_localctx, 20, RULE_field);
+		enterRule(_localctx, 22, RULE_field);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(95);
+			setState(104);
 			match(IDENTIFIER);
 			}
 		}
@@ -703,12 +774,12 @@ public class DQLParser extends Parser {
 
 	public final RangeValueContext rangeValue() throws RecognitionException {
 		RangeValueContext _localctx = new RangeValueContext(_ctx, getState());
-		enterRule(_localctx, 22, RULE_rangeValue);
+		enterRule(_localctx, 24, RULE_rangeValue);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(97);
+			setState(106);
 			_la = _input.LA(1);
 			if ( !(_la==PHRASE || _la==NUMBER) ) {
 			_errHandler.recoverInline(this);
@@ -746,29 +817,29 @@ public class DQLParser extends Parser {
 
 	public final ValueContext value() throws RecognitionException {
 		ValueContext _localctx = new ValueContext(_ctx, getState());
-		enterRule(_localctx, 24, RULE_value);
+		enterRule(_localctx, 26, RULE_value);
 		try {
-			setState(102);
+			setState(111);
 			_errHandler.sync(this);
 			switch (_input.LA(1)) {
 			case PHRASE:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(99);
+				setState(108);
 				match(PHRASE);
 				}
 				break;
 			case NUMBER:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(100);
+				setState(109);
 				match(NUMBER);
 				}
 				break;
 			case IDENTIFIER:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(101);
+				setState(110);
 				termSearch();
 				}
 				break;
@@ -801,12 +872,12 @@ public class DQLParser extends Parser {
 
 	public final ComparisonOperatorContext comparisonOperator() throws RecognitionException {
 		ComparisonOperatorContext _localctx = new ComparisonOperatorContext(_ctx, getState());
-		enterRule(_localctx, 26, RULE_comparisonOperator);
+		enterRule(_localctx, 28, RULE_comparisonOperator);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(104);
+			setState(113);
 			_la = _input.LA(1);
 			if ( !((((_la) & ~0x3f) == 0 && ((1L << _la) & 240L) != 0)) ) {
 			_errHandler.recoverInline(this);
@@ -830,64 +901,68 @@ public class DQLParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\u0004\u0001\u000fk\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
+		"\u0004\u0001\u000et\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002"+
 		"\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002"+
 		"\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002"+
 		"\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002"+
-		"\f\u0007\f\u0002\r\u0007\r\u0001\u0000\u0001\u0000\u0001\u0001\u0001\u0001"+
-		"\u0001\u0001\u0005\u0001\"\b\u0001\n\u0001\f\u0001%\t\u0001\u0001\u0002"+
-		"\u0001\u0002\u0001\u0002\u0005\u0002*\b\u0002\n\u0002\f\u0002-\t\u0002"+
-		"\u0001\u0003\u0001\u0003\u0001\u0003\u0003\u00032\b\u0003\u0001\u0004"+
-		"\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004\u0001\u0004"+
-		"\u0003\u0004;\b\u0004\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005"+
-		"\u0001\u0006\u0001\u0006\u0001\u0006\u0001\u0006\u0003\u0006E\b\u0006"+
-		"\u0001\u0007\u0001\u0007\u0005\u0007I\b\u0007\n\u0007\f\u0007L\t\u0007"+
-		"\u0001\b\u0001\b\u0001\b\u0001\b\u0003\bR\b\b\u0001\b\u0005\bU\b\b\n\b"+
-		"\f\bX\t\b\u0001\b\u0001\b\u0001\t\u0001\t\u0003\t^\b\t\u0001\n\u0001\n"+
-		"\u0001\u000b\u0001\u000b\u0001\f\u0001\f\u0001\f\u0003\fg\b\f\u0001\r"+
-		"\u0001\r\u0001\r\u0000\u0000\u000e\u0000\u0002\u0004\u0006\b\n\f\u000e"+
-		"\u0010\u0012\u0014\u0016\u0018\u001a\u0000\u0003\u0001\u0000\u0001\u0002"+
-		"\u0001\u0000\f\r\u0001\u0000\u0004\u0007i\u0000\u001c\u0001\u0000\u0000"+
-		"\u0000\u0002\u001e\u0001\u0000\u0000\u0000\u0004&\u0001\u0000\u0000\u0000"+
-		"\u00061\u0001\u0000\u0000\u0000\b:\u0001\u0000\u0000\u0000\n<\u0001\u0000"+
-		"\u0000\u0000\f@\u0001\u0000\u0000\u0000\u000eF\u0001\u0000\u0000\u0000"+
-		"\u0010M\u0001\u0000\u0000\u0000\u0012]\u0001\u0000\u0000\u0000\u0014_"+
-		"\u0001\u0000\u0000\u0000\u0016a\u0001\u0000\u0000\u0000\u0018f\u0001\u0000"+
-		"\u0000\u0000\u001ah\u0001\u0000\u0000\u0000\u001c\u001d\u0003\u0002\u0001"+
-		"\u0000\u001d\u0001\u0001\u0000\u0000\u0000\u001e#\u0003\u0004\u0002\u0000"+
-		"\u001f \u0005\u0001\u0000\u0000 \"\u0003\u0004\u0002\u0000!\u001f\u0001"+
-		"\u0000\u0000\u0000\"%\u0001\u0000\u0000\u0000#!\u0001\u0000\u0000\u0000"+
-		"#$\u0001\u0000\u0000\u0000$\u0003\u0001\u0000\u0000\u0000%#\u0001\u0000"+
-		"\u0000\u0000&+\u0003\u0006\u0003\u0000\'(\u0005\u0002\u0000\u0000(*\u0003"+
-		"\u0006\u0003\u0000)\'\u0001\u0000\u0000\u0000*-\u0001\u0000\u0000\u0000"+
-		"+)\u0001\u0000\u0000\u0000+,\u0001\u0000\u0000\u0000,\u0005\u0001\u0000"+
-		"\u0000\u0000-+\u0001\u0000\u0000\u0000./\u0005\u0003\u0000\u0000/2\u0003"+
-		"\u0006\u0003\u000002\u0003\b\u0004\u00001.\u0001\u0000\u0000\u000010\u0001"+
-		"\u0000\u0000\u00002\u0007\u0001\u0000\u0000\u000034\u0005\t\u0000\u0000"+
-		"45\u0003\u0000\u0000\u000056\u0005\n\u0000\u00006;\u0001\u0000\u0000\u0000"+
-		"7;\u0003\n\u0005\u00008;\u0003\f\u0006\u00009;\u0003\u000e\u0007\u0000"+
-		":3\u0001\u0000\u0000\u0000:7\u0001\u0000\u0000\u0000:8\u0001\u0000\u0000"+
-		"\u0000:9\u0001\u0000\u0000\u0000;\t\u0001\u0000\u0000\u0000<=\u0003\u0014"+
-		"\n\u0000=>\u0003\u001a\r\u0000>?\u0003\u0016\u000b\u0000?\u000b\u0001"+
-		"\u0000\u0000\u0000@A\u0003\u0014\n\u0000AD\u0005\b\u0000\u0000BE\u0003"+
-		"\u0018\f\u0000CE\u0003\u0010\b\u0000DB\u0001\u0000\u0000\u0000DC\u0001"+
-		"\u0000\u0000\u0000E\r\u0001\u0000\u0000\u0000FJ\u0005\u000e\u0000\u0000"+
-		"GI\u0005\u000e\u0000\u0000HG\u0001\u0000\u0000\u0000IL\u0001\u0000\u0000"+
-		"\u0000JH\u0001\u0000\u0000\u0000JK\u0001\u0000\u0000\u0000K\u000f\u0001"+
-		"\u0000\u0000\u0000LJ\u0001\u0000\u0000\u0000MN\u0005\t\u0000\u0000NV\u0003"+
-		"\u0012\t\u0000OQ\u0007\u0000\u0000\u0000PR\u0005\u0003\u0000\u0000QP\u0001"+
-		"\u0000\u0000\u0000QR\u0001\u0000\u0000\u0000RS\u0001\u0000\u0000\u0000"+
-		"SU\u0003\u0012\t\u0000TO\u0001\u0000\u0000\u0000UX\u0001\u0000\u0000\u0000"+
-		"VT\u0001\u0000\u0000\u0000VW\u0001\u0000\u0000\u0000WY\u0001\u0000\u0000"+
-		"\u0000XV\u0001\u0000\u0000\u0000YZ\u0005\n\u0000\u0000Z\u0011\u0001\u0000"+
-		"\u0000\u0000[^\u0003\u0010\b\u0000\\^\u0003\u0018\f\u0000][\u0001\u0000"+
-		"\u0000\u0000]\\\u0001\u0000\u0000\u0000^\u0013\u0001\u0000\u0000\u0000"+
-		"_`\u0005\u000e\u0000\u0000`\u0015\u0001\u0000\u0000\u0000ab\u0007\u0001"+
-		"\u0000\u0000b\u0017\u0001\u0000\u0000\u0000cg\u0005\f\u0000\u0000dg\u0005"+
-		"\r\u0000\u0000eg\u0003\u000e\u0007\u0000fc\u0001\u0000\u0000\u0000fd\u0001"+
-		"\u0000\u0000\u0000fe\u0001\u0000\u0000\u0000g\u0019\u0001\u0000\u0000"+
-		"\u0000hi\u0007\u0002\u0000\u0000i\u001b\u0001\u0000\u0000\u0000\n#+1:"+
-		"DJQV]f";
+		"\f\u0007\f\u0002\r\u0007\r\u0002\u000e\u0007\u000e\u0001\u0000\u0001\u0000"+
+		"\u0003\u0000!\b\u0000\u0001\u0001\u0001\u0001\u0003\u0001%\b\u0001\u0001"+
+		"\u0002\u0001\u0002\u0001\u0002\u0005\u0002*\b\u0002\n\u0002\f\u0002-\t"+
+		"\u0002\u0001\u0003\u0001\u0003\u0003\u00031\b\u0003\u0001\u0004\u0001"+
+		"\u0004\u0001\u0004\u0005\u00046\b\u0004\n\u0004\f\u00049\t\u0004\u0001"+
+		"\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001\u0005\u0001"+
+		"\u0005\u0001\u0005\u0001\u0005\u0003\u0005D\b\u0005\u0001\u0006\u0001"+
+		"\u0006\u0001\u0006\u0001\u0006\u0001\u0007\u0001\u0007\u0001\u0007\u0001"+
+		"\u0007\u0003\u0007N\b\u0007\u0001\b\u0001\b\u0005\bR\b\b\n\b\f\bU\t\b"+
+		"\u0001\t\u0001\t\u0001\t\u0001\t\u0003\t[\b\t\u0001\t\u0005\t^\b\t\n\t"+
+		"\f\ta\t\t\u0001\t\u0001\t\u0001\n\u0001\n\u0003\ng\b\n\u0001\u000b\u0001"+
+		"\u000b\u0001\f\u0001\f\u0001\r\u0001\r\u0001\r\u0003\rp\b\r\u0001\u000e"+
+		"\u0001\u000e\u0001\u000e\u0000\u0000\u000f\u0000\u0002\u0004\u0006\b\n"+
+		"\f\u000e\u0010\u0012\u0014\u0016\u0018\u001a\u001c\u0000\u0003\u0001\u0000"+
+		"\u0001\u0002\u0001\u0000\u000b\f\u0001\u0000\u0004\u0007t\u0000 \u0001"+
+		"\u0000\u0000\u0000\u0002$\u0001\u0000\u0000\u0000\u0004&\u0001\u0000\u0000"+
+		"\u0000\u00060\u0001\u0000\u0000\u0000\b2\u0001\u0000\u0000\u0000\nC\u0001"+
+		"\u0000\u0000\u0000\fE\u0001\u0000\u0000\u0000\u000eI\u0001\u0000\u0000"+
+		"\u0000\u0010O\u0001\u0000\u0000\u0000\u0012V\u0001\u0000\u0000\u0000\u0014"+
+		"f\u0001\u0000\u0000\u0000\u0016h\u0001\u0000\u0000\u0000\u0018j\u0001"+
+		"\u0000\u0000\u0000\u001ao\u0001\u0000\u0000\u0000\u001cq\u0001\u0000\u0000"+
+		"\u0000\u001e!\u0003\n\u0005\u0000\u001f!\u0003\u0002\u0001\u0000 \u001e"+
+		"\u0001\u0000\u0000\u0000 \u001f\u0001\u0000\u0000\u0000!\u0001\u0001\u0000"+
+		"\u0000\u0000\"%\u0003\b\u0004\u0000#%\u0003\u0004\u0002\u0000$\"\u0001"+
+		"\u0000\u0000\u0000$#\u0001\u0000\u0000\u0000%\u0003\u0001\u0000\u0000"+
+		"\u0000&+\u0003\u0006\u0003\u0000\'(\u0005\u0001\u0000\u0000(*\u0003\u0006"+
+		"\u0003\u0000)\'\u0001\u0000\u0000\u0000*-\u0001\u0000\u0000\u0000+)\u0001"+
+		"\u0000\u0000\u0000+,\u0001\u0000\u0000\u0000,\u0005\u0001\u0000\u0000"+
+		"\u0000-+\u0001\u0000\u0000\u0000.1\u0003\n\u0005\u0000/1\u0003\b\u0004"+
+		"\u00000.\u0001\u0000\u0000\u00000/\u0001\u0000\u0000\u00001\u0007\u0001"+
+		"\u0000\u0000\u000027\u0003\n\u0005\u000034\u0005\u0002\u0000\u000046\u0003"+
+		"\n\u0005\u000053\u0001\u0000\u0000\u000069\u0001\u0000\u0000\u000075\u0001"+
+		"\u0000\u0000\u000078\u0001\u0000\u0000\u00008\t\u0001\u0000\u0000\u0000"+
+		"97\u0001\u0000\u0000\u0000:;\u0005\t\u0000\u0000;<\u0003\u0000\u0000\u0000"+
+		"<=\u0005\n\u0000\u0000=D\u0001\u0000\u0000\u0000>?\u0005\u0003\u0000\u0000"+
+		"?D\u0003\n\u0005\u0000@D\u0003\f\u0006\u0000AD\u0003\u000e\u0007\u0000"+
+		"BD\u0003\u0010\b\u0000C:\u0001\u0000\u0000\u0000C>\u0001\u0000\u0000\u0000"+
+		"C@\u0001\u0000\u0000\u0000CA\u0001\u0000\u0000\u0000CB\u0001\u0000\u0000"+
+		"\u0000D\u000b\u0001\u0000\u0000\u0000EF\u0003\u0016\u000b\u0000FG\u0003"+
+		"\u001c\u000e\u0000GH\u0003\u0018\f\u0000H\r\u0001\u0000\u0000\u0000IJ"+
+		"\u0003\u0016\u000b\u0000JM\u0005\b\u0000\u0000KN\u0003\u001a\r\u0000L"+
+		"N\u0003\u0012\t\u0000MK\u0001\u0000\u0000\u0000ML\u0001\u0000\u0000\u0000"+
+		"N\u000f\u0001\u0000\u0000\u0000OS\u0005\r\u0000\u0000PR\u0005\r\u0000"+
+		"\u0000QP\u0001\u0000\u0000\u0000RU\u0001\u0000\u0000\u0000SQ\u0001\u0000"+
+		"\u0000\u0000ST\u0001\u0000\u0000\u0000T\u0011\u0001\u0000\u0000\u0000"+
+		"US\u0001\u0000\u0000\u0000VW\u0005\t\u0000\u0000W_\u0003\u0014\n\u0000"+
+		"XZ\u0007\u0000\u0000\u0000Y[\u0005\u0003\u0000\u0000ZY\u0001\u0000\u0000"+
+		"\u0000Z[\u0001\u0000\u0000\u0000[\\\u0001\u0000\u0000\u0000\\^\u0003\u0014"+
+		"\n\u0000]X\u0001\u0000\u0000\u0000^a\u0001\u0000\u0000\u0000_]\u0001\u0000"+
+		"\u0000\u0000_`\u0001\u0000\u0000\u0000`b\u0001\u0000\u0000\u0000a_\u0001"+
+		"\u0000\u0000\u0000bc\u0005\n\u0000\u0000c\u0013\u0001\u0000\u0000\u0000"+
+		"dg\u0003\u0012\t\u0000eg\u0003\u001a\r\u0000fd\u0001\u0000\u0000\u0000"+
+		"fe\u0001\u0000\u0000\u0000g\u0015\u0001\u0000\u0000\u0000hi\u0005\r\u0000"+
+		"\u0000i\u0017\u0001\u0000\u0000\u0000jk\u0007\u0001\u0000\u0000k\u0019"+
+		"\u0001\u0000\u0000\u0000lp\u0005\u000b\u0000\u0000mp\u0005\f\u0000\u0000"+
+		"np\u0003\u0010\b\u0000ol\u0001\u0000\u0000\u0000om\u0001\u0000\u0000\u0000"+
+		"on\u0001\u0000\u0000\u0000p\u001b\u0001\u0000\u0000\u0000qr\u0007\u0002"+
+		"\u0000\u0000r\u001d\u0001\u0000\u0000\u0000\f $+07CMSZ_fo";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {
