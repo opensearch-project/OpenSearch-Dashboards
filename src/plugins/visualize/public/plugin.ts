@@ -71,6 +71,7 @@ import {
 } from './services';
 import { visualizeFieldAction } from './actions/visualize_field_action';
 import { createVisualizeUrlGenerator } from './url_generator';
+import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 
 export interface VisualizePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -150,8 +151,10 @@ export class VisualizePlugin
     setUISettings(core.uiSettings);
     uiActions.addTriggerAction(VISUALIZE_FIELD_TRIGGER, visualizeFieldAction);
 
+    const visualizeAppId = 'visualize';
+
     core.application.register({
-      id: 'visualize',
+      id: visualizeAppId,
       title: 'Visualize',
       order: 8000,
       euiIconType: 'inputOutput',
@@ -224,6 +227,35 @@ export class VisualizePlugin
         };
       },
     });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: visualizeAppId,
+        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+        order: 200,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
+      {
+        id: visualizeAppId,
+        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+        order: 200,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
+      {
+        id: visualizeAppId,
+        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+        order: 200,
+      },
+    ]);
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+      {
+        id: visualizeAppId,
+        category: DEFAULT_APP_CATEGORIES.analyzeSearch,
+        order: 400,
+      },
+    ]);
 
     urlForwarding.forwardApp('visualize', 'visualize');
 

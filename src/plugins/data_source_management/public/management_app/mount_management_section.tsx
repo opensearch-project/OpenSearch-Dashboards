@@ -10,6 +10,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Route, Router, Switch } from 'react-router-dom';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
+import { EuiPageContent } from '@elastic/eui';
 import { ManagementAppMountParams } from '../../../management/public';
 
 import { OpenSearchDashboardsContextProvider } from '../../../opensearch_dashboards_react/public';
@@ -27,7 +28,7 @@ export interface DataSourceManagementStartDependencies {
 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor<DataSourceManagementStartDependencies>,
-  params: ManagementAppMountParams,
+  params: ManagementAppMountParams & { wrapInPage?: boolean },
   authMethodsRegistry: AuthenticationMethodRegistry,
   featureFlagStatus: boolean
 ) {
@@ -48,32 +49,48 @@ export async function mountManagementSection(
     authenticationMethodRegistry: authMethodsRegistry,
   };
 
+  const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
+
+  const content = (
+    <Router history={params.history}>
+      <Switch>
+        {canManageDataSource && (
+          <Route path={['/create']}>
+            <CreateDataSourcePanel {...params} featureFlagStatus={featureFlagStatus} />
+          </Route>
+        )}
+        {featureFlagStatus && canManageDataSource && (
+          <Route path={['/configure/OpenSearch']}>
+            <CreateDataSourceWizardWithRouter />
+          </Route>
+        )}
+        {canManageDataSource && (
+          <Route path={['/configure/:type']}>
+            <ConfigureDirectQueryDataSourceWithRouter notifications={notifications} />
+          </Route>
+        )}
+        {featureFlagStatus && (
+          <Route path={['/:id']}>
+            <EditDataSourceWithRouter />
+          </Route>
+        )}
+        <Route path={['/']}>
+          <DataSourceHomePanel history={params.history} featureFlagStatus={featureFlagStatus} />
+        </Route>
+      </Switch>
+    </Router>
+  );
+
   ReactDOM.render(
     <OpenSearchDashboardsContextProvider services={deps}>
       <I18nProvider>
-        <Router history={params.history}>
-          <Switch>
-            <Route path={['/create']}>
-              <CreateDataSourcePanel {...params} featureFlagStatus={featureFlagStatus} />
-            </Route>
-            {featureFlagStatus && (
-              <Route path={['/configure/OpenSearch']}>
-                <CreateDataSourceWizardWithRouter />
-              </Route>
-            )}
-            <Route path={['/configure/:type']}>
-              <ConfigureDirectQueryDataSourceWithRouter notifications={notifications} />
-            </Route>
-            {featureFlagStatus && (
-              <Route path={['/:id']}>
-                <EditDataSourceWithRouter />
-              </Route>
-            )}
-            <Route path={['/']}>
-              <DataSourceHomePanel history={params.history} featureFlagStatus={featureFlagStatus} />
-            </Route>
-          </Switch>
-        </Router>
+        {params.wrapInPage ? (
+          <EuiPageContent hasShadow={false} hasBorder={false} color="transparent">
+            {content}
+          </EuiPageContent>
+        ) : (
+          content
+        )}
       </I18nProvider>
     </OpenSearchDashboardsContextProvider>,
     params.element
