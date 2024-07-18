@@ -446,7 +446,6 @@ export {
   // for BWC, keeping the old name
   IUiStart as DataPublicPluginStartUi,
   DataSetNavigator,
-  IndexPatternSelectable
 } from './ui';
 
 /**
