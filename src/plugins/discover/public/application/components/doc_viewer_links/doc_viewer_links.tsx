@@ -5,7 +5,7 @@
 
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiListGroupItemProps, EuiLink, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiListGroupItemProps, EuiLink } from '@elastic/eui';
 import { getDocViewsLinksRegistry } from '../../../opensearch_dashboards_services';
 import { DocViewLinkRenderProps } from '../../doc_views_links/doc_views_links_types';
 
@@ -28,16 +28,14 @@ export function DocViewerLinks(renderProps: DocViewLinkRenderProps) {
     <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
       {listItems.map((item, index) => (
         <EuiFlexItem key={index} grow={false}>
-          <EuiText size="s">
-            <EuiLink
-              href={item.href}
-              target="_blank"
-              style={{ fontWeight: 'normal' }}
-              data-test-subj={`${item['data-test-subj']}-${index}`}
-            >
-              {item.label}
-            </EuiLink>
-          </EuiText>
+          <EuiLink
+            href={item.href}
+            target="_blank"
+            style={{ fontWeight: 'normal' }}
+            data-test-subj={`${item['data-test-subj']}-${index}`}
+          >
+            {item.label}
+          </EuiLink>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
