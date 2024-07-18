@@ -348,6 +348,8 @@ describe('ChromeNavGroupService#start()', () => {
 
     // navigate to app don't belongs to any nav group
     mockedApplicationService.navigateToApp('bar-app');
+    // wait for > 500ms for debounce taking effect
+    await new Promise((resolve) => setTimeout(resolve, 600));
 
     currentNavGroup = await chromeNavGroupServiceStart
       .getCurrentNavGroup$()
@@ -357,6 +359,55 @@ describe('ChromeNavGroupService#start()', () => {
     // verify current nav group been reset
     expect(currentNavGroup).toBeFalsy();
     expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toBeFalsy();
+  });
+
+  it('should not reset current nav group after 500ms debounce', async () => {
+    const uiSettings = uiSettingsServiceMock.createSetupContract();
+    const navGroupEnabled$ = new Rx.BehaviorSubject(true);
+    uiSettings.get$.mockImplementation(() => navGroupEnabled$);
+
+    const chromeNavGroupService = new ChromeNavGroupService();
+    const chromeNavGroupServiceSetup = chromeNavGroupService.setup({ uiSettings });
+
+    chromeNavGroupServiceSetup.addNavLinksToGroup(
+      {
+        id: 'foo',
+        title: 'foo title',
+        description: 'foo description',
+      },
+      [{ id: 'foo-app1' }]
+    );
+
+    const chromeNavGroupServiceStart = await chromeNavGroupService.start({
+      navLinks: mockedNavLinkService,
+      application: mockedApplicationService,
+    });
+
+    chromeNavGroupServiceStart.setCurrentNavGroup('foo');
+
+    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toEqual('foo');
+
+    let currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    expect(currentNavGroup?.id).toEqual('foo');
+
+    // navigate to app don't belongs to any nav group
+    mockedApplicationService.navigateToApp('bar-app');
+    // wait < 500ms and change the current application id
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    // navigate back to app belongs to a nav group
+    mockedApplicationService.navigateToApp('foo-app1');
+
+    currentNavGroup = await chromeNavGroupServiceStart
+      .getCurrentNavGroup$()
+      .pipe(first())
+      .toPromise();
+
+    // verify current nav group not be reset
+    expect(currentNavGroup?.id).toEqual('foo');
   });
 });
 

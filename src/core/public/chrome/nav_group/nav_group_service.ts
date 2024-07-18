@@ -5,7 +5,7 @@
 
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { AppCategory, ChromeNavGroup, ChromeNavLink } from 'opensearch-dashboards/public';
-import { map, switchMap, takeUntil } from 'rxjs/operators';
+import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
 import { IUiSettingsClient } from '../../ui_settings';
 import {
   flattenLinksOrCategories,
@@ -213,7 +213,7 @@ export class ChromeNavGroupService {
     };
 
     // erase current nav group when switch app don't belongs to any nav group
-    application.currentAppId$.subscribe((appId) => {
+    application.currentAppId$.pipe(debounceTime(500)).subscribe((appId) => {
       const navGroupMap = this.navGroupsMap$.getValue();
       const appIdsWithNavGroup = Object.values(navGroupMap).flatMap(({ navLinks: links }) =>
         links.map(({ id }) => id)
