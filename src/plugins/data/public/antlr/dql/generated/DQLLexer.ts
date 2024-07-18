@@ -17,7 +17,7 @@ export class DQLLexer extends antlr.Lexer {
     public static readonly RPAREN = 10;
     public static readonly PHRASE = 11;
     public static readonly NUMBER = 12;
-    public static readonly IDENTIFIER = 13;
+    public static readonly ID = 13;
     public static readonly WS = 14;
 
     public static readonly channelNames = [
@@ -31,7 +31,7 @@ export class DQLLexer extends antlr.Lexer {
 
     public static readonly symbolicNames = [
         null, "OR", "AND", "NOT", "GT", "LT", "GE", "LE", "EQ", "LPAREN", 
-        "RPAREN", "PHRASE", "NUMBER", "IDENTIFIER", "WS"
+        "RPAREN", "PHRASE", "NUMBER", "ID", "WS"
     ];
 
     public static readonly modeNames = [
@@ -40,7 +40,7 @@ export class DQLLexer extends antlr.Lexer {
 
     public static readonly ruleNames = [
         "OR", "AND", "NOT", "GT", "LT", "GE", "LE", "EQ", "LPAREN", "RPAREN", 
-        "PHRASE", "NUMBER", "IDENTIFIER", "WS",
+        "PHRASE", "NUMBER", "ID", "WS",
     ];
 
 

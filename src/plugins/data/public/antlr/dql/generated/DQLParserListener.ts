@@ -6,12 +6,12 @@ import { ErrorNode, ParseTreeListener, ParserRuleContext, TerminalNode } from "a
 import { QueryContext } from "./DQLParser.js";
 import { OperatorExpressionContext } from "./DQLParser.js";
 import { OrExpressionContext } from "./DQLParser.js";
-import { OrTermContext } from "./DQLParser.js";
+import { TermContext } from "./DQLParser.js";
 import { AndExpressionContext } from "./DQLParser.js";
 import { PrimaryExpressionContext } from "./DQLParser.js";
 import { ComparisonExpressionContext } from "./DQLParser.js";
-import { FieldExpressionContext } from "./DQLParser.js";
-import { TermSearchContext } from "./DQLParser.js";
+import { KeyValueExpressionContext } from "./DQLParser.js";
+import { TokenSearchContext } from "./DQLParser.js";
 import { GroupExpressionContext } from "./DQLParser.js";
 import { GroupContentContext } from "./DQLParser.js";
 import { FieldContext } from "./DQLParser.js";
@@ -56,15 +56,15 @@ export class DQLParserListener implements ParseTreeListener {
      */
     exitOrExpression?: (ctx: OrExpressionContext) => void;
     /**
-     * Enter a parse tree produced by `DQLParser.orTerm`.
+     * Enter a parse tree produced by `DQLParser.term`.
      * @param ctx the parse tree
      */
-    enterOrTerm?: (ctx: OrTermContext) => void;
+    enterTerm?: (ctx: TermContext) => void;
     /**
-     * Exit a parse tree produced by `DQLParser.orTerm`.
+     * Exit a parse tree produced by `DQLParser.term`.
      * @param ctx the parse tree
      */
-    exitOrTerm?: (ctx: OrTermContext) => void;
+    exitTerm?: (ctx: TermContext) => void;
     /**
      * Enter a parse tree produced by `DQLParser.andExpression`.
      * @param ctx the parse tree
@@ -96,25 +96,25 @@ export class DQLParserListener implements ParseTreeListener {
      */
     exitComparisonExpression?: (ctx: ComparisonExpressionContext) => void;
     /**
-     * Enter a parse tree produced by `DQLParser.fieldExpression`.
+     * Enter a parse tree produced by `DQLParser.keyValueExpression`.
      * @param ctx the parse tree
      */
-    enterFieldExpression?: (ctx: FieldExpressionContext) => void;
+    enterKeyValueExpression?: (ctx: KeyValueExpressionContext) => void;
     /**
-     * Exit a parse tree produced by `DQLParser.fieldExpression`.
+     * Exit a parse tree produced by `DQLParser.keyValueExpression`.
      * @param ctx the parse tree
      */
-    exitFieldExpression?: (ctx: FieldExpressionContext) => void;
+    exitKeyValueExpression?: (ctx: KeyValueExpressionContext) => void;
     /**
-     * Enter a parse tree produced by `DQLParser.termSearch`.
+     * Enter a parse tree produced by `DQLParser.tokenSearch`.
      * @param ctx the parse tree
      */
-    enterTermSearch?: (ctx: TermSearchContext) => void;
+    enterTokenSearch?: (ctx: TokenSearchContext) => void;
     /**
-     * Exit a parse tree produced by `DQLParser.termSearch`.
+     * Exit a parse tree produced by `DQLParser.tokenSearch`.
      * @param ctx the parse tree
      */
-    exitTermSearch?: (ctx: TermSearchContext) => void;
+    exitTokenSearch?: (ctx: TokenSearchContext) => void;
     /**
      * Enter a parse tree produced by `DQLParser.groupExpression`.
      * @param ctx the parse tree

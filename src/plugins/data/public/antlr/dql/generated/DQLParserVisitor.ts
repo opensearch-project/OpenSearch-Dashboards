@@ -6,12 +6,12 @@ import { AbstractParseTreeVisitor } from "antlr4ng";
 import { QueryContext } from "./DQLParser.js";
 import { OperatorExpressionContext } from "./DQLParser.js";
 import { OrExpressionContext } from "./DQLParser.js";
-import { OrTermContext } from "./DQLParser.js";
+import { TermContext } from "./DQLParser.js";
 import { AndExpressionContext } from "./DQLParser.js";
 import { PrimaryExpressionContext } from "./DQLParser.js";
 import { ComparisonExpressionContext } from "./DQLParser.js";
-import { FieldExpressionContext } from "./DQLParser.js";
-import { TermSearchContext } from "./DQLParser.js";
+import { KeyValueExpressionContext } from "./DQLParser.js";
+import { TokenSearchContext } from "./DQLParser.js";
 import { GroupExpressionContext } from "./DQLParser.js";
 import { GroupContentContext } from "./DQLParser.js";
 import { FieldContext } from "./DQLParser.js";
@@ -47,11 +47,11 @@ export class DQLParserVisitor<Result> extends AbstractParseTreeVisitor<Result> {
      */
     visitOrExpression?: (ctx: OrExpressionContext) => Result;
     /**
-     * Visit a parse tree produced by `DQLParser.orTerm`.
+     * Visit a parse tree produced by `DQLParser.term`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitOrTerm?: (ctx: OrTermContext) => Result;
+    visitTerm?: (ctx: TermContext) => Result;
     /**
      * Visit a parse tree produced by `DQLParser.andExpression`.
      * @param ctx the parse tree
@@ -71,17 +71,17 @@ export class DQLParserVisitor<Result> extends AbstractParseTreeVisitor<Result> {
      */
     visitComparisonExpression?: (ctx: ComparisonExpressionContext) => Result;
     /**
-     * Visit a parse tree produced by `DQLParser.fieldExpression`.
+     * Visit a parse tree produced by `DQLParser.keyValueExpression`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitFieldExpression?: (ctx: FieldExpressionContext) => Result;
+    visitKeyValueExpression?: (ctx: KeyValueExpressionContext) => Result;
     /**
-     * Visit a parse tree produced by `DQLParser.termSearch`.
+     * Visit a parse tree produced by `DQLParser.tokenSearch`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitTermSearch?: (ctx: TermSearchContext) => Result;
+    visitTokenSearch?: (ctx: TokenSearchContext) => Result;
     /**
      * Visit a parse tree produced by `DQLParser.groupExpression`.
      * @param ctx the parse tree
