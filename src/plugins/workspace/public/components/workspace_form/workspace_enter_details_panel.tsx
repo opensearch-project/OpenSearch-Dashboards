@@ -5,11 +5,11 @@
 
 import {
   EuiColorPicker,
-  EuiFieldText,
-  EuiFormRow,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
   EuiSpacer,
   EuiText,
-  EuiTextArea,
+  EuiCompressedTextArea,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
@@ -39,7 +39,7 @@ export const EnterDetailsPanel = ({
 }: EnterDetailsPanelProps) => {
   return (
     <>
-      <EuiFormRow
+      <EuiCompressedFormRow
         label={i18n.translate('workspace.form.workspaceDetails.name.label', {
           defaultMessage: 'Name',
         })}
@@ -50,7 +50,7 @@ export const EnterDetailsPanel = ({
         isInvalid={!!formErrors.name}
         error={formErrors.name?.message}
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           value={name}
           onChange={handleNameInputChange}
           readOnly={readOnly}
@@ -59,8 +59,8 @@ export const EnterDetailsPanel = ({
             defaultMessage: 'Enter a name',
           })}
         />
-      </EuiFormRow>
-      <EuiFormRow
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
         label={
           <>
             Description - <i>optional</i>
@@ -74,7 +74,7 @@ export const EnterDetailsPanel = ({
                 'Help others understand the purpose of this workspace by providing an overview of the workspace you’re creating.',
             })}
           </EuiText>
-          <EuiTextArea
+          <EuiCompressedTextArea
             value={description}
             onChange={handleDescriptionChange}
             data-test-subj="workspaceForm-workspaceDetails-descriptionInputText"
@@ -84,8 +84,8 @@ export const EnterDetailsPanel = ({
             })}
           />
         </>
-      </EuiFormRow>
-      <EuiFormRow
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
         label={i18n.translate('workspace.form.workspaceDetails.color.label', {
           defaultMessage: 'Color',
         })}
@@ -105,7 +105,7 @@ export const EnterDetailsPanel = ({
             data-test-subj="workspaceForm-workspaceDetails-colorPicker"
           />
         </div>
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </>
   );
 };
