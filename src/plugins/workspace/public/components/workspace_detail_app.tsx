@@ -9,9 +9,9 @@ import { CoreStart } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
-import { WorkspaceOverview, WorkspaceOverviewProps } from './workspace_overview/workspace_overview';
+import { WorkspaceDetail, WorkspaceDetailProps } from './workspace_detail/workspace_detail';
 
-export const WorkspaceOverviewApp = (props: WorkspaceOverviewProps) => {
+export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
   const {
     services: { workspaces, chrome, application },
   } = useOpenSearchDashboards<CoreStart>();
@@ -40,7 +40,7 @@ export const WorkspaceOverviewApp = (props: WorkspaceOverviewProps) => {
 
   return (
     <I18nProvider>
-      <WorkspaceOverview {...props} />
+      <WorkspaceDetail {...props} />
     </I18nProvider>
   );
 };

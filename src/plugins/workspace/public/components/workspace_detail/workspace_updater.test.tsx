@@ -10,6 +10,7 @@ import { BehaviorSubject } from 'rxjs';
 import { WorkspaceUpdater as WorkspaceUpdaterComponent } from './workspace_updater';
 import { coreMock, workspacesServiceMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
+import { DetailTab } from '../workspace_form/constants';
 
 const workspaceClientUpdate = jest.fn().mockReturnValue({ result: true, success: true });
 
@@ -21,9 +22,9 @@ const PublicAPPInfoMap = new Map([
   ['dashboards', { id: 'dashboards', title: 'Dashboards' }],
 ]);
 const createWorkspacesSetupContractMockWithValue = () => {
-  const currentWorkspaceId$ = new BehaviorSubject<string>('abljlsds');
+  const currentWorkspaceId$ = new BehaviorSubject<string>('workspaceId');
   const currentWorkspace = {
-    id: 'abljlsds',
+    id: 'workspaceId',
     name: 'test1',
     description: 'test1',
     features: ['use-case-observability'],
@@ -86,7 +87,7 @@ const WorkspaceUpdater = (props: any) => {
           },
         },
         navigateToApp,
-        getUrlForApp: jest.fn(() => '/app/workspace_overview'),
+        getUrlForApp: jest.fn(() => '/app/workspace_detail'),
         applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
       },
       workspaces: workspacesService,
@@ -155,6 +156,7 @@ describe('WorkspaceUpdater', () => {
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
         workspacesService={mockedWorkspacesService}
+        detailTab={DetailTab.Settings}
       />
     );
     expect(container).toMatchInlineSnapshot(`<div />`);
@@ -164,6 +166,7 @@ describe('WorkspaceUpdater', () => {
     const { getByTestId } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+        detailTab={DetailTab.Settings}
       />
     );
 
@@ -180,6 +183,7 @@ describe('WorkspaceUpdater', () => {
     const { findByText, getByTestId } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+        detailTab={DetailTab.Settings}
       />
     );
     await waitFor(renderCompleted);
@@ -190,10 +194,11 @@ describe('WorkspaceUpdater', () => {
     expect(navigateToApp).toHaveBeenCalled();
   });
 
-  it('update workspace successfully', async () => {
-    const { getByTestId, getAllByTestId, getAllByLabelText } = render(
+  it('update workspace successfully without permission', async () => {
+    const { getByTestId, getAllByLabelText } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+        detailTab={DetailTab.Settings}
       />
     );
     await waitFor(renderCompleted);
@@ -217,15 +222,7 @@ describe('WorkspaceUpdater', () => {
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
     fireEvent.click(getByTestId('workspaceUseCase-analytics'));
 
-    const userIdInput = getAllByTestId('comboBoxSearchInput')[0];
-    fireEvent.click(userIdInput);
-
-    fireEvent.input(userIdInput, {
-      target: { value: 'test user id' },
-    });
-    fireEvent.blur(userIdInput);
-
-    await act(() => {
+    act(() => {
       fireEvent.click(getAllByLabelText('Delete data source')[0]);
     });
 
@@ -241,10 +238,10 @@ describe('WorkspaceUpdater', () => {
       {
         permissions: {
           library_write: {
-            users: ['test user id'],
+            users: ['foo'],
           },
           write: {
-            users: ['test user id'],
+            users: ['foo'],
           },
         },
         dataSources: ['id2'],
@@ -255,7 +252,53 @@ describe('WorkspaceUpdater', () => {
     });
     expect(notificationToastsAddDanger).not.toHaveBeenCalled();
     await waitFor(() => {
-      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringMatching(/workspace_overview$/));
+      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringMatching(/workspace_detail$/));
+    });
+  });
+
+  it('update workspace permission successfully', async () => {
+    const { getByTestId, getAllByTestId } = render(
+      <WorkspaceUpdater
+        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+        detailTab={DetailTab.Collaborators}
+      />
+    );
+    await waitFor(() => expect(screen.queryByText('Manage access and permissions')).not.toBeNull());
+
+    const userIdInput = getAllByTestId('comboBoxSearchInput')[0];
+    fireEvent.click(userIdInput);
+
+    fireEvent.input(userIdInput, {
+      target: { value: 'test user id' },
+    });
+    fireEvent.blur(userIdInput);
+
+    fireEvent.click(getByTestId('workspaceForm-bottomBar-updateButton'));
+    expect(workspaceClientUpdate).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({
+        name: 'test1',
+        description: 'test1',
+        features: expect.arrayContaining(['use-case-observability']),
+      }),
+      {
+        permissions: {
+          library_write: {
+            users: ['test user id'],
+          },
+          write: {
+            users: ['test user id'],
+          },
+        },
+        dataSources: ['id1', 'id2'],
+      }
+    );
+    await waitFor(() => {
+      expect(notificationToastsAddSuccess).toHaveBeenCalled();
+    });
+    expect(notificationToastsAddDanger).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(setHrefSpy).toHaveBeenCalledWith(expect.stringMatching(/workspace_detail$/));
     });
   });
 
@@ -264,6 +307,7 @@ describe('WorkspaceUpdater', () => {
     const { getByTestId } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+        detailTab={DetailTab.Settings}
       />
     );
     await waitFor(renderCompleted);
@@ -287,6 +331,7 @@ describe('WorkspaceUpdater', () => {
     const { getByTestId } = render(
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
+        detailTab={DetailTab.Settings}
       />
     );
     await waitFor(renderCompleted);
@@ -309,6 +354,7 @@ describe('WorkspaceUpdater', () => {
       <WorkspaceUpdater
         workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
         workspaceService={mockedWorkspacesService}
+        detailTab={DetailTab.Settings}
       />
     );
 

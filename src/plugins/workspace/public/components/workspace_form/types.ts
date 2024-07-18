@@ -9,7 +9,7 @@ import type {
   SavedObjectsStart,
 } from '../../../../../core/public';
 import type { WorkspacePermissionMode } from '../../../common/constants';
-import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
+import type { DetailTab, WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 import { DataSource } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 
@@ -86,5 +86,6 @@ export interface WorkspaceFormProps {
   operationType: WorkspaceOperationType;
   workspaceConfigurableApps?: PublicAppInfo[];
   permissionEnabled?: boolean;
+  detailTab?: DetailTab;
   dataSourceManagement?: DataSourceManagementPluginSetup;
 }
