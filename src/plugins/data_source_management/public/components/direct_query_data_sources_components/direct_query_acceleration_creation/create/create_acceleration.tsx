@@ -261,6 +261,8 @@ export const CreateAcceleration = ({
               setAccelerationFormData={setAccelerationFormData}
               tableFieldsLoading={tableFieldsLoading}
               dataSourceMDSId={dataSourceMDSId}
+              http={http}
+              notifications={notifications}
             />
             <EuiSpacer size="xxl" />
             <IndexAdvancedSettings
@@ -291,6 +293,7 @@ export const CreateAcceleration = ({
                 refreshHandler={refreshHandler}
                 http={http}
                 notifications={notifications}
+                dataSourceMDSId={dataSourceMDSId}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { ASYNC_POLLING_INTERVAL } from '../constants';
 import { DirectQueryLoadingStatus, DirectQueryRequest } from '../types';
@@ -12,13 +12,15 @@ import { get as getObjValue, formatError } from '../utils/shared';
 import { usePolling } from '../utils/use_polling';
 import { SQLService } from '../requests/sql';
 
-// todo: to use the search strategy from core
-export const useDirectQuery = (http: HttpStart, notifications: NotificationsStart) => {
+export const useDirectQuery = (
+  http: HttpStart,
+  notifications: NotificationsStart,
+  dataSourceMDSId?: string
+) => {
   const sqlService = new SQLService(http);
   const [loadStatus, setLoadStatus] = useState<DirectQueryLoadingStatus>(
     DirectQueryLoadingStatus.SCHEDULED
   );
-  const dataSourceMDSClientId = useRef('');
 
   const {
     data: pollingResult,
@@ -27,11 +29,10 @@ export const useDirectQuery = (http: HttpStart, notifications: NotificationsStar
     startPolling,
     stopPolling: stopLoading,
   } = usePolling<any, any>((params) => {
-    return sqlService.fetchWithJobId(params, dataSourceMDSClientId.current);
+    return sqlService.fetchWithJobId(params, dataSourceMDSId || '');
   }, ASYNC_POLLING_INTERVAL);
 
-  const startLoading = (requestPayload: DirectQueryRequest, dataSourceMDSId?: string) => {
-    dataSourceMDSClientId.current = dataSourceMDSId || '';
+  const startLoading = (requestPayload: DirectQueryRequest) => {
     setLoadStatus(DirectQueryLoadingStatus.SCHEDULED);
 
     const sessionId = getAsyncSessionId(requestPayload.datasource);

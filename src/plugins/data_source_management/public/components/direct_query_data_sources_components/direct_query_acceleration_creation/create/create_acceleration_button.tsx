@@ -23,6 +23,7 @@ interface CreateAccelerationButtonProps {
   refreshHandler?: () => void;
   http: HttpStart;
   notifications: NotificationsStart;
+  dataSourceMDSId: string;
 }
 
 export const CreateAccelerationButton = ({
@@ -32,10 +33,12 @@ export const CreateAccelerationButton = ({
   refreshHandler,
   http,
   notifications,
+  dataSourceMDSId,
 }: CreateAccelerationButtonProps) => {
   const { loadStatus: directqueryLoadStatus, startLoading: startDirectQuery } = useDirectQuery(
     http,
-    notifications
+    notifications,
+    dataSourceMDSId
   );
   const [isLoading, setIsLoading] = useState(false);
 

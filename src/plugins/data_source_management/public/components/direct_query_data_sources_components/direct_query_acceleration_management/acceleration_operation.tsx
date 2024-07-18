@@ -16,9 +16,14 @@ import {
 export const useAccelerationOperation = (
   dataSource: string,
   http: HttpStart,
-  notifications: NotificationsStart
+  notifications: NotificationsStart,
+  dataSourceMDSId?: string
 ) => {
-  const { startLoading, stopLoading, loadStatus } = useDirectQuery(http, notifications);
+  const { startLoading, stopLoading, loadStatus } = useDirectQuery(
+    http,
+    notifications,
+    dataSourceMDSId
+  );
   const [isOperating, setIsOperating] = useState(false);
   const [operationSuccess, setOperationSuccess] = useState(false);
   const [accelerationToOperate, setAccelerationToOperate] = useState<CachedAcceleration | null>(
@@ -82,9 +87,7 @@ export const useAccelerationOperation = (
 
   const performOperation = (
     acceleration: CachedAcceleration,
-    operation: AccelerationActionType,
-    featureFlagStatus: boolean,
-    dataSourceMDSId?: string
+    operation: AccelerationActionType
   ) => {
     setOperationSuccess(false);
     setOperationType(operation);
@@ -98,7 +101,7 @@ export const useAccelerationOperation = (
 
     setIsOperating(true);
     setAccelerationToOperate(acceleration);
-    startLoading(requestPayload, featureFlagStatus ? dataSourceMDSId : undefined);
+    startLoading(requestPayload);
   };
 
   return { performOperation, isOperating, operationSuccess };

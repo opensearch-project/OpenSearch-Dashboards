@@ -84,7 +84,8 @@ export const AccelerationTable = ({
   const { performOperation, operationSuccess } = useAccelerationOperation(
     dataSourceName,
     http,
-    notifications
+    notifications,
+    dataSourceMDSId
   );
 
   useEffect(() => {
@@ -252,12 +253,7 @@ export const AccelerationTable = ({
   const handleConfirm = () => {
     if (!modalState.selectedItem || !modalState.actionType) return;
 
-    performOperation(
-      modalState.selectedItem,
-      modalState.actionType,
-      featureFlagStatus,
-      dataSourceMDSId
-    );
+    performOperation(modalState.selectedItem, modalState.actionType);
     handleModalClose();
   };
 

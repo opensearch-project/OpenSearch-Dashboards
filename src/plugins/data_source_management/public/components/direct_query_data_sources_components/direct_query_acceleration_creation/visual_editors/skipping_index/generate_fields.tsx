@@ -6,6 +6,7 @@
 import { EuiButton, EuiConfirmModal } from '@elastic/eui';
 import producer from 'immer';
 import React, { useEffect, useState } from 'react';
+import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import {
   CreateAccelerationForm,
   SkippingIndexRowType,
@@ -25,6 +26,8 @@ interface GenerateFieldsProps {
   isSkippingtableLoading: boolean;
   setIsSkippingtableLoading: React.Dispatch<boolean>;
   dataSourceMDSId?: string;
+  http: HttpStart;
+  notifications: NotificationsStart;
 }
 
 export const GenerateFields = ({
@@ -33,9 +36,15 @@ export const GenerateFields = ({
   isSkippingtableLoading,
   setIsSkippingtableLoading,
   dataSourceMDSId,
+  http,
+  notifications,
 }: GenerateFieldsProps) => {
   const [isGenerateRun, setIsGenerateRun] = useState(false);
-  const { loadStatus, startLoading, stopLoading: _stopLoading, pollingResult } = useDirectQuery();
+  const { loadStatus, startLoading, stopLoading: _stopLoading, pollingResult } = useDirectQuery(
+    http,
+    notifications,
+    dataSourceMDSId
+  );
   const [replaceDefinitionModal, setReplaceDefinitionModal] = useState(<></>);
 
   const mapToDataTableFields = (fieldName: string) => {

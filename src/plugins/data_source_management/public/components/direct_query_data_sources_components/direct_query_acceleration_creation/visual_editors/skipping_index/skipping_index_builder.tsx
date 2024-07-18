@@ -14,6 +14,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import {
   SKIPPING_INDEX_ACCELERATION_METHODS,
   SPARK_STRING_DATATYPE,
@@ -31,12 +32,16 @@ interface SkippingIndexBuilderProps {
   accelerationFormData: CreateAccelerationForm;
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   dataSourceMDSId?: string;
+  http: HttpStart;
+  notifications: NotificationsStart;
 }
 
 export const SkippingIndexBuilder = ({
   accelerationFormData,
   setAccelerationFormData,
   dataSourceMDSId,
+  http,
+  notifications,
 }: SkippingIndexBuilderProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(20);
@@ -203,6 +208,8 @@ export const SkippingIndexBuilder = ({
             accelerationFormData={accelerationFormData}
             setAccelerationFormData={setAccelerationFormData}
             dataSourceMDSId={dataSourceMDSId}
+            http={http}
+            notifications={notifications}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

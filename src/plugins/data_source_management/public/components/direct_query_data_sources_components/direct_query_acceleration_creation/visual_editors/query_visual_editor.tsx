@@ -5,6 +5,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { CreateAccelerationForm } from '../../../../../framework/types';
 import { CoveringIndexBuilder } from './covering_index/covering_index_builder';
 import { MaterializedViewBuilder } from './materialized_view/materialized_view_builder';
@@ -15,6 +16,8 @@ interface QueryVisualEditorProps {
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   tableFieldsLoading: boolean;
   dataSourceMDSId?: string;
+  http: HttpStart;
+  notifications: NotificationsStart;
 }
 
 export const QueryVisualEditor = ({
@@ -22,6 +25,8 @@ export const QueryVisualEditor = ({
   setAccelerationFormData,
   tableFieldsLoading,
   dataSourceMDSId,
+  http,
+  notifications,
 }: QueryVisualEditorProps) => {
   return tableFieldsLoading ? (
     <>
@@ -41,6 +46,8 @@ export const QueryVisualEditor = ({
           accelerationFormData={accelerationFormData}
           setAccelerationFormData={setAccelerationFormData}
           dataSourceMDSId={dataSourceMDSId}
+          http={http}
+          notifications={notifications}
         />
       )}
       {accelerationFormData.accelerationIndexType === 'covering' && (

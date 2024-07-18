@@ -141,7 +141,8 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
   const { performOperation, operationSuccess } = useAccelerationOperation(
     props.dataSourceName,
     http,
-    notifications
+    notifications,
+    dataSourceMDSId
   );
 
   const displayedIndex = getAccelerationName(acceleration);
