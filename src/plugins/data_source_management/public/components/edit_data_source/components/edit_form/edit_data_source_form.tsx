@@ -932,8 +932,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             onChange={this.onChangeAccessKey}
             onBlur={this.validateAccessKey}
             spellCheck={false}
-            disabled={
-              this.props.existingDataSource.auth.type === AuthType.SigV4}
+            disabled={this.props.existingDataSource.auth.type === AuthType.SigV4}
             data-test-subj="editDataSourceFormAccessKeyField"
             name="dataSourceAccessKey"
           />
