@@ -933,9 +933,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             onBlur={this.validateAccessKey}
             spellCheck={false}
             disabled={
-              this.props.existingDataSource.auth.type === AuthType.SigV4 ||
-              !this.props.canManageDataSource
-            }
+              this.props.existingDataSource.auth.type === AuthType.SigV4}
             data-test-subj="editDataSourceFormAccessKeyField"
             name="dataSourceAccessKey"
           />
@@ -964,10 +962,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             onChange={this.onChangeSecretKey}
             onBlur={this.validateSecretKey}
             spellCheck={false}
-            disabled={
-              this.props.existingDataSource.auth.type === AuthType.SigV4 ||
-              !this.props.canManageDataSource
-            }
+            disabled={this.props.existingDataSource.auth.type === AuthType.SigV4}
             data-test-subj="editDataSourceFormSecretKeyField"
             name="dataSourceSecretKey"
           />
