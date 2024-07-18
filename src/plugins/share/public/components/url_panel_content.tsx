@@ -38,6 +38,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiText,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiRadioGroup,
@@ -135,17 +136,19 @@ export class UrlPanelContent extends Component<Props, State> {
                 data-test-subj="copyShareUrlButton"
                 size="s"
               >
-                {this.props.isEmbedded ? (
-                  <FormattedMessage
-                    id="share.urlPanel.copyIframeCodeButtonLabel"
-                    defaultMessage="Copy iFrame code"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="share.urlPanel.copyLinkButtonLabel"
-                    defaultMessage="Copy link"
-                  />
-                )}
+                <EuiText size="s">
+                  {this.props.isEmbedded ? (
+                    <FormattedMessage
+                      id="share.urlPanel.copyIframeCodeButtonLabel"
+                      defaultMessage="Copy iFrame code"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="share.urlPanel.copyLinkButtonLabel"
+                      defaultMessage="Copy link"
+                    />
+                  )}
+                </EuiText>
               </EuiButton>
             )}
           </EuiCopy>
