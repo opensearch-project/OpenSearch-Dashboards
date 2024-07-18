@@ -104,9 +104,9 @@ class QueryVisitor extends DQLParserVisitor<{ field: string; value: string }> {
       const valueText = ctx.value()?.getText();
       if (valueText) foundValue = valueText;
     }
-    // if (ctx.groupExpression()) {
-    //   console.log('in a group');
-    // }
+    if (ctx.groupExpression()) {
+      console.log('in a group');
+    }
     return { field: ctx.field().getText(), value: foundValue };
   };
 }
@@ -124,6 +124,7 @@ export const getSuggestions = async ({
   const lexer = new DQLLexer(inputStream);
   const tokenStream = new CommonTokenStream(lexer);
   const parser = new DQLParser(tokenStream);
+  // parser.removeErrorListeners();
   const tree = parser.query();
 
   const visitor = new QueryVisitor();
@@ -161,8 +162,8 @@ export const getSuggestions = async ({
 
   // find suggested values for the last found field
   const { field: lastField = '', value: lastValue = '' } = visitor.visit(tree) ?? {};
-  // console.log('lastField: ', lastField);
-  console.log('lastValue: ', lastValue);
+  console.log('lastField: ', lastField);
+  // console.log('lastValue: ', lastValue);
   if (!!lastField && candidates.tokens.has(DQLParser.PHRASE)) {
     const values = await findValueSuggestions(currentIndexPattern, lastField, lastValue ?? '');
     completions.push(

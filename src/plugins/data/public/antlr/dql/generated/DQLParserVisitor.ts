@@ -5,9 +5,8 @@ import { AbstractParseTreeVisitor } from "antlr4ng";
 
 import { QueryContext } from "./DQLParser.js";
 import { OperatorExpressionContext } from "./DQLParser.js";
-import { OrExpressionContext } from "./DQLParser.js";
-import { TermContext } from "./DQLParser.js";
-import { AndExpressionContext } from "./DQLParser.js";
+import { BooleanOperatorContext } from "./DQLParser.js";
+import { NotExpressionContext } from "./DQLParser.js";
 import { PrimaryExpressionContext } from "./DQLParser.js";
 import { ComparisonExpressionContext } from "./DQLParser.js";
 import { KeyValueExpressionContext } from "./DQLParser.js";
@@ -41,23 +40,17 @@ export class DQLParserVisitor<Result> extends AbstractParseTreeVisitor<Result> {
      */
     visitOperatorExpression?: (ctx: OperatorExpressionContext) => Result;
     /**
-     * Visit a parse tree produced by `DQLParser.orExpression`.
+     * Visit a parse tree produced by `DQLParser.booleanOperator`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitOrExpression?: (ctx: OrExpressionContext) => Result;
+    visitBooleanOperator?: (ctx: BooleanOperatorContext) => Result;
     /**
-     * Visit a parse tree produced by `DQLParser.term`.
+     * Visit a parse tree produced by `DQLParser.notExpression`.
      * @param ctx the parse tree
      * @return the visitor result
      */
-    visitTerm?: (ctx: TermContext) => Result;
-    /**
-     * Visit a parse tree produced by `DQLParser.andExpression`.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    visitAndExpression?: (ctx: AndExpressionContext) => Result;
+    visitNotExpression?: (ctx: NotExpressionContext) => Result;
     /**
      * Visit a parse tree produced by `DQLParser.primaryExpression`.
      * @param ctx the parse tree
