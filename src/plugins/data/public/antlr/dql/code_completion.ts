@@ -1,17 +1,11 @@
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { DQLLexer } from './generated/DQLLexer';
-import {
-  DQLParser,
-  FieldContext,
-  ValueContext,
-  FieldExpressionContext,
-} from './generated/DQLParser';
+import { DQLParser, KeyValueExpressionContext } from './generated/DQLParser';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { getTokenPosition } from '../opensearch_sql/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { CursorPosition } from '../opensearch_sql/types';
 import { getHttp } from '../../services';
-import { DQLParserListener } from './generated/DQLParserListener';
 import { QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './generated/DQLParserVisitor';
 
@@ -95,7 +89,7 @@ const findValueSuggestions = async (index: IndexPattern, field: string, value: s
 
 // visitor for parsing the current query
 class QueryVisitor extends DQLParserVisitor<{ field: string; value: string }> {
-  public visitFieldExpression = (ctx: FieldExpressionContext) => {
+  public visitKeyValueExpression = (ctx: KeyValueExpressionContext) => {
     let foundValue = '';
 
     if (ctx.value()?.PHRASE()) {
@@ -106,7 +100,7 @@ class QueryVisitor extends DQLParserVisitor<{ field: string; value: string }> {
         .replace(/^["']|["']$/g, '');
       if (strippedPhrase) foundValue = strippedPhrase;
     }
-    if (ctx.value()?.termSearch() || ctx.value()?.NUMBER()) {
+    if (ctx.value()?.tokenSearch() || ctx.value()?.NUMBER()) {
       const valueText = ctx.value()?.getText();
       if (valueText) foundValue = valueText;
     }
@@ -181,7 +175,7 @@ export const getSuggestions = async ({
   // suggest other candidates, mainly keywords
   [...candidates.tokens.keys()].forEach((token: number) => {
     // ignore identifier, already handled with field rule
-    if (token === DQLParser.IDENTIFIER || token === DQLParser.PHRASE) {
+    if (token === DQLParser.ID || token === DQLParser.PHRASE) {
       return;
     }
 

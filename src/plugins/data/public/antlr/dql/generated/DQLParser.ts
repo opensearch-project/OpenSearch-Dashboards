@@ -24,17 +24,17 @@ export class DQLParser extends antlr.Parser {
     public static readonly RPAREN = 10;
     public static readonly PHRASE = 11;
     public static readonly NUMBER = 12;
-    public static readonly IDENTIFIER = 13;
+    public static readonly ID = 13;
     public static readonly WS = 14;
     public static readonly RULE_query = 0;
     public static readonly RULE_operatorExpression = 1;
     public static readonly RULE_orExpression = 2;
-    public static readonly RULE_orTerm = 3;
+    public static readonly RULE_term = 3;
     public static readonly RULE_andExpression = 4;
     public static readonly RULE_primaryExpression = 5;
     public static readonly RULE_comparisonExpression = 6;
-    public static readonly RULE_fieldExpression = 7;
-    public static readonly RULE_termSearch = 8;
+    public static readonly RULE_keyValueExpression = 7;
+    public static readonly RULE_tokenSearch = 8;
     public static readonly RULE_groupExpression = 9;
     public static readonly RULE_groupContent = 10;
     public static readonly RULE_field = 11;
@@ -49,12 +49,12 @@ export class DQLParser extends antlr.Parser {
 
     public static readonly symbolicNames = [
         null, "OR", "AND", "NOT", "GT", "LT", "GE", "LE", "EQ", "LPAREN", 
-        "RPAREN", "PHRASE", "NUMBER", "IDENTIFIER", "WS"
+        "RPAREN", "PHRASE", "NUMBER", "ID", "WS"
     ];
     public static readonly ruleNames = [
-        "query", "operatorExpression", "orExpression", "orTerm", "andExpression", 
-        "primaryExpression", "comparisonExpression", "fieldExpression", 
-        "termSearch", "groupExpression", "groupContent", "field", "rangeValue", 
+        "query", "operatorExpression", "orExpression", "term", "andExpression", 
+        "primaryExpression", "comparisonExpression", "keyValueExpression", 
+        "tokenSearch", "groupExpression", "groupContent", "field", "rangeValue", 
         "value", "comparisonOperator",
     ];
 
@@ -152,7 +152,7 @@ export class DQLParser extends antlr.Parser {
             this.enterOuterAlt(localContext, 1);
             {
             this.state = 38;
-            this.orTerm();
+            this.term();
             this.state = 43;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
@@ -162,7 +162,7 @@ export class DQLParser extends antlr.Parser {
                 this.state = 39;
                 this.match(DQLParser.OR);
                 this.state = 40;
-                this.orTerm();
+                this.term();
                 }
                 }
                 this.state = 45;
@@ -184,9 +184,9 @@ export class DQLParser extends antlr.Parser {
         }
         return localContext;
     }
-    public orTerm(): OrTermContext {
-        let localContext = new OrTermContext(this.context, this.state);
-        this.enterRule(localContext, 6, DQLParser.RULE_orTerm);
+    public term(): TermContext {
+        let localContext = new TermContext(this.context, this.state);
+        this.enterRule(localContext, 6, DQLParser.RULE_term);
         try {
             this.state = 48;
             this.errorHandler.sync(this);
@@ -298,14 +298,14 @@ export class DQLParser extends antlr.Parser {
                 this.enterOuterAlt(localContext, 4);
                 {
                 this.state = 65;
-                this.fieldExpression();
+                this.keyValueExpression();
                 }
                 break;
             case 5:
                 this.enterOuterAlt(localContext, 5);
                 {
                 this.state = 66;
-                this.termSearch();
+                this.tokenSearch();
                 }
                 break;
             }
@@ -350,9 +350,9 @@ export class DQLParser extends antlr.Parser {
         }
         return localContext;
     }
-    public fieldExpression(): FieldExpressionContext {
-        let localContext = new FieldExpressionContext(this.context, this.state);
-        this.enterRule(localContext, 14, DQLParser.RULE_fieldExpression);
+    public keyValueExpression(): KeyValueExpressionContext {
+        let localContext = new KeyValueExpressionContext(this.context, this.state);
+        this.enterRule(localContext, 14, DQLParser.RULE_keyValueExpression);
         try {
             this.enterOuterAlt(localContext, 1);
             {
@@ -365,7 +365,7 @@ export class DQLParser extends antlr.Parser {
             switch (this.tokenStream.LA(1)) {
             case DQLParser.PHRASE:
             case DQLParser.NUMBER:
-            case DQLParser.IDENTIFIER:
+            case DQLParser.ID:
                 {
                 this.state = 75;
                 this.value();
@@ -395,15 +395,15 @@ export class DQLParser extends antlr.Parser {
         }
         return localContext;
     }
-    public termSearch(): TermSearchContext {
-        let localContext = new TermSearchContext(this.context, this.state);
-        this.enterRule(localContext, 16, DQLParser.RULE_termSearch);
+    public tokenSearch(): TokenSearchContext {
+        let localContext = new TokenSearchContext(this.context, this.state);
+        this.enterRule(localContext, 16, DQLParser.RULE_tokenSearch);
         let _la: number;
         try {
             this.enterOuterAlt(localContext, 1);
             {
             this.state = 79;
-            this.match(DQLParser.IDENTIFIER);
+            this.match(DQLParser.ID);
             this.state = 83;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
@@ -411,7 +411,7 @@ export class DQLParser extends antlr.Parser {
                 {
                 {
                 this.state = 80;
-                this.match(DQLParser.IDENTIFIER);
+                this.match(DQLParser.ID);
                 }
                 }
                 this.state = 85;
@@ -512,7 +512,7 @@ export class DQLParser extends antlr.Parser {
                 break;
             case DQLParser.PHRASE:
             case DQLParser.NUMBER:
-            case DQLParser.IDENTIFIER:
+            case DQLParser.ID:
                 this.enterOuterAlt(localContext, 2);
                 {
                 this.state = 101;
@@ -543,7 +543,7 @@ export class DQLParser extends antlr.Parser {
             this.enterOuterAlt(localContext, 1);
             {
             this.state = 104;
-            this.match(DQLParser.IDENTIFIER);
+            this.match(DQLParser.ID);
             }
         }
         catch (re) {
@@ -611,11 +611,11 @@ export class DQLParser extends antlr.Parser {
                 this.match(DQLParser.NUMBER);
                 }
                 break;
-            case DQLParser.IDENTIFIER:
+            case DQLParser.ID:
                 this.enterOuterAlt(localContext, 3);
                 {
                 this.state = 110;
-                this.termSearch();
+                this.tokenSearch();
                 }
                 break;
             default:
@@ -796,14 +796,14 @@ export class OrExpressionContext extends antlr.ParserRuleContext {
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
         super(parent, invokingState);
     }
-    public orTerm(): OrTermContext[];
-    public orTerm(i: number): OrTermContext | null;
-    public orTerm(i?: number): OrTermContext[] | OrTermContext | null {
+    public term(): TermContext[];
+    public term(i: number): TermContext | null;
+    public term(i?: number): TermContext[] | TermContext | null {
         if (i === undefined) {
-            return this.getRuleContexts(OrTermContext);
+            return this.getRuleContexts(TermContext);
         }
 
-        return this.getRuleContext(i, OrTermContext);
+        return this.getRuleContext(i, TermContext);
     }
     public OR(): antlr.TerminalNode[];
     public OR(i: number): antlr.TerminalNode | null;
@@ -837,7 +837,7 @@ export class OrExpressionContext extends antlr.ParserRuleContext {
 }
 
 
-export class OrTermContext extends antlr.ParserRuleContext {
+export class TermContext extends antlr.ParserRuleContext {
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
         super(parent, invokingState);
     }
@@ -848,21 +848,21 @@ export class OrTermContext extends antlr.ParserRuleContext {
         return this.getRuleContext(0, AndExpressionContext);
     }
     public override get ruleIndex(): number {
-        return DQLParser.RULE_orTerm;
+        return DQLParser.RULE_term;
     }
     public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterOrTerm) {
-             listener.enterOrTerm(this);
+        if(listener.enterTerm) {
+             listener.enterTerm(this);
         }
     }
     public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitOrTerm) {
-             listener.exitOrTerm(this);
+        if(listener.exitTerm) {
+             listener.exitTerm(this);
         }
     }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
-        if (visitor.visitOrTerm) {
-            return visitor.visitOrTerm(this);
+        if (visitor.visitTerm) {
+            return visitor.visitTerm(this);
         } else {
             return visitor.visitChildren(this);
         }
@@ -937,11 +937,11 @@ export class PrimaryExpressionContext extends antlr.ParserRuleContext {
     public comparisonExpression(): ComparisonExpressionContext | null {
         return this.getRuleContext(0, ComparisonExpressionContext);
     }
-    public fieldExpression(): FieldExpressionContext | null {
-        return this.getRuleContext(0, FieldExpressionContext);
+    public keyValueExpression(): KeyValueExpressionContext | null {
+        return this.getRuleContext(0, KeyValueExpressionContext);
     }
-    public termSearch(): TermSearchContext | null {
-        return this.getRuleContext(0, TermSearchContext);
+    public tokenSearch(): TokenSearchContext | null {
+        return this.getRuleContext(0, TokenSearchContext);
     }
     public override get ruleIndex(): number {
         return DQLParser.RULE_primaryExpression;
@@ -1002,7 +1002,7 @@ export class ComparisonExpressionContext extends antlr.ParserRuleContext {
 }
 
 
-export class FieldExpressionContext extends antlr.ParserRuleContext {
+export class KeyValueExpressionContext extends antlr.ParserRuleContext {
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
         super(parent, invokingState);
     }
@@ -1019,21 +1019,21 @@ export class FieldExpressionContext extends antlr.ParserRuleContext {
         return this.getRuleContext(0, GroupExpressionContext);
     }
     public override get ruleIndex(): number {
-        return DQLParser.RULE_fieldExpression;
+        return DQLParser.RULE_keyValueExpression;
     }
     public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterFieldExpression) {
-             listener.enterFieldExpression(this);
+        if(listener.enterKeyValueExpression) {
+             listener.enterKeyValueExpression(this);
         }
     }
     public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitFieldExpression) {
-             listener.exitFieldExpression(this);
+        if(listener.exitKeyValueExpression) {
+             listener.exitKeyValueExpression(this);
         }
     }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
-        if (visitor.visitFieldExpression) {
-            return visitor.visitFieldExpression(this);
+        if (visitor.visitKeyValueExpression) {
+            return visitor.visitKeyValueExpression(this);
         } else {
             return visitor.visitChildren(this);
         }
@@ -1041,35 +1041,35 @@ export class FieldExpressionContext extends antlr.ParserRuleContext {
 }
 
 
-export class TermSearchContext extends antlr.ParserRuleContext {
+export class TokenSearchContext extends antlr.ParserRuleContext {
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
         super(parent, invokingState);
     }
-    public IDENTIFIER(): antlr.TerminalNode[];
-    public IDENTIFIER(i: number): antlr.TerminalNode | null;
-    public IDENTIFIER(i?: number): antlr.TerminalNode | null | antlr.TerminalNode[] {
+    public ID(): antlr.TerminalNode[];
+    public ID(i: number): antlr.TerminalNode | null;
+    public ID(i?: number): antlr.TerminalNode | null | antlr.TerminalNode[] {
     	if (i === undefined) {
-    		return this.getTokens(DQLParser.IDENTIFIER);
+    		return this.getTokens(DQLParser.ID);
     	} else {
-    		return this.getToken(DQLParser.IDENTIFIER, i);
+    		return this.getToken(DQLParser.ID, i);
     	}
     }
     public override get ruleIndex(): number {
-        return DQLParser.RULE_termSearch;
+        return DQLParser.RULE_tokenSearch;
     }
     public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterTermSearch) {
-             listener.enterTermSearch(this);
+        if(listener.enterTokenSearch) {
+             listener.enterTokenSearch(this);
         }
     }
     public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitTermSearch) {
-             listener.exitTermSearch(this);
+        if(listener.exitTokenSearch) {
+             listener.exitTokenSearch(this);
         }
     }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
-        if (visitor.visitTermSearch) {
-            return visitor.visitTermSearch(this);
+        if (visitor.visitTokenSearch) {
+            return visitor.visitTokenSearch(this);
         } else {
             return visitor.visitChildren(this);
         }
@@ -1183,8 +1183,8 @@ export class FieldContext extends antlr.ParserRuleContext {
     public constructor(parent: antlr.ParserRuleContext | null, invokingState: number) {
         super(parent, invokingState);
     }
-    public IDENTIFIER(): antlr.TerminalNode {
-        return this.getToken(DQLParser.IDENTIFIER, 0)!;
+    public ID(): antlr.TerminalNode {
+        return this.getToken(DQLParser.ID, 0)!;
     }
     public override get ruleIndex(): number {
         return DQLParser.RULE_field;
@@ -1252,8 +1252,8 @@ export class ValueContext extends antlr.ParserRuleContext {
     public NUMBER(): antlr.TerminalNode | null {
         return this.getToken(DQLParser.NUMBER, 0);
     }
-    public termSearch(): TermSearchContext | null {
-        return this.getRuleContext(0, TermSearchContext);
+    public tokenSearch(): TokenSearchContext | null {
+        return this.getRuleContext(0, TokenSearchContext);
     }
     public override get ruleIndex(): number {
         return DQLParser.RULE_value;

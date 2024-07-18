@@ -15,10 +15,10 @@ operatorExpression
 	;
 
 orExpression
-	: orTerm (OR orTerm)*
+	: term (OR term)*
 	;
-	
-orTerm
+
+term
 	: primaryExpression 
 	| andExpression
 	;
@@ -31,20 +31,20 @@ primaryExpression
 	: LPAREN query RPAREN
 	| NOT primaryExpression
 	| comparisonExpression
-	| fieldExpression
-	| termSearch
+	| keyValueExpression
+	| tokenSearch
 	;
 
 comparisonExpression
 	: field comparisonOperator rangeValue
 	;
 
-fieldExpression
+keyValueExpression
 	: field EQ (value | groupExpression)
 	;
 
-termSearch
-	: IDENTIFIER (IDENTIFIER)*
+tokenSearch
+	: ID (ID)*
 	;
 	
 groupExpression
@@ -57,7 +57,7 @@ groupContent
 	;
 
 field
-	: IDENTIFIER
+	: ID
 	;
 
 rangeValue
@@ -68,7 +68,7 @@ rangeValue
 value
 	: PHRASE 
 	| NUMBER 
-	| termSearch
+	| tokenSearch
 	;
 	
 comparisonOperator
