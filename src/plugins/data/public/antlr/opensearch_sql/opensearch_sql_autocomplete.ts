@@ -15,14 +15,14 @@ import {
   TableOrViewSuggestion,
   OpenSearchSqlAutocompleteResult,
 } from '../shared/types';
-import { OpenSearchSQLLexer } from './generated/OpenSearchSQLLexer';
+import { OpenSearchSQLLexer } from './.generated/OpenSearchSQLLexer';
 import {
   TableFilterContext,
   OpenSearchSQLParser,
   SelectElementsContext,
   TableNameContext,
-} from './generated/OpenSearchSQLParser';
-import { OpenSearchSQLParserVisitor } from './generated/OpenSearchSQLParserVisitor';
+} from './.generated/OpenSearchSQLParser';
+import { OpenSearchSQLParserVisitor } from './.generated/OpenSearchSQLParserVisitor';
 import {
   TableQueryPosition,
   TokenDictionary,
