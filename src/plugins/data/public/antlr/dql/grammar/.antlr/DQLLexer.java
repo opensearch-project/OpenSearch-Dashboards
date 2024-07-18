@@ -17,7 +17,7 @@ public class DQLLexer extends Lexer {
 		new PredictionContextCache();
 	public static final int
 		OR=1, AND=2, NOT=3, GT=4, LT=5, GE=6, LE=7, EQ=8, LPAREN=9, RPAREN=10, 
-		PHRASE=11, NUMBER=12, IDENTIFIER=13, WS=14;
+		PHRASE=11, NUMBER=12, ID=13, WS=14;
 	public static String[] channelNames = {
 		"DEFAULT_TOKEN_CHANNEL", "HIDDEN"
 	};
@@ -29,7 +29,7 @@ public class DQLLexer extends Lexer {
 	private static String[] makeRuleNames() {
 		return new String[] {
 			"OR", "AND", "NOT", "GT", "LT", "GE", "LE", "EQ", "LPAREN", "RPAREN", 
-			"PHRASE", "NUMBER", "IDENTIFIER", "WS"
+			"PHRASE", "NUMBER", "ID", "WS"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -43,7 +43,7 @@ public class DQLLexer extends Lexer {
 	private static String[] makeSymbolicNames() {
 		return new String[] {
 			null, "OR", "AND", "NOT", "GT", "LT", "GE", "LE", "EQ", "LPAREN", "RPAREN", 
-			"PHRASE", "NUMBER", "IDENTIFIER", "WS"
+			"PHRASE", "NUMBER", "ID", "WS"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
