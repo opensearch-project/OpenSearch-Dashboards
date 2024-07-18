@@ -125,12 +125,18 @@ describe('workspace utils: featureMatchesConfig', () => {
 
   it('should match features include by any use cases', () => {
     const match = featureMatchesConfig(
-      ['use-case-observability', 'use-case-analytics'],
+      ['use-case-observability', 'use-case-search'],
       STATIC_USE_CASES
     );
     expect(match({ id: 'dashboards' })).toBe(true);
     expect(match({ id: 'observability-traces' })).toBe(true);
-    expect(match({ id: 'alerting' })).toBe(true);
+
+    /**
+     * The searchRelevance is a feature under search use case. Since each workspace only can be a specific use case,
+     * the feature matches will use first use case to check if features exists. The observability doesn't have
+     * searchRelevance feature, it will return false.
+     */
+    expect(match({ id: 'searchRelevance' })).toBe(false);
     expect(match({ id: 'not-in-any-use-case' })).toBe(false);
   });
 });
@@ -309,11 +315,11 @@ describe('workspace utils: filterWorkspaceConfigurableApps', () => {
 
 describe('workspace utils: isFeatureIdInsideUseCase', () => {
   it('should return false for invalid use case', () => {
-    expect(isFeatureIdInsideUseCase('discover', 'use-case-invalid', [])).toBe(false);
+    expect(isFeatureIdInsideUseCase('discover', 'invalid', [])).toBe(false);
   });
   it('should return false if feature not in use case', () => {
     expect(
-      isFeatureIdInsideUseCase('discover', 'use-case-foo', [
+      isFeatureIdInsideUseCase('discover', 'foo', [
         {
           id: 'foo',
           title: 'Foo',
@@ -325,12 +331,30 @@ describe('workspace utils: isFeatureIdInsideUseCase', () => {
   });
   it('should return true if feature id exists in use case', () => {
     expect(
-      isFeatureIdInsideUseCase('discover', 'use-case-foo', [
+      isFeatureIdInsideUseCase('discover', 'foo', [
         {
           id: 'foo',
           title: 'Foo',
           description: 'Foo description',
           features: ['discover'],
+        },
+      ])
+    ).toBe(true);
+  });
+  it('should return true if feature id exists inside any use case', () => {
+    expect(
+      isFeatureIdInsideUseCase('searchRelevance', 'all', [
+        {
+          id: 'foo',
+          title: 'Foo',
+          description: 'Foo description',
+          features: ['discover'],
+        },
+        {
+          id: 'bar',
+          title: 'Bar',
+          description: 'Bar description',
+          features: ['searchRelevance'],
         },
       ])
     ).toBe(true);

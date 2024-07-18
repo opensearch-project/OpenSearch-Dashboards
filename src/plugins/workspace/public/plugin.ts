@@ -21,6 +21,7 @@ import {
   NavGroupStatus,
   DEFAULT_NAV_GROUPS,
   NavGroupType,
+  ALL_USE_CASE_ID,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -38,6 +39,7 @@ import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
 import {
   filterWorkspaceConfigurableApps,
+  getFirstUseCaseOfFeatureConfigs,
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
@@ -122,6 +124,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           if (
             navGroup.type !== NavGroupType.SYSTEM &&
             currentWorkspace.features &&
+            getFirstUseCaseOfFeatureConfigs(currentWorkspace.features) !== ALL_USE_CASE_ID &&
             !isNavGroupInFeatureConfigs(navGroup.id, currentWorkspace.features)
           ) {
             return {
