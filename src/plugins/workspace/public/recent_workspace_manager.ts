@@ -7,15 +7,20 @@ import { PersistedLog } from '../../../core/public';
 
 const RECENT_WORKSPACES_KEY = 'recentWorkspaces';
 
+interface WorkspaceEntry {
+  id: string;
+  timestamp: number;
+}
+
 class RecentWorkspaceManager {
   private static instance: RecentWorkspaceManager;
-  private recentWorkspaceLog: PersistedLog<string>;
+  private recentWorkspaceLog: PersistedLog<WorkspaceEntry>;
 
   private constructor() {
-    const customIsEqual = (oldItem: string, newItem: string) => {
-      return oldItem === newItem;
+    const customIsEqual = (oldItem: WorkspaceEntry, newItem: WorkspaceEntry) => {
+      return oldItem.id === newItem.id;
     };
-    this.recentWorkspaceLog = new PersistedLog<string>(RECENT_WORKSPACES_KEY, {
+    this.recentWorkspaceLog = new PersistedLog<WorkspaceEntry>(RECENT_WORKSPACES_KEY, {
       maxLength: 10,
       isEqual: customIsEqual,
     });
@@ -29,12 +34,16 @@ class RecentWorkspaceManager {
     return RecentWorkspaceManager.instance;
   }
 
-  public getRecentWorkspaces(): string[] {
+  public getRecentWorkspaces(): WorkspaceEntry[] {
     return this.recentWorkspaceLog.get();
   }
 
-  public addRecentWorkspace(newWorkspace: string): string[] {
-    this.recentWorkspaceLog.add(newWorkspace);
+  public addRecentWorkspace(newWorkspace: string): WorkspaceEntry[] {
+    const newEntry: WorkspaceEntry = {
+      id: newWorkspace,
+      timestamp: Date.now(),
+    };
+    this.recentWorkspaceLog.add(newEntry);
     return this.getRecentWorkspaces();
   }
 }

@@ -60,7 +60,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   const filteredRecentWorkspaces = useMemo(() => {
     return recentWorkspaceManager
       .getRecentWorkspaces()
-      .map((workspaceId) => workspaceList.find((ws) => ws.id === workspaceId))
+      .map((workspace) => workspaceList.find((ws) => ws.id === workspace.id))
       .filter((workspace): workspace is WorkspaceObject => workspace !== undefined)
       .slice(0, MAX_WORKSPACE_PICKER_NUM);
   }, [workspaceList]);
