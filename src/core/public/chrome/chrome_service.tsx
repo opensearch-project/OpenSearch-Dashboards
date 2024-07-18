@@ -294,6 +294,7 @@ export class ChromeService {
           navControlsRight$={navControls.getRight$()}
           navControlsExpandedCenter$={navControls.getExpandedCenter$()}
           navControlsExpandedRight$={navControls.getExpandedRight$()}
+          navControlsLeftBottom$={navControls.getLeftBottom$()}
           onIsLockedUpdate={setIsNavDrawerLocked}
           isLocked$={getIsNavDrawerLocked$}
           branding={injectedMetadata.getBranding()}
@@ -302,7 +303,9 @@ export class ChromeService {
           collapsibleNavHeaderRender={this.collapsibleNavHeaderRender}
           sidecarConfig$={sidecarConfig$}
           navGroupEnabled={navGroup.getNavGroupEnabled()}
-          currentNavgroup$={navGroup.getCurrentNavGroup$()}
+          currentNavGroup$={navGroup.getCurrentNavGroup$()}
+          navGroupsMap$={navGroup.getNavGroupsMap$()}
+          setCurrentNavGroup={navGroup.setCurrentNavGroup}
         />
       ),
 

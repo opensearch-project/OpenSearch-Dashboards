@@ -4,10 +4,11 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-
-import './workspace_use_case.scss';
+import { i18n } from '@osd/i18n';
+import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
 import { WorkspaceUseCase as WorkspaceUseCaseObject } from '../../types';
+import { WorkspaceFormErrors } from './types';
+import './workspace_use_case.scss';
 
 interface WorkspaceUseCaseCardProps {
   id: string;
@@ -48,10 +49,16 @@ const WorkspaceUseCaseCard = ({
 export interface WorkspaceUseCaseProps {
   value: string[];
   onChange: (newValue: string[]) => void;
+  formErrors: WorkspaceFormErrors;
   availableUseCases: WorkspaceUseCaseObject[];
 }
 
-export const WorkspaceUseCase = ({ availableUseCases, value, onChange }: WorkspaceUseCaseProps) => {
+export const WorkspaceUseCase = ({
+  value,
+  onChange,
+  formErrors,
+  availableUseCases,
+}: WorkspaceUseCaseProps) => {
   const handleCardChange = useCallback(
     (id: string) => {
       if (!value.includes(id)) {
@@ -64,20 +71,29 @@ export const WorkspaceUseCase = ({ availableUseCases, value, onChange }: Workspa
   );
 
   return (
-    <EuiFlexGroup>
-      {availableUseCases
-        .filter((item) => !item.systematic)
-        .map(({ id, title, description }) => (
-          <EuiFlexItem key={id}>
-            <WorkspaceUseCaseCard
-              id={id}
-              title={title}
-              description={description}
-              checked={value.includes(id)}
-              onChange={handleCardChange}
-            />
-          </EuiFlexItem>
-        ))}
-    </EuiFlexGroup>
+    <EuiFormRow
+      label={i18n.translate('workspace.form.workspaceUseCase.name.label', {
+        defaultMessage: 'Use case',
+      })}
+      isInvalid={!!formErrors.features}
+      error={formErrors.features?.message}
+      fullWidth
+    >
+      <EuiFlexGroup>
+        {availableUseCases
+          .filter((item) => !item.systematic)
+          .map(({ id, title, description }) => (
+            <EuiFlexItem key={id}>
+              <WorkspaceUseCaseCard
+                id={id}
+                title={title}
+                description={description}
+                checked={value.includes(id)}
+                onChange={handleCardChange}
+              />
+            </EuiFlexItem>
+          ))}
+      </EuiFlexGroup>
+    </EuiFormRow>
   );
 };

@@ -4,31 +4,31 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { BehaviorSubject, of } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
-import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
+import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceAttributeWithPermission } from '../../../../../core/types';
 import { WorkspaceClient } from '../../workspace_client';
 import {
-  WorkspaceForm,
   WorkspaceFormSubmitData,
   WorkspaceOperationType,
   convertPermissionsToPermissionSettings,
   convertPermissionSettingsToPermissions,
+  WorkspaceDetailForm,
 } from '../workspace_form';
 import { getDataSourcesList } from '../../utils';
 import { DataSource } from '../../../common/types';
+import { DetailTab } from '../workspace_form/constants';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceUpdaterProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
-  hideTitle?: boolean;
-  maxWidth?: number | string;
+  detailTab?: DetailTab;
 }
 
 function getFormDataFromWorkspace(
@@ -64,7 +64,6 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
     workspaceClient: WorkspaceClient;
     dataSourceManagement?: DataSourceManagementPluginSetup;
   }>();
-  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const availableUseCases = useObservable(props.registeredUseCases$, []);
@@ -101,7 +100,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
             // Redirect page after one second, leave one second time to show update successful toast.
             window.setTimeout(() => {
               window.location.href = formatUrlWithWorkspaceId(
-                application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+                application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
                   absolute: true,
                 }),
                 currentWorkspace.id,
@@ -146,21 +145,22 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   return (
     <EuiPage>
       <EuiPageBody>
-        {!props.hideTitle ? <EuiPageHeader pageTitle="Update Workspace" /> : null}
+        <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}
+          style={{ width: '100%', maxWidth: '100%' }}
         >
           {application && savedObjects && (
-            <WorkspaceForm
+            <WorkspaceDetailForm
               application={application}
               defaultValues={currentWorkspaceFormData}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Update}
-              permissionEnabled={isPermissionEnabled}
               savedObjects={savedObjects}
+              detailTab={props.detailTab}
               dataSourceManagement={dataSourceManagement}
               availableUseCases={availableUseCases}
             />

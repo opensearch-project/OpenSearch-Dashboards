@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
-import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
+import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
@@ -63,7 +63,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
             // Redirect page after one second, leave one second time to show create successful toast.
             window.setTimeout(() => {
               window.location.href = formatUrlWithWorkspaceId(
-                application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+                application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
                   absolute: true,
                 }),
                 newWorkspaceId,

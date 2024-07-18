@@ -66,7 +66,7 @@ const WorkspaceCreator = ({
           },
         },
         navigateToApp,
-        getUrlForApp: jest.fn(() => '/app/workspace_overview'),
+        getUrlForApp: jest.fn(() => '/app/workspace_detail'),
         applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(PublicAPPInfoMap as any),
       },
       notifications: {

@@ -5,11 +5,13 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
 import { WorkspaceUseCase, WorkspaceUseCaseProps } from './workspace_use_case';
-import { WORKSPACE_USE_CASES } from 'src/plugins/workspace/common/constants';
+import { WorkspaceFormErrors } from './types';
 
 const setup = (options?: Partial<WorkspaceUseCaseProps>) => {
   const onChangeMock = jest.fn();
+  const formErrors: WorkspaceFormErrors = {};
   const renderResult = render(
     <WorkspaceUseCase
       availableUseCases={[
@@ -27,6 +29,7 @@ const setup = (options?: Partial<WorkspaceUseCaseProps>) => {
       ]}
       value={[]}
       onChange={onChangeMock}
+      formErrors={formErrors}
       {...options}
     />
   );
