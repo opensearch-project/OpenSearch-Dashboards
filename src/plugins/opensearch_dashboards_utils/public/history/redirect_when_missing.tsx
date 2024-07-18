@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { History } from 'history';
 import { i18n } from '@osd/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -37,10 +37,9 @@ import ReactDOM from 'react-dom';
 import { ApplicationStart, HttpStart, ToastsSetup } from 'opensearch-dashboards/public';
 import { SavedObjectNotFound } from '..';
 
-const ReactMarkdown = React.lazy(() => import('react-markdown'));
 const ErrorRenderer = (props: { children: string }) => (
   <React.Suspense fallback={<EuiLoadingSpinner />}>
-    <ReactMarkdown renderers={{ root: Fragment }} {...props} />
+    <span>{props.children}</span>
   </React.Suspense>
 );
 

@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import React from 'react';
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
 import { ManagementSetup, ManagementStart } from './types';
@@ -50,6 +51,8 @@ import {
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { SettingsIcon } from './components/settings_icon';
 
 interface ManagementSetupDependencies {
   home?: HomePublicPluginSetup;
@@ -79,6 +82,9 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       icon: '/ui/logos/opensearch_mark.svg',
       category: DEFAULT_APP_CATEGORIES.management,
       updater$: this.appUpdater,
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.hidden
+        : AppNavLinkStatus.default,
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
@@ -112,12 +118,29 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       .getSectionsEnabled()
       .some((section) => section.getAppsEnabled().length > 0);
 
-    if (!this.hasAnyEnabledApps) {
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      this.appUpdater.next(() => {
+        return {
+          navLinkStatus: AppNavLinkStatus.hidden,
+        };
+      });
+    } else if (!this.hasAnyEnabledApps) {
       this.appUpdater.next(() => {
         return {
           status: AppStatus.inaccessible,
           navLinkStatus: AppNavLinkStatus.hidden,
         };
+      });
+    }
+
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.chrome.navControls.registerLeftBottom({
+        order: 3,
+        mount: toMountPoint(
+          React.createElement(SettingsIcon, {
+            core,
+          })
+        ),
       });
     }
 

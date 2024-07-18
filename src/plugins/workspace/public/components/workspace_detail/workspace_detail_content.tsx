@@ -15,9 +15,9 @@ import {
 import React from 'react';
 import { useObservable } from 'react-use';
 import { of } from 'rxjs';
-import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
+import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 
-export const WorkspaceOverviewContent = () => {
+export const WorkspaceDetailContent = () => {
   const {
     services: { workspaces },
   } = useOpenSearchDashboards();
