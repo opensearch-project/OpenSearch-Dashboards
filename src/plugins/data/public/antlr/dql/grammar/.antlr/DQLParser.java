@@ -17,17 +17,17 @@ public class DQLParser extends Parser {
 		new PredictionContextCache();
 	public static final int
 		OR=1, AND=2, NOT=3, GT=4, LT=5, GE=6, LE=7, EQ=8, LPAREN=9, RPAREN=10, 
-		PHRASE=11, NUMBER=12, IDENTIFIER=13, WS=14;
+		PHRASE=11, NUMBER=12, ID=13, WS=14;
 	public static final int
-		RULE_query = 0, RULE_operatorExpression = 1, RULE_orExpression = 2, RULE_orTerm = 3, 
+		RULE_query = 0, RULE_operatorExpression = 1, RULE_orExpression = 2, RULE_term = 3, 
 		RULE_andExpression = 4, RULE_primaryExpression = 5, RULE_comparisonExpression = 6, 
-		RULE_fieldExpression = 7, RULE_termSearch = 8, RULE_groupExpression = 9, 
+		RULE_keyValueExpression = 7, RULE_tokenSearch = 8, RULE_groupExpression = 9, 
 		RULE_groupContent = 10, RULE_field = 11, RULE_rangeValue = 12, RULE_value = 13, 
 		RULE_comparisonOperator = 14;
 	private static String[] makeRuleNames() {
 		return new String[] {
-			"query", "operatorExpression", "orExpression", "orTerm", "andExpression", 
-			"primaryExpression", "comparisonExpression", "fieldExpression", "termSearch", 
+			"query", "operatorExpression", "orExpression", "term", "andExpression", 
+			"primaryExpression", "comparisonExpression", "keyValueExpression", "tokenSearch", 
 			"groupExpression", "groupContent", "field", "rangeValue", "value", "comparisonOperator"
 		};
 	}
@@ -42,7 +42,7 @@ public class DQLParser extends Parser {
 	private static String[] makeSymbolicNames() {
 		return new String[] {
 			null, "OR", "AND", "NOT", "GT", "LT", "GE", "LE", "EQ", "LPAREN", "RPAREN", 
-			"PHRASE", "NUMBER", "IDENTIFIER", "WS"
+			"PHRASE", "NUMBER", "ID", "WS"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -194,11 +194,11 @@ public class DQLParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class OrExpressionContext extends ParserRuleContext {
-		public List<OrTermContext> orTerm() {
-			return getRuleContexts(OrTermContext.class);
+		public List<TermContext> term() {
+			return getRuleContexts(TermContext.class);
 		}
-		public OrTermContext orTerm(int i) {
-			return getRuleContext(OrTermContext.class,i);
+		public TermContext term(int i) {
+			return getRuleContext(TermContext.class,i);
 		}
 		public List<TerminalNode> OR() { return getTokens(DQLParser.OR); }
 		public TerminalNode OR(int i) {
@@ -218,7 +218,7 @@ public class DQLParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(38);
-			orTerm();
+			term();
 			setState(43);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -228,7 +228,7 @@ public class DQLParser extends Parser {
 				setState(39);
 				match(OR);
 				setState(40);
-				orTerm();
+				term();
 				}
 				}
 				setState(45);
@@ -249,22 +249,22 @@ public class DQLParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class OrTermContext extends ParserRuleContext {
+	public static class TermContext extends ParserRuleContext {
 		public PrimaryExpressionContext primaryExpression() {
 			return getRuleContext(PrimaryExpressionContext.class,0);
 		}
 		public AndExpressionContext andExpression() {
 			return getRuleContext(AndExpressionContext.class,0);
 		}
-		public OrTermContext(ParserRuleContext parent, int invokingState) {
+		public TermContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_orTerm; }
+		@Override public int getRuleIndex() { return RULE_term; }
 	}
 
-	public final OrTermContext orTerm() throws RecognitionException {
-		OrTermContext _localctx = new OrTermContext(_ctx, getState());
-		enterRule(_localctx, 6, RULE_orTerm);
+	public final TermContext term() throws RecognitionException {
+		TermContext _localctx = new TermContext(_ctx, getState());
+		enterRule(_localctx, 6, RULE_term);
 		try {
 			setState(48);
 			_errHandler.sync(this);
@@ -366,11 +366,11 @@ public class DQLParser extends Parser {
 		public ComparisonExpressionContext comparisonExpression() {
 			return getRuleContext(ComparisonExpressionContext.class,0);
 		}
-		public FieldExpressionContext fieldExpression() {
-			return getRuleContext(FieldExpressionContext.class,0);
+		public KeyValueExpressionContext keyValueExpression() {
+			return getRuleContext(KeyValueExpressionContext.class,0);
 		}
-		public TermSearchContext termSearch() {
-			return getRuleContext(TermSearchContext.class,0);
+		public TokenSearchContext tokenSearch() {
+			return getRuleContext(TokenSearchContext.class,0);
 		}
 		public PrimaryExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -416,14 +416,14 @@ public class DQLParser extends Parser {
 				enterOuterAlt(_localctx, 4);
 				{
 				setState(65);
-				fieldExpression();
+				keyValueExpression();
 				}
 				break;
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
 				setState(66);
-				termSearch();
+				tokenSearch();
 				}
 				break;
 			}
@@ -482,7 +482,7 @@ public class DQLParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class FieldExpressionContext extends ParserRuleContext {
+	public static class KeyValueExpressionContext extends ParserRuleContext {
 		public FieldContext field() {
 			return getRuleContext(FieldContext.class,0);
 		}
@@ -493,15 +493,15 @@ public class DQLParser extends Parser {
 		public GroupExpressionContext groupExpression() {
 			return getRuleContext(GroupExpressionContext.class,0);
 		}
-		public FieldExpressionContext(ParserRuleContext parent, int invokingState) {
+		public KeyValueExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_fieldExpression; }
+		@Override public int getRuleIndex() { return RULE_keyValueExpression; }
 	}
 
-	public final FieldExpressionContext fieldExpression() throws RecognitionException {
-		FieldExpressionContext _localctx = new FieldExpressionContext(_ctx, getState());
-		enterRule(_localctx, 14, RULE_fieldExpression);
+	public final KeyValueExpressionContext keyValueExpression() throws RecognitionException {
+		KeyValueExpressionContext _localctx = new KeyValueExpressionContext(_ctx, getState());
+		enterRule(_localctx, 14, RULE_keyValueExpression);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
@@ -514,7 +514,7 @@ public class DQLParser extends Parser {
 			switch (_input.LA(1)) {
 			case PHRASE:
 			case NUMBER:
-			case IDENTIFIER:
+			case ID:
 				{
 				setState(75);
 				value();
@@ -543,34 +543,34 @@ public class DQLParser extends Parser {
 	}
 
 	@SuppressWarnings("CheckReturnValue")
-	public static class TermSearchContext extends ParserRuleContext {
-		public List<TerminalNode> IDENTIFIER() { return getTokens(DQLParser.IDENTIFIER); }
-		public TerminalNode IDENTIFIER(int i) {
-			return getToken(DQLParser.IDENTIFIER, i);
+	public static class TokenSearchContext extends ParserRuleContext {
+		public List<TerminalNode> ID() { return getTokens(DQLParser.ID); }
+		public TerminalNode ID(int i) {
+			return getToken(DQLParser.ID, i);
 		}
-		public TermSearchContext(ParserRuleContext parent, int invokingState) {
+		public TokenSearchContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
-		@Override public int getRuleIndex() { return RULE_termSearch; }
+		@Override public int getRuleIndex() { return RULE_tokenSearch; }
 	}
 
-	public final TermSearchContext termSearch() throws RecognitionException {
-		TermSearchContext _localctx = new TermSearchContext(_ctx, getState());
-		enterRule(_localctx, 16, RULE_termSearch);
+	public final TokenSearchContext tokenSearch() throws RecognitionException {
+		TokenSearchContext _localctx = new TokenSearchContext(_ctx, getState());
+		enterRule(_localctx, 16, RULE_tokenSearch);
 		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(79);
-			match(IDENTIFIER);
+			match(ID);
 			setState(83);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
-			while (_la==IDENTIFIER) {
+			while (_la==ID) {
 				{
 				{
 				setState(80);
-				match(IDENTIFIER);
+				match(ID);
 				}
 				}
 				setState(85);
@@ -710,7 +710,7 @@ public class DQLParser extends Parser {
 				break;
 			case PHRASE:
 			case NUMBER:
-			case IDENTIFIER:
+			case ID:
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(101);
@@ -734,7 +734,7 @@ public class DQLParser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class FieldContext extends ParserRuleContext {
-		public TerminalNode IDENTIFIER() { return getToken(DQLParser.IDENTIFIER, 0); }
+		public TerminalNode ID() { return getToken(DQLParser.ID, 0); }
 		public FieldContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -748,7 +748,7 @@ public class DQLParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(104);
-			match(IDENTIFIER);
+			match(ID);
 			}
 		}
 		catch (RecognitionException re) {
@@ -806,8 +806,8 @@ public class DQLParser extends Parser {
 	public static class ValueContext extends ParserRuleContext {
 		public TerminalNode PHRASE() { return getToken(DQLParser.PHRASE, 0); }
 		public TerminalNode NUMBER() { return getToken(DQLParser.NUMBER, 0); }
-		public TermSearchContext termSearch() {
-			return getRuleContext(TermSearchContext.class,0);
+		public TokenSearchContext tokenSearch() {
+			return getRuleContext(TokenSearchContext.class,0);
 		}
 		public ValueContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -836,11 +836,11 @@ public class DQLParser extends Parser {
 				match(NUMBER);
 				}
 				break;
-			case IDENTIFIER:
+			case ID:
 				enterOuterAlt(_localctx, 3);
 				{
 				setState(110);
-				termSearch();
+				tokenSearch();
 				}
 				break;
 			default:

@@ -29,19 +29,19 @@ LPAREN
 RPAREN
 PHRASE
 NUMBER
-IDENTIFIER
+ID
 WS
 
 rule names:
 query
 operatorExpression
 orExpression
-orTerm
+term
 andExpression
 primaryExpression
 comparisonExpression
-fieldExpression
-termSearch
+keyValueExpression
+tokenSearch
 groupExpression
 groupContent
 field
