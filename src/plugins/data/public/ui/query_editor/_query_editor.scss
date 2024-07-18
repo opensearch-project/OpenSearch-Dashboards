@@ -53,6 +53,12 @@
   }
 }
 
+.osdQueryEditor__dataSetNavigatorWrapper {
+  :first-child {
+    border-bottom: $euiBorderThin !important;
+  }
+}
+
 @include euiBreakpoint("xs", "s") {
   .osdQueryEditor--withDatePicker {
     > :first-child {

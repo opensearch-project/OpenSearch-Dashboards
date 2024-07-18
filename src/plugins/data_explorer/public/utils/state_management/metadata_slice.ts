@@ -7,8 +7,8 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DataExplorerServices } from '../../types';
 
 interface DataSourceMeta {
-  ref: string // MDS ID
-  dsName?: string // flint datasource
+  ref: string; // MDS ID
+  dsName?: string; // flint datasource
 }
 
 export interface DataSet {
@@ -17,7 +17,7 @@ export interface DataSet {
   meta?: {
     timestampField: string;
     mapping?: any;
-  }
+  };
   type?: 'dataset' | 'temporary';
 }
 
@@ -40,14 +40,13 @@ export const getPreloadedState = async ({
       .getStateTransfer(scopedHistory)
       .getIncomingEditorState({ keysToRemoveAfterFetch: ['id', 'input'] }) || {};
   const defaultIndexPattern = await data.indexPatterns.getDefault();
-  data.ui.Settings.setSelectedDataSet({ id: defaultIndexPattern?.id, name: defaultIndexPattern?.title });
   const preloadedState: MetadataState = {
     ...initialState,
     originatingApp,
     indexPattern: defaultIndexPattern?.id,
     dataset: {
-      id: defaultIndexPattern?.id
-    }
+      id: defaultIndexPattern?.id,
+    },
   };
 
   return preloadedState;

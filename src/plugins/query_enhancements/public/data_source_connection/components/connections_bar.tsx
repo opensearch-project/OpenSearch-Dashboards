@@ -8,7 +8,6 @@ import { EuiPortal } from '@elastic/eui';
 import { distinctUntilChanged } from 'rxjs/operators';
 import { ToastsSetup } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart, QueryEditorExtensionDependencies } from '../../../../data/public';
-import { DataSourceSelector } from '../../../../data_source_management/public';
 import { ConnectionsService } from '../services';
 
 interface ConnectionsProps {
@@ -75,19 +74,7 @@ export const ConnectionsBar: React.FC<ConnectionsProps> = ({ connectionsService,
         containerRef.current = node;
       }}
     >
-      <div className="dataSourceSelect">
-        <DataSourceSelector
-          savedObjectsClient={connectionsService.getSavedObjects().client}
-          notifications={toasts}
-          disabled={false}
-          fullWidth={false}
-          removePrepend={true}
-          isClearable={false}
-          onSelectedDataSource={(dataSource) =>
-            handleSelectedConnection(dataSource[0]?.id || undefined)
-          }
-        />
-      </div>
+      <div className="dataSourceSelect" />
     </EuiPortal>
   );
 };

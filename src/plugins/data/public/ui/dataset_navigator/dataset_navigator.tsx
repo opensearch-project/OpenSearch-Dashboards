@@ -5,38 +5,15 @@
 
 import React, { useEffect, useState } from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  EuiContextMenuItem,
-  EuiContextMenuPanelDescriptor,
-  EuiPopover,
-} from '@elastic/eui';
-import {
-  DataSetWithDataSource,
-  DataSource,
-  IndexPatternOption,
-} from '../../data_sources/datasource';
-import { DataSourceOption } from '../../data_sources/datasource_selector/types';
-import { IndexPatternSelectable } from './index_pattern_selectable';
-import {
-  HttpSetup,
-  SavedObjectsClientContract,
-  SimpleSavedObject,
-} from 'opensearch-dashboards/public';
-import { DataSourceAttributes } from '../../../../data_source_management/public/types';
-import { ISearchStart } from '../../search/types';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { SavedObjectsClientContract, SimpleSavedObject } from 'opensearch-dashboards/public';
 import { map, scan } from 'rxjs/operators';
-import { IndexPatternsContract } from '../..';
-import { useTypedDispatch, useTypedSelector } from '../../../../data_explorer/public';
-import { getUiService, getIndexPatterns } from '../../services';
-
-const getAllIndexPatterns = async (indexPatternsService: IndexPatternsContract) => {
-  return indexPatternsService.getIdsWithTitle();
-};
+import { ISearchStart } from '../../search/types';
+import { IIndexPattern, IndexPatternsContract } from '../..';
+import { getUiService, getIndexPatterns, getSearchService } from '../../services';
 
 const getClusters = async (savedObjectsClient: SavedObjectsClientContract) => {
-  return await savedObjectsClient.find<DataSourceAttributes>({
+  return await savedObjectsClient.find({
     type: 'data-source',
     perPage: 10000,
   });
@@ -85,7 +62,7 @@ const buildSearchRequest = (showAllIndices: boolean, pattern: string, dataSource
         },
       },
     },
-    dataSourceId: dataSourceId,
+    dataSourceId,
   };
 
   return request;
@@ -108,28 +85,21 @@ interface DataSetOption {
 }
 
 interface DataSetNavigatorProps {
-  http: HttpSetup;
-  search: ISearchStart;
   savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns: any;
-  handleSourceSelection: any;
+  indexPatterns: Array<IIndexPattern | string>;
 }
 
-export const DataSetNavigator = ({
-  http,
-  search,
-  savedObjectsClient,
-  indexPatterns,
-  handleSourceSelection,
-}: DataSetNavigatorProps) => {
+export const DataSetNavigator = ({ savedObjectsClient, indexPatterns }: DataSetNavigatorProps) => {
   const [isDataSetNavigatorOpen, setIsDataSetNavigatorOpen] = useState(false);
-  const [clusterList, setClusterList] = useState<SimpleSavedObject<DataSourceAttributes>[]>([]);
+  const [clusterList, setClusterList] = useState<SimpleSavedObject[]>([]);
   const [indexList, setIndexList] = useState<DataSetOption[]>([]);
   const [selectedCluster, setSelectedCluster] = useState<any>();
-  const [selectedIndex, setSelectedIndex] = useState<string>('');
-  const [selectedField, setSelectedField] = useState<string>('');
-  const [selectedDataSet, setSelectedDataSet] = useState<DataSetOption | undefined>();
+  const [selectedDataSet, setSelectedDataSet] = useState<DataSetOption>({
+    id: indexPatterns[0]?.id,
+    name: indexPatterns[0]?.title,
+  });
   const [indexPatternList, setIndexPatternList] = useState<DataSetOption[]>([]);
+  const search = getSearchService();
   const uiService = getUiService();
   const indexPatternsService = getIndexPatterns();
 
@@ -137,13 +107,13 @@ export const DataSetNavigator = ({
   const closePopover = () => setIsDataSetNavigatorOpen(false);
 
   const onDataSetClick = async (ds: DataSetOption) => {
-    const existingIndexPattern = indexPatterns.getByTitle(ds.id, true);
-    const dataSet = await indexPatterns.create(
+    const existingIndexPattern = indexPatternsService.getByTitle(ds.id, true);
+    const dataSet = await indexPatternsService.create(
       { id: ds.id, title: ds.name },
       !existingIndexPattern?.id
     );
     // save to cache by title because the id is not unique for temporary index pattern created
-    indexPatterns.saveToCache(dataSet.title, dataSet);
+    indexPatternsService.saveToCache(dataSet.title, dataSet);
     uiService.Settings.setSelectedDataSet({
       id: dataSet.id,
       name: dataSet.title,
@@ -155,7 +125,6 @@ export const DataSetNavigator = ({
 
   useEffect(() => {
     const subscription = uiService.Settings.getSelectedDataSet$().subscribe((dataSet) => {
-      console.log('dataset in subscription:', dataSet);
       if (dataSet) {
         setSelectedDataSet(dataSet);
       }
@@ -184,22 +153,9 @@ export const DataSetNavigator = ({
   useEffect(() => {
     if (selectedCluster) {
       // Get all indexes
-      Promise.all([getIndices(search, selectedCluster.id)]).then((res) => {
-        if (res && res.length > 0) {
-          console.log(res);
-          console.log('res', Object.values(res?.[0]));
-          setIndexList(
-            Object.values(res?.[0]).map((index: any) => ({
-              ...index,
-              // panel: 4,
-              onClick: () => onDataSetClick({ name: index.name, id: index.name }),
-            }))
-          );
-        }
-      });
       getIndices(search, selectedCluster.id).then((res) => {
         setIndexList(
-          Object.values(res?.[0]).map((index: any) => ({
+          res.map((index: { name: string }) => ({
             name: index.name,
             id: index.name,
             dataSourceRef: selectedCluster.id,
@@ -207,18 +163,7 @@ export const DataSetNavigator = ({
         );
       });
     }
-  }, [selectedCluster, setIndexList, setSelectedIndex]);
-
-  useEffect(() => {
-    if (selectedIndex) {
-      Promise.all([
-        indexPatterns.getFieldsForWildcard({
-          pattern: selectedIndex,
-          dataSourceId: selectedCluster.id,
-        }),
-      ]).then((res) => console.log(res));
-    }
-  }, [selectedIndex]);
+  }, [search, selectedCluster, setIndexList]);
 
   const dataSetButton = (
     <EuiButtonEmpty
@@ -241,16 +186,16 @@ export const DataSetNavigator = ({
     >
       <EuiContextMenu
         initialPanelId={0}
+        className="datasetNavigator"
         panels={[
           {
             id: 0,
-            title: 'DATA SETS',
+            title: 'DATA',
             items: [
               {
                 name: 'Index Patterns',
                 panel: 1,
               },
-              // Use spread operator with conditional mapping
               ...(clusterList
                 ? clusterList.map((cluster) => ({
                     name: cluster.attributes.title,
@@ -281,9 +226,6 @@ export const DataSetNavigator = ({
               {
                 name: 'Indexes',
                 panel: 3,
-              },
-              {
-                name: 'Connected Data Sources',
               },
             ],
           },
