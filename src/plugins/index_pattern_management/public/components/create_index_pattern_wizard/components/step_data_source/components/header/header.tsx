@@ -6,7 +6,7 @@
 import React, { Fragment, useState } from 'react';
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiRadio,
@@ -212,7 +212,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               data-test-subj="createIndexPatternStepDataSourceNextStepButton"
               fill
               iconSide="right"
@@ -224,7 +224,7 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
                 id="indexPatternManagement.createIndexPattern.step.nextStepButton"
                 defaultMessage="Next step"
               />
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </div>

@@ -41,9 +41,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiComboBox,
-  EuiFieldText,
-  EuiFormRow,
+  EuiCompressedComboBox,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
@@ -128,7 +128,7 @@ const StandardDeviationAggUi = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('field')}
             label={
               <FormattedMessage
@@ -145,10 +145,10 @@ const StandardDeviationAggUi = (props) => {
               value={model.field}
               onChange={handleSelectChange('field')}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('sigma')}
             label={
               <FormattedMessage
@@ -157,11 +157,11 @@ const StandardDeviationAggUi = (props) => {
               />
             }
           >
-            <EuiFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
-          </EuiFormRow>
+            <EuiCompressedFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('mode')}
             label={
               <FormattedMessage
@@ -170,13 +170,13 @@ const StandardDeviationAggUi = (props) => {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               options={modeOptions}
               selectedOptions={selectedModeOption ? [selectedModeOption] : []}
               onChange={handleSelectChange('mode')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

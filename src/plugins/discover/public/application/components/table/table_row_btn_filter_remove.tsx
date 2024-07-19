@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiToolTip, EuiSmallButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 export interface Props {
@@ -53,7 +53,7 @@ export function DocViewTableRowBtnFilterRemove({ onClick, disabled = false }: Pr
 
   return (
     <EuiToolTip content={tooltipContent}>
-      <EuiButtonIcon
+      <EuiSmallButtonIcon
         aria-label={i18n.translate('discover.docViews.table.filterOutValueButtonAriaLabel', {
           defaultMessage: 'Filter out value',
         })}

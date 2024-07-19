@@ -32,7 +32,7 @@ import React from 'react';
 import { History } from 'history';
 import {
   EuiBetaBadge,
-  EuiButton,
+  EuiSmallButton,
   EuiEmptyPrompt,
   EuiIcon,
   EuiLink,
@@ -195,7 +195,7 @@ export const getNoItemsMessage = (createItem: () => void) => (
       </EuiText>
     }
     actions={
-      <EuiButton
+      <EuiSmallButton
         onClick={createItem}
         fill
         iconType="plus"
@@ -205,7 +205,7 @@ export const getNoItemsMessage = (createItem: () => void) => (
           id="visualize.listing.createNew.createButtonLabel"
           defaultMessage="Create new visualization"
         />
-      </EuiButton>
+      </EuiSmallButton>
     }
   />
 );

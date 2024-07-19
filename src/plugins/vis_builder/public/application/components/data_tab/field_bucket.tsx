@@ -6,7 +6,7 @@
 import React from 'react';
 import {
   EuiText,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -84,7 +84,7 @@ export function FieldBucket({ bucket, field }: FieldBucketProps) {
         {isFilterableField && (
           <EuiFlexItem grow={false}>
             <div>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 className="vbFieldDetails__filterButton"
                 iconSize="s"
                 iconType="plusInCircle"
@@ -92,7 +92,7 @@ export function FieldBucket({ bucket, field }: FieldBucketProps) {
                 aria-label={addLabel}
                 data-test-subj={`plus-${fieldName}-${value}`}
               />
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 className="vbFieldDetails__filterButton"
                 iconSize="s"
                 iconType="minusInCircle"

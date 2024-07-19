@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, PopoverAnchorPosition } from '@elastic/eui';
+import {
+  EuiCompressedComboBox,
+  EuiComboBoxOptionOption,
+  PopoverAnchorPosition,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
 import { getUiService } from '../../services';
@@ -73,7 +77,7 @@ export const QueryLanguageSelector = (props: Props) => {
   uiService.Settings.setUserQueryLanguage(props.language);
 
   return (
-    <EuiComboBox
+    <EuiCompressedComboBox
       fullWidth
       className="languageSelector"
       data-test-subj="languageSelector"

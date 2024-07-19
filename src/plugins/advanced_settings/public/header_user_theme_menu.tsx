@@ -7,17 +7,17 @@ import React, { ChangeEvent, SyntheticEvent, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiHeaderSectionItemButton,
   EuiIcon,
   EuiLink,
   EuiPopover,
   EuiPopoverTitle,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiSpacer,
 } from '@elastic/eui';
 import { CoreStart } from 'opensearch-dashboards/public';
@@ -133,10 +133,10 @@ export const HeaderUserThemeMenu = () => {
   // TODO: fix focus behavior
   const appearanceContent = (
     <div style={{ maxWidth: 300 }}>
-      <EuiFormRow label="Theme version" helpText={`Default: ${defaultTheme}`}>
-        <EuiSelect options={themeOptions} value={theme} onChange={onThemeChange} />
-      </EuiFormRow>
-      <EuiFormRow
+      <EuiCompressedFormRow label="Theme version" helpText={`Default: ${defaultTheme}`}>
+        <EuiCompressedSelect options={themeOptions} value={theme} onChange={onThemeChange} />
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
         label="Screen mode"
         helpText={`Default: ${
           screenModeOptions.find((t) => {
@@ -145,26 +145,30 @@ export const HeaderUserThemeMenu = () => {
           })?.text
         }`}
       >
-        <EuiSelect options={screenModeOptions} value={screenMode} onChange={onScreenModeChange} />
-      </EuiFormRow>
+        <EuiCompressedSelect
+          options={screenModeOptions}
+          value={screenMode}
+          onChange={onScreenModeChange}
+        />
+      </EuiCompressedFormRow>
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiFormRow hasEmptyLabelSpace>
+          <EuiCompressedFormRow hasEmptyLabelSpace>
             <EuiLink
               target="_blank"
               href="https://forum.opensearch.org/t/feedback-on-dark-mode-experience/15725"
             >
               Theme feedback
             </EuiLink>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow hasEmptyLabelSpace>
+          <EuiCompressedFormRow hasEmptyLabelSpace>
             {/* TODO: disable submit until changes */}
-            <EuiButton fill onClick={onAppearanceSubmit} type="submit">
+            <EuiSmallButton fill onClick={onAppearanceSubmit} type="submit">
               Apply
-            </EuiButton>
-          </EuiFormRow>
+            </EuiSmallButton>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

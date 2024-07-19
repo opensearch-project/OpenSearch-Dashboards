@@ -33,7 +33,7 @@ import { i18n } from '@osd/i18n';
 
 import classNames from 'classnames';
 import {
-  EuiTextArea,
+  EuiCompressedTextArea,
   EuiOutsideClickDetector,
   PopoverAnchorPosition,
   EuiFlexGroup,
@@ -642,7 +642,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
               className="euiFormControlLayout__childrenWrapper osdQueryBar__textareaWrap"
               ref={this.queryBarInputDivRefInstance}
             >
-              <EuiTextArea
+              <EuiCompressedTextArea
                 placeholder={
                   this.props.placeholder ||
                   i18n.translate('data.query.queryBar.searchInputPlaceholder', {
@@ -686,7 +686,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
                 isInvalid={this.props.isInvalid}
               >
                 {this.getQueryString()}
-              </EuiTextArea>
+              </EuiCompressedTextArea>
             </div>
             <EuiPortal>
               <SuggestionsComponent

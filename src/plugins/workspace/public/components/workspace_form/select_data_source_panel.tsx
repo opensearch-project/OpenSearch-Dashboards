@@ -5,13 +5,13 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  EuiButton,
-  EuiFormRow,
+  EuiSmallButton,
+  EuiCompressedFormRow,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiComboBoxOptionOption,
   EuiFormLabel,
 } from '@elastic/eui';
@@ -95,7 +95,7 @@ export const SelectDataSourcePanel = ({
       </EuiFormLabel>
       <EuiSpacer size="s" />
       {selectedDataSources.map(({ id, title }, index) => (
-        <EuiFormRow
+        <EuiCompressedFormRow
           key={index}
           isInvalid={!!errors?.[index]}
           error={errors?.[index]?.message}
@@ -103,7 +103,7 @@ export const SelectDataSourcePanel = ({
         >
           <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
             <EuiFlexItem style={{ maxWidth: 400 }}>
-              <EuiComboBox
+              <EuiCompressedComboBox
                 data-test-subj="workspaceForm-select-dataSource-comboBox"
                 singleSelection
                 options={dataSourcesOptions}
@@ -133,10 +133,10 @@ export const SelectDataSourcePanel = ({
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       ))}
 
-      <EuiButton
+      <EuiSmallButton
         fill
         fullWidth={false}
         onClick={handleAddNewOne}
@@ -145,7 +145,7 @@ export const SelectDataSourcePanel = ({
         {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
           defaultMessage: 'Add New',
         })}
-      </EuiButton>
+      </EuiSmallButton>
     </div>
   );
 };

@@ -4,14 +4,14 @@ exports[`should render popover when appLinks is not empty 1`] = `
 <EuiPopover
   anchorPosition="downCenter"
   button={
-    <EuiButton
+    <EuiSmallButton
       aria-label="View Sample eCommerce orders"
       iconSide="right"
       iconType="arrowDown"
       onClick={[Function]}
     >
       View data
-    </EuiButton>
+    </EuiSmallButton>
   }
   closePopover={[Function]}
   data-test-subj="launchSampleDataSetecommerce"
@@ -57,11 +57,11 @@ exports[`should render popover when appLinks is not empty 1`] = `
 `;
 
 exports[`should render simple button when appLinks is empty 1`] = `
-<EuiButton
+<EuiSmallButton
   aria-label="View Sample eCommerce orders"
   data-test-subj="launchSampleDataSetecommerce"
   onClick={[Function]}
 >
   View data
-</EuiButton>
+</EuiSmallButton>
 `;

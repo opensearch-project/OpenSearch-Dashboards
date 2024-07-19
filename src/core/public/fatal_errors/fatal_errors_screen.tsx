@@ -29,8 +29,8 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiCallOut,
   EuiCodeBlock,
   EuiEmptyPrompt,
@@ -125,7 +125,7 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
                 </EuiText>
               }
               actions={[
-                <EuiButton
+                <EuiSmallButton
                   color="primary"
                   fill
                   onClick={this.onClickClearSession}
@@ -135,13 +135,13 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
                     id="core.fatalErrors.clearYourSessionButtonLabel"
                     defaultMessage="Clear your session"
                   />
-                </EuiButton>,
-                <EuiButtonEmpty onClick={this.onClickGoBack} data-test-subj="goBack">
+                </EuiSmallButton>,
+                <EuiSmallButtonEmpty onClick={this.onClickGoBack} data-test-subj="goBack">
                   <FormattedMessage
                     id="core.fatalErrors.goBackButtonLabel"
                     defaultMessage="Go back"
                   />
-                </EuiButtonEmpty>,
+                </EuiSmallButtonEmpty>,
               ]}
             />
             {this.state.errors.map((error, i) => (

@@ -97,7 +97,7 @@ export type ChromeHelpExtensionMenuDocumentationLink = EuiButtonEmptyProps & {
 /** @public */
 export type ChromeHelpExtensionMenuCustomLink = EuiButtonEmptyProps & {
   /**
-   * Extend EuiButtonEmpty to provide extra functionality
+   * Extend EuiSmallButtonEmpty to provide extra functionality
    */
   linkType: 'custom';
   /**

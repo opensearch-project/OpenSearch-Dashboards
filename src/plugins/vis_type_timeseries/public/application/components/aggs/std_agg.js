@@ -39,7 +39,7 @@ import {
   htmlIdGenerator,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFormLabel,
   EuiSpacer,
 } from '@elastic/eui';
@@ -86,7 +86,7 @@ export function StandardAgg(props) {
 
         {model.type !== 'count' ? (
           <EuiFlexItem>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('field')}
               label={
                 <FormattedMessage id="visTypeTimeseries.stdAgg.fieldLabel" defaultMessage="Field" />
@@ -103,7 +103,7 @@ export function StandardAgg(props) {
                 uiRestrictions={uiRestrictions}
                 fullWidth
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
