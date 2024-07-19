@@ -1,3 +1,5 @@
+$osdDocTableCellPadding: calc($ouiSizeM / 2); // corresponds to DataGrid medium cellPadding (6px)
+
 .osdDocTable__detailsParent {
   border-top: none !important;
 }
@@ -8,7 +10,7 @@
 }
 
 .osd-table td.osdDocTableCell__toggleDetails {
-  padding: 5px 0 0 4px;
+  padding: 4px 0 0 4px;
 }
 
 /**
@@ -27,7 +29,7 @@
 
     // Vertically align the button group with the first line of text
     // 8px is set by .table and 2em is the line-height
-    top: calc(2em / 2 + 8px);
+    top: calc(2em / 2 + $osdDocTableCellPadding);
     transform: translateY(-50%);
 
     // Stick it to the right but use the padding of the container to distance it from the edge (below)
@@ -80,6 +82,13 @@
   &.eui-textNoWrap {
     // To make sure the time-series column never stretches
     width: 1%;
+  }
+}
+
+// nested for specificity
+.osd-table {
+  .osdDocTableCell {
+    padding: $osdDocTableCellPadding;
   }
 }
 

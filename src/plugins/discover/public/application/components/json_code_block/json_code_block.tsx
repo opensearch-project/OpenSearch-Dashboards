@@ -39,7 +39,7 @@ export function JsonCodeBlock({ hit }: DocViewRenderProps) {
     defaultMessage: 'Read only JSON view of an opensearch document',
   });
   return (
-    <EuiCodeBlock aria-label={label} language="json" isCopyable paddingSize="s">
+    <EuiCodeBlock aria-label={label} language="json" isCopyable paddingSize="s" fontSize="s">
       {stringify(hit, null, 2)}
     </EuiCodeBlock>
   );
