@@ -58,15 +58,6 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
           }
         });
     };
-    data.ui.Settings.getSelectedDataSet$().subscribe((dataSet) => {
-      if (dataSet) {
-        batch(() => {
-          store!.dispatch(updateDataSet(dataSet));
-          store!.dispatch(updateIndexPattern(dataSet.id));
-        });
-        fetchIndexPatternDetails(dataSet.id);
-      }
-    });
 
     if (!indexPatternIdFromState) {
       data.indexPatterns.getCache().then((indexPatternList) => {
@@ -81,14 +72,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
     return () => {
       isMounted = false;
     };
-  }, [
-    indexPatternIdFromState,
-    data.indexPatterns,
-    toastNotifications,
-    config,
-    store,
-    data.ui.Settings,
-  ]);
+  }, [indexPatternIdFromState, data.indexPatterns, toastNotifications, config, store]);
 
   return indexPattern;
 };

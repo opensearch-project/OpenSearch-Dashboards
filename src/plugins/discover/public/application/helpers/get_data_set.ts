@@ -3,23 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IndexPattern, IndexPatternsContract } from '../../../../data/public';
+import { DataSetOption, IndexPattern, IndexPatternsContract } from '../../../../data/public';
 import { SearchData } from '../view_components/utils/use_search';
 
 function getDataSet(
-  indexPattern: IndexPattern | undefined,
+  dataSet: IndexPattern | DataSetOption | undefined,
   state: SearchData,
   indexPatternsService: IndexPatternsContract
 ) {
-  if (!indexPattern) {
+  if (!dataSet) {
     return;
   }
-  return (
-    (state.title &&
-      state.title !== indexPattern?.title &&
-      indexPatternsService.getByTitle(state.title!, true)) ||
-    indexPattern
-  );
+  if (dataSet instanceof IndexPattern) {
+    return (
+      (state.title &&
+        state.title !== dataSet?.title &&
+        indexPatternsService.getByTitle(state.title!, true)) ||
+      dataSet
+    );
+  }
+  return dataSet;
 }
 
 export { getDataSet };

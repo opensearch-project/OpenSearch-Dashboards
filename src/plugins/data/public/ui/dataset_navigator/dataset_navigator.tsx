@@ -3,95 +3,143 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 
 import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { SavedObjectsClientContract, SimpleSavedObject } from 'opensearch-dashboards/public';
-import { map, scan } from 'rxjs/operators';
-import { ISearchStart } from '../../search/types';
 import { IIndexPattern } from '../..';
-import { getUiService, getIndexPatterns, getSearchService } from '../../services';
+import { getUiService, getIndexPatterns, getSearchService, getQueryService } from '../../services';
+import { fetchClusters } from './fetch_clusters';
+import { fetchIndices } from './fetch_indices';
+import _ from 'lodash';
+import { fetchIndexPatterns } from './fetch_index_patterns';
 
-const getClusters = async (savedObjectsClient: SavedObjectsClientContract) => {
-  return await savedObjectsClient.find({
-    type: 'data-source',
-    perPage: 10000,
-  });
-};
-
-export const searchResponseToArray = (showAllIndices: boolean) => (response) => {
-  const { rawResponse } = response;
-  if (!rawResponse.aggregations) {
-    return [];
-  } else {
-    return rawResponse.aggregations.indices.buckets
-      .map((bucket: { key: string }) => {
-        return bucket.key;
-      })
-      .filter((indexName: string) => {
-        if (showAllIndices) {
-          return true;
-        } else {
-          return !indexName.startsWith('.');
-        }
-      })
-      .map((indexName: string) => {
-        return {
-          name: indexName,
-          // item: {},
-        };
-      });
-  }
-};
-
-const buildSearchRequest = (showAllIndices: boolean, pattern: string, dataSourceId?: string) => {
-  const request = {
-    params: {
-      ignoreUnavailable: true,
-      expand_wildcards: showAllIndices ? 'all' : 'open',
-      index: pattern,
-      body: {
-        size: 0, // no hits
-        aggs: {
-          indices: {
-            terms: {
-              field: '_index',
-              size: 100,
-            },
-          },
-        },
-      },
-    },
-    dataSourceId,
-  };
-
-  return request;
-};
-
-const getIndices = async (search: ISearchStart, dataSourceId: string) => {
-  const request = buildSearchRequest(true, '*', dataSourceId);
-  return search
-    .getDefaultSearchInterceptor()
-    .search(request)
-    .pipe(map(searchResponseToArray(true)))
-    .pipe(scan((accumulator = [], value) => accumulator.join(value)))
-    .toPromise()
-    .catch(() => []);
-};
-
-interface DataSetOption {
+export interface DataSetOption {
   id: string;
   name: string;
   dataSourceRef?: string;
 }
 
-interface DataSetNavigatorProps {
+export interface DataSetNavigatorProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: Array<IIndexPattern | string>;
-  onSubmit: any;
+  dataSetId: string;
 }
 
-export const DataSetNavigator = ({ savedObjectsClient, indexPatterns, onSubmit }: DataSetNavigatorProps) => {
+interface DataSetNavigatorState {
+  isLoading: boolean;
+  options: [];
+  selectedDataSet: DataSetOption | undefined;
+  searchValue: string | undefined;
+  dataSourceIdToTitle: Map<string, string>;
+}
+
+// eslint-disable-next-line import/no-default-export
+export default class DataSetNavigator extends Component<DataSetNavigatorProps> {
+  private isMounted: boolean = false;
+  state: DataSetNavigatorState;
+
+
+  constructor(props: DataSetNavigatorProps) {
+    super(props);
+
+    this.state = {
+      isLoading: false,
+      options: [],
+      selectedDataSet: undefined,
+      searchValue: undefined,
+      dataSourceIdToTitle: new Map(),
+    };
+  }
+
+  debouncedFetch = _.debounce(async (searchValue: string) => {
+    const { savedObjectsClient } = this.props;
+
+    const savedObjectFields = ['title'];
+    let savedObjects = await fetchIndexPatterns(savedObjectsClient, searchValue, savedObjectFields);
+
+
+
+    if (!this.isMounted) {
+      return;
+    }
+
+    // We need this check to handle the case where search results come back in a different
+    // order than they were sent out. Only load results for the most recent search.
+    if (searchValue === this.state.searchValue) {
+      const dataSourcesToFetch: Array<{ type: string; id: string }> = [];
+      const dataSourceIdSet = new Set();
+      savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
+        const dataSourceReference = getDataSourceReference(indexPatternSavedObject.references);
+        if (
+          dataSourceReference &&
+          !this.state.dataSourceIdToTitle.has(dataSourceReference.id) &&
+          !dataSourceIdSet.has(dataSourceReference.id)
+        ) {
+          dataSourceIdSet.add(dataSourceReference.id);
+          dataSourcesToFetch.push({ type: 'data-source', id: dataSourceReference.id });
+        }
+      });
+
+      const dataSourceIdToTitleToUpdate = new Map();
+
+      if (dataSourcesToFetch.length > 0) {
+        const resp = await savedObjectsClient.bulkGet(dataSourcesToFetch);
+        resp.savedObjects.map((dataSourceSavedObject: SimpleSavedObject<any>) => {
+          dataSourceIdToTitleToUpdate.set(
+            dataSourceSavedObject.id,
+            dataSourceSavedObject.attributes.title
+          );
+        });
+      }
+
+      const options = savedObjects.map((indexPatternSavedObject: SimpleSavedObject<any>) => {
+        const dataSourceReference = getDataSourceReference(indexPatternSavedObject.references);
+        if (dataSourceReference) {
+          const dataSourceTitle =
+            this.state.dataSourceIdToTitle.get(dataSourceReference.id) ||
+            dataSourceIdToTitleToUpdate.get(dataSourceReference.id) ||
+            dataSourceReference.id;
+          return {
+            label: `${concatDataSourceWithIndexPattern(
+              dataSourceTitle,
+              indexPatternSavedObject.attributes.title
+            )}`,
+            value: indexPatternSavedObject.id,
+          };
+        }
+        return {
+          label: indexPatternSavedObject.attributes.title,
+          value: indexPatternSavedObject.id,
+        };
+      });
+
+      if (dataSourceIdToTitleToUpdate.size > 0) {
+        const mergedDataSourceIdToTitle = new Map();
+        this.state.dataSourceIdToTitle.forEach((k, v) => {
+          mergedDataSourceIdToTitle.set(k, v);
+        });
+        dataSourceIdToTitleToUpdate.forEach((k, v) => {
+          mergedDataSourceIdToTitle.set(k, v);
+        });
+        this.setState({
+          dataSourceIdToTitle: mergedDataSourceIdToTitle,
+          isLoading: false,
+          options,
+        });
+      } else {
+        this.setState({
+          isLoading: false,
+          options,
+        });
+      }
+
+      if (onNoIndexPatterns && searchValue === '' && options.length === 0) {
+        onNoIndexPatterns();
+      }
+    }
+  }, 300);
+  
   const [isDataSetNavigatorOpen, setIsDataSetNavigatorOpen] = useState(false);
   const [clusterList, setClusterList] = useState<SimpleSavedObject[]>([]);
   const [indexList, setIndexList] = useState<DataSetOption[]>([]);
@@ -103,24 +151,13 @@ export const DataSetNavigator = ({ savedObjectsClient, indexPatterns, onSubmit }
   const [indexPatternList, setIndexPatternList] = useState<DataSetOption[]>([]);
   const search = getSearchService();
   const uiService = getUiService();
+  const queryService = getQueryService();
   const indexPatternsService = getIndexPatterns();
 
   const onButtonClick = () => setIsDataSetNavigatorOpen((isOpen) => !isOpen);
   const closePopover = () => setIsDataSetNavigatorOpen(false);
 
   const onDataSetClick = async (ds: DataSetOption) => {
-    const existingIndexPattern = indexPatternsService.getByTitle(ds.id, true);
-    const dataSet = await indexPatternsService.create(
-      { id: ds.id, title: ds.name },
-      !existingIndexPattern?.id
-    );
-    // save to cache by title because the id is not unique for temporary index pattern created
-    indexPatternsService.saveToCache(dataSet.title, dataSet);
-    uiService.Settings.setSelectedDataSet({
-      id: dataSet.id,
-      name: dataSet.title,
-      dataSourceRef: selectedCluster?.id ?? undefined,
-    });
     setSelectedDataSet(ds);
     onSubmit(ds);
     closePopover();
@@ -148,7 +185,7 @@ export const DataSetNavigator = ({ savedObjectsClient, indexPatterns, onSubmit }
   }, [indexPatternsService]);
 
   useEffect(() => {
-    Promise.all([getClusters(savedObjectsClient)]).then((res) => {
+    Promise.all([fetchClusters(savedObjectsClient)]).then((res) => {
       setClusterList(res.length > 0 ? res?.[0].savedObjects : []);
     });
   }, [savedObjectsClient]);
@@ -156,7 +193,7 @@ export const DataSetNavigator = ({ savedObjectsClient, indexPatterns, onSubmit }
   useEffect(() => {
     if (selectedCluster) {
       // Get all indexes
-      getIndices(search, selectedCluster.id).then((res) => {
+      fetchIndices(search, selectedCluster.id).then((res) => {
         setIndexList(
           res.map((index: { name: string }) => ({
             name: index.name,
