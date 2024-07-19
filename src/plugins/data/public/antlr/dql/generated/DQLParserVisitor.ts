@@ -14,7 +14,6 @@ import { TokenSearchContext } from "./DQLParser.js";
 import { GroupExpressionContext } from "./DQLParser.js";
 import { GroupContentContext } from "./DQLParser.js";
 import { FieldContext } from "./DQLParser.js";
-import { RangeValueContext } from "./DQLParser.js";
 import { ValueContext } from "./DQLParser.js";
 import { ComparisonOperatorContext } from "./DQLParser.js";
 
@@ -93,12 +92,6 @@ export class DQLParserVisitor<Result> extends AbstractParseTreeVisitor<Result> {
      * @return the visitor result
      */
     visitField?: (ctx: FieldContext) => Result;
-    /**
-     * Visit a parse tree produced by `DQLParser.rangeValue`.
-     * @param ctx the parse tree
-     * @return the visitor result
-     */
-    visitRangeValue?: (ctx: RangeValueContext) => Result;
     /**
      * Visit a parse tree produced by `DQLParser.value`.
      * @param ctx the parse tree
