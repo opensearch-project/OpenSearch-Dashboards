@@ -241,7 +241,7 @@ export const getTopNavLinks = (
     }),
     run() {
       inspector.open(inspectorAdapters, {
-        title: savedSearch?.title,
+        title: savedSearch?.title || undefined,
       });
     },
   };

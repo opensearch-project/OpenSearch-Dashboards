@@ -2,6 +2,8 @@
   width: 100%;
 
   .euiButtonEmpty__content {
+    font-size: $euiFontSizeXS;
+    font-weight: $euiFontWeightSemiBold;
     justify-content: flex-end;
   }
 }
