@@ -38,6 +38,7 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiCompressedSwitch,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import React, { Component } from 'react';
@@ -100,10 +101,14 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
       <React.Fragment>
         <EuiModalHeader>
           <EuiModalHeaderTitle>
-            <FormattedMessage
-              id="data.filter.applyFilters.popupHeader"
-              defaultMessage="Select filters to apply"
-            />
+            <EuiText size="s">
+              <h2>
+                <FormattedMessage
+                  id="data.filter.applyFilters.popupHeader"
+                  defaultMessage="Select filters to apply"
+                />
+              </h2>
+            </EuiText>
           </EuiModalHeaderTitle>
         </EuiModalHeader>
 
