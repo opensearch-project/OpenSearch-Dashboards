@@ -58,6 +58,7 @@ export interface QueryEditorProps {
   onChangeQueryEditorFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query, dateRange?: TimeRange) => void;
   getQueryStringInitialValue?: (language: string) => string;
+  getQueryStringInitialValueByDataSet?: (language: string, dataSet: any) => string;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
@@ -215,6 +216,36 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
+  private onSelectDataSet = (dataSet: any) => {
+    const newQuery = {
+      query: this.props.getQueryStringInitialValueByDataSet?.(this.props.query.language, dataSet) ?? '',
+      language: this.props.query.language,
+    };
+
+    const enhancement = this.props.settings.getQueryEnhancements(newQuery.language);
+    const fields = enhancement?.fields;
+    const newSettings: DataSettings = {
+      userQueryLanguage: newQuery.language,
+      userQueryString: newQuery.query,
+      ...(fields && { uiOverrides: { fields } }),
+    };
+    this.props.settings?.updateSettings(newSettings);
+
+    const dateRangeEnhancement = enhancement?.searchBar?.dateRange;
+    const dateRange = dateRangeEnhancement
+      ? {
+          from: dateRangeEnhancement.initialFrom!,
+          to: dateRangeEnhancement.initialTo!,
+        }
+      : undefined;
+    this.onChange(newQuery, dateRange);
+    this.onSubmit(newQuery, dateRange);
+    this.setState({
+      isDataSourcesVisible: enhancement?.searchBar?.showDataSourcesSelector ?? true,
+      isDataSetsVisible: enhancement?.searchBar?.showDataSetsSelector ?? true,
+    });
+  }
+
   // TODO: MQL consider moving language select language of setting search source here
   private onSelectLanguage = (language: string) => {
     // Send telemetry info every time the user opts in or out of kuery
@@ -369,13 +400,10 @@ export default class QueryEditorUI extends Component<Props, State> {
     const className = classNames(this.props.className);
     const headerClassName = classNames('osdQueryEditorHeader', this.props.headerClassName);
     const bannerClassName = classNames('osdQueryEditorBanner', this.props.bannerClassName);
-<<<<<<< HEAD
     const footerClassName = classNames('osdQueryEditorFooter', this.props.footerClassName);
 
     const useQueryEditor =
       this.props.query.language !== 'kuery' && this.props.query.language !== 'lucene';
-=======
->>>>>>> 0ae2098677... cleanup dataset dropdown
 
     return (
       <div className={className}>

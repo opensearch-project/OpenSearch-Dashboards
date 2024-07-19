@@ -88,9 +88,10 @@ interface DataSetOption {
 interface DataSetNavigatorProps {
   savedObjectsClient: SavedObjectsClientContract;
   indexPatterns: Array<IIndexPattern | string>;
+  onSubmit: any;
 }
 
-export const DataSetNavigator = ({ savedObjectsClient, indexPatterns }: DataSetNavigatorProps) => {
+export const DataSetNavigator = ({ savedObjectsClient, indexPatterns, onSubmit }: DataSetNavigatorProps) => {
   const [isDataSetNavigatorOpen, setIsDataSetNavigatorOpen] = useState(false);
   const [clusterList, setClusterList] = useState<SimpleSavedObject[]>([]);
   const [indexList, setIndexList] = useState<DataSetOption[]>([]);
@@ -121,6 +122,7 @@ export const DataSetNavigator = ({ savedObjectsClient, indexPatterns }: DataSetN
       dataSourceRef: selectedCluster?.id ?? undefined,
     });
     setSelectedDataSet(ds);
+    onSubmit(ds);
     closePopover();
   };
 
