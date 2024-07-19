@@ -9,9 +9,8 @@ EQ=8
 LPAREN=9
 RPAREN=10
 PHRASE=11
-NUMBER=12
-ID=13
-WS=14
+ID=12
+WS=13
 '>'=4
 '<'=5
 '>='=6
