@@ -32,7 +32,7 @@ import './discover_canvas.scss';
 import { getNewDiscoverSetting, setNewDiscoverSetting } from '../../components/utils/local_storage';
 
 // eslint-disable-next-line import/no-default-export
-export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
+export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const { data$, refetch$, indexPattern } = useDiscoverContext();
   const {
@@ -46,6 +46,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
     };
   });
+  const isEnhancementsEnabled = uiSettings.get('query:enhancements:enabled');
   const filteredColumns = filterColumns(
     columns,
     indexPattern,
@@ -171,12 +172,15 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       className="dscCanvas"
     >
       <TopNav
+        isEnhancementsEnabled={isEnhancementsEnabled}
         opts={{
           setHeaderActionMenu,
           onQuerySubmit,
+          optionalRef,
         }}
         showSaveQuery={showSaveQuery}
       />
+
       {fetchState.status === ResultStatus.NO_RESULTS && (
         <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
       )}

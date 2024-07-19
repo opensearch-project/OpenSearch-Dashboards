@@ -20,3 +20,13 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 .headerIsExpanded .deLayout {
   height: calc(100vh - #{$osdHeaderOffset * 2});
 }
+
+.mainPage {
+  overflow-x: hidden;
+  overflow-y: auto;
+
+  .navBar {
+    padding: $euiSizeS 0 $euiSizeM $euiSizeS;
+    border-bottom: $euiBorderThin;
+  }
+}

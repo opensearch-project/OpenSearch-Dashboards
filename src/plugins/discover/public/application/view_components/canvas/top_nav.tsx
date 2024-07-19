@@ -5,6 +5,8 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { Query, TimeRange } from 'src/plugins/data/common';
+import { createPortal } from 'react-dom';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AppMountParameters } from '../../../../../../core/public';
 import { connectStorageToQueryState, opensearchFilters } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -15,16 +17,19 @@ import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { useDiscoverContext } from '../context';
 import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_management';
+import './discover_canvas.scss';
 
 export interface TopNavProps {
   opts: {
     setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
     onQuerySubmit: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
+    optionalRef?: Record<string, React.RefObject<HTMLDivElement>>;
   };
   showSaveQuery: boolean;
+  isEnhancementsEnabled?: boolean;
 }
 
-export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
+export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavProps) => {
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
@@ -43,7 +48,9 @@ export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
     osdUrlStateStorage,
   } = services;
 
-  const topNavLinks = savedSearch ? getTopNavLinks(services, inspectorAdapters, savedSearch) : [];
+  const topNavLinks = savedSearch
+    ? getTopNavLinks(services, inspectorAdapters, savedSearch, isEnhancementsEnabled)
+    : [];
 
   connectStorageToQueryState(services.data.query, osdUrlStateStorage, {
     filters: opensearchFilters.FilterStateStore.APP_STATE,
@@ -88,22 +95,43 @@ export const TopNav = ({ opts, showSaveQuery }: TopNavProps) => {
   };
 
   return (
-    <TopNavMenu
-      appName={PLUGIN_ID}
-      config={topNavLinks}
-      showSearchBar
-      showDatePicker={showDatePicker}
-      showSaveQuery={showSaveQuery}
-      useDefaultBehaviors
-      setMenuMountPoint={opts.setHeaderActionMenu}
-      indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
-      // TODO after
-      // https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6833
-      // is ported to main, pass dataSource to TopNavMenu by picking
-      // commit 328e08e688c again.
-      onQuerySubmit={opts.onQuerySubmit}
-      savedQueryId={state.savedQuery}
-      onSavedQueryIdChange={updateSavedQueryId}
-    />
+    <>
+      {isEnhancementsEnabled &&
+        !!opts?.optionalRef?.topLinkRef?.current &&
+        createPortal(
+          <EuiFlexGroup gutterSize="m">
+            {topNavLinks.map((topNavLink) => (
+              <EuiFlexItem grow={false} key={topNavLink.id}>
+                <EuiButtonIcon
+                  onClick={(event) => {
+                    topNavLink.run(event.currentTarget);
+                  }}
+                  iconType={topNavLink.iconType}
+                  aria-label={topNavLink.ariaLabel}
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>,
+          opts.optionalRef.topLinkRef.current
+        )}
+      <TopNavMenu
+        className={isEnhancementsEnabled ? 'topNav hidden' : ''}
+        appName={PLUGIN_ID}
+        config={topNavLinks}
+        showSearchBar
+        showDatePicker={showDatePicker}
+        showSaveQuery={showSaveQuery}
+        useDefaultBehaviors
+        setMenuMountPoint={opts.setHeaderActionMenu}
+        indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
+        // TODO after
+        // https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6833
+        // is ported to main, pass dataSource to TopNavMenu by picking
+        // commit 328e08e688c again.
+        onQuerySubmit={opts.onQuerySubmit}
+        savedQueryId={state.savedQuery}
+        onSavedQueryIdChange={updateSavedQueryId}
+      />
+    </>
   );
 };
