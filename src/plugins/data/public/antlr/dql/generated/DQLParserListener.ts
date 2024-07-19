@@ -14,7 +14,6 @@ import { TokenSearchContext } from "./DQLParser.js";
 import { GroupExpressionContext } from "./DQLParser.js";
 import { GroupContentContext } from "./DQLParser.js";
 import { FieldContext } from "./DQLParser.js";
-import { RangeValueContext } from "./DQLParser.js";
 import { ValueContext } from "./DQLParser.js";
 import { ComparisonOperatorContext } from "./DQLParser.js";
 
@@ -134,16 +133,6 @@ export class DQLParserListener implements ParseTreeListener {
      * @param ctx the parse tree
      */
     exitField?: (ctx: FieldContext) => void;
-    /**
-     * Enter a parse tree produced by `DQLParser.rangeValue`.
-     * @param ctx the parse tree
-     */
-    enterRangeValue?: (ctx: RangeValueContext) => void;
-    /**
-     * Exit a parse tree produced by `DQLParser.rangeValue`.
-     * @param ctx the parse tree
-     */
-    exitRangeValue?: (ctx: RangeValueContext) => void;
     /**
      * Enter a parse tree produced by `DQLParser.value`.
      * @param ctx the parse tree

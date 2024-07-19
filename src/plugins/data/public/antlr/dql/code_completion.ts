@@ -100,7 +100,7 @@ class QueryVisitor extends DQLParserVisitor<{ field: string; value: string }> {
         .replace(/^["']|["']$/g, '');
       if (strippedPhrase) foundValue = strippedPhrase;
     }
-    if (ctx.value()?.tokenSearch() || ctx.value()?.NUMBER()) {
+    if (ctx.value()?.tokenSearch()) {
       const valueText = ctx.value()?.getText();
       if (valueText) foundValue = valueText;
     }
@@ -153,7 +153,6 @@ export const getSuggestions = async ({
     DQLParser.GT,
     DQLParser.LE,
     DQLParser.LT,
-    DQLParser.NUMBER,
   ]);
 
   // gets candidates at specified token index
