@@ -1,0 +1,990 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreateAcceleration renders CreateAcceleration component with default options 1`] = `
+<div
+  data-eui="EuiFlyout"
+  role="dialog"
+>
+  <button
+    data-test-subj="euiFlyoutCloseButton"
+    onClick={[Function]}
+    type="button"
+  />
+  <div
+    className="euiFlyoutHeader euiFlyoutHeader--hasBorder"
+  >
+    <div>
+      <header
+        className="euiPageHeader euiPageHeader--responsive euiPageHeader--center"
+      >
+        <div
+          className="euiPageHeaderSection"
+        >
+          <h1
+            className="euiTitle euiTitle--large"
+            data-test-subj="acceleration-header"
+          >
+            Accelerate data
+          </h1>
+        </div>
+      </header>
+      <div
+        className="euiSpacer euiSpacer--s"
+      />
+      <div
+        className="euiText euiText--small"
+      >
+        <div
+          className="euiTextColor euiTextColor--subdued"
+        >
+          Create OpenSearch Indexes from external data connections for better performance.
+           
+          <a
+            className="euiLink euiLink--primary"
+            href="https://opensearch.org/docs/latest/dashboards/management/accelerate-external-data/"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Learn more
+            <span
+              aria-label="External link"
+              className="euiLink__externalIcon"
+              data-euiicon-type="popout"
+              size="s"
+            />
+            <span
+              className="euiScreenReaderOnly"
+            >
+              (opens in a new tab or window)
+            </span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="euiFlyoutBody"
+  >
+    <div
+      className="euiFlyoutBody__overflow"
+      tabIndex={0}
+    >
+      <div
+        className="euiFlyoutBody__overflowContent"
+      >
+        <div
+          className="euiForm"
+          id="acceleration-form"
+        >
+          Array [
+            <div
+              className="euiText euiText--medium"
+              data-test-subj="datasource-selector-header"
+            >
+              <h3>
+                Select data source
+              </h3>
+            </div>,
+            <div
+              className="euiSpacer euiSpacer--s"
+            />,
+            <div
+              className="euiText euiText--small"
+            >
+              <div
+                className="euiTextColor euiTextColor--subdued"
+              >
+                Select the data source to accelerate data from. External data sources may take time to load.
+              </div>
+            </div>,
+            <div
+              className="euiSpacer euiSpacer--m"
+            />,
+            <div
+              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+            >
+              <div
+                className="euiFlexItem"
+              >
+                <dl
+                  className="euiDescriptionList euiDescriptionList--row"
+                >
+                  <dt
+                    className="euiDescriptionList__title"
+                  >
+                    Data source
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description"
+                  >
+                    test_source
+                  </dd>
+                </dl>
+              </div>
+              <div
+                className="euiFlexItem"
+              >
+                <dl
+                  className="euiDescriptionList euiDescriptionList--row"
+                >
+                  <dt
+                    className="euiDescriptionList__title"
+                  >
+                    Database
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description"
+                  >
+                    test_database
+                  </dd>
+                </dl>
+              </div>
+              <div
+                className="euiFlexItem"
+              >
+                <dl
+                  className="euiDescriptionList euiDescriptionList--row"
+                >
+                  <dt
+                    className="euiDescriptionList__title"
+                  >
+                    Table
+                  </dt>
+                  <dd
+                    className="euiDescriptionList__description"
+                  >
+                    test_table
+                  </dd>
+                </dl>
+              </div>
+            </div>,
+          ]
+          <div
+            className="euiSpacer euiSpacer--xxl"
+          />
+          Array [
+            <div
+              className="euiText euiText--medium"
+              data-test-subj="acceleration-setting-header"
+            >
+              <h3>
+                Acceleration setting
+              </h3>
+            </div>,
+            <div
+              className="euiSpacer euiSpacer--s"
+            />,
+            <div
+              className="euiFormRow"
+              id="generated-id-row"
+            >
+              <div
+                className="euiFormRow__labelWrapper"
+              >
+                <label
+                  className="euiFormLabel euiFormRow__label"
+                  htmlFor="generated-id"
+                >
+                  Acceleration type
+                </label>
+                 
+                <div
+                  className="euiText euiText--extraSmall"
+                >
+                  <a
+                    className="euiLink euiLink--primary"
+                    href="https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Help
+                    <span
+                      aria-label="External link"
+                      className="euiLink__externalIcon"
+                      data-euiicon-type="popout"
+                      size="s"
+                    />
+                    <span
+                      className="euiScreenReaderOnly"
+                    >
+                      (opens in a new tab or window)
+                    </span>
+                  </a>
+                </div>
+              </div>
+              <div
+                className="euiFormRow__fieldWrapper"
+              >
+                <div
+                  className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+                  onKeyDown={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                >
+                  <div
+                    className="euiPopover__anchor"
+                  >
+                    <div>
+                      Array [
+                        <input
+                          id="generated-id"
+                          type="hidden"
+                          value="skipping"
+                        />,
+                        <div
+                          className="euiFormControlLayout"
+                        >
+                          <div
+                            className="euiFormControlLayout__childrenWrapper"
+                          >
+                            <span
+                              className="euiScreenReaderOnly"
+                              id="generated-id"
+                            >
+                              Select an option: Skipping index, is selected
+                            </span>
+                            <button
+                              aria-describedby="generated-id-help-0"
+                              aria-haspopup="true"
+                              aria-labelledby="generated-id generated-id"
+                              className="euiSuperSelectControl"
+                              onBlur={[Function]}
+                              onClick={[Function]}
+                              onFocus={[Function]}
+                              onKeyDown={[Function]}
+                              type="button"
+                            >
+                              Skipping index
+                            </button>
+                            <div
+                              className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                            >
+                              <span
+                                className="euiFormControlLayoutCustomIcon"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  className="euiFormControlLayoutCustomIcon__icon"
+                                  data-euiicon-type="arrowDown"
+                                  size="m"
+                                />
+                              </span>
+                            </div>
+                          </div>
+                        </div>,
+                      ]
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="euiFormHelpText euiFormRow__text"
+                  id="generated-id-help-0"
+                >
+                  Select the type of acceleration according to your use case.
+                </div>
+              </div>
+            </div>,
+          ]
+          <div
+            className="euiSpacer euiSpacer--xxl"
+          />
+          Array [
+            <div
+              className="euiText euiText--medium"
+              data-test-subj="define-index-header"
+            >
+              <h3>
+                Define Index
+              </h3>
+            </div>,
+            <div
+              className="euiSpacer euiSpacer--s"
+            />,
+            <div
+              className="euiFormRow"
+              id="generated-id-row"
+            >
+              <div
+                className="euiFormRow__labelWrapper"
+              >
+                <label
+                  className="euiFormLabel euiFormRow__label"
+                  htmlFor="generated-id"
+                >
+                  Refresh type
+                </label>
+              </div>
+              <div
+                className="euiFormRow__fieldWrapper"
+              >
+                <div
+                  className="euiPopover euiPopover--anchorDownLeft euiPopover--displayBlock euiInputPopover euiSuperSelect"
+                  onKeyDown={[Function]}
+                  onMouseDown={[Function]}
+                  onMouseUp={[Function]}
+                  onTouchEnd={[Function]}
+                  onTouchStart={[Function]}
+                >
+                  <div
+                    className="euiPopover__anchor"
+                  >
+                    <div>
+                      Array [
+                        <input
+                          id="generated-id"
+                          type="hidden"
+                          value="autoInterval"
+                        />,
+                        <div
+                          className="euiFormControlLayout"
+                        >
+                          <div
+                            className="euiFormControlLayout__childrenWrapper"
+                          >
+                            <span
+                              className="euiScreenReaderOnly"
+                              id="generated-id"
+                            >
+                              Select an option: Auto (Interval), is selected
+                            </span>
+                            <button
+                              aria-describedby="generated-id-help-0"
+                              aria-haspopup="true"
+                              aria-labelledby="generated-id generated-id"
+                              className="euiSuperSelectControl"
+                              onBlur={[Function]}
+                              onClick={[Function]}
+                              onFocus={[Function]}
+                              onKeyDown={[Function]}
+                              type="button"
+                            >
+                              Auto (Interval)
+                            </button>
+                            <div
+                              className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                            >
+                              <span
+                                className="euiFormControlLayoutCustomIcon"
+                              >
+                                <span
+                                  aria-hidden="true"
+                                  className="euiFormControlLayoutCustomIcon__icon"
+                                  data-euiicon-type="arrowDown"
+                                  size="m"
+                                />
+                              </span>
+                            </div>
+                          </div>
+                        </div>,
+                      ]
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="euiFormHelpText euiFormRow__text"
+                  id="generated-id-help-0"
+                >
+                  Specify how often the index should refresh, which publishes the most recent changes and make them available for search.
+                </div>
+              </div>
+            </div>,
+            <div
+              className="euiFormRow"
+              id="generated-id-row"
+            >
+              <div
+                className="euiFormRow__labelWrapper"
+              >
+                <label
+                  aria-invalid={false}
+                  className="euiFormLabel euiFormRow__label"
+                  htmlFor="generated-id"
+                >
+                  Refresh increments
+                </label>
+              </div>
+              <div
+                className="euiFormRow__fieldWrapper"
+              >
+                <div
+                  className="euiFormControlLayout euiFormControlLayout--group"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <input
+                      aria-describedby="generated-id-help-0"
+                      aria-label="Refresh increments"
+                      className="euiFieldNumber euiFieldNumber--inGroup"
+                      id="generated-id"
+                      min={1}
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      placeholder="Refresh increments"
+                      type="number"
+                      value={15}
+                    />
+                  </div>
+                  <div
+                    className="euiFormControlLayout"
+                  >
+                    <div
+                      className="euiFormControlLayout__childrenWrapper"
+                    >
+                      <select
+                        className="euiSelect euiFormControlLayout__append"
+                        onBlur={[Function]}
+                        onChange={[Function]}
+                        onMouseUp={[Function]}
+                        value="minute"
+                      >
+                        <option
+                          key="0"
+                          value="minute"
+                        >
+                          minutes(s)
+                        </option>
+                        <option
+                          key="1"
+                          value="hour"
+                        >
+                          hour(s)
+                        </option>
+                        <option
+                          key="2"
+                          value="day"
+                        >
+                          day(s)
+                        </option>
+                        <option
+                          key="3"
+                          value="week"
+                        >
+                          week(s)
+                        </option>
+                      </select>
+                      <div
+                        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      >
+                        <span
+                          className="euiFormControlLayoutCustomIcon"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiFormControlLayoutCustomIcon__icon"
+                            data-euiicon-type="arrowDown"
+                            size="m"
+                          />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  className="euiFormHelpText euiFormRow__text"
+                  id="generated-id-help-0"
+                >
+                  Specify how frequent the index gets updated when performing the refresh job.
+                </div>
+              </div>
+            </div>,
+            <div
+              className="euiFormRow"
+              id="generated-id-row"
+            >
+              <div
+                className="euiFormRow__labelWrapper"
+              >
+                <label
+                  aria-invalid={false}
+                  className="euiFormLabel euiFormRow__label"
+                  htmlFor="generated-id"
+                >
+                  Checkpoint location
+                </label>
+                 
+                <div
+                  className="euiText euiText--extraSmall"
+                >
+                  <a
+                    className="euiLink euiLink--primary"
+                    href="https://github.com/opensearch-project/opensearch-spark/blob/main/docs/index.md#create-index-options"
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    Learn more
+                    <span
+                      aria-label="External link"
+                      className="euiLink__externalIcon"
+                      data-euiicon-type="popout"
+                      size="s"
+                    />
+                    <span
+                      className="euiScreenReaderOnly"
+                    >
+                      (opens in a new tab or window)
+                    </span>
+                  </a>
+                </div>
+              </div>
+              <div
+                className="euiFormRow__fieldWrapper"
+              >
+                <div
+                  className="euiFormControlLayout"
+                >
+                  <div
+                    className="euiFormControlLayout__childrenWrapper"
+                  >
+                    <input
+                      aria-describedby="generated-id-help-0"
+                      aria-label="Use aria labels when no actual label is in use"
+                      className="euiFieldText"
+                      id="generated-id"
+                      onBlur={[Function]}
+                      onChange={[Function]}
+                      onFocus={[Function]}
+                      placeholder="s3://checkpoint/location"
+                      type="text"
+                      value=""
+                    />
+                  </div>
+                </div>
+                <div
+                  className="euiFormHelpText euiFormRow__text"
+                  id="generated-id-help-0"
+                >
+                  The HDFS compatible file system location path for incremental refresh job checkpoint.
+                </div>
+              </div>
+            </div>,
+          ]
+          <div
+            className="euiSpacer euiSpacer--m"
+          />
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionColumn euiFlexGroup--responsive"
+          >
+            <div
+              className="euiSpacer euiSpacer--l"
+            />
+            <div
+              className="euiFlexItem"
+            >
+              <span
+                className="euiLoadingSpinner euiLoadingSpinner--large"
+              />
+            </div>
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            >
+              Loading tables fields
+            </div>
+          </div>
+          <div
+            className="euiSpacer euiSpacer--xxl"
+          />
+          <div
+            className="euiAccordion"
+          >
+            <div
+              className="euiAccordion__triggerWrapper"
+            >
+              <button
+                aria-controls="accordion1"
+                aria-expanded={false}
+                className="euiAccordion__button"
+                id="generated-id"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiAccordion__iconWrapper"
+                >
+                  <span
+                    className="euiAccordion__icon"
+                    data-euiicon-type="arrowRight"
+                    size="m"
+                  />
+                </span>
+                <span
+                  className="euiIEFlexWrapFix"
+                >
+                  <div
+                    className="euiText euiText--medium"
+                    data-test-subj="advanced-settings-header"
+                  >
+                    <h3>
+                      Advanced settings
+                    </h3>
+                  </div>
+                </span>
+              </button>
+            </div>
+            <div
+              aria-labelledby="generated-id"
+              className="euiAccordion__childWrapper"
+              id="accordion1"
+              role="region"
+              tabIndex={-1}
+            >
+              <div>
+                <div
+                  className="euiAccordion__padding--l"
+                >
+                  Array [
+                    <div
+                      className="euiFormRow"
+                      id="generated-id-row"
+                    >
+                      <div
+                        className="euiFormRow__labelWrapper"
+                      >
+                        <label
+                          aria-invalid={false}
+                          className="euiFormLabel euiFormRow__label"
+                          htmlFor="generated-id"
+                        >
+                          Index name
+                        </label>
+                         
+                        <div
+                          className="euiText euiText--extraSmall"
+                        >
+                          <button
+                            className="euiLink euiLink--primary"
+                            disabled={false}
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            Help
+                          </button>
+                        </div>
+                      </div>
+                      <div
+                        className="euiFormRow__fieldWrapper"
+                      >
+                        <div
+                          className="euiFormControlLayout euiFormControlLayout--group"
+                        >
+                          <label
+                            className="euiFormLabel euiFormControlLayout__prepend"
+                            htmlFor="generated-id"
+                          >
+                            flint_test_source_test_database_test_table_
+                          </label>
+                          <span
+                            className="euiToolTipAnchor"
+                            onKeyUp={[Function]}
+                            onMouseOut={[Function]}
+                            onMouseOver={[Function]}
+                          >
+                            <span
+                              aria-label="Info"
+                              color="subdued"
+                              data-euiicon-type="iInCircle"
+                              onBlur={[Function]}
+                              onFocus={[Function]}
+                              tabIndex={0}
+                            />
+                          </span>
+                          <div
+                            className="euiFormControlLayout__childrenWrapper"
+                          >
+                            <input
+                              aria-describedby="generated-id-help-0"
+                              aria-label="Enter Index Name"
+                              className="euiFieldText euiFieldText--inGroup"
+                              disabled={true}
+                              id="generated-id"
+                              onBlur={[Function]}
+                              onChange={[Function]}
+                              onFocus={[Function]}
+                              placeholder="Enter index name"
+                              type="text"
+                              value="skipping"
+                            />
+                          </div>
+                          <label
+                            className="euiFormLabel euiFormControlLayout__append"
+                            htmlFor="generated-id"
+                          >
+                            _index
+                          </label>
+                        </div>
+                        <div
+                          className="euiFormHelpText euiFormRow__text"
+                          id="generated-id-help-0"
+                        >
+                          Must be in lowercase letters, numbers and underscore. Spaces, commas, and characters -, :, ", *, +, /, \\, |, ?, #, &gt;, or &lt; are not allowed. Prefix and suffix are added to the name of generated OpenSearch index.
+                        </div>
+                      </div>
+                    </div>,
+                    "",
+                  ]
+                  <div
+                    className="euiFormRow"
+                    id="generated-id-row"
+                  >
+                    <div
+                      className="euiFormRow__labelWrapper"
+                    >
+                      <label
+                        aria-invalid={false}
+                        className="euiFormLabel euiFormRow__label"
+                        htmlFor="generated-id"
+                      >
+                        Number of primary shards
+                      </label>
+                    </div>
+                    <div
+                      className="euiFormRow__fieldWrapper"
+                    >
+                      <div
+                        className="euiFormControlLayout"
+                      >
+                        <div
+                          className="euiFormControlLayout__childrenWrapper"
+                        >
+                          <input
+                            aria-describedby="generated-id-help-0"
+                            aria-label="Number of primary shards"
+                            className="euiFieldNumber"
+                            id="generated-id"
+                            max={100}
+                            min={1}
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                            placeholder="Number of primary shards"
+                            type="number"
+                            value={1}
+                          />
+                        </div>
+                      </div>
+                      <div
+                        className="euiFormHelpText euiFormRow__text"
+                        id="generated-id-help-0"
+                      >
+                        Specify the number of primary shards for the index. The number of primary shards cannot be changed after the index is created.
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                  <div
+                    className="euiFormRow"
+                    id="generated-id-row"
+                  >
+                    <div
+                      className="euiFormRow__labelWrapper"
+                    >
+                      <label
+                        aria-invalid={false}
+                        className="euiFormLabel euiFormRow__label"
+                        htmlFor="generated-id"
+                      >
+                        Number of replicas
+                      </label>
+                    </div>
+                    <div
+                      className="euiFormRow__fieldWrapper"
+                    >
+                      <div
+                        className="euiFormControlLayout"
+                      >
+                        <div
+                          className="euiFormControlLayout__childrenWrapper"
+                        >
+                          <input
+                            aria-describedby="generated-id-help-0"
+                            aria-label="Number of replicas"
+                            className="euiFieldNumber"
+                            id="generated-id"
+                            max={100}
+                            min={0}
+                            onBlur={[Function]}
+                            onChange={[Function]}
+                            onFocus={[Function]}
+                            placeholder="Number of replicas"
+                            type="number"
+                            value={1}
+                          />
+                        </div>
+                      </div>
+                      <div
+                        className="euiFormHelpText euiFormRow__text"
+                        id="generated-id-help-0"
+                      >
+                        Specify the number of replicas each primary shard should have.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            className="euiSpacer euiSpacer--l"
+          />
+          <div
+            className="euiAccordion"
+          >
+            <div
+              className="euiAccordion__triggerWrapper"
+            >
+              <button
+                aria-controls="accordion1"
+                aria-expanded={false}
+                className="euiAccordion__button"
+                id="generated-id"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiAccordion__iconWrapper"
+                >
+                  <span
+                    className="euiAccordion__icon"
+                    data-euiicon-type="arrowRight"
+                    size="m"
+                  />
+                </span>
+                <span
+                  className="euiIEFlexWrapFix"
+                >
+                  <div
+                    className="euiText euiText--medium"
+                    data-test-subj="preview-sql-header"
+                  >
+                    <h3>
+                      Preview SQL definition
+                    </h3>
+                  </div>
+                </span>
+              </button>
+            </div>
+            <div
+              aria-labelledby="generated-id"
+              className="euiAccordion__childWrapper"
+              id="accordion1"
+              role="region"
+              tabIndex={-1}
+            >
+              <div>
+                <div
+                  className="euiAccordion__padding--l"
+                >
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <button
+                        className="euiButton euiButton--success"
+                        disabled={false}
+                        onClick={[Function]}
+                        style={
+                          Object {
+                            "minWidth": undefined,
+                          }
+                        }
+                        type="button"
+                      >
+                        <span
+                          className="euiButtonContent euiButton__content"
+                        >
+                          <span
+                            className="euiButton__text"
+                          >
+                            Generate preview
+                          </span>
+                        </span>
+                      </button>
+                    </div>
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    />
+                  </div>
+                  <div
+                    className="euiSpacer euiSpacer--l"
+                  />
+                  <div>
+                    <pre>
+                      <code />
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="euiFlyoutFooter"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--flushLeft"
+          disabled={false}
+          onClick={[MockFunction]}
+          type="button"
+        >
+          <span
+            className="euiButtonContent euiButtonEmpty__content"
+          >
+            <span
+              className="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="cross"
+              size="m"
+            />
+            <span
+              className="euiButtonEmpty__text"
+            >
+              Cancel
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          className="euiButton euiButton--primary euiButton--fill"
+          disabled={false}
+          onClick={[Function]}
+          style={
+            Object {
+              "minWidth": undefined,
+            }
+          }
+          type="button"
+        >
+          <span
+            className="euiButtonContent euiButton__content"
+          >
+            <span
+              className="euiButton__text"
+            >
+              Create acceleration
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;

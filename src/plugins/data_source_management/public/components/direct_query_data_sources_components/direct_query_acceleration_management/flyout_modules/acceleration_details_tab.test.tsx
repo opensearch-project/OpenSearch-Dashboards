@@ -74,6 +74,13 @@ describe('AccelerationDetailsTab', () => {
   beforeAll(() => {
     // Mock the Date.now() method to always return a specific timestamp
     jest.spyOn(Date, 'now').mockImplementation(() => 1627819985000); // 2021-08-01T11:53:05.000Z
+
+    // Mock the Intl.DateTimeFormat to use UTC
+    jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(() => {
+      return {
+        format: (date) => new Date(date).toLocaleString('en-US', { timeZone: 'UTC' }),
+      } as any;
+    });
   });
 
   afterAll(() => {
