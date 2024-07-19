@@ -283,7 +283,6 @@ function enrichAutocompleteResult(
       result.suggestColumnAliases = suggestColumnAliases;
     }
   }
-
   return result;
 }
 
