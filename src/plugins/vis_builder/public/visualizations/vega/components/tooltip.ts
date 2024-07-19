@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { AxisFormats, VegaLiteSpec } from './types';
+import { AxisFormats, VegaLiteSpec } from '../utils/types';
 
 /**
  * Builds tooltip configuration for a dynamic Vega specification using OpenSearch data.
@@ -19,6 +19,10 @@ export const buildTooltip = (
   formats: AxisFormats
 ): void => {
   const { xAxisLabel, yAxisLabel } = formats;
+
+  if (!baseSpec.encoding) {
+    baseSpec.encoding = {};
+  }
 
   // Configure tooltip based on the presence of yAxisLabel
   if (!yAxisLabel) {

@@ -15,7 +15,7 @@ import { AxisFormats } from './types';
  * @param {Array} group - The group containing axis information
  */
 const setAxisProperties = (converted: any, group: any[]): void => {
-  const axes: Array<keyof AxisFormats> = ['xAxis', 'yAxis', 'zAxis'];
+  const axes = ['xAxis', 'yAxis', 'zAxis'];
   const properties = ['Format', 'Label'];
 
   axes.forEach((axis) => {
@@ -26,22 +26,58 @@ const setAxisProperties = (converted: any, group: any[]): void => {
   });
 };
 
+interface SeriesValue {
+  x: any;
+  y: any;
+  z?: any;
+}
+
+interface Series {
+  label: string;
+  values: SeriesValue[];
+}
+
+interface FlattenedSeriesItem extends SeriesValue {
+  series: string;
+  split?: string;
+}
+
 /**
  * Flattens series data into a single array of data points
- * @param {Array} series - The series data to flatten
+ * @param {Series} series - The series data to flatten
  * @param {string|null} splitLabel - The label for the split, if any
- * @returns {Array} Flattened array of data points
+ * @returns {FlattenedSeriesItem} Flattened array of data points
  */
-const flattenSeries = (series, splitLabel = null) =>
-  series.flatMap((s) =>
-    s.values.map((v) => ({
-      x: v.x,
-      y: v.y,
-      z: v.z,
-      series: s.label,
-      ...(splitLabel && { split: splitLabel }),
-    }))
-  );
+const flattenSeries = (
+  series: Series[],
+  splitLabel: string | null = null
+): FlattenedSeriesItem[] => {
+  return series.flatMap((s) => {
+    if (!s.values || !Array.isArray(s.values)) {
+      throw new Error('Each series must have a "values" array');
+    }
+
+    return s.values.map(
+      (v): FlattenedSeriesItem => {
+        const baseItem: FlattenedSeriesItem = {
+          x: v.x,
+          y: v.y,
+          series: s.label,
+        };
+
+        if (v.z !== undefined) {
+          baseItem.z = v.z;
+        }
+
+        if (splitLabel) {
+          baseItem.split = splitLabel;
+        }
+
+        return baseItem;
+      }
+    );
+  });
+};
 
 export const flattenDataHandler = (context, dimensions, handlerType = 'series') => {
   // Currently, our vislib only supports 'series' or 'slices' response types.
@@ -99,4 +135,4 @@ export const mapFieldTypeToVegaType = (fieldType) => {
  * @returns {string} The corresponding Vega mark type
  */
 export const mapChartTypeToVegaType = (chartType) =>
-  chartType === 'histogram' ? 'rect' : chartType;
+  chartType === 'histogram' ? 'bar' : chartType;

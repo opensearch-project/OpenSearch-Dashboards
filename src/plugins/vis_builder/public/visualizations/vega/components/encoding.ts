@@ -4,20 +4,37 @@
  */
 
 import { mapFieldTypeToVegaType } from '../utils/helpers';
-import { AxisFormats } from '../utils/types';
+import { AxisFormat, AxisFormats } from '../utils/types';
 
-interface EncodingChannel {
-  field: string;
-  type: string;
+interface BaseEncodingChannel {
+  field?: string;
+  type?: string;
+  legend?: { title: string | null } | null;
+}
+
+export interface AxisEncodingChannel extends BaseEncodingChannel {
   axis?: { title: string };
-  legend?: { title: string | null };
 }
 
-interface VegaEncoding {
-  [key: string]: EncodingChannel;
+export type ColorEncodingChannel = BaseEncodingChannel;
+
+export interface TooltipEncodingChannel extends BaseEncodingChannel {
+  title?: string;
+}
+export interface VegaEncoding {
+  x?: AxisEncodingChannel;
+  y?: AxisEncodingChannel;
+  color?: ColorEncodingChannel;
+  tooltip?: TooltipEncodingChannel | TooltipEncodingChannel[];
+  [key: string]:
+    | BaseEncodingChannel
+    | BaseEncodingChannel[]
+    | TooltipEncodingChannel
+    | TooltipEncodingChannel[]
+    | undefined;
 }
 
-interface VegaScale {
+export interface VegaScale {
   name: string;
   type: string;
   domain: {
@@ -25,43 +42,21 @@ interface VegaScale {
     field: string;
     filter?: string;
   };
-  range: string;
+  range?: string;
   padding?: number;
   nice?: boolean;
   zero?: boolean;
 }
 
 /**
- * Builds encoding configuration for Vega or Vega-Lite specifications.
- *
- * @param {any} dimensions - The dimensions of the data.
- * @param {AxisFormats} formats - The formatting information for axes.
- * @param {boolean} isVega - Whether to build for Vega (true) or Vega-Lite (false).
- * @returns {VegaEncoding | VegaScale[]} The encoding configuration.
- */
-export const buildEncoding = (
-  dimensions: any,
-  formats: any,
-  isVega: boolean = false
-): VegaEncoding | VegaScale[] => {
-  const { xAxisFormat, xAxisLabel, yAxisFormat, yAxisLabel, zAxisFormat } = formats;
-
-  if (isVega) {
-    return buildVegaScales(dimensions, formats);
-  }
-
-  return buildVegaLiteEncoding(dimensions, formats);
-};
-
-/**
  * Builds encoding configuration for Vega-Lite specifications.
  *
  * @param {any} dimensions - The dimensions of the data.
- * @param {any} formats - The formatting information for axes.
+ * @param {AxisFormats} formats - The formatting information for axes.
  * @returns {VegaEncoding} The Vega-Lite encoding configuration.
  */
-const buildVegaLiteEncoding = (dimensions: any, formats: any): VegaEncoding => {
-  const { xAxisFormat, xAxisLabel, yAxisFormat, yAxisLabel, zAxisFormat } = formats;
+export const buildVegaLiteEncoding = (dimensions: any, formats: AxisFormats): VegaEncoding => {
+  const { xAxisFormat, xAxisLabel, yAxisFormat, yAxisLabel } = formats;
   const encoding: VegaEncoding = {};
 
   // Handle x-axis
@@ -71,10 +66,8 @@ const buildVegaLiteEncoding = (dimensions: any, formats: any): VegaEncoding => {
   encoding.y = buildAxisEncoding('y', dimensions.y, yAxisFormat, yAxisLabel);
 
   // Handle color encoding for multiple y dimensions or series
-  if (dimensions.y && dimensions.y.length > 1) {
+  if (dimensions.y) {
     encoding.color = buildColorEncoding('series', 'nominal');
-  } else if (dimensions.series) {
-    encoding.color = buildColorEncoding('series', mapFieldTypeToVegaType(zAxisFormat?.id || ''));
   }
 
   return encoding;
@@ -87,7 +80,7 @@ const buildVegaLiteEncoding = (dimensions: any, formats: any): VegaEncoding => {
  * @param {any} formats - The formatting information for axes.
  * @returns {VegaScale[]} The Vega scale configurations.
  */
-const buildVegaScales = (dimensions: any, formats: any): VegaScale[] => {
+export const buildVegaScales = (dimensions: any, formats: any): VegaScale[] => {
   const scales: VegaScale[] = [
     {
       name: 'xscale',
@@ -124,18 +117,18 @@ const buildVegaScales = (dimensions: any, formats: any): VegaScale[] => {
  * @param {any[]} dimension - The dimension data.
  * @param {AxisFormat} axisFormat - The axis format information.
  * @param {string} axisLabel - The axis label.
- * @returns {EncodingChannel} The axis encoding configuration.
+ * @returns {AxisEncodingChannel} The axis encoding configuration.
  */
 const buildAxisEncoding = (
   field: string,
   dimension: any[] | undefined,
-  axisFormat: AxisFormat,
-  axisLabel: string
-): EncodingChannel => {
+  axisFormat?: AxisFormat,
+  axisLabel?: string
+): AxisEncodingChannel => {
   return {
     field,
-    type: dimension ? mapFieldTypeToVegaType(axisFormat.id) : 'ordinal',
-    axis: { title: axisLabel },
+    type: dimension ? mapFieldTypeToVegaType(axisFormat?.id) : 'ordinal',
+    axis: { title: axisLabel ? axisLabel : '' },
   };
 };
 
@@ -144,9 +137,9 @@ const buildAxisEncoding = (
  *
  * @param {string} field - The field name for color encoding.
  * @param {string} type - The data type for color encoding.
- * @returns {EncodingChannel} The color encoding configuration.
+ * @returns {ColorEncodingChannel} The color encoding configuration.
  */
-const buildColorEncoding = (field: string, type: string): EncodingChannel => {
+const buildColorEncoding = (field: string, type: string): ColorEncodingChannel => {
   return {
     field,
     type,

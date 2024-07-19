@@ -14,7 +14,7 @@ import { getAggExpressionFunctions } from '../../common/expression_helpers';
 import { VislibRootState, getValueAxes, getPipelineParams } from '../common';
 import { createVis } from '../common/create_vis';
 import { buildPipeline } from '../../../../../visualizations/public';
-import { buildVegaSpec } from '../../vega/build_vega_spec';
+import { createVegaSpec } from '../../vega/vega_spec_factory';
 import { executeExpression } from '../../vega/utils/expression_helper';
 
 export const toExpression = async (
@@ -22,9 +22,12 @@ export const toExpression = async (
   searchContext: IExpressionLoaderParams['searchContext'],
   useVega: boolean
 ) => {
-  const { expressionFns, aggConfigs, indexPattern } = useVega
-    ? await getAggExpressionFunctions(visualization, styleState, useVega, searchContext)
-    : await getAggExpressionFunctions(visualization);
+  const { expressionFns, aggConfigs, indexPattern } = await getAggExpressionFunctions(
+    visualization,
+    styleState,
+    useVega,
+    searchContext
+  );
   const { addLegend, addTooltip, legendPosition, type } = styleState;
 
   const vis = await createVis(type, aggConfigs, indexPattern, searchContext);
@@ -50,7 +53,7 @@ export const toExpression = async (
     // Execute the expression to get the raw data
     const rawData = await executeExpression(dataExpression, searchContext);
 
-    const vegaSpec = buildVegaSpec(rawData, visConfig, visualization, styleState);
+    const vegaSpec = createVegaSpec(rawData, visConfig, styleState);
 
     const visVega = await createVis('vega', aggConfigs, indexPattern, searchContext);
     visVega.params = {

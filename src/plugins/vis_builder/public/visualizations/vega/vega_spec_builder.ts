@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { buildEncoding } from './components/encoding';
-import { buildMark } from './components/mark';
+import { buildMarkForVega, VegaMarkType } from './components/mark';
 import { buildLegend } from './components/legend';
 import { VegaSpec, AxisFormats } from './utils/types';
 import { StyleState } from '../../application/utils/state_management';
+import { mapChartTypeToVegaType } from './utils/helpers';
 
 /**
  * Builds a Vega specification based on the provided data, visual configuration, and style.
@@ -17,9 +17,10 @@ import { StyleState } from '../../application/utils/state_management';
  * @param {StyleState} style - The style configuration for the visualization.
  * @returns {VegaSpec} The complete Vega specification.
  */
-export const buildVegaSpecViaVega = (data: any, visConfig: any, style: StyleState): VegaSpec => {
+export const generateVegaSpec = (data: any, visConfig: any, style: StyleState): VegaSpec => {
   const { dimensions, addLegend, legendPosition } = visConfig;
   const { type } = style;
+  const vegaType = mapChartTypeToVegaType(type) as VegaMarkType;
   const {
     xAxisFormat,
     xAxisLabel,
@@ -64,7 +65,7 @@ export const buildVegaSpecViaVega = (data: any, visConfig: any, style: StyleStat
       {
         name: 'splitScale',
         type: 'band',
-        domain: { data: 'splits', field: 'split' },
+        domain: { data: type === 'area' ? 'stacked' : 'splits', field: 'split' },
         range: 'width',
         padding: 0.1,
       },
@@ -79,43 +80,34 @@ export const buildVegaSpecViaVega = (data: any, visConfig: any, style: StyleStat
       columns: { signal: 'splitCount' },
       padding: { row: 40, column: 20 },
     },
-    marks: [
-      {
-        type: 'group',
-        from: { data: 'splits' },
-        encode: {
-          enter: {
-            width: { signal: 'chartWidth' },
-            height: { signal: 'height' },
-            stroke: { value: '#ccc' },
-            strokeWidth: { value: 1 },
-          },
-        },
-        signals: [{ name: 'width', update: 'chartWidth' }],
-        scales: buildEncoding(dimensions, formats, true),
-        axes: [
-          {
-            orient: 'bottom',
-            scale: 'xscale',
-            zindex: 1,
-            labelAngle: -90,
-            labelAlign: 'right',
-            labelBaseline: 'middle',
-          },
-          { orient: 'left', scale: 'yscale', zindex: 1 },
-        ],
-        title: {
-          text: { signal: 'parent.split' },
-          anchor: 'middle',
-          offset: 10,
-          limit: { signal: 'chartWidth' },
-          wrap: true,
-          align: 'center',
-        },
-        marks: buildMark(type, true),
-      },
-    ],
+    marks: [buildMarkForVega(vegaType, dimensions, formats)],
   };
+
+  // Special case 1: Handle dot aggregation for line chart
+  if (dimensions.z) {
+    spec.scales!.push({
+      name: 'size',
+      type: 'sqrt',
+      domain: { data: 'source', field: 'z' },
+      range: [{ signal: '2' }, { signal: 'width * height / 500' }],
+    });
+  }
+
+  // Special case 2: Add stack transform for area charts
+  if (type === 'area') {
+    spec.data.push({
+      name: 'stacked',
+      source: 'source',
+      transform: [
+        {
+          type: 'stack',
+          groupby: ['split', 'x'],
+          sort: { field: 'series' },
+          field: 'y',
+        },
+      ],
+    });
+  }
 
   // Add legend if specified
   if (addLegend) {

@@ -53,7 +53,8 @@ export async function executeExpression(
 
   try {
     const result = await expressionService.execute(expression, { type: 'null' }, context);
-    return await result.getData();
+    const data = await result.getData();
+    return data as ExpressionValueBoxed;
   } catch (error) {
     throw error;
   }

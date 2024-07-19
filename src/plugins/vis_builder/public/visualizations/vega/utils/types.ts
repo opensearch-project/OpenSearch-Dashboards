@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { VegaEncoding } from '../components/encoding';
+import { VegaLiteMark } from '../components/mark';
 export interface AxisFormat {
   id: string;
 }
@@ -16,36 +18,38 @@ export interface AxisFormats {
   zAxisFormat?: AxisFormat;
 }
 
-// Define a VegaLiteSpec interface
+// VegaLiteSpec interface
 export interface VegaLiteSpec {
   $schema: string;
   data: {
     values: any[];
   };
-  mark: {
-    type: string;
-    [key: string]: any;
-  };
-  encoding: {
-    [key: string]: {
-      field: string;
-      type: string;
-      title?: string;
-      [key: string]: any;
-    };
-  };
+  mark: VegaLiteMark;
+  encoding: VegaEncoding;
   transform?: Array<{
     calculate: string;
     as: string;
   }>;
-  layer?: VegaSpec[];
+  layer?: LayerSpec[];
   config?: {
     legend?: any;
     [key: string]: any;
   };
+  selection?: {
+    legend_selection?: {
+      type: string;
+      fields: string[];
+      bind: string;
+    };
+  };
 }
 
-// Define a more general VegaSpec interface
+export interface LayerSpec {
+  mark: VegaLiteMark;
+  encoding: VegaEncoding;
+}
+
+// VegaSpec interface
 export interface VegaSpec {
   $schema: string;
   padding?: number | { [key: string]: number };
