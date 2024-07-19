@@ -6,7 +6,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiPage, EuiPageBody, EuiPageContent, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { BehaviorSubject, of } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -25,9 +24,10 @@ import { getDataSourcesList } from '../../utils';
 import { DataSource } from '../../../common/types';
 import { DetailTab } from '../workspace_form/constants';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
+import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceUpdaterProps {
-  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
   detailTab?: DetailTab;
 }
 
@@ -66,9 +66,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   }>();
 
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
-  const workspaceConfigurableApps = useObservable(
-    props.workspaceConfigurableApps$ ?? of(undefined)
-  );
+  const availableUseCases = useObservable(props.registeredUseCases$, []);
   const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<FormDataFromWorkspace>();
 
   const handleWorkspaceFormSubmit = useCallback(
@@ -150,7 +148,6 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
         <EuiSpacer />
         <EuiPageContent
           verticalPosition="center"
-          horizontalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}
@@ -162,10 +159,10 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
               defaultValues={currentWorkspaceFormData}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Update}
-              workspaceConfigurableApps={workspaceConfigurableApps}
               savedObjects={savedObjects}
               detailTab={props.detailTab}
               dataSourceManagement={dataSourceManagement}
+              availableUseCases={availableUseCases}
             />
           )}
         </EuiPageContent>
