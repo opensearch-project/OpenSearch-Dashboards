@@ -70,8 +70,8 @@ describe('<WorkspaceMenu />', () => {
     fireEvent.click(selectButton);
 
     expect(screen.getByText(/all workspaces/i)).toBeInTheDocument();
-    expect(screen.getByTestId('context-menu-item-all-workspace-1')).toBeInTheDocument();
-    expect(screen.getByTestId('context-menu-item-all-workspace-2')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-all-workspace-1')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-all-workspace-2')).toBeInTheDocument();
   });
 
   it('should display a list of recent workspaces in the dropdown', () => {
@@ -91,8 +91,8 @@ describe('<WorkspaceMenu />', () => {
     fireEvent.click(selectButton);
 
     expect(screen.getByText(/recent workspaces/i)).toBeInTheDocument();
-    expect(screen.getByTestId('context-menu-item-recent-workspace-1')).toBeInTheDocument();
-    expect(screen.getByTestId('context-menu-item-recent-workspace-2')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-recent-workspace-1')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-item-recent-workspace-2')).toBeInTheDocument();
   });
 
   it('should display current workspace name and use case name', () => {
@@ -104,8 +104,8 @@ describe('<WorkspaceMenu />', () => {
     render(<WorkspaceMenuCreatorComponent />);
 
     fireEvent.click(screen.getByTestId('current-workspace-button'));
-    expect(screen.getByTestId('context-menu-current-workspace-name')).toBeInTheDocument();
-    expect(screen.getByTestId('context-menu-current-use-case')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-current-workspace-name')).toBeInTheDocument();
+    expect(screen.getByTestId('workspace-menu-current-use-case')).toBeInTheDocument();
     expect(screen.getByText('Observability')).toBeInTheDocument();
   });
 
