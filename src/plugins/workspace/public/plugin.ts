@@ -21,6 +21,7 @@ import {
   NavGroupStatus,
   DEFAULT_NAV_GROUPS,
   NavGroupType,
+  ALL_USE_CASE_ID,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
@@ -38,6 +39,7 @@ import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
 import {
   filterWorkspaceConfigurableApps,
+  getFirstUseCaseOfFeatureConfigs,
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
@@ -121,9 +123,20 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
       if (currentWorkspace) {
         this.navGroupUpdater$.next((navGroup) => {
+          /**
+           * The following logic determines whether a navigation group should be hidden or not based on the workspace's feature configurations.
+           * It checks the following conditions:
+           * 1. The navigation group is not a system-level group (system groups are always visible).
+           * 2. The current workspace has feature configurations set up.
+           * 3. The current workspace's use case it not "All use case".
+           * 4. The current navigation group is not included in the feature configurations of the workspace.
+           *
+           * If all these conditions are true, it means that the navigation group should be hidden.
+           */
           if (
             navGroup.type !== NavGroupType.SYSTEM &&
             currentWorkspace.features &&
+            getFirstUseCaseOfFeatureConfigs(currentWorkspace.features) !== ALL_USE_CASE_ID &&
             !isNavGroupInFeatureConfigs(navGroup.id, currentWorkspace.features)
           ) {
             return {

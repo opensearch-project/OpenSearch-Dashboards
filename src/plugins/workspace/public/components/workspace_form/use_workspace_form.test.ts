@@ -127,4 +127,17 @@ describe('useWorkspaceForm', () => {
       })
     );
   });
+  it('should update selected use case', () => {
+    const { renderResult } = setup({
+      id: 'foo',
+      name: 'test-workspace-name',
+      features: ['use-case-observability'],
+    });
+
+    expect(renderResult.result.current.formData.useCase).toBe('observability');
+    act(() => {
+      renderResult.result.current.handleUseCaseChange('search');
+    });
+    expect(renderResult.result.current.formData.useCase).toBe('search');
+  });
 });

@@ -3,7 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { NavGroupType, SavedObjectsStart, NavGroupItemInMap } from '../../../core/public';
+import {
+  NavGroupType,
+  SavedObjectsStart,
+  NavGroupItemInMap,
+  ALL_USE_CASE_ID,
+} from '../../../core/public';
 import {
   App,
   AppCategory,
@@ -32,14 +37,11 @@ export const getUseCaseFromFeatureConfig = (featureConfig: string) => {
 
 export const isFeatureIdInsideUseCase = (
   featureId: string,
-  featureConfig: string,
+  useCaseId: string,
   useCases: WorkspaceUseCase[]
 ) => {
-  const useCase = useCases.find(({ id }) => id === getUseCaseFromFeatureConfig(featureConfig));
-  if (useCase) {
-    return useCase.features.includes(featureId);
-  }
-  return false;
+  const availableFeatures = useCases.find(({ id }) => id === useCaseId)?.features ?? [];
+  return availableFeatures.includes(featureId);
 };
 
 export const isNavGroupInFeatureConfigs = (navGroupId: string, featureConfigs: string[]) =>
@@ -66,6 +68,7 @@ export const featureMatchesConfig = (featureConfigs: string[], useCases: Workspa
   category?: AppCategory;
 }) => {
   let matched = false;
+  let firstUseCaseId: string | undefined;
 
   /**
    * Iterate through each feature configuration to determine if the given feature matches any of them.
@@ -79,8 +82,14 @@ export const featureMatchesConfig = (featureConfigs: string[], useCases: Workspa
     }
 
     // matches any feature inside use cases
-    if (isFeatureIdInsideUseCase(id, featureConfig, useCases)) {
-      matched = true;
+    if (!firstUseCaseId) {
+      const useCaseId = getUseCaseFromFeatureConfig(featureConfig);
+      if (useCaseId) {
+        firstUseCaseId = useCaseId;
+        if (isFeatureIdInsideUseCase(id, firstUseCaseId, useCases)) {
+          matched = true;
+        }
+      }
     }
 
     // The config starts with `@` matches a category
@@ -127,6 +136,13 @@ export function isAppAccessibleInWorkspace(
    * When workspace has no features configured, all apps are considered to be accessible
    */
   if (!workspace.features) {
+    return true;
+  }
+
+  /**
+   * When workspace is all use case, all apps are accessible
+   */
+  if (getFirstUseCaseOfFeatureConfigs(workspace.features) === ALL_USE_CASE_ID) {
     return true;
   }
 
@@ -244,3 +260,8 @@ export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase
   }
   return true;
 };
+
+const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
+
+export const getFirstUseCaseOfFeatureConfigs = (featureConfigs: string[]): string | undefined =>
+  featureConfigs.map(getUseCaseFromFeatureConfig).filter(isNotNull)[0];
