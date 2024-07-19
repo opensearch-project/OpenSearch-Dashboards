@@ -32,11 +32,11 @@ export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boo
         let res;
         if (dataSourceEnabled && dataSourceMDSId) {
           const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
-          res = await client.callAPI('observability.runDirectQuery', params);
+          res = await client.callAPI('datasourcemanagement.runDirectQuery', params);
         } else {
-          res = await context.observability_plugin.observabilityClient
+          res = await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
-            .callAsCurrentUser('observability.runDirectQuery', params);
+            .callAsCurrentUser('datasourcemanagement.runDirectQuery', params);
         }
         return response.ok({
           body: res,
@@ -68,13 +68,13 @@ export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boo
           const client = await context.dataSource.opensearch.legacy.getClient(
             request.params.dataSourceMDSId
           );
-          res = await client.callAPI('observability.getJobStatus', {
+          res = await client.callAPI('datasourcemanagement.getJobStatus', {
             queryId: request.params.queryId,
           });
         } else {
-          res = await context.observability_plugin.observabilityClient
+          res = await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
-            .callAsCurrentUser('observability.getJobStatus', {
+            .callAsCurrentUser('datasourcemanagement.getJobStatus', {
               queryId: request.params.queryId,
             });
         }
@@ -102,9 +102,9 @@ export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boo
     },
     async (context, request, response): Promise<any> => {
       try {
-        const res = await context.observability_plugin.observabilityClient
+        const res = await context.opensearch_data_source_management.dataSourceManagementClient
           .asScoped(request)
-          .callAsCurrentUser('observability.deleteJob', {
+          .callAsCurrentUser('datasourcemanagement.deleteJob', {
             queryId: request.params.queryId,
           });
         return response.ok({

@@ -16,7 +16,7 @@ import {
 
 import { setupRoutes } from './routes';
 import { DataSourceManagementPluginSetup, DataSourceManagementPluginStart } from './types';
-import { OpenSearchObservabilityPlugin } from './adaptors/opensearch_observability_plugin';
+import { OpenSearchDataSourceManagementPlugin } from './adaptors/opensearch_data_source_management_plugin';
 import { PPLPlugin } from './adaptors/ppl_plugin';
 
 export interface DataSourceManagementPluginDependencies {
@@ -41,25 +41,32 @@ export class DataSourceManagementPlugin
 
     const dataSourceEnabled = !!dataSource;
 
-    const openSearchObservabilityClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
-      'opensearch_observability',
+    const openSearchDataSourceManagementClient: ILegacyClusterClient = core.opensearch.legacy.createClient(
+      'opensearch_data_source_management',
       {
-        plugins: [PPLPlugin, OpenSearchObservabilityPlugin],
+        plugins: [PPLPlugin, OpenSearchDataSourceManagementPlugin],
       }
     );
 
     this.logger.debug('dataSourceManagement: Setup');
     const router = core.http.createRouter();
 
+    if (dataSourceEnabled) {
+      dataSource.registerCustomApiSchema(PPLPlugin);
+      dataSource.registerCustomApiSchema(OpenSearchDataSourceManagementPlugin);
+    }
     // @ts-ignore
-    core.http.registerRouteHandlerContext('observability_plugin', (_context, _request) => {
-      return {
-        logger: this.logger,
-        observabilityClient: openSearchObservabilityClient,
-      };
-    });
+    core.http.registerRouteHandlerContext(
+      'opensearch_data_source_management',
+      (_context, _request) => {
+        return {
+          logger: this.logger,
+          dataSourceManagementClient: openSearchDataSourceManagementClient,
+        };
+      }
+    );
 
-    setupRoutes({ router, client: openSearchObservabilityClient, dataSourceEnabled });
+    setupRoutes({ router, client: openSearchDataSourceManagementClient, dataSourceEnabled });
 
     return {};
   }

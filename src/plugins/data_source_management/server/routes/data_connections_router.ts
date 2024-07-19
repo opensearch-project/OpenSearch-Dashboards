@@ -28,7 +28,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
     },
     async (context, request, response): Promise<any> => {
       try {
-        const dataConnectionsresponse = await context.observability_plugin.observabilityClient
+        const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
           .asScoped(request)
           .callAsCurrentUser('ppl.getDataConnectionById', {
             dataconnection: request.params.name,
@@ -57,7 +57,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
     },
     async (context, request, response): Promise<any> => {
       try {
-        const dataConnectionsresponse = await context.observability_plugin.observabilityClient
+        const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
           .asScoped(request)
           .callAsCurrentUser('ppl.deleteDataConnection', {
             dataconnection: request.params.name,
@@ -87,7 +87,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
     },
     async (context, request, response): Promise<any> => {
       try {
-        const dataConnectionsresponse = await context.observability_plugin.observabilityClient
+        const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
           .asScoped(request)
           .callAsCurrentUser('ppl.modifyDataConnection', {
             body: {
@@ -120,7 +120,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
     },
     async (context, request, response): Promise<any> => {
       try {
-        const dataConnectionsresponse = await context.observability_plugin.observabilityClient
+        const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
           .asScoped(request)
           .callAsCurrentUser('ppl.modifyDataConnection', {
             body: {
@@ -159,7 +159,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
       response
     ): Promise<IOpenSearchDashboardsResponse<any | ResponseError>> => {
       try {
-        const dataConnectionsresponse = await context.observability_plugin.observabilityClient
+        const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
           .asScoped(request)
           .callAsCurrentUser('ppl.createDataSource', {
             body: {
@@ -189,7 +189,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
     },
     async (context, request, response): Promise<any> => {
       try {
-        const dataConnectionsresponse = await context.observability_plugin.observabilityClient
+        const dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
           .asScoped(request)
           .callAsCurrentUser('ppl.getDataConnections');
         return response.ok({
@@ -222,7 +222,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
           dataConnectionsresponse = await client.callAPI('ppl.getDataConnections');
         } else {
-          dataConnectionsresponse = await context.observability_plugin.observabilityClient
+          dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
             .callAsCurrentUser('ppl.getDataConnections');
         }
@@ -267,7 +267,7 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
             dataconnection: request.params.name,
           });
         } else {
-          dataConnectionsresponse = await context.observability_plugin.observabilityClient
+          dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
             .asScoped(request)
             .callAsCurrentUser('ppl.getDataConnectionById', {
               dataconnection: request.params.name,
