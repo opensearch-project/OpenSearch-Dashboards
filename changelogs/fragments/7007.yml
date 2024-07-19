@@ -1,0 +1,2 @@
+refactor:
+- deprecate resize-observer-polyfill for native ResizeObserver [[#7007](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7007)]
