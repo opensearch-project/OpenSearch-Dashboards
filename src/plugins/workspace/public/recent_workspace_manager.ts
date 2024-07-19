@@ -9,7 +9,7 @@ const RECENT_WORKSPACES_KEY = 'recentWorkspaces';
 
 export interface WorkspaceEntry {
   id: string;
-  timestamp: string;
+  timestamp: number;
 }
 
 export class RecentWorkspaceManager {
@@ -41,7 +41,7 @@ export class RecentWorkspaceManager {
   public addRecentWorkspace(newWorkspace: string): WorkspaceEntry[] {
     const newEntry: WorkspaceEntry = {
       id: newWorkspace,
-      timestamp: Date.now().toString(),
+      timestamp: Date.now(),
     };
     this.recentWorkspaceLog.add(newEntry);
     return this.getRecentWorkspaces();

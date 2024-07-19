@@ -29,7 +29,7 @@ import {
   WORKSPACE_DETAIL_APP_ID,
   WORKSPACE_USE_CASES,
 } from '../../../common/constants';
-import { cleanWorkspaceId, formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
+import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { CoreStart, NavGroupItemInMap, WorkspaceObject } from '../../../../../core/public';
 import { WorkspaceUseCaseId, getUseCaseFromFeatureConfig } from '../../utils';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
@@ -234,13 +234,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
                 <EuiButton
                   color="text"
                   onClick={() => {
-                    window.location.assign(
-                      cleanWorkspaceId(
-                        coreStart.application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
-                          absolute: false,
-                        })
-                      )
-                    );
+                    coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
                   }}
                 >
                   <FormattedMessage
@@ -274,13 +268,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
               key={WORKSPACE_LIST_APP_ID}
               data-test-subj="context-menu-view-all-button"
               onClick={() => {
-                window.location.assign(
-                  cleanWorkspaceId(
-                    coreStart.application.getUrlForApp(WORKSPACE_LIST_APP_ID, {
-                      absolute: false,
-                    })
-                  )
-                );
+                coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
               }}
             >
               <FormattedMessage id="core.ui.primaryNav.allWorkspace" defaultMessage="View all" />
@@ -295,11 +283,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
                 key={WORKSPACE_CREATE_APP_ID}
                 data-test-subj="context-menu-create-workspace-button"
                 onClick={() => {
-                  window.location.assign(
-                    coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
-                      absolute: false,
-                    })
-                  );
+                  coreStart.application.navigateToApp(WORKSPACE_CREATE_APP_ID);
                 }}
               >
                 <FormattedMessage
