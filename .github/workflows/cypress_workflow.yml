@@ -32,7 +32,7 @@ env:
   TEST_REPO: ${{ inputs.test_repo != '' && inputs.test_repo || 'opensearch-project/opensearch-dashboards-functional-test' }}
   TEST_BRANCH: "${{ inputs.test_branch != '' && inputs.test_branch || github.base_ref }}"
   FTR_PATH: 'ftr'
-  START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true  --csp.warnLegacyBrowsers=false --uiSettings.overrides['query:enhancements:enabled']=false'
+  START_CMD: 'node ../scripts/opensearch_dashboards --dev --no-base-path --no-watch --savedObjects.maxImportPayloadBytes=10485760 --server.maxPayloadBytes=1759977 --logging.json=false --data.search.aggs.shardDelay.enabled=true  --csp.warnLegacyBrowsers=false --uiSettings.overrides["query:enhancements:enabled"]=false'
   OPENSEARCH_SNAPSHOT_CMD: 'node ../scripts/opensearch snapshot -E cluster.routing.allocation.disk.threshold_enabled=false'
   CYPRESS_BROWSER: 'chromium'
   CYPRESS_VISBUILDER_ENABLED: true
