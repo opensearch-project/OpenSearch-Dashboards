@@ -58,7 +58,6 @@ import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { PersistedLog, getQueryLog, matchPairs, toUser, fromUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
-import { SuggestionsComponent } from '..';
 
 export interface QueryStringInputProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -153,7 +152,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private getSuggestions = async () => {
-    console.log('suggestions????');
     if (!this.inputRef) {
       return;
     }
@@ -191,8 +189,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
           selectionEnd,
           signal: this.abortController.signal,
         })) || [];
-      console.log('query input suggestions: ', suggestions);
-      return [...suggestions, ...recentSearchSuggestions];
+      return [...suggestions];
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
       // Ignore aborted requests
@@ -236,7 +233,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private onChange = (query: Query) => {
-    console.log('onChange????');
     this.updateSuggestions();
 
     if (this.props.onChange) {
