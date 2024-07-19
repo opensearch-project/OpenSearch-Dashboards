@@ -30,7 +30,7 @@
 
 import React, { FC } from 'react';
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiCard,
   EuiFlexGrid,
   EuiFlexGroup,
@@ -114,7 +114,7 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
             <EuiSpacer size="xl" />
 
             <RedirectAppLinks application={application}>
-              <EuiButton
+              <EuiSmallButton
                 fill
                 iconType="indexOpen"
                 href={addBasePath('/app/management/opensearch-dashboards/indexPatterns')}
@@ -123,7 +123,7 @@ export const GettingStarted: FC<Props> = ({ addBasePath, isDarkTheme, apps }) =>
                   defaultMessage="Add your data"
                   id="opensearchDashboardsOverview.gettingStarted.addDataButtonLabel"
                 />
-              </EuiButton>
+              </EuiSmallButton>
             </RedirectAppLinks>
           </div>
         </EuiFlexItem>

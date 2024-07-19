@@ -40,7 +40,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiButton
+      <EuiSmallButton
         data-test-subj="inputControlSubmitBtn"
         disabled={false}
         onClick={[Function]}
@@ -50,12 +50,12 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
           id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
           values={Object {}}
         />
-      </EuiButton>
+      </EuiSmallButton>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
     >
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         data-test-subj="inputControlCancelBtn"
         disabled={false}
         onClick={[Function]}
@@ -65,12 +65,12 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
           id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
           values={Object {}}
         />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
     >
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         data-test-subj="inputControlClearBtn"
         disabled={true}
         onClick={[Function]}
@@ -80,7 +80,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
           id="inputControl.vis.inputControlVis.clearFormButtonLabel"
           values={Object {}}
         />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>
@@ -126,7 +126,7 @@ exports[`Clear btns enabled when there are values 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiButton
+      <EuiSmallButton
         data-test-subj="inputControlSubmitBtn"
         disabled={true}
         onClick={[Function]}
@@ -136,12 +136,12 @@ exports[`Clear btns enabled when there are values 1`] = `
           id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
           values={Object {}}
         />
-      </EuiButton>
+      </EuiSmallButton>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
     >
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         data-test-subj="inputControlCancelBtn"
         disabled={true}
         onClick={[Function]}
@@ -151,12 +151,12 @@ exports[`Clear btns enabled when there are values 1`] = `
           id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
           values={Object {}}
         />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
     >
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         data-test-subj="inputControlClearBtn"
         disabled={false}
         onClick={[Function]}
@@ -166,7 +166,7 @@ exports[`Clear btns enabled when there are values 1`] = `
           id="inputControl.vis.inputControlVis.clearFormButtonLabel"
           values={Object {}}
         />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>
@@ -212,7 +212,7 @@ exports[`Renders list control 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiButton
+      <EuiSmallButton
         data-test-subj="inputControlSubmitBtn"
         disabled={true}
         onClick={[Function]}
@@ -222,12 +222,12 @@ exports[`Renders list control 1`] = `
           id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
           values={Object {}}
         />
-      </EuiButton>
+      </EuiSmallButton>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
     >
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         data-test-subj="inputControlCancelBtn"
         disabled={true}
         onClick={[Function]}
@@ -237,12 +237,12 @@ exports[`Renders list control 1`] = `
           id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
           values={Object {}}
         />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
     >
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         data-test-subj="inputControlClearBtn"
         disabled={true}
         onClick={[Function]}
@@ -252,7 +252,7 @@ exports[`Renders list control 1`] = `
           id="inputControl.vis.inputControlVis.clearFormButtonLabel"
           values={Object {}}
         />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>
@@ -305,7 +305,7 @@ exports[`Renders range control 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiButton
+      <EuiSmallButton
         data-test-subj="inputControlSubmitBtn"
         disabled={true}
         onClick={[Function]}
@@ -315,12 +315,12 @@ exports[`Renders range control 1`] = `
           id="inputControl.vis.inputControlVis.applyChangesButtonLabel"
           values={Object {}}
         />
-      </EuiButton>
+      </EuiSmallButton>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
     >
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         data-test-subj="inputControlCancelBtn"
         disabled={true}
         onClick={[Function]}
@@ -330,12 +330,12 @@ exports[`Renders range control 1`] = `
           id="inputControl.vis.inputControlVis.cancelChangesButtonLabel"
           values={Object {}}
         />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem
       grow={false}
     >
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         data-test-subj="inputControlClearBtn"
         disabled={true}
         onClick={[Function]}
@@ -345,7 +345,7 @@ exports[`Renders range control 1`] = `
           id="inputControl.vis.inputControlVis.clearFormButtonLabel"
           values={Object {}}
         />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>

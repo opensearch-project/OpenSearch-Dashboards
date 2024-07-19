@@ -102,63 +102,71 @@ exports[`DataSourceTable should get datasources failed should render empty table
           }
           isEmptyState={true}
         >
-          <EuiButton
+          <EuiSmallButton
             data-test-subj="createDataSourceButtonEmptyState"
             fill={false}
             onClick={[Function]}
           >
-            <EuiButtonDisplay
-              baseClassName="euiButton"
+            <EuiButton
               data-test-subj="createDataSourceButtonEmptyState"
-              disabled={false}
-              element="button"
               fill={false}
-              isDisabled={false}
               onClick={[Function]}
-              type="button"
+              size="s"
             >
-              <button
-                className="euiButton euiButton--primary"
+              <EuiButtonDisplay
+                baseClassName="euiButton"
                 data-test-subj="createDataSourceButtonEmptyState"
                 disabled={false}
+                element="button"
+                fill={false}
+                isDisabled={false}
                 onClick={[Function]}
-                style={
-                  Object {
-                    "minWidth": undefined,
-                  }
-                }
+                size="s"
                 type="button"
               >
-                <EuiButtonContent
-                  className="euiButton__content"
-                  iconSide="left"
-                  textProps={
+                <button
+                  className="euiButton euiButton--primary euiButton--small"
+                  data-test-subj="createDataSourceButtonEmptyState"
+                  disabled={false}
+                  onClick={[Function]}
+                  style={
                     Object {
-                      "className": "euiButton__text",
+                      "minWidth": undefined,
                     }
                   }
+                  type="button"
                 >
-                  <span
-                    className="euiButtonContent euiButton__content"
+                  <EuiButtonContent
+                    className="euiButton__content"
+                    iconSide="left"
+                    textProps={
+                      Object {
+                        "className": "euiButton__text",
+                      }
+                    }
                   >
                     <span
-                      className="euiButton__text"
+                      className="euiButtonContent euiButton__content"
                     >
-                      <FormattedMessage
-                        defaultMessage="Create data source connection"
-                        id="dataSourcesManagement.dataSourceListing.createButton"
-                        values={Object {}}
+                      <span
+                        className="euiButton__text"
                       >
-                        <span>
-                          Create data source connection
-                        </span>
-                      </FormattedMessage>
+                        <FormattedMessage
+                          defaultMessage="Create data source connection"
+                          id="dataSourcesManagement.dataSourceListing.createButton"
+                          values={Object {}}
+                        >
+                          <span>
+                            Create data source connection
+                          </span>
+                        </FormattedMessage>
+                      </span>
                     </span>
-                  </span>
-                </EuiButtonContent>
-              </button>
-            </EuiButtonDisplay>
-          </EuiButton>
+                  </EuiButtonContent>
+                </button>
+              </EuiButtonDisplay>
+            </EuiButton>
+          </EuiSmallButton>
         </CreateButton>
       </div>
     </EuiPanel>
@@ -361,7 +369,7 @@ exports[`DataSourceTable should get datasources successful should render normall
           "toolsRight": <EuiFlexItem
             grow={false}
           >
-            <EuiButton
+            <EuiSmallButton
               color="danger"
               data-test-subj="deleteDataSourceConnections"
               disabled={true}
@@ -372,7 +380,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                
               
               
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>,
         }
       }
@@ -410,7 +418,7 @@ exports[`DataSourceTable should get datasources successful should render normall
             <EuiFlexItem
               grow={false}
             >
-              <EuiButton
+              <EuiSmallButton
                 color="danger"
                 data-test-subj="deleteDataSourceConnections"
                 disabled={true}
@@ -421,7 +429,7 @@ exports[`DataSourceTable should get datasources successful should render normall
                  
                 
                 
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
           }
         >
@@ -536,57 +544,66 @@ exports[`DataSourceTable should get datasources successful should render normall
                     <div
                       className="euiFlexItem euiFlexItem--flexGrowZero"
                     >
-                      <EuiButton
+                      <EuiSmallButton
                         color="danger"
                         data-test-subj="deleteDataSourceConnections"
                         disabled={true}
                         onClick={[Function]}
                       >
-                        <EuiButtonDisplay
-                          baseClassName="euiButton"
+                        <EuiButton
                           color="danger"
                           data-test-subj="deleteDataSourceConnections"
                           disabled={true}
-                          element="button"
-                          isDisabled={true}
                           onClick={[Function]}
-                          type="button"
+                          size="s"
                         >
-                          <button
-                            className="euiButton euiButton--danger euiButton-isDisabled"
+                          <EuiButtonDisplay
+                            baseClassName="euiButton"
+                            color="danger"
                             data-test-subj="deleteDataSourceConnections"
                             disabled={true}
+                            element="button"
+                            isDisabled={true}
                             onClick={[Function]}
-                            style={
-                              Object {
-                                "minWidth": undefined,
-                              }
-                            }
+                            size="s"
                             type="button"
                           >
-                            <EuiButtonContent
-                              className="euiButton__content"
-                              iconSide="left"
-                              textProps={
+                            <button
+                              className="euiButton euiButton--danger euiButton--small euiButton-isDisabled"
+                              data-test-subj="deleteDataSourceConnections"
+                              disabled={true}
+                              onClick={[Function]}
+                              style={
                                 Object {
-                                  "className": "euiButton__text",
+                                  "minWidth": undefined,
                                 }
                               }
+                              type="button"
                             >
-                              <span
-                                className="euiButtonContent euiButton__content"
+                              <EuiButtonContent
+                                className="euiButton__content"
+                                iconSide="left"
+                                textProps={
+                                  Object {
+                                    "className": "euiButton__text",
+                                  }
+                                }
                               >
                                 <span
-                                  className="euiButton__text"
+                                  className="euiButtonContent euiButton__content"
                                 >
-                                  Delete 
-                                   
+                                  <span
+                                    className="euiButton__text"
+                                  >
+                                    Delete 
+                                     
+                                  </span>
                                 </span>
-                              </span>
-                            </EuiButtonContent>
-                          </button>
-                        </EuiButtonDisplay>
-                      </EuiButton>
+                              </EuiButtonContent>
+                            </button>
+                          </EuiButtonDisplay>
+                        </EuiButton>
+                      </EuiSmallButton>
                     </div>
                   </EuiFlexItem>
                 </div>

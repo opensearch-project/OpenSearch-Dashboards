@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`FormatEditorSamples should render normally 1`] = `
-<EuiFormRow
+<EuiCompressedFormRow
   describedByIds={Array []}
-  display="row"
+  display="rowCompressed"
   fullWidth={false}
   hasChildLabel={true}
   hasEmptyLabelSpace={false}
@@ -56,7 +56,7 @@ exports[`FormatEditorSamples should render normally 1`] = `
     responsive={true}
     tableLayout="fixed"
   />
-</EuiFormRow>
+</EuiCompressedFormRow>
 `;
 
 exports[`FormatEditorSamples should render nothing if there are no samples 1`] = `""`;

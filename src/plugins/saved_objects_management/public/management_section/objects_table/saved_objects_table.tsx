@@ -41,18 +41,18 @@ import {
   EuiLoadingSpinner,
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
-  EuiCheckboxGroup,
+  EuiCompressedCheckboxGroup,
   EuiToolTip,
   EuiPageContent,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiModal,
   EuiModalHeader,
   EuiModalBody,
   EuiModalFooter,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiSmallButtonEmpty,
+  EuiSmallButton,
   EuiModalHeaderTitle,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -826,7 +826,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <EuiFormRow
+          <EuiCompressedFormRow
             label={
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalDescription"
@@ -835,7 +835,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             }
             labelType="legend"
           >
-            <EuiCheckboxGroup
+            <EuiCompressedCheckboxGroup
               options={exportAllOptions}
               idToSelectedMap={exportAllSelectedOptions}
               onChange={(optionId) => {
@@ -851,9 +851,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
                 });
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer size="m" />
-          <EuiSwitch
+          <EuiCompressedSwitch
             name="includeReferencesDeep"
             label={
               <FormattedMessage
@@ -870,20 +870,20 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={this.closeExportAllModal}>
+                  <EuiSmallButtonEmpty onClick={this.closeExportAllModal}>
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
                       defaultMessage="Cancel"
                     />
-                  </EuiButtonEmpty>
+                  </EuiSmallButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={this.onExportAll}>
+                  <EuiSmallButton fill onClick={this.onExportAll}>
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
                       defaultMessage="Export all"
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

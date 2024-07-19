@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiSmallButtonIcon, EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { Component } from 'react';
 import React from 'react';
@@ -161,7 +161,7 @@ class FilterOptionsUI extends Component<Props, State> {
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         button={
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             onClick={this.togglePopover}
             iconType="filter"
             aria-label={this.props.intl.formatMessage({

@@ -33,11 +33,11 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import {
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormRow,
-  EuiFieldText,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
   EuiLink,
 } from '@elastic/eui';
 import { durationOutputOptions, durationInputOptions, isDuration } from './lib/durations';
@@ -178,18 +178,18 @@ class DataFormatPickerUI extends Component {
       return (
         <EuiFlexGroup responsive={false} gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiFormRow id={htmlId('date')} label={this.props.label}>
-              <EuiComboBox
+            <EuiCompressedFormRow id={htmlId('date')} label={this.props.label}>
+              <EuiCompressedComboBox
                 isClearable={false}
                 options={options}
                 selectedOptions={selectedOption ? [selectedOption] : []}
                 onChange={this.handleChange}
                 singleSelection={{ asPlainText: true }}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('from')}
               label={
                 <FormattedMessage
@@ -198,17 +198,17 @@ class DataFormatPickerUI extends Component {
                 />
               }
             >
-              <EuiComboBox
+              <EuiCompressedComboBox
                 isClearable={false}
                 options={durationInputOptions}
                 selectedOptions={selectedFrom ? [selectedFrom] : []}
                 onChange={this.handleDurationChange('from')}
                 singleSelection={{ asPlainText: true }}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow
+            <EuiCompressedFormRow
               id={htmlId('to')}
               label={
                 <FormattedMessage
@@ -217,19 +217,19 @@ class DataFormatPickerUI extends Component {
                 />
               }
             >
-              <EuiComboBox
+              <EuiCompressedComboBox
                 isClearable={false}
                 options={durationOutputOptions}
                 selectedOptions={selectedTo ? [selectedTo] : []}
                 onChange={this.handleDurationChange('to')}
                 singleSelection={{ asPlainText: true }}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
 
           {selectedTo && selectedTo.value !== 'humanize' && (
             <EuiFlexItem grow={false}>
-              <EuiFormRow
+              <EuiCompressedFormRow
                 id={htmlId('decimal')}
                 label={
                   <FormattedMessage
@@ -238,13 +238,13 @@ class DataFormatPickerUI extends Component {
                   />
                 }
               >
-                <EuiFieldText
+                <EuiCompressedFieldText
                   defaultValue={decimals}
                   inputRef={(el) => (this.decimals = el)}
                   placeholder={DEFAULT_OUTPUT_PRECISION}
                   onChange={this.handleDurationChange('decimals')}
                 />
-              </EuiFormRow>
+              </EuiCompressedFormRow>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -253,7 +253,7 @@ class DataFormatPickerUI extends Component {
     if (defaultValue === 'custom') {
       custom = (
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             label={
               <FormattedMessage
                 id="visTypeTimeseries.dataFormatPicker.formatStringLabel"
@@ -276,20 +276,20 @@ class DataFormatPickerUI extends Component {
               </span>
             }
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               defaultValue={value}
               inputRef={(el) => (this.custom = el)}
               onChange={this.handleCustomChange}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       );
     }
     return (
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiFormRow label={this.props.label}>
-            <EuiComboBox
+          <EuiCompressedFormRow label={this.props.label}>
+            <EuiCompressedComboBox
               isClearable={false}
               options={options}
               selectedOptions={selectedOption ? [selectedOption] : []}
@@ -297,7 +297,7 @@ class DataFormatPickerUI extends Component {
               singleSelection={{ asPlainText: true }}
               data-test-subj="tsvbDataFormatPicker"
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         {custom}
       </EuiFlexGroup>

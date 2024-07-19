@@ -33,9 +33,9 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
+  EuiCompressedFieldText,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -191,7 +191,7 @@ export class DashboardCloneModal extends React.Component<Props, State> {
 
           <EuiSpacer />
 
-          <EuiFieldText
+          <EuiCompressedFieldText
             autoFocus
             aria-label={i18n.translate('dashboard.cloneModal.cloneDashboardTitleAriaLabel', {
               defaultMessage: 'Cloned Dashboard Title',
@@ -206,14 +206,14 @@ export class DashboardCloneModal extends React.Component<Props, State> {
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="cloneCancelButton" onClick={this.props.onClose}>
+          <EuiSmallButtonEmpty data-test-subj="cloneCancelButton" onClick={this.props.onClose}>
             <FormattedMessage
               id="dashboard.topNav.cloneModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
 
-          <EuiButton
+          <EuiSmallButton
             fill
             data-test-subj="cloneConfirmButton"
             onClick={this.cloneDashboard}
@@ -223,7 +223,7 @@ export class DashboardCloneModal extends React.Component<Props, State> {
               id="dashboard.topNav.cloneModal.confirmButtonLabel"
               defaultMessage="Confirm Clone"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     );

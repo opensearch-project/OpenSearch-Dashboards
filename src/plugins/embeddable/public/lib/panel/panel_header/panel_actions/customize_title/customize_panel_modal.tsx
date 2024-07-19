@@ -31,11 +31,11 @@
 import React, { Component } from 'react';
 
 import {
-  EuiFormRow,
-  EuiFieldText,
-  EuiButton,
-  EuiSwitch,
-  EuiButtonEmpty,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
+  EuiSmallButton,
+  EuiCompressedSwitch,
+  EuiSmallButtonEmpty,
   EuiModalHeader,
   EuiModalFooter,
   EuiModalBody,
@@ -95,8 +95,8 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiFormRow>
-            <EuiSwitch
+          <EuiCompressedFormRow>
+            <EuiCompressedSwitch
               checked={!this.state.hideTitle}
               data-test-subj="customizePanelHideTitle"
               id="hideTitle"
@@ -108,8 +108,8 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
               }
               onChange={this.onHideTitleToggle}
             />
-          </EuiFormRow>
-          <EuiFormRow
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow
             label={i18n.translate(
               'embeddableApi.customizePanel.modal.optionsMenuForm.panelTitleFormRowLabel',
               {
@@ -117,7 +117,7 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
               }
             )}
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               id="panelTitleInput"
               data-test-subj="customEmbeddablePanelTitleInput"
               name="min"
@@ -132,7 +132,7 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
                 }
               )}
               append={
-                <EuiButtonEmpty
+                <EuiSmallButtonEmpty
                   data-test-subj="resetCustomEmbeddablePanelTitle"
                   onClick={this.reset}
                   disabled={this.state.hideTitle}
@@ -141,25 +141,25 @@ export class CustomizePanelModal extends Component<CustomizePanelProps, State> {
                     id="embeddableApi.customizePanel.modal.optionsMenuForm.resetCustomDashboardButtonLabel"
                     defaultMessage="Reset"
                   />
-                </EuiButtonEmpty>
+                </EuiSmallButtonEmpty>
               }
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiModalBody>
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={() => this.props.cancel()}>
+          <EuiSmallButtonEmpty onClick={() => this.props.cancel()}>
             <FormattedMessage
               id="embeddableApi.customizePanel.modal.cancel"
               defaultMessage="Cancel"
             />
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
 
-          <EuiButton data-test-subj="saveNewTitleButton" onClick={this.save} fill>
+          <EuiSmallButton data-test-subj="saveNewTitleButton" onClick={this.save} fill>
             <FormattedMessage
               id="embeddableApi.customizePanel.modal.saveButtonTitle"
               defaultMessage="Save"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </React.Fragment>
     );
