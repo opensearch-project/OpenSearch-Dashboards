@@ -8,7 +8,7 @@ import { QueryLanguageSelector } from './language_selector';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiCompressedComboBox } from '@elastic/eui';
 import { QueryEnhancement } from '../types';
 
 const startMock = coreMock.createStart();
@@ -53,7 +53,7 @@ describe('LanguageSelector', () => {
         },
       })
     );
-    const euiComboBox = component.find(EuiComboBox);
+    const euiComboBox = component.find(EuiCompressedComboBox);
     expect(euiComboBox.prop('selectedOptions')).toEqual(
       expect.arrayContaining([
         {
@@ -72,7 +72,7 @@ describe('LanguageSelector', () => {
         },
       })
     );
-    const euiComboBox = component.find(EuiComboBox);
+    const euiComboBox = component.find(EuiCompressedComboBox);
     expect(euiComboBox.prop('selectedOptions')).toEqual(
       expect.arrayContaining([
         {

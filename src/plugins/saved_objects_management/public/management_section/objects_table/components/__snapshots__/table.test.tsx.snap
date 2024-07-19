@@ -26,7 +26,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
     onChange={[Function]}
     toolsRight={
       Array [
-        <EuiButton
+        <EuiSmallButton
           color="danger"
           data-test-subj="savedObjectsManagementDelete"
           iconType="trash"
@@ -39,11 +39,11 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
             values={Object {}}
           />
-        </EuiButton>,
+        </EuiSmallButton>,
         <EuiPopover
           anchorPosition="downCenter"
           button={
-            <EuiButton
+            <EuiSmallButton
               iconSide="right"
               iconType="arrowDown"
               isDisabled={false}
@@ -54,7 +54,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
                 id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
                 values={Object {}}
               />
-            </EuiButton>
+            </EuiSmallButton>
           }
           closePopover={[Function]}
           display="inlineBlock"
@@ -63,9 +63,9 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           ownFocus={true}
           panelPaddingSize="m"
         >
-          <EuiFormRow
+          <EuiCompressedFormRow
             describedByIds={Array []}
-            display="row"
+            display="rowCompressed"
             fullWidth={false}
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
@@ -78,7 +78,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             }
             labelType="label"
           >
-            <EuiSwitch
+            <EuiCompressedSwitch
               checked={true}
               label={
                 <FormattedMessage
@@ -90,16 +90,16 @@ exports[`Table prevents saved objects from being deleted 1`] = `
               name="includeReferencesDeep"
               onChange={[Function]}
             />
-          </EuiFormRow>
-          <EuiFormRow
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow
             describedByIds={Array []}
-            display="row"
+            display="rowCompressed"
             fullWidth={false}
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
             labelType="label"
           >
-            <EuiButton
+            <EuiSmallButton
               fill={true}
               iconType="exportAction"
               onClick={[Function]}
@@ -109,8 +109,8 @@ exports[`Table prevents saved objects from being deleted 1`] = `
                 id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                 values={Object {}}
               />
-            </EuiButton>
-          </EuiFormRow>
+            </EuiSmallButton>
+          </EuiCompressedFormRow>
         </EuiPopover>,
       ]
     }
@@ -252,7 +252,7 @@ exports[`Table should render normally 1`] = `
     onChange={[Function]}
     toolsRight={
       Array [
-        <EuiButton
+        <EuiSmallButton
           color="danger"
           data-test-subj="savedObjectsManagementDelete"
           iconType="trash"
@@ -264,11 +264,11 @@ exports[`Table should render normally 1`] = `
             id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
             values={Object {}}
           />
-        </EuiButton>,
+        </EuiSmallButton>,
         <EuiPopover
           anchorPosition="downCenter"
           button={
-            <EuiButton
+            <EuiSmallButton
               iconSide="right"
               iconType="arrowDown"
               isDisabled={false}
@@ -279,7 +279,7 @@ exports[`Table should render normally 1`] = `
                 id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
                 values={Object {}}
               />
-            </EuiButton>
+            </EuiSmallButton>
           }
           closePopover={[Function]}
           display="inlineBlock"
@@ -288,9 +288,9 @@ exports[`Table should render normally 1`] = `
           ownFocus={true}
           panelPaddingSize="m"
         >
-          <EuiFormRow
+          <EuiCompressedFormRow
             describedByIds={Array []}
-            display="row"
+            display="rowCompressed"
             fullWidth={false}
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
@@ -303,7 +303,7 @@ exports[`Table should render normally 1`] = `
             }
             labelType="label"
           >
-            <EuiSwitch
+            <EuiCompressedSwitch
               checked={true}
               label={
                 <FormattedMessage
@@ -315,16 +315,16 @@ exports[`Table should render normally 1`] = `
               name="includeReferencesDeep"
               onChange={[Function]}
             />
-          </EuiFormRow>
-          <EuiFormRow
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow
             describedByIds={Array []}
-            display="row"
+            display="rowCompressed"
             fullWidth={false}
             hasChildLabel={true}
             hasEmptyLabelSpace={false}
             labelType="label"
           >
-            <EuiButton
+            <EuiSmallButton
               fill={true}
               iconType="exportAction"
               onClick={[Function]}
@@ -334,8 +334,8 @@ exports[`Table should render normally 1`] = `
                 id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                 values={Object {}}
               />
-            </EuiButton>
-          </EuiFormRow>
+            </EuiSmallButton>
+          </EuiCompressedFormRow>
         </EuiPopover>,
       ]
     }

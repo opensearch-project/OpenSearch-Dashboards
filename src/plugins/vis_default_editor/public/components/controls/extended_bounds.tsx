@@ -90,17 +90,18 @@ function ExtendedBoundsParamEditor({
       error={error}
     >
       <EuiFlexGroup gutterSize="s" responsive={false}>
-        <EuiFlexItem />
-        <EuiFieldNumber
-          value={isUndefined(value.min) ? '' : value.min}
-          onChange={(ev) => handleChange(ev, 'min')}
-          onBlur={setTouched}
-          fullWidth={true}
-          isInvalid={showValidation ? !isValid : false}
-          aria-label={minLabel}
-          prepend={minLabel}
-          compressed
-        />
+        <EuiFlexItem>
+          <EuiFieldNumber
+            value={isUndefined(value.min) ? '' : value.min}
+            onChange={(ev) => handleChange(ev, 'min')}
+            onBlur={setTouched}
+            fullWidth={true}
+            isInvalid={showValidation ? !isValid : false}
+            aria-label={minLabel}
+            prepend={minLabel}
+            compressed
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldNumber
             value={isUndefined(value.max) ? '' : value.max}

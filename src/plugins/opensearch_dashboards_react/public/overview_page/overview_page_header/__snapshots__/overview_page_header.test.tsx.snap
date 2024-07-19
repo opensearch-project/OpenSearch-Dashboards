@@ -50,14 +50,14 @@ exports[`OverviewPageHeader  renders with the toolbar by default 1`] = `
                 }
               }
             >
-              <EuiButtonEmpty
+              <EuiSmallButtonEmpty
                 className="osdOverviewPageHeader__actionButton"
                 flush="both"
                 href="/app/home#/tutorial_directory"
                 iconType="indexOpen"
               >
                 Add data
-              </EuiButtonEmpty>
+              </EuiSmallButtonEmpty>
             </RedirectAppLinks>
           </EuiFlexItem>
         </EuiFlexGroup>
