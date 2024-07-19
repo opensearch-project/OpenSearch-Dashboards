@@ -29,7 +29,7 @@ primaryExpression
     ;
 
 comparisonExpression
-    : field comparisonOperator rangeValue
+    : field comparisonOperator value
     ;
 
 keyValueExpression
@@ -53,14 +53,8 @@ field
     : ID
     ;
 
-rangeValue
-    : NUMBER
-    | PHRASE
-    ;
-
 value
     : PHRASE 
-    | NUMBER 
     | tokenSearch
     ;
     
