@@ -23,11 +23,10 @@ const setup = (options?: Partial<WorkspaceUseCaseProps>) => {
           id: 'system-use-case',
           title: 'System use case',
           description: 'System use case description',
-          features: [],
           systematic: true,
         },
       ]}
-      value={[]}
+      value=""
       onChange={onChangeMock}
       formErrors={formErrors}
       {...options}
@@ -49,19 +48,19 @@ describe('WorkspaceUseCase', () => {
     expect(renderResult.getByText('Search')).toBeInTheDocument();
   });
 
-  it('should call onChange with new added use case', () => {
+  it('should call onChange with new checked use case', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
     fireEvent.click(renderResult.getByText('Observability'));
-    expect(onChangeMock).toHaveBeenLastCalledWith(['observability']);
+    expect(onChangeMock).toHaveBeenLastCalledWith('observability');
   });
 
-  it('should call onChange without removed use case', () => {
-    const { renderResult, onChangeMock } = setup({ value: ['observability'] });
+  it('should not call onChange after checked use case clicked', () => {
+    const { renderResult, onChangeMock } = setup({ value: 'observability' });
 
     expect(onChangeMock).not.toHaveBeenCalled();
     fireEvent.click(renderResult.getByText('Observability'));
-    expect(onChangeMock).toHaveBeenLastCalledWith([]);
+    expect(onChangeMock).not.toHaveBeenCalled();
   });
 });

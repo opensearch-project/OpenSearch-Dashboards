@@ -17,7 +17,7 @@ import {
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, of } from 'rxjs';
 import { i18n } from '@osd/i18n';
-import { debounce } from '../../../../../core/public';
+import { debounce, DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { WorkspaceAttribute } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
@@ -26,7 +26,7 @@ import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
 import { cleanWorkspaceId } from '../../../../../core/public';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
-import { getUseCaseFromFeatureConfig } from '../../utils';
+import { getFirstUseCaseOfFeatureConfigs, getUseCaseFromFeatureConfig } from '../../utils';
 import { WorkspaceUseCase } from '../../types';
 
 const WORKSPACE_LIST_PAGE_DESCRIPTION = i18n.translate('workspace.list.description', {
@@ -108,17 +108,14 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
         if (!features || features.length === 0) {
           return '';
         }
-        const results: string[] = [];
-        features.forEach((featureConfig) => {
-          const useCaseId = getUseCaseFromFeatureConfig(featureConfig);
-          if (useCaseId) {
-            const useCase = registeredUseCases?.find(({ id }) => id === useCaseId);
-            if (useCase) {
-              results.push(useCase.title);
-            }
-          }
-        });
-        return results.join(', ');
+        const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
+        const useCase =
+          useCaseId === DEFAULT_NAV_GROUPS.all.id
+            ? DEFAULT_NAV_GROUPS.all
+            : registeredUseCases?.find(({ id }) => id === useCaseId);
+        if (useCase) {
+          return useCase.title;
+        }
       },
     },
     {
