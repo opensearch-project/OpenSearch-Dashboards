@@ -5,7 +5,7 @@
 
 import './workspace_menu.scss';
 import { i18n } from '@osd/i18n';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
 import {
   EuiAvatar,
@@ -20,19 +20,19 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { truncate } from 'lodash';
-import { Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
   MAX_WORKSPACE_PICKER_NUM,
   MAX_WORKSPACE_NAME_LENGTH,
   WORKSPACE_DETAIL_APP_ID,
-  WORKSPACE_USE_CASES,
 } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
-import { CoreStart, NavGroupItemInMap, WorkspaceObject } from '../../../../../core/public';
-import { WorkspaceUseCaseId, getUseCaseFromFeatureConfig } from '../../utils';
+import { CoreStart, WorkspaceObject } from '../../../../../core/public';
+import { getUseCaseFromFeatureConfig } from '../../utils';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
+import { WorkspaceUseCase } from '../../types';
 
 const defaultHeaderName = i18n.translate(
   'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
@@ -42,17 +42,15 @@ const defaultHeaderName = i18n.translate(
 );
 interface Props {
   coreStart: CoreStart;
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
-export const WorkspaceMenu = ({ coreStart }: Props) => {
+export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const workspaceList = useObservable(coreStart.workspaces.workspaceList$, []);
   const isDashboardAdmin = !!coreStart.application.capabilities.dashboards;
-  const navGroupsMapRef = useRef<Observable<Record<string, NavGroupItemInMap>>>(
-    coreStart.chrome.navGroup.getNavGroupsMap$()
-  );
-  const navGroupsMap = useObservable(navGroupsMapRef.current, undefined);
+  const availableUseCases = useObservable(registeredUseCases$, []);
 
   const filteredWorkspaceList = useMemo(() => {
     return workspaceList.slice(0, MAX_WORKSPACE_PICKER_NUM);
@@ -69,9 +67,8 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
 
   const getUseCase = (workspace: WorkspaceObject) => {
-    return workspace?.features
-      ?.map(getUseCaseFromFeatureConfig)
-      .filter(Boolean)[0] as WorkspaceUseCaseId;
+    const useCaseId = workspace?.features?.map(getUseCaseFromFeatureConfig).filter(Boolean)[0];
+    return availableUseCases.find((useCase) => useCase.id === useCaseId);
   };
 
   const openPopover = () => {
@@ -83,7 +80,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   };
 
   const workspaceToItem = (workspace: WorkspaceObject, itemType: string) => {
-    const appId = navGroupsMap?.[getUseCase(workspace)]?.navLinks[0].id ?? WORKSPACE_DETAIL_APP_ID;
+    const appId = getUseCase(workspace)?.features[0] ?? WORKSPACE_DETAIL_APP_ID;
     const useCaseURL = formatUrlWithWorkspaceId(
       coreStart.application.getUrlForApp(appId, {
         absolute: false,
@@ -198,7 +195,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
                 {currentWorkspaceName}
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="context-menu-current-use-case">
-                {WORKSPACE_USE_CASES[getUseCase(currentWorkspace)].title ?? ''}
+                {getUseCase(currentWorkspace)?.title ?? ''}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton

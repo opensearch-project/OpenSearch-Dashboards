@@ -7,15 +7,22 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { WorkspaceMenu } from './workspace_menu';
-import { applicationServiceMock, coreMock } from '../../../../../core/public/mocks';
+import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from '../../../../../core/public';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { IntlProvider } from 'react-intl';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
 
 describe('<WorkspaceMenu />', () => {
   let coreStartMock: CoreStart;
   const navigateToApp = jest.fn();
+  const registeredUseCases$ = new BehaviorSubject([
+    WORKSPACE_USE_CASES.observability,
+    WORKSPACE_USE_CASES['security-analytics'],
+    WORKSPACE_USE_CASES.analytics,
+    WORKSPACE_USE_CASES.search,
+  ]);
 
   beforeEach(() => {
     coreStartMock = coreMock.createStart();
@@ -32,16 +39,19 @@ describe('<WorkspaceMenu />', () => {
       navigateToApp,
     };
 
-    // const applicationStartMock = applicationServiceMock.createStartContract();
-
     coreStartMock.workspaces.initialized$.next(true);
     jest.spyOn(coreStartMock.application, 'getUrlForApp').mockImplementation((appId: string) => {
       return `https://test.com/app/${appId}`;
     });
-    // jest.spyOn(coreStartMock.application, 'navigateToApp').mockResolvedValue((appId: string) => {
-    //   return `https://test.com/app/${appId}`;
-    // });
   });
+
+  const WorkspaceMenuCreatorComponent = () => {
+    return (
+      <IntlProvider locale="en">
+        <WorkspaceMenu coreStart={coreStartMock} registeredUseCases$={registeredUseCases$} />
+      </IntlProvider>
+    );
+  };
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -54,11 +64,7 @@ describe('<WorkspaceMenu />', () => {
       { id: 'workspace-2', name: 'workspace 2' },
     ]);
 
-    render(
-      <IntlProvider locale="en">
-        <WorkspaceMenu coreStart={coreStartMock} />
-      </IntlProvider>
-    );
+    render(<WorkspaceMenuCreatorComponent />);
     const selectButton = screen.getByTestId('workspace-select-button');
     fireEvent.click(selectButton);
 
@@ -78,11 +84,8 @@ describe('<WorkspaceMenu />', () => {
       { id: 'workspace-2', name: 'workspace 2' },
     ]);
 
-    render(
-      <IntlProvider locale="en">
-        <WorkspaceMenu coreStart={coreStartMock} />
-      </IntlProvider>
-    );
+    render(<WorkspaceMenuCreatorComponent />);
+
     const selectButton = screen.getByTestId('workspace-select-button');
     fireEvent.click(selectButton);
 
@@ -97,11 +100,7 @@ describe('<WorkspaceMenu />', () => {
       name: 'workspace 1',
       features: ['use-case-observability'],
     });
-    render(
-      <IntlProvider locale="en">
-        <WorkspaceMenu coreStart={coreStartMock} />
-      </IntlProvider>
-    );
+    render(<WorkspaceMenuCreatorComponent />);
 
     fireEvent.click(screen.getByTestId('current-workspace-button'));
     expect(screen.getByTestId('context-menu-current-workspace-name')).toBeInTheDocument();
@@ -110,11 +109,8 @@ describe('<WorkspaceMenu />', () => {
   });
 
   it('should close the workspace dropdown list', async () => {
-    render(
-      <IntlProvider locale="en">
-        <WorkspaceMenu coreStart={coreStartMock} />
-      </IntlProvider>
-    );
+    render(<WorkspaceMenuCreatorComponent />);
+
     fireEvent.click(screen.getByTestId('workspace-select-button'));
 
     expect(screen.getByText(/all workspaces/i)).toBeInTheDocument();
@@ -143,16 +139,12 @@ describe('<WorkspaceMenu />', () => {
       },
     });
 
-    render(
-      <IntlProvider locale="en">
-        <WorkspaceMenu coreStart={coreStartMock} />
-      </IntlProvider>
-    );
+    render(<WorkspaceMenuCreatorComponent />);
     fireEvent.click(screen.getByTestId('workspace-select-button'));
     fireEvent.click(screen.getByText(/workspace 1/i));
 
     expect(window.location.assign).toHaveBeenCalledWith(
-      'https://test.com/w/workspace-1/app/dashboard'
+      'https://test.com/w/workspace-1/app/discover'
     );
 
     Object.defineProperty(window, 'location', {
@@ -172,11 +164,8 @@ describe('<WorkspaceMenu />', () => {
         assign: jest.fn(),
       },
     });
-    render(
-      <IntlProvider locale="en">
-        <WorkspaceMenu coreStart={coreStartMock} />
-      </IntlProvider>
-    );
+    render(<WorkspaceMenuCreatorComponent />);
+
     fireEvent.click(screen.getByTestId('current-workspace-button'));
     const button = screen.getByText(/Manage workspace/i);
     fireEvent.click(button);
@@ -189,68 +178,24 @@ describe('<WorkspaceMenu />', () => {
   });
 
   it('should navigate to workspaces management page', () => {
-    const originalLocation = window.location;
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
-
-    render(
-      <IntlProvider locale="en">
-        <WorkspaceMenu coreStart={coreStartMock} />
-      </IntlProvider>
-    );
+    render(<WorkspaceMenuCreatorComponent />);
     fireEvent.click(screen.getByTestId('workspace-select-button'));
     fireEvent.click(screen.getByText(/manage workspaces/i));
     expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('workspace_list');
-
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    });
   });
 
   it('should navigate to create workspace page', () => {
-    const originalLocation = window.location;
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
-
-    render(
-      <IntlProvider locale="en">
-        <WorkspaceMenu coreStart={coreStartMock} />
-      </IntlProvider>
-    );
+    render(<WorkspaceMenuCreatorComponent />);
     fireEvent.click(screen.getByTestId('workspace-select-button'));
     fireEvent.click(screen.getByText(/create workspace/i));
     expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('workspace_create');
-
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    });
   });
 
   it('should navigate to workspace list page', () => {
-    const originalLocation = window.location;
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
+    render(<WorkspaceMenuCreatorComponent />);
 
-    render(
-      <IntlProvider locale="en">
-        <WorkspaceMenu coreStart={coreStartMock} />
-      </IntlProvider>
-    );
     fireEvent.click(screen.getByTestId('workspace-select-button'));
     fireEvent.click(screen.getByText(/View all/i));
     expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('workspace_list');
-
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    });
   });
 });

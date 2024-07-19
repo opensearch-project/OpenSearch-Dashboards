@@ -385,7 +385,12 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
        */
       core.chrome.navControls.registerLeftBottom({
         order: 2,
-        mount: toMountPoint(React.createElement(WorkspaceMenu, { coreStart: core })),
+        mount: toMountPoint(
+          React.createElement(WorkspaceMenu, {
+            coreStart: core,
+            registeredUseCases$: this.registeredUseCases$,
+          })
+        ),
       });
     }
 
