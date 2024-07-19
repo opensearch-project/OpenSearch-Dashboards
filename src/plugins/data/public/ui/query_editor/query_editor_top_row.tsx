@@ -235,6 +235,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           className="osdQueryEditor"
           dataTestSubj={props.dataTestSubj}
           queryLanguage={queryLanguage}
+          filterBar={props.filterBar}
         />
       </EuiFlexItem>
     );
@@ -363,12 +364,13 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       direction="column"
       justifyContent="flexEnd"
     >
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
+      </EuiFlexGroup>
       {renderQueryEditor()}
       <EuiFlexItem>
-        <EuiFlexGroup responsive={false} gutterSize="none">
-          <EuiFlexItem grow={false}>{props.filterBar}</EuiFlexItem>
+        <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
           <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
-          <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

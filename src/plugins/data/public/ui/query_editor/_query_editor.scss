@@ -15,11 +15,33 @@
   // overflow: auto;
 }
 
-.osdQueryEditor__languageWrapper {
-  :first-child {
-    box-shadow: none !important;
+.osdQueryEditorFooterHide {
+  display: none;
+}
+
+.osdQueryEditorFooter {
+  color: $ouiTextSubduedColor; // Apply the subdued color to all text in this class
+  height: 35px;
+
+  * {
+    color: inherit;
+    font-size: medium;
+    align-items: center;
+  }
+
+  #languageSelector {
     height: 100%;
-    border-radius: 0;
+  }
+}
+
+.osdQueryEditor__languageWrapper {
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  border: $euiBorderThin;
+
+  #languageSelector {
+    height: 100%;
   }
 }
 
@@ -42,6 +64,7 @@
 .osdQueryEditor__dataSetWrapper {
   .dataExplorerDSSelect {
     border-bottom: $euiBorderThin !important;
+    max-width: 375px;
 
     div:is([class$="--group"]) {
       padding: 0 !important;

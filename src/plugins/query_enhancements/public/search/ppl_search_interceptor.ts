@@ -5,6 +5,7 @@
 
 import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
+import { i18n } from '@osd/i18n';
 import { concatMap } from 'rxjs/operators';
 import {
   DataFrameAggConfig,
@@ -147,7 +148,15 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
     const dataFrame = getRawDataFrame(searchRequest);
     if (!dataFrame) {
-      return throwError(this.handleSearchError('DataFrame is not defined', request, signal!));
+      return throwError(
+        this.handleSearchError(
+          {
+            stack: 'DataFrame is not defined',
+          },
+          request,
+          signal!
+        )
+      );
     }
 
     let queryString = dataFrame.meta?.queryConfig?.qs ?? getRawQueryString(searchRequest) ?? '';
@@ -171,6 +180,10 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
         concatMap((response) => {
           const df = response.body;
+          if (df.error) {
+            const jsError = new Error(df.error.response);
+            return throwError(jsError);
+          }
           const timeField = getTimeField(df, aggConfig);
           if (timeField) {
             const timeFilter = getTimeFilter(timeField);
