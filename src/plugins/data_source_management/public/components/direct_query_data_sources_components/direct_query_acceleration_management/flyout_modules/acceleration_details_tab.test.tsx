@@ -101,7 +101,7 @@ describe('AccelerationDetailsTab', () => {
   test('displays the correct creation date', () => {
     const wrapper = shallowComponent();
     const creationDateNode = wrapper.find('DetailComponent[title="Creation Date"]');
-    expect(creationDateNode.prop('description')).toBe('8/1/2021, 11:53:05 AM');
+    expect(creationDateNode.prop('description')).toBe('8/1/2021, 6:53:05 PM');
   });
 
   test('displays the correct refresh type', () => {
