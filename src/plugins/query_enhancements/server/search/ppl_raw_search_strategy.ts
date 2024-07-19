@@ -29,7 +29,7 @@ export const pplRawSearchStrategyProvider = (
           rawResponse,
         };
       } catch (e) {
-        logger.error(`pplSearchStrategy: ${e.message}`);
+        logger.error(`pplRawSearchStrategy: ${e.message}`);
         if (usage) usage.trackError();
         throw e;
       }

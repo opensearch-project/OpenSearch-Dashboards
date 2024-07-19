@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { i18n } from '@osd/i18n';
 import { combineLatest } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { CoreStart, IUiSettingsClient } from 'opensearch-dashboards/public';
@@ -38,10 +39,21 @@ import {
   SearchRequest,
   DataPublicPluginStart,
   IOpenSearchSearchResponse,
+  IOpenSearchSearchRequest,
 } from '../../../data/public';
 import { search as dataPluginSearch } from '../../../data/public';
 import { VegaInspectorAdapters } from '../vega_inspector';
-import { RequestResponder } from '../../../inspector/public';
+import { RequestResponder, RequestStatistics } from '../../../inspector/public';
+
+interface RawPPLStrategySearchResponse {
+  rawResponse: {
+    datarows: any[];
+    jsonData: any[];
+    schema: any[];
+    size: number;
+    total: number;
+  };
+}
 
 export interface SearchAPIDependencies {
   uiSettings: IUiSettingsClient;
@@ -87,13 +99,14 @@ export class SearchAPI {
               ? { params, dataSourceId }
               : { params };
 
-          return search(searchApiParams, {
+          return search<
+            IOpenSearchSearchRequest,
+            IOpenSearchSearchResponse | RawPPLStrategySearchResponse
+          >(searchApiParams, {
             abortSignal: this.abortSignal,
             strategy: options?.strategy,
           }).pipe(
-            tap((data) =>
-              this.inspectSearchResult(data, requestResponders[requestId], options?.strategy)
-            ),
+            tap((data) => this.inspectSearchResult(data, requestResponders[requestId])),
             map((data) => ({
               name: requestId,
               rawResponse: data.rawResponse,
@@ -140,18 +153,44 @@ export class SearchAPI {
     }
   }
 
+  private getPPLRawResponseInspectorStats(response: RawPPLStrategySearchResponse['rawResponse']) {
+    const stats: RequestStatistics = {};
+    stats.hitsTotal = {
+      label: i18n.translate('data.search.searchSource.hitsTotalLabel', {
+        defaultMessage: 'Hits (total)',
+      }),
+      value: `${response.total}`,
+      description: i18n.translate('data.search.searchSource.hitsTotalDescription', {
+        defaultMessage: 'The number of documents that match the query.',
+      }),
+    };
+
+    stats.hits = {
+      label: i18n.translate('data.search.searchSource.hitsLabel', {
+        defaultMessage: 'Hits',
+      }),
+      value: `${response.size}`,
+      description: i18n.translate('data.search.searchSource.hitsDescription', {
+        defaultMessage: 'The number of documents returned by the query.',
+      }),
+    };
+    return stats;
+  }
+
   private inspectSearchResult(
-    response: IOpenSearchSearchResponse,
-    requestResponder: RequestResponder,
-    strategy?: string
+    response: IOpenSearchSearchResponse | RawPPLStrategySearchResponse,
+    requestResponder: RequestResponder
   ) {
     if (requestResponder) {
-      if (!strategy) {
+      // inspect ppl response
+      if ('jsonData' in response.rawResponse) {
+        requestResponder
+          .stats(this.getPPLRawResponseInspectorStats(response.rawResponse))
+          .ok({ json: response.rawResponse });
+      } else {
         requestResponder
           .stats(dataPluginSearch.getResponseInspectorStats(response.rawResponse))
           .ok({ json: response.rawResponse });
-      } else {
-        requestResponder.ok({ json: response.rawResponse });
       }
     }
   }
