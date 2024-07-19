@@ -6,6 +6,8 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
 import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+
+import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { WorkspaceUseCase as WorkspaceUseCaseObject } from '../../types';
 import { WorkspaceFormErrors } from './types';
 import './workspace_use_case.scss';
@@ -31,7 +33,7 @@ const WorkspaceUseCaseCard = ({
   return (
     <EuiCheckableCard
       id={id}
-      checkableType="checkbox"
+      checkableType="radio"
       style={{ height: '100%' }}
       label={title}
       checked={checked}
@@ -47,10 +49,12 @@ const WorkspaceUseCaseCard = ({
 };
 
 export interface WorkspaceUseCaseProps {
-  value: string[];
-  onChange: (newValue: string[]) => void;
+  value: string | undefined;
+  onChange: (newValue: string) => void;
   formErrors: WorkspaceFormErrors;
-  availableUseCases: WorkspaceUseCaseObject[];
+  availableUseCases: Array<
+    Pick<WorkspaceUseCaseObject, 'id' | 'title' | 'description' | 'systematic'>
+  >;
 }
 
 export const WorkspaceUseCase = ({
@@ -59,17 +63,6 @@ export const WorkspaceUseCase = ({
   formErrors,
   availableUseCases,
 }: WorkspaceUseCaseProps) => {
-  const handleCardChange = useCallback(
-    (id: string) => {
-      if (!value.includes(id)) {
-        onChange([...value, id]);
-        return;
-      }
-      onChange(value.filter((item) => item !== id));
-    },
-    [value, onChange]
-  );
-
   return (
     <EuiFormRow
       label={i18n.translate('workspace.form.workspaceUseCase.name.label', {
@@ -82,14 +75,15 @@ export const WorkspaceUseCase = ({
       <EuiFlexGroup>
         {availableUseCases
           .filter((item) => !item.systematic)
+          .concat(DEFAULT_NAV_GROUPS.all)
           .map(({ id, title, description }) => (
             <EuiFlexItem key={id}>
               <WorkspaceUseCaseCard
                 id={id}
                 title={title}
                 description={description}
-                checked={value.includes(id)}
-                onChange={handleCardChange}
+                checked={value === id}
+                onChange={onChange}
               />
             </EuiFlexItem>
           ))}
