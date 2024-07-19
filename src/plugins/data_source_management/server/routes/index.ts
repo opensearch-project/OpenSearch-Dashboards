@@ -3,7 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IRouter } from '../../../../core/server';
+import { IRouter, ILegacyClusterClient } from '../../../../core/server';
+import { registerDslRoute } from './dsl';
+import { registerDataConnectionsRoute } from './data_connections_router';
+import { registerDatasourcesRoute } from './datasources_router';
+import { registerPplRoute } from './ppl';
+import { DSLFacet } from '../services/facets/dsl_facet';
+import { PPLFacet } from '../services/facets/ppl_facet';
 
 export function defineRoutes(router: IRouter) {
   router.get(
@@ -19,4 +25,24 @@ export function defineRoutes(router: IRouter) {
       });
     }
   );
+}
+
+export function setupRoutes({
+  router,
+  client,
+  dataSourceEnabled,
+}: {
+  router: IRouter;
+  client: ILegacyClusterClient;
+  dataSourceEnabled: boolean;
+}) {
+  registerPplRoute({ router, facet: new PPLFacet(client) });
+  registerDslRoute({ router, facet: new DSLFacet(client) }, dataSourceEnabled);
+
+  // notebooks routes
+  // const queryService = new QueryService(client);
+  // registerSqlRoute(router, queryService);
+
+  registerDataConnectionsRoute(router, dataSourceEnabled);
+  registerDatasourcesRoute(router, dataSourceEnabled);
 }
