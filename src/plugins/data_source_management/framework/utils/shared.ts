@@ -3,13 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-/**
- * TODO making this method type-safe is nontrivial: if you just define
- * `Nested<T> = { [k: string]: Nested<T> | T }` then you can't accumulate because `T` is not `Nested<T>`
- * There might be a way to define a recursive type that accumulates cleanly but it's probably not
- * worth the effort.
- */
-
 export function get<T = unknown>(obj: Record<string, any>, path: string, defaultValue?: T): T {
   return path.split('.').reduce((acc: any, part: string) => acc && acc[part], obj) || defaultValue;
 }
@@ -63,9 +56,9 @@ export const formatError = (name: string, message: string, details: string) => {
 
 // TODO: relocate to a more appropriate location
 // Client route
-export const PPL_BASE = '/api/ppl';
+export const PPL_BASE = '/api/directquery/ppl';
 export const PPL_SEARCH = '/search';
-export const DSL_BASE = '/api/dsl';
+export const DSL_BASE = '/api/directquery/dsl';
 export const DSL_SEARCH = '/search';
 export const DSL_CAT = '/cat.indices';
 export const DSL_MAPPING = '/indices.getFieldMapping';
@@ -73,7 +66,7 @@ export const DSL_SETTINGS = '/indices.getFieldSettings';
 export const OBSERVABILITY_BASE = '/api/observability';
 export const INTEGRATIONS_BASE = '/api/integrations';
 export const JOBS_BASE = '/query/jobs';
-export const DATACONNECTIONS_BASE = '/api/dataconnections';
+export const DATACONNECTIONS_BASE = '/api/directquery/dataconnections';
 export const EDIT = '/edit';
 export const DATACONNECTIONS_UPDATE_STATUS = '/status';
 export const SECURITY_ROLES = '/api/v1/configuration/roles';

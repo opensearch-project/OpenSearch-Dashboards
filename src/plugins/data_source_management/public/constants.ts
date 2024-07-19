@@ -22,7 +22,7 @@ export const UrlToDatasourceType: { [key: string]: DirectQueryDatasourceType } =
   [AMAZON_S3_URL]: 'S3GLUE',
 };
 
-export const DATACONNECTIONS_BASE = '/api/dataconnections';
+export const DATACONNECTIONS_BASE = '/api/directquery/dataconnections';
 export const SECURITY_ROLES = '/api/v1/configuration/roles';
 export const EDIT = '/edit';
 export const DATACONNECTIONS_UPDATE_STATUS = '/status';

@@ -36,6 +36,7 @@ import PrometheusLogo from '../icons/prometheus_logo.svg';
 import S3Logo from '../icons/s3_logo.svg';
 import { DataSourceSelector } from '../../data_source_selector';
 import { DataSourceOption } from '../../data_source_menu/types';
+import { DATACONNECTIONS_BASE } from '../../../constants';
 
 interface DataConnection {
   connectionType: DirectQueryDatasourceType;
@@ -75,8 +76,8 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   const fetchDataSources = useCallback(() => {
     const endpoint =
       featureFlagStatus && selectedDataSourceId !== undefined
-        ? `/api/dataconnections/dataSourceMDSId=${selectedDataSourceId}`
-        : `/api/dataconnections`;
+        ? `${DATACONNECTIONS_BASE}/dataSourceMDSId=${selectedDataSourceId}`
+        : `${DATACONNECTIONS_BASE}`;
 
     setIsLoading(true);
 

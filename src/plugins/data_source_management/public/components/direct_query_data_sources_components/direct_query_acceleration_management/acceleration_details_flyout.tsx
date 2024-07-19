@@ -29,6 +29,7 @@ import {
 } from './acceleration_utils';
 // eslint-disable-next-line @osd/eslint/no-restricted-paths
 import { OpenSearchDashboardsResponse } from '../../../../../../core/server/http/router';
+import { DSL_BASE } from '../../../../framework/utils/shared';
 
 export interface AccelerationDetailsFlyoutProps {
   acceleration: CachedAcceleration;
@@ -50,8 +51,8 @@ const fetchFields = async (
 ) => {
   const endpoint =
     featureFlagStatus && dataSourceMDSId
-      ? `/api/dsl/indices.getFieldMapping/dataSourceMDSId=${dataSourceMDSId}`
-      : `/api/dsl/indices.getFieldMapping`;
+      ? `${DSL_BASE}/indices.getFieldMapping/dataSourceMDSId=${dataSourceMDSId}`
+      : `${DSL_BASE}/indices.getFieldMapping`;
 
   return http
     .get(endpoint, {
@@ -72,8 +73,8 @@ const fetchSettings = async (
 ) => {
   const endpoint =
     featureFlagStatus && dataSourceMDSId
-      ? `/api/dsl/indices.getFieldSettings/dataSourceMDSId=${dataSourceMDSId}`
-      : `/api/dsl/indices.getFieldSettings`;
+      ? `${DSL_BASE}/indices.getFieldSettings/dataSourceMDSId=${dataSourceMDSId}`
+      : `${DSL_BASE}/indices.getFieldSettings`;
 
   return http
     .get(endpoint, {
@@ -94,8 +95,8 @@ const fetchIndices = async (
 ) => {
   const endpoint =
     featureFlagStatus && dataSourceMDSId
-      ? `/api/dsl/cat.indices/dataSourceMDSId=${dataSourceMDSId}`
-      : `/api/dsl/cat.indices`;
+      ? `${DSL_BASE}/cat.indices/dataSourceMDSId=${dataSourceMDSId}`
+      : `${DSL_BASE}/cat.indices`;
 
   return http
     .get(endpoint, {
