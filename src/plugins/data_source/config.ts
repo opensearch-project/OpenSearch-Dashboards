@@ -59,6 +59,10 @@ export const configSchema = schema.object({
       enabled: schema.boolean({ defaultValue: true }),
     }),
   }),
+  manageableBy: schema.oneOf(
+    [schema.literal('all'), schema.literal('dashboard_admin'), schema.literal('none')],
+    { defaultValue: 'all' }
+  ),
 });
 
 export type DataSourcePluginConfigType = TypeOf<typeof configSchema>;

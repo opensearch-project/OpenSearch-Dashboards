@@ -24,9 +24,8 @@ import {
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
-  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_DETAIL_APP_ID,
   WORKSPACE_CREATE_APP_ID,
-  WORKSPACE_UPDATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
@@ -130,7 +129,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   };
 
   /**
-   * If workspace is enabled and user has entered workspace, hide advance settings and dataSource menu by disabling the corresponding apps.
+   * If workspace is enabled and user has entered workspace, hide advance settings by disabling the corresponding apps.
    */
   private disableManagementApps(core: CoreSetup, management: ManagementSetup) {
     const currentWorkspaceId$ = core.workspaces.currentWorkspaceId$;
@@ -139,7 +138,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.managementCurrentWorkspaceIdSubscription = currentWorkspaceId$.subscribe(
       (currentWorkspaceId) => {
         if (currentWorkspaceId) {
-          ['settings', 'dataSources'].forEach((appId) =>
+          ['settings'].forEach((appId) =>
             management.sections.section.opensearchDashboards.getApp(appId)?.disable()
           );
         }
@@ -148,7 +147,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   }
 
   /**
-   * Add workspace overview page to breadcrumbs
+   * Add workspace detail page to breadcrumbs
    * @param core CoreStart
    * @private
    */
@@ -165,7 +164,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           const workspaceBreadcrumb: ChromeBreadcrumb = {
             text: currentWorkspace.name,
             onClick: () => {
-              core.application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+              core.application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
             },
           };
           const homeBreadcrumb: ChromeBreadcrumb = {
@@ -232,7 +231,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           const [{ application }] = await core.getStartServices();
           const currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
             if (currentAppId === WORKSPACE_FATAL_ERROR_APP_ID) {
-              application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+              application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
             }
             currentAppIdSubscription.unsubscribe();
           });
@@ -279,32 +278,17 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     });
 
     /**
-     * register workspace overview page
+     * register workspace detail page
      */
     core.application.register({
-      id: WORKSPACE_OVERVIEW_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceOverview', {
-        defaultMessage: 'Workspace Overview',
+      id: WORKSPACE_DETAIL_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceDetail', {
+        defaultMessage: 'Workspace Detail',
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const { renderOverviewApp } = await import('./application');
-        return mountWorkspaceApp(params, renderOverviewApp);
-      },
-    });
-
-    /**
-     * register workspace update page
-     */
-    core.application.register({
-      id: WORKSPACE_UPDATE_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceUpdate', {
-        defaultMessage: 'Update Workspace',
-      }),
-      navLinkStatus: AppNavLinkStatus.hidden,
-      async mount(params: AppMountParameters) {
-        const { renderUpdaterApp } = await import('./application');
-        return mountWorkspaceApp(params, renderUpdaterApp);
+        const { renderDetailApp } = await import('./application');
+        return mountWorkspaceApp(params, renderDetailApp);
       },
     });
 
@@ -350,6 +334,19 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
      * register workspace column into saved objects table
      */
     savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
+
+    /**
+     * Add workspace list to settings and setup group
+     */
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: WORKSPACE_LIST_APP_ID,
+        order: 150,
+        title: i18n.translate('workspace.settings.workspaceSettings', {
+          defaultMessage: 'Workspace settings',
+        }),
+      },
+    ]);
 
     return {};
   }

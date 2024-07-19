@@ -119,4 +119,37 @@ describe('mountManagementSection', () => {
       expect(route.prop('path')).not.toEqual(['/:id']);
     });
   });
+
+  it('renders CreateDataSourcePanel when canManageDataSource is true', async () => {
+    const mockGetStartServices: StartServicesAccessor<DataSourceManagementStartDependencies> = jest
+      .fn()
+      .mockResolvedValue([
+        {
+          chrome: { docTitle: { reset: jest.fn() } },
+          application: { capabilities: { dataSource: { canManage: false } } },
+          savedObjects: {},
+          uiSettings: {},
+          notifications: {},
+          overlays: {},
+          http: {},
+          docLinks: {},
+        },
+      ]);
+
+    await mountManagementSection(mockGetStartServices, mockParams, mockAuthMethodsRegistry, true);
+    const wrapper = shallow(
+      <OpenSearchDashboardsContextProvider services={{}}>
+        <I18nProvider>
+          <Router history={mockParams.history}>
+            <Switch>
+              <Route path={['/:id']} component={EditDataSourceWithRouter} />
+              <Route path={['/']} component={DataSourceHomePanel} />
+            </Switch>
+          </Router>
+        </I18nProvider>
+      </OpenSearchDashboardsContextProvider>
+    );
+
+    expect(wrapper.find(Route)).toHaveLength(2);
+  });
 });

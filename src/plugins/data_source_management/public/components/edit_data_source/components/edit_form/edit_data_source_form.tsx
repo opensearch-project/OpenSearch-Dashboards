@@ -56,6 +56,7 @@ export interface EditDataSourceProps {
   onDeleteDataSource?: () => Promise<void>;
   onSetDefaultDataSource: () => Promise<void>;
   displayToastMessage: (info: ToastMessageItem) => void;
+  canManageDataSource: boolean;
 }
 export interface EditDataSourceState {
   formErrorsByField: CreateEditDataSourceValidation;
@@ -585,6 +586,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
       <>
         <EuiButton
           onClick={this.onClickUpdatePassword}
+          disabled={!this.props.canManageDataSource}
           data-test-subj="editDatasourceUpdatePasswordBtn"
         >
           {
@@ -600,6 +602,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             username={this.state.auth?.credentials?.username || ''}
             handleUpdatePassword={this.updatePassword}
             closeUpdatePasswordModal={this.closePasswordModal}
+            canManageDataSource={this.props.canManageDataSource}
           />
         ) : null}
       </>
@@ -612,6 +615,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         <EuiButton
           onClick={this.onClickUpdateAwsCredential}
           data-test-subj="editDatasourceUpdateAwsCredentialBtn"
+          disabled={!this.props.canManageDataSource}
         >
           {
             <FormattedMessage
@@ -627,6 +631,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             service={this.state.auth.credentials!.service}
             handleUpdateAwsCredential={this.updateAwsCredential}
             closeUpdateAwsCredentialModal={this.closeAwsCredentialModal}
+            canManageDataSource={this.props.canManageDataSource}
           />
         ) : null}
       </>
@@ -644,6 +649,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         onClickTestConnection={this.onClickTestConnection}
         onClickSetDefault={this.setDefaultDataSource}
         isDefault={this.props.isDefault}
+        canManageDataSource={this.props.canManageDataSource}
       />
     );
   };
@@ -723,6 +729,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               isInvalid={!!this.state.formErrorsByField.title.length}
               onChange={this.onChangeTitle}
               onBlur={this.validateTitle}
+              disabled={!this.props.canManageDataSource}
             />
           </EuiFormRow>
           {/* Description */}
@@ -743,6 +750,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                 }
               )}
               onChange={this.onChangeDescription}
+              disabled={!this.props.canManageDataSource}
             />
           </EuiFormRow>
         </EuiDescribedFormGroup>
@@ -835,7 +843,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             options={this.authOptions}
             valueOfSelected={this.state.auth.type}
             onChange={(value) => this.onChangeAuthType(value)}
-            disabled={this.authOptions.length <= 1}
+            disabled={this.authOptions.length <= 1 || !this.props.canManageDataSource}
             name="Credential"
             data-test-subj="editDataSourceSelectAuthType"
           />
@@ -881,6 +889,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             value={this.state.auth.credentials?.region || ''}
             onChange={this.onChangeRegion}
             onBlur={this.validateRegion}
+            disabled={!this.props.canManageDataSource}
             data-test-subj="editDataSourceFormRegionField"
             name="dataSourceRegion"
           />
@@ -893,6 +902,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
           <EuiSuperSelect
             options={sigV4ServiceOptions}
             valueOfSelected={this.state.auth.credentials?.service}
+            disabled={!this.props.canManageDataSource}
             onChange={(value) => this.onChangeSigV4ServiceName(value)}
             name="ServiceName"
             data-test-subj="editDataSourceFormSigV4ServiceTypeSelect"
@@ -987,6 +997,7 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
             isInvalid={!!this.state.formErrorsByField.createCredential?.username?.length}
             onChange={this.onChangeUsername}
             onBlur={this.validateUsername}
+            disabled={!this.props.canManageDataSource}
           />
         </EuiFormRow>
 
@@ -1016,7 +1027,10 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
                 spellCheck={false}
                 onChange={this.onChangePassword}
                 onBlur={this.validatePassword}
-                disabled={this.props.existingDataSource.auth.type === AuthType.UsernamePasswordType}
+                disabled={
+                  this.props.existingDataSource.auth.type === AuthType.UsernamePasswordType ||
+                  !this.props.canManageDataSource
+                }
                 data-test-subj="updateDataSourceFormPasswordField"
               />
             </EuiFlexItem>
@@ -1119,24 +1133,26 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              className="mgtAdvancedSettingsForm__button"
-              disabled={!this.isFormValid()}
-              color="secondary"
-              fill
-              size="s"
-              iconType="check"
-              isLoading={this.state.isLoading}
-              onClick={this.onClickUpdateDataSource}
-              data-test-subj="datasource-edit-saveButton"
-            >
-              <FormattedMessage
-                id="dataSourcesManagement.editDataSource.saveButtonLabel"
-                defaultMessage="Save changes"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          {this.props.canManageDataSource ? (
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                className="mgtAdvancedSettingsForm__button"
+                disabled={!this.isFormValid()}
+                color="secondary"
+                fill
+                size="s"
+                iconType="check"
+                isLoading={this.state.isLoading}
+                onClick={this.onClickUpdateDataSource}
+                data-test-subj="datasource-edit-saveButton"
+              >
+                <FormattedMessage
+                  id="dataSourcesManagement.editDataSource.saveButtonLabel"
+                  defaultMessage="Save changes"
+                />
+              </EuiButton>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiBottomBar>
     );

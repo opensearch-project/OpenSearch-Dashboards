@@ -7,13 +7,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiFormRow,
-  EuiText,
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiFormLabel,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { SavedObjectsStart } from '../../../../../core/public';
@@ -88,13 +88,11 @@ export const SelectDataSourcePanel = ({
 
   return (
     <div>
-      <EuiText>
-        <strong>
-          {i18n.translate('workspace.form.selectDataSource.subTitle', {
-            defaultMessage: 'Data source',
-          })}
-        </strong>
-      </EuiText>
+      <EuiFormLabel>
+        {i18n.translate('workspace.form.selectDataSource.subTitle', {
+          defaultMessage: 'Data source',
+        })}
+      </EuiFormLabel>
       <EuiSpacer size="s" />
       {selectedDataSources.map(({ id, title }, index) => (
         <EuiFormRow
