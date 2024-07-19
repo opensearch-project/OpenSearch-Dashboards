@@ -28,13 +28,17 @@ exports[`SavedObjectsTable delete should show a confirm modal 1`] = `
     />
   }
 >
-  <p>
-    <FormattedMessage
-      defaultMessage="This action will delete the following saved objects:"
-      id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-      values={Object {}}
-    />
-  </p>
+  <EuiText
+    size="s"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="This action will delete the following saved objects:"
+        id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+        values={Object {}}
+      />
+    </p>
+  </EuiText>
   <EuiInMemoryTable
     columns={
       Array [
@@ -102,13 +106,17 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
     />
   }
 >
-  <p>
-    <FormattedMessage
-      defaultMessage="This action will delete the following saved objects:"
-      id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-      values={Object {}}
-    />
-  </p>
+  <EuiText
+    size="s"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="This action will delete the following saved objects:"
+        id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+        values={Object {}}
+      />
+    </p>
+  </EuiText>
   <EuiInMemoryTable
     columns={
       Array [
@@ -172,13 +180,17 @@ exports[`SavedObjectsTable delete should show error toast when failing to delete
     />
   }
 >
-  <p>
-    <FormattedMessage
-      defaultMessage="This action will delete the following saved objects:"
-      id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
-      values={Object {}}
-    />
-  </p>
+  <EuiText
+    size="s"
+  >
+    <p>
+      <FormattedMessage
+        defaultMessage="This action will delete the following saved objects:"
+        id="savedObjectsManagement.deleteSavedObjectsConfirmModalDescription"
+        values={Object {}}
+      />
+    </p>
+  </EuiText>
   <EuiInMemoryTable
     columns={
       Array [

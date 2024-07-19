@@ -172,7 +172,6 @@ exports[`renders ControlsTab 1`] = `
           <EuiButton
             aria-label="Add control"
             data-test-subj="inputControlEditorAddBtn"
-            fill={true}
             iconType="plusInCircle"
             onClick={[Function]}
           >

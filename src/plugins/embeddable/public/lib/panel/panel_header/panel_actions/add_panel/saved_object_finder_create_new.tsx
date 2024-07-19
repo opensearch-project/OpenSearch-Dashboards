@@ -52,7 +52,7 @@ export function SavedObjectFinderCreateNew({ menuItems }: Props) {
       button={
         <EuiButton
           data-test-subj="createNew"
-          iconType="plusInCircle"
+          iconType="plus"
           iconSide="left"
           onClick={toggleCreateMenu}
           fill
@@ -68,7 +68,7 @@ export function SavedObjectFinderCreateNew({ menuItems }: Props) {
       panelPaddingSize="none"
       anchorPosition="downRight"
     >
-      <EuiContextMenuPanel items={menuItems} />
+      <EuiContextMenuPanel items={menuItems} size="s" />
     </EuiPopover>
   );
 }

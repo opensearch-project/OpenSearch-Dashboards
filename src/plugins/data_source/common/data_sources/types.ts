@@ -9,7 +9,7 @@ export interface DataSourceAttributes extends SavedObjectAttributes {
   title: string;
   description?: string;
   endpoint: string;
-  dataSourceVersion?: string;
+  dataSourceVersion: string;
   dataSourceEngineType?: DataSourceEngineType;
   installedPlugins?: string[];
   auth: {
@@ -59,4 +59,10 @@ export enum DataSourceEngineType {
   OpenSearchServerless = 'OpenSearch Serverless',
   Elasticsearch = 'Elasticsearch',
   NA = 'No Engine Type Available',
+}
+
+export enum ManageableBy {
+  All = 'all',
+  DashboardAdmin = 'dashboard_admin',
+  None = 'none',
 }

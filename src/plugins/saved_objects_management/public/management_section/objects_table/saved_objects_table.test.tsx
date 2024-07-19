@@ -65,7 +65,6 @@ import {
 import { Flyout, Relationships } from './components';
 import { SavedObjectWithMetadata } from '../../types';
 import { WorkspaceObject } from 'opensearch-dashboards/public';
-import { PUBLIC_WORKSPACE_NAME, PUBLIC_WORKSPACE_ID } from '../../../../../core/public';
 import { TableProps } from './components/table';
 
 const allowedTypes = ['index-pattern', 'visualization', 'dashboard', 'search'];
@@ -430,10 +429,17 @@ describe('SavedObjectsTable', () => {
     });
 
     it('should export all, accounting for the current workspace criteria', async () => {
-      const component = shallowRender();
+      const workspaceList: WorkspaceObject[] = [
+        {
+          id: 'workspace1',
+          name: 'foo',
+        },
+      ];
+      workspaces.workspaceList$.next(workspaceList);
+      const component = shallowRender({ workspaces });
 
       component.instance().onQueryChange({
-        query: Query.parse(`test workspaces:("${PUBLIC_WORKSPACE_NAME}")`),
+        query: Query.parse(`test workspaces:("foo")`),
       });
 
       // Ensure all promises resolve
@@ -452,7 +458,7 @@ describe('SavedObjectsTable', () => {
         allowedTypes,
         'test*',
         true,
-        [PUBLIC_WORKSPACE_ID]
+        ['workspace1']
       );
       expect(saveAsMock).toHaveBeenCalledWith(blob, 'export.ndjson');
       expect(notifications.toasts.addSuccess).toHaveBeenCalledWith({
@@ -725,10 +731,9 @@ describe('SavedObjectsTable', () => {
       expect(filters.length).toBe(2);
       expect(filters[0].field).toBe('type');
       expect(filters[1].field).toBe('workspaces');
-      expect(filters[1].options.length).toBe(3);
+      expect(filters[1].options.length).toBe(2);
       expect(filters[1].options[0].value).toBe('foo');
       expect(filters[1].options[1].value).toBe('bar');
-      expect(filters[1].options[2].value).toBe(PUBLIC_WORKSPACE_NAME);
     });
 
     it('workspace filter only include current workspaces when in a workspace', async () => {
@@ -864,7 +869,7 @@ describe('SavedObjectsTable', () => {
         expect(findObjectsMock).toBeCalledWith(
           http,
           expect.objectContaining({
-            workspaces: expect.arrayContaining(['workspace1', 'workspace2', PUBLIC_WORKSPACE_ID]),
+            workspaces: expect.arrayContaining(['workspace1', 'workspace2']),
           })
         );
       });

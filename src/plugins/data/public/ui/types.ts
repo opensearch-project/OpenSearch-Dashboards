@@ -21,6 +21,8 @@ export interface QueryEnhancement {
   // Leave blank to support all data sources
   // supportedDataSourceTypes?: Record<string, GenericDataSource>;
   searchBar?: {
+    showDataSetsSelector?: boolean;
+    showDataSourcesSelector?: boolean;
     showQueryInput?: boolean;
     showFilterBar?: boolean;
     showDatePicker?: boolean;
@@ -65,5 +67,6 @@ export interface IUiStart {
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
   SuggestionsComponent: React.ComponentType<SuggestionsComponentProps>;
   Settings: Settings;
+  dataSourceContainer$: Observable<HTMLDivElement | null>;
   container$: Observable<HTMLDivElement | null>;
 }

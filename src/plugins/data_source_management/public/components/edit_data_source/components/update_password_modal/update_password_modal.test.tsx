@@ -30,6 +30,7 @@ describe('Datasource Management: Update Stored Password Modal', () => {
           username={mockUserName}
           handleUpdatePassword={mockFn}
           closeUpdatePasswordModal={mockFn}
+          canManageDataSource={true}
         />
       ),
       {

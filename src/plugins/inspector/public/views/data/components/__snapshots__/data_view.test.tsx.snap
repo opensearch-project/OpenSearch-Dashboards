@@ -612,9 +612,11 @@ exports[`Inspector Data View component should render loading state 1`] = `
                     className="euiSpacer euiSpacer--s"
                   />
                 </EuiSpacer>
-                <EuiText>
+                <EuiText
+                  size="s"
+                >
                   <div
-                    className="euiText euiText--medium"
+                    className="euiText euiText--small"
                   >
                     <p>
                       <FormattedMessage

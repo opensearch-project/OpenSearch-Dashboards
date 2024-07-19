@@ -46,6 +46,7 @@ import {
   getSavedObjectsClient,
   getNotifications,
   getDataSourceManagementSetup,
+  getDataSourceSetup,
 } from '../../services';
 import { createSelectHandler } from './lib/create_select_handler';
 import { createTextHandler } from './lib/create_text_handler';
@@ -119,10 +120,9 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
 
   const model = { ...defaults, ..._model };
 
-  const dataSourceManagementEnabled =
-    !!getDataSourceManagementSetup().dataSourceManagement || false;
+  const mdsEnabled = !!getDataSourceSetup().dataSource || false;
   const handleDataSourceSelectChange = createDataSourcePickerHandler(onChange);
-  const DataSourceSelector = dataSourceManagementEnabled
+  const DataSourceSelector = mdsEnabled
     ? getDataSourceManagementSetup().dataSourceManagement.ui.DataSourceSelector
     : undefined;
 
@@ -171,7 +171,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {!!dataSourceManagementEnabled && (
+      {!!mdsEnabled && (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow

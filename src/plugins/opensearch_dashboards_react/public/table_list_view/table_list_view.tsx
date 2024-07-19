@@ -33,7 +33,6 @@ import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 import { debounce, keyBy, sortBy, uniq } from 'lodash';
 import {
-  EuiTitle,
   EuiInMemoryTable,
   EuiPage,
   EuiPageBody,
@@ -46,6 +45,7 @@ import {
   EuiConfirmModal,
   EuiCallOut,
   EuiBasicTableColumn,
+  EuiText,
 } from '@elastic/eui';
 import { HttpFetchError, ToastsStart } from 'opensearch-dashboards/public';
 import { toMountPoint } from '../util';
@@ -279,13 +279,15 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         confirmButtonText={deleteButton}
         defaultFocusedButton="cancel"
       >
-        <p>
-          <FormattedMessage
-            id="opensearch-dashboards-react.tableListView.listing.deleteConfirmModalDescription"
-            defaultMessage="You can't recover deleted {entityNamePlural}."
-            values={{ entityNamePlural: this.props.entityNamePlural }}
-          />
-        </p>
+        <EuiText size="s">
+          <p>
+            <FormattedMessage
+              id="opensearch-dashboards-react.tableListView.listing.deleteConfirmModalDescription"
+              defaultMessage="You can't recover deleted {entityNamePlural}."
+              values={{ entityNamePlural: this.props.entityNamePlural }}
+            />
+          </p>
+        </EuiText>
       </EuiConfirmModal>
     );
   }
@@ -502,7 +504,7 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
         <EuiButton
           onClick={this.props.createItem}
           data-test-subj="newItemButton"
-          iconType="plusInCircle"
+          iconType="plus"
           fill
         >
           <FormattedMessage
@@ -522,9 +524,9 @@ class TableListView extends React.Component<TableListViewProps, TableListViewSta
 
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd" data-test-subj="top-nav">
           <EuiFlexItem grow={false}>
-            <EuiTitle size="l">
+            <EuiText size="s">
               <h1 id={this.props.headingId}>{this.props.tableListTitle}</h1>
-            </EuiTitle>
+            </EuiText>
           </EuiFlexItem>
 
           {this.props.createButton || defaultCreateButton}

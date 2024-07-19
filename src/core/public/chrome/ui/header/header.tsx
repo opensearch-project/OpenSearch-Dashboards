@@ -66,6 +66,8 @@ import { HeaderActionMenu } from './header_action_menu';
 import { HeaderLogo } from './header_logo';
 import type { Logos } from '../../../../common/types';
 import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
+import { CollapsibleNavGroupEnabled } from './collapsible_nav_group_enabled';
+import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
@@ -87,6 +89,7 @@ export interface HeaderProps {
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
   navControlsExpandedCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsExpandedRight$: Observable<readonly ChromeNavControl[]>;
+  navControlsLeftBottom$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -95,6 +98,10 @@ export interface HeaderProps {
   logos: Logos;
   survey: string | undefined;
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
+  navGroupEnabled: boolean;
+  currentNavGroup$: Observable<NavGroupItemInMap | undefined>;
+  navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
+  setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
 }
 
 export function Header({
@@ -108,6 +115,8 @@ export function Header({
   survey,
   logos,
   collapsibleNavHeaderRender,
+  navGroupEnabled,
+  setCurrentNavGroup,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
@@ -221,6 +230,9 @@ export function Header({
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
+              currentNavgroup$={observables.currentNavGroup$}
+              navGroupEnabled={navGroupEnabled}
+              navigateToApp={application.navigateToApp}
             />
 
             <EuiHeaderSectionItem border="none">
@@ -253,28 +265,54 @@ export function Header({
           </EuiHeader>
         </div>
 
-        <CollapsibleNav
-          appId$={application.currentAppId$}
-          collapsibleNavHeaderRender={collapsibleNavHeaderRender}
-          id={navId}
-          isLocked={isLocked}
-          navLinks$={observables.navLinks$}
-          recentlyAccessed$={observables.recentlyAccessed$}
-          isNavOpen={isNavOpen}
-          homeHref={homeHref}
-          basePath={basePath}
-          navigateToApp={application.navigateToApp}
-          navigateToUrl={application.navigateToUrl}
-          onIsLockedUpdate={onIsLockedUpdate}
-          closeNav={() => {
-            setIsNavOpen(false);
-            if (toggleCollapsibleNavRef.current) {
-              toggleCollapsibleNavRef.current.focus();
-            }
-          }}
-          customNavLink$={observables.customNavLink$}
-          logos={logos}
-        />
+        {navGroupEnabled ? (
+          <CollapsibleNavGroupEnabled
+            appId$={application.currentAppId$}
+            id={navId}
+            isLocked={isLocked}
+            navLinks$={observables.navLinks$}
+            isNavOpen={isNavOpen}
+            basePath={basePath}
+            navigateToApp={application.navigateToApp}
+            navigateToUrl={application.navigateToUrl}
+            onIsLockedUpdate={onIsLockedUpdate}
+            closeNav={() => {
+              setIsNavOpen(false);
+              if (toggleCollapsibleNavRef.current) {
+                toggleCollapsibleNavRef.current.focus();
+              }
+            }}
+            customNavLink$={observables.customNavLink$}
+            logos={logos}
+            navGroupsMap$={observables.navGroupsMap$}
+            navControlsLeftBottom$={observables.navControlsLeftBottom$}
+            currentNavGroup$={observables.currentNavGroup$}
+            setCurrentNavGroup={setCurrentNavGroup}
+          />
+        ) : (
+          <CollapsibleNav
+            appId$={application.currentAppId$}
+            collapsibleNavHeaderRender={collapsibleNavHeaderRender}
+            id={navId}
+            isLocked={isLocked}
+            navLinks$={observables.navLinks$}
+            recentlyAccessed$={observables.recentlyAccessed$}
+            isNavOpen={isNavOpen}
+            homeHref={homeHref}
+            basePath={basePath}
+            navigateToApp={application.navigateToApp}
+            navigateToUrl={application.navigateToUrl}
+            onIsLockedUpdate={onIsLockedUpdate}
+            closeNav={() => {
+              setIsNavOpen(false);
+              if (toggleCollapsibleNavRef.current) {
+                toggleCollapsibleNavRef.current.focus();
+              }
+            }}
+            customNavLink$={observables.customNavLink$}
+            logos={logos}
+          />
+        )}
       </header>
     </>
   );

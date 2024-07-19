@@ -5,10 +5,11 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { PublicAppInfo } from 'opensearch-dashboards/public';
-import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-
+import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { WORKSPACE_USE_CASES } from '../../../common/constants';
 import './workspace_use_case.scss';
+import { WorkspaceFormErrors } from './types';
 
 const ALL_USE_CASES = [
   WORKSPACE_USE_CASES.observability,
@@ -57,9 +58,15 @@ export interface WorkspaceUseCaseProps {
   configurableApps?: PublicAppInfo[];
   value: string[];
   onChange: (newValue: string[]) => void;
+  formErrors: WorkspaceFormErrors;
 }
 
-export const WorkspaceUseCase = ({ configurableApps, value, onChange }: WorkspaceUseCaseProps) => {
+export const WorkspaceUseCase = ({
+  configurableApps,
+  value,
+  onChange,
+  formErrors,
+}: WorkspaceUseCaseProps) => {
   const availableUseCases = useMemo(() => {
     if (!configurableApps) {
       return [];
@@ -82,18 +89,27 @@ export const WorkspaceUseCase = ({ configurableApps, value, onChange }: Workspac
   );
 
   return (
-    <EuiFlexGroup>
-      {availableUseCases.map(({ id, title, description }) => (
-        <EuiFlexItem key={id}>
-          <WorkspaceUseCaseCard
-            id={id}
-            title={title}
-            description={description}
-            checked={value.includes(id)}
-            onChange={handleCardChange}
-          />
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+    <EuiFormRow
+      label={i18n.translate('workspace.form.workspaceUseCase.name.label', {
+        defaultMessage: 'Use case',
+      })}
+      isInvalid={!!formErrors.features}
+      error={formErrors.features?.message}
+      fullWidth
+    >
+      <EuiFlexGroup>
+        {availableUseCases.map(({ id, title, description }) => (
+          <EuiFlexItem key={id}>
+            <WorkspaceUseCaseCard
+              id={id}
+              title={title}
+              description={description}
+              checked={value.includes(id)}
+              onChange={handleCardChange}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </EuiFormRow>
   );
 };

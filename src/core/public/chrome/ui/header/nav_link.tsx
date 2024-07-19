@@ -35,6 +35,7 @@ import { ChromeNavLink, ChromeRecentlyAccessedHistoryItem, CoreStart } from '../
 import { HttpStart } from '../../../http';
 import { InternalApplicationStart } from '../../../application/types';
 import { relativeToAbsolute } from '../../nav_links/to_nav_link';
+import { formatUrlWithWorkspaceId } from '../../../utils';
 
 export const isModifiedOrPrevented = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey || event.defaultPrevented;
@@ -52,7 +53,7 @@ interface Props {
   appId?: string;
   basePath?: HttpStart['basePath'];
   dataTestSubj: string;
-  onClick?: Function;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   navigateToApp: CoreStart['application']['navigateToApp'];
   externalLink?: boolean;
 }
@@ -78,7 +79,7 @@ export function createEuiListItem({
     /* Use href and onClick to support "open in new tab" and SPA navigation in the same link */
     onClick(event: React.MouseEvent<HTMLButtonElement, MouseEvent>) {
       if (!isModifiedOrPrevented(event)) {
-        onClick();
+        onClick(event);
       }
 
       if (
@@ -126,8 +127,12 @@ export function createRecentNavLink(
   basePath: HttpStart['basePath'],
   navigateToUrl: InternalApplicationStart['navigateToUrl']
 ): RecentNavLink {
-  const { link, label } = recentLink;
-  const href = relativeToAbsolute(basePath.prepend(link));
+  const { link, label, workspaceId } = recentLink;
+  const href = relativeToAbsolute(
+    basePath.prepend(formatUrlWithWorkspaceId(link, workspaceId || '', basePath), {
+      withoutClientBasePath: true,
+    })
+  );
   const navLink = navLinks.find((nl) => href.startsWith(nl.baseUrl));
   let titleAndAriaLabel = label;
 

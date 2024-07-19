@@ -17,23 +17,27 @@ exports[`Intro component renders correctly 1`] = `
         <div
           className="euiPageContentHeaderSection"
         >
-          <EuiTitle>
-            <h1
-              className="euiTitle euiTitle--medium"
+          <EuiText
+            size="s"
+          >
+            <div
+              className="euiText euiText--small"
             >
-              <FormattedMessage
-                defaultMessage="Edit {title}"
-                id="savedObjectsManagement.view.editItemTitle"
-                values={
-                  Object {
-                    "title": "search",
+              <h1>
+                <FormattedMessage
+                  defaultMessage="Edit {title}"
+                  id="savedObjectsManagement.view.editItemTitle"
+                  values={
+                    Object {
+                      "title": "search",
+                    }
                   }
-                }
-              >
-                Edit search
-              </FormattedMessage>
-            </h1>
-          </EuiTitle>
+                >
+                  Edit search
+                </FormattedMessage>
+              </h1>
+            </div>
+          </EuiText>
         </div>
       </EuiPageContentHeaderSection>
       <EuiPageContentHeaderSection>

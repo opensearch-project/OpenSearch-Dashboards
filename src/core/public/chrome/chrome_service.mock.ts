@@ -36,6 +36,11 @@ import { getLogosMock } from '../../common/mocks';
 const createSetupContractMock = () => {
   return {
     registerCollapsibleNavHeader: jest.fn(),
+    navGroup: {
+      addNavLinksToGroup: jest.fn(),
+      getNavGroupEnabled: jest.fn(),
+      registerNavGroupUpdater: jest.fn(),
+    },
   };
 };
 
@@ -66,9 +71,17 @@ const createStartContractMock = () => {
       registerLeft: jest.fn(),
       registerCenter: jest.fn(),
       registerRight: jest.fn(),
+      registerLeftBottom: jest.fn(),
       getLeft$: jest.fn(),
       getCenter$: jest.fn(),
       getRight$: jest.fn(),
+      getLeftBottom$: jest.fn(),
+    },
+    navGroup: {
+      getNavGroupsMap$: jest.fn(() => new BehaviorSubject({})),
+      getNavGroupEnabled: jest.fn(),
+      getCurrentNavGroup$: jest.fn(() => new BehaviorSubject(undefined)),
+      setCurrentNavGroup: jest.fn(),
     },
     setAppTitle: jest.fn(),
     setIsVisible: jest.fn(),

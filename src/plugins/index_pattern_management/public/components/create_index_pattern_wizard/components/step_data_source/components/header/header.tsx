@@ -23,10 +23,12 @@ import {
   DataSourceRef,
   IndexPatternManagmentContext,
 } from 'src/plugins/index_pattern_management/public/types';
+import semver from 'semver';
 import { useOpenSearchDashboards } from '../../../../../../../../../plugins/opensearch_dashboards_react/public';
 import { getDataSources } from '../../../../../../components/utils';
 import { DataSourceTableItem, StepInfo } from '../../../../types';
 import { LoadingState } from '../../../loading_state';
+import * as pluginManifest from '../../../../../../../opensearch_dashboards.json';
 
 interface HeaderProps {
   onDataSourceSelected: (id: string, type: string, title: string) => void;
@@ -67,7 +69,26 @@ export const Header: React.FC<HeaderProps> = (props: HeaderProps) => {
     getDataSources(savedObjects.client)
       .then((fetchedDataSources: DataSourceTableItem[]) => {
         setIsLoading(false);
+
         if (fetchedDataSources?.length) {
+          // filter out data sources which does NOT have the required backend plugins installed
+          if (pluginManifest.hasOwnProperty('requiredOSDataSourcePlugins')) {
+            fetchedDataSources = fetchedDataSources.filter((dataSource) =>
+              pluginManifest.requiredOSDataSourcePlugins.every((plugin) =>
+                dataSource.installedplugins.includes(plugin)
+              )
+            );
+          }
+
+          // filter out data sources which is NOT in the support range of plugin
+          if (pluginManifest.hasOwnProperty('supportedOSDataSourceVersions')) {
+            fetchedDataSources = fetchedDataSources.filter((dataSource) =>
+              semver.satisfies(
+                dataSource.datasourceversion,
+                pluginManifest.supportedOSDataSourceVersions
+              )
+            );
+          }
           setDataSources(fetchedDataSources);
         }
       })

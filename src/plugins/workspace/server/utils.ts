@@ -13,9 +13,14 @@ import {
   Principals,
   PrincipalType,
   SharedGlobalConfig,
+  Permissions,
+  SavedObjectsClientContract,
+  IUiSettingsClient,
 } from '../../../core/server';
 import { AuthInfo } from './types';
 import { updateWorkspaceState } from '../../../core/server/utils';
+import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../data_source_management/common';
+import { CURRENT_USER_PLACEHOLDER } from '../common/constants';
 
 /**
  * Generate URL friendly random ID
@@ -67,9 +72,9 @@ export const updateDashboardAdminStateForRequest = (
     updateWorkspaceState(request, { isDashboardAdmin: true });
     return;
   }
-
+  // If groups/users are not configured or [], login defaults to OSD Admin
   if (!configGroups.length && !configUsers.length) {
-    updateWorkspaceState(request, { isDashboardAdmin: false });
+    updateWorkspaceState(request, { isDashboardAdmin: true });
     return;
   }
   const groupMatchAny = groups.some((group) => configGroups.includes(group));
@@ -88,4 +93,70 @@ export const getOSDAdminConfigFromYMLConfig = async (
   const usersResult = (globalConfig.opensearchDashboards?.dashboardAdmin?.users || []) as string[];
 
   return [groupsResult, usersResult];
+};
+
+export const transferCurrentUserInPermissions = (
+  realUserId: string,
+  permissions: Permissions | undefined
+) => {
+  if (!permissions) {
+    return permissions;
+  }
+  return Object.keys(permissions).reduce<Permissions>(
+    (previousPermissions, currentKey) => ({
+      ...previousPermissions,
+      [currentKey]: {
+        ...permissions[currentKey],
+        users: permissions[currentKey].users?.map((user) =>
+          user === CURRENT_USER_PLACEHOLDER ? realUserId : user
+        ),
+      },
+    }),
+    {}
+  );
+};
+
+export const getDataSourcesList = (client: SavedObjectsClientContract, workspaces: string[]) => {
+  return client
+    .find({
+      type: 'data-source',
+      fields: ['id', 'title'],
+      perPage: 10000,
+      workspaces,
+    })
+    .then((response) => {
+      const objects = response?.saved_objects;
+      if (objects) {
+        return objects.map((source) => {
+          const id = source.id;
+          return {
+            id,
+          };
+        });
+      } else {
+        return [];
+      }
+    });
+};
+
+export const checkAndSetDefaultDataSource = async (
+  uiSettingsClient: IUiSettingsClient,
+  dataSources: string[],
+  needCheck: boolean
+) => {
+  if (dataSources?.length > 0) {
+    if (!needCheck) {
+      // Create# Will set first data source as default data source.
+      await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
+    } else {
+      // Update will check if default DS still exists.
+      const defaultDSId = (await uiSettingsClient.get(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID)) ?? '';
+      if (!dataSources.includes(defaultDSId)) {
+        await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, dataSources[0]);
+      }
+    }
+  } else {
+    // If there is no data source left, clear workspace level default data source.
+    await uiSettingsClient.set(DEFAULT_DATA_SOURCE_UI_SETTINGS_ID, undefined);
+  }
 };

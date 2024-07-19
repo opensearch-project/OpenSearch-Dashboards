@@ -10,8 +10,11 @@ import {
   CoreSetup,
   WorkspaceAttribute,
   SavedObjectsServiceStart,
+  UiSettingsServiceStart,
+  WORKSPACE_TYPE,
+  Logger,
 } from '../../../core/server';
-import { WORKSPACE_TYPE } from '../../../core/server';
+import { updateWorkspaceState, getWorkspaceState } from '../../../core/server/utils';
 import {
   IWorkspaceClientImpl,
   WorkspaceFindOptions,
@@ -20,11 +23,12 @@ import {
   WorkspaceAttributeWithPermission,
 } from './types';
 import { workspace } from './saved_objects';
-import { generateRandomId } from './utils';
+import { generateRandomId, getDataSourcesList, checkAndSetDefaultDataSource } from './utils';
 import {
   WORKSPACE_ID_CONSUMER_WRAPPER_ID,
   WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
 } from '../common/constants';
+import { DATA_SOURCE_SAVED_OBJECT_TYPE } from '../../data_source/common';
 
 const WORKSPACE_ID_SIZE = 6;
 
@@ -34,10 +38,13 @@ const DUPLICATE_WORKSPACE_NAME_ERROR = i18n.translate('workspace.duplicate.name.
 
 export class WorkspaceClient implements IWorkspaceClientImpl {
   private setupDep: CoreSetup;
+  private logger: Logger;
   private savedObjects?: SavedObjectsServiceStart;
+  private uiSettings?: UiSettingsServiceStart;
 
-  constructor(core: CoreSetup) {
+  constructor(core: CoreSetup, logger: Logger) {
     this.setupDep = core;
+    this.logger = logger;
   }
 
   private getScopedClientWithoutPermission(
@@ -86,10 +93,12 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   public async create(
     requestDetail: IRequestDetail,
-    payload: Omit<WorkspaceAttributeWithPermission, 'id'>
+    payload: Omit<WorkspaceAttributeWithPermission, 'id'> & {
+      dataSources?: string[];
+    }
   ): ReturnType<IWorkspaceClientImpl['create']> {
     try {
-      const { permissions, ...attributes } = payload;
+      const { permissions, dataSources, ...attributes } = payload;
       const id = generateRandomId(WORKSPACE_ID_SIZE);
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const existingWorkspaceRes = await this.getScopedClientWithoutPermission(requestDetail)?.find(
@@ -102,6 +111,15 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       if (existingWorkspaceRes && existingWorkspaceRes.total > 0) {
         throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
       }
+
+      if (dataSources) {
+        const promises = [];
+        for (const dataSourceId of dataSources) {
+          promises.push(client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id]));
+        }
+        await Promise.all(promises);
+      }
+
       const result = await client.create<Omit<WorkspaceAttribute, 'id'>>(
         WORKSPACE_TYPE,
         attributes,
@@ -110,6 +128,26 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           permissions,
         }
       );
+      if (dataSources && this.uiSettings && client) {
+        const rawState = getWorkspaceState(requestDetail.request);
+        // This is for setting in workspace environment, otherwise uiSettings can't set workspace level value.
+        updateWorkspaceState(requestDetail.request, {
+          requestWorkspaceId: id,
+        });
+        // Set first data source as default after creating workspace
+        const uiSettingsClient = this.uiSettings.asScopedToClient(client);
+        try {
+          await checkAndSetDefaultDataSource(uiSettingsClient, dataSources, false);
+        } catch (e) {
+          this.logger.error('Set default data source error');
+        } finally {
+          // Reset workspace state
+          updateWorkspaceState(requestDetail.request, {
+            requestWorkspaceId: rawState.requestWorkspaceId,
+          });
+        }
+      }
+
       return {
         success: true,
         result: {
@@ -174,9 +212,11 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   public async update(
     requestDetail: IRequestDetail,
     id: string,
-    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>>
+    payload: Partial<Omit<WorkspaceAttributeWithPermission, 'id'>> & {
+      dataSources?: string[];
+    }
   ): Promise<IResponse<boolean>> {
-    const { permissions, ...attributes } = payload;
+    const { permissions, dataSources: newDataSources, ...attributes } = payload;
     try {
       const client = this.getSavedObjectClientsFromRequestDetail(requestDetail);
       const workspaceInDB: SavedObject<WorkspaceAttribute> = await client.get(WORKSPACE_TYPE, id);
@@ -193,6 +233,37 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           throw new Error(DUPLICATE_WORKSPACE_NAME_ERROR);
         }
       }
+
+      if (newDataSources) {
+        const originalSelectedDataSources = await getDataSourcesList(client, [id]);
+        const originalSelectedDataSourceIds = originalSelectedDataSources.map((ds) => ds.id);
+        const dataSourcesToBeRemoved = originalSelectedDataSourceIds.filter(
+          (ds) => !newDataSources.find((item) => item === ds)
+        );
+        const dataSourcesToBeAdded = newDataSources.filter(
+          (ds) => !originalSelectedDataSourceIds.find((item) => item === ds)
+        );
+
+        const promises = [];
+        if (dataSourcesToBeRemoved.length > 0) {
+          for (const dataSourceId of dataSourcesToBeRemoved) {
+            promises.push(
+              client.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id])
+            );
+          }
+        }
+        if (dataSourcesToBeAdded.length > 0) {
+          for (const dataSourceId of dataSourcesToBeAdded) {
+            promises.push(
+              client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id])
+            );
+          }
+        }
+        if (promises.length > 0) {
+          await Promise.all(promises);
+        }
+      }
+
       await client.create<Omit<WorkspaceAttribute, 'id'>>(
         WORKSPACE_TYPE,
         { ...workspaceInDB.attributes, ...attributes },
@@ -203,6 +274,12 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           version: workspaceInDB.version,
         }
       );
+
+      if (newDataSources && this.uiSettings && client) {
+        const uiSettingsClient = this.uiSettings.asScopedToClient(client);
+        checkAndSetDefaultDataSource(uiSettingsClient, newDataSources, true);
+      }
+
       return {
         success: true,
         result: true,
@@ -230,6 +307,21 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           }),
         };
       }
+
+      // When workspace is to be deleted, unassign all assigned data source before deleting saved object by workspace.
+      const selectedDataSources = await getDataSourcesList(savedObjectClient, [id]);
+      if (selectedDataSources.length > 0) {
+        const promises = [];
+        for (const dataSource of selectedDataSources) {
+          promises.push(
+            savedObjectClient.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSource.id, [
+              id,
+            ])
+          );
+        }
+        await Promise.all(promises);
+      }
+
       await savedObjectClient.deleteByWorkspace(id);
       // delete workspace itself at last, deleteByWorkspace depends on the workspace to do permission check
       await savedObjectClient.delete(WORKSPACE_TYPE, id);
@@ -246,6 +338,9 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   }
   public setSavedObjects(savedObjects: SavedObjectsServiceStart) {
     this.savedObjects = savedObjects;
+  }
+  public setUiSettings(uiSettings: UiSettingsServiceStart) {
+    this.uiSettings = uiSettings;
   }
   public async destroy(): Promise<IResponse<boolean>> {
     return {

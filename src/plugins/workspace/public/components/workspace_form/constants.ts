@@ -19,32 +19,8 @@ export enum WorkspacePermissionItemType {
 export enum PermissionModeId {
   Read = 'read',
   ReadAndWrite = 'read+write',
-  Admin = 'admin',
+  Owner = 'owner',
 }
-
-export const permissionModeOptions = [
-  {
-    id: PermissionModeId.Read,
-    label: i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.read', {
-      defaultMessage: 'Read',
-    }),
-  },
-  {
-    id: PermissionModeId.ReadAndWrite,
-    label: i18n.translate(
-      'workspace.form.permissionSettingPanel.permissionModeOptions.readAndWrite',
-      {
-        defaultMessage: 'Read & Write',
-      }
-    ),
-  },
-  {
-    id: PermissionModeId.Admin,
-    label: i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.admin', {
-      defaultMessage: 'Admin',
-    }),
-  },
-];
 
 export const optionIdToWorkspacePermissionModesMap: {
   [key: string]: WorkspacePermissionMode[];
@@ -54,5 +30,27 @@ export const optionIdToWorkspacePermissionModesMap: {
     WorkspacePermissionMode.LibraryWrite,
     WorkspacePermissionMode.Read,
   ],
-  [PermissionModeId.Admin]: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
+  [PermissionModeId.Owner]: [WorkspacePermissionMode.LibraryWrite, WorkspacePermissionMode.Write],
 };
+
+export const workspaceDetailsTitle = i18n.translate('workspace.form.workspaceDetails.title', {
+  defaultMessage: 'Enter details',
+});
+
+export const workspaceUseCaseTitle = i18n.translate('workspace.form.workspaceUseCase.title', {
+  defaultMessage: 'Choose one or more focus areas',
+});
+
+export const selectDataSourceTitle = i18n.translate('workspace.form.selectDataSource.title', {
+  defaultMessage: 'Associate data source',
+});
+
+export const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
+  defaultMessage: 'Manage access and permissions',
+});
+
+export enum DetailTab {
+  Settings = 'settings',
+  Collaborators = 'collaborators',
+  Overview = 'overview',
+}

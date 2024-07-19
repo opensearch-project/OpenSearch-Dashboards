@@ -25,5 +25,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       defaultMessage: 'Try the new home page',
     }),
     schema: schema.boolean(),
+    requiresPageReload: true,
   },
 };

@@ -18,12 +18,14 @@ import {
   PublicAppInfo,
   ChromeBreadcrumb,
   WorkspaceAvailability,
+  ChromeNavGroupUpdater,
+  NavGroupStatus,
+  DEFAULT_NAV_GROUPS,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
-  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_DETAIL_APP_ID,
   WORKSPACE_CREATE_APP_ID,
-  WORKSPACE_UPDATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
@@ -33,7 +35,12 @@ import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_object
 import { ManagementSetup } from '../../../plugins/management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
-import { filterWorkspaceConfigurableApps, isAppAccessibleInWorkspace } from './utils';
+import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
+import {
+  filterWorkspaceConfigurableApps,
+  isAppAccessibleInWorkspace,
+  isNavGroupInFeatureConfigs,
+} from './utils';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -44,6 +51,7 @@ type WorkspaceAppType = (
 interface WorkspacePluginSetupDeps {
   savedObjectsManagement?: SavedObjectsManagementPluginSetup;
   management?: ManagementSetup;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
 export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
@@ -53,7 +61,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private currentWorkspaceIdSubscription?: Subscription;
   private managementCurrentWorkspaceIdSubscription?: Subscription;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
+  private navGroupUpdater$ = new BehaviorSubject<ChromeNavGroupUpdater>(() => undefined);
   private workspaceConfigurableApps$ = new BehaviorSubject<PublicAppInfo[]>([]);
+  private unregisterNavGroupUpdater?: () => void;
+
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
       return this.coreStart.workspaces.currentWorkspaceId$.subscribe((currentWorkspaceId) => {
@@ -88,6 +99,17 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
            * If trying to access such app, an "Application Not Found" page will be displayed
            */
           return { status: AppStatus.inaccessible };
+        });
+
+        this.navGroupUpdater$.next((navGroup) => {
+          if (
+            currentWorkspace.features &&
+            !isNavGroupInFeatureConfigs(navGroup.id, currentWorkspace.features)
+          ) {
+            return {
+              status: NavGroupStatus.Hidden,
+            };
+          }
         });
       }
     });
@@ -125,7 +147,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   }
 
   /**
-   * Add workspace overview page to breadcrumbs
+   * Add workspace detail page to breadcrumbs
    * @param core CoreStart
    * @private
    */
@@ -142,7 +164,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           const workspaceBreadcrumb: ChromeBreadcrumb = {
             text: currentWorkspace.name,
             onClick: () => {
-              core.application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+              core.application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
             },
           };
           const homeBreadcrumb: ChromeBreadcrumb = {
@@ -161,11 +183,14 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
   public async setup(
     core: CoreSetup,
-    { savedObjectsManagement, management }: WorkspacePluginSetupDeps
+    { savedObjectsManagement, management, dataSourceManagement }: WorkspacePluginSetupDeps
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
     core.application.registerAppUpdater(this.appUpdater$);
+    this.unregisterNavGroupUpdater = core.chrome.navGroup.registerNavGroupUpdater(
+      this.navGroupUpdater$
+    );
 
     //  Hide advance settings and dataSource menus and disable in setup
     if (management) {
@@ -206,7 +231,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           const [{ application }] = await core.getStartServices();
           const currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
             if (currentAppId === WORKSPACE_FATAL_ERROR_APP_ID) {
-              application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+              application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
             }
             currentAppIdSubscription.unsubscribe();
           });
@@ -219,6 +244,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       const services = {
         ...coreStart,
         workspaceClient,
+        dataSourceManagement,
       };
 
       return renderApp(params, services, {
@@ -252,32 +278,17 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     });
 
     /**
-     * register workspace overview page
+     * register workspace detail page
      */
     core.application.register({
-      id: WORKSPACE_OVERVIEW_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceOverview', {
-        defaultMessage: 'Workspace Overview',
+      id: WORKSPACE_DETAIL_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceDetail', {
+        defaultMessage: 'Workspace Detail',
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const { renderOverviewApp } = await import('./application');
-        return mountWorkspaceApp(params, renderOverviewApp);
-      },
-    });
-
-    /**
-     * register workspace update page
-     */
-    core.application.register({
-      id: WORKSPACE_UPDATE_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceUpdate', {
-        defaultMessage: 'Update Workspace',
-      }),
-      navLinkStatus: AppNavLinkStatus.hidden,
-      async mount(params: AppMountParameters) {
-        const { renderUpdaterApp } = await import('./application');
-        return mountWorkspaceApp(params, renderUpdaterApp);
+        const { renderDetailApp } = await import('./application');
+        return mountWorkspaceApp(params, renderDetailApp);
       },
     });
 
@@ -295,7 +306,14 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     core.application.register({
       id: WORKSPACE_LIST_APP_ID,
       title: '',
-      navLinkStatus: AppNavLinkStatus.hidden,
+      /**
+       * Nav link status should be visible when nav group enabled.
+       * The page should be refreshed and all applications need to register again
+       * after nav group enabled changed.
+       */
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderListApp } = await import('./application');
         return mountWorkspaceApp(params, renderListApp);
@@ -303,10 +321,32 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: WORKSPACE_LIST_APP_ID,
+        title: i18n.translate('workspace.settingsAndSetup.workspaceSettings', {
+          defaultMessage: 'workspace settings',
+        }),
+      },
+    ]);
+
     /**
      * register workspace column into saved objects table
      */
     savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
+
+    /**
+     * Add workspace list to settings and setup group
+     */
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: WORKSPACE_LIST_APP_ID,
+        order: 150,
+        title: i18n.translate('workspace.settings.workspaceSettings', {
+          defaultMessage: 'Workspace settings',
+        }),
+      },
+    ]);
 
     return {};
   }
@@ -321,7 +361,9 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       this.filterNavLinks(core);
     });
 
-    this.addWorkspaceToBreadcrumbs(core);
+    if (!core.chrome.navGroup.getNavGroupEnabled()) {
+      this.addWorkspaceToBreadcrumbs(core);
+    }
 
     return {};
   }
@@ -331,5 +373,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.currentWorkspaceIdSubscription?.unsubscribe();
     this.managementCurrentWorkspaceIdSubscription?.unsubscribe();
     this.breadcrumbsSubscription?.unsubscribe();
+    this.unregisterNavGroupUpdater?.();
   }
 }

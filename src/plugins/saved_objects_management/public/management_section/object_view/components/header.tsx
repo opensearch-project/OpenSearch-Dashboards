@@ -32,10 +32,10 @@ import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
   EuiButton,
   EuiPageContentHeader,
   EuiPageContentHeaderSection,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
@@ -59,7 +59,7 @@ export const Header = ({
   return (
     <EuiPageContentHeader>
       <EuiPageContentHeaderSection>
-        <EuiTitle>
+        <EuiText size="s">
           {canEdit ? (
             <h1>
               <FormattedMessage
@@ -77,7 +77,7 @@ export const Header = ({
               />
             </h1>
           )}
-        </EuiTitle>
+        </EuiText>
       </EuiPageContentHeaderSection>
       <EuiPageContentHeaderSection>
         <EuiFlexGroup responsive={false}>

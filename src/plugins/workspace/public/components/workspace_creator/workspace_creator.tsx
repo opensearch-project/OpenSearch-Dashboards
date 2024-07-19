@@ -4,7 +4,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent, EuiSpacer } from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { BehaviorSubject, of } from 'rxjs';
@@ -12,10 +12,12 @@ import { BehaviorSubject, of } from 'rxjs';
 import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
-import { WORKSPACE_OVERVIEW_APP_ID } from '../../../common/constants';
+import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
+import { DataSource } from '../../../common/types';
+import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 
 export interface WorkspaceCreatorProps {
   workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
@@ -23,8 +25,18 @@ export interface WorkspaceCreatorProps {
 
 export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   const {
-    services: { application, notifications, http, workspaceClient },
-  } = useOpenSearchDashboards<{ workspaceClient: WorkspaceClient }>();
+    services: {
+      application,
+      notifications,
+      http,
+      workspaceClient,
+      savedObjects,
+      dataSourceManagement,
+    },
+  } = useOpenSearchDashboards<{
+    workspaceClient: WorkspaceClient;
+    dataSourceManagement?: DataSourceManagementPluginSetup;
+  }>();
   const workspaceConfigurableApps = useObservable(
     props.workspaceConfigurableApps$ ?? of(undefined)
   );
@@ -34,11 +46,14 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     async (data: WorkspaceFormSubmitData) => {
       let result;
       try {
-        const { permissionSettings, ...attributes } = data;
-        result = await workspaceClient.create(
-          attributes,
-          convertPermissionSettingsToPermissions(permissionSettings)
-        );
+        const { permissionSettings, selectedDataSources, ...attributes } = data;
+        const selectedDataSourceIds = (selectedDataSources ?? []).map((ds: DataSource) => {
+          return ds.id;
+        });
+        result = await workspaceClient.create(attributes, {
+          dataSources: selectedDataSourceIds,
+          permissions: convertPermissionSettingsToPermissions(permissionSettings),
+        });
         if (result?.success) {
           notifications?.toasts.addSuccess({
             title: i18n.translate('workspace.create.success', {
@@ -50,7 +65,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
             // Redirect page after one second, leave one second time to show create successful toast.
             window.setTimeout(() => {
               window.location.href = formatUrlWithWorkspaceId(
-                application.getUrlForApp(WORKSPACE_OVERVIEW_APP_ID, {
+                application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
                   absolute: true,
                 }),
                 newWorkspaceId,
@@ -76,30 +91,26 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
   );
 
   return (
-    <EuiPage paddingSize="none">
+    <EuiPage>
       <EuiPageBody>
-        <EuiPageHeader restrictWidth pageTitle="Create a workspace" />
-        <EuiSpacer />
+        <EuiPageHeader pageTitle="Create a workspace" />
         <EuiPageContent
           verticalPosition="center"
           horizontalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}
-          /**
-           * Since above EuiPageHeader has a maxWidth: 1000 style,
-           * add maxWidth: 1000 below to align with the above page header
-           **/
-          style={{ width: '100%', maxWidth: 1000 }}
         >
-          {application && (
+          {application && savedObjects && (
             <WorkspaceForm
               application={application}
+              savedObjects={savedObjects}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
               workspaceConfigurableApps={workspaceConfigurableApps}
               permissionEnabled={isPermissionEnabled}
               permissionLastAdminItemDeletable
+              dataSourceManagement={dataSourceManagement}
             />
           )}
         </EuiPageContent>
