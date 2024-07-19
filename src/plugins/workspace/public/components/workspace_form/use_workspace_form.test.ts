@@ -123,8 +123,21 @@ describe('useWorkspaceForm', () => {
     expect(onSubmitMock).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'test-workspace-name',
-        features: ['use-case-observability', 'workspace_update', 'workspace_overview'],
+        features: ['use-case-observability', 'workspace_detail'],
       })
     );
+  });
+  it('should update selected use case', () => {
+    const { renderResult } = setup({
+      id: 'foo',
+      name: 'test-workspace-name',
+      features: ['use-case-observability'],
+    });
+
+    expect(renderResult.result.current.formData.useCase).toBe('observability');
+    act(() => {
+      renderResult.result.current.handleUseCaseChange('search');
+    });
+    expect(renderResult.result.current.formData.useCase).toBe('search');
   });
 });

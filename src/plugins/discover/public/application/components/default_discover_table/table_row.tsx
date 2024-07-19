@@ -144,7 +144,7 @@ const TableRowUI = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <h4
-              className="euiTitle euiTitle--xsmall"
+              className="euiTitle euiTitle--xxsmall"
               i18n-id="discover.docTable.tableRow.detailHeading"
               i18n-default-message="Expanded document"
             >

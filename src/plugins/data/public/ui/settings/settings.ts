@@ -35,7 +35,7 @@ export class Settings {
     private readonly queryEnhancements: Map<string, QueryEnhancement>,
     private readonly queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig>
   ) {
-    this.isEnabled = this.config.enabled;
+    this.isEnabled = true;
     this.setUserQueryEnhancementsEnabled(this.isEnabled);
     this.enhancedAppNames = this.isEnabled ? this.config.supportedAppNames : [];
   }
