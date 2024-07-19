@@ -46,6 +46,7 @@ export class Settings {
    * @experimental - Sets the dataset BehaviorSubject
    */
   setSelectedDataSet = (dataSet: any) => {
+    console.log('dataSet in settings:', dataSet);
     this.storage.set('opensearchDashboards.userQueryDataSet', dataSet);
     this.selectedDataSet$.next(dataSet);
   };

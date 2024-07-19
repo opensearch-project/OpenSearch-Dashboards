@@ -194,7 +194,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     if (query && query.query) return true;
   }
 
-  function getQueryStringInitialValue(language: string, dataSetName?: string) {
+  function getQueryStringInitialValue(language: string) {
     const { indexPatterns, settings } = props;
     const input = settings?.getQueryEnhancements(language)?.searchBar?.queryStringInput
       ?.initialValue;
@@ -206,7 +206,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     )
       return '';
 
-    const defaultDataSet = dataSetName ?? indexPatterns[0];
+    console.log('settings ds:', settings?.getSelectedDataSet());
+    const defaultDataSet = settings?.getSelectedDataSet() ?? indexPatterns[0];
     const dataSet = typeof defaultDataSet === 'string' ? defaultDataSet : defaultDataSet.title;
 
     return input.replace('<data_source>', dataSet);

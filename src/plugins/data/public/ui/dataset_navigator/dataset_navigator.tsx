@@ -10,6 +10,7 @@ import _ from 'lodash';
 import { IIndexPattern } from '../..';
 import { fetchClusters } from './fetch_clusters';
 import { fetchIndices } from './fetch_indices';
+import { Settings } from '../settings';
 
 export interface DataSetOption {
   id: string;
@@ -18,10 +19,13 @@ export interface DataSetOption {
 }
 
 export interface DataSetNavigatorProps {
+  settings: Settings;
   savedObjectsClient: SavedObjectsClientContract;
-  indexPatterns: Array<IIndexPattern | string>;
-  dataSetId: string;
+  indexPattern?: Array<IIndexPattern | string>;
+  dataSetId?: string;
   onDataSetSelected: (dataSet: DataSetOption) => void;
+  indexPatternsService: any;
+  search: any;
 }
 
 interface DataSetNavigatorState {
@@ -36,7 +40,8 @@ interface DataSetNavigatorState {
   dataSourceIdToTitle: Map<string, string>;
 }
 
-export const DataSetNavigator = ({ indexPatternsService, savedObjectsClient, search }) => {
+export const DataSetNavigator = (props: DataSetNavigatorProps) => {
+  const { settings, indexPatternsService, savedObjectsClient, search, onDataSetSelected } = props;
   const [indexPatternList, setIndexPatternList] = useState([]);
   const [clusterList, setClusterList] = useState([]);
   const [indexList, setIndexList] = useState([]);
@@ -46,8 +51,10 @@ export const DataSetNavigator = ({ indexPatternsService, savedObjectsClient, sea
 
   const onButtonClick = () => setIsDataSetNavigatorOpen(!isDataSetNavigatorOpen);
   const closePopover = () => setIsDataSetNavigatorOpen(false);
-  const onDataSetClick = (dataSet) => {
+  const onDataSetClick = async (dataSet) => {
     setSelectedDataSet(dataSet);
+    onDataSetSelected(dataSet);
+    settings.setSelectedDataSet(dataSet);
     closePopover();
   };
 

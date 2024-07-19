@@ -71,6 +71,6 @@ export interface IUiStart {
    * @experimental - Subject to change
    */
   Settings: Settings;
-  DataSetNavigator: React.ComponentType<DataSetNavigatorProps>;
+  DataSetNavigator: (onDataSetSelected: any) => React.ComponentType<DataSetNavigatorProps>;
   container$: Observable<HTMLDivElement | null>;
 }

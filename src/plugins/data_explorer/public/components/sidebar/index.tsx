@@ -3,15 +3,22 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { ComponentType, FC, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiPageSideBar, EuiPortal, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSource, DataSourceGroup, DataSourceSelectable } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
-import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
+import {
+  setIndexPattern,
+  setDataSet,
+  useTypedDispatch,
+  useTypedSelector,
+} from '../../utils/state_management';
 import './index.scss';
+import { DataSetNavigatorProps } from '../../../../data/public/ui/dataset_navigator';
+import { batch } from 'react-redux';
 
 export const Sidebar: FC = ({ children }) => {
   const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
@@ -20,6 +27,8 @@ export const Sidebar: FC = ({ children }) => {
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
   const [activeDataSources, setActiveDataSources] = useState<DataSource[]>([]);
   const [isEnhancementsEnabled, setIsEnhancementsEnabled] = useState<boolean>(false);
+  const [DataSetNavigator, setDataSetNavigator] = useState<any>();
+  const [selectedDataSet, setSelectedDataSet] = useState();
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const {
@@ -30,17 +39,40 @@ export const Sidebar: FC = ({ children }) => {
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
+  const handleDataSetSelection = useCallback(
+    (selectedDataSet: any) => {
+      setSelectedDataSet(selectedDataSet);
+      setSelectedSources([
+        {
+          key: selectedDataSet.id,
+          name: selectedDataSet.name,
+          label: selectedDataSet.name,
+          value: selectedDataSet.id,
+          type: 'OpenSearch Default',
+          ds: activeDataSources[0],
+        },
+      ]);
+      batch(() => {
+        dispatch(setIndexPattern(selectedDataSet.id));
+        dispatch(setDataSet(selectedDataSet));
+      });
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     const subscriptions = ui.Settings.getEnabledQueryEnhancementsUpdated$().subscribe(
       (enabledQueryEnhancements) => {
         setIsEnhancementsEnabled(enabledQueryEnhancements);
+        if (enabledQueryEnhancements)
+          setDataSetNavigator(ui.DataSetNavigator(handleDataSetSelection));
       }
     );
 
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [ui.Settings]);
+  }, [ui.Settings, handleDataSetSelection]);
 
   const setContainerRef = useCallback((uiContainerRef) => {
     uiContainerRef.appendChild(containerRef.current);
@@ -147,8 +179,6 @@ export const Sidebar: FC = ({ children }) => {
     />
   );
 
-  const dataSetNavigator = ui.DataSetNavigator;
-
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer
@@ -163,7 +193,7 @@ export const Sidebar: FC = ({ children }) => {
               containerRef.current = node;
             }}
           >
-            {dataSetNavigator}
+            {DataSetNavigator}
           </EuiPortal>
         )}
         {!isEnhancementsEnabled && (
