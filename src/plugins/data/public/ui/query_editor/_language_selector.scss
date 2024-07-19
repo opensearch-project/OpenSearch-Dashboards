@@ -2,13 +2,10 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-.osdQueryBar__languageSelector {
-  font-size: small;
-}
+.languageSelector {
+  height: 100%;
 
-.osdQueryBar__languageSelectorFooter {
-  font-size: smaller;
-  padding-left: 0;
-  padding-top: 2px;
-  color: $ouiTextSubduedColor;
+  * {
+    font-size: small;
+  }
 }

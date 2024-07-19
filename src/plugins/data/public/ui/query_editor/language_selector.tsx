@@ -100,14 +100,11 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
   });
   return (
     <EuiPopover
-      id="languageSelector"
+      className="languageSelector"
       button={
         <EuiButtonEmpty
           iconSide="right"
           onClick={onButtonClick}
-          className={
-            props.isFooter ? 'osdQueryBar__languageSelectorFooter' : 'osdQueryBar__languageSelector'
-          }
           iconType={props.isFooter ? 'arrowDown' : undefined}
         >
           {selectedLanguage.label}
