@@ -15,28 +15,34 @@ import {
   EuiSearchBarProps,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { i18n } from '@osd/i18n';
-import { debounce } from '../../../../../core/public';
+import { debounce, DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { WorkspaceAttribute } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
 
-import { WORKSPACE_CREATE_APP_ID, WORKSPACE_USE_CASES } from '../../../common/constants';
+import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
 import { cleanWorkspaceId } from '../../../../../core/public';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
-import { getUseCaseFromFeatureConfig, isUseCaseFeatureConfig } from '../../utils';
+import { getFirstUseCaseOfFeatureConfigs, getUseCaseFromFeatureConfig } from '../../utils';
+import { WorkspaceUseCase } from '../../types';
 
-const WORKSPACE_LIST_PAGE_DESCRIPTIOIN = i18n.translate('workspace.list.description', {
+const WORKSPACE_LIST_PAGE_DESCRIPTION = i18n.translate('workspace.list.description', {
   defaultMessage:
     'Workspace allow you to save and organize library items, such as index patterns, visualizations, dashboards, saved searches, and share them with other OpenSearch Dashboards users. You can control which features are visible in each workspace, and which users and groups have read and write access to the library items in the workspace.',
 });
 
-export const WorkspaceList = () => {
+export interface WorkspaceListProps {
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
+}
+
+export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   const {
     services: { workspaces, application, http },
   } = useOpenSearchDashboards();
+  const registeredUseCases = useObservable(registeredUseCases$);
 
   const initialSortField = 'name';
   const initialSortDirection = 'asc';
@@ -102,14 +108,14 @@ export const WorkspaceList = () => {
         if (!features || features.length === 0) {
           return '';
         }
-        const results: string[] = [];
-        features.forEach((featureConfig) => {
-          const useCaseId = getUseCaseFromFeatureConfig(featureConfig);
-          if (useCaseId) {
-            results.push(WORKSPACE_USE_CASES[useCaseId].title);
-          }
-        });
-        return results.join(', ');
+        const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
+        const useCase =
+          useCaseId === DEFAULT_NAV_GROUPS.all.id
+            ? DEFAULT_NAV_GROUPS.all
+            : registeredUseCases?.find(({ id }) => id === useCaseId);
+        if (useCase) {
+          return useCase.title;
+        }
       },
     },
     {
@@ -182,7 +188,7 @@ export const WorkspaceList = () => {
         <EuiPageHeader
           restrictWidth
           pageTitle="Workspaces"
-          description={WORKSPACE_LIST_PAGE_DESCRIPTIOIN}
+          description={WORKSPACE_LIST_PAGE_DESCRIPTION}
           style={{ paddingBottom: 0, borderBottom: 0 }}
         />
         <EuiPageContent
