@@ -55,6 +55,15 @@ export async function mountManagementSection(
   const content = (
     <Router history={params.history}>
       <Switch>
+        <Route path={['/manage/:dataSourceName']}>
+          <DirectQueryDataConnectionDetail
+            featureFlagStatus={featureFlagStatus}
+            http={http}
+            notifications={notifications}
+            setBreadcrumbs={params.setBreadcrumbs}
+            application={application}
+          />
+        </Route>
         {canManageDataSource && (
           <Route path={['/create']}>
             <CreateDataSourcePanel {...params} featureFlagStatus={featureFlagStatus} />
@@ -70,20 +79,6 @@ export async function mountManagementSection(
             <ConfigureDirectQueryDataSourceWithRouter notifications={notifications} />
           </Route>
         )}
-        {featureFlagStatus && (
-          <Route path={['/:id']}>
-            <EditDataSourceWithRouter />
-          </Route>
-        )}
-        <Route path={['/manage/:dataSourceName']}>
-          <DirectQueryDataConnectionDetail
-            featureFlagStatus={featureFlagStatus}
-            http={http}
-            notifications={notifications}
-            setBreadcrumbs={params.setBreadcrumbs}
-            application={application}
-          />
-        </Route>
         {featureFlagStatus && (
           <Route path={['/:id']}>
             <EditDataSourceWithRouter />

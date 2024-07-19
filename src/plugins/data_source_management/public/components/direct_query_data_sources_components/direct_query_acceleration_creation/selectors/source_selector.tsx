@@ -97,7 +97,10 @@ export const AccelerationDataSourceSelector = ({
   };
 
   const loadDatabases = () => {
-    const dsCache = CatalogCacheManager.getOrCreateDataSource(accelerationFormData.dataSource);
+    const dsCache = CatalogCacheManager.getOrCreateDataSource(
+      accelerationFormData.dataSource,
+      dataSourceMDSId
+    );
 
     if (dsCache.status === CachedDataSourceStatus.Updated && dsCache.databases.length > 0) {
       const databaseLabels = dsCache.databases.map((db) => ({ label: db.name }));
@@ -121,7 +124,8 @@ export const AccelerationDataSourceSelector = ({
       try {
         dbCache = CatalogCacheManager.getDatabase(
           accelerationFormData.dataSource,
-          accelerationFormData.database
+          accelerationFormData.database,
+          dataSourceMDSId
         );
         if (dbCache.status === CachedDataSourceStatus.Updated && dbCache.tables.length > 0) {
           const tableLabels = dbCache.tables.map((tb) => ({ label: tb.name }));

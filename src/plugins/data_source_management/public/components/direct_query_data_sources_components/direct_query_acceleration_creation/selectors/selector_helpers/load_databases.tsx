@@ -41,14 +41,11 @@ export const SelectorLoadDatabases = ({
   notifications,
 }: SelectorLoadDatabasesProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  if (dataSourceMDSId === undefined) {
-    dataSourceMDSId = '';
-  }
   const {
     loadStatus: loadDatabasesStatus,
     startLoading: startDatabasesLoading,
     stopLoading: stopDatabasesLoading,
-  } = useLoadDatabasesToCache(http, notifications, dataSourceMDSId);
+  } = useLoadDatabasesToCache(http, notifications);
 
   const onClickRefreshDatabases = () => {
     setIsLoading(true);

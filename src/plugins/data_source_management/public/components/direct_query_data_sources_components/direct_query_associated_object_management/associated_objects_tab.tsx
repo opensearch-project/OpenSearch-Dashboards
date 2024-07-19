@@ -111,7 +111,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
 
   const onRefreshButtonClick = () => {
     if (!isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus, accelerationsLoadStatus)) {
-      startLoadingDatabases({ dataSourceName: datasource.name });
+      startLoadingDatabases({ dataSourceName: datasource.name, dataSourceMDSId });
       setIsRefreshing(true);
     }
   };
@@ -172,13 +172,16 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   // Load databases if empty or retrieve from cache if updated
   useEffect(() => {
     if (datasource.name) {
-      const datasourceCache = CatalogCacheManager.getOrCreateDataSource(datasource.name);
+      const datasourceCache = CatalogCacheManager.getOrCreateDataSource(
+        datasource.name,
+        dataSourceMDSId
+      );
       if (
         (datasourceCache.status === CachedDataSourceStatus.Empty ||
           datasourceCache.status === CachedDataSourceStatus.Failed) &&
         !isCatalogCacheFetching(databasesLoadStatus)
       ) {
-        startLoadingDatabases({ dataSourceName: datasource.name });
+        startLoadingDatabases({ dataSourceName: datasource.name, dataSourceMDSId });
       } else if (datasourceCache.status === CachedDataSourceStatus.Updated) {
         setCachedDatabases(datasourceCache.databases);
         setIsFirstTimeLoading(false);
@@ -190,7 +193,10 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
   // Retrieve from cache upon load success
   useEffect(() => {
     const status = databasesLoadStatus.toLowerCase();
-    const datasourceCache = CatalogCacheManager.getOrCreateDataSource(datasource.name);
+    const datasourceCache = CatalogCacheManager.getOrCreateDataSource(
+      datasource.name,
+      dataSourceMDSId
+    );
     if (status === DirectQueryLoadingStatus.SUCCESS) {
       setCachedDatabases(datasourceCache.databases);
       setIsFirstTimeLoading(false);
@@ -201,6 +207,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       setDatabasesLoadFailed(true);
       setIsFirstTimeLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [datasource.name, databasesLoadStatus]);
 
   const handleObjectsLoad = (
@@ -222,7 +229,11 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
     if (datasource.name && selectedDatabase) {
       let databaseCache;
       try {
-        databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
+        databaseCache = CatalogCacheManager.getDatabase(
+          datasource.name,
+          selectedDatabase,
+          dataSourceMDSId
+        );
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);
@@ -238,7 +249,11 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           databaseCache.status === CachedDataSourceStatus.Failed) &&
         !isCatalogCacheFetching(tablesLoadStatus)
       ) {
-        startLoadingTables({ dataSourceName: datasource.name, databaseName: selectedDatabase });
+        startLoadingTables({
+          dataSourceName: datasource.name,
+          databaseName: selectedDatabase,
+          dataSourceMDSId,
+        });
         setIsObjectsLoading(true);
       } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
         setCachedTables(databaseCache.tables);
@@ -249,7 +264,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
           isRefreshing) &&
         !isCatalogCacheFetching(accelerationsLoadStatus)
       ) {
-        startLoadingAccelerations({ dataSourceName: datasource.name });
+        startLoadingAccelerations({ dataSourceName: datasource.name, dataSourceMDSId });
         setIsObjectsLoading(true);
       } else if (accelerationsCache.status === CachedDataSourceStatus.Updated) {
         setCachedAccelerations(accelerationsCache.accelerations);
@@ -264,7 +279,11 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       const tablesStatus = tablesLoadStatus.toLowerCase();
       let databaseCache;
       try {
-        databaseCache = CatalogCacheManager.getDatabase(datasource.name, selectedDatabase);
+        databaseCache = CatalogCacheManager.getDatabase(
+          datasource.name,
+          selectedDatabase,
+          dataSourceMDSId
+        );
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error(error);
@@ -273,8 +292,8 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       }
       const accelerationsStatus = accelerationsLoadStatus.toLowerCase();
       const accelerationsCache = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
-        datasource.name
-        // dataSourceMDSId
+        datasource.name,
+        dataSourceMDSId
       );
       if (tablesStatus === DirectQueryLoadingStatus.SUCCESS) {
         setCachedTables(databaseCache.tables);

@@ -74,14 +74,7 @@ export const AssociatedObjectsDetailsFlyout = ({
   dataSourceMDSId,
   application,
 }: AssociatedObjectsFlyoutProps) => {
-  if (dataSourceMDSId === undefined) {
-    dataSourceMDSId = '';
-  }
-  const { loadStatus, startLoading } = useLoadTableColumnsToCache(
-    http,
-    notifications,
-    dataSourceMDSId
-  );
+  const { loadStatus, startLoading } = useLoadTableColumnsToCache(http, notifications);
   const [tableColumns, setTableColumns] = useState<CachedColumn[] | undefined>([]);
   const [schemaData, setSchemaData] = useState<any>([]);
 
@@ -222,6 +215,7 @@ export const AssociatedObjectsDetailsFlyout = ({
               databaseName: tableDetail.database,
               tableName: tableDetail.name,
               handleRefresh,
+              dataSourceMDSId,
             })
           }
           iconType="popout"
@@ -256,7 +250,8 @@ export const AssociatedObjectsDetailsFlyout = ({
         const tables = CatalogCacheManager.getTable(
           datasourceName,
           tableDetail.database,
-          tableDetail.name
+          tableDetail.name,
+          dataSourceMDSId
         );
         if (tables?.columns) {
           setTableColumns(tables?.columns);
@@ -265,6 +260,7 @@ export const AssociatedObjectsDetailsFlyout = ({
             dataSourceName: datasourceName,
             databaseName: tableDetail.database,
             tableName: tableDetail.name,
+            dataSourceMDSId,
           });
         }
       } catch (error) {
@@ -285,7 +281,8 @@ export const AssociatedObjectsDetailsFlyout = ({
         columns = CatalogCacheManager.getTable(
           datasourceName,
           tableDetail.database,
-          tableDetail.name
+          tableDetail.name,
+          dataSourceMDSId
         ).columns;
         setTableColumns(columns);
       } catch (error) {

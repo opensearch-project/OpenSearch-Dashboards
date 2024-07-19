@@ -98,7 +98,7 @@ export const AccelerationTable = ({
       !isCatalogCacheFetching(accelerationsLoadStatus)
     ) {
       setIsRefreshing(true);
-      startLoadingAccelerations({ dataSourceName });
+      startLoadingAccelerations({ dataSourceName, dataSourceMDSId });
     } else {
       setAccelerations(cachedDataSource.accelerations);
       setUpdatedTime(cachedDataSource.lastUpdated);
@@ -125,7 +125,7 @@ export const AccelerationTable = ({
   const handleRefresh = useCallback(() => {
     if (!isCatalogCacheFetching(accelerationsLoadStatus)) {
       setIsRefreshing(true);
-      startLoadingAccelerations({ dataSourceName });
+      startLoadingAccelerations({ dataSourceName, dataSourceMDSId });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accelerationsLoadStatus]);

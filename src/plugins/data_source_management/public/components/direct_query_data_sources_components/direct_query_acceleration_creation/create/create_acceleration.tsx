@@ -113,7 +113,7 @@ export const CreateAcceleration = ({
     loadStatus,
     startLoading,
     stopLoading: stopLoadingTableFields,
-  } = useLoadTableColumnsToCache(http, notifications, dataSourceMDSId);
+  } = useLoadTableColumnsToCache(http, notifications);
 
   const loadColumnsToAccelerationForm = (cachedTable: CachedTable) => {
     const idPrefix = htmlIdGenerator()();

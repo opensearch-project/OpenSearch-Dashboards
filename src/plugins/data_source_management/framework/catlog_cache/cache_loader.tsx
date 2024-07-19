@@ -285,8 +285,7 @@ export const createLoadQuery = (
 export const useLoadToCache = (
   loadCacheType: LoadCacheType,
   http: HttpStart,
-  notifications: NotificationsStart,
-  dataSourceMDSId?: string
+  notifications: NotificationsStart
 ) => {
   const sqlService = new SQLService(http);
   const [currentDataSourceName, setCurrentDataSourceName] = useState('');
@@ -296,13 +295,6 @@ export const useLoadToCache = (
     DirectQueryLoadingStatus.INITIAL
   );
   const dataSourceMDSClientId = useRef('');
-
-  // Set dataSourceMDSClientId.current if dataSourceMDSId is provided
-  useEffect(() => {
-    if (dataSourceMDSId !== undefined) {
-      dataSourceMDSClientId.current = dataSourceMDSId;
-    }
-  }, [dataSourceMDSId]);
 
   const {
     data: pollingResult,
@@ -328,7 +320,7 @@ export const useLoadToCache = (
 
   const startLoading = ({
     dataSourceName,
-    dataSourceMDSId: startLoadingDataSourceMDSId,
+    dataSourceMDSId,
     databaseName,
     tableName,
   }: StartLoadingParams) => {
@@ -336,9 +328,7 @@ export const useLoadToCache = (
     setCurrentDataSourceName(dataSourceName);
     setCurrentDatabaseName(databaseName);
     setCurrentTableName(tableName);
-    if (startLoadingDataSourceMDSId !== undefined) {
-      dataSourceMDSClientId.current = startLoadingDataSourceMDSId;
-    }
+    dataSourceMDSClientId.current = dataSourceMDSId || '';
 
     let requestPayload: DirectQueryRequest = {
       lang: 'sql',
@@ -418,58 +408,34 @@ export const useLoadToCache = (
   return { loadStatus, startLoading, stopLoading };
 };
 
-export const useLoadDatabasesToCache = (
-  http: HttpStart,
-  notifications: NotificationsStart,
-  dataSourceMDSId: string
-) => {
+export const useLoadDatabasesToCache = (http: HttpStart, notifications: NotificationsStart) => {
   const { loadStatus, startLoading, stopLoading } = useLoadToCache(
     'databases',
     http,
-    notifications,
-    dataSourceMDSId
+    notifications
   );
   return { loadStatus, startLoading, stopLoading };
 };
 
-export const useLoadTablesToCache = (
-  http: HttpStart,
-  notifications: NotificationsStart,
-  dataSourceMDSId: string
-) => {
-  const { loadStatus, startLoading, stopLoading } = useLoadToCache(
-    'tables',
-    http,
-    notifications,
-    dataSourceMDSId
-  );
+export const useLoadTablesToCache = (http: HttpStart, notifications: NotificationsStart) => {
+  const { loadStatus, startLoading, stopLoading } = useLoadToCache('tables', http, notifications);
   return { loadStatus, startLoading, stopLoading };
 };
 
-export const useLoadTableColumnsToCache = (
-  http: HttpStart,
-  notifications: NotificationsStart,
-  dataSourceMDSId: string
-) => {
+export const useLoadTableColumnsToCache = (http: HttpStart, notifications: NotificationsStart) => {
   const { loadStatus, startLoading, stopLoading } = useLoadToCache(
     'tableColumns',
     http,
-    notifications,
-    dataSourceMDSId
+    notifications
   );
   return { loadStatus, startLoading, stopLoading };
 };
 
-export const useLoadAccelerationsToCache = (
-  http: HttpStart,
-  notifications: NotificationsStart,
-  dataSourceMDSId: string
-) => {
+export const useLoadAccelerationsToCache = (http: HttpStart, notifications: NotificationsStart) => {
   const { loadStatus, startLoading, stopLoading } = useLoadToCache(
     'accelerations',
     http,
-    notifications,
-    dataSourceMDSId
+    notifications
   );
   return { loadStatus, startLoading, stopLoading };
 };
