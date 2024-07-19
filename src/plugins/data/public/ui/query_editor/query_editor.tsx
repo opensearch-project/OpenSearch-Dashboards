@@ -326,7 +326,6 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   singleLineEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
-    // this.setState({ lineCount: editor.getModel()?.getLineCount() });
     this.inputRef = editor;
 
     const editorNode = editor.getDomNode();
@@ -372,9 +371,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     const footerClassName = classNames('osdQueryEditorFooter', this.props.footerClassName);
 
     const useQueryEditor =
-      this.props.query.language === 'SQLAsync' ||
-      this.props.query.language === 'SQL' ||
-      this.props.query.language === 'PPL';
+      this.props.query.language !== 'kuery' && this.props.query.language !== 'lucene';
 
     return (
       <div className={className}>
@@ -516,8 +513,8 @@ export default class QueryEditorUI extends Component<Props, State> {
                   {this.state.lineCount} {this.state.lineCount === 1 ? 'line' : 'lines'}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {typeof this.props.indexPatterns[0] !== 'string' &&
-                    '@' + this.props.indexPatterns[0].timeFieldName}
+                  {typeof this.props.indexPatterns?.[0] !== 'string' &&
+                    '@' + this.props.indexPatterns?.[0].timeFieldName}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>
