@@ -48,7 +48,7 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
     savedObjects,
     defaultValues,
     operationType,
-    workspaceConfigurableApps,
+    availableUseCases,
     dataSourceManagement: isDataSourceEnabled,
   } = props;
   const {
@@ -109,10 +109,10 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
 
             <FormGroup title={workspaceUseCaseTitle}>
               <WorkspaceUseCase
-                configurableApps={workspaceConfigurableApps}
                 value={formData.useCases}
                 onChange={handleUseCasesChange}
                 formErrors={formErrors}
+                availableUseCases={availableUseCases}
               />
             </FormGroup>
 
