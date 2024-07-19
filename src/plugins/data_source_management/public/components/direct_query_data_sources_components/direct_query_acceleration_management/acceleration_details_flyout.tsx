@@ -232,7 +232,7 @@ export const AccelerationDetailsFlyout = (props: AccelerationDetailsFlyoutProps)
     return (
       <EuiButtonEmpty
         onClick={() => {
-          onDiscoverIconClick(acceleration, dataSourceName);
+          onDiscoverIconClick(acceleration, dataSourceName, application);
           resetFlyout();
         }}
       >
