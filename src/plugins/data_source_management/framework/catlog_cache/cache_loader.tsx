@@ -413,15 +413,7 @@ export const useLoadToCache = (
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    pollingResult,
-    pollingError,
-    currentDataSourceName,
-    currentDatabaseName,
-    currentTableName,
-    loadCacheType,
-    stopLoading,
-  ]);
+  }, [pollingResult, pollingError]);
 
   return { loadStatus, startLoading, stopLoading };
 };

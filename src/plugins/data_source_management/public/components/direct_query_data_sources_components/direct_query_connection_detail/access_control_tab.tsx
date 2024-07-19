@@ -34,16 +34,16 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
   const { http } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   useEffect(() => {
-    http!
-      .get(SECURITY_ROLES)
-      .then((data) =>
-        setRoles(
-          Object.keys(data.data).map((key) => {
-            return { label: key };
-          })
-        )
-      )
-      .catch((err) => setHasSecurityAccess(false));
+    // http!
+    //   .get(SECURITY_ROLES)
+    //   .then((data) =>
+    //     setRoles(
+    //       Object.keys(data.data).map((key) => {
+    //         return { label: key };
+    //       })
+    //     )
+    //   )
+    // .catch((err) => setHasSecurityAccess(false));
   }, [http]);
 
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>(

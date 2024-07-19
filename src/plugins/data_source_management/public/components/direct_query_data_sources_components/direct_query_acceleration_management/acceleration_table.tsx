@@ -90,7 +90,8 @@ export const AccelerationTable = ({
 
   useEffect(() => {
     const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
-      dataSourceName
+      dataSourceName,
+      dataSourceMDSId
     );
     if (
       cachedDataSource.status === CachedDataSourceStatus.Empty &&
@@ -102,12 +103,14 @@ export const AccelerationTable = ({
       setAccelerations(cachedDataSource.accelerations);
       setUpdatedTime(cachedDataSource.lastUpdated);
     }
-  }, [accelerationsLoadStatus, dataSourceName, startLoadingAccelerations]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (accelerationsLoadStatus === DirectQueryLoadingStatus.SUCCESS) {
       const cachedDataSource = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
-        dataSourceName
+        dataSourceName,
+        dataSourceMDSId
       );
       setAccelerations(cachedDataSource.accelerations);
       setUpdatedTime(cachedDataSource.lastUpdated);

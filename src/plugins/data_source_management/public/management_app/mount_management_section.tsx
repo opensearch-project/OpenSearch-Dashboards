@@ -80,11 +80,15 @@ export async function mountManagementSection(
             featureFlagStatus={featureFlagStatus}
             http={http}
             notifications={notifications}
-            savedObjects={savedObjects}
-            uiSettings={uiSettings}
             setBreadcrumbs={params.setBreadcrumbs}
+            application={application}
           />
         </Route>
+        {featureFlagStatus && (
+          <Route path={['/:id']}>
+            <EditDataSourceWithRouter />
+          </Route>
+        )}
         <Route path={['/']}>
           <DataSourceHomePanel history={params.history} featureFlagStatus={featureFlagStatus} />
         </Route>

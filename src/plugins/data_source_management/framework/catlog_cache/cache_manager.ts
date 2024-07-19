@@ -88,7 +88,7 @@ export class CatalogCacheManager {
     dataSource: CachedAccelerationByDataSource,
     dataSourceMDSId?: string
   ): void {
-    let index;
+    let index = -1;
     const accCacheData = this.getAccelerationsCache();
     if (dataSourceMDSId) {
       index = accCacheData.dataSources.findIndex(
@@ -97,8 +97,7 @@ export class CatalogCacheManager {
       );
     } else {
       index = accCacheData.dataSources.findIndex(
-        (ds: CachedAccelerationByDataSource) =>
-          ds.name === dataSource.name && ds.dataSourceMDSId === dataSourceMDSId
+        (ds: CachedAccelerationByDataSource) => ds.name === dataSource.name
       );
     }
     if (index !== -1) {
@@ -128,7 +127,6 @@ export class CatalogCacheManager {
     } else {
       cachedDataSource = accCacheData.dataSources.find((ds) => ds.name === dataSourceName);
     }
-
     if (cachedDataSource) return cachedDataSource;
     else {
       let defaultDataSourceObject: CachedAccelerationByDataSource = {

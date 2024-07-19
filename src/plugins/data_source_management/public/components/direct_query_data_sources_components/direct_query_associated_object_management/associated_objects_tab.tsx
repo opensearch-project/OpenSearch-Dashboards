@@ -231,6 +231,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       }
       const accelerationsCache = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
         datasource.name
+        // dataSourceMDSId
       );
       if (
         (databaseCache.status === CachedDataSourceStatus.Empty ||
@@ -273,6 +274,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
       const accelerationsStatus = accelerationsLoadStatus.toLowerCase();
       const accelerationsCache = CatalogCacheManager.getOrCreateAccelerationsByDataSource(
         datasource.name
+        // dataSourceMDSId
       );
       if (tablesStatus === DirectQueryLoadingStatus.SUCCESS) {
         setCachedTables(databaseCache.tables);
