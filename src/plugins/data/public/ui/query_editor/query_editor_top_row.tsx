@@ -222,6 +222,24 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     return input.replace('<data_source>', dataSource);
   }
 
+  function getQueryStringInitialValueByDataSet(language: string, dataSet: any) {
+    const { indexPatterns, settings } = props;
+    const input = settings?.getQueryEnhancements(language)?.searchBar?.queryStringInput
+      ?.initialValue;
+
+    if (
+      !indexPatterns ||
+      (!Array.isArray(indexPatterns) && compact(indexPatterns).length > 0) ||
+      !input
+    )
+      return '';
+
+    // const defaultDataSource = indexPatterns[0];
+    const dataSource = dataSet.name;
+
+    return input.replace('<data_source>', dataSource);
+  }
+
   function renderQueryEditor() {
     if (!shouldRenderQueryEditor()) return;
     return (
@@ -240,6 +258,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           onChangeQueryEditorFocus={onChangeQueryEditorFocus}
           onSubmit={onInputSubmit}
           getQueryStringInitialValue={getQueryStringInitialValue}
+          getQueryStringInitialValueByDataSet={getQueryStringInitialValueByDataSet}
           persistedLog={persistedLog}
           className="osdQueryEditor"
           dataTestSubj={props.dataTestSubj}
