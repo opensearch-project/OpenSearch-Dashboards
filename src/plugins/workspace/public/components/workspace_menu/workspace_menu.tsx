@@ -27,6 +27,7 @@ import {
   MAX_WORKSPACE_PICKER_NUM,
   MAX_WORKSPACE_NAME_LENGTH,
   WORKSPACE_DETAIL_APP_ID,
+  WORKSPACE_USE_CASES,
 } from '../../../common/constants';
 import { cleanWorkspaceId, formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { CoreStart, NavGroupItemInMap, WorkspaceObject } from '../../../../../core/public';
@@ -82,7 +83,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
   };
 
   const workspaceToItem = (workspace: WorkspaceObject, itemType: string) => {
-    const appId = navGroupsMap![getUseCase(workspace)]?.navLinks[0].id;
+    const appId = navGroupsMap?.[getUseCase(workspace)]?.navLinks[0].id ?? WORKSPACE_DETAIL_APP_ID;
     const useCaseURL = formatUrlWithWorkspaceId(
       coreStart.application.getUrlForApp(appId, {
         absolute: false,
@@ -197,7 +198,7 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
                 {currentWorkspaceName}
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="context-menu-current-use-case">
-                {getUseCase(currentWorkspace)}
+                {WORKSPACE_USE_CASES[getUseCase(currentWorkspace)].title ?? ''}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -295,11 +296,9 @@ export const WorkspaceMenu = ({ coreStart }: Props) => {
                 data-test-subj="context-menu-create-workspace-button"
                 onClick={() => {
                   window.location.assign(
-                    cleanWorkspaceId(
-                      coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
-                        absolute: false,
-                      })
-                    )
+                    coreStart.application.getUrlForApp(WORKSPACE_CREATE_APP_ID, {
+                      absolute: false,
+                    })
                   );
                 }}
               >
