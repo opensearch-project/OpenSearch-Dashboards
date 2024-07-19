@@ -20,6 +20,7 @@ describe('UpdateAwsCredentialModal', () => {
     service: SigV4ServiceName.OpenSearch,
     handleUpdateAwsCredential: mockHandleUpdateAwsCredential,
     closeUpdateAwsCredentialModal: mockCloseUpdateAwsCredentialModal,
+    canManageDataSource: true,
   };
 
   it('updates new access key state on input change', () => {
