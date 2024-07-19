@@ -221,6 +221,59 @@ export class WorkspacePlugin
     });
   }
 
+  /**
+   * Enhance breadcrumbs with workspace use case
+   * @param core CoreStart
+   */
+  private enhanceBreadcrumbsWithUseCase(core: CoreStart) {
+    this.breadcrumbsSubscription = combineLatest([
+      core.workspaces.currentWorkspace$,
+      core.chrome.navGroup.getCurrentNavGroup$(),
+      core.chrome.navGroup.getNavGroupsMap$(),
+    ]).subscribe(([currentWorkspace, currentNavGroup, navGroupsMap]) => {
+      if (currentWorkspace) {
+        const useCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []);
+        // get workspace the only use case
+        if (useCase && useCase !== ALL_USE_CASE_ID) {
+          currentNavGroup = navGroupsMap[useCase];
+        }
+        const navGroupBreadcrumb: ChromeBreadcrumb = {
+          text: currentNavGroup?.title,
+          onClick: () => {
+            // current nav group links are sorted, we don't need to sort it again here
+            if (currentNavGroup?.navLinks[0].id) {
+              core.application.navigateToApp(currentNavGroup?.navLinks[0].id);
+            }
+          },
+        };
+        const homeBreadcrumb: ChromeBreadcrumb = {
+          text: 'Home',
+          onClick: () => {
+            core.application.navigateToApp('home');
+          },
+        };
+
+        core.chrome.setBreadcrumbsEnricher((breadcrumbs) => {
+          const workspaceBreadcrumb: ChromeBreadcrumb = {
+            text: currentWorkspace.name,
+            onClick: () => {
+              core.application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
+            },
+          };
+          if (useCase === ALL_USE_CASE_ID) {
+            if (currentNavGroup) {
+              return [homeBreadcrumb, workspaceBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+            } else {
+              return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
+            }
+          } else {
+            return [homeBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+          }
+        });
+      }
+    });
+  }
+
   public async setup(
     core: CoreSetup,
     { savedObjectsManagement, management, dataSourceManagement }: WorkspacePluginSetupDeps
@@ -456,6 +509,10 @@ export class WorkspacePlugin
 
       // register get started card in new home page
       this.registerGetStartedCardToNewHome(core, contentManagement);
+      /**
+       * enhance breadcrumbs with workspace use case
+       */
+      this.enhanceBreadcrumbsWithUseCase(core);
     }
     return {};
   }

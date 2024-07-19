@@ -72,6 +72,8 @@ export interface ChromeBadge {
 /** @public */
 export type ChromeBreadcrumb = EuiBreadcrumb;
 
+export type ChromeBreadcrumbEnricher = (breadcrumbs: ChromeBreadcrumb[]) => ChromeBreadcrumb[];
+
 /** @public */
 export type ChromeBranding = Branding;
 
@@ -190,6 +192,9 @@ export class ChromeService {
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
+    const breadcrumbsEnricher$ = new BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(
+      (breadcrumbs) => breadcrumbs
+    );
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);
     const helpSupportUrl$ = new BehaviorSubject<string>(OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK);
@@ -200,7 +205,7 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http, workspaces });
     const docTitle = this.docTitle.start({ document: window.document });
-    const navGroup = await this.navGroup.start({ navLinks, application });
+    const navGroup = await this.navGroup.start({ navLinks, application, breadcrumbsEnricher$ });
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -279,6 +284,7 @@ export class ChromeService {
           badge$={badge$.pipe(takeUntil(this.stop$))}
           basePath={http.basePath}
           breadcrumbs$={breadcrumbs$.pipe(takeUntil(this.stop$))}
+          breadcrumbsEnricher$={breadcrumbsEnricher$.pipe(takeUntil(this.stop$))}
           customNavLink$={customNavLink$.pipe(takeUntil(this.stop$))}
           opensearchDashboardsDocLink={docLinks.links.opensearchDashboards.introduction}
           forceAppSwitcherNavigation$={navLinks.getForceAppSwitcherNavigation$()}
@@ -343,6 +349,12 @@ export class ChromeService {
 
       setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => {
         breadcrumbs$.next(newBreadcrumbs);
+      },
+
+      getBreadcrumbsEnricher$: () => breadcrumbsEnricher$.pipe(takeUntil(this.stop$)),
+
+      setBreadcrumbsEnricher: (enricher: ChromeBreadcrumbEnricher) => {
+        breadcrumbsEnricher$.next(enricher);
       },
 
       getHelpExtension$: () => helpExtension$.pipe(takeUntil(this.stop$)),
@@ -480,6 +492,16 @@ export interface ChromeStart {
    * Override the current set of breadcrumbs
    */
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[]): void;
+
+  /**
+   * Get an observable of the current breadcrumbs enricher
+   */
+  getBreadcrumbsEnricher$(): Observable<ChromeBreadcrumbEnricher | undefined>;
+
+  /**
+   * Override the current ChromeBreadcrumbEnricher
+   */
+  setBreadcrumbsEnricher(newBreadcrumbsEnricher: ChromeBreadcrumbEnricher): void;
 
   /**
    * Get an observable of the current custom nav link

@@ -44,6 +44,7 @@ describe('HeaderBreadcrumbs', () => {
         navGroupEnabled={false}
         currentNavgroup$={new BehaviorSubject(undefined)}
         navigateToApp={jest.fn()}
+        breadcrumbsEnricher$={new BehaviorSubject(undefined)}
       />
     );
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
@@ -72,6 +73,7 @@ describe('HeaderBreadcrumbs', () => {
         navGroupEnabled={true}
         currentNavgroup$={currentNavgroup$}
         navigateToApp={jest.fn()}
+        breadcrumbsEnricher$={new BehaviorSubject(undefined)}
       />
     );
     const breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');

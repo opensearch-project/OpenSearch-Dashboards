@@ -4,8 +4,14 @@
  */
 
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
-import { AppCategory, ChromeNavGroup, ChromeNavLink } from 'opensearch-dashboards/public';
+import {
+  AppCategory,
+  ApplicationStart,
+  ChromeNavGroup,
+  ChromeNavLink,
+} from 'opensearch-dashboards/public';
 import { map, switchMap, takeUntil } from 'rxjs/operators';
+import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from '../../ui_settings';
 import {
   flattenLinksOrCategories,
@@ -15,6 +21,7 @@ import {
 import { ChromeNavLinks } from '../nav_links';
 import { InternalApplicationStart } from '../../application';
 import { NavGroupStatus } from '../../../../core/types';
+import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../chrome_service';
 
 export const CURRENT_NAV_GROUP_ID = 'core.chrome.currentNavGroupId';
 
@@ -190,9 +197,11 @@ export class ChromeNavGroupService {
   async start({
     navLinks,
     application,
+    breadcrumbsEnricher$,
   }: {
     navLinks: ChromeNavLinks;
     application: InternalApplicationStart;
+    breadcrumbsEnricher$: BehaviorSubject<ChromeBreadcrumbEnricher | undefined>;
   }): Promise<ChromeNavGroupServiceStartContract> {
     this.navLinks$ = navLinks.getNavLinks$();
 
@@ -225,6 +234,18 @@ export class ChromeNavGroupService {
         })
       );
 
+    if (this.navGroupEnabled) {
+      currentNavGroupSorted$.subscribe((currentNavGroup) => {
+        breadcrumbsEnricher$.next((breadcrumbs) =>
+          this.prependCurrentNavGroupToBreadcrumbs(
+            breadcrumbs,
+            currentNavGroup,
+            application.navigateToApp
+          )
+        );
+      });
+    }
+
     return {
       getNavGroupsMap$: () => this.getSortedNavGroupsMap$(),
       getNavGroupEnabled: () => this.navGroupEnabled,
@@ -232,6 +253,41 @@ export class ChromeNavGroupService {
       getCurrentNavGroup$: () => currentNavGroupSorted$,
       setCurrentNavGroup,
     };
+  }
+
+  /**
+   * prepend current nav group into existing breadcrumbs and return new breadcrumbs, the new breadcrumbs will looks like
+   * Home > Search > Visusalization
+   * @param breadcrumbs existing breadcrumbs
+   * @param currentNavGroup current nav group object
+   * @param navigateToApp
+   * @returns new breadcrumbs array
+   */
+  private prependCurrentNavGroupToBreadcrumbs(
+    breadcrumbs: ChromeBreadcrumb[],
+    currentNavGroup: NavGroupItemInMap | undefined,
+    navigateToApp: ApplicationStart['navigateToApp']
+  ) {
+    if (currentNavGroup) {
+      // breadcrumb order is home > navgroup > application, navgroup will be second one
+      const navGroupBreadcrumb: ChromeBreadcrumb = {
+        text: currentNavGroup.title,
+        onClick: () => {
+          if (currentNavGroup.navLinks && currentNavGroup.navLinks.length) {
+            navigateToApp(currentNavGroup.navLinks[0].id);
+          }
+        },
+      };
+      const homeBreadcrumb: ChromeBreadcrumb = {
+        text: i18n.translate('core.breadcrumbs.homeTitle', { defaultMessage: 'Home' }),
+        onClick: () => {
+          navigateToApp('home');
+        },
+      };
+      return [homeBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+    } else {
+      return breadcrumbs;
+    }
   }
 
   async stop() {

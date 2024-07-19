@@ -15,6 +15,7 @@ import { NavLinksService } from '../nav_links';
 import { applicationServiceMock, httpServiceMock } from '../../mocks';
 import { AppCategory } from 'opensearch-dashboards/public';
 import { DEFAULT_NAV_GROUPS } from '../../';
+import { ChromeBreadcrumbEnricher } from '../chrome_service';
 
 const mockedGroupFoo = {
   id: 'foo',
@@ -124,6 +125,7 @@ describe('ChromeNavGroupService#setup()', () => {
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
       application: mockedApplicationService,
+      breadcrumbsEnricher$: new Rx.BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(undefined),
     });
     const groupsMap = await chromeNavGroupServiceStart.getNavGroupsMap$().pipe(first()).toPromise();
     expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(2);
@@ -147,6 +149,7 @@ describe('ChromeNavGroupService#setup()', () => {
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
       application: mockedApplicationService,
+      breadcrumbsEnricher$: new Rx.BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(undefined),
     });
     const groupsMap = await chromeNavGroupServiceStart.getNavGroupsMap$().pipe(first()).toPromise();
     expect(groupsMap[mockedGroupFoo.id].navLinks.length).toEqual(1);
@@ -206,6 +209,7 @@ describe('ChromeNavGroupService#start()', () => {
     const chromeStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
       application: mockedApplicationService,
+      breadcrumbsEnricher$: new Rx.BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(undefined),
     });
 
     const groupsMap = await chromeStart.getNavGroupsMap$().pipe(first()).toPromise();
@@ -231,6 +235,7 @@ describe('ChromeNavGroupService#start()', () => {
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
       application: mockedApplicationService,
+      breadcrumbsEnricher$: new Rx.BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(undefined),
     });
 
     expect(chromeNavGroupServiceStart.getNavGroupEnabled()).toBe(true);
@@ -246,6 +251,7 @@ describe('ChromeNavGroupService#start()', () => {
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
       application: mockedApplicationService,
+      breadcrumbsEnricher$: new Rx.BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(undefined),
     });
 
     navGroupEnabled$.next(false);
@@ -276,6 +282,7 @@ describe('ChromeNavGroupService#start()', () => {
     const chromeNavGroupServiceStart = await chromeNavGroupService.start({
       navLinks: mockedNavLinkService,
       application: mockedApplicationService,
+      breadcrumbsEnricher$: new Rx.BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(undefined),
     });
 
     // set an existing nav group id
@@ -328,6 +335,7 @@ describe('nav group updater', () => {
     const navGroupStart = await navGroup.start({
       navLinks: mockedNavLinkService,
       application: mockedApplicationService,
+      breadcrumbsEnricher$: new Rx.BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(undefined),
     });
 
     expect(await navGroupStart.getNavGroupsMap$().pipe(first()).toPromise()).toEqual({
@@ -365,6 +373,7 @@ describe('nav group updater', () => {
     const navGroupStart = await navGroup.start({
       navLinks: mockedNavLinkService,
       application: mockedApplicationService,
+      breadcrumbsEnricher$: new Rx.BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(undefined),
     });
     expect(await navGroupStart.getNavGroupsMap$().pipe(first()).toPromise()).toEqual({
       dataAdministration: expect.objectContaining({
