@@ -117,7 +117,6 @@ export class HomePublicPlugin
           data,
           urlForwarding: urlForwardingStart,
           dataSource,
-          embeddable,
           contentManagement: contentManagementStart,
         },
       ] = await core.getStartServices();
