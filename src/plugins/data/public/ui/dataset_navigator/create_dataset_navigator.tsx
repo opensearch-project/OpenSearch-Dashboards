@@ -3,15 +3,26 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from 'lodash';
 import React from 'react';
-
 import { SavedObjectsClientContract } from 'src/core/public';
+import { IndexPatternsContract } from 'src/plugins/data/public';
 import { DataSetNavigator, DataSetNavigatorProps } from './';
 
-// Takes in stateful runtime dependencies and pre-wires them to the component
-export function createDataSetNavigator(savedObjectsClient: SavedObjectsClientContract) {
-  return (props: Omit<DataSetNavigatorProps, 'savedObjectsClient'>) => (
-    <DataSetNavigator {...props} savedObjectsClient={savedObjectsClient} />
+// Updated function signature to include additional dependencies
+export function createDataSetNavigator(
+  savedObjectsClient: SavedObjectsClientContract,
+  indexPatternsService: IndexPatternsContract,
+  search: any
+) {
+  // Return a function that takes props, omitting the dependencies from the props type
+  return (
+    props: Omit<DataSetNavigatorProps, 'savedObjectsClient' | 'indexPatternsService' | 'search'>
+  ) => (
+    <DataSetNavigator
+      {...props}
+      savedObjectsClient={savedObjectsClient}
+      indexPatternsService={indexPatternsService}
+      search={search}
+    />
   );
 }

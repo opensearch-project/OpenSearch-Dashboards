@@ -4,7 +4,7 @@
  */
 
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
-import { EuiPageSideBar, EuiSplitPanel } from '@elastic/eui';
+import { EuiPageSideBar, EuiPortal, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DataSource, DataSourceGroup, DataSourceSelectable } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
@@ -58,13 +58,7 @@ export const Sidebar: FC = ({ children }) => {
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [
-    ui.container$,
-    containerRef,
-    setContainerRef,
-    ui.dataSourceContainer$,
-    isEnhancementsEnabled,
-  ]);
+  }, [ui.container$, containerRef, setContainerRef, isEnhancementsEnabled]);
 
   useEffect(() => {
     let isMounted = true;
@@ -93,7 +87,7 @@ export const Sidebar: FC = ({ children }) => {
   useEffect(() => {
     if (indexPatternId) {
       const option = getMatchedOption(dataSourceOptionList, indexPatternId);
-      setSelectedSources((prev) => (option ? [option] : prev));
+      setSelectedSources(option ? [option] : []);
     }
   }, [indexPatternId, activeDataSources, dataSourceOptionList]);
 
@@ -153,6 +147,8 @@ export const Sidebar: FC = ({ children }) => {
     />
   );
 
+  const dataSetNavigator = ui.DataSetNavigator;
+
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer
@@ -161,6 +157,15 @@ export const Sidebar: FC = ({ children }) => {
         borderRadius="none"
         color="transparent"
       >
+        {isEnhancementsEnabled && (
+          <EuiPortal
+            portalRef={(node) => {
+              containerRef.current = node;
+            }}
+          >
+            {dataSetNavigator}
+          </EuiPortal>
+        )}
         {!isEnhancementsEnabled && (
           <EuiSplitPanel.Inner
             paddingSize="s"

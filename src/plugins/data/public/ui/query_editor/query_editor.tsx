@@ -467,6 +467,11 @@ export default class QueryEditorUI extends Component<Props, State> {
               >
                 {this.props.prepend}
               </EuiFlexItem>
+              {this.state.isDataSetsVisible && (
+                <EuiFlexItem grow={false} className={`${className}__dataSetWrapper`}>
+                  <div ref={this.props.containerRef} />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
 
