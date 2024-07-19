@@ -48,7 +48,6 @@ import { SectionTypeService } from '../services/section_type';
 import { ConfigSchema } from '../../config';
 import { HomePluginBranding } from '..';
 import { DataSourcePluginStart } from '../../../data_source/public';
-import { EmbeddableStart } from '../../../embeddable/public';
 import { ContentManagementPluginStart } from '../../../content_management/public';
 
 export interface HomeOpenSearchDashboardsServices {
@@ -59,7 +58,6 @@ export interface HomeOpenSearchDashboardsServices {
   uiSettings: IUiSettingsClient;
   urlForwarding: UrlForwardingStart;
   contentManagement: ContentManagementPluginStart;
-  embeddable: EmbeddableStart;
   homeConfig: ConfigSchema;
   featureCatalogue: FeatureCatalogueRegistry;
   http: HttpStart;

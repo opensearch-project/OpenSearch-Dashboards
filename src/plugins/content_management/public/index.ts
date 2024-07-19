@@ -12,3 +12,4 @@ export const plugin = (initializerContext: PluginInitializerContext) =>
   new ContentManagementPublicPlugin(initializerContext);
 
 export * from './components';
+export * from './mocks';

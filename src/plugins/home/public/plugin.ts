@@ -69,7 +69,6 @@ import {
   ContentManagementPluginSetup,
   ContentManagementPluginStart,
 } from '../../content_management/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
 import { initHome, setupHome } from './application/home_render';
 
 export interface HomePluginStartDependencies {
@@ -78,14 +77,12 @@ export interface HomePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   dataSource?: DataSourcePluginStart;
   contentManagement: ContentManagementPluginStart;
-  embeddable: EmbeddableStart;
 }
 
 export interface HomePluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   urlForwarding: UrlForwardingSetup;
   contentManagement: ContentManagementPluginSetup;
-  embeddable: EmbeddableSetup;
 }
 
 export class HomePublicPlugin
@@ -142,7 +139,6 @@ export class HomePublicPlugin
         environmentService: this.environmentService,
         urlForwarding: urlForwardingStart,
         contentManagement: contentManagementStart,
-        embeddable,
         homeConfig: this.initializerContext.config.get(),
         tutorialService: this.tutorialService,
         featureCatalogue: this.featuresCatalogueRegistry,
