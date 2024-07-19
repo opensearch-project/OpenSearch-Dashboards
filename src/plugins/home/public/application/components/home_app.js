@@ -117,7 +117,7 @@ export function HomeApp({ directories, solutions }) {
     />
   );
 
-  const nextHome = contentManagement.renderPage(HOME_PAGE_ID);
+  const homepage = contentManagement.renderPage(HOME_PAGE_ID);
 
   return (
     <I18nProvider>
@@ -134,13 +134,13 @@ export function HomeApp({ directories, solutions }) {
                 {legacyHome}
               </Route>
               <Route exact path="/">
-                {nextHome}
+                {homepage}
               </Route>
             </>
           ) : (
             <>
               <Route exact path="/next-home">
-                {nextHome}
+                {homepage}
               </Route>
               <Route exact path="/">
                 {legacyHome}

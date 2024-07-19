@@ -60,12 +60,7 @@ import { TelemetryPluginStart } from '../../telemetry/public';
 import { UsageCollectionSetup } from '../../usage_collection/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '../../url_forwarding/public';
 import { AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
-import {
-  PLUGIN_ID,
-  HOME_APP_BASE_PATH,
-  IMPORT_SAMPLE_DATA_APP_ID,
-  HOME_PAGE_ID,
-} from '../common/constants';
+import { PLUGIN_ID, HOME_APP_BASE_PATH, IMPORT_SAMPLE_DATA_APP_ID } from '../common/constants';
 import { DataSourcePluginStart } from '../../data_source/public';
 import { workWithDataSection } from './application/components/homepage/sections/work_with_data';
 import { learnBasicsSection } from './application/components/homepage/sections/learn_basics';
@@ -75,7 +70,7 @@ import {
   ContentManagementPluginStart,
 } from '../../content_management/public';
 import { EmbeddableSetup, EmbeddableStart } from '../../embeddable/public';
-import { initHome } from './application/home_render';
+import { initHome, setupHome } from './application/home_render';
 
 export interface HomePluginStartDependencies {
   data: DataPublicPluginStart;
@@ -225,30 +220,7 @@ export class HomePublicPlugin
 
     sectionTypes.registerSection(workWithDataSection);
     sectionTypes.registerSection(learnBasicsSection);
-
-    contentManagement.registerPage({
-      id: HOME_PAGE_ID,
-      title: 'Home',
-      sections: [
-        {
-          id: 'service_cards',
-          order: 3000,
-          kind: 'dashboard',
-        },
-        {
-          id: 'some_dashboard',
-          order: 2000,
-          title: 'test dashboard',
-          kind: 'dashboard',
-        },
-        {
-          id: 'get_started',
-          order: 1000,
-          title: 'Define your path forward with OpenSearch',
-          kind: 'card',
-        },
-      ],
-    });
+    setupHome(contentManagement);
 
     return {
       featureCatalogue,

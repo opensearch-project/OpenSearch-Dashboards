@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  AppMountParameters,
-  AppNavLinkStatus,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '../../../core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 
 import { ContentManagementService } from './services';
 import {
@@ -61,27 +54,6 @@ export class ContentManagementPublicPlugin
         embeddableServices: (await core.getStartServices())[1].embeddable,
       }))
     );
-
-    core.application.register({
-      id: 'contents',
-      title: 'Contents',
-      navLinkStatus: AppNavLinkStatus.hidden,
-      mount: async (params: AppMountParameters) => {
-        const [coreStart, depsStart] = await core.getStartServices();
-        const { renderApp } = await import('./app');
-        const pages = [...this.contentManagementService.pages.values()];
-
-        return renderApp(
-          {
-            pages,
-            coreStart,
-            depsStart,
-            params,
-          },
-          params.element
-        );
-      },
-    });
 
     return {
       registerPage: this.contentManagementService.registerPage,

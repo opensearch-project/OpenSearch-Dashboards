@@ -5,5 +5,5 @@
   "ui": true,
   "requiredPlugins": ["embeddable"],
   "optionalPlugins": [],
-  "requiredBundles": ["embeddable"]
+  "requiredBundles": []
 }
