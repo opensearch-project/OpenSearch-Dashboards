@@ -65,16 +65,6 @@ export const WorkspaceUseCase = ({
   formErrors,
   availableUseCases,
 }: WorkspaceUseCaseProps) => {
-  const handleCardChange = useCallback(
-    (id: string) => {
-      if (value === id) {
-        return;
-      }
-      onChange(id);
-    },
-    [value, onChange]
-  );
-
   return (
     <EuiFormRow
       label={i18n.translate('workspace.form.workspaceUseCase.name.label', {
@@ -94,8 +84,8 @@ export const WorkspaceUseCase = ({
                 id={id}
                 title={title}
                 description={description}
-                checked={!!value?.includes(id)}
-                onChange={handleCardChange}
+                checked={value === id}
+                onChange={onChange}
               />
             </EuiFlexItem>
           ))}
