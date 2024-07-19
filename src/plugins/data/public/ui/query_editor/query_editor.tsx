@@ -305,6 +305,15 @@ export default class QueryEditorUI extends Component<Props, State> {
       connectionService,
     });
 
+    // current completion item range being given as last 'word' at pos
+    const wordUntil = model.getWordUntilPosition(position);
+    const range = new monaco.Range(
+      position.lineNumber,
+      wordUntil.startColumn,
+      position.lineNumber,
+      wordUntil.endColumn
+    );
+
     return {
       suggestions:
         suggestions && suggestions.length > 0
@@ -312,7 +321,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               label: s.text,
               kind: this.getCodeEditorSuggestionsType(s.type),
               insertText: s.text,
-              range: wordRange,
+              range,
             }))
           : [],
       incomplete: false,
