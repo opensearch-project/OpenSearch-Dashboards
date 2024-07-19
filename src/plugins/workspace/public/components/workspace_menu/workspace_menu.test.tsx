@@ -13,6 +13,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { IntlProvider } from 'react-intl';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import * as workspaceUtils from '../utils/workspace';
 
 describe('<WorkspaceMenu />', () => {
   let coreStartMock: CoreStart;
@@ -158,6 +159,7 @@ describe('<WorkspaceMenu />', () => {
       name: 'workspace 1',
       features: ['use-case-observability'],
     });
+    const navigateToWorkspaceDetail = jest.spyOn(workspaceUtils, 'navigateToWorkspaceDetail');
     const originalLocation = window.location;
     Object.defineProperty(window, 'location', {
       value: {
@@ -169,9 +171,7 @@ describe('<WorkspaceMenu />', () => {
     fireEvent.click(screen.getByTestId('current-workspace-button'));
     const button = screen.getByText(/Manage workspace/i);
     fireEvent.click(button);
-    expect(window.location.assign).toHaveBeenCalledWith(
-      'https://test.com/w/workspace-1/app/workspace_detail'
-    );
+    expect(navigateToWorkspaceDetail).toBeCalled();
     Object.defineProperty(window, 'location', {
       value: originalLocation,
     });

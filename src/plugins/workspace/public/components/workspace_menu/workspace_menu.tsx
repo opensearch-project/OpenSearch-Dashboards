@@ -32,13 +32,11 @@ import { CoreStart, WorkspaceObject } from '../../../../../core/public';
 import { getUseCaseFromFeatureConfig } from '../../utils';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import { WorkspaceUseCase } from '../../types';
+import { navigateToWorkspaceDetail } from '../utils/workspace';
 
-const defaultHeaderName = i18n.translate(
-  'core.ui.primaryNav.workspacePickerMenu.defaultHeaderName',
-  {
-    defaultMessage: 'Workspaces',
-  }
-);
+const defaultHeaderName = i18n.translate('workspace.menu.defaultHeaderName', {
+  defaultMessage: 'Workspaces',
+});
 interface Props {
   coreStart: CoreStart;
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -176,7 +174,12 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
       anchorPosition="downCenter"
     >
       <EuiPanel paddingSize="m" hasBorder={false} color="transparent">
-        <EuiFlexGroup justifyContent="center" alignItems="center" direction="column" gutterSize="s">
+        <EuiFlexGroup
+          justifyContent="spaceAround"
+          alignItems="center"
+          direction="column"
+          gutterSize="s"
+        >
           {currentWorkspace ? (
             <>
               <EuiFlexItem grow={false}>
@@ -198,19 +201,11 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                 <EuiButton
                   color="text"
                   onClick={() => {
-                    window.location.assign(
-                      formatUrlWithWorkspaceId(
-                        coreStart.application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
-                          absolute: false,
-                        }),
-                        currentWorkspace.id,
-                        coreStart.http.basePath
-                      )
-                    );
+                    navigateToWorkspaceDetail(coreStart, currentWorkspace.id);
                   }}
                 >
                   <FormattedMessage
-                    id="core.ui.primaryNav.workspace.manage"
+                    id="workspace.menu.manageWorkspace"
                     defaultMessage="Manage workspace"
                   />
                 </EuiButton>
@@ -232,7 +227,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                   }}
                 >
                   <FormattedMessage
-                    id="core.ui.primaryNav.workspaces.manage"
+                    id="workspace.menu.manageWorkspaces"
                     defaultMessage="Manage workspaces"
                   />
                 </EuiButton>
@@ -265,7 +260,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                 coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
               }}
             >
-              <FormattedMessage id="core.ui.primaryNav.allWorkspace" defaultMessage="View all" />
+              <FormattedMessage id="workspace.menu.viewAll" defaultMessage="View all" />
             </EuiButtonEmpty>
           </EuiFlexItem>
           {isDashboardAdmin && (
@@ -281,7 +276,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                 }}
               >
                 <FormattedMessage
-                  id="core.ui.primaryNav.createWorkspace"
+                  id="workspace.menu.createWorkspace"
                   defaultMessage="Create workspace"
                 />
               </EuiButton>
