@@ -1,10 +1,10 @@
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { DQLLexer } from './generated/DQLLexer';
-import { DQLParser, KeyValueExpressionContext } from './generated/DQLParser';
+import { DQLParser, GroupContentContext, KeyValueExpressionContext } from './generated/DQLParser';
 import { CodeCompletionCore } from 'antlr4-c3';
-import { getTokenPosition } from '../opensearch_sql/cursor';
+import { getTokenPosition } from '../shared/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
-import { CursorPosition } from '../opensearch_sql/types';
+import { CursorPosition } from '../shared/types';
 import { getHttp } from '../../services';
 import { QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './generated/DQLParserVisitor';
@@ -21,7 +21,6 @@ const findCursorIndex = (
     const token = tokenStream.get(i);
     const { startLine, endColumn, endLine } = getTokenPosition(token, whitespaceToken);
 
-    // endColumn makes sense only if startLine === endLine
     if (endLine > cursor.line || (startLine === cursor.line && endColumn > cursorCol)) {
       if (actualIndex) {
         return i;
@@ -91,26 +90,18 @@ const findValueSuggestions = async (index: IndexPattern, field: string, value: s
 class QueryVisitor extends DQLParserVisitor<{ field: string; value: string }> {
   public visitKeyValueExpression = (ctx: KeyValueExpressionContext) => {
     let foundValue = '';
+    const getTextWithoutQuotes = (text: string | undefined) => text?.replace(/^["']|["']$/g, '');
 
     if (ctx.value()?.PHRASE()) {
-      const strippedPhrase = ctx
-        .value()
-        ?.PHRASE()
-        ?.getText()
-        .replace(/^["']|["']$/g, '');
-      if (strippedPhrase) foundValue = strippedPhrase;
-    }
-    if (ctx.value()?.tokenSearch()) {
+      const phraseText = getTextWithoutQuotes(ctx.value()?.PHRASE()?.getText());
+      if (phraseText) foundValue = phraseText;
+    } else if (ctx.value()?.tokenSearch()) {
       const valueText = ctx.value()?.getText();
       if (valueText) foundValue = valueText;
-    }
-    if (ctx.groupExpression()) {
-      const lastGroupContent = ctx
-        .groupExpression()
-        ?.groupContent()
-        .at(-1)
-        ?.getText()
-        .replace(/^["']|["']$/g, '');
+    } else if (ctx.groupExpression()) {
+      const lastGroupContent = getTextWithoutQuotes(
+        ctx.groupExpression()?.groupContent().at(-1)?.getText()
+      );
       if (lastGroupContent) foundValue = lastGroupContent;
     }
     return { field: ctx.field().getText(), value: foundValue };
@@ -165,10 +156,8 @@ export const getSuggestions = async ({
     completions.push(...findFieldSuggestions(currentIndexPattern));
   }
 
-  // find suggested values for the last found field
+  // find suggested values for the last found field (only for kvexpression rule)
   const { field: lastField = '', value: lastValue = '' } = visitor.visit(tree) ?? {};
-  console.log('lastField: ', lastField);
-  console.log('lastValue: ', lastValue);
   if (!!lastField && candidates.tokens.has(DQLParser.PHRASE)) {
     const values = await findValueSuggestions(currentIndexPattern, lastField, lastValue ?? '');
     completions.push(
