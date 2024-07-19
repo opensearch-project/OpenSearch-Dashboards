@@ -12,8 +12,6 @@ import { WorkspaceUseCase as WorkspaceUseCaseObject } from '../../types';
 import { WorkspaceFormErrors } from './types';
 import './workspace_use_case.scss';
 
-import './workspace_use_case.scss';
-
 interface WorkspaceUseCaseCardProps {
   id: string;
   title: string;
