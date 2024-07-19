@@ -29,7 +29,7 @@ import {
 } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
-import { getUseCaseFromFeatureConfig } from '../../utils';
+import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import { WorkspaceUseCase } from '../../types';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
@@ -64,7 +64,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
 
   const getUseCase = (workspace: WorkspaceObject) => {
-    const useCaseId = workspace?.features?.map(getUseCaseFromFeatureConfig).filter(Boolean)[0];
+    const useCaseId = getFirstUseCaseOfFeatureConfigs(workspace?.features!);
     return availableUseCases.find((useCase) => useCase.id === useCaseId);
   };
 
@@ -137,7 +137,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
       title: (
         <span className="custom-title">
           <FormattedMessage
-            id="core.ui.primaryNav.contextMenuTitle.allWorkspaces"
+            id="workspace.menu.title.allWorkspaces"
             defaultMessage="All workspaces"
           />
         </span>
@@ -153,7 +153,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
       title: (
         <span className="custom-title">
           <FormattedMessage
-            id="core.ui.primaryNav.contextMenuTitle.recentWorkspaces"
+            id="workspace.menu.title.recentWorkspaces"
             defaultMessage="Recent workspaces"
           />
         </span>
@@ -205,7 +205,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                   }}
                 >
                   <FormattedMessage
-                    id="workspace.menu.manageWorkspace"
+                    id="workspace.menu.button.manageWorkspace"
                     defaultMessage="Manage workspace"
                   />
                 </EuiButton>
@@ -227,7 +227,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                   }}
                 >
                   <FormattedMessage
-                    id="workspace.menu.manageWorkspaces"
+                    id="workspace.menu.button.manageWorkspaces"
                     defaultMessage="Manage workspaces"
                   />
                 </EuiButton>
@@ -260,7 +260,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                 coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
               }}
             >
-              <FormattedMessage id="workspace.menu.viewAll" defaultMessage="View all" />
+              <FormattedMessage id="workspace.menu.button.viewAll" defaultMessage="View all" />
             </EuiButtonEmpty>
           </EuiFlexItem>
           {isDashboardAdmin && (
@@ -276,7 +276,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                 }}
               >
                 <FormattedMessage
-                  id="workspace.menu.createWorkspace"
+                  id="workspace.menu.button.createWorkspace"
                   defaultMessage="Create workspace"
                 />
               </EuiButton>

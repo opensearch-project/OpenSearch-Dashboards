@@ -61,8 +61,8 @@ describe('<WorkspaceMenu />', () => {
 
   it('should display a list of workspaces in the dropdown', () => {
     coreStartMock.workspaces.workspaceList$.next([
-      { id: 'workspace-1', name: 'workspace 1' },
-      { id: 'workspace-2', name: 'workspace 2' },
+      { id: 'workspace-1', name: 'workspace 1', features: [] },
+      { id: 'workspace-2', name: 'workspace 2', features: [] },
     ]);
 
     render(<WorkspaceMenuCreatorComponent />);
@@ -81,8 +81,8 @@ describe('<WorkspaceMenu />', () => {
     ]);
 
     coreStartMock.workspaces.workspaceList$.next([
-      { id: 'workspace-1', name: 'workspace 1' },
-      { id: 'workspace-2', name: 'workspace 2' },
+      { id: 'workspace-1', name: 'workspace 1', features: [] },
+      { id: 'workspace-2', name: 'workspace 2', features: [] },
     ]);
 
     render(<WorkspaceMenuCreatorComponent />);
@@ -122,13 +122,6 @@ describe('<WorkspaceMenu />', () => {
   });
 
   it('should navigate to the workspace', () => {
-    jest.spyOn(coreStartMock.chrome.navGroup, 'getNavGroupsMap$').mockImplementation(() => {
-      return of({
-        observability: {
-          navLinks: [{ id: 'dashboard', title: '', description: '' }],
-        },
-      });
-    });
     coreStartMock.workspaces.workspaceList$.next([
       { id: 'workspace-1', name: 'workspace 1', features: ['use-case-observability'] },
     ]);
@@ -160,21 +153,12 @@ describe('<WorkspaceMenu />', () => {
       features: ['use-case-observability'],
     });
     const navigateToWorkspaceDetail = jest.spyOn(workspaceUtils, 'navigateToWorkspaceDetail');
-    const originalLocation = window.location;
-    Object.defineProperty(window, 'location', {
-      value: {
-        assign: jest.fn(),
-      },
-    });
     render(<WorkspaceMenuCreatorComponent />);
 
     fireEvent.click(screen.getByTestId('current-workspace-button'));
     const button = screen.getByText(/Manage workspace/i);
     fireEvent.click(button);
     expect(navigateToWorkspaceDetail).toBeCalled();
-    Object.defineProperty(window, 'location', {
-      value: originalLocation,
-    });
   });
 
   it('should navigate to workspaces management page', () => {
