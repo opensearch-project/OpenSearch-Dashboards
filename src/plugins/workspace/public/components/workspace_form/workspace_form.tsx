@@ -41,7 +41,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     numberOfChanges,
     handleFormSubmit,
     handleColorChange,
-    handleUseCasesChange,
+    handleUseCaseChange,
     handleNameInputChange,
     setPermissionSettings,
     setSelectedDataSources,
@@ -85,8 +85,8 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <WorkspaceUseCase
-          value={formData.useCases}
-          onChange={handleUseCasesChange}
+          value={formData.useCase}
+          onChange={handleUseCaseChange}
           formErrors={formErrors}
           availableUseCases={availableUseCases}
         />

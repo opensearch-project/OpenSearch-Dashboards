@@ -25,7 +25,7 @@ jest.mock('../delete_workspace_modal', () => ({
 
 function getWrapWorkspaceListInContext(
   workspaceList = [
-    { id: 'id1', name: 'name1', features: [] },
+    { id: 'id1', name: 'name1', features: ['use-case-all'] },
     { id: 'id2', name: 'name2' },
     { id: 'id3', name: 'name3', features: ['use-case-observability'] },
   ]
@@ -69,6 +69,7 @@ describe('WorkspaceList', () => {
     expect(getByText('name2')).toBeInTheDocument();
 
     // should display use case
+    expect(getByText('All use case')).toBeInTheDocument();
     expect(getByText('Observability')).toBeInTheDocument();
   });
   it('should be able to apply debounce search after input', async () => {
