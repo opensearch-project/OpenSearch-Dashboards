@@ -258,7 +258,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         <EuiFilterGroup>
           <EuiPopover
             id="dataPanelTypeFilter"
-            panelClassName="euiFilterGroup__popoverPanel"
+            panelClassName="euiFilterGroup__popoverPanel dataPanelTypeFilterPopover"
             panelPaddingSize="none"
             anchorPosition="downLeft"
             display="block"
