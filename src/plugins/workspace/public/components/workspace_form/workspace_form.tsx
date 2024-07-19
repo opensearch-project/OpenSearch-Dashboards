@@ -30,8 +30,8 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     defaultValues,
     operationType,
     permissionEnabled,
-    workspaceConfigurableApps,
     dataSourceManagement: isDataSourceEnabled,
+    availableUseCases,
   } = props;
   const {
     formId,
@@ -85,10 +85,10 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <WorkspaceUseCase
-          configurableApps={workspaceConfigurableApps}
           value={formData.useCases}
           onChange={handleUseCasesChange}
           formErrors={formErrors}
+          availableUseCases={availableUseCases}
         />
       </EuiPanel>
       <EuiSpacer />
