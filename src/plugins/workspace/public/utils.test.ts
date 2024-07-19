@@ -246,6 +246,15 @@ describe('workspace utils: isAppAccessibleInWorkspace', () => {
       )
     ).toBe(true);
   });
+  it('any app is accessible when workspace is all use case', () => {
+    expect(
+      isAppAccessibleInWorkspace(
+        { id: 'any_app', title: 'Any app', mount: jest.fn() },
+        { id: 'workspace_id', name: 'workspace name', features: ['use-case-all'] },
+        STATIC_USE_CASES
+      )
+    ).toBe(true);
+  });
 });
 
 describe('workspace utils: filterWorkspaceConfigurableApps', () => {
@@ -337,24 +346,6 @@ describe('workspace utils: isFeatureIdInsideUseCase', () => {
           title: 'Foo',
           description: 'Foo description',
           features: ['discover'],
-        },
-      ])
-    ).toBe(true);
-  });
-  it('should return true if feature id exists inside any use case', () => {
-    expect(
-      isFeatureIdInsideUseCase('searchRelevance', 'all', [
-        {
-          id: 'foo',
-          title: 'Foo',
-          description: 'Foo description',
-          features: ['discover'],
-        },
-        {
-          id: 'bar',
-          title: 'Bar',
-          description: 'Bar description',
-          features: ['searchRelevance'],
         },
       ])
     ).toBe(true);

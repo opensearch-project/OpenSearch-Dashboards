@@ -40,10 +40,7 @@ export const isFeatureIdInsideUseCase = (
   useCaseId: string,
   useCases: WorkspaceUseCase[]
 ) => {
-  const availableFeatures =
-    useCaseId === ALL_USE_CASE_ID
-      ? useCases.reduce<string[]>((previous, { features }) => previous.concat(features ?? []), [])
-      : useCases.find(({ id }) => id === useCaseId)?.features ?? [];
+  const availableFeatures = useCases.find(({ id }) => id === useCaseId)?.features ?? [];
   return availableFeatures.includes(featureId);
 };
 
@@ -139,6 +136,13 @@ export function isAppAccessibleInWorkspace(
    * When workspace has no features configured, all apps are considered to be accessible
    */
   if (!workspace.features) {
+    return true;
+  }
+
+  /**
+   * When workspace is all use case, all apps are accessible
+   */
+  if (getFirstUseCaseOfFeatureConfigs(workspace.features) === ALL_USE_CASE_ID) {
     return true;
   }
 
