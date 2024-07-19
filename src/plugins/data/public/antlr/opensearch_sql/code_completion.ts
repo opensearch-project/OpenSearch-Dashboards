@@ -87,14 +87,14 @@ export const getSuggestions = async ({ position, query }: SuggestionParams) => {
   }
 
   // fill in agregate functions
-  if ('suggestAggregateFunctions' in suggestions && suggestions.suggestAggregateFunctions) {
-    finalSuggestions.push(
-      ...SQL_SYMBOLS.AGREGATE_FUNCTIONS.map((af) => ({
-        text: af,
-        type: 'function',
-      }))
-    );
-  }
+  // if ('suggestAggregateFunctions' in suggestions && suggestions.suggestAggregateFunctions) {
+  //   finalSuggestions.push(
+  //     ...SQL_SYMBOLS.AGREGATE_FUNCTIONS.map((af) => ({
+  //       text: af,
+  //       type: 'function',
+  //     }))
+  //   );
+  // }
 
   // fill in sql keywords
   if ('suggestKeywords' in suggestions && (suggestions.suggestKeywords?.length ?? 0) > 0) {
@@ -194,6 +194,7 @@ export const parseQuery = <
 
   const suggestKeywords: KeywordSuggestion[] = [];
   const { tokens, rules } = core.collectCandidates(cursorTokenIndex, context);
+  console.log('tokens: ', tokens, 'rules: ', rules);
   tokens.forEach((_, tokenType) => {
     // Literal keyword names are quoted
     const literalName = parser.vocabulary.getLiteralName(tokenType)?.replace(quotesRegex, '$1');
