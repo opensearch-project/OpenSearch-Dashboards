@@ -4,8 +4,7 @@
  */
 
 import { PersistedLog } from '../../../core/public';
-
-const RECENT_WORKSPACES_KEY = 'recentWorkspaces';
+import { RECENT_WORKSPACES_KEY } from '../common/constants';
 
 export interface WorkspaceEntry {
   id: string;

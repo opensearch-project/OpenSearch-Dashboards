@@ -17,15 +17,14 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiPopover,
+  EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
-import { truncate } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
   MAX_WORKSPACE_PICKER_NUM,
-  MAX_WORKSPACE_NAME_LENGTH,
   WORKSPACE_DETAIL_APP_ID,
 } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
@@ -81,6 +80,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
 
   const workspaceToItem = (workspace: WorkspaceObject, itemType: string) => {
     const appId = getUseCase(workspace)?.features[0] ?? WORKSPACE_DETAIL_APP_ID;
+    const workspaceName = workspace.name;
     const useCaseURL = formatUrlWithWorkspaceId(
       coreStart.application.getUrlForApp(appId, {
         absolute: false,
@@ -88,11 +88,8 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
       workspace.id,
       coreStart.http.basePath
     );
-
-    const workspaceName = truncate(workspace.name, { length: MAX_WORKSPACE_NAME_LENGTH });
-
     return {
-      name: workspaceName,
+      name: <EuiText className="text-ellipsis">{workspaceName}</EuiText>,
       key: workspace.id,
       'data-test-subj': `context-menu-item-${itemType}-${workspace.id}`,
       icon: (
@@ -192,7 +189,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="context-menu-current-workspace-name">
-                {currentWorkspaceName}
+                <EuiText className="text-ellipsis">{currentWorkspaceName}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="context-menu-current-use-case">
                 {getUseCase(currentWorkspace)?.title ?? ''}
