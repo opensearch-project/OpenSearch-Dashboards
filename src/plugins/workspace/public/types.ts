@@ -11,3 +11,12 @@ export type Services = CoreStart & {
   workspaceClient: WorkspaceClient;
   dataSourceManagement?: DataSourceManagementPluginSetup;
 };
+
+export interface WorkspaceUseCase {
+  id: string;
+  title: string;
+  description: string;
+  features: string[];
+  systematic?: boolean;
+  order?: number;
+}
