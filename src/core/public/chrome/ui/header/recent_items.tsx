@@ -12,6 +12,7 @@ import {
   EuiListGroupItem,
   EuiTitle,
   EuiIcon,
+  EuiText,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { ChromeRecentlyAccessedHistoryItem } from '../..';
@@ -19,6 +20,8 @@ import { WorkspaceObject } from '../../../workspace';
 import { createRecentNavLink } from './nav_link';
 import { HttpStart } from '../../../http';
 import { ChromeNavLink } from '../../../';
+// TODO: replace this icon once added to OUI
+import recent_items from './assets/recent_items.svg';
 
 export interface Props {
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
@@ -68,7 +71,7 @@ export const RecentItems = ({
           }}
           data-test-subj="recentItemsSectionButton"
         >
-          <EuiIcon type="recentlyViewedApp" size="m" />
+          <EuiIcon type={recent_items} size="m" />
         </EuiHeaderSectionItemButton>
       }
       isOpen={isPopoverOpen}
@@ -82,24 +85,28 @@ export const RecentItems = ({
       <EuiTitle size="xs">
         <h4>Recents</h4>
       </EuiTitle>
-      <EuiListGroup>
-        {items.map((item) => (
-          <EuiListGroupItem
-            onClick={() => handleItemClick(item.link)}
-            size="s"
-            key={item.link}
-            label={
-              <>
-                {item.label}
-                {item.workspaceName ? (
-                  <EuiTextColor color="subdued">({item.workspaceName})</EuiTextColor>
-                ) : null}
-              </>
-            }
-            color="text"
-          />
-        ))}
-      </EuiListGroup>
+      {items.length > 0 ? (
+        <EuiListGroup>
+          {items.map((item) => (
+            <EuiListGroupItem
+              onClick={() => handleItemClick(item.link)}
+              size="s"
+              key={item.link}
+              label={
+                <>
+                  {item.label}
+                  {item.workspaceName ? (
+                    <EuiTextColor color="subdued">({item.workspaceName})</EuiTextColor>
+                  ) : null}
+                </>
+              }
+              color="text"
+            />
+          ))}
+        </EuiListGroup>
+      ) : (
+        <EuiText color="subdued">No recently viewed items</EuiText>
+      )}
     </EuiPopover>
   );
 };
