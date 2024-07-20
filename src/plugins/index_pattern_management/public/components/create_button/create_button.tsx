@@ -32,6 +32,7 @@ import React, { Component, Fragment } from 'react';
 
 import {
   EuiBadge,
+  EuiSmallButton,
   EuiButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -72,14 +73,14 @@ export class CreateButton extends Component<Props, State> {
 
     if (options.length === 1) {
       return (
-        <EuiButton
+        <EuiSmallButton
           data-test-subj="createIndexPatternButton"
           fill={true}
           onClick={options[0].onClick}
           iconType="plus"
         >
           {children}
-        </EuiButton>
+        </EuiSmallButton>
       );
     }
 

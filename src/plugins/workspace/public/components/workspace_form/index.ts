@@ -4,6 +4,7 @@
  */
 
 export { WorkspaceForm } from './workspace_form';
+export { WorkspaceDetailForm } from './workspace_detail_form';
 export { WorkspaceFormSubmitData } from './types';
 export { WorkspaceOperationType } from './constants';
 export {

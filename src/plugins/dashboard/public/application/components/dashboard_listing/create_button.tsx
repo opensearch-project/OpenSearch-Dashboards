@@ -5,7 +5,7 @@
 import React, { useState } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexItem,
@@ -47,7 +47,7 @@ const CreateButton = (props: CreateButtonProps) => {
 
   const renderCreateMenuDropDown = () => {
     const button = (
-      <EuiButton
+      <EuiSmallButton
         iconType="arrowDown"
         iconSide="right"
         onClick={onMenuButtonClick}
@@ -55,7 +55,7 @@ const CreateButton = (props: CreateButtonProps) => {
         data-test-subj="createMenuDropdown"
       >
         <FormattedMessage id="dashboard.listing.createButtonText" defaultMessage="Create" />
-      </EuiButton>
+      </EuiSmallButton>
     );
 
     return (
@@ -78,10 +78,15 @@ const CreateButton = (props: CreateButtonProps) => {
     const provider: DashboardProvider = Object.values(props.dashboardProviders!)[0];
     return (
       <EuiFlexItem grow={false}>
-        <EuiButton href={provider.createUrl} data-test-subj="newItemButton" iconType="plus" fill>
+        <EuiSmallButton
+          href={provider.createUrl}
+          data-test-subj="newItemButton"
+          iconType="plus"
+          fill
+        >
           <FormattedMessage id="dashboard.listing.createButtonText" defaultMessage="Create" />
           &nbsp;{provider.createLinkText}
-        </EuiButton>
+        </EuiSmallButton>
       </EuiFlexItem>
     );
   };

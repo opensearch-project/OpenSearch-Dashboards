@@ -42,17 +42,17 @@ import {
   EuiScreenReaderOnly,
   EuiCodeEditor,
   EuiDescribedFormGroup,
-  EuiFieldNumber,
-  EuiFieldText,
-  EuiFilePicker,
-  EuiFormRow,
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
+  EuiCompressedFilePicker,
+  EuiCompressedFormRow,
   EuiIconTip,
   EuiImage,
   EuiLink,
   EuiSpacer,
   EuiText,
-  EuiSelect,
-  EuiSwitch,
+  EuiCompressedSelect,
+  EuiCompressedSwitch,
   EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
@@ -100,7 +100,7 @@ export const getEditableValue = (
 };
 
 export class Field extends PureComponent<FieldProps> {
-  private changeImageForm = React.createRef<EuiFilePicker>();
+  private changeImageForm = React.createRef<EuiCompressedFilePicker>();
 
   getDisplayedDefaultValue(
     type: UiSettingsType,
@@ -327,7 +327,7 @@ export class Field extends PureComponent<FieldProps> {
     switch (type) {
       case 'boolean':
         return (
-          <EuiSwitch
+          <EuiCompressedSwitch
             label={
               !!currentValue ? (
                 <FormattedMessage id="advancedSettings.field.onLabel" defaultMessage="On" />
@@ -374,7 +374,7 @@ export class Field extends PureComponent<FieldProps> {
           return <EuiImage {...a11yProps} allowFullScreen url={value as string} alt={name} />;
         } else {
           return (
-            <EuiFilePicker
+            <EuiCompressedFilePicker
               disabled={loading || isOverridden || !enableSaving}
               onChange={this.onImageChange}
               accept=".jpg,.jpeg,.png"
@@ -387,7 +387,7 @@ export class Field extends PureComponent<FieldProps> {
         }
       case 'select':
         return (
-          <EuiSelect
+          <EuiCompressedSelect
             {...a11yProps}
             value={currentValue}
             options={(options as string[]).map((option) => {
@@ -405,7 +405,7 @@ export class Field extends PureComponent<FieldProps> {
         );
       case 'number':
         return (
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             {...a11yProps}
             value={currentValue}
             onChange={this.onFieldChangeEvent}
@@ -417,7 +417,7 @@ export class Field extends PureComponent<FieldProps> {
         );
       default:
         return (
-          <EuiFieldText
+          <EuiCompressedFieldText
             {...a11yProps}
             value={currentValue}
             onChange={this.onFieldChangeEvent}
@@ -704,7 +704,7 @@ export class Field extends PureComponent<FieldProps> {
         description={this.renderDescription(setting)}
         fullWidth
       >
-        <EuiFormRow
+        <EuiCompressedFormRow
           isInvalid={isInvalid}
           error={error}
           label={this.renderLabel(setting)}
@@ -727,7 +727,7 @@ export class Field extends PureComponent<FieldProps> {
               </EuiScreenReaderOnly>
             )}
           </>
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiDescribedFormGroup>
     );
   }

@@ -5,7 +5,7 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
   <EuiFlexItem
     grow={10}
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       fullWidth={true}
       onChange={[Function]}
       placeholder="source filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
@@ -13,7 +13,7 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem>
-    <EuiButton
+    <EuiSmallButton
       isDisabled={true}
       onClick={[Function]}
     >
@@ -22,7 +22,7 @@ exports[`AddFilter should ignore strings with just spaces 1`] = `
         id="indexPatternManagement.editIndexPattern.source.addButtonLabel"
         values={Object {}}
       />
-    </EuiButton>
+    </EuiSmallButton>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;
@@ -32,7 +32,7 @@ exports[`AddFilter should render normally 1`] = `
   <EuiFlexItem
     grow={10}
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       fullWidth={true}
       onChange={[Function]}
       placeholder="source filter, accepts wildcards (e.g., \`user*\` to filter fields starting with 'user')"
@@ -40,7 +40,7 @@ exports[`AddFilter should render normally 1`] = `
     />
   </EuiFlexItem>
   <EuiFlexItem>
-    <EuiButton
+    <EuiSmallButton
       isDisabled={true}
       onClick={[Function]}
     >
@@ -49,7 +49,7 @@ exports[`AddFilter should render normally 1`] = `
         id="indexPatternManagement.editIndexPattern.source.addButtonLabel"
         values={Object {}}
       />
-    </EuiButton>
+    </EuiSmallButton>
   </EuiFlexItem>
 </EuiFlexGroup>
 `;

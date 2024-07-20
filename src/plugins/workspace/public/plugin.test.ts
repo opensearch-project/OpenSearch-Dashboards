@@ -5,14 +5,21 @@
 
 import { BehaviorSubject, Observable, Subscriber } from 'rxjs';
 import { waitFor } from '@testing-library/dom';
-import { ChromeBreadcrumb } from 'opensearch-dashboards/public';
-import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
+import { first } from 'rxjs/operators';
+
 import { applicationServiceMock, chromeServiceMock, coreMock } from '../../../core/public/mocks';
-import { DEFAULT_NAV_GROUPS, AppNavLinkStatus } from '../../../core/public';
-import { WorkspacePlugin } from './plugin';
-import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_OVERVIEW_APP_ID } from '../common/constants';
+import {
+  ChromeBreadcrumb,
+  NavGroupStatus,
+  DEFAULT_NAV_GROUPS,
+  AppNavLinkStatus,
+} from '../../../core/public';
+import { WORKSPACE_FATAL_ERROR_APP_ID, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { savedObjectsManagementPluginMock } from '../../saved_objects_management/public/mocks';
 import { managementPluginMock } from '../../management/public/mocks';
+import { UseCaseService } from './services/use_case_service';
+import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
+import { WorkspacePlugin } from './plugin';
 
 describe('Workspace plugin', () => {
   const getSetupMock = () => ({
@@ -31,7 +38,7 @@ describe('Workspace plugin', () => {
       savedObjectsManagement: savedObjectManagementSetupMock,
       management: managementPluginMock.createSetupContract(),
     });
-    expect(setupMock.application.register).toBeCalledTimes(5);
+    expect(setupMock.application.register).toBeCalledTimes(4);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(savedObjectManagementSetupMock.columns.register).toBeCalledTimes(1);
   });
@@ -44,7 +51,7 @@ describe('Workspace plugin', () => {
     workspacePlugin.start(coreStart);
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
-    expect(setupMock.application.register).toBeCalledTimes(5);
+    expect(setupMock.application.register).toBeCalledTimes(4);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledTimes(0);
   });
@@ -81,7 +88,7 @@ describe('Workspace plugin', () => {
     await workspacePlugin.setup(setupMock, {
       management: managementPluginMock.createSetupContract(),
     });
-    expect(setupMock.application.register).toBeCalledTimes(5);
+    expect(setupMock.application.register).toBeCalledTimes(4);
     expect(WorkspaceClientMock).toBeCalledTimes(1);
     expect(workspaceClientMock.enterWorkspace).toBeCalledWith('workspaceId');
     expect(setupMock.getStartServices).toBeCalledTimes(1);
@@ -138,17 +145,8 @@ describe('Workspace plugin', () => {
       management: managementPluginMock.createSetupContract(),
     });
     currentAppIdSubscriber?.next(WORKSPACE_FATAL_ERROR_APP_ID);
-    expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_OVERVIEW_APP_ID);
+    expect(applicationStartMock.navigateToApp).toBeCalledWith(WORKSPACE_DETAIL_APP_ID);
     windowSpy.mockRestore();
-  });
-
-  it('#setup register workspace dropdown menu when setup', async () => {
-    const setupMock = coreMock.createSetup();
-    const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock, {
-      management: managementPluginMock.createSetupContract(),
-    });
-    expect(setupMock.chrome.registerCollapsibleNavHeader).toBeCalledTimes(1);
   });
 
   it('#setup should register workspace list with a visible application and register to settingsAndSetup nav group', async () => {
@@ -174,7 +172,7 @@ describe('Workspace plugin', () => {
     );
   });
 
-  it('#start add workspace overview page to breadcrumbs when start', async () => {
+  it('#start add workspace detail page to breadcrumbs when start', async () => {
     const startMock = coreMock.createStart();
     const workspaceObject = {
       id: 'foo',
@@ -197,7 +195,7 @@ describe('Workspace plugin', () => {
     );
   });
 
-  it('#start do not add workspace overview page to breadcrumbs when already exists', async () => {
+  it('#start do not add workspace detail page to breadcrumbs when already exists', async () => {
     const startMock = coreMock.createStart();
     const workspaceObject = {
       id: 'foo',
@@ -234,6 +232,70 @@ describe('Workspace plugin', () => {
     });
   });
 
+  it('#start register workspace dropdown menu at left navigation bottom when start', async () => {
+    const coreStart = coreMock.createStart();
+    coreStart.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    const workspacePlugin = new WorkspacePlugin();
+    workspacePlugin.start(coreStart);
+
+    expect(coreStart.chrome.navControls.registerLeftBottom).toBeCalledTimes(1);
+  });
+  it('#start should not update systematic use case features after currentWorkspace set', async () => {
+    const registeredUseCases$ = new BehaviorSubject([
+      {
+        id: 'foo',
+        title: 'Foo',
+        features: ['system-feature'],
+        systematic: true,
+      },
+    ]);
+    jest.spyOn(UseCaseService.prototype, 'start').mockImplementationOnce(() => ({
+      getRegisteredUseCases$: jest.fn(() => registeredUseCases$),
+    }));
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+    const workspaceObject = {
+      id: 'foo',
+      name: 'bar',
+      features: ['baz'],
+    };
+    coreStart.workspaces.currentWorkspace$.next(workspaceObject);
+
+    const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
+
+    workspacePlugin.start(coreStart);
+
+    const appUpdater = await appUpdater$.pipe(first()).toPromise();
+
+    expect(appUpdater({ id: 'system-feature' })).toBeUndefined();
+  });
+
+  it('#start should update nav group status after currentWorkspace set', async () => {
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+    const workspaceObject = {
+      id: 'foo',
+      name: 'bar',
+      features: ['use-case-foo'],
+    };
+    coreStart.workspaces.currentWorkspace$.next(workspaceObject);
+
+    const navGroupUpdater$ = setupMock.chrome.navGroup.registerNavGroupUpdater.mock.calls[0][0];
+
+    workspacePlugin.start(coreStart);
+
+    const navGroupUpdater = await navGroupUpdater$.pipe(first()).toPromise();
+
+    expect(navGroupUpdater({ id: 'foo' })).toBeUndefined();
+    expect(navGroupUpdater({ id: 'bar' })).toEqual({
+      status: NavGroupStatus.Hidden,
+    });
+  });
+
   it('#stop should call unregisterNavGroupUpdater', async () => {
     const workspacePlugin = new WorkspacePlugin();
     const setupMock = getSetupMock();
@@ -246,5 +308,45 @@ describe('Workspace plugin', () => {
     workspacePlugin.stop();
 
     expect(unregisterNavGroupUpdater).toHaveBeenCalled();
+  });
+
+  it('#stop should not call appUpdater$.next anymore', async () => {
+    const registeredUseCases$ = new BehaviorSubject([
+      {
+        id: 'foo',
+        title: 'Foo',
+        features: ['system-feature'],
+        systematic: true,
+      },
+    ]);
+    jest.spyOn(UseCaseService.prototype, 'start').mockImplementationOnce(() => ({
+      getRegisteredUseCases$: jest.fn(() => registeredUseCases$),
+    }));
+    const workspacePlugin = new WorkspacePlugin();
+    const setupMock = getSetupMock();
+    const coreStart = coreMock.createStart();
+    await workspacePlugin.setup(setupMock, {});
+    const workspaceObject = {
+      id: 'foo',
+      name: 'bar',
+      features: ['baz'],
+    };
+    coreStart.workspaces.currentWorkspace$.next(workspaceObject);
+
+    const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
+    const appUpdaterChangeMock = jest.fn();
+    appUpdater$.subscribe(appUpdaterChangeMock);
+
+    workspacePlugin.start(coreStart);
+
+    // Wait for filterNav been executed
+    await new Promise(setImmediate);
+
+    expect(appUpdaterChangeMock).toHaveBeenCalledTimes(2);
+
+    workspacePlugin.stop();
+
+    registeredUseCases$.next([]);
+    expect(appUpdaterChangeMock).toHaveBeenCalledTimes(2);
   });
 });

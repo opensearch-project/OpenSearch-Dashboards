@@ -709,7 +709,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       name: i18n.translate('data.advancedSettings.query.enhancements.enableTitle', {
         defaultMessage: 'Enable query enhancements',
       }),
-      value: false,
+      value: true,
       description: i18n.translate('data.advancedSettings.query.enhancements.enableText', {
         defaultMessage: `
           <strong>Experimental</strong>:
@@ -749,19 +749,6 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       }),
       category: ['search'],
       schema: schema.string(),
-    },
-    [UI_SETTINGS.QUERY_DATA_SOURCE_READONLY]: {
-      name: i18n.translate('data.advancedSettings.query.dataSource.readOnlyTitle', {
-        defaultMessage: 'Read-only data source in query editor',
-      }),
-      value: true,
-      description: i18n.translate('data.advancedSettings.query.dataSource.readOnlyText', {
-        defaultMessage:
-          'When enabled, the search bar prevents modifying the data source in the query input. ' +
-          '<strong>Experimental</strong>: Requires query enhancements enabled.',
-      }),
-      category: ['search'],
-      schema: schema.boolean(),
     },
     [UI_SETTINGS.SEARCH_QUERY_LANGUAGE_BLOCKLIST]: {
       name: i18n.translate('data.advancedSettings.searchQueryLanguageBlocklistTitle', {

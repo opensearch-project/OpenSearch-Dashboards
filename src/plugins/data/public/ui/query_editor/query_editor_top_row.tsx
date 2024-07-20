@@ -4,11 +4,11 @@
  */
 import dateMath from '@elastic/datemath';
 import {
-  EuiFieldText,
+  EuiButton,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
-  EuiSuperUpdateButton,
   OnRefreshProps,
   prettyDuration,
 } from '@elastic/eui';
@@ -28,7 +28,7 @@ import {
   withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
 import { UI_SETTINGS } from '../../../common';
-import { fromUser, getQueryLog, PersistedLog } from '../../query';
+import { getQueryLog, PersistedLog } from '../../query';
 import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
@@ -50,7 +50,7 @@ export interface QueryEditorTopRowProps {
   indexPatterns?: Array<IIndexPattern | string>;
   dataSource?: DataSource;
   isLoading?: boolean;
-  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
+  prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   showQueryEditor?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;
@@ -74,8 +74,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
   const { uiSettings, storage, appName } = opensearchDashboards.services;
-
-  const isDataSourceReadOnly = uiSettings.get(UI_SETTINGS.QUERY_DATA_SOURCE_READONLY);
 
   const queryLanguage = props.query && props.query.language;
   const queryUiEnhancement =
@@ -193,17 +191,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function isValidQuery(query: Query | undefined) {
-    if (!query || !query.query) return false;
-    return (
-      !Array.isArray(props.indexPatterns!) ||
-      compact(props.indexPatterns!).length === 0 ||
-      !isDataSourceReadOnly ||
-      fromUser(query!.query).includes(
-        typeof props.indexPatterns[0] === 'string'
-          ? props.indexPatterns[0]
-          : props.indexPatterns[0].title
-      )
-    );
+    if (query && query.query) return true;
   }
 
   function getQueryStringInitialValue(language: string) {
@@ -247,6 +235,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           className="osdQueryEditor"
           dataTestSubj={props.dataTestSubj}
           queryLanguage={queryLanguage}
+          filterBar={props.filterBar}
         />
       </EuiFlexItem>
     );
@@ -287,13 +276,16 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     const button = props.customSubmitButton ? (
       React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
     ) : (
-      <EuiSuperUpdateButton
-        needsUpdate={props.isDirty}
+      <EuiButton
         isDisabled={isDateRangeInvalid}
         isLoading={props.isLoading}
         onClick={onClickSubmitButton}
         data-test-subj="querySubmitButton"
-      />
+        className="euiSuperUpdateButton"
+        iconType="play"
+      >
+        {props.isDirty ? 'Refresh' : 'Run'}
+      </EuiButton>
     );
 
     if (!shouldRenderDatePicker()) {
@@ -375,12 +367,15 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       direction="column"
       justifyContent="flexEnd"
     >
+      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false} className="osdQueryEditor--updateButtonWrapper">
+          {renderUpdateButton()}
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {renderQueryEditor()}
       <EuiFlexItem>
-        <EuiFlexGroup responsive={false} gutterSize="none">
-          <EuiFlexItem grow={false}>{props.filterBar}</EuiFlexItem>
+        <EuiFlexGroup responsive={false} gutterSize="none" direction="column">
           <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
-          <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

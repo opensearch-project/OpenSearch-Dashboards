@@ -42,7 +42,6 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
     return {
       __enhance: (enhancements?: UiEnhancements) => {
         if (!enhancements) return;
-        if (!this.enhancementsConfig.enabled) return;
         if (enhancements.query && enhancements.query.language) {
           this.queryEnhancements.set(enhancements.query.language, enhancements.query);
         }
