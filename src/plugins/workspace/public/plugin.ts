@@ -63,7 +63,7 @@ interface WorkspacePluginSetupDeps {
   dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
-interface WorkspacePluginStartDeps {
+export interface WorkspacePluginStartDeps {
   contentManagement: ContentManagementPluginStart;
 }
 
