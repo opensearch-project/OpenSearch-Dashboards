@@ -251,8 +251,8 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         </EuiFlexGroup>
       </EuiPanel>
       <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
-        {getWorkspaceListGroup(filteredWorkspaceList, 'all')}
         {getWorkspaceListGroup(filteredRecentWorkspaces, 'recent')}
+        {getWorkspaceListGroup(filteredWorkspaceList, 'all')}
       </EuiPanel>
       <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
