@@ -286,13 +286,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): Promise<monaco.languages.CompletionList> => {
-    const wordUntil = model.getWordUntilPosition(position);
-    const wordRange = new monaco.Range(
-      position.lineNumber,
-      wordUntil.startColumn,
-      position.lineNumber,
-      wordUntil.endColumn
-    );
     const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
     const connectionService = enhancements?.connectionService;
     const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
