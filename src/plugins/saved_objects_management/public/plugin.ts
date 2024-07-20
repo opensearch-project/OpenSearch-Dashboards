@@ -240,6 +240,7 @@ export class SavedObjectsManagementPlugin
     const actionStart = this.actionService.start();
     const columnStart = this.columnService.start();
     const namespaceStart = this.namespaceService.start();
+    const workspaceEnabled = core.application.capabilities.workspaces.enabled;
 
     contentManagement?.registerContentProvider({
       id: 'recent',
@@ -251,6 +252,7 @@ export class SavedObjectsManagementPlugin
           render: () =>
             React.createElement(RecentWork, {
               core,
+              workspaceEnabled,
             }),
         };
       },

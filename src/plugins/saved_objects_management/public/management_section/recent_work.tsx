@@ -47,7 +47,7 @@ const sortKeyMap = {
 type KeyOf<T> = keyof T;
 
 function sortBy<T>(key: KeyOf<T>) {
-  return (a: T, b: T): number => (a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0);
+  return (a: T, b: T): number => (a[key] > b[key] ? -1 : b[key] > a[key] ? 1 : 0);
 }
 
 type DetailedRecentlyAccessedItem = SavedObjectWithMetadata &
@@ -85,12 +85,11 @@ const bulkGetDetail = (
 const widthForTypeSelector = 220;
 const widthForRightMargin = 4;
 
-export const RecentWork = (props: { core: CoreStart }) => {
-  const { core } = props;
+export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean }) => {
+  const { core, workspaceEnabled } = props;
   const recently$Ref = useRef(core.chrome.recentlyAccessed.get$());
   const recentAccessed = useObservable(recently$Ref.current, []);
   const workspaceList = useObservable(core.workspaces.workspaceList$, []);
-  const navLinks = useObservable(core.chrome.navLinks.getNavLinks$(), []);
 
   const allOptions = useMemo(() => {
     const options: string[] = [allOption];
@@ -115,12 +114,10 @@ export const RecentWork = (props: { core: CoreStart }) => {
     const sortedResult = [...detailedSavedObjects]
       .filter((item) => !item.error)
       .sort(sortBy(sortKeyMap[selectedSort]));
-    return sortedResult
-      .reverse()
-      .filter((item: SavedObject & ChromeRecentlyAccessedHistoryItem) => {
-        if (selectedType === allOption) return true;
-        return item.extraProps?.type === selectedType;
-      });
+    return sortedResult.filter((item: SavedObject & ChromeRecentlyAccessedHistoryItem) => {
+      if (selectedType === allOption) return true;
+      return item.extraProps?.type === selectedType;
+    });
   }, [detailedSavedObjects, selectedSort, selectedType]);
 
   useEffect(() => {
@@ -190,6 +187,7 @@ export const RecentWork = (props: { core: CoreStart }) => {
                       key={item}
                       hasActiveFilters={item === selectedSort}
                       onClick={() => setSelectedSort(item)}
+                      data-test-subj={`filterButton-${encodeURIComponent(item)}`}
                     >
                       {item}
                     </EuiFilterButton>
@@ -214,57 +212,62 @@ export const RecentWork = (props: { core: CoreStart }) => {
         <EuiFlexGroup>
           {Array.from({ length: 6 }).map((item, itemIndexInRow) => {
             const recentAccessItem = itemsForDisplay[itemIndexInRow];
-            const content = recentAccessItem ? (
-              <EuiCard
-                layout="horizontal"
-                title={recentAccessItem.label}
-                titleSize="xs"
-                description={
-                  <>
-                    <div>
-                      <EuiIcon
-                        style={{ marginRight: widthForRightMargin }}
-                        type={recentAccessItem.meta.icon || 'apps'}
-                      />
-                      {recentAccessItem.type}
-                    </div>
-                    <EuiSpacer size="s" />
-                    <div>
-                      {selectedSort === recentlyViewed
-                        ? i18n.translate('homepage.recentWorkSection.viewedAt', {
-                            defaultMessage: 'Viewed',
-                          })
-                        : i18n.translate('homepage.recentWorkSection.updatedAt', {
-                            defaultMessage: 'Updated',
-                          })}
-                      :{' '}
-                      <b>
-                        {selectedSort === recentlyViewed
-                          ? moment(recentAccessItem?.viewedAt).fromNow()
-                          : moment(recentAccessItem?.updatedAt).fromNow()}
-                      </b>
-                    </div>
-                    {recentAccessItem.workspaceName && (
+            let content = null;
+            if (recentAccessItem) {
+              const navLinks = core.chrome.navLinks.getAll();
+              const recentNavLink = createRecentNavLink(
+                recentAccessItem,
+                navLinks,
+                core.http.basePath,
+                core.application.navigateToUrl
+              );
+              content = (
+                <EuiCard
+                  title={recentAccessItem.label}
+                  titleSize="xs"
+                  data-test-subj="recentlyCard"
+                  description=""
+                  textAlign="left"
+                  href={recentNavLink.href}
+                  footer={
+                    <>
                       <div>
-                        {i18n.translate('homepage.recentWorkSection.workspace', {
-                          defaultMessage: 'Workspace',
-                        })}
-                        : <b>{recentAccessItem.workspaceName}</b>
+                        <EuiIcon
+                          style={{ marginRight: widthForRightMargin }}
+                          type={recentAccessItem.meta.icon || 'apps'}
+                        />
+                        {recentAccessItem.type}
                       </div>
-                    )}
-                  </>
-                }
-                onClick={() => {
-                  const recentNavLink = createRecentNavLink(
-                    recentAccessItem,
-                    navLinks,
-                    core.http.basePath,
-                    core.application.navigateToUrl
-                  );
-                  core.application.navigateToUrl(recentNavLink.href);
-                }}
-              />
-            ) : null;
+                      <EuiSpacer size="s" />
+                      <div>
+                        {selectedSort === recentlyViewed
+                          ? i18n.translate('homepage.recentWorkSection.viewedAt', {
+                              defaultMessage: 'Viewed',
+                            })
+                          : i18n.translate('homepage.recentWorkSection.updatedAt', {
+                              defaultMessage: 'Updated',
+                            })}
+                        :{' '}
+                        <b>
+                          {selectedSort === recentlyViewed
+                            ? moment(recentAccessItem?.viewedAt).fromNow()
+                            : moment(recentAccessItem?.updatedAt).fromNow()}
+                        </b>
+                      </div>
+                      {workspaceEnabled && (
+                        <div>
+                          {i18n.translate('homepage.recentWorkSection.workspace', {
+                            defaultMessage: 'Workspace',
+                          })}
+                          : <b>{recentAccessItem.workspaceName || 'N/A'}</b>
+                        </div>
+                      )}
+                    </>
+                  }
+                  onClick={recentNavLink.onClick}
+                />
+              );
+            }
             return (
               <EuiFlexItem key={recentAccessItem?.id || itemIndexInRow}>{content}</EuiFlexItem>
             );
