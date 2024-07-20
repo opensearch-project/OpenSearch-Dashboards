@@ -52,7 +52,9 @@ export function DataGridFlyout({
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
-            <DocViewerLinks hit={hit} indexPattern={indexPattern} columns={columns} />
+            <EuiText size="s">
+              <DocViewerLinks hit={hit} indexPattern={indexPattern} columns={columns} />
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
             <DocViewer

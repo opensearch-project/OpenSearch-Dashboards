@@ -30,7 +30,13 @@
 
 import React from 'react';
 
-import { EuiForm, EuiFormRow, EuiFieldText, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+import {
+  EuiForm,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
+  EuiSmallButtonEmpty,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -49,7 +55,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   onChangeIndexPatternId,
 }) => (
   <div>
-    <EuiButtonEmpty
+    <EuiSmallButtonEmpty
       iconType={isVisible ? 'arrowDown' : 'arrowRight'}
       onClick={toggleAdvancedOptions}
     >
@@ -64,11 +70,11 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
           defaultMessage="Show advanced settings"
         />
       )}
-    </EuiButtonEmpty>
+    </EuiSmallButtonEmpty>
     <EuiSpacer size="xs" />
     {isVisible ? (
       <EuiForm>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.createIndexPattern.stepTime.options.patternHeader"
@@ -83,7 +89,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
             />
           }
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             name="indexPatternId"
             data-test-subj="createIndexPatternIdInput"
             value={indexPatternId}
@@ -95,7 +101,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
               }
             )}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiForm>
     ) : null}
   </div>

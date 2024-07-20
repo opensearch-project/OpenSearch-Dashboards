@@ -4,9 +4,9 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
 <div>
   <EuiFlexGroup>
     <EuiFlexItem>
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -23,12 +23,12 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         <InjectIntl(GroupBySelectUi)
           onChange={[Function]}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -66,14 +66,14 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
           type="terms"
           value="OriginCityName"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup>
     <EuiFlexItem>
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -87,15 +87,15 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         }
         labelType="label"
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           onChange={[Function]}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -109,17 +109,17 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         }
         labelType="label"
       >
-        <EuiFieldText
+        <EuiCompressedFieldText
           onChange={[Function]}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
   <EuiFlexGroup>
     <EuiFlexItem>
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -133,16 +133,16 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         }
         labelType="label"
       >
-        <EuiFieldNumber
+        <EuiCompressedFieldNumber
           onChange={[Function]}
           value={10}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -174,12 +174,12 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
           restrict="basic"
           value="_count"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={false}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -193,9 +193,9 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
         }
         labelType="label"
       >
-        <EuiComboBox
+        <EuiCompressedComboBox
           async={false}
-          compressed={false}
+          compressed={true}
           fullWidth={false}
           isClearable={false}
           onChange={[Function]}
@@ -226,7 +226,7 @@ exports[`src/legacy/core_plugins/metrics/public/components/splits/terms.test.js 
           }
           sortMatchesBy="none"
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiFlexItem>
   </EuiFlexGroup>
 </div>

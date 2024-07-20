@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Datasource Management: Create Datasource form with different authType configurations should render normally with all authMethod combinations 1`] = `
-<EuiSuperSelect
-  compressed={false}
+<EuiCompressedSuperSelect
+  compressed={true}
   data-test-subj="createDataSourceFormAuthTypeSelect"
   disabled={true}
   fullWidth={false}
@@ -34,7 +34,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
     input={
       <EuiSuperSelectControl
         className=""
-        compressed={false}
+        compressed={true}
         data-test-subj="createDataSourceFormAuthTypeSelect"
         disabled={true}
         fullWidth={false}
@@ -100,7 +100,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
               <div>
                 <EuiSuperSelectControl
                   className=""
-                  compressed={false}
+                  compressed={true}
                   data-test-subj="createDataSourceFormAuthTypeSelect"
                   disabled={true}
                   fullWidth={false}
@@ -129,7 +129,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     value="sigv4"
                   />
                   <EuiFormControlLayout
-                    compressed={false}
+                    compressed={true}
                     fullWidth={false}
                     icon={
                       Object {
@@ -140,7 +140,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     isLoading={false}
                   >
                     <div
-                      className="euiFormControlLayout"
+                      className="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         className="euiFormControlLayout__childrenWrapper"
@@ -166,7 +166,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                         <button
                           aria-haspopup="true"
                           aria-labelledby="generated-id generated-id"
-                          className="euiSuperSelectControl"
+                          className="euiSuperSelectControl euiSuperSelectControl--compressed"
                           data-test-subj="createDataSourceFormAuthTypeSelect"
                           disabled={true}
                           onBlur={[Function]}
@@ -178,7 +178,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                           AWS SigV4
                         </button>
                         <EuiFormControlLayoutIcons
-                          compressed={false}
+                          compressed={true}
                           icon={
                             Object {
                               "side": "right",
@@ -191,7 +191,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                             className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                           >
                             <EuiFormControlLayoutCustomIcon
-                              size="m"
+                              size="s"
                               type="arrowDown"
                             >
                               <span
@@ -200,14 +200,14 @@ exports[`Datasource Management: Create Datasource form with different authType c
                                 <EuiIcon
                                   aria-hidden="true"
                                   className="euiFormControlLayoutCustomIcon__icon"
-                                  size="m"
+                                  size="s"
                                   type="arrowDown"
                                 >
                                   <span
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
                                     data-euiicon-type="arrowDown"
-                                    size="m"
+                                    size="s"
                                   />
                                 </EuiIcon>
                               </span>
@@ -225,12 +225,12 @@ exports[`Datasource Management: Create Datasource form with different authType c
       </EuiOutsideClickDetector>
     </EuiPopover>
   </EuiInputPopover>
-</EuiSuperSelect>
+</EuiCompressedSuperSelect>
 `;
 
 exports[`Datasource Management: Create Datasource form with different authType configurations should render normally with all authMethod combinations 2`] = `
-<EuiSuperSelect
-  compressed={false}
+<EuiCompressedSuperSelect
+  compressed={true}
   data-test-subj="createDataSourceFormAuthTypeSelect"
   disabled={true}
   fullWidth={false}
@@ -262,7 +262,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
     input={
       <EuiSuperSelectControl
         className=""
-        compressed={false}
+        compressed={true}
         data-test-subj="createDataSourceFormAuthTypeSelect"
         disabled={true}
         fullWidth={false}
@@ -328,7 +328,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
               <div>
                 <EuiSuperSelectControl
                   className=""
-                  compressed={false}
+                  compressed={true}
                   data-test-subj="createDataSourceFormAuthTypeSelect"
                   disabled={true}
                   fullWidth={false}
@@ -357,7 +357,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     value="no_auth"
                   />
                   <EuiFormControlLayout
-                    compressed={false}
+                    compressed={true}
                     fullWidth={false}
                     icon={
                       Object {
@@ -368,7 +368,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     isLoading={false}
                   >
                     <div
-                      className="euiFormControlLayout"
+                      className="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         className="euiFormControlLayout__childrenWrapper"
@@ -394,7 +394,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                         <button
                           aria-haspopup="true"
                           aria-labelledby="generated-id generated-id"
-                          className="euiSuperSelectControl"
+                          className="euiSuperSelectControl euiSuperSelectControl--compressed"
                           data-test-subj="createDataSourceFormAuthTypeSelect"
                           disabled={true}
                           onBlur={[Function]}
@@ -406,7 +406,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                           No authentication
                         </button>
                         <EuiFormControlLayoutIcons
-                          compressed={false}
+                          compressed={true}
                           icon={
                             Object {
                               "side": "right",
@@ -419,7 +419,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                             className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                           >
                             <EuiFormControlLayoutCustomIcon
-                              size="m"
+                              size="s"
                               type="arrowDown"
                             >
                               <span
@@ -428,14 +428,14 @@ exports[`Datasource Management: Create Datasource form with different authType c
                                 <EuiIcon
                                   aria-hidden="true"
                                   className="euiFormControlLayoutCustomIcon__icon"
-                                  size="m"
+                                  size="s"
                                   type="arrowDown"
                                 >
                                   <span
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
                                     data-euiicon-type="arrowDown"
-                                    size="m"
+                                    size="s"
                                   />
                                 </EuiIcon>
                               </span>
@@ -453,12 +453,12 @@ exports[`Datasource Management: Create Datasource form with different authType c
       </EuiOutsideClickDetector>
     </EuiPopover>
   </EuiInputPopover>
-</EuiSuperSelect>
+</EuiCompressedSuperSelect>
 `;
 
 exports[`Datasource Management: Create Datasource form with different authType configurations should render normally with all authMethod combinations 3`] = `
-<EuiSuperSelect
-  compressed={false}
+<EuiCompressedSuperSelect
+  compressed={true}
   data-test-subj="createDataSourceFormAuthTypeSelect"
   disabled={true}
   fullWidth={false}
@@ -490,7 +490,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
     input={
       <EuiSuperSelectControl
         className=""
-        compressed={false}
+        compressed={true}
         data-test-subj="createDataSourceFormAuthTypeSelect"
         disabled={true}
         fullWidth={false}
@@ -556,7 +556,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
               <div>
                 <EuiSuperSelectControl
                   className=""
-                  compressed={false}
+                  compressed={true}
                   data-test-subj="createDataSourceFormAuthTypeSelect"
                   disabled={true}
                   fullWidth={false}
@@ -585,7 +585,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     value="username_password"
                   />
                   <EuiFormControlLayout
-                    compressed={false}
+                    compressed={true}
                     fullWidth={false}
                     icon={
                       Object {
@@ -596,7 +596,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     isLoading={false}
                   >
                     <div
-                      className="euiFormControlLayout"
+                      className="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         className="euiFormControlLayout__childrenWrapper"
@@ -622,7 +622,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                         <button
                           aria-haspopup="true"
                           aria-labelledby="generated-id generated-id"
-                          className="euiSuperSelectControl"
+                          className="euiSuperSelectControl euiSuperSelectControl--compressed"
                           data-test-subj="createDataSourceFormAuthTypeSelect"
                           disabled={true}
                           onBlur={[Function]}
@@ -634,7 +634,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                           Username & Password
                         </button>
                         <EuiFormControlLayoutIcons
-                          compressed={false}
+                          compressed={true}
                           icon={
                             Object {
                               "side": "right",
@@ -647,7 +647,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                             className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                           >
                             <EuiFormControlLayoutCustomIcon
-                              size="m"
+                              size="s"
                               type="arrowDown"
                             >
                               <span
@@ -656,14 +656,14 @@ exports[`Datasource Management: Create Datasource form with different authType c
                                 <EuiIcon
                                   aria-hidden="true"
                                   className="euiFormControlLayoutCustomIcon__icon"
-                                  size="m"
+                                  size="s"
                                   type="arrowDown"
                                 >
                                   <span
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
                                     data-euiicon-type="arrowDown"
-                                    size="m"
+                                    size="s"
                                   />
                                 </EuiIcon>
                               </span>
@@ -681,12 +681,12 @@ exports[`Datasource Management: Create Datasource form with different authType c
       </EuiOutsideClickDetector>
     </EuiPopover>
   </EuiInputPopover>
-</EuiSuperSelect>
+</EuiCompressedSuperSelect>
 `;
 
 exports[`Datasource Management: Create Datasource form with different authType configurations should render normally with all authMethod combinations 4`] = `
-<EuiSuperSelect
-  compressed={false}
+<EuiCompressedSuperSelect
+  compressed={true}
   data-test-subj="createDataSourceFormAuthTypeSelect"
   disabled={false}
   fullWidth={false}
@@ -722,7 +722,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
     input={
       <EuiSuperSelectControl
         className=""
-        compressed={false}
+        compressed={true}
         data-test-subj="createDataSourceFormAuthTypeSelect"
         disabled={false}
         fullWidth={false}
@@ -792,7 +792,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
               <div>
                 <EuiSuperSelectControl
                   className=""
-                  compressed={false}
+                  compressed={true}
                   data-test-subj="createDataSourceFormAuthTypeSelect"
                   disabled={false}
                   fullWidth={false}
@@ -825,7 +825,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     value="no_auth"
                   />
                   <EuiFormControlLayout
-                    compressed={false}
+                    compressed={true}
                     fullWidth={false}
                     icon={
                       Object {
@@ -836,7 +836,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     isLoading={false}
                   >
                     <div
-                      className="euiFormControlLayout"
+                      className="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         className="euiFormControlLayout__childrenWrapper"
@@ -862,7 +862,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                         <button
                           aria-haspopup="true"
                           aria-labelledby="generated-id generated-id"
-                          className="euiSuperSelectControl"
+                          className="euiSuperSelectControl euiSuperSelectControl--compressed"
                           data-test-subj="createDataSourceFormAuthTypeSelect"
                           disabled={false}
                           onBlur={[Function]}
@@ -874,7 +874,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                           No authentication
                         </button>
                         <EuiFormControlLayoutIcons
-                          compressed={false}
+                          compressed={true}
                           icon={
                             Object {
                               "side": "right",
@@ -887,7 +887,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                             className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                           >
                             <EuiFormControlLayoutCustomIcon
-                              size="m"
+                              size="s"
                               type="arrowDown"
                             >
                               <span
@@ -896,14 +896,14 @@ exports[`Datasource Management: Create Datasource form with different authType c
                                 <EuiIcon
                                   aria-hidden="true"
                                   className="euiFormControlLayoutCustomIcon__icon"
-                                  size="m"
+                                  size="s"
                                   type="arrowDown"
                                 >
                                   <span
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
                                     data-euiicon-type="arrowDown"
-                                    size="m"
+                                    size="s"
                                   />
                                 </EuiIcon>
                               </span>
@@ -921,12 +921,12 @@ exports[`Datasource Management: Create Datasource form with different authType c
       </EuiOutsideClickDetector>
     </EuiPopover>
   </EuiInputPopover>
-</EuiSuperSelect>
+</EuiCompressedSuperSelect>
 `;
 
 exports[`Datasource Management: Create Datasource form with different authType configurations should render normally with all authMethod combinations 5`] = `
-<EuiSuperSelect
-  compressed={false}
+<EuiCompressedSuperSelect
+  compressed={true}
   data-test-subj="createDataSourceFormAuthTypeSelect"
   disabled={false}
   fullWidth={false}
@@ -962,7 +962,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
     input={
       <EuiSuperSelectControl
         className=""
-        compressed={false}
+        compressed={true}
         data-test-subj="createDataSourceFormAuthTypeSelect"
         disabled={false}
         fullWidth={false}
@@ -1032,7 +1032,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
               <div>
                 <EuiSuperSelectControl
                   className=""
-                  compressed={false}
+                  compressed={true}
                   data-test-subj="createDataSourceFormAuthTypeSelect"
                   disabled={false}
                   fullWidth={false}
@@ -1065,7 +1065,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     value="username_password"
                   />
                   <EuiFormControlLayout
-                    compressed={false}
+                    compressed={true}
                     fullWidth={false}
                     icon={
                       Object {
@@ -1076,7 +1076,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     isLoading={false}
                   >
                     <div
-                      className="euiFormControlLayout"
+                      className="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         className="euiFormControlLayout__childrenWrapper"
@@ -1102,7 +1102,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                         <button
                           aria-haspopup="true"
                           aria-labelledby="generated-id generated-id"
-                          className="euiSuperSelectControl"
+                          className="euiSuperSelectControl euiSuperSelectControl--compressed"
                           data-test-subj="createDataSourceFormAuthTypeSelect"
                           disabled={false}
                           onBlur={[Function]}
@@ -1114,7 +1114,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                           Username & Password
                         </button>
                         <EuiFormControlLayoutIcons
-                          compressed={false}
+                          compressed={true}
                           icon={
                             Object {
                               "side": "right",
@@ -1127,7 +1127,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                             className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                           >
                             <EuiFormControlLayoutCustomIcon
-                              size="m"
+                              size="s"
                               type="arrowDown"
                             >
                               <span
@@ -1136,14 +1136,14 @@ exports[`Datasource Management: Create Datasource form with different authType c
                                 <EuiIcon
                                   aria-hidden="true"
                                   className="euiFormControlLayoutCustomIcon__icon"
-                                  size="m"
+                                  size="s"
                                   type="arrowDown"
                                 >
                                   <span
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
                                     data-euiicon-type="arrowDown"
-                                    size="m"
+                                    size="s"
                                   />
                                 </EuiIcon>
                               </span>
@@ -1161,12 +1161,12 @@ exports[`Datasource Management: Create Datasource form with different authType c
       </EuiOutsideClickDetector>
     </EuiPopover>
   </EuiInputPopover>
-</EuiSuperSelect>
+</EuiCompressedSuperSelect>
 `;
 
 exports[`Datasource Management: Create Datasource form with different authType configurations should render normally with all authMethod combinations 6`] = `
-<EuiSuperSelect
-  compressed={false}
+<EuiCompressedSuperSelect
+  compressed={true}
   data-test-subj="createDataSourceFormAuthTypeSelect"
   disabled={false}
   fullWidth={false}
@@ -1202,7 +1202,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
     input={
       <EuiSuperSelectControl
         className=""
-        compressed={false}
+        compressed={true}
         data-test-subj="createDataSourceFormAuthTypeSelect"
         disabled={false}
         fullWidth={false}
@@ -1272,7 +1272,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
               <div>
                 <EuiSuperSelectControl
                   className=""
-                  compressed={false}
+                  compressed={true}
                   data-test-subj="createDataSourceFormAuthTypeSelect"
                   disabled={false}
                   fullWidth={false}
@@ -1305,7 +1305,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     value="username_password"
                   />
                   <EuiFormControlLayout
-                    compressed={false}
+                    compressed={true}
                     fullWidth={false}
                     icon={
                       Object {
@@ -1316,7 +1316,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     isLoading={false}
                   >
                     <div
-                      className="euiFormControlLayout"
+                      className="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         className="euiFormControlLayout__childrenWrapper"
@@ -1342,7 +1342,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                         <button
                           aria-haspopup="true"
                           aria-labelledby="generated-id generated-id"
-                          className="euiSuperSelectControl"
+                          className="euiSuperSelectControl euiSuperSelectControl--compressed"
                           data-test-subj="createDataSourceFormAuthTypeSelect"
                           disabled={false}
                           onBlur={[Function]}
@@ -1354,7 +1354,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                           Username & Password
                         </button>
                         <EuiFormControlLayoutIcons
-                          compressed={false}
+                          compressed={true}
                           icon={
                             Object {
                               "side": "right",
@@ -1367,7 +1367,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                             className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                           >
                             <EuiFormControlLayoutCustomIcon
-                              size="m"
+                              size="s"
                               type="arrowDown"
                             >
                               <span
@@ -1376,14 +1376,14 @@ exports[`Datasource Management: Create Datasource form with different authType c
                                 <EuiIcon
                                   aria-hidden="true"
                                   className="euiFormControlLayoutCustomIcon__icon"
-                                  size="m"
+                                  size="s"
                                   type="arrowDown"
                                 >
                                   <span
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
                                     data-euiicon-type="arrowDown"
-                                    size="m"
+                                    size="s"
                                   />
                                 </EuiIcon>
                               </span>
@@ -1401,12 +1401,12 @@ exports[`Datasource Management: Create Datasource form with different authType c
       </EuiOutsideClickDetector>
     </EuiPopover>
   </EuiInputPopover>
-</EuiSuperSelect>
+</EuiCompressedSuperSelect>
 `;
 
 exports[`Datasource Management: Create Datasource form with different authType configurations should render normally with all authMethod combinations 7`] = `
-<EuiSuperSelect
-  compressed={false}
+<EuiCompressedSuperSelect
+  compressed={true}
   data-test-subj="createDataSourceFormAuthTypeSelect"
   disabled={false}
   fullWidth={false}
@@ -1446,7 +1446,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
     input={
       <EuiSuperSelectControl
         className=""
-        compressed={false}
+        compressed={true}
         data-test-subj="createDataSourceFormAuthTypeSelect"
         disabled={false}
         fullWidth={false}
@@ -1520,7 +1520,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
               <div>
                 <EuiSuperSelectControl
                   className=""
-                  compressed={false}
+                  compressed={true}
                   data-test-subj="createDataSourceFormAuthTypeSelect"
                   disabled={false}
                   fullWidth={false}
@@ -1557,7 +1557,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     value="username_password"
                   />
                   <EuiFormControlLayout
-                    compressed={false}
+                    compressed={true}
                     fullWidth={false}
                     icon={
                       Object {
@@ -1568,7 +1568,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                     isLoading={false}
                   >
                     <div
-                      className="euiFormControlLayout"
+                      className="euiFormControlLayout euiFormControlLayout--compressed"
                     >
                       <div
                         className="euiFormControlLayout__childrenWrapper"
@@ -1594,7 +1594,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                         <button
                           aria-haspopup="true"
                           aria-labelledby="generated-id generated-id"
-                          className="euiSuperSelectControl"
+                          className="euiSuperSelectControl euiSuperSelectControl--compressed"
                           data-test-subj="createDataSourceFormAuthTypeSelect"
                           disabled={false}
                           onBlur={[Function]}
@@ -1606,7 +1606,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                           Username & Password
                         </button>
                         <EuiFormControlLayoutIcons
-                          compressed={false}
+                          compressed={true}
                           icon={
                             Object {
                               "side": "right",
@@ -1619,7 +1619,7 @@ exports[`Datasource Management: Create Datasource form with different authType c
                             className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
                           >
                             <EuiFormControlLayoutCustomIcon
-                              size="m"
+                              size="s"
                               type="arrowDown"
                             >
                               <span
@@ -1628,14 +1628,14 @@ exports[`Datasource Management: Create Datasource form with different authType c
                                 <EuiIcon
                                   aria-hidden="true"
                                   className="euiFormControlLayoutCustomIcon__icon"
-                                  size="m"
+                                  size="s"
                                   type="arrowDown"
                                 >
                                   <span
                                     aria-hidden="true"
                                     className="euiFormControlLayoutCustomIcon__icon"
                                     data-euiicon-type="arrowDown"
-                                    size="m"
+                                    size="s"
                                   />
                                 </EuiIcon>
                               </span>
@@ -1653,5 +1653,5 @@ exports[`Datasource Management: Create Datasource form with different authType c
       </EuiOutsideClickDetector>
     </EuiPopover>
   </EuiInputPopover>
-</EuiSuperSelect>
+</EuiCompressedSuperSelect>
 `;

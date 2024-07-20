@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { EuiText, EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiSmallButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { StringFieldProgressBar } from './string_progress_bar';
 import { Bucket } from './types';
@@ -91,7 +91,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
         {field.filterable && (
           <EuiFlexItem grow={false}>
             <div>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 iconSize="s"
                 iconType="plusInCircle"
                 onClick={() => onAddFilter(field, bucket.value, '+')}
@@ -107,7 +107,7 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
                 }}
                 className={'euiButtonIcon--auto'}
               />
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 iconSize="s"
                 iconType="minusInCircle"
                 onClick={() => onAddFilter(field, bucket.value, '-')}

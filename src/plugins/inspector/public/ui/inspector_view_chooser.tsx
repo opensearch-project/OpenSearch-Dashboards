@@ -36,6 +36,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiPopover,
+  EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { InspectorViewDescription } from '../types';
@@ -111,11 +112,13 @@ export class InspectorViewChooser extends Component<Props, State> {
   renderSingleView() {
     return (
       <EuiToolTip position="bottom" content={this.props.selectedView.help}>
-        <FormattedMessage
-          id="inspector.view"
-          defaultMessage="View: {viewName}"
-          values={{ viewName: this.props.selectedView.title }}
-        />
+        <EuiText size="s">
+          <FormattedMessage
+            id="inspector.view"
+            defaultMessage="View: {viewName}"
+            values={{ viewName: this.props.selectedView.title }}
+          />
+        </EuiText>
       </EuiToolTip>
     );
   }

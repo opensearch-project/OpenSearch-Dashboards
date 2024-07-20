@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import './workspace_menu.scss';
 import { i18n } from '@osd/i18n';
 import React, { useMemo, useState } from 'react';
 import { useObservable } from 'react-use';
@@ -14,6 +13,7 @@ import {
   EuiAvatar,
   EuiButton,
   EuiPopover,
+  EuiToolTip,
   EuiFlexItem,
   EuiFlexGroup,
   EuiListGroup,
@@ -21,7 +21,6 @@ import {
   EuiButtonEmpty,
   EuiListGroupItem,
 } from '@elastic/eui';
-import { FormattedMessage } from '@osd/i18n/react';
 import { BehaviorSubject } from 'rxjs';
 import {
   WORKSPACE_CREATE_APP_ID,
@@ -147,7 +146,17 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
               initialsLength={2}
             />
           }
-          label={<EuiText className="text-ellipsis">{workspace.name}</EuiText>}
+          label={
+            <EuiToolTip
+              anchorClassName="eui-textTruncate"
+              position="bottom"
+              content={workspace.name}
+            >
+              <EuiText style={{ maxWidth: '220px' }} className="eui-textTruncate">
+                {workspace.name}
+              </EuiText>
+            </EuiToolTip>
+          }
           onClick={() => {
             window.location.assign(useCaseURL);
           }}
@@ -195,7 +204,15 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-workspace-name">
-                <EuiText className="text-ellipsis">{currentWorkspaceName}</EuiText>
+                <EuiToolTip
+                  anchorClassName="eui-textTruncate"
+                  position="bottom"
+                  content={currentWorkspaceName}
+                >
+                  <EuiText style={{ maxWidth: '220px' }} className="eui-textTruncate">
+                    {currentWorkspaceName}
+                  </EuiText>
+                </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-use-case">
                 {getUseCase(currentWorkspace)?.title ?? ''}

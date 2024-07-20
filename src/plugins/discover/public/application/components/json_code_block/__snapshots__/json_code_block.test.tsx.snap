@@ -3,6 +3,7 @@
 exports[`returns the \`JsonCodeEditor\` component 1`] = `
 <EuiCodeBlock
   aria-label="Read only JSON view of an opensearch document"
+  fontSize="s"
   isCopyable={true}
   language="json"
   paddingSize="s"
