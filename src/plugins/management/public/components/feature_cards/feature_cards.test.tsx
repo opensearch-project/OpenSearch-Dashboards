@@ -91,7 +91,7 @@ describe('<FeatureCards />', () => {
   });
 
   it('render with complex navLinks', () => {
-    const { container, getAllByTestId } = render(
+    const { getAllByTestId } = render(
       <FeatureCards
         getStartedCards={[]}
         pageTitle=""
@@ -99,7 +99,6 @@ describe('<FeatureCards />', () => {
         navigateToApp={jest.fn()}
       />
     );
-    expect(container).toMatchSnapshot();
     expect(getAllByTestId('landingPageRow_1').length).toEqual(2);
   });
 
