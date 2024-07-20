@@ -15,12 +15,30 @@
   // overflow: auto;
 }
 
-.osdQueryEditor__languageWrapper {
-  :first-child {
-    box-shadow: none !important;
-    height: 100%;
-    border-radius: 0;
+.osdQueryEditorFooter-isHidden {
+  display: none;
+}
+
+.osdQueryEditorFooter {
+  color: $euiTextSubduedColor; // Apply the subdued color to all text in this class
+  height: 25px;
+
+  * {
+    color: inherit;
+    font-size: $euiFontSizeXS;
+    align-items: center;
   }
+}
+
+.osdQueryEditor__collapseWrapper {
+  box-shadow: $euiTextSubduedColor;
+}
+
+.osdQueryEditor__languageWrapper {
+  align-items: center;
+  justify-content: center;
+  max-height: 40px;
+  border: $euiBorderThin;
 }
 
 .osdQueryEditor__dataSourceWrapper {
@@ -42,6 +60,7 @@
 .osdQueryEditor__dataSetWrapper {
   .dataExplorerDSSelect {
     border-bottom: $euiBorderThin !important;
+    max-width: 375px;
 
     div:is([class$="--group"]) {
       padding: 0 !important;
@@ -50,6 +69,20 @@
     .sourceRefreshText {
       max-height: 40px;
     }
+  }
+}
+
+.osdQueryEditor__prependWrapper {
+  box-shadow: $euiTextSubduedColor;
+}
+
+.osdQueryEditor__prependWrapper-isCollapsed {
+  box-shadow: none;
+}
+
+.osdQueryEditor--updateButtonWrapper {
+  :first-child {
+    min-width: 0 !important;
   }
 }
 
