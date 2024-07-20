@@ -73,6 +73,7 @@ import {
   RightNavigationButtonProps,
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,
+  PersistedLog,
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
 } from './chrome';
@@ -375,6 +376,7 @@ export {
   RightNavigationButtonProps,
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,
+  PersistedLog,
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
 };

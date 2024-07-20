@@ -149,15 +149,6 @@ describe('Workspace plugin', () => {
     windowSpy.mockRestore();
   });
 
-  it('#setup register workspace dropdown menu when setup', async () => {
-    const setupMock = coreMock.createSetup();
-    const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock, {
-      management: managementPluginMock.createSetupContract(),
-    });
-    expect(setupMock.chrome.registerCollapsibleNavHeader).toBeCalledTimes(1);
-  });
-
   it('#setup should register workspace list with a visible application and register to settingsAndSetup nav group', async () => {
     const setupMock = coreMock.createSetup();
     setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
@@ -241,6 +232,14 @@ describe('Workspace plugin', () => {
     });
   });
 
+  it('#start register workspace dropdown menu at left navigation bottom when start', async () => {
+    const coreStart = coreMock.createStart();
+    coreStart.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    const workspacePlugin = new WorkspacePlugin();
+    workspacePlugin.start(coreStart);
+
+    expect(coreStart.chrome.navControls.registerLeftBottom).toBeCalledTimes(1);
+  });
   it('#start should not update systematic use case features after currentWorkspace set', async () => {
     const registeredUseCases$ = new BehaviorSubject([
       {

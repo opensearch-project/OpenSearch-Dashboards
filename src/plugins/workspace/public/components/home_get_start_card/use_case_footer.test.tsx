@@ -5,50 +5,65 @@
 
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { UseCaseFooter as UseCaseFooterComponent } from './use_case_footer';
-import { httpServiceMock } from '../../../../../core/public/mocks';
+import { UseCaseFooter as UseCaseFooterComponent, UseCaseFooterProps } from './use_case_footer';
+import { coreMock, httpServiceMock } from '../../../../../core/public/mocks';
 import { IntlProvider } from 'react-intl';
-
-const mockBasePath = httpServiceMock.createSetupContract().basePath;
-const getUrl = (appId: string) => `https://test.com/app/${appId}`;
-
-const createWorkspace = (id: string, name: string, useCaseId: string) => ({
-  id,
-  name,
-  description: '',
-  features: [useCaseId],
-  reserved: false,
-  permissions: {
-    library_write: { users: [] },
-    write: { users: [] },
-  },
-});
-
-const UseCaseFooter = (props: any) => {
-  return (
-    <IntlProvider locale="en">
-      <UseCaseFooterComponent {...props} />
-    </IntlProvider>
-  );
-};
+import { WorkspaceUseCase } from '../../types';
+import { CoreStart } from 'opensearch-dashboards/public';
+import { BehaviorSubject } from 'rxjs';
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
 
 describe('UseCaseFooter', () => {
+  // let coreStartMock: CoreStart;
+  const navigateToApp = jest.fn();
+  const registeredUseCases$ = new BehaviorSubject([
+    WORKSPACE_USE_CASES.observability,
+    WORKSPACE_USE_CASES['security-analytics'],
+    WORKSPACE_USE_CASES.analytics,
+    WORKSPACE_USE_CASES.search,
+  ]);
+
+  const getMockCore = (isDashboardAdmin: boolean = true) => {
+    const coreStartMock = coreMock.createStart();
+    coreStartMock.application.capabilities = {
+      ...coreStartMock.application.capabilities,
+      dashboards: { isDashboardAdmin },
+    };
+    coreStartMock.application = {
+      ...coreStartMock.application,
+      navigateToApp,
+    };
+    jest.spyOn(coreStartMock.application, 'getUrlForApp').mockImplementation((appId: string) => {
+      return `https://test.com/app/${appId}`;
+    });
+    return coreStartMock;
+  };
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
+  const UseCaseFooter = (props: UseCaseFooterProps) => {
+    return (
+      <IntlProvider locale="en">
+        <UseCaseFooterComponent {...props} />
+      </IntlProvider>
+    );
+  };
   it('renders create workspace button for admin when no workspaces within use case exist', () => {
     const { getByTestId } = render(
       <UseCaseFooter
         useCaseId="analytics"
         useCaseTitle="Analytics"
-        workspaceList={[]}
-        basePath={mockBasePath}
-        isDashBoardAdmin={true}
-        getUrl={getUrl}
+        core={getMockCore()}
+        registeredUseCases$={registeredUseCases$}
       />
     );
 
     const button = getByTestId('useCase.footer.createWorkspace.button');
     expect(button).toBeInTheDocument();
     fireEvent.click(button);
-    expect(screen.getByText('No workspaces found')).toBeInTheDocument();
     const createWorkspaceButtonInModal = getByTestId('useCase.footer.modal.create.button');
     expect(createWorkspaceButtonInModal).toHaveAttribute(
       'href',
@@ -61,10 +76,8 @@ describe('UseCaseFooter', () => {
       <UseCaseFooter
         useCaseId="analytics"
         useCaseTitle="Analytics"
-        workspaceList={[]}
-        basePath={mockBasePath}
-        isDashBoardAdmin={false}
-        getUrl={getUrl}
+        core={getMockCore(false)}
+        registeredUseCases$={registeredUseCases$}
       />
     );
 
@@ -73,45 +86,49 @@ describe('UseCaseFooter', () => {
     fireEvent.click(button);
     expect(screen.getByText('Unable to create workspace')).toBeInTheDocument();
     expect(screen.queryByTestId('useCase.footer.modal.create.button')).not.toBeInTheDocument();
+    fireEvent.click(getByTestId('useCase.footer.modal.close.button'));
   });
 
   it('renders open workspace button when one workspace exists', () => {
+    const core = getMockCore();
+    core.workspaces.workspaceList$.next([
+      { id: 'workspace-1', name: 'workspace 1', features: ['use-case-observability'] },
+    ]);
     const { getByTestId } = render(
       <UseCaseFooter
         useCaseId="observability"
         useCaseTitle="Observability"
-        workspaceList={[createWorkspace('1', 'Workspace 1', 'use-case-observability')]}
-        basePath={mockBasePath}
-        isDashBoardAdmin={false}
-        getUrl={getUrl}
+        core={core}
+        registeredUseCases$={registeredUseCases$}
       />
     );
 
     const button = getByTestId('useCase.footer.openWorkspace.button');
     expect(button).toBeInTheDocument();
     expect(button).not.toBeDisabled();
-    expect(button).toHaveAttribute('href', 'https://test.com/w/1/app/workspace_overview');
+    expect(button).toHaveAttribute('href', 'https://test.com/w/workspace-1/app/discover');
   });
 
   it('renders select workspace popover when multiple workspaces exist', () => {
+    const core = getMockCore();
+    core.workspaces.workspaceList$.next([
+      { id: 'workspace-1', name: 'workspace 1', features: ['use-case-observability'] },
+      { id: 'workspace-2', name: 'workspace 2', features: ['use-case-observability'] },
+    ]);
+
     const originalLocation = window.location;
     Object.defineProperty(window, 'location', {
       value: {
         assign: jest.fn(),
       },
     });
-    const workspaces = [
-      createWorkspace('1', 'Workspace 1', 'use-case-observability'),
-      createWorkspace('2', 'Workspace 2', 'use-case-observability'),
-    ];
+
     render(
       <UseCaseFooter
         useCaseId="observability"
         useCaseTitle="Observability"
-        workspaceList={workspaces}
-        basePath={mockBasePath}
-        isDashBoardAdmin={false}
-        getUrl={getUrl}
+        core={core}
+        registeredUseCases$={registeredUseCases$}
       />
     );
 
@@ -119,13 +136,18 @@ describe('UseCaseFooter', () => {
     expect(button).toBeInTheDocument();
 
     fireEvent.click(button);
-    expect(screen.getByText('Workspace 1')).toBeInTheDocument();
-    expect(screen.getByText('Workspace 2')).toBeInTheDocument();
+    expect(screen.getByText('workspace 1')).toBeInTheDocument();
+    expect(screen.getByText('workspace 2')).toBeInTheDocument();
     expect(screen.getByText('Observability Workspaces')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Workspace 1'));
+    const inputElement = screen.getByPlaceholderText('Search');
+    expect(inputElement).toBeInTheDocument();
+    fireEvent.change(inputElement, { target: { value: 'workspace 1' } });
+    expect(screen.queryByText('workspace 2')).toBeNull();
+
+    fireEvent.click(screen.getByText('workspace 1'));
     expect(window.location.assign).toHaveBeenCalledWith(
-      'https://test.com/w/1/app/workspace_overview'
+      'https://test.com/w/workspace-1/app/discover'
     );
     Object.defineProperty(window, 'location', {
       value: originalLocation,

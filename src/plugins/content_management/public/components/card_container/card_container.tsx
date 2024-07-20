@@ -13,8 +13,8 @@ export const CARD_CONTAINER = 'CARD_CONTAINER';
 export type CardContainerInput = ContainerInput<{
   description: string;
   onClick?: () => void;
-  icon?: React.ReactElement;
-  footer?: React.ReactElement;
+  getIcon?: () => React.ReactElement;
+  getFooter?: () => React.ReactElement;
 }>;
 
 export class CardContainer extends Container<{}, CardContainerInput> {

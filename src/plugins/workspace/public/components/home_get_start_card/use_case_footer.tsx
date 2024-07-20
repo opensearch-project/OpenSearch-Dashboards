@@ -4,56 +4,50 @@
  */
 
 import {
+  EuiText,
+  EuiModal,
+  EuiTitle,
+  EuiPanel,
+  EuiAvatar,
+  EuiSpacer,
   EuiButton,
   EuiPopover,
-  EuiContextMenu,
-  EuiAvatar,
-  EuiPanel,
-  EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiFieldSearch,
-  EuiSpacer,
-  EuiModal,
   EuiModalBody,
+  EuiFlexGroup,
+  EuiFieldSearch,
   EuiModalFooter,
   EuiModalHeader,
+  EuiContextMenu,
   EuiModalHeaderTitle,
-  EuiText,
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { i18n } from '@osd/i18n';
 import { BehaviorSubject } from 'rxjs';
-import { useObservable } from 'react-use';
 import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
-import { CoreStart, IBasePath, WorkspaceObject } from '../../../../../core/public';
+import { CoreStart, WorkspaceObject } from '../../../../../core/public';
 import { WorkspaceUseCase } from '../../types';
 import { getUseCaseFromFeatureConfig } from '../../utils';
 
-interface UseCaseFooterProps {
+export interface UseCaseFooterProps {
   useCaseId: string;
   useCaseTitle: string;
-  workspaceList: WorkspaceObject[];
-  basePath: IBasePath;
-  isDashboardAdmin: boolean;
-  getUrl: Function;
-  availableUseCases: WorkspaceUseCase[];
+  core: CoreStart;
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
 export const UseCaseFooter = ({
   useCaseId,
   useCaseTitle,
-  workspaceList,
-  basePath,
-  isDashboardAdmin,
-  getUrl,
-  availableUseCases,
+  core,
+  registeredUseCases$,
 }: UseCaseFooterProps) => {
-  // const workspaceList = useObservable(core.workspaces.workspaceList$, []);
-  // const availableUseCases = useObservable(registeredUseCases$, []);
-  // const a = registeredUseCases$.getValue();
+  const workspaceList = core.workspaces.workspaceList$.getValue();
+  const availableUseCases = registeredUseCases$.getValue();
+  const basePath = core.http.basePath;
+  const isDashboardAdmin = core.application.capabilities?.dashboards?.isDashboardAdmin !== false;
   const [isPopoverOpen, setPopover] = useState(false);
   const [searchValue, setSearchValue] = useState<string>('');
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -61,11 +55,9 @@ export const UseCaseFooter = ({
   const showModal = () => setIsModalVisible(!isModalVisible);
   const onButtonClick = () => setPopover(!isPopoverOpen);
   const closePopover = () => setPopover(false);
-  // const isDashboardAdmin = !!core.application.capabilities.dashboards;
-  // const basePath = core.http.basePath;
 
   const appId =
-    availableUseCases.find((useCase) => useCase.id === useCaseId)?.features[0] ??
+    availableUseCases?.find((useCase) => useCase.id === useCaseId)?.features[0] ??
     WORKSPACE_DETAIL_APP_ID;
 
   const filterWorkspaces = useMemo(
@@ -87,7 +79,7 @@ export const UseCaseFooter = ({
 
   if (filterWorkspaces.length === 0) {
     const modalHeaderTitle = i18n.translate('useCase.footer.modal.headerTitle', {
-      defaultMessage: isDashboardAdmin ? 'No workspaces found' : 'Unable to create workspace',
+      defaultMessage: isDashboardAdmin ? ' ' : 'Unable to create workspace',
     });
     const modalBodyContent = i18n.translate('useCase.footer.modal.bodyContent', {
       defaultMessage: isDashboardAdmin
@@ -115,15 +107,12 @@ export const UseCaseFooter = ({
             </EuiModalBody>
 
             <EuiModalFooter>
-              <EuiButton
-                onClick={closeModal}
-                data-test-subj="useCase.footer.modal.close.close.button"
-              >
+              <EuiButton onClick={closeModal} data-test-subj="useCase.footer.modal.close.button">
                 <FormattedMessage id="useCase.footer.modal.close" defaultMessage="Close" />
               </EuiButton>
               {isDashboardAdmin && (
                 <EuiButton
-                  href={getUrl('workspace_create', { absolute: false })}
+                  href={core.application.getUrlForApp('workspace_create', { absolute: false })}
                   data-test-subj="useCase.footer.modal.create.button"
                   fill
                 >
@@ -142,7 +131,7 @@ export const UseCaseFooter = ({
 
   if (filterWorkspaces.length === 1) {
     const useCaseURL = formatUrlWithWorkspaceId(
-      getUrl(appId, { absolute: false }),
+      core.application.getUrlForApp(appId, { absolute: false }),
       filterWorkspaces[0].id,
       basePath
     );
@@ -155,14 +144,19 @@ export const UseCaseFooter = ({
 
   const workspaceToItem = (workspace: WorkspaceObject) => {
     const useCaseURL = formatUrlWithWorkspaceId(
-      getUrl(appId, { absolute: false }),
+      core.application.getUrlForApp(appId, { absolute: false }),
       workspace.id,
       basePath
     );
     const workspaceName = workspace.name;
 
     return {
-      name: workspaceName,
+      toolTipContent: <div>{workspaceName}</div>,
+      name: (
+        <EuiText style={{ maxWidth: '200px' }} className="eui-textTruncate">
+          {workspaceName}
+        </EuiText>
+      ),
       key: workspace.id,
       icon: (
         <EuiAvatar
@@ -219,7 +213,7 @@ export const UseCaseFooter = ({
           fullWidth
         />
       </EuiPanel>
-      <EuiContextMenu initialPanelId={0} panels={panels} />
+      <EuiContextMenu size="s" initialPanelId={0} panels={panels} />
     </EuiPopover>
   );
 };

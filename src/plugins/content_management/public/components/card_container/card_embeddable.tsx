@@ -13,8 +13,8 @@ export const CARD_EMBEDDABLE = 'card_embeddable';
 export type CardEmbeddableInput = EmbeddableInput & {
   description: string;
   onClick?: () => void;
-  icon?: React.ReactElement;
-  footer?: React.ReactElement;
+  getIcon: () => React.ReactElement;
+  getFooter: () => React.ReactElement;
 };
 
 export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
@@ -37,8 +37,8 @@ export class CardEmbeddable extends Embeddable<CardEmbeddableInput> {
         description={this.input.description}
         display="plain"
         onClick={this.input.onClick}
-        icon={this.input.icon}
-        footer={this.input.footer}
+        icon={this.input?.getIcon()}
+        footer={this.input?.getFooter()}
       />,
       node
     );

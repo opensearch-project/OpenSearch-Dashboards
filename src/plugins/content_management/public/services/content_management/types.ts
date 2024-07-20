@@ -59,8 +59,8 @@ export type Content =
       title: string;
       description: string;
       onClick?: () => void;
-      icon?: React.ReactElement;
-      footer?: React.ReactElement;
+      getIcon?: () => React.ReactElement;
+      getFooter?: () => React.ReactElement;
     };
 
 export type SavedObjectInput =

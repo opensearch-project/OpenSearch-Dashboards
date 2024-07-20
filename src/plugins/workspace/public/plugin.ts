@@ -45,6 +45,8 @@ import {
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
+import { recentWorkspaceManager } from './recent_workspace_manager';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { UseCaseService } from './services/use_case_service';
 import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
 import { UseCaseFooter } from './components/home_get_start_card';
@@ -271,6 +273,8 @@ export class WorkspacePlugin
             }
             currentAppIdSubscription.unsubscribe();
           });
+          // Add workspace id to recent workspaces.
+          recentWorkspaceManager.addRecentWorkspace(workspaceId);
         })();
       }
     }
@@ -326,16 +330,6 @@ export class WorkspacePlugin
         const { renderDetailApp } = await import('./application');
         return mountWorkspaceApp(params, renderDetailApp);
       },
-    });
-
-    /**
-     * Register workspace dropdown selector on the top of left navigation menu
-     */
-    core.chrome.registerCollapsibleNavHeader(() => {
-      if (!this.coreStart) {
-        return null;
-      }
-      return React.createElement(WorkspaceMenu, { coreStart: this.coreStart });
     });
 
     // workspace list
@@ -410,16 +404,14 @@ export class WorkspacePlugin
           order: (index + 1) * 1000,
           description: useCase.description,
           title: useCase.title,
-          icon: React.createElement(EuiIcon, { size: 'xl', type: 'logoOpenSearch' }),
-          footer: React.createElement(UseCaseFooter, {
-            useCaseId: useCase.id,
-            useCaseTitle: useCase.title,
-            workspaceList: core.workspaces.workspaceList$.getValue(),
-            basePath: core.http.basePath,
-            isDashboardAdmin: core.application.capabilities?.dashboards?.isDashboardAdmin !== false,
-            getUrl: core.application.getUrlForApp,
-            availableUseCases: this.registeredUseCases$.getValue(),
-          }),
+          getIcon: () => React.createElement(EuiIcon, { size: 'xl', type: 'logoOpenSearch' }),
+          getFooter: () =>
+            React.createElement(UseCaseFooter, {
+              useCaseId: useCase.id,
+              useCaseTitle: useCase.title,
+              core,
+              registeredUseCases$: this.registeredUseCases$,
+            }),
         }),
       });
     });
@@ -446,6 +438,19 @@ export class WorkspacePlugin
     if (!core.chrome.navGroup.getNavGroupEnabled()) {
       this.addWorkspaceToBreadcrumbs(core);
     } else {
+      /**
+       * Register workspace dropdown selector on the left navigation bottom
+       */
+      core.chrome.navControls.registerLeftBottom({
+        order: 2,
+        mount: toMountPoint(
+          React.createElement(WorkspaceMenu, {
+            coreStart: core,
+            registeredUseCases$: this.registeredUseCases$,
+          })
+        ),
+      });
+
       // register get started card in new home page
       this.registerGetStartedCardToNewHome(core, contentManagement);
     }
