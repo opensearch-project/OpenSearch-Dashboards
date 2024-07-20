@@ -1,37 +1,29 @@
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { DQLLexer } from './generated/DQLLexer';
-import { DQLParser, GroupContentContext, KeyValueExpressionContext } from './generated/DQLParser';
+import { DQLParser, KeyValueExpressionContext } from './generated/DQLParser';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { getTokenPosition } from '../shared/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
-import { CursorPosition } from '../shared/types';
 import { getHttp } from '../../services';
 import { QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './generated/DQLParserVisitor';
+import { monaco } from 'packages/osd-monaco/target';
 
 const findCursorIndex = (
   tokenStream: TokenStream,
-  cursor: CursorPosition,
+  cursor: monaco.Position,
   whitespaceToken: number
 ): number | undefined => {
-  console.clear();
-
-  console.log('cursor:', cursor);
-
   const cursorCol = cursor.column - 1;
 
   for (let i = 0; i < tokenStream.size; i++) {
     const token = tokenStream.get(i);
-    console.log('======================================================');
-    console.log('token:', token);
-    console.log('tokenIndex:', token.tokenIndex);
-    console.log('token:', token.text);
-    console.log('start:', token.start);
-    console.log('stop:', token.stop);
     const { startLine, endColumn, endLine } = getTokenPosition(token, whitespaceToken);
-    console.log('token position:', getTokenPosition(token, whitespaceToken));
 
-    if (endLine > cursor.line || (startLine === cursor.line && endColumn >= cursorCol)) {
+    if (
+      endLine > cursor.lineNumber ||
+      (startLine === cursor.lineNumber && endColumn >= cursorCol)
+    ) {
       if (tokenStream.get(i).type === whitespaceToken) {
         return i + 1;
       }
@@ -118,7 +110,6 @@ export const getSuggestions = async ({
   query,
   indexPatterns,
   position,
-  selectionStart,
 }: QuerySuggestionGetFnArgs) => {
   const currentIndexPattern = indexPatterns[0] as IndexPattern;
 
@@ -132,28 +123,7 @@ export const getSuggestions = async ({
   const visitor = new QueryVisitor();
 
   // find token index
-  const cursorIndex =
-    findCursorIndex(
-      tokenStream,
-      {
-        line: position.lineNumber,
-        column: position.column,
-      },
-      DQLParser.WS
-    ) ?? 0;
-
-  // const cursorIndex =
-  //   findCursorIndex(
-  //     tokenStream,
-  //     {
-  //       line: 1,
-  //       column: selectionStart,
-  //     },
-  //     DQLParser.WS
-  //   ) ?? 0;
-
-  console.log('================================');
-  console.log('final cursor index:', cursorIndex);
+  const cursorIndex = findCursorIndex(tokenStream, position, DQLParser.WS) ?? 0;
 
   const core = new CodeCompletionCore(parser);
 
