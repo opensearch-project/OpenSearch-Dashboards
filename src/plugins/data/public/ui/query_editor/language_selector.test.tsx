@@ -53,14 +53,7 @@ describe('LanguageSelector', () => {
         },
       })
     );
-    const euiComboBox = component.find(EuiCompressedComboBox);
-    expect(euiComboBox.prop('selectedOptions')).toEqual(
-      expect.arrayContaining([
-        {
-          label: 'Lucene',
-        },
-      ])
-    );
+    expect(component).toMatchSnapshot();
   });
 
   it('should select DQL if language is kuery', () => {
@@ -72,13 +65,6 @@ describe('LanguageSelector', () => {
         },
       })
     );
-    const euiComboBox = component.find(EuiCompressedComboBox);
-    expect(euiComboBox.prop('selectedOptions')).toEqual(
-      expect.arrayContaining([
-        {
-          label: 'DQL',
-        },
-      ])
-    );
+    expect(component).toMatchSnapshot();
   });
 });

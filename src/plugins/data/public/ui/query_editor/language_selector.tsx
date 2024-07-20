@@ -4,19 +4,22 @@
  */
 
 import {
-  EuiCompressedComboBox,
-  EuiComboBoxOptionOption,
   PopoverAnchorPosition,
+  EuiContextMenuPanel,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import React from 'react';
+import React, { useState } from 'react';
 import { getUiService } from '../../services';
 
-interface Props {
+export interface QueryLanguageSelectorProps {
   language: string;
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
   appName?: string;
+  isFooter?: boolean;
 }
 
 const mapExternalLanguageToOptions = (language: string) => {
@@ -26,7 +29,13 @@ const mapExternalLanguageToOptions = (language: string) => {
   };
 };
 
-export const QueryLanguageSelector = (props: Props) => {
+export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
+  const [isPopoverOpen, setPopover] = useState(false);
+
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
   const dqlLabel = i18n.translate('data.query.queryEditor.dqlLanguageName', {
     defaultMessage: 'DQL',
   });
@@ -34,7 +43,7 @@ export const QueryLanguageSelector = (props: Props) => {
     defaultMessage: 'Lucene',
   });
 
-  const languageOptions: EuiComboBoxOptionOption[] = [
+  const languageOptions = [
     {
       label: dqlLabel,
       value: 'kuery',
@@ -68,25 +77,58 @@ export const QueryLanguageSelector = (props: Props) => {
       )?.label as string) ?? languageOptions[0].label,
   };
 
-  const handleLanguageChange = (newLanguage: EuiComboBoxOptionOption[]) => {
-    const queryLanguage = newLanguage[0].value as string;
-    props.onSelectLanguage(queryLanguage);
-    uiService.Settings.setUserQueryLanguage(queryLanguage);
+  const handleLanguageChange = (newLanguage: string) => {
+    props.onSelectLanguage(newLanguage);
+    uiService.Settings.setUserQueryLanguage(newLanguage);
   };
 
   uiService.Settings.setUserQueryLanguage(props.language);
 
+  const languageOptionsMenu = languageOptions.map((language) => {
+    return (
+      <EuiContextMenuItem
+        key={language.label}
+        className="languageSelector__menuItem"
+        icon={language.label === selectedLanguage.label ? 'check' : 'empty'}
+        onClick={() => {
+          setPopover(false);
+          handleLanguageChange(language.value);
+        }}
+      >
+        {language.label}
+      </EuiContextMenuItem>
+    );
+  });
   return (
-    <EuiCompressedComboBox
-      fullWidth
+    <EuiPopover
       className="languageSelector"
-      data-test-subj="languageSelector"
-      options={languageOptions}
-      selectedOptions={[selectedLanguage]}
-      onChange={handleLanguageChange}
-      singleSelection={{ asPlainText: true }}
-      isClearable={false}
-      async
-    />
+      button={
+        <EuiButtonEmpty
+          iconSide="right"
+          iconSize="s"
+          onClick={onButtonClick}
+          className="languageSelector__button"
+          iconType={props.isFooter ? 'arrowDown' : undefined}
+        >
+          {selectedLanguage.label}
+        </EuiButtonEmpty>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setPopover(false)}
+      panelPaddingSize="none"
+      anchorPosition={props.anchorPosition ?? 'downLeft'}
+    >
+      <EuiContextMenuPanel
+        initialFocusedItemIndex={languageOptions.findIndex(
+          (option) => option.label === selectedLanguage.label
+        )}
+        size="s"
+        items={languageOptionsMenu}
+      />
+    </EuiPopover>
   );
 };
+
+// Needed for React.lazy
+// eslint-disable-next-line import/no-default-export
+export default QueryLanguageSelector;
