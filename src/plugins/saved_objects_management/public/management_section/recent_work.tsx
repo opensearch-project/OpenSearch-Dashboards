@@ -84,31 +84,33 @@ const bulkGetDetail = (
 
 const widthForTypeSelector = 220;
 const widthForRightMargin = 4;
+const MAX_ITEMS_DISPLAY = 6;
 
 export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean }) => {
   const { core, workspaceEnabled } = props;
   const recently$Ref = useRef(core.chrome.recentlyAccessed.get$());
   const recentAccessed = useObservable(recently$Ref.current, []);
   const workspaceList = useObservable(core.workspaces.workspaceList$, []);
-
-  const allOptions = useMemo(() => {
-    const options: string[] = [allOption];
-    recentAccessed.forEach((recentAccessItem: ChromeRecentlyAccessedHistoryItem) => {
-      if (
-        recentAccessItem.extraProps?.type &&
-        options.indexOf(recentAccessItem.extraProps.type) === -1
-      ) {
-        options.push(recentAccessItem.extraProps.type);
-      }
-    });
-    return options.map((option: string) => ({ label: option, value: option }));
-  }, [recentAccessed]);
-
   const [selectedType, setSelectedType] = useState(allOption);
   const [selectedSort, setSelectedSort] = useState(recentlyViewed);
   const [detailedSavedObjects, setDetailedSavedObjects] = useState<DetailedRecentlyAccessedItem[]>(
     []
   );
+
+  const allOptions = useMemo(() => {
+    const options: string[] = [allOption];
+    detailedSavedObjects
+      .filter((item) => !item.error)
+      .forEach((recentAccessItem: ChromeRecentlyAccessedHistoryItem) => {
+        if (
+          recentAccessItem.extraProps?.type &&
+          options.indexOf(recentAccessItem.extraProps.type) === -1
+        ) {
+          options.push(recentAccessItem.extraProps.type);
+        }
+      });
+    return options.map((option: string) => ({ label: option, value: option }));
+  }, [detailedSavedObjects]);
 
   const itemsForDisplay = useMemo(() => {
     const sortedResult = [...detailedSavedObjects]
@@ -210,7 +212,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup>
-          {Array.from({ length: 6 }).map((item, itemIndexInRow) => {
+          {Array.from({ length: MAX_ITEMS_DISPLAY }).map((item, itemIndexInRow) => {
             const recentAccessItem = itemsForDisplay[itemIndexInRow];
             let content = null;
             if (recentAccessItem) {
