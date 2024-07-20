@@ -10,7 +10,6 @@ import {
   ContentManagementPluginStart,
 } from '../../../../plugins/content_management/public';
 import { HOME_PAGE_ID, SECTIONS } from '../../common/constants';
-import { RecentWork } from './components/homepage/sections/recent_work';
 
 export const setupHome = (contentManagement: ContentManagementPluginSetup) => {
   contentManagement.registerPage({
@@ -51,17 +50,4 @@ export const setupHome = (contentManagement: ContentManagementPluginSetup) => {
   });
 };
 
-export const initHome = (contentManagement: ContentManagementPluginStart, core: CoreStart) => {
-  contentManagement.registerContentProvider({
-    id: 'recent',
-    getContent: () => {
-      return {
-        order: 1,
-        id: 'recent',
-        kind: 'custom',
-        render: () => <RecentWork core={core} />,
-      };
-    },
-    getTargetArea: () => `${HOME_PAGE_ID}/${SECTIONS.RECENTLY_VIEWED}`,
-  });
-};
+export const initHome = (contentManagement: ContentManagementPluginStart, core: CoreStart) => {};

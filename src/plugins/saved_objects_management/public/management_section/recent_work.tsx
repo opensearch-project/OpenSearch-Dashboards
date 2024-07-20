@@ -8,7 +8,6 @@ import moment from 'moment';
 import {
   EuiFlexItem,
   EuiCard,
-  EuiFlexGrid,
   EuiPanel,
   EuiSpacer,
   EuiFlexGroup,
@@ -16,6 +15,7 @@ import {
   EuiFilterGroup,
   EuiFilterButton,
   EuiComboBox,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import {
@@ -24,6 +24,8 @@ import {
   SavedObject,
 } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
+import { SavedObjectWithMetadata } from 'src/plugins/saved_objects_management/common';
+import { createRecentNavLink } from '../../../../core/public';
 
 const allOption = i18n.translate('homepage.recentWorkSection.all.items', {
   defaultMessage: 'all items',
@@ -48,17 +50,47 @@ function sortBy<T>(key: KeyOf<T>) {
   return (a: T, b: T): number => (a[key] > b[key] ? 1 : b[key] > a[key] ? -1 : 0);
 }
 
-type DetailedRecentlyAccessedItem = SavedObject &
+type DetailedRecentlyAccessedItem = SavedObjectWithMetadata &
   ChromeRecentlyAccessedHistoryItem &
   ChromeRecentlyAccessedHistoryItem['extraProps'] & {
     updatedAt: number;
+    workspaceName?: string;
   };
+
+const bulkGetDetail = (
+  savedObjects: Array<Pick<SavedObject, 'type' | 'id'>>,
+  http: CoreStart['http']
+) => {
+  return Promise.all(
+    savedObjects.map((obj) =>
+      http
+        .get<SavedObjectWithMetadata>(
+          `/api/opensearch-dashboards/management/saved_objects/${encodeURIComponent(
+            obj.type
+          )}/${encodeURIComponent(obj.id)}`
+        )
+        .catch((error) => ({
+          id: obj.id,
+          type: obj.type,
+          error,
+          attributes: {},
+          references: [],
+          meta: {},
+          updated_at: '',
+        }))
+    )
+  );
+};
+
+const widthForTypeSelector = 220;
+const widthForRightMargin = 4;
 
 export const RecentWork = (props: { core: CoreStart }) => {
   const { core } = props;
-  const navigateToUrl = core.application.navigateToUrl;
   const recently$Ref = useRef(core.chrome.recentlyAccessed.get$());
   const recentAccessed = useObservable(recently$Ref.current, []);
+  const workspaceList = useObservable(core.workspaces.workspaceList$, []);
+  const navLinks = useObservable(core.chrome.navLinks.getNavLinks$(), []);
 
   const allOptions = useMemo(() => {
     const options: string[] = [allOption];
@@ -80,7 +112,9 @@ export const RecentWork = (props: { core: CoreStart }) => {
   );
 
   const itemsForDisplay = useMemo(() => {
-    const sortedResult = [...detailedSavedObjects].sort(sortBy(sortKeyMap[selectedSort]));
+    const sortedResult = [...detailedSavedObjects]
+      .filter((item) => !item.error)
+      .sort(sortBy(sortKeyMap[selectedSort]));
     return sortedResult
       .reverse()
       .filter((item: SavedObject & ChromeRecentlyAccessedHistoryItem) => {
@@ -97,21 +131,29 @@ export const RecentWork = (props: { core: CoreStart }) => {
         id: item.id,
       }));
 
-    core.savedObjects.client.bulkGet(savedObjects).then((res) => {
-      const formatDetailedSavedObjects = res.savedObjects.map((obj) => {
-        const recentAccessItem = recentAccessed.find(
-          (item) => item.id === obj.id
-        ) as ChromeRecentlyAccessedHistoryItem;
-        return {
-          ...recentAccessItem,
-          ...obj,
-          ...recentAccessItem.extraProps,
-          updatedAt: moment(obj?.updated_at).valueOf(),
-        };
+    if (savedObjects.length) {
+      bulkGetDetail(savedObjects, core.http).then((res) => {
+        const formatDetailedSavedObjects = res.map((obj) => {
+          const recentAccessItem = recentAccessed.find(
+            (item) => item.id === obj.id
+          ) as ChromeRecentlyAccessedHistoryItem;
+
+          const findWorkspace = workspaceList.find(
+            (workspace) => workspace.id === recentAccessItem.workspaceId
+          );
+
+          return {
+            ...recentAccessItem,
+            ...obj,
+            ...recentAccessItem.extraProps,
+            updatedAt: moment(obj?.updated_at).valueOf(),
+            workspaceName: findWorkspace?.name,
+          };
+        });
+        setDetailedSavedObjects(formatDetailedSavedObjects);
       });
-      setDetailedSavedObjects(formatDetailedSavedObjects);
-    });
-  }, [recentAccessed, core.savedObjects.client]);
+    }
+  }, [core.savedObjects.client, recentAccessed, core.http, workspaceList]);
 
   if (!recentAccessed.length) {
     return (
@@ -156,6 +198,9 @@ export const RecentWork = (props: { core: CoreStart }) => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiComboBox
+                  style={{
+                    width: widthForTypeSelector,
+                  }}
                   isClearable={false}
                   options={allOptions}
                   singleSelection={{ asPlainText: true }}
@@ -176,22 +221,48 @@ export const RecentWork = (props: { core: CoreStart }) => {
                 titleSize="xs"
                 description={
                   <>
-                    {selectedSort === recentlyViewed
-                      ? i18n.translate('homepage.recentWorkSection.viewedAt', {
-                          defaultMessage: 'Last viewed {viewedAt}',
-                          values: {
-                            viewedAt: moment(recentAccessItem?.viewedAt).fromNow(),
-                          },
-                        })
-                      : i18n.translate('homepage.recentWorkSection.updatedAt', {
-                          defaultMessage: 'Last updated {updatedAt}',
-                          values: {
-                            updatedAt: moment(recentAccessItem?.updatedAt).fromNow(),
-                          },
+                    <div>
+                      <EuiIcon
+                        style={{ marginRight: widthForRightMargin }}
+                        type={recentAccessItem.meta.icon || 'apps'}
+                      />
+                      {recentAccessItem.type}
+                    </div>
+                    <EuiSpacer size="s" />
+                    <div>
+                      {selectedSort === recentlyViewed
+                        ? i18n.translate('homepage.recentWorkSection.viewedAt', {
+                            defaultMessage: 'Viewed',
+                          })
+                        : i18n.translate('homepage.recentWorkSection.updatedAt', {
+                            defaultMessage: 'Last updated',
+                          })}
+                      :{' '}
+                      <b>
+                        {selectedSort === recentlyViewed
+                          ? moment(recentAccessItem?.viewedAt).fromNow()
+                          : moment(recentAccessItem?.updatedAt).fromNow()}
+                      </b>
+                    </div>
+                    {recentAccessItem.workspaceName && (
+                      <div>
+                        {i18n.translate('homepage.recentWorkSection.workspace', {
+                          defaultMessage: 'Workspace',
                         })}
+                        : <b>{recentAccessItem.workspaceName}</b>
+                      </div>
+                    )}
                   </>
                 }
-                onClick={() => navigateToUrl(core.http.basePath.prepend(recentAccessItem.link))}
+                onClick={() => {
+                  const recentNavLink = createRecentNavLink(
+                    recentAccessItem,
+                    navLinks,
+                    core.http.basePath,
+                    core.application.navigateToUrl
+                  );
+                  core.application.navigateToUrl(recentNavLink.href);
+                }}
               />
             ) : null;
             return (

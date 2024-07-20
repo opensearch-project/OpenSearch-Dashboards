@@ -49,6 +49,7 @@ export {
   TutorialModuleNoticeComponent,
 } from './services';
 export * from '../common/instruction_variant';
+export { HOME_CONTENT_AREAS } from '../common/constants';
 import { HomePublicPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
