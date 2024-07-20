@@ -11,7 +11,6 @@ import {
   useLoadAccelerationsToCache,
   useLoadTablesToCache,
 } from '../../../../../../framework/catlog_cache/cache_loader';
-// import { useToast } from '../../../../../../../common/toast';
 
 interface SelectorLoadDatabasesProps {
   dataSourceName: string;
