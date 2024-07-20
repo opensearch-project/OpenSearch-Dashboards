@@ -33,12 +33,24 @@ export interface TableQueryPosition extends TableQueryPositionBase {
   selectTableQueryPosition?: TableQueryPositionBase;
 }
 
-interface TableQueryPositionBase {
+export interface TableQueryPositionBase {
   start: number;
   end: number;
 }
 
-function getClosingBracketIndex(
+export interface ContextSuggestions {
+  tableContextSuggestion?: TableContextSuggestion;
+  suggestColumnAliases?: AutocompleteResultBase['suggestColumnAliases'];
+}
+
+/**
+ * Finds the index of the closing bracket or semicolon in the token stream starting from a given index.
+ * @param tokenStream - The token stream to search within.
+ * @param tokenIndex - The index to start searching from.
+ * @param dictionary - The token dictionary containing token types.
+ * @returns The index of the closing bracket or semicolon or undefined if not found.
+ */
+export function getClosingBracketIndex(
   tokenStream: TokenStream,
   tokenIndex: number,
   dictionary: TokenDictionary
@@ -63,12 +75,18 @@ function getClosingBracketIndex(
   return { cursorIndex: tokenStream.get(lastIndex).start, tokenIndex: lastIndex };
 }
 
+/**
+ * Determines the position of a table query within the token stream.
+ * @param tokenStream - The token stream to search within.
+ * @param tokenIndex - The index to start searching from.
+ * @param dictionary - The token dictionary containing token types.
+ * @returns The position of the table query or undefined if not found.
+ */
 export function getTableQueryPosition(
   tokenStream: TokenStream,
   tokenIndex: number,
   dictionary: TokenDictionary
 ): TableQueryPosition | undefined {
-  const end = tokenStream.get(tokenStream.size - 1).start;
   let currentIndex = tokenIndex;
   let isAscending = false;
 
@@ -160,7 +178,7 @@ export function getTableQueryPosition(
   return undefined;
 }
 
-function getJoinIndex(
+export function getJoinIndex(
   tokenStream: TokenStream,
   startIndex: number,
   endIndex: number,
@@ -181,6 +199,14 @@ function getJoinIndex(
   return undefined;
 }
 
+/**
+ * Finds the previous token of a specified type in the token stream starting from a given index.
+ * @param tokenStream - The token stream to search within.
+ * @param dictionary - The token dictionary containing token types.
+ * @param tokenIndex - The index to start searching from.
+ * @param tokenType - The type of token to search for.
+ * @returns The previous token of the specified type or undefined if not found.
+ */
 export function getPreviousToken(
   tokenStream: TokenStream,
   dictionary: TokenDictionary,
@@ -206,11 +232,19 @@ export function getPreviousToken(
   return undefined;
 }
 
-interface ContextSuggestions {
-  tableContextSuggestion?: TableContextSuggestion;
-  suggestColumnAliases?: AutocompleteResultBase['suggestColumnAliases'];
-}
-
+/**
+ * Generates context suggestions for autocomplete based on the given query and cursor position.
+ * @param Lexer - The lexer constructor.
+ * @param Parser - The parser constructor.
+ * @param symbolTableVisitor - The symbol table visitor.
+ * @param tokenDictionary - The token dictionary containing token types.
+ * @param getParseTree - The function to get the parse tree.
+ * @param tokenStream - The token stream of the query.
+ * @param cursor - The cursor position in the query.
+ * @param query - The SQL query string.
+ * @param explicitlyParseJoin - Whether to explicitly parse JOIN statements.
+ * @returns The context suggestions for autocomplete.
+ */
 export function getContextSuggestions<L extends LexerType, P extends ParserType>(
   Lexer: LexerConstructor<L>,
   Parser: ParserConstructor<P>,

@@ -153,7 +153,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private getSuggestions = async () => {
-    console.log('suggestions????');
     if (!this.inputRef) {
       return;
     }
@@ -191,7 +190,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
           selectionEnd,
           signal: this.abortController.signal,
         })) || [];
-      console.log('query input suggestions: ', suggestions);
       return [...suggestions, ...recentSearchSuggestions];
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
@@ -236,7 +234,6 @@ export default class QueryStringInputUI extends Component<Props, State> {
   };
 
   private onChange = (query: Query) => {
-    console.log('onChange????');
     this.updateSuggestions();
 
     if (this.props.onChange) {
@@ -690,16 +687,18 @@ export default class QueryStringInputUI extends Component<Props, State> {
               </EuiTextArea>
             </div>
             <EuiPortal>
-              {/* <SuggestionsComponent
-                show={this.state.isSuggestionsVisible}
-                suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
-                index={this.state.index}
-                onClick={this.onClickSuggestion}
-                onMouseEnter={this.onMouseEnterSuggestion}
-                loadMore={this.increaseLimit}
-                queryBarRect={this.state.queryBarRect}
-                size={this.props.size}
-              /> */}
+              {
+                <SuggestionsComponent
+                  show={this.state.isSuggestionsVisible}
+                  suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
+                  index={this.state.index}
+                  onClick={this.onClickSuggestion}
+                  onMouseEnter={this.onMouseEnterSuggestion}
+                  loadMore={this.increaseLimit}
+                  queryBarRect={this.state.queryBarRect}
+                  size={this.props.size}
+                />
+              }
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>

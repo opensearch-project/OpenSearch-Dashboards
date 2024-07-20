@@ -17,7 +17,6 @@ import {
 } from '../shared/types';
 import { OpenSearchSQLLexer } from './.generated/OpenSearchSQLLexer';
 import {
-  TableFilterContext,
   OpenSearchSQLParser,
   SelectElementsContext,
   TableNameContext,
@@ -77,10 +76,8 @@ const rulesToVisit = new Set([
   OpenSearchSQLParser.RULE_constant,
   OpenSearchSQLParser.RULE_columnName,
   OpenSearchSQLParser.RULE_tableName,
-  // We don't need to go inside of those rules, we already know that this is a function call
   OpenSearchSQLParser.RULE_aggregateFunction,
-  OpenSearchSQLParser.RULE_scalarFunctionName, // Maybe also add nonAggregateWindowedFunction?
-  // These functions are very specific, we don't want to suggest them
+  OpenSearchSQLParser.RULE_scalarFunctionName,
   OpenSearchSQLParser.RULE_specificFunction,
   OpenSearchSQLParser.RULE_windowFunctionClause,
   OpenSearchSQLParser.RULE_comparisonOperator,
@@ -101,28 +98,6 @@ class OpenSearchSqlSymbolTableVisitor
   visitTableName = (context: TableNameContext): {} => {
     try {
       this.symbolTable.addNewSymbolOfType(TableSymbol, this.scope, context.getText());
-    } catch (error) {
-      if (!(error instanceof c3.DuplicateSymbolError)) {
-        throw error;
-      }
-    }
-
-    return this.visitChildren(context) as {};
-  };
-
-  visitAtomTableItem = (context: TableFilterContext): {} => {
-    try {
-      const rawAlias = context.uid()?.getText();
-      // For some reason LEFT | RIGHT keyword gets confused with alias
-      const isAliasPartOfJoinStatement =
-        rawAlias?.toLowerCase() === 'left' || rawAlias?.toLowerCase() === 'right';
-
-      this.symbolTable.addNewSymbolOfType(
-        TableSymbol,
-        this.scope,
-        context.tableName().getText(),
-        isAliasPartOfJoinStatement ? undefined : rawAlias
-      );
     } catch (error) {
       if (!(error instanceof c3.DuplicateSymbolError)) {
         throw error;

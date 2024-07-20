@@ -25,6 +25,7 @@ export interface AutocompleteResultBase {
   suggestColumns?: ColumnSuggestion;
   suggestColumnAliases?: ColumnAliasSuggestion[];
   suggestDatabases?: boolean;
+  suggestValuesForColumn?: string;
 }
 
 export interface ParserSyntaxError extends TokenPosition {
