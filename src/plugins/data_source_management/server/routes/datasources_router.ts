@@ -6,12 +6,12 @@
 /* eslint-disable no-console*/
 import { schema } from '@osd/config-schema';
 import { IRouter } from '../../../../../src/core/server';
-import { JOBS_BASE, OBSERVABILITY_BASE } from '../../framework/utils/shared';
+import { JOBS_BASE, DSM_BASE } from '../../framework/utils/shared';
 
 export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boolean) {
   router.post(
     {
-      path: `${OBSERVABILITY_BASE}${JOBS_BASE}`,
+      path: `${DSM_BASE}${JOBS_BASE}`,
       validate: {
         body: schema.object({
           query: schema.string(),
@@ -53,7 +53,7 @@ export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boo
 
   router.get(
     {
-      path: `${OBSERVABILITY_BASE}${JOBS_BASE}/{queryId}/{dataSourceMDSId?}`,
+      path: `${DSM_BASE}${JOBS_BASE}/{queryId}/{dataSourceMDSId?}`,
       validate: {
         params: schema.object({
           queryId: schema.string(),
@@ -93,7 +93,7 @@ export function registerDatasourcesRoute(router: IRouter, dataSourceEnabled: boo
 
   router.delete(
     {
-      path: `${OBSERVABILITY_BASE}${JOBS_BASE}/{queryId}`,
+      path: `${DSM_BASE}${JOBS_BASE}/{queryId}`,
       validate: {
         params: schema.object({
           queryId: schema.string(),
