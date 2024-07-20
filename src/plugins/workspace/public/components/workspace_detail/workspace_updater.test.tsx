@@ -7,10 +7,15 @@ import React from 'react';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
 import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
 import { BehaviorSubject } from 'rxjs';
-import { WorkspaceUpdater as WorkspaceUpdaterComponent } from './workspace_updater';
+
 import { coreMock, workspacesServiceMock } from '../../../../../core/public/mocks';
 import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { DetailTab } from '../workspace_form/constants';
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import {
+  WorkspaceUpdater as WorkspaceUpdaterComponent,
+  WorkspaceUpdaterProps,
+} from './workspace_updater';
 
 const workspaceClientUpdate = jest.fn().mockReturnValue({ result: true, success: true });
 
@@ -70,7 +75,11 @@ const mockCoreStart = coreMock.createStart();
 
 const renderCompleted = () => expect(screen.queryByText('Enter details')).not.toBeNull();
 
-const WorkspaceUpdater = (props: any) => {
+const WorkspaceUpdater = (
+  props: Partial<WorkspaceUpdaterProps> & {
+    workspacesService?: ReturnType<typeof createWorkspacesSetupContractMockWithValue>;
+  }
+) => {
   const workspacesService = props.workspacesService || createWorkspacesSetupContractMockWithValue();
   const { Provider } = createOpenSearchDashboardsReactContext({
     ...mockCoreStart,
@@ -115,10 +124,16 @@ const WorkspaceUpdater = (props: any) => {
       dataSourceManagement: {},
     },
   });
+  const registeredUseCases$ = new BehaviorSubject([
+    WORKSPACE_USE_CASES.observability,
+    WORKSPACE_USE_CASES['security-analytics'],
+    WORKSPACE_USE_CASES.analytics,
+    WORKSPACE_USE_CASES.search,
+  ]);
 
   return (
     <Provider>
-      <WorkspaceUpdaterComponent {...props} />
+      <WorkspaceUpdaterComponent {...props} registeredUseCases$={registeredUseCases$} />
     </Provider>
   );
 };
@@ -154,7 +169,6 @@ describe('WorkspaceUpdater', () => {
     const mockedWorkspacesService = workspacesServiceMock.createSetupContract();
     const { container } = render(
       <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
         workspacesService={mockedWorkspacesService}
         detailTab={DetailTab.Settings}
       />
@@ -163,12 +177,7 @@ describe('WorkspaceUpdater', () => {
   });
 
   it('cannot update workspace with invalid name', async () => {
-    const { getByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        detailTab={DetailTab.Settings}
-      />
-    );
+    const { getByTestId } = render(<WorkspaceUpdater detailTab={DetailTab.Settings} />);
 
     await waitFor(renderCompleted);
 
@@ -180,12 +189,7 @@ describe('WorkspaceUpdater', () => {
   });
 
   it('cancel update workspace', async () => {
-    const { findByText, getByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        detailTab={DetailTab.Settings}
-      />
-    );
+    const { findByText, getByTestId } = render(<WorkspaceUpdater detailTab={DetailTab.Settings} />);
     await waitFor(renderCompleted);
 
     fireEvent.click(getByTestId('workspaceForm-bottomBar-cancelButton'));
@@ -194,12 +198,9 @@ describe('WorkspaceUpdater', () => {
     expect(navigateToApp).toHaveBeenCalled();
   });
 
-  it('update workspace successfully without permission', async () => {
+  it('update workspace successfully', async () => {
     const { getByTestId, getAllByLabelText } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        detailTab={DetailTab.Settings}
-      />
+      <WorkspaceUpdater detailTab={DetailTab.Settings} />
     );
     await waitFor(renderCompleted);
 
@@ -258,10 +259,7 @@ describe('WorkspaceUpdater', () => {
 
   it('update workspace permission successfully', async () => {
     const { getByTestId, getAllByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        detailTab={DetailTab.Collaborators}
-      />
+      <WorkspaceUpdater detailTab={DetailTab.Collaborators} />
     );
     await waitFor(() => expect(screen.queryByText('Manage access and permissions')).not.toBeNull());
 
@@ -304,12 +302,7 @@ describe('WorkspaceUpdater', () => {
 
   it('should show danger toasts after update workspace failed', async () => {
     workspaceClientUpdate.mockReturnValue({ result: false, success: false });
-    const { getByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        detailTab={DetailTab.Settings}
-      />
-    );
+    const { getByTestId } = render(<WorkspaceUpdater detailTab={DetailTab.Settings} />);
     await waitFor(renderCompleted);
 
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
@@ -328,12 +321,7 @@ describe('WorkspaceUpdater', () => {
     workspaceClientUpdate.mockImplementation(() => {
       throw new Error('update workspace failed');
     });
-    const { getByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        detailTab={DetailTab.Settings}
-      />
-    );
+    const { getByTestId } = render(<WorkspaceUpdater detailTab={DetailTab.Settings} />);
     await waitFor(renderCompleted);
 
     const nameInput = getByTestId('workspaceForm-workspaceDetails-nameInputText');
@@ -351,11 +339,7 @@ describe('WorkspaceUpdater', () => {
   it('should show danger toasts when currentWorkspace is missing after click update button', async () => {
     const mockedWorkspacesService = workspacesServiceMock.createSetupContract();
     const { getByTestId } = render(
-      <WorkspaceUpdater
-        workspaceConfigurableApps$={new BehaviorSubject([...PublicAPPInfoMap.values()])}
-        workspaceService={mockedWorkspacesService}
-        detailTab={DetailTab.Settings}
-      />
+      <WorkspaceUpdater workspaceService={mockedWorkspacesService} detailTab={DetailTab.Settings} />
     );
 
     await waitFor(renderCompleted);

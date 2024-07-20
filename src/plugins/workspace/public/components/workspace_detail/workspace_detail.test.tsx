@@ -5,10 +5,11 @@
 
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
-import { coreMock } from '../../../../../core/public/mocks';
-import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
 import { BehaviorSubject } from 'rxjs';
 import { PublicAppInfo, WorkspaceObject } from 'opensearch-dashboards/public';
+import { coreMock } from '../../../../../core/public/mocks';
+import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_dashboards_react/public';
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
 import { WorkspaceDetail } from './workspace_detail';
 
 // all applications
@@ -71,9 +72,16 @@ const WorkspaceDetailPage = (props: any) => {
     },
   });
 
+  const registeredUseCases$ = new BehaviorSubject([
+    WORKSPACE_USE_CASES.observability,
+    WORKSPACE_USE_CASES['security-analytics'],
+    WORKSPACE_USE_CASES.analytics,
+    WORKSPACE_USE_CASES.search,
+  ]);
+
   return (
     <Provider>
-      <WorkspaceDetail {...props} />
+      <WorkspaceDetail registeredUseCases$={registeredUseCases$} {...props} />
     </Provider>
   );
 };

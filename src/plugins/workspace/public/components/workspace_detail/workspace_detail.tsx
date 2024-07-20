@@ -16,15 +16,16 @@ import {
 
 import { useObservable } from 'react-use';
 import { i18n } from '@osd/i18n';
-import { CoreStart, PublicAppInfo } from 'opensearch-dashboards/public';
+import { CoreStart } from 'opensearch-dashboards/public';
 import { BehaviorSubject } from 'rxjs';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
+import { WorkspaceUseCase } from '../../types';
 import { WorkspaceDetailContent } from './workspace_detail_content';
 import { WorkspaceUpdater } from './workspace_updater';
 import { DetailTab } from '../workspace_form/constants';
 
 export interface WorkspaceDetailProps {
-  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
 export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
@@ -60,8 +61,8 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
       }),
       content: (
         <WorkspaceUpdater
-          workspaceConfigurableApps$={props.workspaceConfigurableApps$}
           detailTab={DetailTab.Settings}
+          registeredUseCases$={props.registeredUseCases$}
         />
       ),
     },
@@ -74,8 +75,8 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             }),
             content: (
               <WorkspaceUpdater
-                workspaceConfigurableApps$={props.workspaceConfigurableApps$}
                 detailTab={DetailTab.Collaborators}
+                registeredUseCases$={props.registeredUseCases$}
               />
             ),
           },
