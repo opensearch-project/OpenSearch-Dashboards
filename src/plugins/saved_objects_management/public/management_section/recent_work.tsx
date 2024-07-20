@@ -235,7 +235,7 @@ export const RecentWork = (props: { core: CoreStart }) => {
                             defaultMessage: 'Viewed',
                           })
                         : i18n.translate('homepage.recentWorkSection.updatedAt', {
-                            defaultMessage: 'Last updated',
+                            defaultMessage: 'Updated',
                           })}
                       :{' '}
                       <b>
