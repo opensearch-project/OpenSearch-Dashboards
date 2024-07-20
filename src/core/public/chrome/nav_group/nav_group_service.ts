@@ -212,7 +212,11 @@ export class ChromeNavGroupService {
       }
     };
 
-    // erase current nav group when switch app don't belongs to any nav group
+    // erase current nav group when switch app don't belongs to any nav group.
+    // A debounce is needed because consider the case that apps may have redirect within their mount handler, e.g. index patterns
+    // The legacy index patterns management does not belong to any of the nav group so the current will be reset to undefined when navigate to it
+    // but it will redirect to the one under the correct navGroup after the mount handler get called
+    // For more detail: https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7305
     application.currentAppId$.pipe(debounceTime(500)).subscribe((appId) => {
       const navGroupMap = this.navGroupsMap$.getValue();
       const appIdsWithNavGroup = Object.values(navGroupMap).flatMap(({ navLinks: links }) =>
