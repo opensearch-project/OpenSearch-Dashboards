@@ -687,18 +687,16 @@ export default class QueryStringInputUI extends Component<Props, State> {
               </EuiCompressedTextArea>
             </div>
             <EuiPortal>
-              {
-                <SuggestionsComponent
-                  show={this.state.isSuggestionsVisible}
-                  suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
-                  index={this.state.index}
-                  onClick={this.onClickSuggestion}
-                  onMouseEnter={this.onMouseEnterSuggestion}
-                  loadMore={this.increaseLimit}
-                  queryBarRect={this.state.queryBarRect}
-                  size={this.props.size}
-                />
-              }
+              <SuggestionsComponent
+                show={this.state.isSuggestionsVisible}
+                suggestions={this.state.suggestions.slice(0, this.state.suggestionLimit)}
+                index={this.state.index}
+                onClick={this.onClickSuggestion}
+                onMouseEnter={this.onMouseEnterSuggestion}
+                loadMore={this.increaseLimit}
+                queryBarRect={this.state.queryBarRect}
+                size={this.props.size}
+              />
             </EuiPortal>
           </div>
         </EuiOutsideClickDetector>

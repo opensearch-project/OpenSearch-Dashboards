@@ -363,18 +363,3 @@
 # Dashboard admin will have the access to all the workspaces(workspace.enabled: true) and objects inside OpenSearch Dashboards.
 # opensearchDashboards.dashboardAdmin.groups: ["dashboard_admin"]
 # opensearchDashboards.dashboardAdmin.users: ["dashboard_admin"]
-
-# opensearch.hosts: ["https://localhost:9200"]
-# opensearch.hosts: ["http://ec2-35-90-71-44.us-west-2.compute.amazonaws.com:9200"]
-# opensearch.hosts: ["http://ec2-35-90-71-44.us-west-2.compute.amazonaws.com:9600"]
-
-# server.host: 0.0.0.0
-# opensearch.ssl.verificationMode: none
-# opensearch.username: "admin"
-# opensearch.password: "BugBash@123"
-# opensearch.requestHeadersWhitelist: [ authorization,securitytenant ]
-# opensearch_security.multitenancy.enabled: false
-# opensearch_security.multitenancy.tenants.preferred: ["Private", "Global"]
-# opensearch_security.readonly_mode.roles: ["kibana_read_only"]
-
-data_source.enabled: true
