@@ -28,7 +28,11 @@
  * under the License.
  */
 
-import { EuiFieldNumber, EuiFieldText, EuiSelect } from '@elastic/eui';
+import {
+  EuiCompressedFieldNumber,
+  EuiCompressedFieldText,
+  EuiCompressedSelect,
+} from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { isEmpty } from 'lodash';
 import React, { Component } from 'react';
@@ -53,7 +57,7 @@ class ValueInputTypeUI extends Component<Props> {
     switch (this.props.type) {
       case 'string':
         inputElement = (
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
@@ -65,7 +69,7 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'number':
         inputElement = (
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={
@@ -83,7 +87,7 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'date':
         inputElement = (
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
@@ -97,7 +101,7 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'ip':
         inputElement = (
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth={this.props.fullWidth}
             placeholder={this.props.placeholder}
             value={value}
@@ -110,7 +114,7 @@ class ValueInputTypeUI extends Component<Props> {
         break;
       case 'boolean':
         inputElement = (
-          <EuiSelect
+          <EuiCompressedSelect
             fullWidth={this.props.fullWidth}
             options={[
               { value: undefined, text: this.props.placeholder },

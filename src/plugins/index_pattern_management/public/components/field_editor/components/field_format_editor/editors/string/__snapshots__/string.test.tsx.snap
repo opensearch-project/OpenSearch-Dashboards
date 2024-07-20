@@ -2,9 +2,9 @@
 
 exports[`StringFormatEditor should render normally 1`] = `
 <Fragment>
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -18,7 +18,7 @@ exports[`StringFormatEditor should render normally 1`] = `
     }
     labelType="label"
   >
-    <EuiSelect
+    <EuiCompressedSelect
       data-test-subj="stringEditorTransform"
       defaultValue=""
       isInvalid={false}
@@ -32,7 +32,7 @@ exports[`StringFormatEditor should render normally 1`] = `
         ]
       }
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <FormatEditorSamples
     sampleType="text"
     samples={

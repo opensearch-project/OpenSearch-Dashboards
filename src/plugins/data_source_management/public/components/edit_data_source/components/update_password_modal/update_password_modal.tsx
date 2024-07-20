@@ -5,11 +5,11 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldPassword,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
+  EuiCompressedFieldPassword,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -85,7 +85,7 @@ export const UpdatePasswordModal = ({
         </EuiModalHeader>
 
         <EuiModalBody>
-          <EuiFormRow>
+          <EuiCompressedFormRow>
             <EuiText size="m" style={{ fontWeight: 300 }}>
               {
                 <FormattedMessage
@@ -94,12 +94,12 @@ export const UpdatePasswordModal = ({
                 />
               }
             </EuiText>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer size="m" />
 
           <EuiForm data-test-subj="data-source-update-password">
             {/* Username */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.editDataSource.username', {
                 defaultMessage: 'Username',
               })}
@@ -107,15 +107,15 @@ export const UpdatePasswordModal = ({
               <EuiText size="s" data-test-subj="data-source-update-password-username">
                 {username}
               </EuiText>
-            </EuiFormRow>
+            </EuiCompressedFormRow>
             {/* updated Password */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.editDataSource.newPassword', {
                 defaultMessage: 'Updated password',
               })}
               isInvalid={!isNewPasswordValid}
             >
-              <EuiFieldPassword
+              <EuiCompressedFieldPassword
                 name="updatedPassword"
                 data-test-subj="updateStoredPasswordUpdatedPasswordField"
                 placeholder={i18n.translate(
@@ -132,16 +132,16 @@ export const UpdatePasswordModal = ({
                 onBlur={validateNewPassword}
                 disabled={!canManageDataSource}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
             {/* Password */}
-            <EuiFormRow
+            <EuiCompressedFormRow
               label={i18n.translate('dataSourcesManagement.editDataSource.confirmNewPassword', {
                 defaultMessage: 'Confirm Updated password',
               })}
               isInvalid={!!isConfirmNewPasswordValid.length}
               error={isConfirmNewPasswordValid}
             >
-              <EuiFieldPassword
+              <EuiCompressedFieldPassword
                 name="confirmUpdatedPassword"
                 data-test-subj="updateStoredPasswordConfirmUpdatedPasswordField"
                 placeholder={i18n.translate(
@@ -158,12 +158,12 @@ export const UpdatePasswordModal = ({
                 onBlur={validateConfirmNewPassword}
                 disabled={!canManageDataSource}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiForm>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty
+          <EuiSmallButtonEmpty
             data-test-subj="updateStoredPasswordCancelBtn"
             onClick={closeUpdatePasswordModal}
           >
@@ -173,8 +173,8 @@ export const UpdatePasswordModal = ({
                 defaultMessage="Cancel"
               />
             }
-          </EuiButtonEmpty>
-          <EuiButton
+          </EuiSmallButtonEmpty>
+          <EuiSmallButton
             type="submit"
             data-test-subj="updateStoredPasswordConfirmBtn"
             onClick={onClickUpdatePassword}
@@ -184,7 +184,7 @@ export const UpdatePasswordModal = ({
             {i18n.translate('dataSourcesManagement.editDataSource.updateStoredPassword', {
               defaultMessage: 'Update stored password',
             })}
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </EuiModal>
     );

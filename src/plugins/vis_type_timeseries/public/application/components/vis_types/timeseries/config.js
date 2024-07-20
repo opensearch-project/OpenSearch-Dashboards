@@ -37,14 +37,14 @@ import { createTextHandler } from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
 import {
   htmlIdGenerator,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
-  EuiFormRow,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
   EuiCode,
   EuiHorizontalRule,
-  EuiFieldNumber,
+  EuiCompressedFieldNumber,
   EuiFormLabel,
   EuiSpacer,
 } from '@elastic/eui';
@@ -181,7 +181,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
     type = (
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('chartType')}
             label={
               <FormattedMessage
@@ -190,17 +190,17 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={chartTypeOptions}
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
               onChange={handleSelectChange('chart_type')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('stacked')}
             label={
               <FormattedMessage
@@ -209,17 +209,17 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={stackedOptions}
               selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
               onChange={handleSelectChange('stacked')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('fill')}
             label={
               <FormattedMessage
@@ -228,15 +228,15 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               step={0.1}
               onChange={handleTextChange('fill')}
               value={Number(model.fill)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('lineWidth')}
             label={
               <FormattedMessage
@@ -245,14 +245,14 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               onChange={handleTextChange('line_width')}
               value={Number(model.line_width)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('pointSize')}
             label={
               <FormattedMessage
@@ -261,11 +261,11 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               onChange={handleTextChange('point_size')}
               value={Number(model.point_size)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFormLabel>
@@ -284,7 +284,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
     type = (
       <EuiFlexGroup gutterSize="s" responsive={false} wrap={true}>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('chartType')}
             label={
               <FormattedMessage
@@ -293,17 +293,17 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={chartTypeOptions}
               selectedOptions={selectedChartTypeOption ? [selectedChartTypeOption] : []}
               onChange={handleSelectChange('chart_type')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('stacked')}
             label={
               <FormattedMessage
@@ -312,17 +312,17 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={stackedOptions}
               selectedOptions={selectedStackedOption ? [selectedStackedOption] : []}
               onChange={handleSelectChange('stacked')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('fill')}
             label={
               <FormattedMessage
@@ -331,15 +331,15 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               step={0.1}
               onChange={handleTextChange('fill')}
               value={Number(model.fill)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('lineWidth')}
             label={
               <FormattedMessage
@@ -348,11 +348,11 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiFieldNumber
+            <EuiCompressedFieldNumber
               onChange={handleTextChange('line_width')}
               value={Number(model.line_width)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
@@ -372,7 +372,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
           <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('template')}
             label={
               <FormattedMessage
@@ -391,19 +391,19 @@ export const TimeseriesConfig = injectI18n(function (props) {
             }
             fullWidth
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               onChange={handleTextChange('value_template')}
               value={model.value_template}
               fullWidth
               data-test-subj="tsvb_series_value"
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiHorizontalRule margin="s" />
       <EuiFlexItem>
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={htmlId('series_filter')}
           label={
             <FormattedMessage
@@ -424,7 +424,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             onChange={(filter) => props.onChange({ filter })}
             indexPatterns={[seriesIndexPattern]}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiFlexItem>
       <EuiHorizontalRule margin="s" />
 
@@ -434,7 +434,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
 
       <EuiFlexGroup responsive={false} wrap={true}>
         <EuiFlexItem grow={true}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('offset')}
             label={
               <FormattedMessage
@@ -444,12 +444,12 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiFieldText
+            <EuiCompressedFieldText
               data-test-subj="offsetTimeSeries"
               onChange={handleTextChange('offset_time')}
               value={model.offset_time}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
           <EuiFormLabel>
@@ -462,7 +462,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
           <YesNo value={model.hide_in_legend} name="hide_in_legend" onChange={props.onChange} />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('splitColor')}
             label={
               <FormattedMessage
@@ -471,14 +471,14 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               options={splitColorOptions}
               selectedOptions={selectedSplitColorOption ? [selectedSplitColorOption] : []}
               onChange={handleSelectChange('split_color_mode')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 
@@ -496,7 +496,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
           <YesNo value={model.separate_axis} name="separate_axis" onChange={props.onChange} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('axisMin')}
             label={
               <FormattedMessage
@@ -516,10 +516,10 @@ export const TimeseriesConfig = injectI18n(function (props) {
               onChange={handleTextChange('axis_min')}
               value={model.axis_min}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('axisMax')}
             label={
               <FormattedMessage
@@ -538,10 +538,10 @@ export const TimeseriesConfig = injectI18n(function (props) {
               onChange={handleTextChange('axis_max')}
               value={model.axis_max}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('axisPos')}
             label={
               <FormattedMessage
@@ -550,7 +550,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               isClearable={false}
               isDisabled={disableSeparateYaxis}
               options={positionOptions}
@@ -558,7 +558,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               onChange={handleSelectChange('axis_position')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
 

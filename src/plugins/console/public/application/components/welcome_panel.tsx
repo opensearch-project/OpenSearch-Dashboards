@@ -37,7 +37,7 @@ import {
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTitle,
-  EuiButton,
+  EuiSmallButton,
   EuiText,
   EuiFlyoutFooter,
 } from '@elastic/eui';
@@ -131,14 +131,14 @@ export function WelcomePanel(props: Props) {
         </EuiText>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButton
+        <EuiSmallButton
           fill={true}
           fullWidth={false}
           data-test-subj="help-close-button"
           onClick={props.onDismiss}
         >
           <FormattedMessage id="console.welcomePage.closeButtonLabel" defaultMessage="Dismiss" />
-        </EuiButton>
+        </EuiSmallButton>
       </EuiFlyoutFooter>
     </EuiFlyout>
   );

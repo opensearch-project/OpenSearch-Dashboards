@@ -6,7 +6,7 @@
 import './_doc_table.scss';
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
-import { EuiButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
+import { EuiSmallButtonEmpty, EuiCallOut, EuiProgress } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { TableHeader } from './table_header';
 import { DocViewFilterFn, OpenSearchSearchHit } from '../../doc_views/doc_views_types';
@@ -266,9 +266,9 @@ const DefaultDiscoverTableUI = ({
               values={{ sampleSize }}
             />
 
-            <EuiButtonEmpty onClick={scrollToTop}>
+            <EuiSmallButtonEmpty onClick={scrollToTop}>
               <FormattedMessage id="discover.backToTopLinkText" defaultMessage="Back to top." />
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiCallOut>
         )}
         {showPagination ? (
