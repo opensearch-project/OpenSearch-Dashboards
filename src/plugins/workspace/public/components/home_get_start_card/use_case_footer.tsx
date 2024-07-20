@@ -79,7 +79,7 @@ export const UseCaseFooter = ({
 
   if (filterWorkspaces.length === 0) {
     const modalHeaderTitle = i18n.translate('useCase.footer.modal.headerTitle', {
-      defaultMessage: isDashboardAdmin ? ' ' : 'Unable to create workspace',
+      defaultMessage: isDashboardAdmin ? 'No workspaces found' : 'Unable to create workspace',
     });
     const modalBodyContent = i18n.translate('useCase.footer.modal.bodyContent', {
       defaultMessage: isDashboardAdmin

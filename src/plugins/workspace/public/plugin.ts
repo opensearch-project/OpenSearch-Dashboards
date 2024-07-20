@@ -385,8 +385,6 @@ export class WorkspacePlugin
     core: CoreStart,
     contentManagement: ContentManagementPluginStart
   ) {
-    // console.log('------');
-    // debugger;
     const useCases = [
       WORKSPACE_USE_CASES.observability,
       WORKSPACE_USE_CASES['security-analytics'],
