@@ -39,9 +39,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiTitle,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@osd/i18n/react';
@@ -172,7 +172,7 @@ function SeriesAggUi(props) {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('function')}
             label={
               <FormattedMessage
@@ -181,13 +181,13 @@ function SeriesAggUi(props) {
               />
             }
           >
-            <EuiComboBox
+            <EuiCompressedComboBox
               options={functionOptions}
               selectedOptions={selectedFunctionOption ? [selectedFunctionOption] : []}
               onChange={handleSelectChange('function')}
               singleSelection={{ asPlainText: true }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

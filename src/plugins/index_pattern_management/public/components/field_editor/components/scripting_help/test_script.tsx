@@ -33,10 +33,10 @@ import './test_script.scss';
 import React, { Component, Fragment } from 'react';
 
 import {
-  EuiButton,
+  EuiSmallButton,
   EuiCodeBlock,
-  EuiComboBox,
-  EuiFormRow,
+  EuiCompressedComboBox,
+  EuiCompressedFormRow,
   EuiText,
   EuiSpacer,
   EuiTitle,
@@ -232,13 +232,13 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
 
     return (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={i18n.translate('indexPatternManagement.testScript.fieldsLabel', {
             defaultMessage: 'Additional fields',
           })}
           fullWidth
         >
-          <EuiComboBox
+          <EuiCompressedComboBox
             placeholder={i18n.translate('indexPatternManagement.testScript.fieldsPlaceholder', {
               defaultMessage: 'Select...',
             })}
@@ -248,7 +248,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
             data-test-subj="additionalFieldsSelect"
             fullWidth
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         <div className="testScript__searchBar">
           <this.context.services.data.ui.SearchBar
@@ -260,7 +260,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
             onQuerySubmit={this.previewScript}
             indexPatterns={[this.props.indexPattern]}
             customSubmitButton={
-              <EuiButton
+              <EuiSmallButton
                 disabled={this.props.script ? false : true}
                 isLoading={this.state.isLoading}
                 data-test-subj="runScriptButton"
@@ -269,7 +269,7 @@ export class TestScript extends Component<TestScriptProps, TestScriptState> {
                   id="indexPatternManagement.testScript.submitButtonLabel"
                   defaultMessage="Run script"
                 />
-              </EuiButton>
+              </EuiSmallButton>
             }
           />
         </div>

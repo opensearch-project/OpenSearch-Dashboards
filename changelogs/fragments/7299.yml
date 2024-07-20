@@ -1,0 +1,2 @@
+refactor:
+- Density and consistency changes for discover and query bar ([#7299](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7299))

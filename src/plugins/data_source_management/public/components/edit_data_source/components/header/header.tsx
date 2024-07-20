@@ -11,10 +11,10 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiToolTip,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiConfirmModal,
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -58,7 +58,7 @@ export const Header = ({
 
   const renderDefaultIcon = () => {
     return (
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         onClick={() => {
           onClickSetDefault();
           setIsDefaultDataSourceState(!isDefaultDataSourceState);
@@ -69,7 +69,7 @@ export const Header = ({
         data-test-subj="editSetDefaultDataSource"
       >
         {isDefaultDataSourceState ? 'Default' : 'Set as default'}
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     );
   };
 
@@ -81,7 +81,7 @@ export const Header = ({
             defaultMessage: 'Delete this Data Source',
           })}
         >
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             color="danger"
             data-test-subj="editDatasourceDeleteIcon"
             onClick={() => {
@@ -144,7 +144,7 @@ export const Header = ({
   };
   const renderTestConnectionButton = () => {
     return (
-      <EuiButton
+      <EuiSmallButton
         type="submit"
         fill={false}
         disabled={!isFormValid}
@@ -157,7 +157,7 @@ export const Header = ({
           id="dataSourcesManagement.createDataSource.testConnectionButton"
           defaultMessage="Test connection"
         />
-      </EuiButton>
+      </EuiSmallButton>
     );
   };
 

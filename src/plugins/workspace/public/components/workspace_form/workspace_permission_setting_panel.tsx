@@ -4,7 +4,13 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiSmallButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCompressedFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { WorkspaceFormError, WorkspacePermissionSetting } from './types';
 import {
@@ -97,7 +103,7 @@ const UserOrGroupSection = ({
     <div>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem style={{ maxWidth: 400 }}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             label={
               type === WorkspacePermissionItemType.User
                 ? i18n.translate('workspaceForm.permissionSetting.userLabel', {
@@ -109,22 +115,26 @@ const UserOrGroupSection = ({
             }
           >
             <></>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem style={{ maxWidth: 332 }}>
-          <EuiFormRow
+          <EuiCompressedFormRow
             label={i18n.translate('workspaceForm.permissionSetting.permissionLabel', {
               defaultMessage: 'Permissions',
             })}
           >
             <></>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
       {permissionSettings.map((item, index) => (
         <React.Fragment key={item.id}>
-          <EuiFormRow fullWidth isInvalid={!!errors?.[item.id]} error={errors?.[item.id]?.message}>
+          <EuiCompressedFormRow
+            fullWidth
+            isInvalid={!!errors?.[item.id]}
+            error={errors?.[item.id]?.message}
+          >
             <WorkspacePermissionSettingInput
               {...item}
               type={type}
@@ -134,10 +144,10 @@ const UserOrGroupSection = ({
               onGroupOrUserIdChange={handleGroupOrUserIdChange}
               onPermissionModesChange={handlePermissionModesChange}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </React.Fragment>
       ))}
-      <EuiButton
+      <EuiSmallButton
         fullWidth={false}
         onClick={handleAddNewOne}
         data-test-subj={`workspaceForm-permissionSettingPanel-${type}-addNew`}
@@ -150,7 +160,7 @@ const UserOrGroupSection = ({
           : i18n.translate('workspace.form.permissionSettingPanel.addUserGroup', {
               defaultMessage: 'Add user group',
             })}
-      </EuiButton>
+      </EuiSmallButton>
     </div>
   );
 };

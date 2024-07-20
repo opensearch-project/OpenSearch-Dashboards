@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiFormRow } from '@elastic/eui';
+import { EuiCompressedFormRow } from '@elastic/eui';
 import { InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { uniq } from 'lodash';
 import React from 'react';
@@ -46,7 +46,7 @@ interface Props extends PhraseSuggestorProps {
 class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
   public render() {
     return (
-      <EuiFormRow
+      <EuiCompressedFormRow
         fullWidth={true}
         label={this.props.intl.formatMessage({
           id: 'data.filter.filterEditor.valueInputLabel',
@@ -67,7 +67,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<Props> {
             type={this.props.field ? this.props.field.type : 'string'}
           />
         )}
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 

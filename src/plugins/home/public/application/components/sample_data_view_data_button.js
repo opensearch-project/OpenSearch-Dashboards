@@ -30,7 +30,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
+import { EuiSmallButton, EuiContextMenu, EuiIcon, EuiPopover } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
 import { getServices } from '../opensearch_dashboards_services';
@@ -73,13 +73,13 @@ export class SampleDataViewDataButton extends React.Component {
 
     if (this.props.appLinks.length === 0) {
       return (
-        <EuiButton
+        <EuiSmallButton
           onClick={createAppNavigationHandler(dashboardPath)}
           data-test-subj={`launchSampleDataSet${this.props.id}`}
           aria-label={viewDataButtonAriaLabel}
         >
           {viewDataButtonLabel}
-        </EuiButton>
+        </EuiSmallButton>
       );
     }
 
@@ -108,14 +108,14 @@ export class SampleDataViewDataButton extends React.Component {
       },
     ];
     const popoverButton = (
-      <EuiButton
+      <EuiSmallButton
         aria-label={viewDataButtonAriaLabel}
         onClick={this.togglePopoverVisibility}
         iconType="arrowDown"
         iconSide="right"
       >
         {viewDataButtonLabel}
-      </EuiButton>
+      </EuiSmallButton>
     );
     return (
       <EuiPopover

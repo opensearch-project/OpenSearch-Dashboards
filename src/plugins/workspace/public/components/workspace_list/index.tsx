@@ -10,7 +10,7 @@ import {
   EuiPageHeader,
   EuiPageContent,
   EuiLink,
-  EuiButton,
+  EuiSmallButton,
   EuiInMemoryTable,
   EuiSearchBarProps,
 } from '@elastic/eui';
@@ -172,13 +172,13 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       incremental: true,
     },
     toolsRight: [
-      <EuiButton
+      <EuiSmallButton
         href={workspaceCreateUrl}
         key="create_workspace"
         data-test-subj="workspaceList-create-workspace"
       >
         Create workspace
-      </EuiButton>,
+      </EuiSmallButton>,
     ],
   };
 

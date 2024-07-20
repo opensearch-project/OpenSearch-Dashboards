@@ -40,10 +40,10 @@ import {
   EuiText,
   EuiTitle,
   EuiForm,
-  EuiFormRow,
-  EuiFilePicker,
+  EuiCompressedFormRow,
+  EuiCompressedFilePicker,
   EuiInMemoryTable,
-  EuiSelect,
+  EuiCompressedSelect,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -578,7 +578,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           });
 
           return (
-            <EuiSelect
+            <EuiCompressedSelect
               data-test-subj={`managementChangeIndexSelection-${id}`}
               onChange={(e) => this.onIndexChanged(id, e)}
               options={options}
@@ -765,7 +765,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
 
     return (
       <EuiForm>
-        <EuiFormRow
+        <EuiCompressedFormRow
           fullWidth
           label={
             <FormattedMessage
@@ -774,7 +774,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             />
           }
         >
-          <EuiFilePicker
+          <EuiCompressedFilePicker
             accept=".ndjson, .json"
             fullWidth
             initialPromptText={
@@ -785,7 +785,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             }
             onChange={this.setImportFile}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         {this.renderImportControl(importMode, isLegacyFile, dataSourceEnabled)}
       </EuiForm>
@@ -802,7 +802,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
       return this.renderImportControlForDataSource(importMode, isLegacyFile);
     }
     return (
-      <EuiFormRow fullWidth>
+      <EuiCompressedFormRow fullWidth>
         <ImportModeControl
           initialValues={importMode}
           isLegacyFile={isLegacyFile}
@@ -812,7 +812,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             { defaultMessage: 'Import options' }
           )}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   }
 
@@ -840,7 +840,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
           />
         </EuiFormFieldset>
         <EuiSpacer />
-        <EuiFormRow fullWidth>
+        <EuiCompressedFormRow fullWidth>
           <ImportModeControl
             initialValues={importMode}
             isLegacyFile={isLegacyFile}
@@ -850,7 +850,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
               { defaultMessage: 'Conflict management' }
             )}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </div>
     );
   }

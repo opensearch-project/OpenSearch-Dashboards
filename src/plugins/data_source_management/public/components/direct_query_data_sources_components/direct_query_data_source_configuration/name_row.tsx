@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiText, EuiFormRow, EuiFieldText } from '@elastic/eui';
+import { EuiText, EuiCompressedFormRow, EuiCompressedFieldText } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementContext } from '../../../types';
@@ -64,13 +64,13 @@ export const NameRow: React.FC<ConfigureNameProps> = ({
   };
 
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       label="Data source name"
       isInvalid={currentError.length !== 0}
       error={currentError}
       helpText="Connection name that OpenSearch Dashboards references. This name should be descriptive and concise."
     >
-      <EuiFieldText
+      <EuiCompressedFieldText
         data-test-subj="direct_query-data-source-name"
         id="data-source-name"
         placeholder="Title"
@@ -81,6 +81,6 @@ export const NameRow: React.FC<ConfigureNameProps> = ({
         onBlur={onBlur}
         isInvalid={currentError.length !== 0}
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };

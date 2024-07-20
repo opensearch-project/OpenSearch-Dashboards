@@ -36,7 +36,7 @@ import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -84,7 +84,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
   const renderRemoveButton = useCallback(
     (axis: ValueAxis) => (
       <EuiToolTip position="bottom" content={removeButtonTooltip}>
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           color="danger"
           iconType="cross"
           onClick={() => removeValueAxis(axis)}
@@ -134,7 +134,7 @@ function ValueAxesPanel(props: ValueAxesPanelProps) {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip position="bottom" content={addButtonTooltip}>
-            <EuiButtonIcon
+            <EuiSmallButtonIcon
               iconType="plusInCircleFilled"
               onClick={addValueAxis}
               aria-label={addButtonTooltip}

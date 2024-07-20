@@ -5,7 +5,13 @@
 
 import React, { useCallback } from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiCheckableCard, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+import {
+  EuiCheckableCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCompressedFormRow,
+  EuiText,
+} from '@elastic/eui';
 
 import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { WorkspaceUseCase as WorkspaceUseCaseObject } from '../../types';
@@ -64,7 +70,7 @@ export const WorkspaceUseCase = ({
   availableUseCases,
 }: WorkspaceUseCaseProps) => {
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={i18n.translate('workspace.form.workspaceUseCase.name.label', {
         defaultMessage: 'Use case',
       })}
@@ -88,6 +94,6 @@ export const WorkspaceUseCase = ({
             </EuiFlexItem>
           ))}
       </EuiFlexGroup>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };

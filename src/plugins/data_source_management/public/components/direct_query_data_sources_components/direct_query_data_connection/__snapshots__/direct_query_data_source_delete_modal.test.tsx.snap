@@ -20,32 +20,32 @@ exports[`DeleteModal renders correctly 1`] = `
       </EuiText>
       <EuiSpacer />
       <EuiForm>
-        <EuiFormRow
+        <EuiCompressedFormRow
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           fullWidth={false}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
           label="To confirm deletion, enter \\"delete\\" in the text field"
           labelType="label"
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             data-test-subj="popoverModal__deleteTextInput"
             name="input"
             onChange={[Function]}
             placeholder="delete"
             value=""
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiForm>
     </EuiModalBody>
     <EuiModalFooter>
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         onClick={[MockFunction]}
       >
         Cancel
-      </EuiButtonEmpty>
-      <EuiButton
+      </EuiSmallButtonEmpty>
+      <EuiSmallButton
         color="danger"
         data-test-subj="popoverModal__deleteButton"
         disabled={true}
@@ -53,7 +53,7 @@ exports[`DeleteModal renders correctly 1`] = `
         onClick={[Function]}
       >
         Delete
-      </EuiButton>
+      </EuiSmallButton>
     </EuiModalFooter>
   </EuiModal>
 </EuiOverlayMask>

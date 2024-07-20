@@ -244,9 +244,9 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
     </EuiModalHeaderTitle>
   </EuiModalHeader>
   <EuiModalBody>
-    <EuiFormRow
+    <EuiCompressedFormRow
       describedByIds={Array []}
-      display="row"
+      display="rowCompressed"
       fullWidth={false}
       hasChildLabel={true}
       hasEmptyLabelSpace={false}
@@ -259,7 +259,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
       }
       labelType="legend"
     >
-      <EuiCheckboxGroup
+      <EuiCompressedCheckboxGroup
         idToSelectedMap={
           Object {
             "dashboard": true,
@@ -290,11 +290,11 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
           ]
         }
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
     <EuiSpacer
       size="m"
     />
-    <EuiSwitch
+    <EuiCompressedSwitch
       checked={true}
       label={
         <FormattedMessage
@@ -318,7 +318,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
           <EuiFlexItem
             grow={false}
           >
-            <EuiButtonEmpty
+            <EuiSmallButtonEmpty
               onClick={[Function]}
             >
               <FormattedMessage
@@ -326,12 +326,12 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
                 values={Object {}}
               />
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem
             grow={false}
           >
-            <EuiButton
+            <EuiSmallButton
               fill={true}
               onClick={[Function]}
             >
@@ -340,7 +340,7 @@ exports[`SavedObjectsTable export should allow the user to choose when exporting
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
                 values={Object {}}
               />
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

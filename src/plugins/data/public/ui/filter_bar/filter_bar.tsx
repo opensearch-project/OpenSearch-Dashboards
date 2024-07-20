@@ -110,15 +110,15 @@ function FilterBarUI(props: Props) {
 
     const button = (
       <EuiButtonEmpty
-        size="xs"
+        size="s"
         onClick={() => setIsAddFilterPopoverOpen(true)}
         data-test-subj="addFilter"
         aria-label={i18n.translate('data.filter.filterBar.addFilterButtonLabel', {
           defaultMessage: 'Add filter',
         })}
         className="globalFilterBar__addButton"
+        iconType="plusInCircle"
       >
-        +{' '}
         <FormattedMessage
           id="data.filter.filterBar.addFilterButtonLabel"
           defaultMessage="Add filter"
