@@ -15,25 +15,29 @@
   // overflow: auto;
 }
 
-.osdQueryEditorFooterHide {
+.osdQueryEditorFooter-isHidden {
   display: none;
 }
 
 .osdQueryEditorFooter {
   color: $euiTextSubduedColor; // Apply the subdued color to all text in this class
-  height: 35px;
+  height: 25px;
 
   * {
     color: inherit;
-    font-size: medium;
+    font-size: $euiFontSizeXS;
     align-items: center;
   }
+}
+
+.osdQueryEditor__collapseWrapper {
+  box-shadow: $euiTextSubduedColor;
 }
 
 .osdQueryEditor__languageWrapper {
   align-items: center;
   justify-content: center;
-  height: 40px;
+  max-height: 40px;
   border: $euiBorderThin;
 }
 
@@ -65,6 +69,20 @@
     .sourceRefreshText {
       max-height: 40px;
     }
+  }
+}
+
+.osdQueryEditor__prependWrapper {
+  box-shadow: $euiTextSubduedColor;
+}
+
+.osdQueryEditor__prependWrapper-isCollapsed {
+  box-shadow: none;
+}
+
+.osdQueryEditor--updateButtonWrapper {
+  :first-child {
+    min-width: 0 !important;
   }
 }
 

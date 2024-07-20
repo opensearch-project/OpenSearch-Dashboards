@@ -340,7 +340,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       }
       .${containerId} .monaco-editor .cursor {
         height: ${customCursorHeight}px !important;
-        margin-top: ${(40 - customCursorHeight) / 2}px !important; 
+        margin-top: ${(38 - customCursorHeight) / 2}px !important; 
       }
     `;
 
@@ -379,12 +379,7 @@ export default class QueryEditorUI extends Component<Props, State> {
         <EuiFlexGroup gutterSize="xs" direction="column">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" className={`${className}__wrapper`}>
-              <EuiFlexItem
-                grow={false}
-                style={{
-                  boxShadow: 'inset -1px 0 0 0 rgba(20, 67, 91, 0.1)',
-                }}
-              >
+              <EuiFlexItem grow={false} className={`${className}__collapseWrapper`}>
                 <QueryEditorBtnCollapse
                   onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}
                   isCollapsed={!this.state.isCollapsed}
@@ -453,12 +448,9 @@ export default class QueryEditorUI extends Component<Props, State> {
               </EuiFlexItem>
               <EuiFlexItem
                 grow={false}
-                style={{
-                  boxShadow:
-                    !this.state.isCollapsed && useQueryEditor
-                      ? 'inset 1px 0 0 0 rgba(20, 67, 91, 0.1)'
-                      : 'none',
-                }}
+                className={`${className}__prependWrapper${
+                  !this.state.isCollapsed && useQueryEditor ? '' : '-isCollapsed'
+                }`}
               >
                 {this.props.prepend}
               </EuiFlexItem>
@@ -495,10 +487,10 @@ export default class QueryEditorUI extends Component<Props, State> {
               className={
                 !this.state.isCollapsed && useQueryEditor
                   ? footerClassName
-                  : 'osdQueryEditorFooterHide'
+                  : 'osdQueryEditorFooter-isHidden'
               }
             >
-              <EuiFlexGroup gutterSize="m" responsive={false}>
+              <EuiFlexGroup gutterSize="s" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <QueryLanguageSelector
                     language={this.props.query.language}

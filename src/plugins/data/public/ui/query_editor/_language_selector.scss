@@ -5,7 +5,23 @@
 .languageSelector {
   height: 100%;
 
+  .languageSelector__button {
+    &:hover {
+      text-decoration: none; // Prevents text underline on hover
+    }
+  }
+
   * {
     font-size: small;
+  }
+}
+
+.languageSelector__menuItem {
+  padding-left: 2px;
+  padding-right: 2px;
+  align-items: center;
+
+  &:hover {
+    text-decoration: none; // Prevents text underline on hover
   }
 }

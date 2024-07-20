@@ -4,11 +4,11 @@
  */
 import dateMath from '@elastic/datemath';
 import {
+  EuiButton,
   EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
-  EuiSuperUpdateButton,
   OnRefreshProps,
   prettyDuration,
 } from '@elastic/eui';
@@ -28,7 +28,7 @@ import {
   withOpenSearchDashboards,
 } from '../../../../opensearch_dashboards_react/public';
 import { UI_SETTINGS } from '../../../common';
-import { fromUser, getQueryLog, PersistedLog } from '../../query';
+import { getQueryLog, PersistedLog } from '../../query';
 import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
@@ -276,13 +276,16 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     const button = props.customSubmitButton ? (
       React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
     ) : (
-      <EuiSuperUpdateButton
-        needsUpdate={props.isDirty}
+      <EuiButton
         isDisabled={isDateRangeInvalid}
         isLoading={props.isLoading}
         onClick={onClickSubmitButton}
         data-test-subj="querySubmitButton"
-      />
+        className="euiSuperUpdateButton"
+        iconType="play"
+      >
+        {props.isDirty ? 'Refresh' : 'Run'}
+      </EuiButton>
     );
 
     if (!shouldRenderDatePicker()) {
@@ -365,7 +368,9 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       justifyContent="flexEnd"
     >
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-        <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
+        <EuiFlexItem grow={false} className="osdQueryEditor--updateButtonWrapper">
+          {renderUpdateButton()}
+        </EuiFlexItem>
       </EuiFlexGroup>
       {renderQueryEditor()}
       <EuiFlexItem>

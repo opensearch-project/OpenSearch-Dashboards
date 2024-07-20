@@ -88,6 +88,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
     return (
       <EuiContextMenuItem
         key={language.label}
+        className="languageSelector__menuItem"
         icon={language.label === selectedLanguage.label ? 'check' : 'empty'}
         onClick={() => {
           setPopover(false);
@@ -104,7 +105,9 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
       button={
         <EuiButtonEmpty
           iconSide="right"
+          iconSize="s"
           onClick={onButtonClick}
+          className="languageSelector__button"
           iconType={props.isFooter ? 'arrowDown' : undefined}
         >
           {selectedLanguage.label}
@@ -113,9 +116,15 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
       isOpen={isPopoverOpen}
       closePopover={() => setPopover(false)}
       panelPaddingSize="none"
-      anchorPosition="downLeft"
+      anchorPosition={props.anchorPosition ?? 'downLeft'}
     >
-      <EuiContextMenuPanel size="s" items={languageOptionsMenu} />
+      <EuiContextMenuPanel
+        initialFocusedItemIndex={languageOptions.findIndex(
+          (option) => option.label === selectedLanguage.label
+        )}
+        size="s"
+        items={languageOptionsMenu}
+      />
     </EuiPopover>
   );
 };
