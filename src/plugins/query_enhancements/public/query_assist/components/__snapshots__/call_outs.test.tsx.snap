@@ -1,0 +1,163 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CallOuts spec should display empty_index call out 1`] = `
+<div>
+  <div
+    class="euiCallOut euiCallOut--warning euiCallOut--small"
+    data-test-subj="query-assist-empty-index-callout"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <svg
+        aria-hidden="true"
+        class="euiIcon euiIcon--medium euiIcon--inherit euiCallOutHeader__icon"
+        focusable="false"
+        height="16"
+        role="img"
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M7.5 11.508 7.468 8H6.25V7h2.401l.03 3.508H9.8v1H7.5Zm-.25-6.202a.83.83 0 0 1 .207-.577c.137-.153.334-.229.59-.229.256 0 .454.076.594.23.14.152.209.345.209.576 0 .228-.07.417-.21.568-.14.15-.337.226-.593.226-.256 0-.453-.075-.59-.226a.81.81 0 0 1-.207-.568ZM8 13A5 5 0 1 0 8 3a5 5 0 0 0 0 10Zm0 1A6 6 0 1 1 8 2a6 6 0 0 1 0 12Z"
+          fill-rule="evenodd"
+        />
+      </svg>
+      <span
+        class="euiCallOutHeader__title"
+      >
+        <span>
+          Select a data source or index to ask a question.
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallOuts spec should display empty_query call out 1`] = `
+<div>
+  <div
+    class="euiCallOut euiCallOut--warning euiCallOut--small"
+    data-test-subj="query-assist-empty-query-callout"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <svg
+        aria-hidden="true"
+        class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+        focusable="false"
+        height="16"
+        role="img"
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+        />
+      </svg>
+      <span
+        class="euiCallOutHeader__title"
+      >
+        <span>
+          Enter a natural language question to automatically generate a query to view results.
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallOuts spec should display invalid_query call out 1`] = `
+<div>
+  <div
+    class="euiCallOut euiCallOut--danger euiCallOut--small"
+    data-test-subj="query-assist-guard-callout"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <svg
+        aria-hidden="true"
+        class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+        focusable="false"
+        height="16"
+        role="img"
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+        />
+      </svg>
+      <span
+        class="euiCallOutHeader__title"
+      >
+        <span>
+          I am unable to respond to this query. Try another question.
+        </span>
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`CallOuts spec should display query_generated call out 1`] = `
+<div>
+  <div
+    class="euiCallOut euiCallOut--success euiCallOut--small"
+    data-test-subj="query-assist-query-generated-callout"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <svg
+        aria-hidden="true"
+        class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiCallOutHeader__icon"
+        focusable="false"
+        height="16"
+        role="img"
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+        />
+      </svg>
+      <span
+        class="euiCallOutHeader__title"
+      >
+        <span>
+          test lang query generated. If there are any issues with the response, try adding more context to the question or a new question to submit.
+        </span>
+      </span>
+    </div>
+    <button
+      aria-label="dismissible_icon"
+      class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiCallOut__closeIcon"
+      data-test-subj="closeCallOutButton"
+      type="button"
+    >
+      <svg
+        aria-hidden="true"
+        class="euiIcon euiIcon--medium euiIcon--inherit euiIcon-isLoading euiButtonIcon__icon"
+        focusable="false"
+        height="16"
+        role="img"
+        viewBox="0 0 16 16"
+        width="16"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M5.277 10.088c.02.014.04.03.057.047.582.55 1.134.812 1.666.812.586 0 1.84-.293 3.713-.88L9 6.212V2H7v4.212l-1.723 3.876Zm-.438.987L3.539 14h8.922l-1.32-2.969C9.096 11.677 7.733 12 7 12c-.74 0-1.463-.315-2.161-.925ZM6 2H5V1h6v1h-1v4l3.375 7.594A1 1 0 0 1 12.461 15H3.54a1 1 0 0 1-.914-1.406L6 6V2Z"
+        />
+      </svg>
+    </button>
+  </div>
+</div>
+`;
