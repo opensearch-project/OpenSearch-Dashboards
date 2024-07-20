@@ -119,10 +119,11 @@ export const CreateAcceleration = ({
 
   const loadColumnsToAccelerationForm = (cachedTable: CachedTable) => {
     const idPrefix = htmlIdGenerator()();
-    const dataTableFields = cachedTable.columns!.map((col, index: number) => ({
-      ...col,
-      id: `${idPrefix}${index + 1}`,
-    }));
+    const dataTableFields =
+      cachedTable.columns?.map((col, index: number) => ({
+        ...col,
+        id: `${idPrefix}${index + 1}`,
+      })) || [];
 
     setAccelerationFormData({
       ...accelerationFormData,
