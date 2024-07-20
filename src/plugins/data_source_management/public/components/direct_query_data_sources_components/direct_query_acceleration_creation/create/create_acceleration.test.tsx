@@ -8,7 +8,7 @@ import { mount } from 'enzyme';
 import toJson from 'enzyme-to-json';
 import React from 'react';
 import { CreateAcceleration } from './create_acceleration';
-import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
+import { HttpStart, NotificationsStart, ApplicationStart } from 'opensearch-dashboards/public';
 import { useLoadTableColumnsToCache } from '../../../../../framework/catlog_cache/cache_loader';
 import { DirectQueryLoadingStatus } from '../../../../../framework/types';
 
@@ -24,6 +24,10 @@ const mockNotifications = ({
   },
 } as unknown) as NotificationsStart;
 
+const mockApplication: ApplicationStart = ({
+  navigateToUrl: jest.fn(),
+} as unknown) as ApplicationStart;
+
 const defaultProps = {
   selectedDatasource: 'test_source',
   resetFlyout: jest.fn(),
@@ -33,6 +37,7 @@ const defaultProps = {
   refreshHandler: jest.fn(),
   http: mockHttp,
   notifications: mockNotifications,
+  application: mockApplication,
 };
 
 const startLoading = jest.fn();

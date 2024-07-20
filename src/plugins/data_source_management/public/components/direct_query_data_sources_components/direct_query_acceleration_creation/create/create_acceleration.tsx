@@ -16,7 +16,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
+import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import {
   ACCELERATION_DEFUALT_SKIPPING_INDEX_NAME,
   ACCELERATION_REFRESH_TIME_INTERVAL,
@@ -49,6 +49,7 @@ export interface CreateAccelerationProps {
   refreshHandler?: () => void;
   http: HttpStart;
   notifications: NotificationsStart;
+  application: ApplicationStart;
 }
 
 export const CreateAcceleration = ({
@@ -60,6 +61,7 @@ export const CreateAcceleration = ({
   refreshHandler,
   http,
   notifications,
+  application,
 }: CreateAccelerationProps) => {
   const [accelerationFormData, setAccelerationFormData] = useState<CreateAccelerationForm>({
     dataSource: selectedDatasource,
@@ -275,6 +277,7 @@ export const CreateAcceleration = ({
               setAccelerationFormData={setAccelerationFormData}
               resetFlyout={resetFlyout}
               notifications={notifications}
+              application={application}
             />
           </EuiForm>
         </EuiFlyoutBody>

@@ -13,7 +13,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { NotificationsStart } from 'opensearch-dashboards/public';
+import { ApplicationStart, NotificationsStart } from 'opensearch-dashboards/public';
 import {
   queryWorkbenchPluginCheck,
   queryWorkbenchPluginID,
@@ -27,6 +27,7 @@ interface PreviewSQLDefinitionProps {
   setAccelerationFormData: React.Dispatch<React.SetStateAction<CreateAccelerationForm>>;
   resetFlyout: () => void;
   notifications: NotificationsStart;
+  application: ApplicationStart;
 }
 
 export const PreviewSQLDefinition = ({
@@ -34,6 +35,7 @@ export const PreviewSQLDefinition = ({
   setAccelerationFormData,
   resetFlyout,
   notifications,
+  application,
 }: PreviewSQLDefinitionProps) => {
   const [isPreviewStale, setIsPreviewStale] = useState(false);
   const [isPreviewTriggered, setIsPreviewTriggered] = useState(false);
@@ -93,16 +95,16 @@ export const PreviewSQLDefinition = ({
   };
 
   const openInWorkbench = () => {
-    // if (!checkForErrors()) {
-    //   coreRefs?.application!.navigateToApp(queryWorkbenchPluginID, {
-    //     path: `#/${accelerationFormData.dataSource}`,
-    //     state: {
-    //       language: 'sql',
-    //       queryToRun: accelerationQueryBuilder(accelerationFormData),
-    //     },
-    //   });
-    //   resetFlyout();
-    // }
+    if (!checkForErrors()) {
+      application!.navigateToApp(queryWorkbenchPluginID, {
+        path: `#/${accelerationFormData.dataSource}`,
+        state: {
+          language: 'sql',
+          queryToRun: accelerationQueryBuilder(accelerationFormData),
+        },
+      });
+      resetFlyout();
+    }
   };
 
   const queryWorkbenchButton = sqlWorkbenchPLuginExists ? (
