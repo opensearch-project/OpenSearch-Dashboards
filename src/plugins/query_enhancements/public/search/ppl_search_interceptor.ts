@@ -5,7 +5,6 @@
 
 import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
-import { i18n } from '@osd/i18n';
 import { concatMap } from 'rxjs/operators';
 import {
   DataFrameAggConfig,

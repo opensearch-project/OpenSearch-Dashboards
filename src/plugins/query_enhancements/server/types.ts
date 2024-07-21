@@ -51,7 +51,7 @@ export interface FacetRequest {
   };
 }
 
-declare module '../../../core/server' {
+declare module 'src/core/server' {
   interface RequestHandlerContext {
     query_assist: {
       logger: Logger;

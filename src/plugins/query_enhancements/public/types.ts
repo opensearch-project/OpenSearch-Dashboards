@@ -5,6 +5,7 @@
 
 import { CoreSetup, CoreStart } from 'opensearch-dashboards/public';
 import { DataSourcePluginStart } from 'src/plugins/data_source/public';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DataPublicPluginSetup, DataPublicPluginStart } from '../../data/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -15,6 +16,7 @@ export interface QueryEnhancementsPluginStart {}
 
 export interface QueryEnhancementsPluginSetupDependencies {
   data: DataPublicPluginSetup;
+  uiActions: UiActionsStart;
 }
 
 export interface QueryEnhancementsPluginStartDependencies {
@@ -34,5 +36,6 @@ export interface Connection {
 
 export interface ConnectionsServiceDeps {
   http: CoreSetup['http'];
+  uiActions: UiActionsStart;
   startServices: Promise<[CoreStart, QueryEnhancementsPluginStartDependencies, unknown]>;
 }

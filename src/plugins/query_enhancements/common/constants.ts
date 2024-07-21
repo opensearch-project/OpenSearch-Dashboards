@@ -45,3 +45,5 @@ export const OPENSEARCH_API = {
 export const UI_SETTINGS = {};
 
 export const ERROR_DETAILS = { GUARDRAILS_TRIGGERED: 'guardrails triggered' };
+
+export const ASYNC_TRIGGER_ID = 'async_query_status_trigger';

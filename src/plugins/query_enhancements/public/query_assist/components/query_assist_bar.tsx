@@ -9,7 +9,7 @@ import {
   IDataPluginServices,
   PersistedLog,
   QueryEditorExtensionDependencies,
-} from '../../../../data/public';
+} from 'src/plugins/data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { QueryAssistParameters } from '../../../common/query_assist';
 import { ConnectionsService } from '../../data_source_connection';
