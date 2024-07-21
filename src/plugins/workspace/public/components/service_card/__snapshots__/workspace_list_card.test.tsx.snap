@@ -24,7 +24,7 @@ exports[`workspace list card render normally should show workspace list card cor
           class="euiToolTipAnchor"
         >
           <span
-            aria-label="workspace list card descriptioni"
+            aria-label="workspace list card description"
             data-euiicon-type="iInCircle"
           />
         </span>
