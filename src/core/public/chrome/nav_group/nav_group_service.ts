@@ -5,7 +5,7 @@
 
 import { BehaviorSubject, combineLatest, Observable, of, ReplaySubject, Subscription } from 'rxjs';
 import { AppCategory, ChromeNavGroup, ChromeNavLink } from 'opensearch-dashboards/public';
-import { debounceTime, map, switchMap, takeUntil } from 'rxjs/operators';
+import { map, switchMap, takeUntil } from 'rxjs/operators';
 import { IUiSettingsClient } from '../../ui_settings';
 import {
   flattenLinksOrCategories,
