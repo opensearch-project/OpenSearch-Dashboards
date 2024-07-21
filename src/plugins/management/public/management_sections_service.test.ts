@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { DEFAULT_MANAGEMENT_CAPABILITIES } from '../common/contants';
 import {
   ManagementSectionsService,
   getSectionsServiceStartPrivate,
@@ -104,5 +105,30 @@ describe('ManagementService', () => {
         "test-app-3",
       ]
     `);
+  });
+
+  it('should disable apps register in opensearchDashboards section', () => {
+    const originalDataSourcesCapability =
+      DEFAULT_MANAGEMENT_CAPABILITIES.management.opensearchDashboards.dataSources;
+
+    const setup = managementService.setup();
+
+    // Register app with id dataSources, the app id will be capability id
+    setup.section.opensearchDashboards.registerApp({
+      id: 'dataSources',
+      title: 'Data source',
+      mount: jest.fn(),
+    });
+
+    // Now set dataSources to capability to false should disable
+    // the dataSources app registered in opensearchDashboards section
+    DEFAULT_MANAGEMENT_CAPABILITIES.management.opensearchDashboards.dataSources = false;
+
+    managementService.start({ capabilities: DEFAULT_MANAGEMENT_CAPABILITIES });
+    expect(
+      setup.section.opensearchDashboards.apps.find((app) => app.id === 'dataSources')?.enabled
+    ).toBe(false);
+
+    DEFAULT_MANAGEMENT_CAPABILITIES.management.opensearchDashboards.dataSources = originalDataSourcesCapability;
   });
 });

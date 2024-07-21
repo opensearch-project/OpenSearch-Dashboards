@@ -51,6 +51,10 @@ const [getSectionsServiceStartPrivate, setSectionsServiceStartPrivate] = createG
   ManagementSectionsStartPrivate
 >('SectionsServiceStartPrivate');
 
+const MANAGEMENT_ID_TO_CAPABILITIES: Record<string, string> = {
+  'opensearch-dashboards': 'opensearchDashboards',
+};
+
 export { getSectionsServiceStartPrivate };
 
 export class ManagementSectionsService {
@@ -94,8 +98,9 @@ export class ManagementSectionsService {
 
   start({ capabilities }: SectionsServiceStartDeps) {
     this.getAllSections().forEach((section) => {
-      if (capabilities.management.hasOwnProperty(section.id)) {
-        const sectionCapabilities = capabilities.management[section.id];
+      const capabilityId = MANAGEMENT_ID_TO_CAPABILITIES[section.id] || section.id;
+      if (capabilities.management.hasOwnProperty(capabilityId)) {
+        const sectionCapabilities = capabilities.management[capabilityId];
         section.apps.forEach((app) => {
           if (sectionCapabilities.hasOwnProperty(app.id) && sectionCapabilities[app.id] !== true) {
             app.disable();
