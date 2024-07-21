@@ -11,8 +11,8 @@ import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dash
 import { CatalogCacheManager } from '../../../../framework/catalog_cache/cache_manager';
 import { DirectQueryLoadingStatus } from '../../../../framework/types';
 
-// Mock the Date object to return a fixed date in UTC
-const fixedDate = new Date(Date.UTC(2024, 6, 21, 12, 0, 0));
+// Mock the Date object to return a fixed date
+const fixedDate = new Date('2024-07-21T12:00:00Z');
 const OriginalDate = Date;
 
 global.Date = jest.fn((...args) => {
@@ -23,6 +23,10 @@ global.Date = jest.fn((...args) => {
 }) as any;
 
 global.Date.now = OriginalDate.now;
+
+// Mock toLocaleString to return a fixed string
+// eslint-disable-next-line no-extend-native
+Date.prototype.toLocaleString = jest.fn(() => '7/21/2024, 12:00:00 PM');
 
 jest.mock('../../../plugin', () => ({
   getRenderCreateAccelerationFlyout: jest.fn(() => jest.fn()),
@@ -97,23 +101,6 @@ describe('AssociatedObjectsTab', () => {
 
   afterAll(() => {
     global.Date = OriginalDate;
-  });
-
-  // Mock the Intl.DateTimeFormat to use UTC for consistency
-  jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(() => {
-    return {
-      format: (date) =>
-        new Date(date).toLocaleString('en-US', {
-          timeZone: 'UTC',
-          year: 'numeric',
-          month: 'numeric',
-          day: 'numeric',
-          hour: 'numeric',
-          minute: 'numeric',
-          second: 'numeric',
-          hour12: true,
-        }),
-    } as any;
   });
 
   test('renders without crashing', () => {

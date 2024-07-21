@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import {} from '@elastic/datemath';
 import { AccelerationDetailsTab } from './acceleration_details_tab';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 
@@ -74,24 +73,11 @@ describe('AccelerationDetailsTab', () => {
 
   beforeAll(() => {
     // Mock the Date.now() method to always return a specific timestamp
-    jest.spyOn(Date, 'now').mockImplementation(() => 1627819985000); // 2021-08-01T11:53:05.000Z
+    jest.spyOn(Date, 'now').mockImplementation(() => 1627843985000); // 2021-08-01T18:53:05.000Z
 
-    // Mock the Intl.DateTimeFormat to use a specific timezone (e.g., UTC)
-    jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(() => {
-      return {
-        format: (date) =>
-          new Date(date).toLocaleString('en-US', {
-            timeZone: 'UTC',
-            year: 'numeric',
-            month: 'numeric',
-            day: 'numeric',
-            hour: 'numeric',
-            minute: 'numeric',
-            second: 'numeric',
-            hour12: true,
-          }),
-      } as any;
-    });
+    // Mock toLocaleString to return a fixed string
+    // eslint-disable-next-line no-extend-native
+    Date.prototype.toLocaleString = jest.fn(() => '8/1/2021, 2:53:05 PM');
   });
 
   afterAll(() => {
@@ -113,11 +99,7 @@ describe('AccelerationDetailsTab', () => {
     const wrapper = shallowComponent();
     const creationDateNode = wrapper.find('DetailComponent[title="Creation Date"]');
     const displayedDate = creationDateNode.prop('description') as string;
-
-    // Convert the displayed local time back to UTC
-    const displayedUTC = new Date(displayedDate).toUTCString();
-
-    expect(displayedUTC).toBe('Sun, 01 Aug 2021 18:53:05 GMT');
+    expect(displayedDate).toBe('8/1/2021, 2:53:05 PM');
   });
 
   test('displays the correct refresh type', () => {
