@@ -183,29 +183,6 @@ export function CollapsibleNavGroupEnabled({
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
 
-  const onGroupClick = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    group: NavGroupItemInMap
-  ) => {
-    const fulfilledLinks = fulfillRegistrationLinksToChromeNavLinks(
-      navGroupsMap[group.id]?.navLinks,
-      navLinks
-    );
-    setCurrentNavGroup(group.id);
-
-    // the `navGroupsMap[group.id]?.navLinks` has already been sorted
-    const firstLink = fulfilledLinks[0];
-    if (firstLink) {
-      const propsForEui = createEuiListItem({
-        link: firstLink,
-        appId,
-        dataTestSubj: 'collapsibleNavAppLink',
-        navigateToApp,
-      });
-      propsForEui.onClick(e);
-    }
-  };
-
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
     if (currentNavGroup) {
       return fulfillRegistrationLinksToChromeNavLinks(
@@ -280,6 +257,33 @@ export function CollapsibleNavGroupEnabled({
 
     return 270;
   }, [isNavOpen]);
+
+  if (appId === 'home') {
+    return null;
+  }
+
+  const onGroupClick = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    group: NavGroupItemInMap
+  ) => {
+    const fulfilledLinks = fulfillRegistrationLinksToChromeNavLinks(
+      navGroupsMap[group.id]?.navLinks,
+      navLinks
+    );
+    setCurrentNavGroup(group.id);
+
+    // the `navGroupsMap[group.id]?.navLinks` has already been sorted
+    const firstLink = fulfilledLinks[0];
+    if (firstLink) {
+      const propsForEui = createEuiListItem({
+        link: firstLink,
+        appId,
+        dataTestSubj: 'collapsibleNavAppLink',
+        navigateToApp,
+      });
+      propsForEui.onClick(e);
+    }
+  };
 
   return (
     <EuiFlyout

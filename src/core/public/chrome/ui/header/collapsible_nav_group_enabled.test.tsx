@@ -223,4 +223,24 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     fireEvent.click(getByTestId('back'));
     expect(getAllByTestId('collapsibleNavAppLink-link-in-analytics').length).toEqual(2);
   });
+
+  it('should hide left navigation when in home page', async () => {
+    const props = mockProps({
+      navGroupsMap: {
+        [DEFAULT_NAV_GROUPS.analytics.id]: {
+          ...DEFAULT_NAV_GROUPS.analytics,
+          navLinks: [
+            {
+              id: 'link-in-analytics',
+              title: 'link-in-analytics',
+              showInAllNavGroup: true,
+            },
+          ],
+        },
+      },
+    });
+    props.appId$ = new BehaviorSubject('home');
+    const { container } = render(<CollapsibleNavGroupEnabled {...props} isNavOpen />);
+    expect(container).toMatchSnapshot();
+  });
 });
