@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiSmallButton, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { ScopedHistory } from 'opensearch-dashboards/public';
@@ -65,7 +65,7 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
     </EuiFlexItem>
 
     <EuiFlexItem grow={false}>
-      <EuiButton
+      <EuiSmallButton
         data-test-subj="addScriptedFieldLink"
         {...reactRouterNavigate(history, `patterns/${indexPatternId}/create-field/`)}
       >
@@ -73,7 +73,7 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => (
           id="indexPatternManagement.editIndexPattern.scripted.addFieldButton"
           defaultMessage="Add scripted field"
         />
-      </EuiButton>
+      </EuiSmallButton>
     </EuiFlexItem>
   </EuiFlexGroup>
 ));

@@ -812,7 +812,7 @@ describe('SavedObjectsTable', () => {
       });
     });
 
-    it('all visible workspaces in find options when not in any workspace', async () => {
+    it('no workspaces in find options when not in any workspace', async () => {
       findObjectsMock.mockClear();
       const applications = applicationServiceMock.createStartContract();
       applications.capabilities = {
@@ -851,8 +851,8 @@ describe('SavedObjectsTable', () => {
       await waitFor(() => {
         expect(findObjectsMock).toBeCalledWith(
           http,
-          expect.objectContaining({
-            workspaces: expect.arrayContaining(['workspace1', 'workspace2']),
+          expect.not.objectContaining({
+            workspaces,
           })
         );
       });

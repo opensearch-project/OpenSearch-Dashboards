@@ -5,9 +5,9 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldText,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
+  EuiCompressedFieldText,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -85,7 +85,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           <EuiText color="subdued">
             To confirm your action, type <b>delete</b>.
           </EuiText>
-          <EuiFieldText
+          <EuiCompressedFieldText
             placeholder="delete"
             fullWidth
             value={value}
@@ -96,10 +96,13 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose} data-test-subj="delete-workspace-modal-cancel-button">
+        <EuiSmallButtonEmpty
+          onClick={onClose}
+          data-test-subj="delete-workspace-modal-cancel-button"
+        >
           Cancel
-        </EuiButtonEmpty>
-        <EuiButton
+        </EuiSmallButtonEmpty>
+        <EuiSmallButton
           data-test-subj="delete-workspace-modal-confirm"
           onClick={deleteWorkspace}
           fill
@@ -107,7 +110,7 @@ export function DeleteWorkspaceModal(props: DeleteWorkspaceModalProps) {
           disabled={value !== 'delete'}
         >
           Delete
-        </EuiButton>
+        </EuiSmallButton>
       </EuiModalFooter>
     </EuiModal>
   );

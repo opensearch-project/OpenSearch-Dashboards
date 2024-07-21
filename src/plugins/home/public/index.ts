@@ -53,3 +53,5 @@ import { HomePublicPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new HomePublicPlugin(initializerContext);
+
+export { HOME_PAGE_ID, HOME_CONTENT_AREAS } from '../common/constants';

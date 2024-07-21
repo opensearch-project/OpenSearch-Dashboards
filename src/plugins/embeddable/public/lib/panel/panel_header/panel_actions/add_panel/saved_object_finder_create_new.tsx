@@ -29,7 +29,7 @@
  */
 
 import React, { ReactElement, useState } from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiSmallButton } from '@elastic/eui';
 import { EuiContextMenuPanel } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -50,7 +50,7 @@ export function SavedObjectFinderCreateNew({ menuItems }: Props) {
     <EuiPopover
       id="createNew"
       button={
-        <EuiButton
+        <EuiSmallButton
           data-test-subj="createNew"
           iconType="plus"
           iconSide="left"
@@ -61,14 +61,14 @@ export function SavedObjectFinderCreateNew({ menuItems }: Props) {
             id="embeddableApi.addPanel.createNewDefaultOption"
             defaultMessage="Create new"
           />
-        </EuiButton>
+        </EuiSmallButton>
       }
       isOpen={isCreateMenuOpen}
       closePopover={closeCreateMenu}
       panelPaddingSize="none"
       anchorPosition="downRight"
     >
-      <EuiContextMenuPanel items={menuItems} />
+      <EuiContextMenuPanel items={menuItems} size="s" />
     </EuiPopover>
   );
 }

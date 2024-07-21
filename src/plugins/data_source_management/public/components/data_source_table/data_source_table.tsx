@@ -5,7 +5,7 @@
 
 import {
   EuiBadge,
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiConfirmModal,
   EuiFlexItem,
@@ -53,6 +53,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
     savedObjects,
     notifications: { toasts },
     uiSettings,
+    application,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   /* Component state variables */
@@ -61,6 +62,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isDeleting, setIsDeleting] = React.useState<boolean>(false);
   const [confirmDeleteVisible, setConfirmDeleteVisible] = React.useState(false);
+  const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
 
   /* useEffectOnce hook to avoid these methods called multiple times when state is updated. */
   useEffectOnce(() => {
@@ -96,7 +98,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   /* Table search config */
   const renderDeleteButton = () => {
     return (
-      <EuiButton
+      <EuiSmallButton
         color="danger"
         onClick={() => {
           setConfirmDeleteVisible(true);
@@ -106,16 +108,16 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       >
         Delete {selectedDataSources.length || ''} {selectedDataSources.length ? 'connection' : ''}
         {selectedDataSources.length >= 2 ? 's' : ''}
-      </EuiButton>
+      </EuiSmallButton>
     );
   };
 
   const renderToolsRight = () => {
-    return (
+    return canManageDataSource ? (
       <EuiFlexItem key="delete" grow={false}>
         {renderDeleteButton()}
       </EuiFlexItem>
-    );
+    ) : null;
   };
 
   const search = {
@@ -323,7 +325,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
             />
           </EuiText>
           <EuiSpacer />
-          {createButtonEmptyState}
+          {canManageDataSource ? createButtonEmptyState : null}
         </EuiPanel>
         <EuiSpacer size="l" />
       </>

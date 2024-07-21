@@ -41,18 +41,18 @@ import {
   EuiLoadingSpinner,
   EuiOverlayMask,
   EUI_MODAL_CONFIRM_BUTTON,
-  EuiCheckboxGroup,
+  EuiCompressedCheckboxGroup,
   EuiToolTip,
   EuiPageContent,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiModal,
   EuiModalHeader,
   EuiModalBody,
   EuiModalFooter,
-  EuiButtonEmpty,
-  EuiButton,
+  EuiSmallButtonEmpty,
+  EuiSmallButton,
   EuiModalHeaderTitle,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
@@ -187,15 +187,14 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
   }
 
   private get workspaceIdQuery() {
-    const { availableWorkspaces, currentWorkspaceId, workspaceEnabled } = this.state;
+    const { currentWorkspaceId, workspaceEnabled } = this.state;
     // workspace is turned off
     if (!workspaceEnabled) {
       return undefined;
     } else {
-      // application home
+      // not in any workspace
       if (!currentWorkspaceId) {
-        // public workspace is virtual at this moment
-        return availableWorkspaces?.map((ws) => ws.id);
+        return undefined;
       } else {
         return [currentWorkspaceId];
       }
@@ -250,6 +249,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       typesToInclude: filteredTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
+      availableWorkspaces: this.state.availableWorkspaces?.map((ws) => ws.id),
     });
 
     if (availableNamespaces.length) {
@@ -286,6 +286,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       typesToInclude: allowedTypes,
       searchString: queryText,
       workspaces: this.workspaceIdQuery,
+      availableWorkspaces: this.state.availableWorkspaces?.map((ws) => ws.id),
     });
 
     if (availableNamespaces.length) {
@@ -825,7 +826,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
           </EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
-          <EuiFormRow
+          <EuiCompressedFormRow
             label={
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.exportObjectsConfirmModalDescription"
@@ -834,7 +835,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             }
             labelType="legend"
           >
-            <EuiCheckboxGroup
+            <EuiCompressedCheckboxGroup
               options={exportAllOptions}
               idToSelectedMap={exportAllSelectedOptions}
               onChange={(optionId) => {
@@ -850,9 +851,9 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
                 });
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer size="m" />
-          <EuiSwitch
+          <EuiCompressedSwitch
             name="includeReferencesDeep"
             label={
               <FormattedMessage
@@ -869,20 +870,20 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
             <EuiFlexItem grow={false}>
               <EuiFlexGroup>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={this.closeExportAllModal}>
+                  <EuiSmallButtonEmpty onClick={this.closeExportAllModal}>
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.cancelButtonLabel"
                       defaultMessage="Cancel"
                     />
-                  </EuiButtonEmpty>
+                  </EuiSmallButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButton fill onClick={this.onExportAll}>
+                  <EuiSmallButton fill onClick={this.onExportAll}>
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportAllButtonLabel"
                       defaultMessage="Export all"
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -958,9 +959,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     if (workspaceEnabled && availableWorkspaces?.length) {
       const wsCounts = savedObjectCounts.workspaces || {};
       const wsFilterOptions = availableWorkspaces
-        .filter((ws) => {
-          return this.workspaceIdQuery?.includes(ws.id);
-        })
+        .filter((ws) => (currentWorkspaceId ? currentWorkspaceId === ws.id : true))
         .map((ws) => {
           return {
             name: ws.name,

@@ -6,7 +6,7 @@
 import React from 'react';
 import { History } from 'history';
 
-import { EuiButton } from '@elastic/eui';
+import { EuiSmallButton } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
 interface Props {
@@ -17,7 +17,7 @@ interface Props {
 
 export const CreateButton = ({ history, isEmptyState, dataTestSubj }: Props) => {
   return (
-    <EuiButton
+    <EuiSmallButton
       data-test-subj={dataTestSubj}
       fill={isEmptyState ? false : true}
       onClick={() => history.push('/create')}
@@ -26,6 +26,6 @@ export const CreateButton = ({ history, isEmptyState, dataTestSubj }: Props) => 
         id="dataSourcesManagement.dataSourceListing.createButton"
         defaultMessage="Create data source connection"
       />
-    </EuiButton>
+    </EuiSmallButton>
   );
 };

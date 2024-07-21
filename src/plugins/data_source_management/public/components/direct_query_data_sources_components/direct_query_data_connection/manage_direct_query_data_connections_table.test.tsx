@@ -12,7 +12,7 @@ import {
   SavedObjectsStart,
   IUiSettingsClient,
 } from 'opensearch-dashboards/public';
-import { EuiFieldSearch, EuiInMemoryTable, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiCompressedFieldSearch, EuiInMemoryTable, EuiLoadingSpinner } from '@elastic/eui';
 import { ManageDirectQueryDataConnectionsTable } from './manage_direct_query_data_connections_table';
 
 const mockHttp = ({
@@ -112,7 +112,7 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
     });
     wrapper.update();
 
-    const searchInput = wrapper.find(EuiFieldSearch);
+    const searchInput = wrapper.find(EuiCompressedFieldSearch);
     expect(searchInput.exists()).toBe(true);
 
     await act(async () => {

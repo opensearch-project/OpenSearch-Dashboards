@@ -48,6 +48,7 @@ import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 import './index.scss';
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { DevToolsIcon } from './dev_tools_icon';
 
 export interface DevToolsSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -135,7 +136,18 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
   }
 
   public start(core: CoreStart) {
-    if (this.getSortedDevTools().length === 0) {
+    if (core.chrome.navGroup.getNavGroupEnabled()) {
+      core.chrome.navControls.registerLeftBottom({
+        order: 4,
+        mount: toMountPoint(
+          React.createElement(DevToolsIcon, {
+            core,
+            appId: this.id,
+          })
+        ),
+      });
+    }
+    if (this.getSortedDevTools().length === 0 || core.chrome.navGroup.getNavGroupEnabled()) {
       this.appStateUpdater.next(() => ({ navLinkStatus: AppNavLinkStatus.hidden }));
     } else {
       // Register right navigation for dev tool only when console and futureNavigation are both enabled.

@@ -30,21 +30,21 @@
 
 import {
   htmlIdGenerator,
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiCallOut,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiSwitchEvent,
-  EuiTextArea,
+  EuiCompressedTextArea,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import React from 'react';
@@ -132,13 +132,13 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
             {this.renderCopyOnSave()}
 
-            <EuiFormRow
+            <EuiCompressedFormRow
               fullWidth
               label={
                 <FormattedMessage id="savedObjects.saveModal.titleLabel" defaultMessage="Title" />
               }
             >
-              <EuiFieldText
+              <EuiCompressedFieldText
                 fullWidth
                 autoFocus
                 data-test-subj="savedObjectTitle"
@@ -147,7 +147,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
                 isInvalid={(!isTitleDuplicateConfirmed && hasTitleDuplicate) || title.length === 0}
                 aria-describedby={this.state.hasTitleDuplicate ? duplicateWarningId : undefined}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
 
             {this.renderViewDescription()}
 
@@ -158,12 +158,12 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
+          <EuiSmallButtonEmpty data-test-subj="saveCancelButton" onClick={this.props.onClose}>
             <FormattedMessage
               id="savedObjects.saveModal.cancelButtonLabel"
               defaultMessage="Cancel"
             />
-          </EuiButtonEmpty>
+          </EuiSmallButtonEmpty>
 
           {this.renderConfirmButton()}
         </EuiModalFooter>
@@ -177,7 +177,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     }
 
     return (
-      <EuiFormRow
+      <EuiCompressedFormRow
         fullWidth
         label={
           <FormattedMessage
@@ -186,12 +186,12 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
           />
         }
       >
-        <EuiTextArea
+        <EuiCompressedTextArea
           data-test-subj="viewDescription"
           value={this.state.visualizationDescription}
           onChange={this.onDescriptionChange}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     );
   };
 
@@ -266,7 +266,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
     }
 
     return (
-      <EuiButton
+      <EuiSmallButton
         fill
         data-test-subj="confirmSaveSavedObjectButton"
         isLoading={isLoading}
@@ -275,7 +275,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
         form="savedObjectSaveModalForm"
       >
         {confirmLabel}
-      </EuiButton>
+      </EuiSmallButton>
     );
   };
 
@@ -322,7 +322,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
     return (
       <>
-        <EuiSwitch
+        <EuiCompressedSwitch
           data-test-subj="saveAsNewCheckbox"
           checked={this.state.copyOnSave}
           onChange={this.onCopyOnSaveChange}

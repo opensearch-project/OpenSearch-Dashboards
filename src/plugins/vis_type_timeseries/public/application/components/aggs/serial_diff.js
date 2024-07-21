@@ -41,7 +41,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -87,7 +87,7 @@ export const SerialDiffAgg = (props) => {
           />
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('metric')}
             label={
               <FormattedMessage
@@ -102,10 +102,10 @@ export const SerialDiffAgg = (props) => {
               metric={model}
               value={model.field}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow
+          <EuiCompressedFormRow
             id={htmlId('lag')}
             label={
               <FormattedMessage
@@ -127,7 +127,7 @@ export const SerialDiffAgg = (props) => {
               value={model.lag}
               type="text"
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
     </AggRow>

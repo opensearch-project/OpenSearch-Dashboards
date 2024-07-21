@@ -321,6 +321,12 @@
 #   AWSSigV4:
 #     enabled: true
 
+# Optional setting that controls the permissions of data source to create, update and delete.
+# "none": The data source is readonly for all users.
+# "dashboard_admin": The data source can only be managed by dashboard admin.
+# "all": The data source can be managed by all users. Default to "all".
+# data_source.manageableBy: "all"
+
 # Set the value of this setting to false to hide the help menu link to the OpenSearch Dashboards user survey
 # opensearchDashboards.survey.url: "https://survey.opensearch.org"
 
@@ -352,9 +358,6 @@
 # Set the value to true to enable Ui Metric Collectors in Usage Collector
 # This publishes the Application Usage and UI Metrics into the saved object, which can be accessed by /api/stats?extended=true&legacy=true&exclude_usage=false
 # usageCollection.uiMetric.enabled: false
-
-# Set the value to true to enable enhancements for the data plugin
-# data.enhancements.enabled: false
 
 # Set the backend roles in groups or users, whoever has the backend roles or exactly match the user ids defined in this config will be regard as dashboard admin.
 # Dashboard admin will have the access to all the workspaces(workspace.enabled: true) and objects inside OpenSearch Dashboards.

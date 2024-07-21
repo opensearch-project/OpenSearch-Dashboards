@@ -32,6 +32,7 @@ import React, { useState } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
+  EuiSmallButtonIcon,
   EuiButtonIcon,
   EuiToolTip,
   EuiFlexGroup,
@@ -151,7 +152,7 @@ export const DiscoverField = ({
           defaultMessage: 'Add field as column',
         })}
       >
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           iconType="plusInCircleFilled"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
@@ -175,7 +176,7 @@ export const DiscoverField = ({
           defaultMessage: 'Remove field from table',
         })}
       >
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           color="danger"
           iconType="cross"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {

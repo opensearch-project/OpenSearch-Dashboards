@@ -108,53 +108,60 @@ exports[`ReviewPrometheusDatasource renders correctly 1`] = `
                   <div
                     className="euiFlexItem euiFlexItem--flexGrowZero"
                   >
-                    <EuiButton
+                    <EuiSmallButton
                       data-test-subj="editButton"
                       onClick={[MockFunction]}
                     >
-                      <EuiButtonDisplay
-                        baseClassName="euiButton"
+                      <EuiButton
                         data-test-subj="editButton"
-                        disabled={false}
-                        element="button"
-                        isDisabled={false}
                         onClick={[MockFunction]}
-                        type="button"
+                        size="s"
                       >
-                        <button
-                          className="euiButton euiButton--primary"
+                        <EuiButtonDisplay
+                          baseClassName="euiButton"
                           data-test-subj="editButton"
                           disabled={false}
+                          element="button"
+                          isDisabled={false}
                           onClick={[MockFunction]}
-                          style={
-                            Object {
-                              "minWidth": undefined,
-                            }
-                          }
+                          size="s"
                           type="button"
                         >
-                          <EuiButtonContent
-                            className="euiButton__content"
-                            iconSide="left"
-                            textProps={
+                          <button
+                            className="euiButton euiButton--primary euiButton--small"
+                            data-test-subj="editButton"
+                            disabled={false}
+                            onClick={[MockFunction]}
+                            style={
                               Object {
-                                "className": "euiButton__text",
+                                "minWidth": undefined,
                               }
                             }
+                            type="button"
                           >
-                            <span
-                              className="euiButtonContent euiButton__content"
+                            <EuiButtonContent
+                              className="euiButton__content"
+                              iconSide="left"
+                              textProps={
+                                Object {
+                                  "className": "euiButton__text",
+                                }
+                              }
                             >
                               <span
-                                className="euiButton__text"
+                                className="euiButtonContent euiButton__content"
                               >
-                                Edit
+                                <span
+                                  className="euiButton__text"
+                                >
+                                  Edit
+                                </span>
                               </span>
-                            </span>
-                          </EuiButtonContent>
-                        </button>
-                      </EuiButtonDisplay>
-                    </EuiButton>
+                            </EuiButtonContent>
+                          </button>
+                        </EuiButtonDisplay>
+                      </EuiButton>
+                    </EuiSmallButton>
                   </div>
                 </EuiFlexItem>
               </div>

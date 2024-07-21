@@ -3,14 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type {
-  ApplicationStart,
-  PublicAppInfo,
-  SavedObjectsStart,
-} from '../../../../../core/public';
+import type { ApplicationStart, SavedObjectsStart } from '../../../../../core/public';
 import type { WorkspacePermissionMode } from '../../../common/constants';
-import type { WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
+import type { DetailTab, WorkspaceOperationType, WorkspacePermissionItemType } from './constants';
 import { DataSource } from '../../../common/types';
+import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
+import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceUserPermissionSetting {
   id: number;
@@ -83,6 +81,8 @@ export interface WorkspaceFormProps {
   onSubmit?: (formData: WorkspaceFormSubmitData) => void;
   defaultValues?: WorkspaceFormData;
   operationType: WorkspaceOperationType;
-  workspaceConfigurableApps?: PublicAppInfo[];
   permissionEnabled?: boolean;
+  detailTab?: DetailTab;
+  dataSourceManagement?: DataSourceManagementPluginSetup;
+  availableUseCases: WorkspaceUseCase[];
 }

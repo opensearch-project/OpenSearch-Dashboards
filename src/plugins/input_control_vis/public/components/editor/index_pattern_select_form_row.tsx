@@ -30,7 +30,7 @@
 
 import React, { ComponentType } from 'react';
 import { injectI18n, InjectedIntlProps } from '@osd/i18n/react';
-import { EuiFormRow } from '@elastic/eui';
+import { EuiCompressedFormRow } from '@elastic/eui';
 import { IndexPatternSelectProps } from 'src/plugins/data/public';
 
 export type IndexPatternSelectFormRowUiProps = InjectedIntlProps & {
@@ -45,7 +45,7 @@ function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
   const selectId = `indexPatternSelect-${controlIndex}`;
 
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       id={selectId}
       label={intl.formatMessage({
         id: 'inputControl.editor.indexPatternSelect.patternLabel',
@@ -63,7 +63,7 @@ function IndexPatternSelectFormRowUi(props: IndexPatternSelectFormRowUiProps) {
         // TODO: supply actual savedObjectsClient here
         savedObjectsClient={{} as any}
       />
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 }
 

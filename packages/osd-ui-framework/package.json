@@ -12,7 +12,7 @@
     }
   },
   "dependencies": {
-    "classnames": "2.3.1",
+    "classnames": "^2.3.1",
     "lodash": "^4.17.21",
     "prop-types": "^15.7.2",
     "react": "^16.14.0",
@@ -23,7 +23,7 @@
     "enzyme-adapter-react-16": "^1.9.1"
   },
   "devDependencies": {
-    "@elastic/eui": "npm:@opensearch-project/oui@1.5.1",
+    "@elastic/eui": "npm:@opensearch-project/oui@1.7.0",
     "@osd/babel-preset": "1.0.0",
     "@osd/optimizer": "1.0.0",
     "comment-stripper": "^0.0.4",
