@@ -217,6 +217,14 @@ export class SavedObjectsManagementPlugin
       },
     ]);
 
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: 'objects',
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 300,
+      },
+    ]);
+
     // sets up the context mappings and registers any triggers/actions for the plugin
     bootstrap(uiActions);
 

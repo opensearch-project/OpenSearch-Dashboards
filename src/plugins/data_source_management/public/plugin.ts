@@ -186,6 +186,14 @@ export class DataSourceManagementPlugin
       },
     ]);
 
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: DSM_APP_ID_FOR_STANDARD_APPLICATION,
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 100,
+      },
+    ]);
+
     const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
       if (this.started) {
         throw new Error(
