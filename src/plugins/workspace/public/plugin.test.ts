@@ -26,8 +26,15 @@ describe('Workspace plugin', () => {
     ...coreMock.createSetup(),
     chrome: chromeServiceMock.createSetupContract(),
   });
+  const registerContentProviderMock = jest.fn();
+  const contentManagementMock = {
+    registerContentProvider: registerContentProviderMock,
+    renderPage: jest.fn(),
+  };
+
   beforeEach(() => {
     WorkspaceClientMock.mockClear();
+    registerContentProviderMock.mockClear();
     Object.values(workspaceClientMock).forEach((item) => item.mockClear());
   });
   it('#setup', async () => {
@@ -48,7 +55,7 @@ describe('Workspace plugin', () => {
     const setupMock = getSetupMock();
     const coreStart = coreMock.createStart();
     await workspacePlugin.setup(setupMock, {});
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, { contentManagement: contentManagementMock });
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
     expect(setupMock.application.register).toBeCalledTimes(4);
@@ -182,7 +189,7 @@ describe('Workspace plugin', () => {
     const breadcrumbs = new BehaviorSubject<ChromeBreadcrumb[]>([{ text: 'dashboards' }]);
     startMock.chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs);
     const workspacePlugin = new WorkspacePlugin();
-    workspacePlugin.start(startMock);
+    workspacePlugin.start(startMock, { contentManagement: contentManagementMock });
     expect(startMock.chrome.setBreadcrumbs).toBeCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
@@ -208,8 +215,15 @@ describe('Workspace plugin', () => {
     ]);
     startMock.chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs);
     const workspacePlugin = new WorkspacePlugin();
-    workspacePlugin.start(startMock);
+    workspacePlugin.start(startMock, { contentManagement: contentManagementMock });
     expect(startMock.chrome.setBreadcrumbs).not.toHaveBeenCalled();
+  });
+
+  it('#start should register workspace list card into new home page', async () => {
+    const startMock = coreMock.createStart();
+    const workspacePlugin = new WorkspacePlugin();
+    workspacePlugin.start(startMock, { contentManagement: contentManagementMock });
+    expect(registerContentProviderMock).toBeCalledTimes(1);
   });
 
   it('#start should call navGroupUpdater$.next after currentWorkspace set', async () => {
@@ -225,7 +239,7 @@ describe('Workspace plugin', () => {
     jest.spyOn(navGroupUpdater$, 'next');
 
     expect(navGroupUpdater$.next).not.toHaveBeenCalled();
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, { contentManagement: contentManagementMock });
 
     waitFor(() => {
       expect(navGroupUpdater$.next).toHaveBeenCalled();
@@ -236,7 +250,7 @@ describe('Workspace plugin', () => {
     const coreStart = coreMock.createStart();
     coreStart.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     const workspacePlugin = new WorkspacePlugin();
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, { contentManagement: contentManagementMock });
 
     expect(coreStart.chrome.navControls.registerLeftBottom).toBeCalledTimes(1);
   });
@@ -265,7 +279,7 @@ describe('Workspace plugin', () => {
 
     const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
 
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, { contentManagement: contentManagementMock });
 
     const appUpdater = await appUpdater$.pipe(first()).toPromise();
 
@@ -286,7 +300,7 @@ describe('Workspace plugin', () => {
 
     const navGroupUpdater$ = setupMock.chrome.navGroup.registerNavGroupUpdater.mock.calls[0][0];
 
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, { contentManagement: contentManagementMock });
 
     const navGroupUpdater = await navGroupUpdater$.pipe(first()).toPromise();
 
@@ -337,7 +351,7 @@ describe('Workspace plugin', () => {
     const appUpdaterChangeMock = jest.fn();
     appUpdater$.subscribe(appUpdaterChangeMock);
 
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, { contentManagement: contentManagementMock });
 
     // Wait for filterNav been executed
     await new Promise(setImmediate);
