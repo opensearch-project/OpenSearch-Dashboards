@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
+import {} from '@elastic/datemath';
 import { AccelerationDetailsTab } from './acceleration_details_tab';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 
@@ -75,10 +76,20 @@ describe('AccelerationDetailsTab', () => {
     // Mock the Date.now() method to always return a specific timestamp
     jest.spyOn(Date, 'now').mockImplementation(() => 1627819985000); // 2021-08-01T11:53:05.000Z
 
-    // Mock the Intl.DateTimeFormat to use UTC
+    // Mock the Intl.DateTimeFormat to use a specific timezone (e.g., UTC-5)
     jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(() => {
       return {
-        format: (date) => new Date(date).toLocaleString('en-US', { timeZone: 'UTC' }),
+        format: (date) =>
+          new Date(date).toLocaleString('en-US', {
+            timeZone: 'America/New_York',
+            year: 'numeric',
+            month: 'numeric',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: true,
+          }),
       } as any;
     });
   });
@@ -101,7 +112,12 @@ describe('AccelerationDetailsTab', () => {
   test('displays the correct creation date', () => {
     const wrapper = shallowComponent();
     const creationDateNode = wrapper.find('DetailComponent[title="Creation Date"]');
-    expect(creationDateNode.prop('description')).toBe('8/1/2021, 6:53:05 PM');
+    const displayedDate = creationDateNode.prop('description') as string;
+
+    // Convert the displayed local time back to UTC
+    const displayedUTC = new Date(displayedDate).toUTCString();
+
+    expect(displayedUTC).toBe('Sun, 01 Aug 2021 18:53:05 GMT');
   });
 
   test('displays the correct refresh type', () => {

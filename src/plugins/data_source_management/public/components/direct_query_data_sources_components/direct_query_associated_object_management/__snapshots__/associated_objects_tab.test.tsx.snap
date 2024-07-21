@@ -1,0 +1,160 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AssociatedObjectsTab matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="euiSpacer euiSpacer--l"
+  />
+  <div
+    class="euiCallOut euiCallOut--primary"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <span
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        color="inherit"
+        data-euiicon-type="iInCircle"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        Accelerations recommended for tables. Setup acceleration or configure integrations
+      </span>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--l"
+  />
+  <div
+    class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow"
+  >
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        class="euiFlexItem"
+      >
+        <div
+          class="euiText euiText--medium"
+        >
+          <h2
+            class="panel-title"
+          >
+            Associated objects
+          </h2>
+          Manage objects associated with this data sources.
+        </div>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          class="euiText euiText--extraSmall"
+        >
+          <div
+            class="euiTextAlign euiTextAlign--right"
+          >
+            <div
+              class="euiTextColor euiTextColor--subdued"
+            >
+              Last updated at:
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiText euiText--extraSmall"
+        >
+          <div
+            class="euiTextAlign euiTextAlign--right"
+          >
+            <div
+              class="euiTextColor euiTextColor--subdued"
+            >
+              7/21/2024, 5:00:00 AM
+            </div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          class="euiButton euiButton--primary"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButton__content"
+          >
+            <span
+              class="euiButtonContent__icon"
+              color="inherit"
+              data-euiicon-type="refresh"
+            />
+            <span
+              class="euiButton__text"
+            >
+              Refresh
+            </span>
+          </span>
+        </button>
+      </div>
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <button
+          class="euiButton euiButton--primary euiButton--fill"
+          type="button"
+        >
+          <span
+            class="euiButtonContent euiButton__content"
+          >
+            <span
+              class="euiButton__text"
+            >
+              Create acceleration
+            </span>
+          </span>
+        </button>
+      </div>
+    </div>
+    <hr
+      class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginLarge"
+    />
+    <div
+      class="euiEmptyPrompt"
+    >
+      <span
+        color="subdued"
+        data-euiicon-type="alert"
+      />
+      <div
+        class="euiSpacer euiSpacer--m"
+      />
+      <h3
+        class="euiTitle euiTitle--medium"
+      >
+        Error
+      </h3>
+      <span
+        class="euiTextColor euiTextColor--subdued"
+      >
+        <div
+          class="euiSpacer euiSpacer--m"
+        />
+        <div
+          class="euiText euiText--medium"
+        >
+          <p>
+            Error loading databases
+          </p>
+        </div>
+      </span>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--l"
+  />
+</DocumentFragment>
+`;

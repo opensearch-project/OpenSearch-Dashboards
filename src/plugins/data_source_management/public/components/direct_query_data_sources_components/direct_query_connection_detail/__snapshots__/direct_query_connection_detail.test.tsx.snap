@@ -137,6 +137,7 @@ exports[`DirectQueryDataConnectionDetail matches snapshot 1`] = `
           class="euiAccordion__childWrapper"
           id="queryOrAccelerateAccordion"
           role="region"
+          style="height: 0px"
           tabindex="-1"
         >
           <div>
