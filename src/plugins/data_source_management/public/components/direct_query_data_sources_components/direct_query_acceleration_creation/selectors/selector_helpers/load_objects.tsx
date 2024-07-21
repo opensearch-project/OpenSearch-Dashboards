@@ -10,7 +10,7 @@ import { DirectQueryLoadingStatus } from '../../../../../../framework/types';
 import {
   useLoadAccelerationsToCache,
   useLoadTablesToCache,
-} from '../../../../../../framework/catlog_cache/cache_loader';
+} from '../../../../../../framework/catalog_cache/cache_loader';
 
 interface SelectorLoadDatabasesProps {
   dataSourceName: string;

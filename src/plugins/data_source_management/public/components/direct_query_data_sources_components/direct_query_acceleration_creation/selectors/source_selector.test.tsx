@@ -8,10 +8,10 @@ import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { AccelerationDataSourceSelector } from './source_selector';
 import { EuiComboBox, EuiDescriptionList, EuiFormRow } from '@elastic/eui';
-import { CatalogCacheManager } from '../../../../../framework/catlog_cache/cache_manager';
+import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
 import { CachedDataSourceStatus } from '../../../../../framework/types';
 
-jest.mock('../../../../../framework/catlog_cache/cache_manager');
+jest.mock('../../../../../framework/catalog_cache/cache_manager');
 jest.mock('../../../../../framework/utils/shared', () => ({
   DATACONNECTIONS_BASE: '/api/data_connections',
 }));

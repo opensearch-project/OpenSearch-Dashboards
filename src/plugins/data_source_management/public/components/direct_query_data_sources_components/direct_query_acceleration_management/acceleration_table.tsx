@@ -24,7 +24,7 @@ import {
   CachedDataSourceStatus,
   DirectQueryLoadingStatus,
 } from '../../../../framework/types';
-import { CatalogCacheManager } from '../../../../framework/catlog_cache/cache_manager';
+import { CatalogCacheManager } from '../../../../framework/catalog_cache/cache_manager';
 import { isCatalogCacheFetching } from '../../../../framework/utils/shared';
 import {
   ACC_LOADING_MSG,

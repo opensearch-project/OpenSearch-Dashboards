@@ -10,9 +10,9 @@ import { EuiButtonIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { SelectorLoadDatabases } from './load_databases';
 import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { DirectQueryLoadingStatus } from '../../../../../../framework/types';
-import { useLoadDatabasesToCache } from '../../../../../../framework/catlog_cache/cache_loader';
+import { useLoadDatabasesToCache } from '../../../../../../framework/catalog_cache/cache_loader';
 
-jest.mock('../../../../../../framework/catlog_cache/cache_loader');
+jest.mock('../../../../../../framework/catalog_cache/cache_loader');
 
 const mockHttp: HttpStart = ({} as unknown) as HttpStart;
 const mockNotifications: NotificationsStart = ({

@@ -24,7 +24,7 @@ import {
   CachedDatabase,
   CreateAccelerationForm,
 } from '../../../../../framework/types';
-import { CatalogCacheManager } from '../../../../../framework/catlog_cache/cache_manager';
+import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
 import { hasError, validateDataTable, validateDatabase } from '../create/utils';
 import { SelectorLoadDatabases } from './selector_helpers/load_databases';
 import { SelectorLoadObjects } from './selector_helpers/load_objects';

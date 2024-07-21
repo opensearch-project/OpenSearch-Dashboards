@@ -39,7 +39,7 @@ import {
   getDefaultDataSourceId$,
 } from './components/utils';
 import { DataSourceSelectionService } from './service/data_source_selection_service';
-import { catalogRequestIntercept } from '../framework/catlog_cache/cache_intercept';
+import { catalogRequestIntercept } from '../framework/catalog_cache/cache_intercept';
 import { createGetterSetter } from '../../../../src/plugins/opensearch_dashboards_utils/public';
 import { toMountPoint } from '../../../../src/plugins/opensearch_dashboards_react/public';
 import {

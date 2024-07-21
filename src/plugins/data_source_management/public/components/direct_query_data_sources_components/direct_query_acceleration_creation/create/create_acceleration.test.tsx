@@ -8,12 +8,12 @@ import { shallow, mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { CreateAcceleration } from './create_acceleration';
 import { EuiButtonEmpty, EuiFlyout, EuiForm } from '@elastic/eui';
-import { CatalogCacheManager } from '../../../../../framework/catlog_cache/cache_manager';
-import { useLoadTableColumnsToCache } from '../../../../../framework/catlog_cache/cache_loader';
+import { CatalogCacheManager } from '../../../../../framework/catalog_cache/cache_manager';
+import { useLoadTableColumnsToCache } from '../../../../../framework/catalog_cache/cache_loader';
 import { CachedDataSourceStatus } from '../../../../../framework/types';
 
-jest.mock('../../../../../framework/catlog_cache/cache_manager');
-jest.mock('../../../../../framework/catlog_cache/cache_loader');
+jest.mock('../../../../../framework/catalog_cache/cache_manager');
+jest.mock('../../../../../framework/catalog_cache/cache_loader');
 jest.mock('../selectors/index_type_selector', () => ({
   IndexTypeSelector: () => <div>MockIndexTypeSelector</div>,
 }));

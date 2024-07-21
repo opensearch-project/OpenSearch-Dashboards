@@ -16,7 +16,7 @@ import {
   CachedDatabase,
   DataSourceCacheData,
 } from '../../../../framework/types';
-import { CatalogCacheManager } from '../../../../framework/catlog_cache/cache_manager';
+import { CatalogCacheManager } from '../../../../framework/catalog_cache/cache_manager';
 
 interface LooseObject {
   [key: string]: any;

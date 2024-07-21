@@ -33,8 +33,8 @@ import {
   CachedColumn,
   DirectQueryLoadingStatus,
 } from '../../../../framework/types';
-import { useLoadTableColumnsToCache } from '../../../../framework/catlog_cache/cache_loader';
-import { CatalogCacheManager } from '../../../../framework/catlog_cache/cache_manager';
+import { useLoadTableColumnsToCache } from '../../../../framework/catalog_cache/cache_loader';
+import { CatalogCacheManager } from '../../../../framework/catalog_cache/cache_manager';
 import {
   getRenderAccelerationDetailsFlyout,
   getRenderCreateAccelerationFlyout,

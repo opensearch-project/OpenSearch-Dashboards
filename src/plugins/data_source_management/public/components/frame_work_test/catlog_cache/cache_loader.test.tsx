@@ -16,8 +16,8 @@ import {
   updateDatabasesToCache,
   updateTablesToCache,
   updateToCache,
-} from '../../../../framework/catlog_cache/cache_loader';
-import { CatalogCacheManager } from '../../../../framework/catlog_cache/cache_manager';
+} from '../../../../framework/catalog_cache/cache_loader';
+import { CatalogCacheManager } from '../../../../framework/catalog_cache/cache_manager';
 
 interface LooseObject {
   [key: string]: any;

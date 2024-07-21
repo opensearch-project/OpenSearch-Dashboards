@@ -13,7 +13,7 @@ import { CachedAcceleration } from '../../../../framework/types';
 import { useAccelerationOperation } from './acceleration_operation';
 
 jest.mock('./acceleration_operation');
-jest.mock('../../../../framework/catlog_cache/cache_loader');
+jest.mock('../../../../framework/catalog_cache/cache_loader');
 jest.mock('../../../../framework/utils/shared', () => ({
   DSL_BASE: '/api/accelerations',
 }));

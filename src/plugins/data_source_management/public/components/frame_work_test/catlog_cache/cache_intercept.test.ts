@@ -8,7 +8,7 @@ import {
   ASYNC_QUERY_ACCELERATIONS_CACHE,
   ASYNC_QUERY_DATASOURCE_CACHE,
 } from '../../../../framework/utils/shared';
-import { catalogRequestIntercept } from '../../../../framework/catlog_cache/cache_intercept';
+import { catalogRequestIntercept } from '../../../../framework/catalog_cache/cache_intercept';
 
 interface LooseObject {
   [key: string]: any;

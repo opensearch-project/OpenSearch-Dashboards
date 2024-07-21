@@ -8,11 +8,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { MemoryRouter, Route } from 'react-router-dom';
 import { DirectQueryDataConnectionDetail } from './direct_query_connection_detail';
-import {
-  ApplicationStart,
-  HttpStart,
-  NotificationsStart,
-} from 'opensearch-dashboards/public';
+import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 
 // Mock the imported modules and components
 jest.mock('../../../constants', () => ({
@@ -24,9 +20,7 @@ jest.mock('./utils/no_access_page', () => ({
 }));
 
 jest.mock('./utils/inactive_data_connection_callout', () => ({
-  InactiveDataConnectionCallout: () => (
-    <div>Inactive Data Connection</div>
-  ),
+  InactiveDataConnectionCallout: () => <div>Inactive Data Connection</div>,
 }));
 
 jest.mock('./access_control_tab', () => ({
@@ -37,7 +31,7 @@ jest.mock('../../breadcrumbs', () => ({
   getManageDirectQueryDataSourceBreadcrumbs: () => [{ text: 'Breadcrumb' }],
 }));
 
-jest.mock('../../../../framework/catlog_cache/cache_loader', () => ({
+jest.mock('../../../../framework/catalog_cache/cache_loader', () => ({
   useLoadAccelerationsToCache: jest.fn(() => ({
     loadStatus: 'IDLE',
     startLoading: jest.fn(),
@@ -64,9 +58,12 @@ jest.mock('../direct_query_associated_object_management/associated_objects_tab',
   AssociatedObjectsTab: () => <div>Associated Objects Tab</div>,
 }));
 
-jest.mock('../direct_query_associated_object_management/utils/associated_objects_tab_utils', () => ({
-  redirectToExplorerS3: jest.fn(),
-}));
+jest.mock(
+  '../direct_query_associated_object_management/utils/associated_objects_tab_utils',
+  () => ({
+    redirectToExplorerS3: jest.fn(),
+  })
+);
 
 const renderComponent = ({
   featureFlagStatus = false,

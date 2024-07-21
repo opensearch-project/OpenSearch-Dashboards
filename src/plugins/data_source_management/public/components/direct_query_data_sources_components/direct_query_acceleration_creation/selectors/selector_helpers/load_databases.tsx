@@ -7,7 +7,7 @@ import { EuiButtonIcon, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
 import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { DirectQueryLoadingStatus } from '../../../../../../framework/types';
-import { useLoadDatabasesToCache } from '../../../../../../framework/catlog_cache/cache_loader';
+import { useLoadDatabasesToCache } from '../../../../../../framework/catalog_cache/cache_loader';
 
 interface SelectorLoadDatabasesProps {
   dataSourceName: string;

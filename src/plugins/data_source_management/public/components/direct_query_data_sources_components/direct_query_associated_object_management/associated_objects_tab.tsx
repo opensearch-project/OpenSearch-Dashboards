@@ -27,7 +27,7 @@ import {
   DatasourceDetails,
   DirectQueryLoadingStatus,
 } from '../../../../framework/types';
-import { CatalogCacheManager } from '../../../../framework/catlog_cache/cache_manager';
+import { CatalogCacheManager } from '../../../../framework/catalog_cache/cache_manager';
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import {
   CreateAccelerationFlyoutButton,

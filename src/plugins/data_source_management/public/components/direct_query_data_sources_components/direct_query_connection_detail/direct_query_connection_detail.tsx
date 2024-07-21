@@ -38,7 +38,7 @@ import {
   useLoadAccelerationsToCache,
   useLoadDatabasesToCache,
   useLoadTablesToCache,
-} from '../../../../framework/catlog_cache/cache_loader';
+} from '../../../../framework/catalog_cache/cache_loader';
 import { AccelerationTable } from '../direct_query_acceleration_management/acceleration_table';
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import { AssociatedObjectsTab } from '../direct_query_associated_object_management/associated_objects_tab';

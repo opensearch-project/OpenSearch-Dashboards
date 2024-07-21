@@ -12,7 +12,7 @@ import { act } from 'react-dom/test-utils';
 import { ACC_LOADING_MSG } from './acceleration_utils';
 import { ReactWrapper } from 'enzyme';
 import { DirectQueryLoadingStatus } from '../../../../framework/types';
-import * as cacheLoader from '../../../../framework/catlog_cache/cache_loader';
+import * as cacheLoader from '../../../../framework/catalog_cache/cache_loader';
 
 configure({ adapter: new Adapter() });
 
@@ -68,13 +68,13 @@ const accelerationCache = {
   status: 'Updated',
 };
 
-jest.mock('../../../../framework/catlog_cache/cache_manager', () => ({
+jest.mock('../../../../framework/catalog_cache/cache_manager', () => ({
   CatalogCacheManager: {
     getOrCreateAccelerationsByDataSource: jest.fn().mockReturnValue(accelerationCache),
   },
 }));
 
-jest.mock('../../../../framework/catlog_cache/cache_loader', () => ({
+jest.mock('../../../../framework/catalog_cache/cache_loader', () => ({
   useLoadAccelerationsToCache: jest.fn(() => ({
     loadStatus: 'success',
     startLoading: jest.fn(),
