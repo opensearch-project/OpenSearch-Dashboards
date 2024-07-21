@@ -163,6 +163,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
             dataSourceName={datasource.name}
             renderCreateAccelerationFlyout={renderCreateAccelerationFlyout}
             handleRefresh={onRefreshButtonClick}
+            dataSourceMDSId={dataSourceMDSId}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
