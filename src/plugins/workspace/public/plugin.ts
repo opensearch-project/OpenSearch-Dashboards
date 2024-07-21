@@ -43,6 +43,8 @@ import {
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
+import { recentWorkspaceManager } from './recent_workspace_manager';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { UseCaseService } from './services/use_case_service';
 
 type WorkspaceAppType = (
@@ -262,6 +264,8 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
             }
             currentAppIdSubscription.unsubscribe();
           });
+          // Add workspace id to recent workspaces.
+          recentWorkspaceManager.addRecentWorkspace(workspaceId);
         })();
       }
     }
@@ -317,16 +321,6 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
         const { renderDetailApp } = await import('./application');
         return mountWorkspaceApp(params, renderDetailApp);
       },
-    });
-
-    /**
-     * Register workspace dropdown selector on the top of left navigation menu
-     */
-    core.chrome.registerCollapsibleNavHeader(() => {
-      if (!this.coreStart) {
-        return null;
-      }
-      return React.createElement(WorkspaceMenu, { coreStart: this.coreStart });
     });
 
     // workspace list
@@ -398,6 +392,19 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
     if (!core.chrome.navGroup.getNavGroupEnabled()) {
       this.addWorkspaceToBreadcrumbs(core);
+    } else {
+      /**
+       * Register workspace dropdown selector on the left navigation bottom
+       */
+      core.chrome.navControls.registerLeftBottom({
+        order: 2,
+        mount: toMountPoint(
+          React.createElement(WorkspaceMenu, {
+            coreStart: core,
+            registeredUseCases$: this.registeredUseCases$,
+          })
+        ),
+      });
     }
 
     return {};
