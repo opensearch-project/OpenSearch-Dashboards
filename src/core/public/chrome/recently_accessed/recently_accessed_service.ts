@@ -41,9 +41,9 @@ export interface ChromeRecentlyAccessedHistoryItem {
   label: string;
   id: string;
   workspaceId?: string;
-  extraProps?: {
+  meta?: {
     type?: string;
-    viewedAt?: number;
+    lastAccessedTime?: number;
   };
 }
 
@@ -67,7 +67,7 @@ export class RecentlyAccessedService {
         link: string,
         label: string,
         id: string,
-        extraProps?: ChromeRecentlyAccessedHistoryItem['extraProps']
+        meta?: ChromeRecentlyAccessedHistoryItem['meta']
       ) => {
         const currentWorkspaceId = workspaces.currentWorkspaceId$.getValue();
 
@@ -76,12 +76,7 @@ export class RecentlyAccessedService {
           label,
           id,
           ...(currentWorkspaceId && { workspaceId: currentWorkspaceId }),
-          ...(extraProps?.type && {
-            extraProps: {
-              viewedAt: Date.now(),
-              ...extraProps,
-            },
-          }),
+          ...(meta && { meta: { lastAccessedTime: Date.now(), ...meta } }),
         });
       },
 
@@ -115,7 +110,7 @@ export interface ChromeRecentlyAccessed {
     link: string,
     label: string,
     id: string,
-    extraProps?: ChromeRecentlyAccessedHistoryItem['extraProps']
+    meta?: ChromeRecentlyAccessedHistoryItem['meta']
   ): void;
 
   /**

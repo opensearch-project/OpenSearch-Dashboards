@@ -41,7 +41,7 @@ const recentlyUpdated = i18n.translate('homepage.recentWorkSection.recentlyUpdat
 });
 
 const sortKeyMap = {
-  [recentlyViewed]: 'viewedAt',
+  [recentlyViewed]: 'lastAccessedTime',
   [recentlyUpdated]: 'updatedAt',
 } as const;
 
@@ -53,7 +53,7 @@ function sortBy<T>(key: KeyOf<T>) {
 
 type DetailedRecentlyAccessedItem = SavedObjectWithMetadata &
   ChromeRecentlyAccessedHistoryItem &
-  ChromeRecentlyAccessedHistoryItem['extraProps'] & {
+  ChromeRecentlyAccessedHistoryItem['meta'] & {
     updatedAt: number;
     workspaceName?: string;
   };
@@ -103,11 +103,8 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
     detailedSavedObjects
       .filter((item) => !item.error)
       .forEach((recentAccessItem: ChromeRecentlyAccessedHistoryItem) => {
-        if (
-          recentAccessItem.extraProps?.type &&
-          options.indexOf(recentAccessItem.extraProps.type) === -1
-        ) {
-          options.push(recentAccessItem.extraProps.type);
+        if (recentAccessItem.meta?.type && options.indexOf(recentAccessItem.meta.type) === -1) {
+          options.push(recentAccessItem.meta.type);
         }
       });
     return options.map((option: string) => ({ label: option, value: option }));
@@ -119,15 +116,15 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
       .sort(sortBy(sortKeyMap[selectedSort]));
     return sortedResult.filter((item: SavedObject & ChromeRecentlyAccessedHistoryItem) => {
       if (selectedType === allOption) return true;
-      return item.extraProps?.type === selectedType;
+      return item.type === selectedType;
     });
   }, [detailedSavedObjects, selectedSort, selectedType]);
 
   useEffect(() => {
     const savedObjects = recentAccessed
-      .filter((item) => item.extraProps?.type)
+      .filter((item) => item.meta?.type)
       .map((item) => ({
-        type: item.extraProps?.type || '',
+        type: item.meta?.type || '',
         id: item.id,
       }));
 
@@ -145,7 +142,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
           return {
             ...recentAccessItem,
             ...obj,
-            ...recentAccessItem.extraProps,
+            ...recentAccessItem.meta,
             updatedAt: moment(obj?.updated_at).valueOf(),
             workspaceName: findWorkspace?.name,
           };
@@ -240,7 +237,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                         :{' '}
                         <b>
                           {selectedSort === recentlyViewed
-                            ? moment(recentAccessItem?.viewedAt).fromNow()
+                            ? moment(recentAccessItem?.lastAccessedTime).fromNow()
                             : moment(recentAccessItem?.updatedAt).fromNow()}
                         </b>
                       </div>

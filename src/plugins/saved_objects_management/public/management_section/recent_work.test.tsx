@@ -16,7 +16,7 @@ const mockedRecentItems: ChromeRecentlyAccessedHistoryItem[] = [
     link: '/app/visualize',
     label: 'visualize',
     id: 'visualize',
-    extraProps: {
+    meta: {
       type: 'visualize',
     },
   },
@@ -25,7 +25,7 @@ const mockedRecentItems: ChromeRecentlyAccessedHistoryItem[] = [
     label: 'dashboard',
     id: 'dashboard-in-workspace',
     workspaceId: 'workspace-id',
-    extraProps: {
+    meta: {
       type: 'dashboard',
     },
   },
