@@ -275,9 +275,6 @@ export class WorkspacePlugin
           // Add workspace id to recent workspaces.
           recentWorkspaceManager.addRecentWorkspace(workspaceId);
         })();
-
-        // Add workspace id to recent workspaces.
-        recentWorkspaceManager.addRecentWorkspace(workspaceId);
       }
     }
 
