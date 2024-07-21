@@ -44,7 +44,7 @@ const allWorkspacesTitle = i18n.translate('workspace.menu.title.allWorkspaces', 
 });
 
 const recentWorkspacesTitle = i18n.translate('workspace.menu.title.recentWorkspaces', {
-  defaultMessage: 'recent workspaces',
+  defaultMessage: 'Recent workspaces',
 });
 
 const createWorkspaceButton = i18n.translate('workspace.menu.button.createWorkspace', {
@@ -158,6 +158,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
             </EuiToolTip>
           }
           onClick={() => {
+            closePopover();
             window.location.assign(useCaseURL);
           }}
         />
@@ -221,6 +222,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                 <EuiButton
                   color="text"
                   onClick={() => {
+                    closePopover();
                     navigateToWorkspaceDetail(coreStart, currentWorkspace.id);
                   }}
                 >
@@ -240,6 +242,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                 <EuiButton
                   color="text"
                   onClick={() => {
+                    closePopover();
                     coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
                   }}
                 >
@@ -251,8 +254,9 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         </EuiFlexGroup>
       </EuiPanel>
       <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
-        {getWorkspaceListGroup(filteredRecentWorkspaces, 'recent')}
-        {getWorkspaceListGroup(filteredWorkspaceList, 'all')}
+        {filteredRecentWorkspaces.length > 0 &&
+          getWorkspaceListGroup(filteredRecentWorkspaces, 'recent')}
+        {filteredWorkspaceList.length > 0 && getWorkspaceListGroup(filteredWorkspaceList, 'all')}
       </EuiPanel>
       <EuiPanel paddingSize="s" hasBorder={false} color="transparent">
         <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
@@ -263,6 +267,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
               key={WORKSPACE_LIST_APP_ID}
               data-test-subj="workspace-menu-view-all-button"
               onClick={() => {
+                closePopover();
                 coreStart.application.navigateToApp(WORKSPACE_LIST_APP_ID);
               }}
             >
@@ -278,6 +283,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
                 key={WORKSPACE_CREATE_APP_ID}
                 data-test-subj="workspace-menu-create-workspace-button"
                 onClick={() => {
+                  closePopover();
                   coreStart.application.navigateToApp(WORKSPACE_CREATE_APP_ID);
                 }}
               >
