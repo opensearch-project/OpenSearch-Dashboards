@@ -13,8 +13,8 @@ import {
 
 import { useApplications } from '../../hooks';
 import {
+  getFirstUseCaseOfFeatureConfigs,
   getUseCaseFeatureConfig,
-  getUseCaseFromFeatureConfig,
   isUseCaseFeatureConfig,
 } from '../../utils';
 import { DataSource } from '../../../common/types';
@@ -29,8 +29,6 @@ import {
 import { WorkspacePermissionItemType } from './constants';
 
 const workspaceHtmlIdGenerator = htmlIdGenerator();
-
-const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
 
 export const useWorkspaceForm = ({
   application,
@@ -51,10 +49,9 @@ export const useWorkspaceForm = ({
   const [featureConfigs, setFeatureConfigs] = useState(
     appendDefaultFeatureIds(defaultValues?.features ?? [])
   );
-  const selectedUseCases = useMemo(
-    () => featureConfigs.map(getUseCaseFromFeatureConfig).filter(isNotNull),
-    [featureConfigs]
-  );
+  const selectedUseCase = useMemo(() => getFirstUseCaseOfFeatureConfigs(featureConfigs), [
+    featureConfigs,
+  ]);
   const [permissionSettings, setPermissionSettings] = useState<
     Array<Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>>
   >(initialPermissionSettingsRef.current);
@@ -72,7 +69,7 @@ export const useWorkspaceForm = ({
     name,
     description,
     features: featureConfigs,
-    useCases: selectedUseCases,
+    useCase: selectedUseCase,
     color,
     permissionSettings,
     selectedDataSources,
@@ -92,14 +89,14 @@ export const useWorkspaceForm = ({
     formIdRef.current = workspaceHtmlIdGenerator();
   }
 
-  const handleUseCasesChange = useCallback(
-    (newUseCases: string[]) => {
+  const handleUseCaseChange = useCallback(
+    (newUseCase: string) => {
       setFeatureConfigs((previousFeatureConfigs) => {
         return [
           ...previousFeatureConfigs.filter(
             (featureConfig) => !isUseCaseFeatureConfig(featureConfig)
           ),
-          ...newUseCases.map((useCaseItem) => getUseCaseFeatureConfig(useCaseItem)),
+          getUseCaseFeatureConfig(newUseCase),
         ];
       });
     },
@@ -157,7 +154,7 @@ export const useWorkspaceForm = ({
     numberOfChanges,
     handleFormSubmit,
     handleColorChange,
-    handleUseCasesChange,
+    handleUseCaseChange,
     handleNameInputChange,
     setPermissionSettings,
     setSelectedDataSources,

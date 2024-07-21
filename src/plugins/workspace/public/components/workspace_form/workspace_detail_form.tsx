@@ -59,7 +59,7 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
     numberOfChanges,
     handleFormSubmit,
     handleColorChange,
-    handleUseCasesChange,
+    handleUseCaseChange,
     setPermissionSettings,
     handleNameInputChange,
     setSelectedDataSources,
@@ -109,8 +109,8 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
 
             <FormGroup title={workspaceUseCaseTitle}>
               <WorkspaceUseCase
-                value={formData.useCases}
-                onChange={handleUseCasesChange}
+                value={formData.useCase}
+                onChange={handleUseCaseChange}
                 formErrors={formErrors}
                 availableUseCases={availableUseCases}
               />
