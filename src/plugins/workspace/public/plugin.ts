@@ -50,6 +50,7 @@ import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { UseCaseService } from './services/use_case_service';
 import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
 import { UseCaseFooter } from './components/home_get_start_card';
+import { HOME_CONTENT_AREAS } from '../../home/public';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -395,7 +396,7 @@ export class WorkspacePlugin
     useCases.forEach((useCase, index) => {
       contentManagement.registerContentProvider({
         id: `home_get_start_${useCase.id}`,
-        getTargetArea: () => `osd_homepage/get_started`,
+        getTargetArea: () => HOME_CONTENT_AREAS.GET_STARTED,
         getContent: () => ({
           id: useCase.id,
           kind: 'card',

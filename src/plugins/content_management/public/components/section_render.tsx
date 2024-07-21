@@ -61,7 +61,7 @@ const CardSection = ({ section, embeddable, contents$ }: Props) => {
 
   if (section.kind === 'card' && factory && input) {
     return (
-      <EuiPanel style={{ margin: '0px 8px' }}>
+      <EuiPanel>
         <EuiTitle size="s">
           <h2>
             <EuiButtonIcon
