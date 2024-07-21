@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "3.0.0",
+  "version": "2.14.0",
   "branch": "main",
   "types": "./opensearch_dashboards.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -246,7 +246,8 @@
     "type-detect": "^4.0.8",
     "uuid": "3.3.2",
     "whatwg-fetch": "^3.0.0",
-    "yauzl": "^2.10.0"
+    "yauzl": "^2.10.0",
+    "@opensearch-dashboards-test/opensearch-dashboards-test-library": "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz"
   },
   "devDependencies": {
     "@babel/core": "^7.22.9",
