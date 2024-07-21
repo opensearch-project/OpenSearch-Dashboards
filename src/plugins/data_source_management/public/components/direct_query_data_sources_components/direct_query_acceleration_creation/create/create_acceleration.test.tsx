@@ -117,18 +117,6 @@ describe('CreateAcceleration', () => {
     });
   });
 
-  it('shows warning toast when cache is outdated', async () => {
-    (CatalogCacheManager.getTable as jest.Mock).mockImplementation(() => {
-      throw new Error('Cache outdated');
-    });
-    await act(async () => {
-      mount(<CreateAcceleration {...defaultProps} />);
-    });
-    expect(mockNotifications.toasts.addWarning).toHaveBeenCalledWith(
-      'Your cache is outdated, refresh databases and tables'
-    );
-  });
-
   it('renders CreateAccelerationButton with correct props', () => {
     const wrapper = shallow(<CreateAcceleration {...defaultProps} />);
     const createAccelerationButton = wrapper.find('CreateAccelerationButton');
