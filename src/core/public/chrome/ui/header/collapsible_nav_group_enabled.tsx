@@ -19,7 +19,7 @@ import useObservable from 'react-use/lib/useObservable';
 import * as Rx from 'rxjs';
 import classNames from 'classnames';
 import { ChromeNavControl, ChromeNavLink } from '../..';
-import { NavGroupStatus } from '../../../../types';
+import { AppCategory, NavGroupStatus } from '../../../../types';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
 import { OnIsLockedUpdate } from './';
@@ -164,6 +164,13 @@ export function NavGroups({
   );
 }
 
+// custom category is used for those features not belong to any of use cases in all use case.
+const customCategory: AppCategory = {
+  id: 'custom',
+  label: i18n.translate('core.ui.customNavList.label', { defaultMessage: 'Custom' }),
+  order: Number.MAX_SAFE_INTEGER,
+};
+
 export function CollapsibleNavGroupEnabled({
   basePath,
   id,
@@ -182,29 +189,6 @@ export function CollapsibleNavGroupEnabled({
   const appId = useObservable(observables.appId$, '');
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
-
-  const onGroupClick = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    group: NavGroupItemInMap
-  ) => {
-    const fulfilledLinks = fulfillRegistrationLinksToChromeNavLinks(
-      navGroupsMap[group.id]?.navLinks,
-      navLinks
-    );
-    setCurrentNavGroup(group.id);
-
-    // the `navGroupsMap[group.id]?.navLinks` has already been sorted
-    const firstLink = fulfilledLinks[0];
-    if (firstLink) {
-      const propsForEui = createEuiListItem({
-        link: firstLink,
-        appId,
-        dataTestSubj: 'collapsibleNavAppLink',
-        navigateToApp,
-      });
-      propsForEui.onClick(e);
-    }
-  };
 
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
     if (currentNavGroup) {
@@ -234,7 +218,10 @@ export function CollapsibleNavGroupEnabled({
     navLinks
       .filter((link) => !linkIdsWithUseGroupInfo.includes(link.id))
       .forEach((navLink) => {
-        navLinksForAll.push(navLink);
+        navLinksForAll.push({
+          ...navLink,
+          category: customCategory,
+        });
       });
 
     // Append all the links registered to all use case
@@ -280,6 +267,33 @@ export function CollapsibleNavGroupEnabled({
 
     return 270;
   }, [isNavOpen]);
+
+  if (appId === 'home') {
+    return null;
+  }
+
+  const onGroupClick = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    group: NavGroupItemInMap
+  ) => {
+    const fulfilledLinks = fulfillRegistrationLinksToChromeNavLinks(
+      navGroupsMap[group.id]?.navLinks,
+      navLinks
+    );
+    setCurrentNavGroup(group.id);
+
+    // the `navGroupsMap[group.id]?.navLinks` has already been sorted
+    const firstLink = fulfilledLinks[0];
+    if (firstLink) {
+      const propsForEui = createEuiListItem({
+        link: firstLink,
+        appId,
+        dataTestSubj: 'collapsibleNavAppLink',
+        navigateToApp,
+      });
+      propsForEui.onClick(e);
+    }
+  };
 
   return (
     <EuiFlyout
@@ -335,7 +349,12 @@ export function CollapsibleNavGroupEnabled({
           </EuiPanel>
         </div>
         <EuiHorizontalRule margin="none" />
-        <div className="bottom-container" style={{ flexDirection: isNavOpen ? 'row' : 'column' }}>
+        <div
+          className={classNames({
+            'bottom-container': true,
+            'bottom-container-collapsed': !isNavOpen,
+          })}
+        >
           <HeaderNavControls
             navControls$={observables.navControlsLeftBottom$}
             className={classNames({ 'nav-controls-padding': isNavOpen })}

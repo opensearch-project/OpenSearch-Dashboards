@@ -111,6 +111,17 @@ export class IndexPatternManagementPlugin
       title: sectionsHeader,
       order: 0,
       mount: async (params) => {
+        if (core.chrome.navGroup.getNavGroupEnabled()) {
+          const [coreStart] = await core.getStartServices();
+          const urlForStandardIPMApp = new URL(
+            coreStart.application.getUrlForApp(IPM_APP_ID),
+            window.location.href
+          );
+          const targetUrl = new URL(window.location.href);
+          targetUrl.pathname = urlForStandardIPMApp.pathname;
+          coreStart.application.navigateToUrl(targetUrl.toString());
+          return () => {};
+        }
         const { mountManagementSection } = await import('./management_app');
 
         return mountManagementSection(
@@ -178,14 +189,11 @@ export class IndexPatternManagementPlugin
       },
     ]);
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.dataAdministration, [
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
       {
         id: IPM_APP_ID,
-        category: {
-          id: IPM_APP_ID,
-          label: sectionsHeader,
-          order: 100,
-        },
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 200,
       },
     ]);
 

@@ -456,14 +456,14 @@ export class DashboardPlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: app.id,
-        order: 300,
+        order: 400,
         category: undefined,
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
         id: app.id,
-        order: 300,
+        order: 400,
         category: undefined,
       },
     ]);
