@@ -41,6 +41,15 @@
   .bottom-container {
     padding: 0 $euiSize;
     display: flex;
+
+    &.bottom-container-collapsed {
+      flex-direction: column;
+      align-items: center;
+
+      > * {
+        margin: $euiSizeS 0;
+      }
+    }
   }
 
   .nav-controls-padding {

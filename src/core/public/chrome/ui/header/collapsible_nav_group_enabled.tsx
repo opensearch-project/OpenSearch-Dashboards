@@ -335,7 +335,12 @@ export function CollapsibleNavGroupEnabled({
           </EuiPanel>
         </div>
         <EuiHorizontalRule margin="none" />
-        <div className="bottom-container" style={{ flexDirection: isNavOpen ? 'row' : 'column' }}>
+        <div
+          className={classNames({
+            'bottom-container': true,
+            'bottom-container-collapsed': !isNavOpen,
+          })}
+        >
           <HeaderNavControls
             navControls$={observables.navControlsLeftBottom$}
             className={classNames({ 'nav-controls-padding': isNavOpen })}
