@@ -7,6 +7,7 @@ import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { map } from 'rxjs/operators';
+import { EuiIcon } from '@elastic/eui';
 import {
   Plugin,
   CoreStart,
@@ -28,6 +29,7 @@ import {
   WORKSPACE_DETAIL_APP_ID,
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
+  WORKSPACE_USE_CASES,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
@@ -46,6 +48,9 @@ import {
 import { recentWorkspaceManager } from './recent_workspace_manager';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { UseCaseService } from './services/use_case_service';
+import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
+import { UseCaseFooter } from './components/home_get_start_card';
+import { HOME_CONTENT_AREAS } from '../../home/public';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -59,7 +64,12 @@ interface WorkspacePluginSetupDeps {
   dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
-export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
+export interface WorkspacePluginStartDeps {
+  contentManagement: ContentManagementPluginStart;
+}
+
+export class WorkspacePlugin
+  implements Plugin<{}, {}, WorkspacePluginSetupDeps, WorkspacePluginStartDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private breadcrumbsSubscription?: Subscription;
@@ -372,7 +382,41 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     return {};
   }
 
-  public start(core: CoreStart) {
+  private registerGetStartedCardToNewHome(
+    core: CoreStart,
+    contentManagement: ContentManagementPluginStart
+  ) {
+    const useCases = [
+      WORKSPACE_USE_CASES.observability,
+      WORKSPACE_USE_CASES['security-analytics'],
+      WORKSPACE_USE_CASES.search,
+      WORKSPACE_USE_CASES.analytics,
+    ];
+
+    useCases.forEach((useCase, index) => {
+      contentManagement.registerContentProvider({
+        id: `home_get_start_${useCase.id}`,
+        getTargetArea: () => HOME_CONTENT_AREAS.GET_STARTED,
+        getContent: () => ({
+          id: useCase.id,
+          kind: 'card',
+          order: (index + 1) * 1000,
+          description: useCase.description,
+          title: useCase.title,
+          getIcon: () => React.createElement(EuiIcon, { size: 'xl', type: 'logoOpenSearch' }),
+          getFooter: () =>
+            React.createElement(UseCaseFooter, {
+              useCaseId: useCase.id,
+              useCaseTitle: useCase.title,
+              core,
+              registeredUseCases$: this.registeredUseCases$,
+            }),
+        }),
+      });
+    });
+  }
+
+  public start(core: CoreStart, { contentManagement }: WorkspacePluginStartDeps) {
     this.coreStart = core;
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
@@ -405,8 +449,10 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           })
         ),
       });
-    }
 
+      // register get started card in new home page
+      this.registerGetStartedCardToNewHome(core, contentManagement);
+    }
     return {};
   }
 
