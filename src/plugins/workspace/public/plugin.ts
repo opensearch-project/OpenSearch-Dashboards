@@ -47,7 +47,6 @@ import {
 import { recentWorkspaceManager } from './recent_workspace_manager';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { UseCaseService } from './services/use_case_service';
-import { recentWorkspaceManager } from './recent_workspace_manager';
 import { WorkspaceListCard } from './components/service_card';
 import { HOME_CONTENT_AREAS, HOME_PAGE_ID } from '../../home/public';
 
