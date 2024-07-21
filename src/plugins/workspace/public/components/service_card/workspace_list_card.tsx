@@ -23,7 +23,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
-import _ from 'lodash';
+import { orderBy } from 'lodash';
 import { CoreStart, WorkspaceObject } from '../../../../../core/public';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
 
@@ -50,7 +50,6 @@ export interface WorkspaceListItem {
 export interface WorkspaceListCardState {
   availiableWorkspaces: WorkspaceObject[];
   filter: string;
-  workspaceList: WorkspaceListItem[];
   recentWorkspaces: WorkspaceEntry[];
 }
 
@@ -60,64 +59,43 @@ export class WorkspaceListCard extends Component<WorkspaceListCardProps, Workspa
     super(props);
     this.state = {
       availiableWorkspaces: [],
-      recentWorkspaces: [],
-      workspaceList: [],
+      recentWorkspaces: recentWorkspaceManager.getRecentWorkspaces() || [],
       filter: 'viewed',
     };
   }
 
   componentDidMount() {
-    this.setState({
-      recentWorkspaces: recentWorkspaceManager.getRecentWorkspaces() || [],
-    });
     this.workspaceSub = this.props.core.workspaces.workspaceList$.subscribe((list) => {
       this.setState({
         availiableWorkspaces: list || [],
       });
     });
-    this.loadWorkspaceListItems();
-  }
-
-  componentDidUpdate(
-    prevProps: Readonly<WorkspaceListCardProps>,
-    prevState: Readonly<WorkspaceListCardState>
-  ): void {
-    if (
-      !_.isEqual(prevState.filter, this.state.filter) ||
-      !_.isEqual(prevState.availiableWorkspaces, this.state.availiableWorkspaces) ||
-      !_.isEqual(prevState.recentWorkspaces, this.state.recentWorkspaces)
-    ) {
-      this.loadWorkspaceListItems();
-    }
-  }
-
-  private loadWorkspaceListItems() {
-    if (this.state.filter === 'viewed') {
-      this.setState({
-        workspaceList: _.orderBy(this.state.recentWorkspaces, ['timestamp'], ['desc'])
-          .filter((ws) => this.state.availiableWorkspaces.some((a) => a.id === ws.id))
-          .slice(0, MAX_ITEM_IN_LIST)
-          .map((item) => ({
-            id: item.id,
-            name: this.state.availiableWorkspaces.find((ws) => ws.id === item.id)?.name!,
-            time: item.timestamp,
-          })),
-      });
-    } else if (this.state.filter === 'updated') {
-      this.setState({
-        workspaceList: _.orderBy(this.state.availiableWorkspaces, ['lastUpdatedTime'], ['desc'])
-          .slice(0, MAX_ITEM_IN_LIST)
-          .map((ws) => ({
-            id: ws.id,
-            name: ws.name,
-            time: ws.lastUpdatedTime,
-          })),
-      });
-    }
   }
 
   componentWillUnmount() {
     this.workspaceSub?.unsubscribe();
+  }
+
+  private loadWorkspaceListItems() {
+    if (this.state.filter === 'viewed') {
+      return orderBy(this.state.recentWorkspaces, ['timestamp'], ['desc'])
+        .filter((ws) => this.state.availiableWorkspaces.some((a) => a.id === ws.id))
+        .slice(0, MAX_ITEM_IN_LIST)
+        .map((item) => ({
+          id: item.id,
+          name: this.state.availiableWorkspaces.find((ws) => ws.id === item.id)?.name!,
+          time: item.timestamp,
+        }));
+    } else if (this.state.filter === 'updated') {
+      return orderBy(this.state.availiableWorkspaces, ['lastUpdatedTime'], ['desc'])
+        .slice(0, MAX_ITEM_IN_LIST)
+        .map((ws) => ({
+          id: ws.id,
+          name: ws.name,
+          time: ws.lastUpdatedTime,
+        }));
+    }
+    return [];
   }
 
   private handleSwitchWorkspace = (id: string) => {
@@ -128,7 +106,7 @@ export class WorkspaceListCard extends Component<WorkspaceListCardProps, Workspa
   };
 
   render() {
-    const workspaceList = this.state.workspaceList;
+    const workspaceList = this.loadWorkspaceListItems();
     const { application } = this.props.core;
 
     const isDashboardAdmin = application.capabilities.dashboards?.isDashboardAdmin;
