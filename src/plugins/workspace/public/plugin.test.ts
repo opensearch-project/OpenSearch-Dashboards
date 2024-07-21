@@ -19,9 +19,13 @@ import { savedObjectsManagementPluginMock } from '../../saved_objects_management
 import { managementPluginMock } from '../../management/public/mocks';
 import { UseCaseService } from './services/use_case_service';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
-import { WorkspacePlugin } from './plugin';
+import { WorkspacePlugin, WorkspacePluginStartDeps } from './plugin';
+import { contentManagementPluginMocks } from '../../content_management/public';
 
 describe('Workspace plugin', () => {
+  const mockDependencies: WorkspacePluginStartDeps = {
+    contentManagement: contentManagementPluginMocks.createStartContract(),
+  };
   const getSetupMock = () => ({
     ...coreMock.createSetup(),
   });
@@ -47,7 +51,7 @@ describe('Workspace plugin', () => {
     const setupMock = getSetupMock();
     const coreStart = coreMock.createStart();
     await workspacePlugin.setup(setupMock, {});
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, mockDependencies);
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
     expect(setupMock.application.register).toBeCalledTimes(4);
@@ -181,7 +185,7 @@ describe('Workspace plugin', () => {
     const breadcrumbs = new BehaviorSubject<ChromeBreadcrumb[]>([{ text: 'dashboards' }]);
     startMock.chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs);
     const workspacePlugin = new WorkspacePlugin();
-    workspacePlugin.start(startMock);
+    workspacePlugin.start(startMock, mockDependencies);
     expect(startMock.chrome.setBreadcrumbs).toBeCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
@@ -207,7 +211,7 @@ describe('Workspace plugin', () => {
     ]);
     startMock.chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs);
     const workspacePlugin = new WorkspacePlugin();
-    workspacePlugin.start(startMock);
+    workspacePlugin.start(startMock, mockDependencies);
     expect(startMock.chrome.setBreadcrumbs).not.toHaveBeenCalled();
   });
 
@@ -224,7 +228,7 @@ describe('Workspace plugin', () => {
     jest.spyOn(navGroupUpdater$, 'next');
 
     expect(navGroupUpdater$.next).not.toHaveBeenCalled();
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, mockDependencies);
 
     waitFor(() => {
       expect(navGroupUpdater$.next).toHaveBeenCalled();
@@ -235,7 +239,7 @@ describe('Workspace plugin', () => {
     const coreStart = coreMock.createStart();
     coreStart.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
     const workspacePlugin = new WorkspacePlugin();
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, mockDependencies);
 
     expect(coreStart.chrome.navControls.registerLeftBottom).toBeCalledTimes(1);
   });
@@ -264,7 +268,7 @@ describe('Workspace plugin', () => {
 
     const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
 
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, mockDependencies);
 
     const appUpdater = await appUpdater$.pipe(first()).toPromise();
 
@@ -285,7 +289,7 @@ describe('Workspace plugin', () => {
 
     const navGroupUpdater$ = setupMock.chrome.navGroup.registerNavGroupUpdater.mock.calls[0][0];
 
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, mockDependencies);
 
     const navGroupUpdater = await navGroupUpdater$.pipe(first()).toPromise();
 
@@ -336,7 +340,7 @@ describe('Workspace plugin', () => {
     const appUpdaterChangeMock = jest.fn();
     appUpdater$.subscribe(appUpdaterChangeMock);
 
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, mockDependencies);
 
     // Wait for filterNav been executed
     await new Promise(setImmediate);
