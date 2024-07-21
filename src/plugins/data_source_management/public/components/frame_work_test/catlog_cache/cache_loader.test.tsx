@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CATALOG_CACHE_VERSION } from '../../../framework/constants';
-import { CachedDataSourceStatus } from '../../../framework/types';
+import { CATALOG_CACHE_VERSION } from '../../../../framework/constants';
+import { CachedDataSourceStatus } from '../../../../framework/types';
 import {
   mockShowDatabasesPollingResult,
   mockShowIndexesPollingResult,
@@ -16,8 +16,8 @@ import {
   updateDatabasesToCache,
   updateTablesToCache,
   updateToCache,
-} from '../../../framework/catlog_cache/cache_loader';
-import { CatalogCacheManager } from '../../../framework/catlog_cache/cache_manager';
+} from '../../../../framework/catlog_cache/cache_loader';
+import { CatalogCacheManager } from '../../../../framework/catlog_cache/cache_manager';
 
 interface LooseObject {
   [key: string]: any;

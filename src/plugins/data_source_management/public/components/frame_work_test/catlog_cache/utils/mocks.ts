@@ -12,7 +12,7 @@ import {
   DataSourceCacheData,
   DatasourceDetails,
   DatasourceType,
-} from '../../../../framework/types';
+} from '../../../../../framework/types';
 
 export const showDataConnectionsData = {
   schema: [

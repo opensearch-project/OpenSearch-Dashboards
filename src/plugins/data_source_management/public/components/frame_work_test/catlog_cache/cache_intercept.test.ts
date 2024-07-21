@@ -3,12 +3,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SECURITY_DASHBOARDS_LOGOUT_URL } from '../../../framework/constants';
+import { SECURITY_DASHBOARDS_LOGOUT_URL } from '../../../../framework/constants';
 import {
   ASYNC_QUERY_ACCELERATIONS_CACHE,
   ASYNC_QUERY_DATASOURCE_CACHE,
-} from '../../../framework/utils/shared';
-import { catalogRequestIntercept } from '../../../framework/catlog_cache/cache_intercept';
+} from '../../../../framework/utils/shared';
+import { catalogRequestIntercept } from '../../../../framework/catlog_cache/cache_intercept';
 
 interface LooseObject {
   [key: string]: any;
