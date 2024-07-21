@@ -167,115 +167,110 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
   }
 
   return (
-    <>
-      <EuiSpacer />
-      <EuiPanel>
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <EuiFlexItem>
-            <EuiTitle>
-              <h5>
-                {i18n.translate('homepage.recentWorkSection.title', {
-                  defaultMessage: 'Assets',
-                })}
-              </h5>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup>
-              <EuiFlexItem>
-                <EuiFilterGroup>
-                  {[recentlyViewed, recentlyUpdated].map((item) => (
-                    <EuiFilterButton
-                      key={item}
-                      hasActiveFilters={item === selectedSort}
-                      onClick={() => setSelectedSort(item)}
-                      data-test-subj={`filterButton-${encodeURIComponent(item)}`}
-                    >
-                      {item}
-                    </EuiFilterButton>
-                  ))}
-                </EuiFilterGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiComboBox
-                  style={{
-                    width: widthForTypeSelector,
-                  }}
-                  isClearable={false}
-                  options={allOptions}
-                  singleSelection={{ asPlainText: true }}
-                  onChange={(options) => setSelectedType(options[0].value || '')}
-                  selectedOptions={[{ label: selectedType, value: selectedType }]}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup>
-          {Array.from({ length: MAX_ITEMS_DISPLAY }).map((item, itemIndexInRow) => {
-            const recentAccessItem = itemsForDisplay[itemIndexInRow];
-            let content = null;
-            if (recentAccessItem) {
-              const navLinks = core.chrome.navLinks.getAll();
-              const recentNavLink = createRecentNavLink(
-                recentAccessItem,
-                navLinks,
-                core.http.basePath,
-                core.application.navigateToUrl
-              );
-              content = (
-                <EuiCard
-                  title={recentAccessItem.label}
-                  titleSize="xs"
-                  data-test-subj="recentlyCard"
-                  description=""
-                  textAlign="left"
-                  href={recentNavLink.href}
-                  footer={
-                    <>
-                      <div>
-                        <EuiIcon
-                          style={{ marginRight: widthForRightMargin }}
-                          type={recentAccessItem.meta.icon || 'apps'}
-                        />
-                        {recentAccessItem.type}
-                      </div>
-                      <EuiSpacer size="s" />
-                      <div>
-                        {selectedSort === recentlyViewed
-                          ? i18n.translate('homepage.recentWorkSection.viewedAt', {
-                              defaultMessage: 'Viewed',
-                            })
-                          : i18n.translate('homepage.recentWorkSection.updatedAt', {
-                              defaultMessage: 'Updated',
-                            })}
-                        :{' '}
-                        <b>
-                          {selectedSort === recentlyViewed
-                            ? moment(recentAccessItem?.viewedAt).fromNow()
-                            : moment(recentAccessItem?.updatedAt).fromNow()}
-                        </b>
-                      </div>
-                      {workspaceEnabled && (
-                        <div>
-                          {i18n.translate('homepage.recentWorkSection.workspace', {
-                            defaultMessage: 'Workspace',
-                          })}
-                          : <b>{recentAccessItem.workspaceName || 'N/A'}</b>
-                        </div>
-                      )}
-                    </>
-                  }
-                  onClick={recentNavLink.onClick}
-                />
-              );
-            }
-            return (
-              <EuiFlexItem key={recentAccessItem?.id || itemIndexInRow}>{content}</EuiFlexItem>
+    <EuiPanel>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexItem>
+          <EuiTitle>
+            <h5>
+              {i18n.translate('homepage.recentWorkSection.title', {
+                defaultMessage: 'Assets',
+              })}
+            </h5>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFilterGroup>
+                {[recentlyViewed, recentlyUpdated].map((item) => (
+                  <EuiFilterButton
+                    key={item}
+                    hasActiveFilters={item === selectedSort}
+                    onClick={() => setSelectedSort(item)}
+                    data-test-subj={`filterButton-${encodeURIComponent(item)}`}
+                  >
+                    {item}
+                  </EuiFilterButton>
+                ))}
+              </EuiFilterGroup>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiComboBox
+                style={{
+                  width: widthForTypeSelector,
+                }}
+                isClearable={false}
+                options={allOptions}
+                singleSelection={{ asPlainText: true }}
+                onChange={(options) => setSelectedType(options[0].value || '')}
+                selectedOptions={[{ label: selectedType, value: selectedType }]}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiFlexGroup>
+        {Array.from({ length: MAX_ITEMS_DISPLAY }).map((item, itemIndexInRow) => {
+          const recentAccessItem = itemsForDisplay[itemIndexInRow];
+          let content = null;
+          if (recentAccessItem) {
+            const navLinks = core.chrome.navLinks.getAll();
+            const recentNavLink = createRecentNavLink(
+              recentAccessItem,
+              navLinks,
+              core.http.basePath,
+              core.application.navigateToUrl
             );
-          })}
-        </EuiFlexGroup>
-      </EuiPanel>
-    </>
+            content = (
+              <EuiCard
+                title={recentAccessItem.label}
+                titleSize="xs"
+                data-test-subj="recentlyCard"
+                description=""
+                textAlign="left"
+                href={recentNavLink.href}
+                footer={
+                  <>
+                    <div>
+                      <EuiIcon
+                        style={{ marginRight: widthForRightMargin }}
+                        type={recentAccessItem.meta.icon || 'apps'}
+                      />
+                      {recentAccessItem.type}
+                    </div>
+                    <EuiSpacer size="s" />
+                    <div>
+                      {selectedSort === recentlyViewed
+                        ? i18n.translate('homepage.recentWorkSection.viewedAt', {
+                            defaultMessage: 'Viewed',
+                          })
+                        : i18n.translate('homepage.recentWorkSection.updatedAt', {
+                            defaultMessage: 'Updated',
+                          })}
+                      :{' '}
+                      <b>
+                        {selectedSort === recentlyViewed
+                          ? moment(recentAccessItem?.viewedAt).fromNow()
+                          : moment(recentAccessItem?.updatedAt).fromNow()}
+                      </b>
+                    </div>
+                    {workspaceEnabled && (
+                      <div>
+                        {i18n.translate('homepage.recentWorkSection.workspace', {
+                          defaultMessage: 'Workspace',
+                        })}
+                        : <b>{recentAccessItem.workspaceName || 'N/A'}</b>
+                      </div>
+                    )}
+                  </>
+                }
+                onClick={recentNavLink.onClick}
+              />
+            );
+          }
+          return <EuiFlexItem key={recentAccessItem?.id || itemIndexInRow}>{content}</EuiFlexItem>;
+        })}
+      </EuiFlexGroup>
+    </EuiPanel>
   );
 };
