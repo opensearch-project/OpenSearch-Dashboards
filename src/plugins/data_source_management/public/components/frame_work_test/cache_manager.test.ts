@@ -3,8 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CATALOG_CACHE_VERSION } from '../constants';
-import { ASYNC_QUERY_ACCELERATIONS_CACHE, ASYNC_QUERY_DATASOURCE_CACHE } from '../utils/shared';
+import { CATALOG_CACHE_VERSION } from '../../../framework/constants';
+import {
+  ASYNC_QUERY_ACCELERATIONS_CACHE,
+  ASYNC_QUERY_DATASOURCE_CACHE,
+} from '../../../framework/utils/shared';
 import {
   AccelerationsCacheData,
   CachedAccelerationByDataSource,
@@ -12,8 +15,8 @@ import {
   CachedDataSourceStatus,
   CachedDatabase,
   DataSourceCacheData,
-} from '../types';
-import { CatalogCacheManager } from './cache_manager';
+} from '../../../framework/types';
+import { CatalogCacheManager } from '../../../framework/catlog_cache/cache_manager';
 
 interface LooseObject {
   [key: string]: any;
