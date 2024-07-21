@@ -51,8 +51,8 @@ function sortBy<T>(key: KeyOf<T>) {
   return (a: T, b: T): number => (a[key] > b[key] ? -1 : b[key] > a[key] ? 1 : 0);
 }
 
-type DetailedRecentlyAccessedItem = SavedObjectWithMetadata &
-  ChromeRecentlyAccessedHistoryItem &
+type DetailedRecentlyAccessedItem = ChromeRecentlyAccessedHistoryItem &
+  SavedObjectWithMetadata &
   ChromeRecentlyAccessedHistoryItem['meta'] & {
     updatedAt: number;
     workspaceName?: string;
