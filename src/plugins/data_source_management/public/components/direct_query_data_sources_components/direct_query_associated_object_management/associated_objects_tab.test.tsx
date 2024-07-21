@@ -99,6 +99,23 @@ describe('AssociatedObjectsTab', () => {
     global.Date = OriginalDate;
   });
 
+  // Mock the Intl.DateTimeFormat to use UTC for consistency
+  jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(() => {
+    return {
+      format: (date) =>
+        new Date(date).toLocaleString('en-US', {
+          timeZone: 'UTC',
+          year: 'numeric',
+          month: 'numeric',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: 'numeric',
+          second: 'numeric',
+          hour12: true,
+        }),
+    } as any;
+  });
+
   test('renders without crashing', () => {
     renderComponent();
     expect(
