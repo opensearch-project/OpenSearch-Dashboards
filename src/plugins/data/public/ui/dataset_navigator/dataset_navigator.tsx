@@ -7,7 +7,6 @@ import React, { useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanelItemDescriptor,
   EuiForm,
@@ -15,13 +14,8 @@ import {
   EuiLoadingSpinner,
   EuiPopover,
   EuiSelect,
-  EuiText,
 } from '@elastic/eui';
-import {
-  HttpStart,
-  NotificationsStart,
-  SavedObjectsClientContract,
-} from 'opensearch-dashboards/public';
+import { HttpStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import _ from 'lodash';
 import {
   SIMPLE_DATA_SET_TYPES,
@@ -30,25 +24,26 @@ import {
   SimpleObject,
 } from 'src/plugins/data/common';
 import { i18n } from '@osd/i18n';
-import { IIndexPattern } from '../..';
 import {
   useLoadDatabasesToCache,
   useLoadExternalDataSourcesToCache,
   useLoadTablesToCache,
 } from './lib/catalog_cache/cache_loader';
 import { CatalogCacheManager } from './lib/catalog_cache/cache_manager';
+import { CachedDataSourceStatus, DirectQueryLoadingStatus, ExternalDataSource } from './lib/types';
 import {
-  CachedDataSourceStatus,
-  DataSetOption,
-  DirectQueryLoadingStatus,
-  ExternalDataSource,
-} from './lib/types';
-import { getIndexPatterns, getQueryService, getSearchService, getUiService } from '../../services';
+  getIndexPatterns,
+  getNotifications,
+  getQueryService,
+  getSearchService,
+  getUiService,
+} from '../../services';
 import { fetchDataSources, fetchIndexPatterns, fetchIndices, isCatalogCacheFetching } from './lib';
 
 export interface DataSetNavigatorProps {
   dataSetId: string | undefined;
   savedObjectsClient?: SavedObjectsClientContract;
+  http?: HttpStart;
   onSelectDataSet: (dataSet: SimpleDataSet) => void;
 }
 
@@ -57,6 +52,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   const queryService = getQueryService();
   const uiService = getUiService();
   const indexPatternsService = getIndexPatterns();
+  const notifications = getNotifications();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -64,9 +60,11 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   const [selectedObject, setSelectedObject] = useState<SimpleDataSet | undefined>();
   const [selectedDataSource, setSelectedDataSource] = useState<SimpleDataSource | undefined>();
   const [selectedDataSourceObjects, setSelectedDataSourceObjects] = useState<SimpleObject[]>([]);
-  const [selectedExternalDataSource, setSelectedExternalDataSource] = useState<SimpleDataSource>();
+  const [selectedExternalDataSource, setSelectedExternalDataSource] = useState<
+    ExternalDataSource
+  >();
   const [dataSources, setDataSources] = useState<SimpleDataSource[]>([]);
-  const [externalDataSources, setExternalDataSources] = useState<SimpleDataSource[]>([]);
+  const [externalDataSources, setExternalDataSources] = useState<ExternalDataSource[]>([]);
   // TODO iindexpattern
   const [indexPatterns, setIndexPatterns] = useState<any[]>([]);
 
@@ -74,58 +72,31 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   const [cacheRefreshable, setCacheRefreshable] = useState<boolean>(false);
   const [cachedDatabases, setCachedDatabases] = useState<any[]>([]);
   const [cachedTables, setCachedTables] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
   const [failed, setFailed] = useState<boolean>(false);
 
   const {
     loadStatus: dataSourcesLoadStatus,
     loadExternalDataSources: startLoadingDataSources,
-  } = useLoadExternalDataSourcesToCache(http, notifications);
+  } = useLoadExternalDataSourcesToCache(props.http!, notifications);
   const {
     loadStatus: databasesLoadStatus,
     startLoading: startLoadingDatabases,
-  } = useLoadDatabasesToCache(http, notifications);
+  } = useLoadDatabasesToCache(props.http!, notifications);
   const { loadStatus: tablesLoadStatus, startLoading: startLoadingTables } = useLoadTablesToCache(
-    http,
+    props.http!,
     notifications
   );
 
-  const onButtonClick = () => setIsOpen(!isOpen);
   const closePopover = () => setIsOpen(false);
 
-  const onDataSetClick = async (dataSet: DataSetOption) => {
-    setSelectedDataSet(dataSet);
-    onDataSetSelected(dataSet);
-    settings.setSelectedDataSet(dataSet);
-    CatalogCacheManager.addRecentDataSet(dataSet);
-    closePopover();
-  };
-
   const handleExternalDataSourcesRefresh = () => {
-    if (!isCatalogCacheFetching(dataSourcesLoadStatus) && clusterList.length > 0) {
-      startLoadingDataSources(clusterList.map((cluster) => cluster.id));
+    if (!isCatalogCacheFetching(dataSourcesLoadStatus) && dataSources.length > 0) {
+      startLoadingDataSources(dataSources.map((dataSource) => dataSource.id));
     }
   };
 
-  const getInitialQuery = (dataSet: SimpleDataSet) => {
-    const language = uiService.Settings.getUserQueryLanguage();
-    const input = uiService.Settings.getQueryEnhancements(language)?.searchBar?.queryStringInput
-      ?.initialValue;
-
-    if (!dataSet || !input)
-      return {
-        query: '',
-        language,
-      };
-
-    return {
-      query: input.replace('<data_source>', dataSet.title),
-      language,
-    };
-  };
-
   useEffect(() => {
-    setLoading(true);
+    setIsLoading(true);
 
     Promise.all([
       fetchIndexPatterns(props.savedObjectsClient!, ''),
@@ -149,13 +120,13 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         }
       })
       .finally(() => {
-        setLoading(false);
+        setIsLoading(false);
       });
   }, [indexPatternsService, props.dataSetId, props.savedObjectsClient, selectedDataSet]);
 
   useEffect(() => {
     if (selectedDataSource) {
-      setLoading(true);
+      setIsLoading(true);
       fetchIndices(searchService, selectedDataSource.id).then((indices) => {
         const objects = indices.map(({ indexName }: { indexName: string }) => ({
           id: indexName,
@@ -167,7 +138,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           },
         }));
         setSelectedDataSourceObjects(objects);
-        setLoading(false);
+        setIsLoading(false);
       });
     }
   }, [searchService, selectedDataSource]);
@@ -215,7 +186,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     if (selectedExternalDataSource) {
       const dataSourceCache = CatalogCacheManager.getOrCreateDataSource(
         selectedExternalDataSource.name,
-        selectedExternalDataSource.id
+        selectedExternalDataSource.dataSourceRef
       );
       if (
         (dataSourceCache.status === CachedDataSourceStatus.Empty ||
@@ -224,7 +195,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       ) {
         startLoadingDatabases({
           dataSourceName: selectedExternalDataSource.name,
-          dataSourceMDSId: selectedExternalDataSource.id,
+          dataSourceMDSId: selectedExternalDataSource.dataSourceRef,
         });
       } else if (dataSourceCache.status === CachedDataSourceStatus.Updated) {
         setCachedDatabases(dataSourceCache.databases);
@@ -238,7 +209,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     if (selectedExternalDataSource) {
       const dataSourceCache = CatalogCacheManager.getOrCreateDataSource(
         selectedExternalDataSource?.name,
-        selectedExternalDataSource?.id
+        selectedExternalDataSource?.dataSourceRef
       );
       if (status === DirectQueryLoadingStatus.SUCCESS) {
         setCachedDatabases(dataSourceCache.databases);
@@ -259,7 +230,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         databaseCache = CatalogCacheManager.getDatabase(
           selectedExternalDataSource.name,
           selectedDatabase,
-          selectedExternalDataSource.id
+          selectedExternalDataSource.dataSourceRef
         );
       } catch (error) {
         return;
@@ -272,7 +243,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         startLoadingTables({
           dataSourceName: selectedExternalDataSource.name,
           databaseName: selectedDatabase,
-          dataSourceMDSId: selectedExternalDataSource.id,
+          dataSourceMDSId: selectedExternalDataSource.dataSourceRef,
         });
       } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
         setCachedTables(databaseCache.tables);
@@ -289,7 +260,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         databaseCache = CatalogCacheManager.getDatabase(
           selectedExternalDataSource.name,
           selectedDatabase,
-          selectedExternalDataSource.id
+          selectedExternalDataSource.dataSourceRef
         );
       } catch (error) {
         return;
@@ -304,6 +275,62 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       }
     }
   }, [selectedExternalDataSource, selectedDatabase, tablesLoadStatus]);
+
+  useEffect(() => {
+    const createTemporaryIndexPattern = async (dataSet: SimpleDataSet) => {
+      const fieldsMap = dataSet.fields?.reduce((acc: any, field: any) => {
+        acc[field.name] = field;
+        return acc;
+      });
+      const temporaryIndexPattern = await indexPatternsService.create(
+        {
+          id: dataSet.id,
+          title: dataSet.title,
+          fields: fieldsMap,
+          dataSourceRef: {
+            id: dataSet.dataSourceRef?.id!,
+            name: dataSet.dataSourceRef?.name!,
+            type: dataSet.dataSourceRef?.type!,
+          },
+          timeFieldName: dataSet.timeFieldName,
+        },
+        true
+      );
+      indexPatternsService.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
+    };
+
+    const getInitialQuery = (dataSet: SimpleDataSet) => {
+      const language = uiService.Settings.getUserQueryLanguage();
+      const input = uiService.Settings.getQueryEnhancements(language)?.searchBar?.queryStringInput
+        ?.initialValue;
+
+      if (!dataSet || !input)
+        return {
+          query: '',
+          language,
+        };
+
+      return {
+        query: input.replace('<data_source>', dataSet.title),
+        language,
+      };
+    };
+
+    const onDataSetSelected = async (dataSet: SimpleDataSet) => {
+      if (dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY) {
+        await createTemporaryIndexPattern(dataSet);
+      }
+      // settings.setSelectedDataSet(dataSet);
+      //  CatalogCacheManager.addRecentDataSet(dataSet);
+      props.onSelectDataSet(dataSet);
+      queryService.queryString.setQuery(getInitialQuery(dataSet));
+      closePopover();
+    };
+
+    if (selectedDataSet) {
+      onDataSetSelected(selectedDataSet);
+    }
+  }, [indexPatternsService, props, queryService.queryString, selectedDataSet, uiService.Settings]);
 
   const RefreshButton = (
     <EuiButtonEmpty
@@ -358,7 +385,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                 ? [
                     {
                       name: 'Recently Used',
-                      panel: 7,
+                      panel: 8,
                     },
                   ]
                 : []),
@@ -407,7 +434,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
               },
               ...(indexNum < arr.length - 1 ? [{ isSeparator: true }] : []),
             ]) as EuiContextMenuPanelItemDescriptor[],
-            content: <div>{loading && LoadingSpinner}</div>,
+            content: <div>{isLoading && LoadingSpinner}</div>,
           },
           {
             id: 2,
@@ -418,7 +445,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                 onClick: () => setSelectedDataSource(dataSource),
               })),
             ],
-            content: <div>{loading && LoadingSpinner}</div>,
+            content: <div>{isLoading && LoadingSpinner}</div>,
           },
           {
             id: 3,
@@ -431,7 +458,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                   type: SIMPLE_DATA_SET_TYPES.TEMPORARY,
                 }),
             })),
-            content: <div>{loading && LoadingSpinner}</div>,
+            content: <div>{isLoading && LoadingSpinner}</div>,
           },
           {
             id: 4,
@@ -474,10 +501,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
             content: <div>{isCatalogCacheFetching(tablesLoadStatus) && LoadingSpinner}</div>,
           },
           {
-            id: 8,
+            id: 7,
             title: selectedObject?.title,
             content:
-              loading && !selectedObject ? (
+              isLoading && !selectedObject ? (
                 <div>{LoadingSpinner}</div>
               ) : (
                 <EuiForm className="dataSetNavigatorFormWrapper">
@@ -524,7 +551,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
               ),
           },
           {
-            id: 9,
+            id: 8,
             title: 'Recently Used',
             items: CatalogCacheManager.getRecentDataSets().map((ds) => ({
               name: ds.name,

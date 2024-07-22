@@ -65,12 +65,12 @@ export interface IUiSetup {
  */
 export interface IUiStart {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+  DataSetNavigator: React.ComponentType<DataSetNavigatorProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
   SuggestionsComponent: React.ComponentType<SuggestionsComponentProps>;
   /**
    * @experimental - Subject to change
    */
   Settings: Settings;
-  DataSetNavigator: (onDataSetSelected: any) => React.ComponentType<DataSetNavigatorProps>;
   container$: Observable<HTMLDivElement | null>;
 }
