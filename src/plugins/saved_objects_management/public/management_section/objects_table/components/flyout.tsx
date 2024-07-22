@@ -837,6 +837,7 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
             disabled={!this.props.dataSourceEnabled}
             fullWidth={true}
             isClearable={false}
+            compressed={true}
           />
         </EuiFormFieldset>
         <EuiSpacer />
