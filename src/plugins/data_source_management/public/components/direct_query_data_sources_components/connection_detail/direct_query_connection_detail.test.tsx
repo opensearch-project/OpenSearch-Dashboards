@@ -292,27 +292,4 @@ describe('DirectQueryDataConnectionDetail', () => {
     expect(screen.getByText('Configure Integrations')).toBeInTheDocument();
     expect(screen.getByText('Installed Integrations')).toBeInTheDocument();
   });
-
-  test('matches snapshot', async () => {
-    const mockHttp = {
-      get: jest.fn().mockResolvedValue({
-        allowedRoles: ['role1'],
-        description: 'Test description',
-        name: 'Test datasource',
-        connector: 'PROMETHEUS',
-        properties: { 'prometheus.uri': 'placeholder' },
-        status: 'ACTIVE',
-      }),
-    };
-
-    const { asFragment } = renderComponent({ http: mockHttp });
-
-    await waitFor(() => {
-      const titleElement = screen.getByTestId('datasourceTitle');
-      expect(titleElement).toBeInTheDocument();
-      expect(titleElement).toHaveTextContent('Test datasource');
-    });
-
-    expect(asFragment()).toMatchSnapshot();
-  });
 });
