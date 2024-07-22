@@ -36,6 +36,7 @@ import { Services, WorkspaceUseCase } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { ManagementSetup } from '../../../plugins/management/public';
+import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
@@ -48,7 +49,7 @@ import {
 import { recentWorkspaceManager } from './recent_workspace_manager';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { UseCaseService } from './services/use_case_service';
-import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
+import { WorkspaceListCard } from './components/service_card';
 import { UseCaseFooter } from './components/home_get_start_card';
 import { HOME_CONTENT_AREAS } from '../../home/public';
 
@@ -450,10 +451,31 @@ export class WorkspacePlugin
         ),
       });
 
+      // register workspace list in home page
+      this.registerWorkspaceListToHome(core, contentManagement);
+
       // register get started card in new home page
       this.registerGetStartedCardToNewHome(core, contentManagement);
     }
     return {};
+  }
+
+  private registerWorkspaceListToHome(
+    core: CoreStart,
+    contentManagement: ContentManagementPluginStart
+  ) {
+    if (contentManagement) {
+      contentManagement.registerContentProvider({
+        id: 'workspace_list_card_home',
+        getContent: () => ({
+          id: 'workspace_list',
+          kind: 'custom',
+          order: 0,
+          render: () => React.createElement(WorkspaceListCard, { core }),
+        }),
+        getTargetArea: () => HOME_CONTENT_AREAS.SERVICE_CARDS,
+      });
+    }
   }
 
   public stop() {
