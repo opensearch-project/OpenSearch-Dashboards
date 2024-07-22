@@ -28,15 +28,15 @@ import { useObservable } from 'react-use';
 import { SavedObjectWithMetadata } from 'src/plugins/saved_objects_management/common';
 import { createRecentNavLink } from '../../../../core/public';
 
-const allOption = i18n.translate('homepage.recentWorkSection.all.items', {
+const allOption = i18n.translate('savedObjectsManagement.recentWorkSection.all.items', {
   defaultMessage: 'all items',
 });
 
-const recentlyViewed = i18n.translate('homepage.recentWorkSection.recentlyViewed', {
+const recentlyViewed = i18n.translate('savedObjectsManagement.recentWorkSection.recentlyViewed', {
   defaultMessage: 'recently viewed',
 });
 
-const recentlyUpdated = i18n.translate('homepage.recentWorkSection.recentlyUpdated', {
+const recentlyUpdated = i18n.translate('savedObjectsManagement.recentWorkSection.recentlyUpdated', {
   defaultMessage: 'recently updated',
 });
 
@@ -158,7 +158,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
         <EuiFlexItem>
           <EuiTitle>
             <h5>
-              {i18n.translate('homepage.recentWorkSection.title', {
+              {i18n.translate('savedObjectsManagement.recentWorkSection.title', {
                 defaultMessage: 'Assets',
               })}
             </h5>
@@ -228,10 +228,10 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                       <EuiSpacer size="s" />
                       <div>
                         {selectedSort === recentlyViewed
-                          ? i18n.translate('homepage.recentWorkSection.viewedAt', {
+                          ? i18n.translate('savedObjectsManagement.recentWorkSection.viewedAt', {
                               defaultMessage: 'Viewed',
                             })
-                          : i18n.translate('homepage.recentWorkSection.updatedAt', {
+                          : i18n.translate('savedObjectsManagement.recentWorkSection.updatedAt', {
                               defaultMessage: 'Updated',
                             })}
                         :{' '}
@@ -243,7 +243,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
                       </div>
                       {workspaceEnabled && (
                         <div>
-                          {i18n.translate('homepage.recentWorkSection.workspace', {
+                          {i18n.translate('savedObjectsManagement.recentWorkSection.workspace', {
                             defaultMessage: 'Workspace',
                           })}
                           : <b>{recentAccessItem.workspaceName || 'N/A'}</b>
@@ -264,7 +264,7 @@ export const RecentWork = (props: { core: CoreStart; workspaceEnabled?: boolean 
         <EuiEmptyPrompt
           title={
             <h2>
-              {i18n.translate('homepage.recentWorkSection.empty.title', {
+              {i18n.translate('savedObjectsManagement.recentWorkSection.empty.title', {
                 defaultMessage: 'No recent work',
               })}
             </h2>
