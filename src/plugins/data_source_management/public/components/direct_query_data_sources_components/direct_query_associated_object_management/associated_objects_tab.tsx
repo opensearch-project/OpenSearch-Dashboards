@@ -32,7 +32,7 @@ import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import {
   CreateAccelerationFlyoutButton,
   getAccelerationName,
-} from '../direct_query_acceleration_management/acceleration_utils';
+} from '../acceleration_management/acceleration_utils';
 import { AccelerationsRecommendationCallout } from './accelerations_recommendation_callout';
 import { AssociatedObjectsTable } from './associated_objects_table';
 import { AssociatedObjectsRefreshButton } from './utils/associated_objects_refresh_button';

@@ -19,7 +19,7 @@ import {
   getRenderAssociatedObjectsDetailsFlyout,
   getRenderCreateAccelerationFlyout,
 } from '../../../plugin';
-import { getAccelerationName } from '../direct_query_acceleration_management/acceleration_utils';
+import { getAccelerationName } from '../acceleration_management/acceleration_utils';
 import {
   ASSC_OBJ_TABLE_ACC_COLUMN_NAME,
   ASSC_OBJ_TABLE_SEARCH_HINT,

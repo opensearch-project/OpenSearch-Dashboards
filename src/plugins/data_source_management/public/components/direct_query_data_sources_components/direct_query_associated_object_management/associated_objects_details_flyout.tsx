@@ -42,7 +42,7 @@ import {
 import {
   AccelerationStatus,
   getAccelerationName,
-} from '../direct_query_acceleration_management/acceleration_utils';
+} from '../acceleration_management/acceleration_utils';
 import {
   ACCE_NO_DATA_DESCRIPTION,
   ACCE_NO_DATA_TITLE,

@@ -46,7 +46,7 @@ jest.mock('../../../../framework/catalog_cache/cache_loader', () => ({
   })),
 }));
 
-jest.mock('../direct_query_acceleration_management/acceleration_table', () => ({
+jest.mock('../acceleration_management/acceleration_table', () => ({
   AccelerationTable: () => <div>Acceleration Table</div>,
 }));
 

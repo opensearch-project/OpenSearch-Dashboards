@@ -39,7 +39,7 @@ import {
   useLoadDatabasesToCache,
   useLoadTablesToCache,
 } from '../../../../framework/catalog_cache/cache_loader';
-import { AccelerationTable } from '../direct_query_acceleration_management/acceleration_table';
+import { AccelerationTable } from '../acceleration_management/acceleration_table';
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import { AssociatedObjectsTab } from '../direct_query_associated_object_management/associated_objects_tab';
 import { redirectToExplorerS3 } from '../direct_query_associated_object_management/utils/associated_objects_tab_utils';
