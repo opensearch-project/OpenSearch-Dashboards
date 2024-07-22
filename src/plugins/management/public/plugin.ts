@@ -91,11 +91,13 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
+        const hideInAppNavigation = core.chrome.navGroup.getNavGroupEnabled();
 
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
           opensearchDashboardsVersion,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+          hideInAppNavigation,
         });
       },
     });

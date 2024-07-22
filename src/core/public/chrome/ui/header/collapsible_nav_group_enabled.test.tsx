@@ -18,6 +18,7 @@ import { httpServiceMock } from '../../../mocks';
 import { getLogos } from '../../../../common';
 import { ALL_USE_CASE_ID, DEFAULT_NAV_GROUPS } from '../../../../public';
 import { CollapsibleNavTopProps } from './collapsible_nav_group_enabled_top';
+import { capabilitiesServiceMock } from '../../../application/capabilities/capabilities_service.mock';
 
 jest.mock('./collapsible_nav_group_enabled_top', () => ({
   CollapsibleNavTop: (props: CollapsibleNavTopProps) => (
@@ -166,6 +167,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
           currentNavGroup$.next(undefined);
         }
       },
+      capabilities: { ...capabilitiesServiceMock.createStartContract().capabilities },
       ...props,
     };
   }
@@ -222,5 +224,29 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     expect(container).toMatchSnapshot();
     fireEvent.click(getByTestId('back'));
     expect(getAllByTestId('collapsibleNavAppLink-link-in-analytics').length).toEqual(2);
+  });
+
+  it('should hide left navigation when in home page when workspace is enabled', async () => {
+    const props = mockProps({
+      navGroupsMap: {
+        [DEFAULT_NAV_GROUPS.analytics.id]: {
+          ...DEFAULT_NAV_GROUPS.analytics,
+          navLinks: [
+            {
+              id: 'link-in-analytics',
+              title: 'link-in-analytics',
+              showInAllNavGroup: true,
+            },
+          ],
+        },
+      },
+    });
+    props.appId$ = new BehaviorSubject('home');
+    if (props.capabilities.workspaces) {
+      (props.capabilities.workspaces as Record<string, unknown>) = {};
+      (props.capabilities.workspaces as Record<string, unknown>).enabled = true;
+    }
+    const { container } = render(<CollapsibleNavGroupEnabled {...props} isNavOpen />);
+    expect(container).toMatchSnapshot();
   });
 });
