@@ -127,33 +127,6 @@ export class CodeEditor extends React.Component<Props, {}> {
       this.props.editorWillMount();
     }
 
-    // TEMPORARY fix for suggestion providor not appear for more than one language
-    ['SQL', 'kuery'].forEach((language) => {
-      monaco.languages.onLanguage(language, () => {
-        if (this.props.suggestionProvider) {
-          monaco.languages.registerCompletionItemProvider(language, this.props.suggestionProvider);
-        }
-
-        if (this.props.signatureProvider) {
-          monaco.languages.registerSignatureHelpProvider(
-            this.props.languageId,
-            this.props.signatureProvider
-          );
-        }
-
-        if (this.props.hoverProvider) {
-          monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
-        }
-
-        if (this.props.languageConfiguration) {
-          monaco.languages.setLanguageConfiguration(
-            this.props.languageId,
-            this.props.languageConfiguration
-          );
-        }
-      });
-    });
-
     // Register the theme
     monaco.editor.defineTheme('euiColors', this.props.useDarkTheme ? DARK_THEME : LIGHT_THEME);
   };
@@ -172,6 +145,27 @@ export class CodeEditor extends React.Component<Props, {}> {
 
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
+
+    monaco.languages.onLanguage(languageId, () => {
+      if (this.props.suggestionProvider) {
+        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider);
+      }
+
+      if (this.props.signatureProvider) {
+        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider);
+      }
+
+      if (this.props.hoverProvider) {
+        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider);
+      }
+
+      if (this.props.languageConfiguration) {
+        monaco.languages.setLanguageConfiguration(
+          this.props.languageId,
+          this.props.languageConfiguration
+        );
+      }
+    });
 
     return (
       <React.Fragment>
