@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable no-console */
+
 import {
   EuiBottomBar,
   EuiButton,
@@ -93,7 +95,6 @@ const runQuery = async (
     }
     return { ok: false, error: new Error(poll.error) };
   } catch (err) {
-    // eslint-disable-next-line no-console
     console.error(err);
     return { ok: false, error: err };
   }
@@ -201,7 +202,6 @@ const addIntegration = async ({
       setLoading(false);
     }
   } else {
-    // eslint-disable-next-line no-console
     console.error('Invalid data source type');
   }
 };

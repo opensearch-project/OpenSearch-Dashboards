@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-console */
+
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -170,7 +173,6 @@ export const CreateAcceleration = ({
         }
       } catch (error) {
         notifications.toasts.addWarning('Your cache is outdated, refresh databases and tables');
-        // eslint-disable-next-line no-console
         console.error(error);
       }
     }
@@ -184,7 +186,6 @@ export const CreateAcceleration = ({
         accelerationFormData.dataTable
       );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [databaseName, tableName]);
 
   useEffect(() => {
@@ -200,7 +201,6 @@ export const CreateAcceleration = ({
         );
       } catch (error) {
         notifications.toasts.addWarning('Your cache is outdated, refresh databases and tables');
-        // eslint-disable-next-line no-console
         console.error(error);
       }
 
@@ -212,14 +212,12 @@ export const CreateAcceleration = ({
     ) {
       setTableFieldsLoading(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loadStatus]);
 
   useEffect(() => {
     return () => {
       stopLoadingTableFields();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const dataSourcesPreselected = databaseName !== undefined && tableName !== undefined;
