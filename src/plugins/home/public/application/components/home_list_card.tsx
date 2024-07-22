@@ -4,37 +4,51 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiLink, EuiListGroup } from '@elastic/eui';
+import {
+  EuiDescriptionList,
+  EuiText,
+  EuiLink,
+  EuiTitle,
+  EuiPanel,
+  EuiDescriptionListTitle,
+  EuiDescriptionListDescription,
+  EuiSpacer,
+} from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 
 export const LEARN_OPENSEARCH_CONFIG = {
-  title: 'Learn Opensearch',
+  title: i18n.translate('homepage.card.learnOpenSearch.title', {
+    defaultMessage: 'Learn Opensearch',
+  }),
   list: [
     {
       label: 'Quickstart guide',
       href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
-      target: '_blank',
+      description: 'Get started in minutes with OpenSearch Dashboards',
     },
     {
       label: 'Building data visualizations',
       href: 'https://opensearch.org/docs/latest/dashboards/visualize/viz-index/',
-      target: '_blank',
+      description: 'Design interactive charts and graphs to unlock insights form your data.',
     },
     {
       label: 'Creating dashboards',
       href: 'https://opensearch.org/docs/latest/dashboards/dashboard/index/',
-      target: '_blank',
+      description: 'Build interactive dashboards to explore and analyze your data',
     },
   ],
   allLink: 'https://opensearch.org/docs/latest/',
 };
 
 export const WHATS_NEW_CONFIG = {
-  title: `What's New`,
+  title: i18n.translate('homepage.card.whatsNew.title', {
+    defaultMessage: `What's New`,
+  }),
   list: [
     {
       label: 'Quickstart guide',
       href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
-      target: '_blank',
+      description: 'Get started in minutes with OpenSearch Dashboards',
     },
   ],
 };
@@ -44,7 +58,7 @@ interface Config {
   list: Array<{
     label: string;
     href: string;
-    target?: string;
+    description: string;
   }>;
   allLink?: string;
 }
@@ -52,21 +66,37 @@ interface Config {
 export const HomeListCard = ({ config }: { config: Config }) => {
   return (
     <>
-      <EuiCard
-        title={config.title}
-        description={false}
-        hasBorder={false}
-        display="plain"
-        footer={
-          config.allLink ? (
-            <EuiLink href={config.allLink} external={true} target="_blank">
-              view all
+      <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
+        <EuiTitle>
+          <h4>{config.title}</h4>
+        </EuiTitle>
+        <EuiSpacer />
+        {config.list.length > 0 && (
+          <EuiDescriptionList>
+            {config.list.map((item) => (
+              <>
+                <EuiDescriptionListTitle>
+                  <EuiLink href={item.href} target="_blank">
+                    {item.label}
+                  </EuiLink>
+                </EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>{item.description}</EuiDescriptionListDescription>
+              </>
+            ))}
+          </EuiDescriptionList>
+        )}
+
+        {config.allLink ? (
+          <>
+            <EuiSpacer />
+            <EuiLink href={config.allLink} target="_blank">
+              <EuiText size="s" style={{ display: 'inline' }}>
+                View all
+              </EuiText>
             </EuiLink>
-          ) : null
-        }
-      >
-        <EuiListGroup listItems={config.list} color="text" size="s" />
-      </EuiCard>
+          </>
+        ) : null}
+      </EuiPanel>
     </>
   );
 };

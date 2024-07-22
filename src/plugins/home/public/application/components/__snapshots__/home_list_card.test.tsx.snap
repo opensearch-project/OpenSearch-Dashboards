@@ -4,43 +4,47 @@ exports[`<HomeListCard /> should render static content normally 1`] = `
 <body>
   <div>
     <div
-      class="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder euiCard euiCard--centerAligned"
+      class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
     >
-      <div
-        class="euiCard__content"
+      <h4
+        class="euiTitle euiTitle--medium"
       >
-        <span
-          class="euiTitle euiTitle--small euiCard__title"
-          id="generated-idTitle"
+        What's New
+      </h4>
+      <div
+        class="euiSpacer euiSpacer--l"
+      />
+      <dl
+        class="euiDescriptionList euiDescriptionList--row"
+      >
+        <dt
+          class="euiDescriptionList__title"
         >
-          What's New
-        </span>
-        <div
-          class="euiCard__children"
-        >
-          <ul
-            class="euiListGroup euiListGroup--gutterSmall euiListGroup-maxWidthDefault"
+          <a
+            class="euiLink euiLink--primary"
+            href="https://opensearch.org/docs/latest/dashboards/quickstart/"
+            rel="noopener noreferrer"
+            target="_blank"
           >
-            <li
-              class="euiListGroupItem euiListGroupItem--small euiListGroupItem--text euiListGroupItem-isClickable"
+            Quickstart guide
+            <span
+              aria-label="External link"
+              class="euiLink__externalIcon"
+              data-euiicon-type="popout"
+            />
+            <span
+              class="euiScreenReaderOnly"
             >
-              <a
-                class="euiListGroupItem__button"
-                href="https://opensearch.org/docs/latest/dashboards/quickstart/"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                <span
-                  class="euiListGroupItem__label"
-                  title="Quickstart guide"
-                >
-                  Quickstart guide
-                </span>
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
+              (opens in a new tab or window)
+            </span>
+          </a>
+        </dt>
+        <dd
+          class="euiDescriptionList__description"
+        >
+          Get started in minutes with OpenSearch Dashboards
+        </dd>
+      </dl>
     </div>
   </div>
 </body>

@@ -17,6 +17,7 @@ describe('<HomeListCard />', () => {
           label: 'Quickstart guide',
           href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
           target: '_blank',
+          description: 'Get started in minutes with OpenSearch Dashboards',
         },
       ],
     };
