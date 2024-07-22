@@ -17,8 +17,8 @@ import {
   ISearchOptions,
   SearchInterceptor,
   SearchInterceptorDeps,
-} from 'src/plugins/data/public';
-import { getRawDataFrame, getRawQueryString, IDataFrameResponse } from 'src/plugins/data/common';
+} from '../../../data/public';
+import { getRawDataFrame, getRawQueryString, IDataFrameResponse } from '../../../data/common';
 import {
   API,
   ASYNC_TRIGGER_ID,
