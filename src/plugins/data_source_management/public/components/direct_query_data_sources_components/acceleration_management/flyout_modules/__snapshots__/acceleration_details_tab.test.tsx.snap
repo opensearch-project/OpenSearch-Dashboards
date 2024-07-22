@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccelerationDetailsTab renders correctly 1`] = `
+<Fragment>
+  <EuiSpacer />
+  <EuiFlexGroup
+    direction="row"
+  >
+    <DetailComponent
+      description={
+        <AccelerationStatus
+          status="active"
+        />
+      }
+      title="Status"
+    />
+    <DetailComponent
+      description="skipping"
+      title="Acceleration Type"
+    />
+    <DetailComponent
+      description="8/1/2021, 2:53:05 PM"
+      title="Creation Date"
+    />
+  </EuiFlexGroup>
+  <EuiSpacer />
+  <TitleComponent
+    title="Data source details"
+  />
+  <EuiFlexGroup
+    direction="row"
+  >
+    <DetailComponent
+      description={
+        <EuiLink
+          onClick={[Function]}
+        >
+          test_data_source
+        </EuiLink>
+      }
+      title="Data source connection"
+    />
+    <DetailComponent
+      description="default"
+      title="Database"
+    />
+    <DetailComponent
+      description="test_table"
+      title="Table"
+    />
+  </EuiFlexGroup>
+  <EuiSpacer />
+  <TitleComponent
+    title="Refresh Details"
+  />
+  <EuiFlexGroup
+    direction="row"
+  >
+    <DetailComponent
+      description="Manual"
+      title="Refresh type"
+    />
+    <DetailComponent
+      description="5m"
+      title="Refresh time"
+    />
+    <DetailComponent
+      description="/checkpoints/location"
+      title="Checkpoint location"
+    />
+  </EuiFlexGroup>
+</Fragment>
+`;
