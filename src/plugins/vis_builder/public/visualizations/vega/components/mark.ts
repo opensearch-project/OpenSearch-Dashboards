@@ -4,6 +4,7 @@
  */
 
 import { AxisFormats } from '../utils/types';
+import { buildAxes } from './axes';
 
 export type VegaMarkType =
   | 'line'
@@ -98,7 +99,6 @@ export const buildMarkForVega = (
   dimensions: any,
   formats: AxisFormats
 ): VegaMark => {
-  const { xAxisLabel, yAxisLabel } = formats;
   const baseMark: VegaMark = {
     type: 'group',
     from: {
@@ -116,7 +116,7 @@ export const buildMarkForVega = (
     },
     signals: [{ name: 'width', update: 'chartWidth' }],
     scales: [
-      buildXScale(chartType),
+      buildXScale(chartType, dimensions),
       buildYScale(chartType),
       {
         name: 'color',
@@ -125,21 +125,7 @@ export const buildMarkForVega = (
         range: 'category',
       },
     ],
-    axes: [
-      {
-        orient: 'bottom',
-        scale: 'x',
-        labelAngle: -90,
-        labelAlign: 'right',
-        labelBaseline: 'middle',
-        title: xAxisLabel || '_all',
-      },
-      {
-        orient: 'left',
-        scale: 'y',
-        title: yAxisLabel ? yAxisLabel : dimensions.y[0].label,
-      },
-    ],
+    axes: buildAxes(dimensions, formats),
     title: {
       text: { signal: 'parent.split' },
     },
@@ -161,7 +147,17 @@ export const buildMarkForVega = (
   return baseMark;
 };
 
-const buildXScale = (chartType: VegaMarkType) => {
+const buildXScale = (chartType: VegaMarkType, dimensions) => {
+  // For date-based data, use a time scale regardless of the chart type.
+  if (dimensions.x && dimensions.x.format.id === 'date') {
+    return {
+      name: 'x',
+      type: 'time',
+      domain: { data: 'split_data', field: 'x' },
+      range: 'width',
+    };
+  }
+
   switch (chartType) {
     case 'bar':
       return {
