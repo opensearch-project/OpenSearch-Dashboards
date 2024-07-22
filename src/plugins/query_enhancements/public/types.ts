@@ -32,6 +32,7 @@ export interface Connection {
     installedPlugins?: string[];
     auth?: any;
   };
+  id?: string;
 }
 
 export interface ConnectionsServiceDeps {

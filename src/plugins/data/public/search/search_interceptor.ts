@@ -33,6 +33,7 @@ import { BehaviorSubject, throwError, timer, defer, from, Observable, NEVER } fr
 import { catchError, finalize } from 'rxjs/operators';
 import { CoreStart, CoreSetup, ToastsSetup } from 'opensearch-dashboards/public';
 import { stringify } from '@osd/std';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import {
   getCombinedSignal,
   AbortError,
@@ -52,6 +53,7 @@ export interface SearchInterceptorDeps {
   startServices: Promise<[CoreStart, any, unknown]>;
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
+  uiActions: UiActionsStart;
 }
 
 export class SearchInterceptor {
