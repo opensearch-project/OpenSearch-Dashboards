@@ -31,6 +31,7 @@ import {
   getCreatePrometheusDataSourceBreadcrumbs,
   getCreateBreadcrumbs,
 } from '../../breadcrumbs';
+import { DATACONNECTIONS_BASE } from '../../../constants';
 
 interface ConfigureDatasourceProps extends RouteComponentProps {
   notifications: NotificationsStart;
@@ -73,8 +74,6 @@ export const DirectQueryDataSourceConfigure: React.FC<ConfigureDatasourceProps> 
       title: 'Review configuration',
     },
   ];
-
-  const DATACONNECTIONS_BASE = '/api/dataconnections';
 
   const formatError = (errorName: string, errorMessage: string, errorDetails: string) => {
     return {

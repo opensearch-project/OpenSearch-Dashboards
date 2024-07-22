@@ -1,7 +1,7 @@
 {
   "id": "dataSourceManagement",
   "version": "opensearchDashboards",
-  "server": false,
+  "server": true,
   "ui": true,
   "requiredPlugins": ["management", "indexPatternManagement"],
   "optionalPlugins": ["dataSource"],

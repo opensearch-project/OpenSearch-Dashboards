@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConnectionManagementCallout renders correctly 1`] = `
+<EuiCallOut
+  iconType="iInCircle"
+  title="Configurations may be managed elsewhere."
+>
+  Access to data may be managed in other systems outside of OpenSearch. Check with your administrator for additional configurations.
+</EuiCallOut>
+`;

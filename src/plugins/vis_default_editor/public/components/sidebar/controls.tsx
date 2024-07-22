@@ -109,7 +109,7 @@ function DefaultEditorControls({
                 data-test-subj="visualizeEditorRenderButton"
                 disabled={!isDirty}
                 fill
-                iconType="play"
+                iconType="refresh"
                 onClick={applyChanges}
                 size="s"
               >
