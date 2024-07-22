@@ -28,7 +28,13 @@
  * under the License.
  */
 
-import { EuiSmallButtonIcon, EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import {
+  EuiSmallButtonIcon,
+  EuiContextMenu,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { Component } from 'react';
 import React from 'react';
@@ -161,19 +167,24 @@ class FilterOptionsUI extends Component<Props, State> {
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         button={
-          <EuiSmallButtonIcon
-            onClick={this.togglePopover}
-            iconType="filter"
-            aria-label={this.props.intl.formatMessage({
+          <EuiToolTip
+            content={this.props.intl.formatMessage({
               id: 'data.filter.options.changeAllFiltersButtonLabel',
               defaultMessage: 'Change all filters',
             })}
-            title={this.props.intl.formatMessage({
-              id: 'data.filter.options.changeAllFiltersButtonLabel',
-              defaultMessage: 'Change all filters',
-            })}
-            data-test-subj="showFilterActions"
-          />
+            delay="long"
+            position="bottom"
+          >
+            <EuiSmallButtonIcon
+              onClick={this.togglePopover}
+              iconType="filter"
+              aria-label={this.props.intl.formatMessage({
+                id: 'data.filter.options.changeAllFiltersButtonLabel',
+                defaultMessage: 'Change all filters',
+              })}
+              data-test-subj="showFilterActions"
+            />
+          </EuiToolTip>
         }
         anchorPosition="rightUp"
         panelPaddingSize="none"
