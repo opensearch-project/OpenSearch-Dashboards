@@ -29,7 +29,14 @@
  */
 
 import React from 'react';
-import { EuiText, EuiSmallButtonIcon, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import {
+  EuiText,
+  EuiSmallButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { StringFieldProgressBar } from './string_progress_bar';
 import { Bucket } from './types';
@@ -46,9 +53,15 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
   const emptyTxt = i18n.translate('discover.fieldChooser.detailViews.emptyStringText', {
     defaultMessage: 'Empty string',
   });
+  const addText = i18n.translate('discover.fieldChooser.detailViews.filterValueButton', {
+    defaultMessage: 'Filter for value',
+  });
   const addLabel = i18n.translate('discover.fieldChooser.detailViews.filterValueButtonAriaLabel', {
     defaultMessage: 'Filter for {field}: "{value}"',
     values: { value: bucket.value, field: field.name },
+  });
+  const removeText = i18n.translate('discover.fieldChooser.detailViews.filterOutValueButton', {
+    defaultMessage: 'Filter out value',
   });
   const removeLabel = i18n.translate(
     'discover.fieldChooser.detailViews.filterOutValueButtonAriaLabel',
@@ -91,38 +104,42 @@ export function DiscoverFieldBucket({ field, bucket, onAddFilter }: Props) {
         {field.filterable && (
           <EuiFlexItem grow={false}>
             <div>
-              <EuiSmallButtonIcon
-                iconSize="s"
-                iconType="plusInCircle"
-                onClick={() => onAddFilter(field, bucket.value, '+')}
-                aria-label={addLabel}
-                data-test-subj={`plus-${field.name}-${bucket.value}`}
-                style={{
-                  minHeight: 'auto',
-                  minWidth: 'auto',
-                  paddingRight: 2,
-                  paddingLeft: 2,
-                  paddingTop: 0,
-                  paddingBottom: 0,
-                }}
-                className={'euiButtonIcon--auto'}
-              />
-              <EuiSmallButtonIcon
-                iconSize="s"
-                iconType="minusInCircle"
-                onClick={() => onAddFilter(field, bucket.value, '-')}
-                aria-label={removeLabel}
-                data-test-subj={`minus-${field.name}-${bucket.value}`}
-                style={{
-                  minHeight: 'auto',
-                  minWidth: 'auto',
-                  paddingTop: 0,
-                  paddingBottom: 0,
-                  paddingRight: 2,
-                  paddingLeft: 2,
-                }}
-                className={'euiButtonIcon--auto'}
-              />
+              <EuiToolTip content={addText} position="bottom">
+                <EuiSmallButtonIcon
+                  iconSize="s"
+                  iconType="plusInCircle"
+                  onClick={() => onAddFilter(field, bucket.value, '+')}
+                  aria-label={addLabel}
+                  data-test-subj={`plus-${field.name}-${bucket.value}`}
+                  style={{
+                    minHeight: 'auto',
+                    minWidth: 'auto',
+                    paddingRight: 2,
+                    paddingLeft: 2,
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                  }}
+                  className={'euiButtonIcon--auto'}
+                />
+              </EuiToolTip>
+              <EuiToolTip content={removeText} position="bottom">
+                <EuiSmallButtonIcon
+                  iconSize="s"
+                  iconType="minusInCircle"
+                  onClick={() => onAddFilter(field, bucket.value, '-')}
+                  aria-label={removeLabel}
+                  data-test-subj={`minus-${field.name}-${bucket.value}`}
+                  style={{
+                    minHeight: 'auto',
+                    minWidth: 'auto',
+                    paddingTop: 0,
+                    paddingBottom: 0,
+                    paddingRight: 2,
+                    paddingLeft: 2,
+                  }}
+                  className={'euiButtonIcon--auto'}
+                />
+              </EuiToolTip>
             </div>
           </EuiFlexItem>
         )}

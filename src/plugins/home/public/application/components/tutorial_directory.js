@@ -240,6 +240,7 @@ class TutorialDirectoryUi extends React.Component {
           disabled={!isDataSourceEnabled}
           hideLocalCluster={isLocalClusterHidden}
           uiSettings={getServices().uiSettings}
+          compressed={true}
         />
       </div>
     ) : null;

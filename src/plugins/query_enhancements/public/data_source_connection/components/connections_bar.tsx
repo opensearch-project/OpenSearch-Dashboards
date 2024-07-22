@@ -81,6 +81,7 @@ export const ConnectionsBar: React.FC<ConnectionsProps> = ({ connectionsService,
           notifications={toasts}
           disabled={false}
           fullWidth={false}
+          compressed={true}
           removePrepend={true}
           isClearable={false}
           onSelectedDataSource={(dataSource) =>
