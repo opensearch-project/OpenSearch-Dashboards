@@ -149,7 +149,7 @@ export const buildMarkForVega = (
 
 const buildXScale = (chartType: VegaMarkType, dimensions) => {
   // For date-based data, use a time scale regardless of the chart type.
-  if (dimensions.x && dimensions.x.format.id === 'date') {
+  if (dimensions.x && dimensions.x.format && dimensions.x.format.id === 'date') {
     return {
       name: 'x',
       type: 'time',

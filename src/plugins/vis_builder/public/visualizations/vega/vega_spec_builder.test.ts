@@ -6,22 +6,27 @@
 import { generateVegaSpec } from './vega_spec_builder';
 
 describe('generateVegaSpec', () => {
+  const baseData = {
+    xAxisFormat: { id: 'date' },
+    xAxisLabel: 'Date',
+    yAxisFormat: { id: 'number' },
+    yAxisLabel: 'Value',
+    series: [{ x: '2023-01-01', y: 10, series: 'A' }],
+  };
+
+  const baseVisConfig = {
+    dimensions: {
+      x: { format: { id: 'date' } },
+      y: [{ format: { id: 'number' } }],
+    },
+    addLegend: true,
+    legendPosition: 'right',
+  };
+
   it('should generate a basic Vega specification', () => {
-    const data = {
-      xAxisFormat: { id: 'date' },
-      xAxisLabel: 'Date',
-      yAxisFormat: { id: 'number' },
-      yAxisLabel: 'Value',
-      series: [{ x: '2023-01-01', y: 10, series: 'A' }],
-    };
-    const visConfig = {
-      dimensions: { x: [{}], y: [{}] },
-      addLegend: true,
-      legendPosition: 'right',
-    };
     const style = { type: 'line' };
 
-    const result = generateVegaSpec(data, visConfig, style);
+    const result = generateVegaSpec(baseData, baseVisConfig, style);
 
     expect(result.$schema).toBe('https://vega.github.io/schema/vega/v5.json');
     expect(result.data).toBeDefined();
@@ -31,63 +36,32 @@ describe('generateVegaSpec', () => {
   });
 
   it('should handle area charts', () => {
-    const data = {
-      xAxisFormat: { id: 'date' },
-      xAxisLabel: 'Date',
-      yAxisFormat: { id: 'number' },
-      yAxisLabel: 'Value',
-      series: [{ x: '2023-01-01', y: 10, series: 'A' }],
-    };
-    const visConfig = {
-      dimensions: { x: [{}], y: [{}] },
-      addLegend: true,
-      legendPosition: 'right',
-    };
     const style = { type: 'area' };
 
-    const result = generateVegaSpec(data, visConfig, style);
+    const result = generateVegaSpec(baseData, baseVisConfig, style);
 
-    expect(result.data).toContainEqual(expect.objectContaining({ name: 'stacked' }));
-    expect(result.marks[0].type).toBe('group');
+    expect(result.data).toBeDefined();
+    expect(result.data?.some((d) => d.name === 'stacked')).toBe(true);
+    expect(result.marks?.[0]?.type).toBe('group');
   });
 
   it('should add legend when specified', () => {
-    const data = {
-      xAxisFormat: { id: 'date' },
-      xAxisLabel: 'Date',
-      yAxisFormat: { id: 'number' },
-      yAxisLabel: 'Value',
-      series: [{ x: '2023-01-01', y: 10, series: 'A' }],
-    };
-    const visConfig = {
-      dimensions: { x: [{}], y: [{}] },
-      addLegend: true,
-      legendPosition: 'right',
-    };
     const style = { type: 'line' };
 
-    const result = generateVegaSpec(data, visConfig, style);
+    const result = generateVegaSpec(baseData, baseVisConfig, style);
 
     expect(result.legends).toBeDefined();
-    expect(result.legends![0].orient).toBe('right');
+    expect(result.legends?.[0]?.orient).toBe('right');
   });
 
   it('should not add legend when not specified', () => {
-    const data = {
-      xAxisFormat: { id: 'date' },
-      xAxisLabel: 'Date',
-      yAxisFormat: { id: 'number' },
-      yAxisLabel: 'Value',
-      series: [{ x: '2023-01-01', y: 10, series: 'A' }],
-    };
-    const visConfig = {
-      dimensions: { x: [{}], y: [{}] },
+    const visConfigNoLegend = {
+      ...baseVisConfig,
       addLegend: false,
-      legendPosition: 'right',
     };
     const style = { type: 'line' };
 
-    const result = generateVegaSpec(data, visConfig, style);
+    const result = generateVegaSpec(baseData, visConfigNoLegend, style);
 
     expect(result.legends).toBeUndefined();
   });
