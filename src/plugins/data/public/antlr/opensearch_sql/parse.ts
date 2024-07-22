@@ -14,13 +14,13 @@ export function getCurrentStatement(
   query: string,
   cursorIndex: number
 ): { statement: string; cursorIndex: number } {
-  const textBeforeCursor = query.slice(0, cursorIndex - 1);
-  const textAfterCursor = query.slice(cursorIndex - 1);
+  const textBeforeCursor = query.slice(0, cursorIndex);
+  const textAfterCursor = query.slice(cursorIndex);
   const semiColonBeforeIndex = textBeforeCursor.lastIndexOf(';');
   const semiColonAfterIndex = textAfterCursor.indexOf(';');
   const statementStartIndex = semiColonBeforeIndex > -1 ? semiColonBeforeIndex + 1 : 0;
   const statementEndIndex =
-    semiColonAfterIndex > -1 ? semiColonAfterIndex + textBeforeCursor.length : query.length;
+    semiColonAfterIndex > -1 ? semiColonAfterIndex + cursorIndex : query.length;
   const statement = query.slice(statementStartIndex, statementEndIndex);
   const newCursorIndex = cursorIndex - statementStartIndex;
 
