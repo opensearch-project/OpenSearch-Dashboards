@@ -28,9 +28,16 @@ function getWrapWorkspaceListInContext(
     { id: 'id1', name: 'name1', features: ['use-case-all'] },
     { id: 'id2', name: 'name2' },
     { id: 'id3', name: 'name3', features: ['use-case-observability'] },
-  ]
+  ],
+  isDashboardAdmin = true
 ) {
   const coreStartMock = coreMock.createStart();
+  coreStartMock.application.capabilities = {
+    ...coreStartMock.application.capabilities,
+    dashboards: {
+      isDashboardAdmin,
+    },
+  };
 
   const services = {
     ...coreStartMock,
@@ -134,5 +141,11 @@ describe('WorkspaceList', () => {
     fireEvent.click(paginationButton);
     expect(queryByText('name1')).not.toBeInTheDocument();
     expect(getByText('name6')).toBeInTheDocument();
+  });
+
+  it('should hide create workspace button if not dashboard admin', async () => {
+    const { queryByText } = render(getWrapWorkspaceListInContext([], false));
+
+    expect(queryByText(/create workspace/)).toBeNull();
   });
 });
