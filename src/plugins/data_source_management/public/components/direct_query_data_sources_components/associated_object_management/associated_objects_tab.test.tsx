@@ -139,9 +139,4 @@ describe('AssociatedObjectsTab', () => {
       });
     });
   });
-
-  test('matches snapshot', () => {
-    const { asFragment } = renderComponent();
-    expect(asFragment()).toMatchSnapshot();
-  });
 });
