@@ -109,6 +109,16 @@ public interface OpenSearchSQLParserListener extends ParseTreeListener {
 	 */
 	void exitShowDescribePattern(OpenSearchSQLParser.ShowDescribePatternContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link OpenSearchSQLParser#compatibleID}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompatibleID(OpenSearchSQLParser.CompatibleIDContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OpenSearchSQLParser#compatibleID}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompatibleID(OpenSearchSQLParser.CompatibleIDContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link OpenSearchSQLParser#querySpecification}.
 	 * @param ctx the parse tree
 	 */
@@ -420,6 +430,16 @@ public interface OpenSearchSQLParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDecimalLiteral(OpenSearchSQLParser.DecimalLiteralContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OpenSearchSQLParser#numericLiteral}.
+	 * @param ctx the parse tree
+	 */
+	void enterNumericLiteral(OpenSearchSQLParser.NumericLiteralContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OpenSearchSQLParser#numericLiteral}.
+	 * @param ctx the parse tree
+	 */
+	void exitNumericLiteral(OpenSearchSQLParser.NumericLiteralContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link OpenSearchSQLParser#stringLiteral}.
 	 * @param ctx the parse tree
@@ -1188,6 +1208,28 @@ public interface OpenSearchSQLParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDistinctCountFunctionCall(OpenSearchSQLParser.DistinctCountFunctionCallContext ctx);
+	/**
+	 * Enter a parse tree produced by the {@code percentileApproxFunctionCall}
+	 * labeled alternative in {@link OpenSearchSQLParser#aggregateFunction}.
+	 * @param ctx the parse tree
+	 */
+	void enterPercentileApproxFunctionCall(OpenSearchSQLParser.PercentileApproxFunctionCallContext ctx);
+	/**
+	 * Exit a parse tree produced by the {@code percentileApproxFunctionCall}
+	 * labeled alternative in {@link OpenSearchSQLParser#aggregateFunction}.
+	 * @param ctx the parse tree
+	 */
+	void exitPercentileApproxFunctionCall(OpenSearchSQLParser.PercentileApproxFunctionCallContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link OpenSearchSQLParser#percentileApproxFunction}.
+	 * @param ctx the parse tree
+	 */
+	void enterPercentileApproxFunction(OpenSearchSQLParser.PercentileApproxFunctionContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link OpenSearchSQLParser#percentileApproxFunction}.
+	 * @param ctx the parse tree
+	 */
+	void exitPercentileApproxFunction(OpenSearchSQLParser.PercentileApproxFunctionContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link OpenSearchSQLParser#filterClause}.
 	 * @param ctx the parse tree

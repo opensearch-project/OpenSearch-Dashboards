@@ -461,7 +461,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                       <div className="single-line-editor-wrapper">
                         <CodeEditor
                           height={40} // Adjusted to match lineHeight for a single line
-                          languageId="opensearchql"
+                          languageId={this.props.query.language}
                           value={this.getQueryString()}
                           onChange={this.onSingleLineInputChange}
                           editorDidMount={this.singleLineEditorDidMount}
@@ -520,7 +520,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             {!this.state.isCollapsed && useQueryEditor && (
               <CodeEditor
                 height={70}
-                languageId="opensearchql"
+                languageId={this.props.query.language}
                 value={this.getQueryString()}
                 onChange={this.onInputChange}
                 editorDidMount={this.editorDidMount}

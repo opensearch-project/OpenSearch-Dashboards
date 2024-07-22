@@ -136,6 +136,18 @@ public class OpenSearchSQLParserBaseListener implements OpenSearchSQLParserListe
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterCompatibleID(OpenSearchSQLParser.CompatibleIDContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCompatibleID(OpenSearchSQLParser.CompatibleIDContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterQuerySpecification(OpenSearchSQLParser.QuerySpecificationContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -479,6 +491,18 @@ public class OpenSearchSQLParserBaseListener implements OpenSearchSQLParserListe
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDecimalLiteral(OpenSearchSQLParser.DecimalLiteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterNumericLiteral(OpenSearchSQLParser.NumericLiteralContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitNumericLiteral(OpenSearchSQLParser.NumericLiteralContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1319,6 +1343,30 @@ public class OpenSearchSQLParserBaseListener implements OpenSearchSQLParserListe
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDistinctCountFunctionCall(OpenSearchSQLParser.DistinctCountFunctionCallContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPercentileApproxFunctionCall(OpenSearchSQLParser.PercentileApproxFunctionCallContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPercentileApproxFunctionCall(OpenSearchSQLParser.PercentileApproxFunctionCallContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPercentileApproxFunction(OpenSearchSQLParser.PercentileApproxFunctionContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPercentileApproxFunction(OpenSearchSQLParser.PercentileApproxFunctionContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
