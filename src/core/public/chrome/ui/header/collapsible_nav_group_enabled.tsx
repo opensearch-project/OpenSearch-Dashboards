@@ -58,6 +58,7 @@ export interface CollapsibleNavGroupEnabledProps {
   navControlsLeftBottom$: Rx.Observable<readonly ChromeNavControl[]>;
   currentNavGroup$: Rx.Observable<NavGroupItemInMap | undefined>;
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
+  capabilities: InternalApplicationStart['capabilities'];
 }
 
 interface NavGroupsProps {
@@ -184,6 +185,7 @@ export function CollapsibleNavGroupEnabled({
   navigateToUrl,
   logos,
   setCurrentNavGroup,
+  capabilities,
   ...observables
 }: CollapsibleNavGroupEnabledProps) {
   const navLinks = useObservable(observables.navLinks$, []).filter((link) => !link.hidden);
@@ -269,7 +271,11 @@ export function CollapsibleNavGroupEnabled({
     return 270;
   }, [isNavOpen]);
 
-  if (appId === 'home') {
+  // For now, only home page need to hide left navigation
+  // when workspace is enabled.
+  // If there are more pages need to hide left navigation in the future
+  // need to come up with a mechanism to register.
+  if (capabilities.workspaces.enabled && appId === 'home') {
     return null;
   }
 

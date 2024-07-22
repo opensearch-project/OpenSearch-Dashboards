@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<CollapsibleNavGroupEnabled /> should hide left navigation when in home page 1`] = `<div />`;
+exports[`<CollapsibleNavGroupEnabled /> should hide left navigation when in home page when workspace is enabled 1`] = `<div />`;
 
 exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
 <div>
