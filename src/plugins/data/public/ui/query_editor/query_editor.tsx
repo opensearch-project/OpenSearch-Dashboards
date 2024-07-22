@@ -41,10 +41,7 @@ export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
   dataSource?: DataSource;
   query: Query;
-  container?: HTMLDivElement;
-  dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
-  containerRef?: React.RefCallback<HTMLDivElement>;
-  languageSelectorContainerRef?: React.RefCallback<HTMLDivElement>;
+  dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -74,8 +71,6 @@ interface Props extends QueryEditorProps {
 }
 
 interface State {
-  isDataSourcesVisible: boolean;
-  isDataSetsVisible: boolean;
   isSuggestionsVisible: boolean;
   index: number | null;
   suggestions: QuerySuggestion[];
@@ -102,8 +97,6 @@ const KEY_CODES = {
 // eslint-disable-next-line import/no-default-export
 export default class QueryEditorUI extends Component<Props, State> {
   public state: State = {
-    isDataSourcesVisible: false,
-    isDataSetsVisible: true,
     isSuggestionsVisible: false,
     index: null,
     suggestions: [],
@@ -118,7 +111,6 @@ export default class QueryEditorUI extends Component<Props, State> {
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
   private services = this.props.opensearchDashboards.services;
-  private componentIsUnmounting = false;
   private headerRef: RefObject<HTMLDivElement> = createRef();
   private bannerRef: RefObject<HTMLDivElement> = createRef();
   private extensionMap = this.props.settings?.getQueryEditorExtensionMap();
@@ -282,20 +274,6 @@ export default class QueryEditorUI extends Component<Props, State> {
       : getQueryLog(uiSettings, storage, appName, this.props.query.language);
   };
 
-  private initDataSourcesVisibility = () => {
-    if (this.componentIsUnmounting) return;
-
-    return this.props.settings.getQueryEnhancements(this.props.query.language)?.searchBar
-      ?.showDataSourcesSelector;
-  };
-
-  private initDataSetsVisibility = () => {
-    if (this.componentIsUnmounting) return;
-
-    return this.props.settings.getQueryEnhancements(this.props.query.language)?.searchBar
-      ?.showDataSetsSelector;
-  };
-
   public onMouseEnterSuggestion = (index: number) => {
     this.setState({ index });
   };
@@ -323,7 +301,6 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
-    this.componentIsUnmounting = true;
   }
 
   handleOnFocus = () => {

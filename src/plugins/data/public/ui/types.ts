@@ -72,5 +72,5 @@ export interface IUiStart {
    * @experimental - Subject to change
    */
   Settings: Settings;
-  container$: Observable<HTMLDivElement | null>;
+  dataSetContainer$: Observable<HTMLDivElement | null>;
 }

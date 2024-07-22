@@ -48,8 +48,7 @@ interface StatefulSearchBarDeps {
   data: Omit<DataPublicPluginStart, 'ui'>;
   storage: IStorageWrapper;
   settings: Settings;
-  setDataSourceContainerRef: (ref: HTMLDivElement | null) => void;
-  setContainerRef: (ref: HTMLDivElement | null) => void;
+  setDataSetContainerRef: (ref: HTMLDivElement | null) => void;
 }
 
 export type StatefulSearchBarProps = SearchBarOwnProps & {
@@ -139,8 +138,7 @@ export function createSearchBar({
   storage,
   data,
   settings,
-  setDataSourceContainerRef,
-  setContainerRef,
+  setDataSetContainerRef,
 }: StatefulSearchBarDeps) {
   // App name should come from the core application service.
   // Until it's available, we'll ask the user to provide it for the pre-wired component.
@@ -176,15 +174,9 @@ export function createSearchBar({
       notifications: core.notifications,
     });
 
-    const dataSourceContainerRef = useCallback((node) => {
+    const dataSetContainerRef = useCallback((node) => {
       if (node) {
-        setDataSourceContainerRef(node);
-      }
-    }, []);
-
-    const containerRef = useCallback((node) => {
-      if (node) {
-        setContainerRef(node);
+        setDataSetContainerRef(node);
       }
     }, []);
 
@@ -228,8 +220,7 @@ export function createSearchBar({
           filters={filters}
           query={query}
           settings={settings}
-          dataSourceContainerRef={dataSourceContainerRef}
-          containerRef={containerRef}
+          dataSetContainerRef={dataSetContainerRef}
           onFiltersUpdated={defaultFiltersUpdated(data.query)}
           onRefreshChange={defaultOnRefreshChange(data.query)}
           savedQuery={savedQuery}

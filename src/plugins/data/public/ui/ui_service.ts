@@ -30,8 +30,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
   enhancementsConfig: ConfigSchema['enhancements'];
   private queryEnhancements: Map<string, QueryEnhancement> = new Map();
   private queryEditorExtensionMap: Record<string, QueryEditorExtensionConfig> = {};
-  private dataSourceContainer$ = new BehaviorSubject<HTMLDivElement | null>(null);
-  private container$ = new BehaviorSubject<HTMLDivElement | null>(null);
+  private dataSetContainer$ = new BehaviorSubject<HTMLDivElement | null>(null);
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     const { enhancements } = initializerContext.config.get<ConfigSchema>();
@@ -63,12 +62,8 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       queryEditorExtensionMap: this.queryEditorExtensionMap,
     });
 
-    const setDataSourceContainerRef = (ref: HTMLDivElement | null) => {
-      this.dataSourceContainer$.next(ref);
-    };
-
-    const setContainerRef = (ref: HTMLDivElement | null) => {
-      this.container$.next(ref);
+    const setDataSetContainerRef = (ref: HTMLDivElement | null) => {
+      this.dataSetContainer$.next(ref);
     };
 
     const SearchBar = createSearchBar({
@@ -76,8 +71,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       data: dataServices,
       storage,
       settings: Settings,
-      setDataSourceContainerRef,
-      setContainerRef,
+      setDataSetContainerRef,
     });
 
     return {
@@ -86,7 +80,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       SearchBar,
       SuggestionsComponent,
       Settings,
-      container$: this.container$,
+      dataSetContainer$: this.dataSetContainer$,
     };
   }
 

@@ -18,14 +18,14 @@ export interface DataSet {
     timestampField: string;
     mapping?: any;
   };
-  type?: 'dataset' | 'temporary';
+  type?: 'dataSet' | 'temporary';
 }
 
 export interface MetadataState {
   indexPattern?: string;
   originatingApp?: string;
   view?: string;
-  dataset?: DataSet;
+  dataSet?: DataSet;
 }
 
 const initialState: MetadataState = {};
@@ -44,7 +44,7 @@ export const getPreloadedState = async ({
     ...initialState,
     originatingApp,
     indexPattern: defaultIndexPattern?.id,
-    dataset: {
+    dataSet: {
       id: defaultIndexPattern?.id,
     },
   };
@@ -60,7 +60,7 @@ export const slice = createSlice({
       state.indexPattern = action.payload;
     },
     setDataSet: (state, action: PayloadAction<DataSet>) => {
-      state.dataset = action.payload;
+      state.dataSet = action.payload;
     },
     setOriginatingApp: (state, action: PayloadAction<string | undefined>) => {
       state.originatingApp = action.payload;
