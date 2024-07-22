@@ -32,6 +32,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiPopoverFooter,
+  EuiSmallButtonEmpty,
   EuiButtonEmpty,
   EuiButton,
   EuiFlexGroup,
@@ -41,6 +42,7 @@ import {
   EuiText,
   EuiSpacer,
   EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
@@ -169,21 +171,21 @@ export function SavedQueryManagementComponent({
   const goToPage = (pageNumber: number) => {
     setActivePage(pageNumber);
   };
+  const label = i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
+    defaultMessage: 'See saved queries',
+  });
 
   const savedQueryPopoverButton = (
-    <EuiButtonEmpty
-      onClick={handleTogglePopover}
-      aria-label={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
-        defaultMessage: 'See saved queries',
-      })}
-      title={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
-        defaultMessage: 'See saved queries',
-      })}
-      data-test-subj="saved-query-management-popover-button"
-    >
-      <EuiIcon type="save" className="euiQuickSelectPopover__buttonText" />
-      <EuiIcon type="arrowDown" />
-    </EuiButtonEmpty>
+    <EuiToolTip content={label} delay="long" position="bottom">
+      <EuiSmallButtonEmpty
+        onClick={handleTogglePopover}
+        aria-label={label}
+        data-test-subj="saved-query-management-popover-button"
+      >
+        <EuiIcon type="save" className="euiQuickSelectPopover__buttonText" />
+        <EuiIcon type="arrowDown" />
+      </EuiSmallButtonEmpty>
+    </EuiToolTip>
   );
 
   const savedQueryRows = () => {
