@@ -31,6 +31,12 @@ export interface SuggestionParams {
   query: string;
 }
 
+export interface ISuggestionItem {
+  text: string;
+  type: string;
+  fieldType?: string;
+}
+
 const quotesRegex = /^'(.*)'$/;
 
 export const getSuggestions = async ({
@@ -39,7 +45,7 @@ export const getSuggestions = async ({
   position,
   query,
   connectionService,
-}: QuerySuggestionGetFnArgs): Promise<any[]> => {
+}: QuerySuggestionGetFnArgs): Promise<ISuggestionItem[]> => {
   const { api } = getUiSettings();
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
     line: position?.lineNumber || selectionStart,

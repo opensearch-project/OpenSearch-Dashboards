@@ -358,14 +358,15 @@ export default class QueryEditorUI extends Component<Props, State> {
     });
 
     return {
-      suggestions: suggestions
-        ? suggestions.map((s) => ({
-            label: s.text,
-            kind: this.getCodeEditorSuggestionsType(s.type),
-            insertText: s.text,
-            range: wordRange,
-          }))
-        : [],
+      suggestions:
+        suggestions && suggestions.length > 0
+          ? suggestions.map((s) => ({
+              label: s.text,
+              kind: this.getCodeEditorSuggestionsType(s.type),
+              insertText: s.text,
+              range: wordRange,
+            }))
+          : [],
       incomplete: false,
     };
   };
@@ -536,6 +537,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                   wrappingIndent: 'indent',
                   lineDecorationsWidth: 0,
                   lineNumbersMinChars: 2,
+                  wordBasedSuggestions: false,
                 }}
                 suggestionProvider={{
                   provideCompletionItems: this.provideCompletionItems,
