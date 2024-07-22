@@ -485,6 +485,10 @@ export default class QueryEditorUI extends Component<Props, State> {
                             overviewRulerLanes: 0,
                             hideCursorInOverviewRuler: true,
                             cursorStyle: 'line',
+                            wordBasedSuggestions: false,
+                          }}
+                          suggestionProvider={{
+                            provideCompletionItems: this.provideCompletionItems,
                           }}
                         />
                       </div>
