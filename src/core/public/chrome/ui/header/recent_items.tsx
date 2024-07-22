@@ -38,7 +38,7 @@ export const RecentItems = ({
   navLinks$,
   basePath,
 }: Props) => {
-  const [isPopoverOpen, SetIsPopoverOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const recentlyAccessedItems = useObservable(recentlyAccessed$, []);
   const workspaceList = useObservable(workspaceList$, []);
@@ -59,7 +59,7 @@ export const RecentItems = ({
 
   const handleItemClick = (link: string) => {
     navigateToUrl(link);
-    SetIsPopoverOpen(false);
+    setIsPopoverOpen(false);
   };
 
   return (
@@ -67,7 +67,7 @@ export const RecentItems = ({
       button={
         <EuiHeaderSectionItemButton
           onClick={() => {
-            SetIsPopoverOpen((prev) => !prev);
+            setIsPopoverOpen((prev) => !prev);
           }}
           data-test-subj="recentItemsSectionButton"
         >
@@ -76,13 +76,13 @@ export const RecentItems = ({
       }
       isOpen={isPopoverOpen}
       closePopover={() => {
-        SetIsPopoverOpen(false);
+        setIsPopoverOpen(false);
       }}
       anchorPosition="downCenter"
       repositionOnScroll
       initialFocus={false}
     >
-      <EuiTitle size="xs">
+      <EuiTitle size="xxs">
         <h4>Recents</h4>
       </EuiTitle>
       {items.length > 0 ? (
@@ -90,7 +90,6 @@ export const RecentItems = ({
           {items.map((item) => (
             <EuiListGroupItem
               onClick={() => handleItemClick(item.link)}
-              size="s"
               key={item.link}
               label={
                 <>
