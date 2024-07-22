@@ -369,6 +369,15 @@ export default class QueryEditorUI extends Component<Props, State> {
     const useQueryEditor =
       this.props.query.language !== 'kuery' && this.props.query.language !== 'lucene';
 
+    const languageSelector = (
+      <QueryLanguageSelector
+        language={this.props.query.language}
+        anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+        onSelectLanguage={this.onSelectLanguage}
+        appName={this.services.appName}
+      />
+    );
+
     return (
       <div className={className}>
         <div ref={this.bannerRef} className={bannerClassName} />
@@ -381,11 +390,9 @@ export default class QueryEditorUI extends Component<Props, State> {
                   isCollapsed={!this.state.isCollapsed}
                 />
               </EuiFlexItem>
-              {this.state.isDataSetsVisible && (
-                <EuiFlexItem grow={2} className={`${className}__dataSetWrapper`}>
-                  <div ref={this.props.containerRef} />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={2} className={`${className}__dataSetWrapper`}>
+                <div ref={this.props.dataSetContainerRef} />
+              </EuiFlexItem>
               <EuiFlexItem grow={10}>
                 <EuiFlexGroup gutterSize="none">
                   {(this.state.isCollapsed || !useQueryEditor) && (
@@ -424,14 +431,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                   )}
                   {!useQueryEditor && (
                     <EuiFlexItem grow={false}>
-                      <div className="osdQueryEditor__languageWrapper">
-                        <QueryLanguageSelector
-                          language={this.props.query.language}
-                          anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-                          onSelectLanguage={this.onSelectLanguage}
-                          appName={this.services.appName}
-                        />
-                      </div>
+                      <div className="osdQueryEditor__languageWrapper">{languageSelector}</div>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
@@ -444,11 +444,6 @@ export default class QueryEditorUI extends Component<Props, State> {
               >
                 {this.props.prepend}
               </EuiFlexItem>
-              {this.state.isDataSetsVisible && (
-                <EuiFlexItem grow={false} className={`${className}__dataSetWrapper`}>
-                  <div ref={this.props.containerRef} />
-                </EuiFlexItem>
-              )}
             </EuiFlexGroup>
           </EuiFlexItem>
 
@@ -486,15 +481,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               }
             >
               <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <QueryLanguageSelector
-                    language={this.props.query.language}
-                    anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-                    onSelectLanguage={this.onSelectLanguage}
-                    appName={this.services.appName}
-                    isFooter={true}
-                  />
-                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{languageSelector}</EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
                   {this.state.lineCount} {this.state.lineCount === 1 ? 'line' : 'lines'}
