@@ -16,8 +16,15 @@ import {
   updateDatabasesToCache,
   updateTablesToCache,
   updateToCache,
+  updateTableColumnsToCache,
+  useLoadDatabasesToCache,
+  useLoadTablesToCache,
+  useLoadTableColumnsToCache,
+  useLoadAccelerationsToCache,
 } from '../../../../framework/catalog_cache/cache_loader';
 import { CatalogCacheManager } from '../../../../framework/catalog_cache/cache_manager';
+import { renderHook, act } from '@testing-library/react-hooks';
+import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 
 interface LooseObject {
   [key: string]: any;
@@ -44,6 +51,47 @@ const localStorageMock = (() => {
 
 Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
+// Mock dependencies
+jest.mock('../../../../framework/requests/sql');
+jest.mock('../../../../framework/utils/query_session_utils', () => ({
+  getAsyncSessionId: jest.fn(),
+  setAsyncSessionId: jest.fn(),
+}));
+
+jest.mock('../../../../framework/utils/use_polling', () => ({
+  usePolling: jest.fn(() => ({
+    data: null,
+    loading: false,
+    error: null,
+    startPolling: jest.fn(),
+    stopPolling: jest.fn(),
+  })),
+}));
+
+// Mock SQLService fetch method
+const mockFetch = jest.fn();
+jest.mock('../../../../framework/requests/sql', () => {
+  return {
+    SQLService: jest.fn().mockImplementation(() => {
+      return {
+        fetch: mockFetch,
+        fetchWithJobId: jest.fn(),
+      };
+    }),
+  };
+});
+
+// Mock data
+const mockHttp: HttpStart = ({
+  get: jest.fn(),
+  post: jest.fn(),
+} as unknown) as HttpStart;
+const mockNotifications: NotificationsStart = ({
+  toasts: {
+    addError: jest.fn(),
+  },
+} as unknown) as NotificationsStart;
+
 describe('loadCacheTests', () => {
   beforeEach(() => {
     jest.spyOn(window.localStorage, 'setItem');
@@ -52,6 +100,7 @@ describe('loadCacheTests', () => {
     jest.spyOn(CatalogCacheManager, 'addOrUpdateDataSource');
     jest.spyOn(CatalogCacheManager, 'updateDatabase');
     jest.spyOn(CatalogCacheManager, 'saveAccelerationsCache');
+    mockFetch.mockResolvedValue({ queryId: 'test-query-id' });
   });
 
   afterEach(() => {
@@ -349,6 +398,44 @@ describe('loadCacheTests', () => {
       const databaseName = '`sample`';
       const expectedQuery = "SHOW TABLE EXTENDED IN `example`.`sample` LIKE '*'";
       expect(createLoadQuery(loadCacheType, dataSourceName, databaseName)).toEqual(expectedQuery);
+    });
+  });
+
+  describe('CacheLoader Hooks', () => {
+    it('useLoadDatabasesToCache should work correctly', async () => {
+      const { result } = renderHook(() => useLoadDatabasesToCache(mockHttp, mockNotifications));
+      await act(async () => {
+        result.current.startLoading({ dataSourceName: 'testDS' });
+      });
+      expect(result.current.loadStatus).toBe('scheduled');
+    });
+
+    it('useLoadTablesToCache should work correctly', async () => {
+      const { result } = renderHook(() => useLoadTablesToCache(mockHttp, mockNotifications));
+      await act(async () => {
+        result.current.startLoading({ dataSourceName: 'testDS', databaseName: 'testDB' });
+      });
+      expect(result.current.loadStatus).toBe('scheduled');
+    });
+
+    it('useLoadTableColumnsToCache should work correctly', async () => {
+      const { result } = renderHook(() => useLoadTableColumnsToCache(mockHttp, mockNotifications));
+      await act(async () => {
+        result.current.startLoading({
+          dataSourceName: 'testDS',
+          databaseName: 'testDB',
+          tableName: 'testTable',
+        });
+      });
+      expect(result.current.loadStatus).toBe('scheduled');
+    });
+
+    it('useLoadAccelerationsToCache should work correctly', async () => {
+      const { result } = renderHook(() => useLoadAccelerationsToCache(mockHttp, mockNotifications));
+      await act(async () => {
+        result.current.startLoading({ dataSourceName: 'testDS' });
+      });
+      expect(result.current.loadStatus).toBe('scheduled');
     });
   });
 });
