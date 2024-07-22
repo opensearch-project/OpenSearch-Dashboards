@@ -508,7 +508,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
             id: 7,
             title: selectedObject?.title,
             content:
-              isLoading && !selectedObject ? (
+              isLoading || !selectedObject ? (
                 <div>{LoadingSpinner}</div>
               ) : (
                 <EuiForm className="dataSetNavigatorFormWrapper">

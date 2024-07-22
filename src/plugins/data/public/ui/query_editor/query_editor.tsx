@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  htmlIdGenerator,
-  PopoverAnchorPosition,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator, PopoverAnchorPosition } from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
@@ -206,32 +199,6 @@ export default class QueryEditorUI extends Component<Props, State> {
       this.onQueryStringChange(event.target.value);
     }
   };
-
-  // private onSelectDataSet = (dataSetName: string) => {
-  //   const newQuery = {
-  //     query: this.props.getQueryStringInitialValue?.(this.props.query.language, dataSetName) ?? '',
-  //     language: this.props.query.language,
-  //   };
-
-  //   const enhancement = this.props.settings.getQueryEnhancements(newQuery.language);
-  //   const fields = enhancement?.fields;
-  //   const newSettings: DataSettings = {
-  //     userQueryLanguage: newQuery.language,
-  //     userQueryString: newQuery.query,
-  //     ...(fields && { uiOverrides: { fields } }),
-  //   };
-  //   this.props.settings?.updateSettings(newSettings);
-
-  //   const dateRangeEnhancement = enhancement?.searchBar?.dateRange;
-  //   const dateRange = dateRangeEnhancement
-  //     ? {
-  //         from: dateRangeEnhancement.initialFrom!,
-  //         to: dateRangeEnhancement.initialTo!,
-  //       }
-  //     : undefined;
-  //   this.onChange(newQuery, dateRange);
-  //   this.onSubmit(newQuery, dateRange);
-  // };
 
   // TODO: MQL consider moving language select language of setting search source here
   private onSelectLanguage = (language: string) => {

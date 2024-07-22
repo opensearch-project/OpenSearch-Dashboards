@@ -27,7 +27,6 @@ export class Settings {
   private isEnabled = false;
   private enabledQueryEnhancementsUpdated$ = new BehaviorSubject<boolean>(this.isEnabled);
   private enhancedAppNames: string[] = [];
-  private selectedDataSet$ = new BehaviorSubject<any>(null);
 
   constructor(
     private readonly config: ConfigSchema['enhancements'],
@@ -39,28 +38,7 @@ export class Settings {
     this.isEnabled = true;
     this.setUserQueryEnhancementsEnabled(this.isEnabled);
     this.enhancedAppNames = this.isEnabled ? this.config.supportedAppNames : [];
-    this.setSelectedDataSet(this.getSelectedDataSet());
   }
-
-  /**
-   * @experimental - Sets the dataset BehaviorSubject
-   */
-  setSelectedDataSet = (dataSet: any) => {
-    console.log('dataSet in settings:', dataSet);
-    this.storage.set('opensearchDashboards.userQueryDataSet', dataSet);
-    this.selectedDataSet$.next(dataSet);
-  };
-
-  /**
-   * @experimental - Gets the dataset Observable
-   */
-  getSelectedDataSet$ = () => {
-    return this.selectedDataSet$.asObservable();
-  };
-
-  getSelectedDataSet = () => {
-    return this.storage.get('opensearchDashboards.userQueryDataSet');
-  };
 
   supportsEnhancementsEnabled(appName: string) {
     return this.enhancedAppNames.includes(appName);

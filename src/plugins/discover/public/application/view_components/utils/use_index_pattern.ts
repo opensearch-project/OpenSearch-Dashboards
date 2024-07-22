@@ -5,9 +5,8 @@
 
 import { useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { batch } from 'react-redux';
 import { IndexPattern } from '../../../../../data/public';
-import { updateDataSet, useSelector, updateIndexPattern } from '../../utils/state_management';
+import { useSelector, updateIndexPattern } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
 

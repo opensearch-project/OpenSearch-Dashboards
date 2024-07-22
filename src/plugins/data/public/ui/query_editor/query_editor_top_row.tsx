@@ -205,7 +205,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     )
       return '';
 
-    const defaultDataSet = settings?.getSelectedDataSet() ?? indexPatterns[0];
+    const defaultDataSet = indexPatterns[0];
     const dataSet = typeof defaultDataSet === 'string' ? defaultDataSet : defaultDataSet.title;
 
     return input.replace('<data_source>', dataSet);
