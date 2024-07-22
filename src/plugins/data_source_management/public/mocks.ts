@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { throwError } from 'rxjs';
-import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
+import { HttpStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { IUiSettingsClient } from 'src/core/public';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
 import { AuthType, DataSourceAttributes } from './types';
@@ -25,9 +25,11 @@ import {
 } from '../framework/constants';
 import {
   CreateAccelerationForm,
+  IntegrationConfig,
   MaterializedViewQueryType,
   SkippingIndexRowType,
 } from '../framework/types';
+import { AvailableIntegrationsTableProps } from './components/direct_query_data_sources_components/integrations/available_integration_table';
 
 /* Mock Types */
 
@@ -892,4 +894,86 @@ export const mockDatasourcesQuery = {
     resp:
       '[{  "name": "my_glue",  "description": "",  "connector": "S3GLUE",  "allowedRoles": [],  "properties": {      "glue.indexstore.opensearch.uri": "",      "glue.indexstore.opensearch.region": ""  }}]',
   },
+};
+
+// direct query data source integration mocks
+export const mockHttp: Partial<HttpStart> = {
+  basePath: {
+    prepend: (url: string) => url,
+  },
+};
+
+export const availableTableViewData: AvailableIntegrationsTableProps = {
+  data: {
+    hits: [
+      {
+        name: 'nginx',
+        version: '1.0.1',
+        displayName: 'NginX Dashboard',
+        description: 'Nginx HTTP server collector',
+        license: 'Apache-2.0',
+        type: 'logs',
+        author: 'John Doe',
+        sourceUrl: 'https://github.com/',
+        statics: {
+          logo: { annotation: 'NginX Logo', path: 'logo.svg' },
+          gallery: [
+            { annotation: 'NginX Dashboard', path: 'dashboard1.png' },
+            { annotation: 'NginX Logo', path: 'logo.svg' },
+          ],
+        },
+        components: [
+          { name: 'communication', version: '1.0.0' },
+          { name: 'http', version: '1.0.0' },
+          { name: 'logs', version: '1.0.0' },
+        ],
+        assets: [
+          { name: 'nginx', version: '1.0.1', extension: 'ndjson', type: 'savedObjectBundle' },
+        ],
+      },
+    ],
+  },
+  loading: false,
+  isCardView: false,
+  setCardView: () => {},
+  http: mockHttp as HttpStart, // Added the mock http property here
+};
+
+export const TEST_INTEGRATION_CONFIG: IntegrationConfig = {
+  name: 'sample',
+  version: '2.0.0',
+  license: 'Apache-2.0',
+  type: 'logs',
+  workflows: [
+    {
+      name: 'workflow1',
+      label: 'Workflow 1',
+      description: 'This is a test workflow.',
+      enabled_by_default: true,
+    },
+  ],
+  components: [
+    {
+      name: 'logs',
+      version: '1.0.0',
+    },
+  ],
+  assets: [
+    {
+      name: 'sample',
+      version: '1.0.1',
+      extension: 'ndjson',
+      type: 'savedObjectBundle',
+    },
+  ],
+};
+
+export const TEST_INTEGRATION_SETUP_INPUTS: IntegrationSetupInputs = {
+  displayName: 'Test Instance Name',
+  connectionType: 'index',
+  connectionDataSource: 'ss4o_logs-nginx-test',
+  connectionTableName: '',
+  connectionLocation: '',
+  checkpointLocation: '',
+  enabledWorkflows: [],
 };
