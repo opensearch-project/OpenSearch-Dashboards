@@ -194,7 +194,7 @@ export class ChromeService {
     const helpExtension$ = new BehaviorSubject<ChromeHelpExtension | undefined>(undefined);
     const breadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
     const breadcrumbsEnricher$ = new BehaviorSubject<ChromeBreadcrumbEnricher | undefined>(
-      (breadcrumbs) => breadcrumbs
+      undefined
     );
     const badge$ = new BehaviorSubject<ChromeBadge | undefined>(undefined);
     const customNavLink$ = new BehaviorSubject<ChromeNavLink | undefined>(undefined);

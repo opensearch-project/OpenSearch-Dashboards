@@ -269,7 +269,7 @@ const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
 export const getFirstUseCaseOfFeatureConfigs = (featureConfigs: string[]): string | undefined =>
   featureConfigs.map(getUseCaseFromFeatureConfig).filter(isNotNull)[0];
 
-export function enhanceBreadcrumbsWithUseCase(core: CoreStart) {
+export function enrichBreadcrumbsWithWorkspace(core: CoreStart) {
   return combineLatest([
     core.workspaces.currentWorkspace$,
     core.application.currentAppId$,
