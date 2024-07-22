@@ -18,8 +18,8 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { DEFAULT_SELECTED_FEATURES_IDS } from '../common/constants';
 import { WorkspaceUseCase } from './types';
+import { DEFAULT_SELECTED_FEATURES_IDS } from '../common/constants';
 
 const USE_CASE_PREFIX = 'use-case-';
 

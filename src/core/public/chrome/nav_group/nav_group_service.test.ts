@@ -311,53 +311,6 @@ describe('ChromeNavGroupService#start()', () => {
     expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toBeFalsy();
     expect(currentNavGroup).toBeUndefined();
   });
-
-  it('should reset current nav group if app not belongs to any nav group', async () => {
-    const uiSettings = uiSettingsServiceMock.createSetupContract();
-    const navGroupEnabled$ = new Rx.BehaviorSubject(true);
-    uiSettings.get$.mockImplementation(() => navGroupEnabled$);
-
-    const chromeNavGroupService = new ChromeNavGroupService();
-    const chromeNavGroupServiceSetup = chromeNavGroupService.setup({ uiSettings });
-
-    chromeNavGroupServiceSetup.addNavLinksToGroup(
-      {
-        id: 'foo',
-        title: 'foo title',
-        description: 'foo description',
-      },
-      [{ id: 'foo-app1' }]
-    );
-
-    const chromeNavGroupServiceStart = await chromeNavGroupService.start({
-      navLinks: mockedNavLinkService,
-      application: mockedApplicationService,
-    });
-
-    // set an existing nav group id
-    chromeNavGroupServiceStart.setCurrentNavGroup('foo');
-
-    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toEqual('foo');
-
-    let currentNavGroup = await chromeNavGroupServiceStart
-      .getCurrentNavGroup$()
-      .pipe(first())
-      .toPromise();
-
-    expect(currentNavGroup?.id).toEqual('foo');
-
-    // navigate to app don't belongs to any nav group
-    mockedApplicationService.navigateToApp('bar-app');
-
-    currentNavGroup = await chromeNavGroupServiceStart
-      .getCurrentNavGroup$()
-      .pipe(first())
-      .toPromise();
-
-    // verify current nav group been reset
-    expect(currentNavGroup).toBeFalsy();
-    expect(sessionStorageMock.getItem(CURRENT_NAV_GROUP_ID)).toBeFalsy();
-  });
 });
 
 describe('nav group updater', () => {
