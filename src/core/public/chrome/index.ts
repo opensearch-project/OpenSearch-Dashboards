@@ -44,7 +44,12 @@ export {
   ChromeHelpExtensionMenuDocumentationLink,
   ChromeHelpExtensionMenuGitHubLink,
 } from './ui/header/header_help_menu';
-export { NavType, RightNavigationButton, RightNavigationButtonProps } from './ui';
+export {
+  NavType,
+  RightNavigationButton,
+  RightNavigationButtonProps,
+  createRecentNavLink,
+} from './ui';
 export { ChromeNavLink, ChromeNavLinks, ChromeNavLinkUpdateableFields } from './nav_links';
 export {
   ChromeRecentlyAccessed,

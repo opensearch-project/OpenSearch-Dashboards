@@ -31,7 +31,19 @@ export const setupHome = (contentManagement: ContentManagementPluginSetup) => {
         order: 2000,
         title: 'Recently viewed',
         kind: 'custom',
-        render: () => <></>,
+        render: (contents) => {
+          return (
+            <>
+              {contents.map((content) => {
+                if (content.kind === 'custom') {
+                  return content.render();
+                }
+
+                return null;
+              })}
+            </>
+          );
+        },
       },
       {
         id: SECTIONS.GET_STARTED,
