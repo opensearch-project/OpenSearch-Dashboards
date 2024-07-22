@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccelerationsRecommendationCallout matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="euiCallOut euiCallOut--primary"
+  >
+    <div
+      class="euiCallOutHeader"
+    >
+      <span
+        aria-hidden="true"
+        class="euiCallOutHeader__icon"
+        color="inherit"
+        data-euiicon-type="iInCircle"
+      />
+      <span
+        class="euiCallOutHeader__title"
+      >
+        Accelerations recommended for tables. Setup acceleration or configure integrations
+      </span>
+    </div>
+  </div>
+</DocumentFragment>
+`;
