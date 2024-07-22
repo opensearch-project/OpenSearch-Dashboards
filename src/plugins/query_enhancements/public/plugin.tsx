@@ -112,6 +112,28 @@ export class QueryEnhancementsPlugin
     data.__enhance({
       ui: {
         query: {
+          language: 'PPLAsync',
+          search: sqlAsyncSearchInterceptor,
+          searchBar: {
+            showDatePicker: false,
+            showFilterBar: false,
+            showDataSetsSelector: false,
+            showDataSourcesSelector: true,
+            queryStringInput: { initialValue: 'source = mys3.default.http_logs' },
+          },
+          fields: {
+            filterable: false,
+            visualizable: false,
+          },
+          showDocLinks: false,
+          supportedAppNames: ['discover'],
+        },
+      },
+    });
+
+    data.__enhance({
+      ui: {
+        query: {
           language: 'SQL',
           search: sqlSearchInterceptor,
           searchBar: {

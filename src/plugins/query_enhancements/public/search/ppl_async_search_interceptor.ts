@@ -33,7 +33,7 @@ import {
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 import { ConnectionsService } from '../data_source_connection';
 
-export class SQLAsyncSearchInterceptor extends SearchInterceptor {
+export class PPLAsyncSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
   protected indexPatterns!: DataPublicPluginStart['indexPatterns'];
@@ -59,7 +59,7 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
     _strategy?: string
   ): Observable<IOpenSearchDashboardsSearchResponse> {
     const { id, ...searchRequest } = request;
-    const path = trimEnd(API.SQL_ASYNC_SEARCH);
+    const path = trimEnd(API.PPL_ASYNC_SEARCH);
     const dfContext: FetchDataFrameContext = {
       http: this.deps.http,
       path,
@@ -106,8 +106,8 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
           case JobState.FAILED:
             const jsError = new Error(pollingResult.data.error.response);
             this.deps.toasts.addError(jsError, {
-              title: i18n.translate('queryEnhancements.sqlQueryError', {
-                defaultMessage: 'Could not complete the SQL async query',
+              title: i18n.translate('queryEnhancements.pplQueryError', {
+                defaultMessage: 'Could not complete the PPL async query',
               }),
               toastMessage: pollingResult.data.error.response,
             });
@@ -124,7 +124,7 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
     };
 
     this.deps.toasts.addInfo({
-      title: i18n.translate('queryEnhancements.sqlQueryInfo', {
+      title: i18n.translate('queryEnhancements.pplQueryInfo', {
         defaultMessage: 'Starting query job...',
       }),
     });
@@ -149,6 +149,6 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.SQL_ASYNC);
+    return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.PPL_ASYNC);
   }
 }
