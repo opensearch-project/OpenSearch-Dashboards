@@ -44,7 +44,10 @@ import { AccelerationTable } from '../acceleration_management/acceleration_table
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import { AssociatedObjectsTab } from '../associated_object_management/associated_objects_tab';
 import { redirectToExplorerS3 } from '../associated_object_management/utils/associated_objects_tab_utils';
-import { InstalledIntegrationsTable } from '../integrations/installed_integrations_table';
+import {
+  InstallIntegrationFlyout,
+  InstalledIntegrationsTable,
+} from '../integrations/installed_integrations_table';
 import {
   IntegrationInstanceResult,
   IntegrationInstancesSearchResult,
@@ -136,6 +139,19 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
     findIntegrations();
   }, [http, datasourceDetails.name, refreshIntegrationsFlag]);
 
+  const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
+  const onclickIntegrationsCard = () => {
+    setShowIntegrationsFlyout(true);
+  };
+  const integrationsFlyout = showIntegrationsFlyout ? (
+    <InstallIntegrationFlyout
+      closeFlyout={() => setShowIntegrationsFlyout(false)}
+      datasourceType={datasourceDetails.connector}
+      datasourceName={datasourceDetails.name}
+      http={http}
+    />
+  ) : null;
+
   const fetchSelectedDatasource = () => {
     const endpoint = featureFlagStatus
       ? `${DATACONNECTIONS_BASE}/${dataSourceName}/dataSourceMDSId=${dataSourceMDSId || ''}`
@@ -174,12 +190,12 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
             icon={<EuiIcon size="xxl" type="integrationGeneral" />}
             title={'Configure Integrations'}
             description="Connect to common application log types using integrations"
-            // onClick={onclickIntegrationsCard}
-            // selectable={{
-            //   onClick: onclickIntegrationsCard,
-            //   isDisabled: false,
-            //   children: 'Add Integrations',
-            // }}
+            onClick={onclickIntegrationsCard}
+            selectable={{
+              onClick: onclickIntegrationsCard,
+              isDisabled: false,
+              children: 'Add Integrations',
+            }}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -388,7 +404,6 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
                 datasourceName={datasourceDetails.name}
                 refreshInstances={refreshInstances}
                 http={http}
-                application={application}
               />
             ),
           },
@@ -413,6 +428,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
         </EuiPageHeader>
         <DatasourceOverview />
         <EuiSpacer />
+        {integrationsFlyout}
         {datasourceDetails.status !== 'ACTIVE' ? (
           <InactiveDataConnectionCallout
             datasourceDetails={datasourceDetails}
