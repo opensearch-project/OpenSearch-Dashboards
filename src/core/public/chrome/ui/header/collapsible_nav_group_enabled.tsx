@@ -36,7 +36,7 @@ import {
   LinkItem,
   LinkItemType,
 } from '../../utils';
-import { ALL_USE_CASE_ID } from '../../../../../core/utils';
+import { ALL_USE_CASE_ID, DEFAULT_APP_CATEGORIES } from '../../../../../core/utils';
 import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 import { HeaderNavControls } from './header_nav_controls';
 
@@ -164,11 +164,12 @@ export function NavGroups({
   );
 }
 
-// custom category is used for those features not belong to any of use cases in all use case.
+// Custom category is used for those features not belong to any of use cases in all use case.
+// and the custom category should always sit before manage category
 const customCategory: AppCategory = {
   id: 'custom',
   label: i18n.translate('core.ui.customNavList.label', { defaultMessage: 'Custom' }),
-  order: Number.MAX_SAFE_INTEGER,
+  order: (DEFAULT_APP_CATEGORIES.manage.order || 0) - 500,
 };
 
 export function CollapsibleNavGroupEnabled({
