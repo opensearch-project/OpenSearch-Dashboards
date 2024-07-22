@@ -7,10 +7,9 @@ import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { IStorageWrapper, Storage } from '../../opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../common/config';
-import { ConnectionsService, createDataSourceConnectionExtension } from './data_source_connection';
+import { ConnectionsService, setData, setStorage } from './services';
 import { createQueryAssistExtension } from './query_assist';
 import { PPLSearchInterceptor, SQLAsyncSearchInterceptor, SQLSearchInterceptor } from './search';
-import { setData, setStorage } from './services';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
@@ -89,7 +88,7 @@ export class QueryEnhancementsPlugin
               initialTo: moment().add(2, 'days').toISOString(),
             },
             showFilterBar: false,
-            showDataSetsSelector: false,
+            showDataSetsSelector: true,
             showDataSourcesSelector: true,
           },
           fields: {
@@ -109,7 +108,7 @@ export class QueryEnhancementsPlugin
           searchBar: {
             showDatePicker: false,
             showFilterBar: false,
-            showDataSetsSelector: false,
+            showDataSetsSelector: true,
             showDataSourcesSelector: true,
             queryStringInput: { initialValue: 'SELECT * FROM <data_source>' },
           },
@@ -151,16 +150,6 @@ export class QueryEnhancementsPlugin
           core.http,
           this.connectionsService,
           this.config.queryAssist
-        ),
-      },
-    });
-
-    data.__enhance({
-      ui: {
-        queryEditorExtension: createDataSourceConnectionExtension(
-          this.connectionsService,
-          core.notifications.toasts,
-          this.config
         ),
       },
     });

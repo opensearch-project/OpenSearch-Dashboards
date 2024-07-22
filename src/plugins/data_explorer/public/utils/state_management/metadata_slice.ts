@@ -6,10 +6,26 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DataExplorerServices } from '../../types';
 
+interface DataSourceMeta {
+  ref?: string; // MDS ID
+  dsName?: string; // flint datasource
+}
+
+export interface DataSet {
+  id: string; // index pattern ID, index name, or flintdatasource.database.table
+  dataSource?: DataSourceMeta;
+  meta?: {
+    timestampField: string;
+    mapping?: any;
+  };
+  type?: 'dataset' | 'temporary';
+}
+
 export interface MetadataState {
   indexPattern?: string;
   originatingApp?: string;
   view?: string;
+  dataSet?: DataSet;
 }
 
 const initialState: MetadataState = {};
@@ -40,6 +56,9 @@ export const slice = createSlice({
     setIndexPattern: (state, action: PayloadAction<string>) => {
       state.indexPattern = action.payload;
     },
+    setDataSet: (state, action: PayloadAction<DataSet | undefined>) => {
+      state.dataSet = action.payload;
+    },
     setOriginatingApp: (state, action: PayloadAction<string | undefined>) => {
       state.originatingApp = action.payload;
     },
@@ -53,4 +72,4 @@ export const slice = createSlice({
 });
 
 export const { reducer } = slice;
-export const { setIndexPattern, setOriginatingApp, setView, setState } = slice.actions;
+export const { setIndexPattern, setDataSet, setOriginatingApp, setView, setState } = slice.actions;

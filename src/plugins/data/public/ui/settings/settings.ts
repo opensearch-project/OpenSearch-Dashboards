@@ -110,6 +110,15 @@ export class Settings {
     return true;
   }
 
+  getUserQueryDataSet() {
+    return this.storage.get('opensearchDashboards.userQueryDataSet');
+  }
+
+  setUserQueryDataSet(dataSet: any) {
+    this.storage.set('opensearchDashboards.userQueryDataSet', dataSet);
+    return true;
+  }
+
   getUiOverrides() {
     return this.storage.get('opensearchDashboards.uiOverrides') || {};
   }
