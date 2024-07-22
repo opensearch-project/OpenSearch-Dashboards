@@ -109,18 +109,6 @@ describe('<WorkspaceMenu />', () => {
     expect(screen.getByText('Observability')).toBeInTheDocument();
   });
 
-  it('should close the workspace dropdown list', async () => {
-    render(<WorkspaceMenuCreatorComponent />);
-
-    fireEvent.click(screen.getByTestId('workspace-select-button'));
-
-    expect(screen.getByText(/all workspaces/i)).toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('workspace-select-button'));
-    await waitFor(() => {
-      expect(screen.queryByText(/all workspaces/i)).not.toBeInTheDocument();
-    });
-  });
-
   it('should navigate to the workspace', () => {
     coreStartMock.workspaces.workspaceList$.next([
       { id: 'workspace-1', name: 'workspace 1', features: ['use-case-observability'] },

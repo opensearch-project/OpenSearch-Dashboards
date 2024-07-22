@@ -77,6 +77,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   ): WorkspaceAttributeWithPermission {
     return {
       ...savedObject.attributes,
+      lastUpdatedTime: savedObject.updated_at,
       id: savedObject.id,
       permissions: savedObject.permissions,
     };

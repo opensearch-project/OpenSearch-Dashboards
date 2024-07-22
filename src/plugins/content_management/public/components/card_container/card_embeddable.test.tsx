@@ -3,10 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import React from 'react';
 import { CardEmbeddable } from './card_embeddable';
 
 test('CardEmbeddable should render a card with the title', () => {
-  const embeddable = new CardEmbeddable({ id: 'card-id', title: 'card title', description: '' });
+  const embeddable = new CardEmbeddable({
+    id: 'card-id',
+    title: 'card title',
+    description: '',
+    getIcon: () => <>icon</>,
+    getFooter: () => <>footer</>,
+  });
 
   const node = document.createElement('div');
   embeddable.render(node);

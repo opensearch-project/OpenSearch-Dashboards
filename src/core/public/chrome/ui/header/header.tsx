@@ -288,6 +288,7 @@ export function Header({
             navControlsLeftBottom$={observables.navControlsLeftBottom$}
             currentNavGroup$={observables.currentNavGroup$}
             setCurrentNavGroup={setCurrentNavGroup}
+            capabilities={application.capabilities}
           />
         ) : (
           <CollapsibleNav
