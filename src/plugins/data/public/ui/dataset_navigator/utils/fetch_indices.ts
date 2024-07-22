@@ -4,7 +4,7 @@
  */
 
 import { map, scan } from 'rxjs/operators';
-import { ISearchStart } from '../../search';
+import { ISearchStart } from '../../../search';
 
 export const fetchIndices = async (search: ISearchStart, dataSourceId: string) => {
   const request = buildSearchRequest(true, '*', dataSourceId);

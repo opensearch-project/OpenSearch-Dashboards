@@ -4,6 +4,6 @@
  */
 
 export { DataSetNavigator, DataSetNavigatorProps, DataSetOption } from './dataset_navigator';
-export { fetchClusters } from './fetch_clusters';
-export { fetchIndexPatterns } from './fetch_index_patterns';
-export { fetchIndices } from './fetch_indices';
+export { fetchClusters } from './utils/fetch_clusters';
+export { fetchIndexPatterns } from './utils/fetch_index_patterns';
+export { fetchIndices } from './utils/fetch_indices';

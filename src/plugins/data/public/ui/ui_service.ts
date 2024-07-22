@@ -87,7 +87,9 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
         core.savedObjects.client,
         dataServices.indexPatterns,
         dataServices.search,
-        onSelectedDataSet
+        onSelectedDataSet,
+        core.http,
+        core.notifications,
       ),
       SearchBar,
       SuggestionsComponent,

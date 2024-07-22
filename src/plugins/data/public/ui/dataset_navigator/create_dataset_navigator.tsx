@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { SavedObjectsClientContract } from 'src/core/public';
+import { HttpStart, NotificationsStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { IndexPatternsContract } from 'src/plugins/data/public';
 import { DataSetNavigator, DataSetNavigatorProps } from './';
 import { Settings } from '../settings';
@@ -16,6 +16,8 @@ export function createDataSetNavigator(
   indexPatternsService: IndexPatternsContract,
   search: any,
   onDataSetSelected: any,
+  http: HttpStart,
+  notifications: NotificationsStart,
 ) {
   // Return a function that takes props, omitting the dependencies from the props type
   return (
@@ -28,6 +30,8 @@ export function createDataSetNavigator(
       indexPatternsService={indexPatternsService}
       search={search}
       onDataSetSelected={onDataSetSelected}
+      http={http}
+      notifications={notifications}
     />
   );
 }
