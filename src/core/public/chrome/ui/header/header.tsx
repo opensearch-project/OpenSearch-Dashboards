@@ -68,6 +68,9 @@ import type { Logos } from '../../../../common/types';
 import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
 import { CollapsibleNavGroupEnabled } from './collapsible_nav_group_enabled';
 import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
+import { RecentItems } from './recent_items';
+import { WorkspaceObject } from '../../../../public/workspace';
+
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
@@ -102,6 +105,7 @@ export interface HeaderProps {
   currentNavGroup$: Observable<NavGroupItemInMap | undefined>;
   navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
+  workspaceList$: Observable<WorkspaceObject[]>;
 }
 
 export function Header({
@@ -225,6 +229,18 @@ export function Header({
                   loadingCount$={observables.loadingCount$}
                 />
               </EuiHeaderSectionItem>
+              {/* Only display recent items when navGroup is enabled */}
+              {navGroupEnabled && (
+                <EuiHeaderSectionItem border="right">
+                  <RecentItems
+                    recentlyAccessed$={observables.recentlyAccessed$}
+                    workspaceList$={observables.workspaceList$}
+                    navigateToUrl={application.navigateToUrl}
+                    navLinks$={observables.navLinks$}
+                    basePath={basePath}
+                  />
+                </EuiHeaderSectionItem>
+              )}
             </EuiHeaderSection>
 
             <HeaderBreadcrumbs
