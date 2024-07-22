@@ -29,7 +29,13 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  AppMountParameters,
+} from 'src/core/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { DataSourcePluginSetup, DataSourcePluginStart } from 'src/plugins/data_source/public';
 import { UrlForwardingSetup } from '../../url_forwarding/public';
@@ -40,6 +46,7 @@ import {
 } from './service';
 
 import { ManagementSetup } from '../../management/public';
+import { DEFAULT_NAV_GROUPS, AppStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -104,6 +111,17 @@ export class IndexPatternManagementPlugin
       title: sectionsHeader,
       order: 0,
       mount: async (params) => {
+        if (core.chrome.navGroup.getNavGroupEnabled()) {
+          const [coreStart] = await core.getStartServices();
+          const urlForStandardIPMApp = new URL(
+            coreStart.application.getUrlForApp(IPM_APP_ID),
+            window.location.href
+          );
+          const targetUrl = new URL(window.location.href);
+          targetUrl.pathname = urlForStandardIPMApp.pathname;
+          coreStart.application.navigateToUrl(targetUrl.toString());
+          return () => {};
+        }
         const { mountManagementSection } = await import('./management_app');
 
         return mountManagementSection(
@@ -114,6 +132,70 @@ export class IndexPatternManagementPlugin
         );
       },
     });
+
+    core.application.register({
+      id: IPM_APP_ID,
+      title: sectionsHeader,
+      status: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
+      mount: async (params: AppMountParameters) => {
+        const { mountManagementSection } = await import('./management_app');
+        const [coreStart] = await core.getStartServices();
+
+        return mountManagementSection(
+          core.getStartServices,
+          {
+            ...params,
+            basePath: core.http.basePath.get(),
+            setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+            wrapInPage: true,
+          },
+          () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),
+          dataSource
+        );
+      },
+    });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
+      {
+        id: IPM_APP_ID,
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 200,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
+      {
+        id: IPM_APP_ID,
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 200,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
+      {
+        id: IPM_APP_ID,
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 200,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
+      {
+        id: IPM_APP_ID,
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 200,
+      },
+    ]);
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: IPM_APP_ID,
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 200,
+      },
+    ]);
 
     return this.indexPatternManagementService.setup({ httpClient: core.http });
   }

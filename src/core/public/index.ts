@@ -73,6 +73,10 @@ import {
   RightNavigationButtonProps,
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,
+  PersistedLog,
+  NavGroupItemInMap,
+  fulfillRegistrationLinksToChromeNavLinks,
+  createRecentNavLink,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -373,6 +377,10 @@ export {
   RightNavigationButtonProps,
   ChromeRegistrationNavLink,
   ChromeNavGroupUpdater,
+  PersistedLog,
+  NavGroupItemInMap,
+  fulfillRegistrationLinksToChromeNavLinks,
+  createRecentNavLink,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';

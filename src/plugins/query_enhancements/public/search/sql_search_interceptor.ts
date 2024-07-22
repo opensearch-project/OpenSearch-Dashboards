@@ -71,12 +71,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
           const df = response.body;
           if (df.error) {
             const jsError = new Error(df.error.response);
-            this.deps.toasts.addError(jsError, {
-              title: i18n.translate('queryEnhancements.sqlQueryError', {
-                defaultMessage: 'Could not complete the SQL query',
-              }),
-              toastMessage: df.error.msg,
-            });
+            return throwError(jsError);
           }
           return fetchDataFrame(dfContext, queryString, df);
         })

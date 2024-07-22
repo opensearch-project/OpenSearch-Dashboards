@@ -11,10 +11,10 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   EuiToolTip,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiConfirmModal,
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -29,6 +29,7 @@ export const Header = ({
   onClickSetDefault,
   dataSourceName,
   isDefault,
+  canManageDataSource,
 }: {
   showDeleteIcon: boolean;
   isFormValid: boolean;
@@ -37,6 +38,7 @@ export const Header = ({
   onClickSetDefault: () => void;
   dataSourceName: string;
   isDefault: boolean;
+  canManageDataSource: boolean;
 }) => {
   /* State Variables */
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -56,7 +58,7 @@ export const Header = ({
 
   const renderDefaultIcon = () => {
     return (
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         onClick={() => {
           onClickSetDefault();
           setIsDefaultDataSourceState(!isDefaultDataSourceState);
@@ -67,7 +69,7 @@ export const Header = ({
         data-test-subj="editSetDefaultDataSource"
       >
         {isDefaultDataSourceState ? 'Default' : 'Set as default'}
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     );
   };
 
@@ -79,7 +81,7 @@ export const Header = ({
             defaultMessage: 'Delete this Data Source',
           })}
         >
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             color="danger"
             data-test-subj="editDatasourceDeleteIcon"
             onClick={() => {
@@ -142,7 +144,7 @@ export const Header = ({
   };
   const renderTestConnectionButton = () => {
     return (
-      <EuiButton
+      <EuiSmallButton
         type="submit"
         fill={false}
         disabled={!isFormValid}
@@ -155,7 +157,7 @@ export const Header = ({
           id="dataSourcesManagement.createDataSource.testConnectionButton"
           defaultMessage="Test connection"
         />
-      </EuiButton>
+      </EuiSmallButton>
     );
   };
 
@@ -175,11 +177,15 @@ export const Header = ({
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
           {/* Test default button */}
-          <EuiFlexItem grow={false}>{renderDefaultIcon()}</EuiFlexItem>
+          {canManageDataSource ? (
+            <EuiFlexItem grow={false}>{renderDefaultIcon()}</EuiFlexItem>
+          ) : null}
           {/* Test connection button */}
           <EuiFlexItem grow={false}>{renderTestConnectionButton()}</EuiFlexItem>
           {/* Delete icon button */}
-          <EuiFlexItem grow={false}>{showDeleteIcon ? renderDeleteButton() : null}</EuiFlexItem>
+          {canManageDataSource ? (
+            <EuiFlexItem grow={false}>{showDeleteIcon ? renderDeleteButton() : null}</EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -6,7 +6,8 @@
 import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { first } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
+import { EuiIcon } from '@elastic/eui';
 import {
   Plugin,
   CoreStart,
@@ -15,38 +16,47 @@ import {
   AppNavLinkStatus,
   AppUpdater,
   AppStatus,
-  PublicAppInfo,
   ChromeBreadcrumb,
   WorkspaceAvailability,
   ChromeNavGroupUpdater,
   NavGroupStatus,
   DEFAULT_NAV_GROUPS,
+  NavGroupType,
+  ALL_USE_CASE_ID,
 } from '../../../core/public';
 import {
   WORKSPACE_FATAL_ERROR_APP_ID,
-  WORKSPACE_OVERVIEW_APP_ID,
+  WORKSPACE_DETAIL_APP_ID,
   WORKSPACE_CREATE_APP_ID,
-  WORKSPACE_UPDATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
+  WORKSPACE_USE_CASES,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
-import { Services } from './types';
+import { Services, WorkspaceUseCase } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { ManagementSetup } from '../../../plugins/management/public';
+import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
 import {
   filterWorkspaceConfigurableApps,
+  getFirstUseCaseOfFeatureConfigs,
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
+import { recentWorkspaceManager } from './recent_workspace_manager';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
+import { UseCaseService } from './services/use_case_service';
+import { WorkspaceListCard } from './components/service_card';
+import { UseCaseFooter } from './components/home_get_start_card';
+import { HOME_CONTENT_AREAS } from '../../home/public';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
   services: Services,
-  props: Record<string, any>
+  props: Record<string, any> & { registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]> }
 ) => () => void;
 
 interface WorkspacePluginSetupDeps {
@@ -55,7 +65,12 @@ interface WorkspacePluginSetupDeps {
   dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
-export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
+export interface WorkspacePluginStartDeps {
+  contentManagement: ContentManagementPluginStart;
+}
+
+export class WorkspacePlugin
+  implements Plugin<{}, {}, WorkspacePluginSetupDeps, WorkspacePluginStartDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private breadcrumbsSubscription?: Subscription;
@@ -63,8 +78,11 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   private managementCurrentWorkspaceIdSubscription?: Subscription;
   private appUpdater$ = new BehaviorSubject<AppUpdater>(() => undefined);
   private navGroupUpdater$ = new BehaviorSubject<ChromeNavGroupUpdater>(() => undefined);
-  private workspaceConfigurableApps$ = new BehaviorSubject<PublicAppInfo[]>([]);
   private unregisterNavGroupUpdater?: () => void;
+  private registeredUseCases$ = new BehaviorSubject<WorkspaceUseCase[]>([]);
+  private registeredUseCasesUpdaterSubscription?: Subscription;
+  private workspaceAndUseCasesCombineSubscription?: Subscription;
+  private useCase = new UseCaseService();
 
   private _changeSavedObjectCurrentWorkspace() {
     if (this.coreStart) {
@@ -82,29 +100,54 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
    */
   private filterNavLinks = (core: CoreStart) => {
     const currentWorkspace$ = core.workspaces.currentWorkspace$;
-    this.currentWorkspaceSubscription?.unsubscribe();
 
-    this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
+    this.workspaceAndUseCasesCombineSubscription?.unsubscribe();
+    this.workspaceAndUseCasesCombineSubscription = combineLatest([
+      currentWorkspace$,
+      this.registeredUseCases$,
+    ]).subscribe(([currentWorkspace, registeredUseCases]) => {
       if (currentWorkspace) {
         this.appUpdater$.next((app) => {
-          if (isAppAccessibleInWorkspace(app, currentWorkspace)) {
+          if (isAppAccessibleInWorkspace(app, currentWorkspace, registeredUseCases)) {
             return;
           }
-
           if (app.status === AppStatus.inaccessible) {
             return;
           }
-
+          if (
+            registeredUseCases.some(
+              (useCase) => useCase.systematic && useCase.features.includes(app.id)
+            )
+          ) {
+            return;
+          }
           /**
            * Change the app to `inaccessible` if it is not configured in the workspace
            * If trying to access such app, an "Application Not Found" page will be displayed
            */
           return { status: AppStatus.inaccessible };
         });
+      }
+    });
 
+    this.currentWorkspaceSubscription?.unsubscribe();
+    this.currentWorkspaceSubscription = currentWorkspace$.subscribe((currentWorkspace) => {
+      if (currentWorkspace) {
         this.navGroupUpdater$.next((navGroup) => {
+          /**
+           * The following logic determines whether a navigation group should be hidden or not based on the workspace's feature configurations.
+           * It checks the following conditions:
+           * 1. The navigation group is not a system-level group (system groups are always visible).
+           * 2. The current workspace has feature configurations set up.
+           * 3. The current workspace's use case it not "All use case".
+           * 4. The current navigation group is not included in the feature configurations of the workspace.
+           *
+           * If all these conditions are true, it means that the navigation group should be hidden.
+           */
           if (
+            navGroup.type !== NavGroupType.SYSTEM &&
             currentWorkspace.features &&
+            getFirstUseCaseOfFeatureConfigs(currentWorkspace.features) !== ALL_USE_CASE_ID &&
             !isNavGroupInFeatureConfigs(navGroup.id, currentWorkspace.features)
           ) {
             return {
@@ -117,20 +160,16 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   };
 
   /**
-   * Initiate an observable with the value of all applications which can be configured by workspace
+   * Return an observable with the value of all applications which can be configured by workspace
    */
-  private setWorkspaceConfigurableApps = async (core: CoreStart) => {
-    const allApps = await new Promise<PublicAppInfo[]>((resolve) => {
-      core.application.applications$.pipe(first()).subscribe((apps) => {
-        resolve([...apps.values()]);
-      });
-    });
-    const availableApps = filterWorkspaceConfigurableApps(allApps);
-    this.workspaceConfigurableApps$.next(availableApps);
+  private getWorkspaceConfigurableApps$ = (core: CoreStart) => {
+    return core.application.applications$.pipe(
+      map((apps) => filterWorkspaceConfigurableApps([...apps.values()]))
+    );
   };
 
   /**
-   * If workspace is enabled and user has entered workspace, hide advance settings and dataSource menu by disabling the corresponding apps.
+   * If workspace is enabled and user has entered workspace, hide advance settings by disabling the corresponding apps.
    */
   private disableManagementApps(core: CoreSetup, management: ManagementSetup) {
     const currentWorkspaceId$ = core.workspaces.currentWorkspaceId$;
@@ -139,7 +178,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.managementCurrentWorkspaceIdSubscription = currentWorkspaceId$.subscribe(
       (currentWorkspaceId) => {
         if (currentWorkspaceId) {
-          ['settings', 'dataSources'].forEach((appId) =>
+          ['settings'].forEach((appId) =>
             management.sections.section.opensearchDashboards.getApp(appId)?.disable()
           );
         }
@@ -148,7 +187,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
   }
 
   /**
-   * Add workspace overview page to breadcrumbs
+   * Add workspace detail page to breadcrumbs
    * @param core CoreStart
    * @private
    */
@@ -165,7 +204,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           const workspaceBreadcrumb: ChromeBreadcrumb = {
             text: currentWorkspace.name,
             onClick: () => {
-              core.application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+              core.application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
             },
           };
           const homeBreadcrumb: ChromeBreadcrumb = {
@@ -232,10 +271,12 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
           const [{ application }] = await core.getStartServices();
           const currentAppIdSubscription = application.currentAppId$.subscribe((currentAppId) => {
             if (currentAppId === WORKSPACE_FATAL_ERROR_APP_ID) {
-              application.navigateToApp(WORKSPACE_OVERVIEW_APP_ID);
+              application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
             }
             currentAppIdSubscription.unsubscribe();
           });
+          // Add workspace id to recent workspaces.
+          recentWorkspaceManager.addRecentWorkspace(workspaceId);
         })();
       }
     }
@@ -249,7 +290,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       };
 
       return renderApp(params, services, {
-        workspaceConfigurableApps$: this.workspaceConfigurableApps$,
+        registeredUseCases$: this.registeredUseCases$,
       });
     };
 
@@ -279,43 +320,18 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     });
 
     /**
-     * register workspace overview page
+     * register workspace detail page
      */
     core.application.register({
-      id: WORKSPACE_OVERVIEW_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceOverview', {
-        defaultMessage: 'Workspace Overview',
+      id: WORKSPACE_DETAIL_APP_ID,
+      title: i18n.translate('workspace.settings.workspaceDetail', {
+        defaultMessage: 'Workspace Detail',
       }),
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
-        const { renderOverviewApp } = await import('./application');
-        return mountWorkspaceApp(params, renderOverviewApp);
+        const { renderDetailApp } = await import('./application');
+        return mountWorkspaceApp(params, renderDetailApp);
       },
-    });
-
-    /**
-     * register workspace update page
-     */
-    core.application.register({
-      id: WORKSPACE_UPDATE_APP_ID,
-      title: i18n.translate('workspace.settings.workspaceUpdate', {
-        defaultMessage: 'Update Workspace',
-      }),
-      navLinkStatus: AppNavLinkStatus.hidden,
-      async mount(params: AppMountParameters) {
-        const { renderUpdaterApp } = await import('./application');
-        return mountWorkspaceApp(params, renderUpdaterApp);
-      },
-    });
-
-    /**
-     * Register workspace dropdown selector on the top of left navigation menu
-     */
-    core.chrome.registerCollapsibleNavHeader(() => {
-      if (!this.coreStart) {
-        return null;
-      }
-      return React.createElement(WorkspaceMenu, { coreStart: this.coreStart });
     });
 
     // workspace list
@@ -351,24 +367,115 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
      */
     savedObjectsManagement?.columns.register(getWorkspaceColumn(core));
 
+    /**
+     * Add workspace list to settings and setup group
+     */
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: WORKSPACE_LIST_APP_ID,
+        order: 150,
+        title: i18n.translate('workspace.settings.workspaceSettings', {
+          defaultMessage: 'Workspace settings',
+        }),
+      },
+    ]);
+
     return {};
   }
 
-  public start(core: CoreStart) {
+  private registerGetStartedCardToNewHome(
+    core: CoreStart,
+    contentManagement: ContentManagementPluginStart
+  ) {
+    const useCases = [
+      WORKSPACE_USE_CASES.observability,
+      WORKSPACE_USE_CASES['security-analytics'],
+      WORKSPACE_USE_CASES.search,
+      WORKSPACE_USE_CASES.analytics,
+    ];
+
+    useCases.forEach((useCase, index) => {
+      contentManagement.registerContentProvider({
+        id: `home_get_start_${useCase.id}`,
+        getTargetArea: () => HOME_CONTENT_AREAS.GET_STARTED,
+        getContent: () => ({
+          id: useCase.id,
+          kind: 'card',
+          order: (index + 1) * 1000,
+          description: useCase.description,
+          title: useCase.title,
+          getIcon: () => React.createElement(EuiIcon, { size: 'xl', type: 'logoOpenSearch' }),
+          getFooter: () =>
+            React.createElement(UseCaseFooter, {
+              useCaseId: useCase.id,
+              useCaseTitle: useCase.title,
+              core,
+              registeredUseCases$: this.registeredUseCases$,
+            }),
+        }),
+      });
+    });
+  }
+
+  public start(core: CoreStart, { contentManagement }: WorkspacePluginStartDeps) {
     this.coreStart = core;
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
 
-    this.setWorkspaceConfigurableApps(core).then(() => {
-      // filter the nav links based on the current workspace
-      this.filterNavLinks(core);
+    const useCaseStart = this.useCase.start({
+      chrome: core.chrome,
+      workspaceConfigurableApps$: this.getWorkspaceConfigurableApps$(core),
     });
+
+    this.registeredUseCasesUpdaterSubscription = useCaseStart
+      .getRegisteredUseCases$()
+      .subscribe((registeredUseCases) => {
+        this.registeredUseCases$.next(registeredUseCases);
+      });
+
+    this.filterNavLinks(core);
 
     if (!core.chrome.navGroup.getNavGroupEnabled()) {
       this.addWorkspaceToBreadcrumbs(core);
-    }
+    } else {
+      /**
+       * Register workspace dropdown selector on the left navigation bottom
+       */
+      core.chrome.navControls.registerLeftBottom({
+        order: 2,
+        mount: toMountPoint(
+          React.createElement(WorkspaceMenu, {
+            coreStart: core,
+            registeredUseCases$: this.registeredUseCases$,
+          })
+        ),
+      });
 
+      // register workspace list in home page
+      this.registerWorkspaceListToHome(core, contentManagement);
+
+      // register get started card in new home page
+      this.registerGetStartedCardToNewHome(core, contentManagement);
+    }
     return {};
+  }
+
+  private registerWorkspaceListToHome(
+    core: CoreStart,
+    contentManagement: ContentManagementPluginStart
+  ) {
+    if (contentManagement) {
+      contentManagement.registerContentProvider({
+        id: 'workspace_list_card_home',
+        getContent: () => ({
+          id: 'workspace_list',
+          kind: 'custom',
+          order: 0,
+          render: () => React.createElement(WorkspaceListCard, { core }),
+        }),
+        getTargetArea: () => HOME_CONTENT_AREAS.SERVICE_CARDS,
+      });
+    }
   }
 
   public stop() {
@@ -377,5 +484,7 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     this.managementCurrentWorkspaceIdSubscription?.unsubscribe();
     this.breadcrumbsSubscription?.unsubscribe();
     this.unregisterNavGroupUpdater?.();
+    this.registeredUseCasesUpdaterSubscription?.unsubscribe();
+    this.workspaceAndUseCasesCombineSubscription?.unsubscribe();
   }
 }

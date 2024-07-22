@@ -77,6 +77,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
   ): WorkspaceAttributeWithPermission {
     return {
       ...savedObject.attributes,
+      lastUpdatedTime: savedObject.updated_at,
       id: savedObject.id,
       permissions: savedObject.permissions,
     };
@@ -306,6 +307,21 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
           }),
         };
       }
+
+      // When workspace is to be deleted, unassign all assigned data source before deleting saved object by workspace.
+      const selectedDataSources = await getDataSourcesList(savedObjectClient, [id]);
+      if (selectedDataSources.length > 0) {
+        const promises = [];
+        for (const dataSource of selectedDataSources) {
+          promises.push(
+            savedObjectClient.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSource.id, [
+              id,
+            ])
+          );
+        }
+        await Promise.all(promises);
+      }
+
       await savedObjectClient.deleteByWorkspace(id);
       // delete workspace itself at last, deleteByWorkspace depends on the workspace to do permission check
       await savedObjectClient.delete(WORKSPACE_TYPE, id);

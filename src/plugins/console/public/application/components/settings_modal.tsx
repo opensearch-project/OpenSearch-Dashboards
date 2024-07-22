@@ -34,17 +34,17 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFieldNumber,
-  EuiFormRow,
-  EuiCheckboxGroup,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
+  EuiCompressedFieldNumber,
+  EuiCompressedFormRow,
+  EuiCompressedCheckboxGroup,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiSwitch,
+  EuiCompressedSwitch,
 } from '@elastic/eui';
 
 import { DevToolsSettings } from '../../services';
@@ -122,7 +122,7 @@ export function DevToolsSettingsModal(props: Props) {
   const pollingFields =
     fields || indices || templates ? (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="console.settingsPage.refreshingDataLabel"
@@ -137,7 +137,7 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          <EuiSwitch
+          <EuiCompressedSwitch
             checked={polling}
             data-test-subj="autocompletePolling"
             id="autocompletePolling"
@@ -149,9 +149,9 @@ export function DevToolsSettingsModal(props: Props) {
             }
             onChange={(e) => setPolling(e.target.checked)}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiButton
+        <EuiSmallButton
           data-test-subj="autocompletePolling"
           id="autocompletePolling"
           onClick={() => {
@@ -167,7 +167,7 @@ export function DevToolsSettingsModal(props: Props) {
             defaultMessage="Refresh autocomplete suggestions"
             id="console.settingsPage.refreshButtonLabel"
           />
-        </EuiButton>
+        </EuiSmallButton>
       </Fragment>
     ) : undefined;
 
@@ -184,12 +184,12 @@ export function DevToolsSettingsModal(props: Props) {
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage id="console.settingsPage.fontSizeLabel" defaultMessage="Font Size" />
           }
         >
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             autoFocus
             data-test-subj="setting-font-size-input"
             value={fontSize}
@@ -201,10 +201,10 @@ export function DevToolsSettingsModal(props: Props) {
               setFontSize(val);
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow>
-          <EuiSwitch
+        <EuiCompressedFormRow>
+          <EuiCompressedSwitch
             checked={wrapMode}
             data-test-subj="settingsWrapLines"
             id="wrapLines"
@@ -216,9 +216,9 @@ export function DevToolsSettingsModal(props: Props) {
             }
             onChange={(e) => setWrapMode(e.target.checked)}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="console.settingsPage.jsonSyntaxLabel"
@@ -226,7 +226,7 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          <EuiSwitch
+          <EuiCompressedSwitch
             checked={tripleQuotes}
             data-test-subj="tripleQuotes"
             id="tripleQuotes"
@@ -238,9 +238,9 @@ export function DevToolsSettingsModal(props: Props) {
             }
             onChange={(e) => setTripleQuotes(e.target.checked)}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow
+        <EuiCompressedFormRow
           labelType="legend"
           label={
             <FormattedMessage
@@ -249,7 +249,7 @@ export function DevToolsSettingsModal(props: Props) {
             />
           }
         >
-          <EuiCheckboxGroup
+          <EuiCompressedCheckboxGroup
             options={autoCompleteCheckboxes.map((opts) => {
               const { stateSetter, ...rest } = opts;
               return rest;
@@ -259,19 +259,19 @@ export function DevToolsSettingsModal(props: Props) {
               onAutocompleteChange(e as AutocompleteOptions);
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
         {pollingFields}
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty data-test-subj="settingsCancelButton" onClick={props.onClose}>
+        <EuiSmallButtonEmpty data-test-subj="settingsCancelButton" onClick={props.onClose}>
           <FormattedMessage id="console.settingsPage.cancelButtonLabel" defaultMessage="Cancel" />
-        </EuiButtonEmpty>
+        </EuiSmallButtonEmpty>
 
-        <EuiButton fill data-test-subj="settings-save-button" onClick={saveSettings}>
+        <EuiSmallButton fill data-test-subj="settings-save-button" onClick={saveSettings}>
           <FormattedMessage id="console.settingsPage.saveButtonLabel" defaultMessage="Save" />
-        </EuiButton>
+        </EuiSmallButton>
       </EuiModalFooter>
     </EuiModal>
   );

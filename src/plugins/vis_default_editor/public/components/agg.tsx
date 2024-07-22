@@ -32,7 +32,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   EuiAccordion,
   EuiToolTip,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiButtonIconProps,
   EuiSpacer,
   EuiIconTip,
@@ -254,7 +254,7 @@ function DefaultEditorAgg({
 
           return (
             <EuiToolTip key={icon.id} position="bottom" content={icon.tooltip}>
-              <EuiButtonIcon
+              <EuiSmallButtonIcon
                 disabled={icon.disabled}
                 iconType={icon.type}
                 color={icon.color as EuiButtonIconProps['color']}

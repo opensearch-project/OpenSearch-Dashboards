@@ -107,6 +107,14 @@ export const useSavedVisInstance = (
         if (savedVis.id) {
           chrome.setBreadcrumbs(getEditBreadcrumbs(savedVis.title));
           chrome.docTitle.change(savedVis.title);
+          chrome.recentlyAccessed.add(
+            savedVisInstance.savedVis.getFullPath(),
+            savedVisInstance.savedVis.title,
+            savedVis.id,
+            {
+              type: savedVisInstance.savedVis.getOpenSearchType(),
+            }
+          );
         } else {
           chrome.setBreadcrumbs(getCreateBreadcrumbs());
         }

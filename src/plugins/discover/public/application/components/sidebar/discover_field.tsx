@@ -32,6 +32,7 @@ import React, { useState } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
+  EuiSmallButtonIcon,
   EuiButtonIcon,
   EuiToolTip,
   EuiFlexGroup,
@@ -133,13 +134,14 @@ export const DiscoverField = ({
   }
 
   const fieldName = (
-    <span
-      data-test-subj={`field-${field.name}`}
-      title={field.name}
-      className="dscSidebarField__name eui-textBreakWord"
-    >
-      {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
-    </span>
+    <EuiToolTip delay="long" content={field.name}>
+      <span
+        data-test-subj={`field-${field.name}`}
+        className="dscSidebarField__name eui-textBreakWord"
+      >
+        {useShortDots ? wrapOnDot(shortenDottedString(field.name)) : wrapOnDot(field.displayName)}
+      </span>
+    </EuiToolTip>
   );
 
   let actionButton;
@@ -151,7 +153,7 @@ export const DiscoverField = ({
           defaultMessage: 'Add field as column',
         })}
       >
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           iconType="plusInCircleFilled"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
@@ -175,7 +177,7 @@ export const DiscoverField = ({
           defaultMessage: 'Remove field from table',
         })}
       >
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           color="danger"
           iconType="cross"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
@@ -227,7 +229,7 @@ export const DiscoverField = ({
             }
             panelClassName="dscSidebarItem__fieldPopoverPanel"
           >
-            <EuiPopoverTitle>
+            <EuiPopoverTitle tabIndex={0}>
               {' '}
               {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
                 defaultMessage: 'Top 5 values',

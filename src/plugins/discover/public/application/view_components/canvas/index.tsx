@@ -5,7 +5,13 @@
 
 import { i18n } from '@osd/i18n';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiSwitch } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPanel,
+  EuiPopover,
+  EuiCompressedSwitch,
+} from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
@@ -129,13 +135,14 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
     >
       <EuiContextMenu
         initialPanelId={0}
+        size="s"
         panels={[
           {
             id: 0,
             title: 'Options',
             content: (
               <EuiPanel>
-                <EuiSwitch
+                <EuiCompressedSwitch
                   label="Enable legacy Discover"
                   checked={useLegacy}
                   data-test-subj="discoverOptionsLegacySwitch"

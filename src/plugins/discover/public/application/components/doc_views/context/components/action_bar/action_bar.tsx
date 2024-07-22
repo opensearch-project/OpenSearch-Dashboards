@@ -32,10 +32,11 @@ import React, { useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import {
-  EuiButtonEmpty,
-  EuiFieldNumber,
+  EuiSmallButtonEmpty,
+  EuiCompressedFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiCompressedFormRow,
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
@@ -117,7 +118,7 @@ export function ActionBar({
         {isSuccessor && showWarning && <EuiSpacer size="s" />}
         <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
+            <EuiSmallButtonEmpty
               data-test-subj={`${type}LoadMoreButton`}
               iconType={isSuccessor ? 'arrowDown' : 'arrowUp'}
               isDisabled={isDisabled}
@@ -132,11 +133,11 @@ export function ActionBar({
               flush="right"
             >
               <FormattedMessage id="discover.context.loadButtonLabel" defaultMessage="Load" />
-            </EuiButtonEmpty>
+            </EuiSmallButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow>
-              <EuiFieldNumber
+            <EuiCompressedFormRow>
+              <EuiCompressedFieldNumber
                 aria-label={
                   isSuccessor
                     ? i18n.translate('discover.context.olderDocumentsAriaLabel', {
@@ -162,10 +163,10 @@ export function ActionBar({
                 type="number"
                 value={newDocCount >= 0 ? newDocCount : ''}
               />
-            </EuiFormRow>
+            </EuiCompressedFormRow>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFormRow display={'center'}>
+            <EuiFormRow display="centerCompressed">
               {isSuccessor ? (
                 <FormattedMessage
                   id="discover.context.olderDocumentsDescription"

@@ -33,10 +33,10 @@ import { injectI18n, FormattedMessage, InjectedIntlProps } from '@osd/i18n/react
 
 import {
   EuiAccordion,
-  EuiButtonIcon,
-  EuiFieldText,
+  EuiSmallButtonIcon,
+  EuiCompressedFieldText,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
@@ -132,7 +132,7 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
     const labelId = `controlLabel${this.props.controlIndex}`;
     return (
       <EuiForm>
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={labelId}
           label={
             <FormattedMessage
@@ -141,8 +141,11 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
             />
           }
         >
-          <EuiFieldText value={this.props.controlParams.label} onChange={this.changeLabel} />
-        </EuiFormRow>
+          <EuiCompressedFieldText
+            value={this.props.controlParams.label}
+            onChange={this.changeLabel}
+          />
+        </EuiCompressedFormRow>
 
         {controlEditor}
       </EuiForm>
@@ -152,7 +155,7 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
   renderEditorButtons() {
     return (
       <div>
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           aria-label={this.props.intl.formatMessage({
             id: 'inputControl.editor.controlEditor.moveControlUpAriaLabel',
             defaultMessage: 'Move control up',
@@ -162,7 +165,7 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
           iconType="sortUp"
           data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
         />
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           aria-label={this.props.intl.formatMessage({
             id: 'inputControl.editor.controlEditor.moveControlDownAriaLabel',
             defaultMessage: 'Move control down',
@@ -172,7 +175,7 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
           iconType="sortDown"
           data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
         />
-        <EuiButtonIcon
+        <EuiSmallButtonIcon
           aria-label={this.props.intl.formatMessage({
             id: 'inputControl.editor.controlEditor.removeControlAriaLabel',
             defaultMessage: 'Remove control',

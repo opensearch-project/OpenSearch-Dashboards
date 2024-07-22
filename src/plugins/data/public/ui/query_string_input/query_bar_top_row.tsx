@@ -39,7 +39,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiSuperDatePicker,
-  EuiFieldText,
+  EuiCompressedFieldText,
   prettyDuration,
 } from '@elastic/eui';
 // @ts-ignore
@@ -70,7 +70,7 @@ export interface QueryBarTopRowProps {
   screenTitle?: string;
   indexPatterns?: Array<IIndexPattern | string>;
   isLoading?: boolean;
-  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
+  prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   showQueryInput?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;

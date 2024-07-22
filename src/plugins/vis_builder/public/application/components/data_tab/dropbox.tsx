@@ -5,10 +5,10 @@
 
 import { i18n } from '@osd/i18n';
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiDraggable,
   EuiDroppable,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
@@ -72,7 +72,7 @@ const DropboxComponent = ({
   );
 
   return (
-    <EuiFormRow label={boxLabel} className="dropBox" fullWidth>
+    <EuiCompressedFormRow label={boxLabel} className="dropBox" fullWidth>
       <div className="dropBox__container">
         <EuiDroppable
           className="dropBox__droppable"
@@ -97,7 +97,7 @@ const DropboxComponent = ({
                     {label}
                   </a>
                 </EuiText>
-                <EuiButtonIcon
+                <EuiSmallButtonIcon
                   color="subdued"
                   iconType="cross"
                   aria-label="clear-field"
@@ -122,7 +122,7 @@ const DropboxComponent = ({
                 defaultMessage: 'Click or drop to add',
               })}
             </EuiText>
-            <EuiButtonIcon
+            <EuiSmallButtonIcon
               iconType="plusInCircle"
               aria-label="clear-field"
               iconSize="s"
@@ -132,7 +132,7 @@ const DropboxComponent = ({
           </EuiPanel>
         )}
       </div>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };
 

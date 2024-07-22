@@ -4,15 +4,14 @@
  */
 
 import React from 'react';
-import { WorkspaceList } from './index';
-import { coreMock } from '../../../../../core/public/mocks';
+import { BehaviorSubject, of } from 'rxjs';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
-import { switchWorkspace, navigateToWorkspaceUpdatePage } from '../utils/workspace';
-
-import { of } from 'rxjs';
-
+import { coreMock } from '../../../../../core/public/mocks';
+import { navigateToWorkspaceDetail } from '../utils/workspace';
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import { WorkspaceList } from './index';
 
 jest.mock('../utils/workspace');
 
@@ -26,7 +25,7 @@ jest.mock('../delete_workspace_modal', () => ({
 
 function getWrapWorkspaceListInContext(
   workspaceList = [
-    { id: 'id1', name: 'name1', features: [] },
+    { id: 'id1', name: 'name1', features: ['use-case-all'] },
     { id: 'id2', name: 'name2' },
     { id: 'id3', name: 'name3', features: ['use-case-observability'] },
   ]
@@ -43,7 +42,9 @@ function getWrapWorkspaceListInContext(
   return (
     <I18nProvider>
       <OpenSearchDashboardsContextProvider services={services}>
-        <WorkspaceList />
+        <WorkspaceList
+          registeredUseCases$={new BehaviorSubject([WORKSPACE_USE_CASES.observability])}
+        />
       </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
@@ -51,15 +52,25 @@ function getWrapWorkspaceListInContext(
 
 describe('WorkspaceList', () => {
   it('should render title and table normally', () => {
-    const { getByText, getByRole, container } = render(<WorkspaceList />);
+    const { getByText, getByRole, container } = render(
+      <WorkspaceList
+        registeredUseCases$={new BehaviorSubject([WORKSPACE_USE_CASES.observability])}
+      />
+    );
     expect(getByText('Workspaces')).toBeInTheDocument();
     expect(getByRole('table')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
   it('should render data in table based on workspace list data', async () => {
     const { getByText } = render(getWrapWorkspaceListInContext());
+
+    // should display workspace names
     expect(getByText('name1')).toBeInTheDocument();
     expect(getByText('name2')).toBeInTheDocument();
+
+    // should display use case
+    expect(getByText('All use case')).toBeInTheDocument();
+    expect(getByText('Observability')).toBeInTheDocument();
   });
   it('should be able to apply debounce search after input', async () => {
     const list = [
@@ -87,14 +98,14 @@ describe('WorkspaceList', () => {
     const { getByText } = render(getWrapWorkspaceListInContext());
     const nameLink = getByText('name1');
     fireEvent.click(nameLink);
-    expect(switchWorkspace).toBeCalled();
+    expect(navigateToWorkspaceDetail).toBeCalled();
   });
 
   it('should be able to update workspace after clicking name', async () => {
     const { getAllByTestId } = render(getWrapWorkspaceListInContext());
     const editIcon = getAllByTestId('workspace-list-edit-icon')[0];
     fireEvent.click(editIcon);
-    expect(navigateToWorkspaceUpdatePage).toBeCalled();
+    expect(navigateToWorkspaceDetail).toBeCalled();
   });
 
   it('should be able to call delete modal after clicking delete button', async () => {

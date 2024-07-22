@@ -30,7 +30,13 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiBasicTable, EuiButton, EuiColorPicker, EuiFieldText, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiColorPicker,
+  EuiCompressedFieldText,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -114,7 +120,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
             ),
             render: (value: string, item: IndexedColor) => {
               return (
-                <EuiFieldText
+                <EuiCompressedFieldText
                   value={value}
                   onChange={(e) => {
                     this.onColorChange(
@@ -138,7 +144,7 @@ export class ColorFormatEditor extends DefaultFormatEditor<ColorFormatEditorForm
             ),
             render: (value: string, item: IndexedColor) => {
               return (
-                <EuiFieldText
+                <EuiCompressedFieldText
                   value={value}
                   onChange={(e) => {
                     this.onColorChange(

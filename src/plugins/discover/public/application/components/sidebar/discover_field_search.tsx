@@ -31,21 +31,21 @@
 import React, { OptionHTMLAttributes, ReactNode, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
   EuiPopoverFooter,
   EuiPopoverTitle,
   EuiSelect,
-  EuiSwitch,
+  EuiCompressedSwitch,
   EuiSwitchEvent,
   EuiForm,
   EuiFormRow,
   EuiButtonGroup,
   EuiOutsideClickDetector,
   EuiPanel,
-  EuiFilterButton,
+  EuiSmallFilterButton,
   EuiFilterGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -244,7 +244,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
     <EuiFlexGroup responsive={false} gutterSize="xs">
       <EuiFlexItem>
         <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
-          <EuiFieldSearch
+          <EuiCompressedFieldSearch
             aria-label={searchPlaceholder}
             data-test-subj="fieldFilterSearchInput"
             fullWidth
@@ -258,7 +258,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         <EuiFilterGroup>
           <EuiPopover
             id="dataPanelTypeFilter"
-            panelClassName="euiFilterGroup__popoverPanel"
+            panelClassName="euiFilterGroup__popoverPanel dataPanelTypeFilterPopover"
             panelPaddingSize="none"
             anchorPosition="downLeft"
             display="block"
@@ -267,7 +267,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
               setPopoverOpen(false);
             }}
             button={
-              <EuiFilterButton
+              <EuiSmallFilterButton
                 iconType="filter"
                 iconSide="left"
                 hasActiveFilters={activeFiltersCount > 0}
@@ -282,7 +282,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
                   id="discover.fieldChooser.fieldFilterFacetButtonLabel"
                   defaultMessage="Filter by type"
                 />
-              </EuiFilterButton>
+              </EuiSmallFilterButton>
             }
           >
             <EuiPopoverTitle>
@@ -292,7 +292,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
             </EuiPopoverTitle>
             {selectionPanel}
             <EuiPopoverFooter>
-              <EuiSwitch
+              <EuiCompressedSwitch
                 label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
                   defaultMessage: 'Hide missing fields',
                 })}
