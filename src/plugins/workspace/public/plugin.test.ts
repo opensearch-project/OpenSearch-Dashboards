@@ -30,6 +30,7 @@ describe('Workspace plugin', () => {
     ...coreMock.createSetup(),
     chrome: chromeServiceMock.createSetupContract(),
   });
+
   beforeEach(() => {
     WorkspaceClientMock.mockClear();
     Object.values(workspaceClientMock).forEach((item) => item.mockClear());
@@ -214,6 +215,18 @@ describe('Workspace plugin', () => {
     const workspacePlugin = new WorkspacePlugin();
     workspacePlugin.start(startMock, mockDependencies);
     expect(startMock.chrome.setBreadcrumbs).not.toHaveBeenCalled();
+  });
+
+  it('#start should register workspace list card into new home page', async () => {
+    const startMock = coreMock.createStart();
+    startMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    const workspacePlugin = new WorkspacePlugin();
+    workspacePlugin.start(startMock, mockDependencies);
+    expect(mockDependencies.contentManagement.registerContentProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'workspace_list_card_home',
+      })
+    );
   });
 
   it('#start should call navGroupUpdater$.next after currentWorkspace set', async () => {
