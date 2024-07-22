@@ -61,6 +61,20 @@ jest.mock('../associated_object_management/utils/associated_objects_tab_utils', 
   redirectToExplorerS3: jest.fn(),
 }));
 
+beforeAll(() => {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      json: () =>
+        Promise.resolve({ status: { statuses: [{ id: 'plugin:observabilityDashboards' }] } }),
+    })
+  ) as jest.Mock;
+});
+
+afterAll(() => {
+  global.fetch.mockClear();
+  delete global.fetch;
+});
+
 const renderComponent = ({
   featureFlagStatus = false,
   http = {},
@@ -253,6 +267,30 @@ describe('DirectQueryDataConnectionDetail', () => {
     expect(screen.queryByText('Associated Objects')).not.toBeInTheDocument();
     expect(screen.queryByText('Accelerations')).not.toBeInTheDocument();
     expect(screen.queryByText('Installed Integrations')).not.toBeInTheDocument();
+  });
+
+  test('renders integration card and tab when featureFlagStatus is false and observabilityDashboardsExists is true', async () => {
+    const mockHttp = {
+      get: jest.fn().mockResolvedValue({
+        allowedRoles: ['role1'],
+        description: 'Test description',
+        name: 'Test datasource',
+        connector: 'S3GLUE',
+        properties: {},
+        status: 'ACTIVE',
+      }),
+    };
+
+    renderComponent({ featureFlagStatus: false, http: mockHttp });
+
+    await waitFor(() => {
+      const titleElement = screen.getByTestId('datasourceTitle');
+      expect(titleElement).toBeInTheDocument();
+      expect(titleElement).toHaveTextContent('Test datasource');
+    });
+
+    expect(screen.getByText('Configure Integrations')).toBeInTheDocument();
+    expect(screen.getByText('Installed Integrations')).toBeInTheDocument();
   });
 
   test('matches snapshot', async () => {

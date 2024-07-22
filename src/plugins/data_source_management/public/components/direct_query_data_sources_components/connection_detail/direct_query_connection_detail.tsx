@@ -69,6 +69,42 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   application,
   setBreadcrumbs,
 }) => {
+  const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
+  const checkIfSQLWorkbenchPluginIsInstalled = () => {
+    fetch('/api/status', {
+      headers: {
+        'Content-Type': 'application/json',
+        'osd-xsrf': 'true',
+        'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
+        pragma: 'no-cache',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+      },
+      method: 'GET',
+      referrerPolicy: 'strict-origin-when-cross-origin',
+      mode: 'cors',
+      credentials: 'include',
+    })
+      .then(function (response) {
+        return response.json();
+      })
+      .then((data) => {
+        for (let i = 0; i < data.status.statuses.length; ++i) {
+          if (data.status.statuses[i].id.includes('plugin:observabilityDashboards')) {
+            setObservabilityDashboardsExists(true);
+          }
+        }
+      })
+      .catch((error) => {
+        notifications.toasts.addDanger(
+          'Error checking Dashboards Observability Plugin Installation status.'
+        );
+        // eslint-disable-next-line no-console
+        console.error(error);
+      });
+  };
+
   const { dataSourceName } = useParams<{ dataSourceName: string }>();
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
@@ -175,6 +211,11 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   };
 
   useEffect(() => {
+    checkIfSQLWorkbenchPluginIsInstalled();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     setBreadcrumbs(getManageDirectQueryDataSourceBreadcrumbs(dataSourceName));
     fetchSelectedDatasource();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -185,19 +226,21 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   const DefaultDatasourceCards = () => {
     return (
       <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon size="xxl" type="integrationGeneral" />}
-            title={'Configure Integrations'}
-            description="Connect to common application log types using integrations"
-            onClick={onclickIntegrationsCard}
-            selectable={{
-              onClick: onclickIntegrationsCard,
-              isDisabled: false,
-              children: 'Add Integrations',
-            }}
-          />
-        </EuiFlexItem>
+        {!featureFlagStatus && observabilityDashboardsExists && (
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xxl" type="integrationGeneral" />}
+              title={'Configure Integrations'}
+              description="Connect to common application log types using integrations"
+              onClick={onclickIntegrationsCard}
+              selectable={{
+                onClick: onclickIntegrationsCard,
+                isDisabled: false,
+                children: 'Add Integrations',
+              }}
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           <EuiCard
             icon={<EuiIcon size="xxl" type="bolt" />}
@@ -393,21 +436,22 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
               />
             ),
           },
-          {
-            id: 'installed_integrations',
-            name: 'Installed Integrations',
-            disabled: false,
-            content: (
-              <InstalledIntegrationsTable
-                integrations={dataSourceIntegrations}
-                datasourceType={datasourceDetails.connector}
-                datasourceName={datasourceDetails.name}
-                refreshInstances={refreshInstances}
-                http={http}
-              />
-            ),
-          },
-        ]
+          !featureFlagStatus &&
+            observabilityDashboardsExists && {
+              id: 'installed_integrations',
+              name: 'Installed Integrations',
+              disabled: false,
+              content: (
+                <InstalledIntegrationsTable
+                  integrations={dataSourceIntegrations}
+                  datasourceType={datasourceDetails.connector}
+                  datasourceName={datasourceDetails.name}
+                  refreshInstances={refreshInstances}
+                  http={http}
+                />
+              ),
+            },
+        ].filter(Boolean)
       : [];
 
   const tabs = [...conditionalTabs, ...genericTabs];
