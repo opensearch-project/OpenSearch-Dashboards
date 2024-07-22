@@ -33,6 +33,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { ChromeBreadcrumb } from '../../chrome_service';
 
 describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {
@@ -41,9 +42,6 @@ describe('HeaderBreadcrumbs', () => {
       <HeaderBreadcrumbs
         appTitle$={new BehaviorSubject('')}
         breadcrumbs$={breadcrumbs$}
-        navGroupEnabled={false}
-        currentNavgroup$={new BehaviorSubject(undefined)}
-        navigateToApp={jest.fn()}
         breadcrumbsEnricher$={new BehaviorSubject(undefined)}
       />
     );
@@ -60,20 +58,16 @@ describe('HeaderBreadcrumbs', () => {
 
   it('prepend current nav group into existing breadcrumbs when nav group is enabled', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
-    const currentNavgroup$ = new BehaviorSubject({
-      id: 'analytics',
-      title: 'Analytics',
-      description: '',
-      navLinks: [],
-    });
+    const breadcrumbsEnricher$ = new BehaviorSubject((crumbs: ChromeBreadcrumb[]) => [
+      { text: 'Home' },
+      { text: 'Analytics' },
+      ...crumbs,
+    ]);
     const wrapper = mount(
       <HeaderBreadcrumbs
         appTitle$={new BehaviorSubject('')}
         breadcrumbs$={breadcrumbs$}
-        navGroupEnabled={true}
-        currentNavgroup$={currentNavgroup$}
-        navigateToApp={jest.fn()}
-        breadcrumbsEnricher$={new BehaviorSubject(undefined)}
+        breadcrumbsEnricher$={breadcrumbsEnricher$}
       />
     );
     const breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
@@ -84,12 +78,10 @@ describe('HeaderBreadcrumbs', () => {
 
     act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
     wrapper.update();
-    expect(wrapper.find('.euiBreadcrumbWrapper')).toMatchSnapshot();
     expect(wrapper.find('.euiBreadcrumbWrapper')).toHaveLength(4);
 
     act(() => breadcrumbs$.next([]));
     wrapper.update();
-    expect(wrapper.find('.euiBreadcrumbWrapper')).toMatchSnapshot();
     expect(wrapper.find('.euiBreadcrumbWrapper')).toHaveLength(2);
   });
 });

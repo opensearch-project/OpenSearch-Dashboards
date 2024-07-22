@@ -235,9 +235,6 @@ export function Header({
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
-              currentNavgroup$={observables.currentNavGroup$}
-              navGroupEnabled={navGroupEnabled}
-              navigateToApp={application.navigateToApp}
               breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
             />
 

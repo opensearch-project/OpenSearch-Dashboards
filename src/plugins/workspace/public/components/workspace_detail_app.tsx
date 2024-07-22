@@ -24,9 +24,17 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
   useEffect(() => {
     const breadcrumbs: EuiBreadcrumb[] = [
       {
-        text: 'Workspace Detail',
+        text: 'Home',
+        onClick: () => {
+          application.navigateToApp('home');
+        },
       },
     ];
+    if (currentWorkspace) {
+      breadcrumbs.push({
+        text: currentWorkspace.name,
+      });
+    }
     chrome?.setBreadcrumbs(breadcrumbs);
   }, [chrome, currentWorkspace, application]);
 

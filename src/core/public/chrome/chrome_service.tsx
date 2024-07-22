@@ -72,6 +72,7 @@ export interface ChromeBadge {
 /** @public */
 export type ChromeBreadcrumb = EuiBreadcrumb;
 
+/** @public */
 export type ChromeBreadcrumbEnricher = (breadcrumbs: ChromeBreadcrumb[]) => ChromeBreadcrumb[];
 
 /** @public */
@@ -205,7 +206,12 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const recentlyAccessed = await this.recentlyAccessed.start({ http, workspaces });
     const docTitle = this.docTitle.start({ document: window.document });
-    const navGroup = await this.navGroup.start({ navLinks, application, breadcrumbsEnricher$ });
+    const navGroup = await this.navGroup.start({
+      navLinks,
+      application,
+      breadcrumbsEnricher$,
+      workspaces,
+    });
 
     // erase chrome fields from a previous app while switching to a next app
     application.currentAppId$.subscribe(() => {
@@ -501,7 +507,7 @@ export interface ChromeStart {
   /**
    * Override the current ChromeBreadcrumbEnricher
    */
-  setBreadcrumbsEnricher(newBreadcrumbsEnricher: ChromeBreadcrumbEnricher): void;
+  setBreadcrumbsEnricher(newBreadcrumbsEnricher: ChromeBreadcrumbEnricher | undefined): void;
 
   /**
    * Get an observable of the current custom nav link

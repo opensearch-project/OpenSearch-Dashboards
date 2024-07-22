@@ -33,16 +33,11 @@ import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
-import { ApplicationStart } from 'src/core/public/application';
 import { ChromeBreadcrumb, ChromeBreadcrumbEnricher } from '../../chrome_service';
-import { NavGroupItemInMap } from '../../nav_group';
 
 interface Props {
   appTitle$: Observable<string>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
-  navGroupEnabled: boolean;
-  currentNavgroup$: Observable<NavGroupItemInMap | undefined>;
-  navigateToApp: ApplicationStart['navigateToApp'];
   breadcrumbsEnricher$: Observable<ChromeBreadcrumbEnricher | undefined>;
 }
 
@@ -52,12 +47,14 @@ export function HeaderBreadcrumbs({ appTitle$, breadcrumbs$, breadcrumbsEnricher
   const [breadcrumbEnricher, setBreadcrumbEnricher] = useState<
     ChromeBreadcrumbEnricher | undefined
   >(undefined);
+
   useEffect(() => {
-    breadcrumbsEnricher$.subscribe((enricher) => {
-      // console.log('enricher', enricher);
+    const sub = breadcrumbsEnricher$.subscribe((enricher) => {
       setBreadcrumbEnricher(() => enricher);
     });
+    return () => sub.unsubscribe();
   });
+
   let crumbs = breadcrumbs;
 
   if (breadcrumbs.length === 0 && appTitle) {
