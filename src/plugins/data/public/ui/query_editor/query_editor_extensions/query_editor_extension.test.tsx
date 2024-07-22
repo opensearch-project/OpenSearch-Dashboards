@@ -5,6 +5,7 @@
 
 import { render, waitFor } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
+import { of } from 'rxjs';
 import { IIndexPattern } from '../../../../common';
 import { QueryEditorExtension } from './query_editor_extension';
 
@@ -39,7 +40,7 @@ describe('QueryEditorExtension', () => {
     config: {
       id: 'test-extension',
       order: 1,
-      isEnabled: isEnabledMock,
+      isEnabled$: isEnabledMock,
       getComponent: getComponentMock,
       getBanner: getBannerMock,
     },
@@ -56,7 +57,7 @@ describe('QueryEditorExtension', () => {
   });
 
   it('renders correctly when isEnabled is true', async () => {
-    isEnabledMock.mockResolvedValue(true);
+    isEnabledMock.mockReturnValue(of(true));
     getComponentMock.mockReturnValue(<div>Test Component</div>);
     getBannerMock.mockReturnValue(<div>Test Banner</div>);
 
@@ -72,7 +73,7 @@ describe('QueryEditorExtension', () => {
   });
 
   it('does not render when isEnabled is false', async () => {
-    isEnabledMock.mockResolvedValue(false);
+    isEnabledMock.mockReturnValue(of(false));
     getComponentMock.mockReturnValue(<div>Test Component</div>);
 
     const { queryByText } = render(<QueryEditorExtension {...defaultProps} />);
