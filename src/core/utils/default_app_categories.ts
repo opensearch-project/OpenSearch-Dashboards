@@ -122,6 +122,13 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     label: i18n.translate('core.ui.manageNav.label', {
       defaultMessage: 'Manage',
     }),
-    order: 7000,
+    order: 8000,
+  },
+  manageData: {
+    id: 'manageData',
+    label: i18n.translate('core.ui.manageDataNav.label', {
+      defaultMessage: 'Manage data',
+    }),
+    order: 1000,
   },
 });
