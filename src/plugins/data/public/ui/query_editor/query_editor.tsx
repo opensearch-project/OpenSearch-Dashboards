@@ -513,6 +513,19 @@ export default class QueryEditorUI extends Component<Props, State> {
                 suggestionProvider={{
                   provideCompletionItems: this.provideCompletionItems,
                 }}
+                languageConfiguration={{
+                  language: LANGUAGE_ID_KUERY,
+                  autoClosingPairs: [
+                    {
+                      open: '(',
+                      close: ')',
+                    },
+                    {
+                      open: '"',
+                      close: '"',
+                    },
+                  ],
+                }}
               />
             )}
 
