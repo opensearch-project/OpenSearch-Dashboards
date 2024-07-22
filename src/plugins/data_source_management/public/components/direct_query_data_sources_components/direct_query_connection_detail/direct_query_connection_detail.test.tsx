@@ -54,16 +54,13 @@ jest.mock('../../../plugin', () => ({
   getRenderCreateAccelerationFlyout: () => jest.fn(),
 }));
 
-jest.mock('../direct_query_associated_object_management/associated_objects_tab', () => ({
+jest.mock('../associated_object_management/associated_objects_tab', () => ({
   AssociatedObjectsTab: () => <div>Associated Objects Tab</div>,
 }));
 
-jest.mock(
-  '../direct_query_associated_object_management/utils/associated_objects_tab_utils',
-  () => ({
-    redirectToExplorerS3: jest.fn(),
-  })
-);
+jest.mock('../associated_object_management/utils/associated_objects_tab_utils', () => ({
+  redirectToExplorerS3: jest.fn(),
+}));
 
 const renderComponent = ({
   featureFlagStatus = false,

@@ -11,7 +11,7 @@ import { CachedAcceleration, RenderAccelerationFlyoutParams } from '../../../../
 import {
   redirectToExplorerOSIdx,
   redirectToExplorerWithDataSrc,
-} from '../direct_query_associated_object_management/utils/associated_objects_tab_utils';
+} from '../associated_object_management/utils/associated_objects_tab_utils';
 export const ACC_PANEL_TITLE = 'Accelerations';
 export const ACC_PANEL_DESC =
   'Accelerations optimize query performance by indexing external data into OpenSearch.';
