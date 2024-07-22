@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-console */
+
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -89,7 +92,6 @@ export const AccelerationDataSourceSelector = ({
         }
       })
       .catch((err) => {
-        // eslint-disable-next-line no-console
         console.error(err);
         notifications.toasts.addDanger(`failed to load datasources`);
       });
@@ -139,7 +141,6 @@ export const AccelerationDataSourceSelector = ({
       } catch (error) {
         setTables([]);
         notifications.toasts.addWarning('Your cache is outdated, refresh databases and tables');
-        // eslint-disable-next-line no-console
         console.error(error);
       }
       setSelectedTable([]);
@@ -149,21 +150,18 @@ export const AccelerationDataSourceSelector = ({
 
   useEffect(() => {
     loadDataSource();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     if (accelerationFormData.dataSource !== '') {
       loadDatabases();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accelerationFormData.dataSource]);
 
   useEffect(() => {
     if (accelerationFormData.database !== '') {
       loadTables();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accelerationFormData.database]);
 
   return (
