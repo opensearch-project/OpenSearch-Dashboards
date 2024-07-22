@@ -290,3 +290,99 @@ export interface RenderAccelerationDetailsFlyoutParams {
   handleRefresh?: () => void;
   dataSourceMDSId?: string;
 }
+
+// Integration types
+
+export interface StaticAsset {
+  annotation?: string;
+  path: string;
+}
+
+export interface IntegrationWorkflow {
+  name: string;
+  label: string;
+  description: string;
+  enabled_by_default: boolean;
+}
+
+export interface IntegrationStatics {
+  logo?: StaticAsset;
+  gallery?: StaticAsset[];
+  darkModeLogo?: StaticAsset;
+  darkModeGallery?: StaticAsset[];
+}
+
+export interface IntegrationComponent {
+  name: string;
+  version: string;
+}
+
+export type SupportedAssetType = 'savedObjectBundle' | 'query';
+
+export interface IntegrationAsset {
+  name: string;
+  version: string;
+  extension: string;
+  type: SupportedAssetType;
+  workflows?: string[];
+}
+
+export interface IntegrationConfig {
+  name: string;
+  version: string;
+  displayName?: string;
+  license: string;
+  type: string;
+  labels?: string[];
+  author?: string;
+  description?: string;
+  sourceUrl?: string;
+  workflows?: IntegrationWorkflow[];
+  statics?: IntegrationStatics;
+  components: IntegrationComponent[];
+  assets: IntegrationAsset[];
+  sampleData?: {
+    path: string;
+  };
+}
+
+export interface AvailableIntegrationsList {
+  hits: IntegrationConfig[];
+}
+
+export interface AssetReference {
+  assetType: string;
+  assetId: string;
+  isDefaultAsset: boolean;
+  description: string;
+  status?: string;
+}
+
+export interface IntegrationInstanceResult extends IntegrationInstance {
+  id: string;
+  status: string;
+}
+
+export interface IntegrationInstance {
+  name: string;
+  templateName: string;
+  dataSource: string;
+  creationDate: string;
+  assets: AssetReference[];
+}
+
+export interface AvailableIntegrationsList {
+  hits: IntegrationConfig[];
+}
+
+export interface IntegrationInstancesSearchResult {
+  hits: IntegrationInstanceResult[];
+}
+
+export type ParsedIntegrationAsset =
+  | { type: 'savedObjectBundle'; workflows?: string[]; data: object[] }
+  | { type: 'query'; workflows?: string[]; query: string; language: string };
+
+export type Result<T, E = Error> =
+  | { ok: true; value: T; error?: undefined }
+  | { ok: false; error: E; value?: undefined };

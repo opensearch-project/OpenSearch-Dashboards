@@ -28,6 +28,7 @@ import {
   SavedObjectsStart,
 } from 'opensearch-dashboards/public';
 import { useLocation, useParams } from 'react-router-dom';
+import { escapeRegExp } from 'lodash';
 import { DATACONNECTIONS_BASE } from '../../../constants';
 import { DirectQueryDatasourceDetails, PrometheusProperties } from '../../../types';
 import { NoAccess } from './utils/no_access_page';
@@ -43,6 +44,12 @@ import { AccelerationTable } from '../acceleration_management/acceleration_table
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import { AssociatedObjectsTab } from '../associated_object_management/associated_objects_tab';
 import { redirectToExplorerS3 } from '../associated_object_management/utils/associated_objects_tab_utils';
+import { InstalledIntegrationsTable } from '../integrations/installed_integrations_table';
+import {
+  IntegrationInstanceResult,
+  IntegrationInstancesSearchResult,
+} from '../../../../framework/types';
+import { INTEGRATIONS_BASE } from '../../../../framework/utils/shared';
 
 interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;
@@ -103,6 +110,31 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
     accelerationsLoadStatus,
     startLoadingAccelerations,
   };
+
+  const [dataSourceIntegrations, setDataSourceIntegrations] = useState(
+    [] as IntegrationInstanceResult[]
+  );
+  const [refreshIntegrationsFlag, setRefreshIntegrationsFlag] = useState(false);
+  const refreshInstances = () => setRefreshIntegrationsFlag((prev) => !prev);
+
+  useEffect(() => {
+    const searchDataSourcePattern = new RegExp(
+      `flint_${escapeRegExp(datasourceDetails.name)}_default_.*`
+    );
+    const findIntegrations = async () => {
+      const result: { data: IntegrationInstancesSearchResult } = await http!.get(
+        INTEGRATIONS_BASE + `/store`
+      );
+      if (result.data?.hits) {
+        setDataSourceIntegrations(
+          result.data.hits.filter((res) => res.dataSource.match(searchDataSourcePattern))
+        );
+      } else {
+        setDataSourceIntegrations([]);
+      }
+    };
+    findIntegrations();
+  }, [http, datasourceDetails.name, refreshIntegrationsFlag]);
 
   const fetchSelectedDatasource = () => {
     const endpoint = featureFlagStatus
@@ -341,6 +373,21 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
                 notifications={notifications}
                 featureFlagStatus={featureFlagStatus}
                 dataSourceMDSId={featureFlagStatus ? dataSourceMDSId ?? undefined : undefined}
+                application={application}
+              />
+            ),
+          },
+          {
+            id: 'installed_integrations',
+            name: 'Installed Integrations',
+            disabled: false,
+            content: (
+              <InstalledIntegrationsTable
+                integrations={dataSourceIntegrations}
+                datasourceType={datasourceDetails.connector}
+                datasourceName={datasourceDetails.name}
+                refreshInstances={refreshInstances}
+                http={http}
                 application={application}
               />
             ),
