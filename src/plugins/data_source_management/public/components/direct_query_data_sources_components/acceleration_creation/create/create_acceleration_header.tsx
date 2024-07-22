@@ -12,7 +12,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import React from 'react';
-import { OPENSEARCH_ACC_DOCUMENTATION_URL } from '../../../../components/constants';
+import { OPENSEARCH_ACC_DOCUMENTATION_URL } from '../../../constants';
 
 export const CreateAccelerationHeader = () => {
   return (

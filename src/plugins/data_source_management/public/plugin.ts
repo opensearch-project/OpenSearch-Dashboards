@@ -48,7 +48,7 @@ import {
   RenderAssociatedObjectsDetailsFlyoutParams,
 } from '../framework/types';
 import { AccelerationDetailsFlyout } from './components/direct_query_data_sources_components/direct_query_acceleration_management/acceleration_details_flyout';
-import { CreateAcceleration } from './components/direct_query_data_sources_components/direct_query_acceleration_creation/create/create_acceleration';
+import { CreateAcceleration } from './components/direct_query_data_sources_components/acceleration_creation/create/create_acceleration';
 import { AssociatedObjectsDetailsFlyout } from './components/direct_query_data_sources_components/direct_query_associated_object_management/associated_objects_details_flyout';
 
 export const [
