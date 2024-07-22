@@ -1,12 +1,12 @@
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
-import { DQLLexer } from './generated/DQLLexer';
-import { DQLParser, KeyValueExpressionContext } from './generated/DQLParser';
+import { DQLLexer } from './.generated/DQLLexer';
+import { DQLParser, KeyValueExpressionContext } from './.generated/DQLParser';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { getTokenPosition } from '../shared/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { getHttp } from '../../services';
 import { QuerySuggestionGetFnArgs } from '../../autocomplete';
-import { DQLParserVisitor } from './generated/DQLParserVisitor';
+import { DQLParserVisitor } from './.generated/DQLParserVisitor';
 import { monaco } from 'packages/osd-monaco/target';
 
 const findCursorIndex = (
