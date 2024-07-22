@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { stringify } from '@osd/std';
 import { monaco } from 'packages/osd-monaco/target';
 import { Lexer as LexerType, ParserRuleContext, Parser as ParserType } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
@@ -24,120 +23,102 @@ import { findCursorTokenIndex } from '../shared/cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { getUiSettings } from '../../services';
 import { SQL_SYMBOLS } from './constants';
+import { QuerySuggestionGetFnArgs } from '../../autocomplete';
+import { fetchColumnValues, fetchTableSchemas } from '../shared/utils';
 
 export interface SuggestionParams {
   position: monaco.Position;
   query: string;
 }
 
-export const getSuggestions = async ({ position, query }: SuggestionParams) => {
+const quotesRegex = /^'(.*)'$/;
+
+export const getSuggestions = async ({
+  selectionStart,
+  selectionEnd,
+  position,
+  query,
+  connectionService,
+}: QuerySuggestionGetFnArgs): Promise<any[]> => {
   const { api } = getUiSettings();
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
-    line: position.lineNumber,
-    column: position.column,
+    line: position?.lineNumber || selectionStart,
+    column: position?.column || selectionEnd,
   });
 
   const finalSuggestions = [];
 
-  // fetch columns and values
-  if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
-    const tableNames = suggestions.suggestColumns?.tables?.map((table) => table.name) ?? [];
-    const schemas = await fetchTableSchemas(tableNames, api);
-    schemas.forEach((schema, index) => {
-      if (schema.body?.fields?.length > 0) {
-        const columns = schema.body.fields.find((col) => col.name === 'COLUMN_NAME');
-        const fieldTypes = schema.body.fields.find((col) => col.name === 'COLUMN_NAME');
-        finalSuggestions.push(
-          ...columns.values.map((col: string) => ({
-            text: col,
-            type: 'field',
-            fieldType: fieldTypes ? fieldTypes.values[index] : '',
-          }))
-        );
-      }
-    });
+  try {
+    // Fetch columns and values
+    if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
+      const tableNames = suggestions.suggestColumns?.tables?.map((table) => table.name) ?? [];
+      const schemas = await fetchTableSchemas(tableNames, api, connectionService);
 
-    if (
-      'suggestValuesForColumn' in suggestions &&
-      /\S/.test(suggestions.suggestValuesForColumn as string) &&
-      suggestions.suggestValuesForColumn !== undefined
-    ) {
-      const values = await fetchColumnValues(
-        tableNames,
-        suggestions.suggestValuesForColumn as string,
-        api
-      );
-      values.forEach((value) => {
-        if (value.body?.fields?.length > 0) {
-          finalSuggestions.push(
-            ...value.body.fields[0].values.map((colVal: string) => ({
-              text: `'${colVal}'`,
-              type: 'value',
-            }))
-          );
+      schemas.forEach((schema) => {
+        if (schema.body?.fields?.length > 0) {
+          const columns = schema.body.fields.find((col) => col.name === 'COLUMN_NAME');
+          const fieldTypes = schema.body.fields.find((col) => col.name === 'DATA_TYPE');
+          if (columns && fieldTypes) {
+            finalSuggestions.push(
+              ...columns.values.map((col: string, index: number) => ({
+                text: col,
+                type: 'field',
+                fieldType: fieldTypes.values[index],
+              }))
+            );
+          }
         }
       });
+
+      if (
+        'suggestValuesForColumn' in suggestions &&
+        /\S/.test(suggestions.suggestValuesForColumn as string) &&
+        suggestions.suggestValuesForColumn !== undefined
+      ) {
+        const values = await fetchColumnValues(
+          tableNames,
+          suggestions.suggestValuesForColumn as string,
+          api,
+          connectionService
+        );
+        values.forEach((value) => {
+          if (value.body?.fields?.length > 0) {
+            finalSuggestions.push(
+              ...value.body.fields[0].values.map((colVal: string) => ({
+                text: `'${colVal}'`,
+                type: 'value',
+              }))
+            );
+          }
+        });
+      }
     }
-  }
 
-  // fill in agregate functions
-  // if ('suggestAggregateFunctions' in suggestions && suggestions.suggestAggregateFunctions) {
-  //   finalSuggestions.push(
-  //     ...SQL_SYMBOLS.AGREGATE_FUNCTIONS.map((af) => ({
-  //       text: af,
-  //       type: 'function',
-  //     }))
-  //   );
-  // }
+    // Fill in aggregate functions
+    if ('suggestAggregateFunctions' in suggestions && suggestions.suggestAggregateFunctions) {
+      finalSuggestions.push(
+        ...SQL_SYMBOLS.AGREGATE_FUNCTIONS.map((af) => ({
+          text: af,
+          type: 'function',
+        }))
+      );
+    }
 
-  // fill in sql keywords
-  if ('suggestKeywords' in suggestions && (suggestions.suggestKeywords?.length ?? 0) > 0) {
-    finalSuggestions.push(
-      ...suggestions.suggestKeywords!.map((sk) => ({
-        text: sk.value,
-        type: 'keyword',
-      }))
-    );
+    // Fill in SQL keywords
+    if ('suggestKeywords' in suggestions && (suggestions.suggestKeywords?.length ?? 0) > 0) {
+      finalSuggestions.push(
+        ...(suggestions.suggestKeywords ?? []).map((sk) => ({
+          text: sk.value,
+          type: 'keyword',
+        }))
+      );
+    }
+  } catch (error) {
+    // TODO: pipe error to the UI
   }
 
   return finalSuggestions;
 };
-
-const fetchColumnValues = async (tables: string[], column: string, api) => {
-  return Promise.all(
-    tables.map(async (table) => {
-      const body = stringify({
-        query: { qs: `SELECT DISTINCT ${column} FROM ${table} LIMIT 10`, format: 'jdbc' },
-        df: null,
-      });
-      return api.http.fetch({
-        method: 'POST',
-        path: '/api/enhancements/search/sql',
-        body,
-        undefined,
-      });
-    })
-  );
-};
-
-const fetchTableSchemas = async (tables: string[], api) => {
-  return Promise.all(
-    tables.map(async (table) => {
-      const body = stringify({
-        query: { qs: `DESCRIBE TABLES LIKE ${table}`, format: 'jdbc' },
-        df: null,
-      });
-      return api.http.fetch({
-        method: 'POST',
-        path: '/api/enhancements/search/sql',
-        body,
-        undefined,
-      });
-    })
-  );
-};
-
-const quotesRegex = /^'(.*)'$/;
 
 export interface ParsingSubject<A extends AutocompleteResultBase, L, P> {
   Lexer: LexerConstructor<L>;

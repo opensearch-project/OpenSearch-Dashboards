@@ -53,6 +53,7 @@ export interface QuerySuggestionGetFnArgs {
   signal?: AbortSignal;
   boolFilter?: any;
   position?: monaco.Position;
+  connectionService?: any;
 }
 
 /** @public **/
