@@ -330,24 +330,3 @@ export const QUERY_ASSIST_START_TIME = 'now-40y';
 export const QUERY_ASSIST_END_TIME = 'now';
 
 export const TIMESTAMP_DATETIME_TYPES = ['date', 'date_nanos'];
-
-export enum DirectQueryLoadingStatus {
-  SUCCESS = 'success',
-  FAILED = 'failed',
-  RUNNING = 'running',
-  SCHEDULED = 'scheduled',
-  CANCELED = 'canceled',
-  WAITING = 'waiting',
-  INITIAL = 'initial',
-}
-const catalogCacheFetchingStatus = [
-  DirectQueryLoadingStatus.RUNNING,
-  DirectQueryLoadingStatus.WAITING,
-  DirectQueryLoadingStatus.SCHEDULED,
-];
-
-export const isCatalogCacheFetching = (...statuses: DirectQueryLoadingStatus[]) => {
-  return statuses.some((status: DirectQueryLoadingStatus) =>
-    catalogCacheFetchingStatus.includes(status)
-  );
-};

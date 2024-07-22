@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { DataSetNavigator, DataSetNavigatorProps } from './dataset_navigator';
+export * from './types';
