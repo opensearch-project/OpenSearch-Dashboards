@@ -39,4 +39,5 @@ export {
   NavType,
   RightNavigationButton,
   RightNavigationButtonProps,
+  createRecentNavLink,
 } from './header';

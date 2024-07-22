@@ -74,6 +74,13 @@ export const useSavedVisBuilderVis = (visualizationIdFromUrl: string | undefined
           data.query.filterManager.setAppFilters(actualFilters);
           data.query.queryString.setQuery(query);
 
+          chrome.recentlyAccessed.add(
+            savedVisBuilderVis.getFullPath(),
+            title,
+            savedVisBuilderVis.id,
+            { type: savedVisBuilderVis.getOpenSearchType() }
+          );
+
           dispatch(setUIStateState(state.ui));
           dispatch(setStyleState(state.style));
           dispatch(setVisualizationState(state.visualization));
