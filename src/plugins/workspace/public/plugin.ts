@@ -342,16 +342,6 @@ export class WorkspacePlugin
       },
     });
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      {
-        id: WORKSPACE_DETAIL_APP_ID,
-        order: 100,
-        title: i18n.translate('workspace.nav.workspaceDetail.title', {
-          defaultMessage: 'Overview',
-        }),
-      },
-    ]);
-
     // workspace list
     core.application.register({
       id: WORKSPACE_LIST_APP_ID,
@@ -371,13 +361,22 @@ export class WorkspacePlugin
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
 
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: WORKSPACE_DETAIL_APP_ID,
+        order: 100,
+        title: i18n.translate('workspace.nav.workspaceDetail.title', {
+          defaultMessage: 'Overview',
+        }),
+      },
+    ]);
+
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
         id: WORKSPACE_LIST_APP_ID,
         title: i18n.translate('workspace.settingsAndSetup.workspaceSettings', {
           defaultMessage: 'workspace settings',
         }),
-        order: 100,
       },
     ]);
 
