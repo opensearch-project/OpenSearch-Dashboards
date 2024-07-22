@@ -2053,6 +2053,17 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
   survey="/"
+  workspaceList$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -8829,6 +8840,17 @@ exports[`Header renders condensed header 1`] = `
     }
   }
   survey="/"
+  workspaceList$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
 >
   <header
     className="hide-for-sharing headerGlobalNav"
