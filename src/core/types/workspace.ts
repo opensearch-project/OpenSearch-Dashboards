@@ -14,6 +14,7 @@ export interface WorkspaceAttribute {
   icon?: string;
   reserved?: boolean;
   uiSettings?: Record<string, any>;
+  lastUpdatedTime?: string;
 }
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
