@@ -28,6 +28,7 @@ export const createVegaSpec = (
   const transformedData = flattenDataHandler(context, dimensions, 'series');
 
   // Determine whether to use Vega or Vega-Lite based on the presence of split dimensions
+  // TODO: Summarize the cases to use Vega. Change this to a better determine function.
   if (dimensions.splitRow || dimensions.splitColumn) {
     // Use Vega for more complex, split visualizations
     return generateVegaSpec(transformedData, visConfig, style);

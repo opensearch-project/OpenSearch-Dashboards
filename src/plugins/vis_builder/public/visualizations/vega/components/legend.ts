@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Define types for legend positions and legend configurations
+// Types for legend positions and legend configurations
 type LegendPosition = 'top' | 'bottom' | 'left' | 'right';
 
 interface VegaLegendConfig {
