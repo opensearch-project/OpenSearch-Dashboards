@@ -2,8 +2,8 @@
   border: none !important;
 
   .nav-link-item {
-    padding: $ouiSize / 4 $ouiSize;
-    border-radius: $ouiSize;
+    padding: calc($euiSize / 4) $euiSize;
+    border-radius: $euiSize;
     box-shadow: none;
     margin-bottom: 0;
     margin-top: 0;
@@ -39,11 +39,20 @@
   }
 
   .bottom-container {
-    padding: 0 $ouiSize;
+    padding: 0 $euiSize;
     display: flex;
+
+    &.bottom-container-collapsed {
+      flex-direction: column;
+      align-items: center;
+
+      > * {
+        margin: $euiSizeS 0;
+      }
+    }
   }
 
   .nav-controls-padding {
-    padding: $ouiSize;
+    padding: $euiSize;
   }
 }

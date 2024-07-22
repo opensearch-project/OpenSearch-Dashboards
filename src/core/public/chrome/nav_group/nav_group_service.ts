@@ -212,18 +212,6 @@ export class ChromeNavGroupService {
       }
     };
 
-    // erase current nav group when switch app don't belongs to any nav group
-    application.currentAppId$.subscribe((appId) => {
-      const navGroupMap = this.navGroupsMap$.getValue();
-      const appIdsWithNavGroup = Object.values(navGroupMap).flatMap(({ navLinks: links }) =>
-        links.map(({ id }) => id)
-      );
-
-      if (appId && !appIdsWithNavGroup.includes(appId)) {
-        setCurrentNavGroup(undefined);
-      }
-    });
-
     const currentNavGroupSorted$ = combineLatest([
       this.getSortedNavGroupsMap$(),
       this.currentNavGroup$,
