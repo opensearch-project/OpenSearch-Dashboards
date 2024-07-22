@@ -74,43 +74,6 @@ export const buildVegaLiteEncoding = (dimensions: any, formats: AxisFormats): Ve
 };
 
 /**
- * Builds scale configurations for Vega specifications.
- *
- * @param {any} dimensions - The dimensions of the data.
- * @param {any} formats - The formatting information for axes.
- * @returns {VegaScale[]} The Vega scale configurations.
- */
-export const buildVegaScales = (dimensions: any, formats: any): VegaScale[] => {
-  const scales: VegaScale[] = [
-    {
-      name: 'xscale',
-      type: 'band',
-      domain: { data: 'source', field: 'x', filter: 'datum.split == parent.split' },
-      range: 'width',
-      padding: 0.2,
-    },
-    {
-      name: 'yscale',
-      type: 'linear',
-      domain: { data: 'source', field: 'y', filter: 'datum.split == parent.split' },
-      range: 'height',
-      nice: true,
-      zero: true,
-    },
-  ];
-
-  if (dimensions.z) {
-    scales.push({
-      name: 'size',
-      type: 'linear',
-      domain: { data: 'source', field: 'z' },
-    });
-  }
-
-  return scales;
-};
-
-/**
  * Builds encoding for an axis.
  *
  * @param {string} field - The field name ('x' or 'y').
