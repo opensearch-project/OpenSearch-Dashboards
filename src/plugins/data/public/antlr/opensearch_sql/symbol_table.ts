@@ -20,7 +20,7 @@ export class TableSymbol extends c3.TypedSymbol {
   }
 }
 
-function getUniqueTableSuggestions(symbols: TableSymbol[] = []): Table[] {
+export function getUniqueTableSuggestions(symbols: TableSymbol[] = []): Table[] {
   const suggestionsMap = symbols.reduce((acc, table) => {
     const aliases = acc[table.name] ?? new Set();
     if (table.alias) {
