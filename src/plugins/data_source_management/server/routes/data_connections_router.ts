@@ -230,7 +230,6 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        // You need to grab this into the server
         console.error('Issue in fetching data sources:', error);
         const statusCode = error.statusCode || error.body?.statusCode || 500;
         const errorBody = error.body ||
@@ -277,10 +276,17 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
           body: dataConnectionsresponse,
         });
       } catch (error: any) {
-        console.error('Issue in fetching data connection:', error);
+        console.error('Issue in fetching data sources:', error);
+        const statusCode = error.statusCode || error.body?.statusCode || 500;
+        const errorBody = error.body ||
+          error.response || { message: error.message || 'Unknown error occurred' };
+
         return response.custom({
-          statusCode: error.statusCode || 500,
-          body: error.message,
+          statusCode,
+          body: {
+            error: errorBody,
+            message: errorBody.message || error.message,
+          },
         });
       }
     }

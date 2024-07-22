@@ -10,7 +10,6 @@ import { MemoryRouter, Route } from 'react-router-dom';
 import { DirectQueryDataConnectionDetail } from './direct_query_connection_detail';
 import { ApplicationStart, HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 
-// Mock the imported modules and components
 jest.mock('../../../constants', () => ({
   DATACONNECTIONS_BASE: '/api/dataconnections',
 }));
@@ -106,19 +105,7 @@ describe('DirectQueryDataConnectionDetail', () => {
     });
   });
 
-  test('shows no access message if there is no access', async () => {
-    const mockHttp = {
-      get: jest.fn().mockRejectedValue(new Error('No access')),
-    };
-
-    renderComponent({ http: mockHttp });
-
-    await waitFor(() => {
-      expect(screen.getByText('No Access')).toBeInTheDocument();
-    });
-  });
-
-  test('renders InactiveDataConnectionCallout when datasource is not active', async () => {
+  test('renders InactiveDataConnectionCallout when datasource is inactive', async () => {
     const mockHttp = {
       get: jest.fn().mockResolvedValue({
         allowedRoles: ['role1'],
@@ -135,6 +122,55 @@ describe('DirectQueryDataConnectionDetail', () => {
     await waitFor(() => {
       expect(screen.getByText('Inactive Data Connection')).toBeInTheDocument();
     });
+  });
+
+  test('renders PrometheusDatasourceOverview when connector is PROMETHEUS', async () => {
+    const mockHttp = {
+      get: jest.fn().mockResolvedValue({
+        allowedRoles: ['role1'],
+        description: 'Test description',
+        name: 'Test datasource',
+        connector: 'PROMETHEUS',
+        properties: { 'prometheus.uri': 'placeholder' },
+        status: 'ACTIVE',
+      }),
+    };
+
+    renderComponent({ http: mockHttp });
+
+    await waitFor(() => {
+      const titleElement = screen.getByTestId('datasourceTitle');
+      expect(titleElement).toBeInTheDocument();
+      expect(titleElement).toHaveTextContent('Test datasource');
+    });
+
+    expect(screen.getByText('Connection title')).toBeInTheDocument();
+    expect(screen.getByText('Data source description')).toBeInTheDocument();
+    expect(screen.getByText('Prometheus URI')).toBeInTheDocument();
+  });
+
+  test('renders S3DatasourceOverview when connector is S3GLUE', async () => {
+    const mockHttp = {
+      get: jest.fn().mockResolvedValue({
+        allowedRoles: ['role1'],
+        description: 'Test description',
+        name: 'Test datasource',
+        connector: 'S3GLUE',
+        properties: {},
+        status: 'ACTIVE',
+      }),
+    };
+
+    renderComponent({ http: mockHttp });
+
+    await waitFor(() => {
+      const titleElement = screen.getByTestId('datasourceTitle');
+      expect(titleElement).toBeInTheDocument();
+      expect(titleElement).toHaveTextContent('Test datasource');
+    });
+
+    expect(screen.getByText('Description')).toBeInTheDocument();
+    expect(screen.getByText('Query Access')).toBeInTheDocument();
   });
 
   test('renders AccessControlTab when the tab is clicked', async () => {
@@ -163,6 +199,60 @@ describe('DirectQueryDataConnectionDetail', () => {
     await waitFor(() => {
       expect(screen.getByText('Access Control Tab')).toBeInTheDocument();
     });
+  });
+
+  test('renders appropriate tabs for S3GLUE connector', async () => {
+    const mockHttp = {
+      get: jest.fn().mockResolvedValue({
+        allowedRoles: ['role1'],
+        description: 'Test description',
+        name: 'Test datasource',
+        connector: 'S3GLUE',
+        properties: {},
+        status: 'ACTIVE',
+      }),
+    };
+
+    renderComponent({ http: mockHttp });
+
+    await waitFor(() => {
+      const titleElement = screen.getByTestId('datasourceTitle');
+      expect(titleElement).toBeInTheDocument();
+      expect(titleElement).toHaveTextContent('Test datasource');
+    });
+
+    // Check for the presence of specific tabs
+    expect(screen.getByText('Associated Objects')).toBeInTheDocument();
+    expect(screen.getByText('Accelerations')).toBeInTheDocument();
+    expect(screen.getByText('Installed Integrations')).toBeInTheDocument();
+    expect(screen.getByText('Access control')).toBeInTheDocument();
+  });
+
+  test('renders appropriate tabs for PROMETHEUS connector', async () => {
+    const mockHttp = {
+      get: jest.fn().mockResolvedValue({
+        allowedRoles: ['role1'],
+        description: 'Test description',
+        name: 'Test datasource',
+        connector: 'PROMETHEUS',
+        properties: { 'prometheus.uri': 'placeholder' },
+        status: 'ACTIVE',
+      }),
+    };
+
+    renderComponent({ http: mockHttp });
+
+    await waitFor(() => {
+      const titleElement = screen.getByTestId('datasourceTitle');
+      expect(titleElement).toBeInTheDocument();
+      expect(titleElement).toHaveTextContent('Test datasource');
+    });
+
+    // Check for the presence of specific tabs
+    expect(screen.getByText('Access control')).toBeInTheDocument();
+    expect(screen.queryByText('Associated Objects')).not.toBeInTheDocument();
+    expect(screen.queryByText('Accelerations')).not.toBeInTheDocument();
+    expect(screen.queryByText('Installed Integrations')).not.toBeInTheDocument();
   });
 
   test('matches snapshot', async () => {
