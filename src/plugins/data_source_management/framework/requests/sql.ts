@@ -3,8 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+/* eslint-disable no-console */
+
 import { HttpStart } from 'opensearch-dashboards/public';
 import { DirectQueryRequest } from '../types';
+
+interface FetchError {
+  body: string;
+  message?: string;
+  [key: string]: any;
+}
 
 export class SQLService {
   private http: HttpStart;
@@ -16,7 +24,7 @@ export class SQLService {
   fetch = async (
     params: DirectQueryRequest,
     dataSourceMDSId?: string,
-    errorHandler?: (error: any) => void
+    errorHandler?: (error: FetchError) => void
   ) => {
     const query = {
       dataSourceMDSId,
@@ -26,8 +34,7 @@ export class SQLService {
         body: JSON.stringify(params),
         query,
       })
-      .catch((error) => {
-        // eslint-disable-next-line no-console
+      .catch((error: FetchError) => {
         console.error('fetch error: ', error.body);
         if (errorHandler) errorHandler(error);
         throw error;
@@ -37,24 +44,27 @@ export class SQLService {
   fetchWithJobId = async (
     params: { queryId: string },
     dataSourceMDSId?: string,
-    errorHandler?: (error: any) => void
+    errorHandler?: (error: FetchError) => void
   ) => {
     return this.http
       .get(`/api/observability/query/jobs/${params.queryId}/${dataSourceMDSId ?? ''}`)
-      .catch((error) => {
-        // eslint-disable-next-line no-console
+      .catch((error: FetchError) => {
         console.error('fetch error: ', error.body);
         if (errorHandler) errorHandler(error);
         throw error;
       });
   };
 
-  deleteWithJobId = async (params: { queryId: string }, errorHandler?: (error: any) => void) => {
-    return this.http.delete(`/api/observability/query/jobs/${params.queryId}`).catch((error) => {
-      // eslint-disable-next-line no-console
-      console.error('delete error: ', error.body);
-      if (errorHandler) errorHandler(error);
-      throw error;
-    });
+  deleteWithJobId = async (
+    params: { queryId: string },
+    errorHandler?: (error: FetchError) => void
+  ) => {
+    return this.http
+      .delete(`/api/observability/query/jobs/${params.queryId}`)
+      .catch((error: FetchError) => {
+        console.error('delete error: ', error.body);
+        if (errorHandler) errorHandler(error);
+        throw error;
+      });
   };
 }
