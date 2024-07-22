@@ -17,14 +17,14 @@ import {
 } from '@elastic/eui';
 import { HttpStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import _ from 'lodash';
+import { i18n } from '@osd/i18n';
 import {
   SIMPLE_DATA_SET_TYPES,
   SIMPLE_DATA_SOURCE_TYPES,
   SimpleDataSet,
   SimpleDataSource,
   SimpleObject,
-} from 'src/plugins/data/common';
-import { i18n } from '@osd/i18n';
+} from '../../../common';
 import {
   useLoadDatabasesToCache,
   useLoadExternalDataSourcesToCache,

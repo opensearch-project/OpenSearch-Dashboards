@@ -4,7 +4,7 @@
  */
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
-import { SimpleDataSource } from 'src/plugins/data/common';
+import { SimpleDataSource } from '../../../../../common';
 
 export const fetchDataSources = async (client: SavedObjectsClientContract) => {
   const resp = await client.find<any>({

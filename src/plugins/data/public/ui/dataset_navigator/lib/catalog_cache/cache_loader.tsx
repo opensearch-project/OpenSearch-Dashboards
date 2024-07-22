@@ -8,7 +8,6 @@ import { HttpStart, NotificationsStart } from 'opensearch-dashboards/public';
 import { ASYNC_POLLING_INTERVAL, SPARK_HIVE_TABLE_REGEX, SPARK_PARTITION_INFO } from '../constants';
 import {
   AsyncPollingResult,
-  CachedAccelerations,
   CachedColumn,
   CachedDataSourceStatus,
   CachedTable,
@@ -27,7 +26,7 @@ import {
 import { usePolling } from '../utils/use_polling';
 import { SQLService } from '../requests/sql';
 import { CatalogCacheManager } from './cache_manager';
-import { fetchExternalDataSources } from '../../utils/fetch_external_data_sources';
+import { fetchExternalDataSources } from '../utils';
 
 export const updateDatabasesToCache = (
   dataSourceName: string,
@@ -146,7 +145,7 @@ export const updateAccelerationsToCache = (
 
   const combinedData = combineSchemaAndDatarows(pollingResult.schema, pollingResult.datarows);
 
-  const newAccelerations: CachedAccelerations[] = combinedData.map((row: any) => ({
+  const newAccelerations: any[] = combinedData.map((row: any) => ({
     flintIndexName: row.flint_index_name,
     type: row.kind === 'mv' ? 'materialized' : row.kind,
     database: row.database,
