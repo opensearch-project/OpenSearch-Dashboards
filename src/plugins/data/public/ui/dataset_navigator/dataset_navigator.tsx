@@ -25,23 +25,17 @@ import { fetchExternalDataSources } from './utils/fetch_external_data_sources';
 import { Settings } from '../settings';
 import {
   useLoadDatabasesToCache,
+  useLoadExternalDataSourcesToCache,
   useLoadTablesToCache,
 } from './framework/catalog_cache/cache_loader';
 import { CatalogCacheManager } from './framework/catalog_cache/cache_manager';
-import { CachedDataSourceStatus, DirectQueryLoadingStatus } from './framework/types';
+import {
+  CachedDataSourceStatus,
+  DataSetOption,
+  DirectQueryLoadingStatus,
+  ExternalDataSource,
+} from './framework/types';
 import { isCatalogCacheFetching } from './framework/utils/shared';
-
-export interface DataSetOption {
-  id: string;
-  name: string;
-  dataSourceRef?: string;
-}
-
-export interface ExternalDataSource {
-  name: string;
-  dataSourceRef: string;
-  status: DirectQueryLoadingStatus;
-}
 
 export interface DataSetNavigatorProps {
   settings: Settings;
@@ -66,7 +60,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     notifications,
   } = props;
   const [isDataSetNavigatorOpen, setIsDataSetNavigatorOpen] = useState(false);
-  const [selectedDataSet, setSelectedDataSet] = useState(null);
+  const [selectedDataSet, setSelectedDataSet] = useState<DataSetOption>();
   const [indexPatternList, setIndexPatternList] = useState([]);
   const [clusterList, setClusterList] = useState([]);
   const [selectedCluster, setSelectedCluster] = useState(null);
@@ -83,6 +77,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   const [failed, setFailed] = useState<boolean>(false);
 
   const {
+    loadStatus: dataSourcesLoadStatus,
+    loadExternalDataSources: startLoadingDataSources,
+  } = useLoadExternalDataSourcesToCache(http, notifications);
+  const {
     loadStatus: databasesLoadStatus,
     startLoading: startLoadingDatabases,
   } = useLoadDatabasesToCache(http, notifications);
@@ -93,21 +91,27 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
 
   const onButtonClick = () => setIsDataSetNavigatorOpen(!isDataSetNavigatorOpen);
   const closePopover = () => setIsDataSetNavigatorOpen(false);
-  const onDataSetClick = async (dataSet) => {
+  const onDataSetClick = async (dataSet: DataSetOption) => {
     setSelectedDataSet(dataSet);
     onDataSetSelected(dataSet);
     settings.setSelectedDataSet(dataSet);
+    CatalogCacheManager.addRecentDataSet(dataSet);
     closePopover();
   };
-  const handleRefresh = () => {
-    if (
-      !isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus) &&
-      selectedExternalDataSource
-    ) {
-      startLoadingDatabases({
-        dataSourceName: selectedExternalDataSource.name,
-        dataSourceMDSId: selectedExternalDataSource.dataSourceRef,
-      });
+  // const handleRefresh = () => {
+  //   if (
+  //     !isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus) &&
+  //     selectedExternalDataSource
+  //   ) {
+  //     startLoadingDatabases({
+  //       dataSourceName: selectedExternalDataSource.name,
+  //       dataSourceMDSId: selectedExternalDataSource.dataSourceRef,
+  //     });
+  //   }
+  // };
+  const handleExternalDataSourcesRefresh = () => {
+    if (!isCatalogCacheFetching(dataSourcesLoadStatus) && clusterList.length > 0) {
+      startLoadingDataSources(clusterList.map((cluster) => cluster.id));
     }
   };
 
@@ -138,6 +142,20 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     setLoading(false);
   }, [indexPatternsService, savedObjectsClient, search, selectedCluster]);
 
+  // Retrieve external datasources from cache upon success
+  useEffect(() => {
+    const status = dataSourcesLoadStatus.toLowerCase();
+    const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
+    if (status === DirectQueryLoadingStatus.SUCCESS) {
+      setExternalDataSourceList(externalDataSourcesCache.externalDataSources);
+    } else if (
+      status === DirectQueryLoadingStatus.CANCELED ||
+      status === DirectQueryLoadingStatus.FAILED
+    ) {
+      setFailed(true);
+    }
+  }, [dataSourcesLoadStatus]);
+
   // Start loading databases for datasource
   useEffect(() => {
     if (selectedExternalDataSource) {
@@ -150,7 +168,6 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           dataSourceCache.status === CachedDataSourceStatus.Failed) &&
         !isCatalogCacheFetching(databasesLoadStatus)
       ) {
-        // setLoading(true);
         startLoadingDatabases({
           dataSourceName: selectedExternalDataSource.name,
           dataSourceMDSId: selectedExternalDataSource.dataSourceRef,
@@ -236,12 +253,6 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     }
   }, [selectedExternalDataSource, selectedDatabase, tablesLoadStatus]);
 
-  useEffect(() => {
-    console.log('selectedExternalDataSource:', selectedExternalDataSource);
-    console.log('cachedDatabases:', cachedDatabases);
-    console.log('cachedTables:', cachedTables);
-  }, [selectedExternalDataSource, cachedDatabases, cachedTables]);
-
   const dataSetButton = (
     <EuiButtonEmpty
       className="dataExplorerDSSelect"
@@ -257,7 +268,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   const RefreshButton = (
     <EuiButtonEmpty
       iconType="refresh"
-      onClick={handleRefresh}
+      onClick={handleExternalDataSourcesRefresh}
       isLoading={isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus)}
     />
   );
@@ -270,6 +281,14 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       // title: (<EuiText size="s">Data</EuiText>),
       title: 'Data',
       items: [
+        ...(CatalogCacheManager.getRecentDataSets().length > 0
+          ? [
+              {
+                name: 'Recently Used',
+                panel: 7,
+              },
+            ]
+          : []),
         {
           name: 'Index Patterns',
           panel: 1,
@@ -280,17 +299,22 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         },
         {
           name: 'S3',
-          panel: 5,
-          onClick: () =>
-            fetchExternalDataSources(
-              http,
-              clusterList.map((cluster) => cluster.id),
-              setExternalDataSourceList,
-              setLoading
-            ),
+          panel: 4,
+          onClick: () => {
+            const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
+            if (
+              (externalDataSourcesCache.status === CachedDataSourceStatus.Empty ||
+                externalDataSourcesCache.status === CachedDataSourceStatus.Failed) &&
+              !isCatalogCacheFetching(dataSourcesLoadStatus) &&
+              clusterList.length > 0
+            ) {
+              startLoadingDataSources(clusterList.map((cluster) => cluster.id));
+            } else if (externalDataSourcesCache.status === CachedDataSourceStatus.Updated) {
+              setExternalDataSourceList(externalDataSourcesCache.externalDataSources);
+            }
+          },
         },
       ],
-      content: <div>hello</div>,
     },
     {
       id: 1,
@@ -316,16 +340,6 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     {
       id: 3,
       title: selectedCluster ? selectedCluster.attributes.title : 'Cluster',
-      items: [
-        {
-          name: 'Indexes',
-          panel: 4,
-        },
-      ],
-    },
-    {
-      id: 4,
-      title: selectedCluster ? selectedCluster.attributes.title : 'Cluster',
       items: indexList.map((index) => ({
         name: index.name,
         onClick: () => onDataSetClick(index),
@@ -333,31 +347,37 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       content: <div>{loading && LoadingSpinner}</div>,
     },
     {
-      id: 5,
-      title: <div>S3 Connections {selectedExternalDataSource && RefreshButton}</div>,
+      id: 4,
+      title: (
+        <div>
+          S3 Connections{' '}
+          {CatalogCacheManager.getExternalDataSourcesCache().status ===
+            CachedDataSourceStatus.Updated && RefreshButton}
+        </div>
+      ),
       items: [
         ...externalDataSourceList.map((ds) => ({
           name: ds.name,
           onClick: () => setSelectedExternalDataSource(ds),
-          panel: 6,
+          panel: 5,
         })),
       ],
-      content: <div>{loading && LoadingSpinner}</div>,
+      content: <div>{dataSourcesLoadStatus && LoadingSpinner}</div>,
     },
     {
-      id: 6,
+      id: 5,
       title: selectedExternalDataSource ? selectedExternalDataSource.name : 'Databases',
       items: [
         ...cachedDatabases.map((db) => ({
           name: db.name,
           onClick: () => setSelectedDatabase(db.name),
-          panel: 7,
+          panel: 6,
         })),
       ],
       content: <div>{isCatalogCacheFetching(databasesLoadStatus) && LoadingSpinner}</div>,
     },
     {
-      id: 7,
+      id: 6,
       title: selectedDatabase ? selectedDatabase : 'Tables',
       items: [
         ...cachedTables.map((table) => ({
@@ -365,6 +385,14 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         })),
       ],
       content: <div>{isCatalogCacheFetching(tablesLoadStatus) && LoadingSpinner}</div>,
+    },
+    {
+      id: 7,
+      title: 'Recently Used',
+      items: CatalogCacheManager.getRecentDataSets().map((ds) => ({
+        name: ds.name,
+        onClick: () => onDataSetClick(ds),
+      })),
     },
   ];
 

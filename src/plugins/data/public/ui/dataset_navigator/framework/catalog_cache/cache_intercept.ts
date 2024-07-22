@@ -16,6 +16,8 @@ export function catalogRequestIntercept(): any {
       // Clears all user catalog cache details
       CatalogCacheManager.clearDataSourceCache();
       CatalogCacheManager.clearAccelerationsCache();
+      CatalogCacheManager.clearExternalDataSourcesCache();
+      CatalogCacheManager.clearRecentDataSetsCache();
     }
   };
 }

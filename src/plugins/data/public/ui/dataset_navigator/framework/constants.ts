@@ -4,6 +4,8 @@
  */
 
 export const ASYNC_QUERY_SESSION_ID = 'async-query-session-id';
+export const ASYNC_QUERY_EXTERNAL_DATASOURCES_CACHE = 'async_query_external_datasources_cache';
+export const RECENT_DATASET_OPTIONS_CACHE = 'recent_dataset_options_cache';
 
 export const DATA_SOURCE_NAME_URL_PARAM_KEY = 'datasourceName';
 export const DATA_SOURCE_TYPE_URL_PARAM_KEY = 'datasourceType';

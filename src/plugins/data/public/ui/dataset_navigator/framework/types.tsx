@@ -290,3 +290,27 @@ export interface RenderAccelerationDetailsFlyoutParams {
   handleRefresh?: () => void;
   dataSourceMDSId?: string;
 }
+
+export interface DataSetOption {
+  id: string;
+  name: string;
+  dataSourceRef?: string;
+}
+
+export interface RecentDataSetOptionsCacheData {
+  version: string;
+  recentDataSets: DataSetOption[];
+}
+
+export interface ExternalDataSource {
+  name: string;
+  status: string;
+  dataSourceRef: string;
+}
+
+export interface ExternalDataSourcesCacheData {
+  version: string;
+  externalDataSources: ExternalDataSource[];
+  lastUpdated: string;
+  status: CachedDataSourceStatus;
+}

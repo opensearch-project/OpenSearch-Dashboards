@@ -27,6 +27,7 @@ import {
 import { usePolling } from '../utils/use_polling';
 import { SQLService } from '../requests/sql';
 import { CatalogCacheManager } from './cache_manager';
+import { fetchExternalDataSources } from '../../utils/fetch_external_data_sources';
 
 export const updateDatabasesToCache = (
   dataSourceName: string,
@@ -438,4 +439,33 @@ export const useLoadAccelerationsToCache = (http: HttpStart, notifications: Noti
     notifications
   );
   return { loadStatus, startLoading, stopLoading };
+};
+
+export const useLoadExternalDataSourcesToCache = (
+  http: HttpStart,
+  notifications: NotificationsStart
+) => {
+  const [loadStatus, setLoadStatus] = useState<DirectQueryLoadingStatus>(
+    DirectQueryLoadingStatus.INITIAL
+  );
+
+  const loadExternalDataSources = async (connectedClusters: string[]) => {
+    setLoadStatus(DirectQueryLoadingStatus.SCHEDULED);
+    CatalogCacheManager.setExternalDataSourcesLoadingStatus(CachedDataSourceStatus.Empty);
+
+    try {
+      const externalDataSources = await fetchExternalDataSources(http, connectedClusters);
+      CatalogCacheManager.updateExternalDataSources(externalDataSources);
+      setLoadStatus(DirectQueryLoadingStatus.SUCCESS);
+      CatalogCacheManager.setExternalDataSourcesLoadingStatus(CachedDataSourceStatus.Updated);
+    } catch (error) {
+      setLoadStatus(DirectQueryLoadingStatus.FAILED);
+      CatalogCacheManager.setExternalDataSourcesLoadingStatus(CachedDataSourceStatus.Failed);
+      notifications.toasts.addError(error, {
+        title: 'Failed to load external datasources',
+      });
+    }
+  };
+
+  return { loadStatus, loadExternalDataSources };
 };

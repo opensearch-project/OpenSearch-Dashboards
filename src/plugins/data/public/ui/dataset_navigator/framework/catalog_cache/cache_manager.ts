@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { CATALOG_CACHE_VERSION } from '../constants';
+import {
+  ASYNC_QUERY_EXTERNAL_DATASOURCES_CACHE,
+  CATALOG_CACHE_VERSION,
+  RECENT_DATASET_OPTIONS_CACHE,
+} from '../constants';
 import { ASYNC_QUERY_ACCELERATIONS_CACHE, ASYNC_QUERY_DATASOURCE_CACHE } from '../utils/shared';
 import {
   AccelerationsCacheData,
@@ -12,7 +16,11 @@ import {
   CachedDataSourceStatus,
   CachedDatabase,
   CachedTable,
+  DataSetOption,
   DataSourceCacheData,
+  ExternalDataSource,
+  ExternalDataSourcesCacheData,
+  RecentDataSetOptionsCacheData,
 } from '../types';
 
 /**
@@ -28,6 +36,19 @@ export class CatalogCacheManager {
    * Key for the accelerations cache in local storage.
    */
   private static readonly accelerationsCacheKey = ASYNC_QUERY_ACCELERATIONS_CACHE;
+
+  /**
+   * Key for external datasources cache in local storage
+   */
+  private static readonly externalDataSourcesCacheKey = ASYNC_QUERY_EXTERNAL_DATASOURCES_CACHE;
+
+  /**
+   * Key for recently selected datasets in local storage
+   */
+  private static readonly recentDataSetCacheKey = RECENT_DATASET_OPTIONS_CACHE;
+
+  // TODO: make this an advanced setting
+  private static readonly maxRecentDataSet = 4;
 
   /**
    * Saves data source cache to local storage.
@@ -296,6 +317,7 @@ export class CatalogCacheManager {
    */
   static clearDataSourceCache(): void {
     sessionStorage.removeItem(this.datasourceCacheKey);
+    this.clearExternalDataSourcesCache();
   }
 
   /**
@@ -303,5 +325,92 @@ export class CatalogCacheManager {
    */
   static clearAccelerationsCache(): void {
     sessionStorage.removeItem(this.accelerationsCacheKey);
+  }
+
+  static saveExternalDataSourcesCache(cacheData: ExternalDataSourcesCacheData): void {
+    sessionStorage.setItem(this.externalDataSourcesCacheKey, JSON.stringify(cacheData));
+  }
+
+  static getExternalDataSourcesCache(): ExternalDataSourcesCacheData {
+    const externalDataSourcesData = sessionStorage.getItem(this.externalDataSourcesCacheKey);
+
+    if (externalDataSourcesData) {
+      return JSON.parse(externalDataSourcesData);
+    } else {
+      const defaultCacheObject: ExternalDataSourcesCacheData = {
+        version: CATALOG_CACHE_VERSION,
+        externalDataSources: [],
+        lastUpdated: '',
+        status: CachedDataSourceStatus.Empty,
+      };
+      this.saveExternalDataSourcesCache(defaultCacheObject);
+      return defaultCacheObject;
+    }
+  }
+
+  static updateExternalDataSources(externalDataSources: ExternalDataSource[]): void {
+    const currentTime = new Date().toUTCString();
+    const cacheData = this.getExternalDataSourcesCache();
+    cacheData.externalDataSources = externalDataSources;
+    cacheData.lastUpdated = currentTime;
+    cacheData.status = CachedDataSourceStatus.Updated;
+    this.saveExternalDataSourcesCache(cacheData);
+  }
+
+  static getExternalDataSources(): ExternalDataSourcesCacheData {
+    return this.getExternalDataSourcesCache();
+  }
+
+  static clearExternalDataSourcesCache(): void {
+    sessionStorage.removeItem(this.externalDataSourcesCacheKey);
+  }
+
+  static setExternalDataSourcesLoadingStatus(status: CachedDataSourceStatus): void {
+    const cacheData = this.getExternalDataSourcesCache();
+    cacheData.status = status;
+    this.saveExternalDataSourcesCache(cacheData);
+  }
+
+  static saveRecentDataSetsCache(cacheData: RecentDataSetOptionsCacheData): void {
+    sessionStorage.setItem(this.recentDataSetCacheKey, JSON.stringify(cacheData));
+  }
+
+  static getRecentDataSetsCache(): RecentDataSetOptionsCacheData {
+    const recentDataSetOptionsData = sessionStorage.getItem(this.recentDataSetCacheKey);
+
+    if (recentDataSetOptionsData) {
+      return JSON.parse(recentDataSetOptionsData);
+    } else {
+      const defaultCacheObject: RecentDataSetOptionsCacheData = {
+        version: CATALOG_CACHE_VERSION,
+        recentDataSets: [],
+      };
+      this.saveRecentDataSetsCache(defaultCacheObject);
+      return defaultCacheObject;
+    }
+  }
+
+  static addRecentDataSet(dataSetOption: DataSetOption): void {
+    const cacheData = this.getRecentDataSetsCache();
+
+    cacheData.recentDataSets = cacheData.recentDataSets.filter(
+      (option) => option.id !== dataSetOption.id
+    );
+
+    cacheData.recentDataSets.push(dataSetOption);
+
+    if (cacheData.recentDataSets.length > this.maxRecentDataSet) {
+      cacheData.recentDataSets.shift();
+    }
+
+    this.saveRecentDataSetsCache(cacheData);
+  }
+
+  static getRecentDataSets(): DataSetOption[] {
+    return this.getRecentDataSetsCache().recentDataSets;
+  }
+
+  static clearRecentDataSetsCache(): void {
+    sessionStorage.removeItem(this.recentDataSetCacheKey);
   }
 }
