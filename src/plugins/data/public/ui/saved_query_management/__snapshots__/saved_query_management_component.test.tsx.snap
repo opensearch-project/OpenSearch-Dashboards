@@ -10,7 +10,7 @@ exports[`Saved query management component has a popover button 1`] = `
       delay="long"
       position="bottom"
     >
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         aria-label="See saved queries"
         data-test-subj="saved-query-management-popover-button"
         onClick={[Function]}
@@ -22,7 +22,7 @@ exports[`Saved query management component has a popover button 1`] = `
         <EuiIcon
           type="arrowDown"
         />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     </EuiToolTip>
   }
   closePopover={[Function]}
