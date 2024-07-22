@@ -170,7 +170,7 @@ export class DataSourceManagementPlugin
               wrapInPage: true,
             },
             this.authMethodsRegistry,
-            featureFlagStatus
+            this.featureFlagStatus
           );
         },
       });
