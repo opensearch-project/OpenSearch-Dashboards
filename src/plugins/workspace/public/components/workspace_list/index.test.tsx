@@ -143,7 +143,13 @@ describe('WorkspaceList', () => {
     expect(getByText('name6')).toBeInTheDocument();
   });
 
-  it('should hide create workspace button if not dashboard admin', async () => {
+  it('should display create workspace button for dashboard admin', async () => {
+    const { getByText } = render(getWrapWorkspaceListInContext([], true));
+
+    expect(getByText(/create workspace/)).toBeInTheDocument();
+  });
+
+  it('should hide create workspace button for non dashboard admin', async () => {
     const { queryByText } = render(getWrapWorkspaceListInContext([], false));
 
     expect(queryByText(/create workspace/)).toBeNull();
