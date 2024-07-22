@@ -2590,6 +2590,10 @@
     mkdirp "^1.0.4"
     rimraf "^3.0.2"
 
+"@opensearch-dashboards-test/opensearch-dashboards-test-library@https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz":
+  version "1.0.6"
+  resolved "https://github.com/opensearch-project/opensearch-dashboards-test-library/archive/refs/tags/1.0.6.tar.gz#f2f489832a75191e243c6d2b42d49047265d9ce3"
+
 "@opensearch-project/opensearch@^2.9.0":
   version "2.9.0"
   resolved "https://registry.yarnpkg.com/@opensearch-project/opensearch/-/opensearch-2.9.0.tgz#319b4d174540b6d000c31477a56618e5054c6fcb"

@@ -472,7 +472,8 @@ BACKTICK_QUOTE_ID:                  BQUOTA_STRING;
 
 // Fragments for Literal primitives
 fragment EXPONENT_NUM_PART:         'E' [-+]? DEC_DIGIT+;
-fragment ID_LITERAL:                [a-zA-Z_][a-zA-Z_0-9]*;
+// fragment ID_LITERAL:                [a-zA-Z_][a-zA-Z_0-9]*;
+fragment ID_LITERAL:                ([@*A-Z_])+ ([*A-Z_\-0-9])*;
 fragment DQUOTA_STRING:             '"' ( '\\'. | '""' | ~('"'| '\\') )* '"';
 fragment SQUOTA_STRING:             '\'' ('\\'. | '\'\'' | ~('\'' | '\\'))* '\'';
 fragment BQUOTA_STRING:             '`' ( '\\'. | '``' | ~('`'|'\\'))* '`';
