@@ -28,7 +28,6 @@ import {
   getContextSuggestions,
   getPreviousToken,
 } from './table';
-import { isStartingToWriteRule } from '../shared/cursor';
 import { shouldSuggestTemplates } from './parse';
 
 const tokenDictionary: TokenDictionary = {
@@ -133,10 +132,6 @@ function processVisitedRules(
   let suggestValuesForColumn: string | undefined;
 
   for (const [ruleId, rule] of rules) {
-    if (!isStartingToWriteRule(cursorTokenIndex, rule)) {
-      continue;
-    }
-
     switch (ruleId) {
       case OpenSearchSQLParser.RULE_tableName: {
         if (
