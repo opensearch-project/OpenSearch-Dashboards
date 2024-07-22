@@ -59,7 +59,7 @@ export const HomeListCard = ({ config }: { config: Config }) => {
         display="plain"
         footer={
           config.allLink ? (
-            <EuiLink href={config.allLink} external>
+            <EuiLink href={config.allLink} external={true} target="_blank">
               view all
             </EuiLink>
           ) : null
