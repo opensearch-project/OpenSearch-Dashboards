@@ -19,6 +19,7 @@ import { HttpStart, SavedObjectsClientContract } from 'opensearch-dashboards/pub
 import _ from 'lodash';
 import {
   SIMPLE_DATA_SET_TYPES,
+  SIMPLE_DATA_SOURCE_TYPES,
   SimpleDataSet,
   SimpleDataSource,
   SimpleObject,
@@ -69,7 +70,6 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   const [indexPatterns, setIndexPatterns] = useState<any[]>([]);
 
   const [selectedDatabase, setSelectedDatabase] = useState<any>();
-  const [cacheRefreshable, setCacheRefreshable] = useState<boolean>(false);
   const [cachedDatabases, setCachedDatabases] = useState<any[]>([]);
   const [cachedTables, setCachedTables] = useState<any[]>([]);
   const [failed, setFailed] = useState<boolean>(false);
@@ -320,8 +320,12 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       if (dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY) {
         await createTemporaryIndexPattern(dataSet);
       }
-      // settings.setSelectedDataSet(dataSet);
-      //  CatalogCacheManager.addRecentDataSet(dataSet);
+
+      CatalogCacheManager.addRecentDataSet({
+        id: dataSet.id,
+        name: dataSet.title,
+        dataSourceRef: dataSet.dataSourceRef?.id,
+      });
       props.onSelectDataSet(dataSet);
       queryService.queryString.setQuery(getInitialQuery(dataSet));
       closePopover();
@@ -541,7 +545,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                   <EuiButton
                     size="s"
                     fullWidth
-                    onClick={async () => {
+                    onClick={() => {
                       setSelectedDataSet(selectedObject);
                     }}
                   >
@@ -555,7 +559,17 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
             title: 'Recently Used',
             items: CatalogCacheManager.getRecentDataSets().map((ds) => ({
               name: ds.name,
-              onClick: () => onDataSetClick(ds),
+              onClick: () =>
+                setSelectedDataSet({
+                  id: ds.id,
+                  title: ds.name,
+                  dataSourceRef: {
+                    id: ds.dataSourceRef!,
+                    name: ds.dataSourceRef!,
+                    type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
+                  },
+                  type: SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC,
+                }),
             })),
           },
         ]}

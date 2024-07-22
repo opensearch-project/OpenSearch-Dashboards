@@ -13,6 +13,7 @@ export enum SIMPLE_DATA_SOURCE_TYPES {
 export enum SIMPLE_DATA_SET_TYPES {
   INDEX_PATTERN = 'index-pattern',
   TEMPORARY = 'temporary',
+  TEMPORARY_ASYNC = 'temporary-async',
 }
 
 export interface SimpleObject {
