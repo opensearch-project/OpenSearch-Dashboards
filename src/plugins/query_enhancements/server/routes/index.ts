@@ -132,6 +132,7 @@ export function defineRoutes(
   >
 ) {
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.PPL);
+  defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.PPL_ASYNC);
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQL);
   defineRoute(logger, router, searchStrategies, SEARCH_STRATEGY.SQL_ASYNC);
   registerDataSourceConnectionsRoutes(router);

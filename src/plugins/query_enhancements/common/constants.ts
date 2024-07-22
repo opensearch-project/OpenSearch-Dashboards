@@ -12,6 +12,7 @@ export const SEARCH_STRATEGY = {
   PPL: 'ppl',
   SQL: 'sql',
   SQL_ASYNC: 'sqlasync',
+  PPL_ASYNC: 'pplasync',
 };
 
 export const API = {
@@ -19,6 +20,7 @@ export const API = {
   PPL_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.PPL}`,
   SQL_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.SQL}`,
   SQL_ASYNC_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.SQL_ASYNC}`,
+  PPL_ASYNC_SEARCH: `${BASE_API}/search/${SEARCH_STRATEGY.PPL_ASYNC}`,
   QUERY_ASSIST: {
     LANGUAGES: `${BASE_API}/assist/languages`,
     GENERATE: `${BASE_API}/assist/generate`,

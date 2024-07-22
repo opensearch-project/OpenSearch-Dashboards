@@ -18,6 +18,7 @@ import { ConfigSchema } from '../common/config';
 import { defineRoutes } from './routes';
 import {
   pplSearchStrategyProvider,
+  pplAsyncSearchStrategyProvider,
   sqlSearchStrategyProvider,
   sqlAsyncSearchStrategyProvider,
 } from './search';
@@ -51,6 +52,11 @@ export class QueryEnhancementsPlugin
     }
 
     const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
+    const pplAsyncSearchStrategy = pplAsyncSearchStrategyProvider(
+      this.config$,
+      this.logger,
+      client
+    );
     const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
     const sqlAsyncSearchStrategy = sqlAsyncSearchStrategyProvider(
       this.config$,
@@ -59,6 +65,7 @@ export class QueryEnhancementsPlugin
     );
 
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL, pplSearchStrategy);
+    data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL_ASYNC, pplAsyncSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL, sqlSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL_ASYNC, sqlAsyncSearchStrategy);
 
