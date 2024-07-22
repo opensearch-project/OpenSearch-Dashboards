@@ -229,7 +229,7 @@ export const DiscoverField = ({
             }
             panelClassName="dscSidebarItem__fieldPopoverPanel"
           >
-            <EuiPopoverTitle>
+            <EuiPopoverTitle tabIndex={0}>
               {' '}
               {i18n.translate('discover.fieldChooser.discoverField.fieldTopValuesLabel', {
                 defaultMessage: 'Top 5 values',
