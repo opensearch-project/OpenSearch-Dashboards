@@ -264,19 +264,21 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
             }}
           />
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiCard
-            icon={<EuiIcon size="xxl" type="discoverApp" />}
-            title={'Query data'}
-            description="Uncover insights from your data or better understand it"
-            onClick={onclickDiscoverCard}
-            selectable={{
-              onClick: onclickDiscoverCard,
-              isDisabled: false,
-              children: 'Query in Observability Logs',
-            }}
-          />
-        </EuiFlexItem>
+        {observabilityDashboardsExists && (
+          <EuiFlexItem>
+            <EuiCard
+              icon={<EuiIcon size="xxl" type="discoverApp" />}
+              title={'Query data'}
+              description="Uncover insights from your data or better understand it"
+              onClick={onclickDiscoverCard}
+              selectable={{
+                onClick: onclickDiscoverCard,
+                isDisabled: false,
+                children: 'Query in Observability Logs',
+              }}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   };
