@@ -18,6 +18,7 @@ import { IOsdUrlStateStorage } from '../../opensearch_dashboards_utils/public';
 import { DataPublicPluginSetup } from '../../data/public';
 import { UiActionsStart } from '../../ui_actions/public';
 import { Capabilities } from '../../../core/public';
+import { IUiSettingsClient } from '../../../core/public';
 
 export type VisBuilderSetup = TypeServiceSetup;
 export interface VisBuilderStart extends TypeServiceStart {
@@ -38,6 +39,7 @@ export interface VisBuilderPluginStartDependencies {
   dashboard: DashboardStart;
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export interface VisBuilderServices extends CoreStart {
