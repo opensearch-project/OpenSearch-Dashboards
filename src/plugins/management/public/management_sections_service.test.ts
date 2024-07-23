@@ -107,13 +107,15 @@ describe('ManagementService', () => {
     `);
   });
 
-  it('should disable apps register in opensearchDashboards section', () => {
+  it('should disable apps register in predefined opensearchDashboards section', () => {
+    // The management capabilities has `opensearchDashboards` as the key
     const originalDataSourcesCapability =
       DEFAULT_MANAGEMENT_CAPABILITIES.management.opensearchDashboards.dataSources;
 
     const setup = managementService.setup();
 
-    // Register app with id dataSources, the app id will be capability id
+    // The predefined opensearchDashboards section has id `opensearch-dashboards` which
+    // doesn't match the capability id `opensearchDashboards`
     setup.section.opensearchDashboards.registerApp({
       id: 'dataSources',
       title: 'Data source',
