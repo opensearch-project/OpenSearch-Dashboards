@@ -1,0 +1,1148 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Visual builder components renders visual builder with covering index options 1`] = `
+Array [
+  <div
+    className="euiSpacer euiSpacer--l"
+  />,
+  Array [
+    <div
+      className="euiText euiText--medium"
+      data-test-subj="covering-index-builder"
+    >
+      <h3>
+        Covering index definition
+      </h3>
+    </div>,
+    <div
+      className="euiSpacer euiSpacer--s"
+    />,
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <span
+          className="euiExpression euiExpression-isUppercase euiExpression--success"
+        >
+          <span
+            className="euiExpression__description"
+          >
+            CREATE INDEX
+          </span>
+           
+          <span
+            className="euiExpression__value"
+          >
+            cv-idx
+          </span>
+        </span>
+      </div>
+      <div
+        className="euiFlexItem"
+      >
+        <span
+          className="euiExpression euiExpression-isUppercase euiExpression--accent"
+        >
+          <span
+            className="euiExpression__description"
+          >
+            ON
+          </span>
+           
+          <span
+            className="euiExpression__value"
+          >
+            ..
+          </span>
+        </span>
+        <div
+          className="euiPopover euiPopover--anchorDownLeft"
+          id="coveringIndexFieldsPopOver"
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <button
+              className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--success"
+              onClick={[Function]}
+            >
+              <span
+                className="euiExpression__description"
+              />
+               
+              <span
+                className="euiExpression__value"
+              >
+                (add fields here)
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>,
+  ],
+]
+`;
+
+exports[`Visual builder components renders visual builder with default options 1`] = `
+Array [
+  <div
+    className="euiSpacer euiSpacer--l"
+  />,
+  Array [
+    <div
+      className="euiText euiText--medium"
+      data-test-subj="skipping-index-builder"
+    >
+      <h3>
+        Skipping index definition
+      </h3>
+    </div>,
+    <div
+      className="euiSpacer euiSpacer--s"
+    />,
+    <div
+      className="euiBasicTable"
+      itemID="id"
+    >
+      <div>
+        <div
+          className="euiTableHeaderMobile"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+          </div>
+        </div>
+        <table
+          className="euiTable euiTable--responsive"
+          id="__table_generated-id"
+          tabIndex={-1}
+        >
+          <caption
+            className="euiScreenReaderOnly euiTableCaption"
+          />
+          <thead>
+            <tr>
+              <th
+                className="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_fieldName_0"
+                role="columnheader"
+                scope="col"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <span
+                  className="euiTableCellContent"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                    title="Field name"
+                  >
+                    Field name
+                  </span>
+                </span>
+              </th>
+              <th
+                className="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_dataType_1"
+                role="columnheader"
+                scope="col"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <span
+                  className="euiTableCellContent"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                    title="Datatype"
+                  >
+                    Datatype
+                  </span>
+                </span>
+              </th>
+              <th
+                className="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Acceleration method_2"
+                role="columnheader"
+                scope="col"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <span
+                  className="euiTableCellContent"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                    title="Acceleration method"
+                  >
+                    Acceleration method
+                  </span>
+                </span>
+              </th>
+              <th
+                className="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Delete_3"
+                role="columnheader"
+                scope="col"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <span
+                  className="euiTableCellContent"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                    title="Delete"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              className="euiTableRow"
+            >
+              <td
+                className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                colSpan={4}
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <div
+                  className="euiTableCellContent euiTableCellContent--alignCenter"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
+                    You have no definitions defined.
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>,
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              className="euiButton euiButton--primary"
+              disabled={false}
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+              type="button"
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Add fields
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              className="euiButton euiButton--danger"
+              disabled={false}
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+              type="button"
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Bulk delete
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        Array [
+          <button
+            className="euiButton euiButton--primary"
+            disabled={false}
+            onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
+            type="button"
+          >
+            <span
+              className="euiButtonContent euiButton__content"
+            >
+              <span
+                className="euiButton__text"
+              >
+                Generate
+              </span>
+            </span>
+          </button>,
+          "",
+        ]
+      </div>
+    </div>,
+  ],
+]
+`;
+
+exports[`Visual builder components renders visual builder with materialized view options 1`] = `
+Array [
+  <div
+    className="euiSpacer euiSpacer--l"
+  />,
+  Array [
+    <div
+      className="euiText euiText--medium"
+      data-test-subj="covering-index-builder"
+    >
+      <h3>
+        Materialized view definition
+      </h3>
+    </div>,
+    <div
+      className="euiSpacer euiSpacer--s"
+    />,
+    <span
+      className="euiExpression euiExpression-isUppercase euiExpression--success"
+    >
+      <span
+        className="euiExpression__description"
+      >
+        CREATE MATERIALIZED VIEW
+      </span>
+       
+      <span
+        className="euiExpression__value"
+      >
+        ..skipping
+      </span>
+    </span>,
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <span
+          className="euiExpression euiExpression-isUppercase euiExpression--accent"
+        >
+          <span
+            className="euiExpression__description"
+          >
+            AS SELECT
+          </span>
+           
+        </span>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        <div
+          className="euiPopover euiPopover--anchorDownCenter"
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <button
+              aria-label="add column"
+              className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall"
+              disabled={false}
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiButtonContent euiButtonEmpty__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  color="inherit"
+                  data-euiicon-type="plusInCircle"
+                  size="s"
+                />
+                <span
+                  className="euiButtonEmpty__text"
+                >
+                  Add Column
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>,
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionColumn euiFlexGroup--responsive"
+    />,
+    <div
+      className="euiSpacer euiSpacer--s"
+    />,
+    <span
+      className="euiExpression euiExpression-isUppercase euiExpression--success"
+    >
+      <span
+        className="euiExpression__description"
+      >
+        FROM
+      </span>
+       
+      <span
+        className="euiExpression__value"
+      >
+        ..
+      </span>
+    </span>,
+    <div
+      className="euiSpacer euiSpacer--s"
+    />,
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownLeft"
+        id="groupByTumblePopOver"
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <button
+            className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--success"
+            onClick={[Function]}
+          >
+            <span
+              className="euiExpression__description"
+            >
+              GROUP BY
+            </span>
+             
+            <span
+              className="euiExpression__value"
+            >
+              TUMBLE(, '1 minute')
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>,
+  ],
+]
+`;
+
+exports[`Visual builder components renders visual builder with skipping index options 1`] = `
+Array [
+  <div
+    className="euiSpacer euiSpacer--l"
+  />,
+  Array [
+    <div
+      className="euiText euiText--medium"
+      data-test-subj="skipping-index-builder"
+    >
+      <h3>
+        Skipping index definition
+      </h3>
+    </div>,
+    <div
+      className="euiSpacer euiSpacer--s"
+    />,
+    <div
+      className="euiBasicTable"
+      itemID="id"
+    >
+      <div>
+        <div
+          className="euiTableHeaderMobile"
+        >
+          <div
+            className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+          >
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+            <div
+              className="euiFlexItem euiFlexItem--flexGrowZero"
+            />
+          </div>
+        </div>
+        <table
+          className="euiTable euiTable--responsive"
+          id="__table_generated-id"
+          tabIndex={-1}
+        >
+          <caption
+            className="euiScreenReaderOnly euiTableCaption"
+          />
+          <thead>
+            <tr>
+              <th
+                className="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_fieldName_0"
+                role="columnheader"
+                scope="col"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <span
+                  className="euiTableCellContent"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                    title="Field name"
+                  >
+                    Field name
+                  </span>
+                </span>
+              </th>
+              <th
+                className="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_dataType_1"
+                role="columnheader"
+                scope="col"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <span
+                  className="euiTableCellContent"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                    title="Datatype"
+                  >
+                    Datatype
+                  </span>
+                </span>
+              </th>
+              <th
+                className="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Acceleration method_2"
+                role="columnheader"
+                scope="col"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <span
+                  className="euiTableCellContent"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                    title="Acceleration method"
+                  >
+                    Acceleration method
+                  </span>
+                </span>
+              </th>
+              <th
+                className="euiTableHeaderCell"
+                data-test-subj="tableHeaderCell_Delete_3"
+                role="columnheader"
+                scope="col"
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <span
+                  className="euiTableCellContent"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                    title="Delete"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              className="euiTableRow euiTableRow-hasActions"
+            >
+              <td
+                className="euiTableRowCell"
+                readOnly={false}
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <div
+                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Field name
+                </div>
+                <div
+                  className="euiTableCellContent euiTableCellContent--truncateText"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
+                    field1
+                  </span>
+                </div>
+              </td>
+              <td
+                className="euiTableRowCell"
+                readOnly={false}
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <div
+                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Datatype
+                </div>
+                <div
+                  className="euiTableCellContent euiTableCellContent--truncateText"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
+                    string
+                  </span>
+                </div>
+              </td>
+              <td
+                className="euiTableRowCell"
+                readOnly={false}
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <div
+                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Acceleration method
+                </div>
+                <div
+                  className="euiTableCellContent euiTableCellContent--overflowingContent"
+                >
+                  <div
+                    className="euiFormControlLayout"
+                  >
+                    <div
+                      className="euiFormControlLayout__childrenWrapper"
+                    >
+                      <select
+                        aria-label="Use aria labels when no actual label is in use"
+                        className="euiSelect"
+                        id="selectDocExample"
+                        onChange={[Function]}
+                        onMouseUp={[Function]}
+                        value="PARTITION"
+                      >
+                        <option
+                          key="0"
+                          value="PARTITION"
+                        >
+                          Partition
+                        </option>
+                        <option
+                          key="1"
+                          value="VALUE_SET"
+                        >
+                          Value Set
+                        </option>
+                        <option
+                          key="2"
+                          value="BLOOM_FILTER"
+                        >
+                          Bloom Filter
+                        </option>
+                      </select>
+                      <div
+                        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      >
+                        <span
+                          className="euiFormControlLayoutCustomIcon"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiFormControlLayoutCustomIcon__icon"
+                            data-euiicon-type="arrowDown"
+                            size="m"
+                          />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td
+                className="euiTableRowCell"
+                readOnly={false}
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <div
+                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Delete
+                </div>
+                <div
+                  className="euiTableCellContent euiTableCellContent--overflowingContent"
+                >
+                  <button
+                    className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="trash"
+                      size="m"
+                    />
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr
+              className="euiTableRow euiTableRow-hasActions"
+            >
+              <td
+                className="euiTableRowCell"
+                readOnly={false}
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <div
+                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Field name
+                </div>
+                <div
+                  className="euiTableCellContent euiTableCellContent--truncateText"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
+                    field2
+                  </span>
+                </div>
+              </td>
+              <td
+                className="euiTableRowCell"
+                readOnly={false}
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <div
+                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Datatype
+                </div>
+                <div
+                  className="euiTableCellContent euiTableCellContent--truncateText"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
+                    number
+                  </span>
+                </div>
+              </td>
+              <td
+                className="euiTableRowCell"
+                readOnly={false}
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <div
+                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Acceleration method
+                </div>
+                <div
+                  className="euiTableCellContent euiTableCellContent--overflowingContent"
+                >
+                  <div
+                    className="euiFormControlLayout"
+                  >
+                    <div
+                      className="euiFormControlLayout__childrenWrapper"
+                    >
+                      <select
+                        aria-label="Use aria labels when no actual label is in use"
+                        className="euiSelect"
+                        id="selectDocExample"
+                        onChange={[Function]}
+                        onMouseUp={[Function]}
+                        value="VALUE_SET"
+                      >
+                        <option
+                          key="0"
+                          value="PARTITION"
+                        >
+                          Partition
+                        </option>
+                        <option
+                          key="1"
+                          value="VALUE_SET"
+                        >
+                          Value Set
+                        </option>
+                        <option
+                          key="2"
+                          value="MIN_MAX"
+                        >
+                          Min Max
+                        </option>
+                        <option
+                          key="3"
+                          value="BLOOM_FILTER"
+                        >
+                          Bloom Filter
+                        </option>
+                      </select>
+                      <div
+                        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
+                      >
+                        <span
+                          className="euiFormControlLayoutCustomIcon"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiFormControlLayoutCustomIcon__icon"
+                            data-euiicon-type="arrowDown"
+                            size="m"
+                          />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td
+                className="euiTableRowCell"
+                readOnly={false}
+                style={
+                  Object {
+                    "width": undefined,
+                  }
+                }
+              >
+                <div
+                  className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                >
+                  Delete
+                </div>
+                <div
+                  className="euiTableCellContent euiTableCellContent--overflowingContent"
+                >
+                  <button
+                    className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="trash"
+                      size="m"
+                    />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <div
+          className="euiSpacer euiSpacer--m"
+        />
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              className="euiPopover euiPopover--anchorUpRight"
+            >
+              <div
+                className="euiPopover__anchor"
+              >
+                <button
+                  className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                  data-test-subj="tablePaginationPopoverButton"
+                  disabled={false}
+                  onClick={[Function]}
+                  type="button"
+                >
+                  <span
+                    className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                  >
+                    <span
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                      size="s"
+                    />
+                    <span
+                      className="euiButtonEmpty__text"
+                    >
+                      Rows per page
+                      : 
+                      20
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <nav
+              className="euiPagination"
+            >
+              <button
+                aria-label="Previous page"
+                className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="pagination-button-previous"
+                disabled={true}
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="arrowLeft"
+                  size="m"
+                />
+              </button>
+              <ul
+                className="euiPagination__list"
+              >
+                <li
+                  className="euiPagination__item"
+                >
+                  <button
+                    aria-controls="__table_generated-id"
+                    aria-current={true}
+                    aria-label="Page 1 of 1"
+                    className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                    data-test-subj="pagination-button-0"
+                    disabled={true}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <span
+                      className="euiButtonContent euiButtonEmpty__content"
+                    >
+                      <span
+                        className="euiButtonEmpty__text"
+                      >
+                        1
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              </ul>
+              <button
+                aria-label="Next page"
+                className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                data-test-subj="pagination-button-next"
+                disabled={true}
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  aria-hidden="true"
+                  className="euiButtonIcon__icon"
+                  color="inherit"
+                  data-euiicon-type="arrowRight"
+                  size="m"
+                />
+              </button>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>,
+    <div
+      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <div
+        className="euiFlexItem"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--wrap"
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              className="euiButton euiButton--primary"
+              disabled={false}
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+              type="button"
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Add fields
+                </span>
+              </span>
+            </button>
+          </div>
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <button
+              className="euiButton euiButton--danger"
+              disabled={false}
+              onClick={[Function]}
+              style={
+                Object {
+                  "minWidth": undefined,
+                }
+              }
+              type="button"
+            >
+              <span
+                className="euiButtonContent euiButton__content"
+              >
+                <span
+                  className="euiButton__text"
+                >
+                  Bulk delete
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div
+        className="euiFlexItem euiFlexItem--flexGrowZero"
+      >
+        Array [
+          <button
+            className="euiButton euiButton--primary"
+            disabled={false}
+            onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
+            type="button"
+          >
+            <span
+              className="euiButtonContent euiButton__content"
+            >
+              <span
+                className="euiButton__text"
+              >
+                Generate
+              </span>
+            </span>
+          </button>,
+          "",
+        ]
+      </div>
+    </div>,
+  ],
+]
+`;

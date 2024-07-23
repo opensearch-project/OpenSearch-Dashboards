@@ -52,6 +52,7 @@ function mockProps() {
     appTitle$: new BehaviorSubject('test'),
     badge$: new BehaviorSubject(undefined),
     breadcrumbs$: new BehaviorSubject([]),
+    breadcrumbsEnricher$: new BehaviorSubject(undefined),
     homeHref: '/',
     isVisible$: new BehaviorSubject(true),
     opensearchDashboardsDocLink: '/docs',
@@ -82,6 +83,7 @@ function mockProps() {
     navGroupsMap$: new BehaviorSubject({}),
     navControlsLeftBottom$: new BehaviorSubject([]),
     setCurrentNavGroup: jest.fn(() => {}),
+    workspaceList$: new BehaviorSubject([]),
   };
 }
 

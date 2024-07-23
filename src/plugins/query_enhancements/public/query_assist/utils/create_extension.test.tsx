@@ -24,13 +24,10 @@ const httpMock = coreSetupMock.http;
 
 jest.mock('../components', () => ({
   QueryAssistBar: jest.fn(() => <div>QueryAssistBar</div>),
-}));
-
-jest.mock('../components/query_assist_banner', () => ({
   QueryAssistBanner: jest.fn(() => <div>QueryAssistBanner</div>),
 }));
 
-describe.skip('CreateExtension', () => {
+describe('CreateExtension', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });

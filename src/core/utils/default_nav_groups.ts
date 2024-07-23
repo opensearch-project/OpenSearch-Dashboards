@@ -37,7 +37,7 @@ const defaultNavGroups = {
       defaultMessage: 'All use case',
     }),
     description: i18n.translate('core.ui.group.all.description', {
-      defaultMessage: 'This is a usse case contains all the features.',
+      defaultMessage: 'This is a use case contains all the features.',
     }),
     order: 3000,
     type: NavGroupType.SYSTEM,

@@ -29,3 +29,4 @@
  */
 
 export { mountManagementSection } from './mount_section';
+export { SavedObjectsDuplicateModal } from './objects_table';

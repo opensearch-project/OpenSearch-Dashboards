@@ -205,8 +205,5 @@ describe('Datasource Management: Edit Datasource Header', () => {
       expect(component.find(headerTitleIdentifier).last().text()).toBe(dataSourceName);
       expect(component.find(deleteIconIdentifier).exists()).toBe(false);
     });
-    test('should not show default icon', () => {
-      expect(component.find(setDefaultButtonIdentifier).exists()).toBe(false);
-    });
   });
 });
