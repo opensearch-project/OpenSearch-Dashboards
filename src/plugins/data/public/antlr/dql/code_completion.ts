@@ -5,30 +5,27 @@
 
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
-import { monaco } from '@osd/monaco';
+import { HttpSetup } from 'opensearch-dashboards/public';
 import { DQLLexer } from './.generated/DQLLexer';
 import { DQLParser, KeyValueExpressionContext } from './.generated/DQLParser';
 import { getTokenPosition } from '../shared/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
-import { getHttp } from '../../services';
 import { QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
 
 const findCursorIndex = (
   tokenStream: TokenStream,
-  cursor: monaco.Position,
+  cursorColumn: number,
+  cursorLine: number,
   whitespaceToken: number
 ): number | undefined => {
-  const cursorCol = cursor.column - 1;
+  const actualCursorCol = cursorColumn - 1;
 
   for (let i = 0; i < tokenStream.size; i++) {
     const token = tokenStream.get(i);
     const { startLine, endColumn, endLine } = getTokenPosition(token, whitespaceToken);
 
-    if (
-      endLine > cursor.lineNumber ||
-      (startLine === cursor.lineNumber && endColumn >= cursorCol)
-    ) {
+    if (endLine > cursorLine || (startLine === cursorLine && endColumn >= actualCursorCol)) {
       if (tokenStream.get(i).type === whitespaceToken) {
         return i + 1;
       }
@@ -58,16 +55,22 @@ const findFieldSuggestions = (indexPattern: IndexPattern) => {
 const getFieldSuggestedValues = async (
   indexTitle: string,
   fieldName: string,
-  currentValue: string
+  currentValue: string,
+  http?: HttpSetup
 ) => {
-  const http = getHttp();
+  if (!http) return [];
   return await http.fetch(`/api/opensearch-dashboards/suggestions/values/${indexTitle}`, {
     method: 'POST',
     body: JSON.stringify({ query: currentValue, field: fieldName, boolFilter: [] }),
   });
 };
 
-const findValueSuggestions = async (index: IndexPattern, field: string, value: string) => {
+const findValueSuggestions = async (
+  index: IndexPattern,
+  field: string,
+  value: string,
+  http?: HttpSetup
+) => {
   // check to see if last field is within index and if it can suggest values, first check
   // if .keyword appended field exists because that has values
   const matchedField =
@@ -87,7 +90,7 @@ const findValueSuggestions = async (index: IndexPattern, field: string, value: s
   if (!matchedField || !matchedField.aggregatable || matchedField.type !== 'string') return;
 
   // ask api for suggestions
-  return await getFieldSuggestedValues(index.title, matchedField.displayName, value);
+  return await getFieldSuggestedValues(index.title, matchedField.displayName, value, http);
 };
 
 // visitor for parsing the current query
@@ -116,7 +119,10 @@ export const getSuggestions = async ({
   query,
   indexPatterns,
   position,
+  selectionEnd,
+  core: coreSetup,
 }: QuerySuggestionGetFnArgs) => {
+  const http = coreSetup?.http;
   const currentIndexPattern = indexPatterns[0] as IndexPattern;
 
   const inputStream = CharStream.fromString(query);
@@ -129,7 +135,10 @@ export const getSuggestions = async ({
   const visitor = new QueryVisitor();
 
   // find token index
-  const cursorIndex = findCursorIndex(tokenStream, position, DQLParser.WS) ?? 0;
+  const cursorColumn = position?.column ?? selectionEnd;
+  const cursorLine = position?.lineNumber ?? 1;
+
+  const cursorIndex = findCursorIndex(tokenStream, cursorColumn, cursorLine, DQLParser.WS) ?? 0;
 
   const core = new CodeCompletionCore(parser);
 
@@ -160,7 +169,12 @@ export const getSuggestions = async ({
   // find suggested values for the last found field (only for kvexpression rule)
   const { field: lastField = '', value: lastValue = '' } = visitor.visit(tree) ?? {};
   if (!!lastField && candidates.tokens.has(DQLParser.PHRASE)) {
-    const values = await findValueSuggestions(currentIndexPattern, lastField, lastValue ?? '');
+    const values = await findValueSuggestions(
+      currentIndexPattern,
+      lastField,
+      lastValue ?? '',
+      http
+    );
     if (!!values) {
       completions.push(
         ...values?.map((val: any) => {
