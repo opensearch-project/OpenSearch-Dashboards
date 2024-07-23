@@ -41,13 +41,13 @@ import { DataSourceSelectionService } from './service/data_source_selection_serv
 export interface DataSourceManagementSetupDependencies {
   management: ManagementSetup;
   indexPatternManagement: IndexPatternManagementSetup;
-  dataSource: DataSourcePluginSetup;
+  dataSource?: DataSourcePluginSetup;
 }
 
 export interface DataSourceManagementPluginSetup {
   registerAuthenticationMethod: (authMethodValues: AuthenticationMethod) => void;
   ui: {
-    DataSourceSelector: React.ComponentType<DataSourceSelectorProps>;
+    DataSourceSelector: React.ComponentType<DataSourceSelectorProps> | null;
     getDataSourceMenu: <T>() => React.ComponentType<DataSourceMenuProps<T>>;
   };
   dataSourceSelection: DataSourceSelectionService;
@@ -90,6 +90,8 @@ export class DataSourceManagementPlugin
     const column = new DataSourceColumn(savedObjectPromise);
     indexPatternManagement.columns.register(column);
 
+    const featureFlagStatus = !!dataSource;
+
     opensearchDashboardsSection.registerApp({
       id: DSM_APP_ID,
       title: PLUGIN_NAME,
@@ -97,7 +99,12 @@ export class DataSourceManagementPlugin
       mount: async (params) => {
         const { mountManagementSection } = await import('./management_app');
 
-        return mountManagementSection(core.getStartServices, params, this.authMethodsRegistry);
+        return mountManagementSection(
+          core.getStartServices,
+          params,
+          this.authMethodsRegistry,
+          featureFlagStatus
+        );
       },
     });
 
@@ -124,7 +131,8 @@ export class DataSourceManagementPlugin
               setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
               wrapInPage: true,
             },
-            this.authMethodsRegistry
+            this.authMethodsRegistry,
+            featureFlagStatus
           );
         },
       });
@@ -177,6 +185,11 @@ export class DataSourceManagementPlugin
         order: 100,
       },
     ]);
+
+    // when the feature flag is disabled, we don't need to register any of the mds components
+    if (!featureFlagStatus) {
+      return undefined;
+    }
 
     const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
       if (this.started) {
