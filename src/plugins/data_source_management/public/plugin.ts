@@ -50,6 +50,7 @@ import {
 import { AccelerationDetailsFlyout } from './components/direct_query_data_sources_components/acceleration_management/acceleration_details_flyout';
 import { CreateAcceleration } from './components/direct_query_data_sources_components/acceleration_creation/create/create_acceleration';
 import { AssociatedObjectsDetailsFlyout } from './components/direct_query_data_sources_components/associated_object_management/associated_objects_details_flyout';
+import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 
 export const [
   getRenderAccelerationDetailsFlyout,
@@ -166,7 +167,8 @@ export class DataSourceManagementPlugin
             {
               ...params,
               basePath: core.http.basePath.get(),
-              setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+              setBreadcrumbs: (breadCrumbs) =>
+                coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
               wrapInPage: true,
             },
             this.authMethodsRegistry,
