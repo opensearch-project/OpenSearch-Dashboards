@@ -14,4 +14,7 @@ export const QueryEditorExtensions = (props: ComponentProps<typeof LazyQueryEdit
   </React.Suspense>
 );
 
-export { QueryEditorExtensionConfig } from './query_editor_extension';
+export {
+  QueryEditorExtensionDependencies,
+  QueryEditorExtensionConfig,
+} from './query_editor_extension';

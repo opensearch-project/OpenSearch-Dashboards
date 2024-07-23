@@ -212,7 +212,10 @@ export default class QueryEditorUI extends Component<Props, State> {
       : undefined;
     this.onChange(newQuery, dateRange);
     this.onSubmit(newQuery, dateRange);
-    this.setState({ isDataSourcesVisible: enhancement?.searchBar?.showDataSourceSelector ?? true });
+    this.setState({
+      isDataSourcesVisible: enhancement?.searchBar?.showDataSourcesSelector ?? true,
+      isDataSetsVisible: enhancement?.searchBar?.showDataSetsSelector ?? true,
+    });
   };
 
   private initPersistedLog = () => {
@@ -225,10 +228,15 @@ export default class QueryEditorUI extends Component<Props, State> {
   private initDataSourcesVisibility = () => {
     if (this.componentIsUnmounting) return;
 
-    const isDataSourcesVisible =
-      this.props.settings.getQueryEnhancements(this.props.query.language)?.searchBar
-        ?.showDataSourceSelector ?? true;
-    this.setState({ isDataSourcesVisible });
+    return this.props.settings.getQueryEnhancements(this.props.query.language)?.searchBar
+      ?.showDataSourcesSelector;
+  };
+
+  private initDataSetsVisibility = () => {
+    if (this.componentIsUnmounting) return;
+
+    return this.props.settings.getQueryEnhancements(this.props.query.language)?.searchBar
+      ?.showDataSetsSelector;
   };
 
   public onMouseEnterSuggestion = (index: number) => {
@@ -245,7 +253,10 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     this.initPersistedLog();
     // this.fetchIndexPatterns().then(this.updateSuggestions);
-    this.initDataSourcesVisibility();
+    this.setState({
+      isDataSourcesVisible: this.initDataSourcesVisibility() || true,
+      isDataSetsVisible: this.initDataSetsVisibility() || true,
+    });
   }
 
   public componentDidUpdate(prevProps: Props) {
