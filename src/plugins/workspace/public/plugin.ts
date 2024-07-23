@@ -114,6 +114,12 @@ export class WorkspacePlugin
           if (app.id === 'home' && isAllUseCase) {
             return { navLinkStatus: AppNavLinkStatus.hidden };
           }
+
+          // show the overview page in all use case
+          if (app.id === WORKSPACE_DETAIL_APP_ID && isAllUseCase) {
+            return { navLinkStatus: AppNavLinkStatus.visible };
+          }
+
           if (isAppAccessibleInWorkspace(app, currentWorkspace, registeredUseCases)) {
             return;
           }
@@ -333,9 +339,7 @@ export class WorkspacePlugin
       title: i18n.translate('workspace.settings.workspaceDetail', {
         defaultMessage: 'Workspace Detail',
       }),
-      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden,
+      navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderDetailApp } = await import('./application');
         return mountWorkspaceApp(params, renderDetailApp);
