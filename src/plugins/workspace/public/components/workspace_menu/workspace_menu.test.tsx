@@ -62,7 +62,7 @@ describe('<WorkspaceMenu />', () => {
   it('should display a list of workspaces in the dropdown', () => {
     coreStartMock.workspaces.workspaceList$.next([
       { id: 'workspace-1', name: 'workspace 1', features: [] },
-      { id: 'workspace-2', name: 'workspace 2', features: [] },
+      { id: 'workspace-2', name: 'workspace 2' },
     ]);
 
     render(<WorkspaceMenuCreatorComponent />);
@@ -169,5 +169,20 @@ describe('<WorkspaceMenu />', () => {
     fireEvent.click(screen.getByTestId('workspace-select-button'));
     fireEvent.click(screen.getByText(/View all/i));
     expect(coreStartMock.application.navigateToApp).toHaveBeenCalledWith('workspace_list');
+  });
+
+  it('should hide create workspace button for non dashboard admin', () => {
+    coreStartMock.application.capabilities = {
+      ...coreStartMock.application.capabilities,
+      dashboards: {
+        ...coreStartMock.application.capabilities.dashboards,
+        isDashboardAdmin: false,
+      },
+    };
+    render(<WorkspaceMenuCreatorComponent />);
+
+    fireEvent.click(screen.getByTestId('workspace-select-button'));
+    expect(screen.getByText(/View all/i)).toBeInTheDocument();
+    expect(screen.queryByText(/create workspaces/i)).toBeNull();
   });
 });

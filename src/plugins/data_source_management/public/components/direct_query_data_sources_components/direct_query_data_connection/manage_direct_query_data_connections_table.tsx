@@ -25,6 +25,7 @@ import {
   NotificationsStart,
   SavedObjectsStart,
 } from 'opensearch-dashboards/public';
+import { useHistory } from 'react-router-dom';
 import {
   DirectQueryDatasourceDetails,
   DirectQueryDatasourceStatus,
@@ -35,6 +36,7 @@ import PrometheusLogo from '../icons/prometheus_logo.svg';
 import S3Logo from '../icons/s3_logo.svg';
 import { DataSourceSelector } from '../../data_source_selector';
 import { DataSourceOption } from '../../data_source_menu/types';
+import { DATACONNECTIONS_BASE } from '../../../constants';
 
 interface DataConnection {
   connectionType: DirectQueryDatasourceType;
@@ -69,12 +71,13 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | undefined>('');
   const [searchText, setSearchText] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const history = useHistory();
 
   const fetchDataSources = useCallback(() => {
     const endpoint =
       featureFlagStatus && selectedDataSourceId !== undefined
-        ? `/api/dataconnections/dataSourceMDSId=${selectedDataSourceId}`
-        : `/api/dataconnections`;
+        ? `${DATACONNECTIONS_BASE}/dataSourceMDSId=${selectedDataSourceId}`
+        : `${DATACONNECTIONS_BASE}`;
 
     setIsLoading(true);
 
@@ -191,7 +194,9 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
           <EuiFlexItem grow={false}>
             <EuiLink
               data-test-subj={`${record.name}DataConnectionsLink`}
-              href={`#/manage/${record.name}`}
+              onClick={() =>
+                history.push(`/manage/${record.name}?dataSourceMDSId=${selectedDataSourceId}`)
+              }
             >
               {truncate(record.name, 100)}
             </EuiLink>

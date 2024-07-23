@@ -40,7 +40,7 @@ import { UrlParser } from './url_parser';
 
 interface Body {
   aggs?: SearchParams['body']['aggs'];
-  query?: Query;
+  query?: Query | string;
   timeout?: string;
 }
 
@@ -214,6 +214,7 @@ export type OpenSearchQueryRequest = Requests;
 export type EmsQueryRequest = Requests & {
   obj: UrlObject;
 };
+export type PPLQueryRequest = Requests;
 
 export interface ContextVarsObject {
   [index: string]: any;

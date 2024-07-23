@@ -8,7 +8,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
       "get": [MockFunction] {
         "calls": Array [
           Array [
-            "/api/dataconnections/dataSourceMDSId=",
+            "/api/directquery/dataconnections/dataSourceMDSId=",
           ],
         ],
         "results": Array [

@@ -30,6 +30,9 @@ import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
 
+const LANGUAGE_ID = 'SQL';
+monaco.languages.register({ id: LANGUAGE_ID });
+
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
   dataSource?: DataSource;
@@ -276,6 +279,60 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
+  getCodeEditorSuggestionsType = (columnType: string) => {
+    switch (columnType) {
+      case 'text':
+        return monaco.languages.CompletionItemKind.Text;
+      case 'function':
+        return monaco.languages.CompletionItemKind.Function;
+      case 'object':
+        return monaco.languages.CompletionItemKind.Struct;
+      case 'field':
+        return monaco.languages.CompletionItemKind.Field;
+      case 'value':
+        return monaco.languages.CompletionItemKind.Value;
+      default:
+        return monaco.languages.CompletionItemKind.Text;
+    }
+  };
+
+  provideCompletionItems = async (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position
+  ): Promise<monaco.languages.CompletionList> => {
+    const wordUntil = model.getWordUntilPosition(position);
+    const wordRange = new monaco.Range(
+      position.lineNumber,
+      wordUntil.startColumn,
+      position.lineNumber,
+      wordUntil.endColumn
+    );
+    const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
+    const connectionService = enhancements?.connectionService;
+    const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
+      query: this.getQueryString(),
+      selectionStart: model.getOffsetAt(position),
+      selectionEnd: model.getOffsetAt(position),
+      language: this.props.query.language,
+      indexPatterns: this.state.indexPatterns,
+      position,
+      connectionService,
+    });
+
+    return {
+      suggestions:
+        suggestions && suggestions.length > 0
+          ? suggestions.map((s) => ({
+              label: s.text,
+              kind: this.getCodeEditorSuggestionsType(s.type),
+              insertText: s.text,
+              range: wordRange,
+            }))
+          : [],
+      incomplete: false,
+    };
+  };
+
   editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     this.setState({ lineCount: editor.getModel()?.getLineCount() });
     this.inputRef = editor;
@@ -367,7 +424,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                       <div className="single-line-editor-wrapper">
                         <CodeEditor
                           height={40} // Adjusted to match lineHeight for a single line
-                          languageId="opensearchql"
+                          languageId={this.props.query.language}
                           value={this.getQueryString()}
                           onChange={this.onSingleLineInputChange}
                           editorDidMount={this.singleLineEditorDidMount}
@@ -391,6 +448,10 @@ export default class QueryEditorUI extends Component<Props, State> {
                             overviewRulerLanes: 0,
                             hideCursorInOverviewRuler: true,
                             cursorStyle: 'line',
+                            wordBasedSuggestions: false,
+                          }}
+                          suggestionProvider={{
+                            provideCompletionItems: this.provideCompletionItems,
                           }}
                         />
                       </div>
@@ -419,7 +480,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             {!this.state.isCollapsed && useQueryEditor && (
               <CodeEditor
                 height={70}
-                languageId="opensearchql"
+                languageId={this.props.query.language}
                 value={this.getQueryString()}
                 onChange={this.onInputChange}
                 editorDidMount={this.editorDidMount}
@@ -436,6 +497,10 @@ export default class QueryEditorUI extends Component<Props, State> {
                   wrappingIndent: 'indent',
                   lineDecorationsWidth: 0,
                   lineNumbersMinChars: 2,
+                  wordBasedSuggestions: false,
+                }}
+                suggestionProvider={{
+                  provideCompletionItems: this.provideCompletionItems,
                 }}
               />
             )}

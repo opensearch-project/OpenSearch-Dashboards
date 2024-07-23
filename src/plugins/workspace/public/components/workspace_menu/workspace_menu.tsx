@@ -72,7 +72,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const currentWorkspace = useObservable(coreStart.workspaces.currentWorkspace$, null);
   const workspaceList = useObservable(coreStart.workspaces.workspaceList$, []);
-  const isDashboardAdmin = !!coreStart.application.capabilities.dashboards;
+  const isDashboardAdmin = coreStart.application.capabilities?.dashboards?.isDashboardAdmin;
   const availableUseCases = useObservable(registeredUseCases$, []);
 
   const filteredWorkspaceList = useMemo(() => {
@@ -90,7 +90,10 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   const currentWorkspaceName = currentWorkspace?.name ?? defaultHeaderName;
 
   const getUseCase = (workspace: WorkspaceObject) => {
-    const useCaseId = getFirstUseCaseOfFeatureConfigs(workspace?.features!);
+    if (!workspace.features) {
+      return;
+    }
+    const useCaseId = getFirstUseCaseOfFeatureConfigs(workspace.features);
     return availableUseCases.find((useCase) => useCase.id === useCaseId);
   };
 
@@ -103,7 +106,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   };
 
   const currentWorkspaceButton = currentWorkspace ? (
-    <EuiButtonEmpty flush="left" onClick={openPopover} data-test-subj="current-workspace-button">
+    <EuiButtonEmpty onClick={openPopover} data-test-subj="current-workspace-button">
       <EuiAvatar
         size="s"
         type="space"
