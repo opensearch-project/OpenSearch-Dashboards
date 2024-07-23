@@ -314,3 +314,21 @@ export interface ExternalDataSourcesCacheData {
   lastUpdated: string;
   status: CachedDataSourceStatus;
 }
+
+interface DataSourceMeta {
+  // ref: string; // MDS ID
+  // dsName?: string; // flint datasource
+  id: string;
+  name: string;
+  type?: string;
+}
+
+export interface DataSet {
+  id: string | undefined; // index pattern ID, index name, or flintdatasource.database.table
+  datasource?: DataSourceMeta;
+  meta?: {
+    timestampField: string;
+    mapping?: any;
+  };
+  type?: 'dataSet' | 'temporary';
+}

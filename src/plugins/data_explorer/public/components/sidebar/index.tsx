@@ -20,7 +20,9 @@ import {
 import './index.scss';
 
 export const Sidebar: FC = ({ children }) => {
-  const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
+  const { indexPattern: indexPatternId, dataSet: dataSet } = useTypedSelector(
+    (state) => state.metadata
+  );
   const dispatch = useTypedDispatch();
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
@@ -141,8 +143,9 @@ export const Sidebar: FC = ({ children }) => {
   const handleDataSetSelection = useCallback(
     (dataSet: any) => {
       batch(() => {
-        dispatch(setIndexPattern(dataSet!.id));
-        dispatch(setDataSet(dataSet));
+        const { id, ...ds } = dataSet;
+        dispatch(setIndexPattern(id));
+        dispatch(setDataSet(ds));
       });
     },
     [dispatch]
@@ -166,7 +169,11 @@ export const Sidebar: FC = ({ children }) => {
               containerRef.current = node;
             }}
           >
-            <DataSetNavigator dataSetId={indexPatternId} onSelectDataSet={handleDataSetSelection} />
+            <DataSetNavigator
+              dataSet={dataSet}
+              indexPatternId={indexPatternId}
+              onSelectDataSet={handleDataSetSelection}
+            />
           </EuiPortal>
         )}
         {!isEnhancementsEnabled && (

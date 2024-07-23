@@ -26,10 +26,32 @@ import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
  */
 export const useIndexPattern = (services: DiscoverViewServices) => {
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
+  const dataSetFromState = useSelector((state) => state.metadata.dataSet);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const { data, toastNotifications, uiSettings: config, store } = services;
 
   useEffect(() => {
+    const checkDataSet = async (dataset: any, indexPatternIdFromState: string) => {
+      if (dataset) {
+        const temporaryIndexPattern = await data.indexPatterns.create(
+          {
+            id: dataset.id,
+            title: dataset.id,
+            type: dataset.type,
+            dataSourceRef: {
+              id: dataset.datasource?.ref!,
+              name: dataset.datasource?.dsName!,
+              type: dataset.type!,
+            },
+            timeFieldName: dataset.meta?.timestampField,
+          },
+          true
+        );
+        data.indexPatterns.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
+      }
+      fetchIndexPatternDetails(indexPatternIdFromState);
+    };
+
     let isMounted = true;
 
     const fetchIndexPatternDetails = (id: string) => {
@@ -65,7 +87,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
         fetchIndexPatternDetails(newId);
       });
     } else {
-      fetchIndexPatternDetails(indexPatternIdFromState);
+      checkDataSet(dataSetFromState, indexPatternIdFromState);
     }
 
     return () => {
