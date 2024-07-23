@@ -83,10 +83,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
     }
 
     if (
-      (optionId === '' && this.props.hideLocalCluster) ||
-      (this.props.dataSourceFilter &&
-        this.props.selectedOption.filter(this.props.dataSourceFilter).length === 0)
-    ) {
+      optionId === '' && this.props.hideLocalCluster) {
       this.setState({
         selectedOption: [],
       });
@@ -100,6 +97,13 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
           optionId,
           this.props.savedObjectsClient!
         );
+        if (this.props.dataSourceFilter && [selectedDataSource].filter(this.props.dataSourceFilter).length === 0) {
+          this.setState({
+            selectedOption: [],
+          });
+          this.onSelectedDataSources([]);
+        }
+        console.log("selected", selectedDataSource)
         if (!this._isMounted) return;
         this.setState({
           selectedOption: [{ id: optionId, label: selectedDataSource.title }],
