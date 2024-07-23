@@ -177,6 +177,31 @@ describe('Workspace plugin', () => {
     );
   });
 
+  it('#setup should register workspace detail with a visible application and register to all nav group', async () => {
+    const setupMock = coreMock.createSetup();
+    setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {});
+
+    expect(setupMock.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'workspace_detail',
+        navLinkStatus: AppNavLinkStatus.visible,
+      })
+    );
+
+    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
+      DEFAULT_NAV_GROUPS.all,
+      expect.arrayContaining([
+        {
+          id: 'workspace_detail',
+          title: 'Overview',
+          order: 100,
+        },
+      ])
+    );
+  });
+
   it('#start add workspace detail page to breadcrumbs when start', async () => {
     const startMock = coreMock.createStart();
     const workspaceObject = {
@@ -264,6 +289,7 @@ describe('Workspace plugin', () => {
         title: 'Foo',
         features: ['system-feature'],
         systematic: true,
+        description: '',
       },
     ]);
     jest.spyOn(UseCaseService.prototype, 'start').mockImplementationOnce(() => ({
@@ -286,7 +312,7 @@ describe('Workspace plugin', () => {
 
     const appUpdater = await appUpdater$.pipe(first()).toPromise();
 
-    expect(appUpdater({ id: 'system-feature' })).toBeUndefined();
+    expect(appUpdater({ id: 'system-feature', title: '', mount: () => () => {} })).toBeUndefined();
   });
 
   it('#start should update nav group status after currentWorkspace set', async () => {
@@ -334,6 +360,7 @@ describe('Workspace plugin', () => {
         title: 'Foo',
         features: ['system-feature'],
         systematic: true,
+        description: '',
       },
     ]);
     jest.spyOn(UseCaseService.prototype, 'start').mockImplementationOnce(() => ({
