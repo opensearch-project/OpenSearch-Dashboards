@@ -438,23 +438,29 @@ export const DataSetNavigator = ({
                 name: indicesLabel,
                 panel: 2,
               },
-              {
-                name: 'Connected data sources',
-                panel: 4,
-                onClick: () => {
-                  const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
-                  if (
-                    (externalDataSourcesCache.status === CachedDataSourceStatus.Empty ||
-                      externalDataSourcesCache.status === CachedDataSourceStatus.Failed) &&
-                    !isCatalogCacheFetching(dataSourcesLoadStatus) &&
-                    dataSources.length > 0
-                  ) {
-                    startLoadingDataSources(dataSources.map((dataSource) => dataSource.id));
-                  } else if (externalDataSourcesCache.status === CachedDataSourceStatus.Updated) {
-                    setExternalDataSources(externalDataSourcesCache.externalDataSources);
-                  }
-                },
-              },
+              ...(isExternalDataSourcesEnabled
+                ? [
+                    {
+                      name: 'Connected data sources',
+                      panel: 4,
+                      onClick: () => {
+                        const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
+                        if (
+                          (externalDataSourcesCache.status === CachedDataSourceStatus.Empty ||
+                            externalDataSourcesCache.status === CachedDataSourceStatus.Failed) &&
+                          !isCatalogCacheFetching(dataSourcesLoadStatus) &&
+                          dataSources.length > 0
+                        ) {
+                          startLoadingDataSources(dataSources.map((dataSource) => dataSource.id));
+                        } else if (
+                          externalDataSourcesCache.status === CachedDataSourceStatus.Updated
+                        ) {
+                          setExternalDataSources(externalDataSourcesCache.externalDataSources);
+                        }
+                      },
+                    },
+                  ]
+                : []),
             ],
           },
           {
