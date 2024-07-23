@@ -5,25 +5,29 @@
 
 import { ApiResponse } from '@opensearch-project/opensearch';
 import { ResponseError } from '@opensearch-project/opensearch/lib/errors';
-import { RequestHandlerContext } from 'src/core/server';
-// // eslint-disable-next-line @osd/eslint/no-restricted-paths
-// import { CoreRouteHandlerContext } from 'src/core/server/core_route_handler_context';
-import { coreMock } from '../../../../../core/server/mocks';
 import { loggerMock } from '@osd/logging/target/mocks';
+import { RequestHandlerContext } from 'src/core/server';
+import { coreMock } from '../../../../../core/server/mocks';
 import { getAgentIdByConfig, requestAgentByConfig } from './agents';
 
-describe.skip('Agents helper functions', () => {
-  // const coreContext = new CoreRouteHandlerContext(
-  //   coreMock.createInternalStart(),
-  //   httpServerMock.createOpenSearchDashboardsRequest()
-  // );
+describe('Agents helper functions', () => {
   const coreContext = coreMock.createRequestHandlerContext();
   const client = coreContext.opensearch.client.asCurrentUser;
   const mockedTransport = client.transport.request as jest.Mock;
   const context: RequestHandlerContext = {
     core: coreContext,
+    // @ts-ignore
     dataSource: jest.fn(),
-    query_assist: { dataSourceEnabled: false, logger: loggerMock.create() },
+    query_assist: {
+      dataSourceEnabled: false,
+      logger: loggerMock.create(),
+      configPromise: Promise.resolve({
+        enabled: true,
+        queryAssist: {
+          supportedLanguages: [{ language: 'PPL', agentConfig: 'testConfig' }],
+        },
+      }),
+    },
   };
 
   afterEach(() => {

@@ -55,6 +55,7 @@ export type TopNavMenuProps = StatefulSearchBarProps &
     showDataSourceMenu?: boolean;
     data?: DataPublicPluginStart;
     className?: string;
+    datePickerRef?: any;
     /**
      * If provided, the menu part of the component will be rendered as a portal inside the given mount point.
      *

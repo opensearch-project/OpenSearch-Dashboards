@@ -29,7 +29,8 @@ import { OpenSearchPanel } from './open_search_panel';
 export const getTopNavLinks = (
   services: DiscoverViewServices,
   inspectorAdapters: Adapters,
-  savedSearch: SavedSearch
+  savedSearch: SavedSearch,
+  isEnhancementEnabled: boolean = false
 ) => {
   const {
     history,
@@ -44,7 +45,7 @@ export const getTopNavLinks = (
     osdUrlStateStorage,
   } = services;
 
-  const newSearch = {
+  const newSearch: TopNavMenuData = {
     id: 'new',
     label: i18n.translate('discover.localMenu.localMenu.newSearchTitle', {
       defaultMessage: 'New',
@@ -61,6 +62,7 @@ export const getTopNavLinks = (
     ariaLabel: i18n.translate('discover.topNav.discoverNewButtonLabel', {
       defaultMessage: `New Search`,
     }),
+    iconType: 'plusInCircle',
   };
 
   const saveSearch: TopNavMenuData = {
@@ -160,9 +162,10 @@ export const getTopNavLinks = (
       );
       showSaveModal(saveModal, core.i18n.Context);
     },
+    iconType: 'save',
   };
 
-  const openSearch = {
+  const openSearch: TopNavMenuData = {
     id: 'open',
     label: i18n.translate('discover.localMenu.openTitle', {
       defaultMessage: 'Open',
@@ -190,6 +193,7 @@ export const getTopNavLinks = (
         )
       );
     },
+    iconType: 'folderOpen',
   };
 
   const shareSearch: TopNavMenuData = {
@@ -225,9 +229,10 @@ export const getTopNavLinks = (
         isDirty: !savedSearch.id || state.isDirty || false,
       });
     },
+    iconType: 'share',
   };
 
-  const inspectSearch = {
+  const inspectSearch: TopNavMenuData = {
     id: 'inspect',
     label: i18n.translate('discover.localMenu.inspectTitle', {
       defaultMessage: 'Inspect',
@@ -244,15 +249,28 @@ export const getTopNavLinks = (
         title: savedSearch?.title || undefined,
       });
     },
+    iconType: 'inspect',
   };
 
-  return [
+  const topNavLinksArray = [
     newSearch,
     ...(capabilities.discover?.save ? [saveSearch] : []),
     openSearch,
     ...(share ? [shareSearch] : []), // Show share option only if share plugin is available
     inspectSearch,
   ];
+
+  if (!isEnhancementEnabled) {
+    return topNavLinksArray.map((topNavLink) => {
+      if (topNavLink) {
+        const { iconType, ...rest } = topNavLink; // Removing the Icon Type property to maintain consistency with older Nav Bar
+        return rest;
+      }
+      return topNavLink;
+    });
+  }
+
+  return topNavLinksArray;
 };
 
 // TODO: This does not seem to affect the share menu. need to look into it in future
