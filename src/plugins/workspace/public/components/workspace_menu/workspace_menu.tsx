@@ -106,7 +106,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   };
 
   const currentWorkspaceButton = currentWorkspace ? (
-    <EuiButtonEmpty flush="left" onClick={openPopover} data-test-subj="current-workspace-button">
+    <EuiButtonEmpty onClick={openPopover} data-test-subj="current-workspace-button">
       <EuiAvatar
         size="s"
         type="space"
