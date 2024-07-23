@@ -177,7 +177,7 @@ export function CollapsibleNavGroupEnabled({
   basePath,
   id,
   isLocked,
-  isNavOpen: isNavOpenProps,
+  isNavOpen,
   storage = window.localStorage,
   onIsLockedUpdate,
   closeNav,
@@ -262,18 +262,6 @@ export function CollapsibleNavGroupEnabled({
 
     return fulfillRegistrationLinksToChromeNavLinks(navLinksForAll, navLinks);
   }, [navLinks, navGroupsMap, currentNavGroup]);
-
-  const isNavOpen = useMemo(() => {
-    // For now, only home page need to always collapse left navigation
-    // when workspace is enabled.
-    // If there are more pages need to collapse left navigation in the future
-    // need to come up with a mechanism to register.
-    if (capabilities.workspaces.enabled && appId === 'home') {
-      return false;
-    }
-
-    return isNavOpenProps;
-  }, [isNavOpenProps, capabilities.workspaces.enabled, appId]);
 
   const width = useMemo(() => {
     if (!isNavOpen) {
