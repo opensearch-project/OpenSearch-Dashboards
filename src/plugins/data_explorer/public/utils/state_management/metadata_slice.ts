@@ -5,27 +5,32 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { DataExplorerServices } from '../../types';
+import { SimpleDataSet } from '../../../../data/common';
 
-interface DataSourceMeta {
-  ref: string; // MDS ID
-  dsName?: string; // flint datasource
-}
+// interface DataSourceMeta {
+//   // ref: string; // MDS ID
+//   // dsName?: string; // flint datasource
+//   id: string;
+//   name: string;
+//   type?: string;
+// }
 
-export interface DataSet {
-  id: string | undefined; // index pattern ID, index name, or flintdatasource.database.table
-  datasource?: DataSourceMeta;
-  meta?: {
-    timestampField: string;
-    mapping?: any;
-  };
-  type?: 'dataSet' | 'temporary';
-}
+// export interface DataSet {
+//   // id: string | undefined; // index pattern ID, index name, or flintdatasource.database.table
+//   // TODO: treating index pattern ID as DataSet ID
+//   datasource?: DataSourceMeta;
+//   meta?: {
+//     timestampField: string;
+//     mapping?: any;
+//   };
+//   type?: 'dataSet' | 'temporary';
+// }
 
 export interface MetadataState {
   indexPattern?: string;
   originatingApp?: string;
   view?: string;
-  dataSet?: DataSet;
+  dataSet?: Omit<SimpleDataSet, 'id'>;
 }
 
 const initialState: MetadataState = {};
@@ -44,9 +49,9 @@ export const getPreloadedState = async ({
     ...initialState,
     originatingApp,
     indexPattern: defaultIndexPattern?.id,
-    dataSet: {
-      id: defaultIndexPattern?.id,
-    },
+    // dataSet: {
+    //   id: defaultIndexPattern?.id,
+    // },
   };
 
   return preloadedState;

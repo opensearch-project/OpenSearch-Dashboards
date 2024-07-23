@@ -32,7 +32,7 @@ import {
   useLoadTablesToCache,
 } from './lib/catalog_cache/cache_loader';
 import { CatalogCacheManager } from './lib/catalog_cache/cache_manager';
-import { CachedDataSourceStatus, DirectQueryLoadingStatus } from './lib/types';
+import { CachedDataSourceStatus, DataSet, DirectQueryLoadingStatus } from './lib/types';
 import {
   getIndexPatterns,
   getNotifications,
@@ -49,14 +49,16 @@ import {
 } from './lib';
 
 export interface DataSetNavigatorProps {
-  dataSetId: string | undefined;
+  dataSet: Omit<SimpleDataSet, 'id'> | undefined;
+  indexPatternId: string | undefined;
   savedObjectsClient?: SavedObjectsClientContract;
   http?: HttpStart;
   onSelectDataSet: (dataSet: SimpleDataSet) => void;
 }
 
 export const DataSetNavigator = ({
-  dataSetId,
+  dataSet,
+  indexPatternId,
   savedObjectsClient,
   http,
   onSelectDataSet,
@@ -71,7 +73,7 @@ export const DataSetNavigator = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isExternalDataSourcesEnabled, setIsExternalDataSourcesEnabled] = useState(false);
-  const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet | undefined>();
+  // const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet | undefined>({ id: dataSet?.id, title: dataSet?.datasource?.name, });
   const [selectedObject, setSelectedObject] = useState<SimpleDataSet | undefined>();
   const [selectedDataSource, setSelectedDataSource] = useState<SimpleDataSource | undefined>();
   const [selectedDataSourceObjects, setSelectedDataSourceObjects] = useState<SimpleObject[]>([]);
@@ -119,12 +121,18 @@ export const DataSetNavigator = ({
           setIsExternalDataSourcesEnabled(isExternalDSEnabled);
           setIndexPatterns(defaultIndexPatterns);
           setDataSources(defaultDataSources);
-          if (!selectedDataSet && dataSetId) {
+          // If there's no dataset, then should be an index pattern
+          if (!dataSet && indexPatternId) {
             const selectedPattern = defaultIndexPatterns.find(
-              (pattern) => pattern.id === dataSetId
+              (pattern) => pattern.id === indexPatternId
             );
             if (selectedPattern) {
-              setSelectedDataSet({
+              // setSelectedDataSet({
+              //   id: selectedPattern.id ?? selectedPattern.title,
+              //   title: selectedPattern.title,
+              //   type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
+              // });
+              onSelectDataSet({
                 id: selectedPattern.id ?? selectedPattern.title,
                 title: selectedPattern.title,
                 type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
@@ -137,7 +145,7 @@ export const DataSetNavigator = ({
           setIsLoading(false);
         });
     }
-  }, [indexPatternsService, dataSetId, savedObjectsClient, selectedDataSet, isMounted, http]);
+  }, [indexPatternsService, savedObjectsClient, isMounted, http]);
 
   useEffect(() => {
     const status = dataSourcesLoadStatus.toLowerCase();
@@ -366,14 +374,19 @@ export const DataSetNavigator = ({
           dataSourceRef: dataSet.dataSourceRef?.id,
         });
         searchService.df.clear();
-        onSelectDataSet(dataSet);
+        onSelectDataSet({
+          id: dataSet.id,
+          title: dataSet.title,
+          dataSourceRef: dataSet.dataSourceRef,
+          type: dataSet.type,
+        });
         queryService.queryString.setQuery(getInitialQuery(dataSet));
         closePopover();
       };
 
       if (ds) {
         await onDataSetSelected(ds);
-        setSelectedDataSet(ds);
+        // setSelectedDataSet(ds);
       }
     },
     [
@@ -419,11 +432,8 @@ export const DataSetNavigator = ({
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
         >
-          {`${selectedDataSet?.dataSourceRef ? `${selectedDataSet.dataSourceRef.name}::` : ''}${
-            selectedDataSet?.title ??
-            i18n.translate('data.query.dataSetNavigator.selectDataSet', {
-              defaultMessage: 'Select data set',
-            })
+          {`${dataSet?.dataSourceRef?.name ? `${dataSet.dataSourceRef?.name}::` : ''}${
+            dataSet?.title
           }`}
         </EuiButtonEmpty>
       }
