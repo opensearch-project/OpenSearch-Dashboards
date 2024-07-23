@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { monaco } from 'packages/osd-monaco/target';
 import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
 
 export enum QuerySuggestionTypes {
@@ -51,6 +52,8 @@ export interface QuerySuggestionGetFnArgs {
   selectionEnd: number;
   signal?: AbortSignal;
   boolFilter?: any;
+  position?: monaco.Position;
+  connectionService?: any; // will need to add type when ConnectionService is properly exposed from queryEnhancements
 }
 
 /** @public **/
