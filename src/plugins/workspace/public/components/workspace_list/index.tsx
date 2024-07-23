@@ -26,7 +26,7 @@ import { WORKSPACE_CREATE_APP_ID } from '../../../common/constants';
 
 import { cleanWorkspaceId } from '../../../../../core/public';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
-import { getFirstUseCaseOfFeatureConfigs, getUseCaseFromFeatureConfig } from '../../utils';
+import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { WorkspaceUseCase } from '../../types';
 
 const WORKSPACE_LIST_PAGE_DESCRIPTION = i18n.translate('workspace.list.description', {
@@ -43,6 +43,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     services: { workspaces, application, http },
   } = useOpenSearchDashboards();
   const registeredUseCases = useObservable(registeredUseCases$);
+  const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin;
 
   const initialSortField = 'name';
   const initialSortDirection = 'asc';
@@ -172,13 +173,19 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       incremental: true,
     },
     toolsRight: [
-      <EuiButton
-        href={workspaceCreateUrl}
-        key="create_workspace"
-        data-test-subj="workspaceList-create-workspace"
-      >
-        Create workspace
-      </EuiButton>,
+      ...(isDashboardAdmin
+        ? [
+            <EuiButton
+              href={workspaceCreateUrl}
+              key="create_workspace"
+              data-test-subj="workspaceList-create-workspace"
+            >
+              {i18n.translate('workspace.workspaceList.buttons.createWorkspace', {
+                defaultMessage: 'Create workspace',
+              })}
+            </EuiButton>,
+          ]
+        : []),
     ],
   };
 

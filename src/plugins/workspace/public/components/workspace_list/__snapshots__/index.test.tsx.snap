@@ -81,25 +81,6 @@ exports[`WorkspaceList should render title and table normally 1`] = `
                 </div>
               </div>
             </div>
-            <div
-              class="euiFlexItem euiFlexItem--flexGrowZero"
-            >
-              <button
-                class="euiButton euiButton--primary"
-                data-test-subj="workspaceList-create-workspace"
-                type="button"
-              >
-                <span
-                  class="euiButtonContent euiButton__content"
-                >
-                  <span
-                    class="euiButton__text"
-                  >
-                    Create workspace
-                  </span>
-                </span>
-              </button>
-            </div>
           </div>
           <div
             class="euiSpacer euiSpacer--l"
