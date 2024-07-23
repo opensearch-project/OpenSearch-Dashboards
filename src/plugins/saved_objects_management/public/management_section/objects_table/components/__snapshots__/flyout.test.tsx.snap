@@ -598,6 +598,7 @@ exports[`Flyout should render cluster selector and import options when datasourc
           }
         >
           <DataSourceSelector
+            compressed={true}
             disabled={false}
             fullWidth={true}
             isClearable={false}
