@@ -1,0 +1,2 @@
+fix:
+- Breadcrumb issue in the new application. ([#7401](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7401))
