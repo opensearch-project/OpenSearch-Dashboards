@@ -12,6 +12,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiPopover,
   EuiSelect,
 } from '@elastic/eui';
@@ -368,7 +369,11 @@ export const DataSetNavigator = ({
     />
   );
 
-  const LoadingSpinner = <EuiLoadingSpinner size="l" />;
+  const LoadingSpinner = (
+    <EuiPanel hasShadow={false} hasBorder={false}>
+      <EuiLoadingSpinner className="dataSetNavigator__loading" size="m" />
+    </EuiPanel>
+  );
 
   const indexPatternsLabel = i18n.translate('data.query.dataSetNavigator.indexPatternsName', {
     defaultMessage: 'Index patterns',
@@ -552,8 +557,8 @@ export const DataSetNavigator = ({
                           : []),
                         { value: 'no-time-filter', text: "I don't want to use a time filter" },
                       ]}
-                      onChange={(event) => {
-                        setSelectedObject({
+                      onChange={async (event) => {
+                        await handleSelectedObject({
                           ...selectedObject,
                           timeFieldName:
                             event.target.value !== 'no-time-filter'
