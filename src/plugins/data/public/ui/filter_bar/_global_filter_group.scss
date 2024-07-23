@@ -1,6 +1,7 @@
 // SASSTODO: Probably not the right file for this selector, but temporary until the files get re-organized
 .globalQueryBar {
   padding: 0 $euiSizeS $euiSizeS $euiSizeS;
+  height: 160px;
 }
 
 .globalQueryBar:first-child {
@@ -32,10 +33,8 @@
 }
 
 .globalFilterGroup__branch {
-  padding: $euiSizeS $euiSizeM 0 0;
-  background-repeat: no-repeat;
-  background-position: $euiSizeM ($euiSizeS * -1);
-  background-image: url("data:image/svg+xml,%0A%3Csvg width='28px' height='28px' viewBox='0 0 28 28' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='#{hexToRGB($euiColorLightShade)}'%3E%3Crect x='14' y='27' width='14' height='1'%3E%3C/rect%3E%3C/g%3E%3C/svg%3E");
+  // matches inline #GlobalFilterGroup height and same size as add filter button + padding to vertically center
+  line-height: 40px;
 }
 
 .globalFilterGroup__wrapper {

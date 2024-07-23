@@ -37,6 +37,7 @@ import {
   EuiHideFor,
   EuiIcon,
   EuiShowFor,
+  EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -68,6 +69,9 @@ import type { Logos } from '../../../../common/types';
 import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
 import { CollapsibleNavGroupEnabled } from './collapsible_nav_group_enabled';
 import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
+import { RecentItems } from './recent_items';
+import { WorkspaceObject } from '../../../../public/workspace';
+
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
@@ -102,6 +106,7 @@ export interface HeaderProps {
   currentNavGroup$: Observable<NavGroupItemInMap | undefined>;
   navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
+  workspaceList$: Observable<WorkspaceObject[]>;
 }
 
 export function Header({
@@ -189,25 +194,27 @@ export function Header({
           <EuiHeader position="fixed" className="primaryHeader" style={sidecarPaddingStyle}>
             <EuiHeaderSection grow={false}>
               <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
-                <EuiHeaderSectionItemButton
-                  data-test-subj="toggleNavButton"
-                  aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-                    defaultMessage: 'Toggle primary navigation',
+                <EuiToolTip
+                  content={i18n.translate('core.ui.primaryNav.menu', {
+                    defaultMessage: 'Menu',
                   })}
-                  onClick={() => setIsNavOpen(!isNavOpen)}
-                  aria-expanded={isNavOpen}
-                  aria-pressed={isNavOpen}
-                  aria-controls={navId}
-                  ref={toggleCollapsibleNavRef}
+                  delay="long"
+                  position="bottom"
                 >
-                  <EuiIcon
-                    type="menu"
-                    size="m"
-                    title={i18n.translate('core.ui.primaryNav.menu', {
-                      defaultMessage: 'Menu',
+                  <EuiHeaderSectionItemButton
+                    data-test-subj="toggleNavButton"
+                    aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                      defaultMessage: 'Toggle primary navigation',
                     })}
-                  />
-                </EuiHeaderSectionItemButton>
+                    onClick={() => setIsNavOpen(!isNavOpen)}
+                    aria-expanded={isNavOpen}
+                    aria-pressed={isNavOpen}
+                    aria-controls={navId}
+                    ref={toggleCollapsibleNavRef}
+                  >
+                    <EuiIcon type="menu" size="m" />
+                  </EuiHeaderSectionItemButton>
+                </EuiToolTip>
               </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem border="right">
@@ -225,6 +232,18 @@ export function Header({
                   loadingCount$={observables.loadingCount$}
                 />
               </EuiHeaderSectionItem>
+              {/* Only display recent items when navGroup is enabled */}
+              {navGroupEnabled && (
+                <EuiHeaderSectionItem border="right">
+                  <RecentItems
+                    recentlyAccessed$={observables.recentlyAccessed$}
+                    workspaceList$={observables.workspaceList$}
+                    navigateToUrl={application.navigateToUrl}
+                    navLinks$={observables.navLinks$}
+                    basePath={basePath}
+                  />
+                </EuiHeaderSectionItem>
+              )}
             </EuiHeaderSection>
 
             <HeaderBreadcrumbs
@@ -288,6 +307,7 @@ export function Header({
             navControlsLeftBottom$={observables.navControlsLeftBottom$}
             currentNavGroup$={observables.currentNavGroup$}
             setCurrentNavGroup={setCurrentNavGroup}
+            capabilities={application.capabilities}
           />
         ) : (
           <CollapsibleNav

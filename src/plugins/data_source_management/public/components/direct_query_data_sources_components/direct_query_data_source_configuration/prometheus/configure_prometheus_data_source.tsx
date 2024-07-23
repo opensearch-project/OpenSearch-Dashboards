@@ -9,11 +9,11 @@ import {
   EuiSpacer,
   EuiText,
   EuiLink,
-  EuiFormRow,
-  EuiFieldText,
-  EuiTextArea,
-  EuiSelect,
-  EuiFieldPassword,
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
+  EuiCompressedTextArea,
+  EuiCompressedSelect,
+  EuiCompressedFieldPassword,
   EuiForm,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -110,8 +110,8 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
             currentError={error}
             setErrorForForm={setError}
           />
-          <EuiFormRow label="Description - Optional">
-            <EuiTextArea
+          <EuiCompressedFormRow label="Description - Optional">
+            <EuiCompressedTextArea
               data-test-subj="data-source-description"
               placeholder="Placeholder"
               value={details}
@@ -122,7 +122,7 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
                 setDetails(e.target.value);
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer />
 
           <EuiText>
@@ -130,12 +130,12 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
           </EuiText>
           <EuiSpacer size="m" />
 
-          <EuiFormRow label="Prometheus URI">
+          <EuiCompressedFormRow label="Prometheus URI">
             <>
               <EuiText size="xs">
                 <p>Enter the Prometheus URI endpoint.</p>
               </EuiText>
-              <EuiFieldText
+              <EuiCompressedFieldText
                 data-test-subj="Prometheus-URI"
                 placeholder="Prometheus URI"
                 value={store}
@@ -147,7 +147,7 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
                 }}
               />
             </>
-          </EuiFormRow>
+          </EuiCompressedFormRow>
           <EuiSpacer />
 
           <EuiText>
@@ -155,8 +155,8 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
           </EuiText>
           <EuiSpacer size="m" />
 
-          <EuiFormRow label="Authentication method">
-            <EuiSelect
+          <EuiCompressedFormRow label="Authentication method">
+            <EuiCompressedSelect
               id="selectAuthMethod"
               options={authOptions}
               value={currentAuthMethod}
@@ -164,7 +164,7 @@ export const ConfigurePrometheusDatasourcePanel = (props: ConfigurePrometheusDat
                 setAuthMethodForRequest(e.target.value as AuthMethod);
               }}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
 
           <AuthDetails
             currentUsername={currentUsername}

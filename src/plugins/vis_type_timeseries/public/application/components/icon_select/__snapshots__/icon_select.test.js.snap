@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`src/legacy/core_plugins/metrics/public/components/icon_select/icon_select.js <IconSelect /> should render and match a snapshot 1`] = `
-<EuiComboBox
+<EuiCompressedComboBox
   async={false}
-  compressed={false}
+  compressed={true}
   fullWidth={false}
   isClearable={false}
   onChange={[MockFunction]}

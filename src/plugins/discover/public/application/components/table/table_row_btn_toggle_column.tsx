@@ -30,7 +30,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiToolTip, EuiButtonIcon } from '@elastic/eui';
+import { EuiToolTip, EuiSmallButtonIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
 export interface Props {
@@ -42,7 +42,7 @@ export interface Props {
 export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = false }: Props) {
   if (disabled) {
     return (
-      <EuiButtonIcon
+      <EuiSmallButtonIcon
         aria-label={i18n.translate('discover.docViews.table.toggleColumnInTableButtonAriaLabel', {
           defaultMessage: 'Toggle column in table',
         })}
@@ -63,7 +63,7 @@ export function DocViewTableRowBtnToggleColumn({ onClick, active, disabled = fal
         />
       }
     >
-      <EuiButtonIcon
+      <EuiSmallButtonIcon
         aria-label={i18n.translate('discover.docViews.table.toggleColumnInTableButtonAriaLabel', {
           defaultMessage: 'Toggle column in table',
         })}

@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiCompressedComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import React from 'react';
 
 export interface GenericComboBoxProps<T> {
@@ -66,7 +66,7 @@ export function GenericComboBox<T>(props: GenericComboBoxProps<T>) {
   };
 
   return (
-    <EuiComboBox
+    <EuiCompressedComboBox
       options={euiOptions}
       selectedOptions={selectedEuiOptions}
       onChange={onComboBoxChange}

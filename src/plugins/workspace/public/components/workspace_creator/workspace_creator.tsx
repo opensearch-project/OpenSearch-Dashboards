@@ -7,9 +7,8 @@ import React, { useCallback } from 'react';
 import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-import { PublicAppInfo } from 'opensearch-dashboards/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { WorkspaceForm, WorkspaceFormSubmitData, WorkspaceOperationType } from '../workspace_form';
 import { WORKSPACE_DETAIL_APP_ID } from '../../../common/constants';
@@ -18,9 +17,10 @@ import { WorkspaceClient } from '../../workspace_client';
 import { convertPermissionSettingsToPermissions } from '../workspace_form';
 import { DataSource } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
+import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceCreatorProps {
-  workspaceConfigurableApps$?: BehaviorSubject<PublicAppInfo[]>;
+  registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
 export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
@@ -37,10 +37,8 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     workspaceClient: WorkspaceClient;
     dataSourceManagement?: DataSourceManagementPluginSetup;
   }>();
-  const workspaceConfigurableApps = useObservable(
-    props.workspaceConfigurableApps$ ?? of(undefined)
-  );
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
+  const availableUseCases = useObservable(props.registeredUseCases$, []);
 
   const handleWorkspaceFormSubmit = useCallback(
     async (data: WorkspaceFormSubmitData) => {
@@ -96,7 +94,6 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
         <EuiPageHeader pageTitle="Create a workspace" />
         <EuiPageContent
           verticalPosition="center"
-          horizontalPosition="center"
           paddingSize="none"
           color="subdued"
           hasShadow={false}
@@ -107,10 +104,9 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               savedObjects={savedObjects}
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Create}
-              workspaceConfigurableApps={workspaceConfigurableApps}
               permissionEnabled={isPermissionEnabled}
-              permissionLastAdminItemDeletable
               dataSourceManagement={dataSourceManagement}
+              availableUseCases={availableUseCases}
             />
           )}
         </EuiPageContent>

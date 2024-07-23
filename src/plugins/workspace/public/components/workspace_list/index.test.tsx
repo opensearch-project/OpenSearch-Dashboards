@@ -4,15 +4,14 @@
  */
 
 import React from 'react';
-import { WorkspaceList } from './index';
-import { coreMock } from '../../../../../core/public/mocks';
+import { BehaviorSubject, of } from 'rxjs';
 import { render, fireEvent, screen } from '@testing-library/react';
 import { I18nProvider } from '@osd/i18n/react';
+import { coreMock } from '../../../../../core/public/mocks';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
-
-import { of } from 'rxjs';
-
 import { OpenSearchDashboardsContextProvider } from '../../../../../plugins/opensearch_dashboards_react/public';
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
+import { WorkspaceList } from './index';
 
 jest.mock('../utils/workspace');
 
@@ -26,12 +25,19 @@ jest.mock('../delete_workspace_modal', () => ({
 
 function getWrapWorkspaceListInContext(
   workspaceList = [
-    { id: 'id1', name: 'name1', features: [] },
+    { id: 'id1', name: 'name1', features: ['use-case-all'] },
     { id: 'id2', name: 'name2' },
     { id: 'id3', name: 'name3', features: ['use-case-observability'] },
-  ]
+  ],
+  isDashboardAdmin = true
 ) {
   const coreStartMock = coreMock.createStart();
+  coreStartMock.application.capabilities = {
+    ...coreStartMock.application.capabilities,
+    dashboards: {
+      isDashboardAdmin,
+    },
+  };
 
   const services = {
     ...coreStartMock,
@@ -43,7 +49,9 @@ function getWrapWorkspaceListInContext(
   return (
     <I18nProvider>
       <OpenSearchDashboardsContextProvider services={services}>
-        <WorkspaceList />
+        <WorkspaceList
+          registeredUseCases$={new BehaviorSubject([WORKSPACE_USE_CASES.observability])}
+        />
       </OpenSearchDashboardsContextProvider>
     </I18nProvider>
   );
@@ -51,15 +59,25 @@ function getWrapWorkspaceListInContext(
 
 describe('WorkspaceList', () => {
   it('should render title and table normally', () => {
-    const { getByText, getByRole, container } = render(<WorkspaceList />);
+    const { getByText, getByRole, container } = render(
+      <WorkspaceList
+        registeredUseCases$={new BehaviorSubject([WORKSPACE_USE_CASES.observability])}
+      />
+    );
     expect(getByText('Workspaces')).toBeInTheDocument();
     expect(getByRole('table')).toBeInTheDocument();
     expect(container).toMatchSnapshot();
   });
   it('should render data in table based on workspace list data', async () => {
     const { getByText } = render(getWrapWorkspaceListInContext());
+
+    // should display workspace names
     expect(getByText('name1')).toBeInTheDocument();
     expect(getByText('name2')).toBeInTheDocument();
+
+    // should display use case
+    expect(getByText('All use case')).toBeInTheDocument();
+    expect(getByText('Observability')).toBeInTheDocument();
   });
   it('should be able to apply debounce search after input', async () => {
     const list = [
@@ -123,5 +141,17 @@ describe('WorkspaceList', () => {
     fireEvent.click(paginationButton);
     expect(queryByText('name1')).not.toBeInTheDocument();
     expect(getByText('name6')).toBeInTheDocument();
+  });
+
+  it('should display create workspace button for dashboard admin', async () => {
+    const { getByText } = render(getWrapWorkspaceListInContext([], true));
+
+    expect(getByText('Create workspace')).toBeInTheDocument();
+  });
+
+  it('should hide create workspace button for non dashboard admin', async () => {
+    const { queryByText } = render(getWrapWorkspaceListInContext([], false));
+
+    expect(queryByText('Create workspace')).toBeNull();
   });
 });

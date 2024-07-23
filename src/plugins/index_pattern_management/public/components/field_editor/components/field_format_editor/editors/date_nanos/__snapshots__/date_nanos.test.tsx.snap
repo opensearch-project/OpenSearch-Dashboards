@@ -2,9 +2,9 @@
 
 exports[`DateFormatEditor should render normally 1`] = `
 <Fragment>
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -42,14 +42,14 @@ exports[`DateFormatEditor should render normally 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       data-test-subj="dateEditorPattern"
       isInvalid={false}
       onChange={[Function]}
       placeholder="MMM D, YYYY @ HH:mm:ss.SSSSSSSSS"
       value=""
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <FormatEditorSamples
     sampleType="text"
     samples={

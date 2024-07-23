@@ -51,6 +51,7 @@ export interface ManagementAppDependencies {
   sections: SectionsServiceStart;
   opensearchDashboardsVersion: string;
   setBreadcrumbs: (newBreadcrumbs: ChromeBreadcrumb[]) => void;
+  hideInAppNavigation?: boolean;
 }
 
 export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => {
@@ -89,7 +90,9 @@ export const ManagementApp = ({ dependencies, history }: ManagementAppProps) => 
   return (
     <I18nProvider>
       <EuiPage>
-        <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
+        {dependencies.hideInAppNavigation ? null : (
+          <ManagementSidebarNav selectedId={selectedId} sections={sections} history={history} />
+        )}
         <ManagementRouter
           history={history}
           setBreadcrumbs={setBreadcrumbsScoped}

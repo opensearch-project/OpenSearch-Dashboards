@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
+import { WORKSPACE_USE_CASES } from '../../../common/constants';
 import { WorkspaceUseCase, WorkspaceUseCaseProps } from './workspace_use_case';
 import { WorkspaceFormErrors } from './types';
 
@@ -13,12 +14,19 @@ const setup = (options?: Partial<WorkspaceUseCaseProps>) => {
   const formErrors: WorkspaceFormErrors = {};
   const renderResult = render(
     <WorkspaceUseCase
-      configurableApps={[
+      availableUseCases={[
+        WORKSPACE_USE_CASES.observability,
+        WORKSPACE_USE_CASES['security-analytics'],
+        WORKSPACE_USE_CASES.analytics,
+        WORKSPACE_USE_CASES.search,
         {
-          id: 'discover',
+          id: 'system-use-case',
+          title: 'System use case',
+          description: 'System use case description',
+          systematic: true,
         },
       ]}
-      value={[]}
+      value=""
       onChange={onChangeMock}
       formErrors={formErrors}
       {...options}
@@ -40,19 +48,19 @@ describe('WorkspaceUseCase', () => {
     expect(renderResult.getByText('Search')).toBeInTheDocument();
   });
 
-  it('should call onChange with new added use case', () => {
+  it('should call onChange with new checked use case', () => {
     const { renderResult, onChangeMock } = setup();
 
     expect(onChangeMock).not.toHaveBeenCalled();
     fireEvent.click(renderResult.getByText('Observability'));
-    expect(onChangeMock).toHaveBeenLastCalledWith(['observability']);
+    expect(onChangeMock).toHaveBeenLastCalledWith('observability');
   });
 
-  it('should call onChange without removed use case', () => {
-    const { renderResult, onChangeMock } = setup({ value: ['observability'] });
+  it('should not call onChange after checked use case clicked', () => {
+    const { renderResult, onChangeMock } = setup({ value: 'observability' });
 
     expect(onChangeMock).not.toHaveBeenCalled();
     fireEvent.click(renderResult.getByText('Observability'));
-    expect(onChangeMock).toHaveBeenLastCalledWith([]);
+    expect(onChangeMock).not.toHaveBeenCalled();
   });
 });

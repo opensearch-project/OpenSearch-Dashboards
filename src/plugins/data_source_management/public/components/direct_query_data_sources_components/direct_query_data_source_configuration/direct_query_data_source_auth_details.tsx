@@ -3,7 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiFormRow, EuiFieldText, EuiFieldPassword } from '@elastic/eui';
+import {
+  EuiCompressedFormRow,
+  EuiCompressedFieldText,
+  EuiCompressedFieldPassword,
+} from '@elastic/eui';
 import { useState } from 'react';
 import React from 'react';
 import { AuthMethod } from '../../constants';
@@ -45,29 +49,29 @@ export const AuthDetails = (props: AuthDetailProps) => {
     case 'basicauth':
       return (
         <>
-          <EuiFormRow label="Username">
-            <EuiFieldText
+          <EuiCompressedFormRow label="Username">
+            <EuiCompressedFieldText
               placeholder={'Username'}
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               onBlur={(e) => setUsernameForRequest(e.target.value)}
             />
-          </EuiFormRow>
-          <EuiFormRow label="Password">
-            <EuiFieldPassword
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow label="Password">
+            <EuiCompressedFieldPassword
               type={'dual'}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               onBlur={(e) => setPasswordForRequest(e.target.value)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </>
       );
     case 'awssigv4':
       return (
         <>
-          <EuiFormRow label="Auth Region">
-            <EuiFieldText
+          <EuiCompressedFormRow label="Auth Region">
+            <EuiCompressedFieldText
               placeholder="us-west-2"
               value={region}
               onBlur={(e) => {
@@ -77,23 +81,23 @@ export const AuthDetails = (props: AuthDetailProps) => {
                 setRegion(e.target.value);
               }}
             />
-          </EuiFormRow>
-          <EuiFormRow label="Access Key">
-            <EuiFieldText
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow label="Access Key">
+            <EuiCompressedFieldText
               placeholder={'Access key placeholder'}
               value={accessKey}
               onChange={(e) => setAccessKey(e.target.value)}
               onBlur={(e) => setAccessKeyForRequest(e.target.value)}
             />
-          </EuiFormRow>
-          <EuiFormRow label="Secret Key">
-            <EuiFieldPassword
+          </EuiCompressedFormRow>
+          <EuiCompressedFormRow label="Secret Key">
+            <EuiCompressedFieldPassword
               type={'dual'}
               value={secretKey}
               onChange={(e) => setSecretKey(e.target.value)}
               onBlur={(e) => setSecretKeyForRequest(e.target.value)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         </>
       );
     default:

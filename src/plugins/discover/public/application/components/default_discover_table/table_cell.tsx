@@ -12,7 +12,7 @@
 import './_table_cell.scss';
 
 import React from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiSmallButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 
@@ -42,7 +42,7 @@ const TableCellUI = ({
             defaultMessage: 'Filter for value',
           })}
         >
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             onClick={() => onFilter?.(columnId, fieldMapping, '+')}
             iconType="plusInCircle"
             aria-label={i18n.translate('discover.filterForValueLabel', {
@@ -57,7 +57,7 @@ const TableCellUI = ({
             defaultMessage: 'Filter out value',
           })}
         >
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             onClick={() => onFilter?.(columnId, fieldMapping, '-')}
             iconType="minusInCircle"
             aria-label={i18n.translate('discover.filterOutValueLabel', {

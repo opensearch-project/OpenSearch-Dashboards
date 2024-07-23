@@ -1,5 +1,34 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`<CollapsibleNavGroupEnabled /> should hide left navigation when in home page when workspace is enabled 1`] = `
+<div>
+  <div
+    data-eui="EuiFlyout"
+    data-test-subj="collapsibleNav"
+    role="dialog"
+  >
+    <div
+      class="eui-fullHeight left-navigation-wrapper"
+    >
+      <div
+        class="eui-yScroll scrollable-container"
+      >
+        <div
+          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
+          style="min-height: 100%;"
+        />
+      </div>
+      <hr
+        class="euiHorizontalRule euiHorizontalRule--full"
+      />
+      <div
+        class="bottom-container bottom-container-collapsed"
+      />
+    </div>
+  </div>
+</div>
+`;
+
 exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
 <div>
   <div
@@ -237,7 +266,6 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
       />
       <div
         class="bottom-container"
-        style="flex-direction: row;"
       />
     </div>
   </div>
@@ -266,8 +294,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 2`] = `
         class="euiHorizontalRule euiHorizontalRule--full"
       />
       <div
-        class="bottom-container"
-        style="flex-direction: column;"
+        class="bottom-container bottom-container-collapsed"
       />
     </div>
   </div>
@@ -341,7 +368,6 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
       />
       <div
         class="bottom-container"
-        style="flex-direction: row;"
       />
     </div>
   </div>

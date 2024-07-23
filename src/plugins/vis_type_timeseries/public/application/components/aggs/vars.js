@@ -36,7 +36,7 @@ import _ from 'lodash';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { collectionActions } from '../lib/collection_actions';
 import { MetricSelect } from './metric_select';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiCompressedFieldText } from '@elastic/eui';
 
 export const newVariable = (opts) => ({ id: uuid.v1(), name: '', field: '', ...opts });
 
@@ -63,7 +63,7 @@ export class CalculationVars extends Component {
       <EuiFlexItem key={row.id} data-test-subj="varRow">
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
-            <EuiFieldText
+            <EuiCompressedFieldText
               className="tvbAggs__varName"
               aria-label={i18n.translate('visTypeTimeseries.vars.variableNameAriaLabel', {
                 defaultMessage: 'Variable name',

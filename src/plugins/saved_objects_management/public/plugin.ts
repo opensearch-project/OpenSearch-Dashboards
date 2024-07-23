@@ -28,10 +28,12 @@
  * under the License.
  */
 
+import React from 'react';
 import { i18n } from '@osd/i18n';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'src/core/public';
 
 import { DataSourcePluginSetup } from 'src/plugins/data_source/public';
+import { ContentManagementPluginStart } from 'src/plugins/content_management/public';
 import { DataSourceManagementPluginSetup } from 'src/plugins/data_source_management/public';
 import { VisBuilderStart } from '../../vis_builder/public';
 import { ManagementSetup } from '../../management/public';
@@ -62,6 +64,8 @@ import {
 import { registerServices } from './register_services';
 import { bootstrap } from './ui_actions_bootstrap';
 import { DEFAULT_NAV_GROUPS, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { RecentWork } from './management_section/recent_work';
+import { HOME_CONTENT_AREAS } from '../../../plugins/home/public';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -93,6 +97,7 @@ export interface StartDependencies {
   discover?: DiscoverStart;
   visBuilder?: VisBuilderStart;
   uiActions: UiActionsStart;
+  contentManagement?: ContentManagementPluginStart;
 }
 
 export class SavedObjectsManagementPlugin
@@ -217,6 +222,14 @@ export class SavedObjectsManagementPlugin
       },
     ]);
 
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: 'objects',
+        category: DEFAULT_APP_CATEGORIES.manage,
+        order: 300,
+      },
+    ]);
+
     // sets up the context mappings and registers any triggers/actions for the plugin
     bootstrap(uiActions);
 
@@ -231,10 +244,28 @@ export class SavedObjectsManagementPlugin
     };
   }
 
-  public start(core: CoreStart, { data, uiActions }: StartDependencies) {
+  public start(core: CoreStart, { data, uiActions, contentManagement }: StartDependencies) {
     const actionStart = this.actionService.start();
     const columnStart = this.columnService.start();
     const namespaceStart = this.namespaceService.start();
+    const workspaceEnabled = core.application.capabilities.workspaces.enabled;
+
+    contentManagement?.registerContentProvider({
+      id: 'recent',
+      getContent: () => {
+        return {
+          order: 1,
+          id: 'recent',
+          kind: 'custom',
+          render: () =>
+            React.createElement(RecentWork, {
+              core,
+              workspaceEnabled,
+            }),
+        };
+      },
+      getTargetArea: () => HOME_CONTENT_AREAS.RECENTLY_VIEWED,
+    });
 
     return {
       actions: actionStart,

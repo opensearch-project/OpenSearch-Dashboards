@@ -82,6 +82,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     core,
     toastNotifications,
     osdUrlStateStorage,
+    chrome,
   } = services;
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
@@ -308,7 +309,10 @@ export const useSearch = (services: DiscoverViewServices) => {
         chrome.recentlyAccessed.add(
           savedSearchInstance.getFullPath(),
           savedSearchInstance.title,
-          savedSearchInstance.id
+          savedSearchInstance.id,
+          {
+            type: savedSearchInstance.getOpenSearchType(),
+          }
         );
       }
     })();

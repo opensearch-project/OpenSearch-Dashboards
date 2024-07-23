@@ -177,3 +177,15 @@ export interface PermissionsConfigurationProps {
   layout: 'horizontal' | 'vertical';
   hasSecurityAccess: boolean;
 }
+
+export interface DirectQueryDatasourceDetails {
+  allowedRoles: string[];
+  name: string;
+  connector: DirectQueryDatasourceType;
+  description: string;
+  properties: S3GlueProperties | PrometheusProperties;
+  status: DirectQueryDatasourceStatus;
+}
+export interface PrometheusProperties {
+  'prometheus.uri': string;
+}

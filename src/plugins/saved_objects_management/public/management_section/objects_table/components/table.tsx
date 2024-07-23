@@ -34,15 +34,15 @@ import moment from 'moment';
 import {
   EuiSearchBar,
   EuiBasicTable,
-  EuiButton,
+  EuiSmallButton,
   EuiIcon,
   EuiLink,
   EuiSpacer,
   EuiToolTip,
   EuiFormErrorText,
   EuiPopover,
-  EuiSwitch,
-  EuiFormRow,
+  EuiCompressedSwitch,
+  EuiCompressedFormRow,
   EuiText,
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
@@ -379,7 +379,7 @@ export class Table extends PureComponent<TableProps, TableState> {
     }
 
     const button = (
-      <EuiButton
+      <EuiSmallButton
         iconType="arrowDown"
         iconSide="right"
         onClick={this.toggleExportPopoverVisibility}
@@ -389,13 +389,13 @@ export class Table extends PureComponent<TableProps, TableState> {
           id="savedObjectsManagement.objectsTable.table.exportPopoverButtonLabel"
           defaultMessage="Export"
         />
-      </EuiButton>
+      </EuiSmallButton>
     );
 
     const activeActionContents = this.state.activeAction?.render() ?? null;
 
     const duplicateButton = (
-      <EuiButton
+      <EuiSmallButton
         key="duplicateSO"
         iconType="copy"
         onClick={onDuplicate}
@@ -406,7 +406,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           id="savedObjectsManagement.objectsTable.table.duplicateSOButtonLabel"
           defaultMessage="Copy to..."
         />
-      </EuiButton>
+      </EuiSmallButton>
     );
 
     return (
@@ -418,7 +418,7 @@ export class Table extends PureComponent<TableProps, TableState> {
           onChange={this.onChange}
           toolsRight={[
             <>{showDuplicate && duplicateButton}</>,
-            <EuiButton
+            <EuiSmallButton
               key="deleteSO"
               iconType="trash"
               color="danger"
@@ -437,14 +437,14 @@ export class Table extends PureComponent<TableProps, TableState> {
                 id="savedObjectsManagement.objectsTable.table.deleteButtonLabel"
                 defaultMessage="Delete"
               />
-            </EuiButton>,
+            </EuiSmallButton>,
             <EuiPopover
               key="exportSOOptions"
               button={button}
               isOpen={this.state.isExportPopoverOpen}
               closePopover={this.closeExportPopover}
             >
-              <EuiFormRow
+              <EuiCompressedFormRow
                 label={
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.exportObjectsConfirmModal.exportOptionsLabel"
@@ -452,7 +452,7 @@ export class Table extends PureComponent<TableProps, TableState> {
                   />
                 }
               >
-                <EuiSwitch
+                <EuiCompressedSwitch
                   name="includeReferencesDeep"
                   label={
                     <FormattedMessage
@@ -463,15 +463,20 @@ export class Table extends PureComponent<TableProps, TableState> {
                   checked={this.state.isIncludeReferencesDeepChecked}
                   onChange={this.toggleIsIncludeReferencesDeepChecked}
                 />
-              </EuiFormRow>
-              <EuiFormRow>
-                <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
+              </EuiCompressedFormRow>
+              <EuiCompressedFormRow>
+                <EuiSmallButton
+                  key="exportSO"
+                  iconType="exportAction"
+                  onClick={this.onExportClick}
+                  fill
+                >
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                     defaultMessage="Export"
                   />
-                </EuiButton>
-              </EuiFormRow>
+                </EuiSmallButton>
+              </EuiCompressedFormRow>
             </EuiPopover>,
           ]}
         />

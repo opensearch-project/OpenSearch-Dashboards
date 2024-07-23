@@ -390,8 +390,8 @@ export const buildVislibDimensions = async (
 
 export const buildPipeline = async (vis: Vis, params: BuildPipelineParams) => {
   const { indexPattern, searchSource } = vis.data;
-  const query = searchSource!.getField('query');
-  const filters = searchSource!.getField('filter');
+  const query = searchSource?.getField('query');
+  const filters = searchSource?.getField('filter');
   const { uiState, title } = vis;
 
   // context

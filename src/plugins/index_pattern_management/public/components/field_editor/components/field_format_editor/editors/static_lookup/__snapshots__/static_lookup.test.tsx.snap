@@ -80,9 +80,9 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
   <EuiSpacer
     size="l"
   />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -95,12 +95,12 @@ exports[`StaticLookupFormatEditor should render multiple lookup entries and unkn
     }
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       onChange={[Function]}
       placeholder="Leave blank to keep value as-is"
       value="test value"
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <EuiSpacer
     size="m"
   />
@@ -181,9 +181,9 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
   <EuiSpacer
     size="l"
   />
-  <EuiFormRow
+  <EuiCompressedFormRow
     describedByIds={Array []}
-    display="row"
+    display="rowCompressed"
     fullWidth={false}
     hasChildLabel={true}
     hasEmptyLabelSpace={false}
@@ -196,12 +196,12 @@ exports[`StaticLookupFormatEditor should render normally 1`] = `
     }
     labelType="label"
   >
-    <EuiFieldText
+    <EuiCompressedFieldText
       onChange={[Function]}
       placeholder="Leave blank to keep value as-is"
       value=""
     />
-  </EuiFormRow>
+  </EuiCompressedFormRow>
   <EuiSpacer
     size="m"
   />

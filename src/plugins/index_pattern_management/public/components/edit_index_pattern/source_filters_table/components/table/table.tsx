@@ -34,7 +34,7 @@ import {
   keys,
   EuiBasicTableColumn,
   EuiInMemoryTable,
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiButtonIcon,
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
@@ -148,7 +148,7 @@ export class Table extends Component<TableProps, TableState> {
         render: (value, filter) => {
           if (this.state.editingFilterId && this.state.editingFilterId === filter.clientId) {
             return (
-              <EuiFieldText
+              <EuiCompressedFieldText
                 autoFocus
                 value={this.state.editingFilterValue}
                 onChange={this.onEditingFilterChange}
