@@ -1,13 +1,18 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
+import { CodeCompletionCore } from 'antlr4-c3';
+import { monaco } from '@osd/monaco';
 import { DQLLexer } from './.generated/DQLLexer';
 import { DQLParser, KeyValueExpressionContext } from './.generated/DQLParser';
-import { CodeCompletionCore } from 'antlr4-c3';
 import { getTokenPosition } from '../shared/cursor';
 import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { getHttp } from '../../services';
 import { QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
-import { monaco } from 'packages/osd-monaco/target';
 
 const findCursorIndex = (
   tokenStream: TokenStream,
@@ -42,9 +47,11 @@ const findFieldSuggestions = (indexPattern: IndexPattern) => {
       return idxField.displayName;
     });
 
-  const fieldSuggestions: { text: string; type: string }[] = fieldNames.map((field: string) => {
-    return { text: field, type: 'field' };
-  });
+  const fieldSuggestions: Array<{ text: string; type: string }> = fieldNames.map(
+    (field: string) => {
+      return { text: field, type: 'field' };
+    }
+  );
 
   return fieldSuggestions;
 };
@@ -144,7 +151,7 @@ export const getSuggestions = async ({
   // gets candidates at specified token index
   const candidates = core.collectCandidates(cursorIndex);
 
-  let completions = [];
+  const completions = [];
 
   // check to see if field rule is a candidate. if so, suggest field names
   if (candidates.rules.has(DQLParser.RULE_field)) {
