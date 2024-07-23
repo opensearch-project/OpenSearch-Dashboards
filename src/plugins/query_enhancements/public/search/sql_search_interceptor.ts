@@ -163,10 +163,9 @@ export class SQLSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    return this.runSearch(
-      request,
-      options.abortSignal,
-      !!options.isAsync ? SEARCH_STRATEGY.SQL_ASYNC : SEARCH_STRATEGY.SQL
-    );
+    if (options.isAsync) {
+      return this.runSearchAsync(request, options.abortSignal, SEARCH_STRATEGY.SQL_ASYNC);
+    }
+    return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.SQL);
   }
 }
