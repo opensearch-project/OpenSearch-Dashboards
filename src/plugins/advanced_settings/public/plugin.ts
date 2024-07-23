@@ -33,7 +33,7 @@ import { AppMountParameters, CoreSetup, Plugin } from 'opensearch-dashboards/pub
 import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
-import { DEFAULT_NAV_GROUPS, AppNavLinkStatus } from '../../../core/public';
+import { DEFAULT_NAV_GROUPS, AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
 
 const component = new ComponentRegistry();
 
@@ -68,6 +68,7 @@ export class AdvancedSettingsPlugin
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
       mount: async (params: AppMountParameters) => {
         const { mountManagementSection } = await import(
           './management_app/mount_management_section'
