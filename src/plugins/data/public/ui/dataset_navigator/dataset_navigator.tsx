@@ -32,7 +32,7 @@ import {
   useLoadTablesToCache,
 } from './lib/catalog_cache/cache_loader';
 import { CatalogCacheManager } from './lib/catalog_cache/cache_manager';
-import { CachedDataSourceStatus, DirectQueryLoadingStatus, ExternalDataSource } from './lib/types';
+import { CachedDataSourceStatus, DirectQueryLoadingStatus } from './lib/types';
 import {
   getIndexPatterns,
   getNotifications,
@@ -315,6 +315,7 @@ export const DataSetNavigator = ({
             id: dataSet.id,
             title: dataSet.title,
             fields: fieldsMap,
+            type: dataSet.type,
             dataSourceRef: {
               id: dataSet.dataSourceRef?.id!,
               name: dataSet.dataSourceRef?.name!,
@@ -345,7 +346,10 @@ export const DataSetNavigator = ({
       };
 
       const onDataSetSelected = async (dataSet: SimpleDataSet) => {
-        if (dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY) {
+        if (
+          dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY ||
+          dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC
+        ) {
           await createTemporaryIndexPattern(dataSet);
         }
 
@@ -555,6 +559,18 @@ export const DataSetNavigator = ({
             items: [
               ...cachedTables.map((table) => ({
                 name: table.name,
+                onClick: async () => {
+                  await handleSelectedDataSet({
+                    id: table.name,
+                    title: `${selectedExternalDataSource!.name}.${selectedDatabase}.${table.name}`,
+                    dataSourceRef: {
+                      id: selectedExternalDataSource!.id,
+                      name: selectedExternalDataSource!.name,
+                      type: selectedExternalDataSource!.type,
+                    },
+                    type: SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC,
+                  });
+                },
               })),
             ],
             content: <div>{isCatalogCacheFetching(tablesLoadStatus) && LoadingSpinner}</div>,
