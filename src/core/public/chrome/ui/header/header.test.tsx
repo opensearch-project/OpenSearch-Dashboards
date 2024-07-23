@@ -82,6 +82,7 @@ function mockProps() {
     navGroupsMap$: new BehaviorSubject({}),
     navControlsLeftBottom$: new BehaviorSubject([]),
     setCurrentNavGroup: jest.fn(() => {}),
+    workspaceList$: new BehaviorSubject([]),
   };
 }
 
