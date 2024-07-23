@@ -13,7 +13,7 @@ import {
 } from '../../../../data/public';
 import { API } from '../../../common';
 import { ConfigSchema } from '../../../common/config';
-import { ConnectionsService } from '../../data_source_connection';
+import { ConnectionsService } from '../../services';
 import { QueryAssistBar, QueryAssistBanner } from '../components';
 
 /**
@@ -28,7 +28,7 @@ const getAvailableLanguages$ = (
   connectionsService.getSelectedConnection$().pipe(
     distinctUntilChanged(),
     switchMap(async (connection) => {
-      const dataSourceId = connection?.id;
+      const dataSourceId = connection?.dataSource.id;
       const cached = availableLanguagesByDataSource.get(dataSourceId);
       if (cached !== undefined) return cached;
       const languages = await http

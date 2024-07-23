@@ -43,16 +43,13 @@ export class QueryEnhancementsPlugin
       http: core.http,
     });
 
-    const pplSearchInterceptor = new PPLSearchInterceptor(
-      {
-        toasts: core.notifications.toasts,
-        http: core.http,
-        uiSettings: core.uiSettings,
-        startServices: core.getStartServices(),
-        usageCollector: data.search.usageCollector,
-      },
-      this.connectionsService
-    );
+    const pplSearchInterceptor = new PPLSearchInterceptor({
+      toasts: core.notifications.toasts,
+      http: core.http,
+      uiSettings: core.uiSettings,
+      startServices: core.getStartServices(),
+      usageCollector: data.search.usageCollector,
+    });
 
     const sqlSearchInterceptor = new SQLSearchInterceptor({
       toasts: core.notifications.toasts,

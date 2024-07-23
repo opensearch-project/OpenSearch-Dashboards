@@ -5,7 +5,6 @@
 
 import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
-import { i18n } from '@osd/i18n';
 import { concatMap } from 'rxjs/operators';
 import {
   DataFrameAggConfig,
@@ -34,16 +33,12 @@ import {
   fetchDataFrame,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
-import { ConnectionsService } from '../services';
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
 
-  constructor(
-    deps: SearchInterceptorDeps,
-    private readonly connectionsService: ConnectionsService
-  ) {
+  constructor(deps: SearchInterceptorDeps) {
     super(deps);
 
     deps.startServices.then(([coreStart, depsStart]) => {

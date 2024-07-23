@@ -158,29 +158,6 @@ export const DataSetNavigator = ({
     }
   }, [dataSourcesLoadStatus]);
 
-  // Start loading databases for datasource
-  useEffect(() => {
-    if (selectedExternalDataSource) {
-      const dataSourceCache = CatalogCacheManager.getOrCreateDataSource(
-        selectedExternalDataSource.name,
-        selectedExternalDataSource.id
-      );
-      if (
-        (dataSourceCache.status === CachedDataSourceStatus.Empty ||
-          dataSourceCache.status === CachedDataSourceStatus.Failed) &&
-        !isCatalogCacheFetching(databasesLoadStatus)
-      ) {
-        startLoadingDatabases({
-          dataSourceName: selectedExternalDataSource.name,
-          dataSourceMDSId: selectedExternalDataSource.id,
-        });
-      } else if (dataSourceCache.status === CachedDataSourceStatus.Updated) {
-        setCachedDatabases(dataSourceCache.databases);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedExternalDataSource]);
-
   // Retrieve databases from cache upon success
   useEffect(() => {
     const status = databasesLoadStatus.toLowerCase();
@@ -200,35 +177,65 @@ export const DataSetNavigator = ({
     }
   }, [selectedExternalDataSource, databasesLoadStatus]);
 
-  // Start loading tables for selected database
-  useEffect(() => {
-    if (selectedExternalDataSource && selectedDatabase) {
-      let databaseCache;
-      try {
-        databaseCache = CatalogCacheManager.getDatabase(
+  // Start loading databases for datasource
+  const handleSelectExternalDataSource = useCallback(
+    async (externalDataSource) => {
+      if (selectedExternalDataSource) {
+        const dataSourceCache = CatalogCacheManager.getOrCreateDataSource(
           selectedExternalDataSource.name,
-          selectedDatabase,
           selectedExternalDataSource.id
         );
-      } catch (error) {
-        return;
+        if (
+          (dataSourceCache.status === CachedDataSourceStatus.Empty ||
+            dataSourceCache.status === CachedDataSourceStatus.Failed) &&
+          !isCatalogCacheFetching(databasesLoadStatus)
+        ) {
+          startLoadingDatabases({
+            dataSourceName: selectedExternalDataSource.name,
+            dataSourceMDSId: selectedExternalDataSource.id,
+          });
+        } else if (dataSourceCache.status === CachedDataSourceStatus.Updated) {
+          setCachedDatabases(dataSourceCache.databases);
+        }
       }
-      if (
-        databaseCache.status === CachedDataSourceStatus.Empty ||
-        (databaseCache.status === CachedDataSourceStatus.Failed &&
-          !isCatalogCacheFetching(tablesLoadStatus))
-      ) {
-        startLoadingTables({
-          dataSourceName: selectedExternalDataSource.name,
-          databaseName: selectedDatabase,
-          dataSourceMDSId: selectedExternalDataSource.id,
-        });
-      } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
-        setCachedTables(databaseCache.tables);
-      }
-    }
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedExternalDataSource, selectedDatabase]);
+    [selectedExternalDataSource]
+  );
+
+  // Start loading tables for selected database
+  const handleSelectExternalDatabase = useCallback(
+    async (externalDatabase) => {
+      if (selectedExternalDataSource && externalDatabase) {
+        let databaseCache;
+        try {
+          databaseCache = CatalogCacheManager.getDatabase(
+            selectedExternalDataSource.name,
+            selectedDatabase,
+            selectedExternalDataSource.id
+          );
+        } catch (error) {
+          return;
+        }
+        if (
+          databaseCache.status === CachedDataSourceStatus.Empty ||
+          (databaseCache.status === CachedDataSourceStatus.Failed &&
+            !isCatalogCacheFetching(tablesLoadStatus))
+        ) {
+          await startLoadingTables({
+            dataSourceName: selectedExternalDataSource.name,
+            databaseName: externalDatabase,
+            dataSourceMDSId: selectedExternalDataSource.id,
+          });
+          setSelectedDatabase(externalDatabase);
+        } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
+          setCachedTables(databaseCache.tables);
+        }
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [selectedExternalDataSource, selectedDatabase]
+  );
 
   // Retrieve tables from cache upon success
   useEffect(() => {
@@ -547,7 +554,9 @@ export const DataSetNavigator = ({
             items: [
               ...cachedDatabases.map((db) => ({
                 name: db.name,
-                onClick: () => setSelectedDatabase(db.name),
+                onClick: async () => {
+                  await handleSelectExternalDatabase(db.name);
+                },
                 panel: 6,
               })),
             ],

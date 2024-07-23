@@ -318,7 +318,7 @@ export const useLoadToCache = (
     );
   };
 
-  const startLoading = ({
+  const startLoading = async ({
     dataSourceName,
     dataSourceMDSId,
     databaseName,
@@ -340,7 +340,7 @@ export const useLoadToCache = (
     if (sessionId) {
       requestPayload = { ...requestPayload, sessionId };
     }
-    sqlService
+    await sqlService
       .fetch(requestPayload, dataSourceMDSId)
       .then((result) => {
         setAsyncSessionId(dataSourceName, getObjValue(result, 'sessionId', null));
