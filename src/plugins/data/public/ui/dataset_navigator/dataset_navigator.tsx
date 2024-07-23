@@ -75,11 +75,9 @@ export const DataSetNavigator = ({
   const [selectedObject, setSelectedObject] = useState<SimpleDataSet | undefined>();
   const [selectedDataSource, setSelectedDataSource] = useState<SimpleDataSource | undefined>();
   const [selectedDataSourceObjects, setSelectedDataSourceObjects] = useState<SimpleObject[]>([]);
-  const [selectedExternalDataSource, setSelectedExternalDataSource] = useState<
-    ExternalDataSource
-  >();
+  const [selectedExternalDataSource, setSelectedExternalDataSource] = useState<SimpleDataSource>();
   const [dataSources, setDataSources] = useState<SimpleDataSource[]>([]);
-  const [externalDataSources, setExternalDataSources] = useState<ExternalDataSource[]>([]);
+  const [externalDataSources, setExternalDataSources] = useState<SimpleDataSource[]>([]);
   // TODO iindexpattern
   const [indexPatterns, setIndexPatterns] = useState<any[]>([]);
 
@@ -145,7 +143,13 @@ export const DataSetNavigator = ({
     const status = dataSourcesLoadStatus.toLowerCase();
     const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
     if (status === DirectQueryLoadingStatus.SUCCESS) {
-      setExternalDataSources(externalDataSourcesCache.externalDataSources);
+      setExternalDataSources(
+        externalDataSourcesCache.externalDataSources.map((ds) => ({
+          id: ds.dataSourceRef,
+          name: ds.name,
+          type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
+        }))
+      );
     } else if (
       status === DirectQueryLoadingStatus.CANCELED ||
       status === DirectQueryLoadingStatus.FAILED
@@ -159,7 +163,7 @@ export const DataSetNavigator = ({
     if (selectedExternalDataSource) {
       const dataSourceCache = CatalogCacheManager.getOrCreateDataSource(
         selectedExternalDataSource.name,
-        selectedExternalDataSource.dataSourceRef
+        selectedExternalDataSource.id
       );
       if (
         (dataSourceCache.status === CachedDataSourceStatus.Empty ||
@@ -168,7 +172,7 @@ export const DataSetNavigator = ({
       ) {
         startLoadingDatabases({
           dataSourceName: selectedExternalDataSource.name,
-          dataSourceMDSId: selectedExternalDataSource.dataSourceRef,
+          dataSourceMDSId: selectedExternalDataSource.id,
         });
       } else if (dataSourceCache.status === CachedDataSourceStatus.Updated) {
         setCachedDatabases(dataSourceCache.databases);
@@ -183,7 +187,7 @@ export const DataSetNavigator = ({
     if (selectedExternalDataSource) {
       const dataSourceCache = CatalogCacheManager.getOrCreateDataSource(
         selectedExternalDataSource?.name,
-        selectedExternalDataSource?.dataSourceRef
+        selectedExternalDataSource?.id
       );
       if (status === DirectQueryLoadingStatus.SUCCESS) {
         setCachedDatabases(dataSourceCache.databases);
@@ -204,7 +208,7 @@ export const DataSetNavigator = ({
         databaseCache = CatalogCacheManager.getDatabase(
           selectedExternalDataSource.name,
           selectedDatabase,
-          selectedExternalDataSource.dataSourceRef
+          selectedExternalDataSource.id
         );
       } catch (error) {
         return;
@@ -217,7 +221,7 @@ export const DataSetNavigator = ({
         startLoadingTables({
           dataSourceName: selectedExternalDataSource.name,
           databaseName: selectedDatabase,
-          dataSourceMDSId: selectedExternalDataSource.dataSourceRef,
+          dataSourceMDSId: selectedExternalDataSource.id,
         });
       } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
         setCachedTables(databaseCache.tables);
@@ -235,7 +239,7 @@ export const DataSetNavigator = ({
         databaseCache = CatalogCacheManager.getDatabase(
           selectedExternalDataSource.name,
           selectedDatabase,
-          selectedExternalDataSource.dataSourceRef
+          selectedExternalDataSource.id
         );
       } catch (error) {
         return;
@@ -390,6 +394,9 @@ export const DataSetNavigator = ({
   const indicesLabel = i18n.translate('data.query.dataSetNavigator.indicesName', {
     defaultMessage: 'Indexes',
   });
+  const S3DataSourcesLabel = i18n.translate('data.query.dataSetNavigator.S3DataSourcesLabel', {
+    defaultMessage: 'S3',
+  });
 
   return (
     <EuiPopover
@@ -441,7 +448,7 @@ export const DataSetNavigator = ({
               ...(isExternalDataSourcesEnabled
                 ? [
                     {
-                      name: 'Connected data sources',
+                      name: S3DataSourcesLabel,
                       panel: 4,
                       onClick: () => {
                         const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
@@ -455,7 +462,13 @@ export const DataSetNavigator = ({
                         } else if (
                           externalDataSourcesCache.status === CachedDataSourceStatus.Updated
                         ) {
-                          setExternalDataSources(externalDataSourcesCache.externalDataSources);
+                          setExternalDataSources(
+                            externalDataSourcesCache.externalDataSources.map((ds) => ({
+                              id: ds.dataSourceRef,
+                              name: ds.name,
+                              type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
+                            }))
+                          );
                         }
                       },
                     },
@@ -510,7 +523,7 @@ export const DataSetNavigator = ({
             id: 4,
             title: (
               <div>
-                S3
+                {S3DataSourcesLabel}
                 {CatalogCacheManager.getExternalDataSourcesCache().status ===
                   CachedDataSourceStatus.Updated && RefreshButton}
               </div>
