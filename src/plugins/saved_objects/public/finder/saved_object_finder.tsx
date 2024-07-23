@@ -36,8 +36,8 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiEmptyPrompt,
-  EuiFieldSearch,
-  EuiFilterButton,
+  EuiCompressedFieldSearch,
+  EuiSmallFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
@@ -376,7 +376,7 @@ class SavedObjectFinderUi extends React.Component<
     return (
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem grow={true}>
-          <EuiFieldSearch
+          <EuiCompressedFieldSearch
             placeholder={i18n.translate('savedObjects.finder.searchPlaceholder', {
               defaultMessage: 'Search…',
             })}
@@ -406,7 +406,7 @@ class SavedObjectFinderUi extends React.Component<
               isOpen={this.state.sortOpen}
               closePopover={() => this.setState({ sortOpen: false })}
               button={
-                <EuiFilterButton
+                <EuiSmallFilterButton
                   onClick={() =>
                     this.setState(({ sortOpen }) => ({
                       sortOpen: !sortOpen,
@@ -419,7 +419,7 @@ class SavedObjectFinderUi extends React.Component<
                   {i18n.translate('savedObjects.finder.sortButtonLabel', {
                     defaultMessage: 'Sort',
                   })}
-                </EuiFilterButton>
+                </EuiSmallFilterButton>
               }
             >
               <EuiContextMenuPanel
@@ -436,7 +436,7 @@ class SavedObjectFinderUi extends React.Component<
                 isOpen={this.state.filterOpen}
                 closePopover={() => this.setState({ filterOpen: false })}
                 button={
-                  <EuiFilterButton
+                  <EuiSmallFilterButton
                     onClick={() =>
                       this.setState(({ filterOpen }) => ({
                         filterOpen: !filterOpen,
@@ -452,7 +452,7 @@ class SavedObjectFinderUi extends React.Component<
                     {i18n.translate('savedObjects.finder.filterButtonLabel', {
                       defaultMessage: 'Types',
                     })}
-                  </EuiFilterButton>
+                  </EuiSmallFilterButton>
                 }
               >
                 <EuiContextMenuPanel

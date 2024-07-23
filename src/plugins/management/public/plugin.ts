@@ -45,6 +45,7 @@ import {
   AppStatus,
   AppNavLinkStatus,
   DEFAULT_NAV_GROUPS,
+  WorkspaceAvailability,
 } from '../../../core/public';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -91,11 +92,13 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       async mount(params: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart] = await core.getStartServices();
+        const hideInAppNavigation = core.chrome.navGroup.getNavGroupEnabled();
 
         return renderApp(params, {
           sections: getSectionsServiceStartPrivate(),
           opensearchDashboardsVersion,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+          hideInAppNavigation,
         });
       },
     });
@@ -122,6 +125,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
       mount: async (params: AppMountParameters) => {
         const { renderApp } = await import('./landing_page_application');
         const [coreStart] = await core.getStartServices();
@@ -154,6 +158,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
       navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
         ? AppNavLinkStatus.visible
         : AppNavLinkStatus.hidden,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
       mount: async (params: AppMountParameters) => {
         const { renderApp } = await import('./landing_page_application');
         const [coreStart] = await core.getStartServices();

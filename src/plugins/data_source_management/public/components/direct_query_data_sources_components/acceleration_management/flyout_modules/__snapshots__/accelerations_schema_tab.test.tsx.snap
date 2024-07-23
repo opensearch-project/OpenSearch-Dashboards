@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AccelerationSchemaTab renders correctly 1`] = `
+<Fragment>
+  <EuiInMemoryTable
+    columns={
+      Array [
+        Object {
+          "field": "columns_name",
+          "name": "Column name",
+        },
+        Object {
+          "field": "data_type",
+          "name": "Data type",
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "acceleration_type": "default",
+          "columns_name": "column1",
+          "data_type": "text",
+        },
+        Object {
+          "acceleration_type": "default",
+          "columns_name": "column2",
+          "data_type": "keyword",
+        },
+      ]
+    }
+    responsive={true}
+    tableLayout="fixed"
+  />
+</Fragment>
+`;

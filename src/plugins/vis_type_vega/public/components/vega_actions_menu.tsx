@@ -29,7 +29,12 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiButtonIcon, EuiContextMenuPanel, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
+import {
+  EuiSmallButtonIcon,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
+} from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { i18n } from '@osd/i18n';
 
@@ -55,7 +60,7 @@ function VegaActionsMenu({ formatHJson, formatJson }: VegaActionsMenuProps) {
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
   const button = (
-    <EuiButtonIcon
+    <EuiSmallButtonIcon
       iconType="wrench"
       onClick={onButtonClick}
       aria-label={i18n.translate('visTypeVega.editor.vegaEditorOptionsButtonAriaLabel', {

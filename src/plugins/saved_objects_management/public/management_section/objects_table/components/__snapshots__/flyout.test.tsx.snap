@@ -550,9 +550,9 @@ exports[`Flyout should render cluster selector and import options when datasourc
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiForm>
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -565,9 +565,9 @@ exports[`Flyout should render cluster selector and import options when datasourc
         }
         labelType="label"
       >
-        <EuiFilePicker
+        <EuiCompressedFilePicker
           accept=".ndjson, .json"
-          compressed={false}
+          compressed={true}
           display="large"
           fullWidth={true}
           initialPromptText={
@@ -579,7 +579,7 @@ exports[`Flyout should render cluster selector and import options when datasourc
           }
           onChange={[Function]}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
       <div
         className="savedObjectImportControlForDataSource"
       >
@@ -598,6 +598,7 @@ exports[`Flyout should render cluster selector and import options when datasourc
           }
         >
           <DataSourceSelector
+            compressed={true}
             disabled={false}
             fullWidth={true}
             isClearable={false}
@@ -617,9 +618,9 @@ exports[`Flyout should render cluster selector and import options when datasourc
           />
         </EuiFormFieldset>
         <EuiSpacer />
-        <EuiFormRow
+        <EuiCompressedFormRow
           describedByIds={Array []}
-          display="row"
+          display="rowCompressed"
           fullWidth={true}
           hasChildLabel={true}
           hasEmptyLabelSpace={false}
@@ -636,7 +637,7 @@ exports[`Flyout should render cluster selector and import options when datasourc
             optionLabel="Conflict management"
             updateSelection={[Function]}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </div>
     </EuiForm>
   </EuiFlyoutBody>
@@ -705,9 +706,9 @@ exports[`Flyout should render import step 1`] = `
   </EuiFlyoutHeader>
   <EuiFlyoutBody>
     <EuiForm>
-      <EuiFormRow
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -720,9 +721,9 @@ exports[`Flyout should render import step 1`] = `
         }
         labelType="label"
       >
-        <EuiFilePicker
+        <EuiCompressedFilePicker
           accept=".ndjson, .json"
-          compressed={false}
+          compressed={true}
           display="large"
           fullWidth={true}
           initialPromptText={
@@ -734,10 +735,10 @@ exports[`Flyout should render import step 1`] = `
           }
           onChange={[Function]}
         />
-      </EuiFormRow>
-      <EuiFormRow
+      </EuiCompressedFormRow>
+      <EuiCompressedFormRow
         describedByIds={Array []}
-        display="row"
+        display="rowCompressed"
         fullWidth={true}
         hasChildLabel={true}
         hasEmptyLabelSpace={false}
@@ -754,7 +755,7 @@ exports[`Flyout should render import step 1`] = `
           optionLabel="Import options"
           updateSelection={[Function]}
         />
-      </EuiFormRow>
+      </EuiCompressedFormRow>
     </EuiForm>
   </EuiFlyoutBody>
   <EuiFlyoutFooter>

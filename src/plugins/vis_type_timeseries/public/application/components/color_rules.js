@@ -36,8 +36,8 @@ import { collectionActions } from './lib/collection_actions';
 import { ColorPicker } from './color_picker';
 import {
   htmlIdGenerator,
-  EuiComboBox,
-  EuiFieldNumber,
+  EuiCompressedComboBox,
+  EuiCompressedFieldNumber,
   EuiFormLabel,
   EuiFlexGroup,
   EuiFlexItem,
@@ -175,7 +175,7 @@ class ColorRulesUI extends Component {
           </EuiFormLabel>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiComboBox
+          <EuiCompressedComboBox
             id={htmlId('ifMetricIs')}
             options={operatorOptions}
             selectedOptions={selectedOperatorOption ? [selectedOperatorOption] : []}
@@ -187,7 +187,7 @@ class ColorRulesUI extends Component {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFieldNumber
+          <EuiCompressedFieldNumber
             aria-label={intl.formatMessage({
               id: 'visTypeTimeseries.colorRules.valueAriaLabel',
               defaultMessage: 'Value',

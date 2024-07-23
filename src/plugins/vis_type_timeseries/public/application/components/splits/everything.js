@@ -32,7 +32,7 @@ import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem, EuiCompressedFormRow } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
 export const SplitByEverything = (props) => {
@@ -42,7 +42,7 @@ export const SplitByEverything = (props) => {
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <EuiFormRow
+        <EuiCompressedFormRow
           id={htmlId('group')}
           label={
             <FormattedMessage
@@ -56,7 +56,7 @@ export const SplitByEverything = (props) => {
             onChange={handleSelectChange('split_mode')}
             uiRestrictions={uiRestrictions}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

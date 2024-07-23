@@ -40,7 +40,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiButton,
+  EuiSmallButton,
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
@@ -199,13 +199,13 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton
+            <EuiSmallButton
               onClick={this.installSavedObjects}
               isLoading={this.state.isInstalling}
               data-test-subj="loadSavedObjects"
             >
               {this.state.buttonLabel}
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
 

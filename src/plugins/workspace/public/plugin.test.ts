@@ -19,13 +19,18 @@ import { savedObjectsManagementPluginMock } from '../../saved_objects_management
 import { managementPluginMock } from '../../management/public/mocks';
 import { UseCaseService } from './services/use_case_service';
 import { workspaceClientMock, WorkspaceClientMock } from './workspace_client.mock';
-import { WorkspacePlugin } from './plugin';
+import { WorkspacePlugin, WorkspacePluginStartDeps } from './plugin';
+import { contentManagementPluginMocks } from '../../content_management/public';
 
 describe('Workspace plugin', () => {
+  const mockDependencies: WorkspacePluginStartDeps = {
+    contentManagement: contentManagementPluginMocks.createStartContract(),
+  };
   const getSetupMock = () => ({
     ...coreMock.createSetup(),
     chrome: chromeServiceMock.createSetupContract(),
   });
+
   beforeEach(() => {
     WorkspaceClientMock.mockClear();
     Object.values(workspaceClientMock).forEach((item) => item.mockClear());
@@ -48,7 +53,7 @@ describe('Workspace plugin', () => {
     const setupMock = getSetupMock();
     const coreStart = coreMock.createStart();
     await workspacePlugin.setup(setupMock, {});
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, mockDependencies);
     coreStart.workspaces.currentWorkspaceId$.next('foo');
     expect(coreStart.savedObjects.client.setCurrentWorkspace).toHaveBeenCalledWith('foo');
     expect(setupMock.application.register).toBeCalledTimes(4);
@@ -149,15 +154,6 @@ describe('Workspace plugin', () => {
     windowSpy.mockRestore();
   });
 
-  it('#setup register workspace dropdown menu when setup', async () => {
-    const setupMock = coreMock.createSetup();
-    const workspacePlugin = new WorkspacePlugin();
-    await workspacePlugin.setup(setupMock, {
-      management: managementPluginMock.createSetupContract(),
-    });
-    expect(setupMock.chrome.registerCollapsibleNavHeader).toBeCalledTimes(1);
-  });
-
   it('#setup should register workspace list with a visible application and register to settingsAndSetup nav group', async () => {
     const setupMock = coreMock.createSetup();
     setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
@@ -181,6 +177,31 @@ describe('Workspace plugin', () => {
     );
   });
 
+  it('#setup should register workspace detail with a visible application and register to all nav group', async () => {
+    const setupMock = coreMock.createSetup();
+    setupMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    const workspacePlugin = new WorkspacePlugin();
+    await workspacePlugin.setup(setupMock, {});
+
+    expect(setupMock.application.register).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'workspace_detail',
+        navLinkStatus: AppNavLinkStatus.visible,
+      })
+    );
+
+    expect(setupMock.chrome.navGroup.addNavLinksToGroup).toHaveBeenCalledWith(
+      DEFAULT_NAV_GROUPS.all,
+      expect.arrayContaining([
+        {
+          id: 'workspace_detail',
+          title: 'Overview',
+          order: 100,
+        },
+      ])
+    );
+  });
+
   it('#start add workspace detail page to breadcrumbs when start', async () => {
     const startMock = coreMock.createStart();
     const workspaceObject = {
@@ -191,7 +212,7 @@ describe('Workspace plugin', () => {
     const breadcrumbs = new BehaviorSubject<ChromeBreadcrumb[]>([{ text: 'dashboards' }]);
     startMock.chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs);
     const workspacePlugin = new WorkspacePlugin();
-    workspacePlugin.start(startMock);
+    workspacePlugin.start(startMock, mockDependencies);
     expect(startMock.chrome.setBreadcrumbs).toBeCalledWith(
       expect.arrayContaining([
         expect.objectContaining({
@@ -217,8 +238,20 @@ describe('Workspace plugin', () => {
     ]);
     startMock.chrome.getBreadcrumbs$.mockReturnValue(breadcrumbs);
     const workspacePlugin = new WorkspacePlugin();
-    workspacePlugin.start(startMock);
+    workspacePlugin.start(startMock, mockDependencies);
     expect(startMock.chrome.setBreadcrumbs).not.toHaveBeenCalled();
+  });
+
+  it('#start should register workspace list card into new home page', async () => {
+    const startMock = coreMock.createStart();
+    startMock.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    const workspacePlugin = new WorkspacePlugin();
+    workspacePlugin.start(startMock, mockDependencies);
+    expect(mockDependencies.contentManagement.registerContentProvider).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: 'workspace_list_card_home',
+      })
+    );
   });
 
   it('#start should call navGroupUpdater$.next after currentWorkspace set', async () => {
@@ -234,13 +267,21 @@ describe('Workspace plugin', () => {
     jest.spyOn(navGroupUpdater$, 'next');
 
     expect(navGroupUpdater$.next).not.toHaveBeenCalled();
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, mockDependencies);
 
     waitFor(() => {
       expect(navGroupUpdater$.next).toHaveBeenCalled();
     });
   });
 
+  it('#start register workspace dropdown menu at left navigation bottom when start', async () => {
+    const coreStart = coreMock.createStart();
+    coreStart.chrome.navGroup.getNavGroupEnabled.mockReturnValue(true);
+    const workspacePlugin = new WorkspacePlugin();
+    workspacePlugin.start(coreStart, mockDependencies);
+
+    expect(coreStart.chrome.navControls.registerLeftBottom).toBeCalledTimes(1);
+  });
   it('#start should not update systematic use case features after currentWorkspace set', async () => {
     const registeredUseCases$ = new BehaviorSubject([
       {
@@ -248,6 +289,7 @@ describe('Workspace plugin', () => {
         title: 'Foo',
         features: ['system-feature'],
         systematic: true,
+        description: '',
       },
     ]);
     jest.spyOn(UseCaseService.prototype, 'start').mockImplementationOnce(() => ({
@@ -266,11 +308,11 @@ describe('Workspace plugin', () => {
 
     const appUpdater$ = setupMock.application.registerAppUpdater.mock.calls[0][0];
 
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, mockDependencies);
 
     const appUpdater = await appUpdater$.pipe(first()).toPromise();
 
-    expect(appUpdater({ id: 'system-feature' })).toBeUndefined();
+    expect(appUpdater({ id: 'system-feature', title: '', mount: () => () => {} })).toBeUndefined();
   });
 
   it('#start should update nav group status after currentWorkspace set', async () => {
@@ -287,7 +329,7 @@ describe('Workspace plugin', () => {
 
     const navGroupUpdater$ = setupMock.chrome.navGroup.registerNavGroupUpdater.mock.calls[0][0];
 
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, mockDependencies);
 
     const navGroupUpdater = await navGroupUpdater$.pipe(first()).toPromise();
 
@@ -318,6 +360,7 @@ describe('Workspace plugin', () => {
         title: 'Foo',
         features: ['system-feature'],
         systematic: true,
+        description: '',
       },
     ]);
     jest.spyOn(UseCaseService.prototype, 'start').mockImplementationOnce(() => ({
@@ -338,7 +381,7 @@ describe('Workspace plugin', () => {
     const appUpdaterChangeMock = jest.fn();
     appUpdater$.subscribe(appUpdaterChangeMock);
 
-    workspacePlugin.start(coreStart);
+    workspacePlugin.start(coreStart, mockDependencies);
 
     // Wait for filterNav been executed
     await new Promise(setImmediate);

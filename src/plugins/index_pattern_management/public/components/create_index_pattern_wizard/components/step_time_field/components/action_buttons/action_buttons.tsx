@@ -30,7 +30,7 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSmallButton, EuiSmallButtonEmpty } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 
@@ -45,15 +45,15 @@ export const ActionButtons = ({
 }) => (
   <EuiFlexGroup justifyContent="flexEnd">
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty iconType="arrowLeft" onClick={goToPreviousStep}>
+      <EuiSmallButtonEmpty iconType="arrowLeft" onClick={goToPreviousStep}>
         <FormattedMessage
           id="indexPatternManagement.createIndexPattern.stepTime.backButton"
           defaultMessage="Back"
         />
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiButton
+      <EuiSmallButton
         isDisabled={!submittable}
         data-test-subj="createIndexPatternButton"
         fill
@@ -63,7 +63,7 @@ export const ActionButtons = ({
           id="indexPatternManagement.createIndexPattern.stepTime.createPatternButton"
           defaultMessage="Create index pattern"
         />
-      </EuiButton>
+      </EuiSmallButton>
     </EuiFlexItem>
   </EuiFlexGroup>
 );

@@ -38,7 +38,7 @@ import {
   EuiDraggable,
   EuiPanel,
   EuiSplitPanel,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
 } from '@elastic/eui';
 import { I18nProvider } from '@osd/i18n/react';
 import { DiscoverField } from './discover_field';
@@ -298,7 +298,7 @@ const FieldList = ({
 
   return (
     <>
-      <EuiButtonEmpty
+      <EuiSmallButtonEmpty
         iconSide="right"
         color="text"
         iconType={expanded ? 'arrowDown' : 'arrowRight'}
@@ -310,7 +310,7 @@ const FieldList = ({
         })}
       >
         {title}
-      </EuiButtonEmpty>
+      </EuiSmallButtonEmpty>
       {expanded && (
         <EuiDroppable
           droppableId={`${category.toUpperCase()}_FIELDS`}

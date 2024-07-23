@@ -7,6 +7,7 @@ import { BehaviorSubject, combineLatest, Subscription } from 'rxjs';
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import { map } from 'rxjs/operators';
+import { EuiIcon } from '@elastic/eui';
 import {
   Plugin,
   CoreStart,
@@ -28,12 +29,14 @@ import {
   WORKSPACE_DETAIL_APP_ID,
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
+  WORKSPACE_USE_CASES,
 } from '../common/constants';
 import { getWorkspaceIdFromUrl } from '../../../core/public/utils';
 import { Services, WorkspaceUseCase } from './types';
 import { WorkspaceClient } from './workspace_client';
 import { SavedObjectsManagementPluginSetup } from '../../../plugins/saved_objects_management/public';
 import { ManagementSetup } from '../../../plugins/management/public';
+import { ContentManagementPluginStart } from '../../../plugins/content_management/public';
 import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
@@ -43,7 +46,12 @@ import {
   isAppAccessibleInWorkspace,
   isNavGroupInFeatureConfigs,
 } from './utils';
+import { recentWorkspaceManager } from './recent_workspace_manager';
+import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { UseCaseService } from './services/use_case_service';
+import { WorkspaceListCard } from './components/service_card';
+import { UseCaseFooter } from './components/home_get_start_card';
+import { HOME_CONTENT_AREAS } from '../../home/public';
 
 type WorkspaceAppType = (
   params: AppMountParameters,
@@ -57,7 +65,12 @@ interface WorkspacePluginSetupDeps {
   dataSourceManagement?: DataSourceManagementPluginSetup;
 }
 
-export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps> {
+export interface WorkspacePluginStartDeps {
+  contentManagement: ContentManagementPluginStart;
+}
+
+export class WorkspacePlugin
+  implements Plugin<{}, {}, WorkspacePluginSetupDeps, WorkspacePluginStartDeps> {
   private coreStart?: CoreStart;
   private currentWorkspaceSubscription?: Subscription;
   private breadcrumbsSubscription?: Subscription;
@@ -94,7 +107,13 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       this.registeredUseCases$,
     ]).subscribe(([currentWorkspace, registeredUseCases]) => {
       if (currentWorkspace) {
+        const isAllUseCase =
+          getFirstUseCaseOfFeatureConfigs(currentWorkspace.features || []) === ALL_USE_CASE_ID;
         this.appUpdater$.next((app) => {
+          // When in all workspace, the home should be replaced by workspace detail page
+          if (app.id === 'home' && isAllUseCase) {
+            return { navLinkStatus: AppNavLinkStatus.hidden };
+          }
           if (isAppAccessibleInWorkspace(app, currentWorkspace, registeredUseCases)) {
             return;
           }
@@ -262,6 +281,8 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
             }
             currentAppIdSubscription.unsubscribe();
           });
+          // Add workspace id to recent workspaces.
+          recentWorkspaceManager.addRecentWorkspace(workspaceId);
         })();
       }
     }
@@ -312,21 +333,13 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       title: i18n.translate('workspace.settings.workspaceDetail', {
         defaultMessage: 'Workspace Detail',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderDetailApp } = await import('./application');
         return mountWorkspaceApp(params, renderDetailApp);
       },
-    });
-
-    /**
-     * Register workspace dropdown selector on the top of left navigation menu
-     */
-    core.chrome.registerCollapsibleNavHeader(() => {
-      if (!this.coreStart) {
-        return null;
-      }
-      return React.createElement(WorkspaceMenu, { coreStart: this.coreStart });
     });
 
     // workspace list
@@ -347,6 +360,16 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: WORKSPACE_DETAIL_APP_ID,
+        order: 100,
+        title: i18n.translate('workspace.nav.workspaceDetail.title', {
+          defaultMessage: 'Overview',
+        }),
+      },
+    ]);
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
@@ -378,7 +401,41 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
     return {};
   }
 
-  public start(core: CoreStart) {
+  private registerGetStartedCardToNewHome(
+    core: CoreStart,
+    contentManagement: ContentManagementPluginStart
+  ) {
+    const useCases = [
+      WORKSPACE_USE_CASES.observability,
+      WORKSPACE_USE_CASES['security-analytics'],
+      WORKSPACE_USE_CASES.search,
+      WORKSPACE_USE_CASES.analytics,
+    ];
+
+    useCases.forEach((useCase, index) => {
+      contentManagement.registerContentProvider({
+        id: `home_get_start_${useCase.id}`,
+        getTargetArea: () => HOME_CONTENT_AREAS.GET_STARTED,
+        getContent: () => ({
+          id: useCase.id,
+          kind: 'card',
+          order: (index + 1) * 1000,
+          description: useCase.description,
+          title: useCase.title,
+          getIcon: () => React.createElement(EuiIcon, { size: 'xl', type: 'logoOpenSearch' }),
+          getFooter: () =>
+            React.createElement(UseCaseFooter, {
+              useCaseId: useCase.id,
+              useCaseTitle: useCase.title,
+              core,
+              registeredUseCases$: this.registeredUseCases$,
+            }),
+        }),
+      });
+    });
+  }
+
+  public start(core: CoreStart, { contentManagement }: WorkspacePluginStartDeps) {
     this.coreStart = core;
 
     this.currentWorkspaceIdSubscription = this._changeSavedObjectCurrentWorkspace();
@@ -398,9 +455,45 @@ export class WorkspacePlugin implements Plugin<{}, {}, WorkspacePluginSetupDeps>
 
     if (!core.chrome.navGroup.getNavGroupEnabled()) {
       this.addWorkspaceToBreadcrumbs(core);
-    }
+    } else {
+      /**
+       * Register workspace dropdown selector on the left navigation bottom
+       */
+      core.chrome.navControls.registerLeftBottom({
+        order: 2,
+        mount: toMountPoint(
+          React.createElement(WorkspaceMenu, {
+            coreStart: core,
+            registeredUseCases$: this.registeredUseCases$,
+          })
+        ),
+      });
 
+      // register workspace list in home page
+      this.registerWorkspaceListToHome(core, contentManagement);
+
+      // register get started card in new home page
+      this.registerGetStartedCardToNewHome(core, contentManagement);
+    }
     return {};
+  }
+
+  private registerWorkspaceListToHome(
+    core: CoreStart,
+    contentManagement: ContentManagementPluginStart
+  ) {
+    if (contentManagement) {
+      contentManagement.registerContentProvider({
+        id: 'workspace_list_card_home',
+        getContent: () => ({
+          id: 'workspace_list',
+          kind: 'custom',
+          order: 0,
+          render: () => React.createElement(WorkspaceListCard, { core }),
+        }),
+        getTargetArea: () => HOME_CONTENT_AREAS.SERVICE_CARDS,
+      });
+    }
   }
 
   public stop() {

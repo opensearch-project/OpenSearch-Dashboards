@@ -6,7 +6,7 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
-  EuiComboBox,
+  EuiCompressedComboBox,
   EuiFlexItem,
   EuiButtonIcon,
   EuiButtonGroup,
@@ -133,7 +133,7 @@ export const WorkspacePermissionSettingInput = ({
   return (
     <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
       <EuiFlexItem style={{ maxWidth: 400 }}>
-        <EuiComboBox
+        <EuiCompressedComboBox
           singleSelection
           selectedOptions={groupOrUserIdSelectedOptions}
           onCreateOption={handleGroupOrUserIdCreate}

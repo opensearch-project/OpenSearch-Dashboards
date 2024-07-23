@@ -30,7 +30,7 @@
 
 import PropTypes from 'prop-types';
 import React from 'react';
-import { EuiComboBox, EuiIcon } from '@elastic/eui';
+import { EuiCompressedComboBox, EuiIcon } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { ICON_TYPES_MAP } from '../../visualizations/constants/icons';
 
@@ -122,7 +122,7 @@ export function IconSelect({ value, onChange }) {
   const selectedIcon = ICONS.find((option) => value === option.value) || ICONS[0];
 
   return (
-    <EuiComboBox
+    <EuiCompressedComboBox
       isClearable={false}
       options={ICONS}
       selectedOptions={[selectedIcon]}

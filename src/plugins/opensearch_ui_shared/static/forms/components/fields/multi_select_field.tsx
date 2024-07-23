@@ -29,7 +29,7 @@
  */
 
 import React from 'react';
-import { EuiFormRow, EuiSelectable, EuiPanel } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiSelectable, EuiPanel } from '@elastic/eui';
 
 import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
@@ -44,7 +44,7 @@ export const MultiSelectField = ({ field, euiFieldProps = {}, ...rest }: Props) 
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
   return (
-    <EuiFormRow
+    <EuiCompressedFormRow
       label={field.label}
       helpText={typeof field.helpText === 'function' ? field.helpText() : field.helpText}
       error={errorMessage}
@@ -70,6 +70,6 @@ export const MultiSelectField = ({ field, euiFieldProps = {}, ...rest }: Props) 
           </EuiPanel>
         )}
       </EuiSelectable>
-    </EuiFormRow>
+    </EuiCompressedFormRow>
   );
 };

@@ -11,7 +11,7 @@ import {
   EuiFlexGroup,
   EuiHorizontalRule,
   EuiFlexItem,
-  EuiButton,
+  EuiSmallButton,
 } from '@elastic/eui';
 import React from 'react';
 import { AuthMethod } from '../../../constants';
@@ -53,9 +53,9 @@ export const ReviewPrometheusDatasource = (props: ConfigurePrometheusDatasourceP
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={goBack} data-test-subj="editButton">
+            <EuiSmallButton onClick={goBack} data-test-subj="editButton">
               Edit
-            </EuiButton>
+            </EuiSmallButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule />
