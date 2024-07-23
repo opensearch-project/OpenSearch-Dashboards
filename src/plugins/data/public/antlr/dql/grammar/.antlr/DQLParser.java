@@ -503,6 +503,10 @@ public class DQLParser extends Parser {
 			return getRuleContext(GroupContentContext.class,i);
 		}
 		public TerminalNode RPAREN() { return getToken(DQLParser.RPAREN, 0); }
+		public List<TerminalNode> NOT() { return getTokens(DQLParser.NOT); }
+		public TerminalNode NOT(int i) {
+			return getToken(DQLParser.NOT, i);
+		}
 		public List<TerminalNode> OR() { return getTokens(DQLParser.OR); }
 		public TerminalNode OR(int i) {
 			return getToken(DQLParser.OR, i);
@@ -510,10 +514,6 @@ public class DQLParser extends Parser {
 		public List<TerminalNode> AND() { return getTokens(DQLParser.AND); }
 		public TerminalNode AND(int i) {
 			return getToken(DQLParser.AND, i);
-		}
-		public List<TerminalNode> NOT() { return getTokens(DQLParser.NOT); }
-		public TerminalNode NOT(int i) {
-			return getToken(DQLParser.NOT, i);
 		}
 		public GroupExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -530,7 +530,6 @@ public class DQLParser extends Parser {
 			{
 			setState(70);
 			match(LPAREN);
-			{
 			setState(72);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -541,7 +540,6 @@ public class DQLParser extends Parser {
 				}
 			}
 
-			}
 			setState(74);
 			groupContent();
 			setState(82);
@@ -560,7 +558,6 @@ public class DQLParser extends Parser {
 					_errHandler.reportMatch(this);
 					consume();
 				}
-				{
 				setState(77);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -571,7 +568,6 @@ public class DQLParser extends Parser {
 					}
 				}
 
-				}
 				setState(79);
 				groupContent();
 				}

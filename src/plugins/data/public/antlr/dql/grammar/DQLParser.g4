@@ -41,7 +41,7 @@ tokenSearch
     ;
     
 groupExpression
-    : LPAREN (NOT?) groupContent ((OR | AND) (NOT?) groupContent)* RPAREN
+    : LPAREN NOT? groupContent ((OR | AND) NOT? groupContent)* RPAREN
     ;
 
 groupContent
