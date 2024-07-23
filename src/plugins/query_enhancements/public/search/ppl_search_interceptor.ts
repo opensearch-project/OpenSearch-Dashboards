@@ -165,9 +165,6 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       ...dataFrame.meta,
       queryConfig: {
         ...dataFrame.meta.queryConfig,
-        ...(this.connectionsService.getSelectedConnection() && {
-          dataSourceId: this.connectionsService.getSelectedConnection()?.dataSource.id,
-        }),
       },
     };
     const aggConfig = getAggConfig(
