@@ -99,8 +99,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       return throwError(this.handleSearchError('DataFrame is not defined', request, signal!));
     }
 
-    const queryString =
-      dataFrame.meta?.queryConfig?.formattedQs() ?? getRawQueryString(searchRequest) ?? '';
+    const queryString = getRawQueryString(searchRequest) ?? '';
 
     dataFrame.meta = {
       ...dataFrame.meta,
