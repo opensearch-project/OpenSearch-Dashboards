@@ -11,6 +11,11 @@ import {
   DSM_APP_ID,
 } from './plugin';
 import { PLUGIN_NAME } from '../common';
+import {
+  getRenderAccelerationDetailsFlyout,
+  getRenderCreateAccelerationFlyout,
+  getRenderAssociatedObjectsDetailsFlyout,
+} from './plugin';
 
 describe('#dataSourceManagement', () => {
   let coreSetup: any;
@@ -127,5 +132,62 @@ describe('#dataSourceManagement', () => {
         mount: expect.any(Function),
       })
     );
+  });
+
+  it('should set and get renderAccelerationDetailsFlyout correctly', () => {
+    const plugin = new DataSourceManagementPlugin();
+    plugin.setup(coreSetup, {
+      management: managementMock,
+      indexPatternManagement: indexPatternManagementMock,
+      dataSource: {
+        awsSigV4AuthEnabled: true,
+        noAuthenticationTypeEnabled: true,
+        usernamePasswordAuthEnabled: true,
+        hideLocalCluster: false,
+      } as any,
+    });
+
+    plugin.start(coreStart);
+
+    const renderAccelerationDetailsFlyout = getRenderAccelerationDetailsFlyout();
+    expect(renderAccelerationDetailsFlyout).toBeInstanceOf(Function);
+  });
+
+  it('should set and get renderCreateAccelerationFlyout correctly', () => {
+    const plugin = new DataSourceManagementPlugin();
+    plugin.setup(coreSetup, {
+      management: managementMock,
+      indexPatternManagement: indexPatternManagementMock,
+      dataSource: {
+        awsSigV4AuthEnabled: true,
+        noAuthenticationTypeEnabled: true,
+        usernamePasswordAuthEnabled: true,
+        hideLocalCluster: false,
+      } as any,
+    });
+
+    plugin.start(coreStart);
+
+    const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
+    expect(renderCreateAccelerationFlyout).toBeInstanceOf(Function);
+  });
+
+  it('should set and get renderAssociatedObjectsDetailsFlyout correctly', () => {
+    const plugin = new DataSourceManagementPlugin();
+    plugin.setup(coreSetup, {
+      management: managementMock,
+      indexPatternManagement: indexPatternManagementMock,
+      dataSource: {
+        awsSigV4AuthEnabled: true,
+        noAuthenticationTypeEnabled: true,
+        usernamePasswordAuthEnabled: true,
+        hideLocalCluster: false,
+      } as any,
+    });
+
+    plugin.start(coreStart);
+
+    const renderAssociatedObjectsDetailsFlyout = getRenderAssociatedObjectsDetailsFlyout();
+    expect(renderAssociatedObjectsDetailsFlyout).toBeInstanceOf(Function);
   });
 });
