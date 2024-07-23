@@ -49,6 +49,7 @@ import './index.scss';
 import { ManagementOverViewPluginSetup } from '../../management_overview/public';
 import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { DevToolsIcon } from './dev_tools_icon';
+import { WorkspaceAvailability } from '../../../core/public';
 
 export interface DevToolsSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -97,6 +98,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup> {
       /* the order of dev tools, it shows as last item of management section */
       order: 9070,
       category: DEFAULT_APP_CATEGORIES.management,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
       mount: async (params: AppMountParameters) => {
         const { element, history } = params;
         element.classList.add('devAppWrapper');
