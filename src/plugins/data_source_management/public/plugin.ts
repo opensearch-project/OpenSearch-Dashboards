@@ -142,11 +142,6 @@ export class DataSourceManagementPlugin
       },
     });
 
-    // when the feature flag is disabled, we don't need to register any of the mds components
-    if (!this.featureFlagStatus) {
-      return undefined;
-    }
-
     /**
      * The data sources features in observability has the same name as `DSM_APP_ID`
      * Add a suffix to avoid duplication
@@ -225,6 +220,11 @@ export class DataSourceManagementPlugin
         order: 100,
       },
     ]);
+
+    // when the feature flag is disabled, we don't need to register any of the mds components
+    if (!this.featureFlagStatus) {
+      return undefined;
+    }
 
     const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
       if (this.started) {
