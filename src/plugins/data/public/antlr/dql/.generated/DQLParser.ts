@@ -3,7 +3,6 @@
 import * as antlr from "antlr4ng";
 import { Token } from "antlr4ng";
 
-import { DQLParserListener } from "./DQLParserListener.js";
 import { DQLParserVisitor } from "./DQLParserVisitor.js";
 
 // for running tests with parameters, TODO: discuss strategy for typed parameters in CI
@@ -369,15 +368,27 @@ export class DQLParser extends antlr.Parser {
             {
             this.state = 70;
             this.match(DQLParser.LPAREN);
-            this.state = 71;
+            {
+            this.state = 72;
+            this.errorHandler.sync(this);
+            _la = this.tokenStream.LA(1);
+            if (_la === 3) {
+                {
+                this.state = 71;
+                this.match(DQLParser.NOT);
+                }
+            }
+
+            }
+            this.state = 74;
             this.groupContent();
-            this.state = 79;
+            this.state = 82;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
             while (_la === 1 || _la === 2) {
                 {
                 {
-                this.state = 72;
+                this.state = 75;
                 _la = this.tokenStream.LA(1);
                 if(!(_la === 1 || _la === 2)) {
                 this.errorHandler.recoverInline(this);
@@ -387,26 +398,26 @@ export class DQLParser extends antlr.Parser {
                     this.consume();
                 }
                 {
-                this.state = 74;
+                this.state = 77;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
                 if (_la === 3) {
                     {
-                    this.state = 73;
+                    this.state = 76;
                     this.match(DQLParser.NOT);
                     }
                 }
 
                 }
-                this.state = 76;
+                this.state = 79;
                 this.groupContent();
                 }
                 }
-                this.state = 81;
+                this.state = 84;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
             }
-            this.state = 82;
+            this.state = 85;
             this.match(DQLParser.RPAREN);
             }
         }
@@ -427,13 +438,13 @@ export class DQLParser extends antlr.Parser {
         let localContext = new GroupContentContext(this.context, this.state);
         this.enterRule(localContext, 18, DQLParser.RULE_groupContent);
         try {
-            this.state = 86;
+            this.state = 89;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case DQLParser.LPAREN:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 84;
+                this.state = 87;
                 this.groupExpression();
                 }
                 break;
@@ -441,7 +452,7 @@ export class DQLParser extends antlr.Parser {
             case DQLParser.ID:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 85;
+                this.state = 88;
                 this.value();
                 }
                 break;
@@ -468,7 +479,7 @@ export class DQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 88;
+            this.state = 91;
             this.match(DQLParser.ID);
             }
         }
@@ -489,20 +500,20 @@ export class DQLParser extends antlr.Parser {
         let localContext = new ValueContext(this.context, this.state);
         this.enterRule(localContext, 22, DQLParser.RULE_value);
         try {
-            this.state = 92;
+            this.state = 95;
             this.errorHandler.sync(this);
             switch (this.tokenStream.LA(1)) {
             case DQLParser.PHRASE:
                 this.enterOuterAlt(localContext, 1);
                 {
-                this.state = 90;
+                this.state = 93;
                 this.match(DQLParser.PHRASE);
                 }
                 break;
             case DQLParser.ID:
                 this.enterOuterAlt(localContext, 2);
                 {
-                this.state = 91;
+                this.state = 94;
                 this.tokenSearch();
                 }
                 break;
@@ -530,7 +541,7 @@ export class DQLParser extends antlr.Parser {
         try {
             this.enterOuterAlt(localContext, 1);
             {
-            this.state = 94;
+            this.state = 97;
             _la = this.tokenStream.LA(1);
             if(!((((_la) & ~0x1F) === 0 && ((1 << _la) & 240) !== 0))) {
             this.errorHandler.recoverInline(this);
@@ -556,36 +567,37 @@ export class DQLParser extends antlr.Parser {
     }
 
     public static readonly _serializedATN: number[] = [
-        4,1,13,97,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        4,1,13,100,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
         6,2,7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,1,0,1,0,
         1,1,1,1,1,1,1,1,5,1,33,8,1,10,1,12,1,36,9,1,1,2,1,2,1,3,3,3,41,8,
         3,1,3,1,3,1,4,1,4,1,4,1,4,1,4,1,4,1,4,3,4,52,8,4,1,5,1,5,1,5,1,5,
         1,6,1,6,1,6,1,6,3,6,62,8,6,1,7,1,7,5,7,66,8,7,10,7,12,7,69,9,7,1,
-        8,1,8,1,8,1,8,3,8,75,8,8,1,8,5,8,78,8,8,10,8,12,8,81,9,8,1,8,1,8,
-        1,9,1,9,3,9,87,8,9,1,10,1,10,1,11,1,11,3,11,93,8,11,1,12,1,12,1,
-        12,0,0,13,0,2,4,6,8,10,12,14,16,18,20,22,24,0,2,1,0,1,2,1,0,4,7,
-        94,0,26,1,0,0,0,2,28,1,0,0,0,4,37,1,0,0,0,6,40,1,0,0,0,8,51,1,0,
-        0,0,10,53,1,0,0,0,12,57,1,0,0,0,14,63,1,0,0,0,16,70,1,0,0,0,18,86,
-        1,0,0,0,20,88,1,0,0,0,22,92,1,0,0,0,24,94,1,0,0,0,26,27,3,2,1,0,
-        27,1,1,0,0,0,28,34,3,6,3,0,29,30,3,4,2,0,30,31,3,6,3,0,31,33,1,0,
-        0,0,32,29,1,0,0,0,33,36,1,0,0,0,34,32,1,0,0,0,34,35,1,0,0,0,35,3,
-        1,0,0,0,36,34,1,0,0,0,37,38,7,0,0,0,38,5,1,0,0,0,39,41,5,3,0,0,40,
-        39,1,0,0,0,40,41,1,0,0,0,41,42,1,0,0,0,42,43,3,8,4,0,43,7,1,0,0,
-        0,44,45,5,9,0,0,45,46,3,0,0,0,46,47,5,10,0,0,47,52,1,0,0,0,48,52,
-        3,10,5,0,49,52,3,12,6,0,50,52,3,14,7,0,51,44,1,0,0,0,51,48,1,0,0,
-        0,51,49,1,0,0,0,51,50,1,0,0,0,52,9,1,0,0,0,53,54,3,20,10,0,54,55,
-        3,24,12,0,55,56,3,22,11,0,56,11,1,0,0,0,57,58,3,20,10,0,58,61,5,
-        8,0,0,59,62,3,22,11,0,60,62,3,16,8,0,61,59,1,0,0,0,61,60,1,0,0,0,
-        62,13,1,0,0,0,63,67,5,12,0,0,64,66,5,12,0,0,65,64,1,0,0,0,66,69,
-        1,0,0,0,67,65,1,0,0,0,67,68,1,0,0,0,68,15,1,0,0,0,69,67,1,0,0,0,
-        70,71,5,9,0,0,71,79,3,18,9,0,72,74,7,0,0,0,73,75,5,3,0,0,74,73,1,
-        0,0,0,74,75,1,0,0,0,75,76,1,0,0,0,76,78,3,18,9,0,77,72,1,0,0,0,78,
-        81,1,0,0,0,79,77,1,0,0,0,79,80,1,0,0,0,80,82,1,0,0,0,81,79,1,0,0,
-        0,82,83,5,10,0,0,83,17,1,0,0,0,84,87,3,16,8,0,85,87,3,22,11,0,86,
-        84,1,0,0,0,86,85,1,0,0,0,87,19,1,0,0,0,88,89,5,12,0,0,89,21,1,0,
-        0,0,90,93,5,11,0,0,91,93,3,14,7,0,92,90,1,0,0,0,92,91,1,0,0,0,93,
-        23,1,0,0,0,94,95,7,1,0,0,95,25,1,0,0,0,9,34,40,51,61,67,74,79,86,
-        92
+        8,1,8,3,8,73,8,8,1,8,1,8,1,8,3,8,78,8,8,1,8,5,8,81,8,8,10,8,12,8,
+        84,9,8,1,8,1,8,1,9,1,9,3,9,90,8,9,1,10,1,10,1,11,1,11,3,11,96,8,
+        11,1,12,1,12,1,12,0,0,13,0,2,4,6,8,10,12,14,16,18,20,22,24,0,2,1,
+        0,1,2,1,0,4,7,98,0,26,1,0,0,0,2,28,1,0,0,0,4,37,1,0,0,0,6,40,1,0,
+        0,0,8,51,1,0,0,0,10,53,1,0,0,0,12,57,1,0,0,0,14,63,1,0,0,0,16,70,
+        1,0,0,0,18,89,1,0,0,0,20,91,1,0,0,0,22,95,1,0,0,0,24,97,1,0,0,0,
+        26,27,3,2,1,0,27,1,1,0,0,0,28,34,3,6,3,0,29,30,3,4,2,0,30,31,3,6,
+        3,0,31,33,1,0,0,0,32,29,1,0,0,0,33,36,1,0,0,0,34,32,1,0,0,0,34,35,
+        1,0,0,0,35,3,1,0,0,0,36,34,1,0,0,0,37,38,7,0,0,0,38,5,1,0,0,0,39,
+        41,5,3,0,0,40,39,1,0,0,0,40,41,1,0,0,0,41,42,1,0,0,0,42,43,3,8,4,
+        0,43,7,1,0,0,0,44,45,5,9,0,0,45,46,3,0,0,0,46,47,5,10,0,0,47,52,
+        1,0,0,0,48,52,3,10,5,0,49,52,3,12,6,0,50,52,3,14,7,0,51,44,1,0,0,
+        0,51,48,1,0,0,0,51,49,1,0,0,0,51,50,1,0,0,0,52,9,1,0,0,0,53,54,3,
+        20,10,0,54,55,3,24,12,0,55,56,3,22,11,0,56,11,1,0,0,0,57,58,3,20,
+        10,0,58,61,5,8,0,0,59,62,3,22,11,0,60,62,3,16,8,0,61,59,1,0,0,0,
+        61,60,1,0,0,0,62,13,1,0,0,0,63,67,5,12,0,0,64,66,5,12,0,0,65,64,
+        1,0,0,0,66,69,1,0,0,0,67,65,1,0,0,0,67,68,1,0,0,0,68,15,1,0,0,0,
+        69,67,1,0,0,0,70,72,5,9,0,0,71,73,5,3,0,0,72,71,1,0,0,0,72,73,1,
+        0,0,0,73,74,1,0,0,0,74,82,3,18,9,0,75,77,7,0,0,0,76,78,5,3,0,0,77,
+        76,1,0,0,0,77,78,1,0,0,0,78,79,1,0,0,0,79,81,3,18,9,0,80,75,1,0,
+        0,0,81,84,1,0,0,0,82,80,1,0,0,0,82,83,1,0,0,0,83,85,1,0,0,0,84,82,
+        1,0,0,0,85,86,5,10,0,0,86,17,1,0,0,0,87,90,3,16,8,0,88,90,3,22,11,
+        0,89,87,1,0,0,0,89,88,1,0,0,0,90,19,1,0,0,0,91,92,5,12,0,0,92,21,
+        1,0,0,0,93,96,5,11,0,0,94,96,3,14,7,0,95,93,1,0,0,0,95,94,1,0,0,
+        0,96,23,1,0,0,0,97,98,7,1,0,0,98,25,1,0,0,0,10,34,40,51,61,67,72,
+        77,82,89,95
     ];
 
     private static __ATN: antlr.ATN;
@@ -616,16 +628,6 @@ export class QueryContext extends antlr.ParserRuleContext {
     }
     public override get ruleIndex(): number {
         return DQLParser.RULE_query;
-    }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterQuery) {
-             listener.enterQuery(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitQuery) {
-             listener.exitQuery(this);
-        }
     }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitQuery) {
@@ -662,16 +664,6 @@ export class OperatorExpressionContext extends antlr.ParserRuleContext {
     public override get ruleIndex(): number {
         return DQLParser.RULE_operatorExpression;
     }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterOperatorExpression) {
-             listener.enterOperatorExpression(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitOperatorExpression) {
-             listener.exitOperatorExpression(this);
-        }
-    }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitOperatorExpression) {
             return visitor.visitOperatorExpression(this);
@@ -695,16 +687,6 @@ export class BooleanOperatorContext extends antlr.ParserRuleContext {
     public override get ruleIndex(): number {
         return DQLParser.RULE_booleanOperator;
     }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterBooleanOperator) {
-             listener.enterBooleanOperator(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitBooleanOperator) {
-             listener.exitBooleanOperator(this);
-        }
-    }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitBooleanOperator) {
             return visitor.visitBooleanOperator(this);
@@ -727,16 +709,6 @@ export class NotExpressionContext extends antlr.ParserRuleContext {
     }
     public override get ruleIndex(): number {
         return DQLParser.RULE_notExpression;
-    }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterNotExpression) {
-             listener.enterNotExpression(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitNotExpression) {
-             listener.exitNotExpression(this);
-        }
     }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitNotExpression) {
@@ -773,16 +745,6 @@ export class PrimaryExpressionContext extends antlr.ParserRuleContext {
     public override get ruleIndex(): number {
         return DQLParser.RULE_primaryExpression;
     }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterPrimaryExpression) {
-             listener.enterPrimaryExpression(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitPrimaryExpression) {
-             listener.exitPrimaryExpression(this);
-        }
-    }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitPrimaryExpression) {
             return visitor.visitPrimaryExpression(this);
@@ -808,16 +770,6 @@ export class ComparisonExpressionContext extends antlr.ParserRuleContext {
     }
     public override get ruleIndex(): number {
         return DQLParser.RULE_comparisonExpression;
-    }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterComparisonExpression) {
-             listener.enterComparisonExpression(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitComparisonExpression) {
-             listener.exitComparisonExpression(this);
-        }
     }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitComparisonExpression) {
@@ -848,16 +800,6 @@ export class KeyValueExpressionContext extends antlr.ParserRuleContext {
     public override get ruleIndex(): number {
         return DQLParser.RULE_keyValueExpression;
     }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterKeyValueExpression) {
-             listener.enterKeyValueExpression(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitKeyValueExpression) {
-             listener.exitKeyValueExpression(this);
-        }
-    }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitKeyValueExpression) {
             return visitor.visitKeyValueExpression(this);
@@ -883,16 +825,6 @@ export class TokenSearchContext extends antlr.ParserRuleContext {
     }
     public override get ruleIndex(): number {
         return DQLParser.RULE_tokenSearch;
-    }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterTokenSearch) {
-             listener.enterTokenSearch(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitTokenSearch) {
-             listener.exitTokenSearch(this);
-        }
     }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitTokenSearch) {
@@ -953,16 +885,6 @@ export class GroupExpressionContext extends antlr.ParserRuleContext {
     public override get ruleIndex(): number {
         return DQLParser.RULE_groupExpression;
     }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterGroupExpression) {
-             listener.enterGroupExpression(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitGroupExpression) {
-             listener.exitGroupExpression(this);
-        }
-    }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitGroupExpression) {
             return visitor.visitGroupExpression(this);
@@ -986,16 +908,6 @@ export class GroupContentContext extends antlr.ParserRuleContext {
     public override get ruleIndex(): number {
         return DQLParser.RULE_groupContent;
     }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterGroupContent) {
-             listener.enterGroupContent(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitGroupContent) {
-             listener.exitGroupContent(this);
-        }
-    }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitGroupContent) {
             return visitor.visitGroupContent(this);
@@ -1015,16 +927,6 @@ export class FieldContext extends antlr.ParserRuleContext {
     }
     public override get ruleIndex(): number {
         return DQLParser.RULE_field;
-    }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterField) {
-             listener.enterField(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitField) {
-             listener.exitField(this);
-        }
     }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitField) {
@@ -1048,16 +950,6 @@ export class ValueContext extends antlr.ParserRuleContext {
     }
     public override get ruleIndex(): number {
         return DQLParser.RULE_value;
-    }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterValue) {
-             listener.enterValue(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitValue) {
-             listener.exitValue(this);
-        }
     }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitValue) {
@@ -1087,16 +979,6 @@ export class ComparisonOperatorContext extends antlr.ParserRuleContext {
     }
     public override get ruleIndex(): number {
         return DQLParser.RULE_comparisonOperator;
-    }
-    public override enterRule(listener: DQLParserListener): void {
-        if(listener.enterComparisonOperator) {
-             listener.enterComparisonOperator(this);
-        }
-    }
-    public override exitRule(listener: DQLParserListener): void {
-        if(listener.exitComparisonOperator) {
-             listener.exitComparisonOperator(this);
-        }
     }
     public override accept<Result>(visitor: DQLParserVisitor<Result>): Result | null {
         if (visitor.visitComparisonOperator) {
