@@ -10,6 +10,7 @@ export const BASE_API = '/api/enhancements';
 
 export const SEARCH_STRATEGY = {
   PPL: 'ppl',
+  PPL_RAW: 'pplraw',
   SQL: 'sql',
   SQL_ASYNC: 'sqlasync',
   PPL_ASYNC: 'pplasync',

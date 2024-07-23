@@ -53,7 +53,7 @@ export interface SearchInterceptorDeps {
   startServices: Promise<[CoreStart, any, unknown]>;
   toasts: ToastsSetup;
   usageCollector?: SearchUsageCollector;
-  uiActions: UiActionsStart;
+  uiActions?: UiActionsStart;
 }
 
 export class SearchInterceptor {

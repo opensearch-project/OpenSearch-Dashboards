@@ -105,6 +105,7 @@ export class QueryEnhancementsPlugin
             visualizable: false,
           },
           supportedAppNames: ['discover'],
+          connectionService: this.connectionsService,
         },
       },
     });
@@ -149,6 +150,7 @@ export class QueryEnhancementsPlugin
           },
           showDocLinks: false,
           supportedAppNames: ['discover'],
+          connectionService: this.connectionsService,
         },
       },
     });
@@ -171,6 +173,7 @@ export class QueryEnhancementsPlugin
           },
           showDocLinks: false,
           supportedAppNames: ['discover'],
+          connectionService: this.connectionsService,
         },
       },
     });

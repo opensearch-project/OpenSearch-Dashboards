@@ -38,7 +38,7 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
   protected indexPatterns!: DataPublicPluginStart['indexPatterns'];
   protected dataFrame$ = new BehaviorSubject<IDataFrameResponse | undefined>(undefined);
-  protected uiActions: UiActionsStart;
+  protected uiActions?: UiActionsStart;
 
   constructor(
     deps: SearchInterceptorDeps,
@@ -86,7 +86,7 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
     const queryId = uuid();
     // Send an initial submit event to get faster feedback to clients waiting for info, since
     // polling will wait for the first polling cycle to finish before sending anything
-    this.uiActions.getTrigger(ASYNC_TRIGGER_ID).exec({
+    this.uiActions?.getTrigger(ASYNC_TRIGGER_ID).exec({
       queryId,
       queryStatus: JobState.SUBMITTED,
     });
@@ -95,7 +95,7 @@ export class SQLAsyncSearchInterceptor extends SearchInterceptor {
       if (pollingResult) {
         const queryStatus = parseJobState(pollingResult.body.meta.status)!;
 
-        this.uiActions.getTrigger(ASYNC_TRIGGER_ID).exec({
+        this.uiActions?.getTrigger(ASYNC_TRIGGER_ID).exec({
           queryId,
           queryStatus,
         });

@@ -124,7 +124,7 @@ function DevToolsWrapper({
           onSelectedDataSource={onChange}
           disabled={!dataSourceEnabled}
           fullWidth={false}
-          compressed
+          compressed={true}
         />
       </div>
     );
