@@ -189,6 +189,7 @@ export const IndexPattern = ({ fields, prefix, onChange, disabled, model: _model
                 }
                 disabled={false}
                 fullWidth={false}
+                compressed={true}
                 removePrepend={true}
                 isClearable={false}
               />

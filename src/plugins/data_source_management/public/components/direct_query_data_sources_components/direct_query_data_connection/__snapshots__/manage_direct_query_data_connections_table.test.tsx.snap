@@ -107,6 +107,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                       }
                     >
                       <DataSourceSelector
+                        compressed={true}
                         disabled={false}
                         fullWidth={true}
                         notifications={
@@ -135,7 +136,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                         <EuiComboBox
                           aria-label="Select a data source"
                           async={false}
-                          compressed={false}
+                          compressed={true}
                           data-test-subj="dataSourceSelectorComboBox"
                           fullWidth={true}
                           isClearable={true}
@@ -171,14 +172,14 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                             aria-expanded={false}
                             aria-haspopup="listbox"
                             aria-label="Select a data source"
-                            className="euiComboBox euiComboBox--fullWidth"
+                            className="euiComboBox euiComboBox--compressed euiComboBox--fullWidth"
                             data-test-subj="dataSourceSelectorComboBox"
                             onKeyDown={[Function]}
                             role="combobox"
                           >
                             <EuiComboBoxInput
                               autoSizeInputRef={[Function]}
-                              compressed={false}
+                              compressed={true}
                               fullWidth={true}
                               hasSelectedOptions={true}
                               inputRef={[Function]}
@@ -220,7 +221,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                                     "onClick": [Function],
                                   }
                                 }
-                                compressed={false}
+                                compressed={true}
                                 fullWidth={true}
                                 icon={
                                   Object {
@@ -236,7 +237,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                                 prepend="Data source"
                               >
                                 <div
-                                  className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--group"
+                                  className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
                                 >
                                   <EuiFormLabel
                                     className="euiFormControlLayout__prepend"
@@ -251,7 +252,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                                     className="euiFormControlLayout__childrenWrapper"
                                   >
                                     <div
-                                      className="euiComboBox__inputWrap euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable euiComboBox__inputWrap--inGroup"
+                                      className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable euiComboBox__inputWrap--inGroup"
                                       data-test-subj="comboBoxInput"
                                       onClick={[Function]}
                                       tabIndex={-1}
@@ -342,7 +343,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                                           "onClick": [Function],
                                         }
                                       }
-                                      compressed={false}
+                                      compressed={true}
                                       icon={
                                         Object {
                                           "aria-label": "Open list of options",
@@ -361,7 +362,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                                         <EuiFormControlLayoutClearButton
                                           data-test-subj="comboBoxClearButton"
                                           onClick={[Function]}
-                                          size="m"
+                                          size="s"
                                         >
                                           <EuiI18n
                                             default="Clear input"
@@ -369,7 +370,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                                           >
                                             <button
                                               aria-label="Clear input"
-                                              className="euiFormControlLayoutClearButton"
+                                              className="euiFormControlLayoutClearButton euiFormControlLayoutClearButton--small"
                                               data-test-subj="comboBoxClearButton"
                                               onClick={[Function]}
                                               type="button"
@@ -392,7 +393,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                                           disabled={false}
                                           iconRef={[Function]}
                                           onClick={[Function]}
-                                          size="m"
+                                          size="s"
                                           type="arrowDown"
                                         >
                                           <button
@@ -406,14 +407,14 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                                             <EuiIcon
                                               aria-hidden="true"
                                               className="euiFormControlLayoutCustomIcon__icon"
-                                              size="m"
+                                              size="s"
                                               type="arrowDown"
                                             >
                                               <span
                                                 aria-hidden="true"
                                                 className="euiFormControlLayoutCustomIcon__icon"
                                                 data-euiicon-type="arrowDown"
-                                                size="m"
+                                                size="s"
                                               />
                                             </EuiIcon>
                                           </button>
