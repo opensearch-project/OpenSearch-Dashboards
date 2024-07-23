@@ -48,6 +48,9 @@ const names: Record<string, string> = {
   visualizations: i18n.translate('advancedSettings.categoryNames.visualizationsLabel', {
     defaultMessage: 'Visualizations',
   }),
+  visbuilder: i18n.translate('advancedSettings.categoryNames.visbuilderLabel', {
+    defaultMessage: 'VisBuilder',
+  }),
   discover: i18n.translate('advancedSettings.categoryNames.discoverLabel', {
     defaultMessage: 'Discover',
   }),
