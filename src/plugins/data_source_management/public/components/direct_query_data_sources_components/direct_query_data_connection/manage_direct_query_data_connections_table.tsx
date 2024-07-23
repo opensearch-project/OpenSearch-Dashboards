@@ -68,6 +68,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   const [data, setData] = useState<DataConnection[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
+  const [selectedConnection, setSelectedConnection] = useState<string | undefined>('');
   const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | undefined>('');
   const [searchText, setSearchText] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -99,6 +100,42 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       });
   }, [http, notifications.toasts, selectedDataSourceId, featureFlagStatus]);
 
+  const deleteDataSources = useCallback(() => {
+    if (!selectedConnection) return;
+
+    const endpoint =
+      featureFlagStatus && selectedDataSourceId !== undefined
+        ? `${DATACONNECTIONS_BASE}/${selectedConnection}/dataSourceMDSId=${selectedDataSourceId}`
+        : `${DATACONNECTIONS_BASE}/${selectedConnection}`;
+
+    setIsLoading(true);
+
+    http
+      .delete(endpoint)
+      .then(() => {
+        notifications.toasts.addSuccess(
+          `Data connection ${selectedConnection} deleted successfully`
+        );
+        setData(data.filter((connection) => connection.name !== selectedConnection));
+      })
+      .catch((err) => {
+        notifications.toasts.addDanger(
+          `Data connection ${selectedConnection} not deleted. See output for more details.`
+        );
+      })
+      .finally(() => {
+        setIsLoading(false);
+        setSelectedConnection(''); // Clear the selected connection after deletion
+      });
+  }, [
+    http,
+    notifications.toasts,
+    selectedDataSourceId,
+    featureFlagStatus,
+    selectedConnection,
+    data,
+  ]);
+
   useEffect(() => {
     fetchDataSources();
   }, [fetchDataSources]);
@@ -108,19 +145,17 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
     setSelectedDataSourceId(dataSourceId);
   };
 
-  const deleteConnection = (connectionName: string) => {
-    setData(data.filter((connection) => !(connection.name === connectionName)));
-  };
-
   const displayDeleteModal = (connectionName: string) => {
+    setSelectedConnection(connectionName);
     setModalLayout(
       <DeleteModal
         onConfirm={() => {
           setIsModalVisible(false);
-          deleteConnection(connectionName);
+          deleteDataSources();
         }}
         onCancel={() => {
           setIsModalVisible(false);
+          setSelectedConnection(''); // Clear the selected connection if cancel is clicked
         }}
         title={`Delete ${connectionName}`}
         message={`Are you sure you want to delete ${connectionName}?`}
