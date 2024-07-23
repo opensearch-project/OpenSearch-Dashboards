@@ -67,8 +67,6 @@ export const Template: FunctionComponent<Props> = ({
          * ToDo: Custom branded favicons will not work correctly across all browsers with
          * these `link` elements and single type. Try to guess the image and use only one.
          *
-         * Favicons (generated from https://realfavicongenerator.net/)
-         *
          * For user customized favicon using yml file:
          * If user inputs a valid URL, we guarantee basic favicon customization, such as
          * browser favicon(Chrome, Firefox, Safari, and Edge), apple touch icon, safari
