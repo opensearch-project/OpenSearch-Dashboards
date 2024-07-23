@@ -1,0 +1,163 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Column expression components in materialized view renders column expression components in materialized view with default options 1`] = `
+<div
+  className="euiFlexItem euiFlexItem--flexGrowZero"
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownLeft"
+        id="columnFunctionExpression-1"
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <button
+            className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--success"
+            onClick={[Function]}
+          >
+            <span
+              className="euiExpression__description"
+            />
+             
+            <span
+              className="euiExpression__value"
+            >
+              count(field1)
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownLeft"
+        id="columnFunctionExpressionAlias-1"
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <button
+            className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--accent"
+            onClick={[Function]}
+          >
+            <span
+              className="euiExpression__description"
+            >
+              AS
+            </span>
+             
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        aria-label="delete-column-expression"
+        className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="trash"
+          size="m"
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`Column expression components in materialized view renders column expression components in materialized view with different options 1`] = `
+<div
+  className="euiFlexItem euiFlexItem--flexGrowZero"
+>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+  >
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownLeft"
+        id="columnFunctionExpression-2"
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <button
+            className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--success"
+            onClick={[Function]}
+          >
+            <span
+              className="euiExpression__description"
+            />
+             
+            <span
+              className="euiExpression__value"
+            >
+              sum(field2)
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <div
+        className="euiPopover euiPopover--anchorDownLeft"
+        id="columnFunctionExpressionAlias-2"
+      >
+        <div
+          className="euiPopover__anchor"
+        >
+          <button
+            className="euiExpression euiExpression-isClickable euiExpression-isUppercase euiExpression--accent"
+            onClick={[Function]}
+          >
+            <span
+              className="euiExpression__description"
+            >
+              AS
+            </span>
+             
+          </button>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero"
+    >
+      <button
+        aria-label="delete-column-expression"
+        className="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="trash"
+          size="m"
+        />
+      </button>
+    </div>
+  </div>
+</div>
+`;

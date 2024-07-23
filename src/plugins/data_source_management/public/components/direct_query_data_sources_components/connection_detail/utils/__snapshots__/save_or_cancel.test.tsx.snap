@@ -1,0 +1,36 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SaveOrCancel renders correctly 1`] = `
+<EuiBottomBar
+  affordForDisplacement={false}
+>
+  <EuiFlexGroup
+    justifyContent="flexEnd"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButtonEmpty
+        color="ghost"
+        iconType="cross"
+        onClick={[MockFunction]}
+        size="s"
+      >
+        Discard change(s)
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiButton
+        fill={true}
+        iconType="check"
+        onClick={[MockFunction]}
+        size="s"
+      >
+        Save
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiBottomBar>
+`;
