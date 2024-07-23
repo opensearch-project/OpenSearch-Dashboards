@@ -1,0 +1,1960 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Delete fields modal in skipping index renders delete fields modal in skipping index with default options 1`] = `
+<Portal
+  containerInfo={
+    <div
+      class="euiOverlayMask euiOverlayMask--aboveHeader"
+    >
+      <div
+        data-eui="EuiFocusTrap"
+      >
+        <div
+          class="euiModal euiModal--maxWidth-default"
+          tabindex="0"
+        >
+          <button
+            aria-label="Closes this modal window"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="cross"
+            />
+          </button>
+          <div
+            class="euiModal__flex"
+          >
+            <div
+              class="euiModalHeader"
+            >
+              <div
+                class="euiModalHeader__title"
+              >
+                <h1>
+                  Bulk delete
+                </h1>
+              </div>
+            </div>
+            <div
+              class="euiModalBody"
+            >
+              <div
+                class="euiModalBody__overflow"
+              >
+                <div>
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+                  >
+                    <div
+                      class="euiFlexItem euiSearchBar__searchHolder"
+                    >
+                      <div
+                        class="euiFormControlLayout euiFormControlLayout--fullWidth"
+                      >
+                        <div
+                          class="euiFormControlLayout__childrenWrapper"
+                        >
+                          <input
+                            aria-label="This is a search bar. After typing your query, hit enter to filter the results lower in the page."
+                            class="euiFieldSearch euiFieldSearch--fullWidth"
+                            placeholder="Search..."
+                            type="search"
+                            value=""
+                          />
+                          <div
+                            class="euiFormControlLayoutIcons"
+                          >
+                            <span
+                              class="euiFormControlLayoutCustomIcon"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="euiFormControlLayoutCustomIcon__icon"
+                                data-euiicon-type="search"
+                              />
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiSpacer euiSpacer--l"
+                  />
+                  <div
+                    class="euiBasicTable"
+                  >
+                    <div>
+                      <div
+                        class="euiTableHeaderMobile"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                        >
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <div
+                              class="euiCheckbox"
+                            >
+                              <input
+                                aria-label="Select all rows"
+                                class="euiCheckbox__input"
+                                disabled=""
+                                id="_selection_column-checkbox_generated-id"
+                                type="checkbox"
+                              />
+                              <div
+                                class="euiCheckbox__square"
+                              />
+                              <label
+                                class="euiCheckbox__label"
+                                for="_selection_column-checkbox_generated-id"
+                              >
+                                Select all rows
+                              </label>
+                            </div>
+                          </div>
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <div
+                              class="euiTableSortMobile"
+                            >
+                              <div
+                                class="euiPopover euiPopover--anchorDownRight"
+                              >
+                                <div
+                                  class="euiPopover__anchor"
+                                >
+                                  <button
+                                    class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        class="euiButtonContent__icon"
+                                        color="inherit"
+                                        data-euiicon-type="arrowDown"
+                                      />
+                                      <span
+                                        class="euiButtonEmpty__text"
+                                      >
+                                        Sorting
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <table
+                        class="euiTable euiTable--responsive"
+                        id="__table_generated-id"
+                        tabindex="-1"
+                      >
+                        <caption
+                          class="euiScreenReaderOnly euiTableCaption"
+                        />
+                        <thead>
+                          <tr>
+                            <th
+                              class="euiTableHeaderCellCheckbox"
+                              scope="col"
+                            >
+                              <div
+                                class="euiTableCellContent"
+                              >
+                                <div
+                                  class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                >
+                                  <input
+                                    aria-label="Select all rows"
+                                    class="euiCheckbox__input"
+                                    data-test-subj="checkboxSelectAll"
+                                    disabled=""
+                                    id="_selection_column-checkbox_generated-id"
+                                    type="checkbox"
+                                  />
+                                  <div
+                                    class="euiCheckbox__square"
+                                  />
+                                </div>
+                              </div>
+                            </th>
+                            <th
+                              aria-live="polite"
+                              aria-sort="none"
+                              class="euiTableHeaderCell"
+                              data-test-subj="tableHeaderCell_fieldName_0"
+                              role="columnheader"
+                              scope="col"
+                            >
+                              <button
+                                class="euiTableHeaderButton"
+                                data-test-subj="tableHeaderSortButton"
+                                type="button"
+                              >
+                                <span
+                                  class="euiTableCellContent"
+                                >
+                                  <span
+                                    class="euiTableCellContent__text"
+                                    title="Field name"
+                                  >
+                                    Field name
+                                  </span>
+                                </span>
+                              </button>
+                            </th>
+                            <th
+                              aria-live="polite"
+                              aria-sort="none"
+                              class="euiTableHeaderCell"
+                              data-test-subj="tableHeaderCell_dataType_1"
+                              role="columnheader"
+                              scope="col"
+                            >
+                              <button
+                                class="euiTableHeaderButton"
+                                data-test-subj="tableHeaderSortButton"
+                                type="button"
+                              >
+                                <span
+                                  class="euiTableCellContent"
+                                >
+                                  <span
+                                    class="euiTableCellContent__text"
+                                    title="Datatype"
+                                  >
+                                    Datatype
+                                  </span>
+                                </span>
+                              </button>
+                            </th>
+                            <th
+                              aria-live="polite"
+                              aria-sort="none"
+                              class="euiTableHeaderCell"
+                              data-test-subj="tableHeaderCell_accelerationMethod_2"
+                              role="columnheader"
+                              scope="col"
+                            >
+                              <button
+                                class="euiTableHeaderButton"
+                                data-test-subj="tableHeaderSortButton"
+                                type="button"
+                              >
+                                <span
+                                  class="euiTableCellContent"
+                                >
+                                  <span
+                                    class="euiTableCellContent__text"
+                                    title="Acceleration method"
+                                  >
+                                    Acceleration method
+                                  </span>
+                                </span>
+                              </button>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr
+                            class="euiTableRow"
+                          >
+                            <td
+                              class="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                              colspan="4"
+                            >
+                              <div
+                                class="euiTableCellContent euiTableCellContent--alignCenter"
+                              >
+                                <span
+                                  class="euiTableCellContent__text"
+                                >
+                                  No items found
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiModalFooter"
+            >
+              <button
+                class="euiButton euiButton--primary"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text"
+                  >
+                    Cancel
+                  </span>
+                </span>
+              </button>
+              <button
+                class="euiButton euiButton--danger euiButton--fill"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+>
+  <div
+    data-eui="EuiFocusTrap"
+  >
+    <div
+      className="euiModal euiModal--maxWidth-default"
+      onKeyDown={[Function]}
+      tabIndex={0}
+    >
+      <button
+        aria-label="Closes this modal window"
+        className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="cross"
+          size="m"
+        />
+      </button>
+      <div
+        className="euiModal__flex"
+      >
+        <div
+          className="euiModalHeader"
+        >
+          <div
+            className="euiModalHeader__title"
+          >
+            <h1>
+              Bulk delete
+            </h1>
+          </div>
+        </div>
+        <div
+          className="euiModalBody"
+        >
+          <div
+            className="euiModalBody__overflow"
+          >
+            <div>
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+              >
+                <div
+                  className="euiFlexItem euiSearchBar__searchHolder"
+                >
+                  <div
+                    className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                  >
+                    <div
+                      className="euiFormControlLayout__childrenWrapper"
+                    >
+                      <input
+                        aria-label="This is a search bar. After typing your query, hit enter to filter the results lower in the page."
+                        className="euiFieldSearch euiFieldSearch--fullWidth"
+                        defaultValue=""
+                        onKeyUp={[Function]}
+                        placeholder="Search..."
+                        type="search"
+                      />
+                      <div
+                        className="euiFormControlLayoutIcons"
+                      >
+                        <span
+                          className="euiFormControlLayoutCustomIcon"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiFormControlLayoutCustomIcon__icon"
+                            data-euiicon-type="search"
+                            size="m"
+                          />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+              <div
+                className="euiBasicTable"
+              >
+                <div>
+                  <div
+                    className="euiTableHeaderMobile"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <div
+                          className="euiCheckbox"
+                        >
+                          <input
+                            aria-label="Select all rows"
+                            checked={false}
+                            className="euiCheckbox__input"
+                            disabled={true}
+                            id="_selection_column-checkbox_generated-id"
+                            onChange={[Function]}
+                            type="checkbox"
+                          />
+                          <div
+                            className="euiCheckbox__square"
+                          />
+                          <label
+                            className="euiCheckbox__label"
+                            htmlFor="_selection_column-checkbox_generated-id"
+                          >
+                            Select all rows
+                          </label>
+                        </div>
+                      </div>
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <div
+                          className="euiTableSortMobile"
+                        >
+                          <div
+                            className="euiPopover euiPopover--anchorDownRight"
+                          >
+                            <div
+                              className="euiPopover__anchor"
+                            >
+                              <button
+                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonContent__icon"
+                                    color="inherit"
+                                    data-euiicon-type="arrowDown"
+                                    size="s"
+                                  />
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Sorting
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <table
+                    className="euiTable euiTable--responsive"
+                    id="__table_generated-id"
+                    tabIndex={-1}
+                  >
+                    <caption
+                      className="euiScreenReaderOnly euiTableCaption"
+                    />
+                    <thead>
+                      <tr>
+                        <th
+                          className="euiTableHeaderCellCheckbox"
+                          scope="col"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableCellContent"
+                          >
+                            <div
+                              className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                            >
+                              <input
+                                aria-label="Select all rows"
+                                checked={false}
+                                className="euiCheckbox__input"
+                                data-test-subj="checkboxSelectAll"
+                                disabled={true}
+                                id="_selection_column-checkbox_generated-id"
+                                onChange={[Function]}
+                                type="checkbox"
+                              />
+                              <div
+                                className="euiCheckbox__square"
+                              />
+                            </div>
+                          </div>
+                        </th>
+                        <th
+                          aria-live="polite"
+                          aria-sort="none"
+                          className="euiTableHeaderCell"
+                          data-test-subj="tableHeaderCell_fieldName_0"
+                          role="columnheader"
+                          scope="col"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <button
+                            className="euiTableHeaderButton"
+                            data-test-subj="tableHeaderSortButton"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiTableCellContent"
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Field name"
+                              >
+                                Field name
+                              </span>
+                            </span>
+                          </button>
+                        </th>
+                        <th
+                          aria-live="polite"
+                          aria-sort="none"
+                          className="euiTableHeaderCell"
+                          data-test-subj="tableHeaderCell_dataType_1"
+                          role="columnheader"
+                          scope="col"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <button
+                            className="euiTableHeaderButton"
+                            data-test-subj="tableHeaderSortButton"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiTableCellContent"
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Datatype"
+                              >
+                                Datatype
+                              </span>
+                            </span>
+                          </button>
+                        </th>
+                        <th
+                          aria-live="polite"
+                          aria-sort="none"
+                          className="euiTableHeaderCell"
+                          data-test-subj="tableHeaderCell_accelerationMethod_2"
+                          role="columnheader"
+                          scope="col"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <button
+                            className="euiTableHeaderButton"
+                            data-test-subj="tableHeaderSortButton"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiTableCellContent"
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Acceleration method"
+                              >
+                                Acceleration method
+                              </span>
+                            </span>
+                          </button>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        className="euiTableRow"
+                      >
+                        <td
+                          className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+                          colSpan={4}
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableCellContent euiTableCellContent--alignCenter"
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                            >
+                              No items found
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiModalFooter"
+        >
+          <button
+            className="euiButton euiButton--primary"
+            disabled={false}
+            onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
+            type="button"
+          >
+            <span
+              className="euiButtonContent euiButton__content"
+            >
+              <span
+                className="euiButton__text"
+              >
+                Cancel
+              </span>
+            </span>
+          </button>
+          <button
+            className="euiButton euiButton--danger euiButton--fill"
+            disabled={false}
+            onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
+            type="button"
+          >
+            <span
+              className="euiButtonContent euiButton__content"
+            >
+              <span
+                className="euiButton__text"
+              >
+                Delete
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</Portal>
+`;
+
+exports[`Delete fields modal in skipping index renders delete fields modal in skipping index with different options 1`] = `
+<Portal
+  containerInfo={
+    <div
+      class="euiOverlayMask euiOverlayMask--aboveHeader"
+    >
+      <div
+        data-eui="EuiFocusTrap"
+      >
+        <div
+          class="euiModal euiModal--maxWidth-default"
+          tabindex="0"
+        >
+          <button
+            aria-label="Closes this modal window"
+            class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+            type="button"
+          >
+            <span
+              aria-hidden="true"
+              class="euiButtonIcon__icon"
+              color="inherit"
+              data-euiicon-type="cross"
+            />
+          </button>
+          <div
+            class="euiModal__flex"
+          >
+            <div
+              class="euiModalHeader"
+            >
+              <div
+                class="euiModalHeader__title"
+              >
+                <h1>
+                  Bulk delete
+                </h1>
+              </div>
+            </div>
+            <div
+              class="euiModalBody"
+            >
+              <div
+                class="euiModalBody__overflow"
+              >
+                <div>
+                  <div
+                    class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+                  >
+                    <div
+                      class="euiFlexItem euiSearchBar__searchHolder"
+                    >
+                      <div
+                        class="euiFormControlLayout euiFormControlLayout--fullWidth"
+                      >
+                        <div
+                          class="euiFormControlLayout__childrenWrapper"
+                        >
+                          <input
+                            aria-label="This is a search bar. After typing your query, hit enter to filter the results lower in the page."
+                            class="euiFieldSearch euiFieldSearch--fullWidth"
+                            placeholder="Search..."
+                            type="search"
+                            value=""
+                          />
+                          <div
+                            class="euiFormControlLayoutIcons"
+                          >
+                            <span
+                              class="euiFormControlLayoutCustomIcon"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="euiFormControlLayoutCustomIcon__icon"
+                                data-euiicon-type="search"
+                              />
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div
+                    class="euiSpacer euiSpacer--l"
+                  />
+                  <div
+                    class="euiBasicTable"
+                  >
+                    <div>
+                      <div
+                        class="euiTableHeaderMobile"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                        >
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <div
+                              class="euiCheckbox"
+                            >
+                              <input
+                                aria-label="Select all rows"
+                                class="euiCheckbox__input"
+                                id="_selection_column-checkbox_generated-id"
+                                type="checkbox"
+                              />
+                              <div
+                                class="euiCheckbox__square"
+                              />
+                              <label
+                                class="euiCheckbox__label"
+                                for="_selection_column-checkbox_generated-id"
+                              >
+                                Select all rows
+                              </label>
+                            </div>
+                          </div>
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <div
+                              class="euiTableSortMobile"
+                            >
+                              <div
+                                class="euiPopover euiPopover--anchorDownRight"
+                              >
+                                <div
+                                  class="euiPopover__anchor"
+                                >
+                                  <button
+                                    class="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                                    type="button"
+                                  >
+                                    <span
+                                      class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                    >
+                                      <span
+                                        class="euiButtonContent__icon"
+                                        color="inherit"
+                                        data-euiicon-type="arrowDown"
+                                      />
+                                      <span
+                                        class="euiButtonEmpty__text"
+                                      >
+                                        Sorting
+                                      </span>
+                                    </span>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <table
+                        class="euiTable euiTable--responsive"
+                        id="__table_generated-id"
+                        tabindex="-1"
+                      >
+                        <caption
+                          class="euiScreenReaderOnly euiTableCaption"
+                        />
+                        <thead>
+                          <tr>
+                            <th
+                              class="euiTableHeaderCellCheckbox"
+                              scope="col"
+                            >
+                              <div
+                                class="euiTableCellContent"
+                              >
+                                <div
+                                  class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                >
+                                  <input
+                                    aria-label="Select all rows"
+                                    class="euiCheckbox__input"
+                                    data-test-subj="checkboxSelectAll"
+                                    id="_selection_column-checkbox_generated-id"
+                                    type="checkbox"
+                                  />
+                                  <div
+                                    class="euiCheckbox__square"
+                                  />
+                                </div>
+                              </div>
+                            </th>
+                            <th
+                              aria-live="polite"
+                              aria-sort="none"
+                              class="euiTableHeaderCell"
+                              data-test-subj="tableHeaderCell_fieldName_0"
+                              role="columnheader"
+                              scope="col"
+                            >
+                              <button
+                                class="euiTableHeaderButton"
+                                data-test-subj="tableHeaderSortButton"
+                                type="button"
+                              >
+                                <span
+                                  class="euiTableCellContent"
+                                >
+                                  <span
+                                    class="euiTableCellContent__text"
+                                    title="Field name"
+                                  >
+                                    Field name
+                                  </span>
+                                </span>
+                              </button>
+                            </th>
+                            <th
+                              aria-live="polite"
+                              aria-sort="none"
+                              class="euiTableHeaderCell"
+                              data-test-subj="tableHeaderCell_dataType_1"
+                              role="columnheader"
+                              scope="col"
+                            >
+                              <button
+                                class="euiTableHeaderButton"
+                                data-test-subj="tableHeaderSortButton"
+                                type="button"
+                              >
+                                <span
+                                  class="euiTableCellContent"
+                                >
+                                  <span
+                                    class="euiTableCellContent__text"
+                                    title="Datatype"
+                                  >
+                                    Datatype
+                                  </span>
+                                </span>
+                              </button>
+                            </th>
+                            <th
+                              aria-live="polite"
+                              aria-sort="none"
+                              class="euiTableHeaderCell"
+                              data-test-subj="tableHeaderCell_accelerationMethod_2"
+                              role="columnheader"
+                              scope="col"
+                            >
+                              <button
+                                class="euiTableHeaderButton"
+                                data-test-subj="tableHeaderSortButton"
+                                type="button"
+                              >
+                                <span
+                                  class="euiTableCellContent"
+                                >
+                                  <span
+                                    class="euiTableCellContent__text"
+                                    title="Acceleration method"
+                                  >
+                                    Acceleration method
+                                  </span>
+                                </span>
+                              </button>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr
+                            class="euiTableRow euiTableRow-isSelectable"
+                          >
+                            <td
+                              class="euiTableRowCellCheckbox"
+                            >
+                              <div
+                                class="euiTableCellContent"
+                              >
+                                <div
+                                  class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                >
+                                  <input
+                                    aria-label="Select this row"
+                                    class="euiCheckbox__input"
+                                    data-test-subj="checkboxSelectRow-1"
+                                    id="_selection_column_1-checkbox"
+                                    title="Select this row"
+                                    type="checkbox"
+                                  />
+                                  <div
+                                    class="euiCheckbox__square"
+                                  />
+                                </div>
+                              </div>
+                            </td>
+                            <td
+                              class="euiTableRowCell"
+                            >
+                              <div
+                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Field name
+                              </div>
+                              <div
+                                class="euiTableCellContent euiTableCellContent--truncateText"
+                              >
+                                <span
+                                  class="euiTableCellContent__text"
+                                >
+                                  field1
+                                </span>
+                              </div>
+                            </td>
+                            <td
+                              class="euiTableRowCell"
+                            >
+                              <div
+                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Datatype
+                              </div>
+                              <div
+                                class="euiTableCellContent euiTableCellContent--truncateText"
+                              >
+                                <span
+                                  class="euiTableCellContent__text"
+                                >
+                                  string
+                                </span>
+                              </div>
+                            </td>
+                            <td
+                              class="euiTableRowCell"
+                            >
+                              <div
+                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Acceleration method
+                              </div>
+                              <div
+                                class="euiTableCellContent euiTableCellContent--truncateText"
+                              >
+                                <span
+                                  class="euiTableCellContent__text"
+                                >
+                                  PARTITION
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                          <tr
+                            class="euiTableRow euiTableRow-isSelectable"
+                          >
+                            <td
+                              class="euiTableRowCellCheckbox"
+                            >
+                              <div
+                                class="euiTableCellContent"
+                              >
+                                <div
+                                  class="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                                >
+                                  <input
+                                    aria-label="Select this row"
+                                    class="euiCheckbox__input"
+                                    data-test-subj="checkboxSelectRow-2"
+                                    id="_selection_column_2-checkbox"
+                                    title="Select this row"
+                                    type="checkbox"
+                                  />
+                                  <div
+                                    class="euiCheckbox__square"
+                                  />
+                                </div>
+                              </div>
+                            </td>
+                            <td
+                              class="euiTableRowCell"
+                            >
+                              <div
+                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Field name
+                              </div>
+                              <div
+                                class="euiTableCellContent euiTableCellContent--truncateText"
+                              >
+                                <span
+                                  class="euiTableCellContent__text"
+                                >
+                                  field2
+                                </span>
+                              </div>
+                            </td>
+                            <td
+                              class="euiTableRowCell"
+                            >
+                              <div
+                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Datatype
+                              </div>
+                              <div
+                                class="euiTableCellContent euiTableCellContent--truncateText"
+                              >
+                                <span
+                                  class="euiTableCellContent__text"
+                                >
+                                  number
+                                </span>
+                              </div>
+                            </td>
+                            <td
+                              class="euiTableRowCell"
+                            >
+                              <div
+                                class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                              >
+                                Acceleration method
+                              </div>
+                              <div
+                                class="euiTableCellContent euiTableCellContent--truncateText"
+                              >
+                                <span
+                                  class="euiTableCellContent__text"
+                                >
+                                  VALUE_SET
+                                </span>
+                              </div>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div>
+                      <div
+                        class="euiSpacer euiSpacer--m"
+                      />
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <div
+                            class="euiPopover euiPopover--anchorUpRight"
+                          >
+                            <div
+                              class="euiPopover__anchor"
+                            >
+                              <button
+                                class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                                data-test-subj="tablePaginationPopoverButton"
+                                type="button"
+                              >
+                                <span
+                                  class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                >
+                                  <span
+                                    class="euiButtonContent__icon"
+                                    color="inherit"
+                                    data-euiicon-type="arrowDown"
+                                  />
+                                  <span
+                                    class="euiButtonEmpty__text"
+                                  >
+                                    Rows per page
+                                    : 
+                                    20
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <nav
+                            class="euiPagination"
+                          >
+                            <button
+                              aria-label="Previous page"
+                              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                              data-test-subj="pagination-button-previous"
+                              disabled=""
+                              type="button"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="euiButtonIcon__icon"
+                                color="inherit"
+                                data-euiicon-type="arrowLeft"
+                              />
+                            </button>
+                            <ul
+                              class="euiPagination__list"
+                            >
+                              <li
+                                class="euiPagination__item"
+                              >
+                                <button
+                                  aria-controls="__table_generated-id"
+                                  aria-current="true"
+                                  aria-label="Page 1 of 1"
+                                  class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                                  data-test-subj="pagination-button-0"
+                                  disabled=""
+                                  type="button"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButtonEmpty__content"
+                                  >
+                                    <span
+                                      class="euiButtonEmpty__text"
+                                    >
+                                      1
+                                    </span>
+                                  </span>
+                                </button>
+                              </li>
+                            </ul>
+                            <button
+                              aria-label="Next page"
+                              class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                              data-test-subj="pagination-button-next"
+                              disabled=""
+                              type="button"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="euiButtonIcon__icon"
+                                color="inherit"
+                                data-euiicon-type="arrowRight"
+                              />
+                            </button>
+                          </nav>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiModalFooter"
+            >
+              <button
+                class="euiButton euiButton--primary"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text"
+                  >
+                    Cancel
+                  </span>
+                </span>
+              </button>
+              <button
+                class="euiButton euiButton--danger euiButton--fill"
+                type="button"
+              >
+                <span
+                  class="euiButtonContent euiButton__content"
+                >
+                  <span
+                    class="euiButton__text"
+                  >
+                    Delete
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+>
+  <div
+    data-eui="EuiFocusTrap"
+  >
+    <div
+      className="euiModal euiModal--maxWidth-default"
+      onKeyDown={[Function]}
+      tabIndex={0}
+    >
+      <button
+        aria-label="Closes this modal window"
+        className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiModal__closeIcon"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          className="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="cross"
+          size="m"
+        />
+      </button>
+      <div
+        className="euiModal__flex"
+      >
+        <div
+          className="euiModalHeader"
+        >
+          <div
+            className="euiModalHeader__title"
+          >
+            <h1>
+              Bulk delete
+            </h1>
+          </div>
+        </div>
+        <div
+          className="euiModalBody"
+        >
+          <div
+            className="euiModalBody__overflow"
+          >
+            <div>
+              <div
+                className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+              >
+                <div
+                  className="euiFlexItem euiSearchBar__searchHolder"
+                >
+                  <div
+                    className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                  >
+                    <div
+                      className="euiFormControlLayout__childrenWrapper"
+                    >
+                      <input
+                        aria-label="This is a search bar. After typing your query, hit enter to filter the results lower in the page."
+                        className="euiFieldSearch euiFieldSearch--fullWidth"
+                        defaultValue=""
+                        onKeyUp={[Function]}
+                        placeholder="Search..."
+                        type="search"
+                      />
+                      <div
+                        className="euiFormControlLayoutIcons"
+                      >
+                        <span
+                          className="euiFormControlLayoutCustomIcon"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiFormControlLayoutCustomIcon__icon"
+                            data-euiicon-type="search"
+                            size="m"
+                          />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                className="euiSpacer euiSpacer--l"
+              />
+              <div
+                className="euiBasicTable"
+              >
+                <div>
+                  <div
+                    className="euiTableHeaderMobile"
+                  >
+                    <div
+                      className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                    >
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <div
+                          className="euiCheckbox"
+                        >
+                          <input
+                            aria-label="Select all rows"
+                            checked={false}
+                            className="euiCheckbox__input"
+                            disabled={false}
+                            id="_selection_column-checkbox_generated-id"
+                            onChange={[Function]}
+                            type="checkbox"
+                          />
+                          <div
+                            className="euiCheckbox__square"
+                          />
+                          <label
+                            className="euiCheckbox__label"
+                            htmlFor="_selection_column-checkbox_generated-id"
+                          >
+                            Select all rows
+                          </label>
+                        </div>
+                      </div>
+                      <div
+                        className="euiFlexItem euiFlexItem--flexGrowZero"
+                      >
+                        <div
+                          className="euiTableSortMobile"
+                        >
+                          <div
+                            className="euiPopover euiPopover--anchorDownRight"
+                          >
+                            <div
+                              className="euiPopover__anchor"
+                            >
+                              <button
+                                className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
+                              >
+                                <span
+                                  className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                                >
+                                  <span
+                                    className="euiButtonContent__icon"
+                                    color="inherit"
+                                    data-euiicon-type="arrowDown"
+                                    size="s"
+                                  />
+                                  <span
+                                    className="euiButtonEmpty__text"
+                                  >
+                                    Sorting
+                                  </span>
+                                </span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <table
+                    className="euiTable euiTable--responsive"
+                    id="__table_generated-id"
+                    tabIndex={-1}
+                  >
+                    <caption
+                      className="euiScreenReaderOnly euiTableCaption"
+                    />
+                    <thead>
+                      <tr>
+                        <th
+                          className="euiTableHeaderCellCheckbox"
+                          scope="col"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableCellContent"
+                          >
+                            <div
+                              className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                            >
+                              <input
+                                aria-label="Select all rows"
+                                checked={false}
+                                className="euiCheckbox__input"
+                                data-test-subj="checkboxSelectAll"
+                                disabled={false}
+                                id="_selection_column-checkbox_generated-id"
+                                onChange={[Function]}
+                                type="checkbox"
+                              />
+                              <div
+                                className="euiCheckbox__square"
+                              />
+                            </div>
+                          </div>
+                        </th>
+                        <th
+                          aria-live="polite"
+                          aria-sort="none"
+                          className="euiTableHeaderCell"
+                          data-test-subj="tableHeaderCell_fieldName_0"
+                          role="columnheader"
+                          scope="col"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <button
+                            className="euiTableHeaderButton"
+                            data-test-subj="tableHeaderSortButton"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiTableCellContent"
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Field name"
+                              >
+                                Field name
+                              </span>
+                            </span>
+                          </button>
+                        </th>
+                        <th
+                          aria-live="polite"
+                          aria-sort="none"
+                          className="euiTableHeaderCell"
+                          data-test-subj="tableHeaderCell_dataType_1"
+                          role="columnheader"
+                          scope="col"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <button
+                            className="euiTableHeaderButton"
+                            data-test-subj="tableHeaderSortButton"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiTableCellContent"
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Datatype"
+                              >
+                                Datatype
+                              </span>
+                            </span>
+                          </button>
+                        </th>
+                        <th
+                          aria-live="polite"
+                          aria-sort="none"
+                          className="euiTableHeaderCell"
+                          data-test-subj="tableHeaderCell_accelerationMethod_2"
+                          role="columnheader"
+                          scope="col"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <button
+                            className="euiTableHeaderButton"
+                            data-test-subj="tableHeaderSortButton"
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiTableCellContent"
+                            >
+                              <span
+                                className="euiTableCellContent__text"
+                                title="Acceleration method"
+                              >
+                                Acceleration method
+                              </span>
+                            </span>
+                          </button>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr
+                        className="euiTableRow euiTableRow-isSelectable"
+                      >
+                        <td
+                          className="euiTableRowCellCheckbox"
+                        >
+                          <div
+                            className="euiTableCellContent"
+                          >
+                            <div
+                              className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                            >
+                              <input
+                                aria-label="Select this row"
+                                checked={false}
+                                className="euiCheckbox__input"
+                                data-test-subj="checkboxSelectRow-1"
+                                disabled={false}
+                                id="_selection_column_1-checkbox"
+                                onChange={[Function]}
+                                title="Select this row"
+                                type="checkbox"
+                              />
+                              <div
+                                className="euiCheckbox__square"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Field name
+                          </div>
+                          <div
+                            className="euiTableCellContent euiTableCellContent--truncateText"
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                            >
+                              field1
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Datatype
+                          </div>
+                          <div
+                            className="euiTableCellContent euiTableCellContent--truncateText"
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                            >
+                              string
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Acceleration method
+                          </div>
+                          <div
+                            className="euiTableCellContent euiTableCellContent--truncateText"
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                            >
+                              PARTITION
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr
+                        className="euiTableRow euiTableRow-isSelectable"
+                      >
+                        <td
+                          className="euiTableRowCellCheckbox"
+                        >
+                          <div
+                            className="euiTableCellContent"
+                          >
+                            <div
+                              className="euiCheckbox euiCheckbox--inList euiCheckbox--noLabel"
+                            >
+                              <input
+                                aria-label="Select this row"
+                                checked={false}
+                                className="euiCheckbox__input"
+                                data-test-subj="checkboxSelectRow-2"
+                                disabled={false}
+                                id="_selection_column_2-checkbox"
+                                onChange={[Function]}
+                                title="Select this row"
+                                type="checkbox"
+                              />
+                              <div
+                                className="euiCheckbox__square"
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Field name
+                          </div>
+                          <div
+                            className="euiTableCellContent euiTableCellContent--truncateText"
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                            >
+                              field2
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Datatype
+                          </div>
+                          <div
+                            className="euiTableCellContent euiTableCellContent--truncateText"
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                            >
+                              number
+                            </span>
+                          </div>
+                        </td>
+                        <td
+                          className="euiTableRowCell"
+                          style={
+                            Object {
+                              "width": undefined,
+                            }
+                          }
+                        >
+                          <div
+                            className="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                          >
+                            Acceleration method
+                          </div>
+                          <div
+                            className="euiTableCellContent euiTableCellContent--truncateText"
+                          >
+                            <span
+                              className="euiTableCellContent__text"
+                            >
+                              VALUE_SET
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div>
+                  <div
+                    className="euiSpacer euiSpacer--m"
+                  />
+                  <div
+                    className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+                  >
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <div
+                        className="euiPopover euiPopover--anchorUpRight"
+                      >
+                        <div
+                          className="euiPopover__anchor"
+                        >
+                          <button
+                            className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                            data-test-subj="tablePaginationPopoverButton"
+                            disabled={false}
+                            onClick={[Function]}
+                            type="button"
+                          >
+                            <span
+                              className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                            >
+                              <span
+                                className="euiButtonContent__icon"
+                                color="inherit"
+                                data-euiicon-type="arrowDown"
+                                size="s"
+                              />
+                              <span
+                                className="euiButtonEmpty__text"
+                              >
+                                Rows per page
+                                : 
+                                20
+                              </span>
+                            </span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div
+                      className="euiFlexItem euiFlexItem--flexGrowZero"
+                    >
+                      <nav
+                        className="euiPagination"
+                      >
+                        <button
+                          aria-label="Previous page"
+                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                          data-test-subj="pagination-button-previous"
+                          disabled={true}
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowLeft"
+                            size="m"
+                          />
+                        </button>
+                        <ul
+                          className="euiPagination__list"
+                        >
+                          <li
+                            className="euiPagination__item"
+                          >
+                            <button
+                              aria-controls="__table_generated-id"
+                              aria-current={true}
+                              aria-label="Page 1 of 1"
+                              className="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                              data-test-subj="pagination-button-0"
+                              disabled={true}
+                              onClick={[Function]}
+                              type="button"
+                            >
+                              <span
+                                className="euiButtonContent euiButtonEmpty__content"
+                              >
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  1
+                                </span>
+                              </span>
+                            </button>
+                          </li>
+                        </ul>
+                        <button
+                          aria-label="Next page"
+                          className="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                          data-test-subj="pagination-button-next"
+                          disabled={true}
+                          onClick={[Function]}
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            className="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="arrowRight"
+                            size="m"
+                          />
+                        </button>
+                      </nav>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          className="euiModalFooter"
+        >
+          <button
+            className="euiButton euiButton--primary"
+            disabled={false}
+            onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
+            type="button"
+          >
+            <span
+              className="euiButtonContent euiButton__content"
+            >
+              <span
+                className="euiButton__text"
+              >
+                Cancel
+              </span>
+            </span>
+          </button>
+          <button
+            className="euiButton euiButton--danger euiButton--fill"
+            disabled={false}
+            onClick={[Function]}
+            style={
+              Object {
+                "minWidth": undefined,
+              }
+            }
+            type="button"
+          >
+            <span
+              className="euiButtonContent euiButton__content"
+            >
+              <span
+                className="euiButton__text"
+              >
+                Delete
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</Portal>
+`;
