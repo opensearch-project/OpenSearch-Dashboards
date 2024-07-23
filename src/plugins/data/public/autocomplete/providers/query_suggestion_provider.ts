@@ -52,7 +52,7 @@ export interface QuerySuggestionGetFnArgs {
   selectionEnd: number;
   signal?: AbortSignal;
   boolFilter?: any;
-  position?: monaco.Position;
+  position: monaco.Position;
   connectionService?: any; // will need to add type when ConnectionService is properly exposed from queryEnhancements
 }
 
