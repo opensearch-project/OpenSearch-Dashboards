@@ -104,6 +104,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
             selectedOption: [],
           });
           this.onSelectedDataSources([]);
+          return;
         }
 
         if (!this._isMounted) return;
