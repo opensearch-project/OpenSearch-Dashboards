@@ -37,6 +37,7 @@ import S3Logo from '../icons/s3_logo.svg';
 import { DataSourceSelector } from '../../data_source_selector';
 import { DataSourceOption } from '../../data_source_menu/types';
 import { DATACONNECTIONS_BASE } from '../../../constants';
+import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 
 interface DataConnection {
   connectionType: DirectQueryDatasourceType;
@@ -164,6 +165,8 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
     setIsModalVisible(true);
   };
 
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
+
   const actions = [
     {
       name: (datasource: DataConnection) =>
@@ -182,7 +185,12 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       icon: 'bolt',
       type: 'icon',
       available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
-      onClick: () => {},
+      onClick: (datasource: DataConnection) => {
+        renderCreateAccelerationFlyout({
+          dataSourceName: datasource.name,
+          dataSourceMDSId: selectedDataSourceId,
+        });
+      },
       'data-test-subj': 'action-accelerate',
     },
     {
