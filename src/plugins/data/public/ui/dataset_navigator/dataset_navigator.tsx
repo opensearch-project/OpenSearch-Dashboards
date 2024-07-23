@@ -461,7 +461,7 @@ export const DataSetNavigator = ({
                     {
                       name: S3DataSourcesLabel,
                       panel: 4,
-                      onClick: () => {
+                      onClick: async () => {
                         const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
                         if (
                           (externalDataSourcesCache.status === CachedDataSourceStatus.Empty ||
@@ -473,7 +473,7 @@ export const DataSetNavigator = ({
                         } else if (
                           externalDataSourcesCache.status === CachedDataSourceStatus.Updated
                         ) {
-                          setExternalDataSources(
+                          await handleSelectExternalDataSource(
                             externalDataSourcesCache.externalDataSources.map((ds) => ({
                               id: ds.dataSourceRef,
                               name: ds.name,
