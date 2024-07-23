@@ -368,7 +368,6 @@ export class DQLParser extends antlr.Parser {
             {
             this.state = 70;
             this.match(DQLParser.LPAREN);
-            {
             this.state = 72;
             this.errorHandler.sync(this);
             _la = this.tokenStream.LA(1);
@@ -379,7 +378,6 @@ export class DQLParser extends antlr.Parser {
                 }
             }
 
-            }
             this.state = 74;
             this.groupContent();
             this.state = 82;
@@ -397,7 +395,6 @@ export class DQLParser extends antlr.Parser {
                     this.errorHandler.reportMatch(this);
                     this.consume();
                 }
-                {
                 this.state = 77;
                 this.errorHandler.sync(this);
                 _la = this.tokenStream.LA(1);
@@ -408,7 +405,6 @@ export class DQLParser extends antlr.Parser {
                     }
                 }
 
-                }
                 this.state = 79;
                 this.groupContent();
                 }
@@ -855,6 +851,15 @@ export class GroupExpressionContext extends antlr.ParserRuleContext {
     public RPAREN(): antlr.TerminalNode {
         return this.getToken(DQLParser.RPAREN, 0)!;
     }
+    public NOT(): antlr.TerminalNode[];
+    public NOT(i: number): antlr.TerminalNode | null;
+    public NOT(i?: number): antlr.TerminalNode | null | antlr.TerminalNode[] {
+    	if (i === undefined) {
+    		return this.getTokens(DQLParser.NOT);
+    	} else {
+    		return this.getToken(DQLParser.NOT, i);
+    	}
+    }
     public OR(): antlr.TerminalNode[];
     public OR(i: number): antlr.TerminalNode | null;
     public OR(i?: number): antlr.TerminalNode | null | antlr.TerminalNode[] {
@@ -871,15 +876,6 @@ export class GroupExpressionContext extends antlr.ParserRuleContext {
     		return this.getTokens(DQLParser.AND);
     	} else {
     		return this.getToken(DQLParser.AND, i);
-    	}
-    }
-    public NOT(): antlr.TerminalNode[];
-    public NOT(i: number): antlr.TerminalNode | null;
-    public NOT(i?: number): antlr.TerminalNode | null | antlr.TerminalNode[] {
-    	if (i === undefined) {
-    		return this.getTokens(DQLParser.NOT);
-    	} else {
-    		return this.getToken(DQLParser.NOT, i);
     	}
     }
     public override get ruleIndex(): number {
