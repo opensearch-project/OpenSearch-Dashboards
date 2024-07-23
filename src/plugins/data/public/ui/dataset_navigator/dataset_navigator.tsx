@@ -132,50 +132,6 @@ export const DataSetNavigator = ({
   }, [indexPatternsService, dataSetId, savedObjectsClient, selectedDataSet, isMounted]);
 
   useEffect(() => {
-    if (selectedDataSource) {
-      setIsLoading(true);
-      fetchIndices(searchService, selectedDataSource.id).then((indices) => {
-        const objects = indices.map(({ indexName }: { indexName: string }) => ({
-          id: indexName,
-          title: indexName,
-          dataSourceRef: {
-            id: selectedDataSource.id,
-            name: selectedDataSource.name,
-            type: selectedDataSource.type,
-          },
-        }));
-        setSelectedDataSourceObjects(objects);
-        setIsLoading(false);
-      });
-    }
-  }, [searchService, selectedDataSource]);
-
-  useEffect(() => {
-    const getFieldsForWildcard = async (object: SimpleObject | SimpleDataSet) => {
-      const fields = await indexPatternsService.getFieldsForWildcard({
-        pattern: object.title,
-        dataSourceId: object.dataSourceRef?.id,
-      });
-
-      const timeFields = fields.filter((field: any) => field.type === 'date');
-
-      setSelectedObject({
-        id: object.id,
-        title: object.title,
-        fields,
-        timeFields,
-        ...(timeFields[0]?.name ? { timeFieldName: timeFields[0].name } : {}),
-        dataSourceRef: object.dataSourceRef,
-        type: SIMPLE_DATA_SET_TYPES.TEMPORARY,
-      });
-    };
-
-    if (selectedObject) {
-      getFieldsForWildcard(selectedObject);
-    }
-  }, [indexPatternsService, searchService, selectedObject]);
-
-  useEffect(() => {
     const status = dataSourcesLoadStatus.toLowerCase();
     const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
     if (status === DirectQueryLoadingStatus.SUCCESS) {
@@ -282,6 +238,54 @@ export const DataSetNavigator = ({
       }
     }
   }, [selectedExternalDataSource, selectedDatabase, tablesLoadStatus]);
+
+  const handleSelectedDataSource = useCallback(
+    async (source) => {
+      if (source) {
+        setIsLoading(true);
+        await fetchIndices(searchService, source.id).then((indices) => {
+          const objects = indices.map((indexName: string) => ({
+            id: indexName,
+            title: indexName,
+            dataSourceRef: {
+              id: source.id,
+              name: source.name,
+              type: source.type,
+            },
+          }));
+          setSelectedDataSourceObjects(objects);
+          setIsLoading(false);
+        });
+      }
+    },
+    [searchService]
+  );
+
+  const handleSelectedObject = useCallback(
+    async (object) => {
+      setIsLoading(true);
+      if (object) {
+        const fields = await indexPatternsService.getFieldsForWildcard({
+          pattern: object.title,
+          dataSourceId: object.dataSourceRef?.id,
+        });
+
+        const timeFields = fields.filter((field: any) => field.type === 'date');
+
+        setSelectedObject({
+          id: object.id,
+          title: object.title,
+          fields,
+          timeFields,
+          ...(timeFields[0]?.name ? { timeFieldName: timeFields[0].name } : {}),
+          dataSourceRef: object.dataSourceRef,
+          type: SIMPLE_DATA_SET_TYPES.TEMPORARY,
+        });
+        setIsLoading(false);
+      }
+    },
+    [indexPatternsService]
+  );
 
   const handleSelectedDataSet = useCallback(
     async (ds: any) => {
@@ -457,7 +461,7 @@ export const DataSetNavigator = ({
               ...dataSources.map((dataSource) => ({
                 name: dataSource.name,
                 panel: 3,
-                onClick: () => setSelectedDataSource(dataSource),
+                onClick: async () => await handleSelectedDataSource(dataSource),
               })),
             ],
             content: <div>{isLoading && LoadingSpinner}</div>,
@@ -467,11 +471,8 @@ export const DataSetNavigator = ({
             title: selectedDataSource?.name ?? indicesLabel,
             items: selectedDataSourceObjects.map((object) => ({
               name: object.title,
-              onClick: () =>
-                setSelectedObject({
-                  ...object,
-                  type: SIMPLE_DATA_SET_TYPES.TEMPORARY,
-                }),
+              onClick: async () =>
+                await handleSelectedObject({ ...object, type: SIMPLE_DATA_SET_TYPES.TEMPORARY }),
             })),
             content: <div>{isLoading && LoadingSpinner}</div>,
           },
