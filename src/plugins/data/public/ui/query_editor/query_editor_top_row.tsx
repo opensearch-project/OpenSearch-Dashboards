@@ -15,6 +15,7 @@ import {
 import classNames from 'classnames';
 import { compact, isEqual } from 'lodash';
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   DataSource,
   IDataPluginServices,
@@ -64,6 +65,7 @@ export interface QueryEditorTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
+  datePickerRef?: React.RefObject<HTMLDivElement>;
 }
 
 // Needed for React.lazy
@@ -290,7 +292,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
     return (
       <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
-        <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
           {renderDatePicker()}
           <EuiFlexItem grow={false}>{button}</EuiFlexItem>
         </EuiFlexGroup>
@@ -355,6 +357,14 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     'osdQueryEditor--withDatePicker': props.showDatePicker,
   });
 
+  const datePicker = (
+    <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+      <EuiFlexItem grow={false} className="osdQueryEditor--updateButtonWrapper">
+        {renderUpdateButton()}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <EuiFlexGroup
       className={classes}
@@ -363,12 +373,14 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       direction="column"
       justifyContent="flexEnd"
     >
+      {props?.datePickerRef?.current && uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)
+        ? createPortal(datePicker, props.datePickerRef.current)
+        : datePicker}
       {renderQueryEditor()}
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="none">
           <EuiFlexItem grow={false}>{props.filterBar}</EuiFlexItem>
           <EuiFlexItem>{renderSharingMetaFields()}</EuiFlexItem>
-          <EuiFlexItem grow={false}>{renderUpdateButton()}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
