@@ -164,7 +164,8 @@ export const DataSetNavigator = ({
         setCachedDatabases(dataSourceCache.databases);
       }
     }
-  }, [databasesLoadStatus, selectedExternalDataSource, startLoadingDatabases]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedExternalDataSource]);
 
   // Retrieve databases from cache upon success
   useEffect(() => {
@@ -212,7 +213,8 @@ export const DataSetNavigator = ({
         setCachedTables(databaseCache.tables);
       }
     }
-  }, [selectedExternalDataSource, selectedDatabase, tablesLoadStatus, startLoadingTables]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedExternalDataSource, selectedDatabase]);
 
   // Retrieve tables from cache upon success
   useEffect(() => {
