@@ -9,7 +9,7 @@ import { IStorageWrapper, Storage } from '../../opensearch_dashboards_utils/publ
 import { ConfigSchema } from '../common/config';
 import { ConnectionsService, setData, setStorage } from './services';
 import { createQueryAssistExtension } from './query_assist';
-import { PPLSearchInterceptor, SQLAsyncSearchInterceptor, SQLSearchInterceptor } from './search';
+import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
 import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
@@ -54,27 +54,13 @@ export class QueryEnhancementsPlugin
       this.connectionsService
     );
 
-    const sqlSearchInterceptor = new SQLSearchInterceptor(
-      {
-        toasts: core.notifications.toasts,
-        http: core.http,
-        uiSettings: core.uiSettings,
-        startServices: core.getStartServices(),
-        usageCollector: data.search.usageCollector,
-      },
-      this.connectionsService
-    );
-
-    const sqlAsyncSearchInterceptor = new SQLAsyncSearchInterceptor(
-      {
-        toasts: core.notifications.toasts,
-        http: core.http,
-        uiSettings: core.uiSettings,
-        startServices: core.getStartServices(),
-        usageCollector: data.search.usageCollector,
-      },
-      this.connectionsService
-    );
+    const sqlSearchInterceptor = new SQLSearchInterceptor({
+      toasts: core.notifications.toasts,
+      http: core.http,
+      uiSettings: core.uiSettings,
+      startServices: core.getStartServices(),
+      usageCollector: data.search.usageCollector,
+    });
 
     data.__enhance({
       ui: {
@@ -111,28 +97,6 @@ export class QueryEnhancementsPlugin
             showDataSetsSelector: true,
             showDataSourcesSelector: true,
             queryStringInput: { initialValue: 'SELECT * FROM <data_source>' },
-          },
-          fields: {
-            filterable: false,
-            visualizable: false,
-          },
-          showDocLinks: false,
-          supportedAppNames: ['discover'],
-        },
-      },
-    });
-
-    data.__enhance({
-      ui: {
-        query: {
-          language: 'SQLAsync',
-          search: sqlAsyncSearchInterceptor,
-          searchBar: {
-            showDatePicker: false,
-            showFilterBar: false,
-            showDataSetsSelector: false,
-            showDataSourcesSelector: true,
-            queryStringInput: { initialValue: 'SHOW DATABASES IN ::mys3::' },
           },
           fields: {
             filterable: false,

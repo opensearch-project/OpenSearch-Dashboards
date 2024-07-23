@@ -7,8 +7,8 @@ import { HttpStart } from 'opensearch-dashboards/public';
 
 export const fetchIfExternalDataSourcesEnabled = async (http: HttpStart) => {
   try {
-    const resp = await http.head('/api/dataconnections');
-    return resp.status === 200;
+    await http.get('/api/dataconnections');
+    return true;
   } catch (e) {
     return false;
   }
