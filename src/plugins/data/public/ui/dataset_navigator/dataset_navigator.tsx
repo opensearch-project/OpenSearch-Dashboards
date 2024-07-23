@@ -338,6 +338,7 @@ export const DataSetNavigator = ({
           name: dataSet.title,
           dataSourceRef: dataSet.dataSourceRef?.id,
         });
+        searchService.df.clear();
         onSelectDataSet(dataSet);
         queryService.queryString.setQuery(getInitialQuery(dataSet));
         closePopover();
@@ -348,7 +349,13 @@ export const DataSetNavigator = ({
         setSelectedDataSet(ds);
       }
     },
-    [indexPatternsService, onSelectDataSet, queryService.queryString, uiService.Settings]
+    [
+      indexPatternsService,
+      onSelectDataSet,
+      queryService.queryString,
+      searchService.df,
+      uiService.Settings,
+    ]
   );
 
   const RefreshButton = (
