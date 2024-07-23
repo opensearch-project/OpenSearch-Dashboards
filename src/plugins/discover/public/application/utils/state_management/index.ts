@@ -7,7 +7,7 @@ import { TypedUseSelectorHook } from 'react-redux';
 import {
   RootState,
   setIndexPattern as updateIndexPattern,
-  setDataset as updateDataSet,
+  setDataSet as updateDataSet,
   useTypedDispatch,
   useTypedSelector,
 } from '../../../../../data_explorer/public';

@@ -141,9 +141,9 @@ export const Sidebar: FC = ({ children }) => {
   );
 
   const handleDataSetSelection = useCallback(
-    (dataSet: any) => {
+    (selectedDataSet: any) => {
       batch(() => {
-        const { id, ...ds } = dataSet;
+        const { id, ...ds } = selectedDataSet;
         dispatch(setIndexPattern(id));
         dispatch(setDataSet(ds));
       });

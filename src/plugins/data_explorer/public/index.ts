@@ -18,5 +18,5 @@ export {
   useTypedSelector,
   useTypedDispatch,
   setIndexPattern,
-  setDataset,
+  setDataSet,
 } from './utils/state_management';
