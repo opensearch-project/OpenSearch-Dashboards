@@ -19,11 +19,17 @@ import { NoView } from './no_view';
 import { View } from '../services/view_service/view';
 import { shallowEqual } from '../utils/use/shallow_equal';
 import './app_container.scss';
+import { useOpenSearchDashboards } from '../../../opensearch_dashboards_react/public';
+import { IDataPluginServices } from '../../../data/public';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from './constants';
 
 export const AppContainer = React.memo(
   ({ view, params }: { view?: View; params: AppMountParameters }) => {
     const isMobile = useIsWithinBreakpoints(['xs', 's', 'm']);
-    // TODO: Make this more robust.
+
+    const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
+    const { uiSettings } = opensearchDashboards.services;
+
     const topLinkRef = useRef<HTMLDivElement>(null);
     const datePickerRef = useRef<HTMLDivElement>(null);
     if (!view) {
@@ -43,14 +49,22 @@ export const AppContainer = React.memo(
     // Render the application DOM.
     return (
       <div className="mainPage">
-        <EuiFlexGroup direction="row" className="mainPage navBar" gutterSize="none">
-          <EuiFlexItem>
-            <div ref={topLinkRef} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <div ref={datePickerRef} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {uiSettings?.get(QUERY_ENHANCEMENT_ENABLED_SETTING) && (
+          <EuiFlexGroup
+            direction="row"
+            className="mainPage navBar"
+            gutterSize="none"
+            alignItems="center"
+            justifyContent="spaceBetween"
+          >
+            <EuiFlexItem grow={false}>
+              <div ref={topLinkRef} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <div ref={datePickerRef} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
 
         <EuiPage className="deLayout" paddingSize="none" grow={false}>
           {/* TODO: improve fallback state */}

@@ -25,7 +25,11 @@ import { setColumns, useDispatch, useSelector } from '../../utils/state_manageme
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { filterColumns } from '../utils/filter_columns';
-import { DEFAULT_COLUMNS_SETTING, MODIFY_COLUMNS_ON_SWITCH } from '../../../../common';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  MODIFY_COLUMNS_ON_SWITCH,
+  QUERY_ENHANCEMENT_ENABLED_SETTING,
+} from '../../../../common';
 import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
 import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
@@ -46,7 +50,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
       columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
     };
   });
-  const isEnhancementsEnabled = uiSettings.get('query:enhancements:enabled');
+  const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
   const filteredColumns = filterColumns(
     columns,
     indexPattern,

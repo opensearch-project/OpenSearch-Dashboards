@@ -26,7 +26,7 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
   overflow-y: auto;
 
   .navBar {
-    padding: $euiSizeS 0 $euiSizeM $euiSizeS;
+    padding: $euiSizeXS $euiSizeXS $euiSizeXS $euiSizeM;
     border-bottom: $euiBorderThin;
   }
 }

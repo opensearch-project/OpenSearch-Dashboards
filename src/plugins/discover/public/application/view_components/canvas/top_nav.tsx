@@ -6,7 +6,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Query, TimeRange } from 'src/plugins/data/common';
 import { createPortal } from 'react-dom';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { AppMountParameters } from '../../../../../../core/public';
 import { connectStorageToQueryState, opensearchFilters } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -102,13 +102,15 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
           <EuiFlexGroup gutterSize="m">
             {topNavLinks.map((topNavLink) => (
               <EuiFlexItem grow={false} key={topNavLink.id}>
-                <EuiButtonIcon
-                  onClick={(event) => {
-                    topNavLink.run(event.currentTarget);
-                  }}
-                  iconType={topNavLink.iconType}
-                  aria-label={topNavLink.ariaLabel}
-                />
+                <EuiToolTip position="bottom" content={topNavLink.label}>
+                  <EuiButtonIcon
+                    onClick={(event) => {
+                      topNavLink.run(event.currentTarget);
+                    }}
+                    iconType={topNavLink.iconType}
+                    aria-label={topNavLink.ariaLabel}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             ))}
           </EuiFlexGroup>,
@@ -131,6 +133,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
         onQuerySubmit={opts.onQuerySubmit}
         savedQueryId={state.savedQuery}
         onSavedQueryIdChange={updateSavedQueryId}
+        datePickerRef={opts?.optionalRef?.datePickerRef}
       />
     </>
   );
