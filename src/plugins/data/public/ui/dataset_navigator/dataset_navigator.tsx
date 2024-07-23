@@ -440,8 +440,8 @@ export const DataSetNavigator = ({
             items: indexPatterns.flatMap((indexPattern, indexNum, arr) => [
               {
                 name: indexPattern.title,
-                onClick: () => {
-                  setSelectedDataSet({
+                onClick: async () => {
+                  await handleSelectedDataSet({
                     id: indexPattern.id ?? indexPattern.title,
                     title: indexPattern.title,
                     fields: indexPattern.fields,
