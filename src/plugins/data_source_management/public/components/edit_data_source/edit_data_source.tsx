@@ -46,7 +46,6 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
     setBreadcrumbs,
     http,
     notifications: { toasts },
-    application,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
   const dataSourceID: string = props.match.params.id;
 
@@ -163,7 +162,6 @@ export const EditDataSource: React.FunctionComponent<RouteComponentProps<{ id: s
             handleSubmit={handleSubmit}
             displayToastMessage={handleDisplayToastMessage}
             handleTestConnection={handleTestConnection}
-            canManageDataSource={!!application.capabilities?.dataSource?.canManage}
           />
         ) : null}
         {isLoading || !dataSource?.endpoint ? <LoadingMask /> : null}

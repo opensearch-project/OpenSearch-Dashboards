@@ -56,7 +56,6 @@ export interface EditDataSourceProps {
   onDeleteDataSource?: () => Promise<void>;
   onSetDefaultDataSource: () => Promise<void>;
   displayToastMessage: (info: ToastMessageItem) => void;
-  canManageDataSource: boolean;
 }
 export interface EditDataSourceState {
   formErrorsByField: CreateEditDataSourceValidation;
@@ -649,7 +648,6 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
         onClickTestConnection={this.onClickTestConnection}
         onClickSetDefault={this.setDefaultDataSource}
         isDefault={this.props.isDefault}
-        canManageDataSource={this.props.canManageDataSource}
       />
     );
   };
@@ -1133,26 +1131,24 @@ export class EditDataSourceForm extends React.Component<EditDataSourceProps, Edi
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {this.props.canManageDataSource ? (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                className="mgtAdvancedSettingsForm__button"
-                disabled={!this.isFormValid()}
-                color="secondary"
-                fill
-                size="s"
-                iconType="check"
-                isLoading={this.state.isLoading}
-                onClick={this.onClickUpdateDataSource}
-                data-test-subj="datasource-edit-saveButton"
-              >
-                <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.saveButtonLabel"
-                  defaultMessage="Save changes"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              className="mgtAdvancedSettingsForm__button"
+              disabled={!this.isFormValid()}
+              color="secondary"
+              fill
+              size="s"
+              iconType="check"
+              isLoading={this.state.isLoading}
+              onClick={this.onClickUpdateDataSource}
+              data-test-subj="datasource-edit-saveButton"
+            >
+              <FormattedMessage
+                id="dataSourcesManagement.editDataSource.saveButtonLabel"
+                defaultMessage="Save changes"
+              />
+            </EuiButton>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiBottomBar>
     );

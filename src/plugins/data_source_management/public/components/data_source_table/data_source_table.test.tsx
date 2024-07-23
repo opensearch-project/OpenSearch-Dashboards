@@ -24,10 +24,7 @@ const tableColumnHeaderButtonIdentifier = 'EuiTableHeaderCell .euiTableHeaderBut
 const emptyStateIdentifier = '[data-test-subj="datasourceTableEmptyState"]';
 
 describe('DataSourceTable', () => {
-  const mockedContext = {
-    ...mockManagementPlugin.createDataSourceManagementContext(),
-    application: { capabilities: { dataSource: { canManage: true } } },
-  };
+  const mockedContext = mockManagementPlugin.createDataSourceManagementContext();
   const uiSettings = mockedContext.uiSettings;
   let component: ReactWrapper<any, Readonly<{}>, React.Component<{}, {}, any>>;
   const history = (scopedHistoryMock.create() as unknown) as ScopedHistory;
@@ -170,38 +167,6 @@ describe('DataSourceTable', () => {
       expect(utils.setFirstDataSourceAsDefault).not.toHaveBeenCalled();
       // @ts-ignore
       expect(component.find(confirmModalIdentifier).exists()).toBe(false);
-    });
-  });
-
-  describe('should not manage datasources when canManageDataSource is false', () => {
-    const mockedContextWithFalseManage = {
-      ...mockManagementPlugin.createDataSourceManagementContext(),
-      application: { capabilities: { dataSource: { canManage: false } } },
-    };
-    beforeEach(async () => {
-      spyOn(utils, 'getDataSources').and.returnValue(Promise.reject());
-      await act(async () => {
-        component = await mount(
-          wrapWithIntl(
-            <DataSourceTable
-              history={history}
-              location={({} as unknown) as RouteComponentProps['location']}
-              match={({} as unknown) as RouteComponentProps['match']}
-            />
-          ),
-          {
-            wrappingComponent: OpenSearchDashboardsContextProvider,
-            wrappingComponentProps: {
-              services: mockedContextWithFalseManage,
-            },
-          }
-        );
-      });
-      component.update();
-    });
-    test('should render empty table', () => {
-      expect(component).toMatchSnapshot();
-      expect(component.find(emptyStateIdentifier).exists()).toBe(true);
     });
   });
 });
