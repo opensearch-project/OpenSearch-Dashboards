@@ -31,6 +31,11 @@ export enum JobState {
   CANCELLED = 'CANCELLED',
 }
 
+const jobStatesMap = Object.values(JobState).reduce((acc, value) => {
+  acc.set(value.toUpperCase(), value);
+  return acc;
+}, new Map<string, JobState>());
+
 /**
  * Convert a string to a {@link JobState} if possible. Case-insensitive. Returns `null` for
  * invalid strings or non-strings.
@@ -42,9 +47,7 @@ export const parseJobState = (maybeState: unknown): JobState | null => {
   if (!maybeState || typeof maybeState !== 'string') {
     return null;
   }
-  maybeState = maybeState.toUpperCase();
-  const result = Object.values(JobState).find((state) => state === maybeState);
-  return result ?? null;
+  return jobStatesMap.get(maybeState.toUpperCase()) ?? null;
 };
 
 export interface AsyncQueryContext {

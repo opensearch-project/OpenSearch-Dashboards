@@ -7,6 +7,8 @@ import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { concatMap, map } from 'rxjs/operators';
+import uuid from 'uuid';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DATA_FRAME_TYPES, getRawDataFrame, getRawQueryString } from '../../../data/common';
 import {
   DataPublicPluginStart,
@@ -28,8 +30,6 @@ import {
   parseJobState,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
-import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import uuid from 'uuid';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
