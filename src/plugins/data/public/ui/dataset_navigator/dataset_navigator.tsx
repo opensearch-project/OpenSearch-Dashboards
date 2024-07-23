@@ -344,7 +344,7 @@ export const DataSetNavigator = ({
       };
 
       if (ds) {
-        onDataSetSelected(ds);
+        await onDataSetSelected(ds);
         setSelectedDataSet(ds);
       }
     },
