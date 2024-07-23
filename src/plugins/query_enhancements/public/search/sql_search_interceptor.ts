@@ -125,17 +125,20 @@ export class SQLSearchInterceptor extends SearchInterceptor {
 
     const onPollingSuccess = (pollingResult: any) => {
       if (pollingResult) {
-        const queryStatus = parseJobState(pollingResult.body.meta.status)!;
+        const queryStatus = parseJobState(pollingResult.body?.meta?.status);
 
-        this.uiActions?.getTrigger(ASYNC_TRIGGER_ID).exec({
-          queryId,
-          queryStatus,
-        });
+        if (queryStatus) {
+          this.uiActions?.getTrigger(ASYNC_TRIGGER_ID).exec({
+            queryId,
+            queryStatus,
+          });
+        }
 
         switch (queryStatus) {
           case JobState.SUCCESS:
             return false;
           case JobState.FAILED:
+          case null:
             const jsError = new Error(pollingResult.data.error.response);
             this.deps.toasts.addError(jsError, {
               title: i18n.translate('queryEnhancements.sqlQueryError', {
