@@ -72,7 +72,9 @@ export interface ISearchSetup {
 }
 
 export interface ISearchStart<
-  SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest,
+  SearchStrategyRequest extends IOpenSearchDashboardsSearchRequest = IOpenSearchSearchRequest & {
+    rawRequest?: OpenSearchDashboardsRequest;
+  },
   SearchStrategyResponse extends IOpenSearchDashboardsSearchResponse = IOpenSearchSearchResponse
 > {
   aggs: AggsStart;

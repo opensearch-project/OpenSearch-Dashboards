@@ -11,6 +11,7 @@ import {
   WorkspaceAttribute,
   WorkspacesSetup,
 } from '../../../core/public';
+import { WorkspacePermissionMode } from '../common/constants';
 import { SavedObjectPermissions, WorkspaceAttributeWithPermission } from '../../../core/types';
 
 const WORKSPACES_API_BASE_URL = '/api/workspaces';
@@ -38,6 +39,7 @@ interface WorkspaceFindOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
+  permissionModes?: WorkspacePermissionMode[];
 }
 
 /**
@@ -118,7 +120,20 @@ export class WorkspaceClient {
     });
 
     if (result?.success) {
-      this.workspaces.workspaceList$.next(result.result.workspaces);
+      const resultWithWritePermission = await this.list({
+        perPage: 999,
+        permissionModes: [WorkspacePermissionMode.LibraryWrite],
+      });
+      if (resultWithWritePermission?.success) {
+        const workspaceIdsWithWritePermission = resultWithWritePermission.result.workspaces.map(
+          (workspace: WorkspaceAttribute) => workspace.id
+        );
+        const workspaces = result.result.workspaces.map((workspace: WorkspaceAttribute) => ({
+          ...workspace,
+          readonly: !workspaceIdsWithWritePermission.includes(workspace.id),
+        }));
+        this.workspaces.workspaceList$.next(workspaces);
+      }
     } else {
       this.workspaces.workspaceList$.next([]);
     }
@@ -233,6 +248,7 @@ export class WorkspaceClient {
    * @property {integer} [options.page=1]
    * @property {integer} [options.perPage=20]
    * @property {array} options.fields
+   * @property {string array} permissionModes
    * @returns A find result with workspaces matching the specified search.
    */
   public list(

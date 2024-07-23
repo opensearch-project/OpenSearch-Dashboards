@@ -25,8 +25,10 @@ import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
   QueryEnhancementsPluginStart,
+  QueryEnhancementsPluginStartDependencies,
 } from './types';
 import { OpenSearchObservabilityPlugin, OpenSearchPPLPlugin } from './utils';
+import { pplRawSearchStrategyProvider } from './search/ppl_raw_search_strategy';
 
 export class QueryEnhancementsPlugin
   implements Plugin<QueryEnhancementsPluginSetup, QueryEnhancementsPluginStart> {
@@ -51,6 +53,7 @@ export class QueryEnhancementsPlugin
     }
 
     const pplSearchStrategy = pplSearchStrategyProvider(this.config$, this.logger, client);
+    const pplRawSearchStrategy = pplRawSearchStrategyProvider(this.config$, this.logger, client);
     const sqlSearchStrategy = sqlSearchStrategyProvider(this.config$, this.logger, client);
     const sqlAsyncSearchStrategy = sqlAsyncSearchStrategyProvider(
       this.config$,
@@ -59,6 +62,7 @@ export class QueryEnhancementsPlugin
     );
 
     data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL, pplSearchStrategy);
+    data.search.registerSearchStrategy(SEARCH_STRATEGY.PPL_RAW, pplRawSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL, sqlSearchStrategy);
     data.search.registerSearchStrategy(SEARCH_STRATEGY.SQL_ASYNC, sqlAsyncSearchStrategy);
 

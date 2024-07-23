@@ -77,6 +77,7 @@ export interface SearchBarOwnProps {
   refreshInterval?: number;
   dateRangeFrom?: string;
   dateRangeTo?: string;
+  datePickerRef?: React.RefObject<HTMLDivElement>;
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
   settings?: Settings;
@@ -482,6 +483,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           }
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
+          datePickerRef={this.props.datePickerRef}
         />
       );
     }
@@ -518,6 +520,7 @@ class SearchBarUI extends Component<SearchBarProps, State> {
           filterBar={filterBar}
           dataTestSubj={this.props.dataTestSubj}
           indicateNoData={this.props.indicateNoData}
+          datePickerRef={this.props.datePickerRef}
         />
       );
     }

@@ -256,6 +256,16 @@ export function getWebpackConfig(bundle: Bundle, bundleRefs: BundleRefs, worker:
             loader: 'raw-loader',
           },
         },
+        {
+          test: /\.cjs$/,
+          include: /node_modules/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              presets: [BABEL_PRESET_PATH],
+            },
+          },
+        },
       ],
     },
 

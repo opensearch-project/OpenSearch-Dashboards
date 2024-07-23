@@ -304,7 +304,7 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
-  currentNavGroup$={
+  breadcrumbsEnricher$={
     BehaviorSubject {
       "_isScalar": false,
       "_value": undefined,
@@ -350,6 +350,17 @@ exports[`Header handles visibility and lock changes 1`] = `
           "syncErrorValue": null,
         },
       ],
+      "thrownError": null,
+    }
+  }
+  currentNavGroup$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
       "thrownError": null,
     }
   }
@@ -4056,7 +4067,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                 "thrownError": null,
               }
             }
-            currentNavgroup$={
+            breadcrumbsEnricher$={
               BehaviorSubject {
                 "_isScalar": false,
                 "_value": undefined,
@@ -4105,8 +4116,6 @@ exports[`Header handles visibility and lock changes 1`] = `
                 "thrownError": null,
               }
             }
-            navGroupEnabled={false}
-            navigateToApp={[MockFunction]}
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
@@ -7259,7 +7268,7 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
-  currentNavGroup$={
+  breadcrumbsEnricher$={
     BehaviorSubject {
       "_isScalar": false,
       "_value": undefined,
@@ -7305,6 +7314,17 @@ exports[`Header renders condensed header 1`] = `
           "syncErrorValue": null,
         },
       ],
+      "thrownError": null,
+    }
+  }
+  currentNavGroup$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
       "thrownError": null,
     }
   }
@@ -9782,7 +9802,7 @@ exports[`Header renders condensed header 1`] = `
                 "thrownError": null,
               }
             }
-            currentNavgroup$={
+            breadcrumbsEnricher$={
               BehaviorSubject {
                 "_isScalar": false,
                 "_value": undefined,
@@ -9831,8 +9851,6 @@ exports[`Header renders condensed header 1`] = `
                 "thrownError": null,
               }
             }
-            navGroupEnabled={false}
-            navigateToApp={[MockFunction]}
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={

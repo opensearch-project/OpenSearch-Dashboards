@@ -41,6 +41,7 @@ import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
 import {
+  enrichBreadcrumbsWithWorkspace,
   filterWorkspaceConfigurableApps,
   getFirstUseCaseOfFeatureConfigs,
   isAppAccessibleInWorkspace,
@@ -478,6 +479,9 @@ export class WorkspacePlugin
 
       // register get started card in new home page
       this.registerGetStartedCardToNewHome(core, contentManagement);
+
+      // set breadcrumbs enricher for workspace
+      this.breadcrumbsSubscription = enrichBreadcrumbsWithWorkspace(core);
     }
     return {};
   }
