@@ -26,7 +26,7 @@ import {
   fetchDataFramePolling,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
-import { ConnectionsService } from '../data_source_connection';
+import { ConnectionsService } from '../services';
 
 export class SQLAsyncSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];

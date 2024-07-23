@@ -18,7 +18,7 @@ import {
 } from '../../../data/public';
 import { API, FetchDataFrameContext, SEARCH_STRATEGY, fetchDataFrame } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
-import { ConnectionsService } from '../data_source_connection';
+import { ConnectionsService } from '../services';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
@@ -60,7 +60,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       queryConfig: {
         ...dataFrame.meta.queryConfig,
         ...(this.connectionsService.getSelectedConnection() && {
-          dataSourceId: this.connectionsService.getSelectedConnection()?.id,
+          dataSourceId: this.connectionsService.getSelectedConnection()?.dataSource.id,
         }),
       },
     };
