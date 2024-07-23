@@ -5,46 +5,48 @@
 
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
-import { of } from 'rxjs';
-import { distinctUntilChanged, switchMap, map } from 'rxjs/operators';
+import { from, of } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { getMdsDataSourceId } from '.';
 import {
   QueryEditorExtensionConfig,
   QueryEditorExtensionDependencies,
 } from '../../../../data/public';
 import { API } from '../../../common';
 import { ConfigSchema } from '../../../common/config';
-import { ConnectionsService } from '../../services';
-import { QueryAssistBar, QueryAssistBanner } from '../components';
+import { getData } from '../../services';
+import { QueryAssistBanner, QueryAssistBar } from '../components';
 
 /**
- * @returns observable list of query assist agent configured languages in the
- * selected data source.
+ * @param dependencies - QueryEditorExtensionDependencies.
+ * @param http - HttpSetup.
+ * @returns list of query assist agents configured languages in the data source
+ * associated with the currently selected index pattern.
  */
-const getAvailableLanguages$ = (
+const getAvailableLanguages = async (
   availableLanguagesByDataSource: Map<string | undefined, string[]>,
-  connectionsService: ConnectionsService,
+  dependencies: QueryEditorExtensionDependencies,
   http: HttpSetup
-) =>
-  connectionsService.getSelectedConnection$().pipe(
-    distinctUntilChanged(),
-    switchMap(async (connection) => {
-      const dataSourceId = connection?.dataSource?.id;
-      const cached = availableLanguagesByDataSource.get(dataSourceId);
-      if (cached !== undefined) return cached;
-      const languages = await http
-        .get<{ configuredLanguages: string[] }>(API.QUERY_ASSIST.LANGUAGES, {
-          query: { dataSourceId },
-        })
-        .then((response) => response.configuredLanguages)
-        .catch(() => []);
-      availableLanguagesByDataSource.set(dataSourceId, languages);
-      return languages;
-    })
+) => {
+  const dataSourceId = await getMdsDataSourceId(
+    getData().indexPatterns,
+    dependencies.indexPatterns?.at(0)
   );
+  const cached = availableLanguagesByDataSource.get(dataSourceId);
+  if (cached !== undefined) return cached;
+
+  const languages = await http
+    .get<{ configuredLanguages: string[] }>(API.QUERY_ASSIST.LANGUAGES, {
+      query: { dataSourceId },
+    })
+    .then((response) => response.configuredLanguages)
+    .catch(() => []);
+  availableLanguagesByDataSource.set(dataSourceId, languages);
+  return languages;
+};
 
 export const createQueryAssistExtension = (
   http: HttpSetup,
-  connectionsService: ConnectionsService,
   config: ConfigSchema['queryAssist']
 ): QueryEditorExtensionConfig => {
   const availableLanguagesByDataSource: Map<string | undefined, string[]> = new Map();
@@ -58,7 +60,7 @@ export const createQueryAssistExtension = (
       if (dependencies.dataSource && dependencies.dataSource?.getType() !== 'default')
         return of(false);
 
-      return getAvailableLanguages$(availableLanguagesByDataSource, connectionsService, http).pipe(
+      return from(getAvailableLanguages(availableLanguagesByDataSource, dependencies, http)).pipe(
         map((languages) => languages.length > 0)
       );
     },
@@ -68,10 +70,9 @@ export const createQueryAssistExtension = (
         <QueryAssistWrapper
           availableLanguagesByDataSource={availableLanguagesByDataSource}
           dependencies={dependencies}
-          connectionsService={connectionsService}
           http={http}
         >
-          <QueryAssistBar dependencies={dependencies} connectionsService={connectionsService} />
+          <QueryAssistBar dependencies={dependencies} />
         </QueryAssistWrapper>
       );
     },
@@ -81,7 +82,6 @@ export const createQueryAssistExtension = (
         <QueryAssistWrapper
           availableLanguagesByDataSource={availableLanguagesByDataSource}
           dependencies={dependencies}
-          connectionsService={connectionsService}
           http={http}
           invert
         >
@@ -95,7 +95,6 @@ export const createQueryAssistExtension = (
 interface QueryAssistWrapperProps {
   availableLanguagesByDataSource: Map<string | undefined, string[]>;
   dependencies: QueryEditorExtensionDependencies;
-  connectionsService: ConnectionsService;
   http: HttpSetup;
   invert?: boolean;
 }
@@ -106,18 +105,19 @@ const QueryAssistWrapper: React.FC<QueryAssistWrapperProps> = (props) => {
   useEffect(() => {
     let mounted = true;
 
-    const subscription = getAvailableLanguages$(
-      props.availableLanguagesByDataSource,
-      props.connectionsService,
-      props.http
-    ).subscribe((languages) => {
-      const available = languages.includes(props.dependencies.language);
+    (async () => {
+      const available = (
+        await getAvailableLanguages(
+          props.availableLanguagesByDataSource,
+          props.dependencies,
+          props.http
+        )
+      ).includes(props.dependencies.language);
       if (mounted) setVisible(props.invert ? !available : available);
-    });
+    })();
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
     };
   }, [props]);
 
