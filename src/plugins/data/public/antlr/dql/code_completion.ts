@@ -41,7 +41,6 @@ const findCursorIndex = (
 
 const findFieldSuggestions = (indexPattern: IndexPattern) => {
   const fieldNames: string[] = indexPattern.fields
-    .getAll()
     .filter((idxField: IndexPatternField) => !idxField.subType) // filter removed .keyword fields
     .map((idxField: { displayName: string }) => {
       return idxField.displayName;
@@ -72,11 +71,11 @@ const findValueSuggestions = async (index: IndexPattern, field: string, value: s
   // check to see if last field is within index and if it can suggest values, first check
   // if .keyword appended field exists because that has values
   const matchedField =
-    index.fields.getAll().find((idxField: IndexPatternField) => {
+    index.fields.find((idxField: IndexPatternField) => {
       // check to see if the field matches another field with .keyword appended
       if (idxField.displayName === `${field}.keyword`) return idxField;
     }) ||
-    index.fields.getAll().find((idxField: IndexPatternField) => {
+    index.fields.find((idxField: IndexPatternField) => {
       // if the display name matches, return
       if (idxField.displayName === field) return idxField;
     });
@@ -162,11 +161,13 @@ export const getSuggestions = async ({
   const { field: lastField = '', value: lastValue = '' } = visitor.visit(tree) ?? {};
   if (!!lastField && candidates.tokens.has(DQLParser.PHRASE)) {
     const values = await findValueSuggestions(currentIndexPattern, lastField, lastValue ?? '');
-    completions.push(
-      ...values.map((val: any) => {
-        return { text: val, type: 'value' };
-      })
-    );
+    if (!!values) {
+      completions.push(
+        ...values?.map((val: any) => {
+          return { text: val, type: 'value' };
+        })
+      );
+    }
   }
 
   // suggest other candidates, mainly keywords
