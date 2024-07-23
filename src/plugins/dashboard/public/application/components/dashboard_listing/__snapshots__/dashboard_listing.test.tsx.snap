@@ -2309,7 +2309,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
             noItemsFragment={
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
                     iconType="plus"
@@ -2320,7 +2320,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       id="dashboard.listing.createNewDashboard.createButtonLabel"
                       values={Object {}}
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 }
                 body={
                   <React.Fragment>
@@ -3560,7 +3560,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
             noItemsFragment={
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
                     iconType="plus"
@@ -3571,7 +3571,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       id="dashboard.listing.createNewDashboard.createButtonLabel"
                       values={Object {}}
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 }
                 body={
                   <React.Fragment>
@@ -4811,7 +4811,7 @@ exports[`dashboard listing renders table rows 1`] = `
             noItemsFragment={
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
                     iconType="plus"
@@ -4822,7 +4822,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       id="dashboard.listing.createNewDashboard.createButtonLabel"
                       values={Object {}}
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 }
                 body={
                   <React.Fragment>
@@ -6062,7 +6062,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
             noItemsFragment={
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
                     iconType="plus"
@@ -6073,7 +6073,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       id="dashboard.listing.createNewDashboard.createButtonLabel"
                       values={Object {}}
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 }
                 body={
                   <React.Fragment>

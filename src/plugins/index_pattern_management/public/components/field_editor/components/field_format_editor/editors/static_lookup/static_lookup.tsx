@@ -30,7 +30,13 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiBasicTable, EuiButton, EuiFieldText, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButton,
+  EuiCompressedFieldText,
+  EuiCompressedFormRow,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -102,7 +108,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
         ),
         render: (value: number, item: StaticLookupItem) => {
           return (
-            <EuiFieldText
+            <EuiCompressedFieldText
               value={value || ''}
               onChange={(e) => {
                 this.onLookupChange(
@@ -126,7 +132,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
         ),
         render: (value: number, item: StaticLookupItem) => {
           return (
-            <EuiFieldText
+            <EuiCompressedFieldText
               value={value || ''}
               onChange={(e) => {
                 this.onLookupChange(
@@ -177,7 +183,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
           />
         </EuiButton>
         <EuiSpacer size="l" />
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.staticLookup.unknownKeyLabel"
@@ -185,7 +191,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
             />
           }
         >
-          <EuiFieldText
+          <EuiCompressedFieldText
             value={formatParams.unknownKeyValue || ''}
             placeholder={i18n.translate(
               'indexPatternManagement.staticLookup.leaveBlankPlaceholder',
@@ -197,7 +203,7 @@ export class StaticLookupFormatEditor extends DefaultFormatEditor<
               this.onChange({ unknownKeyValue: e.target.value });
             }}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         <EuiSpacer size="m" />
       </Fragment>
     );

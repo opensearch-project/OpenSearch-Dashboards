@@ -30,7 +30,7 @@
 
 import React, { PureComponent } from 'react';
 
-import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiForm, EuiCompressedFormRow, EuiCompressedSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { EuiSwitchEvent } from '@elastic/eui';
 
@@ -64,8 +64,8 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
   render() {
     return (
       <EuiForm>
-        <EuiFormRow id="updateFiltersOnChange">
-          <EuiSwitch
+        <EuiCompressedFormRow id="updateFiltersOnChange">
+          <EuiCompressedSwitch
             label={
               <FormattedMessage
                 id="inputControl.editor.optionsTab.updateFilterLabel"
@@ -76,10 +76,10 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
             onChange={this.handleUpdateFiltersChange}
             data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow id="useTimeFilter">
-          <EuiSwitch
+        <EuiCompressedFormRow id="useTimeFilter">
+          <EuiCompressedSwitch
             label={
               <FormattedMessage
                 id="inputControl.editor.optionsTab.useTimeFilterLabel"
@@ -90,10 +90,10 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
             onChange={this.handleUseTimeFilter}
             data-test-subj="inputControlEditorUseTimeFilterCheckbox"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
 
-        <EuiFormRow id="pinFilters">
-          <EuiSwitch
+        <EuiCompressedFormRow id="pinFilters">
+          <EuiCompressedSwitch
             label={
               <FormattedMessage
                 id="inputControl.editor.optionsTab.pinFiltersLabel"
@@ -104,7 +104,7 @@ export class OptionsTab extends PureComponent<OptionsTabProps> {
             onChange={this.handlePinFilters}
             data-test-subj="inputControlEditorPinFiltersCheckbox"
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
       </EuiForm>
     );
   }

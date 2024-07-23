@@ -6,7 +6,7 @@
 import React from 'react';
 import { i18n } from '@osd/i18n';
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiButtonIconProps,
   EuiText,
   EuiToolTip,
@@ -33,7 +33,7 @@ export const DataSelectorRefresher: React.FC<IDataSelectorRefresherProps> = Reac
           data-test-subj="sourceRefreshButtonToolTip"
           {...toolTipProps}
         >
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             onClick={onRefresh}
             iconType="refresh"
             aria-label="sourceRefresh"

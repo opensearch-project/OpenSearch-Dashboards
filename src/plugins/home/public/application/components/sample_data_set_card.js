@@ -32,8 +32,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiCard,
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
@@ -79,7 +79,7 @@ export class SampleDataSetCard extends React.Component {
         return (
           <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
+              <EuiSmallButtonEmpty
                 isLoading={this.props.isProcessing}
                 onClick={this.uninstall}
                 color="danger"
@@ -112,7 +112,7 @@ export class SampleDataSetCard extends React.Component {
                     defaultMessage="Remove"
                   />
                 )}
-              </EuiButtonEmpty>
+              </EuiSmallButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <SampleDataViewDataButton
@@ -129,7 +129,7 @@ export class SampleDataSetCard extends React.Component {
         return (
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButton
+              <EuiSmallButton
                 isDisabled={buttonDisabled}
                 isLoading={this.props.isProcessing}
                 onClick={this.install}
@@ -161,7 +161,7 @@ export class SampleDataSetCard extends React.Component {
                     defaultMessage="Add data"
                   />
                 )}
-              </EuiButton>
+              </EuiSmallButton>
             </EuiFlexItem>
           </EuiFlexGroup>
         );
@@ -182,7 +182,7 @@ export class SampleDataSetCard extends React.Component {
                   </p>
                 }
               >
-                <EuiButton
+                <EuiSmallButton
                   isDisabled={buttonDisabled}
                   data-test-subj={`addSampleDataSet${this.props.id}`}
                   aria-label={i18n.translate('home.sampleDataSetCard.default.addButtonAriaLabel', {
@@ -196,7 +196,7 @@ export class SampleDataSetCard extends React.Component {
                     id="home.sampleDataSetCard.default.addButtonLabel"
                     defaultMessage="Add data"
                   />
-                </EuiButton>
+                </EuiSmallButton>
               </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>

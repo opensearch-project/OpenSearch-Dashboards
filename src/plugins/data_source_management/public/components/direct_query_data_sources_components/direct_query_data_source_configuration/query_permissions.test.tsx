@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
-import { EuiComboBox, EuiRadioGroup } from '@elastic/eui';
+import { EuiCompressedComboBox, EuiRadioGroup } from '@elastic/eui';
 import { QUERY_ALL, QUERY_RESTRICTED } from '../../../constants';
 import { QueryPermissionsConfiguration } from './query_permissions';
 import { Role } from '../../../types';
@@ -58,22 +58,22 @@ describe('QueryPermissionsConfiguration', () => {
     expect(wrapper.find(EuiRadioGroup).prop('idSelected')).toBe(QUERY_RESTRICTED);
   });
 
-  test('renders EuiComboBox when QUERY_RESTRICTED is selected', async () => {
+  test('renders EuiCompressedComboBox when QUERY_RESTRICTED is selected', async () => {
     await act(async () => {
       wrapper.find(EuiRadioGroup).prop('onChange')!(QUERY_RESTRICTED);
     });
 
     wrapper.update();
-    expect(wrapper.find(EuiComboBox).exists()).toBe(true);
+    expect(wrapper.find(EuiCompressedComboBox).exists()).toBe(true);
   });
 
-  test('validates EuiComboBox correctly', async () => {
+  test('validates EuiCompressedComboBox correctly', async () => {
     await act(async () => {
       wrapper.find(EuiRadioGroup).prop('onChange')!(QUERY_RESTRICTED);
     });
 
     wrapper.update();
-    const comboBox = wrapper.find(EuiComboBox);
+    const comboBox = wrapper.find(EuiCompressedComboBox);
 
     expect(comboBox.prop('isInvalid')).toBe(true);
 
@@ -83,7 +83,7 @@ describe('QueryPermissionsConfiguration', () => {
 
     wrapper.update();
 
-    const updatedComboBox = wrapper.find(EuiComboBox);
+    const updatedComboBox = wrapper.find(EuiCompressedComboBox);
     expect(updatedComboBox.prop('isInvalid')).toBe(false);
   });
 });

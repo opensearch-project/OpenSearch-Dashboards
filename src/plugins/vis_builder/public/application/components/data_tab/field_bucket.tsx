@@ -6,7 +6,7 @@
 import React from 'react';
 import {
   EuiText,
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -95,7 +95,7 @@ export function FieldBucket({ bucket, field }: FieldBucketProps) {
           <EuiFlexItem grow={false}>
             <div>
               <EuiToolTip content={addText} delay="long" position="bottom">
-                <EuiButtonIcon
+                <EuiSmallButtonIcon
                   className="vbFieldDetails__filterButton"
                   iconSize="s"
                   iconType="plusInCircle"
@@ -105,7 +105,7 @@ export function FieldBucket({ bucket, field }: FieldBucketProps) {
                 />
               </EuiToolTip>
               <EuiToolTip content={removeText} delay="long" position="bottom">
-                <EuiButtonIcon
+                <EuiSmallButtonIcon
                   className="vbFieldDetails__filterButton"
                   iconSize="s"
                   iconType="minusInCircle"

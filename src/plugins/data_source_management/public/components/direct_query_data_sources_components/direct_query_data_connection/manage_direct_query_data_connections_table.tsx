@@ -14,7 +14,7 @@ import {
   EuiPageBody,
   EuiSpacer,
   EuiTableFieldDataColumnType,
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiLoadingSpinner,
   EuiText,
 } from '@elastic/eui';
@@ -238,7 +238,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={true}>
-        <EuiFieldSearch
+        <EuiCompressedFieldSearch
           placeholder="Search..."
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}

@@ -5,7 +5,7 @@
 
 import {
   EuiBadge,
-  EuiButton,
+  EuiSmallButton,
   EuiButtonEmpty,
   EuiConfirmModal,
   EuiFlexItem,
@@ -98,7 +98,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
   /* Table search config */
   const renderDeleteButton = () => {
     return (
-      <EuiButton
+      <EuiSmallButton
         color="danger"
         onClick={() => {
           setConfirmDeleteVisible(true);
@@ -108,7 +108,7 @@ export const DataSourceTable = ({ history }: RouteComponentProps) => {
       >
         Delete {selectedDataSources.length || ''} {selectedDataSources.length ? 'connection' : ''}
         {selectedDataSources.length >= 2 ? 's' : ''}
-      </EuiButton>
+      </EuiSmallButton>
     );
   };
 
