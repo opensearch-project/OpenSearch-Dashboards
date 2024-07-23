@@ -25,7 +25,6 @@ import {
   QueryEnhancementsPluginSetup,
   QueryEnhancementsPluginSetupDependencies,
   QueryEnhancementsPluginStart,
-  QueryEnhancementsPluginStartDependencies,
 } from './types';
 import { OpenSearchObservabilityPlugin, OpenSearchPPLPlugin } from './utils';
 import { pplRawSearchStrategyProvider } from './search/ppl_raw_search_strategy';

@@ -5,8 +5,6 @@
 
 import { PluginSetup } from 'src/plugins/data/server';
 import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
-import { Logger } from '../../../core/server';
-import { ConfigSchema } from '../common/config';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface QueryEnhancementsPluginSetup {}

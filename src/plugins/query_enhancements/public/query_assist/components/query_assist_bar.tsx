@@ -12,18 +12,15 @@ import {
 } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { QueryAssistParameters } from '../../../common/query_assist';
-import { ConnectionsService } from '../../services';
 import { getStorage } from '../../services';
 import { useGenerateQuery } from '../hooks';
-import { getPersistedLog, ProhibitedQueryError } from '../utils';
+import { getMdsDataSourceId, getPersistedLog, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
-import { IndexSelector } from './index_selector';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
 
 interface QueryAssistInputProps {
   dependencies: QueryEditorExtensionDependencies;
-  connectionsService: ConnectionsService;
 }
 
 export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
@@ -37,18 +34,18 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { generateQuery, loading } = useGenerateQuery();
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
-  const [selectedIndex, setSelectedIndex] = useState<string>('');
+  const selectedIndexPattern = props.dependencies.indexPatterns?.at(0);
+  const selectedIndex =
+    selectedIndexPattern &&
+    (typeof selectedIndexPattern === 'string' ? selectedIndexPattern : selectedIndexPattern.title);
   const dataSourceIdRef = useRef<string>();
   const previousQuestionRef = useRef<string>();
 
   useEffect(() => {
-    const subscription = props.connectionsService
-      .getSelectedConnection$()
-      .subscribe((connection) => {
-        dataSourceIdRef.current = connection?.dataSource?.id;
-      });
-    return () => subscription.unsubscribe();
-  }, [props.connectionsService]);
+    getMdsDataSourceId(services.data.indexPatterns, props.dependencies.indexPatterns?.at(0)).then(
+      (id) => (dataSourceIdRef.current = id)
+    );
+  }, [props.dependencies.indexPatterns, services.data.indexPatterns]);
 
   const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -90,13 +87,6 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     <EuiForm component="form" onSubmit={onSubmit}>
       <EuiFormRow fullWidth>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            <IndexSelector
-              selectedIndex={selectedIndex}
-              setSelectedIndex={setSelectedIndex}
-              dataSourceId={dataSourceIdRef.current}
-            />
-          </EuiFlexItem>
           <EuiFlexItem>
             <QueryAssistInput
               inputRef={inputRef}
