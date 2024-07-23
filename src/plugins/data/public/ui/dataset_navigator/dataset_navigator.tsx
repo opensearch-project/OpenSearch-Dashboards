@@ -40,7 +40,13 @@ import {
   getSearchService,
   getUiService,
 } from '../../services';
-import { fetchDataSources, fetchIndexPatterns, fetchIndices, isCatalogCacheFetching } from './lib';
+import {
+  fetchDataSources,
+  fetchIndexPatterns,
+  fetchIndices,
+  isCatalogCacheFetching,
+  fetchIfExternalDataSourcesEnabled,
+} from './lib';
 
 export interface DataSetNavigatorProps {
   dataSetId: string | undefined;
@@ -64,6 +70,7 @@ export const DataSetNavigator = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [isExternalDataSourcesEnabled, setIsExternalDataSourcesEnabled] = useState(false);
   const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet | undefined>();
   const [selectedObject, setSelectedObject] = useState<SimpleDataSet | undefined>();
   const [selectedDataSource, setSelectedDataSource] = useState<SimpleDataSource | undefined>();
@@ -108,8 +115,10 @@ export const DataSetNavigator = ({
       Promise.all([
         fetchIndexPatterns(savedObjectsClient!, ''),
         fetchDataSources(savedObjectsClient!),
+        fetchIfExternalDataSourcesEnabled(http!),
       ])
-        .then(([defaultIndexPatterns, defaultDataSources]) => {
+        .then(([defaultIndexPatterns, defaultDataSources, isExternalDSEnabled]) => {
+          setIsExternalDataSourcesEnabled(isExternalDSEnabled);
           setIndexPatterns(defaultIndexPatterns);
           setDataSources(defaultDataSources);
           if (!selectedDataSet && dataSetId) {
@@ -130,7 +139,7 @@ export const DataSetNavigator = ({
           setIsLoading(false);
         });
     }
-  }, [indexPatternsService, dataSetId, savedObjectsClient, selectedDataSet, isMounted]);
+  }, [indexPatternsService, dataSetId, savedObjectsClient, selectedDataSet, isMounted, http]);
 
   useEffect(() => {
     const status = dataSourcesLoadStatus.toLowerCase();
@@ -495,7 +504,7 @@ export const DataSetNavigator = ({
             id: 4,
             title: (
               <div>
-                Connected data sources
+                S3
                 {CatalogCacheManager.getExternalDataSourcesCache().status ===
                   CachedDataSourceStatus.Updated && RefreshButton}
               </div>

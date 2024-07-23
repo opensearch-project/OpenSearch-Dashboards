@@ -5,6 +5,15 @@
 
 import { HttpStart } from 'opensearch-dashboards/public';
 
+export const fetchIfExternalDataSourcesEnabled = async (http: HttpStart) => {
+  try {
+    const resp = await http.head('/api/dataconnections');
+    return resp.status === 200;
+  } catch (e) {
+    return false;
+  }
+};
+
 export const fetchExternalDataSources = async (http: HttpStart, connectedClusters: string[]) => {
   const results = await Promise.all(
     connectedClusters.map(async (cluster) => {
