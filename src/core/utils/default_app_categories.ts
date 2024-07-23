@@ -102,13 +102,12 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
     }),
     order: 4000,
   },
-  // TODO remove this default category
   detect: {
-    id: 'configure',
-    label: i18n.translate('core.ui.configure.label', {
-      defaultMessage: 'Configure',
+    id: 'detect',
+    label: i18n.translate('core.ui.detect.label', {
+      defaultMessage: 'Detect',
     }),
-    order: 2000,
+    order: 3000,
   },
   configure: {
     id: 'configure',
