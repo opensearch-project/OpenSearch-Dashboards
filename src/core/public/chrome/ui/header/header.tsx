@@ -55,7 +55,11 @@ import {
 } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { ChromeHelpExtension, ChromeBranding } from '../../chrome_service';
+import {
+  ChromeHelpExtension,
+  ChromeBranding,
+  ChromeBreadcrumbEnricher,
+} from '../../chrome_service';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -69,12 +73,16 @@ import type { Logos } from '../../../../common/types';
 import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
 import { CollapsibleNavGroupEnabled } from './collapsible_nav_group_enabled';
 import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
+import { RecentItems } from './recent_items';
+import { WorkspaceObject } from '../../../../public/workspace';
+
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  breadcrumbsEnricher$: Observable<ChromeBreadcrumbEnricher | undefined>;
   collapsibleNavHeaderRender?: () => JSX.Element | null;
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
@@ -103,6 +111,7 @@ export interface HeaderProps {
   currentNavGroup$: Observable<NavGroupItemInMap | undefined>;
   navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
   setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
+  workspaceList$: Observable<WorkspaceObject[]>;
 }
 
 export function Header({
@@ -228,14 +237,24 @@ export function Header({
                   loadingCount$={observables.loadingCount$}
                 />
               </EuiHeaderSectionItem>
+              {/* Only display recent items when navGroup is enabled */}
+              {navGroupEnabled && (
+                <EuiHeaderSectionItem border="right">
+                  <RecentItems
+                    recentlyAccessed$={observables.recentlyAccessed$}
+                    workspaceList$={observables.workspaceList$}
+                    navigateToUrl={application.navigateToUrl}
+                    navLinks$={observables.navLinks$}
+                    basePath={basePath}
+                  />
+                </EuiHeaderSectionItem>
+              )}
             </EuiHeaderSection>
 
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
-              currentNavgroup$={observables.currentNavGroup$}
-              navGroupEnabled={navGroupEnabled}
-              navigateToApp={application.navigateToApp}
+              breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
             />
 
             <EuiHeaderSectionItem border="none">

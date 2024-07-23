@@ -3,10 +3,14 @@
 exports[`DataExplorerApp should render the canvas and panel when selected 1`] = `
 <div>
   <div
-    class="euiPage euiPage--grow deLayout"
+    class="mainPage"
   >
-    <div>
-      Context
+    <div
+      class="euiPage deLayout"
+    >
+      <div>
+        Context
+      </div>
     </div>
   </div>
 </div>

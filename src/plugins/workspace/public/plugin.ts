@@ -41,6 +41,7 @@ import { WorkspaceMenu } from './components/workspace_menu/workspace_menu';
 import { getWorkspaceColumn } from './components/workspace_column';
 import { DataSourceManagementPluginSetup } from '../../../plugins/data_source_management/public';
 import {
+  enrichBreadcrumbsWithWorkspace,
   filterWorkspaceConfigurableApps,
   getFirstUseCaseOfFeatureConfigs,
   isAppAccessibleInWorkspace,
@@ -107,7 +108,13 @@ export class WorkspacePlugin
       this.registeredUseCases$,
     ]).subscribe(([currentWorkspace, registeredUseCases]) => {
       if (currentWorkspace) {
+        const isAllUseCase =
+          getFirstUseCaseOfFeatureConfigs(currentWorkspace.features || []) === ALL_USE_CASE_ID;
         this.appUpdater$.next((app) => {
+          // When in all workspace, the home should be replaced by workspace detail page
+          if (app.id === 'home' && isAllUseCase) {
+            return { navLinkStatus: AppNavLinkStatus.hidden };
+          }
           if (isAppAccessibleInWorkspace(app, currentWorkspace, registeredUseCases)) {
             return;
           }
@@ -327,7 +334,9 @@ export class WorkspacePlugin
       title: i18n.translate('workspace.settings.workspaceDetail', {
         defaultMessage: 'Workspace Detail',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const { renderDetailApp } = await import('./application');
         return mountWorkspaceApp(params, renderDetailApp);
@@ -352,6 +361,16 @@ export class WorkspacePlugin
       },
       workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
     });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
+      {
+        id: WORKSPACE_DETAIL_APP_ID,
+        order: 100,
+        title: i18n.translate('workspace.nav.workspaceDetail.title', {
+          defaultMessage: 'Overview',
+        }),
+      },
+    ]);
 
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
       {
@@ -456,6 +475,9 @@ export class WorkspacePlugin
 
       // register get started card in new home page
       this.registerGetStartedCardToNewHome(core, contentManagement);
+
+      // set breadcrumbs enricher for workspace
+      this.breadcrumbsSubscription = enrichBreadcrumbsWithWorkspace(core);
     }
     return {};
   }
