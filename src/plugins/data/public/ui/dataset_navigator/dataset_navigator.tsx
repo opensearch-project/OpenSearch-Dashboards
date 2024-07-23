@@ -49,20 +49,14 @@ import {
 } from './lib';
 
 export interface DataSetNavigatorProps {
-  dataSet: Omit<SimpleDataSet, 'id'> | undefined;
-  indexPatternId: string | undefined;
+  dataSet: SimpleDataSet | undefined;
   savedObjectsClient?: SavedObjectsClientContract;
   http?: HttpStart;
   onSelectDataSet: (dataSet: SimpleDataSet) => void;
 }
 
-export const DataSetNavigator = ({
-  dataSet,
-  indexPatternId,
-  savedObjectsClient,
-  http,
-  onSelectDataSet,
-}: DataSetNavigatorProps) => {
+export const DataSetNavigator = (props: DataSetNavigatorProps) => {
+  const { savedObjectsClient, http, onSelectDataSet } = props;
   const searchService = getSearchService();
   const queryService = getQueryService();
   const uiService = getUiService();
@@ -73,14 +67,12 @@ export const DataSetNavigator = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isExternalDataSourcesEnabled, setIsExternalDataSourcesEnabled] = useState(false);
-  // const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet | undefined>({ id: dataSet?.id, title: dataSet?.datasource?.name, });
   const [selectedObject, setSelectedObject] = useState<SimpleDataSet | undefined>();
   const [selectedDataSource, setSelectedDataSource] = useState<SimpleDataSource | undefined>();
   const [selectedDataSourceObjects, setSelectedDataSourceObjects] = useState<SimpleObject[]>([]);
   const [selectedExternalDataSource, setSelectedExternalDataSource] = useState<SimpleDataSource>();
   const [dataSources, setDataSources] = useState<SimpleDataSource[]>([]);
   const [externalDataSources, setExternalDataSources] = useState<SimpleDataSource[]>([]);
-  // TODO iindexpattern
   const [indexPatterns, setIndexPatterns] = useState<any[]>([]);
 
   const [selectedDatabase, setSelectedDatabase] = useState<any>();
@@ -121,23 +113,15 @@ export const DataSetNavigator = ({
           setIsExternalDataSourcesEnabled(isExternalDSEnabled);
           setIndexPatterns(defaultIndexPatterns);
           setDataSources(defaultDataSources);
-          // If there's no dataset, then should be an index pattern
-          if (!dataSet && indexPatternId) {
-            const selectedPattern = defaultIndexPatterns.find(
-              (pattern) => pattern.id === indexPatternId
-            );
-            if (selectedPattern) {
-              // setSelectedDataSet({
-              //   id: selectedPattern.id ?? selectedPattern.title,
-              //   title: selectedPattern.title,
-              //   type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
-              // });
-              onSelectDataSet({
-                id: selectedPattern.id ?? selectedPattern.title,
-                title: selectedPattern.title,
-                type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
-              });
-            }
+          const selectedPattern = defaultIndexPatterns.find(
+            (pattern) => pattern.id === props.dataSet?.id
+          );
+          if (selectedPattern) {
+            onSelectDataSet({
+              id: selectedPattern.id ?? selectedPattern.title,
+              title: selectedPattern.title,
+              type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
+            });
           }
         })
         .finally(() => {
@@ -145,7 +129,14 @@ export const DataSetNavigator = ({
           setIsLoading(false);
         });
     }
-  }, [indexPatternsService, savedObjectsClient, isMounted, http]);
+  }, [
+    indexPatternsService,
+    savedObjectsClient,
+    isMounted,
+    http,
+    onSelectDataSet,
+    props.dataSet?.id,
+  ]);
 
   useEffect(() => {
     const status = dataSourcesLoadStatus.toLowerCase();
@@ -319,30 +310,7 @@ export const DataSetNavigator = ({
   );
 
   const handleSelectedDataSet = useCallback(
-    async (ds: any) => {
-      const createTemporaryIndexPattern = async (dataSet: SimpleDataSet) => {
-        const fieldsMap = dataSet.fields?.reduce((acc: any, field: any) => {
-          acc[field.name] = field;
-          return acc;
-        });
-        const temporaryIndexPattern = await indexPatternsService.create(
-          {
-            id: dataSet.id,
-            title: dataSet.title,
-            fields: fieldsMap,
-            type: dataSet.type,
-            dataSourceRef: {
-              id: dataSet.dataSourceRef?.id!,
-              name: dataSet.dataSourceRef?.name!,
-              type: dataSet.dataSourceRef?.type!,
-            },
-            timeFieldName: dataSet.timeFieldName,
-          },
-          true
-        );
-        indexPatternsService.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
-      };
-
+    async (selectedDataSet: SimpleDataSet) => {
       const getInitialQuery = (dataSet: SimpleDataSet) => {
         const language = uiService.Settings.getUserQueryLanguage();
         const input = uiService.Settings.getQueryEnhancements(language)?.searchBar?.queryStringInput
@@ -355,7 +323,7 @@ export const DataSetNavigator = ({
           };
 
         return {
-          query: input.replace('<data_source>', dataSet.title),
+          query: input.replace('<data_source>', dataSet.title!),
           language,
         };
       };
@@ -365,12 +333,31 @@ export const DataSetNavigator = ({
           dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY ||
           dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC
         ) {
-          await createTemporaryIndexPattern(dataSet);
+          const fieldsMap = dataSet.fields?.reduce((acc: any, field: any) => {
+            acc[field.name] = field;
+            return acc;
+          });
+          const temporaryIndexPattern = await indexPatternsService.create(
+            {
+              id: dataSet.id,
+              title: dataSet.title,
+              fields: fieldsMap,
+              type: dataSet.type,
+              dataSourceRef: {
+                id: dataSet.dataSourceRef?.id!,
+                name: dataSet.dataSourceRef?.name!,
+                type: dataSet.dataSourceRef?.type!,
+              },
+              timeFieldName: dataSet.timeFieldName,
+            },
+            true
+          );
+          indexPatternsService.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
         }
 
         CatalogCacheManager.addRecentDataSet({
           id: dataSet.id,
-          name: dataSet.title,
+          name: dataSet.title ?? dataSet.id!,
           dataSourceRef: dataSet.dataSourceRef?.id,
         });
         searchService.df.clear();
@@ -384,9 +371,8 @@ export const DataSetNavigator = ({
         closePopover();
       };
 
-      if (ds) {
-        await onDataSetSelected(ds);
-        // setSelectedDataSet(ds);
+      if (selectedDataSet) {
+        await onDataSetSelected(selectedDataSet);
       }
     },
     [
@@ -432,8 +418,8 @@ export const DataSetNavigator = ({
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
         >
-          {`${dataSet?.dataSourceRef?.name ? `${dataSet.dataSourceRef?.name}::` : ''}${
-            dataSet?.title
+          {`${props.dataSet?.dataSourceRef?.name ? `${props.dataSet.dataSourceRef?.name}::` : ''}${
+            props.dataSet?.title
           }`}
         </EuiButtonEmpty>
       }

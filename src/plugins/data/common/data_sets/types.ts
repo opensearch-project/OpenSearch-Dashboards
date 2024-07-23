@@ -17,8 +17,8 @@ export enum SIMPLE_DATA_SET_TYPES {
 }
 
 export interface SimpleObject {
-  id: string;
-  title: string;
+  id?: string;
+  title?: string;
   dataSourceRef?: SimpleDataSource;
 }
 
@@ -33,5 +33,5 @@ export interface SimpleDataSet extends SimpleObject {
   fields?: any[];
   timeFieldName?: string;
   timeFields?: any[];
-  type: SIMPLE_DATA_SET_TYPES;
+  type?: SIMPLE_DATA_SET_TYPES;
 }

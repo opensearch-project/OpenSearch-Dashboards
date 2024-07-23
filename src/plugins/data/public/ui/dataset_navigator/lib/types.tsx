@@ -292,7 +292,7 @@ export interface RenderAccelerationDetailsFlyoutParams {
 }
 
 export interface DataSetOption {
-  id: string;
+  id?: string;
   name: string;
   dataSourceRef?: string;
 }

@@ -170,8 +170,10 @@ export const Sidebar: FC = ({ children }) => {
             }}
           >
             <DataSetNavigator
-              dataSet={dataSet}
-              indexPatternId={indexPatternId}
+              dataSet={{
+                id: indexPatternId,
+                ...dataSet,
+              }}
               onSelectDataSet={handleDataSetSelection}
             />
           </EuiPortal>
