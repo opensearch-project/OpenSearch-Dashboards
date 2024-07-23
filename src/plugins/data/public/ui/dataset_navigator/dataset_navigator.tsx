@@ -471,6 +471,7 @@ export const DataSetNavigator = ({
             title: selectedDataSource?.name ?? indicesLabel,
             items: selectedDataSourceObjects.map((object) => ({
               name: object.title,
+              panel: 7,
               onClick: async () =>
                 await handleSelectedObject({ ...object, type: SIMPLE_DATA_SET_TYPES.TEMPORARY }),
             })),
