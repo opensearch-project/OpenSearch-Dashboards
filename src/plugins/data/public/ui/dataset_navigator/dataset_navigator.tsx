@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -48,7 +48,12 @@ export interface DataSetNavigatorProps {
   onSelectDataSet: (dataSet: SimpleDataSet) => void;
 }
 
-export const DataSetNavigator = (props: DataSetNavigatorProps) => {
+export const DataSetNavigator = ({
+  dataSetId,
+  savedObjectsClient,
+  http,
+  onSelectDataSet,
+}: DataSetNavigatorProps) => {
   const searchService = getSearchService();
   const queryService = getQueryService();
   const uiService = getUiService();
@@ -57,6 +62,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet | undefined>();
   const [selectedObject, setSelectedObject] = useState<SimpleDataSet | undefined>();
   const [selectedDataSource, setSelectedDataSource] = useState<SimpleDataSource | undefined>();
@@ -77,13 +83,13 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   const {
     loadStatus: dataSourcesLoadStatus,
     loadExternalDataSources: startLoadingDataSources,
-  } = useLoadExternalDataSourcesToCache(props.http!, notifications);
+  } = useLoadExternalDataSourcesToCache(http!, notifications);
   const {
     loadStatus: databasesLoadStatus,
     startLoading: startLoadingDatabases,
-  } = useLoadDatabasesToCache(props.http!, notifications);
+  } = useLoadDatabasesToCache(http!, notifications);
   const { loadStatus: tablesLoadStatus, startLoading: startLoadingTables } = useLoadTablesToCache(
-    props.http!,
+    http!,
     notifications
   );
 
@@ -96,33 +102,34 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   };
 
   useEffect(() => {
-    setIsLoading(true);
-
-    Promise.all([
-      fetchIndexPatterns(props.savedObjectsClient!, ''),
-      fetchDataSources(props.savedObjectsClient!),
-    ])
-      .then(([defaultIndexPatterns, defaultDataSources]) => {
-        setIndexPatterns(defaultIndexPatterns);
-        setDataSources(defaultDataSources);
-
-        if (!selectedDataSet && props.dataSetId) {
-          const selectedPattern = defaultIndexPatterns.find(
-            (pattern) => pattern.id === props.dataSetId
-          );
-          if (selectedPattern) {
-            setSelectedDataSet({
-              id: selectedPattern.id ?? selectedPattern.title,
-              title: selectedPattern.title,
-              type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
-            });
+    if (!isMounted) {
+      setIsLoading(true);
+      Promise.all([
+        fetchIndexPatterns(savedObjectsClient!, ''),
+        fetchDataSources(savedObjectsClient!),
+      ])
+        .then(([defaultIndexPatterns, defaultDataSources]) => {
+          setIndexPatterns(defaultIndexPatterns);
+          setDataSources(defaultDataSources);
+          if (!selectedDataSet && dataSetId) {
+            const selectedPattern = defaultIndexPatterns.find(
+              (pattern) => pattern.id === dataSetId
+            );
+            if (selectedPattern) {
+              setSelectedDataSet({
+                id: selectedPattern.id ?? selectedPattern.title,
+                title: selectedPattern.title,
+                type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
+              });
+            }
           }
-        }
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  }, [indexPatternsService, props.dataSetId, props.savedObjectsClient, selectedDataSet]);
+        })
+        .finally(() => {
+          setIsMounted(true);
+          setIsLoading(false);
+        });
+    }
+  }, [indexPatternsService, dataSetId, savedObjectsClient, selectedDataSet, isMounted]);
 
   useEffect(() => {
     if (selectedDataSource) {
@@ -276,65 +283,69 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     }
   }, [selectedExternalDataSource, selectedDatabase, tablesLoadStatus]);
 
-  useEffect(() => {
-    const createTemporaryIndexPattern = async (dataSet: SimpleDataSet) => {
-      const fieldsMap = dataSet.fields?.reduce((acc: any, field: any) => {
-        acc[field.name] = field;
-        return acc;
-      });
-      const temporaryIndexPattern = await indexPatternsService.create(
-        {
-          id: dataSet.id,
-          title: dataSet.title,
-          fields: fieldsMap,
-          dataSourceRef: {
-            id: dataSet.dataSourceRef?.id!,
-            name: dataSet.dataSourceRef?.name!,
-            type: dataSet.dataSourceRef?.type!,
+  const handleSelectedDataSet = useCallback(
+    async (ds: any) => {
+      const createTemporaryIndexPattern = async (dataSet: SimpleDataSet) => {
+        const fieldsMap = dataSet.fields?.reduce((acc: any, field: any) => {
+          acc[field.name] = field;
+          return acc;
+        });
+        const temporaryIndexPattern = await indexPatternsService.create(
+          {
+            id: dataSet.id,
+            title: dataSet.title,
+            fields: fieldsMap,
+            dataSourceRef: {
+              id: dataSet.dataSourceRef?.id!,
+              name: dataSet.dataSourceRef?.name!,
+              type: dataSet.dataSourceRef?.type!,
+            },
+            timeFieldName: dataSet.timeFieldName,
           },
-          timeFieldName: dataSet.timeFieldName,
-        },
-        true
-      );
-      indexPatternsService.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
-    };
+          true
+        );
+        indexPatternsService.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
+      };
 
-    const getInitialQuery = (dataSet: SimpleDataSet) => {
-      const language = uiService.Settings.getUserQueryLanguage();
-      const input = uiService.Settings.getQueryEnhancements(language)?.searchBar?.queryStringInput
-        ?.initialValue;
+      const getInitialQuery = (dataSet: SimpleDataSet) => {
+        const language = uiService.Settings.getUserQueryLanguage();
+        const input = uiService.Settings.getQueryEnhancements(language)?.searchBar?.queryStringInput
+          ?.initialValue;
 
-      if (!dataSet || !input)
+        if (!dataSet || !input)
+          return {
+            query: '',
+            language,
+          };
+
         return {
-          query: '',
+          query: input.replace('<data_source>', dataSet.title),
           language,
         };
-
-      return {
-        query: input.replace('<data_source>', dataSet.title),
-        language,
       };
-    };
 
-    const onDataSetSelected = async (dataSet: SimpleDataSet) => {
-      if (dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY) {
-        await createTemporaryIndexPattern(dataSet);
+      const onDataSetSelected = async (dataSet: SimpleDataSet) => {
+        if (dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY) {
+          await createTemporaryIndexPattern(dataSet);
+        }
+
+        CatalogCacheManager.addRecentDataSet({
+          id: dataSet.id,
+          name: dataSet.title,
+          dataSourceRef: dataSet.dataSourceRef?.id,
+        });
+        onSelectDataSet(dataSet);
+        queryService.queryString.setQuery(getInitialQuery(dataSet));
+        closePopover();
+      };
+
+      if (ds) {
+        onDataSetSelected(ds);
+        setSelectedDataSet(ds);
       }
-
-      CatalogCacheManager.addRecentDataSet({
-        id: dataSet.id,
-        name: dataSet.title,
-        dataSourceRef: dataSet.dataSourceRef?.id,
-      });
-      props.onSelectDataSet(dataSet);
-      queryService.queryString.setQuery(getInitialQuery(dataSet));
-      closePopover();
-    };
-
-    if (selectedDataSet) {
-      onDataSetSelected(selectedDataSet);
-    }
-  }, [indexPatternsService, props, queryService.queryString, selectedDataSet, uiService.Settings]);
+    },
+    [indexPatternsService, onSelectDataSet, queryService.queryString, uiService.Settings]
+  );
 
   const RefreshButton = (
     <EuiButtonEmpty
@@ -383,7 +394,6 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         panels={[
           {
             id: 0,
-            title: 'Data',
             items: [
               ...(CatalogCacheManager.getRecentDataSets().length > 0
                 ? [
@@ -399,7 +409,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
               },
               {
                 name: indicesLabel,
-                panel: 3,
+                panel: 2,
               },
               {
                 name: 'Connected data sources',
@@ -442,6 +452,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           },
           {
             id: 2,
+            title: 'Clusters',
             items: [
               ...dataSources.map((dataSource) => ({
                 name: dataSource.name,
@@ -545,8 +556,8 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                   <EuiButton
                     size="s"
                     fullWidth
-                    onClick={() => {
-                      setSelectedDataSet(selectedObject);
+                    onClick={async () => {
+                      await handleSelectedDataSet(selectedObject);
                     }}
                   >
                     Select
@@ -559,8 +570,8 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
             title: 'Recently Used',
             items: CatalogCacheManager.getRecentDataSets().map((ds) => ({
               name: ds.name,
-              onClick: () =>
-                setSelectedDataSet({
+              onClick: async () =>
+                await handleSelectedDataSet({
                   id: ds.id,
                   title: ds.name,
                   dataSourceRef: {
