@@ -25,7 +25,7 @@ export const getRawSuggestionData$ = (
       if (connection === undefined) {
         return from(defaultReuqstHandler());
       }
-      const dataSourceId = connection?.dataSource.id;
+      const dataSourceId = connection?.dataSource?.id;
       const title = connection?.attributes?.title;
       return from(dataSourceReuqstHandler({ dataSourceId, title }));
     })

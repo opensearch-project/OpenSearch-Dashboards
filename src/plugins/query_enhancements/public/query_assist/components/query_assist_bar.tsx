@@ -45,7 +45,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     const subscription = props.connectionsService
       .getSelectedConnection$()
       .subscribe((connection) => {
-        dataSourceIdRef.current = connection?.dataSource.id;
+        dataSourceIdRef.current = connection?.dataSource?.id;
       });
     return () => subscription.unsubscribe();
   }, [props.connectionsService]);

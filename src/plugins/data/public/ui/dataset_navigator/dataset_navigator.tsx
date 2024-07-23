@@ -67,6 +67,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const [isExternalDataSourcesEnabled, setIsExternalDataSourcesEnabled] = useState(false);
+  const [selectedTimeFieldName, setSelectedTimeFieldName] = useState<string | undefined>();
   const [selectedObject, setSelectedObject] = useState<SimpleDataSet | undefined>();
   const [selectedDataSource, setSelectedDataSource] = useState<SimpleDataSource | undefined>();
   const [selectedDataSourceObjects, setSelectedDataSourceObjects] = useState<SimpleObject[]>([]);
@@ -293,20 +294,21 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         });
 
         const timeFields = fields.filter((field: any) => field.type === 'date');
-
+        const timeFieldName = timeFields?.length > 0 ? timeFields[0].name : undefined;
+        setSelectedTimeFieldName(timeFieldName);
         setSelectedObject({
           id: object.id,
           title: object.title,
           fields,
           timeFields,
-          ...(timeFields[0]?.name ? { timeFieldName: timeFields[0].name } : {}),
+          timeFieldName: selectedTimeFieldName,
           dataSourceRef: object.dataSourceRef,
           type: SIMPLE_DATA_SET_TYPES.TEMPORARY,
         });
         setIsLoading(false);
       }
     },
-    [indexPatternsService]
+    [indexPatternsService, selectedTimeFieldName]
   );
 
   const handleSelectedDataSet = useCallback(
@@ -336,13 +338,13 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           const fieldsMap = dataSet.fields?.reduce((acc: any, field: any) => {
             acc[field.name] = field;
             return acc;
-          });
+          }, {});
           const temporaryIndexPattern = await indexPatternsService.create(
             {
               id: dataSet.id,
               title: dataSet.title,
+              // type: dataSet.type,
               fields: fieldsMap,
-              type: dataSet.type,
               dataSourceRef: {
                 id: dataSet.dataSourceRef?.id!,
                 name: dataSet.dataSourceRef?.name!,
@@ -365,6 +367,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           id: dataSet.id,
           title: dataSet.title,
           dataSourceRef: dataSet.dataSourceRef,
+          timeFieldName: dataSet.timeFieldName,
           type: dataSet.type,
         });
         queryService.queryString.setQuery(getInitialQuery(dataSet));
@@ -606,14 +609,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                           : []),
                         { value: 'no-time-filter', text: "I don't want to use a time filter" },
                       ]}
-                      onChange={async (event) => {
-                        await handleSelectedObject({
-                          ...selectedObject,
-                          timeFieldName:
-                            event.target.value !== 'no-time-filter'
-                              ? event.target.value
-                              : undefined,
-                        } as SimpleDataSet);
+                      onChange={(event) => {
+                        setSelectedTimeFieldName(
+                          event.target.value !== 'no-time-filter' ? event.target.value : undefined
+                        );
                       }}
                       aria-label="Select a date field"
                     />
@@ -622,7 +621,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                     size="s"
                     fullWidth
                     onClick={async () => {
-                      await handleSelectedDataSet(selectedObject);
+                      await handleSelectedDataSet({
+                        ...selectedObject,
+                        timeFieldName: selectedTimeFieldName,
+                      } as SimpleDataSet);
                     }}
                   >
                     Select
