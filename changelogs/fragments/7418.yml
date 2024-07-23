@@ -1,0 +1,2 @@
+fix:
+- Update reading data source id from dataset in query assist ([#7418](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7418))
