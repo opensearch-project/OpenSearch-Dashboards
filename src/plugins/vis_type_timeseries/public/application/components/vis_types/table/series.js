@@ -38,8 +38,8 @@ import {
   EuiTab,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFieldText,
-  EuiButtonIcon,
+  EuiCompressedFieldText,
+  EuiSmallButtonIcon,
 } from '@elastic/eui';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { FormattedMessage, injectI18n } from '@osd/i18n/react';
@@ -124,7 +124,7 @@ function TableSeriesUI(props) {
     <div className={`${props.className}`} style={props.style}>
       <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonIcon
+          <EuiSmallButtonIcon
             iconType={caretIcon}
             color="text"
             onClick={props.toggleVisible}
@@ -137,7 +137,7 @@ function TableSeriesUI(props) {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiFieldText
+          <EuiCompressedFieldText
             fullWidth
             aria-label={intl.formatMessage({
               id: 'visTypeTimeseries.table.labelAriaLabel',

@@ -31,7 +31,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
-import { EuiRadio, htmlIdGenerator } from '@elastic/eui';
+import { EuiCompressedRadio, htmlIdGenerator } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
 export function YesNo(props) {
@@ -47,7 +47,7 @@ export function YesNo(props) {
   const inputName = name + _.uniqueId();
   return (
     <div>
-      <EuiRadio
+      <EuiCompressedRadio
         id={htmlId('yes')}
         data-test-subj={`${dataTestSubj}-yes`}
         label={
@@ -65,7 +65,7 @@ export function YesNo(props) {
         disabled={disabled}
       />
       &emsp;
-      <EuiRadio
+      <EuiCompressedRadio
         id={htmlId('no')}
         data-test-subj={`${dataTestSubj}-no`}
         label={

@@ -29,14 +29,15 @@
  */
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
+  EuiSmallButton,
+  EuiSmallButtonEmpty,
   EuiForm,
-  EuiFormRow,
+  EuiCompressedFormRow,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiCompressedSwitch,
   EuiSwitch,
   EuiText,
 } from '@elastic/eui';
@@ -86,13 +87,13 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
     const form = (
       <EuiForm>
         {mappedFilters.map((filter, i) => (
-          <EuiFormRow key={i}>
-            <EuiSwitch
+          <EuiCompressedFormRow key={i}>
+            <EuiCompressedSwitch
               label={this.getLabel(filter)}
               checked={this.isFilterSelected(i)}
               onChange={() => this.toggleFilterSelected(i)}
             />
-          </EuiFormRow>
+          </EuiCompressedFormRow>
         ))}
       </EuiForm>
     );
@@ -115,18 +116,18 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
         <EuiModalBody>{form}</EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={this.props.onCancel}>
+          <EuiSmallButtonEmpty onClick={this.props.onCancel}>
             <FormattedMessage
               id="data.filter.applyFiltersPopup.cancelButtonLabel"
               defaultMessage="Cancel"
             />
-          </EuiButtonEmpty>
-          <EuiButton onClick={this.onSubmit} data-test-subj="applyFiltersPopoverButton" fill>
+          </EuiSmallButtonEmpty>
+          <EuiSmallButton onClick={this.onSubmit} data-test-subj="applyFiltersPopoverButton" fill>
             <FormattedMessage
               id="data.filter.applyFiltersPopup.saveButtonLabel"
               defaultMessage="Apply"
             />
-          </EuiButton>
+          </EuiSmallButton>
         </EuiModalFooter>
       </React.Fragment>
     );

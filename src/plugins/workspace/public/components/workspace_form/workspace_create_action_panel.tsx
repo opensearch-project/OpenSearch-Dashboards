@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiSmallButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React, { useState, useCallback } from 'react';
 import { ApplicationStart } from 'opensearch-dashboards/public';
@@ -26,17 +26,17 @@ export const WorkspaceCreateActionPanel = ({
     <>
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiSmallButton
             data-test-subj="workspaceForm-bottomBar-cancelButton"
             onClick={showCancelModal}
           >
             {i18n.translate('workspace.form.bottomBar.cancel', {
               defaultMessage: 'Cancel',
             })}
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton
+          <EuiSmallButton
             fill
             type="submit"
             form={formId}
@@ -45,7 +45,7 @@ export const WorkspaceCreateActionPanel = ({
             {i18n.translate('workspace.form.bottomBar.createWorkspace', {
               defaultMessage: 'Create workspace',
             })}
-          </EuiButton>
+          </EuiSmallButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       {isCancelModalVisible && (

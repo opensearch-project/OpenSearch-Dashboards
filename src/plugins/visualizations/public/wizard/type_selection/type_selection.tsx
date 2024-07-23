@@ -34,7 +34,7 @@ import { orderBy } from 'lodash';
 import React, { ChangeEvent } from 'react';
 
 import {
-  EuiFieldSearch,
+  EuiCompressedFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiKeyPadMenu,
@@ -117,7 +117,7 @@ class TypeSelection extends React.Component<TypeSelectionProps, TypeSelectionSta
                 responsive={false}
               >
                 <EuiFlexItem grow={false} className="visNewVisDialog__searchWrapper">
-                  <EuiFieldSearch
+                  <EuiCompressedFieldSearch
                     placeholder="Filter"
                     value={query}
                     onChange={this.onQueryChange}

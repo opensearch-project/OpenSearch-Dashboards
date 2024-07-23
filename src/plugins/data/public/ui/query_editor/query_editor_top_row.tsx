@@ -4,7 +4,7 @@
  */
 import dateMath from '@elastic/datemath';
 import {
-  EuiFieldText,
+  EuiCompressedFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSuperDatePicker,
@@ -50,7 +50,7 @@ export interface QueryEditorTopRowProps {
   indexPatterns?: Array<IIndexPattern | string>;
   dataSource?: DataSource;
   isLoading?: boolean;
-  prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
+  prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   showQueryEditor?: boolean;
   showDatePicker?: boolean;
   dateRangeFrom?: string;

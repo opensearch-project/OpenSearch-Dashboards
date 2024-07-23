@@ -5,7 +5,7 @@
 
 import React, { Fragment } from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { EuiButton, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
+import { EuiSmallButton, EuiEmptyPrompt, EuiLink, EuiText } from '@elastic/eui';
 import { ApplicationStart } from 'opensearch-dashboards/public';
 
 export const getNoItemsMessage = (
@@ -77,7 +77,7 @@ export const getNoItemsMessage = (
         </Fragment>
       }
       actions={
-        <EuiButton
+        <EuiSmallButton
           onClick={createItem}
           fill
           iconType="plus"
@@ -87,7 +87,7 @@ export const getNoItemsMessage = (
             id="dashboard.listing.createNewDashboard.createButtonLabel"
             defaultMessage="Create new dashboard"
           />
-        </EuiButton>
+        </EuiSmallButton>
       }
     />
   );

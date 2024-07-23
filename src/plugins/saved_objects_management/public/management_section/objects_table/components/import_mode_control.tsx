@@ -33,7 +33,7 @@ import {
   EuiFormFieldset,
   EuiTitle,
   EuiCheckableCard,
-  EuiRadioGroup,
+  EuiCompressedRadioGroup,
   EuiText,
   EuiSpacer,
   EuiFlexGroup,
@@ -108,7 +108,7 @@ const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
 
 const overwriteRadio = (disabled: boolean, overwrite: boolean, onChange) => {
   return (
-    <EuiRadioGroup
+    <EuiCompressedRadioGroup
       options={[overwriteEnabled, overwriteDisabled]}
       idSelected={overwrite ? overwriteEnabled.id : overwriteDisabled.id}
       onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}

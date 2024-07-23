@@ -34,7 +34,7 @@ exports[`renders DashboardCloneModal 1`] = `
       </p>
     </EuiText>
     <EuiSpacer />
-    <EuiFieldText
+    <EuiCompressedFieldText
       aria-label="Cloned Dashboard Title"
       autoFocus={true}
       data-test-subj="clonedDashboardTitle"
@@ -44,7 +44,7 @@ exports[`renders DashboardCloneModal 1`] = `
     />
   </EuiModalBody>
   <EuiModalFooter>
-    <EuiButtonEmpty
+    <EuiSmallButtonEmpty
       data-test-subj="cloneCancelButton"
       onClick={[Function]}
     >
@@ -53,8 +53,8 @@ exports[`renders DashboardCloneModal 1`] = `
         id="dashboard.topNav.cloneModal.cancelButtonLabel"
         values={Object {}}
       />
-    </EuiButtonEmpty>
-    <EuiButton
+    </EuiSmallButtonEmpty>
+    <EuiSmallButton
       data-test-subj="cloneConfirmButton"
       fill={true}
       isLoading={false}
@@ -65,7 +65,7 @@ exports[`renders DashboardCloneModal 1`] = `
         id="dashboard.topNav.cloneModal.confirmButtonLabel"
         values={Object {}}
       />
-    </EuiButton>
+    </EuiSmallButton>
   </EuiModalFooter>
 </EuiModal>
 `;

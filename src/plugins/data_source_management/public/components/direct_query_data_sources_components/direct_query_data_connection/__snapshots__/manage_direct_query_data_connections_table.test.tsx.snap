@@ -435,8 +435,8 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                     <div
                       className="euiFlexItem"
                     >
-                      <EuiFieldSearch
-                        compressed={false}
+                      <EuiCompressedFieldSearch
+                        compressed={true}
                         fullWidth={true}
                         incremental={false}
                         isClearable={true}
@@ -446,20 +446,20 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                         value=""
                       >
                         <EuiFormControlLayout
-                          compressed={false}
+                          compressed={true}
                           fullWidth={true}
                           icon="search"
                           isLoading={false}
                         >
                           <div
-                            className="euiFormControlLayout euiFormControlLayout--fullWidth"
+                            className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
                           >
                             <div
                               className="euiFormControlLayout__childrenWrapper"
                             >
                               <EuiValidatableControl>
                                 <input
-                                  className="euiFieldSearch euiFieldSearch--fullWidth"
+                                  className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
                                   onChange={[Function]}
                                   onKeyUp={[Function]}
                                   placeholder="Search..."
@@ -468,7 +468,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                                 />
                               </EuiValidatableControl>
                               <EuiFormControlLayoutIcons
-                                compressed={false}
+                                compressed={true}
                                 icon="search"
                                 isLoading={false}
                               >
@@ -476,7 +476,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                                   className="euiFormControlLayoutIcons"
                                 >
                                   <EuiFormControlLayoutCustomIcon
-                                    size="m"
+                                    size="s"
                                     type="search"
                                   >
                                     <span
@@ -485,14 +485,14 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                                       <EuiIcon
                                         aria-hidden="true"
                                         className="euiFormControlLayoutCustomIcon__icon"
-                                        size="m"
+                                        size="s"
                                         type="search"
                                       >
                                         <span
                                           aria-hidden="true"
                                           className="euiFormControlLayoutCustomIcon__icon"
                                           data-euiicon-type="search"
-                                          size="m"
+                                          size="s"
                                         />
                                       </EuiIcon>
                                     </span>
@@ -502,7 +502,7 @@ exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
                             </div>
                           </div>
                         </EuiFormControlLayout>
-                      </EuiFieldSearch>
+                      </EuiCompressedFieldSearch>
                     </div>
                   </EuiFlexItem>
                 </div>

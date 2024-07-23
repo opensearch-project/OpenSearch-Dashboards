@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { i18n } from '@osd/i18n';
-import { EuiToolTip, EuiButtonIcon, EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiToolTip, EuiSmallButtonIcon, EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { useDataGridContext } from './data_grid_table_context';
 
 export const DocViewInspectButton = ({ rowIndex }: EuiDataGridCellValueElementProps) => {
@@ -18,7 +18,7 @@ export const DocViewInspectButton = ({ rowIndex }: EuiDataGridCellValueElementPr
 
   return (
     <EuiToolTip content={inspectHintMsg}>
-      <EuiButtonIcon
+      <EuiSmallButtonIcon
         onClick={() => setInspectedHit(isCurrentInspected ? undefined : currentInspected)}
         iconType={isCurrentInspected ? 'minimize' : 'inspect'}
         aria-label={inspectHintMsg}

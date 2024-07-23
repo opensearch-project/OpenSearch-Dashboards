@@ -10,7 +10,7 @@ import {
   EuiPageHeader,
   EuiPageContent,
   EuiLink,
-  EuiButton,
+  EuiSmallButton,
   EuiInMemoryTable,
   EuiSearchBarProps,
 } from '@elastic/eui';
@@ -175,7 +175,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     toolsRight: [
       ...(isDashboardAdmin
         ? [
-            <EuiButton
+            <EuiSmallButton
               href={workspaceCreateUrl}
               key="create_workspace"
               data-test-subj="workspaceList-create-workspace"
@@ -183,7 +183,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
               {i18n.translate('workspace.workspaceList.buttons.createWorkspace', {
                 defaultMessage: 'Create workspace',
               })}
-            </EuiButton>,
+            </EuiSmallButton>,
           ]
         : []),
     ],

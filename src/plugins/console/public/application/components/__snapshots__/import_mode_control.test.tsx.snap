@@ -14,7 +14,7 @@ exports[`ImportModeControl Component should render correclty 1`] = `
     }
   }
 >
-  <EuiRadioGroup
+  <EuiCompressedRadioGroup
     idSelected="overwriteDisabled"
     onChange={[Function]}
     options={

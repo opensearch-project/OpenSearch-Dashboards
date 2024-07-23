@@ -10,7 +10,7 @@ import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
 import {
   EuiPageTemplate,
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiHorizontalRule,
   EuiFlexGroup,
   EuiFlexItem,
@@ -232,22 +232,22 @@ export const Homepage = () => {
   });
 
   const sideItems: React.ReactNode[] = [
-    <EuiButtonEmpty
+    <EuiSmallButtonEmpty
       iconType="wrench"
       href={getUrlForApp('dev_tools', { path: '#/console' })}
       data-test-subj="homeSynopsisLinkconsole"
     >
       <FormattedMessage id="home.devTools" defaultMessage="Dev tools" />
-    </EuiButtonEmpty>,
-    <EuiButtonEmpty iconType="gear" href={getUrlForApp('management')}>
+    </EuiSmallButtonEmpty>,
+    <EuiSmallButtonEmpty iconType="gear" href={getUrlForApp('management')}>
       <FormattedMessage id="home.manage" defaultMessage="Manage" />
-    </EuiButtonEmpty>,
-    <EuiButtonEmpty
+    </EuiSmallButtonEmpty>,
+    <EuiSmallButtonEmpty
       iconType="indexOpen"
       href={getUrlForApp('home', { path: '#/tutorial_directory' })}
     >
       <FormattedMessage id="home.addData" defaultMessage="Add data" />
-    </EuiButtonEmpty>,
+    </EuiSmallButtonEmpty>,
   ];
 
   return (

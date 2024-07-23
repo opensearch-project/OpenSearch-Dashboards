@@ -31,7 +31,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { get } from 'lodash';
-import { keys, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
+import {
+  keys,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButton,
+  EuiText,
+  EuiCompressedSwitch,
+} from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@osd/i18n/react';
 import {
   getInterval,
@@ -203,7 +210,7 @@ class VisEditorVisualizationUI extends Component {
     const applyButton = (
       <EuiFlexGroup className="tvbEditorVisualization__apply" alignItems="center">
         <EuiFlexItem grow={true}>
-          <EuiSwitch
+          <EuiCompressedSwitch
             id="tsvbAutoApplyInput"
             label={
               <FormattedMessage

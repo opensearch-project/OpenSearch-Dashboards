@@ -32,6 +32,7 @@ import {
   EuiPopover,
   EuiPopoverTitle,
   EuiPopoverFooter,
+  EuiSmallButtonEmpty,
   EuiButtonEmpty,
   EuiButton,
   EuiFlexGroup,
@@ -171,7 +172,7 @@ export function SavedQueryManagementComponent({
   };
 
   const savedQueryPopoverButton = (
-    <EuiButtonEmpty
+    <EuiSmallButtonEmpty
       onClick={handleTogglePopover}
       aria-label={i18n.translate('data.search.searchBar.savedQueryPopoverButtonText', {
         defaultMessage: 'See saved queries',
@@ -183,7 +184,7 @@ export function SavedQueryManagementComponent({
     >
       <EuiIcon type="save" className="euiQuickSelectPopover__buttonText" />
       <EuiIcon type="arrowDown" />
-    </EuiButtonEmpty>
+    </EuiSmallButtonEmpty>
   );
 
   const savedQueryRows = () => {

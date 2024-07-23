@@ -30,7 +30,7 @@
 
 import React, { FC } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiSmallButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -113,7 +113,7 @@ export const OverviewPageHeader: FC<Props> = ({
               <EuiFlexGroup className="osdOverviewPageHeader__actions" responsive={false} wrap>
                 <EuiFlexItem className="osdOverviewPageHeader__actionItem" grow={false}>
                   <RedirectAppLinks application={application}>
-                    <EuiButtonEmpty
+                    <EuiSmallButtonEmpty
                       className="osdOverviewPageHeader__actionButton"
                       flush="both"
                       href={addBasePath('/app/home#/tutorial_directory')}
@@ -125,14 +125,14 @@ export const OverviewPageHeader: FC<Props> = ({
                           defaultMessage: 'Add data',
                         }
                       )}
-                    </EuiButtonEmpty>
+                    </EuiSmallButtonEmpty>
                   </RedirectAppLinks>
                 </EuiFlexItem>
 
                 {showManagementLink && isManagementEnabled ? (
                   <EuiFlexItem className="osdOverviewPageHeader__actionItem" grow={false}>
                     <RedirectAppLinks application={application}>
-                      <EuiButtonEmpty
+                      <EuiSmallButtonEmpty
                         className="osdOverviewPageHeader__actionButton"
                         flush="both"
                         iconType="gear"
@@ -144,7 +144,7 @@ export const OverviewPageHeader: FC<Props> = ({
                             defaultMessage: 'Manage',
                           }
                         )}
-                      </EuiButtonEmpty>
+                      </EuiSmallButtonEmpty>
                     </RedirectAppLinks>
                   </EuiFlexItem>
                 ) : null}
@@ -152,7 +152,7 @@ export const OverviewPageHeader: FC<Props> = ({
                 {showDevToolsLink && isDevToolsEnabled ? (
                   <EuiFlexItem className="osdOverviewPageHeader__actionItem" grow={false}>
                     <RedirectAppLinks application={application}>
-                      <EuiButtonEmpty
+                      <EuiSmallButtonEmpty
                         className="osdOverviewPageHeader__actionButton"
                         flush="both"
                         iconType="wrench"
@@ -164,7 +164,7 @@ export const OverviewPageHeader: FC<Props> = ({
                             defaultMessage: 'Dev tools',
                           }
                         )}
-                      </EuiButtonEmpty>
+                      </EuiSmallButtonEmpty>
                     </RedirectAppLinks>
                   </EuiFlexItem>
                 ) : null}
