@@ -54,7 +54,11 @@ import {
 } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { ChromeHelpExtension, ChromeBranding } from '../../chrome_service';
+import {
+  ChromeHelpExtension,
+  ChromeBranding,
+  ChromeBreadcrumbEnricher,
+} from '../../chrome_service';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -77,6 +81,7 @@ export interface HeaderProps {
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  breadcrumbsEnricher$: Observable<ChromeBreadcrumbEnricher | undefined>;
   collapsibleNavHeaderRender?: () => JSX.Element | null;
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
@@ -246,9 +251,7 @@ export function Header({
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
-              currentNavgroup$={observables.currentNavGroup$}
-              navGroupEnabled={navGroupEnabled}
-              navigateToApp={application.navigateToApp}
+              breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
             />
 
             <EuiHeaderSectionItem border="none">
