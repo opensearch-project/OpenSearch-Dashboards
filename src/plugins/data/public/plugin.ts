@@ -93,6 +93,7 @@ import { DataSourceFactory } from './data_sources/datasource';
 import { registerDefaultDataSource } from './data_sources/register_default_datasource';
 import { DefaultDslDataSource } from './data_sources/default_datasource';
 import { DEFAULT_DATA_SOURCE_TYPE } from './data_sources/constants';
+import { getSuggestions as getSQLSuggestions } from './antlr/opensearch_sql/code_completion';
 
 declare module '../../ui_actions/public' {
   export interface ActionContextMapping {
@@ -164,6 +165,9 @@ export class DataPublicPlugin
     });
 
     const uiService = this.uiService.setup(core, {});
+
+    const ac = this.autocomplete.setup(core);
+    ac.addQuerySuggestionProvider('SQL', getSQLSuggestions);
 
     return {
       // TODO: MQL
