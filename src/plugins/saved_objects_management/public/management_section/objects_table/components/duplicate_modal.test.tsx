@@ -112,7 +112,7 @@ describe('DuplicateModal', () => {
     expect(options[1].label).toEqual('bar');
   });
 
-  it('should display the suffix (current) in target workspace options when in workspace1', async () => {
+  it('should display the suffix (current) in target workspace options when it is the current workspace', async () => {
     workspaces.workspaceList$.next(workspaceList);
     workspaces.currentWorkspaceId$.next('workspace1');
     workspaces.currentWorkspace$.next({

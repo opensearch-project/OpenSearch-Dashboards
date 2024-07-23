@@ -71,12 +71,16 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
   }
 
   duplicateSavedObjects = async (savedObjects: DuplicateObject[]) => {
+    const selectedWorkspace = this.state.targetWorkspaceOption[0];
+    if (!selectedWorkspace) {
+      return;
+    }
+    const targetWorkspace = selectedWorkspace.key;
+    const targetWorkspaceName = selectedWorkspace.label;
+
     this.setState({
       isLoading: true,
     });
-
-    const targetWorkspace = this.state.targetWorkspaceOption[0].key;
-    const targetWorkspaceName = this.state.targetWorkspaceOption[0].label;
 
     await this.props.onDuplicate(
       savedObjects,
@@ -98,10 +102,10 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
     });
   };
 
-  changeIncludeReferencesDeep = () => {
-    this.setState((state) => ({
-      isIncludeReferencesDeepChecked: !state.isIncludeReferencesDeepChecked,
-    }));
+  changeIncludeReferencesDeep = (e: React.ChangeEvent<HTMLInputElement>) => {
+    this.setState({
+      isIncludeReferencesDeepChecked: e.target.checked,
+    });
   };
 
   render() {
@@ -137,7 +141,7 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
           <EuiFormRow
             fullWidth
             label={i18n.translate(
-              'savedObjectsManagement.objectsTable.duplicateModal.targetWorkspacelabel',
+              'savedObjectsManagement.objectsTable.duplicateModal.targetWorkspaceLabel',
               { defaultMessage: 'Workspace' }
             )}
           >
@@ -210,9 +214,6 @@ export class SavedObjectsDuplicateModal extends React.Component<ShowDuplicateMod
             <FormattedMessage
               id="savedObjectsManagement.objectsTable.duplicateModal.confirmButtonLabel"
               defaultMessage="Copy"
-              values={{
-                objectCount: allSelectedObjects.length,
-              }}
             />
           </EuiButton>
         </EuiModalFooter>
