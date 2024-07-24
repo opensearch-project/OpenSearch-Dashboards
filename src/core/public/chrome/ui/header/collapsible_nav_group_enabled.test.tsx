@@ -96,9 +96,10 @@ describe('<CollapsibleNavGroupEnabled />', () => {
   function mockProps(
     props?: Partial<CollapsibleNavGroupEnabledProps> & {
       navGroupsMap?: Record<string, NavGroupItemInMap>;
+      currentNavGroupId?: string;
+      navLinks?: ChromeNavLink[];
     }
   ): CollapsibleNavGroupEnabledProps {
-    const currentNavGroup$ = new BehaviorSubject<NavGroupItemInMap | undefined>(undefined);
     const navGroupsMap$ = new BehaviorSubject<Record<string, NavGroupItemInMap>>({
       [ALL_USE_CASE_ID]: {
         ...DEFAULT_NAV_GROUPS[ALL_USE_CASE_ID],
@@ -121,6 +122,9 @@ describe('<CollapsibleNavGroupEnabled />', () => {
       },
       ...props?.navGroupsMap,
     });
+    const currentNavGroup$ = new BehaviorSubject<NavGroupItemInMap | undefined>(
+      props?.currentNavGroupId ? navGroupsMap$.getValue()[props.currentNavGroupId] : undefined
+    );
     return {
       appId$: new BehaviorSubject('test'),
       basePath: mockBasePath,
@@ -146,6 +150,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
           baseUrl: '',
           href: '',
         },
+        ...(props?.navLinks || []),
       ]),
       storage: new StubBrowserStorage(),
       onIsLockedUpdate: () => {},
@@ -226,8 +231,9 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     expect(getAllByTestId('collapsibleNavAppLink-link-in-analytics').length).toEqual(2);
   });
 
-  it('should hide left navigation when in home page when workspace is enabled', async () => {
+  it('should show all use case when current nav group is `all`', async () => {
     const props = mockProps({
+      currentNavGroupId: ALL_USE_CASE_ID,
       navGroupsMap: {
         [DEFAULT_NAV_GROUPS.analytics.id]: {
           ...DEFAULT_NAV_GROUPS.analytics,
@@ -241,12 +247,45 @@ describe('<CollapsibleNavGroupEnabled />', () => {
         },
       },
     });
-    props.appId$ = new BehaviorSubject('home');
-    if (props.capabilities.workspaces) {
-      (props.capabilities.workspaces as Record<string, unknown>) = {};
-      (props.capabilities.workspaces as Record<string, unknown>).enabled = true;
-    }
-    const { container } = render(<CollapsibleNavGroupEnabled {...props} isNavOpen />);
+    const { container, getAllByTestId, getByTestId } = render(
+      <CollapsibleNavGroupEnabled {...props} isNavOpen />
+    );
+    fireEvent.click(getAllByTestId('collapsibleNavAppLink-link-in-analytics')[1]);
+    expect(getAllByTestId('collapsibleNavAppLink-link-in-analytics').length).toEqual(1);
     expect(container).toMatchSnapshot();
+    fireEvent.click(getByTestId('back'));
+    expect(getAllByTestId('collapsibleNavAppLink-link-in-analytics').length).toEqual(2);
+  });
+
+  it('should not show group if the nav link is hidden', async () => {
+    const props = mockProps({
+      currentNavGroupId: ALL_USE_CASE_ID,
+      navGroupsMap: {
+        [DEFAULT_NAV_GROUPS.analytics.id]: {
+          ...DEFAULT_NAV_GROUPS.analytics,
+          navLinks: [
+            {
+              id: 'link-in-analytics-but-hidden',
+              title: 'link-in-analytics-but-hidden',
+              showInAllNavGroup: true,
+            },
+          ],
+        },
+      },
+      navLinks: [
+        {
+          id: 'link-in-analytics-but-hidden',
+          hidden: true,
+          title: 'link-in-analytics-but-hidden',
+          baseUrl: '',
+          href: '',
+        },
+      ],
+    });
+    const { queryAllByTestId } = render(<CollapsibleNavGroupEnabled {...props} isNavOpen />);
+    expect(queryAllByTestId('collapsibleNavAppLink-link-in-analytics-but-hidden').length).toEqual(
+      0
+    );
+    expect(queryAllByTestId('collapsibleNavAppLink-link-in-all').length).toEqual(1);
   });
 });

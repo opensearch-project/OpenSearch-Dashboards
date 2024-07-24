@@ -79,7 +79,7 @@ class ValueInputTypeUI extends Component<Props> {
                 ? (value as BigInt).toString()
                 : value
             }
-            onChange={this.onChange}
+            onChange={this.onNumberChange}
             controlOnly={this.props.controlOnly}
             className={this.props.className}
           />
@@ -149,6 +149,17 @@ class ValueInputTypeUI extends Component<Props> {
   private onBoolChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const boolValue = event.target.value === 'true';
     this.props.onChange(boolValue);
+  };
+
+  private onNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const params = event.target.value;
+    let numValue;
+    if (typeof params === 'string') {
+      numValue = parseFloat(params);
+    } else if (typeof params === 'bigint') {
+      numValue = (params as BigInt).toString();
+    }
+    this.props.onChange(numValue ?? params);
   };
 
   private onChange = (event: React.ChangeEvent<HTMLInputElement>) => {

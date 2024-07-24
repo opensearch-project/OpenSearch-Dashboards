@@ -46,17 +46,22 @@ const GLOBAL_STATE_STORAGE_KEY = '_g';
  * @param osdUrlStateStorage to use for syncing
  */
 export const syncQueryStateWithUrl = (
-  query: Pick<QueryStart | QuerySetup, 'filterManager' | 'timefilter' | 'queryString' | 'state$'>,
+  query: Pick<
+    QueryStart | QuerySetup,
+    'filterManager' | 'timefilter' | 'queryString' | 'dataSet' | 'state$'
+  >,
   osdUrlStateStorage: IOsdUrlStateStorage
 ) => {
   const {
     timefilter: { timefilter },
     filterManager,
+    dataSet,
   } = query;
   const defaultState: QueryState = {
     time: timefilter.getTime(),
     refreshInterval: timefilter.getRefreshInterval(),
     filters: filterManager.getGlobalFilters(),
+    dataSet: dataSet.getDataSet(),
   };
 
   // retrieve current state from `_g` url
@@ -78,6 +83,7 @@ export const syncQueryStateWithUrl = (
     refreshInterval: true,
     time: true,
     filters: FilterStateStore.GLOBAL_STATE,
+    dataSet: true,
   });
 
   // if there weren't any initial state in url,
@@ -107,8 +113,8 @@ export const syncQueryStateWithUrl = (
 
   start();
   return {
-    stop: () => {
-      stopSyncingWithStateContainer();
+    stop: async () => {
+      (await stopSyncingWithStateContainer)();
       stopSyncingWithUrl();
     },
     hasInheritedQueryFromUrl,

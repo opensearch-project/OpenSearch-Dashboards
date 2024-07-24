@@ -5,6 +5,7 @@
 
 import { Observable } from 'rxjs';
 import { SearchInterceptor } from '../search';
+import { DataSetNavigatorProps } from './dataset_navigator';
 import { IndexPatternSelectProps } from './index_pattern_select';
 import { StatefulSearchBarProps } from './search_bar';
 import { QueryEditorExtensionConfig } from './query_editor/query_editor_extensions';
@@ -65,9 +66,15 @@ export interface IUiSetup {
  */
 export interface IUiStart {
   IndexPatternSelect: React.ComponentType<IndexPatternSelectProps>;
+  /**
+   * @experimental - Subject to change
+   */
+  DataSetNavigator: React.ComponentType<DataSetNavigatorProps>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
   SuggestionsComponent: React.ComponentType<SuggestionsComponentProps>;
+  /**
+   * @experimental - Subject to change
+   */
   Settings: Settings;
-  dataSourceContainer$: Observable<HTMLDivElement | null>;
-  container$: Observable<HTMLDivElement | null>;
+  dataSetContainer$: Observable<HTMLDivElement | null>;
 }

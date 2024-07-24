@@ -3,11 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { combineLatest } from 'rxjs';
 import {
   NavGroupType,
   SavedObjectsStart,
   NavGroupItemInMap,
   ALL_USE_CASE_ID,
+  CoreStart,
+  ChromeBreadcrumb,
 } from '../../../core/public';
 import {
   App,
@@ -18,10 +21,10 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
+import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
 import { WorkspaceUseCase } from './types';
-import { DEFAULT_SELECTED_FEATURES_IDS } from '../common/constants';
 
-const USE_CASE_PREFIX = 'use-case-';
+export const USE_CASE_PREFIX = 'use-case-';
 
 export const getUseCaseFeatureConfig = (useCaseId: string) => `${USE_CASE_PREFIX}${useCaseId}`;
 
@@ -265,3 +268,83 @@ const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
 
 export const getFirstUseCaseOfFeatureConfigs = (featureConfigs: string[]): string | undefined =>
   featureConfigs.map(getUseCaseFromFeatureConfig).filter(isNotNull)[0];
+
+export function enrichBreadcrumbsWithWorkspace(core: CoreStart) {
+  return combineLatest([
+    core.workspaces.currentWorkspace$,
+    core.application.currentAppId$,
+    core.chrome.navGroup.getCurrentNavGroup$(),
+    core.chrome.navGroup.getNavGroupsMap$(),
+  ]).subscribe(([currentWorkspace, appId, currentNavGroup, navGroupsMap]) => {
+    prependWorkspaceToBreadcrumbs(core, currentWorkspace, appId, currentNavGroup, navGroupsMap);
+  });
+}
+
+/**
+ * prepend workspace or its use case to breadcrumbs
+ * @param core CoreStart
+ */
+export function prependWorkspaceToBreadcrumbs(
+  core: CoreStart,
+  currentWorkspace: WorkspaceObject | null,
+  appId: string | undefined,
+  currentNavGroup: NavGroupItemInMap | undefined,
+  navGroupsMap: Record<string, NavGroupItemInMap>
+) {
+  if (appId === WORKSPACE_DETAIL_APP_ID) {
+    core.chrome.setBreadcrumbsEnricher(undefined);
+    return;
+  }
+
+  /**
+   * There has 3 cases
+   * nav group is enable + workspace enable + in a workspace -> workspace enricher
+   * nav group is enable + workspace enable + out a workspace -> nav group enricher
+   * nav group is enable + workspace disabled -> nav group enricher
+   *
+   * switch workspace will cause page refresh, breadcrumbs enricher will reset automatically
+   * so we don't need to have reset logic for workspace
+   */
+  if (currentWorkspace) {
+    const useCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []);
+    // get workspace the only use case
+    if (useCase && useCase !== ALL_USE_CASE_ID) {
+      currentNavGroup = navGroupsMap[useCase];
+    }
+    const navGroupBreadcrumb: ChromeBreadcrumb = {
+      text: currentNavGroup?.title,
+      onClick: () => {
+        // current nav group links are sorted, we don't need to sort it again here
+        if (currentNavGroup?.navLinks[0].id) {
+          core.application.navigateToApp(currentNavGroup?.navLinks[0].id);
+        }
+      },
+    };
+    const homeBreadcrumb: ChromeBreadcrumb = {
+      text: 'Home',
+      onClick: () => {
+        core.application.navigateToApp('home');
+      },
+    };
+
+    core.chrome.setBreadcrumbsEnricher((breadcrumbs) => {
+      if (!breadcrumbs || !breadcrumbs.length) return breadcrumbs;
+
+      const workspaceBreadcrumb: ChromeBreadcrumb = {
+        text: currentWorkspace.name,
+        onClick: () => {
+          core.application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
+        },
+      };
+      if (useCase === ALL_USE_CASE_ID) {
+        if (currentNavGroup) {
+          return [homeBreadcrumb, workspaceBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+        } else {
+          return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
+        }
+      } else {
+        return [homeBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+      }
+    });
+  }
+}

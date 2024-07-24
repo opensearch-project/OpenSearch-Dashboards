@@ -15,6 +15,7 @@ import {
 import classNames from 'classnames';
 import { compact, isEqual } from 'lodash';
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   DataSource,
   IDataPluginServices,
@@ -38,8 +39,7 @@ const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 // @internal
 export interface QueryEditorTopRowProps {
   query?: Query;
-  dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
-  containerRef?: React.RefCallback<HTMLDivElement>;
+  dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -64,6 +64,7 @@ export interface QueryEditorTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
+  datePickerRef?: React.RefObject<HTMLDivElement>;
 }
 
 // Needed for React.lazy
@@ -206,11 +207,10 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     )
       return '';
 
-    const defaultDataSource = indexPatterns[0];
-    const dataSource =
-      typeof defaultDataSource === 'string' ? defaultDataSource : defaultDataSource.title;
+    const defaultDataSet = indexPatterns[0];
+    const dataSet = typeof defaultDataSet === 'string' ? defaultDataSet : defaultDataSet.title;
 
-    return input.replace('<data_source>', dataSource);
+    return input.replace('<data_source>', dataSet);
   }
 
   function renderQueryEditor() {
@@ -223,8 +223,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           dataSource={props.dataSource}
           prepend={props.prepend}
           query={parsedQuery}
-          dataSourceContainerRef={props.dataSourceContainerRef}
-          containerRef={props.containerRef}
+          dataSetContainerRef={props.dataSetContainerRef}
           settings={props.settings!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
@@ -294,7 +293,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
     return (
       <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
-        <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
           {renderDatePicker()}
           <EuiFlexItem grow={false}>{button}</EuiFlexItem>
         </EuiFlexGroup>
@@ -359,6 +358,14 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     'osdQueryEditor--withDatePicker': props.showDatePicker,
   });
 
+  const datePicker = (
+    <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+      <EuiFlexItem grow={false} className="osdQueryEditor--updateButtonWrapper">
+        {renderUpdateButton()}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <EuiFlexGroup
       className={classes}
@@ -367,11 +374,9 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       direction="column"
       justifyContent="flexEnd"
     >
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-        <EuiFlexItem grow={false} className="osdQueryEditor--updateButtonWrapper">
-          {renderUpdateButton()}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {props?.datePickerRef?.current && uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)
+        ? createPortal(datePicker, props.datePickerRef.current)
+        : datePicker}
       {renderQueryEditor()}
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="none" direction="column">

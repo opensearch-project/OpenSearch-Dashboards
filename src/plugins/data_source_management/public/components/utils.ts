@@ -206,6 +206,8 @@ export async function getDataSourceById(
     endpoint: attributes.endpoint,
     description: attributes.description || '',
     auth: attributes.auth,
+    datasourceversion: attributes.dataSourceVersion,
+    installedplugins: attributes.installedPlugins,
   };
 }
 
