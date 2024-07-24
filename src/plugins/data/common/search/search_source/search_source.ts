@@ -94,7 +94,6 @@ import {
   convertResult,
   createDataFrame,
   getRawQueryString,
-  parseRawQueryString,
 } from '../../data_frames';
 import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
@@ -324,7 +323,12 @@ export class SearchSource {
     const dataFrame = createDataFrame({
       name: searchRequest.index.title || searchRequest.index,
       fields: [],
-      ...(rawQueryString && { meta: { queryConfig: parseRawQueryString(rawQueryString) } }),
+      ...(rawQueryString && {
+        meta: {
+          queryConfig: { qs: rawQueryString },
+          ...(searchRequest.dataSourceId && { dataSource: searchRequest.dataSourceId }),
+        },
+      }),
     });
     await this.setDataFrame(dataFrame);
     return this.getDataFrame();
@@ -353,6 +357,7 @@ export class SearchSource {
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else if (this.isUnsupportedRequest(searchRequest)) {
+      options = { ...options, isAsync: this.getField('type')?.includes('async') };
       response = await this.fetchExternalSearch(searchRequest, options);
     } else {
       const indexPattern = this.getField('index');
@@ -426,7 +431,8 @@ export class SearchSource {
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
-    if (!this.getDataFrame()) {
+    const currentDataframe = this.getDataFrame();
+    if (!currentDataframe || currentDataframe.name !== searchRequest.index?.id) {
       await this.createDataFrame(searchRequest);
     }
 

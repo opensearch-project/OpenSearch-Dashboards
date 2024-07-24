@@ -3,14 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  htmlIdGenerator,
-  PopoverAnchorPosition,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator, PopoverAnchorPosition } from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
@@ -44,10 +37,7 @@ export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
   dataSource?: DataSource;
   query: Query;
-  container?: HTMLDivElement;
-  dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
-  containerRef?: React.RefCallback<HTMLDivElement>;
-  languageSelectorContainerRef?: React.RefCallback<HTMLDivElement>;
+  dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -60,7 +50,7 @@ export interface QueryEditorProps {
   onChange?: (query: Query, dateRange?: TimeRange) => void;
   onChangeQueryEditorFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query, dateRange?: TimeRange) => void;
-  getQueryStringInitialValue?: (language: string) => string;
+  getQueryStringInitialValue?: (language: string, dataSetName?: string) => string;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
@@ -77,8 +67,6 @@ interface Props extends QueryEditorProps {
 }
 
 interface State {
-  isDataSourcesVisible: boolean;
-  isDataSetsVisible: boolean;
   isSuggestionsVisible: boolean;
   index: number | null;
   suggestions: QuerySuggestion[];
@@ -105,8 +93,6 @@ const KEY_CODES = {
 // eslint-disable-next-line import/no-default-export
 export default class QueryEditorUI extends Component<Props, State> {
   public state: State = {
-    isDataSourcesVisible: false,
-    isDataSetsVisible: true,
     isSuggestionsVisible: false,
     index: null,
     suggestions: [],
@@ -121,7 +107,6 @@ export default class QueryEditorUI extends Component<Props, State> {
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
   private services = this.props.opensearchDashboards.services;
-  private componentIsUnmounting = false;
   private headerRef: RefObject<HTMLDivElement> = createRef();
   private bannerRef: RefObject<HTMLDivElement> = createRef();
   private extensionMap = this.props.settings?.getQueryEditorExtensionMap();
@@ -250,10 +235,6 @@ export default class QueryEditorUI extends Component<Props, State> {
       : undefined;
     this.onChange(newQuery, dateRange);
     this.onSubmit(newQuery, dateRange);
-    this.setState({
-      isDataSourcesVisible: enhancement?.searchBar?.showDataSourcesSelector ?? true,
-      isDataSetsVisible: enhancement?.searchBar?.showDataSetsSelector ?? true,
-    });
   };
 
   private initPersistedLog = () => {
@@ -261,20 +242,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(uiSettings, storage, appName, this.props.query.language);
-  };
-
-  private initDataSourcesVisibility = () => {
-    if (this.componentIsUnmounting) return;
-
-    return this.props.settings.getQueryEnhancements(this.props.query.language)?.searchBar
-      ?.showDataSourcesSelector;
-  };
-
-  private initDataSetsVisibility = () => {
-    if (this.componentIsUnmounting) return;
-
-    return this.props.settings.getQueryEnhancements(this.props.query.language)?.searchBar
-      ?.showDataSetsSelector;
   };
 
   public onMouseEnterSuggestion = (index: number) => {
@@ -291,10 +258,6 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     this.initPersistedLog();
     // this.fetchIndexPatterns().then(this.updateSuggestions);
-    this.setState({
-      isDataSourcesVisible: this.initDataSourcesVisibility() || true,
-      isDataSetsVisible: this.initDataSetsVisibility() || true,
-    });
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -308,7 +271,6 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
-    this.componentIsUnmounting = true;
   }
 
   handleOnFocus = () => {
@@ -431,6 +393,15 @@ export default class QueryEditorUI extends Component<Props, State> {
     const useQueryEditor =
       this.props.query.language !== 'kuery' && this.props.query.language !== 'lucene';
 
+    const languageSelector = (
+      <QueryLanguageSelector
+        language={this.props.query.language}
+        anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+        onSelectLanguage={this.onSelectLanguage}
+        appName={this.services.appName}
+      />
+    );
+
     return (
       <div className={className}>
         <div ref={this.bannerRef} className={bannerClassName} />
@@ -443,22 +414,14 @@ export default class QueryEditorUI extends Component<Props, State> {
                   isCollapsed={!this.state.isCollapsed}
                 />
               </EuiFlexItem>
-              {this.state.isDataSourcesVisible && (
-                <EuiFlexItem grow={2} className={`${className}__dataSourceWrapper`}>
-                  <div ref={this.props.dataSourceContainerRef} />
-                </EuiFlexItem>
-              )}
-
-              {this.state.isDataSetsVisible && (
-                <EuiFlexItem grow={2} className={`${className}__dataSetWrapper`}>
-                  <div ref={this.props.containerRef} />
-                </EuiFlexItem>
-              )}
+              <EuiFlexItem grow={2} className={`${className}__dataSetWrapper`}>
+                <div ref={this.props.dataSetContainerRef} />
+              </EuiFlexItem>
               <EuiFlexItem grow={10}>
                 <EuiFlexGroup gutterSize="none">
                   {(this.state.isCollapsed || !useQueryEditor) && (
                     <EuiFlexItem grow={9}>
-                      <div className="single-line-editor-wrapper">
+                      {/* <div className="single-line-editor-wrapper">
                         <CodeEditor
                           height={40} // Adjusted to match lineHeight for a single line
                           languageId={this.props.query.language}
@@ -491,19 +454,12 @@ export default class QueryEditorUI extends Component<Props, State> {
                             provideCompletionItems: this.provideCompletionItems,
                           }}
                         />
-                      </div>
+                      </div> */}
                     </EuiFlexItem>
                   )}
                   {!useQueryEditor && (
                     <EuiFlexItem grow={false}>
-                      <div className="osdQueryEditor__languageWrapper">
-                        <QueryLanguageSelector
-                          language={this.props.query.language}
-                          anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-                          onSelectLanguage={this.onSelectLanguage}
-                          appName={this.services.appName}
-                        />
-                      </div>
+                      <div className="osdQueryEditor__languageWrapper">{languageSelector}</div>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
@@ -557,15 +513,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               }
             >
               <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <QueryLanguageSelector
-                    language={this.props.query.language}
-                    anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-                    onSelectLanguage={this.onSelectLanguage}
-                    appName={this.services.appName}
-                    isFooter={true}
-                  />
-                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{languageSelector}</EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
                   {this.state.lineCount} {this.state.lineCount === 1 ? 'line' : 'lines'}

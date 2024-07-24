@@ -36,15 +36,18 @@ import { QueryState, QueryStateChange } from './index';
 import { createStateContainer } from '../../../../opensearch_dashboards_utils/public';
 import { isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
 import { QueryStringContract } from '../query_string';
+import { DataSetContract } from '../dataset_manager';
 
 export function createQueryStateObservable({
   timefilter: { timefilter },
   filterManager,
   queryString,
+  dataSet,
 }: {
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
   queryString: QueryStringContract;
+  dataSet: DataSetContract;
 }): Observable<{ changes: QueryStateChange; state: QueryState }> {
   return new Observable((subscriber) => {
     const state = createStateContainer<QueryState>({
@@ -59,6 +62,10 @@ export function createQueryStateObservable({
       queryString.getUpdates$().subscribe(() => {
         currentChange.query = true;
         state.set({ ...state.get(), query: queryString.getQuery() });
+      }),
+      dataSet.getUpdates$().subscribe(() => {
+        currentChange.dataSet = true;
+        state.set({ ...state.get(), dataSet: dataSet.getDataSet() });
       }),
       timefilter.getTimeUpdate$().subscribe(() => {
         currentChange.time = true;
