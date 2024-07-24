@@ -142,22 +142,16 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
 
     const dataFrame = getRawDataFrame(searchRequest);
-    if (!dataFrame) {
-      return throwError(
-        this.handleSearchError(
-          {
-            stack: 'DataFrame is not defined',
-          },
-          request,
-          signal!
-        )
-      );
-    }
 
     let queryString = dataFrame.meta?.queryConfig?.qs ?? getRawQueryString(searchRequest) ?? '';
 
     dataFrame.meta = {
       ...dataFrame.meta,
+      aggConfig: {
+        ...dataFrame.meta.aggConfig,
+        ...(this.aggsService.types.get.bind(this) &&
+          getAggConfig(searchRequest, {}, this.aggsService.types.get.bind(this))),
+      },
       queryConfig: {
         ...dataFrame.meta.queryConfig,
         ...(this.queryService.dataSet.getDataSet() && {
@@ -165,11 +159,6 @@ export class PPLSearchInterceptor extends SearchInterceptor {
         }),
       },
     };
-    const aggConfig = getAggConfig(
-      searchRequest,
-      {},
-      this.aggsService.types.get.bind(this)
-    ) as DataFrameAggConfig;
 
     if (!dataFrame.schema) {
       return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
@@ -179,14 +168,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
             const jsError = new Error(df.error.response);
             return throwError(jsError);
           }
-          const timeField = getTimeField(df, aggConfig);
+          const timeField = getTimeField(df, dataFrame.meta?.aggConfig);
           if (timeField) {
             const timeFilter = getTimeFilter(timeField);
             const newQuery = insertTimeFilter(queryString, timeFilter);
             updateDataFrameMeta({
               dataFrame: df,
               qs: newQuery,
-              aggConfig,
+              aggConfig: dataFrame.meta?.aggConfig,
               timeField,
               timeFilter,
               getAggQsFn: getAggQsFn.bind(this),
@@ -199,14 +188,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     }
 
     if (dataFrame.schema) {
-      const timeField = getTimeField(dataFrame, aggConfig);
+      const timeField = getTimeField(dataFrame, dataFrame.meta?.aggConfig);
       if (timeField) {
         const timeFilter = getTimeFilter(timeField);
         const newQuery = insertTimeFilter(queryString, timeFilter);
         updateDataFrameMeta({
           dataFrame,
           qs: newQuery,
-          aggConfig,
+          aggConfig: dataFrame.meta?.aggConfig,
           timeField,
           timeFilter,
           getAggQsFn: getAggQsFn.bind(this),

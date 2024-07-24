@@ -431,7 +431,6 @@ export class SearchSource {
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
-    console.log('fetchExternalSearch', searchRequest);
     if (!this.getDataFrame()) {
       await this.createDataFrame(searchRequest);
     }

@@ -166,8 +166,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       },
       clear: () => {
         if (this.dfCache.get() === undefined) return;
-        // name because the id is not unique for temporary index pattern created
-        indexPatterns.clearCache(this.dfCache.get()!.name, false);
         this.dfCache.clear();
       },
     };
