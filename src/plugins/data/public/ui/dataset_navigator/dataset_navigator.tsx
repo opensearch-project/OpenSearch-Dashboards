@@ -363,7 +363,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         setSelectedDataSetState((prevState) => ({
           ...prevState,
           isExternal: false,
-          dataSource: source,
+          dataSourceRef: source,
         }));
         isLoading(false);
       }
@@ -431,35 +431,6 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       });
 
       closePopover();
-
-      // if (
-      //   selectedDataSetState.object.type === SIMPLE_DATA_SET_TYPES.TEMPORARY ||
-      //   selectedDataSetState.object.type === SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC
-      // ) {
-      //   const dataFrame = createDataFrame({
-      //     name: selectedDataSetState.object.title!,
-      //     fields: [],
-      //     meta: {
-      //       dataSourceRef: {
-      //         id: selectedDataSetState.dataSource?.id!,
-      //         name: selectedDataSetState.dataSource?.name!,
-      //         type: selectedDataSetState.dataSource?.type!,
-      //       },
-      //     },
-      //   });
-      //   const temporaryIndexPattern = await indexPatternsService.create(
-      //     dataFrameToSpec(dataFrame),
-      //     true
-      //   );
-      //   indexPatternsService.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
-      // }
-      // queryService.queryString.setQuery({ query, language });
-      // queryService.dataSet.setDataSet({
-      //   ...selectedDataSetState.object,
-      //   timeFieldName: selectedDataSetState.timeFieldName,
-      // });
-      // onSelectDataSet(selectedDataSetState.object);
-      // closePopover();
     },
     [
       dataSetManager,
