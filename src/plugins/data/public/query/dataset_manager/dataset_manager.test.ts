@@ -14,20 +14,21 @@ describe('DataSetManager', () => {
     service = new DataSetManager(coreMock.createSetup().uiSettings);
   });
 
-  test('getUpdates$ is a cold emits only after query changes', () => {
+  test('getUpdates$ emits initially and after data set changes', () => {
     const obs$ = service.getUpdates$();
-    const emittedValues: SimpleDataSet[] = [];
+    const emittedValues: Array<SimpleDataSet | undefined> = [];
     obs$.subscribe((v) => {
-      emittedValues.push(v!);
+      emittedValues.push(v);
     });
-    expect(emittedValues).toHaveLength(0);
+    expect(emittedValues).toHaveLength(1);
+    expect(emittedValues[1]).toEqual(undefined);
 
     const newDataSet: SimpleDataSet = { id: 'test_dataset', title: 'Test Dataset' };
     service.setDataSet(newDataSet);
-    expect(emittedValues).toHaveLength(1);
-    expect(emittedValues[0]).toEqual(newDataSet);
+    expect(emittedValues).toHaveLength(2);
+    expect(emittedValues[1]).toEqual(newDataSet);
 
     service.setDataSet({ ...newDataSet });
-    expect(emittedValues).toHaveLength(2);
+    expect(emittedValues).toHaveLength(3);
   });
 });
