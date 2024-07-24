@@ -7,7 +7,7 @@ import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { concatMap, map } from 'rxjs/operators';
-import { DATA_FRAME_TYPES, getRawDataFrame, getRawQueryString } from '../../../data/common';
+import { createDataFrame, DATA_FRAME_TYPES, getRawDataFrame, getRawQueryString } from '../../../data/common';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -51,10 +51,23 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       signal,
     };
 
+    console.log('SQLSearchInterceptor.runSearch', searchRequest);
+
+    // let dataFrame = getRawDataFrame(searchRequest);
+    // if (!dataFrame) {
+    //   const rawQueryString = getRawQueryString(searchRequest);
+    //   dataFrame = createDataFrame({
+    //     name: searchRequest.params.index,
+    //     fields: [],
+    //     ...(rawQueryString && {
+    //       meta: {
+    //         queryConfig: getRawQueryString(searchRequest),
+    //         ...(searchRequest && { dataSource: searchRequest.dataSourceId }),
+    //       },
+    //     }),
+    //   });
+    // }
     const dataFrame = getRawDataFrame(searchRequest);
-    if (!dataFrame) {
-      return throwError(this.handleSearchError('DataFrame is not defined', request, signal!));
-    }
 
     const queryString = dataFrame.meta?.queryConfig?.qs ?? getRawQueryString(searchRequest) ?? '';
 

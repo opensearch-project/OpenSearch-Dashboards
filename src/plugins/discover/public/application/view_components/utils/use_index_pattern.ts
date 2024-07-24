@@ -6,7 +6,6 @@
 import { useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { IndexPattern } from '../../../../../data/public';
-import { SimpleDataSet } from '../../../../../data/common';
 import { useSelector, updateIndexPattern } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
@@ -27,35 +26,10 @@ import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
  */
 export const useIndexPattern = (services: DiscoverViewServices) => {
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
-  const dataSetFromState = useSelector((state) => state.metadata.dataSet);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const { data, toastNotifications, uiSettings: config, store } = services;
 
   useEffect(() => {
-    const checkDataSet = async (idFromState: string, dataSet?: Omit<SimpleDataSet, 'id'>) => {
-      if (dataSet) {
-        const temporaryIndexPattern = await data.indexPatterns.create(
-          {
-            id: idFromState,
-            title: dataSet.title,
-            ...(dataSet.dataSourceRef
-              ? {
-                  dataSourceRef: {
-                    id: dataSet.dataSourceRef.id ?? dataSet.dataSourceRef.name,
-                    name: dataSet.dataSourceRef.name,
-                    type: dataSet.type!,
-                  },
-                }
-              : {}),
-            timeFieldName: dataSet.timeFieldName,
-          },
-          true
-        );
-        data.indexPatterns.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
-      }
-      fetchIndexPatternDetails(idFromState);
-    };
-
     let isMounted = true;
 
     const fetchIndexPatternDetails = (id: string) => {
@@ -91,20 +65,13 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
         fetchIndexPatternDetails(newId);
       });
     } else {
-      checkDataSet(indexPatternIdFromState, dataSetFromState);
+      fetchIndexPatternDetails(indexPatternIdFromState);
     }
 
     return () => {
       isMounted = false;
     };
-  }, [
-    indexPatternIdFromState,
-    data.indexPatterns,
-    toastNotifications,
-    config,
-    store,
-    dataSetFromState,
-  ]);
+  }, [indexPatternIdFromState, data.indexPatterns, toastNotifications, config, store]);
 
   return indexPattern;
 };

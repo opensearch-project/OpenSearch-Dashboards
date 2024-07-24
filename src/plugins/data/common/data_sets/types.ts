@@ -26,6 +26,7 @@ export interface SimpleDataSource {
   id: string;
   name: string;
   indices?: SimpleObject[];
+  tables?: SimpleObject[];
   type: SIMPLE_DATA_SOURCE_TYPES;
 }
 

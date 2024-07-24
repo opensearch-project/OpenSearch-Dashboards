@@ -30,7 +30,14 @@ export const updateSearchSource = async ({
   histogramConfigs,
 }: Props) => {
   const { uiSettings, data } = services;
-  let dataSet = indexPattern;
+  const queryDataSet = data.query.dataSet.getDataSet();
+
+  console.log('what should be set if', queryDataSet);
+
+  let dataSet =
+    indexPattern.id === queryDataSet?.id
+      ? await data.indexPatterns.getByTitle(queryDataSet?.title!)
+      : indexPattern;
   const dataFrame = searchSource?.getDataFrame();
   if (
     searchSource &&
@@ -42,6 +49,7 @@ export const updateSearchSource = async ({
     dataSet = data.indexPatterns.getByTitle(dataFrame.name, true) ?? dataSet;
     searchSource.setField('index', dataSet);
   }
+  console.log('what should be set after', dataSet);
 
   const sortForSearchSource = getSortForSearchSource(
     sort,

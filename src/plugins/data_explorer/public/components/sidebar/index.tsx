@@ -7,22 +7,16 @@ import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiPageSideBar, EuiPortal, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { batch } from 'react-redux';
+import { SimpleDataSet } from '../../../../data/common';
 import { DataSource, DataSourceGroup, DataSourceSelectable } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
-import {
-  setDataSet,
-  setIndexPattern,
-  useTypedDispatch,
-  useTypedSelector,
-} from '../../utils/state_management';
+import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
 import './index.scss';
 
 export const Sidebar: FC = ({ children }) => {
-  const { indexPattern: indexPatternId, dataSet: dataSet } = useTypedSelector(
-    (state) => state.metadata
-  );
+  const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
   const dispatch = useTypedDispatch();
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
@@ -141,11 +135,8 @@ export const Sidebar: FC = ({ children }) => {
   );
 
   const handleDataSetSelection = useCallback(
-    (selectedDataSet: any) => {
-      batch(() => {
-        const { id, ...ds } = selectedDataSet;
-        dispatch(setIndexPattern(id));
-      });
+    (selectedDataSet: SimpleDataSet) => {
+      dispatch(setIndexPattern(selectedDataSet.id));
     },
     [dispatch]
   );
@@ -168,13 +159,7 @@ export const Sidebar: FC = ({ children }) => {
               containerRef.current = node;
             }}
           >
-            <DataSetNavigator
-              dataSet={{
-                id: indexPatternId,
-                ...dataSet,
-              }}
-              onSelectDataSet={handleDataSetSelection}
-            />
+            <DataSetNavigator dataSetId={indexPatternId} onSelectDataSet={handleDataSetSelection} />
           </EuiPortal>
         )}
         {!isEnhancementsEnabled && (
