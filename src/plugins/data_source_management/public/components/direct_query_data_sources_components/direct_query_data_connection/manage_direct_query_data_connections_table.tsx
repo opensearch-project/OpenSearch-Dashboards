@@ -38,6 +38,7 @@ import { DataSourceSelector } from '../../data_source_selector';
 import { DataSourceOption } from '../../data_source_menu/types';
 import { DATACONNECTIONS_BASE } from '../../../constants';
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
+import { InstallIntegrationFlyout } from '../integrations/installed_integrations_table';
 
 interface DataConnection {
   connectionType: DirectQueryDatasourceType;
@@ -67,6 +68,8 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   featureFlagStatus,
 }) => {
   const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
+  const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
+  const [integrationsFlyout, setIntegrationsFlyout] = useState<React.JSX.Element | null>(null);
 
   const checkIfObservabilityDashboardsPluginIsInstalled = () => {
     fetch('/api/status', {
@@ -241,7 +244,17 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
         !featureFlagStatus &&
         observabilityDashboardsExists &&
         datasource.connectionType !== 'PROMETHEUS',
-      onClick: () => {},
+      onClick: (datasource: DataConnection) => {
+        setIntegrationsFlyout(
+          <InstallIntegrationFlyout
+            closeFlyout={() => setShowIntegrationsFlyout(false)}
+            datasourceType={datasource.connectionType}
+            datasourceName={datasource.name}
+            http={http}
+          />
+        );
+        setShowIntegrationsFlyout(true);
+      },
       'data-test-subj': 'action-integrate',
     },
     {
@@ -368,6 +381,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
         </EuiFlexItem>
       </EuiFlexGroup>
       {isModalVisible && modalLayout}
+      {showIntegrationsFlyout && integrationsFlyout}
     </EuiPageBody>
   );
 };
