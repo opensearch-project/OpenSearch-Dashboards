@@ -67,23 +67,23 @@ describe('DataSourceHomePanel', () => {
 
   test('renders DataSourceTableWithRouter when manageOpensearchDataSources tab is selected', () => {
     const wrapper = mountComponent();
-    wrapper.find(EuiTab).at(1).simulate('click');
+    wrapper.find(EuiTab).at(0).simulate('click');
     expect(wrapper.find(DataSourceTableWithRouter)).toHaveLength(1);
     expect(wrapper.find(ManageDirectQueryDataConnectionsTable)).toHaveLength(0);
   });
 
   test('renders ManageDirectQueryDataConnectionsTable when manageDirectQueryDataSources tab is selected', () => {
     const wrapper = mountComponent();
-    wrapper.find(EuiTab).at(0).simulate('click');
+    wrapper.find(EuiTab).at(1).simulate('click');
     expect(wrapper.find(ManageDirectQueryDataConnectionsTable)).toHaveLength(1);
     expect(wrapper.find(DataSourceTableWithRouter)).toHaveLength(0);
   });
 
   test('handles tab changes', () => {
     const wrapper = mountComponent();
-    expect(wrapper.find(ManageDirectQueryDataConnectionsTable)).toHaveLength(1);
-    wrapper.find(EuiTab).at(1).simulate('click');
     expect(wrapper.find(DataSourceTableWithRouter)).toHaveLength(1);
+    wrapper.find(EuiTab).at(1).simulate('click');
+    expect(wrapper.find(ManageDirectQueryDataConnectionsTable)).toHaveLength(1);
   });
 
   test('does not render OpenSearch connections tab when featureFlagStatus is false', () => {

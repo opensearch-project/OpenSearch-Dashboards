@@ -4,12 +4,12 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 
 import { WorkspaceMenu } from './workspace_menu';
 import { coreMock } from '../../../../../core/public/mocks';
 import { CoreStart } from '../../../../../core/public';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { IntlProvider } from 'react-intl';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import { WORKSPACE_USE_CASES } from '../../../common/constants';
@@ -109,7 +109,7 @@ describe('<WorkspaceMenu />', () => {
     expect(screen.getByText('Observability')).toBeInTheDocument();
   });
 
-  it('should navigate to the workspace', () => {
+  it('should navigate to the first feature of workspace use case', () => {
     coreStartMock.workspaces.workspaceList$.next([
       { id: 'workspace-1', name: 'workspace 1', features: ['use-case-observability'] },
     ]);
@@ -127,6 +127,31 @@ describe('<WorkspaceMenu />', () => {
 
     expect(window.location.assign).toHaveBeenCalledWith(
       'https://test.com/w/workspace-1/app/discover'
+    );
+
+    Object.defineProperty(window, 'location', {
+      value: originalLocation,
+    });
+  });
+
+  it('should navigate to the workspace detail page when use case is all', () => {
+    coreStartMock.workspaces.workspaceList$.next([
+      { id: 'workspace-1', name: 'workspace 1', features: ['use-case-all'] },
+    ]);
+
+    const originalLocation = window.location;
+    Object.defineProperty(window, 'location', {
+      value: {
+        assign: jest.fn(),
+      },
+    });
+
+    render(<WorkspaceMenuCreatorComponent />);
+    fireEvent.click(screen.getByTestId('workspace-select-button'));
+    fireEvent.click(screen.getByText(/workspace 1/i));
+
+    expect(window.location.assign).toHaveBeenCalledWith(
+      'https://test.com/w/workspace-1/app/workspace_detail'
     );
 
     Object.defineProperty(window, 'location', {
