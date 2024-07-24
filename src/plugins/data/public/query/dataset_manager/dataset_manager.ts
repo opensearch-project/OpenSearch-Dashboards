@@ -6,7 +6,12 @@
 import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { IndexPatternsService, SIMPLE_DATA_SET_TYPES, SimpleDataSet } from '../../../common';
+import {
+  IndexPatternsService,
+  SIMPLE_DATA_SET_TYPES,
+  SimpleDataSet,
+  SimpleDataSource,
+} from '../../../common';
 
 export class DataSetManager {
   private dataSet$: BehaviorSubject<SimpleDataSet | undefined>;
@@ -55,6 +60,17 @@ export class DataSetManager {
       id: indexPattern.id,
       title: indexPattern.title,
       type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
+      timeFieldName: indexPattern.timeFieldName,
+      fields: indexPattern.fields,
+      ...(indexPattern.dataSourceRef
+        ? {
+            dataSourceRef: {
+              id: indexPattern.dataSourceRef?.id,
+              name: indexPattern.dataSourceRef?.name,
+              type: indexPattern.dataSourceRef?.type,
+            } as SimpleDataSource,
+          }
+        : {}),
     };
   };
 }
