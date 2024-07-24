@@ -33,8 +33,6 @@ import { registerTestConnectionRoute } from './routes/test_connection';
 import { registerFetchDataSourceMetaDataRoute } from './routes/fetch_data_source_metadata';
 import { AuthenticationMethodRegistry, IAuthenticationMethodRegistry } from './auth_registry';
 import { CustomApiSchemaRegistry } from './schema_registry';
-import { ManageableBy } from '../common/data_sources';
-import { getWorkspaceState } from '../../../../src/core/server/utils';
 
 export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourcePluginStart> {
   private readonly logger: Logger;
@@ -82,25 +80,6 @@ export class DataSourcePlugin implements Plugin<DataSourcePluginSetup, DataSourc
       DATA_SOURCE_SAVED_OBJECT_TYPE,
       dataSourceSavedObjectsClientWrapper.wrapperFactory
     );
-
-    const { manageableBy } = config;
-    core.capabilities.registerProvider(() => ({
-      dataSource: {
-        canManage: false,
-      },
-    }));
-
-    core.capabilities.registerSwitcher((request) => {
-      const { requestWorkspaceId, isDashboardAdmin } = getWorkspaceState(request);
-      // User can not manage data source in the workspace.
-      const canManage =
-        (manageableBy === ManageableBy.All && !requestWorkspaceId) ||
-        (manageableBy === ManageableBy.DashboardAdmin &&
-          isDashboardAdmin !== false &&
-          !requestWorkspaceId);
-
-      return { dataSource: { canManage } };
-    });
 
     core.logging.configure(
       this.config$.pipe<LoggerContextConfigInput>(
