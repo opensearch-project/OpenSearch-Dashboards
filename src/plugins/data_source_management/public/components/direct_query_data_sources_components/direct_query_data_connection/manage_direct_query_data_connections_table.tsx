@@ -234,6 +234,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
             fullWidth={true}
             uiSettings={uiSettings}
             disabled={false}
+            compressed={true}
           />
         </EuiFlexItem>
       )}
