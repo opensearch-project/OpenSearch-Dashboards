@@ -515,7 +515,7 @@ describe('workspace utils: prependWorkspaceToBreadcrumbs', () => {
   it('should not enrich breadcrumbs when out a workspace', async () => {
     const coreStart = coreMock.createStart();
     prependWorkspaceToBreadcrumbs(coreStart, null, 'app1', undefined, {});
-    expect(coreStart.chrome.setBreadcrumbsEnricher).toHaveBeenCalledWith(undefined);
+    expect(coreStart.chrome.setBreadcrumbsEnricher).not.toHaveBeenCalled();
   });
 
   it('should enrich breadcrumbs when in a workspace and use workspace use case as current nav group', async () => {
