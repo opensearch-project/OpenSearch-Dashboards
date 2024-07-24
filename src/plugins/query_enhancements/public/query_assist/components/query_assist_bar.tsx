@@ -4,7 +4,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
-import React, { SyntheticEvent, useMemo, useRef, useState } from 'react';
+import React, { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { SimpleDataSet } from '../../../../data/common';
 import {
   IDataPluginServices,
   PersistedLog,
@@ -34,8 +35,18 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { generateQuery, loading } = useGenerateQuery();
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
-  const selectedIndex = services.data.query.dataSet.getDataSet()?.title;
+  const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet | undefined>(
+    services.data.query.dataSet.getDataSet()
+  );
+  const selectedIndex = selectedDataSet?.title;
   const previousQuestionRef = useRef<string>();
+
+  useEffect(() => {
+    const subscription = services.data.query.dataSet.getUpdates$().subscribe((dataSet) => {
+      setSelectedDataSet(dataSet);
+    });
+    return () => subscription.unsubscribe();
+  }, [services.data.query.dataSet]);
 
   const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -54,7 +65,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
       question: inputRef.current.value,
       index: selectedIndex,
       language: props.dependencies.language,
-      dataSourceId: services.data.query.dataSet.getDataSet()?.dataSourceRef?.id,
+      dataSourceId: selectedDataSet?.dataSourceRef?.id,
     };
     const { response, error } = await generateQuery(params);
     if (error) {
