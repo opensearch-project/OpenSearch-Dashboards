@@ -421,7 +421,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                 <EuiFlexGroup gutterSize="none">
                   {(this.state.isCollapsed || !useQueryEditor) && (
                     <EuiFlexItem grow={9}>
-                      {/* <div className="single-line-editor-wrapper">
+                      <div className="single-line-editor-wrapper">
                         <CodeEditor
                           height={40} // Adjusted to match lineHeight for a single line
                           languageId={this.props.query.language}
@@ -454,7 +454,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                             provideCompletionItems: this.provideCompletionItems,
                           }}
                         />
-                      </div> */}
+                      </div>
                     </EuiFlexItem>
                   )}
                   {!useQueryEditor && (
