@@ -6,8 +6,12 @@
 import { firstValueFrom } from '@osd/std';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
+import { of } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
+import { SimpleDataSet } from '../../../../data/common';
 import { IIndexPattern } from '../../../../data/public';
+import { dataPluginMock } from '../../../../data/public/mocks';
+import { DataSetContract } from '../../../../data/public/query';
 import { ConfigSchema } from '../../../common/config';
 import { createQueryAssistExtension } from './create_extension';
 
@@ -19,18 +23,19 @@ const coreSetupMock = coreMock.createSetup({
   },
 });
 const httpMock = coreSetupMock.http;
+const dataMock = dataPluginMock.createSetupContract();
+const dataSetMock = dataMock.query.dataSet as jest.Mocked<DataSetContract>;
 
-jest.mock('../../services', () => ({
-  getData: jest.fn().mockReturnValue({
-    indexPatterns: {
-      get: jest.fn().mockResolvedValue({ id: 'test-pattern' }),
-    },
-  }),
-}));
+const mockSimpleDataSet = {
+  id: 'mock-data-set-id',
+  title: 'mock-title',
+  dataSourceRef: {
+    id: 'mock-data-source-id',
+  },
+} as SimpleDataSet;
 
-jest.mock('.', () => ({
-  getMdsDataSourceId: jest.fn().mockResolvedValue('mock-data-source-id'),
-}));
+dataSetMock.getUpdates$.mockReturnValue(of(mockSimpleDataSet));
+dataSetMock.getDataSet.mockReturnValue(mockSimpleDataSet);
 
 jest.mock('../components', () => ({
   QueryAssistBar: jest.fn(() => <div>QueryAssistBar</div>),
@@ -48,7 +53,7 @@ describe('CreateExtension', () => {
 
   it('should be enabled if at least one language is configured', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(httpMock, config);
+    const extension = createQueryAssistExtension(httpMock, dataMock, config);
     const isEnabled = await firstValueFrom(extension.isEnabled$({ language: 'PPL' }));
     expect(isEnabled).toBeTruthy();
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
@@ -58,7 +63,7 @@ describe('CreateExtension', () => {
 
   it('should be disabled for unsupported language', async () => {
     httpMock.get.mockRejectedValueOnce(new Error('network failure'));
-    const extension = createQueryAssistExtension(httpMock, config);
+    const extension = createQueryAssistExtension(httpMock, dataMock, config);
     const isEnabled = await firstValueFrom(extension.isEnabled$({ language: 'PPL' }));
     expect(isEnabled).toBeFalsy();
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
@@ -68,7 +73,7 @@ describe('CreateExtension', () => {
 
   it('should render the component if language is supported', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(httpMock, config);
+    const extension = createQueryAssistExtension(httpMock, dataMock, config);
     const component = extension.getComponent?.({
       language: 'PPL',
       indexPatterns: [{ id: 'test-pattern' }] as IIndexPattern[],
@@ -85,7 +90,7 @@ describe('CreateExtension', () => {
 
   it('should render the banner if language is not supported', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(httpMock, config);
+    const extension = createQueryAssistExtension(httpMock, dataMock, config);
     const banner = extension.getBanner?.({
       language: 'DQL',
       indexPatterns: [{ id: 'test-pattern' }] as IIndexPattern[],

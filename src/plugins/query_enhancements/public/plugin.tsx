@@ -109,7 +109,7 @@ export class QueryEnhancementsPlugin
 
     data.__enhance({
       ui: {
-        queryEditorExtension: createQueryAssistExtension(core.http, this.config.queryAssist),
+        queryEditorExtension: createQueryAssistExtension(core.http, data, this.config.queryAssist),
       },
     });
 

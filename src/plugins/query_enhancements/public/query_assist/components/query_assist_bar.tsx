@@ -4,7 +4,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
-import React, { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
+import React, { SyntheticEvent, useMemo, useRef, useState } from 'react';
 import {
   IDataPluginServices,
   PersistedLog,
@@ -14,7 +14,7 @@ import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react
 import { QueryAssistParameters } from '../../../common/query_assist';
 import { getStorage } from '../../services';
 import { useGenerateQuery } from '../hooks';
-import { getMdsDataSourceId, getPersistedLog, ProhibitedQueryError } from '../utils';
+import { getPersistedLog, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
@@ -34,18 +34,8 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { generateQuery, loading } = useGenerateQuery();
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
-  const selectedIndexPattern = props.dependencies.indexPatterns?.at(0);
-  const selectedIndex =
-    selectedIndexPattern &&
-    (typeof selectedIndexPattern === 'string' ? selectedIndexPattern : selectedIndexPattern.title);
-  const dataSourceIdRef = useRef<string>();
+  const selectedIndex = services.data.query.dataSet.getDataSet()?.title;
   const previousQuestionRef = useRef<string>();
-
-  useEffect(() => {
-    getMdsDataSourceId(services.data.indexPatterns, props.dependencies.indexPatterns?.at(0)).then(
-      (id) => (dataSourceIdRef.current = id)
-    );
-  }, [props.dependencies.indexPatterns, services.data.indexPatterns]);
 
   const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -64,7 +54,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
       question: inputRef.current.value,
       index: selectedIndex,
       language: props.dependencies.language,
-      dataSourceId: dataSourceIdRef.current,
+      dataSourceId: services.data.query.dataSet.getDataSet()?.dataSourceRef?.id,
     };
     const { response, error } = await generateQuery(params);
     if (error) {
