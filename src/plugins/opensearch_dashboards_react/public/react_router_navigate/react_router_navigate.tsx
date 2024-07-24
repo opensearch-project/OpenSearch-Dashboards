@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { ScopedHistory } from 'opensearch-dashboards/public';
+import { ChromeBreadcrumb, ScopedHistory } from 'opensearch-dashboards/public';
 import { History } from 'history';
 
 interface LocationObject {
@@ -78,4 +78,15 @@ export const reactRouterOnClickHandler = (
   // prevents page reload
   event.preventDefault();
   history.push(toLocationObject(to));
+};
+
+export const getScopedBreadcrumbs = (
+  crumbs: ChromeBreadcrumb[] = [],
+  appHistory: ScopedHistory
+) => {
+  const wrapBreadcrumb = (item: ChromeBreadcrumb, scopedHistory: ScopedHistory) => ({
+    ...item,
+    ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
+  });
+  return crumbs.map((item) => wrapBreadcrumb(item, appHistory));
 };
