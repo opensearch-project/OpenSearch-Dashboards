@@ -350,20 +350,21 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       if (source) {
         isLoading(true);
         const indices = await fetchIndices(searchService, source.id);
-        const objects = indices.map((indexName: string) => ({
-          id: indexName,
-          title: indexName,
-          dataSourceRef: {
-            id: source.id,
-            name: source.name,
-            type: source.type,
-          },
-        }));
-        source.indices = objects;
         setSelectedDataSetState((prevState) => ({
           ...prevState,
           isExternal: false,
-          dataSourceRef: source,
+          dataSourceRef: {
+            ...source,
+            indices: indices.map((indexName: string) => ({
+              id: indexName,
+              title: indexName,
+              dataSourceRef: {
+                id: source.id,
+                name: source.name,
+                type: source.type,
+              },
+            })),
+          },
         }));
         isLoading(false);
       }
@@ -603,13 +604,16 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                         } else if (
                           externalDataSourcesCache.status === CachedDataSourceStatus.Updated
                         ) {
-                          await handleSelectExternalDataSource(
-                            externalDataSourcesCache.externalDataSources.map((ds) => ({
-                              id: ds.dataSourceRef,
-                              name: ds.name,
-                              type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
-                            }))
-                          );
+                          setNavigatorState((prevState) => ({
+                            ...prevState,
+                            externalDataSources: externalDataSourcesCache.externalDataSources.map(
+                              (ds) => ({
+                                id: ds.name,
+                                name: ds.name,
+                                type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
+                              })
+                            ),
+                          }));
                         }
                       },
                     },
