@@ -92,6 +92,13 @@ export class Settings {
       this.search.df.clear();
     }
     this.storage.set('opensearchDashboards.userQueryLanguage', language);
+    const queryEnhancement = this.queryEnhancements.get(language);
+    this.search.__enhance({
+      searchInterceptor: queryEnhancement
+        ? queryEnhancement.search
+        : this.search.getDefaultSearchInterceptor(),
+    });
+    this.setUiOverridesByUserQueryLanguage(language);
 
     return true;
   }

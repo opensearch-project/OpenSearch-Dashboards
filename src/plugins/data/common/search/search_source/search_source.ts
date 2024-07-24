@@ -357,7 +357,6 @@ export class SearchSource {
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else if (this.isUnsupportedRequest(searchRequest)) {
-      options = { ...options, isAsync: this.getField('type')?.includes('async') };
       response = await this.fetchExternalSearch(searchRequest, options);
     } else {
       const indexPattern = this.getField('index');
