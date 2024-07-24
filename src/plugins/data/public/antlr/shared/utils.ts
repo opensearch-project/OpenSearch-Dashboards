@@ -69,7 +69,7 @@ export const fetchColumnValues = (
   return fetchData(
     tables,
     (table, dataSourceId, title) => ({
-      query: { qs: `SELECT DISTINCT ${column} FROM ${table} LIMIT 5`, format: 'jdbc' },
+      query: { qs: `SELECT DISTINCT ${column} FROM ${table} LIMIT 10`, format: 'jdbc' },
       df: {
         meta: {
           queryConfig: {
