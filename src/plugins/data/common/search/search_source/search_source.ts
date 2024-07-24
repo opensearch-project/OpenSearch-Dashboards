@@ -322,6 +322,7 @@ export class SearchSource {
   async createDataFrame(searchRequest: SearchRequest) {
     const rawQueryString = this.getRawQueryStringFromRequest(searchRequest);
     const dataFrame = createDataFrame({
+      // name: searchRequest.index.id, // search source will always use an index pattern so it should also always have an id that matches the cache key even for temporary indices,
       name: searchRequest.index.title || searchRequest.index,
       fields: [],
       ...(rawQueryString && {
@@ -431,8 +432,8 @@ export class SearchSource {
    */
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
-
-    if (!this.getDataFrame()) {
+    const currentDataframe = this.getDataFrame();
+    if (!currentDataframe || currentDataframe.name !== searchRequest.index?.id) {
       await this.createDataFrame(searchRequest);
     }
 

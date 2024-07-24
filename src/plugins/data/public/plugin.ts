@@ -220,7 +220,7 @@ export class DataPublicPlugin
     });
     setQueryService(query);
 
-    const search = this.searchService.start(core, { fieldFormats, indexPatterns });
+    const search = this.searchService.start(core, { fieldFormats, indexPatterns, query });
     setSearchService(search);
 
     uiActions.addTriggerAction(

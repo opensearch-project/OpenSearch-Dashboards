@@ -64,6 +64,9 @@ import {
   createDataFrameCache,
   dataFrameToSpec,
 } from '../../common/data_frames';
+import { DataPublicPluginStart } from '../types';
+import { getUiService } from '../services';
+import { UI_SETTINGS } from '../../common';
 
 /** @internal */
 export interface SearchServiceSetupDependencies {
@@ -75,6 +78,7 @@ export interface SearchServiceSetupDependencies {
 export interface SearchServiceStartDependencies {
   fieldFormats: AggsStartDependencies['fieldFormats'];
   indexPatterns: IndexPatternsContract;
+  query: DataPublicPluginStart['query']; // TODO: Use query service for now as it holds the language source of truth
 }
 
 export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
@@ -130,9 +134,19 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
   public start(
     { application, http, notifications, uiSettings }: CoreStart,
-    { fieldFormats, indexPatterns }: SearchServiceStartDependencies
+    { fieldFormats, indexPatterns, query }: SearchServiceStartDependencies
   ): ISearchStart {
     const search = ((request, options) => {
+      // TODO: Rework the dataflow to put these values in the right place instead of moving the data around so many services
+      const selectedLanguage = query.queryString.getQuery().language;
+      const uiService = getUiService();
+      const enhancement = uiService.Settings.getQueryEnhancements(selectedLanguage);
+      const isEnhanced = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+
+      if (isEnhanced && enhancement) {
+        return enhancement.search.search(request, options);
+      }
+
       return this.searchInterceptor.search(request, options);
     }) as ISearchGeneric;
 

@@ -393,7 +393,6 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       name: cluster.title,
       panel: 7,
       onClick: async () => {
-        // debugger;
         await handleSelectCluster({ ...cluster, type: SIMPLE_DATA_SET_TYPES.TEMPORARY });
       },
     })),

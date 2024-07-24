@@ -6,7 +6,8 @@
 import { EuiComboBox, EuiComboBoxOptionOption, PopoverAnchorPosition } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import React from 'react';
-import { getSearchService, getUiService } from '../../services';
+import { getUiService, getUiSettings } from '../../services';
+import { UI_SETTINGS } from '../../../common/constants';
 
 interface Props {
   language: string;
@@ -42,10 +43,12 @@ export function QueryLanguageSwitcher(props: Props) {
   ];
 
   const uiService = getUiService();
-  const searchService = getSearchService();
+  const uiSettings = getUiSettings();
+  const queryEnhancements = uiService.Settings.getAllQueryEnhancements();
 
-  const queryEnhancements = uiService.queryEnhancements;
-  if (uiService.isEnhancementsEnabled) {
+  const isQueryEnhancementsEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+
+  if (isQueryEnhancementsEnabled) {
     queryEnhancements.forEach((enhancement) => {
       if (
         enhancement.supportedAppNames &&
@@ -64,28 +67,10 @@ export function QueryLanguageSwitcher(props: Props) {
       )?.label as string) ?? languageOptions[0].label,
   };
 
-  const setSearchEnhance = (queryLanguage: string) => {
-    if (!uiService.isEnhancementsEnabled) return;
-    const queryEnhancement = queryEnhancements.get(queryLanguage);
-    searchService.__enhance({
-      searchInterceptor: queryEnhancement
-        ? queryEnhancement.search
-        : searchService.getDefaultSearchInterceptor(),
-    });
-
-    if (!queryEnhancement) {
-      searchService.df.clear();
-    }
-    uiService.Settings.setUiOverridesByUserQueryLanguage(queryLanguage);
-  };
-
   const handleLanguageChange = (newLanguage: EuiComboBoxOptionOption[]) => {
     const queryLanguage = newLanguage[0].value as string;
     props.onSelectLanguage(queryLanguage);
-    setSearchEnhance(queryLanguage);
   };
-
-  setSearchEnhance(props.language);
 
   return (
     <EuiComboBox
