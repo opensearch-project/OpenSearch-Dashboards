@@ -194,7 +194,7 @@ export function CollapsibleNavGroupEnabled({
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
 
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
-    if (currentNavGroup) {
+    if (currentNavGroup && currentNavGroup.id !== ALL_USE_CASE_ID) {
       return fulfillRegistrationLinksToChromeNavLinks(
         navGroupsMap[currentNavGroup.id].navLinks || [],
         navLinks
@@ -241,7 +241,10 @@ export function CollapsibleNavGroupEnabled({
           label: group.title,
           order: group.order,
         };
-        const linksForAllUseCaseWithinNavGroup = group.navLinks
+        const linksForAllUseCaseWithinNavGroup = fulfillRegistrationLinksToChromeNavLinks(
+          group.navLinks,
+          navLinks
+        )
           .filter((navLink) => navLink.showInAllNavGroup)
           .map((navLink) => ({
             ...navLink,
