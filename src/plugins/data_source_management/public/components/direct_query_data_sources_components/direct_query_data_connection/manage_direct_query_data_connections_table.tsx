@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  ApplicationStart,
   HttpStart,
   IUiSettingsClient,
   NotificationsStart,
@@ -36,9 +37,10 @@ import PrometheusLogo from '../icons/prometheus_logo.svg';
 import S3Logo from '../icons/s3_logo.svg';
 import { DataSourceSelector } from '../../data_source_selector';
 import { DataSourceOption } from '../../data_source_menu/types';
-import { DATACONNECTIONS_BASE } from '../../../constants';
+import { DATACONNECTIONS_BASE, observabilityMetricsID } from '../../../constants';
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import { InstallIntegrationFlyout } from '../integrations/installed_integrations_table';
+import { redirectToExplorerS3 } from '../associated_object_management/utils/associated_objects_tab_utils';
 
 interface DataConnection {
   connectionType: DirectQueryDatasourceType;
@@ -52,6 +54,7 @@ interface ManageDirectQueryDataConnectionsTableProps {
   savedObjects: SavedObjectsStart;
   uiSettings: IUiSettingsClient;
   featureFlagStatus: boolean;
+  application: ApplicationStart;
 }
 
 // Custom truncate function
@@ -66,6 +69,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   savedObjects,
   uiSettings,
   featureFlagStatus,
+  application,
 }) => {
   const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
   const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
@@ -218,7 +222,13 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       isPrimary: true,
       icon: 'discoverApp',
       type: 'icon',
-      onClick: () => {},
+      onClick: (datasource: DataConnection) => {
+        if (datasource.connectionType === 'PROMETHEUS') {
+          application!.navigateToApp(observabilityMetricsID);
+        } else if (datasource.connectionType === 'S3GLUE') {
+          redirectToExplorerS3(datasource.name, application);
+        }
+      },
       'data-test-subj': 'action-query',
     },
     {

@@ -113,6 +113,7 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
               savedObjects={savedObjects}
               uiSettings={uiSettings}
               featureFlagStatus={featureFlagStatus}
+              application={application}
             />
           )}
         </EuiFlexItem>
