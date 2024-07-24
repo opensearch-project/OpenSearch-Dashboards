@@ -32,7 +32,7 @@ import {
   WORKSPACE_DETAIL_APP_ID,
 } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
-import { CoreStart, WorkspaceObject } from '../../../../../core/public';
+import { ALL_USE_CASE_ID, CoreStart, WorkspaceObject } from '../../../../../core/public';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import { WorkspaceUseCase } from '../../types';
@@ -129,7 +129,9 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
 
   const getWorkspaceListGroup = (filterWorkspaceList: WorkspaceObject[], itemType: string) => {
     const listItems = filterWorkspaceList.map((workspace: WorkspaceObject) => {
-      const appId = getUseCase(workspace)?.features[0] ?? WORKSPACE_DETAIL_APP_ID;
+      const useCase = getUseCase(workspace);
+      const appId =
+        (useCase?.id !== ALL_USE_CASE_ID && useCase?.features?.[0]) || WORKSPACE_DETAIL_APP_ID;
       const useCaseURL = formatUrlWithWorkspaceId(
         coreStart.application.getUrlForApp(appId, {
           absolute: false,
@@ -141,6 +143,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         <EuiListGroupItem
           key={workspace.id}
           style={{ paddingLeft: '0' }}
+          className="eui-textTruncate"
           size="s"
           data-test-subj={`workspace-menu-item-${itemType}-${workspace.id}`}
           icon={
@@ -152,17 +155,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
               initialsLength={2}
             />
           }
-          label={
-            <EuiToolTip
-              anchorClassName="eui-textTruncate"
-              position="bottom"
-              content={workspace.name}
-            >
-              <EuiText style={{ maxWidth: '220px' }} className="eui-textTruncate">
-                {workspace.name}
-              </EuiText>
-            </EuiToolTip>
-          }
+          label={workspace.name}
           onClick={() => {
             closePopover();
             window.location.assign(useCaseURL);
@@ -175,7 +168,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
         <EuiTitle size="xxs">
           <h4>{itemType === 'all' ? allWorkspacesTitle : recentWorkspacesTitle}</h4>
         </EuiTitle>
-        <EuiListGroup flush gutterSize="none" maxWidth={280}>
+        <EuiListGroup showToolTips flush gutterSize="none" wrapText maxWidth={240}>
           {listItems}
         </EuiListGroup>
       </>
@@ -213,16 +206,16 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-workspace-name">
                 <EuiToolTip
                   anchorClassName="eui-textTruncate"
-                  position="bottom"
+                  position="right"
                   content={currentWorkspaceName}
                 >
-                  <EuiText style={{ maxWidth: '220px' }} className="eui-textTruncate">
+                  <EuiText size="s" style={{ maxWidth: '195px' }} className="eui-textTruncate">
                     {currentWorkspaceName}
                   </EuiText>
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false} data-test-subj="workspace-menu-current-use-case">
-                {getUseCase(currentWorkspace)?.title ?? ''}
+                <EuiText size="s">{getUseCase(currentWorkspace)?.title ?? ''}</EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiSmallButton
