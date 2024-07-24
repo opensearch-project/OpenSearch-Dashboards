@@ -5,6 +5,7 @@
 
 import React, { useEffect } from 'react';
 import { I18nProvider } from '@osd/i18n/react';
+import { i18n } from '@osd/i18n';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { useObservable } from 'react-use';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -33,6 +34,9 @@ export const WorkspaceDetailApp = (props: WorkspaceDetailProps) => {
     if (currentWorkspace) {
       breadcrumbs.push({
         text: currentWorkspace.name,
+      });
+      breadcrumbs.push({
+        text: i18n.translate('workspace.detail.breadcrumb', { defaultMessage: 'Workspace Detail' }),
       });
     }
     chrome?.setBreadcrumbs(breadcrumbs);
