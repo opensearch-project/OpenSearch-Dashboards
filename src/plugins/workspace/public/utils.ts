@@ -295,6 +295,16 @@ export function prependWorkspaceToBreadcrumbs(
     core.chrome.setBreadcrumbsEnricher(undefined);
     return;
   }
+
+  /**
+   * There has 3 cases
+   * nav group is enable + workspace enable + in a workspace -> workspace enricher
+   * nav group is enable + workspace enable + out a workspace -> nav group enricher
+   * nav group is enable + workspace disabled -> nav group enricher
+   *
+   * switch workspace will cause page refresh, breadcrumbs enricher will reset automatically
+   * so we don't need to have reset logic for workspace
+   */
   if (currentWorkspace) {
     const useCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []);
     // get workspace the only use case
@@ -336,7 +346,5 @@ export function prependWorkspaceToBreadcrumbs(
         return [homeBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
       }
     });
-  } else {
-    core.chrome.setBreadcrumbsEnricher(undefined);
   }
 }
