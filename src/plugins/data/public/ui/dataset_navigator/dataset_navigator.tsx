@@ -71,6 +71,8 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   const [isExternalDataSourcesEnabled, setIsExternalDataSourcesEnabled] = useState(false);
   const [selectedTimeFieldName, setSelectedTimeFieldName] = useState<string | undefined>();
   const [selectedObject, setSelectedObject] = useState<SimpleDataSet | undefined>();
+  const [selectedDs, setSelectedDs] = useState<SimpleDataSet | undefined>();
+
   const [selectedDataSource, setSelectedDataSource] = useState<SimpleDataSource | undefined>();
   const [selectedDataSourceObjects, setSelectedDataSourceObjects] = useState<SimpleObject[]>([]);
   const [selectedExternalDataSource, setSelectedExternalDataSource] = useState<SimpleDataSource>();
@@ -330,27 +332,28 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       };
 
       const onDataSetSelected = async (dataSet: SimpleDataSet) => {
-        // if (
-        //   dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY ||
-        //   dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC
-        // ) {
-        //   const dataFrame = createDataFrame({
-        //     name: dataSet.title!,
-        //     fields: [],
-        //     meta: {
-        //       dataSourceRef: {
-        //         id: dataSet.dataSourceRef?.id!,
-        //         name: dataSet.dataSourceRef?.name!,
-        //         type: dataSet.dataSourceRef?.type!,
-        //       },
-        //     },
-        //   });
-        //   const temporaryIndexPattern = await indexPatternsService.create(
-        //     dataFrameToSpec(dataFrame),
-        //     true
-        //   );
-        //   indexPatternsService.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
-        // }
+        // TODO: i think the fields are wrong
+        if (
+          dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY ||
+          dataSet.type === SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC
+        ) {
+          const dataFrame = createDataFrame({
+            name: dataSet.title!,
+            fields: [],
+            meta: {
+              dataSourceRef: {
+                id: dataSet.dataSourceRef?.id!,
+                name: dataSet.dataSourceRef?.name!,
+                type: dataSet.dataSourceRef?.type!,
+              },
+            },
+          });
+          const temporaryIndexPattern = await indexPatternsService.create(
+            dataFrameToSpec(dataFrame),
+            true
+          );
+          indexPatternsService.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
+        }
 
         CatalogCacheManager.addRecentDataSet({
           id: dataSet.id,
@@ -365,6 +368,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           timeFieldName: dataSet.timeFieldName,
           type: dataSet.type,
         });
+        setSelectedDs(dataSet);
         queryService.queryString.setQuery(getInitialQuery(dataSet));
         queryService.dataSet.setDataSet(dataSet);
         closePopover();
@@ -374,7 +378,13 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         await onDataSetSelected(selectedDataSet);
       }
     },
-    [onSelectDataSet, queryService.dataSet, queryService.queryString, uiService.Settings]
+    [
+      indexPatternsService,
+      onSelectDataSet,
+      queryService.dataSet,
+      queryService.queryString,
+      uiService.Settings,
+    ]
   );
 
   const RefreshButton = (
@@ -411,8 +421,8 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           iconSide="right"
           onClick={() => setIsOpen(!isOpen)}
         >
-          {`${props.dataSet?.dataSourceRef?.name ? `${props.dataSet.dataSourceRef?.name}::` : ''}${
-            props.dataSet?.title
+          {`${selectedDs?.dataSourceRef?.name ? `${selectedDs.dataSourceRef?.name}::` : ''}${
+            selectedDs?.title
           }`}
         </EuiButtonEmpty>
       }
