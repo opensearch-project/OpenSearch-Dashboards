@@ -384,6 +384,8 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         const timeFieldName = timeFields?.length > 0 ? timeFields[0].name : undefined;
         setSelectedDataSetState((prevState) => ({
           ...prevState,
+          id: object.id,
+          title: object.title,
           fields,
           timeFields,
           timeFieldName,

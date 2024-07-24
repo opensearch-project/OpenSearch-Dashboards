@@ -55,6 +55,7 @@ export function createQueryStateObservable({
       refreshInterval: timefilter.getRefreshInterval(),
       filters: filterManager.getFilters(),
       query: queryString.getQuery(),
+      dataSet: dataSet.getDataSet(),
     });
 
     let currentChange: QueryStateChange = {};
