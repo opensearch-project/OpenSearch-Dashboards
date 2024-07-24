@@ -44,17 +44,17 @@ exports[`DataSourceHomePanel renders correctly 1`] = `
       <EuiTabs>
         <EuiTab
           isSelected={true}
-          key="manageDirectQueryDataSources"
-          onClick={[Function]}
-        >
-          Direct query connections
-        </EuiTab>
-        <EuiTab
-          isSelected={false}
           key="manageOpensearchDataSources"
           onClick={[Function]}
         >
           OpenSearch connections
+        </EuiTab>
+        <EuiTab
+          isSelected={false}
+          key="manageDirectQueryDataSources"
+          onClick={[Function]}
+        >
+          Direct query connections
         </EuiTab>
       </EuiTabs>
     </EuiFlexItem>
@@ -62,12 +62,14 @@ exports[`DataSourceHomePanel renders correctly 1`] = `
       <EuiSpacer
         size="s"
       />
-      <ManageDirectQueryDataConnectionsTable
-        featureFlagStatus={true}
-        http={Object {}}
-        notifications={Object {}}
-        savedObjects={Object {}}
-        uiSettings={Object {}}
+      <DataSourceTableWithRouter
+        history={
+          Object {
+            "push": [MockFunction],
+          }
+        }
+        location={Object {}}
+        match={Object {}}
       />
     </EuiFlexItem>
   </EuiFlexGroup>
