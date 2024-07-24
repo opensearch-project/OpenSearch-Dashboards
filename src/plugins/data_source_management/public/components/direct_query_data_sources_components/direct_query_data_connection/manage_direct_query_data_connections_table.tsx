@@ -66,6 +66,43 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   uiSettings,
   featureFlagStatus,
 }) => {
+  const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
+
+  const checkIfObservabilityDashboardsPluginIsInstalled = () => {
+    fetch('/api/status', {
+      headers: {
+        'Content-Type': 'application/json',
+        'osd-xsrf': 'true',
+        'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
+        pragma: 'no-cache',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+      },
+      method: 'GET',
+      referrerPolicy: 'strict-origin-when-cross-origin',
+      mode: 'cors',
+      credentials: 'include',
+    })
+      .then(function (response) {
+        return response.json();
+      })
+      .then((data) => {
+        for (let i = 0; i < data.status.statuses.length; ++i) {
+          if (data.status.statuses[i].id.includes('plugin:observabilityDashboards')) {
+            setObservabilityDashboardsExists(true);
+          }
+        }
+      })
+      .catch((error) => {
+        notifications.toasts.addDanger(
+          'Error checking Dashboards Observability Plugin Installation status.'
+        );
+        // eslint-disable-next-line no-console
+        console.error(error);
+      });
+  };
+
   const [data, setData] = useState<DataConnection[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
@@ -139,6 +176,8 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
 
   useEffect(() => {
     fetchDataSources();
+    checkIfObservabilityDashboardsPluginIsInstalled();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchDataSources]);
 
   const handleSelectedDataSourceChange = (e: DataSourceOption[]) => {
@@ -198,7 +237,10 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       isPrimary: false,
       icon: 'integrationGeneral',
       type: 'icon',
-      available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
+      available: (datasource: DataConnection) =>
+        !featureFlagStatus &&
+        observabilityDashboardsExists &&
+        datasource.connectionType !== 'PROMETHEUS',
       onClick: () => {},
       'data-test-subj': 'action-integrate',
     },

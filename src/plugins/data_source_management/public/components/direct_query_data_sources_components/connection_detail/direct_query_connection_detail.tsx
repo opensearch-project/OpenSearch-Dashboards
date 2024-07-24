@@ -70,7 +70,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   setBreadcrumbs,
 }) => {
   const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
-  const checkIfSQLWorkbenchPluginIsInstalled = () => {
+  const checkIfObservabilityDashboardsPluginIsInstalled = () => {
     fetch('/api/status', {
       headers: {
         'Content-Type': 'application/json',
@@ -211,7 +211,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   };
 
   useEffect(() => {
-    checkIfSQLWorkbenchPluginIsInstalled();
+    checkIfObservabilityDashboardsPluginIsInstalled();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
