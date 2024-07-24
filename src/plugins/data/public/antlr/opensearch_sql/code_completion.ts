@@ -87,6 +87,7 @@ export const getSuggestions = async ({
           api,
           selectedDataSet
         );
+
         values.forEach((value) => {
           if (value.body?.fields?.length > 0) {
             finalSuggestions.push(

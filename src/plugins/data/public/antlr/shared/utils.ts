@@ -16,8 +16,8 @@ export const fetchData = (
 ): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     try {
-      const dataSourceId = dataSet.dataSourceRef.id;
-      const title = dataSet.title;
+      const dataSourceId = dataSet && dataSet.dataSourceRef ? dataSet.dataSourceRef.id : undefined;
+      const title = dataSet && dataSet.dataSourceRef ? dataSet.dataSourceRef.name : undefined;
 
       const fetchPromises = tables.map(async (table) => {
         const body = JSON.stringify(queryFormatter(table, dataSourceId, title));
