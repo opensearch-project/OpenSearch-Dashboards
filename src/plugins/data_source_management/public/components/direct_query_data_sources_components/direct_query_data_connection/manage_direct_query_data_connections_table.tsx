@@ -41,6 +41,7 @@ import { DATACONNECTIONS_BASE, observabilityMetricsID } from '../../../constants
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import { InstallIntegrationFlyout } from '../integrations/installed_integrations_table';
 import { redirectToExplorerS3 } from '../associated_object_management/utils/associated_objects_tab_utils';
+import { checkIfPluginIsInstalled } from '../../utils';
 
 interface DataConnection {
   connectionType: DirectQueryDatasourceType;
@@ -74,41 +75,6 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
   const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
   const [integrationsFlyout, setIntegrationsFlyout] = useState<React.JSX.Element | null>(null);
-
-  const checkIfObservabilityDashboardsPluginIsInstalled = () => {
-    fetch('/api/status', {
-      headers: {
-        'Content-Type': 'application/json',
-        'osd-xsrf': 'true',
-        'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
-        pragma: 'no-cache',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-      },
-      method: 'GET',
-      referrerPolicy: 'strict-origin-when-cross-origin',
-      mode: 'cors',
-      credentials: 'include',
-    })
-      .then((response) =>
-        response.json().then((data) => {
-          const pluginExists = data.status.statuses.some((status: { id: string | string[] }) =>
-            status.id.includes('plugin:observabilityDashboards')
-          );
-          if (pluginExists) {
-            setObservabilityDashboardsExists(true);
-          }
-        })
-      )
-      .catch((error) => {
-        notifications.toasts.addDanger(
-          'Error checking Dashboards Observability Plugin Installation status.'
-        );
-        // eslint-disable-next-line no-console
-        console.error(error);
-      });
-  };
 
   const [data, setData] = useState<DataConnection[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -177,7 +143,11 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
 
   useEffect(() => {
     fetchDataSources();
-    checkIfObservabilityDashboardsPluginIsInstalled();
+    checkIfPluginIsInstalled(
+      'plugin:observabilityDashboards',
+      setObservabilityDashboardsExists,
+      notifications
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchDataSources]);
 

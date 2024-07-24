@@ -11,6 +11,7 @@ import {
   ToastsStart,
   ApplicationStart,
   CoreStart,
+  NotificationsStart,
 } from 'src/core/public';
 import { deepFreeze } from '@osd/std';
 import uuid from 'uuid';
@@ -405,4 +406,39 @@ export const formatError = (name: string, message: string, details: string) => {
       },
     },
   };
+};
+
+export const checkIfPluginIsInstalled = (
+  pluginId: string,
+  setPluginExists: (exists: boolean) => void,
+  notifications: NotificationsStart
+) => {
+  fetch('/api/status', {
+    headers: {
+      'Content-Type': 'application/json',
+      'osd-xsrf': 'true',
+      'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
+      pragma: 'no-cache',
+      'sec-fetch-dest': 'empty',
+      'sec-fetch-mode': 'cors',
+      'sec-fetch-site': 'same-origin',
+    },
+    method: 'GET',
+    referrerPolicy: 'strict-origin-when-cross-origin',
+    mode: 'cors',
+    credentials: 'include',
+  })
+    .then((response) =>
+      response.json().then((data) => {
+        const pluginExists = data.status.statuses.some((status: { id: string | string[] }) =>
+          status.id.includes(pluginId)
+        );
+        setPluginExists(pluginExists);
+      })
+    )
+    .catch((error) => {
+      notifications.toasts.addDanger(`Error checking ${pluginId} Plugin Installation status.`);
+      // eslint-disable-next-line no-console
+      console.error(error);
+    });
 };
