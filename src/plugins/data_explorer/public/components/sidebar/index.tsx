@@ -6,8 +6,6 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiPageSideBar, EuiPortal, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
-import { batch } from 'react-redux';
-import { SimpleDataSet } from '../../../../data/common';
 import { DataSource, DataSourceGroup, DataSourceSelectable } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
@@ -134,13 +132,6 @@ export const Sidebar: FC = ({ children }) => {
     [toasts]
   );
 
-  const handleDataSetSelection = useCallback(
-    (selectedDataSet: SimpleDataSet) => {
-      dispatch(setIndexPattern(selectedDataSet.id));
-    },
-    [dispatch]
-  );
-
   const memorizedReload = useCallback(() => {
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
@@ -159,7 +150,7 @@ export const Sidebar: FC = ({ children }) => {
               containerRef.current = node;
             }}
           >
-            <DataSetNavigator dataSetId={indexPatternId} onSelectDataSet={handleDataSetSelection} />
+            <DataSetNavigator />
           </EuiPortal>
         )}
         {!isEnhancementsEnabled && (

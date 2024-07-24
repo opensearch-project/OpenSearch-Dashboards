@@ -76,7 +76,11 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
 
     return {
       IndexPatternSelect: createIndexPatternSelect(core.savedObjects.client),
-      DataSetNavigator: createDataSetNavigator(core.savedObjects.client, core.http),
+      DataSetNavigator: createDataSetNavigator(
+        core.savedObjects.client,
+        core.http,
+        dataServices.query.dataSet
+      ),
       SearchBar,
       SuggestionsComponent,
       Settings,

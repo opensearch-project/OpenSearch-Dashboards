@@ -36,7 +36,7 @@ import { QueryState, QueryStateChange } from './index';
 import { createStateContainer } from '../../../../opensearch_dashboards_utils/public';
 import { isFilterPinned, compareFilters, COMPARE_ALL_OPTIONS } from '../../../common';
 import { QueryStringContract } from '../query_string';
-import { DataSetContract } from '../data_set';
+import { DataSetContract } from '../dataset_manager';
 
 export function createQueryStateObservable({
   timefilter: { timefilter },

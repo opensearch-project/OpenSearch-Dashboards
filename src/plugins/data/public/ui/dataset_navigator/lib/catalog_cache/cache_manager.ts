@@ -15,13 +15,13 @@ import {
   CachedDataSource,
   CachedDataSourceStatus,
   CachedDatabase,
-  CachedTable,
   DataSetOption,
   DataSourceCacheData,
   ExternalDataSource,
   ExternalDataSourcesCacheData,
   RecentDataSetOptionsCacheData,
 } from '../types';
+import { SimpleObject } from '../../../../../common';
 
 /**
  * Manages caching for catalog data including data sources and accelerations.
@@ -267,10 +267,10 @@ export class CatalogCacheManager {
     databaseName: string,
     tableName: string,
     dataSourceMDSId?: string
-  ): CachedTable {
+  ): SimpleObject {
     const cachedDatabase = this.getDatabase(dataSourceName, databaseName, dataSourceMDSId);
 
-    const cachedTable = cachedDatabase.tables!.find((table) => table.name === tableName);
+    const cachedTable = cachedDatabase.tables!.find((table) => table.title === tableName);
     if (!cachedTable) {
       throw new Error('Table not found exception: ' + tableName);
     }

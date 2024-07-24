@@ -5,7 +5,7 @@
 
 import { SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import { IIndexPattern } from '../.././../..';
-import { SIMPLE_DATA_SOURCE_TYPES } from '../../../../../common';
+import { SIMPLE_DATA_SOURCE_TYPES, SIMPLE_DATA_SET_TYPES } from '../../../../../common';
 
 export const fetchIndexPatterns = async (client: SavedObjectsClientContract, search: string) => {
   const resp = await client.find<IIndexPattern>({
@@ -20,9 +20,10 @@ export const fetchIndexPatterns = async (client: SavedObjectsClientContract, sea
     title: savedObject.attributes.title,
     timeFieldName: savedObject.attributes.timeFieldName,
     fields: savedObject.attributes.fields,
+    type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
     ...(savedObject.references[0]
       ? {
-          dataSource: {
+          dataSourceRef: {
             id: savedObject.references[0]?.id,
             name: savedObject.references[0]?.name,
             type: SIMPLE_DATA_SOURCE_TYPES.DEFAULT,

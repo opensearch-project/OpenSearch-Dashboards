@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiContextMenu,
-  EuiContextMenuPanelItemDescriptor,
   EuiForm,
   EuiFormRow,
   EuiLoadingSpinner,
@@ -20,9 +19,6 @@ import { HttpStart, SavedObjectsClientContract } from 'opensearch-dashboards/pub
 import _ from 'lodash';
 import { i18n } from '@osd/i18n';
 import {
-  createDataFrame,
-  dataFrameToSpec,
-  IndexPattern,
   SIMPLE_DATA_SET_TYPES,
   SIMPLE_DATA_SOURCE_TYPES,
   SimpleDataSet,
@@ -50,12 +46,13 @@ import {
   isCatalogCacheFetching,
   fetchIfExternalDataSourcesEnabled,
 } from './lib';
+import { useDataSetManager } from '../search_bar/lib/use_dataset_manager';
+import { DataSetContract } from '../../query';
 
 export interface DataSetNavigatorProps {
-  dataSetId: string | undefined;
   savedObjectsClient?: SavedObjectsClientContract;
   http?: HttpStart;
-  onSelectDataSet: (dataSet: SimpleDataSet) => void;
+  dataSet?: DataSetContract;
 }
 
 interface DataSetNavigatorState {
@@ -67,24 +64,23 @@ interface DataSetNavigatorState {
   dataSources: SimpleDataSource[];
   externalDataSources: SimpleDataSource[];
   cachedDatabases: any[];
-  cachedTables: any[];
+  cachedTables: SimpleObject[];
 }
 
-interface SelectedDataSetState {
+interface SelectedDataSetState extends SimpleDataSet {
   isExternal: boolean;
-  dataSource?: SimpleDataSource | undefined; // dataSource or externalDataSource
-  database: any | undefined;
-  object: SimpleDataSet | undefined; // index or table
-  timeFieldName: string | undefined;
+  database?: any | undefined;
 }
 
 export const DataSetNavigator = (props: DataSetNavigatorProps) => {
-  const { savedObjectsClient, http, onSelectDataSet } = props;
+  const { savedObjectsClient, http, dataSet: dataSetManager } = props;
   const searchService = getSearchService();
   const queryService = getQueryService();
   const uiService = getUiService();
   const indexPatternsService = getIndexPatterns();
   const notifications = getNotifications();
+
+  const { dataSet } = useDataSetManager({ dataSetManager: dataSetManager! });
 
   const [navigatorState, setNavigatorState] = useState<DataSetNavigatorState>({
     isOpen: false,
@@ -99,11 +95,14 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   });
 
   const [selectedDataSetState, setSelectedDataSetState] = useState<SelectedDataSetState>({
+    id: dataSet?.id ?? '',
+    title: dataSet?.title,
+    type: dataSet?.type,
     isExternal: false,
-    dataSource: undefined,
+    dataSourceRef: dataSet?.dataSourceRef,
     database: undefined,
-    object: undefined,
-    timeFieldName: undefined,
+    timeFieldName: dataSet?.timeFieldName,
+    fields: dataSet?.fields,
   });
 
   const {
@@ -164,28 +163,27 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           indexPatterns,
           dataSources,
         }));
-        const selectedPattern = indexPatterns.find((pattern) => pattern.id === props.dataSetId);
+        const selectedPattern = indexPatterns.find(
+          (pattern) => pattern.id === props.dataSet?.getDataSet()?.id
+        );
         if (selectedPattern) {
           setSelectedDataSetState({
-            object: {
-              id: selectedPattern.id,
-              title: selectedPattern.title,
-              type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
-              timeFieldName: selectedPattern.timeFieldName,
-              fields: selectedPattern.fields,
-            },
-            ...(selectedPattern.dataSource
+            id: selectedPattern.id,
+            title: selectedPattern.title,
+            type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
+            timeFieldName: selectedPattern.timeFieldName,
+            fields: selectedPattern.fields,
+            ...(selectedPattern.dataSourceRef
               ? {
-                  dataSource: {
-                    id: selectedPattern.dataSource.id,
-                    name: selectedPattern.dataSource.name,
-                    type: selectedPattern.dataSource.type,
+                  dataSourceRef: {
+                    id: selectedPattern.dataSourceRef.id,
+                    name: selectedPattern.dataSourceRef.name,
+                    type: selectedPattern.dataSourceRef.type,
                   },
                 }
               : { dataSource: undefined }),
             database: undefined,
             isExternal: false,
-            timeFieldName: selectedPattern.timeFieldName,
           });
         }
       })
@@ -195,7 +193,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     return () => {
       setNavigatorState((prevState) => ({ ...prevState, isMounted: false }));
     };
-  }, [savedObjectsClient, http, onSelectDataSet, navigatorState.isMounted, props.dataSetId]);
+  }, [savedObjectsClient, http, navigatorState.isMounted, props.dataSet]);
 
   useEffect(() => {
     const status = dataSourcesLoadStatus.toLowerCase();
@@ -219,10 +217,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
 
   useEffect(() => {
     const status = databasesLoadStatus.toLowerCase();
-    if (selectedDataSetState.isExternal && selectedDataSetState.dataSource) {
+    if (selectedDataSetState.isExternal && selectedDataSetState.dataSourceRef) {
       const dataSourceCache = CatalogCacheManager.getOrCreateDataSource(
-        selectedDataSetState.dataSource.name,
-        selectedDataSetState.dataSource.id
+        selectedDataSetState.dataSourceRef.name,
+        selectedDataSetState.dataSourceRef.id
       );
       if (status === DirectQueryLoadingStatus.SUCCESS) {
         setNavigatorState((prevState) => ({
@@ -236,7 +234,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         setNavigatorState((prevState) => ({ ...prevState, failed: true }));
       }
     }
-  }, [databasesLoadStatus, selectedDataSetState.isExternal, selectedDataSetState.dataSource]);
+  }, [databasesLoadStatus, selectedDataSetState.isExternal, selectedDataSetState.dataSourceRef]);
 
   const handleSelectExternalDataSource = useCallback(
     async (dataSource) => {
@@ -273,13 +271,13 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   // Start loading tables for selected database
   const handleSelectExternalDatabase = useCallback(
     (externalDatabase: SimpleDataSource) => {
-      if (selectedDataSetState.dataSource && externalDatabase) {
+      if (selectedDataSetState.dataSourceRef && externalDatabase) {
         let databaseCache;
         try {
           databaseCache = CatalogCacheManager.getDatabase(
-            selectedDataSetState.dataSource.name,
+            selectedDataSetState.dataSourceRef.name,
             externalDatabase.name,
-            selectedDataSetState.dataSource.id
+            selectedDataSetState.dataSourceRef.id
           );
         } catch (error) {
           return;
@@ -290,9 +288,9 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
             !isCatalogCacheFetching(tablesLoadStatus))
         ) {
           startLoadingTables({
-            dataSourceName: selectedDataSetState.dataSource.name,
+            dataSourceName: selectedDataSetState.dataSourceRef.name,
             databaseName: externalDatabase.name,
-            dataSourceMDSId: selectedDataSetState.dataSource.id,
+            dataSourceMDSId: selectedDataSetState.dataSourceRef.id,
           });
           setSelectedDataSetState((prevState) => ({
             ...prevState,
@@ -306,13 +304,13 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         }
       }
     },
-    [tablesLoadStatus, selectedDataSetState.dataSource, startLoadingTables]
+    [selectedDataSetState.dataSourceRef, tablesLoadStatus, startLoadingTables]
   );
 
   // Retrieve tables from cache upon success
   useEffect(() => {
     if (
-      selectedDataSetState.dataSource &&
+      selectedDataSetState.dataSourceRef &&
       selectedDataSetState.isExternal &&
       selectedDataSetState.database
     ) {
@@ -320,9 +318,9 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       let databaseCache;
       try {
         databaseCache = CatalogCacheManager.getDatabase(
-          selectedDataSetState.dataSource.name,
+          selectedDataSetState.dataSourceRef.name,
           selectedDataSetState.database,
-          selectedDataSetState.dataSource.id
+          selectedDataSetState.dataSourceRef.id
         );
       } catch (error) {
         return;
@@ -341,7 +339,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     }
   }, [
     tablesLoadStatus,
-    selectedDataSetState.dataSource,
+    selectedDataSetState.dataSourceRef,
     selectedDataSetState.isExternal,
     selectedDataSetState.database,
     notifications.toasts,
@@ -397,77 +395,79 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     [indexPatternsService]
   );
 
-  const handleSelectedDataSet = useCallback(async () => {
-    if (!selectedDataSetState.object) return;
-    if (
-      selectedDataSetState.object.type === SIMPLE_DATA_SET_TYPES.TEMPORARY ||
-      selectedDataSetState.object.type === SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC
-    ) {
-      const dataFrame = createDataFrame({
-        name: selectedDataSetState.object.title!,
-        fields: [],
-        meta: {
-          dataSourceRef: {
-            id: selectedDataSetState.dataSource?.id!,
-            name: selectedDataSetState.dataSource?.name!,
-            type: selectedDataSetState.dataSource?.type!,
-          },
-        },
+  const handleSelectedDataSet = useCallback(
+    async (ds?: SimpleDataSet) => {
+      const selectedDataSet = ds ?? selectedDataSetState;
+      if (!selectedDataSet || !selectedDataSet.id) return;
+
+      const language = uiService.Settings.getUserQueryLanguage();
+      const queryEnhancements = uiService.Settings.getQueryEnhancements(language);
+      const initialInput = queryEnhancements?.searchBar?.queryStringInput?.initialValue;
+
+      // Update query
+      const query = initialInput
+        ? initialInput.replace('<data_source>', selectedDataSet.title!)
+        : '';
+      uiService.Settings.setUserQueryString(query);
+      queryService.queryString.setQuery({ query, language });
+
+      // Update dataset
+      queryService.dataSet.setDataSet(selectedDataSet);
+
+      // Add to recent datasets
+      CatalogCacheManager.addRecentDataSet({
+        id: selectedDataSet.id,
+        name: selectedDataSet.title ?? selectedDataSet.id!,
+        dataSourceRef: selectedDataSet.dataSourceRef?.id,
       });
-      const temporaryIndexPattern = await indexPatternsService.create(
-        dataFrameToSpec(dataFrame),
-        true
-      );
-      indexPatternsService.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
-    }
 
-    CatalogCacheManager.addRecentDataSet({
-      id: selectedDataSetState.object.id!,
-      name: selectedDataSetState.object.title ?? selectedDataSetState.object.id!,
-      dataSourceRef: selectedDataSetState.dataSource?.id,
-    });
-    searchService.df.clear();
-    const language = uiService.Settings.getUserQueryLanguage();
-    const input = uiService.Settings.getQueryEnhancements(language)?.searchBar?.queryStringInput
-      ?.initialValue;
+      // Update data set manager
+      dataSetManager!.setDataSet({
+        id: selectedDataSet.id,
+        title: selectedDataSet.title,
+        dataSourceRef: selectedDataSet.dataSourceRef,
+        timeFieldName: selectedDataSet.timeFieldName,
+        type: selectedDataSet.type,
+      });
 
-    const query =
-      !input || !selectedDataSetState.object
-        ? ''
-        : input.replace('<data_source>', selectedDataSetState.object.title!);
-    uiService.Settings.setUserQueryString(query);
+      closePopover();
 
-    queryService.queryString.setQuery({ query, language });
-    queryService.dataSet.setDataSet({
-      ...selectedDataSetState.object,
-      timeFieldName: selectedDataSetState.timeFieldName,
-    });
-    onSelectDataSet(selectedDataSetState.object);
-    closePopover();
-  }, [
-    indexPatternsService,
-    onSelectDataSet,
-    queryService.dataSet,
-    queryService.queryString,
-    searchService.df,
-    selectedDataSetState.dataSource,
-    selectedDataSetState.object,
-    selectedDataSetState.timeFieldName,
-    uiService.Settings,
-  ]);
-
-  const RefreshButton = (
-    <EuiButtonEmpty
-      iconType="refresh"
-      onClick={onRefresh}
-      isLoading={isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus)}
-    />
-  );
-
-  const LoadingSpinner = (
-    <EuiPanel hasShadow={false} hasBorder={false}>
-      <EuiLoadingSpinner className="dataSetNavigator__loading" size="m" />
-    </EuiPanel>
+      // if (
+      //   selectedDataSetState.object.type === SIMPLE_DATA_SET_TYPES.TEMPORARY ||
+      //   selectedDataSetState.object.type === SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC
+      // ) {
+      //   const dataFrame = createDataFrame({
+      //     name: selectedDataSetState.object.title!,
+      //     fields: [],
+      //     meta: {
+      //       dataSourceRef: {
+      //         id: selectedDataSetState.dataSource?.id!,
+      //         name: selectedDataSetState.dataSource?.name!,
+      //         type: selectedDataSetState.dataSource?.type!,
+      //       },
+      //     },
+      //   });
+      //   const temporaryIndexPattern = await indexPatternsService.create(
+      //     dataFrameToSpec(dataFrame),
+      //     true
+      //   );
+      //   indexPatternsService.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
+      // }
+      // queryService.queryString.setQuery({ query, language });
+      // queryService.dataSet.setDataSet({
+      //   ...selectedDataSetState.object,
+      //   timeFieldName: selectedDataSetState.timeFieldName,
+      // });
+      // onSelectDataSet(selectedDataSetState.object);
+      // closePopover();
+    },
+    [
+      dataSetManager,
+      queryService.dataSet,
+      queryService.queryString,
+      selectedDataSetState,
+      uiService.Settings,
+    ]
   );
 
   const indexPatternsLabel = i18n.translate('data.query.dataSetNavigator.indexPatternsName', {
@@ -480,6 +480,91 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     defaultMessage: 'S3',
   });
 
+  const createRefreshButton = () => (
+    <EuiButtonEmpty
+      iconType="refresh"
+      onClick={onRefresh}
+      isLoading={isCatalogCacheFetching(databasesLoadStatus, tablesLoadStatus)}
+    />
+  );
+
+  const createLoadingSpinner = () => (
+    <EuiPanel hasShadow={false} hasBorder={false}>
+      <EuiLoadingSpinner className="dataSetNavigator__loading" size="m" />
+    </EuiPanel>
+  );
+
+  const createIndexPatternsPanel = () => ({
+    id: 1,
+    title: indexPatternsLabel,
+    items: navigatorState.indexPatterns.map((indexPattern) => ({
+      name: indexPattern.title,
+      onClick: async () => await handleSelectedDataSet(indexPattern),
+    })),
+    content: <div>{navigatorState.indexPatterns.length === 0 && createLoadingSpinner()}</div>,
+  });
+
+  const createIndexesPanel = () => ({
+    id: 2,
+    title: indicesLabel,
+    items: [
+      ...navigatorState.dataSources.map((dataSource) => ({
+        name: dataSource.name,
+        panel: 3,
+        onClick: async () => await handleSelectedDataSource(dataSource),
+      })),
+    ],
+    content: <div>{navigatorState.isLoading && createLoadingSpinner()}</div>,
+  });
+
+  const createDataSourcesPanel = () => ({
+    id: 3,
+    title: selectedDataSetState.dataSourceRef?.name ?? indicesLabel,
+    items: selectedDataSetState.dataSourceRef?.indices?.map((object) => ({
+      name: object.title,
+      panel: 7,
+      onClick: async () =>
+        await handleSelectedObject({ ...object, type: SIMPLE_DATA_SET_TYPES.TEMPORARY }),
+    })),
+    content: <div>{navigatorState.isLoading && createLoadingSpinner()}</div>,
+  });
+
+  const createS3DataSourcesPanel = () => ({
+    id: 4,
+    title: (
+      <div>
+        {S3DataSourcesLabel}
+        {CatalogCacheManager.getExternalDataSourcesCache().status ===
+          CachedDataSourceStatus.Updated && createRefreshButton()}
+      </div>
+    ),
+    items: [
+      ...navigatorState.externalDataSources.map((dataSource) => ({
+        name: dataSource.name,
+        onClick: async () => await handleSelectExternalDataSource(dataSource),
+        panel: 5,
+      })),
+    ],
+    content: <div>{dataSourcesLoadStatus && createLoadingSpinner()}</div>,
+  });
+
+  const createDatabasesPanel = () => ({
+    id: 5,
+    title: selectedDataSetState.dataSourceRef?.name
+      ? selectedDataSetState.dataSourceRef?.name
+      : 'Databases',
+    items: [
+      ...navigatorState.externalDataSources.map((db) => ({
+        name: db.name,
+        onClick: async () => {
+          await handleSelectExternalDatabase(db);
+        },
+        panel: 6,
+      })),
+    ],
+    content: <div>{isCatalogCacheFetching(databasesLoadStatus) && createLoadingSpinner()}</div>,
+  });
+
   return (
     <EuiPopover
       button={
@@ -490,9 +575,9 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           iconSide="right"
           onClick={onClick}
         >
-          {selectedDataSetState.dataSource?.name
-            ? `${selectedDataSetState.dataSource?.name}::${selectedDataSetState.object?.title}`
-            : selectedDataSetState.object?.title}
+          {dataSet?.dataSourceRef?.name
+            ? `${dataSet.dataSourceRef?.name}::${dataSet?.title}`
+            : dataSet?.title}
         </EuiButtonEmpty>
       }
       isOpen={navigatorState.isOpen}
@@ -557,111 +642,31 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                 : []),
             ],
           },
-          {
-            id: 1,
-            title: indexPatternsLabel,
-            items: navigatorState.indexPatterns.flatMap((indexPattern, indexNum, arr) => [
-              {
-                name: indexPattern.title,
-                onClick: async () => {
-                  setSelectedDataSetState({
-                    object: {
-                      id: indexPattern.id,
-                      title: indexPattern.title,
-                      type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
-                      timeFieldName: indexPattern.timeFieldName,
-                      timeFields: indexPattern.timeFields,
-                      fields: indexPattern.fields,
-                    },
-                    dataSource: indexPattern.dataSource,
-                    database: undefined,
-                    isExternal: false,
-                    timeFieldName: indexPattern.timeFieldName,
-                  });
-                  await handleSelectedDataSet();
-                },
-              },
-              ...(indexNum < arr.length - 1 ? [{ isSeparator: true }] : []),
-            ]) as EuiContextMenuPanelItemDescriptor[],
-            content: <div>{navigatorState.isLoading && LoadingSpinner}</div>,
-          },
-          {
-            id: 2,
-            title: 'Clusters',
-            items: [
-              ...navigatorState.dataSources.map((dataSource) => ({
-                name: dataSource.name,
-                panel: 3,
-                onClick: async () => await handleSelectedDataSource(dataSource),
-              })),
-            ],
-            content: <div>{navigatorState.isLoading && LoadingSpinner}</div>,
-          },
-          {
-            id: 3,
-            title: selectedDataSetState.dataSource?.name ?? indicesLabel,
-            items: selectedDataSetState.dataSource?.indices?.map((object) => ({
-              name: object.title,
-              panel: 7,
-              onClick: async () =>
-                await handleSelectedObject({ ...object, type: SIMPLE_DATA_SET_TYPES.TEMPORARY }),
-            })),
-            content: <div>{navigatorState.isLoading && LoadingSpinner}</div>,
-          },
-          {
-            id: 4,
-            title: (
-              <div>
-                {S3DataSourcesLabel}
-                {CatalogCacheManager.getExternalDataSourcesCache().status ===
-                  CachedDataSourceStatus.Updated && RefreshButton}
-              </div>
-            ),
-            items: [
-              ...navigatorState.externalDataSources.map((dataSource) => ({
-                name: dataSource.name,
-                onClick: async () => await handleSelectExternalDataSource(dataSource),
-                panel: 5,
-              })),
-            ],
-            content: <div>{dataSourcesLoadStatus && LoadingSpinner}</div>,
-          },
-          {
-            id: 5,
-            title: selectedDataSetState.dataSource?.name
-              ? selectedDataSetState.dataSource?.name
-              : 'Databases',
-            items: [
-              ...navigatorState.externalDataSources.map((db) => ({
-                name: db.name,
-                onClick: async () => {
-                  await handleSelectExternalDatabase(db);
-                },
-                panel: 6,
-              })),
-            ],
-            content: <div>{isCatalogCacheFetching(databasesLoadStatus) && LoadingSpinner}</div>,
-          },
+          createIndexPatternsPanel(),
+          createIndexesPanel(),
+          createDataSourcesPanel(),
+          createS3DataSourcesPanel(),
+          createDatabasesPanel(),
           {
             id: 6,
             title: selectedDataSetState.database ? selectedDataSetState.database : 'Tables',
             items: [
               ...navigatorState.cachedTables.map((table) => ({
-                name: table.name,
+                name: table.title,
                 onClick: async () => {
                   setSelectedDataSetState((prevState) => ({
                     ...prevState,
                     object: {
-                      id: `${selectedDataSetState.dataSource!.name}.${
+                      id: `${selectedDataSetState.dataSourceRef!.name}.${
                         selectedDataSetState.database
-                      }.${table.name}`,
-                      title: `${selectedDataSetState.dataSource!.name}.${
+                      }.${table.title}`,
+                      title: `${selectedDataSetState.dataSourceRef!.name}.${
                         selectedDataSetState.database
-                      }.${table.name}`,
+                      }.${table.title}`,
                       dataSource: {
-                        id: selectedDataSetState.dataSource!.id,
-                        name: selectedDataSetState.dataSource!.name,
-                        type: selectedDataSetState.dataSource!.type,
+                        id: selectedDataSetState.dataSourceRef!.id,
+                        name: selectedDataSetState.dataSourceRef!.name,
+                        type: selectedDataSetState.dataSourceRef!.type,
                       },
                       type: SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC,
                     },
@@ -669,14 +674,16 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                 },
               })),
             ],
-            content: <div>{isCatalogCacheFetching(tablesLoadStatus) && LoadingSpinner}</div>,
+            content: (
+              <div>{isCatalogCacheFetching(tablesLoadStatus) && createLoadingSpinner()}</div>
+            ),
           },
           {
             id: 7,
-            title: selectedDataSetState.object?.title,
+            title: selectedDataSetState.title,
             content:
-              navigatorState.isLoading || !selectedDataSetState.object ? (
-                <div>{LoadingSpinner}</div>
+              navigatorState.isLoading || !selectedDataSetState.title ? (
+                <div>{createLoadingSpinner()}</div>
               ) : (
                 <EuiForm className="dataSetNavigatorFormWrapper">
                   <EuiFormRow
@@ -688,10 +695,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                       compressed
                       value={selectedDataSetState.timeFieldName}
                       options={[
-                        ...(selectedDataSetState.object!.timeFields &&
-                        selectedDataSetState.object!.timeFields!.length > 0
+                        ...(selectedDataSetState.timeFields &&
+                        selectedDataSetState.timeFields!.length > 0
                           ? [
-                              ...selectedDataSetState.object!.timeFields!.map((field: any) => ({
+                              ...selectedDataSetState.timeFields!.map((field: any) => ({
                                 value: field.name,
                                 text: field.name,
                               })),
@@ -700,7 +707,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                         { value: 'no-time-filter', text: "I don't want to use a time filter" },
                       ]}
                       onChange={(event) => {
-                        setNavigatorState((prevState) => ({
+                        setSelectedDataSetState((prevState) => ({
                           ...prevState,
                           timeFieldName:
                             event.target.value !== 'no-time-filter'
@@ -730,11 +737,9 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
               name: ds.name,
               onClick: async () => {
                 setSelectedDataSetState({
-                  object: {
-                    id: ds.id ?? ds.name,
-                    title: ds.name,
-                  },
-                  dataSource: {
+                  id: ds.id ?? ds.name,
+                  title: ds.name,
+                  dataSourceRef: {
                     id: ds.dataSourceRef!,
                     name: ds.dataSourceRef!,
                     type: ds.dataSourceRef!.startsWith('data-source')

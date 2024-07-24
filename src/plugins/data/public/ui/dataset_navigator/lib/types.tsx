@@ -4,6 +4,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
+import { SimpleObject } from '../../../../common';
 
 export enum DirectQueryLoadingStatus {
   SUCCESS = 'success',
@@ -120,14 +121,9 @@ export interface CachedColumn {
   dataType: string;
 }
 
-export interface CachedTable {
-  name: string;
-  columns?: CachedColumn[];
-}
-
 export interface CachedDatabase {
   name: string;
-  tables: CachedTable[];
+  tables: SimpleObject[];
   lastUpdated: string; // date string in UTC format
   status: CachedDataSourceStatus;
 }
