@@ -1,34 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<CollapsibleNavGroupEnabled /> should hide left navigation when in home page when workspace is enabled 1`] = `
-<div>
-  <div
-    data-eui="EuiFlyout"
-    data-test-subj="collapsibleNav"
-    role="dialog"
-  >
-    <div
-      class="eui-fullHeight left-navigation-wrapper"
-    >
-      <div
-        class="eui-yScroll scrollable-container"
-      >
-        <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
-          style="min-height: 100%;"
-        />
-      </div>
-      <hr
-        class="euiHorizontalRule euiHorizontalRule--full"
-      />
-      <div
-        class="bottom-container bottom-container-collapsed"
-      />
-    </div>
-  </div>
-</div>
-`;
-
 exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
 <div>
   <div
@@ -302,6 +273,79 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 2`] = `
 `;
 
 exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and able to click see all 1`] = `
+<div>
+  <div
+    data-eui="EuiFlyout"
+    data-test-subj="collapsibleNav"
+    role="dialog"
+  >
+    <div
+      class="eui-fullHeight left-navigation-wrapper"
+    >
+      <div
+        class="eui-yScroll scrollable-container"
+      >
+        <div
+          class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
+          style="min-height: 100%;"
+        >
+          <button
+            data-test-subj="back"
+          >
+            go back
+          </button>
+          <div
+            class="euiFlexItem"
+          >
+            <nav
+              class="euiSideNav"
+            >
+              <div
+                class="euiSideNav__content euiSideNav__contentMobile-xs euiSideNav__contentMobile-s"
+                id="euiSideNavContent_generated-id"
+              >
+                <div
+                  class="euiSideNavItem euiSideNavItem--root nav-link-item "
+                >
+                  <button
+                    aria-label="link-in-analytics"
+                    class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
+                    data-test-subj="collapsibleNavAppLink-link-in-analytics"
+                    type="button"
+                  >
+                    <span
+                      class="euiSideNavItemButton__content"
+                    >
+                      <span
+                        class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
+                        title="link-in-analytics"
+                      >
+                        <div
+                          class="euiText euiText--small"
+                        >
+                          link-in-analytics
+                        </div>
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+      <hr
+        class="euiHorizontalRule euiHorizontalRule--full"
+      />
+      <div
+        class="bottom-container"
+      />
+    </div>
+  </div>
+</div>
+`;
+
+exports[`<CollapsibleNavGroupEnabled /> should show all use case when current nav group is \`all\` 1`] = `
 <div>
   <div
     data-eui="EuiFlyout"
