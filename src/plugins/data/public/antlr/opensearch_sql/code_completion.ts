@@ -24,7 +24,6 @@ import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { fetchColumnValues, fetchTableSchemas } from '../shared/utils';
-import { getUiSettings } from '../../services';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -44,9 +43,11 @@ export const getSuggestions = async ({
   selectionEnd,
   position,
   query,
-  connectionService,
+  openSearchDashboards,
 }: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
-  const { api } = getUiSettings();
+  const { api } = openSearchDashboards.uiSettings;
+  const dataSetManager = openSearchDashboards.data.query.dataSet;
+  const selectedDataSet = dataSetManager.getDataSet();
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
     line: position?.lineNumber || selectionStart,
     column: position?.column || selectionEnd,
@@ -58,7 +59,7 @@ export const getSuggestions = async ({
     // Fetch columns and values
     if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
       const tableNames = suggestions.suggestColumns?.tables?.map((table) => table.name) ?? [];
-      const schemas = await fetchTableSchemas(tableNames, api, connectionService);
+      const schemas = await fetchTableSchemas(tableNames, api, selectedDataSet);
 
       schemas.forEach((schema) => {
         if (schema.body?.fields?.length > 0) {
@@ -84,7 +85,7 @@ export const getSuggestions = async ({
           tableNames,
           suggestions.suggestValuesForColumn as string,
           api,
-          connectionService
+          selectedDataSet
         );
         values.forEach((value) => {
           if (value.body?.fields?.length > 0) {

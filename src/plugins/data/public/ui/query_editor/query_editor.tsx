@@ -290,8 +290,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       position.lineNumber,
       wordUntil.endColumn
     );
-    const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
-    const connectionService = enhancements?.connectionService;
+
     const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
       query: this.getQueryString(),
       selectionStart: model.getOffsetAt(position),
@@ -299,7 +298,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       language: this.props.query.language,
       indexPatterns: this.state.indexPatterns,
       position,
-      connectionService,
+      openSearchDashboards: this.services,
     });
 
     return {
