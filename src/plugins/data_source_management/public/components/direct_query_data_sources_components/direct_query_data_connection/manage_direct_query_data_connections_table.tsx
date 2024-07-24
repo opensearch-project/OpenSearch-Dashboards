@@ -41,7 +41,7 @@ import { DATACONNECTIONS_BASE, observabilityMetricsID } from '../../../constants
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import { InstallIntegrationFlyout } from '../integrations/installed_integrations_table';
 import { redirectToExplorerS3 } from '../associated_object_management/utils/associated_objects_tab_utils';
-import { checkIfPluginIsInstalled } from '../../utils';
+import { isPluginInstalled } from '../../utils';
 
 interface DataConnection {
   connectionType: DirectQueryDatasourceType;
@@ -143,10 +143,8 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
 
   useEffect(() => {
     fetchDataSources();
-    checkIfPluginIsInstalled(
-      'plugin:observabilityDashboards',
-      setObservabilityDashboardsExists,
-      notifications
+    isPluginInstalled('plugin:observabilityDashboards', notifications, http).then(
+      setObservabilityDashboardsExists
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchDataSources]);

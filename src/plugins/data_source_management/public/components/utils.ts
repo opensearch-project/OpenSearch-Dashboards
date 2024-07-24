@@ -408,37 +408,21 @@ export const formatError = (name: string, message: string, details: string) => {
   };
 };
 
-export const checkIfPluginIsInstalled = (
+export const isPluginInstalled = async (
   pluginId: string,
-  setPluginExists: (exists: boolean) => void,
-  notifications: NotificationsStart
-) => {
-  fetch('/api/status', {
-    headers: {
-      'Content-Type': 'application/json',
-      'osd-xsrf': 'true',
-      'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
-      pragma: 'no-cache',
-      'sec-fetch-dest': 'empty',
-      'sec-fetch-mode': 'cors',
-      'sec-fetch-site': 'same-origin',
-    },
-    method: 'GET',
-    referrerPolicy: 'strict-origin-when-cross-origin',
-    mode: 'cors',
-    credentials: 'include',
-  })
-    .then((response) =>
-      response.json().then((data) => {
-        const pluginExists = data.status.statuses.some((status: { id: string | string[] }) =>
-          status.id.includes(pluginId)
-        );
-        setPluginExists(pluginExists);
-      })
-    )
-    .catch((error) => {
-      notifications.toasts.addDanger(`Error checking ${pluginId} Plugin Installation status.`);
-      // eslint-disable-next-line no-console
-      console.error(error);
-    });
+  notifications: NotificationsStart,
+  http: HttpStart
+): Promise<boolean> => {
+  try {
+    const response = await http.get('/api/status');
+    const pluginExists = response.status.statuses.some((status: { id: string }) =>
+      status.id.includes(pluginId)
+    );
+    return pluginExists;
+  } catch (error) {
+    notifications.toasts.addDanger(`Error checking ${pluginId} Plugin Installation status.`);
+    // eslint-disable-next-line no-console
+    console.error(error);
+    return false;
+  }
 };

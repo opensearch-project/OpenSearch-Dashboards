@@ -53,7 +53,7 @@ import {
   IntegrationInstancesSearchResult,
 } from '../../../../framework/types';
 import { INTEGRATIONS_BASE } from '../../../../framework/utils/shared';
-import { checkIfPluginIsInstalled } from '../../utils';
+import { isPluginInstalled } from '../../utils';
 
 interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;
@@ -177,10 +177,8 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   };
 
   useEffect(() => {
-    checkIfPluginIsInstalled(
-      'plugin:observabilityDashboards',
-      setObservabilityDashboardsExists,
-      notifications
+    isPluginInstalled('plugin:observabilityDashboards', notifications, http).then(
+      setObservabilityDashboardsExists
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
