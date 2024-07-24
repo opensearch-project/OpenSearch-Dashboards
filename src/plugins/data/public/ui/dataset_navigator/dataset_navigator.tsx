@@ -417,8 +417,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       // Add to recent datasets
       CatalogCacheManager.addRecentDataSet({
         id: selectedDataSet.id,
-        name: selectedDataSet.title ?? selectedDataSet.id!,
-        dataSourceRef: selectedDataSet.dataSourceRef?.id,
+        title: selectedDataSet.title ?? selectedDataSet.id!,
+        dataSourceRef: selectedDataSet.dataSourceRef,
+        timeFieldName: selectedDataSet.timeFieldName,
+        type: selectedDataSet.type,
       });
 
       // Update data set manager
@@ -704,21 +706,15 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
             id: 8,
             title: 'Recently Used',
             items: CatalogCacheManager.getRecentDataSets().map((ds) => ({
-              name: ds.name,
+              name: ds.title,
               onClick: async () => {
                 setSelectedDataSetState({
-                  id: ds.id ?? ds.name,
-                  title: ds.name,
-                  dataSourceRef: {
-                    id: ds.dataSourceRef!,
-                    name: ds.dataSourceRef!,
-                    type: ds.dataSourceRef!.startsWith('data-source')
-                      ? SIMPLE_DATA_SOURCE_TYPES.DEFAULT
-                      : SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
-                  },
+                  id: ds.id ?? ds.title,
+                  title: ds.title,
+                  dataSourceRef: ds.dataSourceRef,
                   database: undefined,
-                  isExternal: ds.dataSourceRef!.startsWith('data-source'),
-                  timeFieldName: '',
+                  isExternal: !ds.dataSourceRef?.type?.startsWith('data-source'),
+                  timeFieldName: ds.timeFieldName,
                 });
                 await handleSelectedDataSet();
               },

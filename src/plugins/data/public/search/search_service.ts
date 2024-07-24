@@ -136,8 +136,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
   ): ISearchStart {
     const search = ((request, options) => {
       const selectedLanguage = getQueryService().queryString.getQuery().language;
+      const dataSet = getQueryService().dataSet.getDataSet()?.type;
       const uiService = getUiService();
       const enhancement = uiService.Settings.getQueryEnhancements(selectedLanguage);
+      uiService.Settings.setUiOverridesByUserQueryLanguage(selectedLanguage);
       const isEnhancedEnabled = uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
 
       if (enhancement) {

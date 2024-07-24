@@ -4,7 +4,7 @@
  */
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { SimpleObject } from '../../../../common';
+import { SimpleDataSet, SimpleObject } from '../../../../common';
 
 export enum DirectQueryLoadingStatus {
   SUCCESS = 'success',
@@ -295,7 +295,7 @@ export interface DataSetOption {
 
 export interface RecentDataSetOptionsCacheData {
   version: string;
-  recentDataSets: DataSetOption[];
+  recentDataSets: SimpleDataSet[];
 }
 
 export interface ExternalDataSource {
