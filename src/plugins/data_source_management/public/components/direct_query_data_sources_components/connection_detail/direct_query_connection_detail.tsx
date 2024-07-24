@@ -365,6 +365,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
           properties={datasourceDetails.properties}
           allowedRoles={datasourceDetails.allowedRoles}
           key={JSON.stringify(datasourceDetails.allowedRoles)}
+          dataSourceMDSId={featureFlagStatus ? dataSourceMDSId ?? '' : ''}
         />
       ),
     },
