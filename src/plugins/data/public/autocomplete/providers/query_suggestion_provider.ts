@@ -28,7 +28,7 @@
  * under the License.
  */
 
-import { monaco } from 'packages/osd-monaco/target';
+import { monaco } from '@osd/monaco';
 import { CoreSetup } from 'opensearch-dashboards/public';
 import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
 
