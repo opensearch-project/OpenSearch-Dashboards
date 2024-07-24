@@ -279,23 +279,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
-  getCodeEditorSuggestionsType = (columnType: string) => {
-    switch (columnType) {
-      case 'text':
-        return monaco.languages.CompletionItemKind.Text;
-      case 'function':
-        return monaco.languages.CompletionItemKind.Function;
-      case 'object':
-        return monaco.languages.CompletionItemKind.Struct;
-      case 'field':
-        return monaco.languages.CompletionItemKind.Field;
-      case 'value':
-        return monaco.languages.CompletionItemKind.Value;
-      default:
-        return monaco.languages.CompletionItemKind.Text;
-    }
-  };
-
   provideCompletionItems = async (
     model: monaco.editor.ITextModel,
     position: monaco.Position
@@ -322,9 +305,9 @@ export default class QueryEditorUI extends Component<Props, State> {
     return {
       suggestions:
         suggestions && suggestions.length > 0
-          ? suggestions.map((s) => ({
+          ? suggestions.map((s: QuerySuggestion) => ({
               label: s.text,
-              kind: this.getCodeEditorSuggestionsType(s.type),
+              kind: s.type as monaco.languages.CompletionItemKind,
               insertText: s.text,
               range: wordRange,
             }))

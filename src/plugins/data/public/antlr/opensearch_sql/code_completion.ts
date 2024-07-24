@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { monaco } from 'packages/osd-monaco/target';
+import { monaco } from '@osd/monaco';
 import { Lexer as LexerType, ParserRuleContext, Parser as ParserType } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
 import {
@@ -21,10 +21,10 @@ import { createParser } from './parse';
 import { SqlErrorListener } from './sql_error_listerner';
 import { findCursorTokenIndex } from '../shared/cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
-import { getUiSettings } from '../../services';
 import { SQL_SYMBOLS } from './constants';
-import { QuerySuggestionGetFnArgs } from '../../autocomplete';
+import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { fetchColumnValues, fetchTableSchemas } from '../shared/utils';
+import { getUiSettings } from '../../services';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -45,14 +45,14 @@ export const getSuggestions = async ({
   position,
   query,
   connectionService,
-}: QuerySuggestionGetFnArgs): Promise<ISuggestionItem[]> => {
+}: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
   const { api } = getUiSettings();
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
     line: position?.lineNumber || selectionStart,
     column: position?.column || selectionEnd,
   });
 
-  const finalSuggestions = [];
+  const finalSuggestions = [] as QuerySuggestion[];
 
   try {
     // Fetch columns and values
@@ -66,10 +66,9 @@ export const getSuggestions = async ({
           const fieldTypes = schema.body.fields.find((col) => col.name === 'DATA_TYPE');
           if (columns && fieldTypes) {
             finalSuggestions.push(
-              ...columns.values.map((col: string, index: number) => ({
+              ...columns.values.map((col: string) => ({
                 text: col,
-                type: 'field',
-                fieldType: fieldTypes.values[index],
+                type: monaco.languages.CompletionItemKind.Field,
               }))
             );
           }
@@ -92,7 +91,7 @@ export const getSuggestions = async ({
             finalSuggestions.push(
               ...value.body.fields[0].values.map((colVal: string) => ({
                 text: `'${colVal}'`,
-                type: 'value',
+                type: monaco.languages.CompletionItemKind.Value,
               }))
             );
           }
@@ -105,7 +104,7 @@ export const getSuggestions = async ({
       finalSuggestions.push(
         ...SQL_SYMBOLS.AGREGATE_FUNCTIONS.map((af) => ({
           text: af,
-          type: 'function',
+          type: monaco.languages.CompletionItemKind.Function,
         }))
       );
     }
@@ -115,12 +114,13 @@ export const getSuggestions = async ({
       finalSuggestions.push(
         ...(suggestions.suggestKeywords ?? []).map((sk) => ({
           text: sk.value,
-          type: 'keyword',
+          type: monaco.languages.CompletionItemKind.Keyword,
         }))
       );
     }
   } catch (error) {
     // TODO: pipe error to the UI
+    return [];
   }
 
   return finalSuggestions;
