@@ -7,7 +7,7 @@ import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { concatMap, map } from 'rxjs/operators';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import { DATA_FRAME_TYPES, getRawDataFrame, getRawQueryString } from '../../../data/common';
 import {
@@ -115,7 +115,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
         ...dataFrame.meta.queryConfig,
       },
     };
-    const queryId = uuid();
+    const queryId = uuidv4();
     // Send an initial submit event to get faster feedback to clients waiting for info, since
     // polling will wait for the first polling cycle to finish before sending anything
     this.uiActions?.getTrigger(ASYNC_TRIGGER_ID).exec({
