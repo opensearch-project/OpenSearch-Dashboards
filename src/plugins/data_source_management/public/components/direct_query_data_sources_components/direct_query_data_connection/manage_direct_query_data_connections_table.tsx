@@ -91,16 +91,16 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       mode: 'cors',
       credentials: 'include',
     })
-      .then(function (response) {
-        return response.json();
-      })
-      .then((data) => {
-        for (let i = 0; i < data.status.statuses.length; ++i) {
-          if (data.status.statuses[i].id.includes('plugin:observabilityDashboards')) {
+      .then((response) =>
+        response.json().then((data) => {
+          const pluginExists = data.status.statuses.some((status: { id: string | string[] }) =>
+            status.id.includes('plugin:observabilityDashboards')
+          );
+          if (pluginExists) {
             setObservabilityDashboardsExists(true);
           }
-        }
-      })
+        })
+      )
       .catch((error) => {
         notifications.toasts.addDanger(
           'Error checking Dashboards Observability Plugin Installation status.'
