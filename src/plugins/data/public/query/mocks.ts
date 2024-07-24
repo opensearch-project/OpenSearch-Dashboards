@@ -33,6 +33,7 @@ import { QueryService, QuerySetup, QueryStart } from '.';
 import { timefilterServiceMock } from './timefilter/timefilter_service.mock';
 import { createFilterManagerMock } from './filter_manager/filter_manager.mock';
 import { queryStringManagerMock } from './query_string/query_string_manager.mock';
+import { dataSetManagerMock } from './dataset_manager/dataset_manager.mock';
 
 type QueryServiceClientContract = PublicMethodsOf<QueryService>;
 
@@ -41,6 +42,7 @@ const createSetupContractMock = () => {
     filterManager: createFilterManagerMock(),
     timefilter: timefilterServiceMock.createSetupContract(),
     queryString: queryStringManagerMock.createSetupContract(),
+    dataSet: dataSetManagerMock.createSetupContract(),
     state$: new Observable(),
   };
 
@@ -55,6 +57,7 @@ const createStartContractMock = () => {
     savedQueries: jest.fn() as any,
     state$: new Observable(),
     timefilter: timefilterServiceMock.createStartContract(),
+    dataSet: dataSetManagerMock.createStartContract(),
     getOpenSearchQuery: jest.fn(),
   };
 
