@@ -50,6 +50,7 @@ import {
 import { AccelerationDetailsFlyout } from './components/direct_query_data_sources_components/acceleration_management/acceleration_details_flyout';
 import { CreateAcceleration } from './components/direct_query_data_sources_components/acceleration_creation/create/create_acceleration';
 import { AssociatedObjectsDetailsFlyout } from './components/direct_query_data_sources_components/associated_object_management/associated_objects_details_flyout';
+import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 
 export const [
   getRenderAccelerationDetailsFlyout,
@@ -141,11 +142,6 @@ export class DataSourceManagementPlugin
       },
     });
 
-    // when the feature flag is disabled, we don't need to register any of the mds components
-    if (!this.featureFlagStatus) {
-      return undefined;
-    }
-
     /**
      * The data sources features in observability has the same name as `DSM_APP_ID`
      * Add a suffix to avoid duplication
@@ -166,7 +162,8 @@ export class DataSourceManagementPlugin
             {
               ...params,
               basePath: core.http.basePath.get(),
-              setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+              setBreadcrumbs: (breadCrumbs) =>
+                coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
               wrapInPage: true,
             },
             this.authMethodsRegistry,
@@ -223,6 +220,11 @@ export class DataSourceManagementPlugin
         order: 100,
       },
     ]);
+
+    // when the feature flag is disabled, we don't need to register any of the mds components
+    if (!this.featureFlagStatus) {
+      return undefined;
+    }
 
     const registerAuthenticationMethod = (authMethod: AuthenticationMethod) => {
       if (this.started) {
