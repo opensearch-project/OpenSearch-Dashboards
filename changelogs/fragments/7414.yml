@@ -1,2 +1,2 @@
 fix:
-- [Discover] Remaining changes and fixes for discover and autosuggest ([#7414](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7414))
+- [Discover] Fixes for discover top space issue ([#7414](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7414))
