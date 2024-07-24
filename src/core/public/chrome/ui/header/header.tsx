@@ -37,6 +37,7 @@ import {
   EuiHideFor,
   EuiIcon,
   EuiShowFor,
+  EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -207,25 +208,27 @@ export function Header({
             <EuiHeaderSection grow={false}>
               {shouldHideExpandIcon ? null : (
                 <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
-                  <EuiHeaderSectionItemButton
-                    data-test-subj="toggleNavButton"
-                    aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-                      defaultMessage: 'Toggle primary navigation',
+                  <EuiToolTip
+                    content={i18n.translate('core.ui.primaryNav.menu', {
+                      defaultMessage: 'Menu',
                     })}
-                    onClick={() => setIsNavOpen(!isNavOpen)}
-                    aria-expanded={isNavOpen}
-                    aria-pressed={isNavOpen}
-                    aria-controls={navId}
-                    ref={toggleCollapsibleNavRef}
+                    delay="long"
+                    position="bottom"
                   >
-                    <EuiIcon
-                      type="menu"
-                      size="m"
-                      title={i18n.translate('core.ui.primaryNav.menu', {
-                        defaultMessage: 'Menu',
+                    <EuiHeaderSectionItemButton
+                      data-test-subj="toggleNavButton"
+                      aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                        defaultMessage: 'Toggle primary navigation',
                       })}
-                    />
-                  </EuiHeaderSectionItemButton>
+                      onClick={() => setIsNavOpen(!isNavOpen)}
+                      aria-expanded={isNavOpen}
+                      aria-pressed={isNavOpen}
+                      aria-controls={navId}
+                      ref={toggleCollapsibleNavRef}
+                    >
+                      <EuiIcon type="menu" size="m" />
+                    </EuiHeaderSectionItemButton>
+                  </EuiToolTip>
                 </EuiHeaderSectionItem>
               )}
 
