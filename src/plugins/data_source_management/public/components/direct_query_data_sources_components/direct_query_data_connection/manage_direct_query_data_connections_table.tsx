@@ -222,6 +222,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       isPrimary: true,
       icon: 'discoverApp',
       type: 'icon',
+      available: (datasource: DataConnection) => observabilityDashboardsExists,
       onClick: (datasource: DataConnection) => {
         if (datasource.connectionType === 'PROMETHEUS') {
           application!.navigateToApp(observabilityMetricsID);
