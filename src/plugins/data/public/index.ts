@@ -446,7 +446,6 @@ export {
   // for BWC, keeping the old name
   IUiStart as DataPublicPluginStartUi,
   DataSetNavigator,
-  DataSetOption,
 } from './ui';
 
 /**
@@ -473,6 +472,7 @@ export {
   QueryStateChange,
   QueryStart,
   PersistedLog,
+  DataSetManager,
 } from './query';
 
 export { AggsStart } from './search/aggs';

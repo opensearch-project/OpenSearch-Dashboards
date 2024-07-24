@@ -45,7 +45,10 @@ export class QueryStringManager {
   }
 
   private getDefaultQueryString() {
-    return this.storage.get('opensearchDashboards.userQueryString') || '';
+    const isQueryEnhancementEnabled = this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED);
+    return isQueryEnhancementEnabled
+      ? '' // Dont set the default query if query enhancements are enabled
+      : this.storage.get('opensearchDashboards.userQueryString') || '';
   }
 
   private getDefaultLanguage() {

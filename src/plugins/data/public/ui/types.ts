@@ -69,7 +69,7 @@ export interface IUiStart {
   /**
    * @experimental - Subject to change
    */
-  DataSetNavigator: React.ComponentType<DataSetNavigatorProps>;
+  DataSetNavigator: React.ComponentType<Omit<DataSetNavigatorProps, 'dataSet'>>;
   SearchBar: React.ComponentType<StatefulSearchBarProps>;
   SuggestionsComponent: React.ComponentType<SuggestionsComponentProps>;
   /**

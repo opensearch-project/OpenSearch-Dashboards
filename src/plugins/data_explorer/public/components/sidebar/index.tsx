@@ -168,13 +168,7 @@ export const Sidebar: FC = ({ children }) => {
               containerRef.current = node;
             }}
           >
-            <DataSetNavigator
-              dataSet={{
-                id: indexPatternId,
-                ...dataSet,
-              }}
-              onSelectDataSet={handleDataSetSelection}
-            />
+            <DataSetNavigator />
           </EuiPortal>
         )}
         {!isEnhancementsEnabled && (

@@ -17,8 +17,8 @@ export enum SIMPLE_DATA_SET_TYPES {
 }
 
 export interface SimpleObject {
-  id: string;
-  title?: string;
+  id?: string;
+  title: string;
   dataSourceRef?: SimpleDataSource;
 }
 

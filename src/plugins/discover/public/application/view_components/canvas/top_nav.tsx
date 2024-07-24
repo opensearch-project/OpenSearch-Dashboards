@@ -55,6 +55,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   connectStorageToQueryState(services.data.query, osdUrlStateStorage, {
     filters: opensearchFilters.FilterStateStore.APP_STATE,
     query: true,
+    dataSet: true,
   });
 
   useEffect(() => {

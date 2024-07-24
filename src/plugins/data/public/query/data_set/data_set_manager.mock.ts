@@ -32,9 +32,11 @@ import { DataSetContract } from '.';
 
 const createSetupContractMock = () => {
   const dataSetManagerMock: jest.Mocked<DataSetContract> = {
+    init: jest.fn(),
     getDataSet: jest.fn(),
     setDataSet: jest.fn(),
     getUpdates$: jest.fn(),
+    getDefaultDataSet: jest.fn(),
   };
   return dataSetManagerMock;
 };

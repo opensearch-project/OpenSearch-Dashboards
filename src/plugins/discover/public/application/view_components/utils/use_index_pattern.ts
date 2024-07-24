@@ -3,13 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
 import { IndexPattern } from '../../../../../data/public';
-import { SimpleDataSet } from '../../../../../data/common';
-import { useSelector, updateIndexPattern } from '../../utils/state_management';
+import { SIMPLE_DATA_SET_TYPES, SimpleDataSet } from '../../../../../data/common';
+import { useSelector } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
-import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
+import { useDataSetManager } from './use_dataset_manager';
 
 /**
  * Custom hook to fetch and manage the index pattern based on the provided services.
@@ -26,39 +27,47 @@ import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
  * @returns - The fetched index pattern.
  */
 export const useIndexPattern = (services: DiscoverViewServices) => {
+  const { data, toastNotifications, uiSettings } = services;
+  const { dataSet } = useDataSetManager({
+    dataSetManager: data.query.dataSet,
+  });
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
-  const dataSetFromState = useSelector((state) => state.metadata.dataSet);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
-  const { data, toastNotifications, uiSettings: config, store } = services;
+  const isQueryEnhancementEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
+
+  const cacheTemporaryIndexPattern = useCallback(
+    async (dataset: SimpleDataSet) => {
+      const temporaryIndexPatternID = dataset.id ?? `${dataset.dataSourceRef?.id}.${dataset.title}`;
+      const temporaryIndexPattern = await data.indexPatterns.create(
+        {
+          id: temporaryIndexPatternID,
+          title: dataset.title,
+          timeFieldName: dataset.timeFieldName,
+          type: dataset.type,
+          ...(dataset.dataSourceRef
+            ? {
+                dataSourceRef: {
+                  id: dataset.dataSourceRef.id ?? dataset.dataSourceRef.name,
+                  name: dataset.dataSourceRef.name,
+                  type: dataset.type!,
+                },
+              }
+            : {}),
+        },
+        true
+      );
+      data.indexPatterns.saveToCache(temporaryIndexPatternID, temporaryIndexPattern);
+
+      return temporaryIndexPattern;
+    },
+    [data.indexPatterns]
+  );
 
   useEffect(() => {
-    const checkDataSet = async (idFromState: string, dataSet?: Omit<SimpleDataSet, 'id'>) => {
-      if (dataSet) {
-        const temporaryIndexPattern = await data.indexPatterns.create(
-          {
-            id: idFromState,
-            title: dataSet.title,
-            ...(dataSet.dataSourceRef
-              ? {
-                  dataSourceRef: {
-                    id: dataSet.dataSourceRef.id ?? dataSet.dataSourceRef.name,
-                    name: dataSet.dataSourceRef.name,
-                    type: dataSet.type!,
-                  },
-                }
-              : {}),
-            timeFieldName: dataSet.timeFieldName,
-          },
-          true
-        );
-        data.indexPatterns.saveToCache(temporaryIndexPattern.title, temporaryIndexPattern);
-      }
-      fetchIndexPatternDetails(idFromState);
-    };
-
+    // Only perform updates when the component is mounted. Use to prevent asyn updates to unmounted components
     let isMounted = true;
 
-    const fetchIndexPatternDetails = (id: string) => {
+    const fetchAndSetIndexPatternDetails = (id: string) => {
       data.indexPatterns
         .get(id)
         .then((result) => {
@@ -84,26 +93,43 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
         });
     };
 
-    if (!indexPatternIdFromState) {
-      data.indexPatterns.getCache().then((indexPatternList) => {
-        const newId = getIndexPatternId('', indexPatternList, config.get('defaultIndex'));
-        store!.dispatch(updateIndexPattern(newId));
-        fetchIndexPatternDetails(newId);
-      });
+    if (!isQueryEnhancementEnabled) {
+      // The index pattern in the legacy mode uses the metadata slice's index field
+      if (!indexPatternIdFromState) {
+        // If no indexpattern set in the app state, use the default index pattern
+        data.indexPatterns.getDefault().then((ip) => {
+          if (ip && isMounted) {
+            setIndexPattern(ip);
+          }
+        });
+      } else {
+        fetchAndSetIndexPatternDetails(indexPatternIdFromState);
+      }
     } else {
-      checkDataSet(indexPatternIdFromState, dataSetFromState);
+      // With query enhancements enabled, we use datasets
+      if (dataSet) {
+        if (dataSet.type === SIMPLE_DATA_SET_TYPES.INDEX_PATTERN) {
+          fetchAndSetIndexPatternDetails(dataSet.id!);
+        } else {
+          cacheTemporaryIndexPattern(dataSet).then((ip) => {
+            if (isMounted) {
+              setIndexPattern(ip);
+            }
+          });
+        }
+      }
     }
 
     return () => {
       isMounted = false;
     };
   }, [
-    indexPatternIdFromState,
+    cacheTemporaryIndexPattern,
     data.indexPatterns,
+    dataSet,
+    indexPatternIdFromState,
+    isQueryEnhancementEnabled,
     toastNotifications,
-    config,
-    store,
-    dataSetFromState,
   ]);
 
   return indexPattern;

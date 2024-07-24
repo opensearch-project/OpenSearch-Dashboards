@@ -117,8 +117,7 @@ export const useSearch = (services: DiscoverViewServices) => {
   const refetch$ = useMemo(() => new Subject<SearchRefetch>(), []);
 
   const fetch = useCallback(async () => {
-    let dataSet = indexPattern;
-    if (!dataSet) {
+    if (!indexPattern) {
       data$.next({
         status: shouldSearchOnPageLoad() ? ResultStatus.LOADING : ResultStatus.UNINITIALIZED,
       });
@@ -135,18 +134,20 @@ export const useSearch = (services: DiscoverViewServices) => {
     // Abort any in-progress requests before fetching again
     if (fetchStateRef.current.abortController) fetchStateRef.current.abortController.abort();
     fetchStateRef.current.abortController = new AbortController();
-    const histogramConfigs = dataSet.timeFieldName
-      ? createHistogramConfigs(dataSet, interval || 'auto', data)
+
+    const histogramConfigs = indexPattern.timeFieldName
+      ? createHistogramConfigs(indexPattern, interval || 'auto', data)
       : undefined;
     const searchSource = await updateSearchSource({
-      indexPattern: dataSet,
+      indexPattern,
       services,
       sort,
       searchSource: savedSearch?.searchSource,
       histogramConfigs,
     });
 
-    dataSet = searchSource.getField('index');
+    // TODO: Why do we need this?
+    const updatedIndexPattern = searchSource.getField('index');
 
     try {
       // Only show loading indicator if we are fetching when the rows are empty
@@ -182,7 +183,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       let bucketInterval = {};
       let chartData;
       for (const row of rows) {
-        const fields = Object.keys(dataSet!.flattenHit(row));
+        const fields = Object.keys(updatedIndexPattern!.flattenHit(row));
         for (const fieldName of fields) {
           fetchStateRef.current.fieldCounts[fieldName] =
             (fetchStateRef.current.fieldCounts[fieldName] || 0) + 1;
@@ -244,6 +245,7 @@ export const useSearch = (services: DiscoverViewServices) => {
   ]);
 
   useEffect(() => {
+    // Rerun fetch if any of these observables update
     const fetch$ = merge(
       refetch$,
       filterManager.getFetches$(),

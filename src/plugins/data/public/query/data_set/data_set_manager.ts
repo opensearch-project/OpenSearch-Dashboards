@@ -32,17 +32,25 @@ import { BehaviorSubject } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
-import { Query, SimpleDataSet, UI_SETTINGS } from '../../../common';
+import {
+  IndexPatternsService,
+  Query,
+  SIMPLE_DATA_SET_TYPES,
+  SimpleDataSet,
+  UI_SETTINGS,
+} from '../../../common';
 
 export class DataSetManager {
   private dataSet$: BehaviorSubject<SimpleDataSet | undefined>;
+  private indexPatterns?: IndexPatternsService;
 
-  constructor(
-    private readonly storage: IStorageWrapper,
-    private readonly uiSettings: CoreStart['uiSettings']
-  ) {
+  constructor(private readonly uiSettings: CoreStart['uiSettings']) {
     this.dataSet$ = new BehaviorSubject<SimpleDataSet | undefined>(undefined);
   }
+
+  public init = (indexPatterns: IndexPatternsService) => {
+    this.indexPatterns = indexPatterns;
+  };
 
   public getUpdates$ = () => {
     return this.dataSet$.asObservable().pipe(skip(1));
@@ -58,6 +66,28 @@ export class DataSetManager {
    */
   public setDataSet = (dataSet: SimpleDataSet | undefined) => {
     this.dataSet$.next(dataSet);
+  };
+
+  public getDefaultDataSet = async (): Promise<SimpleDataSet | undefined> => {
+    const defaultIndexPatternId = await this.uiSettings.get('defaultIndex');
+    if (!defaultIndexPatternId) {
+      return undefined;
+    }
+
+    const indexPattern = await this.indexPatterns?.get(defaultIndexPatternId);
+    if (!indexPattern) {
+      return undefined;
+    }
+
+    if (!indexPattern.id) {
+      return undefined;
+    }
+
+    return {
+      id: indexPattern.id,
+      title: indexPattern.title,
+      type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
+    };
   };
 }
 
