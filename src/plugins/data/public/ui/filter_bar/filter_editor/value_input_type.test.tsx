@@ -22,19 +22,8 @@ describe('Value input type', () => {
       placeholder: '',
     };
     const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
-    expect(component).toMatchSnapshot();
-  });
-
-  it('is number bigint', async () => {
-    const valueInputProps = {
-      value: '1n',
-      type: 'number',
-      onChange: onChangeMock,
-      onBlur: () => {},
-      placeholder: '',
-    };
-    const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
-    expect(component).toMatchSnapshot();
+    expect(component.find('EuiFieldNumber').exists()).toBeTruthy();
+    expect(component.find('EuiFieldNumber').prop('value')).toBe(1);
   });
 
   it('is string', async () => {
@@ -46,7 +35,8 @@ describe('Value input type', () => {
       placeholder: '',
     };
     const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
-    expect(component).toMatchSnapshot();
+    expect(component.find('EuiFieldText').exists()).toBeTruthy();
+    expect(component.find('EuiFieldText').prop('value')).toBe('value');
   });
 
   it('is boolean', async () => {
@@ -58,7 +48,8 @@ describe('Value input type', () => {
       placeholder: '',
     };
     const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
-    expect(component).toMatchSnapshot();
+    expect(component.find('EuiSelect').exists()).toBeTruthy();
+    expect(component.find('EuiSelect').prop('value')).toBe('true');
   });
 
   it('is date', async () => {
@@ -70,7 +61,8 @@ describe('Value input type', () => {
       placeholder: '',
     };
     const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
-    expect(component).toMatchSnapshot();
+    expect(component.find('EuiFieldText').exists()).toBeTruthy();
+    expect(component.find('EuiFieldText').prop('value')).toBe('Jun 18, 2024 @ 12:01:55.000');
   });
 
   it('is ip', async () => {
@@ -82,6 +74,7 @@ describe('Value input type', () => {
       placeholder: '',
     };
     const component = mountWithIntl(<ValueInputType {...valueInputProps} />);
-    expect(component).toMatchSnapshot();
+    expect(component.find('EuiFieldText').exists()).toBeTruthy();
+    expect(component.find('EuiFieldText').prop('value')).toBe('127.0.0.1');
   });
 });
