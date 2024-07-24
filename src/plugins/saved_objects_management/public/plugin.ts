@@ -66,6 +66,7 @@ import { bootstrap } from './ui_actions_bootstrap';
 import { DEFAULT_NAV_GROUPS, DEFAULT_APP_CATEGORIES } from '../../../core/public';
 import { RecentWork } from './management_section/recent_work';
 import { HOME_CONTENT_AREAS } from '../../../plugins/home/public';
+import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 
 export interface SavedObjectsManagementPluginSetup {
   actions: SavedObjectsManagementActionServiceSetup;
@@ -173,7 +174,8 @@ export class SavedObjectsManagementPlugin
             mountParams: {
               ...params,
               basePath: core.http.basePath.get(),
-              setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+              setBreadcrumbs: (breadCrumbs) =>
+                coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
               wrapInPage: true,
             },
             dataSourceEnabled: !!dataSource,
