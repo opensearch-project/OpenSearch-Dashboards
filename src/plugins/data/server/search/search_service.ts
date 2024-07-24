@@ -229,7 +229,10 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                 dataFrame.meta.queryConfig.dataSourceId = dataSource?.id;
               }
               this.dfCache.set(dataFrame);
-              const existingIndexPattern = scopedIndexPatterns.getByTitle(dataFrame.name!, true);
+              const dataSetName = `${dataFrame.meta?.queryConfig?.dataSourceId ?? ''}.${
+                dataFrame.name
+              }`;
+              const existingIndexPattern = await scopedIndexPatterns.get(dataSetName, true);
               const dataSet = await scopedIndexPatterns.create(
                 dataFrameToSpec(dataFrame, existingIndexPattern?.id),
                 !existingIndexPattern?.id
