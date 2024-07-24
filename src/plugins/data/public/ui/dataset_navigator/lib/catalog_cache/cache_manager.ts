@@ -21,7 +21,7 @@ import {
   ExternalDataSourcesCacheData,
   RecentDataSetOptionsCacheData,
 } from '../types';
-import { SimpleObject } from '../../../../../common';
+import { SimpleDataSet, SimpleObject } from '../../../../../common';
 
 /**
  * Manages caching for catalog data including data sources and accelerations.
@@ -390,14 +390,14 @@ export class CatalogCacheManager {
     }
   }
 
-  static addRecentDataSet(dataSetOption: DataSetOption): void {
+  static addRecentDataSet(dataSet: SimpleDataSet): void {
     const cacheData = this.getRecentDataSetsCache();
 
     cacheData.recentDataSets = cacheData.recentDataSets.filter(
-      (option) => option.id !== dataSetOption.id
+      (option) => option.id !== dataSet.id
     );
 
-    cacheData.recentDataSets.push(dataSetOption);
+    cacheData.recentDataSets.push(dataSet);
 
     if (cacheData.recentDataSets.length > this.maxRecentDataSet) {
       cacheData.recentDataSets.shift();
@@ -406,7 +406,7 @@ export class CatalogCacheManager {
     this.saveRecentDataSetsCache(cacheData);
   }
 
-  static getRecentDataSets(): DataSetOption[] {
+  static getRecentDataSets(): SimpleDataSet[] {
     return this.getRecentDataSetsCache().recentDataSets;
   }
 

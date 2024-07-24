@@ -61,7 +61,6 @@ export class DataSetManager {
       title: indexPattern.title,
       type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
       timeFieldName: indexPattern.timeFieldName,
-      fields: indexPattern.fields,
       ...(indexPattern.dataSourceRef
         ? {
             dataSourceRef: {

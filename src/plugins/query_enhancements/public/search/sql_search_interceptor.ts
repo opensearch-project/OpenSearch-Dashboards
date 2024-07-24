@@ -9,7 +9,12 @@ import { i18n } from '@osd/i18n';
 import { concatMap, map } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { UiActionsStart } from 'src/plugins/ui_actions/public';
-import { DATA_FRAME_TYPES, getRawDataFrame, getRawQueryString } from '../../../data/common';
+import {
+  DATA_FRAME_TYPES,
+  getRawDataFrame,
+  getRawQueryString,
+  SIMPLE_DATA_SET_TYPES,
+} from '../../../data/common';
 import {
   DataPublicPluginStart,
   IOpenSearchDashboardsSearchRequest,
@@ -184,7 +189,8 @@ export class SQLSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    if (options.isAsync) {
+    const dataSet = this.queryService.dataSet.getDataSet();
+    if (dataSet?.type === SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC) {
       return this.runSearchAsync(request, options.abortSignal, SEARCH_STRATEGY.SQL_ASYNC);
     }
     return this.runSearch(request, options.abortSignal, SEARCH_STRATEGY.SQL);
