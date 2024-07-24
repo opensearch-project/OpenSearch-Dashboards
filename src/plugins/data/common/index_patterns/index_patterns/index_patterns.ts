@@ -433,11 +433,13 @@ export class IndexPatternsService {
   /**
    * Get an index pattern by id. Cache optimized
    * @param id
+   * @param onlyCheckCache - Only check cache for index pattern if it doesn't exist it will not error out
    */
 
-  get = async (id: string): Promise<IndexPattern> => {
+  get = async (id: string, onlyCheckCache: boolean = false): Promise<IndexPattern> => {
     const cache = indexPatternCache.get(id);
-    if (cache) {
+
+    if (cache || onlyCheckCache) {
       return cache;
     }
 
