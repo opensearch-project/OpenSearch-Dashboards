@@ -28,7 +28,7 @@ const getAvailableLanguages$ = (
   connectionsService.getSelectedConnection$().pipe(
     distinctUntilChanged(),
     switchMap(async (connection) => {
-      const dataSourceId = connection?.id;
+      const dataSourceId = connection?.dataSource.id;
       const cached = availableLanguagesByDataSource.get(dataSourceId);
       if (cached !== undefined) return cached;
       const languages = await http
