@@ -133,13 +133,14 @@ export function Header({
   const appId = useObservable(application.currentAppId$, '');
   const [isNavOpen, setIsNavOpen] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
+  const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
 
   /**
    * This is a workaround on 2.16 to hide the navigation items within left navigation
    * when user is in homepage with workspace enabled + new navigation enabled
    */
   const shouldHideExpandIcon =
-    navGroupEnabled && appId === 'home' && application.capabilities.workspaces.enabled;
+    navGroupEnabled && appId === 'home' && application.capabilities?.workspaces?.enabled;
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
@@ -149,14 +150,11 @@ export function Header({
     return <LoadingIndicator loadingCount$={observables.loadingCount$} showAsBar />;
   }
 
-  const toggleCollapsibleNavRef = createRef<HTMLButtonElement & { euiAnimate: () => void }>();
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
   const { useExpandedHeader = true } = branding;
 
   const expandedHeaderColorScheme: EuiHeaderProps['theme'] = 'dark';
-
-  // a comment
 
   return (
     <>
