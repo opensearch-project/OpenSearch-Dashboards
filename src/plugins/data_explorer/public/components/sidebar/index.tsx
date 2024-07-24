@@ -6,15 +6,23 @@
 import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiPageSideBar, EuiPortal, EuiSplitPanel } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { batch } from 'react-redux';
 import { DataSource, DataSourceGroup, DataSourceSelectable } from '../../../../data/public';
 import { DataSourceOption } from '../../../../data/public/';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataExplorerServices } from '../../types';
-import { setIndexPattern, useTypedDispatch, useTypedSelector } from '../../utils/state_management';
+import {
+  setDataSet,
+  setIndexPattern,
+  useTypedDispatch,
+  useTypedSelector,
+} from '../../utils/state_management';
 import './index.scss';
 
 export const Sidebar: FC = ({ children }) => {
-  const { indexPattern: indexPatternId } = useTypedSelector((state) => state.metadata);
+  const { indexPattern: indexPatternId, dataSet: dataSet } = useTypedSelector(
+    (state) => state.metadata
+  );
   const dispatch = useTypedDispatch();
   const [selectedSources, setSelectedSources] = useState<DataSourceOption[]>([]);
   const [dataSourceOptionList, setDataSourceOptionList] = useState<DataSourceGroup[]>([]);
@@ -29,6 +37,8 @@ export const Sidebar: FC = ({ children }) => {
       application,
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
+
+  const { DataSetNavigator } = ui;
 
   useEffect(() => {
     const subscriptions = ui.Settings.getEnabledQueryEnhancementsUpdated$().subscribe(
@@ -48,17 +58,17 @@ export const Sidebar: FC = ({ children }) => {
 
   useEffect(() => {
     if (!isEnhancementsEnabled) return;
-    const subscriptions = ui.container$.subscribe((container) => {
-      if (container === null) return;
+    const subscriptions = ui.dataSetContainer$.subscribe((dataSetContainer) => {
+      if (dataSetContainer === null) return;
       if (containerRef.current) {
-        setContainerRef(container);
+        setContainerRef(dataSetContainer);
       }
     });
 
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [ui.container$, containerRef, setContainerRef, isEnhancementsEnabled]);
+  }, [ui.dataSetContainer$, containerRef, setContainerRef, isEnhancementsEnabled]);
 
   useEffect(() => {
     let isMounted = true;
@@ -130,22 +140,19 @@ export const Sidebar: FC = ({ children }) => {
     [toasts]
   );
 
+  const handleDataSetSelection = useCallback(
+    (selectedDataSet: any) => {
+      batch(() => {
+        const { id, ...ds } = selectedDataSet;
+        dispatch(setIndexPattern(id));
+      });
+    },
+    [dispatch]
+  );
+
   const memorizedReload = useCallback(() => {
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
-
-  const dataSourceSelector = (
-    <DataSourceSelectable
-      dataSources={activeDataSources}
-      dataSourceOptionList={dataSourceOptionList}
-      setDataSourceOptionList={setDataSourceOptionList}
-      onDataSourceSelect={handleSourceSelection}
-      selectedSources={selectedSources}
-      onGetDataSetError={handleGetDataSetError}
-      onRefresh={memorizedReload}
-      fullWidth
-    />
-  );
 
   return (
     <EuiPageSideBar className="deSidebar" sticky>
@@ -161,7 +168,13 @@ export const Sidebar: FC = ({ children }) => {
               containerRef.current = node;
             }}
           >
-            {dataSourceSelector}
+            <DataSetNavigator
+              dataSet={{
+                id: indexPatternId,
+                ...dataSet,
+              }}
+              onSelectDataSet={handleDataSetSelection}
+            />
           </EuiPortal>
         )}
         {!isEnhancementsEnabled && (
@@ -171,7 +184,16 @@ export const Sidebar: FC = ({ children }) => {
             color="transparent"
             className="deSidebar_dataSource"
           >
-            {dataSourceSelector}
+            <DataSourceSelectable
+              dataSources={activeDataSources}
+              dataSourceOptionList={dataSourceOptionList}
+              setDataSourceOptionList={setDataSourceOptionList}
+              onDataSourceSelect={handleSourceSelection}
+              selectedSources={selectedSources}
+              onGetDataSetError={handleGetDataSetError}
+              onRefresh={memorizedReload}
+              fullWidth
+            />
           </EuiSplitPanel.Inner>
         )}
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">

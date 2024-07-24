@@ -324,7 +324,12 @@ export class SearchSource {
     const dataFrame = createDataFrame({
       name: searchRequest.index.title || searchRequest.index,
       fields: [],
-      ...(rawQueryString && { meta: { queryConfig: parseRawQueryString(rawQueryString) } }),
+      ...(rawQueryString && {
+        meta: {
+          queryConfig: parseRawQueryString(rawQueryString),
+          ...(searchRequest.dataSourceId && { dataSource: searchRequest.dataSourceId }),
+        },
+      }),
     });
     await this.setDataFrame(dataFrame);
     return this.getDataFrame();
@@ -353,6 +358,7 @@ export class SearchSource {
     if (getConfig(UI_SETTINGS.COURIER_BATCH_SEARCHES)) {
       response = await this.legacyFetch(searchRequest, options);
     } else if (this.isUnsupportedRequest(searchRequest)) {
+      options = { ...options, isAsync: this.getField('type')?.includes('async') };
       response = await this.fetchExternalSearch(searchRequest, options);
     } else {
       const indexPattern = this.getField('index');

@@ -48,6 +48,10 @@ export interface ISearchOptions {
    * Use this option to enable support for long numerals.
    */
   withLongNumeralsSupport?: boolean;
+  /**
+   * Use this option to enable support for async.
+   */
+  isAsync?: boolean;
 }
 
 export type ISearchRequestParams<T = Record<string, any>> = {

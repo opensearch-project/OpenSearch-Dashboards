@@ -12,7 +12,7 @@ export interface IDataSourceRequestHandlerParams {
 }
 
 export const getRawSuggestionData$ = (
-  connectionsService,
+  connectionsService: any,
   dataSourceReuqstHandler: ({
     dataSourceId,
     title,
@@ -21,11 +21,11 @@ export const getRawSuggestionData$ = (
 ) =>
   connectionsService.getSelectedConnection$().pipe(
     distinctUntilChanged(),
-    switchMap((connection) => {
+    switchMap((connection: any) => {
       if (connection === undefined) {
         return from(defaultReuqstHandler());
       }
-      const dataSourceId = connection?.id;
+      const dataSourceId = connection?.dataSource?.id;
       const title = connection?.attributes?.title;
       return from(dataSourceReuqstHandler({ dataSourceId, title }));
     })
@@ -34,8 +34,8 @@ export const getRawSuggestionData$ = (
 export const fetchData = (
   tables: string[],
   queryFormatter: (table: string, dataSourceId?: string, title?: string) => any,
-  api,
-  connectionService
+  api: any,
+  connectionService: any
 ): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     getRawSuggestionData$(
@@ -65,8 +65,8 @@ export const fetchData = (
         );
       }
     ).subscribe({
-      next: (dataFrames) => resolve(dataFrames),
-      error: (err) => {
+      next: (dataFrames: any) => resolve(dataFrames),
+      error: (err: any) => {
         // TODO: pipe error to UI
         reject(err);
       },
@@ -74,7 +74,11 @@ export const fetchData = (
   });
 };
 
-export const fetchTableSchemas = (tables: string[], api, connectionService): Promise<any[]> => {
+export const fetchTableSchemas = (
+  tables: string[],
+  api: any,
+  connectionService: any
+): Promise<any[]> => {
   return fetchData(
     tables,
     (table, dataSourceId, title) => ({
@@ -96,8 +100,8 @@ export const fetchTableSchemas = (tables: string[], api, connectionService): Pro
 export const fetchColumnValues = (
   tables: string[],
   column: string,
-  api,
-  connectionService
+  api: any,
+  connectionService: any
 ): Promise<any[]> => {
   return fetchData(
     tables,
