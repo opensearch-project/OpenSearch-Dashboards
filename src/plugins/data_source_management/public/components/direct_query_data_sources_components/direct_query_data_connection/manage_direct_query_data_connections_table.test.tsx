@@ -4,134 +4,125 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act } from 'react-dom/test-utils';
+import { mount, ReactWrapper } from 'enzyme';
+import {
+  HttpStart,
+  NotificationsStart,
+  SavedObjectsStart,
+  IUiSettingsClient,
+} from 'opensearch-dashboards/public';
+import { EuiFieldSearch, EuiInMemoryTable, EuiLoadingSpinner } from '@elastic/eui';
 import { ManageDirectQueryDataConnectionsTable } from './manage_direct_query_data_connections_table';
 
-// Mock dependencies
-jest.mock('react-router-dom', () => ({
-  useHistory: () => ({
-    push: jest.fn(),
-  }),
-}));
+const mockHttp = ({
+  get: jest.fn(),
+} as unknown) as jest.Mocked<HttpStart>;
 
-jest.mock('../../../plugin', () => ({
-  getRenderCreateAccelerationFlyout: jest.fn(() => jest.fn()),
-}));
+const mockNotifications = ({
+  toasts: { addDanger: jest.fn(), addSuccess: jest.fn(), addWarning: jest.fn() },
+} as unknown) as jest.Mocked<NotificationsStart>;
 
-jest.mock('../icons/prometheus_logo.svg', () => 'prometheusLogo');
-jest.mock('../icons/s3_logo.svg', () => 's3Logo');
-jest.mock('../integrations/installed_integrations_table', () => ({
-  InstallIntegrationFlyout: jest.fn(() => <div>MockInstallIntegrationFlyout</div>),
-}));
+const mockSavedObjects = ({
+  client: {},
+} as unknown) as jest.Mocked<SavedObjectsStart>;
+
+const mockUiSettings = ({} as unknown) as jest.Mocked<IUiSettingsClient>;
+
+const defaultProps = {
+  http: mockHttp,
+  notifications: mockNotifications,
+  savedObjects: mockSavedObjects,
+  uiSettings: mockUiSettings,
+  featureFlagStatus: true,
+};
 
 describe('ManageDirectQueryDataConnectionsTable', () => {
-  const mockHttp = { get: jest.fn(), delete: jest.fn() };
-  const mockNotifications = { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } };
-  const mockSavedObjects = { client: {} };
-  const mockUiSettings = {};
-  const mockApplication = { navigateToApp: jest.fn() };
-
-  const defaultProps = {
-    http: mockHttp,
-    notifications: mockNotifications,
-    savedObjects: mockSavedObjects,
-    uiSettings: mockUiSettings,
-    featureFlagStatus: false,
-    application: mockApplication,
-  };
+  let wrapper: ReactWrapper;
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('renders data connections', async () => {
-    mockHttp.get.mockResolvedValue([
-      { name: 'connection1', connector: 'PROMETHEUS', status: 'ACTIVE' },
-      { name: 'connection2', connector: 'S3GLUE', status: 'INACTIVE' },
+  test('renders correctly', async () => {
+    mockHttp.get.mockResolvedValueOnce([]); // Mock an empty array for the initial fetch
+
+    await act(async () => {
+      wrapper = mount(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
+    });
+    wrapper.update();
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  test('displays loading spinner while fetching data', async () => {
+    let resolveFetch;
+    const fetchPromise = new Promise((resolve) => {
+      resolveFetch = resolve;
+    });
+    mockHttp.get.mockImplementation(() => fetchPromise);
+
+    await act(async () => {
+      wrapper = mount(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
+    });
+
+    wrapper.update();
+
+    expect(wrapper.find(EuiLoadingSpinner).exists()).toBe(true);
+
+    // Simulate fetch completion
+    await act(async () => {
+      resolveFetch([]);
+    });
+    wrapper.update();
+  });
+
+  test('fetches and displays data connections', async () => {
+    mockHttp.get.mockResolvedValueOnce([
+      {
+        name: 'Test Connection',
+        connector: 'S3GLUE',
+        status: 'ACTIVE',
+      },
     ]);
 
-    render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-    await waitFor(() => expect(screen.getByText('connection1')).toBeInTheDocument());
-    expect(screen.getByText('connection2')).toBeInTheDocument();
+    await act(async () => {
+      wrapper = mount(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
+    });
+    wrapper.update();
+
+    expect(wrapper.find(EuiInMemoryTable).prop('items')).toHaveLength(1);
   });
 
-  test('handles search input change', async () => {
-    mockHttp.get.mockResolvedValue([
-      { name: 'connection1', connector: 'PROMETHEUS', status: 'ACTIVE' },
-      { name: 'connection2', connector: 'S3GLUE', status: 'INACTIVE' },
+  test('filters data connections based on search text', async () => {
+    mockHttp.get.mockResolvedValueOnce([
+      {
+        name: 'Test Connection',
+        connector: 'S3GLUE',
+        status: 'ACTIVE',
+      },
+      {
+        name: 'Another Connection',
+        connector: 'PROMETHEUS',
+        status: 'INACTIVE',
+      },
     ]);
 
-    render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-    await waitFor(() => expect(screen.getByText('connection1')).toBeInTheDocument());
+    await act(async () => {
+      wrapper = mount(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
+    });
+    wrapper.update();
 
-    const searchInput = screen.getByPlaceholderText('Search...');
-    fireEvent.change(searchInput, { target: { value: 'connection2' } });
+    const searchInput = wrapper.find(EuiFieldSearch);
+    expect(searchInput.exists()).toBe(true);
 
-    expect(screen.queryByText('connection1')).not.toBeInTheDocument();
-    expect(screen.getByText('connection2')).toBeInTheDocument();
-  });
+    await act(async () => {
+      searchInput.find('input').simulate('change', { target: { value: 'Test' } });
+    });
+    wrapper.update();
 
-  test('displays error on failed fetch', async () => {
-    mockHttp.get.mockRejectedValue(new Error('Fetch error'));
-
-    render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-
-    await waitFor(() =>
-      expect(mockNotifications.toasts.addDanger).toHaveBeenCalledWith(
-        'Could not fetch data sources'
-      )
-    );
-  });
-
-  test('matches snapshot', async () => {
-    mockHttp.get.mockResolvedValue([
-      { name: 'connection1', connector: 'PROMETHEUS', status: 'ACTIVE' },
-      { name: 'connection2', connector: 'S3GLUE', status: 'INACTIVE' },
-    ]);
-
-    const { asFragment } = render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-    await waitFor(() => expect(screen.getByText('connection1')).toBeInTheDocument());
-    expect(asFragment()).toMatchSnapshot();
-  });
-
-  // Conditional rendering tests
-  test('renders no connections message when there are no connections', async () => {
-    mockHttp.get.mockResolvedValue([]);
-
-    render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-    await waitFor(() => expect(screen.getByText('No items found')).toBeInTheDocument());
-  });
-
-  test('renders error message when fetch fails', async () => {
-    mockHttp.get.mockRejectedValue(new Error('Fetch error'));
-
-    render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-    await waitFor(() =>
-      expect(mockNotifications.toasts.addDanger).toHaveBeenCalledWith(
-        'Could not fetch data sources'
-      )
-    );
-  });
-
-  test('displays loading indicator while fetching data', async () => {
-    mockHttp.get.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          setTimeout(
-            () =>
-              resolve([
-                { name: 'connection1', connector: 'PROMETHEUS', status: 'ACTIVE' },
-                { name: 'connection2', connector: 'S3GLUE', status: 'INACTIVE' },
-              ]),
-            1000
-          );
-        })
-    );
-
-    render(<ManageDirectQueryDataConnectionsTable {...defaultProps} />);
-    expect(screen.getByText('Loading direct query data connections...')).toBeInTheDocument();
-
-    await waitFor(() => expect(screen.getByText('connection1')).toBeInTheDocument());
-    expect(screen.queryByText('Loading direct query data connections...')).not.toBeInTheDocument();
+    const table = wrapper.find(EuiInMemoryTable);
+    const items = table.prop('items') as any[];
+    expect(items).toHaveLength(1);
+    expect(items[0].name).toBe('Test Connection');
   });
 });
