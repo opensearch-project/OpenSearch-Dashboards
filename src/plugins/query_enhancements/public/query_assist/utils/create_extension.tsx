@@ -6,7 +6,7 @@
 import { HttpSetup } from 'opensearch-dashboards/public';
 import React, { useEffect, useState } from 'react';
 import { of } from 'rxjs';
-import { distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 import {
   DataPublicPluginSetup,
   QueryEditorExtensionConfig,
@@ -26,7 +26,6 @@ const getAvailableLanguages$ = (
   data: DataPublicPluginSetup
 ) =>
   data.query.dataSet.getUpdates$().pipe(
-    startWith(data.query.dataSet.getDataSet()),
     distinctUntilChanged(),
     switchMap(async (simpleDataSet) => {
       const dataSourceId = simpleDataSet?.dataSourceRef?.id;

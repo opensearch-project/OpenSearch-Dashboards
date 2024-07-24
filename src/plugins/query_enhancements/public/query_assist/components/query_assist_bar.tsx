@@ -35,9 +35,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { generateQuery, loading } = useGenerateQuery();
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
-  const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet | undefined>(
-    services.data.query.dataSet.getDataSet()
-  );
+  const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet>();
   const selectedIndex = selectedDataSet?.title;
   const previousQuestionRef = useRef<string>();
 

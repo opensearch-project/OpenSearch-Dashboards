@@ -35,7 +35,6 @@ const mockSimpleDataSet = {
 } as SimpleDataSet;
 
 dataSetMock.getUpdates$.mockReturnValue(of(mockSimpleDataSet));
-dataSetMock.getDataSet.mockReturnValue(mockSimpleDataSet);
 
 jest.mock('../components', () => ({
   QueryAssistBar: jest.fn(() => <div>QueryAssistBar</div>),

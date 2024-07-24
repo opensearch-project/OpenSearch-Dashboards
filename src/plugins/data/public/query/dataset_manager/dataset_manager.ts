@@ -26,7 +26,7 @@ export class DataSetManager {
   };
 
   public getUpdates$ = () => {
-    return this.dataSet$.asObservable().pipe(skip(1));
+    return this.dataSet$.asObservable();
   };
 
   public getDataSet = () => {
