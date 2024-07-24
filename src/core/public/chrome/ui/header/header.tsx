@@ -140,7 +140,7 @@ export function Header({
    * when user is in homepage with workspace enabled + new navigation enabled
    */
   const shouldHideExpandIcon =
-    navGroupEnabled && appId === 'home' && application.capabilities?.workspaces?.enabled;
+    navGroupEnabled && appId === 'home' && application.capabilities.workspaces.enabled;
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
