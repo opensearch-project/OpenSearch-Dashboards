@@ -191,16 +191,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function isValidQuery(query: Query | undefined) {
-    if (!query || !query.query) return false;
-    return (
-      !Array.isArray(props.indexPatterns!) ||
-      compact(props.indexPatterns!).length === 0 ||
-      fromUser(query!.query).includes(
-        typeof props.indexPatterns[0] === 'string'
-          ? props.indexPatterns[0]
-          : props.indexPatterns[0].title
-      )
-    );
+    if (query && query.query) return true;
   }
 
   function getQueryStringInitialValue(language: string) {
