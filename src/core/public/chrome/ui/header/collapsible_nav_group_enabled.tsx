@@ -177,7 +177,7 @@ export function CollapsibleNavGroupEnabled({
   basePath,
   id,
   isLocked,
-  isNavOpen: isNavOpenProps,
+  isNavOpen,
   storage = window.localStorage,
   onIsLockedUpdate,
   closeNav,
@@ -194,7 +194,7 @@ export function CollapsibleNavGroupEnabled({
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
 
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
-    if (currentNavGroup) {
+    if (currentNavGroup && currentNavGroup.id !== ALL_USE_CASE_ID) {
       return fulfillRegistrationLinksToChromeNavLinks(
         navGroupsMap[currentNavGroup.id].navLinks || [],
         navLinks
@@ -241,7 +241,10 @@ export function CollapsibleNavGroupEnabled({
           label: group.title,
           order: group.order,
         };
-        const linksForAllUseCaseWithinNavGroup = group.navLinks
+        const linksForAllUseCaseWithinNavGroup = fulfillRegistrationLinksToChromeNavLinks(
+          group.navLinks,
+          navLinks
+        )
           .filter((navLink) => navLink.showInAllNavGroup)
           .map((navLink) => ({
             ...navLink,
@@ -262,18 +265,6 @@ export function CollapsibleNavGroupEnabled({
 
     return fulfillRegistrationLinksToChromeNavLinks(navLinksForAll, navLinks);
   }, [navLinks, navGroupsMap, currentNavGroup]);
-
-  const isNavOpen = useMemo(() => {
-    // For now, only home page need to always collapse left navigation
-    // when workspace is enabled.
-    // If there are more pages need to collapse left navigation in the future
-    // need to come up with a mechanism to register.
-    if (capabilities.workspaces.enabled && appId === 'home') {
-      return false;
-    }
-
-    return isNavOpenProps;
-  }, [isNavOpenProps, capabilities.workspaces.enabled, appId]);
 
   const width = useMemo(() => {
     if (!isNavOpen) {
