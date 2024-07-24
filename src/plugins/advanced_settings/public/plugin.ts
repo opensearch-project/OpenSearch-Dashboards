@@ -29,16 +29,22 @@
  */
 
 import { i18n } from '@osd/i18n';
-import { CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/public';
+import { AppMountParameters, CoreSetup, CoreStart, Plugin } from 'opensearch-dashboards/public';
 import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 import { setupTopNavThemeButton } from './register_nav_control';
+import { DEFAULT_NAV_GROUPS, AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
+import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 
 const component = new ComponentRegistry();
 
 const title = i18n.translate('advancedSettings.advancedSettingsLabel', {
   defaultMessage: 'Advanced settings',
+});
+
+const titleInGroup = i18n.translate('advancedSettings.applicationSettingsLabel', {
+  defaultMessage: 'Application settings',
 });
 
 export class AdvancedSettingsPlugin
@@ -57,6 +63,41 @@ export class AdvancedSettingsPlugin
         return mountManagementSection(core.getStartServices, params, component.start);
       },
     });
+
+    core.application.register({
+      id: 'settings',
+      title,
+      navLinkStatus: core.chrome.navGroup.getNavGroupEnabled()
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden,
+      workspaceAvailability: WorkspaceAvailability.outsideWorkspace,
+      mount: async (params: AppMountParameters) => {
+        const { mountManagementSection } = await import(
+          './management_app/mount_management_section'
+        );
+        const [coreStart] = await core.getStartServices();
+
+        return mountManagementSection(
+          core.getStartServices,
+          {
+            ...params,
+            basePath: core.http.basePath.get(),
+            setBreadcrumbs: (breadCrumbs) =>
+              coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
+            wrapInPage: true,
+          },
+          component.start
+        );
+      },
+    });
+
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.settingsAndSetup, [
+      {
+        id: 'settings',
+        title: titleInGroup,
+        order: 100,
+      },
+    ]);
 
     if (home) {
       home.featureCatalogue.register({

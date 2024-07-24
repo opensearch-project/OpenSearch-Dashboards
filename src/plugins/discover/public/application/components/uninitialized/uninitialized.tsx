@@ -31,7 +31,7 @@
 import React from 'react';
 import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 
-import { EuiButton, EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
+import { EuiSmallButton, EuiEmptyPrompt, EuiPage, EuiPageBody, EuiPageContent } from '@elastic/eui';
 
 interface Props {
   onRefresh: () => void;
@@ -62,12 +62,12 @@ export const DiscoverUninitialized = ({ onRefresh }: Props) => {
                 </p>
               }
               actions={
-                <EuiButton color="primary" fill onClick={onRefresh}>
+                <EuiSmallButton color="primary" fill onClick={onRefresh}>
                   <FormattedMessage
                     id="discover.uninitializedRefreshButtonText"
                     defaultMessage="Refresh data"
                   />
-                </EuiButton>
+                </EuiSmallButton>
               }
             />
           </EuiPageContent>

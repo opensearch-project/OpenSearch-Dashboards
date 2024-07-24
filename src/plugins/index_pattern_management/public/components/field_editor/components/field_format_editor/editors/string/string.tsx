@@ -30,7 +30,7 @@
 
 import React, { Fragment } from 'react';
 
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
+import { EuiCompressedFormRow, EuiCompressedSelect } from '@elastic/eui';
 
 import { FormattedMessage } from '@osd/i18n/react';
 import { DefaultFormatEditor, defaultState } from '../default';
@@ -66,7 +66,7 @@ export class StringFormatEditor extends DefaultFormatEditor<StringFormatEditorFo
 
     return (
       <Fragment>
-        <EuiFormRow
+        <EuiCompressedFormRow
           label={
             <FormattedMessage
               id="indexPatternManagement.string.transformLabel"
@@ -76,7 +76,7 @@ export class StringFormatEditor extends DefaultFormatEditor<StringFormatEditorFo
           isInvalid={!!error}
           error={error}
         >
-          <EuiSelect
+          <EuiCompressedSelect
             data-test-subj="stringEditorTransform"
             defaultValue={formatParams.transform}
             options={(format.type.transformOptions || []).map((option: TransformOptions) => {
@@ -90,7 +90,7 @@ export class StringFormatEditor extends DefaultFormatEditor<StringFormatEditorFo
             }}
             isInvalid={!!error}
           />
-        </EuiFormRow>
+        </EuiCompressedFormRow>
         <FormatEditorSamples samples={samples} />
       </Fragment>
     );

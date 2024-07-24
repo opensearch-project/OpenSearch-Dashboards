@@ -5,7 +5,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import {
-  EuiSuperSelect,
+  EuiCompressedSuperSelect,
   EuiSuperSelectOption,
   EuiIcon,
   IconType,
@@ -73,7 +73,7 @@ export const RightNavUI = () => {
   return (
     <section className="vbSidenav right">
       <div className="vbSidenav__header">
-        <EuiSuperSelect
+        <EuiCompressedSuperSelect
           options={options}
           valueOfSelected={activeVisName}
           onChange={handleVisTypeChange}

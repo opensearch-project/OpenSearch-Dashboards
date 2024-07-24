@@ -9,13 +9,12 @@ import { AppCategory } from '../../../core/types';
 export const WORKSPACE_FATAL_ERROR_APP_ID = 'workspace_fatal_error';
 export const WORKSPACE_CREATE_APP_ID = 'workspace_create';
 export const WORKSPACE_LIST_APP_ID = 'workspace_list';
-export const WORKSPACE_UPDATE_APP_ID = 'workspace_update';
-export const WORKSPACE_OVERVIEW_APP_ID = 'workspace_overview';
+export const WORKSPACE_DETAIL_APP_ID = 'workspace_detail';
 /**
  * Since every workspace always have overview and update page, these features will be selected by default
  * and can't be changed in the workspace form feature selector
  */
-export const DEFAULT_SELECTED_FEATURES_IDS = [WORKSPACE_UPDATE_APP_ID, WORKSPACE_OVERVIEW_APP_ID];
+export const DEFAULT_SELECTED_FEATURES_IDS = [WORKSPACE_DETAIL_APP_ID];
 export const WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID = 'workspace';
 export const WORKSPACE_CONFLICT_CONTROL_SAVED_OBJECTS_CLIENT_WRAPPER_ID =
   'workspace_conflict_control';
@@ -182,3 +181,7 @@ export const WORKSPACE_USE_CASES = Object.freeze({
     ] as string[],
   },
 });
+
+export const MAX_WORKSPACE_PICKER_NUM = 3;
+export const RECENT_WORKSPACES_KEY = 'recentWorkspaces';
+export const CURRENT_USER_PLACEHOLDER = '%me%';

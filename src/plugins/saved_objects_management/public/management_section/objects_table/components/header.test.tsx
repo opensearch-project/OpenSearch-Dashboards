@@ -38,12 +38,48 @@ describe('Header', () => {
       onExportAll: () => {},
       onImport: () => {},
       onRefresh: () => {},
-      totalCount: 4,
+      onDuplicate: () => {},
+      objectCount: 4,
       filteredCount: 2,
+      showDuplicateAll: false,
     };
 
     const component = shallow(<Header {...props} />);
 
     expect(component).toMatchSnapshot();
+  });
+
+  it('should render normally when showDuplicateAll is undefined', () => {
+    const props = {
+      onExportAll: () => {},
+      onImport: () => {},
+      onRefresh: () => {},
+      onDuplicate: () => {},
+      objectCount: 4,
+      filteredCount: 2,
+      showDuplicateAll: undefined,
+    };
+
+    const component = shallow(<Header {...props} />);
+
+    expect(component).toMatchSnapshot();
+  });
+});
+
+describe('Header - workspace enabled', () => {
+  it('should render `Duplicate All` button when workspace enabled', () => {
+    const props = {
+      onExportAll: () => {},
+      onImport: () => {},
+      onRefresh: () => {},
+      onDuplicate: () => {},
+      objectCount: 4,
+      filteredCount: 2,
+      showDuplicateAll: true,
+    };
+
+    const component = shallow(<Header {...props} />);
+
+    expect(component.find('EuiButtonEmpty[data-test-subj="duplicateObjects"]').exists()).toBe(true);
   });
 });

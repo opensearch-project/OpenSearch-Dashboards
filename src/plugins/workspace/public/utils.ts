@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { SavedObjectsStart } from '../../../core/public';
+import { combineLatest } from 'rxjs';
+import {
+  NavGroupType,
+  SavedObjectsStart,
+  NavGroupItemInMap,
+  ALL_USE_CASE_ID,
+  CoreStart,
+  ChromeBreadcrumb,
+} from '../../../core/public';
 import {
   App,
   AppCategory,
@@ -13,33 +21,30 @@ import {
   WorkspaceObject,
   WorkspaceAvailability,
 } from '../../../core/public';
-import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_USE_CASES } from '../common/constants';
+import { DEFAULT_SELECTED_FEATURES_IDS, WORKSPACE_DETAIL_APP_ID } from '../common/constants';
+import { WorkspaceUseCase } from './types';
 
-const USE_CASE_PREFIX = 'use-case-';
+export const USE_CASE_PREFIX = 'use-case-';
 
 export const getUseCaseFeatureConfig = (useCaseId: string) => `${USE_CASE_PREFIX}${useCaseId}`;
 
 export const isUseCaseFeatureConfig = (featureConfig: string) =>
   featureConfig.startsWith(USE_CASE_PREFIX);
 
-type WorkspaceUseCaseId = keyof typeof WORKSPACE_USE_CASES;
-
 export const getUseCaseFromFeatureConfig = (featureConfig: string) => {
   if (isUseCaseFeatureConfig(featureConfig)) {
-    const useCaseId = featureConfig.substring(USE_CASE_PREFIX.length);
-    if (Object.keys(WORKSPACE_USE_CASES).includes(useCaseId)) {
-      return useCaseId as WorkspaceUseCaseId;
-    }
+    return featureConfig.substring(USE_CASE_PREFIX.length);
   }
   return null;
 };
 
-export const isFeatureIdInsideUseCase = (featureId: string, featureConfig: string) => {
-  const useCase = getUseCaseFromFeatureConfig(featureConfig);
-  if (useCase && useCase in WORKSPACE_USE_CASES) {
-    return WORKSPACE_USE_CASES[useCase].features.includes(featureId);
-  }
-  return false;
+export const isFeatureIdInsideUseCase = (
+  featureId: string,
+  useCaseId: string,
+  useCases: WorkspaceUseCase[]
+) => {
+  const availableFeatures = useCases.find(({ id }) => id === useCaseId)?.features ?? [];
+  return availableFeatures.includes(featureId);
 };
 
 export const isNavGroupInFeatureConfigs = (navGroupId: string, featureConfigs: string[]) =>
@@ -58,7 +63,7 @@ export const isNavGroupInFeatureConfigs = (navGroupId: string, featureConfigs: s
  * 6. For feature id start with use case prefix, it will read use case's features and match every passed apps.
  *    For example, ['user-case-observability'] matches all features under observability use case.
  */
-export const featureMatchesConfig = (featureConfigs: string[]) => ({
+export const featureMatchesConfig = (featureConfigs: string[], useCases: WorkspaceUseCase[]) => ({
   id,
   category,
 }: {
@@ -66,6 +71,7 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
   category?: AppCategory;
 }) => {
   let matched = false;
+  let firstUseCaseId: string | undefined;
 
   /**
    * Iterate through each feature configuration to determine if the given feature matches any of them.
@@ -79,10 +85,13 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
     }
 
     // matches any feature inside use cases
-    if (getUseCaseFromFeatureConfig(featureConfig)) {
-      const isInsideUseCase = isFeatureIdInsideUseCase(id, featureConfig);
-      if (isInsideUseCase) {
-        matched = true;
+    if (!firstUseCaseId) {
+      const useCaseId = getUseCaseFromFeatureConfig(featureConfig);
+      if (useCaseId) {
+        firstUseCaseId = useCaseId;
+        if (isFeatureIdInsideUseCase(id, firstUseCaseId, useCases)) {
+          matched = true;
+        }
       }
     }
 
@@ -114,7 +123,11 @@ export const featureMatchesConfig = (featureConfigs: string[]) => ({
 /**
  * Check if an app is accessible in a workspace based on the workspace configured features
  */
-export function isAppAccessibleInWorkspace(app: App, workspace: WorkspaceObject) {
+export function isAppAccessibleInWorkspace(
+  app: App,
+  workspace: WorkspaceObject,
+  availableUseCases: WorkspaceUseCase[]
+) {
   /**
    * App is not accessible within workspace if it explicitly declare itself as WorkspaceAvailability.outsideWorkspace
    */
@@ -130,9 +143,16 @@ export function isAppAccessibleInWorkspace(app: App, workspace: WorkspaceObject)
   }
 
   /**
+   * When workspace is all use case, all apps are accessible
+   */
+  if (getFirstUseCaseOfFeatureConfigs(workspace.features) === ALL_USE_CASE_ID) {
+    return true;
+  }
+
+  /**
    * The app is configured into a workspace, it is accessible after entering the workspace
    */
-  const featureMatcher = featureMatchesConfig(workspace.features);
+  const featureMatcher = featureMatchesConfig(workspace.features, availableUseCases);
   if (featureMatcher({ id: app.id, category: app.category })) {
     return true;
   }
@@ -202,3 +222,129 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
       }
     });
 };
+
+export const convertNavGroupToWorkspaceUseCase = ({
+  id,
+  title,
+  description,
+  navLinks,
+  type,
+  order,
+}: NavGroupItemInMap): WorkspaceUseCase => ({
+  id,
+  title,
+  description,
+  features: navLinks.map((item) => item.id),
+  systematic: type === NavGroupType.SYSTEM,
+  order,
+});
+
+export const isEqualWorkspaceUseCase = (a: WorkspaceUseCase, b: WorkspaceUseCase) => {
+  if (a.id !== b.id) {
+    return false;
+  }
+  if (a.title !== b.title) {
+    return false;
+  }
+  if (a.description !== b.description) {
+    return false;
+  }
+  if (a.systematic !== b.systematic) {
+    return false;
+  }
+  if (a.order !== b.order) {
+    return false;
+  }
+  if (
+    a.features.length !== b.features.length ||
+    a.features.some((featureId) => !b.features.includes(featureId))
+  ) {
+    return false;
+  }
+  return true;
+};
+
+const isNotNull = <T extends unknown>(value: T | null): value is T => !!value;
+
+export const getFirstUseCaseOfFeatureConfigs = (featureConfigs: string[]): string | undefined =>
+  featureConfigs.map(getUseCaseFromFeatureConfig).filter(isNotNull)[0];
+
+export function enrichBreadcrumbsWithWorkspace(core: CoreStart) {
+  return combineLatest([
+    core.workspaces.currentWorkspace$,
+    core.application.currentAppId$,
+    core.chrome.navGroup.getCurrentNavGroup$(),
+    core.chrome.navGroup.getNavGroupsMap$(),
+  ]).subscribe(([currentWorkspace, appId, currentNavGroup, navGroupsMap]) => {
+    prependWorkspaceToBreadcrumbs(core, currentWorkspace, appId, currentNavGroup, navGroupsMap);
+  });
+}
+
+/**
+ * prepend workspace or its use case to breadcrumbs
+ * @param core CoreStart
+ */
+export function prependWorkspaceToBreadcrumbs(
+  core: CoreStart,
+  currentWorkspace: WorkspaceObject | null,
+  appId: string | undefined,
+  currentNavGroup: NavGroupItemInMap | undefined,
+  navGroupsMap: Record<string, NavGroupItemInMap>
+) {
+  if (appId === WORKSPACE_DETAIL_APP_ID) {
+    core.chrome.setBreadcrumbsEnricher(undefined);
+    return;
+  }
+
+  /**
+   * There has 3 cases
+   * nav group is enable + workspace enable + in a workspace -> workspace enricher
+   * nav group is enable + workspace enable + out a workspace -> nav group enricher
+   * nav group is enable + workspace disabled -> nav group enricher
+   *
+   * switch workspace will cause page refresh, breadcrumbs enricher will reset automatically
+   * so we don't need to have reset logic for workspace
+   */
+  if (currentWorkspace) {
+    const useCase = getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features || []);
+    // get workspace the only use case
+    if (useCase && useCase !== ALL_USE_CASE_ID) {
+      currentNavGroup = navGroupsMap[useCase];
+    }
+    const navGroupBreadcrumb: ChromeBreadcrumb = {
+      text: currentNavGroup?.title,
+      onClick: () => {
+        // current nav group links are sorted, we don't need to sort it again here
+        if (currentNavGroup?.navLinks[0].id) {
+          core.application.navigateToApp(currentNavGroup?.navLinks[0].id);
+        }
+      },
+    };
+    const homeBreadcrumb: ChromeBreadcrumb = {
+      text: 'Home',
+      onClick: () => {
+        core.application.navigateToApp('home');
+      },
+    };
+
+    core.chrome.setBreadcrumbsEnricher((breadcrumbs) => {
+      if (!breadcrumbs || !breadcrumbs.length) return breadcrumbs;
+
+      const workspaceBreadcrumb: ChromeBreadcrumb = {
+        text: currentWorkspace.name,
+        onClick: () => {
+          core.application.navigateToApp(WORKSPACE_DETAIL_APP_ID);
+        },
+      };
+      if (useCase === ALL_USE_CASE_ID) {
+        if (currentNavGroup) {
+          return [homeBreadcrumb, workspaceBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+        } else {
+          return [homeBreadcrumb, workspaceBreadcrumb, ...breadcrumbs];
+        }
+      } else {
+        return [homeBreadcrumb, navGroupBreadcrumb, ...breadcrumbs];
+      }
+    });
+  }
+}

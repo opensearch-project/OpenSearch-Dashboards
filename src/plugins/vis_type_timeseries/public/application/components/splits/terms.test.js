@@ -40,6 +40,10 @@ jest.mock('@elastic/eui', () => ({
   EuiFieldNumber: jest.requireActual('@elastic/eui').EuiFieldNumber,
   EuiComboBox: jest.requireActual('@elastic/eui').EuiComboBox,
   EuiFieldText: jest.requireActual('@elastic/eui').EuiFieldText,
+  EuiCompressedFormRow: jest.requireActual('@elastic/eui').EuiCompressedFormRow,
+  EuiCompressedFieldNumber: jest.requireActual('@elastic/eui').EuiCompressedFieldNumber,
+  EuiCompressedComboBox: jest.requireActual('@elastic/eui').EuiCompressedComboBox,
+  EuiCompressedFieldText: jest.requireActual('@elastic/eui').EuiCompressedFieldText,
 }));
 
 describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js', () => {

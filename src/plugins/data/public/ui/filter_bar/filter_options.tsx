@@ -28,7 +28,13 @@
  * under the License.
  */
 
-import { EuiButtonIcon, EuiContextMenu, EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import {
+  EuiSmallButtonIcon,
+  EuiContextMenu,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiToolTip,
+} from '@elastic/eui';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@osd/i18n/react';
 import { Component } from 'react';
 import React from 'react';
@@ -161,31 +167,36 @@ class FilterOptionsUI extends Component<Props, State> {
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover}
         button={
-          <EuiButtonIcon
-            onClick={this.togglePopover}
-            iconType="filter"
-            aria-label={this.props.intl.formatMessage({
+          <EuiToolTip
+            content={this.props.intl.formatMessage({
               id: 'data.filter.options.changeAllFiltersButtonLabel',
               defaultMessage: 'Change all filters',
             })}
-            title={this.props.intl.formatMessage({
-              id: 'data.filter.options.changeAllFiltersButtonLabel',
-              defaultMessage: 'Change all filters',
-            })}
-            data-test-subj="showFilterActions"
-          />
+            delay="long"
+            position="bottom"
+          >
+            <EuiSmallButtonIcon
+              onClick={this.togglePopover}
+              iconType="filter"
+              aria-label={this.props.intl.formatMessage({
+                id: 'data.filter.options.changeAllFiltersButtonLabel',
+                defaultMessage: 'Change all filters',
+              })}
+              data-test-subj="showFilterActions"
+            />
+          </EuiToolTip>
         }
         anchorPosition="rightUp"
         panelPaddingSize="none"
         repositionOnScroll
       >
-        <EuiPopoverTitle>
+        <EuiPopoverTitle paddingSize="s">
           <FormattedMessage
             id="data.filter.searchBar.changeAllFiltersTitle"
             defaultMessage="Change all filters"
           />
         </EuiPopoverTitle>
-        <EuiContextMenu initialPanelId={0} panels={[panelTree]} />
+        <EuiContextMenu initialPanelId={0} panels={[panelTree]} size="s" />
       </EuiPopover>
     );
   }

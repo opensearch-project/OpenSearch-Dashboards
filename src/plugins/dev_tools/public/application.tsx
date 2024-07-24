@@ -124,6 +124,7 @@ function DevToolsWrapper({
           onSelectedDataSource={onChange}
           disabled={!dataSourceEnabled}
           fullWidth={false}
+          compressed={true}
         />
       </div>
     );
@@ -131,7 +132,7 @@ function DevToolsWrapper({
 
   return (
     <main className="devApp">
-      <EuiTabs className="devAppTabs">
+      <EuiTabs size="s" className="devAppTabs">
         {devTools.map((currentDevTool) => (
           <EuiToolTip content={currentDevTool.tooltipContent} key={currentDevTool.id}>
             <EuiTab

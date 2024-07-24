@@ -52,6 +52,7 @@ function mockProps() {
     appTitle$: new BehaviorSubject('test'),
     badge$: new BehaviorSubject(undefined),
     breadcrumbs$: new BehaviorSubject([]),
+    breadcrumbsEnricher$: new BehaviorSubject(undefined),
     homeHref: '/',
     isVisible$: new BehaviorSubject(true),
     opensearchDashboardsDocLink: '/docs',
@@ -77,6 +78,12 @@ function mockProps() {
       dockedMode: SIDECAR_DOCKED_MODE.RIGHT,
       paddingSize: 640,
     }),
+    navGroupEnabled: false,
+    currentNavGroup$: new BehaviorSubject(undefined),
+    navGroupsMap$: new BehaviorSubject({}),
+    navControlsLeftBottom$: new BehaviorSubject([]),
+    setCurrentNavGroup: jest.fn(() => {}),
+    workspaceList$: new BehaviorSubject([]),
   };
 }
 
@@ -165,5 +172,37 @@ describe('Header', () => {
     expect(component.find('HeaderHelpMenuUI').exists()).toBeTruthy();
 
     expect(component).toMatchSnapshot();
+  });
+
+  it('renders new header when feature flag is turned on', () => {
+    const branding = {
+      useExpandedHeader: false,
+    };
+    const props = {
+      ...mockProps(),
+      branding,
+    };
+
+    const component = mountWithIntl(<Header {...props} navGroupEnabled />);
+
+    expect(component.find('CollapsibleNavGroupEnabled').exists()).toBeTruthy();
+  });
+
+  it('show hide expand icon in top left navigation when workspace enabled + homepage + new navigation enabled', () => {
+    const branding = {
+      useExpandedHeader: false,
+    };
+    const props = {
+      ...mockProps(),
+      branding,
+    };
+    props.application.currentAppId$ = new BehaviorSubject('home');
+    props.application.capabilities = { ...props.application.capabilities };
+    (props.application.capabilities.workspaces as Record<string, unknown>) = {};
+    (props.application.capabilities.workspaces as Record<string, unknown>).enabled = true;
+
+    const component = mountWithIntl(<Header {...props} navGroupEnabled />);
+
+    expect(component.find('.header__toggleNavButtonSection').exists()).toBeFalsy();
   });
 });

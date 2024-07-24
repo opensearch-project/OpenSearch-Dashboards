@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AssociatedObjectsTabEmpty renders correctly 1`] = `
+<EuiEmptyPrompt
+  actions={
+    <EuiButton
+      iconSide="right"
+      iconType="popout"
+      onClick={[Function]}
+    >
+      Query Workbench
+    </EuiButton>
+  }
+  body={
+    <React.Fragment>
+      <EuiText>
+        <h4>
+          You have no databases in your data source
+        </h4>
+        <p>
+          Add databases and tables to your data source or use Query Workbench
+        </p>
+      </EuiText>
+    </React.Fragment>
+  }
+/>
+`;

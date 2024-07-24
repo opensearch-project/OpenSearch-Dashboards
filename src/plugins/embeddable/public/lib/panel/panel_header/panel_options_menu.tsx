@@ -32,7 +32,7 @@ import { i18n } from '@osd/i18n';
 import React from 'react';
 
 import {
-  EuiButtonIcon,
+  EuiSmallButtonIcon,
   EuiContextMenu,
   EuiContextMenuPanelDescriptor,
   EuiPopover,
@@ -101,7 +101,7 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
     );
 
     const button = (
-      <EuiButtonIcon
+      <EuiSmallButtonIcon
         iconType={isViewMode ? 'boxesHorizontal' : 'gear'}
         color="text"
         className="embPanel__optionsMenuButton"
@@ -128,6 +128,7 @@ export class PanelOptionsMenu extends React.Component<PanelOptionsMenuProps, Sta
         <EuiContextMenu
           initialPanelId="mainMenu"
           panels={this.state.actionContextMenuPanel || []}
+          size="s"
         />
       </EuiPopover>
     );

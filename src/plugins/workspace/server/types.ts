@@ -12,11 +12,13 @@ import {
   WorkspaceAttribute,
   SavedObjectsServiceStart,
   Permissions,
+  UiSettingsServiceStart,
 } from '../../../core/server';
 
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
 }
+import { WorkspacePermissionMode } from '../common/constants';
 
 export interface WorkspaceFindOptions {
   page?: number;
@@ -25,6 +27,7 @@ export interface WorkspaceFindOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
+  permissionModes?: WorkspacePermissionMode[];
 }
 
 export interface IRequestDetail {
@@ -48,6 +51,13 @@ export interface IWorkspaceClientImpl {
    * @public
    */
   setSavedObjects(savedObjects: SavedObjectsServiceStart): void;
+  /**
+   * Set ui settings client that will be used inside the workspace client.
+   * @param uiSettings {@link UiSettingsServiceStart}
+   * @returns void
+   * @public
+   */
+  setUiSettings(uiSettings: UiSettingsServiceStart): void;
   /**
    * Create a workspace
    * @param requestDetail {@link IRequestDetail}

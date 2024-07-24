@@ -121,6 +121,7 @@ export class RangeControl extends PureComponent<RangeControlProps, RangeControlS
         id={this.props.control.id}
         min={min}
         max={max}
+        formRowDisplay={'rowCompressed'}
         value={this.state.value}
         onChange={this.onChangeComplete}
         showInput

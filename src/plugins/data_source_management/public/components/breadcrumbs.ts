@@ -73,6 +73,21 @@ export function getCreatePrometheusDataSourceBreadcrumbs() {
   ];
 }
 
+export function getManageDirectQueryDataSourceBreadcrumbs(directQueryDatasourceName: string) {
+  return [
+    ...getListBreadcrumbs(),
+    {
+      text: i18n.translate(
+        'dataSourcesManagement.dataSources.manageDirectQueryDataSourceBreadcrumbs',
+        {
+          defaultMessage: directQueryDatasourceName,
+        }
+      ),
+      href: `/manage/${directQueryDatasourceName}`,
+    },
+  ];
+}
+
 export function getEditBreadcrumbs(dataSource: DataSourceAttributes) {
   return [
     ...getListBreadcrumbs(),

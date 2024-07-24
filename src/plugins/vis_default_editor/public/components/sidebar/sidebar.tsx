@@ -31,7 +31,7 @@
 import React, { useMemo, useState, useCallback, KeyboardEventHandler, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@osd/i18n';
-import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { keys, EuiSmallButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { EventEmitter } from 'events';
 
 import {
@@ -243,7 +243,7 @@ function DefaultEditorSideBar({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiButtonIcon
+      <EuiSmallButtonIcon
         aria-expanded={!isCollapsed}
         aria-label={i18n.translate('visDefaultEditor.sidebar.collapseButtonAriaLabel', {
           defaultMessage: 'Toggle sidebar',

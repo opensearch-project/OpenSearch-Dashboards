@@ -7,6 +7,7 @@ import { loggerMock } from '@osd/logging/target/mocks';
 import { httpServerMock, savedObjectsClientMock, coreMock } from '../../../../core/server/mocks';
 import { WorkspaceUiSettingsClientWrapper } from './workspace_ui_settings_client_wrapper';
 import { WORKSPACE_TYPE } from '../../../../core/server';
+import { DEFAULT_DATA_SOURCE_UI_SETTINGS_ID } from '../../../data_source_management/common';
 
 import * as utils from '../../../../core/server/utils';
 
@@ -28,6 +29,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
           type: 'config',
           attributes: {
             defaultIndex: 'default-index-global',
+            [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: 'default-ds-global',
           },
         });
       } else if (type === WORKSPACE_TYPE) {
@@ -59,7 +61,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
     };
   };
 
-  it('should return workspace ui settings if in a workspace', async () => {
+  it('should return workspace ui settings and should return workspace default data source and not extend global if in a workspace', async () => {
     // Currently in a workspace
     jest.spyOn(utils, 'getWorkspaceState').mockReturnValue({ requestWorkspaceId: 'workspace-id' });
 
@@ -72,6 +74,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
       type: 'config',
       attributes: {
         defaultIndex: 'default-index-workspace',
+        [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: undefined,
       },
     });
   });
@@ -89,6 +92,7 @@ describe('WorkspaceUiSettingsClientWrapper', () => {
       type: 'config',
       attributes: {
         defaultIndex: 'default-index-global',
+        [DEFAULT_DATA_SOURCE_UI_SETTINGS_ID]: 'default-ds-global',
       },
     });
   });

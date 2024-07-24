@@ -94,7 +94,10 @@ describe('Search service', () => {
     await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockDataStart.search.search).toBeCalled();
-    expect(mockDataStart.search.search.mock.calls[0][1]).toStrictEqual(mockBody);
+    expect(mockDataStart.search.search.mock.calls[0][1]).toStrictEqual({
+      ...mockBody,
+      rawRequest: mockRequest,
+    });
     expect(mockResponse.ok).toBeCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: response,
@@ -125,7 +128,10 @@ describe('Search service', () => {
     await handler((mockContext as unknown) as RequestHandlerContext, mockRequest, mockResponse);
 
     expect(mockDataStart.search.search).toBeCalled();
-    expect(mockDataStart.search.search.mock.calls[0][1]).toStrictEqual(mockBody);
+    expect(mockDataStart.search.search.mock.calls[0][1]).toStrictEqual({
+      ...mockBody,
+      rawRequest: mockRequest,
+    });
     expect(mockResponse.customError).toBeCalled();
     const error: any = mockResponse.customError.mock.calls[0][0];
     expect(error.body.message).toBe('oh no');

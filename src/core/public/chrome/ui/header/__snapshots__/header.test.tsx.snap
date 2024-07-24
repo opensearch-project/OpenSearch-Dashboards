@@ -160,6 +160,43 @@ exports[`Header handles visibility and lock changes 1`] = `
               "syncErrorThrown": false,
               "syncErrorValue": null,
             },
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
           ],
           "thrownError": null,
         },
@@ -301,6 +338,66 @@ exports[`Header handles visibility and lock changes 1`] = `
           "syncErrorValue": null,
         },
       ],
+      "thrownError": null,
+    }
+  }
+  breadcrumbsEnricher$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  currentNavGroup$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
       "thrownError": null,
     }
   }
@@ -1690,6 +1787,17 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  navControlsLeftBottom$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsRight$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1736,6 +1844,18 @@ exports[`Header handles visibility and lock changes 1`] = `
           "syncErrorValue": null,
         },
       ],
+      "thrownError": null,
+    }
+  }
+  navGroupEnabled={false}
+  navGroupsMap$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {},
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
       "thrownError": null,
     }
   }
@@ -1927,6 +2047,7 @@ exports[`Header handles visibility and lock changes 1`] = `
       "thrownError": null,
     }
   }
+  setCurrentNavGroup={[MockFunction]}
   sidecarConfig$={
     BehaviorSubject {
       "_isScalar": false,
@@ -1980,6 +2101,17 @@ exports[`Header handles visibility and lock changes 1`] = `
     }
   }
   survey="/"
+  workspaceList$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -3002,102 +3134,118 @@ exports[`Header handles visibility and lock changes 1`] = `
                 <div
                   className="euiHeaderSectionItem euiHeaderSectionItem--borderRight header__toggleNavButtonSection"
                 >
-                  <EuiHeaderSectionItemButton
-                    aria-controls="mockId"
-                    aria-expanded={false}
-                    aria-label="Toggle primary navigation"
-                    aria-pressed={false}
-                    data-test-subj="toggleNavButton"
-                    onClick={[Function]}
+                  <EuiToolTip
+                    content="Menu"
+                    delay="long"
+                    position="bottom"
                   >
-                    <EuiButtonEmpty
-                      aria-controls="mockId"
-                      aria-expanded={false}
-                      aria-label="Toggle primary navigation"
-                      aria-pressed={false}
-                      buttonRef={
-                        Object {
-                          "current": <button
-                            aria-controls="mockId"
-                            aria-expanded="false"
-                            aria-label="Toggle primary navigation"
-                            aria-pressed="false"
-                            class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                            data-test-subj="toggleNavButton"
-                            type="button"
-                          >
-                            <span
-                              class="euiButtonContent euiButtonEmpty__content"
-                            >
-                              <span
-                                class="euiButtonEmpty__text"
-                              >
-                                <span
-                                  class="euiHeaderSectionItemButton__content"
-                                >
-                                  <span
-                                    data-euiicon-type="menu"
-                                    title="Menu"
-                                  />
-                                </span>
-                              </span>
-                            </span>
-                          </button>,
-                        }
-                      }
-                      className="euiHeaderSectionItemButton"
-                      color="text"
-                      data-test-subj="toggleNavButton"
-                      onClick={[Function]}
+                    <span
+                      className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      <button
+                      <EuiHeaderSectionItemButton
                         aria-controls="mockId"
                         aria-expanded={false}
                         aria-label="Toggle primary navigation"
                         aria-pressed={false}
-                        className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
                         data-test-subj="toggleNavButton"
-                        disabled={false}
+                        onBlur={[Function]}
                         onClick={[Function]}
-                        type="button"
+                        onFocus={[Function]}
                       >
-                        <EuiButtonContent
-                          className="euiButtonEmpty__content"
-                          iconSide="left"
-                          iconSize="m"
-                          textProps={
+                        <EuiButtonEmpty
+                          aria-controls="mockId"
+                          aria-expanded={false}
+                          aria-label="Toggle primary navigation"
+                          aria-pressed={false}
+                          buttonRef={
                             Object {
-                              "className": "euiButtonEmpty__text",
-                            }
-                          }
-                        >
-                          <span
-                            className="euiButtonContent euiButtonEmpty__content"
-                          >
-                            <span
-                              className="euiButtonEmpty__text"
-                            >
-                              <span
-                                className="euiHeaderSectionItemButton__content"
+                              "current": <button
+                                aria-controls="mockId"
+                                aria-expanded="false"
+                                aria-label="Toggle primary navigation"
+                                aria-pressed="false"
+                                class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                data-test-subj="toggleNavButton"
+                                type="button"
                               >
-                                <EuiIcon
-                                  size="m"
-                                  title="Menu"
-                                  type="menu"
+                                <span
+                                  class="euiButtonContent euiButtonEmpty__content"
                                 >
                                   <span
-                                    data-euiicon-type="menu"
-                                    size="m"
-                                    title="Menu"
-                                  />
-                                </EuiIcon>
+                                    class="euiButtonEmpty__text"
+                                  >
+                                    <span
+                                      class="euiHeaderSectionItemButton__content"
+                                    >
+                                      <span
+                                        data-euiicon-type="menu"
+                                      />
+                                    </span>
+                                  </span>
+                                </span>
+                              </button>,
+                            }
+                          }
+                          className="euiHeaderSectionItemButton"
+                          color="text"
+                          data-test-subj="toggleNavButton"
+                          onBlur={[Function]}
+                          onClick={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <button
+                            aria-controls="mockId"
+                            aria-expanded={false}
+                            aria-label="Toggle primary navigation"
+                            aria-pressed={false}
+                            className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                            data-test-subj="toggleNavButton"
+                            disabled={false}
+                            onBlur={[Function]}
+                            onClick={[Function]}
+                            onFocus={[Function]}
+                            type="button"
+                          >
+                            <EuiButtonContent
+                              className="euiButtonEmpty__content"
+                              iconSide="left"
+                              iconSize="m"
+                              textProps={
+                                Object {
+                                  "className": "euiButtonEmpty__text",
+                                }
+                              }
+                            >
+                              <span
+                                className="euiButtonContent euiButtonEmpty__content"
+                              >
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  <span
+                                    className="euiHeaderSectionItemButton__content"
+                                  >
+                                    <EuiIcon
+                                      size="m"
+                                      type="menu"
+                                    >
+                                      <span
+                                        data-euiicon-type="menu"
+                                        size="m"
+                                      />
+                                    </EuiIcon>
+                                  </span>
+                                </span>
                               </span>
-                            </span>
-                          </span>
-                        </EuiButtonContent>
-                      </button>
-                    </EuiButtonEmpty>
-                  </EuiHeaderSectionItemButton>
+                            </EuiButtonContent>
+                          </button>
+                        </EuiButtonEmpty>
+                      </EuiHeaderSectionItemButton>
+                    </span>
+                  </EuiToolTip>
                 </div>
               </EuiHeaderSectionItem>
               <EuiHeaderSectionItem
@@ -3538,301 +3686,316 @@ exports[`Header handles visibility and lock changes 1`] = `
                     }
                     navigateToApp={[MockFunction]}
                   >
-                    <EuiHeaderSectionItemButton
-                      aria-label="Go to home page"
-                      className="header__homeLoaderNavButton"
-                      data-test-subj="homeLoader"
-                      href="/"
-                      onClick={[Function]}
-                      title="Go to home page"
+                    <EuiToolTip
+                      content="Go to home page"
+                      delay="long"
+                      position="top"
                     >
-                      <EuiButtonEmpty
-                        aria-label="Go to home page"
-                        buttonRef={
-                          Object {
-                            "current": <a
-                              aria-label="Go to home page"
-                              class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton header__homeLoaderNavButton"
-                              data-test-subj="homeLoader"
-                              href="/"
-                              rel="noreferrer"
-                              title="Go to home page"
-                            >
-                              <span
-                                class="euiButtonContent euiButtonEmpty__content"
-                              >
-                                <span
-                                  class="euiButtonEmpty__text"
-                                >
-                                  <span
-                                    class="euiHeaderSectionItemButton__content"
-                                  >
-                                    <div
-                                      class="homeIconContainer"
-                                    >
-                                      <span
-                                        class="logoImage"
-                                        data-euiicon-type="home"
-                                        data-test-image-url="home"
-                                        data-test-subj="homeIcon"
-                                        title="opensearch dashboards home"
-                                      />
-                                    </div>
-                                    <div
-                                      class="loaderContainer"
-                                    >
-                                      <span
-                                        aria-hidden="true"
-                                        aria-label="Loading content"
-                                        class="euiLoadingSpinner euiLoadingSpinner--medium osdLoadingIndicator-hidden"
-                                        data-test-subj="globalLoadingIndicator-hidden"
-                                      />
-                                    </div>
-                                  </span>
-                                </span>
-                              </span>
-                            </a>,
-                          }
-                        }
-                        className="euiHeaderSectionItemButton header__homeLoaderNavButton"
-                        color="text"
-                        data-test-subj="homeLoader"
-                        href="/"
-                        onClick={[Function]}
-                        title="Go to home page"
+                      <span
+                        className="euiToolTipAnchor"
+                        onKeyUp={[Function]}
+                        onMouseOut={[Function]}
+                        onMouseOver={[Function]}
                       >
-                        <a
+                        <EuiHeaderSectionItemButton
                           aria-label="Go to home page"
-                          className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton header__homeLoaderNavButton"
+                          className="header__homeLoaderNavButton"
                           data-test-subj="homeLoader"
                           href="/"
+                          onBlur={[Function]}
                           onClick={[Function]}
-                          rel="noreferrer"
-                          title="Go to home page"
+                          onFocus={[Function]}
                         >
-                          <EuiButtonContent
-                            className="euiButtonEmpty__content"
-                            iconSide="left"
-                            iconSize="m"
-                            textProps={
+                          <EuiButtonEmpty
+                            aria-label="Go to home page"
+                            buttonRef={
                               Object {
-                                "className": "euiButtonEmpty__text",
+                                "current": <a
+                                  aria-label="Go to home page"
+                                  class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton header__homeLoaderNavButton"
+                                  data-test-subj="homeLoader"
+                                  href="/"
+                                  rel="noreferrer"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButtonEmpty__content"
+                                  >
+                                    <span
+                                      class="euiButtonEmpty__text"
+                                    >
+                                      <span
+                                        class="euiHeaderSectionItemButton__content"
+                                      >
+                                        <div
+                                          class="homeIconContainer"
+                                        >
+                                          <span
+                                            class="logoImage"
+                                            data-euiicon-type="home"
+                                            data-test-image-url="home"
+                                            data-test-subj="homeIcon"
+                                            title="opensearch dashboards home"
+                                          />
+                                        </div>
+                                        <div
+                                          class="loaderContainer"
+                                        >
+                                          <span
+                                            aria-hidden="true"
+                                            aria-label="Loading content"
+                                            class="euiLoadingSpinner euiLoadingSpinner--medium osdLoadingIndicator-hidden"
+                                            data-test-subj="globalLoadingIndicator-hidden"
+                                          />
+                                        </div>
+                                      </span>
+                                    </span>
+                                  </span>
+                                </a>,
                               }
                             }
+                            className="euiHeaderSectionItemButton header__homeLoaderNavButton"
+                            color="text"
+                            data-test-subj="homeLoader"
+                            href="/"
+                            onBlur={[Function]}
+                            onClick={[Function]}
+                            onFocus={[Function]}
                           >
-                            <span
-                              className="euiButtonContent euiButtonEmpty__content"
+                            <a
+                              aria-label="Go to home page"
+                              className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton header__homeLoaderNavButton"
+                              data-test-subj="homeLoader"
+                              href="/"
+                              onBlur={[Function]}
+                              onClick={[Function]}
+                              onFocus={[Function]}
+                              rel="noreferrer"
                             >
-                              <span
-                                className="euiButtonEmpty__text"
+                              <EuiButtonContent
+                                className="euiButtonEmpty__content"
+                                iconSide="left"
+                                iconSize="m"
+                                textProps={
+                                  Object {
+                                    "className": "euiButtonEmpty__text",
+                                  }
+                                }
                               >
                                 <span
-                                  className="euiHeaderSectionItemButton__content"
+                                  className="euiButtonContent euiButtonEmpty__content"
                                 >
-                                  <div
-                                    className="homeIconContainer"
+                                  <span
+                                    className="euiButtonEmpty__text"
                                   >
-                                    <HomeIcon
-                                      branding={Object {}}
-                                      logos={
-                                        Object {
-                                          "AnimatedMark": Object {
-                                            "dark": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_spinner_on_dark.svg",
-                                            },
-                                            "light": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_spinner_on_light.svg",
-                                            },
-                                            "type": "default",
-                                            "url": "/ui/logos/opensearch_spinner_on_light.svg",
-                                          },
-                                          "Application": Object {
-                                            "dark": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
-                                            },
-                                            "light": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-                                            },
-                                            "type": "default",
-                                            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-                                          },
-                                          "CenterMark": Object {
-                                            "dark": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
-                                            },
-                                            "light": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-                                            },
-                                            "type": "default",
-                                            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-                                          },
-                                          "Mark": Object {
-                                            "dark": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_mark_on_dark.svg",
-                                            },
-                                            "light": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_mark_on_light.svg",
-                                            },
-                                            "type": "default",
-                                            "url": "/ui/logos/opensearch_mark_on_light.svg",
-                                          },
-                                          "OpenSearch": Object {
-                                            "dark": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_on_dark.svg",
-                                            },
-                                            "light": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_on_light.svg",
-                                            },
-                                            "type": "default",
-                                            "url": "/ui/logos/opensearch_on_light.svg",
-                                          },
-                                          "colorScheme": "light",
-                                        }
-                                      }
+                                    <span
+                                      className="euiHeaderSectionItemButton__content"
                                     >
-                                      <EuiIcon
-                                        className="logoImage"
-                                        data-test-image-url="home"
-                                        data-test-subj="homeIcon"
-                                        size="m"
-                                        title="opensearch dashboards home"
-                                        type="home"
+                                      <div
+                                        className="homeIconContainer"
                                       >
-                                        <span
-                                          className="logoImage"
-                                          data-euiicon-type="home"
-                                          data-test-image-url="home"
-                                          data-test-subj="homeIcon"
-                                          size="m"
-                                          title="opensearch dashboards home"
-                                        />
-                                      </EuiIcon>
-                                    </HomeIcon>
-                                  </div>
-                                  <div
-                                    className="loaderContainer"
-                                  >
-                                    <LoadingIndicator
-                                      loadingCount$={
-                                        BehaviorSubject {
-                                          "_isScalar": false,
-                                          "_value": 0,
-                                          "closed": false,
-                                          "hasError": false,
-                                          "isStopped": false,
-                                          "observers": Array [
-                                            Subscriber {
-                                              "_parentOrParents": null,
-                                              "_subscriptions": Array [
-                                                SubjectSubscription {
-                                                  "_parentOrParents": [Circular],
-                                                  "_subscriptions": null,
+                                        <HomeIcon
+                                          branding={Object {}}
+                                          logos={
+                                            Object {
+                                              "AnimatedMark": Object {
+                                                "dark": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                                                },
+                                                "light": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                                                },
+                                                "type": "default",
+                                                "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                                              },
+                                              "Application": Object {
+                                                "dark": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                                                },
+                                                "light": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                                                },
+                                                "type": "default",
+                                                "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                                              },
+                                              "CenterMark": Object {
+                                                "dark": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                                                },
+                                                "light": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                                                },
+                                                "type": "default",
+                                                "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                                              },
+                                              "Mark": Object {
+                                                "dark": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                                                },
+                                                "light": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                                                },
+                                                "type": "default",
+                                                "url": "/ui/logos/opensearch_mark_on_light.svg",
+                                              },
+                                              "OpenSearch": Object {
+                                                "dark": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_on_dark.svg",
+                                                },
+                                                "light": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_on_light.svg",
+                                                },
+                                                "type": "default",
+                                                "url": "/ui/logos/opensearch_on_light.svg",
+                                              },
+                                              "colorScheme": "light",
+                                            }
+                                          }
+                                        >
+                                          <EuiIcon
+                                            className="logoImage"
+                                            data-test-image-url="home"
+                                            data-test-subj="homeIcon"
+                                            size="m"
+                                            title="opensearch dashboards home"
+                                            type="home"
+                                          >
+                                            <span
+                                              className="logoImage"
+                                              data-euiicon-type="home"
+                                              data-test-image-url="home"
+                                              data-test-subj="homeIcon"
+                                              size="m"
+                                              title="opensearch dashboards home"
+                                            />
+                                          </EuiIcon>
+                                        </HomeIcon>
+                                      </div>
+                                      <div
+                                        className="loaderContainer"
+                                      >
+                                        <LoadingIndicator
+                                          loadingCount$={
+                                            BehaviorSubject {
+                                              "_isScalar": false,
+                                              "_value": 0,
+                                              "closed": false,
+                                              "hasError": false,
+                                              "isStopped": false,
+                                              "observers": Array [
+                                                Subscriber {
+                                                  "_parentOrParents": null,
+                                                  "_subscriptions": Array [
+                                                    SubjectSubscription {
+                                                      "_parentOrParents": [Circular],
+                                                      "_subscriptions": null,
+                                                      "closed": false,
+                                                      "subject": [Circular],
+                                                      "subscriber": [Circular],
+                                                    },
+                                                  ],
                                                   "closed": false,
-                                                  "subject": [Circular],
-                                                  "subscriber": [Circular],
+                                                  "destination": SafeSubscriber {
+                                                    "_complete": undefined,
+                                                    "_context": [Circular],
+                                                    "_error": undefined,
+                                                    "_next": [Function],
+                                                    "_parentOrParents": null,
+                                                    "_parentSubscriber": [Circular],
+                                                    "_subscriptions": null,
+                                                    "closed": false,
+                                                    "destination": Object {
+                                                      "closed": true,
+                                                      "complete": [Function],
+                                                      "error": [Function],
+                                                      "next": [Function],
+                                                    },
+                                                    "isStopped": false,
+                                                    "syncErrorThrowable": false,
+                                                    "syncErrorThrown": false,
+                                                    "syncErrorValue": null,
+                                                  },
+                                                  "isStopped": false,
+                                                  "syncErrorThrowable": true,
+                                                  "syncErrorThrown": false,
+                                                  "syncErrorValue": null,
+                                                },
+                                                Subscriber {
+                                                  "_parentOrParents": null,
+                                                  "_subscriptions": Array [
+                                                    SubjectSubscription {
+                                                      "_parentOrParents": [Circular],
+                                                      "_subscriptions": null,
+                                                      "closed": false,
+                                                      "subject": [Circular],
+                                                      "subscriber": [Circular],
+                                                    },
+                                                  ],
+                                                  "closed": false,
+                                                  "destination": SafeSubscriber {
+                                                    "_complete": undefined,
+                                                    "_context": [Circular],
+                                                    "_error": undefined,
+                                                    "_next": [Function],
+                                                    "_parentOrParents": null,
+                                                    "_parentSubscriber": [Circular],
+                                                    "_subscriptions": null,
+                                                    "closed": false,
+                                                    "destination": Object {
+                                                      "closed": true,
+                                                      "complete": [Function],
+                                                      "error": [Function],
+                                                      "next": [Function],
+                                                    },
+                                                    "isStopped": false,
+                                                    "syncErrorThrowable": false,
+                                                    "syncErrorThrown": false,
+                                                    "syncErrorValue": null,
+                                                  },
+                                                  "isStopped": false,
+                                                  "syncErrorThrowable": true,
+                                                  "syncErrorThrown": false,
+                                                  "syncErrorValue": null,
                                                 },
                                               ],
-                                              "closed": false,
-                                              "destination": SafeSubscriber {
-                                                "_complete": undefined,
-                                                "_context": [Circular],
-                                                "_error": undefined,
-                                                "_next": [Function],
-                                                "_parentOrParents": null,
-                                                "_parentSubscriber": [Circular],
-                                                "_subscriptions": null,
-                                                "closed": false,
-                                                "destination": Object {
-                                                  "closed": true,
-                                                  "complete": [Function],
-                                                  "error": [Function],
-                                                  "next": [Function],
-                                                },
-                                                "isStopped": false,
-                                                "syncErrorThrowable": false,
-                                                "syncErrorThrown": false,
-                                                "syncErrorValue": null,
-                                              },
-                                              "isStopped": false,
-                                              "syncErrorThrowable": true,
-                                              "syncErrorThrown": false,
-                                              "syncErrorValue": null,
-                                            },
-                                            Subscriber {
-                                              "_parentOrParents": null,
-                                              "_subscriptions": Array [
-                                                SubjectSubscription {
-                                                  "_parentOrParents": [Circular],
-                                                  "_subscriptions": null,
-                                                  "closed": false,
-                                                  "subject": [Circular],
-                                                  "subscriber": [Circular],
-                                                },
-                                              ],
-                                              "closed": false,
-                                              "destination": SafeSubscriber {
-                                                "_complete": undefined,
-                                                "_context": [Circular],
-                                                "_error": undefined,
-                                                "_next": [Function],
-                                                "_parentOrParents": null,
-                                                "_parentSubscriber": [Circular],
-                                                "_subscriptions": null,
-                                                "closed": false,
-                                                "destination": Object {
-                                                  "closed": true,
-                                                  "complete": [Function],
-                                                  "error": [Function],
-                                                  "next": [Function],
-                                                },
-                                                "isStopped": false,
-                                                "syncErrorThrowable": false,
-                                                "syncErrorThrown": false,
-                                                "syncErrorValue": null,
-                                              },
-                                              "isStopped": false,
-                                              "syncErrorThrowable": true,
-                                              "syncErrorThrown": false,
-                                              "syncErrorValue": null,
-                                            },
-                                          ],
-                                          "thrownError": null,
-                                        }
-                                      }
-                                      showAsBar={false}
-                                    >
-                                      <EuiLoadingSpinner
-                                        aria-hidden={true}
-                                        aria-label="Loading content"
-                                        className="osdLoadingIndicator-hidden"
-                                        data-test-subj="globalLoadingIndicator-hidden"
-                                      >
-                                        <span
-                                          aria-hidden={true}
-                                          aria-label="Loading content"
-                                          className="euiLoadingSpinner euiLoadingSpinner--medium osdLoadingIndicator-hidden"
-                                          data-test-subj="globalLoadingIndicator-hidden"
-                                        />
-                                      </EuiLoadingSpinner>
-                                    </LoadingIndicator>
-                                  </div>
+                                              "thrownError": null,
+                                            }
+                                          }
+                                          showAsBar={false}
+                                        >
+                                          <EuiLoadingSpinner
+                                            aria-hidden={true}
+                                            aria-label="Loading content"
+                                            className="osdLoadingIndicator-hidden"
+                                            data-test-subj="globalLoadingIndicator-hidden"
+                                          >
+                                            <span
+                                              aria-hidden={true}
+                                              aria-label="Loading content"
+                                              className="euiLoadingSpinner euiLoadingSpinner--medium osdLoadingIndicator-hidden"
+                                              data-test-subj="globalLoadingIndicator-hidden"
+                                            />
+                                          </EuiLoadingSpinner>
+                                        </LoadingIndicator>
+                                      </div>
+                                    </span>
+                                  </span>
                                 </span>
-                              </span>
-                            </span>
-                          </EuiButtonContent>
-                        </a>
-                      </EuiButtonEmpty>
-                    </EuiHeaderSectionItemButton>
+                              </EuiButtonContent>
+                            </a>
+                          </EuiButtonEmpty>
+                        </EuiHeaderSectionItemButton>
+                      </span>
+                    </EuiToolTip>
                   </HomeLoader>
                 </div>
               </EuiHeaderSectionItem>
@@ -3896,6 +4059,55 @@ exports[`Header handles visibility and lock changes 1`] = `
                     "text": "test",
                   },
                 ],
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [
+                  Subscriber {
+                    "_parentOrParents": null,
+                    "_subscriptions": Array [
+                      SubjectSubscription {
+                        "_parentOrParents": [Circular],
+                        "_subscriptions": null,
+                        "closed": false,
+                        "subject": [Circular],
+                        "subscriber": [Circular],
+                      },
+                    ],
+                    "closed": false,
+                    "destination": SafeSubscriber {
+                      "_complete": undefined,
+                      "_context": [Circular],
+                      "_error": undefined,
+                      "_next": [Function],
+                      "_parentOrParents": null,
+                      "_parentSubscriber": [Circular],
+                      "_subscriptions": null,
+                      "closed": false,
+                      "destination": Object {
+                        "closed": true,
+                        "complete": [Function],
+                        "error": [Function],
+                        "next": [Function],
+                      },
+                      "isStopped": false,
+                      "syncErrorThrowable": false,
+                      "syncErrorThrown": false,
+                      "syncErrorValue": null,
+                    },
+                    "isStopped": false,
+                    "syncErrorThrowable": true,
+                    "syncErrorThrown": false,
+                    "syncErrorValue": null,
+                  },
+                ],
+                "thrownError": null,
+              }
+            }
+            breadcrumbsEnricher$={
+              BehaviorSubject {
+                "_isScalar": false,
+                "_value": undefined,
                 "closed": false,
                 "hasError": false,
                 "isStopped": false,
@@ -5761,18 +5973,23 @@ exports[`Header handles visibility and lock changes 1`] = `
                       <EuiPopover
                         anchorPosition="downRight"
                         button={
-                          <EuiHeaderSectionItemButton
-                            aria-expanded={false}
-                            aria-haspopup="true"
-                            aria-label="Help menu"
-                            onClick={[Function]}
+                          <EuiToolTip
+                            content="Help"
+                            delay="long"
+                            position="bottom"
                           >
-                            <EuiIcon
-                              size="m"
-                              title="Help"
-                              type="questionInCircle"
-                            />
-                          </EuiHeaderSectionItemButton>
+                            <EuiHeaderSectionItemButton
+                              aria-expanded={false}
+                              aria-haspopup="true"
+                              aria-label="Help menu"
+                              onClick={[Function]}
+                            >
+                              <EuiIcon
+                                size="m"
+                                type="questionInCircle"
+                              />
+                            </EuiHeaderSectionItemButton>
+                          </EuiToolTip>
                         }
                         closePopover={[Function]}
                         data-test-subj="helpMenuButton"
@@ -5792,94 +6009,110 @@ exports[`Header handles visibility and lock changes 1`] = `
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiHeaderSectionItemButton
-                              aria-expanded={false}
-                              aria-haspopup="true"
-                              aria-label="Help menu"
-                              onClick={[Function]}
+                            <EuiToolTip
+                              content="Help"
+                              delay="long"
+                              position="bottom"
                             >
-                              <EuiButtonEmpty
-                                aria-expanded={false}
-                                aria-haspopup="true"
-                                aria-label="Help menu"
-                                buttonRef={
-                                  Object {
-                                    "current": <button
-                                      aria-expanded="false"
-                                      aria-haspopup="true"
-                                      aria-label="Help menu"
-                                      class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                                      type="button"
-                                    >
-                                      <span
-                                        class="euiButtonContent euiButtonEmpty__content"
-                                      >
-                                        <span
-                                          class="euiButtonEmpty__text"
-                                        >
-                                          <span
-                                            class="euiHeaderSectionItemButton__content"
-                                          >
-                                            <span
-                                              data-euiicon-type="questionInCircle"
-                                              title="Help"
-                                            />
-                                          </span>
-                                        </span>
-                                      </span>
-                                    </button>,
-                                  }
-                                }
-                                className="euiHeaderSectionItemButton"
-                                color="text"
-                                onClick={[Function]}
+                              <span
+                                className="euiToolTipAnchor"
+                                onKeyUp={[Function]}
+                                onMouseOut={[Function]}
+                                onMouseOver={[Function]}
                               >
-                                <button
+                                <EuiHeaderSectionItemButton
                                   aria-expanded={false}
                                   aria-haspopup="true"
                                   aria-label="Help menu"
-                                  className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                                  disabled={false}
+                                  onBlur={[Function]}
                                   onClick={[Function]}
-                                  type="button"
+                                  onFocus={[Function]}
                                 >
-                                  <EuiButtonContent
-                                    className="euiButtonEmpty__content"
-                                    iconSide="left"
-                                    iconSize="m"
-                                    textProps={
+                                  <EuiButtonEmpty
+                                    aria-expanded={false}
+                                    aria-haspopup="true"
+                                    aria-label="Help menu"
+                                    buttonRef={
                                       Object {
-                                        "className": "euiButtonEmpty__text",
-                                      }
-                                    }
-                                  >
-                                    <span
-                                      className="euiButtonContent euiButtonEmpty__content"
-                                    >
-                                      <span
-                                        className="euiButtonEmpty__text"
-                                      >
-                                        <span
-                                          className="euiHeaderSectionItemButton__content"
+                                        "current": <button
+                                          aria-expanded="false"
+                                          aria-haspopup="true"
+                                          aria-label="Help menu"
+                                          class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                          type="button"
                                         >
-                                          <EuiIcon
-                                            size="m"
-                                            title="Help"
-                                            type="questionInCircle"
+                                          <span
+                                            class="euiButtonContent euiButtonEmpty__content"
                                           >
                                             <span
-                                              data-euiicon-type="questionInCircle"
-                                              size="m"
-                                              title="Help"
-                                            />
-                                          </EuiIcon>
+                                              class="euiButtonEmpty__text"
+                                            >
+                                              <span
+                                                class="euiHeaderSectionItemButton__content"
+                                              >
+                                                <span
+                                                  data-euiicon-type="questionInCircle"
+                                                />
+                                              </span>
+                                            </span>
+                                          </span>
+                                        </button>,
+                                      }
+                                    }
+                                    className="euiHeaderSectionItemButton"
+                                    color="text"
+                                    onBlur={[Function]}
+                                    onClick={[Function]}
+                                    onFocus={[Function]}
+                                  >
+                                    <button
+                                      aria-expanded={false}
+                                      aria-haspopup="true"
+                                      aria-label="Help menu"
+                                      className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                      disabled={false}
+                                      onBlur={[Function]}
+                                      onClick={[Function]}
+                                      onFocus={[Function]}
+                                      type="button"
+                                    >
+                                      <EuiButtonContent
+                                        className="euiButtonEmpty__content"
+                                        iconSide="left"
+                                        iconSize="m"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButtonEmpty__text",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="euiButtonContent euiButtonEmpty__content"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__text"
+                                          >
+                                            <span
+                                              className="euiHeaderSectionItemButton__content"
+                                            >
+                                              <EuiIcon
+                                                size="m"
+                                                type="questionInCircle"
+                                              >
+                                                <span
+                                                  data-euiicon-type="questionInCircle"
+                                                  size="m"
+                                                />
+                                              </EuiIcon>
+                                            </span>
+                                          </span>
                                         </span>
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </button>
-                              </EuiButtonEmpty>
-                            </EuiHeaderSectionItemButton>
+                                      </EuiButtonContent>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </EuiHeaderSectionItemButton>
+                              </span>
+                            </EuiToolTip>
                           </div>
                         </div>
                       </EuiPopover>
@@ -5902,6 +6135,43 @@ exports[`Header handles visibility and lock changes 1`] = `
             "hasError": false,
             "isStopped": false,
             "observers": Array [
+              Subscriber {
+                "_parentOrParents": null,
+                "_subscriptions": Array [
+                  SubjectSubscription {
+                    "_parentOrParents": [Circular],
+                    "_subscriptions": null,
+                    "closed": false,
+                    "subject": [Circular],
+                    "subscriber": [Circular],
+                  },
+                ],
+                "closed": false,
+                "destination": SafeSubscriber {
+                  "_complete": undefined,
+                  "_context": [Circular],
+                  "_error": undefined,
+                  "_next": [Function],
+                  "_parentOrParents": null,
+                  "_parentSubscriber": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "destination": Object {
+                    "closed": true,
+                    "complete": [Function],
+                    "error": [Function],
+                    "next": [Function],
+                  },
+                  "isStopped": false,
+                  "syncErrorThrowable": false,
+                  "syncErrorThrown": false,
+                  "syncErrorValue": null,
+                },
+                "isStopped": false,
+                "syncErrorThrowable": true,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
               Subscriber {
                 "_parentOrParents": null,
                 "_subscriptions": Array [
@@ -6928,6 +7198,43 @@ exports[`Header renders condensed header 1`] = `
               "syncErrorThrown": false,
               "syncErrorValue": null,
             },
+            Subscriber {
+              "_parentOrParents": null,
+              "_subscriptions": Array [
+                SubjectSubscription {
+                  "_parentOrParents": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "subject": [Circular],
+                  "subscriber": [Circular],
+                },
+              ],
+              "closed": false,
+              "destination": SafeSubscriber {
+                "_complete": undefined,
+                "_context": [Circular],
+                "_error": undefined,
+                "_next": [Function],
+                "_parentOrParents": null,
+                "_parentSubscriber": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "destination": Object {
+                  "closed": true,
+                  "complete": [Function],
+                  "error": [Function],
+                  "next": [Function],
+                },
+                "isStopped": false,
+                "syncErrorThrowable": false,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
+              "isStopped": false,
+              "syncErrorThrowable": true,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
           ],
           "thrownError": null,
         },
@@ -7069,6 +7376,66 @@ exports[`Header renders condensed header 1`] = `
           "syncErrorValue": null,
         },
       ],
+      "thrownError": null,
+    }
+  }
+  breadcrumbsEnricher$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  currentNavGroup$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
       "thrownError": null,
     }
   }
@@ -8340,6 +8707,17 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  navControlsLeftBottom$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
   navControlsRight$={
     BehaviorSubject {
       "_isScalar": false,
@@ -8386,6 +8764,18 @@ exports[`Header renders condensed header 1`] = `
           "syncErrorValue": null,
         },
       ],
+      "thrownError": null,
+    }
+  }
+  navGroupEnabled={false}
+  navGroupsMap$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Object {},
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
       "thrownError": null,
     }
   }
@@ -8527,6 +8917,7 @@ exports[`Header renders condensed header 1`] = `
       "thrownError": null,
     }
   }
+  setCurrentNavGroup={[MockFunction]}
   sidecarConfig$={
     BehaviorSubject {
       "_isScalar": false,
@@ -8580,6 +8971,17 @@ exports[`Header renders condensed header 1`] = `
     }
   }
   survey="/"
+  workspaceList$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": Array [],
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [],
+      "thrownError": null,
+    }
+  }
 >
   <header
     className="hide-for-sharing headerGlobalNav"
@@ -8618,102 +9020,118 @@ exports[`Header renders condensed header 1`] = `
                 <div
                   className="euiHeaderSectionItem euiHeaderSectionItem--borderRight header__toggleNavButtonSection"
                 >
-                  <EuiHeaderSectionItemButton
-                    aria-controls="mockId"
-                    aria-expanded={false}
-                    aria-label="Toggle primary navigation"
-                    aria-pressed={false}
-                    data-test-subj="toggleNavButton"
-                    onClick={[Function]}
+                  <EuiToolTip
+                    content="Menu"
+                    delay="long"
+                    position="bottom"
                   >
-                    <EuiButtonEmpty
-                      aria-controls="mockId"
-                      aria-expanded={false}
-                      aria-label="Toggle primary navigation"
-                      aria-pressed={false}
-                      buttonRef={
-                        Object {
-                          "current": <button
-                            aria-controls="mockId"
-                            aria-expanded="false"
-                            aria-label="Toggle primary navigation"
-                            aria-pressed="false"
-                            class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                            data-test-subj="toggleNavButton"
-                            type="button"
-                          >
-                            <span
-                              class="euiButtonContent euiButtonEmpty__content"
-                            >
-                              <span
-                                class="euiButtonEmpty__text"
-                              >
-                                <span
-                                  class="euiHeaderSectionItemButton__content"
-                                >
-                                  <span
-                                    data-euiicon-type="menu"
-                                    title="Menu"
-                                  />
-                                </span>
-                              </span>
-                            </span>
-                          </button>,
-                        }
-                      }
-                      className="euiHeaderSectionItemButton"
-                      color="text"
-                      data-test-subj="toggleNavButton"
-                      onClick={[Function]}
+                    <span
+                      className="euiToolTipAnchor"
+                      onKeyUp={[Function]}
+                      onMouseOut={[Function]}
+                      onMouseOver={[Function]}
                     >
-                      <button
+                      <EuiHeaderSectionItemButton
                         aria-controls="mockId"
                         aria-expanded={false}
                         aria-label="Toggle primary navigation"
                         aria-pressed={false}
-                        className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
                         data-test-subj="toggleNavButton"
-                        disabled={false}
+                        onBlur={[Function]}
                         onClick={[Function]}
-                        type="button"
+                        onFocus={[Function]}
                       >
-                        <EuiButtonContent
-                          className="euiButtonEmpty__content"
-                          iconSide="left"
-                          iconSize="m"
-                          textProps={
+                        <EuiButtonEmpty
+                          aria-controls="mockId"
+                          aria-expanded={false}
+                          aria-label="Toggle primary navigation"
+                          aria-pressed={false}
+                          buttonRef={
                             Object {
-                              "className": "euiButtonEmpty__text",
-                            }
-                          }
-                        >
-                          <span
-                            className="euiButtonContent euiButtonEmpty__content"
-                          >
-                            <span
-                              className="euiButtonEmpty__text"
-                            >
-                              <span
-                                className="euiHeaderSectionItemButton__content"
+                              "current": <button
+                                aria-controls="mockId"
+                                aria-expanded="false"
+                                aria-label="Toggle primary navigation"
+                                aria-pressed="false"
+                                class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                data-test-subj="toggleNavButton"
+                                type="button"
                               >
-                                <EuiIcon
-                                  size="m"
-                                  title="Menu"
-                                  type="menu"
+                                <span
+                                  class="euiButtonContent euiButtonEmpty__content"
                                 >
                                   <span
-                                    data-euiicon-type="menu"
-                                    size="m"
-                                    title="Menu"
-                                  />
-                                </EuiIcon>
+                                    class="euiButtonEmpty__text"
+                                  >
+                                    <span
+                                      class="euiHeaderSectionItemButton__content"
+                                    >
+                                      <span
+                                        data-euiicon-type="menu"
+                                      />
+                                    </span>
+                                  </span>
+                                </span>
+                              </button>,
+                            }
+                          }
+                          className="euiHeaderSectionItemButton"
+                          color="text"
+                          data-test-subj="toggleNavButton"
+                          onBlur={[Function]}
+                          onClick={[Function]}
+                          onFocus={[Function]}
+                        >
+                          <button
+                            aria-controls="mockId"
+                            aria-expanded={false}
+                            aria-label="Toggle primary navigation"
+                            aria-pressed={false}
+                            className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                            data-test-subj="toggleNavButton"
+                            disabled={false}
+                            onBlur={[Function]}
+                            onClick={[Function]}
+                            onFocus={[Function]}
+                            type="button"
+                          >
+                            <EuiButtonContent
+                              className="euiButtonEmpty__content"
+                              iconSide="left"
+                              iconSize="m"
+                              textProps={
+                                Object {
+                                  "className": "euiButtonEmpty__text",
+                                }
+                              }
+                            >
+                              <span
+                                className="euiButtonContent euiButtonEmpty__content"
+                              >
+                                <span
+                                  className="euiButtonEmpty__text"
+                                >
+                                  <span
+                                    className="euiHeaderSectionItemButton__content"
+                                  >
+                                    <EuiIcon
+                                      size="m"
+                                      type="menu"
+                                    >
+                                      <span
+                                        data-euiicon-type="menu"
+                                        size="m"
+                                      />
+                                    </EuiIcon>
+                                  </span>
+                                </span>
                               </span>
-                            </span>
-                          </span>
-                        </EuiButtonContent>
-                      </button>
-                    </EuiButtonEmpty>
-                  </EuiHeaderSectionItemButton>
+                            </EuiButtonContent>
+                          </button>
+                        </EuiButtonEmpty>
+                      </EuiHeaderSectionItemButton>
+                    </span>
+                  </EuiToolTip>
                 </div>
               </EuiHeaderSectionItem>
               <EuiHeaderSectionItem
@@ -9077,305 +9495,320 @@ exports[`Header renders condensed header 1`] = `
                     }
                     navigateToApp={[MockFunction]}
                   >
-                    <EuiHeaderSectionItemButton
-                      aria-label="Go to home page"
-                      className="header__homeLoaderNavButton"
-                      data-test-subj="homeLoader"
-                      href="/"
-                      onClick={[Function]}
-                      title="Go to home page"
+                    <EuiToolTip
+                      content="Go to home page"
+                      delay="long"
+                      position="top"
                     >
-                      <EuiButtonEmpty
-                        aria-label="Go to home page"
-                        buttonRef={
-                          Object {
-                            "current": <a
-                              aria-label="Go to home page"
-                              class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton header__homeLoaderNavButton"
-                              data-test-subj="homeLoader"
-                              href="/"
-                              rel="noreferrer"
-                              title="Go to home page"
-                            >
-                              <span
-                                class="euiButtonContent euiButtonEmpty__content"
-                              >
-                                <span
-                                  class="euiButtonEmpty__text"
-                                >
-                                  <span
-                                    class="euiHeaderSectionItemButton__content"
-                                  >
-                                    <div
-                                      class="homeIconContainer"
-                                    >
-                                      <span
-                                        class="logoImage"
-                                        data-euiicon-type="/ui/logos/opensearch_mark_on_light.svg"
-                                        data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
-                                        data-test-subj="defaultMark"
-                                        title="opensearch dashboards home"
-                                      />
-                                    </div>
-                                    <div
-                                      class="loaderContainer"
-                                    >
-                                      <span
-                                        aria-hidden="true"
-                                        aria-label="Loading content"
-                                        class="euiLoadingSpinner euiLoadingSpinner--medium osdLoadingIndicator-hidden"
-                                        data-test-subj="globalLoadingIndicator-hidden"
-                                      />
-                                    </div>
-                                  </span>
-                                </span>
-                              </span>
-                            </a>,
-                          }
-                        }
-                        className="euiHeaderSectionItemButton header__homeLoaderNavButton"
-                        color="text"
-                        data-test-subj="homeLoader"
-                        href="/"
-                        onClick={[Function]}
-                        title="Go to home page"
+                      <span
+                        className="euiToolTipAnchor"
+                        onKeyUp={[Function]}
+                        onMouseOut={[Function]}
+                        onMouseOver={[Function]}
                       >
-                        <a
+                        <EuiHeaderSectionItemButton
                           aria-label="Go to home page"
-                          className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton header__homeLoaderNavButton"
+                          className="header__homeLoaderNavButton"
                           data-test-subj="homeLoader"
                           href="/"
+                          onBlur={[Function]}
                           onClick={[Function]}
-                          rel="noreferrer"
-                          title="Go to home page"
+                          onFocus={[Function]}
                         >
-                          <EuiButtonContent
-                            className="euiButtonEmpty__content"
-                            iconSide="left"
-                            iconSize="m"
-                            textProps={
+                          <EuiButtonEmpty
+                            aria-label="Go to home page"
+                            buttonRef={
                               Object {
-                                "className": "euiButtonEmpty__text",
+                                "current": <a
+                                  aria-label="Go to home page"
+                                  class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton header__homeLoaderNavButton"
+                                  data-test-subj="homeLoader"
+                                  href="/"
+                                  rel="noreferrer"
+                                >
+                                  <span
+                                    class="euiButtonContent euiButtonEmpty__content"
+                                  >
+                                    <span
+                                      class="euiButtonEmpty__text"
+                                    >
+                                      <span
+                                        class="euiHeaderSectionItemButton__content"
+                                      >
+                                        <div
+                                          class="homeIconContainer"
+                                        >
+                                          <span
+                                            class="logoImage"
+                                            data-euiicon-type="/ui/logos/opensearch_mark_on_light.svg"
+                                            data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
+                                            data-test-subj="defaultMark"
+                                            title="opensearch dashboards home"
+                                          />
+                                        </div>
+                                        <div
+                                          class="loaderContainer"
+                                        >
+                                          <span
+                                            aria-hidden="true"
+                                            aria-label="Loading content"
+                                            class="euiLoadingSpinner euiLoadingSpinner--medium osdLoadingIndicator-hidden"
+                                            data-test-subj="globalLoadingIndicator-hidden"
+                                          />
+                                        </div>
+                                      </span>
+                                    </span>
+                                  </span>
+                                </a>,
                               }
                             }
+                            className="euiHeaderSectionItemButton header__homeLoaderNavButton"
+                            color="text"
+                            data-test-subj="homeLoader"
+                            href="/"
+                            onBlur={[Function]}
+                            onClick={[Function]}
+                            onFocus={[Function]}
                           >
-                            <span
-                              className="euiButtonContent euiButtonEmpty__content"
+                            <a
+                              aria-label="Go to home page"
+                              className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton header__homeLoaderNavButton"
+                              data-test-subj="homeLoader"
+                              href="/"
+                              onBlur={[Function]}
+                              onClick={[Function]}
+                              onFocus={[Function]}
+                              rel="noreferrer"
                             >
-                              <span
-                                className="euiButtonEmpty__text"
+                              <EuiButtonContent
+                                className="euiButtonEmpty__content"
+                                iconSide="left"
+                                iconSize="m"
+                                textProps={
+                                  Object {
+                                    "className": "euiButtonEmpty__text",
+                                  }
+                                }
                               >
                                 <span
-                                  className="euiHeaderSectionItemButton__content"
+                                  className="euiButtonContent euiButtonEmpty__content"
                                 >
-                                  <div
-                                    className="homeIconContainer"
+                                  <span
+                                    className="euiButtonEmpty__text"
                                   >
-                                    <HomeIcon
-                                      branding={
-                                        Object {
-                                          "useExpandedHeader": false,
-                                        }
-                                      }
-                                      logos={
-                                        Object {
-                                          "AnimatedMark": Object {
-                                            "dark": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_spinner_on_dark.svg",
-                                            },
-                                            "light": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_spinner_on_light.svg",
-                                            },
-                                            "type": "default",
-                                            "url": "/ui/logos/opensearch_spinner_on_light.svg",
-                                          },
-                                          "Application": Object {
-                                            "dark": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
-                                            },
-                                            "light": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-                                            },
-                                            "type": "default",
-                                            "url": "/ui/logos/opensearch_dashboards_on_light.svg",
-                                          },
-                                          "CenterMark": Object {
-                                            "dark": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
-                                            },
-                                            "light": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-                                            },
-                                            "type": "default",
-                                            "url": "/ui/logos/opensearch_center_mark_on_light.svg",
-                                          },
-                                          "Mark": Object {
-                                            "dark": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_mark_on_dark.svg",
-                                            },
-                                            "light": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_mark_on_light.svg",
-                                            },
-                                            "type": "default",
-                                            "url": "/ui/logos/opensearch_mark_on_light.svg",
-                                          },
-                                          "OpenSearch": Object {
-                                            "dark": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_on_dark.svg",
-                                            },
-                                            "light": Object {
-                                              "type": "default",
-                                              "url": "/ui/logos/opensearch_on_light.svg",
-                                            },
-                                            "type": "default",
-                                            "url": "/ui/logos/opensearch_on_light.svg",
-                                          },
-                                          "colorScheme": "light",
-                                        }
-                                      }
+                                    <span
+                                      className="euiHeaderSectionItemButton__content"
                                     >
-                                      <EuiIcon
-                                        className="logoImage"
-                                        data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
-                                        data-test-subj="defaultMark"
-                                        size="l"
-                                        title="opensearch dashboards home"
-                                        type="/ui/logos/opensearch_mark_on_light.svg"
+                                      <div
+                                        className="homeIconContainer"
                                       >
-                                        <span
-                                          className="logoImage"
-                                          data-euiicon-type="/ui/logos/opensearch_mark_on_light.svg"
-                                          data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
-                                          data-test-subj="defaultMark"
-                                          size="l"
-                                          title="opensearch dashboards home"
-                                        />
-                                      </EuiIcon>
-                                    </HomeIcon>
-                                  </div>
-                                  <div
-                                    className="loaderContainer"
-                                  >
-                                    <LoadingIndicator
-                                      loadingCount$={
-                                        BehaviorSubject {
-                                          "_isScalar": false,
-                                          "_value": 0,
-                                          "closed": false,
-                                          "hasError": false,
-                                          "isStopped": false,
-                                          "observers": Array [
-                                            Subscriber {
-                                              "_parentOrParents": null,
-                                              "_subscriptions": Array [
-                                                SubjectSubscription {
-                                                  "_parentOrParents": [Circular],
-                                                  "_subscriptions": null,
+                                        <HomeIcon
+                                          branding={
+                                            Object {
+                                              "useExpandedHeader": false,
+                                            }
+                                          }
+                                          logos={
+                                            Object {
+                                              "AnimatedMark": Object {
+                                                "dark": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_spinner_on_dark.svg",
+                                                },
+                                                "light": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                                                },
+                                                "type": "default",
+                                                "url": "/ui/logos/opensearch_spinner_on_light.svg",
+                                              },
+                                              "Application": Object {
+                                                "dark": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_dashboards_on_dark.svg",
+                                                },
+                                                "light": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                                                },
+                                                "type": "default",
+                                                "url": "/ui/logos/opensearch_dashboards_on_light.svg",
+                                              },
+                                              "CenterMark": Object {
+                                                "dark": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_center_mark_on_dark.svg",
+                                                },
+                                                "light": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                                                },
+                                                "type": "default",
+                                                "url": "/ui/logos/opensearch_center_mark_on_light.svg",
+                                              },
+                                              "Mark": Object {
+                                                "dark": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_mark_on_dark.svg",
+                                                },
+                                                "light": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_mark_on_light.svg",
+                                                },
+                                                "type": "default",
+                                                "url": "/ui/logos/opensearch_mark_on_light.svg",
+                                              },
+                                              "OpenSearch": Object {
+                                                "dark": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_on_dark.svg",
+                                                },
+                                                "light": Object {
+                                                  "type": "default",
+                                                  "url": "/ui/logos/opensearch_on_light.svg",
+                                                },
+                                                "type": "default",
+                                                "url": "/ui/logos/opensearch_on_light.svg",
+                                              },
+                                              "colorScheme": "light",
+                                            }
+                                          }
+                                        >
+                                          <EuiIcon
+                                            className="logoImage"
+                                            data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
+                                            data-test-subj="defaultMark"
+                                            size="l"
+                                            title="opensearch dashboards home"
+                                            type="/ui/logos/opensearch_mark_on_light.svg"
+                                          >
+                                            <span
+                                              className="logoImage"
+                                              data-euiicon-type="/ui/logos/opensearch_mark_on_light.svg"
+                                              data-test-image-url="/ui/logos/opensearch_mark_on_light.svg"
+                                              data-test-subj="defaultMark"
+                                              size="l"
+                                              title="opensearch dashboards home"
+                                            />
+                                          </EuiIcon>
+                                        </HomeIcon>
+                                      </div>
+                                      <div
+                                        className="loaderContainer"
+                                      >
+                                        <LoadingIndicator
+                                          loadingCount$={
+                                            BehaviorSubject {
+                                              "_isScalar": false,
+                                              "_value": 0,
+                                              "closed": false,
+                                              "hasError": false,
+                                              "isStopped": false,
+                                              "observers": Array [
+                                                Subscriber {
+                                                  "_parentOrParents": null,
+                                                  "_subscriptions": Array [
+                                                    SubjectSubscription {
+                                                      "_parentOrParents": [Circular],
+                                                      "_subscriptions": null,
+                                                      "closed": false,
+                                                      "subject": [Circular],
+                                                      "subscriber": [Circular],
+                                                    },
+                                                  ],
                                                   "closed": false,
-                                                  "subject": [Circular],
-                                                  "subscriber": [Circular],
+                                                  "destination": SafeSubscriber {
+                                                    "_complete": undefined,
+                                                    "_context": [Circular],
+                                                    "_error": undefined,
+                                                    "_next": [Function],
+                                                    "_parentOrParents": null,
+                                                    "_parentSubscriber": [Circular],
+                                                    "_subscriptions": null,
+                                                    "closed": false,
+                                                    "destination": Object {
+                                                      "closed": true,
+                                                      "complete": [Function],
+                                                      "error": [Function],
+                                                      "next": [Function],
+                                                    },
+                                                    "isStopped": false,
+                                                    "syncErrorThrowable": false,
+                                                    "syncErrorThrown": false,
+                                                    "syncErrorValue": null,
+                                                  },
+                                                  "isStopped": false,
+                                                  "syncErrorThrowable": true,
+                                                  "syncErrorThrown": false,
+                                                  "syncErrorValue": null,
+                                                },
+                                                Subscriber {
+                                                  "_parentOrParents": null,
+                                                  "_subscriptions": Array [
+                                                    SubjectSubscription {
+                                                      "_parentOrParents": [Circular],
+                                                      "_subscriptions": null,
+                                                      "closed": false,
+                                                      "subject": [Circular],
+                                                      "subscriber": [Circular],
+                                                    },
+                                                  ],
+                                                  "closed": false,
+                                                  "destination": SafeSubscriber {
+                                                    "_complete": undefined,
+                                                    "_context": [Circular],
+                                                    "_error": undefined,
+                                                    "_next": [Function],
+                                                    "_parentOrParents": null,
+                                                    "_parentSubscriber": [Circular],
+                                                    "_subscriptions": null,
+                                                    "closed": false,
+                                                    "destination": Object {
+                                                      "closed": true,
+                                                      "complete": [Function],
+                                                      "error": [Function],
+                                                      "next": [Function],
+                                                    },
+                                                    "isStopped": false,
+                                                    "syncErrorThrowable": false,
+                                                    "syncErrorThrown": false,
+                                                    "syncErrorValue": null,
+                                                  },
+                                                  "isStopped": false,
+                                                  "syncErrorThrowable": true,
+                                                  "syncErrorThrown": false,
+                                                  "syncErrorValue": null,
                                                 },
                                               ],
-                                              "closed": false,
-                                              "destination": SafeSubscriber {
-                                                "_complete": undefined,
-                                                "_context": [Circular],
-                                                "_error": undefined,
-                                                "_next": [Function],
-                                                "_parentOrParents": null,
-                                                "_parentSubscriber": [Circular],
-                                                "_subscriptions": null,
-                                                "closed": false,
-                                                "destination": Object {
-                                                  "closed": true,
-                                                  "complete": [Function],
-                                                  "error": [Function],
-                                                  "next": [Function],
-                                                },
-                                                "isStopped": false,
-                                                "syncErrorThrowable": false,
-                                                "syncErrorThrown": false,
-                                                "syncErrorValue": null,
-                                              },
-                                              "isStopped": false,
-                                              "syncErrorThrowable": true,
-                                              "syncErrorThrown": false,
-                                              "syncErrorValue": null,
-                                            },
-                                            Subscriber {
-                                              "_parentOrParents": null,
-                                              "_subscriptions": Array [
-                                                SubjectSubscription {
-                                                  "_parentOrParents": [Circular],
-                                                  "_subscriptions": null,
-                                                  "closed": false,
-                                                  "subject": [Circular],
-                                                  "subscriber": [Circular],
-                                                },
-                                              ],
-                                              "closed": false,
-                                              "destination": SafeSubscriber {
-                                                "_complete": undefined,
-                                                "_context": [Circular],
-                                                "_error": undefined,
-                                                "_next": [Function],
-                                                "_parentOrParents": null,
-                                                "_parentSubscriber": [Circular],
-                                                "_subscriptions": null,
-                                                "closed": false,
-                                                "destination": Object {
-                                                  "closed": true,
-                                                  "complete": [Function],
-                                                  "error": [Function],
-                                                  "next": [Function],
-                                                },
-                                                "isStopped": false,
-                                                "syncErrorThrowable": false,
-                                                "syncErrorThrown": false,
-                                                "syncErrorValue": null,
-                                              },
-                                              "isStopped": false,
-                                              "syncErrorThrowable": true,
-                                              "syncErrorThrown": false,
-                                              "syncErrorValue": null,
-                                            },
-                                          ],
-                                          "thrownError": null,
-                                        }
-                                      }
-                                      showAsBar={false}
-                                    >
-                                      <EuiLoadingSpinner
-                                        aria-hidden={true}
-                                        aria-label="Loading content"
-                                        className="osdLoadingIndicator-hidden"
-                                        data-test-subj="globalLoadingIndicator-hidden"
-                                      >
-                                        <span
-                                          aria-hidden={true}
-                                          aria-label="Loading content"
-                                          className="euiLoadingSpinner euiLoadingSpinner--medium osdLoadingIndicator-hidden"
-                                          data-test-subj="globalLoadingIndicator-hidden"
-                                        />
-                                      </EuiLoadingSpinner>
-                                    </LoadingIndicator>
-                                  </div>
+                                              "thrownError": null,
+                                            }
+                                          }
+                                          showAsBar={false}
+                                        >
+                                          <EuiLoadingSpinner
+                                            aria-hidden={true}
+                                            aria-label="Loading content"
+                                            className="osdLoadingIndicator-hidden"
+                                            data-test-subj="globalLoadingIndicator-hidden"
+                                          >
+                                            <span
+                                              aria-hidden={true}
+                                              aria-label="Loading content"
+                                              className="euiLoadingSpinner euiLoadingSpinner--medium osdLoadingIndicator-hidden"
+                                              data-test-subj="globalLoadingIndicator-hidden"
+                                            />
+                                          </EuiLoadingSpinner>
+                                        </LoadingIndicator>
+                                      </div>
+                                    </span>
+                                  </span>
                                 </span>
-                              </span>
-                            </span>
-                          </EuiButtonContent>
-                        </a>
-                      </EuiButtonEmpty>
-                    </EuiHeaderSectionItemButton>
+                              </EuiButtonContent>
+                            </a>
+                          </EuiButtonEmpty>
+                        </EuiHeaderSectionItemButton>
+                      </span>
+                    </EuiToolTip>
                   </HomeLoader>
                 </div>
               </EuiHeaderSectionItem>
@@ -9480,12 +9913,61 @@ exports[`Header renders condensed header 1`] = `
                 "thrownError": null,
               }
             }
+            breadcrumbsEnricher$={
+              BehaviorSubject {
+                "_isScalar": false,
+                "_value": undefined,
+                "closed": false,
+                "hasError": false,
+                "isStopped": false,
+                "observers": Array [
+                  Subscriber {
+                    "_parentOrParents": null,
+                    "_subscriptions": Array [
+                      SubjectSubscription {
+                        "_parentOrParents": [Circular],
+                        "_subscriptions": null,
+                        "closed": false,
+                        "subject": [Circular],
+                        "subscriber": [Circular],
+                      },
+                    ],
+                    "closed": false,
+                    "destination": SafeSubscriber {
+                      "_complete": undefined,
+                      "_context": [Circular],
+                      "_error": undefined,
+                      "_next": [Function],
+                      "_parentOrParents": null,
+                      "_parentSubscriber": [Circular],
+                      "_subscriptions": null,
+                      "closed": false,
+                      "destination": Object {
+                        "closed": true,
+                        "complete": [Function],
+                        "error": [Function],
+                        "next": [Function],
+                      },
+                      "isStopped": false,
+                      "syncErrorThrowable": false,
+                      "syncErrorThrown": false,
+                      "syncErrorValue": null,
+                    },
+                    "isStopped": false,
+                    "syncErrorThrowable": true,
+                    "syncErrorThrown": false,
+                    "syncErrorValue": null,
+                  },
+                ],
+                "thrownError": null,
+              }
+            }
           >
             <EuiHeaderBreadcrumbs
               breadcrumbs={
                 Array [
                   Object {
-                    "data-test-subj": "breadcrumb first",
+                    "data-test-subj": "breadcrumb first last",
                     "text": "test",
                   },
                 ]
@@ -9497,7 +9979,7 @@ exports[`Header renders condensed header 1`] = `
                 breadcrumbs={
                   Array [
                     Object {
-                      "data-test-subj": "breadcrumb first",
+                      "data-test-subj": "breadcrumb first last",
                       "text": "test",
                     },
                   ]
@@ -9522,7 +10004,7 @@ exports[`Header renders condensed header 1`] = `
                         <span
                           aria-current="page"
                           className="euiBreadcrumb euiBreadcrumb--last"
-                          data-test-subj="breadcrumb first"
+                          data-test-subj="breadcrumb first last"
                           title="test"
                         >
                           test
@@ -11300,18 +11782,23 @@ exports[`Header renders condensed header 1`] = `
                       <EuiPopover
                         anchorPosition="downRight"
                         button={
-                          <EuiHeaderSectionItemButton
-                            aria-expanded={false}
-                            aria-haspopup="true"
-                            aria-label="Help menu"
-                            onClick={[Function]}
+                          <EuiToolTip
+                            content="Help"
+                            delay="long"
+                            position="bottom"
                           >
-                            <EuiIcon
-                              size="m"
-                              title="Help"
-                              type="questionInCircle"
-                            />
-                          </EuiHeaderSectionItemButton>
+                            <EuiHeaderSectionItemButton
+                              aria-expanded={false}
+                              aria-haspopup="true"
+                              aria-label="Help menu"
+                              onClick={[Function]}
+                            >
+                              <EuiIcon
+                                size="m"
+                                type="questionInCircle"
+                              />
+                            </EuiHeaderSectionItemButton>
+                          </EuiToolTip>
                         }
                         closePopover={[Function]}
                         data-test-subj="helpMenuButton"
@@ -11331,94 +11818,110 @@ exports[`Header renders condensed header 1`] = `
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiHeaderSectionItemButton
-                              aria-expanded={false}
-                              aria-haspopup="true"
-                              aria-label="Help menu"
-                              onClick={[Function]}
+                            <EuiToolTip
+                              content="Help"
+                              delay="long"
+                              position="bottom"
                             >
-                              <EuiButtonEmpty
-                                aria-expanded={false}
-                                aria-haspopup="true"
-                                aria-label="Help menu"
-                                buttonRef={
-                                  Object {
-                                    "current": <button
-                                      aria-expanded="false"
-                                      aria-haspopup="true"
-                                      aria-label="Help menu"
-                                      class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                                      type="button"
-                                    >
-                                      <span
-                                        class="euiButtonContent euiButtonEmpty__content"
-                                      >
-                                        <span
-                                          class="euiButtonEmpty__text"
-                                        >
-                                          <span
-                                            class="euiHeaderSectionItemButton__content"
-                                          >
-                                            <span
-                                              data-euiicon-type="questionInCircle"
-                                              title="Help"
-                                            />
-                                          </span>
-                                        </span>
-                                      </span>
-                                    </button>,
-                                  }
-                                }
-                                className="euiHeaderSectionItemButton"
-                                color="text"
-                                onClick={[Function]}
+                              <span
+                                className="euiToolTipAnchor"
+                                onKeyUp={[Function]}
+                                onMouseOut={[Function]}
+                                onMouseOver={[Function]}
                               >
-                                <button
+                                <EuiHeaderSectionItemButton
                                   aria-expanded={false}
                                   aria-haspopup="true"
                                   aria-label="Help menu"
-                                  className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                                  disabled={false}
+                                  onBlur={[Function]}
                                   onClick={[Function]}
-                                  type="button"
+                                  onFocus={[Function]}
                                 >
-                                  <EuiButtonContent
-                                    className="euiButtonEmpty__content"
-                                    iconSide="left"
-                                    iconSize="m"
-                                    textProps={
+                                  <EuiButtonEmpty
+                                    aria-expanded={false}
+                                    aria-haspopup="true"
+                                    aria-label="Help menu"
+                                    buttonRef={
                                       Object {
-                                        "className": "euiButtonEmpty__text",
-                                      }
-                                    }
-                                  >
-                                    <span
-                                      className="euiButtonContent euiButtonEmpty__content"
-                                    >
-                                      <span
-                                        className="euiButtonEmpty__text"
-                                      >
-                                        <span
-                                          className="euiHeaderSectionItemButton__content"
+                                        "current": <button
+                                          aria-expanded="false"
+                                          aria-haspopup="true"
+                                          aria-label="Help menu"
+                                          class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                          type="button"
                                         >
-                                          <EuiIcon
-                                            size="m"
-                                            title="Help"
-                                            type="questionInCircle"
+                                          <span
+                                            class="euiButtonContent euiButtonEmpty__content"
                                           >
                                             <span
-                                              data-euiicon-type="questionInCircle"
-                                              size="m"
-                                              title="Help"
-                                            />
-                                          </EuiIcon>
+                                              class="euiButtonEmpty__text"
+                                            >
+                                              <span
+                                                class="euiHeaderSectionItemButton__content"
+                                              >
+                                                <span
+                                                  data-euiicon-type="questionInCircle"
+                                                />
+                                              </span>
+                                            </span>
+                                          </span>
+                                        </button>,
+                                      }
+                                    }
+                                    className="euiHeaderSectionItemButton"
+                                    color="text"
+                                    onBlur={[Function]}
+                                    onClick={[Function]}
+                                    onFocus={[Function]}
+                                  >
+                                    <button
+                                      aria-expanded={false}
+                                      aria-haspopup="true"
+                                      aria-label="Help menu"
+                                      className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                      disabled={false}
+                                      onBlur={[Function]}
+                                      onClick={[Function]}
+                                      onFocus={[Function]}
+                                      type="button"
+                                    >
+                                      <EuiButtonContent
+                                        className="euiButtonEmpty__content"
+                                        iconSide="left"
+                                        iconSize="m"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButtonEmpty__text",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="euiButtonContent euiButtonEmpty__content"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__text"
+                                          >
+                                            <span
+                                              className="euiHeaderSectionItemButton__content"
+                                            >
+                                              <EuiIcon
+                                                size="m"
+                                                type="questionInCircle"
+                                              >
+                                                <span
+                                                  data-euiicon-type="questionInCircle"
+                                                  size="m"
+                                                />
+                                              </EuiIcon>
+                                            </span>
+                                          </span>
                                         </span>
-                                      </span>
-                                    </span>
-                                  </EuiButtonContent>
-                                </button>
-                              </EuiButtonEmpty>
-                            </EuiHeaderSectionItemButton>
+                                      </EuiButtonContent>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </EuiHeaderSectionItemButton>
+                              </span>
+                            </EuiToolTip>
                           </div>
                         </div>
                       </EuiPopover>
@@ -11441,6 +11944,43 @@ exports[`Header renders condensed header 1`] = `
             "hasError": false,
             "isStopped": false,
             "observers": Array [
+              Subscriber {
+                "_parentOrParents": null,
+                "_subscriptions": Array [
+                  SubjectSubscription {
+                    "_parentOrParents": [Circular],
+                    "_subscriptions": null,
+                    "closed": false,
+                    "subject": [Circular],
+                    "subscriber": [Circular],
+                  },
+                ],
+                "closed": false,
+                "destination": SafeSubscriber {
+                  "_complete": undefined,
+                  "_context": [Circular],
+                  "_error": undefined,
+                  "_next": [Function],
+                  "_parentOrParents": null,
+                  "_parentSubscriber": [Circular],
+                  "_subscriptions": null,
+                  "closed": false,
+                  "destination": Object {
+                    "closed": true,
+                    "complete": [Function],
+                    "error": [Function],
+                    "next": [Function],
+                  },
+                  "isStopped": false,
+                  "syncErrorThrowable": false,
+                  "syncErrorThrown": false,
+                  "syncErrorValue": null,
+                },
+                "isStopped": false,
+                "syncErrorThrowable": true,
+                "syncErrorThrown": false,
+                "syncErrorValue": null,
+              },
               Subscriber {
                 "_parentOrParents": null,
                 "_subscriptions": Array [

@@ -5,7 +5,13 @@
 
 import { i18n } from '@osd/i18n';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiSwitch } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiContextMenu,
+  EuiPanel,
+  EuiPopover,
+  EuiCompressedSwitch,
+} from '@elastic/eui';
 import { TopNav } from './top_nav';
 import { ViewProps } from '../../../../../data_explorer/public';
 import { DiscoverTable } from './discover_table';
@@ -19,14 +25,18 @@ import { setColumns, useDispatch, useSelector } from '../../utils/state_manageme
 import { DiscoverViewServices } from '../../../build_services';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { filterColumns } from '../utils/filter_columns';
-import { DEFAULT_COLUMNS_SETTING, MODIFY_COLUMNS_ON_SWITCH } from '../../../../common';
+import {
+  DEFAULT_COLUMNS_SETTING,
+  MODIFY_COLUMNS_ON_SWITCH,
+  QUERY_ENHANCEMENT_ENABLED_SETTING,
+} from '../../../../common';
 import { OpenSearchSearchHit } from '../../../application/doc_views/doc_views_types';
 import { buildColumns } from '../../utils/columns';
 import './discover_canvas.scss';
 import { getNewDiscoverSetting, setNewDiscoverSetting } from '../../components/utils/local_storage';
 
 // eslint-disable-next-line import/no-default-export
-export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewProps) {
+export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalRef }: ViewProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const { data$, refetch$, indexPattern } = useDiscoverContext();
   const {
@@ -40,6 +50,7 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       columns: stateColumns !== undefined ? stateColumns : buildColumns([]),
     };
   });
+  const isEnhancementsEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
   const filteredColumns = filterColumns(
     columns,
     indexPattern,
@@ -129,13 +140,14 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
     >
       <EuiContextMenu
         initialPanelId={0}
+        size="s"
         panels={[
           {
             id: 0,
             title: 'Options',
             content: (
               <EuiPanel>
-                <EuiSwitch
+                <EuiCompressedSwitch
                   label="Enable legacy Discover"
                   checked={useLegacy}
                   data-test-subj="discoverOptionsLegacySwitch"
@@ -164,12 +176,15 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history }: ViewPro
       className="dscCanvas"
     >
       <TopNav
+        isEnhancementsEnabled={isEnhancementsEnabled}
         opts={{
           setHeaderActionMenu,
           onQuerySubmit,
+          optionalRef,
         }}
         showSaveQuery={showSaveQuery}
       />
+
       {fetchState.status === ResultStatus.NO_RESULTS && (
         <DiscoverNoResults timeFieldName={timeField} queryLanguage={''} />
       )}

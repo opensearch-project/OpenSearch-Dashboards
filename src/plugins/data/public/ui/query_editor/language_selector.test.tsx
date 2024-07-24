@@ -8,7 +8,7 @@ import { QueryLanguageSelector } from './language_selector';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiCompressedComboBox } from '@elastic/eui';
 import { QueryEnhancement } from '../types';
 
 const startMock = coreMock.createStart();
@@ -53,14 +53,7 @@ describe('LanguageSelector', () => {
         },
       })
     );
-    const euiComboBox = component.find(EuiComboBox);
-    expect(euiComboBox.prop('selectedOptions')).toEqual(
-      expect.arrayContaining([
-        {
-          label: 'Lucene',
-        },
-      ])
-    );
+    expect(component).toMatchSnapshot();
   });
 
   it('should select DQL if language is kuery', () => {
@@ -72,13 +65,6 @@ describe('LanguageSelector', () => {
         },
       })
     );
-    const euiComboBox = component.find(EuiComboBox);
-    expect(euiComboBox.prop('selectedOptions')).toEqual(
-      expect.arrayContaining([
-        {
-          label: 'DQL',
-        },
-      ])
-    );
+    expect(component).toMatchSnapshot();
   });
 });

@@ -60,7 +60,7 @@ exports[`DataSourceView Should return error when provided datasource has been fi
   button={
     <DataSourceMenuPopoverButton
       className="dataSourceView"
-      label=""
+      label="test1"
       onClick={[Function]}
     />
   }
@@ -88,7 +88,16 @@ exports[`DataSourceView Should return error when provided datasource has been fi
       <EuiSelectable
         data-test-subj="dataSourceView"
         isPreFiltered={false}
-        options={Array []}
+        options={
+          Array [
+            Object {
+              "checked": "on",
+              "disabled": true,
+              "id": "test1",
+              "label": "test1",
+            },
+          ]
+        }
         renderOption={[Function]}
         searchable={false}
         singleSelection={true}

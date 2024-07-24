@@ -1,0 +1,9 @@
+ {
+  "id": "queryEnhancements",
+  "version": "opensearchDashboards",
+  "server": true,
+  "ui": true,
+  "requiredPlugins": ["data", "opensearchDashboardsReact", "opensearchDashboardsUtils", "dataSourceManagement", "savedObjects", "uiActions"],
+  "optionalPlugins": ["dataSource"]
+}
+

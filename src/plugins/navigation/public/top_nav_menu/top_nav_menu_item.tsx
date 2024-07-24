@@ -30,7 +30,7 @@
 
 import { upperFirst, isFunction } from 'lodash';
 import React, { MouseEvent } from 'react';
-import { EuiToolTip, EuiButton, EuiHeaderLink, EuiSwitch } from '@elastic/eui';
+import { EuiToolTip, EuiButton, EuiHeaderLink, EuiCompressedSwitch } from '@elastic/eui';
 import { TopNavMenuData } from './top_nav_menu_data';
 
 export function TopNavMenuItem(props: TopNavMenuData) {
@@ -62,7 +62,7 @@ export function TopNavMenuItem(props: TopNavMenuData) {
   let component;
   if (props.type === 'toggle') {
     component = (
-      <EuiSwitch
+      <EuiCompressedSwitch
         label={upperFirst(props.label || props.id!)}
         checked={props.emphasize || false}
         onChange={(e) => {

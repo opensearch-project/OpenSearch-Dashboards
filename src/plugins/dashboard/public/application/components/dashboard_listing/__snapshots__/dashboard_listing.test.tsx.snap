@@ -143,6 +143,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
+              "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -214,14 +215,18 @@ exports[`dashboard listing hideWriteControls 1`] = `
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -258,6 +263,7 @@ exports[`dashboard listing hideWriteControls 1`] = `
                   },
                 ],
               },
+              "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -1327,6 +1333,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
+              "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -1398,14 +1405,18 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -1442,6 +1453,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                   },
                 ],
               },
+              "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -2297,7 +2309,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
             noItemsFragment={
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
                     iconType="plus"
@@ -2308,7 +2320,7 @@ exports[`dashboard listing render table listing with initial filters from URL 1`
                       id="dashboard.listing.createNewDashboard.createButtonLabel"
                       values={Object {}}
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 }
                 body={
                   <React.Fragment>
@@ -2572,6 +2584,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
+              "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -2643,14 +2656,18 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -2687,6 +2704,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                   },
                 ],
               },
+              "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -3542,7 +3560,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
             noItemsFragment={
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
                     iconType="plus"
@@ -3553,7 +3571,7 @@ exports[`dashboard listing renders call to action when no dashboards exist 1`] =
                       id="dashboard.listing.createNewDashboard.createButtonLabel"
                       values={Object {}}
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 }
                 body={
                   <React.Fragment>
@@ -3817,6 +3835,7 @@ exports[`dashboard listing renders table rows 1`] = `
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
+              "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -3888,14 +3907,18 @@ exports[`dashboard listing renders table rows 1`] = `
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -3932,6 +3955,7 @@ exports[`dashboard listing renders table rows 1`] = `
                   },
                 ],
               },
+              "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -4787,7 +4811,7 @@ exports[`dashboard listing renders table rows 1`] = `
             noItemsFragment={
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
                     iconType="plus"
@@ -4798,7 +4822,7 @@ exports[`dashboard listing renders table rows 1`] = `
                       id="dashboard.listing.createNewDashboard.createButtonLabel"
                       values={Object {}}
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 }
                 body={
                   <React.Fragment>
@@ -5062,6 +5086,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               "getApplicationClasses$": [MockFunction],
               "getBadge$": [MockFunction],
               "getBreadcrumbs$": [MockFunction],
+              "getBreadcrumbsEnricher$": [MockFunction],
               "getCustomNavLink$": [MockFunction],
               "getHeaderComponent": [MockFunction],
               "getHelpExtension$": [MockFunction],
@@ -5133,14 +5158,18 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
               "navControls": Object {
                 "getCenter$": [MockFunction],
                 "getLeft$": [MockFunction],
+                "getLeftBottom$": [MockFunction],
                 "getRight$": [MockFunction],
                 "registerCenter": [MockFunction],
                 "registerLeft": [MockFunction],
+                "registerLeftBottom": [MockFunction],
                 "registerRight": [MockFunction],
               },
               "navGroup": Object {
+                "getCurrentNavGroup$": [MockFunction],
                 "getNavGroupEnabled": [MockFunction],
                 "getNavGroupsMap$": [MockFunction],
+                "setCurrentNavGroup": [MockFunction],
               },
               "navLinks": Object {
                 "enableForcedAppSwitcherNavigation": [MockFunction],
@@ -5177,6 +5206,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                   },
                 ],
               },
+              "setBreadcrumbsEnricher": [MockFunction],
               "setCustomNavLink": [MockFunction],
               "setHelpExtension": [MockFunction],
               "setHelpSupportUrl": [MockFunction],
@@ -6032,7 +6062,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
             noItemsFragment={
               <EuiEmptyPrompt
                 actions={
-                  <EuiButton
+                  <EuiSmallButton
                     data-test-subj="createDashboardPromptButton"
                     fill={true}
                     iconType="plus"
@@ -6043,7 +6073,7 @@ exports[`dashboard listing renders warning when listingLimit is exceeded 1`] = `
                       id="dashboard.listing.createNewDashboard.createButtonLabel"
                       values={Object {}}
                     />
-                  </EuiButton>
+                  </EuiSmallButton>
                 }
                 body={
                   <React.Fragment>

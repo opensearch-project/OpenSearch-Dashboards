@@ -37,6 +37,7 @@ import {
   EuiHideFor,
   EuiIcon,
   EuiShowFor,
+  EuiToolTip,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -54,7 +55,11 @@ import {
 } from '../..';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
-import { ChromeHelpExtension, ChromeBranding } from '../../chrome_service';
+import {
+  ChromeHelpExtension,
+  ChromeBranding,
+  ChromeBreadcrumbEnricher,
+} from '../../chrome_service';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
@@ -66,12 +71,18 @@ import { HeaderActionMenu } from './header_action_menu';
 import { HeaderLogo } from './header_logo';
 import type { Logos } from '../../../../common/types';
 import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
+import { CollapsibleNavGroupEnabled } from './collapsible_nav_group_enabled';
+import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
+import { RecentItems } from './recent_items';
+import { WorkspaceObject } from '../../../../public/workspace';
+
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
   application: InternalApplicationStart;
   appTitle$: Observable<string>;
   badge$: Observable<ChromeBadge | undefined>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  breadcrumbsEnricher$: Observable<ChromeBreadcrumbEnricher | undefined>;
   collapsibleNavHeaderRender?: () => JSX.Element | null;
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
@@ -87,6 +98,7 @@ export interface HeaderProps {
   navControlsRight$: Observable<readonly ChromeNavControl[]>;
   navControlsExpandedCenter$: Observable<readonly ChromeNavControl[]>;
   navControlsExpandedRight$: Observable<readonly ChromeNavControl[]>;
+  navControlsLeftBottom$: Observable<readonly ChromeNavControl[]>;
   basePath: HttpStart['basePath'];
   isLocked$: Observable<boolean>;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -95,6 +107,11 @@ export interface HeaderProps {
   logos: Logos;
   survey: string | undefined;
   sidecarConfig$: Observable<ISidecarConfig | undefined>;
+  navGroupEnabled: boolean;
+  currentNavGroup$: Observable<NavGroupItemInMap | undefined>;
+  navGroupsMap$: Observable<Record<string, NavGroupItemInMap>>;
+  setCurrentNavGroup: ChromeNavGroupServiceStartContract['setCurrentNavGroup'];
+  workspaceList$: Observable<WorkspaceObject[]>;
 }
 
 export function Header({
@@ -108,12 +125,22 @@ export function Header({
   survey,
   logos,
   collapsibleNavHeaderRender,
+  navGroupEnabled,
+  setCurrentNavGroup,
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
   const isLocked = useObservable(observables.isLocked$, false);
+  const appId = useObservable(application.currentAppId$, '');
   const [isNavOpen, setIsNavOpen] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
+
+  /**
+   * This is a workaround on 2.16 to hide the navigation items within left navigation
+   * when user is in homepage with workspace enabled + new navigation enabled
+   */
+  const shouldHideExpandIcon =
+    navGroupEnabled && appId === 'home' && application.capabilities.workspaces.enabled;
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
@@ -179,27 +206,31 @@ export function Header({
 
           <EuiHeader position="fixed" className="primaryHeader" style={sidecarPaddingStyle}>
             <EuiHeaderSection grow={false}>
-              <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
-                <EuiHeaderSectionItemButton
-                  data-test-subj="toggleNavButton"
-                  aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-                    defaultMessage: 'Toggle primary navigation',
-                  })}
-                  onClick={() => setIsNavOpen(!isNavOpen)}
-                  aria-expanded={isNavOpen}
-                  aria-pressed={isNavOpen}
-                  aria-controls={navId}
-                  ref={toggleCollapsibleNavRef}
-                >
-                  <EuiIcon
-                    type="menu"
-                    size="m"
-                    title={i18n.translate('core.ui.primaryNav.menu', {
+              {shouldHideExpandIcon ? null : (
+                <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
+                  <EuiToolTip
+                    content={i18n.translate('core.ui.primaryNav.menu', {
                       defaultMessage: 'Menu',
                     })}
-                  />
-                </EuiHeaderSectionItemButton>
-              </EuiHeaderSectionItem>
+                    delay="long"
+                    position="bottom"
+                  >
+                    <EuiHeaderSectionItemButton
+                      data-test-subj="toggleNavButton"
+                      aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                        defaultMessage: 'Toggle primary navigation',
+                      })}
+                      onClick={() => setIsNavOpen(!isNavOpen)}
+                      aria-expanded={isNavOpen}
+                      aria-pressed={isNavOpen}
+                      aria-controls={navId}
+                      ref={toggleCollapsibleNavRef}
+                    >
+                      <EuiIcon type="menu" size="m" />
+                    </EuiHeaderSectionItemButton>
+                  </EuiToolTip>
+                </EuiHeaderSectionItem>
+              )}
 
               <EuiHeaderSectionItem border="right">
                 <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
@@ -216,11 +247,24 @@ export function Header({
                   loadingCount$={observables.loadingCount$}
                 />
               </EuiHeaderSectionItem>
+              {/* Only display recent items when navGroup is enabled */}
+              {navGroupEnabled && (
+                <EuiHeaderSectionItem border="right">
+                  <RecentItems
+                    recentlyAccessed$={observables.recentlyAccessed$}
+                    workspaceList$={observables.workspaceList$}
+                    navigateToUrl={application.navigateToUrl}
+                    navLinks$={observables.navLinks$}
+                    basePath={basePath}
+                  />
+                </EuiHeaderSectionItem>
+              )}
             </EuiHeaderSection>
 
             <HeaderBreadcrumbs
               appTitle$={observables.appTitle$}
               breadcrumbs$={observables.breadcrumbs$}
+              breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
             />
 
             <EuiHeaderSectionItem border="none">
@@ -253,28 +297,55 @@ export function Header({
           </EuiHeader>
         </div>
 
-        <CollapsibleNav
-          appId$={application.currentAppId$}
-          collapsibleNavHeaderRender={collapsibleNavHeaderRender}
-          id={navId}
-          isLocked={isLocked}
-          navLinks$={observables.navLinks$}
-          recentlyAccessed$={observables.recentlyAccessed$}
-          isNavOpen={isNavOpen}
-          homeHref={homeHref}
-          basePath={basePath}
-          navigateToApp={application.navigateToApp}
-          navigateToUrl={application.navigateToUrl}
-          onIsLockedUpdate={onIsLockedUpdate}
-          closeNav={() => {
-            setIsNavOpen(false);
-            if (toggleCollapsibleNavRef.current) {
-              toggleCollapsibleNavRef.current.focus();
-            }
-          }}
-          customNavLink$={observables.customNavLink$}
-          logos={logos}
-        />
+        {navGroupEnabled ? (
+          <CollapsibleNavGroupEnabled
+            appId$={application.currentAppId$}
+            id={navId}
+            isLocked={isLocked}
+            navLinks$={observables.navLinks$}
+            isNavOpen={shouldHideExpandIcon ? false : isNavOpen}
+            basePath={basePath}
+            navigateToApp={application.navigateToApp}
+            navigateToUrl={application.navigateToUrl}
+            onIsLockedUpdate={onIsLockedUpdate}
+            closeNav={() => {
+              setIsNavOpen(false);
+              if (toggleCollapsibleNavRef.current) {
+                toggleCollapsibleNavRef.current.focus();
+              }
+            }}
+            customNavLink$={observables.customNavLink$}
+            logos={logos}
+            navGroupsMap$={observables.navGroupsMap$}
+            navControlsLeftBottom$={observables.navControlsLeftBottom$}
+            currentNavGroup$={observables.currentNavGroup$}
+            setCurrentNavGroup={setCurrentNavGroup}
+            capabilities={application.capabilities}
+          />
+        ) : (
+          <CollapsibleNav
+            appId$={application.currentAppId$}
+            collapsibleNavHeaderRender={collapsibleNavHeaderRender}
+            id={navId}
+            isLocked={isLocked}
+            navLinks$={observables.navLinks$}
+            recentlyAccessed$={observables.recentlyAccessed$}
+            isNavOpen={isNavOpen}
+            homeHref={homeHref}
+            basePath={basePath}
+            navigateToApp={application.navigateToApp}
+            navigateToUrl={application.navigateToUrl}
+            onIsLockedUpdate={onIsLockedUpdate}
+            closeNav={() => {
+              setIsNavOpen(false);
+              if (toggleCollapsibleNavRef.current) {
+                toggleCollapsibleNavRef.current.focus();
+              }
+            }}
+            customNavLink$={observables.customNavLink$}
+            logos={logos}
+          />
+        )}
       </header>
     </>
   );

@@ -1,0 +1,301 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AssociatedObjectsTable should render correctly and match the snapshot 1`] = `
+<div>
+  <div
+    className="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive euiFlexGroup--wrap"
+  >
+    <div
+      className="euiFlexItem euiSearchBar__searchHolder"
+    >
+      <div
+        className="euiFormControlLayout euiFormControlLayout--fullWidth"
+      >
+        <div
+          className="euiFormControlLayout__childrenWrapper"
+        >
+          <input
+            aria-label="This is a search bar. As you type, the results lower in the page will automatically filter."
+            className="euiFieldSearch euiFieldSearch--fullWidth"
+            defaultValue=""
+            onKeyUp={[Function]}
+            placeholder="Search for objects"
+            type="search"
+          />
+          <div
+            className="euiFormControlLayoutIcons"
+          >
+            <span
+              className="euiFormControlLayoutCustomIcon"
+            >
+              <span
+                aria-hidden="true"
+                className="euiFormControlLayoutCustomIcon__icon"
+                data-euiicon-type="search"
+                size="m"
+              />
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      className="euiFlexItem euiFlexItem--flexGrowZero euiSearchBar__filtersHolder"
+    >
+      <div
+        className="euiFilterGroup"
+      >
+        <div
+          className="euiPopover euiPopover--anchorDownCenter"
+          id="field_value_selection_0"
+        >
+          <div
+            className="euiPopover__anchor"
+          >
+            <button
+              className="euiButtonEmpty euiButtonEmpty--text euiFilterButton euiFilterButton--hasIcon"
+              disabled={false}
+              onClick={[Function]}
+              type="button"
+            >
+              <span
+                className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+              >
+                <span
+                  className="euiButtonContent__icon"
+                  color="inherit"
+                  data-euiicon-type="arrowDown"
+                  size="m"
+                />
+                <span
+                  className="euiButtonEmpty__text"
+                >
+                  <span
+                    className="euiFilterButton__textShift"
+                    data-text="Accelerations"
+                    title="Accelerations"
+                  >
+                    Accelerations
+                  </span>
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    className="euiSpacer euiSpacer--l"
+  />
+  <div
+    className="euiBasicTable"
+    data-test-subj="associatedObjectsTable"
+  >
+    <div>
+      <div
+        className="euiTableHeaderMobile"
+      >
+        <div
+          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+        >
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          />
+          <div
+            className="euiFlexItem euiFlexItem--flexGrowZero"
+          >
+            <div
+              className="euiTableSortMobile"
+            >
+              <div
+                className="euiPopover euiPopover--anchorDownRight"
+              >
+                <div
+                  className="euiPopover__anchor"
+                >
+                  <button
+                    className="euiButtonEmpty euiButtonEmpty--primary euiButtonEmpty--xSmall euiButtonEmpty--flushRight"
+                    disabled={false}
+                    onClick={[Function]}
+                    type="button"
+                  >
+                    <span
+                      className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
+                    >
+                      <span
+                        className="euiButtonContent__icon"
+                        color="inherit"
+                        data-euiicon-type="arrowDown"
+                        size="s"
+                      />
+                      <span
+                        className="euiButtonEmpty__text"
+                      >
+                        Sorting
+                      </span>
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <table
+        className="euiTable euiTable--responsive euiTable--auto"
+        id="__table_generated-id"
+        tabIndex={-1}
+      >
+        <caption
+          className="euiScreenReaderOnly euiTableCaption"
+        />
+        <thead>
+          <tr>
+            <th
+              aria-live="polite"
+              aria-sort="ascending"
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_name_0"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <button
+                className="euiTableHeaderButton euiTableHeaderButton-isSorted"
+                data-test-subj="tableHeaderSortButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiTableCellContent"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
+                    Name
+                  </span>
+                  <span
+                    className="euiTableSortIcon"
+                    data-euiicon-type="sortUp"
+                    size="m"
+                  />
+                </span>
+              </button>
+            </th>
+            <th
+              aria-live="polite"
+              aria-sort="none"
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_type_1"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <button
+                className="euiTableHeaderButton"
+                data-test-subj="tableHeaderSortButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiTableCellContent"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
+                    Type
+                  </span>
+                </span>
+              </button>
+            </th>
+            <th
+              aria-live="polite"
+              aria-sort="none"
+              className="euiTableHeaderCell"
+              data-test-subj="tableHeaderCell_accelerations_2"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <button
+                className="euiTableHeaderButton"
+                data-test-subj="tableHeaderSortButton"
+                onClick={[Function]}
+                type="button"
+              >
+                <span
+                  className="euiTableCellContent"
+                >
+                  <span
+                    className="euiTableCellContent__text"
+                  >
+                    Associations
+                  </span>
+                </span>
+              </button>
+            </th>
+            <th
+              className="euiTableHeaderCell"
+              role="columnheader"
+              scope="col"
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <span
+                className="euiTableCellContent euiTableCellContent--alignRight"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  Actions
+                </span>
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            className="euiTableRow"
+          >
+            <td
+              className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
+              colSpan={4}
+              style={
+                Object {
+                  "width": undefined,
+                }
+              }
+            >
+              <div
+                className="euiTableCellContent euiTableCellContent--alignCenter"
+              >
+                <span
+                  className="euiTableCellContent__text"
+                >
+                  No items found
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+`;

@@ -33,12 +33,17 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { ChromeBreadcrumb } from '../../chrome_service';
 
 describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
     const wrapper = mount(
-      <HeaderBreadcrumbs appTitle$={new BehaviorSubject('')} breadcrumbs$={breadcrumbs$} />
+      <HeaderBreadcrumbs
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+        breadcrumbsEnricher$={new BehaviorSubject(undefined)}
+      />
     );
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
 
@@ -49,5 +54,34 @@ describe('HeaderBreadcrumbs', () => {
     act(() => breadcrumbs$.next([]));
     wrapper.update();
     expect(wrapper.find('.euiBreadcrumb')).toMatchSnapshot();
+  });
+
+  it('prepend current nav group into existing breadcrumbs when nav group is enabled', () => {
+    const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
+    const breadcrumbsEnricher$ = new BehaviorSubject((crumbs: ChromeBreadcrumb[]) => [
+      { text: 'Home' },
+      { text: 'Analytics' },
+      ...crumbs,
+    ]);
+    const wrapper = mount(
+      <HeaderBreadcrumbs
+        appTitle$={new BehaviorSubject('')}
+        breadcrumbs$={breadcrumbs$}
+        breadcrumbsEnricher$={breadcrumbsEnricher$}
+      />
+    );
+    const breadcrumbs = wrapper.find('.euiBreadcrumbWrapper');
+    expect(breadcrumbs).toHaveLength(3);
+    expect(breadcrumbs.at(0).text()).toBe('Home');
+    expect(breadcrumbs.at(1).text()).toBe('Analytics');
+    expect(breadcrumbs.at(2).text()).toBe('First');
+
+    act(() => breadcrumbs$.next([{ text: 'First' }, { text: 'Second' }]));
+    wrapper.update();
+    expect(wrapper.find('.euiBreadcrumbWrapper')).toHaveLength(4);
+
+    act(() => breadcrumbs$.next([]));
+    wrapper.update();
+    expect(wrapper.find('.euiBreadcrumbWrapper')).toHaveLength(2);
   });
 });
