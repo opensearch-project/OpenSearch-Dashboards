@@ -148,6 +148,8 @@ export function Header({
 
   const expandedHeaderColorScheme: EuiHeaderProps['theme'] = 'dark';
 
+  // a comment
+
   return (
     <>
       <header className={className} data-test-subj="headerGlobalNav">
