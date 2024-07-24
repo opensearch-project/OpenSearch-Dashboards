@@ -382,10 +382,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
 
         const timeFields = fields.filter((field: any) => field.type === 'date');
         const timeFieldName = timeFields?.length > 0 ? timeFields[0].name : undefined;
-        object.timeFields = timeFields;
         setSelectedDataSetState((prevState) => ({
           ...prevState,
-          object,
+          fields,
+          timeFields,
           timeFieldName,
           type: SIMPLE_DATA_SET_TYPES.TEMPORARY,
         }));
@@ -664,7 +664,6 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                     <EuiSelect
                       id="dateFieldSelector"
                       compressed
-                      value={selectedDataSetState.timeFieldName}
                       options={[
                         ...(selectedDataSetState.timeFields &&
                         selectedDataSetState.timeFields!.length > 0
