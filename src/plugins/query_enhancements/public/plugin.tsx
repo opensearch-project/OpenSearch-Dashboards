@@ -19,8 +19,6 @@ import {
 } from './types';
 import { ASYNC_TRIGGER_ID } from '../common';
 
-export type PublicConfig = Pick<ConfigSchema, 'queryAssist'>;
-
 export class QueryEnhancementsPlugin
   implements
     Plugin<
@@ -119,16 +117,6 @@ export class QueryEnhancementsPlugin
           core.http,
           this.connectionsService,
           this.config.queryAssist
-        ),
-      },
-    });
-
-    data.__enhance({
-      ui: {
-        queryEditorExtension: createDataSourceConnectionExtension(
-          this.connectionsService,
-          core.notifications.toasts,
-          this.config
         ),
       },
     });
