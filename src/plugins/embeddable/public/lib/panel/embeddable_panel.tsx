@@ -94,6 +94,7 @@ interface State {
   focusedPanelIndex?: string;
   viewMode: ViewMode;
   hidePanelTitle: boolean;
+  hidePanelAction: boolean;
   closeContextMenu: boolean;
   badges: Array<Action<EmbeddableContext>>;
   notifications: Array<Action<EmbeddableContext>>;
@@ -116,11 +117,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     const hidePanelTitle =
       Boolean(embeddable.parent?.getInput()?.hidePanelTitles) ||
       Boolean(embeddable.getInput()?.hidePanelTitles);
+    const hidePanelAction =
+      Boolean(embeddable.parent?.getInput()?.hidePanelActions) ||
+      Boolean(embeddable.getInput()?.hidePanelActions);
 
     this.state = {
       panels: [],
       viewMode,
       hidePanelTitle,
+      hidePanelAction,
       closeContextMenu: false,
       badges: [],
       notifications: [],
@@ -187,6 +192,11 @@ export class EmbeddablePanel extends React.Component<Props, State> {
               Boolean(embeddable.parent?.getInput()?.hidePanelTitles) ||
               Boolean(embeddable.getInput()?.hidePanelTitles),
           });
+          this.setState({
+            hidePanelAction:
+              Boolean(embeddable.parent?.getInput()?.hidePanelActions) ||
+              Boolean(embeddable.getInput()?.hidePanelActions),
+          });
 
           this.refreshBadges();
           this.refreshNotifications();
@@ -245,6 +255,7 @@ export class EmbeddablePanel extends React.Component<Props, State> {
           <PanelHeader
             getActionContextMenuPanel={this.getActionContextMenuPanel}
             hidePanelTitle={this.state.hidePanelTitle}
+            hidePanelAction={this.state.hidePanelAction}
             isViewMode={viewOnlyMode}
             closeContextMenu={this.state.closeContextMenu}
             title={title}
