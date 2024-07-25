@@ -547,7 +547,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         <EuiButtonEmpty
           className="dataExplorerDSSelect"
           color="text"
-          iconType="arrowDowxn"
+          iconType="arrowDown"
           iconSide="right"
           onClick={onClick}
         >
