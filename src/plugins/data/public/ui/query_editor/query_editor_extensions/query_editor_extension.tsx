@@ -24,6 +24,14 @@ export interface QueryEditorExtensionDependencies {
    * Change the selected query language.
    */
   onSelectLanguage: (language: string) => void;
+  /**
+   * Whether the query editor is collapsed.
+   */
+  isCollapsed: boolean;
+  /**
+   * Set whether the query editor is collapsed.
+   */
+  setIsCollapsed: (isCollapsed: boolean) => void;
 }
 
 export interface QueryEditorExtensionConfig {

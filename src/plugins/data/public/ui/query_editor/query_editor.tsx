@@ -123,6 +123,10 @@ export default class QueryEditorUI extends Component<Props, State> {
     return toUser(this.props.query.query);
   };
 
+  private setIsCollapsed = (isCollapsed: boolean) => {
+    this.setState({ isCollapsed });
+  };
+
   private renderQueryEditorExtensions() {
     if (
       !(
@@ -139,6 +143,8 @@ export default class QueryEditorUI extends Component<Props, State> {
       <QueryEditorExtensions
         language={this.props.queryLanguage}
         onSelectLanguage={this.onSelectLanguage}
+        isCollapsed={this.state.isCollapsed}
+        setIsCollapsed={this.setIsCollapsed}
         configMap={this.extensionMap}
         componentContainer={this.headerRef.current}
         bannerContainer={this.bannerRef.current}

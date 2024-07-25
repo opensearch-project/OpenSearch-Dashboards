@@ -27,6 +27,8 @@ const renderQueryAssistBanner = (overrideProps: Partial<QueryAssistBannerProps> 
       dependencies: {
         language: 'default',
         onSelectLanguage: jest.fn(),
+        isCollapsed: true,
+        setIsCollapsed: jest.fn(),
       },
     },
     overrideProps
@@ -57,5 +59,6 @@ describe('<QueryAssistBanner /> spec', () => {
 
     fireEvent.click(component.getByTestId('queryAssist-banner-changeLanguage'));
     expect(props.dependencies.onSelectLanguage).toBeCalledWith('test-lang1');
+    expect(props.dependencies.setIsCollapsed).toBeCalledWith(false);
   });
 });

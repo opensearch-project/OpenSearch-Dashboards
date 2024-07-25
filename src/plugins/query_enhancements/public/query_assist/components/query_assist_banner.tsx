@@ -59,7 +59,10 @@ export const QueryAssistBanner: React.FC<QueryAssistBannerProps> = (props) => {
               />
               <EuiLink
                 data-test-subj="queryAssist-banner-changeLanguage"
-                onClick={() => props.dependencies.onSelectLanguage(props.languages[0])}
+                onClick={() => {
+                  props.dependencies.onSelectLanguage(props.languages[0]);
+                  if (props.dependencies.isCollapsed) props.dependencies.setIsCollapsed(false);
+                }}
               >
                 <FormattedMessage
                   id="queryAssist.banner.title.suffix"
