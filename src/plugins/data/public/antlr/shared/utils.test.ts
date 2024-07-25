@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import { fetchData } from './utils';
 import { DataSetManager } from '../../query';
 
+
 describe('fetchData', () => {
   it('should fetch data using the dataSourceRequestHandler', async () => {
     const mockTables = ['table1', 'table2'];
