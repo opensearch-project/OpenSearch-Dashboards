@@ -80,7 +80,7 @@ export const connectStorageToQueryState = async (
     const initialStateFromURL: QueryState = OsdUrlStateStorage.get('_q') ?? {
       query: queryString.getDefaultQuery(),
       filters: filterManager.getAppFilters(),
-      dataSet: await dataSet.getDefaultDataSet(),
+      dataSet: dataSet.getDefaultDataSet(),
     };
 
     // set up initial '_q' flag in the URL to sync query and filter changes

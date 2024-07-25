@@ -118,6 +118,14 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     notifications
   );
 
+  const getLabel = (currentDataSet: SimpleDataSet) => {
+    return `${
+      currentDataSet?.dataSourceRef?.name
+        ? `${currentDataSet.dataSourceRef?.name}::${currentDataSet?.title}`
+        : currentDataSet?.title
+    }`;
+  };
+
   const onClick = () => {
     setNavigatorState((prevState) => ({
       ...prevState,
@@ -551,9 +559,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           iconSide="right"
           onClick={onClick}
         >
-          {dataSet?.dataSourceRef?.name
-            ? `${dataSet.dataSourceRef?.name}::${dataSet?.title}`
-            : dataSet?.title}
+          {getLabel(selectedDataSetState)}
         </EuiButtonEmpty>
       }
       isOpen={navigatorState.isOpen}
