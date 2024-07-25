@@ -551,7 +551,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           iconSide="right"
           onClick={onClick}
         >
-          {dataSet?.dataSourceRef?.name
+          {navigatorState.isMounted && dataSet?.dataSourceRef && dataSet?.dataSourceRef.name
             ? `${dataSet.dataSourceRef?.name}::${dataSet?.title}`
             : dataSet?.title}
         </EuiButtonEmpty>
