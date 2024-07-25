@@ -5,7 +5,7 @@
 
 import { DataSetManager } from './dataset_manager';
 import { coreMock } from '../../../../../core/public/mocks';
-import { SimpleDataSet } from '../../../common/data_sets';
+import { SimpleDataSet } from '../../../common';
 
 describe('DataSetManager', () => {
   let service: DataSetManager;

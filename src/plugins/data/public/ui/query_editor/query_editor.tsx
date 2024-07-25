@@ -9,14 +9,7 @@ import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
 import { monaco } from '@osd/monaco';
 import { Settings } from '..';
-import {
-  DataSource,
-  IDataPluginServices,
-  IFieldType,
-  IIndexPattern,
-  Query,
-  TimeRange,
-} from '../..';
+import { IDataPluginServices, IFieldType, IIndexPattern, Query, TimeRange } from '../..';
 import {
   CodeEditor,
   OpenSearchDashboardsReactContextValue,

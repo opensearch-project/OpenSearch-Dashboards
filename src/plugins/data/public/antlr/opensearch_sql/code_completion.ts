@@ -43,10 +43,10 @@ export const getSuggestions = async ({
   selectionEnd,
   position,
   query,
-  openSearchDashboards,
+  services,
 }: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
-  const { api } = openSearchDashboards.uiSettings;
-  const dataSetManager = openSearchDashboards.data.query.dataSet;
+  const { api } = services.uiSettings;
+  const dataSetManager = services.data.query.dataSet;
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
     line: position?.lineNumber || selectionStart,
     column: position?.column || selectionEnd,
@@ -62,8 +62,8 @@ export const getSuggestions = async ({
 
       schemas.forEach((schema) => {
         if (schema.body?.fields?.length > 0) {
-          const columns = schema.body.fields.find((col) => col.name === 'COLUMN_NAME');
-          const fieldTypes = schema.body.fields.find((col) => col.name === 'DATA_TYPE');
+          const columns = schema.body.fields.find((col: any) => col.name === 'COLUMN_NAME');
+          const fieldTypes = schema.body.fields.find((col: any) => col.name === 'DATA_TYPE');
           if (columns && fieldTypes) {
             finalSuggestions.push(
               ...columns.values.map((col: string) => ({
