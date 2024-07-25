@@ -3,16 +3,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.osdQueryEditor__wrap {
-  height: 200px;
-  width: 500px;
+.osdQueryEditor__wrapper {
+  display: flex;
+}
+
+.osdQueryEditor__editorAndSelectorWrapper {
+  z-index: $euiZContentMenu;
+  max-width: 1000px;
 }
 
 .osdQueryEditorHeader {
   max-height: 400px;
-
-  // TODO fix styling: with "overflow: auto" the scroll bar appears although the content is below max-height
-  // overflow: auto;
 }
 
 .osdQueryEditorFooter-isHidden {
@@ -21,17 +22,23 @@
 
 .osdQueryEditorFooter {
   color: $euiTextSubduedColor; // Apply the subdued color to all text in this class
-  height: 25px;
+  max-height: 25px;
 
   * {
     color: inherit;
     font-size: $euiFontSizeXS;
     align-items: center;
+    height: 100%;
   }
 }
 
+.osdQueryEditor__filterBarWrapper {
+  margin-top: -10px;
+}
+
 .osdQueryEditor__collapseWrapper {
-  box-shadow: $euiTextSubduedColor;
+  max-width: 32px;
+  box-shadow: 1px 0 0 0 $euiColorLightShade;
 }
 
 .osdQueryEditor__languageWrapper {
@@ -58,9 +65,16 @@
 }
 
 .osdQueryEditor__dataSetWrapper {
+  max-width: 350px;
+
   .dataExplorerDSSelect {
     border-bottom: $euiBorderThin !important;
-    max-width: 375px;
+    min-width: 300px;
+
+    span:is([class$="__text"]) {
+      width: 350px;
+      text-align: left;
+    }
 
     div:is([class$="--group"]) {
       padding: 0 !important;
@@ -73,11 +87,13 @@
 }
 
 .osdQueryEditor__prependWrapper {
-  box-shadow: $euiTextSubduedColor;
+  box-shadow: -1px 0 0 0 $euiColorLightShade;
+  max-width: 32px;
 }
 
 .osdQueryEditor__prependWrapper-isCollapsed {
   box-shadow: none;
+  max-width: 32px;
 }
 
 .osdQueryEditor--updateButtonWrapper {
