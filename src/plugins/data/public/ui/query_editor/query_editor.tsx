@@ -324,7 +324,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       language: this.props.query.language,
       indexPatterns,
       position,
-      connectionService,
+      services: this.services,
     });
 
     // current completion item range being given as last 'word' at pos
