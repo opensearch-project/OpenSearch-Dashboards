@@ -1,0 +1,2 @@
+fix:
+- Update state sync to not be async again. Also fix the tests to pass in the missing mock. ([#7482](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7482))
