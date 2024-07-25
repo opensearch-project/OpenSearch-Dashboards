@@ -8,7 +8,6 @@ import { QueryLanguageSelector } from './language_selector';
 import { OpenSearchDashboardsContextProvider } from 'src/plugins/opensearch_dashboards_react/public';
 import { coreMock } from '../../../../../core/public/mocks';
 import { mountWithIntl } from 'test_utils/enzyme_helpers';
-import { EuiCompressedComboBox } from '@elastic/eui';
 import { QueryEnhancement } from '../types';
 
 const startMock = coreMock.createStart();
