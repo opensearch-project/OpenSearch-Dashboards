@@ -30,6 +30,7 @@ describe('QueryEditorExtension', () => {
     },
     dependencies: {
       language: 'Test',
+      onSelectLanguage: jest.fn(),
     },
     componentContainer: document.createElement('div'),
     bannerContainer: document.createElement('div'),

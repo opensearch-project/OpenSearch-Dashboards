@@ -83,7 +83,10 @@ export const createQueryAssistExtension = (
           data={data}
           invert
         >
-          <QueryAssistBanner languages={config.supportedLanguages.map((conf) => conf.language)} />
+          <QueryAssistBanner
+            dependencies={dependencies}
+            languages={config.supportedLanguages.map((conf) => conf.language)}
+          />
         </QueryAssistWrapper>
       );
     },

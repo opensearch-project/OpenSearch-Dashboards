@@ -9,7 +9,6 @@ import React from 'react';
 import { of } from 'rxjs';
 import { coreMock } from '../../../../../core/public/mocks';
 import { SimpleDataSet } from '../../../../data/common';
-import { IIndexPattern } from '../../../../data/public';
 import { dataPluginMock } from '../../../../data/public/mocks';
 import { DataSetContract } from '../../../../data/public/query';
 import { ConfigSchema } from '../../../common/config';
@@ -53,7 +52,9 @@ describe('CreateExtension', () => {
   it('should be enabled if at least one language is configured', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
     const extension = createQueryAssistExtension(httpMock, dataMock, config);
-    const isEnabled = await firstValueFrom(extension.isEnabled$({ language: 'PPL' }));
+    const isEnabled = await firstValueFrom(
+      extension.isEnabled$({ language: 'PPL', onSelectLanguage: jest.fn() })
+    );
     expect(isEnabled).toBeTruthy();
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
       query: { dataSourceId: 'mock-data-source-id' },
@@ -63,7 +64,9 @@ describe('CreateExtension', () => {
   it('should be disabled for unsupported language', async () => {
     httpMock.get.mockRejectedValueOnce(new Error('network failure'));
     const extension = createQueryAssistExtension(httpMock, dataMock, config);
-    const isEnabled = await firstValueFrom(extension.isEnabled$({ language: 'PPL' }));
+    const isEnabled = await firstValueFrom(
+      extension.isEnabled$({ language: 'PPL', onSelectLanguage: jest.fn() })
+    );
     expect(isEnabled).toBeFalsy();
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {
       query: { dataSourceId: 'mock-data-source-id' },
@@ -75,7 +78,7 @@ describe('CreateExtension', () => {
     const extension = createQueryAssistExtension(httpMock, dataMock, config);
     const component = extension.getComponent?.({
       language: 'PPL',
-      indexPatterns: [{ id: 'test-pattern' }] as IIndexPattern[],
+      onSelectLanguage: jest.fn(),
     });
 
     if (!component) throw new Error('QueryEditorExtensions Component is undefined');
@@ -92,7 +95,7 @@ describe('CreateExtension', () => {
     const extension = createQueryAssistExtension(httpMock, dataMock, config);
     const banner = extension.getBanner?.({
       language: 'DQL',
-      indexPatterns: [{ id: 'test-pattern' }] as IIndexPattern[],
+      onSelectLanguage: jest.fn(),
     });
 
     if (!banner) throw new Error('QueryEditorExtensions Banner is undefined');

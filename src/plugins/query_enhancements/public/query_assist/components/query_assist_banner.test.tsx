@@ -24,6 +24,10 @@ const renderQueryAssistBanner = (overrideProps: Partial<QueryAssistBannerProps> 
   >(
     {
       languages: ['test-lang1', 'test-lang2'],
+      dependencies: {
+        language: 'default',
+        onSelectLanguage: jest.fn(),
+      },
     },
     overrideProps
   );
@@ -46,5 +50,12 @@ describe('<QueryAssistBanner /> spec', () => {
     expect(
       component.queryByText('Natural Language Query Generation for test-lang1, test-lang2')
     ).toBeNull();
+  });
+
+  it('should change language', async () => {
+    const { props, component } = renderQueryAssistBanner();
+
+    fireEvent.click(component.getByTestId('queryAssist-banner-changeLanguage'));
+    expect(props.dependencies.onSelectLanguage).toBeCalledWith('test-lang1');
   });
 });

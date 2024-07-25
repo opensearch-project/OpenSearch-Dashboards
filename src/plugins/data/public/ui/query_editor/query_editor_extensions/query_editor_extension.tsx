@@ -20,6 +20,10 @@ export interface QueryEditorExtensionDependencies {
    * Currently selected query language.
    */
   language: string;
+  /**
+   * Change the selected query language.
+   */
+  onSelectLanguage: (language: string) => void;
 }
 
 export interface QueryEditorExtensionConfig {

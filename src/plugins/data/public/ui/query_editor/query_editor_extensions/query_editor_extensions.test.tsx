@@ -24,6 +24,7 @@ describe('QueryEditorExtensions', () => {
     componentContainer: document.createElement('div'),
     bannerContainer: document.createElement('div'),
     language: 'Test-lang',
+    onSelectLanguage: jest.fn(),
   };
 
   beforeEach(() => {
@@ -69,7 +70,7 @@ describe('QueryEditorExtensions', () => {
 
     expect(QueryEditorExtension).toHaveBeenCalledWith(
       expect.objectContaining({
-        dependencies: { language: 'Test-lang' },
+        dependencies: { language: 'Test-lang', onSelectLanguage: expect.any(Function) },
       }),
       expect.anything()
     );

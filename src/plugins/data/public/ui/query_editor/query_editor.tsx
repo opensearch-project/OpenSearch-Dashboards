@@ -138,6 +138,7 @@ export default class QueryEditorUI extends Component<Props, State> {
     return (
       <QueryEditorExtensions
         language={this.props.queryLanguage}
+        onSelectLanguage={this.onSelectLanguage}
         configMap={this.extensionMap}
         componentContainer={this.headerRef.current}
         bannerContainer={this.bannerRef.current}
