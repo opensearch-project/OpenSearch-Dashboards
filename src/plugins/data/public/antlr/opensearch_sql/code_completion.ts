@@ -23,7 +23,7 @@ import { findCursorTokenIndex } from '../shared/cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
-import { fetchColumnValues, fetchTableSchemas } from '../shared/utils';
+import { fetchTableSchemas } from '../shared/utils';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -47,7 +47,6 @@ export const getSuggestions = async ({
 }: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
   const { api } = openSearchDashboards.uiSettings;
   const dataSetManager = openSearchDashboards.data.query.dataSet;
-  const selectedDataSet = dataSetManager.getDataSet();
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
     line: position?.lineNumber || selectionStart,
     column: position?.column || selectionEnd,
@@ -59,7 +58,7 @@ export const getSuggestions = async ({
     // Fetch columns and values
     if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
       const tableNames = suggestions.suggestColumns?.tables?.map((table) => table.name) ?? [];
-      const schemas = await fetchTableSchemas(tableNames, api, selectedDataSet);
+      const schemas = await fetchTableSchemas(tableNames, api, dataSetManager);
 
       schemas.forEach((schema) => {
         if (schema.body?.fields?.length > 0) {
@@ -76,29 +75,8 @@ export const getSuggestions = async ({
         }
       });
 
-      if (
-        'suggestValuesForColumn' in suggestions &&
-        /\S/.test(suggestions.suggestValuesForColumn as string) &&
-        suggestions.suggestValuesForColumn !== undefined
-      ) {
-        const values = await fetchColumnValues(
-          tableNames,
-          suggestions.suggestValuesForColumn as string,
-          api,
-          selectedDataSet
-        );
-
-        values.forEach((value) => {
-          if (value.body?.fields?.length > 0) {
-            finalSuggestions.push(
-              ...value.body.fields[0].values.map((colVal: string) => ({
-                text: `'${colVal}'`,
-                type: monaco.languages.CompletionItemKind.Value,
-              }))
-            );
-          }
-        });
-      }
+      // later TODO: fetch column values, currently within the industry, it's not a common practice to suggest
+      // values due to different types of the columns as well as the performance impact. For now just avoid it.
     }
 
     // Fill in aggregate functions
