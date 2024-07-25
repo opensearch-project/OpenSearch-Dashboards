@@ -431,17 +431,24 @@ export default class QueryEditorUI extends Component<Props, State> {
         <EuiFlexGroup gutterSize="xs" direction="column">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" className={`${className}__wrapper`}>
-              <EuiFlexItem grow={false} className={`${className}__collapseWrapper`}>
+              <EuiFlexItem className={`${className}__collapseWrapper`}>
                 <QueryEditorBtnCollapse
                   onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}
                   isCollapsed={!this.state.isCollapsed}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={2} className={`${className}__dataSetWrapper`}>
+              <EuiFlexItem className={`${className}__dataSetWrapper`}>
                 <div ref={this.props.dataSetContainerRef} />
               </EuiFlexItem>
-              <EuiFlexItem grow={10}>
-                <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem grow={true}>
+                <EuiFlexGroup
+                  gutterSize="none"
+                  className={
+                    !useQueryEditor
+                      ? 'euiFormControlLayout euiFormControlLayout--group osdQueryEditor__editorAndSelectorWrapper'
+                      : ''
+                  }
+                >
                   {(this.state.isCollapsed || !useQueryEditor) && (
                     <EuiFlexItem grow={9}>
                       <div className="single-line-editor-wrapper">
@@ -495,13 +502,17 @@ export default class QueryEditorUI extends Component<Props, State> {
                   )}
                   {!useQueryEditor && (
                     <EuiFlexItem grow={false}>
-                      <div className="osdQueryEditor__languageWrapper">{languageSelector}</div>
+                      <QueryLanguageSelector
+                        language={this.props.query.language}
+                        anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+                        onSelectLanguage={this.onSelectLanguage}
+                        appName={this.services.appName}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem
-                grow={false}
                 className={`${className}__prependWrapper${
                   !this.state.isCollapsed && useQueryEditor ? '' : '-isCollapsed'
                 }`}
@@ -576,7 +587,9 @@ export default class QueryEditorUI extends Component<Props, State> {
           </EuiFlexItem>
 
           {!this.state.isCollapsed && (
-            <EuiFlexItem grow={false}>{this.props.filterBar}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <div className="osdQueryEditor__filterBarWrapper">{this.props.filterBar}</div>
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
         {this.renderQueryEditorExtensions()}

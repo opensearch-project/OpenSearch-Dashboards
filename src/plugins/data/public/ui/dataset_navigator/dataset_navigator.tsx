@@ -549,6 +549,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           color="text"
           iconType="arrowDown"
           iconSide="right"
+          flush="left"
           onClick={onClick}
         >
           {navigatorState.isMounted && dataSet?.dataSourceRef && dataSet?.dataSourceRef.name
@@ -559,6 +560,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       isOpen={navigatorState.isOpen}
       closePopover={closePopover}
       anchorPosition="downLeft"
+      display="block"
       panelPaddingSize="none"
     >
       <EuiContextMenu
