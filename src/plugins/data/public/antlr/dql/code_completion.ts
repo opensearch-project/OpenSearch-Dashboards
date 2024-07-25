@@ -6,10 +6,11 @@
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { HttpSetup } from 'opensearch-dashboards/public';
+import { monaco } from '@osd/monaco';
 import { DQLLexer } from './.generated/DQLLexer';
 import { DQLParser, KeyValueExpressionContext } from './.generated/DQLParser';
 import { getTokenPosition } from '../shared/cursor';
-import { IndexPattern, IndexPatternField } from '../../index_patterns';
+import { IndexPatternField } from '../../index_patterns';
 import { QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
 
@@ -43,11 +44,12 @@ const findFieldSuggestions = (indexPattern: any) => {
       return idxField.name;
     });
 
-  const fieldSuggestions: Array<{ text: string; type: string }> = fieldNames.map(
-    (field: string) => {
-      return { text: field, type: 'field' };
-    }
-  );
+  const fieldSuggestions: Array<{
+    text: string;
+    type: monaco.languages.CompletionItemKind;
+  }> = fieldNames.map((field: string) => {
+    return { text: field, type: monaco.languages.CompletionItemKind.Field };
+  });
 
   return fieldSuggestions;
 };
@@ -173,7 +175,7 @@ export const getSuggestions = async ({
     if (!!values) {
       completions.push(
         ...values?.map((val: any) => {
-          return { text: val, type: 'value' };
+          return { text: val, type: monaco.languages.CompletionItemKind.Value };
         })
       );
     }
@@ -187,7 +189,7 @@ export const getSuggestions = async ({
     }
 
     const tokenSymbolName = parser.vocabulary.getSymbolicName(token)?.toLowerCase();
-    completions.push({ text: tokenSymbolName, type: 'keyword' });
+    completions.push({ text: tokenSymbolName, type: monaco.languages.CompletionItemKind.Keyword });
   });
 
   return completions;
