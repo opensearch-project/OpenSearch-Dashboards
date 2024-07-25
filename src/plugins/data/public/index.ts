@@ -445,6 +445,7 @@ export {
   QueryEditorTopRow,
   // for BWC, keeping the old name
   IUiStart as DataPublicPluginStartUi,
+  DataSetNavigator,
 } from './ui';
 
 /**

@@ -9,7 +9,7 @@ import { coreMock } from '../../../../core/public/mocks';
 import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
 import { TableVisApp } from './table_vis_app';
 import { TableVisConfig } from '../types';
-import { TableVisData } from '../table_vis_response_handler';
+import { TableVisData, FormattedTableContext } from '../table_vis_response_handler';
 
 jest.mock('./table_vis_component_group', () => ({
   TableVisComponentGroup: () => (
@@ -42,15 +42,24 @@ describe('TableVisApp', () => {
   } as unknown) as IInterpreterRenderHandlers;
   const visConfigMock = ({} as unknown) as TableVisConfig;
 
-  it('should render TableVisComponent if no split table', () => {
-    const visDataMock = {
-      table: {
-        columns: [],
-        rows: [],
-        formattedColumns: [],
+  const createMockFormattedTableContext = (rowCount: number): FormattedTableContext => ({
+    columns: [{ id: 'col1', name: 'Column 1' }],
+    rows: Array(rowCount).fill({ col1: 'value' }),
+    formattedColumns: [
+      {
+        id: 'col1',
+        title: 'Column 1',
+        formatter: {} as any,
+        filterable: true,
       },
+    ],
+  });
+
+  it('should render TableVisComponent if no split table and has rows', () => {
+    const visDataMock: TableVisData = {
+      table: createMockFormattedTableContext(1),
       tableGroups: [],
-    } as TableVisData;
+    };
     const { getByTestId } = render(
       <TableVisApp
         services={serviceMock}
@@ -63,10 +72,15 @@ describe('TableVisApp', () => {
   });
 
   it('should render TableVisComponentGroup component if split direction is column', () => {
-    const visDataMock = {
-      tableGroups: [],
+    const visDataMock: TableVisData = {
+      tableGroups: [
+        {
+          table: createMockFormattedTableContext(1),
+          title: 'Group 1',
+        },
+      ],
       direction: 'column',
-    } as TableVisData;
+    };
     const { container, getByTestId } = render(
       <TableVisApp
         services={serviceMock}
@@ -75,15 +89,20 @@ describe('TableVisApp', () => {
         handlers={handlersMock}
       />
     );
-    expect(container.outerHTML.includes('visTable')).toBe(true);
+    expect(container.querySelector('.visTable')).not.toBeNull();
     expect(getByTestId('TableVisComponentGroup')).toBeInTheDocument();
   });
 
   it('should render TableVisComponentGroup component if split direction is row', () => {
-    const visDataMock = {
-      tableGroups: [],
+    const visDataMock: TableVisData = {
+      tableGroups: [
+        {
+          table: createMockFormattedTableContext(1),
+          title: 'Group 1',
+        },
+      ],
       direction: 'row',
-    } as TableVisData;
+    };
     const { container, getByTestId } = render(
       <TableVisApp
         services={serviceMock}
@@ -92,7 +111,23 @@ describe('TableVisApp', () => {
         handlers={handlersMock}
       />
     );
-    expect(container.outerHTML.includes('visTable')).toBe(true);
+    expect(container.querySelector('.visTable')).not.toBeNull();
     expect(getByTestId('TableVisComponentGroup')).toBeInTheDocument();
+  });
+
+  it('should render "No results found" when there are no rows', () => {
+    const visDataMock: TableVisData = {
+      table: createMockFormattedTableContext(0),
+      tableGroups: [],
+    };
+    const { getByText } = render(
+      <TableVisApp
+        services={serviceMock}
+        visData={visDataMock}
+        visConfig={visConfigMock}
+        handlers={handlersMock}
+      />
+    );
+    expect(getByText('No results found')).toBeInTheDocument();
   });
 });
