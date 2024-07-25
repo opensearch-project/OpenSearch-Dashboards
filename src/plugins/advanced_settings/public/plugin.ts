@@ -34,6 +34,7 @@ import { FeatureCatalogueCategory } from '../../home/public';
 import { ComponentRegistry } from './component_registry';
 import { AdvancedSettingsSetup, AdvancedSettingsStart, AdvancedSettingsPluginSetup } from './types';
 import { DEFAULT_NAV_GROUPS, AppNavLinkStatus, WorkspaceAvailability } from '../../../core/public';
+import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 
 const component = new ComponentRegistry();
 
@@ -80,7 +81,8 @@ export class AdvancedSettingsPlugin
           {
             ...params,
             basePath: core.http.basePath.get(),
-            setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+            setBreadcrumbs: (breadCrumbs) =>
+              coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
             wrapInPage: true,
           },
           component.start
