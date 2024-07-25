@@ -157,21 +157,16 @@ export default class QueryStringInputUI extends Component<Props, State> {
       return;
     }
 
-    const language = this.props.query.language;
     const queryString = this.getQueryString();
-
     const recentSearchSuggestions = this.getRecentSearchSuggestions(queryString);
-    const hasQuerySuggestions = this.services.data.autocomplete.hasQuerySuggestions(language);
+    // NOTE: autocomplete suggestions were pulled here; when reintroducing, would need to go here
 
     if (
-      !hasQuerySuggestions ||
       !Array.isArray(this.state.indexPatterns) ||
       compact(this.state.indexPatterns).length === 0
     ) {
       return recentSearchSuggestions;
     }
-
-    const indexPatterns = this.state.indexPatterns;
 
     const { selectionStart, selectionEnd } = this.inputRef;
     if (selectionStart === null || selectionEnd === null) {
@@ -181,16 +176,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     try {
       if (this.abortController) this.abortController.abort();
       this.abortController = new AbortController();
-      const suggestions =
-        (await this.services.data.autocomplete.getQuerySuggestions({
-          language,
-          indexPatterns,
-          query: queryString,
-          selectionStart,
-          selectionEnd,
-          signal: this.abortController.signal,
-        })) || [];
-      return [...suggestions, ...recentSearchSuggestions];
+      return recentSearchSuggestions;
     } catch (e) {
       // TODO: Waiting on https://github.com/elastic/kibana/issues/51406 for a properly typed error
       // Ignore aborted requests
