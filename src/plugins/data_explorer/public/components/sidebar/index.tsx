@@ -30,6 +30,8 @@ export const Sidebar: FC = ({ children }) => {
     },
   } = useOpenSearchDashboards<DataExplorerServices>();
 
+  const { DataSetNavigator } = ui;
+
   useEffect(() => {
     const subscriptions = ui.Settings.getEnabledQueryEnhancementsUpdated$().subscribe(
       (enabledQueryEnhancements) => {
@@ -48,17 +50,17 @@ export const Sidebar: FC = ({ children }) => {
 
   useEffect(() => {
     if (!isEnhancementsEnabled) return;
-    const subscriptions = ui.container$.subscribe((container) => {
-      if (container === null) return;
+    const subscriptions = ui.dataSetContainer$.subscribe((dataSetContainer) => {
+      if (dataSetContainer === null) return;
       if (containerRef.current) {
-        setContainerRef(container);
+        setContainerRef(dataSetContainer);
       }
     });
 
     return () => {
       subscriptions.unsubscribe();
     };
-  }, [ui.container$, containerRef, setContainerRef, isEnhancementsEnabled]);
+  }, [ui.dataSetContainer$, containerRef, setContainerRef, isEnhancementsEnabled]);
 
   useEffect(() => {
     let isMounted = true;
@@ -134,19 +136,6 @@ export const Sidebar: FC = ({ children }) => {
     dataSources.dataSourceService.reload();
   }, [dataSources.dataSourceService]);
 
-  const dataSourceSelector = (
-    <DataSourceSelectable
-      dataSources={activeDataSources}
-      dataSourceOptionList={dataSourceOptionList}
-      setDataSourceOptionList={setDataSourceOptionList}
-      onDataSourceSelect={handleSourceSelection}
-      selectedSources={selectedSources}
-      onGetDataSetError={handleGetDataSetError}
-      onRefresh={memorizedReload}
-      fullWidth
-    />
-  );
-
   return (
     <EuiPageSideBar className="deSidebar" sticky>
       <EuiSplitPanel.Outer
@@ -161,7 +150,7 @@ export const Sidebar: FC = ({ children }) => {
               containerRef.current = node;
             }}
           >
-            {dataSourceSelector}
+            <DataSetNavigator />
           </EuiPortal>
         )}
         {!isEnhancementsEnabled && (
@@ -171,7 +160,16 @@ export const Sidebar: FC = ({ children }) => {
             color="transparent"
             className="deSidebar_dataSource"
           >
-            {dataSourceSelector}
+            <DataSourceSelectable
+              dataSources={activeDataSources}
+              dataSourceOptionList={dataSourceOptionList}
+              setDataSourceOptionList={setDataSourceOptionList}
+              onDataSourceSelect={handleSourceSelection}
+              selectedSources={selectedSources}
+              onGetDataSetError={handleGetDataSetError}
+              onRefresh={memorizedReload}
+              fullWidth
+            />
           </EuiSplitPanel.Inner>
         )}
         <EuiSplitPanel.Inner paddingSize="none" color="transparent" className="eui-yScroll">
