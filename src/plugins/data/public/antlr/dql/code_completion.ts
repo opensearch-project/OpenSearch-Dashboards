@@ -36,11 +36,11 @@ const findCursorIndex = (
   return undefined;
 };
 
-const findFieldSuggestions = (indexPattern: IndexPattern) => {
+const findFieldSuggestions = (indexPattern: any) => {
   const fieldNames: string[] = indexPattern.fields
-    .filter((idxField: IndexPatternField) => !idxField.subType) // filter removed .keyword fields
-    .map((idxField: { displayName: string }) => {
-      return idxField.displayName;
+    .filter((idxField: IndexPatternField) => !idxField?.subType) // filter removed .keyword fields
+    .map((idxField: { name: string }) => {
+      return idxField.name;
     });
 
   const fieldSuggestions: Array<{ text: string; type: string }> = fieldNames.map(
@@ -65,22 +65,17 @@ const getFieldSuggestedValues = async (
   });
 };
 
-const findValueSuggestions = async (
-  index: IndexPattern,
-  field: string,
-  value: string,
-  http?: HttpSetup
-) => {
+const findValueSuggestions = async (index: any, field: string, value: string, http?: HttpSetup) => {
   // check to see if last field is within index and if it can suggest values, first check
   // if .keyword appended field exists because that has values
   const matchedField =
     index.fields.find((idxField: IndexPatternField) => {
       // check to see if the field matches another field with .keyword appended
-      if (idxField.displayName === `${field}.keyword`) return idxField;
+      if (idxField.name === `${field}.keyword`) return idxField;
     }) ||
     index.fields.find((idxField: IndexPatternField) => {
       // if the display name matches, return
-      if (idxField.displayName === field) return idxField;
+      if (idxField.name === field) return idxField;
     });
 
   if (matchedField?.type === 'boolean') {
@@ -90,7 +85,7 @@ const findValueSuggestions = async (
   if (!matchedField || !matchedField.aggregatable || matchedField.type !== 'string') return;
 
   // ask api for suggestions
-  return await getFieldSuggestedValues(index.title, matchedField.displayName, value, http);
+  return await getFieldSuggestedValues(index.title, matchedField.name, value, http);
 };
 
 // visitor for parsing the current query
@@ -122,8 +117,11 @@ export const getSuggestions = async ({
   selectionEnd,
   core: coreSetup,
 }: QuerySuggestionGetFnArgs) => {
+  console.log('indexpa', indexPatterns);
+
   const http = coreSetup?.http;
-  const currentIndexPattern = indexPatterns[0] as IndexPattern;
+  const currentIndexPattern = indexPatterns[0];
+  console.log('curr', currentIndexPattern);
 
   const inputStream = CharStream.fromString(query);
   const lexer = new DQLLexer(inputStream);
