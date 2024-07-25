@@ -37,6 +37,7 @@ import { applicationServiceMock, chromeServiceMock } from '../../../mocks';
 import { Header } from './header';
 import { StubBrowserStorage } from 'test_utils/stub_browser_storage';
 import { ISidecarConfig, SIDECAR_DOCKED_MODE } from '../../../overlays';
+import { EuiHeaderSectionItemButton } from '@elastic/eui';
 
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => 'mockId',
@@ -204,5 +205,18 @@ describe('Header', () => {
     const component = mountWithIntl(<Header {...props} navGroupEnabled />);
 
     expect(component.find('.header__toggleNavButtonSection').exists()).toBeFalsy();
+  });
+
+  it('toggles primary navigation menu when clicked', () => {
+    const branding = {
+      useExpandedHeader: false,
+    };
+    const props = {
+      ...mockProps(),
+      branding,
+    };
+    const component = mountWithIntl(<Header {...props} />);
+    component.find(EuiHeaderSectionItemButton).first().simulate('click');
+    expect(component).toMatchSnapshot();
   });
 });
