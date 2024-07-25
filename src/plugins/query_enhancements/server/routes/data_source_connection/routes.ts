@@ -5,6 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter } from 'opensearch-dashboards/server';
+import { DataSourceAttributes } from '../../../../data_source/common/data_sources';
 import { API } from '../../../common';
 
 export function registerDataSourceConnectionsRoutes(router: IRouter) {
@@ -17,7 +18,7 @@ export function registerDataSourceConnectionsRoutes(router: IRouter) {
     },
     async (context, request, response) => {
       const fields = ['id', 'title', 'auth.type'];
-      const resp = await context.core.savedObjects.client.find({
+      const resp = await context.core.savedObjects.client.find<DataSourceAttributes>({
         type: 'data-source',
         fields,
         perPage: 10000,
@@ -37,7 +38,7 @@ export function registerDataSourceConnectionsRoutes(router: IRouter) {
       },
     },
     async (context, request, response) => {
-      const resp = await context.core.savedObjects.client.get(
+      const resp = await context.core.savedObjects.client.get<DataSourceAttributes>(
         'data-source',
         request.params.dataSourceId
       );

@@ -39,7 +39,8 @@ const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 // @internal
 export interface QueryEditorTopRowProps {
   query?: Query;
-  dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
+  dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
+  containerRef?: React.RefCallback<HTMLDivElement>;
   settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -207,10 +208,11 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     )
       return '';
 
-    const defaultDataSet = indexPatterns[0];
-    const dataSet = typeof defaultDataSet === 'string' ? defaultDataSet : defaultDataSet.title;
+    const defaultDataSource = indexPatterns[0];
+    const dataSource =
+      typeof defaultDataSource === 'string' ? defaultDataSource : defaultDataSource.title;
 
-    return input.replace('<data_source>', dataSet);
+    return input.replace('<data_source>', dataSource);
   }
 
   function renderQueryEditor() {
@@ -223,7 +225,8 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
           dataSource={props.dataSource}
           prepend={props.prepend}
           query={parsedQuery}
-          dataSetContainerRef={props.dataSetContainerRef}
+          dataSourceContainerRef={props.dataSourceContainerRef}
+          containerRef={props.containerRef}
           settings={props.settings!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}

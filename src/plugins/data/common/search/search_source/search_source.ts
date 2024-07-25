@@ -94,6 +94,7 @@ import {
   convertResult,
   createDataFrame,
   getRawQueryString,
+  parseRawQueryString,
 } from '../../data_frames';
 import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
@@ -323,12 +324,7 @@ export class SearchSource {
     const dataFrame = createDataFrame({
       name: searchRequest.index.title || searchRequest.index,
       fields: [],
-      ...(rawQueryString && {
-        meta: {
-          queryConfig: { qs: rawQueryString },
-          ...(searchRequest.dataSourceId && { dataSource: searchRequest.dataSourceId }),
-        },
-      }),
+      ...(rawQueryString && { meta: { queryConfig: parseRawQueryString(rawQueryString) } }),
     });
     await this.setDataFrame(dataFrame);
     return this.getDataFrame();
@@ -430,8 +426,7 @@ export class SearchSource {
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
-    const currentDataframe = this.getDataFrame();
-    if (!currentDataframe || currentDataframe.name !== searchRequest.index?.id) {
+    if (!this.getDataFrame()) {
       await this.createDataFrame(searchRequest);
     }
 

@@ -48,21 +48,16 @@ import { validateTimeRange } from '../timefilter';
  * @param  OsdUrlStateStorage to use for syncing and store data
  * @param syncConfig app filter and query
  */
-export const connectStorageToQueryState = async (
+export const connectStorageToQueryState = (
   {
-    dataSet,
     filterManager,
     queryString,
     state$,
-  }: Pick<
-    QueryStart | QuerySetup,
-    'timefilter' | 'filterManager' | 'queryString' | 'dataSet' | 'state$'
-  >,
+  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
   OsdUrlStateStorage: IOsdUrlStateStorage,
   syncConfig: {
     filters: FilterStateStore;
     query: boolean;
-    dataSet?: boolean;
   }
 ) => {
   try {
@@ -73,14 +68,10 @@ export const connectStorageToQueryState = async (
     if (syncConfig.filters === FilterStateStore.APP_STATE) {
       syncKeys.push('appFilters');
     }
-    if (syncConfig.dataSet) {
-      syncKeys.push('dataSet');
-    }
 
     const initialStateFromURL: QueryState = OsdUrlStateStorage.get('_q') ?? {
       query: queryString.getDefaultQuery(),
       filters: filterManager.getAppFilters(),
-      dataSet: await dataSet.getDefaultDataSet(),
     };
 
     // set up initial '_q' flag in the URL to sync query and filter changes
@@ -93,17 +84,6 @@ export const connectStorageToQueryState = async (
     if (syncConfig.query && !_.isEqual(initialStateFromURL.query, queryString.getQuery())) {
       if (initialStateFromURL.query) {
         queryString.setQuery(_.cloneDeep(initialStateFromURL.query));
-      }
-    }
-
-    if (syncConfig.dataSet && !_.isEqual(initialStateFromURL.dataSet, dataSet.getDataSet())) {
-      if (initialStateFromURL.dataSet) {
-        dataSet.setDataSet(_.cloneDeep(initialStateFromURL.dataSet));
-      } else {
-        const defaultDataSet = await dataSet.getDefaultDataSet();
-        if (defaultDataSet) {
-          dataSet.setDataSet(defaultDataSet);
-        }
       }
     }
 
@@ -139,10 +119,6 @@ export const connectStorageToQueryState = async (
                 newState.filters = filterManager.getAppFilters();
               }
 
-              if (syncConfig.dataSet && changes.dataSet) {
-                newState.dataSet = dataSet.getDataSet();
-              }
-
               return newState;
             })
           )
@@ -167,24 +143,19 @@ export const connectStorageToQueryState = async (
  * @param QueryService: either setup or start
  * @param stateContainer to use for syncing
  */
-export const connectToQueryState = async <S extends QueryState>(
+export const connectToQueryState = <S extends QueryState>(
   {
     timefilter: { timefilter },
     filterManager,
     queryString,
-    dataSet,
     state$,
-  }: Pick<
-    QueryStart | QuerySetup,
-    'timefilter' | 'filterManager' | 'dataSet' | 'queryString' | 'state$'
-  >,
+  }: Pick<QueryStart | QuerySetup, 'timefilter' | 'filterManager' | 'queryString' | 'state$'>,
   stateContainer: BaseStateContainer<S>,
   syncConfig: {
     time?: boolean;
     refreshInterval?: boolean;
     filters?: FilterStateStore | boolean;
     query?: boolean;
-    dataSet?: boolean;
   }
 ) => {
   const syncKeys: Array<keyof QueryStateChange> = [];
@@ -209,9 +180,6 @@ export const connectToQueryState = async <S extends QueryState>(
         syncKeys.push('globalFilters');
         break;
     }
-  }
-  if (syncConfig.dataSet) {
-    syncKeys.push('dataSet');
   }
 
   // initial syncing
@@ -267,11 +235,6 @@ export const connectToQueryState = async <S extends QueryState>(
     }
   }
 
-  if (syncConfig.dataSet && !initialState.dataSet) {
-    initialState.dataSet = await dataSet.getDefaultDataSet();
-    initialDirty = true;
-  }
-
   if (initialDirty) {
     stateContainer.set({ ...stateContainer.get(), ...initialState });
   }
@@ -309,16 +272,13 @@ export const connectToQueryState = async <S extends QueryState>(
               newState.filters = filterManager.getAppFilters();
             }
           }
-          if (syncConfig.dataSet && changes.dataSet) {
-            newState.dataSet = dataSet.getDataSet();
-          }
           return newState;
         })
       )
       .subscribe((newState) => {
         stateContainer.set({ ...stateContainer.get(), ...newState });
       }),
-    stateContainer.state$.subscribe(async (state) => {
+    stateContainer.state$.subscribe((state) => {
       updateInProgress = true;
 
       // cloneDeep is required because services are mutating passed objects
@@ -367,21 +327,6 @@ export const connectToQueryState = async <S extends QueryState>(
             })
           ) {
             filterManager.setGlobalFilters(_.cloneDeep(filters));
-          }
-        }
-      }
-
-      if (syncConfig.dataSet) {
-        const currentDataSet = dataSet.getDataSet();
-        if (!_.isEqual(state.dataSet, currentDataSet)) {
-          if (state.dataSet) {
-            dataSet.setDataSet(state.dataSet);
-          } else {
-            const defaultDataSet = await dataSet.getDefaultDataSet();
-            if (defaultDataSet) {
-              dataSet.setDataSet(defaultDataSet);
-              stateContainer.set({ ...stateContainer.get(), dataSet: defaultDataSet });
-            }
           }
         }
       }
