@@ -3,7 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { first } from 'rxjs/operators';
 import { SharedGlobalConfig, Logger, ILegacyClusterClient } from 'opensearch-dashboards/server';
 import { Observable } from 'rxjs';
 import { ISearchStrategy, getDefaultSearchParams, SearchUsage } from '../../../data/server';
@@ -19,7 +18,7 @@ import { getFields } from '../../common/utils';
 import { Facet } from '../utils';
 
 export const pplSearchStrategyProvider = (
-  config$: Observable<SharedGlobalConfig>,
+  _config$: Observable<SharedGlobalConfig>,
   logger: Logger,
   client: ILegacyClusterClient,
   usage?: SearchUsage
@@ -62,13 +61,10 @@ export const pplSearchStrategyProvider = (
   };
 
   return {
-    search: async (context, request: any, options) => {
-      const config = await config$.pipe(first()).toPromise();
+    search: async (context, request: any, _options) => {
       const uiSettingsClient = await context.core.uiSettings.client;
 
-      const { dataFrameHydrationStrategy, ...defaultParams } = await getDefaultSearchParams(
-        uiSettingsClient
-      );
+      const { dataFrameHydrationStrategy } = await getDefaultSearchParams(uiSettingsClient);
 
       try {
         const requestParams = parseRequest(request.body.query.qs);

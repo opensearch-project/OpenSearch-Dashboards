@@ -7,6 +7,8 @@ import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
 import { i18n } from '@osd/i18n';
 import { concatMap, map } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
+import { UiActionsStart } from 'src/plugins/ui_actions/public';
 import {
   DATA_FRAME_TYPES,
   getRawDataFrame,
@@ -23,17 +25,21 @@ import {
 } from '../../../data/public';
 import {
   API,
+  ASYNC_TRIGGER_ID,
   DataFramePolling,
   FetchDataFrameContext,
+  JobState,
   SEARCH_STRATEGY,
   fetchDataFrame,
   fetchDataFramePolling,
+  parseJobState,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
 
 export class SQLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
+  protected uiActions?: UiActionsStart;
 
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
@@ -42,6 +48,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
       this.aggsService = (depsStart as QueryEnhancementsPluginStartDependencies).data.search.aggs;
     });
+    this.uiActions = deps.uiActions;
   }
 
   protected runSearch(
@@ -112,27 +119,41 @@ export class SQLSearchInterceptor extends SearchInterceptor {
         ...dataFrame.meta.queryConfig,
       },
     };
+    const queryId = uuidv4();
+    // Send an initial submit event to get faster feedback to clients waiting for info, since
+    // polling will wait for the first polling cycle to finish before sending anything
+    this.uiActions?.getTrigger(ASYNC_TRIGGER_ID).exec({
+      queryId,
+      queryStatus: JobState.SUBMITTED,
+    });
 
     const onPollingSuccess = (pollingResult: any) => {
-      if (pollingResult && pollingResult.body.meta.status === 'SUCCESS') {
-        return false;
-      }
-      if (pollingResult && pollingResult.body.meta.status === 'FAILED') {
-        const jsError = new Error(pollingResult.data.error.response);
-        this.deps.toasts.addError(jsError, {
-          title: i18n.translate('queryEnhancements.sqlQueryError', {
-            defaultMessage: 'Could not complete the SQL async query',
-          }),
-          toastMessage: pollingResult.data.error.response,
-        });
-        return false;
-      }
+      if (pollingResult) {
+        const queryStatus = parseJobState(pollingResult.body?.meta?.status);
 
-      this.deps.toasts.addInfo({
-        title: i18n.translate('queryEnhancements.sqlQueryPolling', {
-          defaultMessage: 'Polling query job results...',
-        }),
-      });
+        if (queryStatus) {
+          this.uiActions?.getTrigger(ASYNC_TRIGGER_ID).exec({
+            queryId,
+            queryStatus,
+          });
+        }
+
+        switch (queryStatus) {
+          case JobState.SUCCESS:
+            return false;
+          case JobState.FAILED:
+          case null:
+            const jsError = new Error(pollingResult.data.error.response);
+            this.deps.toasts.addError(jsError, {
+              title: i18n.translate('queryEnhancements.sqlQueryError', {
+                defaultMessage: 'Could not complete the SQL async query',
+              }),
+              toastMessage: pollingResult.data.error.response,
+            });
+            return false;
+          default:
+        }
+      }
 
       return true;
     };

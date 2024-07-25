@@ -4,6 +4,7 @@
  */
 
 import moment from 'moment';
+import { Trigger } from 'src/plugins/ui_actions/public';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { IStorageWrapper, Storage } from '../../opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../common/config';
@@ -16,6 +17,7 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
+import { ASYNC_TRIGGER_ID } from '../common';
 
 export class QueryEnhancementsPlugin
   implements
@@ -36,11 +38,12 @@ export class QueryEnhancementsPlugin
 
   public setup(
     core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
-    { data }: QueryEnhancementsPluginSetupDependencies
+    { data, uiActions }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
     this.connectionsService = new ConnectionsService({
       startServices: core.getStartServices(),
       http: core.http,
+      uiActions,
     });
 
     const pplSearchInterceptor = new PPLSearchInterceptor({
@@ -57,6 +60,7 @@ export class QueryEnhancementsPlugin
       uiSettings: core.uiSettings,
       startServices: core.getStartServices(),
       usageCollector: data.search.usageCollector,
+      uiActions,
     });
 
     data.__enhance({
@@ -112,6 +116,11 @@ export class QueryEnhancementsPlugin
         queryEditorExtension: createQueryAssistExtension(core.http, data, this.config.queryAssist),
       },
     });
+
+    const ASYNC_TRIGGER: Trigger<typeof ASYNC_TRIGGER_ID> = {
+      id: ASYNC_TRIGGER_ID,
+    };
+    uiActions.registerTrigger(ASYNC_TRIGGER);
 
     return {};
   }
