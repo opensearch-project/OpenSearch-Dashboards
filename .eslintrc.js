@@ -751,5 +751,14 @@ module.exports = {
         'no-undef': 'off',
       },
     },
+    {
+      files: [
+        'src/plugins/data/public/antlr/opensearch_sql/.generated/*',
+        'src/plugins/data/public/antlr/opensearch_sql/grammar/**/*',
+      ],
+      rules: {
+        'filenames/match-regex': 'off',
+      },
+    },
   ],
 };
