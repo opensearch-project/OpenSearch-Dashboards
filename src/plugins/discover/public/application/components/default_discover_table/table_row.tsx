@@ -48,7 +48,7 @@ const TableRowUI = ({
   ]);
 
   const tableRow = (
-    <tr key={row._id}>
+    <tr key={row._id} className={row.isAnchor ? 'osdDocTable__row--highlight' : ''}>
       <td data-test-subj="docTableExpandToggleColumn" className="osdDocTableCell__toggleDetails">
         <EuiSmallButtonIcon
           color="text"
