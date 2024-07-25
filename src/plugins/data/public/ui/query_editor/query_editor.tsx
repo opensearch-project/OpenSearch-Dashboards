@@ -39,7 +39,6 @@ monaco.languages.register({ id: LANGUAGE_ID_KUERY });
 
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
-  dataSource?: DataSource;
   query: Query;
   dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
@@ -142,8 +141,6 @@ export default class QueryEditorUI extends Component<Props, State> {
         configMap={this.extensionMap}
         componentContainer={this.headerRef.current}
         bannerContainer={this.bannerRef.current}
-        indexPatterns={this.props.indexPatterns}
-        dataSource={this.props.dataSource}
       />
     );
   }
@@ -375,11 +372,11 @@ export default class QueryEditorUI extends Component<Props, State> {
       // eslint-disable-next-line no-unsanitized/property
       style.innerHTML = `
       .${containerId} .monaco-editor .view-lines {
-        padding-left: 15px; 
+        padding-left: 15px;
       }
       .${containerId} .monaco-editor .cursor {
         height: ${customCursorHeight}px !important;
-        margin-top: ${(38 - customCursorHeight) / 2}px !important; 
+        margin-top: ${(38 - customCursorHeight) / 2}px !important;
       }
     `;
 
