@@ -114,7 +114,7 @@ export const syncQueryStateWithUrl = (
   start();
   return {
     stop: async () => {
-      (await stopSyncingWithStateContainer)();
+      stopSyncingWithStateContainer();
       stopSyncingWithUrl();
     },
     hasInheritedQueryFromUrl,

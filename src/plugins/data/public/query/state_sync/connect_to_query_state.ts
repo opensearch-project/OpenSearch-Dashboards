@@ -167,7 +167,7 @@ export const connectStorageToQueryState = async (
  * @param QueryService: either setup or start
  * @param stateContainer to use for syncing
  */
-export const connectToQueryState = async <S extends QueryState>(
+export const connectToQueryState = <S extends QueryState>(
   {
     timefilter: { timefilter },
     filterManager,
@@ -268,7 +268,7 @@ export const connectToQueryState = async <S extends QueryState>(
   }
 
   if (syncConfig.dataSet && !initialState.dataSet) {
-    initialState.dataSet = await dataSet.getDefaultDataSet();
+    initialState.dataSet = dataSet.getDefaultDataSet();
     initialDirty = true;
   }
 
