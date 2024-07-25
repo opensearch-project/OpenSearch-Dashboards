@@ -238,7 +238,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
 
   const handleSelectExternalDataSource = useCallback(
     async (dataSource) => {
-      if (selectedDataSetState.isExternal && dataSource) {
+      if (dataSource && dataSource.type === SIMPLE_DATA_SOURCE_TYPES.EXTERNAL) {
         const dataSourceCache = CatalogCacheManager.getOrCreateDataSource(
           dataSource.name,
           dataSource.id
@@ -265,7 +265,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         }
       }
     },
-    [databasesLoadStatus, selectedDataSetState.isExternal, startLoadingDatabases]
+    [databasesLoadStatus, startLoadingDatabases]
   );
 
   // Start loading tables for selected database
@@ -530,10 +530,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       ? selectedDataSetState.dataSourceRef?.name
       : 'Databases',
     items: [
-      ...navigatorState.externalDataSources.map((db) => ({
+      ...navigatorState.cachedDatabases.map((db) => ({
         name: db.name,
         onClick: async () => {
-          await handleSelectExternalDatabase(db);
+          handleSelectExternalDatabase(db);
         },
         panel: 6,
       })),
@@ -608,7 +608,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                             ...prevState,
                             externalDataSources: externalDataSourcesCache.externalDataSources.map(
                               (ds) => ({
-                                id: ds.name,
+                                id: ds.dataSourceRef,
                                 name: ds.name,
                                 type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
                               })
