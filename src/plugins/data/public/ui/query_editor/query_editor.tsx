@@ -273,25 +273,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
-  getCodeEditorSuggestionsType = (columnType: string) => {
-    switch (columnType) {
-      case 'text':
-        return monaco.languages.CompletionItemKind.Text;
-      case 'function':
-        return monaco.languages.CompletionItemKind.Function;
-      case 'object':
-        return monaco.languages.CompletionItemKind.Struct;
-      case 'field':
-        return monaco.languages.CompletionItemKind.Field;
-      case 'value':
-        return monaco.languages.CompletionItemKind.Value;
-      case 'keyword':
-        return monaco.languages.CompletionItemKind.Keyword;
-      default:
-        return monaco.languages.CompletionItemKind.Text;
-    }
-  };
-
   private fetchIndexPatterns = async () => {
     const client = this.services.savedObjects.client;
     const dataSet = this.queryService.dataSet.getDataSet();
@@ -318,8 +299,13 @@ export default class QueryEditorUI extends Component<Props, State> {
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): Promise<monaco.languages.CompletionList> => {
-    const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
-    const connectionService = enhancements?.connectionService;
+    const wordUntil = model.getWordUntilPosition(position);
+    const wordRange = new monaco.Range(
+      position.lineNumber,
+      wordUntil.startColumn,
+      position.lineNumber,
+      wordUntil.endColumn
+    );
 
     const indexPatterns = await this.fetchIndexPatterns();
 
@@ -330,26 +316,17 @@ export default class QueryEditorUI extends Component<Props, State> {
       language: this.props.query.language,
       indexPatterns,
       position,
-      connectionService,
+      openSearchDashboards: this.services,
     });
-
-    // current completion item range being given as last 'word' at pos
-    const wordUntil = model.getWordUntilPosition(position);
-    const range = new monaco.Range(
-      position.lineNumber,
-      wordUntil.startColumn,
-      position.lineNumber,
-      wordUntil.endColumn
-    );
 
     return {
       suggestions:
         suggestions && suggestions.length > 0
-          ? suggestions.map((s) => ({
+          ? suggestions.map((s: QuerySuggestion) => ({
               label: s.text,
-              kind: this.getCodeEditorSuggestionsType(s.type),
+              kind: s.type as monaco.languages.CompletionItemKind,
               insertText: s.text,
-              range,
+              range: wordRange,
             }))
           : [],
       incomplete: false,
