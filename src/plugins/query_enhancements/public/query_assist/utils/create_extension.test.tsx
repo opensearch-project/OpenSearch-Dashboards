@@ -9,7 +9,7 @@ import React from 'react';
 import { coreMock } from '../../../../../core/public/mocks';
 import { IIndexPattern } from '../../../../data/public';
 import { ConfigSchema } from '../../../common/config';
-import { ConnectionsService } from '../../data_source_connection';
+import { ConnectionsService } from '../../services';
 import { Connection } from '../../types';
 import { createQueryAssistExtension } from './create_extension';
 
