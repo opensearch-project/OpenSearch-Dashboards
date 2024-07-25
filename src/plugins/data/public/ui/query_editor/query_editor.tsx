@@ -322,7 +322,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               label: s.text,
               kind: s.type as monaco.languages.CompletionItemKind,
               insertText: s.text,
-              range,
+              range: wordRange,
             }))
           : [],
       incomplete: false,
