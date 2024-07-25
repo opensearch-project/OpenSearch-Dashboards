@@ -80,7 +80,7 @@ export const connectStorageToQueryState = async (
     const initialStateFromURL: QueryState = OsdUrlStateStorage.get('_q') ?? {
       query: queryString.getDefaultQuery(),
       filters: filterManager.getAppFilters(),
-      dataSet: await dataSet.getDefaultDataSet(),
+      dataSet: dataSet.getDefaultDataSet(),
     };
 
     // set up initial '_q' flag in the URL to sync query and filter changes
@@ -167,7 +167,7 @@ export const connectStorageToQueryState = async (
  * @param QueryService: either setup or start
  * @param stateContainer to use for syncing
  */
-export const connectToQueryState = async <S extends QueryState>(
+export const connectToQueryState = <S extends QueryState>(
   {
     timefilter: { timefilter },
     filterManager,
@@ -268,7 +268,7 @@ export const connectToQueryState = async <S extends QueryState>(
   }
 
   if (syncConfig.dataSet && !initialState.dataSet) {
-    initialState.dataSet = await dataSet.getDefaultDataSet();
+    initialState.dataSet = dataSet.getDefaultDataSet();
     initialDirty = true;
   }
 

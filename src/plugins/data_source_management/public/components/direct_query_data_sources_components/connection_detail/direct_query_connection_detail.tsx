@@ -53,6 +53,7 @@ import {
   IntegrationInstancesSearchResult,
 } from '../../../../framework/types';
 import { INTEGRATIONS_BASE } from '../../../../framework/utils/shared';
+import { isPluginInstalled } from '../../utils';
 
 interface DirectQueryDataConnectionDetailProps {
   featureFlagStatus: boolean;
@@ -70,41 +71,6 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   setBreadcrumbs,
 }) => {
   const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
-  const checkIfSQLWorkbenchPluginIsInstalled = () => {
-    fetch('/api/status', {
-      headers: {
-        'Content-Type': 'application/json',
-        'osd-xsrf': 'true',
-        'accept-language': 'en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6',
-        pragma: 'no-cache',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-      },
-      method: 'GET',
-      referrerPolicy: 'strict-origin-when-cross-origin',
-      mode: 'cors',
-      credentials: 'include',
-    })
-      .then(function (response) {
-        return response.json();
-      })
-      .then((data) => {
-        for (let i = 0; i < data.status.statuses.length; ++i) {
-          if (data.status.statuses[i].id.includes('plugin:observabilityDashboards')) {
-            setObservabilityDashboardsExists(true);
-          }
-        }
-      })
-      .catch((error) => {
-        notifications.toasts.addDanger(
-          'Error checking Dashboards Observability Plugin Installation status.'
-        );
-        // eslint-disable-next-line no-console
-        console.error(error);
-      });
-  };
-
   const { dataSourceName } = useParams<{ dataSourceName: string }>();
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
@@ -211,7 +177,9 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
   };
 
   useEffect(() => {
-    checkIfSQLWorkbenchPluginIsInstalled();
+    isPluginInstalled('plugin:observabilityDashboards', notifications, http).then(
+      setObservabilityDashboardsExists
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -397,6 +365,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
           properties={datasourceDetails.properties}
           allowedRoles={datasourceDetails.allowedRoles}
           key={JSON.stringify(datasourceDetails.allowedRoles)}
+          dataSourceMDSId={featureFlagStatus ? dataSourceMDSId ?? '' : ''}
         />
       ),
     },
