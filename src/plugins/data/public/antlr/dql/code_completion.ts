@@ -117,11 +117,8 @@ export const getSuggestions = async ({
   selectionEnd,
   core: coreSetup,
 }: QuerySuggestionGetFnArgs) => {
-  console.log('indexpa', indexPatterns);
-
   const http = coreSetup?.http;
   const currentIndexPattern = indexPatterns[0];
-  console.log('curr', currentIndexPattern);
 
   const inputStream = CharStream.fromString(query);
   const lexer = new DQLLexer(inputStream);
