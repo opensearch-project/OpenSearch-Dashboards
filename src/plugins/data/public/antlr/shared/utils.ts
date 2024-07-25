@@ -12,7 +12,7 @@ export interface IDataSourceRequestHandlerParams {
 }
 
 export const getRawSuggestionData$ = (
-  connectionsService: any,
+  connectionsService,
   dataSourceReuqstHandler: ({
     dataSourceId,
     title,
@@ -21,11 +21,11 @@ export const getRawSuggestionData$ = (
 ) =>
   connectionsService.getSelectedConnection$().pipe(
     distinctUntilChanged(),
-    switchMap((connection: any) => {
+    switchMap((connection) => {
       if (connection === undefined) {
         return from(defaultReuqstHandler());
       }
-      const dataSourceId = connection?.dataSource?.id;
+      const dataSourceId = connection?.id;
       const title = connection?.attributes?.title;
       return from(dataSourceReuqstHandler({ dataSourceId, title }));
     })
@@ -34,8 +34,8 @@ export const getRawSuggestionData$ = (
 export const fetchData = (
   tables: string[],
   queryFormatter: (table: string, dataSourceId?: string, title?: string) => any,
-  api: any,
-  connectionService: any
+  api,
+  connectionService
 ): Promise<any[]> => {
   return new Promise((resolve, reject) => {
     getRawSuggestionData$(
@@ -65,8 +65,8 @@ export const fetchData = (
         );
       }
     ).subscribe({
-      next: (dataFrames: any) => resolve(dataFrames),
-      error: (err: any) => {
+      next: (dataFrames) => resolve(dataFrames),
+      error: (err) => {
         // TODO: pipe error to UI
         reject(err);
       },
@@ -74,11 +74,7 @@ export const fetchData = (
   });
 };
 
-export const fetchTableSchemas = (
-  tables: string[],
-  api: any,
-  connectionService: any
-): Promise<any[]> => {
+export const fetchTableSchemas = (tables: string[], api, connectionService): Promise<any[]> => {
   return fetchData(
     tables,
     (table, dataSourceId, title) => ({
@@ -100,8 +96,8 @@ export const fetchTableSchemas = (
 export const fetchColumnValues = (
   tables: string[],
   column: string,
-  api: any,
-  connectionService: any
+  api,
+  connectionService
 ): Promise<any[]> => {
   return fetchData(
     tables,

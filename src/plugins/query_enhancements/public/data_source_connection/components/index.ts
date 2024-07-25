@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export * from './direct_query_hook';
+export { ConnectionsBar } from './connections_bar';
