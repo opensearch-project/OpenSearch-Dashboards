@@ -110,6 +110,10 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       ...dataFrame.meta,
       queryConfig: {
         ...dataFrame.meta.queryConfig,
+        ...(this.queryService.dataSet.getDataSet() && {
+          dataSourceId: this.queryService.dataSet.getDataSet()?.dataSourceRef?.id,
+          dataSourceName: this.queryService.dataSet.getDataSet()?.dataSourceRef?.name,
+        }),
       },
     };
 

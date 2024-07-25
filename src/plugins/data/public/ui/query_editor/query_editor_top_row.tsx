@@ -48,7 +48,6 @@ export interface QueryEditorTopRowProps {
   disableAutoFocus?: boolean;
   screenTitle?: string;
   indexPatterns?: Array<IIndexPattern | string>;
-  dataSource?: DataSource;
   isLoading?: boolean;
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   showQueryEditor?: boolean;
@@ -220,7 +219,6 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
           indexPatterns={props.indexPatterns!}
-          dataSource={props.dataSource}
           prepend={props.prepend}
           query={parsedQuery}
           dataSetContainerRef={props.dataSetContainerRef}

@@ -6,7 +6,6 @@
 import { render, waitFor } from '@testing-library/react';
 import React, { ComponentProps } from 'react';
 import { of } from 'rxjs';
-import { IIndexPattern } from '../../../../common';
 import { QueryEditorExtension } from './query_editor_extension';
 
 jest.mock('react-dom', () => ({
@@ -15,21 +14,6 @@ jest.mock('react-dom', () => ({
 }));
 
 type QueryEditorExtensionProps = ComponentProps<typeof QueryEditorExtension>;
-
-const mockIndexPattern = {
-  id: '1234',
-  title: 'logstash-*',
-  fields: [
-    {
-      name: 'response',
-      type: 'number',
-      esTypes: ['integer'],
-      aggregatable: true,
-      filterable: true,
-      searchable: true,
-    },
-  ],
-} as IIndexPattern;
 
 describe('QueryEditorExtension', () => {
   const getComponentMock = jest.fn();
@@ -45,8 +29,10 @@ describe('QueryEditorExtension', () => {
       getBanner: getBannerMock,
     },
     dependencies: {
-      indexPatterns: [mockIndexPattern],
       language: 'Test',
+      onSelectLanguage: jest.fn(),
+      isCollapsed: false,
+      setIsCollapsed: jest.fn(),
     },
     componentContainer: document.createElement('div'),
     bannerContainer: document.createElement('div'),

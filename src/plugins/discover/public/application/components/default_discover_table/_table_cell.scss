@@ -104,3 +104,7 @@ $osdDocTableCellPadding: calc($ouiSizeM / 2); // corresponds to DataGrid medium 
     font-size: inherit !important;
   }
 }
+
+.osdDocTableCell__dataField {
+  white-space: pre-wrap;
+}

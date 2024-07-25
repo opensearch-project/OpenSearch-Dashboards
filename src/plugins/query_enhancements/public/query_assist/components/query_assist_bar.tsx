@@ -82,6 +82,8 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     }
   };
 
+  if (props.dependencies.isCollapsed) return null;
+
   return (
     <EuiForm component="form" onSubmit={onSubmit}>
       <EuiFormRow fullWidth>

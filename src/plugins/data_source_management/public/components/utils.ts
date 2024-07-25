@@ -11,6 +11,7 @@ import {
   ToastsStart,
   ApplicationStart,
   CoreStart,
+  NotificationsStart,
 } from 'src/core/public';
 import { deepFreeze } from '@osd/std';
 import uuid from 'uuid';
@@ -405,4 +406,23 @@ export const formatError = (name: string, message: string, details: string) => {
       },
     },
   };
+};
+
+export const isPluginInstalled = async (
+  pluginId: string,
+  notifications: NotificationsStart,
+  http: HttpStart
+): Promise<boolean> => {
+  try {
+    const response = await http.get('/api/status');
+    const pluginExists = response.status.statuses.some((status: { id: string }) =>
+      status.id.includes(pluginId)
+    );
+    return pluginExists;
+  } catch (error) {
+    notifications.toasts.addDanger(`Error checking ${pluginId} Plugin Installation status.`);
+    // eslint-disable-next-line no-console
+    console.error(error);
+    return false;
+  }
 };

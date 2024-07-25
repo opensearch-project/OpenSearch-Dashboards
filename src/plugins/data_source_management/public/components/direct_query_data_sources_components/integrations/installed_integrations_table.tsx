@@ -44,7 +44,7 @@ interface IntegrationInstanceTableEntry {
 const labelFromDataSourceType = (dsType: DatasourceType): string | null => {
   switch (dsType) {
     case 'S3GLUE':
-      return 'Flint S3';
+      return 'S3 Glue';
     case 'PROMETHEUS':
       return null; // TODO Prometheus integrations not supported so no label available
     default:
