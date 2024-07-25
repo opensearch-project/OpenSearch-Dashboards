@@ -25,13 +25,17 @@ import { QuerySuggestion } from '../../autocomplete';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { DataSettings } from '../types';
-import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
+import { getQueryService } from '../../services';
+import { SIMPLE_DATA_SET_TYPES } from '../../../common';
 
-const LANGUAGE_ID = 'SQL';
-monaco.languages.register({ id: LANGUAGE_ID });
+const LANGUAGE_ID_SQL = 'SQL';
+monaco.languages.register({ id: LANGUAGE_ID_SQL });
+
+const LANGUAGE_ID_KUERY = 'kuery';
+monaco.languages.register({ id: LANGUAGE_ID_KUERY });
 
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -104,6 +108,8 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
 
+  private queryService = getQueryService();
+
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
   private services = this.props.opensearchDashboards.services;
@@ -116,26 +122,6 @@ export default class QueryEditorUI extends Component<Props, State> {
       return this.props.getQueryStringInitialValue?.(this.props.query.language) ?? '';
     }
     return toUser(this.props.query.query);
-  };
-
-  // TODO: MQL don't do this here? || Fetch data sources
-  private fetchIndexPatterns = async () => {
-    const stringPatterns = this.props.indexPatterns.filter(
-      (indexPattern) => typeof indexPattern === 'string'
-    ) as string[];
-    const objectPatterns = this.props.indexPatterns.filter(
-      (indexPattern) => typeof indexPattern !== 'string'
-    ) as IIndexPattern[];
-
-    const objectPatternsFromStrings = (await fetchIndexPatterns(
-      this.services.savedObjects!.client,
-      stringPatterns,
-      this.services.uiSettings!
-    )) as IIndexPattern[];
-
-    this.setState({
-      indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
-    });
   };
 
   private renderQueryEditorExtensions() {
@@ -257,10 +243,14 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
-    // this.fetchIndexPatterns().then(this.updateSuggestions);
+    this.fetchIndexPatterns();
   }
 
   public componentDidUpdate(prevProps: Props) {
+    if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
+      this.fetchIndexPatterns();
+    }
+
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });
@@ -279,6 +269,28 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
+  private fetchIndexPatterns = async () => {
+    const client = this.services.savedObjects.client;
+    const dataSet = this.queryService.dataSet.getDataSet();
+    const title = dataSet?.title;
+
+    const resp = await client.find({
+      type: 'index-pattern',
+      fields: ['title', 'timeFieldName', 'fields'],
+      search: `${title}*`,
+      searchFields: ['title'],
+      perPage: 100,
+    });
+
+    return resp.savedObjects.map((savedObject: any) => ({
+      id: savedObject.id,
+      title: savedObject.attributes?.title,
+      timeFieldName: savedObject.attributes?.timeFieldName,
+      fields: JSON.parse(savedObject.attributes?.fields),
+      type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
+    }));
+  };
+
   provideCompletionItems = async (
     model: monaco.editor.ITextModel,
     position: monaco.Position
@@ -291,12 +303,14 @@ export default class QueryEditorUI extends Component<Props, State> {
       wordUntil.endColumn
     );
 
+    const indexPatterns = await this.fetchIndexPatterns();
+
     const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
       query: this.getQueryString(),
       selectionStart: model.getOffsetAt(position),
       selectionEnd: model.getOffsetAt(position),
       language: this.props.query.language,
-      indexPatterns: this.state.indexPatterns,
+      indexPatterns,
       position,
       openSearchDashboards: this.services,
     });
@@ -308,7 +322,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               label: s.text,
               kind: s.type as monaco.languages.CompletionItemKind,
               insertText: s.text,
-              range: wordRange,
+              range,
             }))
           : [],
       incomplete: false,
@@ -435,6 +449,19 @@ export default class QueryEditorUI extends Component<Props, State> {
                           suggestionProvider={{
                             provideCompletionItems: this.provideCompletionItems,
                           }}
+                          languageConfiguration={{
+                            language: LANGUAGE_ID_KUERY,
+                            autoClosingPairs: [
+                              {
+                                open: '(',
+                                close: ')',
+                              },
+                              {
+                                open: '"',
+                                close: '"',
+                              },
+                            ],
+                          }}
                         />
                       </div>
                     </EuiFlexItem>
@@ -483,6 +510,19 @@ export default class QueryEditorUI extends Component<Props, State> {
                 }}
                 suggestionProvider={{
                   provideCompletionItems: this.provideCompletionItems,
+                }}
+                languageConfiguration={{
+                  language: LANGUAGE_ID_KUERY,
+                  autoClosingPairs: [
+                    {
+                      open: '(',
+                      close: ')',
+                    },
+                    {
+                      open: '"',
+                      close: '"',
+                    },
+                  ],
                 }}
               />
             )}
