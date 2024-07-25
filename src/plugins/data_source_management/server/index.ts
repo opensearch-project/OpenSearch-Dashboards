@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { PluginInitializerContext } from '../../../core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
+import { ConfigSchema, configSchema } from '../config';
 import { DataSourceManagementPlugin } from './plugin';
 
 // This exports static code and TypeScript types,
@@ -12,5 +13,9 @@ import { DataSourceManagementPlugin } from './plugin';
 export function plugin(initializerContext: PluginInitializerContext) {
   return new DataSourceManagementPlugin(initializerContext);
 }
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  schema: configSchema,
+};
 
 export { DataSourceManagementPluginSetup, DataSourceManagementPluginStart } from './types';

@@ -325,7 +325,7 @@
 # "none": The data source is readonly for all users.
 # "dashboard_admin": The data source can only be managed by dashboard admin.
 # "all": The data source can be managed by all users. Default to "all".
-# data_source.manageableBy: "all"
+# data_source_management.manageableBy: "all"
 
 # Set the value of this setting to false to hide the help menu link to the OpenSearch Dashboards user survey
 # opensearchDashboards.survey.url: "https://survey.opensearch.org"
