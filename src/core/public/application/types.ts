@@ -539,6 +539,8 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * Optional datasource id to pass while mounting app
    */
   dataSourceId?: string;
+
+  optionalRef?: Record<string, React.RefObject<HTMLDivElement>>;
 }
 
 /**
