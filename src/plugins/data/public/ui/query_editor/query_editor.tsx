@@ -22,6 +22,8 @@ import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
 import { SimpleDataSet } from '../../../common';
+import { getQueryService } from '../../services';
+import { SIMPLE_DATA_SET_TYPES } from '../../../common';
 
 const LANGUAGE_ID_SQL = 'SQL';
 monaco.languages.register({ id: LANGUAGE_ID_SQL });
@@ -98,6 +100,8 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
+
+  private queryService = getQueryService();
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
@@ -282,18 +286,43 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
+  private fetchIndexPatterns = async () => {
+    const client = this.services.savedObjects.client;
+    const dataSet = this.queryService.dataSet.getDataSet();
+    const title = dataSet?.title;
+
+    const resp = await client.find({
+      type: 'index-pattern',
+      fields: ['title', 'timeFieldName', 'fields'],
+      search: `${title}*`,
+      searchFields: ['title'],
+      perPage: 100,
+    });
+
+    return resp.savedObjects.map((savedObject: any) => ({
+      id: savedObject.id,
+      title: savedObject.attributes?.title,
+      timeFieldName: savedObject.attributes?.timeFieldName,
+      fields: JSON.parse(savedObject.attributes?.fields),
+      type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
+    }));
+  };
+
   provideCompletionItems = async (
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): Promise<monaco.languages.CompletionList> => {
     const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
     const connectionService = enhancements?.connectionService;
+
+    const indexPatterns = await this.fetchIndexPatterns();
+
     const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
       query: this.getQueryString(),
       selectionStart: model.getOffsetAt(position),
       selectionEnd: model.getOffsetAt(position),
       language: this.props.query.language,
-      indexPatterns: this.state.indexPatterns,
+      indexPatterns,
       position,
       connectionService,
     });
