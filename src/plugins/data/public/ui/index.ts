@@ -49,4 +49,3 @@ export {
 } from './query_editor';
 export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
 export { SuggestionsComponent } from './typeahead';
-export { DataSetNavigator } from './dataset_navigator';
