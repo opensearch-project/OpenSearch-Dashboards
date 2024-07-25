@@ -31,7 +31,7 @@ import {
   useLoadTablesToCache,
 } from './lib/catalog_cache/cache_loader';
 import { CatalogCacheManager } from './lib/catalog_cache/cache_manager';
-import { CachedDataSourceStatus, DirectQueryLoadingStatus } from './lib/types';
+import { CachedDataSourceStatus, CachedDatabase, DirectQueryLoadingStatus } from './lib/types';
 import {
   getIndexPatterns,
   getNotifications,
@@ -181,7 +181,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                     type: selectedPattern.dataSourceRef.type,
                   },
                 }
-              : { dataSource: undefined }),
+              : { dataSourceRef: undefined }),
             database: undefined,
             isExternal: false,
           });
@@ -257,12 +257,12 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
             ...prevState,
             cachedDatabases: dataSourceCache.databases,
           }));
-          setSelectedDataSetState((prevState) => ({
-            ...prevState,
-            dataSource,
-            isExternal: true,
-          }));
         }
+        setSelectedDataSetState((prevState) => ({
+          ...prevState,
+          dataSourceRef: dataSource,
+          isExternal: true,
+        }));
       }
     },
     [databasesLoadStatus, startLoadingDatabases]
@@ -272,7 +272,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   const handleSelectExternalDatabase = useCallback(
     (externalDatabase: SimpleDataSource) => {
       if (selectedDataSetState.dataSourceRef && externalDatabase) {
-        let databaseCache;
+        let databaseCache: CachedDatabase;
         try {
           databaseCache = CatalogCacheManager.getDatabase(
             selectedDataSetState.dataSourceRef.name,
@@ -292,10 +292,6 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
             databaseName: externalDatabase.name,
             dataSourceMDSId: selectedDataSetState.dataSourceRef.id,
           });
-          setSelectedDataSetState((prevState) => ({
-            ...prevState,
-            database: externalDatabase,
-          }));
         } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
           setNavigatorState((prevState) => ({
             ...prevState,
@@ -315,7 +311,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       selectedDataSetState.database
     ) {
       const tablesStatus = tablesLoadStatus.toLowerCase();
-      let databaseCache;
+      let databaseCache: CachedDatabase;
       try {
         databaseCache = CatalogCacheManager.getDatabase(
           selectedDataSetState.dataSourceRef.name,
@@ -533,7 +529,11 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       ...navigatorState.cachedDatabases.map((db) => ({
         name: db.name,
         onClick: async () => {
-          handleSelectExternalDatabase(db);
+          setSelectedDataSetState((prevState) => ({
+            ...prevState,
+            database: db,
+          }));
+          await handleSelectExternalDatabase(db);
         },
         panel: 6,
       })),
@@ -628,28 +628,28 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           createDatabasesPanel(),
           {
             id: 6,
-            title: selectedDataSetState.database ? selectedDataSetState.database : 'Tables',
+            title: selectedDataSetState.database ? selectedDataSetState.database.name : 'Tables',
             items: [
               ...navigatorState.cachedTables.map((table) => ({
-                name: table.title,
+                name: table.name,
                 onClick: async () => {
-                  setSelectedDataSetState((prevState) => ({
-                    ...prevState,
-                    object: {
-                      id: `${selectedDataSetState.dataSourceRef!.name}.${
-                        selectedDataSetState.database
-                      }.${table.title}`,
-                      title: `${selectedDataSetState.dataSourceRef!.name}.${
-                        selectedDataSetState.database
-                      }.${table.title}`,
-                      dataSource: {
-                        id: selectedDataSetState.dataSourceRef!.id,
-                        name: selectedDataSetState.dataSourceRef!.name,
-                        type: selectedDataSetState.dataSourceRef!.type,
-                      },
-                      type: SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC,
+                  const tableObject = {
+                    ...selectedDataSetState,
+                    id: `${selectedDataSetState.dataSourceRef!.name}.${
+                      selectedDataSetState.database.name
+                    }.${table.name}`,
+                    title: `${selectedDataSetState.dataSourceRef!.name}.${
+                      selectedDataSetState.database.name
+                    }.${table.name}`,
+                    dataSourceRef: {
+                      id: selectedDataSetState.dataSourceRef!.id,
+                      name: selectedDataSetState.dataSourceRef!.name,
+                      type: selectedDataSetState.dataSourceRef!.type,
                     },
-                  }));
+                    type: SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC,
+                  };
+                  setSelectedDataSetState(tableObject);
+                  handleSelectedDataSet(tableObject);
                 },
               })),
             ],

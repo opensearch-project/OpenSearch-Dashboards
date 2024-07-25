@@ -38,7 +38,7 @@ export const sqlAsyncSearchStrategyProvider = (
           const df = request.body?.df;
           request.body = {
             query: request.body.query.qs,
-            datasource: df?.meta?.queryConfig?.dataSource,
+            datasource: df?.meta?.queryConfig?.dataSourceName,
             lang: 'sql',
             sessionId: df?.meta?.sessionId,
           };
