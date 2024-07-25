@@ -5,6 +5,7 @@
 
 import { trimEnd } from 'lodash';
 import { Observable, throwError } from 'rxjs';
+import { i18n } from '@osd/i18n';
 import { concatMap } from 'rxjs/operators';
 import {
   DataFrameAggConfig,
@@ -33,12 +34,16 @@ import {
   fetchDataFrame,
 } from '../../common';
 import { QueryEnhancementsPluginStartDependencies } from '../types';
+import { ConnectionsService } from '../data_source_connection';
 
 export class PPLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
 
-  constructor(deps: SearchInterceptorDeps) {
+  constructor(
+    deps: SearchInterceptorDeps,
+    private readonly connectionsService: ConnectionsService
+  ) {
     super(deps);
 
     deps.startServices.then(([coreStart, depsStart]) => {
@@ -142,23 +147,34 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     };
 
     const dataFrame = getRawDataFrame(searchRequest);
+    if (!dataFrame) {
+      return throwError(
+        this.handleSearchError(
+          {
+            stack: 'DataFrame is not defined',
+          },
+          request,
+          signal!
+        )
+      );
+    }
 
     let queryString = dataFrame.meta?.queryConfig?.qs ?? getRawQueryString(searchRequest) ?? '';
 
     dataFrame.meta = {
       ...dataFrame.meta,
-      aggConfig: {
-        ...dataFrame.meta.aggConfig,
-        ...(this.aggsService.types.get.bind(this) &&
-          getAggConfig(searchRequest, {}, this.aggsService.types.get.bind(this))),
-      },
       queryConfig: {
         ...dataFrame.meta.queryConfig,
-        ...(this.queryService.dataSet.getDataSet() && {
-          dataSourceId: this.queryService.dataSet.getDataSet()?.dataSourceRef?.id,
+        ...(this.connectionsService.getSelectedConnection() && {
+          dataSourceId: this.connectionsService.getSelectedConnection()?.id,
         }),
       },
     };
+    const aggConfig = getAggConfig(
+      searchRequest,
+      {},
+      this.aggsService.types.get.bind(this)
+    ) as DataFrameAggConfig;
 
     if (!dataFrame.schema) {
       return fetchDataFrame(dfContext, queryString, dataFrame).pipe(
@@ -168,14 +184,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
             const jsError = new Error(df.error.response);
             return throwError(jsError);
           }
-          const timeField = getTimeField(df, dataFrame.meta?.aggConfig);
+          const timeField = getTimeField(df, aggConfig);
           if (timeField) {
             const timeFilter = getTimeFilter(timeField);
             const newQuery = insertTimeFilter(queryString, timeFilter);
             updateDataFrameMeta({
               dataFrame: df,
               qs: newQuery,
-              aggConfig: dataFrame.meta?.aggConfig,
+              aggConfig,
               timeField,
               timeFilter,
               getAggQsFn: getAggQsFn.bind(this),
@@ -188,14 +204,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     }
 
     if (dataFrame.schema) {
-      const timeField = getTimeField(dataFrame, dataFrame.meta?.aggConfig);
+      const timeField = getTimeField(dataFrame, aggConfig);
       if (timeField) {
         const timeFilter = getTimeFilter(timeField);
         const newQuery = insertTimeFilter(queryString, timeFilter);
         updateDataFrameMeta({
           dataFrame,
           qs: newQuery,
-          aggConfig: dataFrame.meta?.aggConfig,
+          aggConfig,
           timeField,
           timeFilter,
           getAggQsFn: getAggQsFn.bind(this),

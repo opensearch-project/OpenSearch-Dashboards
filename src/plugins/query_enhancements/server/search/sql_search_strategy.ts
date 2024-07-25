@@ -39,7 +39,7 @@ export const sqlSearchStrategyProvider = (
         }
 
         const partial: PartialDataFrame = {
-          ...request.body.df,
+          name: '',
           fields: rawResponse.data?.schema || [],
         };
         const dataFrame = createDataFrame(partial);

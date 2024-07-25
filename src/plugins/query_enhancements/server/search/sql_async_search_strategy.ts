@@ -55,7 +55,7 @@ export const sqlAsyncSearchStrategyProvider = (
           const sessionId = rawResponse.data?.sessionId;
 
           const partial: PartialDataFrame = {
-            ...request.body.df,
+            name: '',
             fields: rawResponse?.data?.schema || [],
           };
           const dataFrame = createDataFrame(partial);
