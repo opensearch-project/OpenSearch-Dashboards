@@ -36,10 +36,3 @@ type DeeplyMockedKeys<T> = {
   T;
 
 type MockedKeys<T> = { [P in keyof T]: jest.Mocked<T[P]> };
-
-// Need to declare like typings/index.d.ts otherwise would be overwritten
-declare module '*.svg' {
-  const content: string;
-  // eslint-disable-next-line import/no-default-export
-  export default content;
-}
