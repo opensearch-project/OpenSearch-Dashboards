@@ -1,0 +1,2 @@
+refactor:
+- [Look&Feel] Reverted tooltip addition for navigation menu ([#7493](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7493))
