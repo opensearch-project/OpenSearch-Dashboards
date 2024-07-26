@@ -34,6 +34,35 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const isQueryEnhancementEnabled = uiSettings.get('query:enhancements:enabled');
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  const fetchFromState = useCallback(
+    async (dataset: SimpleDataSet) => {
+      const temporaryIndexPatternID = dataset.id ?? `${dataset.dataSourceRef?.id}.${dataset.title}`;
+      const temporaryIndexPattern = await data.indexPatterns.create(
+        {
+          id: temporaryIndexPatternID,
+          title: dataset.title,
+          timeFieldName: dataset.timeFieldName,
+          type: dataset.type,
+          ...(dataset.dataSourceRef
+            ? {
+                dataSourceRef: {
+                  id: dataset.dataSourceRef.id ?? dataset.dataSourceRef.name,
+                  name: dataset.dataSourceRef.name,
+                  type: dataset.type!,
+                },
+              }
+            : {}),
+        },
+        true
+      );
+      data.indexPatterns.saveToCache(temporaryIndexPatternID, temporaryIndexPattern);
+
+      return temporaryIndexPattern;
+    },
+    [data.indexPatterns]
+  );
 
   const fetchIndexPatternDetails = useCallback(
     async (id: string) => {
@@ -49,10 +78,15 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
           fetchIndexPatternDetails(dataSet.id).then((ip) => {
             setIndexPattern(ip);
           });
+        } else if (!isLoaded) {
+          fetchFromState(dataSet).then((ip) => {
+            setIsLoaded(true);
+            setIndexPattern(ip);
+          });
         }
       }
     }
-  }, [dataSet, fetchIndexPatternDetails, isQueryEnhancementEnabled]);
+  }, [dataSet, fetchFromState, fetchIndexPatternDetails, isLoaded, isQueryEnhancementEnabled]);
 
   useEffect(() => {
     let isMounted = true;

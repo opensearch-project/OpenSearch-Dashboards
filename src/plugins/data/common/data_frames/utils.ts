@@ -484,6 +484,11 @@ export const dataFrameToSpec = (dataFrame: IDataFrame, id?: string): IndexPatter
     id: id ?? DATA_FRAME_TYPES.DEFAULT,
     title: dataFrame.name,
     timeFieldName: getTimeField(dataFrame, dataFrame.meta?.queryConfig)?.name,
+    dataSourceRef: {
+      id: dataFrame.meta?.queryConfig?.dataSourceId,
+      name: dataFrame.meta?.queryConfig?.dataSourceName,
+      type: dataFrame.meta?.queryConfig?.dataSourceType,
+    },
     type: !id ? DATA_FRAME_TYPES.DEFAULT : undefined,
     fields: fields.reduce(flattenFields, {} as IndexPatternFieldMap),
   };

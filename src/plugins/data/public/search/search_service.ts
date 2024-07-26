@@ -161,6 +161,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         if (this.dfCache.get() && this.dfCache.get()?.name !== dataFrame.name) {
           indexPatterns.clearCache(this.dfCache.get()!.name, false);
         }
+
         if (
           dataFrame.meta &&
           dataFrame.meta.queryConfig &&
@@ -178,7 +179,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           dataFrameToSpec(dataFrame, existingIndexPattern?.id ?? dataSetName),
           !existingIndexPattern?.id
         );
-        await indexPatterns.refreshFields(dataSet, true);
         indexPatterns.saveToCache(dataSetName, dataSet);
       },
       clear: () => {

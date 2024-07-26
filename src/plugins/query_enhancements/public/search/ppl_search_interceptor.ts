@@ -14,6 +14,7 @@ import {
   formatTimePickerDate,
   getUniqueValuesForRawAggs,
   updateDataFrameMeta,
+  getRawAggs,
 } from '../../../data/common';
 import {
   DataPublicPluginStart,
@@ -144,7 +145,8 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       ...dataFrame.meta,
       aggConfig: {
         ...dataFrame.meta.aggConfig,
-        ...(this.aggsService.types.get.bind(this) &&
+        ...(getRawAggs(searchRequest) &&
+          this.aggsService.types.get.bind(this) &&
           getAggConfig(searchRequest, {}, this.aggsService.types.get.bind(this))),
       },
       queryConfig: {
@@ -166,13 +168,14 @@ export class PPLSearchInterceptor extends SearchInterceptor {
             return throwError(jsError);
           }
           const timeField = dataFrame.meta?.queryConfig?.timeFieldName;
-          if (timeField) {
+          const aggConfig = dataFrame.meta?.aggConfig;
+          if (timeField && aggConfig) {
             const timeFilter = getTimeFilter(timeField);
             const newQuery = insertTimeFilter(queryString, timeFilter);
             updateDataFrameMeta({
               dataFrame: df,
               qs: newQuery,
-              aggConfig: dataFrame.meta?.aggConfig,
+              aggConfig,
               timeField,
               timeFilter,
               getAggQsFn: getAggQsFn.bind(this),
@@ -189,7 +192,8 @@ export class PPLSearchInterceptor extends SearchInterceptor {
 
     if (dataFrame.schema) {
       const timeField = dataFrame.meta?.queryConfig?.timeFieldName;
-      if (timeField) {
+      const aggConfig = dataFrame.meta?.aggConfig;
+      if (timeField && aggConfig) {
         const timeFilter = getTimeFilter(timeField);
         const newQuery = insertTimeFilter(queryString, timeFilter);
         updateDataFrameMeta({

@@ -454,6 +454,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
             fields,
             timeFields,
             timeFieldName,
+            dataSourceRef: object.dataSourceRef,
             type: SIMPLE_DATA_SET_TYPES.TEMPORARY,
           },
         }));
@@ -676,8 +677,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
                     },
                     type: SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC,
                   };
-                  setSelectedDataSetState(tableObject);
-                  handleSelectedDataSet(tableObject);
+                  await handleSelectedDataSet(tableObject);
                 },
               })),
             ],

@@ -237,7 +237,6 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                 dataFrameToSpec(dataFrame, existingIndexPattern?.id ?? dataSetName),
                 !existingIndexPattern?.id
               );
-              scopedIndexPatterns.refreshFields(dataSet, true);
               scopedIndexPatterns.saveToCache(dataSetName, dataSet);
             },
             clear: () => {
