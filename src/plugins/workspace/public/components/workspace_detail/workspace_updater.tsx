@@ -144,7 +144,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   }
 
   return (
-    <EuiPage paddingSize="none">
+    <EuiPage>
       <EuiPageBody>
         <EuiSpacer />
         <EuiPageContent
