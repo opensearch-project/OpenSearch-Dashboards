@@ -80,14 +80,16 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
   const [selectedConnection, setSelectedConnection] = useState<string | undefined>(undefined);
-  const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | undefined>('');
+  const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | undefined>(undefined);
   const [searchText, setSearchText] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const history = useHistory();
 
   const fetchDataSources = useCallback(() => {
+    if (featureFlagStatus && !selectedDataSourceId) return;
+
     const endpoint =
-      featureFlagStatus && selectedDataSourceId !== undefined
+      featureFlagStatus && selectedDataSourceId
         ? `${DATACONNECTIONS_BASE}/dataSourceMDSId=${selectedDataSourceId}`
         : `${DATACONNECTIONS_BASE}`;
 
@@ -113,10 +115,10 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
 
   const deleteDataSources = useCallback(
     (connectionName: string | undefined) => {
-      if (!connectionName) return;
+      if (!connectionName || (featureFlagStatus && !selectedDataSourceId)) return;
 
       const endpoint =
-        featureFlagStatus && selectedDataSourceId !== undefined
+        featureFlagStatus && selectedDataSourceId
           ? `${DATACONNECTIONS_BASE}/${connectionName}/dataSourceMDSId=${selectedDataSourceId}`
           : `${DATACONNECTIONS_BASE}/${connectionName}`;
 
@@ -150,7 +152,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   }, [fetchDataSources]);
 
   const handleSelectedDataSourceChange = (e: DataSourceOption[]) => {
-    const dataSourceId = e[0] ? e[0].id : '';
+    const dataSourceId = e[0] ? e[0].id : undefined;
     setSelectedDataSourceId(dataSourceId);
   };
 
@@ -203,7 +205,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       onClick: (datasource: DataConnection) => {
         renderCreateAccelerationFlyout({
           dataSourceName: datasource.name,
-          dataSourceMDSId: selectedDataSourceId,
+          dataSourceMDSId: selectedDataSourceId ?? '',
         });
       },
       'data-test-subj': 'action-accelerate',
@@ -266,7 +268,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
             <EuiLink
               data-test-subj={`${record.name}DataConnectionsLink`}
               onClick={() =>
-                history.push(`/manage/${record.name}?dataSourceMDSId=${selectedDataSourceId}`)
+                history.push(`/manage/${record.name}?dataSourceMDSId=${selectedDataSourceId ?? ''}`)
               }
             >
               {truncate(record.name, 100)}
@@ -307,6 +309,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
             disabled={false}
             compressed={true}
             hideLocalCluster={getHideLocalCluster().enabled}
+            isClearable={false}
           />
         </EuiFlexItem>
       )}
