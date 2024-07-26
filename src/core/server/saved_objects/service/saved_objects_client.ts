@@ -473,12 +473,14 @@ export class SavedObjectsClient {
   deleteFromWorkspaces = async <T = unknown>(
     type: string,
     id: string,
-    options: { workspaces: string[] }
+    options: { workspaces?: string[] }
   ) => {
     const { workspaces } = options;
     if (!workspaces || workspaces.length === 0) {
       throw new TypeError(`Workspaces is required.`);
     }
+    // There may be some customized wrappers which will extend the options etc, so we will delete workspace field and pass options continuously.
+    delete options.workspaces;
     const object = await this.get<T>(type, id, options);
     const existingWorkspaces = object.workspaces ?? [];
     const newWorkspaces = existingWorkspaces.filter((item) => {
@@ -518,12 +520,14 @@ export class SavedObjectsClient {
   addToWorkspaces = async <T = unknown>(
     type: string,
     id: string,
-    options: { workspaces: string[] }
+    options: { workspaces?: string[] }
   ): Promise<any> => {
     const { workspaces } = options;
     if (!workspaces || workspaces.length === 0) {
       throw new TypeError(`Workspaces is required.`);
     }
+    // There may be some customized wrappers which will extend the options etc, so we will delete workspace field and pass options continuously.
+    delete options.workspaces;
     const object = await this.get<T>(type, id, options);
     const existingWorkspaces = object.workspaces ?? [];
     const mergedWorkspaces = existingWorkspaces.concat(workspaces);
