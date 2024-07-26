@@ -3,76 +3,70 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { from, Observable } from 'rxjs';
+import { from } from 'rxjs';
 import { distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { DataSetManager } from '../../query';
 
 export interface IDataSourceRequestHandlerParams {
   dataSourceId: string;
   title: string;
 }
 
-// Function to get raw suggestion data
 export const getRawSuggestionData$ = (
-  dataSetManager: DataSetManager,
-  dataSourceRequestHandler: ({
+  connectionsService: any,
+  dataSourceReuqstHandler: ({
     dataSourceId,
     title,
   }: IDataSourceRequestHandlerParams) => Promise<any>,
-  defaultRequestHandler: () => Promise<any>
-): Observable<any> =>
-  dataSetManager.getUpdates$().pipe(
+  defaultReuqstHandler: () => any
+) =>
+  connectionsService.getSelectedConnection$().pipe(
     distinctUntilChanged(),
-    switchMap((dataSet) => {
-      if (!dataSet) {
-        return from(defaultRequestHandler());
+    switchMap((connection: any) => {
+      if (connection === undefined) {
+        return from(defaultReuqstHandler());
       }
-      const dataSourceId = dataSet?.dataSourceRef?.id;
-      const title = dataSet?.dataSourceRef?.name;
-      return from(dataSourceRequestHandler({ dataSourceId, title }));
+      const dataSourceId = connection?.dataSource?.id;
+      const title = connection?.attributes?.title;
+      return from(dataSourceReuqstHandler({ dataSourceId, title }));
     })
   );
 
-// Generic fetchData function
 export const fetchData = (
   tables: string[],
   queryFormatter: (table: string, dataSourceId?: string, title?: string) => any,
   api: any,
-  dataSetManager: DataSetManager
+  connectionService: any
 ): Promise<any[]> => {
-  const fetchFromAPI = async (body: string) => {
-    try {
-      return await api.http.fetch({
-        method: 'POST',
-        path: '/api/enhancements/search/sql',
-        body,
-      });
-    } catch (err) {
-      // TODO: pipe error to UI
-      return Promise.reject(err);
-    }
-  };
-
   return new Promise((resolve, reject) => {
     getRawSuggestionData$(
-      dataSetManager,
+      connectionService,
       ({ dataSourceId, title }) => {
-        const requests = tables.map(async (table) => {
-          const body = JSON.stringify(queryFormatter(table, dataSourceId, title));
-          return fetchFromAPI(body);
-        });
-        return Promise.all(requests);
+        return Promise.all(
+          tables.map(async (table) => {
+            const body = JSON.stringify(queryFormatter(table, dataSourceId, title));
+            return api.http.fetch({
+              method: 'POST',
+              path: '/api/enhancements/search/sql',
+              body,
+            });
+          })
+        );
       },
       () => {
-        const requests = tables.map(async (table) => {
-          const body = JSON.stringify(queryFormatter(table));
-          return fetchFromAPI(body);
-        });
-        return Promise.all(requests);
+        return Promise.all(
+          tables.map(async (table) => {
+            const body = JSON.stringify(queryFormatter(table));
+            return api.http.fetch({
+              method: 'POST',
+              path: '/api/enhancements/search/sql',
+              body,
+            });
+          })
+        );
       }
     ).subscribe({
       next: (dataFrames: any) => resolve(dataFrames),
-      error: (err: Error) => {
+      error: (err: any) => {
         // TODO: pipe error to UI
         reject(err);
       },
@@ -80,11 +74,10 @@ export const fetchData = (
   });
 };
 
-// Specific fetch function for table schemas
 export const fetchTableSchemas = (
   tables: string[],
   api: any,
-  dataSetManager: DataSetManager
+  connectionService: any
 ): Promise<any[]> => {
   return fetchData(
     tables,
@@ -100,16 +93,15 @@ export const fetchTableSchemas = (
       },
     }),
     api,
-    dataSetManager
+    connectionService
   );
 };
 
-// Specific fetch function for column values
 export const fetchColumnValues = (
   tables: string[],
   column: string,
   api: any,
-  dataSetManager: DataSetManager
+  connectionService: any
 ): Promise<any[]> => {
   return fetchData(
     tables,
@@ -125,6 +117,6 @@ export const fetchColumnValues = (
       },
     }),
     api,
-    dataSetManager
+    connectionService
   );
 };

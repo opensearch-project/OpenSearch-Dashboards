@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { monaco } from '@osd/monaco';
+import { monaco } from 'packages/osd-monaco/target';
 import { Lexer as LexerType, ParserRuleContext, Parser as ParserType } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
 import {
@@ -21,9 +21,10 @@ import { createParser } from './parse';
 import { SqlErrorListener } from './sql_error_listerner';
 import { findCursorTokenIndex } from '../shared/cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
+import { getUiSettings } from '../../services';
 import { SQL_SYMBOLS } from './constants';
-import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
-import { fetchTableSchemas } from '../shared/utils';
+import { QuerySuggestionGetFnArgs } from '../../autocomplete';
+import { fetchColumnValues, fetchTableSchemas } from '../shared/utils';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -52,13 +53,13 @@ export const getSuggestions = async ({
     column: position?.column || selectionEnd,
   });
 
-  const finalSuggestions = [] as QuerySuggestion[];
+  const finalSuggestions = [];
 
   try {
     // Fetch columns and values
     if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
       const tableNames = suggestions.suggestColumns?.tables?.map((table) => table.name) ?? [];
-      const schemas = await fetchTableSchemas(tableNames, api, dataSetManager);
+      const schemas = await fetchTableSchemas(tableNames, api, connectionService);
 
       schemas.forEach((schema) => {
         if (schema.body?.fields?.length > 0) {
@@ -66,17 +67,38 @@ export const getSuggestions = async ({
           const fieldTypes = schema.body.fields.find((col: any) => col.name === 'DATA_TYPE');
           if (columns && fieldTypes) {
             finalSuggestions.push(
-              ...columns.values.map((col: string) => ({
+              ...columns.values.map((col: string, index: number) => ({
                 text: col,
-                type: monaco.languages.CompletionItemKind.Field,
+                type: 'field',
+                fieldType: fieldTypes.values[index],
               }))
             );
           }
         }
       });
 
-      // later TODO: fetch column values, currently within the industry, it's not a common practice to suggest
-      // values due to different types of the columns as well as the performance impact. For now just avoid it.
+      if (
+        'suggestValuesForColumn' in suggestions &&
+        /\S/.test(suggestions.suggestValuesForColumn as string) &&
+        suggestions.suggestValuesForColumn !== undefined
+      ) {
+        const values = await fetchColumnValues(
+          tableNames,
+          suggestions.suggestValuesForColumn as string,
+          api,
+          connectionService
+        );
+        values.forEach((value) => {
+          if (value.body?.fields?.length > 0) {
+            finalSuggestions.push(
+              ...value.body.fields[0].values.map((colVal: string) => ({
+                text: `'${colVal}'`,
+                type: 'value',
+              }))
+            );
+          }
+        });
+      }
     }
 
     // Fill in aggregate functions
@@ -84,7 +106,7 @@ export const getSuggestions = async ({
       finalSuggestions.push(
         ...SQL_SYMBOLS.AGREGATE_FUNCTIONS.map((af) => ({
           text: af,
-          type: monaco.languages.CompletionItemKind.Function,
+          type: 'function',
         }))
       );
     }
@@ -94,13 +116,12 @@ export const getSuggestions = async ({
       finalSuggestions.push(
         ...(suggestions.suggestKeywords ?? []).map((sk) => ({
           text: sk.value,
-          type: monaco.languages.CompletionItemKind.Keyword,
+          type: 'keyword',
         }))
       );
     }
   } catch (error) {
     // TODO: pipe error to the UI
-    return [];
   }
 
   return finalSuggestions;

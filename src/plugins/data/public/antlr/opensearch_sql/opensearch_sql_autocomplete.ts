@@ -41,7 +41,7 @@ const tokenDictionary: TokenDictionary = {
 };
 
 // These are keywords that we do not want to show in autocomplete
-export function getIgnoredTokens(): number[] {
+function getIgnoredTokens(): number[] {
   const tokens = [];
 
   const firstOperatorIndex = OpenSearchSQLParser.SLASH;
@@ -119,7 +119,7 @@ class OpenSearchSqlSymbolTableVisitor
   };
 }
 
-export function processVisitedRules(
+function processVisitedRules(
   rules: c3.CandidatesCollection['rules'],
   cursorTokenIndex: number,
   tokenStream: TokenStream
@@ -192,7 +192,7 @@ export function processVisitedRules(
   };
 }
 
-export function getParseTree(
+function getParseTree(
   parser: OpenSearchSQLParser,
   type?: TableQueryPosition['type'] | 'select'
 ): ParseTree {
@@ -210,7 +210,7 @@ export function getParseTree(
   }
 }
 
-export function enrichAutocompleteResult(
+function enrichAutocompleteResult(
   baseResult: AutocompleteResultBase,
   rules: c3.CandidatesCollection['rules'],
   tokenStream: TokenStream,

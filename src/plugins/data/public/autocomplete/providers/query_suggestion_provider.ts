@@ -60,10 +60,10 @@ export interface QuerySuggestionGetFnArgs {
 
 /** @public **/
 export interface QuerySuggestionBasic {
-  type: QuerySuggestionTypes | monaco.languages.CompletionItemKind;
+  type: QuerySuggestionTypes;
   description?: string | JSX.Element;
-  end?: number;
-  start?: number;
+  end: number;
+  start: number;
   text: string;
   cursorIndex?: number;
 }
