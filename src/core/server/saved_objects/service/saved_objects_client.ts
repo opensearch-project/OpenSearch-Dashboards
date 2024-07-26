@@ -480,6 +480,9 @@ export class SavedObjectsClient {
     if (!targetWorkspaces || targetWorkspaces.length === 0) {
       throw new TypeError(`Workspaces is required.`);
     }
+    if ('workspaces' in options && options.workspaces) {
+      throw new TypeError('Invalid options, options.workspaces should not exist.');
+    }
     const object = await this.get<T>(type, id, options);
     const existingWorkspaces = object.workspaces ?? [];
     const newWorkspaces = existingWorkspaces.filter((item) => {
@@ -500,7 +503,6 @@ export class SavedObjectsClient {
         },
         {
           ...options,
-          workspaces: [],
           id,
           permissions: object.permissions,
           overwrite: true,
