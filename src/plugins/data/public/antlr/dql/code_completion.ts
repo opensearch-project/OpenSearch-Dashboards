@@ -6,14 +6,12 @@
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
 import { HttpSetup } from 'opensearch-dashboards/public';
-import { monaco } from '@osd/monaco';
 import { DQLLexer } from './.generated/DQLLexer';
 import { DQLParser, KeyValueExpressionContext } from './.generated/DQLParser';
 import { getTokenPosition } from '../shared/cursor';
-import { IndexPatternField } from '../../index_patterns';
+import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
-import { getUiService } from '../../services';
 
 const findCursorIndex = (
   tokenStream: TokenStream,
@@ -45,12 +43,11 @@ const findFieldSuggestions = (indexPattern: any) => {
       return idxField.name;
     });
 
-  const fieldSuggestions: Array<{
-    text: string;
-    type: monaco.languages.CompletionItemKind;
-  }> = fieldNames.map((field: string) => {
-    return { text: field, type: monaco.languages.CompletionItemKind.Field };
-  });
+  const fieldSuggestions: Array<{ text: string; type: string }> = fieldNames.map(
+    (field: string) => {
+      return { text: field, type: 'field' };
+    }
+  );
 
   return fieldSuggestions;
 };
@@ -119,16 +116,7 @@ export const getSuggestions = async ({
   position,
   selectionEnd,
   core: coreSetup,
-  services,
 }: QuerySuggestionGetFnArgs) => {
-  if (
-    !services ||
-    !services.appName ||
-    !getUiService().Settings.supportsEnhancementsEnabled(services.appName)
-  ) {
-    return [];
-  }
-
   const http = coreSetup?.http;
   const currentIndexPattern = indexPatterns[0];
 
@@ -185,7 +173,7 @@ export const getSuggestions = async ({
     if (!!values) {
       completions.push(
         ...values?.map((val: any) => {
-          return { text: val, type: monaco.languages.CompletionItemKind.Value };
+          return { text: val, type: 'value' };
         })
       );
     }
@@ -199,7 +187,7 @@ export const getSuggestions = async ({
     }
 
     const tokenSymbolName = parser.vocabulary.getSymbolicName(token)?.toLowerCase();
-    completions.push({ text: tokenSymbolName, type: monaco.languages.CompletionItemKind.Keyword });
+    completions.push({ text: tokenSymbolName, type: 'keyword' });
   });
 
   return completions;

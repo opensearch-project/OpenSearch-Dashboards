@@ -54,7 +54,7 @@ export interface QuerySuggestionGetFnArgs {
   signal?: AbortSignal;
   boolFilter?: any;
   position?: monaco.Position;
-  services?: any; // will need to add type when ConnectionService is properly exposed from queryEnhancements
+  connectionService?: any; // will need to add type when ConnectionService is properly exposed from queryEnhancements
   core?: CoreSetup;
 }
 

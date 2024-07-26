@@ -309,7 +309,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       language: this.props.query.language,
       indexPatterns,
       position,
-      services: this.services,
+      openSearchDashboards: this.services,
     });
 
     return {
