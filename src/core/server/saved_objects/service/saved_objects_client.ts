@@ -479,7 +479,7 @@ export class SavedObjectsClient {
     if (!workspaces || workspaces.length === 0) {
       throw new TypeError(`Workspaces is required.`);
     }
-    // There may be some customized wrappers which will extend the options etc, so we will delete workspace field and pass options continuously.
+    // There may be some customized wrappers which will extend the options,  so we will delete workspace field and pass options continuously for extensibility.
     delete options.workspaces;
     const object = await this.get<T>(type, id, options);
     const existingWorkspaces = object.workspaces ?? [];
