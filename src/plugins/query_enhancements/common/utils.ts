@@ -125,6 +125,14 @@ export class DataFramePolling<T, P = void> {
   }
 }
 
+export const handleDataFrameError = (response: any) => {
+  const df = response.body;
+  if (df.error) {
+    const jsError = new Error(df.error.response);
+    return throwError(jsError);
+  }
+};
+
 export const fetchDataFrame = (
   context: FetchDataFrameContext,
   queryString: string,
@@ -139,7 +147,7 @@ export const fetchDataFrame = (
       body,
       signal,
     })
-  );
+  ).pipe(tap(handleDataFrameError));
 };
 
 export const fetchDataFramePolling = (context: FetchDataFrameContext, df: IDataFrame) => {

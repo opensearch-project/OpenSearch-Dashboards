@@ -30,7 +30,7 @@ describe('getRawSuggestionData$', () => {
     const mockConnectionsService = {
       getSelectedConnection$: jest.fn().mockReturnValue(
         of({
-          id: 'testId',
+          dataSource: { id: 'testId' },
           attributes: { title: 'testTitle' },
         })
       ),
@@ -102,7 +102,7 @@ describe('fetchTableSchemas', () => {
     const mockConnectionService = {
       getSelectedConnection$: jest
         .fn()
-        .mockReturnValue(of({ id: 'testId', attributes: { title: 'testTitle' } })),
+        .mockReturnValue(of({ dataSource: { id: 'testId' }, attributes: { title: 'testTitle' } })),
     };
 
     const result = await fetchTableSchemas(['table1'], mockApi, mockConnectionService);
@@ -135,7 +135,7 @@ describe('fetchColumnValues', () => {
     const mockConnectionService = {
       getSelectedConnection$: jest
         .fn()
-        .mockReturnValue(of({ id: 'testId', attributes: { title: 'testTitle' } })),
+        .mockReturnValue(of({ dataSource: { id: 'testId' }, attributes: { title: 'testTitle' } })),
     };
 
     const result = await fetchColumnValues(['table1'], 'column1', mockApi, mockConnectionService);

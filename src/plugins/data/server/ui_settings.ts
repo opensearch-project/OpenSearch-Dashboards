@@ -709,7 +709,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       name: i18n.translate('data.advancedSettings.query.enhancements.enableTitle', {
         defaultMessage: 'Enable query enhancements',
       }),
-      value: true,
+      value: false,
       description: i18n.translate('data.advancedSettings.query.enhancements.enableText', {
         defaultMessage: `
           <strong>Experimental</strong>:
@@ -717,6 +717,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
           only querying and querying languages that are considered production-ready are available to the user.`,
       }),
       category: ['search'],
+      requiresPageReload: true,
       schema: schema.boolean(),
     },
     [UI_SETTINGS.QUERY_DATAFRAME_HYDRATION_STRATEGY]: {
