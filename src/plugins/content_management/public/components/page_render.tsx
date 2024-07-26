@@ -28,7 +28,7 @@ export const PageRender = ({ page, embeddable, savedObjectsClient }: Props) => {
       style={{ margin: '10px 20px' }}
     >
       {sections.map((section) => (
-        <EuiFlexItem>
+        <EuiFlexItem key={section.id}>
           <SectionRender
             key={section.id}
             embeddable={embeddable}
