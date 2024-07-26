@@ -23,7 +23,7 @@ import { findCursorTokenIndex } from '../shared/cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { getUiSettings } from '../../services';
 import { SQL_SYMBOLS } from './constants';
-import { QuerySuggestionGetFnArgs } from '../../autocomplete';
+import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { fetchColumnValues, fetchTableSchemas } from '../shared/utils';
 
 export interface SuggestionParams {
@@ -59,7 +59,7 @@ export const getSuggestions = async ({
     // Fetch columns and values
     if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
       const tableNames = suggestions.suggestColumns?.tables?.map((table) => table.name) ?? [];
-      const schemas = await fetchTableSchemas(tableNames, api, connectionService);
+      const schemas = await fetchTableSchemas(tableNames, api, services);
 
       schemas.forEach((schema) => {
         if (schema.body?.fields?.length > 0) {

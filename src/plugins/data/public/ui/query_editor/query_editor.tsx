@@ -18,16 +18,16 @@ import { QuerySuggestion } from '../../autocomplete';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { DataSettings } from '../types';
-import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
+import { SimpleDataSet } from '../../../common';
 
 const LANGUAGE_ID = 'SQL';
 monaco.languages.register({ id: LANGUAGE_ID });
 
 export interface QueryEditorProps {
-  indexPatterns: Array<IIndexPattern | string>;
+  dataSet?: SimpleDataSet;
   query: Query;
   dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
@@ -42,7 +42,7 @@ export interface QueryEditorProps {
   onChange?: (query: Query, dateRange?: TimeRange) => void;
   onChangeQueryEditorFocus?: (isFocused: boolean) => void;
   onSubmit?: (query: Query, dateRange?: TimeRange) => void;
-  getQueryStringInitialValue?: (language: string, dataSetName?: string) => string;
+  getQueryStringInitialValue?: (language: string) => string;
   dataTestSubj?: string;
   size?: SuggestionsListSize;
   className?: string;
@@ -273,42 +273,42 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
-  provideCompletionItems = async (
-    model: monaco.editor.ITextModel,
-    position: monaco.Position
-  ): Promise<monaco.languages.CompletionList> => {
-    const wordUntil = model.getWordUntilPosition(position);
-    const wordRange = new monaco.Range(
-      position.lineNumber,
-      wordUntil.startColumn,
-      position.lineNumber,
-      wordUntil.endColumn
-    );
-    const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
-    const connectionService = enhancements?.connectionService;
-    const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
-      query: this.getQueryString(),
-      selectionStart: model.getOffsetAt(position),
-      selectionEnd: model.getOffsetAt(position),
-      language: this.props.query.language,
-      indexPatterns: this.state.indexPatterns,
-      position,
-      connectionService,
-    });
+  // provideCompletionItems = async (
+  //   model: monaco.editor.ITextModel,
+  //   position: monaco.Position
+  // ): Promise<monaco.languages.CompletionList> => {
+  //   const wordUntil = model.getWordUntilPosition(position);
+  //   const wordRange = new monaco.Range(
+  //     position.lineNumber,
+  //     wordUntil.startColumn,
+  //     position.lineNumber,
+  //     wordUntil.endColumn
+  //   );
+  //   const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
+  //   const connectionService = enhancements?.connectionService;
+  //   const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
+  //     query: this.getQueryString(),
+  //     selectionStart: model.getOffsetAt(position),
+  //     selectionEnd: model.getOffsetAt(position),
+  //     language: this.props.query.language,
+  //     indexPatterns: this.state.indexPatterns,
+  //     position,
+  //     connectionService,
+  //   });
 
-    return {
-      suggestions:
-        suggestions && suggestions.length > 0
-          ? suggestions.map((s) => ({
-              label: s.text,
-              kind: this.getCodeEditorSuggestionsType(s.type),
-              insertText: s.text,
-              range: wordRange,
-            }))
-          : [],
-      incomplete: false,
-    };
-  };
+  //   return {
+  //     suggestions:
+  //       suggestions && suggestions.length > 0
+  //         ? suggestions.map((s) => ({
+  //             label: s.text,
+  //             kind: this.getCodeEditorSuggestionsType(s.type),
+  //             insertText: s.text,
+  //             range: wordRange,
+  //           }))
+  //         : [],
+  //     incomplete: false,
+  //   };
+  // };
 
   editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     this.setState({ lineCount: editor.getModel()?.getLineCount() });
@@ -434,9 +434,9 @@ export default class QueryEditorUI extends Component<Props, State> {
                             cursorStyle: 'line',
                             wordBasedSuggestions: false,
                           }}
-                          suggestionProvider={{
-                            provideCompletionItems: this.provideCompletionItems,
-                          }}
+                          // suggestionProvider={{
+                          //   provideCompletionItems: this.provideCompletionItems,
+                          // }}
                         />
                       </div>
                     </EuiFlexItem>
@@ -487,9 +487,9 @@ export default class QueryEditorUI extends Component<Props, State> {
                   lineNumbersMinChars: 2,
                   wordBasedSuggestions: false,
                 }}
-                suggestionProvider={{
-                  provideCompletionItems: this.provideCompletionItems,
-                }}
+                // suggestionProvider={{
+                //   provideCompletionItems: this.provideCompletionItems,
+                // }}
               />
             )}
 
@@ -507,8 +507,7 @@ export default class QueryEditorUI extends Component<Props, State> {
                   {this.state.lineCount} {this.state.lineCount === 1 ? 'line' : 'lines'}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {typeof this.props.indexPatterns?.[0] !== 'string' &&
-                    '@' + this.props.indexPatterns?.[0].timeFieldName}
+                  {this.props.dataSet && `@${this.props.dataSet.timeFieldName}`}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>

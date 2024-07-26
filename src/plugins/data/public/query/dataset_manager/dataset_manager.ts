@@ -5,25 +5,22 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from 'opensearch-dashboards/public';
-import {
-  IndexPatternsService,
-  SIMPLE_DATA_SET_TYPES,
-  SimpleDataSet,
-  SimpleDataSource,
-} from '../../../common';
+import { SIMPLE_DATA_SET_TYPES, SimpleDataSet, SimpleDataSource } from '../../../common';
+import { IndexPatternsContract } from '../../index_patterns';
 
 export class DataSetManager {
   private dataSet$: BehaviorSubject<SimpleDataSet | undefined>;
-  private indexPatterns?: IndexPatternsService;
+  private indexPatterns?: IndexPatternsContract;
   private defaultDataSet?: SimpleDataSet;
 
   constructor(private readonly uiSettings: CoreStart['uiSettings']) {
     this.dataSet$ = new BehaviorSubject<SimpleDataSet | undefined>(undefined);
   }
 
-  public init = async (indexPatterns: IndexPatternsService) => {
+  public init = async (indexPatterns: IndexPatternsContract) => {
     this.indexPatterns = indexPatterns;
     this.defaultDataSet = await this.fetchDefaultDataSet();
+    return this.defaultDataSet;
   };
 
   public getUpdates$ = () => {
@@ -46,7 +43,7 @@ export class DataSetManager {
     return this.defaultDataSet;
   };
 
-  private fetchDefaultDataSet = async (): Promise<SimpleDataSet | undefined> => {
+  public fetchDefaultDataSet = async (): Promise<SimpleDataSet | undefined> => {
     const defaultIndexPatternId = this.uiSettings.get('defaultIndex');
     if (!defaultIndexPatternId) {
       return undefined;

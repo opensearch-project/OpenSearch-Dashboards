@@ -90,6 +90,7 @@ import { IIndexPattern } from '../../index_patterns';
 import {
   DATA_FRAME_TYPES,
   IDataFrame,
+  IDataFrameError,
   IDataFrameResponse,
   convertResult,
   createDataFrame,
@@ -446,6 +447,10 @@ export class SearchSource {
           const dataFrameResponse = response as IDataFrameResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+        }
+        if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.ERROR) {
+          const dataFrameError = response as IDataFrameError;
+          throw new RequestFailure(null, dataFrameError);
         }
         // TODO: MQL else if data_frame_polling then poll for the data frame updating the df fields only
       }

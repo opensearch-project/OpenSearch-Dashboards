@@ -37,7 +37,7 @@ import { TimefilterService, TimefilterSetup } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
 import { createQueryStateObservable } from './state_sync/create_global_query_observable';
 import { QueryStringManager, QueryStringContract } from './query_string';
-import { DataSetManager, DataSetContract } from './dataset_manager';
+import { DataSetManager } from './dataset_manager';
 import { buildOpenSearchQuery, getOpenSearchQueryConfig, IndexPatternsService } from '../../common';
 import { getUiSettings } from '../services';
 import { IndexPattern } from '..';
@@ -63,7 +63,7 @@ export class QueryService {
   filterManager!: FilterManager;
   timefilter!: TimefilterSetup;
   queryStringManager!: QueryStringContract;
-  dataSetManager!: DataSetContract;
+  dataSetManager!: DataSetManager;
 
   state$!: ReturnType<typeof createQueryStateObservable>;
 

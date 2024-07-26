@@ -234,11 +234,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               }`;
               const existingIndexPattern = await scopedIndexPatterns.get(dataSetName, true);
               const dataSet = await scopedIndexPatterns.create(
-                dataFrameToSpec(dataFrame, existingIndexPattern?.id),
+                dataFrameToSpec(dataFrame, existingIndexPattern?.id ?? dataSetName),
                 !existingIndexPattern?.id
               );
-              // save to cache by title because the id is not unique for temporary index pattern created
-              scopedIndexPatterns.saveToCache(dataSet.title, dataSet);
+              scopedIndexPatterns.refreshFields(dataSet, true);
+              scopedIndexPatterns.saveToCache(dataSetName, dataSet);
             },
             clear: () => {
               if (this.dfCache.get() === undefined) return;
