@@ -97,7 +97,7 @@ import {
   HandlerParameters,
 } from './context';
 import { Branding } from '../types';
-import { WorkspacesStart, WorkspacesSetup } from './workspace';
+import { WorkspacesStart, WorkspacesSetup, IWorkspaceClient } from './workspace';
 
 export type { Logos } from '../common';
 export { PackageInfo, EnvironmentMode } from '../server/types';
@@ -385,6 +385,12 @@ export {
 
 export { __osdBootstrap__ } from './osd_bootstrap';
 
-export { WorkspacesStart, WorkspacesSetup, WorkspacesService, WorkspaceObject } from './workspace';
+export {
+  WorkspacesStart,
+  WorkspacesSetup,
+  WorkspacesService,
+  WorkspaceObject,
+  IWorkspaceClient,
+} from './workspace';
 
 export { debounce } from './utils';
