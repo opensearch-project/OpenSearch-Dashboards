@@ -1,0 +1,2 @@
+fix:
+- Add workspace blank check ([#7512](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7512))
