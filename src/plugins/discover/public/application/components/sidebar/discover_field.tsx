@@ -153,7 +153,7 @@ export const DiscoverField = ({
           defaultMessage: 'Add field as column',
         })}
       >
-        <EuiSmallButtonIcon
+        <EuiButtonIcon
           iconType="plusInCircleFilled"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
             if (ev.type === 'click') {
@@ -163,6 +163,7 @@ export const DiscoverField = ({
             ev.stopPropagation();
             toggleDisplay(field);
           }}
+          size="xs"
           data-test-subj={`fieldToggle-${field.name}`}
           aria-label={addLabelAria}
           className="dscSidebarField__actionButton"
