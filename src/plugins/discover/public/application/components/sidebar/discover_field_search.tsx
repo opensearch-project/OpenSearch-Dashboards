@@ -241,69 +241,59 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   );
 
   return (
-    <EuiFlexGroup responsive={false} gutterSize="xs">
-      <EuiFlexItem>
-        <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
-          <EuiCompressedFieldSearch
-            aria-label={searchPlaceholder}
-            data-test-subj="fieldFilterSearchInput"
-            fullWidth
-            onChange={(event) => onChange('name', event.currentTarget.value)}
-            placeholder={searchPlaceholder}
-            value={value}
+    <div className="euiFormControlLayout euiFormControlLayout--group osdDiscoverSideBar__wrap">
+      <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
+        <EuiCompressedFieldSearch
+          aria-label={searchPlaceholder}
+          data-test-subj="fieldFilterSearchInput"
+          fullWidth
+          onChange={(event) => onChange('name', event.currentTarget.value)}
+          placeholder={searchPlaceholder}
+          value={value}
+        />
+      </EuiOutsideClickDetector>
+
+      <EuiPopover
+        id="dataPanelTypeFilter"
+        panelClassName="euiFilterGroup__popoverPanel dataPanelTypeFilterPopover"
+        panelPaddingSize="none"
+        anchorPosition="downLeft"
+        display="block"
+        isOpen={isPopoverOpen}
+        closePopover={() => {
+          setPopoverOpen(false);
+        }}
+        button={
+          <EuiSmallFilterButton
+            iconType="filter"
+            iconSide="left"
+            hasActiveFilters={activeFiltersCount > 0}
+            aria-label={filterBtnAriaLabel}
+            data-test-subj="toggleFieldFilterButton"
+            numFilters={activeFiltersCount} // {NUM_FILTERS} https://github.com/opensearch-project/oui/issues/1219
+            onClick={handleFacetButtonClicked}
+            numActiveFilters={activeFiltersCount}
+            isSelected={isPopoverOpen}
           />
-        </EuiOutsideClickDetector>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          <EuiPopover
-            id="dataPanelTypeFilter"
-            panelClassName="euiFilterGroup__popoverPanel dataPanelTypeFilterPopover"
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-            display="block"
-            isOpen={isPopoverOpen}
-            closePopover={() => {
-              setPopoverOpen(false);
-            }}
-            button={
-              <EuiSmallFilterButton
-                iconType="filter"
-                iconSide="left"
-                hasActiveFilters={activeFiltersCount > 0}
-                aria-label={filterBtnAriaLabel}
-                data-test-subj="toggleFieldFilterButton"
-                numFilters={activeFiltersCount} // {NUM_FILTERS} https://github.com/opensearch-project/oui/issues/1219
-                onClick={handleFacetButtonClicked}
-                numActiveFilters={activeFiltersCount}
-                isSelected={isPopoverOpen}
-              >
-                <FormattedMessage
-                  id="discover.fieldChooser.fieldFilterFacetButtonLabel"
-                  defaultMessage="Filter by type"
-                />
-              </EuiSmallFilterButton>
-            }
-          >
-            <EuiPopoverTitle>
-              {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
-                defaultMessage: 'Filter by type',
-              })}
-            </EuiPopoverTitle>
-            {selectionPanel}
-            <EuiPopoverFooter>
-              <EuiCompressedSwitch
-                label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
-                  defaultMessage: 'Hide missing fields',
-                })}
-                checked={values.missing}
-                onChange={handleMissingChange}
-                data-test-subj="missingSwitch"
-              />
-            </EuiPopoverFooter>
-          </EuiPopover>
-        </EuiFilterGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        }
+      >
+        <EuiPopoverTitle>
+          {i18n.translate('discover.fieldChooser.filter.filterByTypeLabel', {
+            defaultMessage: 'Filter by type',
+          })}
+        </EuiPopoverTitle>
+        {selectionPanel}
+        <EuiPopoverFooter>
+          <EuiCompressedSwitch
+            label={i18n.translate('discover.fieldChooser.filter.hideMissingFieldsLabel', {
+              defaultMessage: 'Hide missing fields',
+            })}
+            checked={values.missing}
+            onChange={handleMissingChange}
+            data-test-subj="missingSwitch"
+          />
+        </EuiPopoverFooter>
+      </EuiPopover>
+    </div>
   );
 }
