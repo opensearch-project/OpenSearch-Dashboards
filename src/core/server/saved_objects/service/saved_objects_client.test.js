@@ -293,14 +293,16 @@ test(`#addToWorkspaces`, async () => {
 
   const type = Symbol();
   const id = Symbol();
+  const workspaces = Symbol();
   const options = {
-    workspaces: Symbol(),
+    workspaces,
   };
   const result = await client.addToWorkspaces(type, id, options);
 
-  expect(mockRepository.get).toHaveBeenCalledWith(type, id, options);
+  expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
   expect(mockRepository.update).toHaveBeenCalledWith(type, id, undefined, {
-    workspaces: [options.workspaces],
+    version: undefined,
+    workspaces: [workspaces],
   });
 
   expect(result).toBe(returnValue);
