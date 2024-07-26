@@ -101,6 +101,13 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
       WORKSPACE_SAVED_OBJECTS_CLIENT_WRAPPER_ID,
       this.workspaceSavedObjectsClientWrapper.wrapperFactory
     );
+
+    core.http.registerOnPreResponse((request, _response, toolkit) => {
+      if (this.permissionControl?.isSavedObjectsCacheActive(request)) {
+        this.permissionControl?.clearSavedObjectsCache(request);
+      }
+      return toolkit.next();
+    });
   }
 
   constructor(initializerContext: PluginInitializerContext) {
