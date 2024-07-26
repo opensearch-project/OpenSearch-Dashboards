@@ -41,7 +41,7 @@ import { DATACONNECTIONS_BASE, observabilityMetricsID } from '../../../constants
 import { getRenderCreateAccelerationFlyout } from '../../../plugin';
 import { InstallIntegrationFlyout } from '../integrations/installed_integrations_table';
 import { redirectToExplorerS3 } from '../associated_object_management/utils/associated_objects_tab_utils';
-import { isPluginInstalled } from '../../utils';
+import { isPluginInstalled, getHideLocalCluster } from '../../utils';
 
 interface DataConnection {
   connectionType: DirectQueryDatasourceType;
@@ -306,6 +306,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
             uiSettings={uiSettings}
             disabled={false}
             compressed={true}
+            hideLocalCluster={getHideLocalCluster().enabled}
           />
         </EuiFlexItem>
       )}
