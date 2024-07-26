@@ -11,6 +11,7 @@ import { useSelector, updateIndexPattern } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
 import { useDataSetManager } from './use_dataset_manager';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 
 /**
  * Custom hook to fetch and manage the index pattern based on the provided services.
@@ -33,7 +34,7 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
   });
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
-  const isQueryEnhancementEnabled = uiSettings.get('query:enhancements:enabled');
+  const isQueryEnhancementEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const fetchFromState = useCallback(

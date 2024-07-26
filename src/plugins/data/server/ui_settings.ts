@@ -709,7 +709,7 @@ export function getUiSettings(): Record<string, UiSettingsParams<unknown>> {
       name: i18n.translate('data.advancedSettings.query.enhancements.enableTitle', {
         defaultMessage: 'Enable query enhancements',
       }),
-      value: true,
+      value: false,
       description: i18n.translate('data.advancedSettings.query.enhancements.enableText', {
         defaultMessage: `
           <strong>Experimental</strong>:
