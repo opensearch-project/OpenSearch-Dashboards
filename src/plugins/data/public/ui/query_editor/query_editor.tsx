@@ -273,42 +273,42 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
-  // provideCompletionItems = async (
-  //   model: monaco.editor.ITextModel,
-  //   position: monaco.Position
-  // ): Promise<monaco.languages.CompletionList> => {
-  //   const wordUntil = model.getWordUntilPosition(position);
-  //   const wordRange = new monaco.Range(
-  //     position.lineNumber,
-  //     wordUntil.startColumn,
-  //     position.lineNumber,
-  //     wordUntil.endColumn
-  //   );
-  //   const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
-  //   const connectionService = enhancements?.connectionService;
-  //   const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
-  //     query: this.getQueryString(),
-  //     selectionStart: model.getOffsetAt(position),
-  //     selectionEnd: model.getOffsetAt(position),
-  //     language: this.props.query.language,
-  //     indexPatterns: this.state.indexPatterns,
-  //     position,
-  //     connectionService,
-  //   });
+  provideCompletionItems = async (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position
+  ): Promise<monaco.languages.CompletionList> => {
+    const wordUntil = model.getWordUntilPosition(position);
+    const wordRange = new monaco.Range(
+      position.lineNumber,
+      wordUntil.startColumn,
+      position.lineNumber,
+      wordUntil.endColumn
+    );
+    const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
+    const connectionService = enhancements?.connectionService;
+    const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
+      query: this.getQueryString(),
+      selectionStart: model.getOffsetAt(position),
+      selectionEnd: model.getOffsetAt(position),
+      language: this.props.query.language,
+      indexPatterns: this.state.indexPatterns,
+      position,
+      connectionService,
+    });
 
-  //   return {
-  //     suggestions:
-  //       suggestions && suggestions.length > 0
-  //         ? suggestions.map((s) => ({
-  //             label: s.text,
-  //             kind: this.getCodeEditorSuggestionsType(s.type),
-  //             insertText: s.text,
-  //             range: wordRange,
-  //           }))
-  //         : [],
-  //     incomplete: false,
-  //   };
-  // };
+    return {
+      suggestions:
+        suggestions && suggestions.length > 0
+          ? suggestions.map((s) => ({
+              label: s.text,
+              kind: this.getCodeEditorSuggestionsType(s.type),
+              insertText: s.text,
+              range: wordRange,
+            }))
+          : [],
+      incomplete: false,
+    };
+  };
 
   editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     this.setState({ lineCount: editor.getModel()?.getLineCount() });
@@ -434,9 +434,9 @@ export default class QueryEditorUI extends Component<Props, State> {
                             cursorStyle: 'line',
                             wordBasedSuggestions: false,
                           }}
-                          // suggestionProvider={{
-                          //   provideCompletionItems: this.provideCompletionItems,
-                          // }}
+                          suggestionProvider={{
+                            provideCompletionItems: this.provideCompletionItems,
+                          }}
                         />
                       </div>
                     </EuiFlexItem>
@@ -487,9 +487,9 @@ export default class QueryEditorUI extends Component<Props, State> {
                   lineNumbersMinChars: 2,
                   wordBasedSuggestions: false,
                 }}
-                // suggestionProvider={{
-                //   provideCompletionItems: this.provideCompletionItems,
-                // }}
+                suggestionProvider={{
+                  provideCompletionItems: this.provideCompletionItems,
+                }}
               />
             )}
 
