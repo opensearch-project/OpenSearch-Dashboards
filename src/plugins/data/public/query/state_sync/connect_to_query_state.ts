@@ -31,13 +31,19 @@
 import { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 import _ from 'lodash';
+import { CoreStart } from 'opensearch-dashboards/public';
 import {
   BaseStateContainer,
   IOsdUrlStateStorage,
 } from '../../../../opensearch_dashboards_utils/public';
 import { QuerySetup, QueryStart } from '../query_service';
 import { QueryState, QueryStateChange } from './types';
-import { FilterStateStore, COMPARE_ALL_OPTIONS, compareFilters } from '../../../common';
+import {
+  FilterStateStore,
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
+  UI_SETTINGS,
+} from '../../../common';
 import { validateTimeRange } from '../timefilter';
 
 /**
@@ -63,7 +69,8 @@ export const connectStorageToQueryState = async (
     filters: FilterStateStore;
     query: boolean;
     dataSet?: boolean;
-  }
+  },
+  uiSettings?: CoreStart['uiSettings']
 ) => {
   try {
     const syncKeys: Array<keyof QueryStateChange> = [];
@@ -80,7 +87,10 @@ export const connectStorageToQueryState = async (
     const initialStateFromURL: QueryState = OsdUrlStateStorage.get('_q') ?? {
       query: queryString.getDefaultQuery(),
       filters: filterManager.getAppFilters(),
-      dataSet: dataSet.getDefaultDataSet(),
+      ...(uiSettings &&
+        uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
+          dataSet: dataSet.getDataSet(),
+        }),
     };
 
     // set up initial '_q' flag in the URL to sync query and filter changes

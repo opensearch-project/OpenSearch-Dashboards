@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { CoreStart } from 'opensearch-dashboards/public';
 import {
   createStateContainer,
   IOsdUrlStateStorage,
@@ -37,6 +38,7 @@ import { QuerySetup, QueryStart } from '../query_service';
 import { connectToQueryState } from './connect_to_query_state';
 import { QueryState } from './types';
 import { FilterStateStore } from '../../../common/opensearch_query/filters';
+import { UI_SETTINGS } from '../../../common';
 
 const GLOBAL_STATE_STORAGE_KEY = '_g';
 
@@ -50,7 +52,8 @@ export const syncQueryStateWithUrl = (
     QueryStart | QuerySetup,
     'filterManager' | 'timefilter' | 'queryString' | 'dataSet' | 'state$'
   >,
-  osdUrlStateStorage: IOsdUrlStateStorage
+  osdUrlStateStorage: IOsdUrlStateStorage,
+  uiSettings?: CoreStart['uiSettings']
 ) => {
   const {
     timefilter: { timefilter },
@@ -61,7 +64,10 @@ export const syncQueryStateWithUrl = (
     time: timefilter.getTime(),
     refreshInterval: timefilter.getRefreshInterval(),
     filters: filterManager.getGlobalFilters(),
-    dataSet: dataSet.getDataSet(),
+    ...(uiSettings &&
+      uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
+        dataSet: dataSet.getDataSet(),
+      }),
   };
 
   // retrieve current state from `_g` url

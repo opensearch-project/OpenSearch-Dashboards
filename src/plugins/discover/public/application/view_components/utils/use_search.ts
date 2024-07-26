@@ -83,6 +83,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     toastNotifications,
     osdUrlStateStorage,
     chrome,
+    uiSettings,
   } = services;
   const timefilter = data.query.timefilter.timefilter;
   const fetchStateRef = useRef<{
@@ -327,13 +328,13 @@ export const useSearch = (services: DiscoverViewServices) => {
 
   useEffect(() => {
     // syncs `_g` portion of url with query services
-    const { stop } = syncQueryStateWithUrl(data.query, osdUrlStateStorage);
+    const { stop } = syncQueryStateWithUrl(data.query, osdUrlStateStorage, uiSettings);
 
     return () => stop();
 
     // this effect should re-run when pathname is changed to preserve querystring part,
     // so the global state is always preserved
-  }, [data.query, osdUrlStateStorage, pathname]);
+  }, [data.query, osdUrlStateStorage, pathname, uiSettings]);
 
   return {
     data$,
