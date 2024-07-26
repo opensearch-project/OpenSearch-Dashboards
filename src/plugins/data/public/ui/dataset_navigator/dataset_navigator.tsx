@@ -10,10 +10,12 @@ import {
   EuiContextMenu,
   EuiForm,
   EuiFormRow,
+  EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
   EuiPopover,
   EuiSelect,
+  EuiToolTip,
 } from '@elastic/eui';
 import { HttpStart, SavedObjectsClientContract } from 'opensearch-dashboards/public';
 import _ from 'lodash';
@@ -568,23 +570,29 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
     content: <div>{isCatalogCacheFetching(databasesLoadStatus) && createLoadingSpinner()}</div>,
   });
 
+  const datasetTitle =
+    selectedDataSetState &&
+    selectedDataSetState?.dataSourceRef &&
+    selectedDataSetState?.dataSourceRef.name
+      ? `${selectedDataSetState.dataSourceRef?.name}::${selectedDataSetState?.title}`
+      : selectedDataSetState?.title;
+
   return (
     <EuiPopover
       button={
-        <EuiButtonEmpty
-          className="dataExplorerDSSelect"
-          color="text"
-          iconType="arrowDown"
-          iconSide="right"
-          flush="left"
-          onClick={onClick}
-        >
-          {selectedDataSetState &&
-          selectedDataSetState?.dataSourceRef &&
-          selectedDataSetState?.dataSourceRef.name
-            ? `${selectedDataSetState.dataSourceRef?.name}::${selectedDataSetState?.title}`
-            : selectedDataSetState?.title}
-        </EuiButtonEmpty>
+        <EuiToolTip content={datasetTitle}>
+          <EuiButtonEmpty
+            className="dataSetNavigator"
+            color="text"
+            iconType="arrowDown"
+            iconSide="right"
+            flush="left"
+            onClick={onClick}
+          >
+            <EuiIcon type="database" className="dataSetNavigator__icon" />
+            {datasetTitle}
+          </EuiButtonEmpty>
+        </EuiToolTip>
       }
       isOpen={navigatorState.isOpen}
       closePopover={closePopover}
