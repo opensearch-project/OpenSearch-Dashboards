@@ -173,6 +173,11 @@ const customCategory: AppCategory = {
   order: (DEFAULT_APP_CATEGORIES.manage.order || 0) - 500,
 };
 
+enum NavWidth {
+  Expanded = 270,
+  Collapsed = 48, // The Collasped width is supposed to be aligned with the hamburger icon on the top left navigation.
+}
+
 export function CollapsibleNavGroupEnabled({
   basePath,
   id,
@@ -268,10 +273,10 @@ export function CollapsibleNavGroupEnabled({
 
   const width = useMemo(() => {
     if (!isNavOpen) {
-      return 50;
+      return NavWidth.Collapsed;
     }
 
-    return 270;
+    return NavWidth.Expanded;
   }, [isNavOpen]);
 
   const onGroupClick = (

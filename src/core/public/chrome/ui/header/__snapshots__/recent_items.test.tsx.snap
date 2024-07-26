@@ -24,7 +24,7 @@ exports[`Recent items should render base element normally 1`] = `
                 class="euiHeaderSectionItemButton__content"
               >
                 <span
-                  data-euiicon-type="RecentItemsIcon"
+                  data-euiicon-type="recentlyViewedApp"
                 />
               </span>
             </span>
