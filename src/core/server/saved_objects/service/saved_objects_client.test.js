@@ -237,7 +237,8 @@ test(`#deleteFromWorkspaces Should use update if there is existing workspaces`, 
 
   const type = Symbol();
   const id = Symbol();
-  await client.deleteFromWorkspaces(type, id, ['id2']);
+  const workspaces = ['id2'];
+  await client.deleteFromWorkspaces(type, id, workspaces);
   expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
   expect(mockRepository.update).toHaveBeenCalledWith(type, id, undefined, {
     version: undefined,
@@ -259,7 +260,8 @@ test(`#deleteFromWorkspaces Should use overwrite create if there is no existing 
 
   const type = Symbol();
   const id = Symbol();
-  await client.deleteFromWorkspaces(type, id, ['id1']);
+  const workspaces = ['id1'];
+  await client.deleteFromWorkspaces(type, id, workspaces);
   expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
   expect(mockRepository.create).toHaveBeenCalledWith(
     type,
@@ -292,6 +294,7 @@ test(`#addToWorkspaces`, async () => {
 
   expect(mockRepository.get).toHaveBeenCalledWith(type, id, {});
   expect(mockRepository.update).toHaveBeenCalledWith(type, id, undefined, {
+    version: undefined,
     workspaces: [workspaces],
   });
 
