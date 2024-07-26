@@ -180,6 +180,7 @@ export function SavedQueryManagementComponent({
       aria-label={label}
       data-test-subj="saved-query-management-popover-button"
       className="osdSavedQueryManagement__popoverButton"
+      title={label}
     >
       <EuiIcon type="save" className="euiQuickSelectPopover__buttonText" />
     </EuiSmallButtonEmpty>

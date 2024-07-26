@@ -9,6 +9,7 @@ exports[`Saved query management component has a popover button 1`] = `
       aria-label="See saved queries"
       data-test-subj="saved-query-management-popover-button"
       onClick={[Function]}
+      title="See saved queries"
     >
       <EuiIcon
         className="euiQuickSelectPopover__buttonText"
