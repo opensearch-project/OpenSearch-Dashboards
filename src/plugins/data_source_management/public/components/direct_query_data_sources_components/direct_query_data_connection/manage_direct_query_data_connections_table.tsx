@@ -86,10 +86,10 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   const history = useHistory();
 
   const fetchDataSources = useCallback(() => {
-    if (featureFlagStatus && !selectedDataSourceId) return;
+    if (featureFlagStatus && selectedDataSourceId === undefined) return;
 
     const endpoint =
-      featureFlagStatus && selectedDataSourceId
+      featureFlagStatus && selectedDataSourceId !== undefined
         ? `${DATACONNECTIONS_BASE}/dataSourceMDSId=${selectedDataSourceId}`
         : `${DATACONNECTIONS_BASE}`;
 
@@ -115,10 +115,10 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
 
   const deleteDataSources = useCallback(
     (connectionName: string | undefined) => {
-      if (!connectionName || (featureFlagStatus && !selectedDataSourceId)) return;
+      if (!connectionName || (featureFlagStatus && selectedDataSourceId === undefined)) return;
 
       const endpoint =
-        featureFlagStatus && selectedDataSourceId
+        featureFlagStatus && selectedDataSourceId !== undefined
           ? `${DATACONNECTIONS_BASE}/${connectionName}/dataSourceMDSId=${selectedDataSourceId}`
           : `${DATACONNECTIONS_BASE}/${connectionName}`;
 
