@@ -32,7 +32,6 @@ import React, { useState } from 'react';
 import {
   EuiPopover,
   EuiPopoverTitle,
-  EuiSmallButtonIcon,
   EuiButtonIcon,
   EuiToolTip,
   EuiFlexGroup,
@@ -178,7 +177,7 @@ export const DiscoverField = ({
           defaultMessage: 'Remove field from table',
         })}
       >
-        <EuiSmallButtonIcon
+        <EuiButtonIcon
           color="danger"
           iconType="cross"
           onClick={(ev: React.MouseEvent<HTMLButtonElement>) => {
@@ -189,6 +188,7 @@ export const DiscoverField = ({
             ev.stopPropagation();
             toggleDisplay(field);
           }}
+          size="xs"
           data-test-subj={`fieldToggle-${field.name}`}
           aria-label={removeLabelAria}
           className="dscSidebarField__actionButton"
