@@ -5,6 +5,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from 'opensearch-dashboards/public';
+import { skip } from 'rxjs/operators';
 import {
   SIMPLE_DATA_SET_TYPES,
   SimpleDataSet,
@@ -29,7 +30,7 @@ export class DataSetManager {
   };
 
   public getUpdates$ = () => {
-    return this.dataSet$.asObservable();
+    return this.dataSet$.asObservable().pipe(skip(1));
   };
 
   public getDataSet = () => {

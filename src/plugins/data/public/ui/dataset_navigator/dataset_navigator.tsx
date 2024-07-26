@@ -187,8 +187,6 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         type: selectedDataSet.type,
       });
 
-      setSelectedDataSetState(selectedDataSet);
-
       closePopover();
     },
     [
@@ -246,13 +244,12 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       setNavigatorState((prevState) => ({ ...prevState, isMounted: false }));
     };
   }, [
-    savedObjectsClient,
-    http,
-    navigatorState.isMounted,
     dataSet,
     dataSetManager,
+    http,
     indexPatternsService,
-    handleSelectedDataSet,
+    navigatorState.isMounted,
+    savedObjectsClient,
   ]);
 
   useEffect(() => {
@@ -689,9 +686,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
             id: 7,
             title: navigatorState.currentDataSet?.title,
             content:
-              navigatorState.isLoading ||
-              !navigatorState.currentDataSet ||
-              !navigatorState.currentDataSet?.title ? (
+              !navigatorState.currentDataSet || !navigatorState.currentDataSet?.title ? (
                 <div>{createLoadingSpinner()}</div>
               ) : (
                 <EuiForm className="dataSetNavigatorFormWrapper">

@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { SIMPLE_DATA_SET_TYPES, SimpleDataSet } from '../../../../../data/common';
+import { SIMPLE_DATA_SET_TYPES } from '../../../../../data/common';
 import { IndexPattern } from '../../../../../data/public';
 import { useSelector, updateIndexPattern } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
@@ -35,35 +35,6 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
   const isQueryEnhancementEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  const fetchFromState = useCallback(
-    async (dataset: SimpleDataSet) => {
-      const temporaryIndexPatternID = dataset.id ?? `${dataset.dataSourceRef?.id}.${dataset.title}`;
-      const temporaryIndexPattern = await data.indexPatterns.create(
-        {
-          id: temporaryIndexPatternID,
-          title: dataset.title,
-          timeFieldName: dataset.timeFieldName,
-          type: dataset.type,
-          ...(dataset.dataSourceRef
-            ? {
-                dataSourceRef: {
-                  id: dataset.dataSourceRef.id ?? dataset.dataSourceRef.name,
-                  name: dataset.dataSourceRef.name,
-                  type: dataset.type!,
-                },
-              }
-            : {}),
-        },
-        true
-      );
-      data.indexPatterns.saveToCache(temporaryIndexPatternID, temporaryIndexPattern);
-
-      return temporaryIndexPattern;
-    },
-    [data.indexPatterns]
-  );
 
   const fetchIndexPatternDetails = useCallback(
     async (id: string) => {
@@ -79,15 +50,10 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
           fetchIndexPatternDetails(dataSet.id).then((ip) => {
             setIndexPattern(ip);
           });
-        } else if (!isLoaded) {
-          fetchFromState(dataSet).then((ip) => {
-            setIsLoaded(true);
-            setIndexPattern(ip);
-          });
         }
       }
     }
-  }, [dataSet, fetchFromState, fetchIndexPatternDetails, isLoaded, isQueryEnhancementEnabled]);
+  }, [dataSet, fetchIndexPatternDetails, isQueryEnhancementEnabled]);
 
   useEffect(() => {
     let isMounted = true;
