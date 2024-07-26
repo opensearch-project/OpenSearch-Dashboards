@@ -446,6 +446,9 @@ export {
   // for BWC, keeping the old name
   IUiStart as DataPublicPluginStartUi,
   DataSetNavigator,
+  setAsyncSessionId,
+  getAsyncSessionId,
+  setAsyncSessionIdByObj,
 } from './ui';
 
 /**

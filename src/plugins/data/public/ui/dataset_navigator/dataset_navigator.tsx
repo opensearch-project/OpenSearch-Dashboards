@@ -358,7 +358,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
           setNavigatorState((prevState) => ({
             ...prevState,
-            cachedTables: databaseCache.tables,
+            cachedTables: databaseCache.tables.map((table) => ({
+              id: table.name,
+              title: table.name,
+            })),
           }));
         }
       }
@@ -387,7 +390,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       if (tablesStatus === DirectQueryLoadingStatus.SUCCESS) {
         setNavigatorState((prevState) => ({
           ...prevState,
-          cachedTables: databaseCache.tables,
+          cachedTables: databaseCache.tables.map((table) => ({
+            id: table.name,
+            title: table.name,
+          })),
         }));
       } else if (
         tablesStatus === DirectQueryLoadingStatus.CANCELED ||
