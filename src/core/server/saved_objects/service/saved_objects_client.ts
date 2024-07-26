@@ -473,7 +473,7 @@ export class SavedObjectsClient {
   deleteFromWorkspaces = async <T = unknown>(
     type: string,
     id: string,
-    options: { workspaces?: string[] }
+    options: SavedObjectsBaseOptions
   ) => {
     const { workspaces } = options;
     if (!workspaces || workspaces.length === 0) {
@@ -519,7 +519,7 @@ export class SavedObjectsClient {
   addToWorkspaces = async <T = unknown>(
     type: string,
     id: string,
-    options: { workspaces?: string[] }
+    options: SavedObjectsBaseOptions
   ): Promise<any> => {
     const { workspaces } = options;
     if (!workspaces || workspaces.length === 0) {
