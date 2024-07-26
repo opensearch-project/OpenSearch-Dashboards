@@ -1027,7 +1027,7 @@ describe('SavedObjectsTable', () => {
       const component = shallowRender({ applications, workspaces });
       component.setState({ isShowingDuplicateModal: true });
 
-      const mockCopy = jest.fn().mockResolvedValueOnce(() => new Error('Copy operation failed'));
+      const mockCopy = jest.fn().mockRejectedValue(() => new Error('Copy operation failed'));
       workspaces.client$.next({ copy: mockCopy });
       const client = workspaces.client$.getValue();
 
