@@ -94,7 +94,7 @@ export class QueryEnhancementsPlugin
             showFilterBar: false,
             showDataSetsSelector: true,
             showDataSourcesSelector: true,
-            queryStringInput: { initialValue: 'SELECT * FROM <data_source>' },
+            queryStringInput: { initialValue: 'SELECT * FROM <data_source> LIMIT 10' },
           },
           fields: {
             filterable: false,

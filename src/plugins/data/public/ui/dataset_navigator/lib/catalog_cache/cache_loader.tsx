@@ -16,13 +16,8 @@ import {
   DirectQueryLoadingStatus,
   DirectQueryRequest,
 } from '../types';
-import { getAsyncSessionId, setAsyncSessionId } from '../utils/query_session_utils';
-import {
-  addBackticksIfNeeded,
-  combineSchemaAndDatarows,
-  get as getObjValue,
-  formatError,
-} from '../utils/shared';
+import { getAsyncSessionId, setAsyncSessionIdByObj } from '../utils/query_session_utils';
+import { addBackticksIfNeeded, combineSchemaAndDatarows, formatError } from '../utils/shared';
 import { usePolling } from '../utils/use_polling';
 import { SQLService } from '../requests/sql';
 import { CatalogCacheManager } from './cache_manager';
@@ -343,7 +338,7 @@ export const useLoadToCache = (
     await sqlService
       .fetch(requestPayload, dataSourceMDSId)
       .then((result) => {
-        setAsyncSessionId(dataSourceName, getObjValue(result, 'sessionId', null));
+        setAsyncSessionIdByObj(dataSourceName, result);
         if (result.queryId) {
           startPolling({
             queryId: result.queryId,
