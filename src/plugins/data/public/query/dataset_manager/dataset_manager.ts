@@ -5,7 +5,12 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { SIMPLE_DATA_SET_TYPES, SimpleDataSet, SimpleDataSource } from '../../../common';
+import {
+  SIMPLE_DATA_SET_TYPES,
+  SimpleDataSet,
+  SimpleDataSource,
+  UI_SETTINGS,
+} from '../../../common';
 import { IndexPatternsContract } from '../../index_patterns';
 
 export class DataSetManager {
@@ -36,6 +41,7 @@ export class DataSetManager {
    * @param {Query} query
    */
   public setDataSet = (dataSet: SimpleDataSet | undefined) => {
+    if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
     this.dataSet$.next(dataSet);
   };
 
