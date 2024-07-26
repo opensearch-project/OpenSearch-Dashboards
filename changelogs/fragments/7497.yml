@@ -1,0 +1,2 @@
+fix:
+- [MDS] Fix the hide local cluster config ([#7497](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7497))
