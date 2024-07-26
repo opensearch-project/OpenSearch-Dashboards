@@ -12,6 +12,14 @@ import {
   testingIndex,
 } from '../shared/constants';
 
+jest.mock('../../services', () => ({
+  getUiService: () => ({
+    Settings: {
+      supportsEnhancementsEnabled: () => true,
+    },
+  }),
+}));
+
 const getSuggestionsAtPos = async (query: string, endPos: number) => {
   return await getSuggestions({
     query,
@@ -20,6 +28,7 @@ const getSuggestionsAtPos = async (query: string, endPos: number) => {
     language: '', // not relevant
     selectionEnd: 0, // not relevant
     selectionStart: 0, // not relevant
+    services: { appName: 'discover' },
   });
 };
 
