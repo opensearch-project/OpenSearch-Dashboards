@@ -91,9 +91,9 @@ describe('#WorkspaceClient', () => {
       dataSources: ['id1'],
     });
 
-    expect(addToWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id1', {
-      workspaces: [mockWorkspaceId],
-    });
+    expect(addToWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id1', [
+      mockWorkspaceId,
+    ]);
   });
 
   it('create# should call set default data source after creating', async () => {
@@ -137,13 +137,13 @@ describe('#WorkspaceClient', () => {
       name: 'workspace_name',
       dataSources: ['id3', 'id4'],
     });
-    expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id1', {
-      workspaces: [mockWorkspaceId],
-    });
+    expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id1', [
+      mockWorkspaceId,
+    ]);
 
-    expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id2', {
-      workspaces: [mockWorkspaceId],
-    });
+    expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id2', [
+      mockWorkspaceId,
+    ]);
   });
   it('update# should calculate data sources to be added and to be removed', async () => {
     const client = new WorkspaceClient(coreSetup, logger);
@@ -155,13 +155,13 @@ describe('#WorkspaceClient', () => {
       name: mockWorkspaceName,
       dataSources: ['id1', 'id3'],
     });
-    expect(addToWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id3', {
-      workspaces: [mockWorkspaceId],
-    });
+    expect(addToWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id3', [
+      mockWorkspaceId,
+    ]);
 
-    expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id2', {
-      workspaces: [mockWorkspaceId],
-    });
+    expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id2', [
+      mockWorkspaceId,
+    ]);
   });
 
   it('update# should call set default data source with check after updating', async () => {
@@ -189,11 +189,11 @@ describe('#WorkspaceClient', () => {
 
     await client.delete(mockRequestDetail, mockWorkspaceId);
 
-    expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id1', {
-      workspaces: [mockWorkspaceId],
-    });
-    expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id2', {
-      workspaces: [mockWorkspaceId],
-    });
+    expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id1', [
+      mockWorkspaceId,
+    ]);
+    expect(deleteFromWorkspaces).toHaveBeenCalledWith(DATA_SOURCE_SAVED_OBJECT_TYPE, 'id2', [
+      mockWorkspaceId,
+    ]);
   });
 });

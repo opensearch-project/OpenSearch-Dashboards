@@ -468,23 +468,22 @@ export class SavedObjectsClient {
    * Remove a saved object from workspaces
    * @param type
    * @param id
+   * @param targetWorkspaces
    * @param options
    */
   deleteFromWorkspaces = async <T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsBaseOptions
+    targetWorkspaces: string[],
+    options: SavedObjectsBaseOptions = {}
   ) => {
-    const { workspaces } = options;
-    if (!workspaces || workspaces.length === 0) {
+    if (!targetWorkspaces || targetWorkspaces.length === 0) {
       throw new TypeError(`Workspaces is required.`);
     }
-    // There may be some customized wrappers which will extend the options,  so we will delete workspace field and pass options continuously for extensibility.
-    delete options.workspaces;
     const object = await this.get<T>(type, id, options);
     const existingWorkspaces = object.workspaces ?? [];
     const newWorkspaces = existingWorkspaces.filter((item) => {
-      return workspaces.indexOf(item) === -1;
+      return targetWorkspaces.indexOf(item) === -1;
     });
     if (newWorkspaces.length > 0) {
       return await this.update<T>(type, id, object.attributes, {
@@ -501,6 +500,7 @@ export class SavedObjectsClient {
         },
         {
           ...options,
+          workspaces: [],
           id,
           permissions: object.permissions,
           overwrite: true,
@@ -514,22 +514,21 @@ export class SavedObjectsClient {
    * Add a saved object to workspaces
    * @param type
    * @param id
+   * @param targetWorkspaces
    * @param options
    */
   addToWorkspaces = async <T = unknown>(
     type: string,
     id: string,
-    options: SavedObjectsBaseOptions
+    targetWorkspaces: string[],
+    options: SavedObjectsBaseOptions = {}
   ): Promise<any> => {
-    const { workspaces } = options;
-    if (!workspaces || workspaces.length === 0) {
+    if (!targetWorkspaces || targetWorkspaces.length === 0) {
       throw new TypeError(`Workspaces is required.`);
     }
-    // There may be some customized wrappers which will extend the options,  so we will delete workspace field and pass options continuously for extensibility.
-    delete options.workspaces;
     const object = await this.get<T>(type, id, options);
     const existingWorkspaces = object.workspaces ?? [];
-    const mergedWorkspaces = existingWorkspaces.concat(workspaces);
+    const mergedWorkspaces = existingWorkspaces.concat(targetWorkspaces);
     const nonDuplicatedWorkspaces = Array.from(new Set(mergedWorkspaces));
 
     return await this.update<T>(type, id, object.attributes, {

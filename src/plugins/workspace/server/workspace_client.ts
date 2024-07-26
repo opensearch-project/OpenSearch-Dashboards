@@ -116,11 +116,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
       if (dataSources) {
         const promises = [];
         for (const dataSourceId of dataSources) {
-          promises.push(
-            client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, {
-              workspaces: [id],
-            })
-          );
+          promises.push(client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id]));
         }
         await Promise.all(promises);
       }
@@ -253,18 +249,14 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         if (dataSourcesToBeRemoved.length > 0) {
           for (const dataSourceId of dataSourcesToBeRemoved) {
             promises.push(
-              client.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, {
-                workspaces: [id],
-              })
+              client.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id])
             );
           }
         }
         if (dataSourcesToBeAdded.length > 0) {
           for (const dataSourceId of dataSourcesToBeAdded) {
             promises.push(
-              client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, {
-                workspaces: [id],
-              })
+              client.addToWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSourceId, [id])
             );
           }
         }
@@ -323,9 +315,9 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         const promises = [];
         for (const dataSource of selectedDataSources) {
           promises.push(
-            savedObjectClient.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSource.id, {
-              workspaces: [id],
-            })
+            savedObjectClient.deleteFromWorkspaces(DATA_SOURCE_SAVED_OBJECT_TYPE, dataSource.id, [
+              id,
+            ])
           );
         }
         await Promise.all(promises);
