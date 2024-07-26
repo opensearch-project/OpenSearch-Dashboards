@@ -248,6 +248,19 @@ export function DiscoverFieldSearch({
     </EuiPanel>
   );
 
+  const compressedFieldSearch = (
+    <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
+      <EuiCompressedFieldSearch
+        aria-label={searchPlaceholder}
+        data-test-subj="fieldFilterSearchInput"
+        fullWidth
+        onChange={(event) => onChange('name', event.currentTarget.value)}
+        placeholder={searchPlaceholder}
+        value={value}
+      />
+    </EuiOutsideClickDetector>
+  );
+
   const fieldSearch = (
     <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
       <EuiFieldSearch
@@ -284,7 +297,14 @@ export function DiscoverFieldSearch({
           numActiveFilters={activeFiltersCount}
           isSelected={isPopoverOpen}
           className={isEnhancementsEnabledOverride ? 'toggleFieldFilterButton' : ''}
-        />
+        >
+          {!isEnhancementsEnabledOverride && (
+            <FormattedMessage
+              id="discover.fieldChooser.fieldFilterFacetButtonLabel"
+              defaultMessage="Filter by type"
+            />
+          )}
+        </EuiSmallFilterButton>
       }
     >
       <EuiPopoverTitle>
@@ -316,7 +336,7 @@ export function DiscoverFieldSearch({
   } else {
     return (
       <EuiFlexGroup responsive={false} gutterSize="xs">
-        <EuiFlexItem>{fieldSearch}</EuiFlexItem>
+        <EuiFlexItem>{compressedFieldSearch}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>{fieldPopover}</EuiFilterGroup>
         </EuiFlexItem>
