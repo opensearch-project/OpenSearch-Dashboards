@@ -21,7 +21,6 @@ import { createParser } from './parse';
 import { SqlErrorListener } from './sql_error_listerner';
 import { findCursorTokenIndex } from '../shared/cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
-import { getUiSettings } from '../../services';
 import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { fetchColumnValues, fetchTableSchemas } from '../shared/utils';
@@ -86,7 +85,7 @@ export const getSuggestions = async ({
           tableNames,
           suggestions.suggestValuesForColumn as string,
           api,
-          connectionService
+          services
         );
         values.forEach((value) => {
           if (value.body?.fields?.length > 0) {
