@@ -47,6 +47,7 @@ import {
   EuiPanel,
   EuiSmallFilterButton,
   EuiFilterGroup,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 
@@ -243,7 +244,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
   return (
     <div className="euiFormControlLayout euiFormControlLayout--group osdDiscoverSideBar__wrap">
       <EuiOutsideClickDetector onOutsideClick={() => {}} isDisabled={!isPopoverOpen}>
-        <EuiCompressedFieldSearch
+        <EuiFieldSearch
           aria-label={searchPlaceholder}
           data-test-subj="fieldFilterSearchInput"
           fullWidth
@@ -258,7 +259,6 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
         panelClassName="euiFilterGroup__popoverPanel dataPanelTypeFilterPopover"
         panelPaddingSize="none"
         anchorPosition="downLeft"
-        display="block"
         isOpen={isPopoverOpen}
         closePopover={() => {
           setPopoverOpen(false);
@@ -274,6 +274,7 @@ export function DiscoverFieldSearch({ onChange, value, types }: Props) {
             onClick={handleFacetButtonClicked}
             numActiveFilters={activeFiltersCount}
             isSelected={isPopoverOpen}
+            className="toggleFieldFilterButton"
           />
         }
       >
