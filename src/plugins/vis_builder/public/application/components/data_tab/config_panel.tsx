@@ -31,6 +31,7 @@ export interface ConfigPanelProps {
   aggProps: AggProps;
   activeSchemaFields: SchemaDisplayStates;
   setActiveSchemaFields: React.Dispatch<React.SetStateAction<SchemaDisplayStates>>;
+  isDragging: boolean;
 }
 
 export function ConfigPanel({
@@ -39,6 +40,7 @@ export function ConfigPanel({
   aggProps,
   activeSchemaFields,
   setActiveSchemaFields,
+  isDragging,
 }: ConfigPanelProps) {
   if (!schemas) return null;
 
@@ -46,7 +48,8 @@ export function ConfigPanel({
     schemas,
     aggProps,
     activeSchemaFields,
-    setActiveSchemaFields
+    setActiveSchemaFields,
+    isDragging
   );
 
   return (
