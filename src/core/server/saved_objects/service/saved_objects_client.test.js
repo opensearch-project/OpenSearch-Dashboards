@@ -270,7 +270,7 @@ test(`#deleteFromWorkspaces Should use overwrite create if there is no existing 
   expect(mockRepository.create).toHaveBeenCalledWith(
     type,
     {},
-    { workspaces: [], id, overwrite: true, permissions: undefined, version: undefined }
+    { id, overwrite: true, permissions: undefined, version: undefined }
   );
 });
 

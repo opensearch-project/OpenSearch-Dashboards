@@ -501,7 +501,6 @@ export class SavedObjectsClient {
         },
         {
           ...options,
-          workspaces: [],
           id,
           permissions: object.permissions,
           overwrite: true,
