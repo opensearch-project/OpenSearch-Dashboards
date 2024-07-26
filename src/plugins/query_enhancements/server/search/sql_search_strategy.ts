@@ -32,14 +32,14 @@ export const sqlSearchStrategyProvider = (
 
         if (!rawResponse.success) {
           return {
-            type: DATA_FRAME_TYPES.DEFAULT,
+            type: DATA_FRAME_TYPES.ERROR,
             body: { error: rawResponse.data },
             took: rawResponse.took,
           } as IDataFrameError;
         }
 
         const partial: PartialDataFrame = {
-          name: '',
+          ...request.body.df,
           fields: rawResponse.data?.schema || [],
         };
         const dataFrame = createDataFrame(partial);

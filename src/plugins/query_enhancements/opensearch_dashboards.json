@@ -3,7 +3,7 @@
   "version": "opensearchDashboards",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["data", "opensearchDashboardsReact", "opensearchDashboardsUtils", "dataSourceManagement", "savedObjects", "uiActions"],
+  "requiredPlugins": ["data", "opensearchDashboardsReact", "opensearchDashboardsUtils", "savedObjects", "uiActions"],
   "optionalPlugins": ["dataSource"]
 }
 

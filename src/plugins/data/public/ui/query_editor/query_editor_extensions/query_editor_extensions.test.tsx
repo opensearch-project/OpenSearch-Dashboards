@@ -14,33 +14,19 @@ type QueryEditorExtensionsProps = ComponentProps<typeof QueryEditorExtensions>;
 jest.mock('./query_editor_extension', () => ({
   QueryEditorExtension: jest.fn(({ config, dependencies }: QueryEditorExtensionProps) => (
     <div>
-      Mocked QueryEditorExtension {config.id} with{' '}
-      {dependencies.indexPatterns?.map((i) => (typeof i === 'string' ? i : i.title)).join(', ')}
+      Mocked QueryEditorExtension {config.id} with {dependencies.language}
     </div>
   )),
 }));
 
 describe('QueryEditorExtensions', () => {
   const defaultProps: QueryEditorExtensionsProps = {
-    indexPatterns: [
-      {
-        id: '1234',
-        title: 'logstash-*',
-        fields: [
-          {
-            name: 'response',
-            type: 'number',
-            esTypes: ['integer'],
-            aggregatable: true,
-            filterable: true,
-            searchable: true,
-          },
-        ],
-      },
-    ],
     componentContainer: document.createElement('div'),
     bannerContainer: document.createElement('div'),
-    language: 'Test',
+    language: 'Test-lang',
+    onSelectLanguage: jest.fn(),
+    isCollapsed: false,
+    setIsCollapsed: jest.fn(),
   };
 
   beforeEach(() => {
@@ -59,8 +45,8 @@ describe('QueryEditorExtensions', () => {
 
   it('correctly orders configurations based on order property', () => {
     const configMap = {
-      '1': { id: '1', order: 2, isEnabled: jest.fn(), getComponent: jest.fn() },
-      '2': { id: '2', order: 1, isEnabled: jest.fn(), getComponent: jest.fn() },
+      '1': { id: '1', order: 2, isEnabled$: jest.fn(), getComponent: jest.fn() },
+      '2': { id: '2', order: 1, isEnabled$: jest.fn(), getComponent: jest.fn() },
     };
 
     const { getAllByText } = render(
@@ -75,18 +61,23 @@ describe('QueryEditorExtensions', () => {
 
   it('passes dependencies correctly to QueryEditorExtension', async () => {
     const configMap = {
-      '1': { id: '1', order: 1, isEnabled: jest.fn(), getComponent: jest.fn() },
+      '1': { id: '1', order: 1, isEnabled$: jest.fn(), getComponent: jest.fn() },
     };
 
     const { getByText } = render(<QueryEditorExtensions {...defaultProps} configMap={configMap} />);
 
     await waitFor(() => {
-      expect(getByText(/logstash-\*/)).toBeInTheDocument();
+      expect(getByText(/Test-lang/)).toBeInTheDocument();
     });
 
     expect(QueryEditorExtension).toHaveBeenCalledWith(
       expect.objectContaining({
-        dependencies: { indexPatterns: defaultProps.indexPatterns, language: 'Test' },
+        dependencies: {
+          language: 'Test-lang',
+          onSelectLanguage: expect.any(Function),
+          isCollapsed: false,
+          setIsCollapsed: expect.any(Function),
+        },
       }),
       expect.anything()
     );

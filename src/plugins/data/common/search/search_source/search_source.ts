@@ -90,11 +90,11 @@ import { IIndexPattern } from '../../index_patterns';
 import {
   DATA_FRAME_TYPES,
   IDataFrame,
+  IDataFrameError,
   IDataFrameResponse,
   convertResult,
   createDataFrame,
   getRawQueryString,
-  parseRawQueryString,
 } from '../../data_frames';
 import { IOpenSearchSearchRequest, IOpenSearchSearchResponse, ISearchOptions } from '../..';
 import { IOpenSearchDashboardsSearchRequest, IOpenSearchDashboardsSearchResponse } from '../types';
@@ -324,7 +324,12 @@ export class SearchSource {
     const dataFrame = createDataFrame({
       name: searchRequest.index.title || searchRequest.index,
       fields: [],
-      ...(rawQueryString && { meta: { queryConfig: parseRawQueryString(rawQueryString) } }),
+      ...(rawQueryString && {
+        meta: {
+          queryConfig: { qs: rawQueryString },
+          ...(searchRequest.dataSourceId && { dataSource: searchRequest.dataSourceId }),
+        },
+      }),
     });
     await this.setDataFrame(dataFrame);
     return this.getDataFrame();
@@ -426,7 +431,8 @@ export class SearchSource {
   private async fetchExternalSearch(searchRequest: SearchRequest, options: ISearchOptions) {
     const { search, getConfig, onResponse } = this.dependencies;
 
-    if (!this.getDataFrame()) {
+    const currentDataframe = this.getDataFrame();
+    if (!currentDataframe || currentDataframe.name !== searchRequest.index?.id) {
       await this.createDataFrame(searchRequest);
     }
 
@@ -441,6 +447,10 @@ export class SearchSource {
           const dataFrameResponse = response as IDataFrameResponse;
           await this.setDataFrame(dataFrameResponse.body as IDataFrame);
           return onResponse(searchRequest, convertResult(response as IDataFrameResponse));
+        }
+        if ((response as IDataFrameResponse).type === DATA_FRAME_TYPES.ERROR) {
+          const dataFrameError = response as IDataFrameError;
+          throw new RequestFailure(null, dataFrameError);
         }
         // TODO: MQL else if data_frame_polling then poll for the data frame updating the df fields only
       }

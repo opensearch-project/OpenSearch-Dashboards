@@ -38,14 +38,17 @@ function createStartContract(
   const queryEnhancements = new Map();
   return {
     IndexPatternSelect: jest.fn(),
+    DataSetNavigator: jest.fn(), // Add the missing property
     SearchBar: jest.fn(),
+    SuggestionsComponent: jest.fn(), // Add the missing property
     Settings: new SettingsMock(
-      { enabled: isEnhancementsEnabled, supportedAppNames: ['discover'] },
+      { supportedAppNames: ['discover'] },
       searchServiceMock,
       createMockStorage(),
-      queryEnhancements
+      queryEnhancements,
+      {} // Add the missing argument here
     ),
-    container$: new Observable(),
+    dataSetContainer$: new Observable(),
   };
 }
 

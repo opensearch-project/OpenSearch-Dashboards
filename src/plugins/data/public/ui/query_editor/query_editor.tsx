@@ -3,27 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
-  htmlIdGenerator,
-  PopoverAnchorPosition,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, htmlIdGenerator, PopoverAnchorPosition } from '@elastic/eui';
 import classNames from 'classnames';
 import { isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
 import { monaco } from '@osd/monaco';
 import { Settings } from '..';
-import {
-  DataSource,
-  IDataPluginServices,
-  IFieldType,
-  IIndexPattern,
-  Query,
-  TimeRange,
-} from '../..';
+import { IDataPluginServices, IFieldType, IIndexPattern, Query, TimeRange } from '../..';
 import {
   CodeEditor,
   OpenSearchDashboardsReactContextValue,
@@ -32,22 +18,18 @@ import { QuerySuggestion } from '../../autocomplete';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { DataSettings } from '../types';
-import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
+import { SimpleDataSet } from '../../../common';
 
 const LANGUAGE_ID = 'SQL';
 monaco.languages.register({ id: LANGUAGE_ID });
 
 export interface QueryEditorProps {
-  indexPatterns: Array<IIndexPattern | string>;
-  dataSource?: DataSource;
+  dataSet?: SimpleDataSet;
   query: Query;
-  container?: HTMLDivElement;
-  dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
-  containerRef?: React.RefCallback<HTMLDivElement>;
-  languageSelectorContainerRef?: React.RefCallback<HTMLDivElement>;
+  dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   settings: Settings;
   disableAutoFocus?: boolean;
   screenTitle?: string;
@@ -77,8 +59,6 @@ interface Props extends QueryEditorProps {
 }
 
 interface State {
-  isDataSourcesVisible: boolean;
-  isDataSetsVisible: boolean;
   isSuggestionsVisible: boolean;
   index: number | null;
   suggestions: QuerySuggestion[];
@@ -105,8 +85,6 @@ const KEY_CODES = {
 // eslint-disable-next-line import/no-default-export
 export default class QueryEditorUI extends Component<Props, State> {
   public state: State = {
-    isDataSourcesVisible: false,
-    isDataSetsVisible: true,
     isSuggestionsVisible: false,
     index: null,
     suggestions: [],
@@ -121,7 +99,6 @@ export default class QueryEditorUI extends Component<Props, State> {
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
   private services = this.props.opensearchDashboards.services;
-  private componentIsUnmounting = false;
   private headerRef: RefObject<HTMLDivElement> = createRef();
   private bannerRef: RefObject<HTMLDivElement> = createRef();
   private extensionMap = this.props.settings?.getQueryEditorExtensionMap();
@@ -133,24 +110,8 @@ export default class QueryEditorUI extends Component<Props, State> {
     return toUser(this.props.query.query);
   };
 
-  // TODO: MQL don't do this here? || Fetch data sources
-  private fetchIndexPatterns = async () => {
-    const stringPatterns = this.props.indexPatterns.filter(
-      (indexPattern) => typeof indexPattern === 'string'
-    ) as string[];
-    const objectPatterns = this.props.indexPatterns.filter(
-      (indexPattern) => typeof indexPattern !== 'string'
-    ) as IIndexPattern[];
-
-    const objectPatternsFromStrings = (await fetchIndexPatterns(
-      this.services.savedObjects!.client,
-      stringPatterns,
-      this.services.uiSettings!
-    )) as IIndexPattern[];
-
-    this.setState({
-      indexPatterns: [...objectPatterns, ...objectPatternsFromStrings],
-    });
+  private setIsCollapsed = (isCollapsed: boolean) => {
+    this.setState({ isCollapsed });
   };
 
   private renderQueryEditorExtensions() {
@@ -168,11 +129,12 @@ export default class QueryEditorUI extends Component<Props, State> {
     return (
       <QueryEditorExtensions
         language={this.props.queryLanguage}
+        onSelectLanguage={this.onSelectLanguage}
+        isCollapsed={this.state.isCollapsed}
+        setIsCollapsed={this.setIsCollapsed}
         configMap={this.extensionMap}
         componentContainer={this.headerRef.current}
         bannerContainer={this.bannerRef.current}
-        indexPatterns={this.props.indexPatterns}
-        dataSource={this.props.dataSource}
       />
     );
   }
@@ -250,10 +212,6 @@ export default class QueryEditorUI extends Component<Props, State> {
       : undefined;
     this.onChange(newQuery, dateRange);
     this.onSubmit(newQuery, dateRange);
-    this.setState({
-      isDataSourcesVisible: enhancement?.searchBar?.showDataSourcesSelector ?? true,
-      isDataSetsVisible: enhancement?.searchBar?.showDataSetsSelector ?? true,
-    });
   };
 
   private initPersistedLog = () => {
@@ -261,20 +219,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     this.persistedLog = this.props.persistedLog
       ? this.props.persistedLog
       : getQueryLog(uiSettings, storage, appName, this.props.query.language);
-  };
-
-  private initDataSourcesVisibility = () => {
-    if (this.componentIsUnmounting) return;
-
-    return this.props.settings.getQueryEnhancements(this.props.query.language)?.searchBar
-      ?.showDataSourcesSelector;
-  };
-
-  private initDataSetsVisibility = () => {
-    if (this.componentIsUnmounting) return;
-
-    return this.props.settings.getQueryEnhancements(this.props.query.language)?.searchBar
-      ?.showDataSetsSelector;
   };
 
   public onMouseEnterSuggestion = (index: number) => {
@@ -291,10 +235,6 @@ export default class QueryEditorUI extends Component<Props, State> {
 
     this.initPersistedLog();
     // this.fetchIndexPatterns().then(this.updateSuggestions);
-    this.setState({
-      isDataSourcesVisible: this.initDataSourcesVisibility() || true,
-      isDataSetsVisible: this.initDataSetsVisibility() || true,
-    });
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -308,7 +248,6 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   public componentWillUnmount() {
     if (this.abortController) this.abortController.abort();
-    this.componentIsUnmounting = true;
   }
 
   handleOnFocus = () => {
@@ -334,42 +273,42 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
-  provideCompletionItems = async (
-    model: monaco.editor.ITextModel,
-    position: monaco.Position
-  ): Promise<monaco.languages.CompletionList> => {
-    const wordUntil = model.getWordUntilPosition(position);
-    const wordRange = new monaco.Range(
-      position.lineNumber,
-      wordUntil.startColumn,
-      position.lineNumber,
-      wordUntil.endColumn
-    );
-    const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
-    const connectionService = enhancements?.connectionService;
-    const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
-      query: this.getQueryString(),
-      selectionStart: model.getOffsetAt(position),
-      selectionEnd: model.getOffsetAt(position),
-      language: this.props.query.language,
-      indexPatterns: this.state.indexPatterns,
-      position,
-      connectionService,
-    });
+  // provideCompletionItems = async (
+  //   model: monaco.editor.ITextModel,
+  //   position: monaco.Position
+  // ): Promise<monaco.languages.CompletionList> => {
+  //   const wordUntil = model.getWordUntilPosition(position);
+  //   const wordRange = new monaco.Range(
+  //     position.lineNumber,
+  //     wordUntil.startColumn,
+  //     position.lineNumber,
+  //     wordUntil.endColumn
+  //   );
+  //   const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
+  //   const connectionService = enhancements?.connectionService;
+  //   const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
+  //     query: this.getQueryString(),
+  //     selectionStart: model.getOffsetAt(position),
+  //     selectionEnd: model.getOffsetAt(position),
+  //     language: this.props.query.language,
+  //     indexPatterns: this.state.indexPatterns,
+  //     position,
+  //     connectionService,
+  //   });
 
-    return {
-      suggestions:
-        suggestions && suggestions.length > 0
-          ? suggestions.map((s) => ({
-              label: s.text,
-              kind: this.getCodeEditorSuggestionsType(s.type),
-              insertText: s.text,
-              range: wordRange,
-            }))
-          : [],
-      incomplete: false,
-    };
-  };
+  //   return {
+  //     suggestions:
+  //       suggestions && suggestions.length > 0
+  //         ? suggestions.map((s) => ({
+  //             label: s.text,
+  //             kind: this.getCodeEditorSuggestionsType(s.type),
+  //             insertText: s.text,
+  //             range: wordRange,
+  //           }))
+  //         : [],
+  //     incomplete: false,
+  //   };
+  // };
 
   editorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
     this.setState({ lineCount: editor.getModel()?.getLineCount() });
@@ -394,11 +333,11 @@ export default class QueryEditorUI extends Component<Props, State> {
       // eslint-disable-next-line no-unsanitized/property
       style.innerHTML = `
       .${containerId} .monaco-editor .view-lines {
-        padding-left: 15px; 
+        padding-left: 15px;
       }
       .${containerId} .monaco-editor .cursor {
         height: ${customCursorHeight}px !important;
-        margin-top: ${(38 - customCursorHeight) / 2}px !important; 
+        margin-top: ${(38 - customCursorHeight) / 2}px !important;
       }
     `;
 
@@ -431,31 +370,39 @@ export default class QueryEditorUI extends Component<Props, State> {
     const useQueryEditor =
       this.props.query.language !== 'kuery' && this.props.query.language !== 'lucene';
 
+    const languageSelector = (
+      <QueryLanguageSelector
+        language={this.props.query.language}
+        anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+        onSelectLanguage={this.onSelectLanguage}
+        appName={this.services.appName}
+      />
+    );
+
     return (
       <div className={className}>
         <div ref={this.bannerRef} className={bannerClassName} />
         <EuiFlexGroup gutterSize="xs" direction="column">
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center" className={`${className}__wrapper`}>
-              <EuiFlexItem grow={false} className={`${className}__collapseWrapper`}>
+              <EuiFlexItem className={`${className}__collapseWrapper`}>
                 <QueryEditorBtnCollapse
                   onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}
                   isCollapsed={!this.state.isCollapsed}
                 />
               </EuiFlexItem>
-              {this.state.isDataSourcesVisible && (
-                <EuiFlexItem grow={2} className={`${className}__dataSourceWrapper`}>
-                  <div ref={this.props.dataSourceContainerRef} />
-                </EuiFlexItem>
-              )}
-
-              {this.state.isDataSetsVisible && (
-                <EuiFlexItem grow={2} className={`${className}__dataSetWrapper`}>
-                  <div ref={this.props.containerRef} />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem grow={10}>
-                <EuiFlexGroup gutterSize="none">
+              <EuiFlexItem className={`${className}__dataSetWrapper`}>
+                <div ref={this.props.dataSetContainerRef} />
+              </EuiFlexItem>
+              <EuiFlexItem grow={true}>
+                <EuiFlexGroup
+                  gutterSize="none"
+                  className={
+                    !useQueryEditor
+                      ? 'euiFormControlLayout euiFormControlLayout--group osdQueryEditor__editorAndSelectorWrapper'
+                      : ''
+                  }
+                >
                   {(this.state.isCollapsed || !useQueryEditor) && (
                     <EuiFlexItem grow={9}>
                       <div className="single-line-editor-wrapper">
@@ -487,29 +434,26 @@ export default class QueryEditorUI extends Component<Props, State> {
                             cursorStyle: 'line',
                             wordBasedSuggestions: false,
                           }}
-                          suggestionProvider={{
-                            provideCompletionItems: this.provideCompletionItems,
-                          }}
+                          // suggestionProvider={{
+                          //   provideCompletionItems: this.provideCompletionItems,
+                          // }}
                         />
                       </div>
                     </EuiFlexItem>
                   )}
                   {!useQueryEditor && (
                     <EuiFlexItem grow={false}>
-                      <div className="osdQueryEditor__languageWrapper">
-                        <QueryLanguageSelector
-                          language={this.props.query.language}
-                          anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-                          onSelectLanguage={this.onSelectLanguage}
-                          appName={this.services.appName}
-                        />
-                      </div>
+                      <QueryLanguageSelector
+                        language={this.props.query.language}
+                        anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
+                        onSelectLanguage={this.onSelectLanguage}
+                        appName={this.services.appName}
+                      />
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
               </EuiFlexItem>
               <EuiFlexItem
-                grow={false}
                 className={`${className}__prependWrapper${
                   !this.state.isCollapsed && useQueryEditor ? '' : '-isCollapsed'
                 }`}
@@ -543,9 +487,9 @@ export default class QueryEditorUI extends Component<Props, State> {
                   lineNumbersMinChars: 2,
                   wordBasedSuggestions: false,
                 }}
-                suggestionProvider={{
-                  provideCompletionItems: this.provideCompletionItems,
-                }}
+                // suggestionProvider={{
+                //   provideCompletionItems: this.provideCompletionItems,
+                // }}
               />
             )}
 
@@ -557,29 +501,22 @@ export default class QueryEditorUI extends Component<Props, State> {
               }
             >
               <EuiFlexGroup gutterSize="s" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <QueryLanguageSelector
-                    language={this.props.query.language}
-                    anchorPosition={this.props.languageSwitcherPopoverAnchorPosition}
-                    onSelectLanguage={this.onSelectLanguage}
-                    appName={this.services.appName}
-                    isFooter={true}
-                  />
-                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{languageSelector}</EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
                   {this.state.lineCount} {this.state.lineCount === 1 ? 'line' : 'lines'}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {typeof this.props.indexPatterns?.[0] !== 'string' &&
-                    '@' + this.props.indexPatterns?.[0].timeFieldName}
+                  {this.props.dataSet && `@${this.props.dataSet.timeFieldName}`}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </div>
           </EuiFlexItem>
 
           {!this.state.isCollapsed && (
-            <EuiFlexItem grow={false}>{this.props.filterBar}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <div className="osdQueryEditor__filterBarWrapper">{this.props.filterBar}</div>
+            </EuiFlexItem>
           )}
         </EuiFlexGroup>
         {this.renderQueryEditorExtensions()}

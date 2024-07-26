@@ -19,9 +19,6 @@ exports[`Saved query management component has a popover button 1`] = `
           className="euiQuickSelectPopover__buttonText"
           type="save"
         />
-        <EuiIcon
-          type="arrowDown"
-        />
       </EuiSmallButtonEmpty>
     </EuiToolTip>
   }
