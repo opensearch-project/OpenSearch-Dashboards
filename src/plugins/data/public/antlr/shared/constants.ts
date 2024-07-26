@@ -167,26 +167,26 @@ export const testingIndex = ({
 } as unknown) as IIndexPattern;
 
 export const booleanOperatorSuggestions = [
-  { text: 'or', type: 'keyword' },
-  { text: 'and', type: 'keyword' },
+  { text: 'or', type: 17 },
+  { text: 'and', type: 17 },
 ];
 
-export const notOperatorSuggestion = { text: 'not', type: 'keyword' };
+export const notOperatorSuggestion = { text: 'not', type: 17 };
 
 export const fieldNameSuggestions = [
-  { text: 'Carrier', type: 'field' },
-  { text: 'DestCityName', type: 'field' },
-  { text: 'DestCountry', type: 'field' },
-  { text: 'DestWeather', type: 'field' },
-  { text: 'DistanceMiles', type: 'field' },
-  { text: 'FlightDelay', type: 'field' },
-  { text: 'FlightNum', type: 'field' },
-  { text: 'OriginWeather', type: 'field' },
-  { text: '_id', type: 'field' },
-  { text: '_index', type: 'field' },
-  { text: '_score', type: 'field' },
-  { text: '_source', type: 'field' },
-  { text: '_type', type: 'field' },
+  { text: 'Carrier', type: 3 },
+  { text: 'DestCityName', type: 3 },
+  { text: 'DestCountry', type: 3 },
+  { text: 'DestWeather', type: 3 },
+  { text: 'DistanceMiles', type: 3 },
+  { text: 'FlightDelay', type: 3 },
+  { text: 'FlightNum', type: 3 },
+  { text: 'OriginWeather', type: 3 },
+  { text: '_id', type: 3 },
+  { text: '_index', type: 3 },
+  { text: '_score', type: 3 },
+  { text: '_source', type: 3 },
+  { text: '_type', type: 3 },
 ];
 
 export const fieldNameWithNotSuggestions = fieldNameSuggestions.concat(notOperatorSuggestion);
