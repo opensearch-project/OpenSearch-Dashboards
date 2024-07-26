@@ -407,10 +407,12 @@ exports[`Dashboard top nav render in embed mode 1`] = `
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DataSetNavigator": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "Settings": undefined,
-                "container$": Observable {
+                "SuggestionsComponent": [MockFunction],
+                "dataSetContainer$": Observable {
                   "_isScalar": false,
                 },
               },
@@ -1426,10 +1428,12 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DataSetNavigator": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "Settings": undefined,
-                "container$": Observable {
+                "SuggestionsComponent": [MockFunction],
+                "dataSetContainer$": Observable {
                   "_isScalar": false,
                 },
               },
@@ -2445,10 +2449,12 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DataSetNavigator": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "Settings": undefined,
-                "container$": Observable {
+                "SuggestionsComponent": [MockFunction],
+                "dataSetContainer$": Observable {
                   "_isScalar": false,
                 },
               },
@@ -3464,10 +3470,12 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DataSetNavigator": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "Settings": undefined,
-                "container$": Observable {
+                "SuggestionsComponent": [MockFunction],
+                "dataSetContainer$": Observable {
                   "_isScalar": false,
                 },
               },
@@ -4483,10 +4491,12 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DataSetNavigator": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "Settings": undefined,
-                "container$": Observable {
+                "SuggestionsComponent": [MockFunction],
+                "dataSetContainer$": Observable {
                   "_isScalar": false,
                 },
               },
@@ -5502,10 +5512,12 @@ exports[`Dashboard top nav render with all components 1`] = `
                 "showError": [MockFunction],
               },
               "ui": Object {
+                "DataSetNavigator": [MockFunction],
                 "IndexPatternSelect": [MockFunction],
                 "SearchBar": [MockFunction],
                 "Settings": undefined,
-                "container$": Observable {
+                "SuggestionsComponent": [MockFunction],
+                "dataSetContainer$": Observable {
                   "_isScalar": false,
                 },
               },
