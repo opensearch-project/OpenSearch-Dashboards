@@ -110,7 +110,7 @@ describe('sqlSearchStrategyProvider', () => {
     );
 
     expect(result).toEqual(({
-      type: DATA_FRAME_TYPES.DEFAULT,
+      type: DATA_FRAME_TYPES.ERROR,
       body: { error: { cause: 'Query failed' } },
       took: 50,
     } as unknown) as IDataFrameError);

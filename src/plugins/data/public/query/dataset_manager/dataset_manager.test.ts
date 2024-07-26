@@ -6,12 +6,13 @@
 import { DataSetManager } from './dataset_manager';
 import { coreMock } from '../../../../../core/public/mocks';
 import { SimpleDataSet } from '../../../common';
-
 describe('DataSetManager', () => {
   let service: DataSetManager;
 
   beforeEach(() => {
-    service = new DataSetManager(coreMock.createSetup().uiSettings);
+    const uiSettingsMock = coreMock.createSetup().uiSettings;
+    uiSettingsMock.get.mockReturnValue(true);
+    service = new DataSetManager(uiSettingsMock);
   });
 
   test('getUpdates$ emits initially and after data set changes', () => {
