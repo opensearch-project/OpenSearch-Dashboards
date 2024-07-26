@@ -3,14 +3,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { WorkspacesService, WorkspacesStart } from './workspaces_service';
+import {
+  WorkspacesService,
+  WorkspacesSetup,
+  WorkspacesStart,
+  IWorkspaceClient,
+} from './workspaces_service';
 
 describe('WorkspacesService', () => {
   let workspaces: WorkspacesService;
   let workspacesStart: WorkspacesStart;
+  let workspacesSetUp: WorkspacesSetup;
 
   beforeEach(() => {
     workspaces = new WorkspacesService();
+    workspacesSetUp = workspaces.setup();
     workspacesStart = workspaces.start();
   });
 
@@ -29,6 +36,16 @@ describe('WorkspacesService', () => {
 
   it('workspaceList$ is empty by default', () => {
     expect(workspacesStart.workspaceList$.value.length).toBe(0);
+  });
+
+  it('client$ is not set by default', () => {
+    expect(workspacesStart.client$.value).toBe(null);
+  });
+
+  it('client is updated when set client', () => {
+    const client: IWorkspaceClient = { copy: jest.fn() };
+    workspacesSetUp.setClient(client);
+    expect(workspacesStart.client$.value).toEqual(client);
   });
 
   it('currentWorkspace is updated when currentWorkspaceId changes', () => {
