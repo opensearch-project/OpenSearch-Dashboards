@@ -18,17 +18,13 @@ import { QuerySuggestion } from '../../autocomplete';
 import { fromUser, getQueryLog, PersistedLog, toUser } from '../../query';
 import { SuggestionsListSize } from '../typeahead/suggestions_component';
 import { DataSettings } from '../types';
+import { fetchIndexPatterns } from './fetch_index_patterns';
 import { QueryLanguageSelector } from './language_selector';
 import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
-import { getQueryService } from '../../services';
-import { SIMPLE_DATA_SET_TYPES } from '../../../common';
 
-const LANGUAGE_ID_SQL = 'SQL';
-monaco.languages.register({ id: LANGUAGE_ID_SQL });
-
-const LANGUAGE_ID_KUERY = 'kuery';
-monaco.languages.register({ id: LANGUAGE_ID_KUERY });
+const LANGUAGE_ID = 'SQL';
+monaco.languages.register({ id: LANGUAGE_ID });
 
 export interface QueryEditorProps {
   indexPatterns: Array<IIndexPattern | string>;
@@ -99,8 +95,6 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
-
-  private queryService = getQueryService();
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
@@ -240,14 +234,10 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
-    this.fetchIndexPatterns();
+    // this.fetchIndexPatterns().then(this.updateSuggestions);
   }
 
   public componentDidUpdate(prevProps: Props) {
-    if (!isEqual(prevProps.indexPatterns, this.props.indexPatterns)) {
-      this.fetchIndexPatterns();
-    }
-
     const parsedQuery = fromUser(toUser(this.props.query.query));
     if (!isEqual(this.props.query.query, parsedQuery)) {
       this.onChange({ ...this.props.query, query: parsedQuery });
@@ -278,62 +268,33 @@ export default class QueryEditorUI extends Component<Props, State> {
         return monaco.languages.CompletionItemKind.Field;
       case 'value':
         return monaco.languages.CompletionItemKind.Value;
-      case 'keyword':
-        return monaco.languages.CompletionItemKind.Keyword;
       default:
         return monaco.languages.CompletionItemKind.Text;
     }
-  };
-
-  private fetchIndexPatterns = async () => {
-    const client = this.services.savedObjects.client;
-    const dataSet = this.queryService.dataSet.getDataSet();
-    const title = dataSet?.title;
-
-    const resp = await client.find({
-      type: 'index-pattern',
-      fields: ['title', 'timeFieldName', 'fields'],
-      search: `${title}*`,
-      searchFields: ['title'],
-      perPage: 100,
-    });
-
-    return resp.savedObjects.map((savedObject: any) => ({
-      id: savedObject.id,
-      title: savedObject.attributes?.title,
-      timeFieldName: savedObject.attributes?.timeFieldName,
-      fields: JSON.parse(savedObject.attributes?.fields),
-      type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
-    }));
   };
 
   provideCompletionItems = async (
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): Promise<monaco.languages.CompletionList> => {
-    const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
-    const connectionService = enhancements?.connectionService;
-
-    const indexPatterns = await this.fetchIndexPatterns();
-
-    const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
-      query: this.getQueryString(),
-      selectionStart: model.getOffsetAt(position),
-      selectionEnd: model.getOffsetAt(position),
-      language: this.props.query.language,
-      indexPatterns,
-      position,
-      connectionService,
-    });
-
-    // current completion item range being given as last 'word' at pos
     const wordUntil = model.getWordUntilPosition(position);
-    const range = new monaco.Range(
+    const wordRange = new monaco.Range(
       position.lineNumber,
       wordUntil.startColumn,
       position.lineNumber,
       wordUntil.endColumn
     );
+    const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
+    const connectionService = enhancements?.connectionService;
+    const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
+      query: this.getQueryString(),
+      selectionStart: model.getOffsetAt(position),
+      selectionEnd: model.getOffsetAt(position),
+      language: this.props.query.language,
+      indexPatterns: this.state.indexPatterns,
+      position,
+      connectionService,
+    });
 
     return {
       suggestions:
@@ -342,7 +303,7 @@ export default class QueryEditorUI extends Component<Props, State> {
               label: s.text,
               kind: this.getCodeEditorSuggestionsType(s.type),
               insertText: s.text,
-              range,
+              range: wordRange,
             }))
           : [],
       incomplete: false,
@@ -476,19 +437,6 @@ export default class QueryEditorUI extends Component<Props, State> {
                           suggestionProvider={{
                             provideCompletionItems: this.provideCompletionItems,
                           }}
-                          languageConfiguration={{
-                            language: LANGUAGE_ID_KUERY,
-                            autoClosingPairs: [
-                              {
-                                open: '(',
-                                close: ')',
-                              },
-                              {
-                                open: '"',
-                                close: '"',
-                              },
-                            ],
-                          }}
                         />
                       </div>
                     </EuiFlexItem>
@@ -541,19 +489,6 @@ export default class QueryEditorUI extends Component<Props, State> {
                 }}
                 suggestionProvider={{
                   provideCompletionItems: this.provideCompletionItems,
-                }}
-                languageConfiguration={{
-                  language: LANGUAGE_ID_KUERY,
-                  autoClosingPairs: [
-                    {
-                      open: '(',
-                      close: ')',
-                    },
-                    {
-                      open: '"',
-                      close: '"',
-                    },
-                  ],
                 }}
               />
             )}
