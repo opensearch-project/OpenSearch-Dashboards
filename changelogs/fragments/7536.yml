@@ -1,0 +1,2 @@
+feat:
+- Add styling for discover filter selector when query enhancement is on ([#7536](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7536))
