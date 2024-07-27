@@ -9,3 +9,8 @@
 .dscHistogram .echChartBackground {
   background-color: inherit !important;
 }
+
+.dscChart__wrapper {
+  border-top: 1px solid $euiColorLightShade;
+  border-bottom: 1px solid $euiColorLightShade;
+}
