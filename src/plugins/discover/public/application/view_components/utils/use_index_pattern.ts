@@ -3,12 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@osd/i18n';
+import { SIMPLE_DATA_SET_TYPES } from '../../../../../data/common';
 import { IndexPattern } from '../../../../../data/public';
 import { useSelector, updateIndexPattern } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
 import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
+import { useDataSetManager } from './use_dataset_manager';
+import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
 
 /**
  * Custom hook to fetch and manage the index pattern based on the provided services.
@@ -25,16 +28,38 @@ import { getIndexPatternId } from '../../helpers/get_index_pattern_id';
  * @returns - The fetched index pattern.
  */
 export const useIndexPattern = (services: DiscoverViewServices) => {
+  const { data, toastNotifications, uiSettings, store } = services;
+  const { dataSet } = useDataSetManager({
+    dataSetManager: data.query.dataSet,
+  });
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
-  const { data, toastNotifications, uiSettings: config, store } = services;
+  const isQueryEnhancementEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
+
+  const fetchIndexPatternDetails = useCallback(
+    async (id: string) => {
+      return await data.indexPatterns.get(id);
+    },
+    [data.indexPatterns]
+  );
+
+  useEffect(() => {
+    if (isQueryEnhancementEnabled) {
+      if (dataSet) {
+        if (dataSet.type === SIMPLE_DATA_SET_TYPES.INDEX_PATTERN) {
+          fetchIndexPatternDetails(dataSet.id).then((ip) => {
+            setIndexPattern(ip);
+          });
+        }
+      }
+    }
+  }, [dataSet, fetchIndexPatternDetails, isQueryEnhancementEnabled]);
 
   useEffect(() => {
     let isMounted = true;
 
-    const fetchIndexPatternDetails = (id: string) => {
-      data.indexPatterns
-        .get(id)
+    const fetchIndexPattern = (id: string) => {
+      fetchIndexPatternDetails(id)
         .then((result) => {
           if (isMounted) {
             setIndexPattern(result);
@@ -58,20 +83,31 @@ export const useIndexPattern = (services: DiscoverViewServices) => {
         });
     };
 
-    if (!indexPatternIdFromState) {
-      data.indexPatterns.getCache().then((indexPatternList) => {
-        const newId = getIndexPatternId('', indexPatternList, config.get('defaultIndex'));
-        store!.dispatch(updateIndexPattern(newId));
-        fetchIndexPatternDetails(newId);
-      });
-    } else {
-      fetchIndexPatternDetails(indexPatternIdFromState);
+    if (!isQueryEnhancementEnabled) {
+      if (!indexPatternIdFromState) {
+        data.indexPatterns.getCache().then((indexPatternList) => {
+          const newId = getIndexPatternId('', indexPatternList, uiSettings.get('defaultIndex'));
+          store!.dispatch(updateIndexPattern(newId));
+          fetchIndexPattern(newId);
+        });
+      } else {
+        fetchIndexPattern(indexPatternIdFromState);
+      }
     }
 
     return () => {
       isMounted = false;
     };
-  }, [indexPatternIdFromState, data.indexPatterns, toastNotifications, config, store]);
+  }, [
+    indexPatternIdFromState,
+    data.indexPatterns,
+    toastNotifications,
+    store,
+    isQueryEnhancementEnabled,
+    dataSet,
+    uiSettings,
+    fetchIndexPatternDetails,
+  ]);
 
   return indexPattern;
 };

@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { ConnectionsBar } from './connections_bar';
+export { DataSetContract, DataSetManager } from './dataset_manager';

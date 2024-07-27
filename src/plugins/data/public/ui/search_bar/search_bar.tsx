@@ -60,7 +60,6 @@ interface SearchBarInjectedDeps {
 
 export interface SearchBarOwnProps {
   indexPatterns?: IIndexPattern[];
-  dataSource?: DataSource;
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   screenTitle?: string;
@@ -81,8 +80,7 @@ export interface SearchBarOwnProps {
   // Query bar - should be in SearchBarInjectedDeps
   query?: Query;
   settings?: Settings;
-  dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
-  containerRef?: React.RefCallback<HTMLDivElement>;
+  dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   // Show when user has privileges to save
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
@@ -493,14 +491,12 @@ class SearchBarUI extends Component<SearchBarProps, State> {
       queryEditor = (
         <QueryEditorTopRow
           timeHistory={this.props.timeHistory}
-          dataSourceContainerRef={this.props.dataSourceContainerRef}
-          containerRef={this.props.containerRef}
+          dataSetContainerRef={this.props.dataSetContainerRef}
           settings={this.props.settings}
           query={this.state.query}
           screenTitle={this.props.screenTitle}
           onSubmit={this.onQueryBarSubmit}
           indexPatterns={this.props.indexPatterns}
-          dataSource={this.props.dataSource}
           isLoading={this.props.isLoading}
           prepend={this.props.showFilterBar ? savedQueryManagement : undefined}
           showDatePicker={this.props.showDatePicker}

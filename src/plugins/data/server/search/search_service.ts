@@ -229,18 +229,18 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                 dataFrame.meta.queryConfig.dataSourceId = dataSource?.id;
               }
               this.dfCache.set(dataFrame);
-              const existingIndexPattern = scopedIndexPatterns.getByTitle(dataFrame.name!, true);
+              const dataSetName = `${dataFrame.meta?.queryConfig?.dataSourceId ?? ''}.${
+                dataFrame.name
+              }`;
+              const existingIndexPattern = await scopedIndexPatterns.get(dataSetName, true);
               const dataSet = await scopedIndexPatterns.create(
-                dataFrameToSpec(dataFrame, existingIndexPattern?.id),
+                dataFrameToSpec(dataFrame, existingIndexPattern?.id ?? dataSetName),
                 !existingIndexPattern?.id
               );
-              // save to cache by title because the id is not unique for temporary index pattern created
-              scopedIndexPatterns.saveToCache(dataSet.title, dataSet);
+              scopedIndexPatterns.saveToCache(dataSetName, dataSet);
             },
             clear: () => {
               if (this.dfCache.get() === undefined) return;
-              // name because the id is not unique for temporary index pattern created
-              scopedIndexPatterns.clearCache(this.dfCache.get()!.name, false);
               this.dfCache.clear();
             },
           };

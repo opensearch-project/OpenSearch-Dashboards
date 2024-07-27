@@ -49,7 +49,10 @@ describe('sqlSearchStrategyProvider', () => {
     const mockResponse = {
       success: true,
       data: {
-        schema: [{ name: 'field1' }, { name: 'field2' }],
+        schema: [
+          { name: 'field1', type: 'long' },
+          { name: 'field2', type: 'text' },
+        ],
         datarows: [
           [1, 'value1'],
           [2, 'value2'],
@@ -66,7 +69,7 @@ describe('sqlSearchStrategyProvider', () => {
     const result = await strategy.search(
       emptyRequestHandlerContext,
       ({
-        body: { query: { qs: 'SELECT * FROM table' } },
+        body: { query: { qs: 'SELECT * FROM table' }, df: { name: 'table' } },
       } as unknown) as IOpenSearchDashboardsSearchRequest<unknown>,
       {}
     );
@@ -74,10 +77,10 @@ describe('sqlSearchStrategyProvider', () => {
     expect(result).toEqual({
       type: DATA_FRAME_TYPES.DEFAULT,
       body: {
-        name: '',
+        name: 'table',
         fields: [
-          { name: 'field1', values: [1, 2] },
-          { name: 'field2', values: ['value1', 'value2'] },
+          { name: 'field1', type: 'long', values: [1, 2] },
+          { name: 'field2', type: 'text', values: ['value1', 'value2'] },
         ],
         size: 2,
       },
@@ -107,7 +110,7 @@ describe('sqlSearchStrategyProvider', () => {
     );
 
     expect(result).toEqual(({
-      type: DATA_FRAME_TYPES.DEFAULT,
+      type: DATA_FRAME_TYPES.ERROR,
       body: { error: { cause: 'Query failed' } },
       took: 50,
     } as unknown) as IDataFrameError);
