@@ -67,12 +67,12 @@ interface DataSetNavigatorState {
   externalDataSources: SimpleDataSource[];
   currentDataSourceRef?: SimpleDataSource;
   currentDataSet?: SimpleDataSet;
-  cachedDatabases: any[];
+  cachedDatabases: SimpleObject[];
   cachedTables: SimpleObject[];
 }
 
 interface SelectedDataSetState extends SimpleDataSet {
-  database?: any | undefined;
+  database?: SimpleObject | undefined;
 }
 
 export const DataSetNavigator = (props: DataSetNavigatorProps) => {
@@ -287,7 +287,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       if (status === DirectQueryLoadingStatus.SUCCESS) {
         setNavigatorState((prevState) => ({
           ...prevState,
-          cachedDatabases: dataSourceCache.databases,
+          cachedDatabases: dataSourceCache.databases.map((database) => ({
+            id: database.name,
+            title: database.name,
+          })),
         }));
       } else if (
         status === DirectQueryLoadingStatus.CANCELED ||
@@ -299,7 +302,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
   }, [databasesLoadStatus, selectedDataSetState?.dataSourceRef]);
 
   const handleSelectExternalDataSource = useCallback(
-    async (dataSource) => {
+    async (dataSource: SimpleDataSource) => {
       if (dataSource && dataSource.type === SIMPLE_DATA_SOURCE_TYPES.EXTERNAL) {
         const dataSourceCache = CatalogCacheManager.getOrCreateDataSource(
           dataSource.name,
@@ -317,13 +320,15 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         } else if (dataSourceCache.status === CachedDataSourceStatus.Updated) {
           setNavigatorState((prevState) => ({
             ...prevState,
-            cachedDatabases: dataSourceCache.databases,
+            cachedDatabases: dataSourceCache.databases.map((database) => ({
+              id: database.name,
+              title: database.name,
+            })),
           }));
         }
         setSelectedDataSetState((prevState) => ({
-          ...prevState,
+          ...prevState!,
           dataSourceRef: dataSource,
-          isExternal: true,
         }));
       }
     },
@@ -332,13 +337,13 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
 
   // Start loading tables for selected database
   const handleSelectExternalDatabase = useCallback(
-    (externalDatabase: SimpleDataSource) => {
-      if (selectedDataSetState?.dataSourceRef && externalDatabase) {
+    (externalDatabase: SimpleObject) => {
+      if (selectedDataSetState?.dataSourceRef && externalDatabase && externalDatabase.title) {
         let databaseCache: CachedDatabase;
         try {
           databaseCache = CatalogCacheManager.getDatabase(
             selectedDataSetState.dataSourceRef.name,
-            externalDatabase.name,
+            externalDatabase.title,
             selectedDataSetState.dataSourceRef.id
           );
         } catch (error) {
@@ -351,7 +356,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
         ) {
           startLoadingTables({
             dataSourceName: selectedDataSetState.dataSourceRef.name,
-            databaseName: externalDatabase.name,
+            databaseName: externalDatabase.title,
             dataSourceMDSId: selectedDataSetState.dataSourceRef.id,
           });
         } else if (databaseCache.status === CachedDataSourceStatus.Updated) {
@@ -380,7 +385,7 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       try {
         databaseCache = CatalogCacheManager.getDatabase(
           selectedDataSetState.dataSourceRef.name,
-          selectedDataSetState.database,
+          selectedDataSetState.database.title!,
           selectedDataSetState.dataSourceRef.id
         );
       } catch (error) {
@@ -551,10 +556,10 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
       : 'Databases',
     items: [
       ...navigatorState.cachedDatabases.map((db) => ({
-        name: db.name,
+        name: db.title,
         onClick: async () => {
           setSelectedDataSetState((prevState) => ({
-            ...prevState,
+            ...prevState!,
             database: db,
           }));
           await handleSelectExternalDatabase(db);
@@ -662,24 +667,26 @@ export const DataSetNavigator = (props: DataSetNavigatorProps) => {
           createDatabasesPanel(),
           {
             id: 6,
-            title: selectedDataSetState?.database ? selectedDataSetState.database.name : 'Tables',
+            title: selectedDataSetState?.database ? selectedDataSetState.database.title : 'Tables',
             items: [
               ...navigatorState.cachedTables.map((table) => ({
-                name: table.name,
+                name: table.title,
                 onClick: async () => {
-                  const tableObject = {
+                  const tableObject: SimpleDataSet = {
                     ...selectedDataSetState,
                     id: `${selectedDataSetState?.dataSourceRef!.name}.${
-                      selectedDataSetState?.database.name
-                    }.${table.name}`,
+                      selectedDataSetState?.database?.title
+                    }.${table.title}`,
                     title: `${selectedDataSetState?.dataSourceRef!.name}.${
-                      selectedDataSetState?.database.name
-                    }.${table.name}`,
-                    dataSourceRef: {
-                      id: selectedDataSetState?.dataSourceRef!.id,
-                      name: selectedDataSetState?.dataSourceRef!.name,
-                      type: selectedDataSetState?.dataSourceRef!.type,
-                    },
+                      selectedDataSetState?.database?.title
+                    }.${table.title}`,
+                    ...(selectedDataSetState?.dataSourceRef && {
+                      dataSourceRef: {
+                        id: selectedDataSetState?.dataSourceRef!.id,
+                        name: selectedDataSetState?.dataSourceRef!.name,
+                        type: selectedDataSetState?.dataSourceRef!.type,
+                      } as SimpleDataSource,
+                    }),
                     type: SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC,
                   };
                   await handleSelectedDataSet(tableObject);
