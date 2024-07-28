@@ -264,14 +264,12 @@ export default class QueryEditorUI extends Component<Props, State> {
       wordUntil.endColumn
     );
 
-    const indexPatterns = await this.fetchIndexPatterns();
-
     const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
       query: this.getQueryString(),
       selectionStart: model.getOffsetAt(position),
       selectionEnd: model.getOffsetAt(position),
       language: this.props.query.language,
-      indexPatterns,
+      indexPatterns: this.state.indexPatterns,
       position,
       services: this.services,
     });

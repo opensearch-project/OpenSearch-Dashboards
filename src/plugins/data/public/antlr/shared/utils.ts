@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { from, Observable } from 'rxjs';
+import { from } from 'rxjs';
 import { distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { DataSetManager } from '../../query';
 
@@ -20,7 +20,7 @@ export const getRawSuggestionData$ = (
     title,
   }: IDataSourceRequestHandlerParams) => Promise<any>,
   defaultRequestHandler: () => Promise<any>
-): Observable<any> =>
+) =>
   dataSetManager.getUpdates$().pipe(
     distinctUntilChanged(),
     switchMap((dataSet) => {
@@ -39,7 +39,7 @@ export const fetchData = (
   queryFormatter: (table: string, dataSourceId?: string, title?: string) => any,
   api: any,
   dataSetManager: DataSetManager
-): Promise<any[]> => {
+) => {
   const fetchFromAPI = async (body: string) => {
     try {
       return await api.http.fetch({
@@ -81,40 +81,11 @@ export const fetchData = (
 };
 
 // Specific fetch function for table schemas
-export const fetchTableSchemas = (
-  tables: string[],
-  api: any,
-  dataSetManager: DataSetManager
-): Promise<any[]> => {
+export const fetchTableSchemas = (tables: string[], api: any, dataSetManager: DataSetManager) => {
   return fetchData(
     tables,
     (table, dataSourceId, title) => ({
       query: { qs: `DESCRIBE TABLES LIKE ${table}`, format: 'jdbc' },
-      df: {
-        meta: {
-          queryConfig: {
-            dataSourceId: dataSourceId || undefined,
-            title: title || undefined,
-          },
-        },
-      },
-    }),
-    api,
-    dataSetManager
-  );
-};
-
-// Specific fetch function for column values
-export const fetchColumnValues = (
-  tables: string[],
-  column: string,
-  api: any,
-  dataSetManager: DataSetManager
-): Promise<any[]> => {
-  return fetchData(
-    tables,
-    (table, dataSourceId, title) => ({
-      query: { qs: `SELECT DISTINCT ${column} FROM ${table} LIMIT 10`, format: 'jdbc' },
       df: {
         meta: {
           queryConfig: {

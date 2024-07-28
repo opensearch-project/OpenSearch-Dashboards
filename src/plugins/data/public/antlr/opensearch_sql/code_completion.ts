@@ -24,6 +24,7 @@ import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { fetchTableSchemas } from '../shared/utils';
+import { IDataFrameResponse, IFieldType } from '../../../common';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -47,23 +48,25 @@ export const getSuggestions = async ({
 }: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
   const { api } = services.uiSettings;
   const dataSetManager = services.data.query.dataSetManager;
+  const { lineNumber, column } = position || {};
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
-    line: position?.lineNumber || selectionStart,
-    column: position?.column || selectionEnd,
+    line: lineNumber || selectionStart,
+    column: column || selectionEnd,
   });
 
-  const finalSuggestions = [] as QuerySuggestion[];
+  const finalSuggestions: QuerySuggestion[] = [];
 
   try {
     // Fetch columns and values
-    if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
-      const tableNames = suggestions.suggestColumns?.tables?.map((table) => table.name) ?? [];
+    if (suggestions.suggestColumns?.tables?.length) {
+      const tableNames = suggestions.suggestColumns.tables.map((table) => table.name);
       const schemas = await fetchTableSchemas(tableNames, api, dataSetManager);
 
-      schemas.forEach((schema) => {
-        if (schema.body?.fields?.length > 0) {
-          const columns = schema.body.fields.find((col: any) => col.name === 'COLUMN_NAME');
-          const fieldTypes = schema.body.fields.find((col: any) => col.name === 'DATA_TYPE');
+      (schemas as IDataFrameResponse[]).forEach((schema: IDataFrameResponse) => {
+        if ('body' in schema && schema.body && 'fields' in schema.body) {
+          const columns = schema.body.fields.find((col: IFieldType) => col.name === 'COLUMN_NAME');
+          const fieldTypes = schema.body.fields.find((col: IFieldType) => col.name === 'DATA_TYPE');
+
           if (columns && fieldTypes) {
             finalSuggestions.push(
               ...columns.values.map((col: string) => ({
@@ -74,13 +77,10 @@ export const getSuggestions = async ({
           }
         }
       });
-
-      // later TODO: fetch column values, currently within the industry, it's not a common practice to suggest
-      // values due to different types of the columns as well as the performance impact. For now just avoid it.
     }
 
     // Fill in aggregate functions
-    if ('suggestAggregateFunctions' in suggestions && suggestions.suggestAggregateFunctions) {
+    if (suggestions.suggestAggregateFunctions) {
       finalSuggestions.push(
         ...SQL_SYMBOLS.AGREGATE_FUNCTIONS.map((af) => ({
           text: af,
@@ -90,16 +90,16 @@ export const getSuggestions = async ({
     }
 
     // Fill in SQL keywords
-    if ('suggestKeywords' in suggestions && (suggestions.suggestKeywords?.length ?? 0) > 0) {
+    if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
-        ...(suggestions.suggestKeywords ?? []).map((sk) => ({
+        ...suggestions.suggestKeywords.map((sk) => ({
           text: sk.value,
           type: monaco.languages.CompletionItemKind.Keyword,
         }))
       );
     }
   } catch (error) {
-    // TODO: pipe error to the UI
+    // TODO: Handle errors appropriately, possibly logging or displaying a message to the user
     return [];
   }
 
