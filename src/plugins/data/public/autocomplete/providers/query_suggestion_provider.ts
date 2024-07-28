@@ -60,8 +60,8 @@ export interface QuerySuggestionGetFnArgs {
 export interface QuerySuggestionBasic {
   type: QuerySuggestionTypes | monaco.languages.CompletionItemKind;
   description?: string | JSX.Element;
-  end?: number;
-  start?: number;
+  end: number;
+  start: number;
   text: string;
   cursorIndex?: number;
 }

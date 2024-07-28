@@ -33,6 +33,19 @@ export const getRawSuggestionData$ = (
     })
   );
 
+const fetchFromAPI = async (api: any, body: string) => {
+  try {
+    return await api.http.fetch({
+      method: 'POST',
+      path: '/api/enhancements/search/sql',
+      body,
+    });
+  } catch (err) {
+    // TODO: pipe error to UI
+    return Promise.reject(err);
+  }
+};
+
 // Generic fetchData function
 export const fetchData = (
   tables: string[],
@@ -40,33 +53,20 @@ export const fetchData = (
   api: any,
   dataSetManager: DataSetManager
 ) => {
-  const fetchFromAPI = async (body: string) => {
-    try {
-      return await api.http.fetch({
-        method: 'POST',
-        path: '/api/enhancements/search/sql',
-        body,
-      });
-    } catch (err) {
-      // TODO: pipe error to UI
-      return Promise.reject(err);
-    }
-  };
-
   return new Promise((resolve, reject) => {
     getRawSuggestionData$(
       dataSetManager,
       ({ dataSourceId, title }) => {
         const requests = tables.map(async (table) => {
           const body = JSON.stringify(queryFormatter(table, dataSourceId, title));
-          return fetchFromAPI(body);
+          return fetchFromAPI(api, body);
         });
         return Promise.all(requests);
       },
       () => {
         const requests = tables.map(async (table) => {
           const body = JSON.stringify(queryFormatter(table));
-          return fetchFromAPI(body);
+          return fetchFromAPI(api, body);
         });
         return Promise.all(requests);
       }
