@@ -118,54 +118,6 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
   };
   const showSaveQuery = !!capabilities.discover?.saveQuery;
 
-  const [isOptionsOpen, setOptionsOpen] = useState(false);
-  const [useLegacy, setUseLegacy] = useState(!getNewDiscoverSetting(storage));
-  const DiscoverOptions = () => (
-    <EuiPopover
-      button={
-        <EuiButtonIcon
-          data-test-subj="discoverOptionsButton"
-          aria-label={i18n.translate('discover.canvas.discoverOptionsButtonLabel', {
-            defaultMessage: 'Options for discover',
-          })}
-          size="s"
-          iconType="gear"
-          onClick={() => setOptionsOpen(!isOptionsOpen)}
-        />
-      }
-      closePopover={() => setOptionsOpen(false)}
-      isOpen={isOptionsOpen}
-      panelPaddingSize="none"
-      className="dscCanvas_options"
-    >
-      <EuiContextMenu
-        initialPanelId={0}
-        size="s"
-        panels={[
-          {
-            id: 0,
-            title: 'Options',
-            content: (
-              <EuiPanel>
-                <EuiCompressedSwitch
-                  label="Enable legacy Discover"
-                  checked={useLegacy}
-                  data-test-subj="discoverOptionsLegacySwitch"
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setUseLegacy(checked);
-                    setNewDiscoverSetting(!checked, storage);
-                    window.location.reload();
-                  }}
-                />
-              </EuiPanel>
-            ),
-          },
-        ]}
-      />
-    </EuiPopover>
-  );
-
   return (
     <EuiPanel
       panelRef={panelRef}
@@ -192,11 +144,16 @@ export default function DiscoverCanvas({ setHeaderActionMenu, history, optionalR
         <DiscoverUninitialized onRefresh={() => refetch$.next()} />
       )}
       {fetchState.status === ResultStatus.LOADING && <LoadingSpinner />}
-      {fetchState.status === ResultStatus.READY && (
+      {fetchState.status === ResultStatus.READY && isEnhancementsEnabled && (
+        <>
+          <MemoizedDiscoverChartContainer {...fetchState} />
+          <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
+        </>
+      )}
+      {fetchState.status === ResultStatus.READY && !isEnhancementsEnabled && (
         <EuiPanel hasShadow={false} paddingSize="none" className="dscCanvas_results">
           <MemoizedDiscoverChartContainer {...fetchState} />
           <MemoizedDiscoverTable rows={rows} scrollToTop={scrollToTop} />
-          <DiscoverOptions />
         </EuiPanel>
       )}
     </EuiPanel>

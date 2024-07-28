@@ -9,7 +9,7 @@
 
 .osdQueryEditor__editorAndSelectorWrapper {
   z-index: $euiZContentMenu;
-  max-width: 1000px;
+  max-width: 1200px;
 }
 
 .osdQueryEditorHeader {
@@ -141,7 +141,7 @@
 .osdQueryEditor {
   display: flex;
   flex-direction: column;
-  margin-bottom: -2px; // TODO: Hack to handle the renderSharingMetaFields adding a new empty div to the UI
+  margin-bottom: -3px; // TODO: Hack to handle the renderSharingMetaFields adding a new empty div to the UI
 
   &.expanded.emptyExpanded {
     .osdQueryEditor__datasetPicker {
