@@ -1,2 +1,0 @@
-fix:
-- [Bug][Workspace] Add permission validation at workspace detail page ([#7435](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7435))

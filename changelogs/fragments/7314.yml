@@ -1,2 +1,0 @@
-fix:
-- Unused config setting and remove data sources as a required plugin. ([#7314](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7314))

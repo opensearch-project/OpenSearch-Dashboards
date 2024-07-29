@@ -1,2 +1,0 @@
-chore:
-- Adds a git pre commit hook to ensure that developer docs are always updated ([#6585](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6585))
