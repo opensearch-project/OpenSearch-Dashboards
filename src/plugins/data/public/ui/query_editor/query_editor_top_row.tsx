@@ -269,8 +269,9 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         data-test-subj="querySubmitButton"
         className="euiSuperUpdateButton"
         iconType="play"
+        fill
       >
-        {props.isDirty ? 'Refresh' : 'Run'}
+        Run
       </EuiButton>
     );
 
