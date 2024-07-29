@@ -3,6 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.queryAssist__form {
-  padding: $euiSizeXS;
+.queryAssist {
+  &.queryAssist__form {
+    padding: 0 $euiSizeXS $euiSizeXS;
+  }
+
+  &.queryAssist__callout {
+    margin-top: $euiSizeXS;
+  }
+
+  &.queryAssist__banner {
+    margin: 0 $euiSizeXS $euiSizeXS;
+  }
 }
