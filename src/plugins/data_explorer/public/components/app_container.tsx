@@ -13,6 +13,7 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { Suspense } from 'react';
+import classNames from 'classnames';
 import { AppMountParameters } from '../../../../core/public';
 import { Sidebar } from './sidebar';
 import { NoView } from './no_view';
@@ -29,6 +30,7 @@ export const AppContainer = React.memo(
 
     const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
     const { uiSettings } = opensearchDashboards.services;
+    const isEnhancementsEnabled = uiSettings?.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
 
     const topLinkRef = useRef<HTMLDivElement>(null);
     const datePickerRef = useRef<HTMLDivElement>(null);
@@ -49,7 +51,7 @@ export const AppContainer = React.memo(
     // Render the application DOM.
     return (
       <div className="mainPage">
-        {uiSettings?.get(QUERY_ENHANCEMENT_ENABLED_SETTING) && (
+        {isEnhancementsEnabled && (
           <EuiFlexGroup
             direction="row"
             className="mainPage navBar"
@@ -66,7 +68,11 @@ export const AppContainer = React.memo(
           </EuiFlexGroup>
         )}
 
-        <EuiPage className="deLayout" paddingSize="none" grow={false}>
+        <EuiPage
+          className={classNames('deLayout', isEnhancementsEnabled && 'dsc--next')}
+          paddingSize="none"
+          grow={false}
+        >
           {/* TODO: improve fallback state */}
           <Suspense fallback={<div>Loading...</div>}>
             <Context {...params}>
