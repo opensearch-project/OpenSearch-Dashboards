@@ -173,7 +173,7 @@ export const booleanOperatorSuggestions = [
 
 export const notOperatorSuggestion = { text: 'not', type: 17 };
 
-export const fieldNameSuggestions: { text: string; type: number; insertText?: string }[] = [
+export const fieldNameSuggestions: Array<{ text: string; type: number; insertText?: string }> = [
   { text: 'Carrier', type: 3, insertText: 'Carrier: ' },
   { text: 'DestCityName', type: 3, insertText: 'DestCityName: ' },
   { text: 'DestCountry', type: 3, insertText: 'DestCountry: ' },
