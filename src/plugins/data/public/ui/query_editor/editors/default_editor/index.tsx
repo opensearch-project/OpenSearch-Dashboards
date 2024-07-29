@@ -56,6 +56,7 @@ const DefaultInput: React.FC<DefaultInputProps> = ({
           wrappingIndent: 'same',
           lineDecorationsWidth: 0,
           lineNumbersMinChars: 2,
+          wordBasedSuggestions: false,
         }}
         suggestionProvider={{
           provideCompletionItems,
