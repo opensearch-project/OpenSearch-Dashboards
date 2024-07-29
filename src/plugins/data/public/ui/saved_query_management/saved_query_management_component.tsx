@@ -181,6 +181,7 @@ export function SavedQueryManagementComponent({
         onClick={handleTogglePopover}
         aria-label={label}
         data-test-subj="saved-query-management-popover-button"
+        className="osdSavedQueryManagement__popoverButton"
       >
         <EuiIcon type="save" className="euiQuickSelectPopover__buttonText" />
       </EuiSmallButtonEmpty>
