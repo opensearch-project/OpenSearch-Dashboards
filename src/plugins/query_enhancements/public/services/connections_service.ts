@@ -6,8 +6,8 @@
 import { BehaviorSubject, Observable, from } from 'rxjs';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { CoreStart } from 'opensearch-dashboards/public';
-import { API } from '../../../common';
-import { Connection, ConnectionsServiceDeps } from '../../types';
+import { API } from '../../common';
+import { Connection, ConnectionsServiceDeps } from '../types';
 
 export class ConnectionsService {
   protected http!: ConnectionsServiceDeps['http'];

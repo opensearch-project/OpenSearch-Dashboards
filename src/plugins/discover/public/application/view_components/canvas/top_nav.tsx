@@ -46,16 +46,22 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     data,
     chrome,
     osdUrlStateStorage,
+    uiSettings,
   } = services;
 
   const topNavLinks = savedSearch
     ? getTopNavLinks(services, inspectorAdapters, savedSearch, isEnhancementsEnabled)
     : [];
 
-  connectStorageToQueryState(services.data.query, osdUrlStateStorage, {
-    filters: opensearchFilters.FilterStateStore.APP_STATE,
-    query: true,
-  });
+  connectStorageToQueryState(
+    services.data.query,
+    osdUrlStateStorage,
+    {
+      filters: opensearchFilters.FilterStateStore.APP_STATE,
+      query: true,
+    },
+    uiSettings
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -126,10 +132,6 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
         useDefaultBehaviors
         setMenuMountPoint={opts.setHeaderActionMenu}
         indexPatterns={indexPattern ? [indexPattern] : indexPatterns}
-        // TODO after
-        // https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6833
-        // is ported to main, pass dataSource to TopNavMenu by picking
-        // commit 328e08e688c again.
         onQuerySubmit={opts.onQuerySubmit}
         savedQueryId={state.savedQuery}
         onSavedQueryIdChange={updateSavedQueryId}

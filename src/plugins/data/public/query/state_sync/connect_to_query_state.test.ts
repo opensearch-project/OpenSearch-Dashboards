@@ -31,7 +31,13 @@
 import { Subscription } from 'rxjs';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
-import { Filter, FilterStateStore, Query, UI_SETTINGS } from '../../../common';
+import {
+  Filter,
+  FilterStateStore,
+  IndexPatternsService,
+  Query,
+  UI_SETTINGS,
+} from '../../../common';
 import { coreMock } from '../../../../../core/public/mocks';
 import {
   BaseStateContainer,
@@ -74,6 +80,8 @@ const startMock = coreMock.createStart();
 
 setupMock.uiSettings.get.mockImplementation((key: string) => {
   switch (key) {
+    case 'defaultIndex':
+      return 'logstash-*';
     case UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT:
       return true;
     case UI_SETTINGS.SEARCH_QUERY_LANGUAGE:
@@ -96,6 +104,7 @@ describe('connect_storage_to_query_state', () => {
   let filterManagerChangeSub: Subscription;
   let filterManagerChangeTriggered = jest.fn();
   let osdUrlStateStorage: IOsdUrlStateStorage;
+  let indexPatternsMock: IndexPatternsService;
   let history: History;
   let gF1: Filter;
   let gF2: Filter;
@@ -113,7 +122,11 @@ describe('connect_storage_to_query_state', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
       savedObjectsClient: startMock.savedObjects.client,
+      indexPatterns: indexPatternsMock,
     });
+    indexPatternsMock = ({
+      get: jest.fn(),
+    } as unknown) as IndexPatternsService;
 
     queryString = queryServiceStart.queryString;
     queryChangeTriggered = jest.fn();
@@ -200,6 +213,7 @@ describe('connect_to_global_state', () => {
   let globalStateChangeTriggered = jest.fn();
   let filterManagerChangeSub: Subscription;
   let filterManagerChangeTriggered = jest.fn();
+  let indexPatternsMock: IndexPatternsService;
 
   let gF1: Filter;
   let gF2: Filter;
@@ -216,9 +230,13 @@ describe('connect_to_global_state', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
       savedObjectsClient: startMock.savedObjects.client,
+      indexPatterns: indexPatternsMock,
     });
     filterManager = queryServiceStart.filterManager;
     timeFilter = queryServiceStart.timefilter.timefilter;
+    indexPatternsMock = ({
+      get: jest.fn(),
+    } as unknown) as IndexPatternsService;
 
     globalState = createStateContainer({});
     globalStateChangeTriggered = jest.fn();
@@ -433,6 +451,7 @@ describe('connect_to_app_state', () => {
   let appStateChangeTriggered = jest.fn();
   let filterManagerChangeSub: Subscription;
   let filterManagerChangeTriggered = jest.fn();
+  let indexPatternsMock: IndexPatternsService;
 
   let gF1: Filter;
   let gF2: Filter;
@@ -449,8 +468,12 @@ describe('connect_to_app_state', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
       savedObjectsClient: startMock.savedObjects.client,
+      indexPatterns: indexPatternsMock,
     });
     filterManager = queryServiceStart.filterManager;
+    indexPatternsMock = ({
+      get: jest.fn(),
+    } as unknown) as IndexPatternsService;
 
     appState = createStateContainer({});
     appStateChangeTriggered = jest.fn();
@@ -614,6 +637,7 @@ describe('filters with different state', () => {
   let stateChangeTriggered = jest.fn();
   let filterManagerChangeSub: Subscription;
   let filterManagerChangeTriggered = jest.fn();
+  let indexPatternsMock: IndexPatternsService;
 
   let filter: Filter;
 
@@ -627,8 +651,12 @@ describe('filters with different state', () => {
       uiSettings: setupMock.uiSettings,
       storage: new Storage(new StubBrowserStorage()),
       savedObjectsClient: startMock.savedObjects.client,
+      indexPatterns: indexPatternsMock,
     });
     filterManager = queryServiceStart.filterManager;
+    indexPatternsMock = ({
+      get: jest.fn(),
+    } as unknown) as IndexPatternsService;
 
     state = createStateContainer({});
     stateChangeTriggered = jest.fn();
