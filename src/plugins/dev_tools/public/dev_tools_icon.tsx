@@ -14,6 +14,9 @@ export function DevToolsIcon({ core, appId }: { core: CoreStart; appId: string }
       aria-label="go-to-dev-tools"
       iconType="consoleApp"
       onClick={() => {
+        /**
+         * This is a workaround before devTools refactor as a drawer in 2.16.
+         */
         core.chrome.navGroup.setCurrentNavGroup(DEFAULT_NAV_GROUPS.dataAdministration.id);
         core.application.navigateToApp(appId);
       }}
