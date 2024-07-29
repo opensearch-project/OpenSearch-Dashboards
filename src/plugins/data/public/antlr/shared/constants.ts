@@ -173,20 +173,20 @@ export const booleanOperatorSuggestions = [
 
 export const notOperatorSuggestion = { text: 'not', type: 17 };
 
-export const fieldNameSuggestions = [
-  { text: 'Carrier', type: 3 },
-  { text: 'DestCityName', type: 3 },
-  { text: 'DestCountry', type: 3 },
-  { text: 'DestWeather', type: 3 },
-  { text: 'DistanceMiles', type: 3 },
-  { text: 'FlightDelay', type: 3 },
-  { text: 'FlightNum', type: 3 },
-  { text: 'OriginWeather', type: 3 },
-  { text: '_id', type: 3 },
-  { text: '_index', type: 3 },
-  { text: '_score', type: 3 },
-  { text: '_source', type: 3 },
-  { text: '_type', type: 3 },
+export const fieldNameSuggestions: { text: string; type: number; insertText?: string }[] = [
+  { text: 'Carrier', type: 3, insertText: 'Carrier: ' },
+  { text: 'DestCityName', type: 3, insertText: 'DestCityName: ' },
+  { text: 'DestCountry', type: 3, insertText: 'DestCountry: ' },
+  { text: 'DestWeather', type: 3, insertText: 'DestWeather: ' },
+  { text: 'DistanceMiles', type: 3, insertText: 'DistanceMiles: ' },
+  { text: 'FlightDelay', type: 3, insertText: 'FlightDelay: ' },
+  { text: 'FlightNum', type: 3, insertText: 'FlightNum: ' },
+  { text: 'OriginWeather', type: 3, insertText: 'OriginWeather: ' },
+  { text: '_id', type: 3, insertText: '_id: ' },
+  { text: '_index', type: 3, insertText: '_index: ' },
+  { text: '_score', type: 3, insertText: '_score: ' },
+  { text: '_source', type: 3, insertText: '_source: ' },
+  { text: '_type', type: 3, insertText: '_type: ' },
 ];
 
 export const fieldNameWithNotSuggestions = fieldNameSuggestions.concat(notOperatorSuggestion);
