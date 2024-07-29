@@ -1,2 +1,0 @@
-feat:
-- Add data source selection service to support storing and getting selected data source updates ([#6827](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6827))

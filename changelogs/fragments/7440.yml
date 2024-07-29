@@ -1,2 +1,0 @@
-fix:
-- [Bug][Data Source] Move data source manageable feature flag to DSM plugin ([#7440](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7440))
