@@ -12,7 +12,7 @@ import { DataSetContract } from '../../query';
 export function createDataSetNavigator(
   savedObjectsClient: SavedObjectsClientContract,
   http: HttpStart,
-  dataSet: DataSetContract
+  dataSetManager: DataSetContract
 ) {
   // Return a function that takes props, omitting the dependencies from the props type
   return (props: Omit<DataSetNavigatorProps, 'savedObjectsClient' | 'http' | 'dataSet'>) => (
@@ -20,7 +20,7 @@ export function createDataSetNavigator(
       {...props}
       savedObjectsClient={savedObjectsClient}
       http={http}
-      dataSet={dataSet}
+      dataSetManager={dataSetManager}
     />
   );
 }

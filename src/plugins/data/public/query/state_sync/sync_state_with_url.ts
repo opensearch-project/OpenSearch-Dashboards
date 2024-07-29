@@ -50,7 +50,7 @@ const GLOBAL_STATE_STORAGE_KEY = '_g';
 export const syncQueryStateWithUrl = (
   query: Pick<
     QueryStart | QuerySetup,
-    'filterManager' | 'timefilter' | 'queryString' | 'dataSet' | 'state$'
+    'filterManager' | 'timefilter' | 'queryString' | 'dataSetManager' | 'state$'
   >,
   osdUrlStateStorage: IOsdUrlStateStorage,
   uiSettings?: CoreStart['uiSettings']
@@ -58,7 +58,7 @@ export const syncQueryStateWithUrl = (
   const {
     timefilter: { timefilter },
     filterManager,
-    dataSet,
+    dataSetManager,
   } = query;
   const defaultState: QueryState = {
     time: timefilter.getTime(),
@@ -66,7 +66,7 @@ export const syncQueryStateWithUrl = (
     filters: filterManager.getGlobalFilters(),
     ...(uiSettings &&
       uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
-        dataSet: dataSet.getDataSet(),
+        dataSet: dataSetManager.getDataSet(),
       }),
   };
 

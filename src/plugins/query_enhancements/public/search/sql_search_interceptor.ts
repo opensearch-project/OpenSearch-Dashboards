@@ -66,10 +66,10 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       ...dataFrame.meta,
       queryConfig: {
         ...dataFrame.meta.queryConfig,
-        ...(this.queryService.dataSet.getDataSet() && {
-          dataSourceId: this.queryService.dataSet.getDataSet()?.dataSourceRef?.id,
-          dataSourceName: this.queryService.dataSet.getDataSet()?.dataSourceRef?.name,
-          timeFieldName: this.queryService.dataSet.getDataSet()?.timeFieldName,
+        ...(this.queryService.dataSetManager.getDataSet() && {
+          dataSourceId: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.id,
+          dataSourceName: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.name,
+          timeFieldName: this.queryService.dataSetManager.getDataSet()?.timeFieldName,
         }),
       },
     };
@@ -109,10 +109,10 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     }
 
     const queryString = getRawQueryString(searchRequest) ?? '';
-    const dataSourceRef = this.queryService.dataSet.getDataSet()
+    const dataSourceRef = this.queryService.dataSetManager.getDataSet()
       ? {
-          dataSourceId: this.queryService.dataSet.getDataSet()?.dataSourceRef?.id,
-          dataSourceName: this.queryService.dataSet.getDataSet()?.dataSourceRef?.name,
+          dataSourceId: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.id,
+          dataSourceName: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.name,
         }
       : {};
 
@@ -182,7 +182,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    const dataSet = this.queryService.dataSet.getDataSet();
+    const dataSet = this.queryService.dataSetManager.getDataSet();
     if (dataSet?.type === SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC) {
       return this.runSearchAsync(request, options.abortSignal, SEARCH_STRATEGY.SQL_ASYNC);
     }

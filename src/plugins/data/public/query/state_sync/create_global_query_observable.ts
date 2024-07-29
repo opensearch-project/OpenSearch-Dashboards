@@ -42,12 +42,12 @@ export function createQueryStateObservable({
   timefilter: { timefilter },
   filterManager,
   queryString,
-  dataSet,
+  dataSetManager,
 }: {
   timefilter: TimefilterSetup;
   filterManager: FilterManager;
   queryString: QueryStringContract;
-  dataSet: DataSetContract;
+  dataSetManager: DataSetContract;
 }): Observable<{ changes: QueryStateChange; state: QueryState }> {
   return new Observable((subscriber) => {
     const state = createStateContainer<QueryState>({
@@ -55,7 +55,7 @@ export function createQueryStateObservable({
       refreshInterval: timefilter.getRefreshInterval(),
       filters: filterManager.getFilters(),
       query: queryString.getQuery(),
-      dataSet: dataSet.getDataSet(),
+      dataSet: dataSetManager.getDataSet(),
     });
 
     let currentChange: QueryStateChange = {};
@@ -64,9 +64,9 @@ export function createQueryStateObservable({
         currentChange.query = true;
         state.set({ ...state.get(), query: queryString.getQuery() });
       }),
-      dataSet.getUpdates$().subscribe(() => {
+      dataSetManager.getUpdates$().subscribe(() => {
         currentChange.dataSet = true;
-        state.set({ ...state.get(), dataSet: dataSet.getDataSet() });
+        state.set({ ...state.get(), dataSet: dataSetManager.getDataSet() });
       }),
       timefilter.getTimeUpdate$().subscribe(() => {
         currentChange.time = true;
