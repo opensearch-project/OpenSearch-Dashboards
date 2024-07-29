@@ -15,7 +15,7 @@ export function DevToolsIcon({ core, appId }: { core: CoreStart; appId: string }
       iconType="consoleApp"
       onClick={() => {
         /**
-         * This is a workaround before devTools refactor as a drawer in 2.16.
+         * This is a workaround in 2.16, once devTools being refactor to a drawer, we can remove the setCurrentNavGroup line.
          */
         core.chrome.navGroup.setCurrentNavGroup(DEFAULT_NAV_GROUPS.dataAdministration.id);
         core.application.navigateToApp(appId);
