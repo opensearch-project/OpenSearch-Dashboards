@@ -311,7 +311,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           ? suggestions.map((s: QuerySuggestion) => ({
               label: s.text,
               kind: s.type as monaco.languages.CompletionItemKind,
-              insertText: s.text,
+              insertText: s.insertText ?? s.text,
               range,
             }))
           : [],

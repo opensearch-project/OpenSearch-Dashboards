@@ -49,7 +49,11 @@ const findFieldSuggestions = (indexPattern: any) => {
     text: string;
     type: monaco.languages.CompletionItemKind;
   }> = fieldNames.map((field: string) => {
-    return { text: field, type: monaco.languages.CompletionItemKind.Field };
+    return {
+      text: field,
+      type: monaco.languages.CompletionItemKind.Field,
+      insertText: `${field}: `,
+    };
   });
 
   return fieldSuggestions;
@@ -128,7 +132,6 @@ export const getSuggestions = async ({
   ) {
     return [];
   }
-
   const http = coreSetup?.http;
   const currentIndexPattern = indexPatterns[0];
 
