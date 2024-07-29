@@ -406,6 +406,10 @@ export default class QueryEditorUI extends Component<Props, State> {
           {languageSelector}
           {this.props.queryActions}
         </div>
+        <div
+          ref={this.headerRef}
+          className={classNames('osdQueryEditor__header', this.props.headerClassName)}
+        />
         {!this.state.isCollapsed && (
           <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
         )}
@@ -505,7 +509,6 @@ export default class QueryEditorUI extends Component<Props, State> {
            </EuiFlexItem>
 
            <EuiFlexItem onClick={this.onClickInput} grow={true}>
-             <div ref={this.headerRef} className={headerClassName} />
              {!this.state.isCollapsed && useQueryEditor && (
                <CodeEditor
                  height={70}
