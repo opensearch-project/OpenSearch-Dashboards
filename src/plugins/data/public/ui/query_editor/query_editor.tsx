@@ -322,7 +322,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           this.props.dataSet?.timeFieldName || '',
         ],
       },
-      // provideCompletionItems: this.provideCompletionItems,
+      provideCompletionItems: this.provideCompletionItems,
     };
 
     const singleLineInputProps = {
