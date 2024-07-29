@@ -337,7 +337,7 @@ export default class QueryEditorUI extends Component<Props, State> {
       footerItems: {
         start: [
           `${this.state.lineCount} ${this.state.lineCount === 1 ? 'line' : 'lines'}`,
-          typeof this.props.dataSet?.timeFieldName || '',
+          this.props.dataSet?.timeFieldName || '',
         ],
       },
       // provideCompletionItems: this.provideCompletionItems,
@@ -397,7 +397,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}
             isCollapsed={!this.state.isCollapsed}
           />
-          <div ref={this.props.dataSetContainerRef} className="osdQueryEditor__datasetPicker" />
+          <div ref={this.props.dataSetContainerRef} className="osdQueryEditor__dataSetPicker" />
           <div className="osdQueryEditor__input">
             {this.state.isCollapsed
               ? languageEditor.TopBar.Collapsed()

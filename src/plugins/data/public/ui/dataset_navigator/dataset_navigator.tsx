@@ -632,7 +632,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
     ]
   );
 
-  const datasetTitle =
+  const dataSetTitle =
     selectedDataSetState &&
     selectedDataSetState?.dataSourceRef &&
     selectedDataSetState?.dataSourceRef.name
@@ -642,7 +642,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
   return (
     <EuiPopover
       button={
-        <EuiToolTip content={datasetTitle}>
+        <EuiToolTip content={dataSetTitle}>
           <EuiButtonEmpty
             className="dataSetNavigator"
             color="text"
@@ -652,7 +652,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
             onClick={togglePopover}
           >
             <EuiIcon type="database" className="dataSetNavigator__icon" />
-            {datasetTitle}
+            {dataSetTitle ?? 'Select data set'}
           </EuiButtonEmpty>
         </EuiToolTip>
       }
@@ -662,7 +662,12 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
       display="block"
       panelPaddingSize="none"
     >
-      <EuiContextMenu initialPanelId={0} className="dataSetNavigator" size="s" panels={panels} />
+      <EuiContextMenu
+        initialPanelId={0}
+        className="dataSetNavigator dataSetNavigator__menu"
+        size="s"
+        panels={panels}
+      />
     </EuiPopover>
   );
 };
