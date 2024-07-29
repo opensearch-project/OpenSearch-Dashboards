@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import {
-  EuiPanel,
+  EuiCard,
   EuiLink,
   EuiDescriptionList,
   EuiIcon,
@@ -13,8 +13,6 @@ import {
   EuiFlexItem,
   EuiSelect,
   EuiButtonIcon,
-  EuiSpacer,
-  EuiListGroup,
   EuiText,
   EuiTitle,
   EuiToolTip,
@@ -88,62 +86,63 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
   const isDashboardAdmin = application.capabilities.dashboards?.isDashboardAdmin;
 
   return (
-    <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
-      <EuiFlexGroup gutterSize="xs" alignItems="center">
-        <EuiFlexItem grow={3}>
-          <EuiTitle>
-            <h4>Workspaces</h4>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          <EuiToolTip position="bottom" content={WORKSPACE_LIST_CARD_DESCRIPTION}>
-            <EuiIcon type="iInCircle" aria-label="workspace list card description" />
-          </EuiToolTip>
-        </EuiFlexItem>
-        <EuiFlexItem grow={5}>
-          <EuiSelect
-            value={filter}
-            data-test-subj="workspace_filter"
-            onChange={(e) => {
-              setFilter(e.target.value);
-            }}
-            options={[
-              {
-                value: 'viewed',
-                text: i18n.translate('workspace.list.card.filter.viewed', {
-                  defaultMessage: 'Recently viewed',
-                }),
-              },
-              {
-                value: 'updated',
-                text: i18n.translate('workspace.list.card.filter.updated', {
-                  defaultMessage: 'Recently updated',
-                }),
-              },
-            ]}
-          />
-        </EuiFlexItem>
-        {isDashboardAdmin && (
-          <EuiFlexItem grow={false}>
-            <EuiToolTip position="top" content="Create workspace">
-              <EuiButtonIcon
-                data-test-subj="create_workspace"
-                aria-label="create workspace"
-                display="base"
-                iconType="plus"
-                size="m"
-                onClick={() => {
-                  application.navigateToApp(WORKSPACE_CREATE_APP_ID);
-                }}
-              />
+    <EuiCard
+      textAlign="left"
+      title={
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={3}>
+            <EuiTitle>
+              <h4>Workspaces</h4>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>
+            <EuiToolTip position="bottom" content={WORKSPACE_LIST_CARD_DESCRIPTION}>
+              <EuiIcon type="iInCircle" aria-label="workspace list card description" />
             </EuiToolTip>
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-
-      <EuiSpacer />
-      <EuiListGroup flush={true} bordered={false} style={{ minHeight: '300px' }}>
-        {workspaceList && workspaceList.length === 0 ? (
+          <EuiFlexItem grow={5}>
+            <EuiSelect
+              value={filter}
+              data-test-subj="workspace_filter"
+              onChange={(e) => {
+                setFilter(e.target.value);
+              }}
+              options={[
+                {
+                  value: 'viewed',
+                  text: i18n.translate('workspace.list.card.filter.viewed', {
+                    defaultMessage: 'Recently viewed',
+                  }),
+                },
+                {
+                  value: 'updated',
+                  text: i18n.translate('workspace.list.card.filter.updated', {
+                    defaultMessage: 'Recently updated',
+                  }),
+                },
+              ]}
+            />
+          </EuiFlexItem>
+          {isDashboardAdmin && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip position="top" content="Create workspace">
+                <EuiButtonIcon
+                  data-test-subj="create_workspace"
+                  aria-label="create workspace"
+                  display="base"
+                  iconType="plus"
+                  size="m"
+                  onClick={() => {
+                    application.navigateToApp(WORKSPACE_CREATE_APP_ID);
+                  }}
+                />
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      }
+      description={
+        workspaceList && workspaceList.length === 0 ? (
           <EuiEmptyPrompt
             iconType="database"
             titleSize="xs"
@@ -158,8 +157,8 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
         ) : (
           <EuiDescriptionList
             type="column"
-            titleProps={{ style: { width: '70%' } }}
-            descriptionProps={{ style: { width: '30%' } }}
+            titleProps={{ style: { width: '60%' } }}
+            descriptionProps={{ style: { width: '40%' } }}
             listItems={workspaceList.map((workspace) => ({
               title: (
                 <EuiLink
@@ -177,16 +176,17 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
               ),
             }))}
           />
-        )}
-      </EuiListGroup>
-
-      <EuiLink
-        onClick={() => {
-          application.navigateToApp(WORKSPACE_LIST_APP_ID);
-        }}
-      >
-        <EuiText size="s">View all</EuiText>
-      </EuiLink>
-    </EuiPanel>
+        )
+      }
+      footer={
+        <EuiLink
+          onClick={() => {
+            application.navigateToApp(WORKSPACE_LIST_APP_ID);
+          }}
+        >
+          <EuiText size="s">View all</EuiText>
+        </EuiLink>
+      }
+    />
   );
 };

@@ -9,10 +9,10 @@ import {
   EuiText,
   EuiLink,
   EuiTitle,
-  EuiPanel,
   EuiDescriptionListTitle,
   EuiDescriptionListDescription,
-  EuiSpacer,
+  EuiCard,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 
@@ -64,39 +64,50 @@ interface Config {
 }
 
 export const HomeListCard = ({ config }: { config: Config }) => {
+  const isMobile = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
+
+  const overflowStyle = {
+    overflow: isMobile ? 'scroll' : 'visible',
+    maxHeight: '230px',
+  };
+
   return (
     <>
-      <EuiPanel paddingSize="s" hasBorder={false} hasShadow={false}>
-        <EuiTitle>
-          <h4>{config.title}</h4>
-        </EuiTitle>
-        <EuiSpacer />
-        {config.list.length > 0 && (
-          <EuiDescriptionList>
-            {config.list.map((item) => (
-              <>
-                <EuiDescriptionListTitle>
-                  <EuiLink href={item.href} target="_blank">
-                    {item.label}
-                  </EuiLink>
-                </EuiDescriptionListTitle>
-                <EuiDescriptionListDescription>{item.description}</EuiDescriptionListDescription>
-              </>
-            ))}
-          </EuiDescriptionList>
-        )}
-
-        {config.allLink ? (
-          <>
-            <EuiSpacer />
-            <EuiLink href={config.allLink} target="_blank">
-              <EuiText size="s" style={{ display: 'inline' }}>
-                View all
-              </EuiText>
-            </EuiLink>
-          </>
-        ) : null}
-      </EuiPanel>
+      <EuiCard
+        textAlign="left"
+        title={
+          <EuiTitle>
+            <h4>{config.title}</h4>
+          </EuiTitle>
+        }
+        description={
+          config.list.length > 0 && (
+            <EuiDescriptionList style={overflowStyle}>
+              {config.list.map((item) => (
+                <>
+                  <EuiDescriptionListTitle>
+                    <EuiLink href={item.href} target="_blank">
+                      {item.label}
+                    </EuiLink>
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription>{item.description}</EuiDescriptionListDescription>
+                </>
+              ))}
+            </EuiDescriptionList>
+          )
+        }
+        footer={
+          config.allLink ? (
+            <>
+              <EuiLink href={config.allLink} target="_blank">
+                <EuiText size="s" style={{ display: 'inline' }}>
+                  View all
+                </EuiText>
+              </EuiLink>
+            </>
+          ) : null
+        }
+      />
     </>
   );
 };
