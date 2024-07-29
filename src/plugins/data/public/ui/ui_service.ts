@@ -79,7 +79,7 @@ export class UiService implements Plugin<IUiSetup, IUiStart> {
       DataSetNavigator: createDataSetNavigator(
         core.savedObjects.client,
         core.http,
-        dataServices.query.dataSet
+        dataServices.query.dataSetManager
       ),
       SearchBar,
       SuggestionsComponent,

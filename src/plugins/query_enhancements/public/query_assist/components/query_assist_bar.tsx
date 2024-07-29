@@ -40,11 +40,11 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const previousQuestionRef = useRef<string>();
 
   useEffect(() => {
-    const subscription = services.data.query.dataSet.getUpdates$().subscribe((dataSet) => {
+    const subscription = services.data.query.dataSetManager.getUpdates$().subscribe((dataSet) => {
       setSelectedDataSet(dataSet);
     });
     return () => subscription.unsubscribe();
-  }, [services.data.query.dataSet]);
+  }, [services.data.query.dataSetManager]);
 
   const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();

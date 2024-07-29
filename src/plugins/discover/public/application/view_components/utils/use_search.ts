@@ -252,7 +252,7 @@ export const useSearch = (services: DiscoverViewServices) => {
       timefilter.getTimeUpdate$(),
       timefilter.getAutoRefreshFetch$(),
       data.query.queryString.getUpdates$(),
-      data.query.dataSet.getUpdates$()
+      data.query.dataSetManager.getUpdates$()
     ).pipe(debounceTime(100));
 
     const subscription = fetch$.subscribe(() => {
@@ -282,7 +282,7 @@ export const useSearch = (services: DiscoverViewServices) => {
     fetch,
     core.fatalErrors,
     shouldSearchOnPageLoad,
-    data.query.dataSet,
+    data.query.dataSetManager,
   ]);
 
   // Get savedSearch if it exists
