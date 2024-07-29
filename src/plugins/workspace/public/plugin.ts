@@ -371,7 +371,7 @@ export class WorkspacePlugin
         }),
       },
     ]);
-
+    
 
     /**
      * register workspace column into saved objects table

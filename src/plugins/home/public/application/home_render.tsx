@@ -36,11 +36,7 @@ export const setupHome = (contentManagement: ContentManagementPluginSetup) => {
             <>
               {contents.map((content) => {
                 if (content.kind === 'custom') {
-                  return (
-                    <React.Fragment key={content.id}>
-                      {content.render()}
-                    </React.Fragment>
-                  )
+                  return <React.Fragment key={content.id}>{content.render()}</React.Fragment>;
                 }
 
                 return null;

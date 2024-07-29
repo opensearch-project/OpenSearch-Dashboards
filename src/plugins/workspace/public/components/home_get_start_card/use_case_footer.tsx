@@ -94,7 +94,7 @@ export const UseCaseFooter = ({
           onClick={showModal}
           data-test-subj="useCase.footer.createWorkspace.button"
         >
-          {i18n.translate("useCase.footer.createWorkspace", {defaultMessage: "Create workspace"})}
+          {i18n.translate('useCase.footer.createWorkspace', { defaultMessage: 'Create workspace' })}
         </EuiButton>
         {isModalVisible && (
           <EuiModal onClose={closeModal} style={{ width: '450px' }}>
@@ -108,7 +108,7 @@ export const UseCaseFooter = ({
 
             <EuiModalFooter>
               <EuiButton onClick={closeModal} data-test-subj="useCase.footer.modal.close.button">
-                {i18n.translate("useCase.footer.modal.close", {defaultMessage: "Close"})}
+                {i18n.translate('useCase.footer.modal.close', { defaultMessage: 'Close' })}
               </EuiButton>
               {isDashboardAdmin && (
                 <EuiButton
@@ -116,7 +116,9 @@ export const UseCaseFooter = ({
                   data-test-subj="useCase.footer.modal.create.button"
                   fill
                 >
-                  {i18n.translate("useCase.footer.modal.create", {defaultMessage: "Create workspace"})}
+                  {i18n.translate('useCase.footer.modal.create', {
+                    defaultMessage: 'Create workspace',
+                  })}
                 </EuiButton>
               )}
             </EuiModalFooter>
@@ -134,7 +136,7 @@ export const UseCaseFooter = ({
     );
     return (
       <EuiButton href={useCaseURL} data-test-subj="useCase.footer.openWorkspace.button">
-        {i18n.translate("useCase.footer.openWorkspace", {defaultMessage: "Open"})}
+        {i18n.translate('useCase.footer.openWorkspace', { defaultMessage: 'Open' })}
       </EuiButton>
     );
   }
@@ -172,7 +174,7 @@ export const UseCaseFooter = ({
 
   const button = (
     <EuiButton iconType="arrowDown" iconSide="right" onClick={onButtonClick}>
-      {i18n.translate("useCase.footer.selectWorkspace", {defaultMessage: "Select workspace"})}
+      {i18n.translate('useCase.footer.selectWorkspace', { defaultMessage: 'Select workspace' })}
     </EuiButton>
   );
   const panels = [
