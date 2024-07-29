@@ -21,9 +21,8 @@ import { createParser } from './parse';
 import { SqlErrorListener } from './sql_error_listerner';
 import { findCursorTokenIndex } from '../shared/cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
-import { getUiSettings } from '../../services';
 import { SQL_SYMBOLS } from './constants';
-import { QuerySuggestionGetFnArgs } from '../../autocomplete';
+import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { fetchColumnValues, fetchTableSchemas } from '../shared/utils';
 
 export interface SuggestionParams {
@@ -44,9 +43,10 @@ export const getSuggestions = async ({
   selectionEnd,
   position,
   query,
-  connectionService,
-}: QuerySuggestionGetFnArgs): Promise<ISuggestionItem[]> => {
-  const { api } = getUiSettings();
+  services,
+}: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
+  const { api } = services.uiSettings;
+  const dataSetManager = services.data.query.dataSet;
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
     line: position?.lineNumber || selectionStart,
     column: position?.column || selectionEnd,
@@ -58,12 +58,12 @@ export const getSuggestions = async ({
     // Fetch columns and values
     if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
       const tableNames = suggestions.suggestColumns?.tables?.map((table) => table.name) ?? [];
-      const schemas = await fetchTableSchemas(tableNames, api, connectionService);
+      const schemas = await fetchTableSchemas(tableNames, api, services);
 
       schemas.forEach((schema) => {
         if (schema.body?.fields?.length > 0) {
-          const columns = schema.body.fields.find((col) => col.name === 'COLUMN_NAME');
-          const fieldTypes = schema.body.fields.find((col) => col.name === 'DATA_TYPE');
+          const columns = schema.body.fields.find((col: any) => col.name === 'COLUMN_NAME');
+          const fieldTypes = schema.body.fields.find((col: any) => col.name === 'DATA_TYPE');
           if (columns && fieldTypes) {
             finalSuggestions.push(
               ...columns.values.map((col: string, index: number) => ({
@@ -85,7 +85,7 @@ export const getSuggestions = async ({
           tableNames,
           suggestions.suggestValuesForColumn as string,
           api,
-          connectionService
+          services
         );
         values.forEach((value) => {
           if (value.body?.fields?.length > 0) {

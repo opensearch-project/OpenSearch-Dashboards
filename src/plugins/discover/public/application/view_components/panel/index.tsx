@@ -16,7 +16,7 @@ import {
 import { DiscoverSidebar } from '../../components/sidebar';
 import { useDiscoverContext } from '../context';
 import { ResultStatus, SearchData } from '../utils/use_search';
-import { IndexPatternField, opensearchFilters } from '../../../../../data/public';
+import { IndexPatternField, UI_SETTINGS, opensearchFilters } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { popularizeField } from '../../helpers/popularize_field';
@@ -108,6 +108,10 @@ export default function DiscoverPanel(props: ViewProps) {
     await indexPatterns.refreshFields(dataSet!, true);
   }, [fetchState, indexPattern, indexPatterns]);
 
+  const isEnhancementsEnabledOverride = services.uiSettings.get(
+    UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED
+  );
+
   return (
     <DiscoverSidebar
       columns={columns || []}
@@ -146,6 +150,7 @@ export default function DiscoverPanel(props: ViewProps) {
       onCreateIndexPattern={onCreateIndexPattern}
       onNormalize={onNormalize}
       onAddFilter={onAddFilter}
+      isEnhancementsEnabledOverride={isEnhancementsEnabledOverride}
     />
   );
 }

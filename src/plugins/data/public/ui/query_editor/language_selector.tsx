@@ -19,7 +19,6 @@ export interface QueryLanguageSelectorProps {
   onSelectLanguage: (newLanguage: string) => void;
   anchorPosition?: PopoverAnchorPosition;
   appName?: string;
-  isFooter?: boolean;
 }
 
 const mapExternalLanguageToOptions = (language: string) => {
@@ -84,21 +83,25 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
 
   uiService.Settings.setUserQueryLanguage(props.language);
 
-  const languageOptionsMenu = languageOptions.map((language) => {
-    return (
-      <EuiContextMenuItem
-        key={language.label}
-        className="languageSelector__menuItem"
-        icon={language.label === selectedLanguage.label ? 'check' : 'empty'}
-        onClick={() => {
-          setPopover(false);
-          handleLanguageChange(language.value);
-        }}
-      >
-        {language.label}
-      </EuiContextMenuItem>
-    );
-  });
+  const languageOptionsMenu = languageOptions
+    .sort((a, b) => {
+      return a.label.localeCompare(b.label);
+    })
+    .map((language) => {
+      return (
+        <EuiContextMenuItem
+          key={language.label}
+          className="languageSelector__menuItem"
+          icon={language.label === selectedLanguage.label ? 'check' : 'empty'}
+          onClick={() => {
+            setPopover(false);
+            handleLanguageChange(language.value);
+          }}
+        >
+          {language.label}
+        </EuiContextMenuItem>
+      );
+    });
   return (
     <EuiPopover
       className="languageSelector"
@@ -108,7 +111,7 @@ export const QueryLanguageSelector = (props: QueryLanguageSelectorProps) => {
           iconSize="s"
           onClick={onButtonClick}
           className="languageSelector__button"
-          iconType={props.isFooter ? 'arrowDown' : undefined}
+          iconType={'arrowDown'}
         >
           {selectedLanguage.label}
         </EuiButtonEmpty>

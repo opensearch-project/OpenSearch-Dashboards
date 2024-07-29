@@ -63,7 +63,7 @@
     "start": "scripts/use_node scripts/opensearch_dashboards --dev",
     "start:docker": "scripts/use_node scripts/opensearch_dashboards --dev --opensearch.hosts=$OPENSEARCH_HOSTS --opensearch.ignoreVersionMismatch=true --server.host=$SERVER_HOST",
     "start:security": "scripts/use_node scripts/opensearch_dashboards --dev --security",
-    "start:enhancements": "scripts/use_node scripts/opensearch_dashboards --dev --uiSettings.overrides['query:enhancements:enabled']=true",
+    "start:enhancements": "scripts/use_node scripts/opensearch_dashboards --dev --uiSettings.overrides['query:enhancements:enabled']=true --uiSettings.overrides['home:useNewHomePage']=true",
     "debug": "scripts/use_node --nolazy --inspect scripts/opensearch_dashboards --dev",
     "debug-break": "scripts/use_node --nolazy --inspect-brk scripts/opensearch_dashboards --dev",
     "lint": "yarn run lint:es && yarn run lint:style",
@@ -89,7 +89,7 @@
     "url": "https://github.com/opensearch-project/opensearch-dashboards.git"
   },
   "resolutions": {
-    "**/@babel/traverse": "^7.23.2",
+    "**/@babel/traverse": "^7.25.0",
     "**/@types/node": "~18.7.0",
     "**/ansi-regex": "^5.0.1",
     "**/async": "^3.2.3",
@@ -255,7 +255,7 @@
   "devDependencies": {
     "@babel/core": "^7.22.9",
     "@babel/parser": "^7.22.9",
-    "@babel/plugin-transform-class-static-block": "^7.24.4",
+    "@babel/plugin-transform-class-static-block": "^7.24.7",
     "@babel/register": "^7.22.9",
     "@babel/types": "^7.22.9",
     "@elastic/apm-rum": "^5.6.1",

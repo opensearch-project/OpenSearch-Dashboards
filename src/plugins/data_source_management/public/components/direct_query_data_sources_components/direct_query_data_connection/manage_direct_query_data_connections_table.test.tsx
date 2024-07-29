@@ -6,6 +6,7 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ManageDirectQueryDataConnectionsTable } from './manage_direct_query_data_connections_table';
+import { getHideLocalCluster } from '../../utils';
 
 // Mock dependencies
 jest.mock('react-router-dom', () => ({
@@ -24,9 +25,20 @@ jest.mock('../integrations/installed_integrations_table', () => ({
   InstallIntegrationFlyout: jest.fn(() => <div>MockInstallIntegrationFlyout</div>),
 }));
 
+jest.mock('../../utils', () => ({
+  ...jest.requireActual('../../utils'),
+  getHideLocalCluster: jest.fn(() => ({ enabled: true })),
+}));
+
 describe('ManageDirectQueryDataConnectionsTable', () => {
   const mockHttp = { get: jest.fn(), delete: jest.fn() };
-  const mockNotifications = { toasts: { addSuccess: jest.fn(), addDanger: jest.fn() } };
+  const mockNotifications = {
+    toasts: {
+      addSuccess: jest.fn(),
+      addDanger: jest.fn(),
+      addWarning: jest.fn(),
+    },
+  };
   const mockSavedObjects = { client: {} };
   const mockUiSettings = {};
   const mockApplication = { navigateToApp: jest.fn() };
@@ -133,5 +145,23 @@ describe('ManageDirectQueryDataConnectionsTable', () => {
 
     await waitFor(() => expect(screen.getByText('connection1')).toBeInTheDocument());
     expect(screen.queryByText('Loading direct query data connections...')).not.toBeInTheDocument();
+  });
+
+  test('renders DataSourceSelector with hideLocalCluster enabled', async () => {
+    const newProps = {
+      ...defaultProps,
+      featureFlagStatus: true,
+    };
+
+    render(<ManageDirectQueryDataConnectionsTable {...newProps} />);
+
+    await waitFor(() => {
+      const dataSourceSelector = screen.getByTestId('dataSourceSelectorComboBox');
+      expect(dataSourceSelector).toBeInTheDocument();
+    });
+
+    // Verify that the hideLocalCluster prop is passed correctly
+    expect(getHideLocalCluster).toHaveBeenCalled();
+    expect(getHideLocalCluster().enabled).toBe(true);
   });
 });
