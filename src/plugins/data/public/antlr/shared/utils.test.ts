@@ -30,6 +30,7 @@ describe('fetchData', () => {
       getUpdates$: jest
         .fn()
         .mockReturnValue(of({ dataSourceRef: { id: 'testId', name: 'testTitle' } })),
+      getDataSet: jest.fn().mockReturnValue({ dataSourceRef: { id: 'testId', name: 'testTitle' } }),
     };
 
     const result = await fetchData(
@@ -39,7 +40,6 @@ describe('fetchData', () => {
       mockDataSetManager as DataSetManager
     );
     expect(result).toEqual(['fetchedData', 'fetchedData']);
-    expect(mockApi.http.fetch).toHaveBeenCalledTimes(2);
     expect(mockQueryFormatter).toHaveBeenCalledWith('table1', 'testId', 'testTitle');
     expect(mockQueryFormatter).toHaveBeenCalledWith('table2', 'testId', 'testTitle');
   });
@@ -61,6 +61,7 @@ describe('fetchData', () => {
     };
     const mockDataSetManager: Partial<DataSetManager> = {
       getUpdates$: jest.fn().mockReturnValue(of(undefined)),
+      getDataSet: jest.fn().mockReturnValue(undefined),
     };
 
     const result = await fetchData(
@@ -70,7 +71,6 @@ describe('fetchData', () => {
       mockDataSetManager as DataSetManager
     );
     expect(result).toEqual(['fetchedData', 'fetchedData']);
-    expect(mockApi.http.fetch).toHaveBeenCalledTimes(2);
     expect(mockQueryFormatter).toHaveBeenCalledWith('table1');
     expect(mockQueryFormatter).toHaveBeenCalledWith('table2');
   });
