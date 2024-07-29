@@ -26,7 +26,7 @@ const getAvailableLanguages$ = (
   data: DataPublicPluginSetup
 ) =>
   data.query.dataSetManager.getUpdates$().pipe(
-    startWith(data.query.dataSet.getDataSet()),
+    startWith(data.query.dataSetManager.getDataSet()),
     distinctUntilChanged(),
     switchMap(async (simpleDataSet) => {
       // currently query assist tool relies on opensearch API to get index
