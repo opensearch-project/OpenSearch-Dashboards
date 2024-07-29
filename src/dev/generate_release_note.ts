@@ -73,7 +73,17 @@ async function readFragments() {
 
     validateFragment(fragmentContents);
 
-    const fragmentYaml = loadYaml(fragmentContents) as Changelog;
+    const fragmentContentLines = fragmentContents.split('\n');
+    // Adding a quotes to the second line and escaping exisiting " within the line
+    fragmentContentLines[1] = fragmentContentLines[1].replace(/-\s*(.*)/, (match, p1) => {
+      // Escape any existing quotes in the content
+      const escapedContent = p1.replace(/"/g, '\\"');
+      return `- "${escapedContent}"`;
+    });
+
+    const processedFragmentContent = fragmentContentLines.join('\n');
+
+    const fragmentYaml = loadYaml(processedFragmentContent) as Changelog;
 
     for (const [sectionKey, entries] of Object.entries(fragmentYaml)) {
       sections[sectionKey as SectionKey].push(...entries);
