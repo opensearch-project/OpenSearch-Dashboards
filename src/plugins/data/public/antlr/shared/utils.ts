@@ -4,7 +4,7 @@
  */
 
 import { from } from 'rxjs';
-import { distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, startWith, switchMap } from 'rxjs/operators';
 import { DataSetManager } from '../../query';
 
 export interface IDataSourceRequestHandlerParams {
@@ -22,6 +22,7 @@ export const getRawSuggestionData$ = (
   defaultRequestHandler: () => Promise<any>
 ) =>
   dataSetManager.getUpdates$().pipe(
+    startWith(dataSetManager.getDataSet()),
     distinctUntilChanged(),
     switchMap((dataSet) => {
       if (!dataSet) {
