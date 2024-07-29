@@ -12,6 +12,7 @@ exports[`Saved query management component has a popover button 1`] = `
     >
       <EuiSmallButtonEmpty
         aria-label="See saved queries"
+        className="osdSavedQueryManagement__popoverButton"
         data-test-subj="saved-query-management-popover-button"
         onClick={[Function]}
       >

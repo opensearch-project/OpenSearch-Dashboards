@@ -19,3 +19,14 @@
     opacity: 1;
   }
 }
+
+.osdDiscoverSideBar__wrap {
+  max-width: 100%;
+  z-index: $euiZContentMenu;
+}
+
+.toggleFieldFilterButton {
+  span:is([class$="__textShift"]) {
+    min-width: 0;
+  }
+}

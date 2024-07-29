@@ -1,3 +1,21 @@
+.deSidebar_panel {
+  border-left: 0;
+
+  .dscSideBar_searchContainer {
+    padding: $euiSizeXS;
+    border-bottom: $euiBorderThin;
+
+    .toggleFieldFilterButton {
+      border: none;
+    }
+
+    .dscSideBar_searchInput {
+      box-shadow: none;
+      border-right: $euiBorderThin;
+    }
+  }
+}
+
 .dscSideBar_fieldGroup {
   width: 100%;
 
