@@ -40,7 +40,7 @@ export const QueryAssistBanner: React.FC<QueryAssistBannerProps> = (props) => {
 
   return (
     <EuiCallOut
-      className="queryAssist queryAssist__banner"
+      className="queryAssist"
       size="s"
       title={
         <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
