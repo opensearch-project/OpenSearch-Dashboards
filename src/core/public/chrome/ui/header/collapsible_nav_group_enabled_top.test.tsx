@@ -7,11 +7,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ChromeNavLink } from '../../nav_links';
 import { ChromeRegistrationNavLink } from '../../nav_group';
-import { httpServiceMock } from '../../../mocks';
+import { coreMock, httpServiceMock } from '../../../mocks';
 import { getLogos } from '../../../../common';
 import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 
 const mockBasePath = httpServiceMock.createSetupContract({ basePath: '/test' }).basePath;
+const coreStartMock = coreMock.createStart();
 
 describe('<CollapsibleNavTop />', () => {
   const getMockedNavLink = (
@@ -63,9 +64,10 @@ describe('<CollapsibleNavTop />', () => {
     return {
       navLinks: mockedNavLinks,
       navigateToApp: jest.fn(),
-      navGroupsMap: {},
       logos: getLogos({}, mockBasePath.serverBasePath),
       shouldShrinkNavigation: false,
+      visibleUseCases: [],
+      capabilities: coreStartMock.application.capabilities,
     };
   };
   it('should render home icon', async () => {
@@ -74,23 +76,23 @@ describe('<CollapsibleNavTop />', () => {
   });
 
   it('should render back icon', async () => {
-    const { findByTestId } = render(
+    const { findByTestId, findByText } = render(
       <CollapsibleNavTop
         {...getMockedProps()}
-        navGroupsMap={{
-          navGroupFoo: {
+        visibleUseCases={[
+          {
             id: 'navGroupFoo',
             title: 'navGroupFoo',
             description: 'navGroupFoo',
             navLinks: [],
           },
-          navGroupBar: {
+          {
             id: 'navGroupBar',
             title: 'navGroupBar',
             description: 'navGroupBar',
             navLinks: [],
           },
-        }}
+        ]}
         currentNavGroup={{
           id: 'navGroupFoo',
           title: 'navGroupFoo',
@@ -100,6 +102,37 @@ describe('<CollapsibleNavTop />', () => {
       />
     );
     await findByTestId('collapsibleNavBackButton');
+    await findByText('Back');
+  });
+
+  it('should render back home icon', async () => {
+    const { findByTestId, findByText } = render(
+      <CollapsibleNavTop
+        {...getMockedProps()}
+        visibleUseCases={[
+          {
+            id: 'navGroupFoo',
+            title: 'navGroupFoo',
+            description: 'navGroupFoo',
+            navLinks: [],
+          },
+          {
+            id: 'navGroupBar',
+            title: 'navGroupBar',
+            description: 'navGroupBar',
+            navLinks: [],
+          },
+        ]}
+        currentNavGroup={{
+          id: 'global',
+          title: 'navGroupFoo',
+          description: 'navGroupFoo',
+          navLinks: [],
+        }}
+      />
+    );
+    await findByTestId('collapsibleNavBackButton');
+    await findByText('Home');
   });
 
   it('should render expand icon', async () => {

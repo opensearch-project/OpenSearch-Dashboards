@@ -22,35 +22,48 @@ import { ALL_USE_CASE_ID } from '../../../../../core/utils';
 
 export interface CollapsibleNavTopProps {
   navLinks: ChromeNavLink[];
-  navGroupsMap: Record<string, NavGroupItemInMap>;
   currentNavGroup?: NavGroupItemInMap;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   logos: Logos;
   onClickBack?: () => void;
   onClickShrink?: () => void;
   shouldShrinkNavigation: boolean;
+  visibleUseCases: NavGroupItemInMap[];
 }
 
 export const CollapsibleNavTop = ({
   navLinks,
-  navGroupsMap,
   currentNavGroup,
   navigateToApp,
   logos,
   onClickBack,
   onClickShrink,
   shouldShrinkNavigation,
+  visibleUseCases,
 }: CollapsibleNavTopProps) => {
   const homeLink = useMemo(() => navLinks.find((link) => link.id === 'home'), [navLinks]);
 
-  const shouldShowBackButton = useMemo(
-    () =>
-      currentNavGroup?.id !== ALL_USE_CASE_ID &&
-      !shouldShrinkNavigation &&
-      Object.values(navGroupsMap).filter((item) => !item.type).length > 1 &&
-      currentNavGroup,
-    [navGroupsMap, currentNavGroup, shouldShrinkNavigation]
+  const isInGlobalWorkspace = useMemo(
+    () => !visibleUseCases.find((useCase) => useCase.id === currentNavGroup?.id),
+    [currentNavGroup, visibleUseCases]
   );
+
+  const shouldShowBackButton = useMemo(() => {
+    if (!currentNavGroup || currentNavGroup.id === ALL_USE_CASE_ID || shouldShrinkNavigation) {
+      return false;
+    }
+
+    // It means user is in a specific type of workspace
+    if (visibleUseCases.length <= 1) {
+      return false;
+    }
+
+    if (isInGlobalWorkspace) {
+      return true;
+    }
+
+    return visibleUseCases.length > 1;
+  }, [visibleUseCases, currentNavGroup, shouldShrinkNavigation, isInGlobalWorkspace]);
 
   const shouldShowHomeLink = useMemo(() => {
     if (!homeLink || shouldShrinkNavigation) return false;
@@ -59,9 +72,9 @@ export const CollapsibleNavTop = ({
   }, [shouldShowBackButton, homeLink, shouldShrinkNavigation]);
 
   const homeLinkProps = useMemo(() => {
-    if (shouldShowHomeLink) {
+    if (homeLink) {
       const propsForHomeIcon = createEuiListItem({
-        link: homeLink as ChromeNavLink,
+        link: homeLink,
         appId: 'home',
         dataTestSubj: 'collapsibleNavHome',
         navigateToApp,
@@ -74,7 +87,7 @@ export const CollapsibleNavTop = ({
     }
 
     return {};
-  }, [shouldShowHomeLink, homeLink, navigateToApp]);
+  }, [homeLink, navigateToApp]);
 
   return (
     <div className="side-naivgation-top">
@@ -91,13 +104,17 @@ export const CollapsibleNavTop = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="l"
-              onClick={onClickBack}
+              onClick={isInGlobalWorkspace ? homeLinkProps.onClick : onClickBack}
               data-test-subj="collapsibleNavBackButton"
             >
               <EuiIcon type="arrowLeft" />
-              {i18n.translate('core.ui.primaryNav.backButtonLabel', {
-                defaultMessage: 'Back',
-              })}
+              {isInGlobalWorkspace
+                ? i18n.translate('core.ui.primaryNav.homeButtonLabel', {
+                    defaultMessage: 'Home',
+                  })
+                : i18n.translate('core.ui.primaryNav.backButtonLabel', {
+                    defaultMessage: 'Back',
+                  })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         ) : null}
