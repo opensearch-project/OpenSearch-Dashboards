@@ -338,9 +338,7 @@ export function CollapsibleNavGroupEnabled({
                   navLinks={navLinks}
                   navigateToApp={navigateToApp}
                   logos={logos}
-                  onClickBack={() => {
-                    setCurrentNavGroup(undefined);
-                  }}
+                  onClickBack={() => setCurrentNavGroup(undefined)}
                   currentNavGroup={currentNavGroup}
                   shouldShrinkNavigation={!isNavOpen}
                   onClickShrink={closeNav}

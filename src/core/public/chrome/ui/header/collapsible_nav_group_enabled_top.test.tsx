@@ -7,12 +7,11 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { ChromeNavLink } from '../../nav_links';
 import { ChromeRegistrationNavLink } from '../../nav_group';
-import { coreMock, httpServiceMock } from '../../../mocks';
+import { httpServiceMock } from '../../../mocks';
 import { getLogos } from '../../../../common';
 import { CollapsibleNavTop } from './collapsible_nav_group_enabled_top';
 
 const mockBasePath = httpServiceMock.createSetupContract({ basePath: '/test' }).basePath;
-const coreStartMock = coreMock.createStart();
 
 describe('<CollapsibleNavTop />', () => {
   const getMockedNavLink = (
@@ -67,7 +66,6 @@ describe('<CollapsibleNavTop />', () => {
       logos: getLogos({}, mockBasePath.serverBasePath),
       shouldShrinkNavigation: false,
       visibleUseCases: [],
-      capabilities: coreStartMock.application.capabilities,
     };
   };
   it('should render home icon', async () => {
