@@ -216,6 +216,7 @@ export class DataPublicPlugin
       storage: this.storage,
       savedObjectsClient: savedObjects.client,
       uiSettings,
+      indexPatterns,
     });
     setQueryService(query);
 
