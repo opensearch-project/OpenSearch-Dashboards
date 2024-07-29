@@ -60,6 +60,8 @@ setupMock.uiSettings.get.mockImplementation((key: string) => {
       return 'kuery';
     case UI_SETTINGS.TIMEPICKER_REFRESH_INTERVAL_DEFAULTS:
       return { pause: false, value: 0 };
+    case UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED:
+      return false;
     default:
       throw new Error(`sync_query test: not mocked uiSetting: ${key}`);
   }
