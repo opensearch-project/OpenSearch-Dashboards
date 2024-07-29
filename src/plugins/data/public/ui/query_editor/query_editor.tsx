@@ -260,7 +260,7 @@ export default class QueryEditorUI extends Component<Props, State> {
 
   private fetchIndexPatterns = async () => {
     const client = this.services.savedObjects.client;
-    const dataSet = this.queryService.dataSet.getDataSet();
+    const dataSet = this.queryService.dataSetManager.getDataSet();
     const title = dataSet?.title;
 
     const resp = await client.find({
