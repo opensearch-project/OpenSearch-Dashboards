@@ -61,16 +61,15 @@ const DefaultInput: React.FC<DefaultInputProps> = ({
         suggestionProvider={{
           provideCompletionItems,
         }}
-        // languageConfiguration={{
-        //   language: ,
-        //   autoClosingPairs: [
-        //     { open: '(', close: ')' },
-        //     { open: '[', close: ']' },
-        //     { open: '{', close: '}' },
-        //     { open: '"', close: '"' },
-        //     { open: "'", close: "'" },
-        //   ],
-        // }}
+        languageConfiguration={{
+          autoClosingPairs: [
+            { open: '(', close: ')' },
+            { open: '[', close: ']' },
+            { open: '{', close: '}' },
+            { open: '"', close: '"' },
+            { open: "'", close: "'" },
+          ],
+        }}
       />
       {footerItems && (
         <div className="defaultEditor__footer">

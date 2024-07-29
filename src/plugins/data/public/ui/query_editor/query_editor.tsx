@@ -384,6 +384,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           disposable.dispose();
         };
       },
+      provideCompletionItems: this.provideCompletionItems,
     };
 
     const languageEditor = useQueryEditor
