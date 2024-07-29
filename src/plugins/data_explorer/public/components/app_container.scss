@@ -10,7 +10,11 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 }
 
 .deLayout {
-  height: calc(100vh - #{$osdHeaderOffset});
+  height: calc(100vh - #{$osdHeaderOffset * 1});
+
+  &.dsc--next {
+    height: calc(100vh - #{$osdHeaderOffset * 2});
+  }
 
   &__canvas {
     height: 100%;
@@ -19,6 +23,10 @@ $osdHeaderOffset: $euiHeaderHeightCompensation;
 
 .headerIsExpanded .deLayout {
   height: calc(100vh - #{$osdHeaderOffset * 2});
+
+  &.dsc--next {
+    height: calc(100vh - #{$osdHeaderOffset * 3});
+  }
 }
 
 .mainPage {
