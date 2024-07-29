@@ -15,7 +15,7 @@ describe('DataSetManager', () => {
     service = new DataSetManager(uiSettingsMock);
   });
 
-  test('getUpdates$ is a cold emits only after query changes', () => {
+  test('getUpdates$ is a cold emits only after dataset changes', () => {
     const obs$ = service.getUpdates$();
     const emittedValues: SimpleDataSet[] = [];
     obs$.subscribe((v) => {
