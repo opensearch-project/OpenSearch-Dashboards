@@ -328,27 +328,32 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
     async (source: SimpleDataSource) => {
       if (source) {
         setIsLoading(true);
-        const indices = await fetchIndices(searchService, source.id);
-        setSelectedDataSetState((prevState) => {
-          if (!prevState) return;
-
-          return {
-            ...prevState,
-            dataSourceRef: {
-              ...source,
-              indices: indices.map((indexName: string) => ({
-                id: indexName,
-                title: indexName,
-                dataSourceRef: {
-                  id: source.id,
-                  name: source.name,
-                  type: source.type,
-                },
-              })),
-            },
+        try {
+          const indices = await fetchIndices(searchService, source.id);
+          const updatedSource = {
+            ...source,
+            indices: indices.map((indexName: string) => ({
+              id: indexName,
+              title: indexName,
+              dataSourceRef: {
+                id: source.id,
+                name: source.name,
+                type: source.type,
+              },
+            })),
           };
-        });
-        setIsLoading(false);
+
+          setDataSources((prevDataSources) =>
+            prevDataSources.map((ds) => (ds.id === source.id ? updatedSource : ds))
+          );
+
+          setSelectedDataSetState((prevState) => ({
+            ...prevState!,
+            dataSourceRef: updatedSource,
+          }));
+        } finally {
+          setIsLoading(false);
+        }
       }
     },
     [searchService]
@@ -485,7 +490,8 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
           panel: 7,
           onClick: () => handleSelectedObject(object),
         })),
-        content: isLoading && !selectedDataSetState?.dataSourceRef && createLoadingSpinner(),
+        content:
+          isLoading && !selectedDataSetState?.dataSourceRef?.indices && createLoadingSpinner(),
       },
       {
         id: 4,
