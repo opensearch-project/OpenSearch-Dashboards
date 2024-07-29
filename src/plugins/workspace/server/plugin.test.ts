@@ -161,9 +161,6 @@ describe('Workspace server plugin', () => {
 
     it('should clear saved objects cache', async () => {
       jest.spyOn(utilsExports, 'getPrincipalsFromRequest').mockImplementation(() => ({}));
-      jest
-        .spyOn(SavedObjectsPermissionControl.prototype, 'isSavedObjectsCacheActive')
-        .mockReturnValueOnce(true);
       const clearSavedObjectsCacheMock = jest
         .spyOn(SavedObjectsPermissionControl.prototype, 'clearSavedObjectsCache')
         .mockImplementationOnce(() => {});

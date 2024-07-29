@@ -103,9 +103,7 @@ export class WorkspacePlugin implements Plugin<WorkspacePluginSetup, WorkspacePl
     );
 
     core.http.registerOnPreResponse((request, _response, toolkit) => {
-      if (this.permissionControl?.isSavedObjectsCacheActive(request)) {
-        this.permissionControl?.clearSavedObjectsCache(request);
-      }
+      this.permissionControl?.clearSavedObjectsCache(request);
       return toolkit.next();
     });
   }

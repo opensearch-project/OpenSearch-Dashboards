@@ -234,12 +234,11 @@ export class SavedObjectsPermissionControl {
 
   public clearSavedObjectsCache(request: OpenSearchDashboardsRequest) {
     const requestKey = ensureRawRequest(request);
-    this._shouldCachedSavedObjects.delete(requestKey);
-    this._savedObjectCache.delete(requestKey);
-  }
-
-  public isSavedObjectsCacheActive(request: OpenSearchDashboardsRequest) {
-    const requestKey = ensureRawRequest(request);
-    return this._savedObjectCache.has(requestKey) || this._shouldCachedSavedObjects.has(requestKey);
+    if (this._shouldCachedSavedObjects.has(requestKey)) {
+      this._shouldCachedSavedObjects.delete(requestKey);
+    }
+    if (this._savedObjectCache.has(requestKey)) {
+      this._savedObjectCache.delete(requestKey);
+    }
   }
 }
