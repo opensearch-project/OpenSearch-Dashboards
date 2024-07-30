@@ -252,59 +252,41 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
-  getCodeEditorSuggestionsType = (columnType: string) => {
-    switch (columnType) {
-      case 'text':
-        return monaco.languages.CompletionItemKind.Text;
-      case 'function':
-        return monaco.languages.CompletionItemKind.Function;
-      case 'object':
-        return monaco.languages.CompletionItemKind.Struct;
-      case 'field':
-        return monaco.languages.CompletionItemKind.Field;
-      case 'value':
-        return monaco.languages.CompletionItemKind.Value;
-      default:
-        return monaco.languages.CompletionItemKind.Text;
-    }
+  provideCompletionItems = async (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position
+  ): Promise<monaco.languages.CompletionList> => {
+    const wordUntil = model.getWordUntilPosition(position);
+    const wordRange = new monaco.Range(
+      position.lineNumber,
+      wordUntil.startColumn,
+      position.lineNumber,
+      wordUntil.endColumn
+    );
+
+    const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
+      query: this.getQueryString(),
+      selectionStart: model.getOffsetAt(position),
+      selectionEnd: model.getOffsetAt(position),
+      language: this.props.query.language,
+      indexPatterns: this.state.indexPatterns,
+      position,
+      services: this.services,
+    });
+
+    return {
+      suggestions:
+        suggestions && suggestions.length > 0
+          ? suggestions.map((s: QuerySuggestion) => ({
+              label: s.text,
+              kind: s.type as monaco.languages.CompletionItemKind,
+              insertText: s.text,
+              range: wordRange,
+            }))
+          : [],
+      incomplete: false,
+    };
   };
-
-  // provideCompletionItems = async (
-  //   model: monaco.editor.ITextModel,
-  //   position: monaco.Position
-  // ): Promise<monaco.languages.CompletionList> => {
-  //   const wordUntil = model.getWordUntilPosition(position);
-  //   const wordRange = new monaco.Range(
-  //     position.lineNumber,
-  //     wordUntil.startColumn,
-  //     position.lineNumber,
-  //     wordUntil.endColumn
-  //   );
-  //   const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
-  //   const connectionService = enhancements?.connectionService;
-  //   const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
-  //     query: this.getQueryString(),
-  //     selectionStart: model.getOffsetAt(position),
-  //     selectionEnd: model.getOffsetAt(position),
-  //     language: this.props.query.language,
-  //     indexPatterns: this.state.indexPatterns,
-  //     position,
-  //     connectionService,
-  //   });
-
-  //   return {
-  //     suggestions:
-  //       suggestions && suggestions.length > 0
-  //         ? suggestions.map((s) => ({
-  //             label: s.text,
-  //             kind: this.getCodeEditorSuggestionsType(s.type),
-  //             insertText: s.text,
-  //             range: wordRange,
-  //           }))
-  //         : [],
-  //     incomplete: false,
-  //   };
-  // };
 
   public render() {
     const className = classNames(this.props.className);
@@ -340,7 +322,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           this.props.dataSet?.timeFieldName || '',
         ],
       },
-      // provideCompletionItems: this.provideCompletionItems,
+      provideCompletionItems: this.provideCompletionItems,
     };
 
     const singleLineInputProps = {
