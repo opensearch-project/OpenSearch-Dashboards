@@ -321,8 +321,13 @@ export class SearchSource {
    */
   async createDataFrame(searchRequest: SearchRequest) {
     const rawQueryString = this.getRawQueryStringFromRequest(searchRequest);
+    const indexTitle = searchRequest.index.title || searchRequest.index;
+    const dfName = searchRequest.dataSourceId
+      ? `${searchRequest.dataSourceId}.${indexTitle}`
+      : indexTitle;
+    console.log(dfName);
     const dataFrame = createDataFrame({
-      name: searchRequest.index.title || searchRequest.index,
+      name: dfName,
       fields: [],
       ...(rawQueryString && {
         meta: {
@@ -432,6 +437,9 @@ export class SearchSource {
     const { search, getConfig, onResponse } = this.dependencies;
 
     const currentDataframe = this.getDataFrame();
+    console.log(currentDataframe);
+    console.log(searchRequest.index?.id);
+    console.log(searchRequest.index);
     if (!currentDataframe || currentDataframe.name !== searchRequest.index?.id) {
       await this.createDataFrame(searchRequest);
     }

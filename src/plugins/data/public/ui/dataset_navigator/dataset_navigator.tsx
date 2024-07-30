@@ -159,10 +159,12 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
       setIsLoading(true);
       try {
         const [
+          initialIndexPattern,
           fetchedIndexPatterns,
           fetchedDataSources,
           fetchedIsExternalDataSourcesEnabled,
         ] = await Promise.all([
+          indexPatternsService.get(dataSet?.id ?? '', true),
           fetchIndexPatterns(savedObjectsClient!, ''),
           fetchDataSources(savedObjectsClient!),
           fetchIfExternalDataSourcesEnabled(http!),
@@ -172,6 +174,31 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
         setDataSources(fetchedDataSources);
         setIsExternalDataSourcesEnabled(fetchedIsExternalDataSourcesEnabled);
         if (dataSet) {
+          const language = uiService.Settings.getUserQueryLanguage();
+          const queryEnhancements = uiService.Settings.getQueryEnhancements(language);
+          const initialInput = queryEnhancements?.searchBar?.queryStringInput?.initialValue;
+
+          const query = initialInput ? initialInput.replace('<data_source>', dataSet.title!) : '';
+          uiService.Settings.setUserQueryString(query);
+
+          if (!initialIndexPattern) {
+            const tempIndexPattern = await indexPatternsService.create(
+              {
+                id: dataSet.id,
+                title: dataSet.title,
+                dataSourceRef: dataSet.dataSourceRef,
+                type: dataSet.type,
+                timeFieldName: dataSet.timeFieldName,
+                fields: dataSet.fields as any,
+              },
+              true
+            );
+            indexPatternsService.saveToCache(tempIndexPattern.id!, tempIndexPattern);
+          }
+
+          queryService.queryString.setQuery({ query, language });
+          queryService.dataSetManager.setDataSet(dataSet);
+
           setSelectedDataSetState({
             id: dataSet.id,
             title: dataSet.title,
