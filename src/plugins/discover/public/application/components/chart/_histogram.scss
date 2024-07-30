@@ -9,3 +9,18 @@
 .dscHistogram .echChartBackground {
   background-color: inherit !important;
 }
+
+.dscChart__wrapper {
+  border-top: 1px solid $euiColorLightShade;
+  border-bottom: 1px solid $euiColorLightShade;
+  padding: 8px;
+  gap: 8px;
+
+  .dscChart__chartheader {
+    align-items: center;
+  }
+
+  .dscResultCount {
+    padding-top: 0;
+  }
+}

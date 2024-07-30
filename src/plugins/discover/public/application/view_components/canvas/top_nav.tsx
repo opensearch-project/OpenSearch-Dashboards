@@ -17,7 +17,9 @@ import { getTopNavLinks } from '../../components/top_nav/get_top_nav_links';
 import { getRootBreadcrumbs } from '../../helpers/breadcrumbs';
 import { useDiscoverContext } from '../context';
 import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_management';
+
 import './discover_canvas.scss';
+import { useDataSetManager } from '../utils/use_dataset_manager';
 
 export interface TopNavProps {
   opts: {
@@ -65,21 +67,27 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
 
   useEffect(() => {
     let isMounted = true;
-    const getDefaultIndexPattern = async () => {
+    const initializeDataSet = async () => {
       await data.indexPatterns.ensureDefaultIndexPattern();
       const defaultIndexPattern = await data.indexPatterns.getDefault();
+      const { dataSetManager } = data.query;
+      dataSetManager.initWithIndexPattern(defaultIndexPattern);
+      const defaultDataSet = dataSetManager.getDefaultDataSet();
 
       if (!isMounted) return;
 
       setIndexPatterns(defaultIndexPattern ? [defaultIndexPattern] : undefined);
+      if (defaultDataSet) {
+        dataSetManager.setDataSet(defaultDataSet);
+      }
     };
 
-    getDefaultIndexPattern();
+    initializeDataSet();
 
     return () => {
       isMounted = false;
     };
-  }, [data.indexPatterns]);
+  }, [data.indexPatterns, data.query]);
 
   useEffect(() => {
     const pageTitleSuffix = savedSearch?.id && savedSearch.title ? `: ${savedSearch.title}` : '';

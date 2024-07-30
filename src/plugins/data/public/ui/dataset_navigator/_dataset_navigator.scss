@@ -2,15 +2,46 @@
  * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
  */
-.datasetNavigator {
-  min-width: 350px;
-  border-bottom: $euiBorderThin !important;
+
+.dataSetNavigator {
+  padding: $euiSizeXS;
+  color: $euiColorPrimaryText;
+  max-height: 60vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: $euiColorMediumShade $euiColorLightestShade;
+
+  &__icon {
+    margin-right: 4px;
+  }
+
+  &__loading {
+    padding: $euiSizeS;
+  }
+
+  &:not(:hover)::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $euiColorLightestShade;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $euiColorMediumShade;
+    border-radius: 4px;
+  }
+
+  &__menu {
+    width: 365px;
+  }
 }
 
 .dataSetNavigatorFormWrapper {
-  padding: $euiSizeS;
-}
-
-.dataSetNavigator__loading {
   padding: $euiSizeS;
 }

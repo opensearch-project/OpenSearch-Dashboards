@@ -9,7 +9,7 @@
 
 .osdQueryEditor__editorAndSelectorWrapper {
   z-index: $euiZContentMenu;
-  max-width: 1000px;
+  max-width: 1200px;
 }
 
 .osdQueryEditorHeader {
@@ -133,5 +133,64 @@
       overflow: hidden;
       max-width: 0;
     }
+  }
+}
+
+// ------------
+
+.osdQueryEditor {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: -3px; // TODO: Hack to handle the renderSharingMetaFields adding a new empty div to the UI
+
+  &.expanded.emptyExpanded {
+    .osdQueryEditor__dataSetPicker {
+      width: auto;
+    }
+  }
+}
+
+.osdQueryEditor__topBar {
+  display: flex;
+  align-items: center;
+  padding: $euiSizeXS;
+
+  .osdQueryEditor__collapseBtn {
+    padding-right: $euiSizeXS;
+    border-right: $euiBorderThin;
+  }
+
+  .osdQueryEditor__dataSetPicker {
+    width: 155px;
+    padding-left: 4px;
+
+    // To prevent overflow due to Oui styles
+    .euiToolTipAnchor {
+      display: block;
+    }
+  }
+
+  .osdQueryEditor__input {
+    flex-grow: 1;
+  }
+
+  #savedQueryPopover {
+    padding-left: $euiSizeXS;
+    border-left: $euiBorderThin;
+  }
+}
+
+// TODO: improve how this is styled. Styling just for the DQL editor.
+.osdQueryEditor__body .globalFilterGroup__wrapper {
+  margin-top: -$euiSizeS;
+}
+
+.osdQuerEditor__singleLine {
+  padding: $euiSizeS;
+  background-color: $euiColorEmptyShade;
+  border: $euiBorderThin;
+
+  .monaco-editor .view-overlays .current-line {
+    border: none;
   }
 }

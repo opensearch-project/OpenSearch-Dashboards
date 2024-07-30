@@ -8,7 +8,7 @@ import { withOpenSearchDashboards } from '../../../../opensearch_dashboards_reac
 import type { QueryEditorTopRowProps } from './query_editor_top_row';
 import type { QueryEditorProps } from './query_editor';
 
-const Fallback = () => <div />;
+const Fallback = () => null;
 
 const LazyQueryEditorTopRow = React.lazy(() => import('./query_editor_top_row'));
 export const QueryEditorTopRow = (props: QueryEditorTopRowProps) => (

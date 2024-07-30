@@ -63,9 +63,9 @@ export class PPLSearchInterceptor extends SearchInterceptor {
     const { fromDate, toDate } = formatTimePickerDate(dateRange, 'YYYY-MM-DD HH:mm:ss.SSS');
 
     const getTimeFilter = (timeField: any) => {
-      return ` | where ${timeField} >= '${formatDate(fromDate)}' and ${timeField} <= '${formatDate(
-        toDate
-      )}'`;
+      return ` | where \`${timeField}\` >= '${formatDate(
+        fromDate
+      )}' and \`${timeField}\` <= '${formatDate(toDate)}'`;
     };
 
     const insertTimeFilter = (query: string, filter: string) => {
@@ -151,10 +151,10 @@ export class PPLSearchInterceptor extends SearchInterceptor {
       },
       queryConfig: {
         ...dataFrame.meta.queryConfig,
-        ...(this.queryService.dataSet.getDataSet() && {
-          dataSourceId: this.queryService.dataSet.getDataSet()?.dataSourceRef?.id,
-          dataSourceName: this.queryService.dataSet.getDataSet()?.dataSourceRef?.name,
-          timeFieldName: this.queryService.dataSet.getDataSet()?.timeFieldName,
+        ...(this.queryService.dataSetManager.getDataSet() && {
+          dataSourceId: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.id,
+          dataSourceName: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.name,
+          timeFieldName: this.queryService.dataSetManager.getDataSet()?.timeFieldName,
         }),
       },
     };
