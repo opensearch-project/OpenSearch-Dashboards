@@ -94,8 +94,8 @@ export const DiscoverChart = ({
     </div>
   );
 
-  const toggleLabel = i18n.translate('queryEditor.collapse', {
-    defaultMessage: 'Toggle query editor',
+  const toggleLabel = i18n.translate('histogram.collapse', {
+    defaultMessage: 'Toggle histogram',
   });
 
   const toggle = (
