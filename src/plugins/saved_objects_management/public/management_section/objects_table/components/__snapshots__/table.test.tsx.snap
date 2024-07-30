@@ -62,7 +62,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           hasArrow={true}
           isOpen={false}
           ownFocus={true}
-          panelPaddingSize="m"
+          panelPaddingSize="s"
         >
           <EuiCompressedFormRow
             describedByIds={Array []}
@@ -301,7 +301,7 @@ exports[`Table should call onDuplicateSingle when show duplicate 1`] = `
           hasArrow={true}
           isOpen={false}
           ownFocus={true}
-          panelPaddingSize="m"
+          panelPaddingSize="s"
         >
           <EuiCompressedFormRow
             describedByIds={Array []}
@@ -536,7 +536,7 @@ exports[`Table should render normally 1`] = `
           hasArrow={true}
           isOpen={false}
           ownFocus={true}
-          panelPaddingSize="m"
+          panelPaddingSize="s"
         >
           <EuiCompressedFormRow
             describedByIds={Array []}
