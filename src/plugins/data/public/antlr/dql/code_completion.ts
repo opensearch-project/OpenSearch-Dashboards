@@ -10,7 +10,7 @@ import { monaco } from '@osd/monaco';
 import { DQLLexer } from './.generated/DQLLexer';
 import { DQLParser, KeyValueExpressionContext } from './.generated/DQLParser';
 import { getTokenPosition } from '../shared/cursor';
-import { IndexPatternField } from '../../index_patterns';
+import { IndexPattern, IndexPatternField } from '../../index_patterns';
 import { QuerySuggestionGetFnArgs } from '../../autocomplete';
 import { DQLParserVisitor } from './.generated/DQLParserVisitor';
 import { getUiService } from '../../services';
@@ -38,7 +38,7 @@ const findCursorIndex = (
   return undefined;
 };
 
-const findFieldSuggestions = (indexPattern: any) => {
+const findFieldSuggestions = (indexPattern: IndexPattern) => {
   const fieldNames: string[] = indexPattern.fields
     .filter((idxField: IndexPatternField) => !idxField?.subType) // filter removed .keyword fields
     .map((idxField: { name: string }) => {
@@ -72,7 +72,12 @@ const getFieldSuggestedValues = async (
   });
 };
 
-const findValueSuggestions = async (index: any, field: string, value: string, http?: HttpSetup) => {
+const findValueSuggestions = async (
+  index: IndexPattern,
+  field: string,
+  value: string,
+  http?: HttpSetup
+) => {
   // check to see if last field is within index and if it can suggest values, first check
   // if .keyword appended field exists because that has values
   const matchedField =
@@ -119,7 +124,7 @@ class QueryVisitor extends DQLParserVisitor<{ field: string; value: string }> {
 
 export const getSuggestions = async ({
   query,
-  indexPatterns,
+  indexPattern,
   position,
   selectionEnd,
   services,
@@ -127,82 +132,84 @@ export const getSuggestions = async ({
   if (
     !services ||
     !services.appName ||
-    !getUiService().Settings.supportsEnhancementsEnabled(services.appName)
+    !getUiService().Settings.supportsEnhancementsEnabled(services.appName) ||
+    !indexPattern
   ) {
     return [];
   }
-  const http = services.http;
-  const currentIndexPattern = indexPatterns[0];
+  try {
+    const http = services.http;
 
-  const inputStream = CharStream.fromString(query);
-  const lexer = new DQLLexer(inputStream);
-  const tokenStream = new CommonTokenStream(lexer);
-  const parser = new DQLParser(tokenStream);
-  parser.removeErrorListeners();
-  const tree = parser.query();
+    const inputStream = CharStream.fromString(query);
+    const lexer = new DQLLexer(inputStream);
+    const tokenStream = new CommonTokenStream(lexer);
+    const parser = new DQLParser(tokenStream);
+    parser.removeErrorListeners();
+    const tree = parser.query();
 
-  const visitor = new QueryVisitor();
+    const visitor = new QueryVisitor();
 
-  // find token index
-  const cursorColumn = position?.column ?? selectionEnd;
-  const cursorLine = position?.lineNumber ?? 1;
+    // find token index
+    const cursorColumn = position?.column ?? selectionEnd;
+    const cursorLine = position?.lineNumber ?? 1;
 
-  const cursorIndex = findCursorIndex(tokenStream, cursorColumn, cursorLine, DQLParser.WS) ?? 0;
+    const cursorIndex = findCursorIndex(tokenStream, cursorColumn, cursorLine, DQLParser.WS) ?? 0;
 
-  const core = new CodeCompletionCore(parser);
+    const core = new CodeCompletionCore(parser);
 
-  // specify preferred rules to appear in candidate collection
-  core.preferredRules = new Set([DQLParser.RULE_field]);
+    // specify preferred rules to appear in candidate collection
+    core.preferredRules = new Set([DQLParser.RULE_field]);
 
-  // specify tokens to ignore
-  core.ignoredTokens = new Set([
-    DQLParser.LPAREN,
-    DQLParser.RPAREN,
-    DQLParser.EQ,
-    DQLParser.GE,
-    DQLParser.GT,
-    DQLParser.LE,
-    DQLParser.LT,
-  ]);
+    // specify tokens to ignore
+    core.ignoredTokens = new Set([
+      DQLParser.LPAREN,
+      DQLParser.RPAREN,
+      DQLParser.EQ,
+      DQLParser.GE,
+      DQLParser.GT,
+      DQLParser.LE,
+      DQLParser.LT,
+    ]);
 
-  // gets candidates at specified token index
-  const candidates = core.collectCandidates(cursorIndex);
+    // gets candidates at specified token index
+    const candidates = core.collectCandidates(cursorIndex);
 
-  const completions = [];
+    const completions = [];
 
-  // check to see if field rule is a candidate. if so, suggest field names
-  if (candidates.rules.has(DQLParser.RULE_field)) {
-    completions.push(...findFieldSuggestions(currentIndexPattern));
-  }
-
-  // find suggested values for the last found field (only for kvexpression rule)
-  const { field: lastField = '', value: lastValue = '' } = visitor.visit(tree) ?? {};
-  if (!!lastField && candidates.tokens.has(DQLParser.PHRASE)) {
-    const values = await findValueSuggestions(
-      currentIndexPattern,
-      lastField,
-      lastValue ?? '',
-      http
-    );
-    if (!!values) {
-      completions.push(
-        ...values?.map((val: any) => {
-          return { text: val, type: monaco.languages.CompletionItemKind.Value };
-        })
-      );
-    }
-  }
-
-  // suggest other candidates, mainly keywords
-  [...candidates.tokens.keys()].forEach((token: number) => {
-    // ignore identifier, already handled with field rule
-    if (token === DQLParser.ID || token === DQLParser.PHRASE) {
-      return;
+    // check to see if field rule is a candidate. if so, suggest field names
+    if (candidates.rules.has(DQLParser.RULE_field)) {
+      completions.push(...findFieldSuggestions(indexPattern));
     }
 
-    const tokenSymbolName = parser.vocabulary.getSymbolicName(token)?.toLowerCase();
-    completions.push({ text: tokenSymbolName, type: monaco.languages.CompletionItemKind.Keyword });
-  });
+    // find suggested values for the last found field (only for kvexpression rule)
+    const { field: lastField = '', value: lastValue = '' } = visitor.visit(tree) ?? {};
+    if (!!lastField && candidates.tokens.has(DQLParser.PHRASE)) {
+      const values = await findValueSuggestions(indexPattern, lastField, lastValue ?? '', http);
+      if (!!values) {
+        completions.push(
+          ...values?.map((val: any) => {
+            return { text: val, type: monaco.languages.CompletionItemKind.Value };
+          })
+        );
+      }
+    }
 
-  return completions;
+    // suggest other candidates, mainly keywords
+    [...candidates.tokens.keys()].forEach((token: number) => {
+      // ignore identifier, already handled with field rule
+      if (token === DQLParser.ID || token === DQLParser.PHRASE) {
+        return;
+      }
+
+      const tokenSymbolName = parser.vocabulary.getSymbolicName(token)?.toLowerCase();
+      completions.push({
+        text: tokenSymbolName,
+        type: monaco.languages.CompletionItemKind.Keyword,
+      });
+    });
+
+    return completions;
+  } catch {
+    return [];
+  }
 };

@@ -30,7 +30,7 @@
 
 import { monaco } from '@osd/monaco';
 import { CoreSetup } from 'opensearch-dashboards/public';
-import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
+import { IFieldType, IndexPattern } from '../../../common/index_patterns';
 import { IDataPluginServices } from '../../types';
 
 export enum QuerySuggestionTypes {
@@ -48,7 +48,7 @@ export type QuerySuggestionGetFn = (
 /** @public **/
 export interface QuerySuggestionGetFnArgs {
   language: string;
-  indexPatterns: IIndexPattern[];
+  indexPattern: IndexPattern | undefined;
   query: string;
   selectionStart: number;
   selectionEnd: number;
