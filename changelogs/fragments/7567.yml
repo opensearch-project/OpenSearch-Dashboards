@@ -1,2 +1,0 @@
-fix:
-- Fixes databases not being displayed upon success ([#7567](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7567))

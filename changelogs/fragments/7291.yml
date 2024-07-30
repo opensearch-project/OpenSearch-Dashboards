@@ -1,2 +1,0 @@
-deprecate:
-- Remove data enhancements config and readonly flag. Removes dead url link, ([#7291](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7291))

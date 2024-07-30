@@ -1,2 +1,0 @@
-security:
-- [CVE-2024-28863] Bump tar from 6.1.11 to 6.2.1 ([#6492](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6492))

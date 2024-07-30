@@ -1,2 +1,0 @@
-fix:
-- [MDS] Include data source name when importing a timeline visualization ([#6954](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6954))

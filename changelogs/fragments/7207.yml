@@ -1,2 +1,0 @@
-fix:
-- Break new lines in table cell in legacy discover ([#7207](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7207))
