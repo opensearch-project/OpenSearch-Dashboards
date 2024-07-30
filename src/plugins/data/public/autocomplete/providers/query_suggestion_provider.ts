@@ -58,7 +58,7 @@ export interface QuerySuggestionGetFnArgs {
 
 /** @public **/
 export interface QuerySuggestionBasic {
-  type: QuerySuggestionTypes;
+  type: QuerySuggestionTypes | monaco.languages.CompletionItemKind;
   description?: string | JSX.Element;
   end: number;
   start: number;
