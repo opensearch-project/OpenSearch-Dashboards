@@ -670,7 +670,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
     >
       <EuiContextMenu
         initialPanelId={0}
-        className="dataSetNavigator dataSetNavigator__menu"
+        className="dataSetNavigator__menu"
         size="s"
         panels={panels}
       />

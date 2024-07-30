@@ -6,10 +6,6 @@
 .dataSetNavigator {
   padding: $euiSizeXS;
   color: $euiColorPrimaryText;
-  max-height: 60vh;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: $euiColorMediumShade $euiColorLightestShade;
 
   &__icon {
     margin-right: 4px;
@@ -19,26 +15,14 @@
     padding: $euiSizeS;
   }
 
-  &:not(:hover)::-webkit-scrollbar {
-    width: 0;
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: $euiColorLightestShade;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: $euiColorMediumShade;
-    border-radius: 4px;
-  }
-
   &__menu {
     width: 365px;
+
+    .euiContextMenu__panel > div {
+      @include euiYScrollWithShadows;
+
+      max-height: 60vh;
+    }
   }
 }
 
