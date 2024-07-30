@@ -10,7 +10,7 @@ import { coreMock } from '../../../core/public/mocks';
 import { DEFAULT_NAV_GROUPS } from '../../../core/public';
 
 describe('<DevToolsIcon />', () => {
-  it('should call some methods from core service when click', () => {
+  it('should call chrome.navGroup.setCurrentNavGroup and application.navigateToApp methods from core service when click', () => {
     const coreStartMock = coreMock.createStart();
     const { container } = render(<DevToolsIcon core={coreStartMock} appId="foo" />);
     const component = container.children[0];

@@ -43,7 +43,7 @@ export const CollapsibleNavTop = ({
 }: CollapsibleNavTopProps) => {
   const homeLink = useMemo(() => navLinks.find((link) => link.id === 'home'), [navLinks]);
 
-  const isInGlobalWorkspace = useMemo(
+  const isOutsideWorkspace = useMemo(
     () => !visibleUseCases.find((useCase) => useCase.id === currentNavGroup?.id),
     [currentNavGroup, visibleUseCases]
   );
@@ -58,12 +58,12 @@ export const CollapsibleNavTop = ({
       return false;
     }
 
-    if (isInGlobalWorkspace) {
+    if (isOutsideWorkspace) {
       return true;
     }
 
     return visibleUseCases.length > 1;
-  }, [visibleUseCases, currentNavGroup, shouldShrinkNavigation, isInGlobalWorkspace]);
+  }, [visibleUseCases, currentNavGroup, shouldShrinkNavigation, isOutsideWorkspace]);
 
   const shouldShowHomeLink = useMemo(() => {
     if (!homeLink || shouldShrinkNavigation) return false;
