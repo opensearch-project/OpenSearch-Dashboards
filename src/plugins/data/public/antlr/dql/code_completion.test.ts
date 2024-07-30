@@ -23,7 +23,7 @@ jest.mock('../../services', () => ({
 const getSuggestionsAtPos = async (query: string, endPos: number) => {
   return await getSuggestions({
     query,
-    indexPatterns: [testingIndex],
+    indexPattern: testingIndex,
     position: new monaco.Position(1, endPos),
     language: '', // not relevant
     selectionEnd: 0, // not relevant

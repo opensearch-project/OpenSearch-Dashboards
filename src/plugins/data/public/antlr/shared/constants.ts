@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { IIndexPattern } from '../..';
+import { IndexPattern } from '../..';
 
 export const testingIndex = ({
   title: 'opensearch_dashboards_sample_data_flights',
@@ -164,7 +164,7 @@ export const testingIndex = ({
       subType: undefined,
     },
   ],
-} as unknown) as IIndexPattern;
+} as unknown) as IndexPattern;
 
 export const booleanOperatorSuggestions = [
   { text: 'or', type: 17 },
