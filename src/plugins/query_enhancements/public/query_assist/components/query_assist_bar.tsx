@@ -5,6 +5,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiForm, EuiFormRow } from '@elastic/eui';
 import React, { SyntheticEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { SimpleDataSet } from '../../../../data/common';
 import {
   IDataPluginServices,
   PersistedLog,
@@ -12,18 +13,15 @@ import {
 } from '../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { QueryAssistParameters } from '../../../common/query_assist';
-import { ConnectionsService } from '../../data_source_connection';
 import { getStorage } from '../../services';
 import { useGenerateQuery } from '../hooks';
 import { getPersistedLog, ProhibitedQueryError } from '../utils';
 import { QueryAssistCallOut, QueryAssistCallOutType } from './call_outs';
-import { IndexSelector } from './index_selector';
 import { QueryAssistInput } from './query_assist_input';
 import { QueryAssistSubmitButton } from './submit_button';
 
 interface QueryAssistInputProps {
   dependencies: QueryEditorExtensionDependencies;
-  connectionsService: ConnectionsService;
 }
 
 export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
@@ -37,18 +35,16 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { generateQuery, loading } = useGenerateQuery();
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
-  const [selectedIndex, setSelectedIndex] = useState<string>('');
-  const dataSourceIdRef = useRef<string>();
+  const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet>();
+  const selectedIndex = selectedDataSet?.title;
   const previousQuestionRef = useRef<string>();
 
   useEffect(() => {
-    const subscription = props.connectionsService
-      .getSelectedConnection$()
-      .subscribe((connection) => {
-        dataSourceIdRef.current = connection?.id;
-      });
+    const subscription = services.data.query.dataSetManager.getUpdates$().subscribe((dataSet) => {
+      setSelectedDataSet(dataSet);
+    });
     return () => subscription.unsubscribe();
-  }, [props.connectionsService]);
+  }, [services.data.query.dataSetManager]);
 
   const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -67,7 +63,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
       question: inputRef.current.value,
       index: selectedIndex,
       language: props.dependencies.language,
-      dataSourceId: dataSourceIdRef.current,
+      dataSourceId: selectedDataSet?.dataSourceRef?.id,
     };
     const { response, error } = await generateQuery(params);
     if (error) {
@@ -86,17 +82,12 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
     }
   };
 
+  if (props.dependencies.isCollapsed) return null;
+
   return (
     <EuiForm component="form" onSubmit={onSubmit}>
       <EuiFormRow fullWidth>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            <IndexSelector
-              selectedIndex={selectedIndex}
-              setSelectedIndex={setSelectedIndex}
-              dataSourceId={dataSourceIdRef.current}
-            />
-          </EuiFlexItem>
           <EuiFlexItem>
             <QueryAssistInput
               inputRef={inputRef}

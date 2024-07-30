@@ -27,6 +27,8 @@ This document contains a list of maintainers in this repo. See [opensearch-proje
 | Eric Wei                  | [mengweieric](https://github.com/mengweieric)       | Amazon      |
 | Suchit Sahoo              | [LDrago27](https://github.com/LDrago27)             | Amazon      |
 | Viraj Sanghvi             | [virajsanghvi](https://github.com/virajsanghvi)     | Amazon      |
+| Sean Li                   | [sejli](https://github.com/sejli)                   | Amazon      |
+| Joshua Li                 | [joshuali925](https://github.com/joshuali925)       | Amazon      |
 
 ## Emeritus
 

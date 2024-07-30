@@ -4,7 +4,7 @@
  */
 
 import { PluginSetup } from 'src/plugins/data/server';
-import { DataSourcePluginSetup } from '../../data_source/server';
+import { DataSourcePluginSetup } from 'src/plugins/data_source/server';
 import { Logger } from '../../../core/server';
 import { ConfigSchema } from '../common/config';
 
@@ -51,7 +51,10 @@ export interface FacetRequest {
   };
 }
 
-declare module '../../../core/server' {
+// TODO declaring it in core changes the interface for every reference. we only
+// need this declaration in query_enhancements, but it doesn't seem possible
+// https://github.com/opensearch-project/OpenSearch-Dashboards/issues/4274
+/* declare module '../../../core/server' {
   interface RequestHandlerContext {
     query_assist: {
       logger: Logger;
@@ -64,4 +67,4 @@ declare module '../../../core/server' {
       dataSourceEnabled: boolean;
     };
   }
-}
+} */

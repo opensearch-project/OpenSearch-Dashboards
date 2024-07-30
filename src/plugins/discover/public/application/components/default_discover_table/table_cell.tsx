@@ -12,7 +12,7 @@
 import './_table_cell.scss';
 
 import React from 'react';
-import { EuiSmallButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { DocViewFilterFn } from '../../doc_views/doc_views_types';
 
@@ -34,15 +34,19 @@ const TableCellUI = ({
 }: TableCellProps) => {
   const content = (
     <>
-      {/* eslint-disable-next-line react/no-danger */}
-      <span dangerouslySetInnerHTML={{ __html: sanitizedCellValue }} />
+      <span
+        className="osdDocTableCell__dataField"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: sanitizedCellValue }}
+      />
       <span className="osdDocTableCell__filter">
         <EuiToolTip
           content={i18n.translate('discover.filterForValue', {
             defaultMessage: 'Filter for value',
           })}
         >
-          <EuiSmallButtonIcon
+          <EuiButtonIcon
+            size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '+')}
             iconType="plusInCircle"
             aria-label={i18n.translate('discover.filterForValueLabel', {
@@ -57,7 +61,8 @@ const TableCellUI = ({
             defaultMessage: 'Filter out value',
           })}
         >
-          <EuiSmallButtonIcon
+          <EuiButtonIcon
+            size="xs"
             onClick={() => onFilter?.(columnId, fieldMapping, '-')}
             iconType="minusInCircle"
             aria-label={i18n.translate('discover.filterOutValueLabel', {

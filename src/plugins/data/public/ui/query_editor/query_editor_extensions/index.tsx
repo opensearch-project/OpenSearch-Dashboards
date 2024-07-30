@@ -5,7 +5,7 @@
 
 import React, { ComponentProps } from 'react';
 
-const Fallback = () => <div />;
+const Fallback = () => null;
 
 const LazyQueryEditorExtensions = React.lazy(() => import('./query_editor_extensions'));
 export const QueryEditorExtensions = (props: ComponentProps<typeof LazyQueryEditorExtensions>) => (

@@ -1,921 +1,476 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`ManageDirectQueryDataConnectionsTable renders correctly 1`] = `
-<ManageDirectQueryDataConnectionsTable
-  featureFlagStatus={true}
-  http={
-    Object {
-      "get": [MockFunction] {
-        "calls": Array [
-          Array [
-            "/api/directquery/dataconnections/dataSourceMDSId=",
-          ],
-        ],
-        "results": Array [
-          Object {
-            "type": "return",
-            "value": Promise {},
-          },
-        ],
-      },
-    }
-  }
-  notifications={
-    Object {
-      "toasts": Object {
-        "addDanger": [MockFunction],
-        "addSuccess": [MockFunction],
-        "addWarning": [MockFunction] {
-          "calls": Array [
-            Array [
-              "Unable to fetch existing data sources",
-            ],
-          ],
-          "results": Array [
-            Object {
-              "type": "return",
-              "value": undefined,
-            },
-          ],
-        },
-      },
-    }
-  }
-  savedObjects={
-    Object {
-      "client": Object {},
-    }
-  }
-  uiSettings={Object {}}
->
-  <EuiPageBody
-    component="div"
+exports[`ManageDirectQueryDataConnectionsTable matches snapshot 1`] = `
+<DocumentFragment>
+  <div
+    class="euiPageBody euiPageBody--borderRadiusNone"
   >
     <div
-      className="euiPageBody euiPageBody--borderRadiusNone"
+      class="euiSpacer euiSpacer--s"
+    />
+    <div
+      class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
     >
-      <EuiSpacer
-        size="s"
+      <div
+        class="euiFlexItem euiFlexItem--flexGrowZero"
+        style="width: 100%;"
       >
         <div
-          className="euiSpacer euiSpacer--s"
-        />
-      </EuiSpacer>
-      <EuiFlexGroup
-        justifyContent="center"
-      >
-        <div
-          className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
+          class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
         >
-          <EuiFlexItem
-            grow={false}
-            style={
-              Object {
-                "width": "100%",
-              }
-            }
+          <div
+            class="euiFlexItem"
           >
             <div
-              className="euiFlexItem euiFlexItem--flexGrowZero"
-              style={
-                Object {
-                  "width": "100%",
-                }
-              }
+              class="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
             >
-              <EuiFlexGroup
-                gutterSize="s"
-                justifyContent="flexEnd"
+              <div
+                class="euiFormControlLayout__childrenWrapper"
               >
-                <div
-                  className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"
-                >
-                  <EuiFlexItem
-                    grow={false}
-                    style={
-                      Object {
-                        "width": "30%",
-                      }
-                    }
-                  >
-                    <div
-                      className="euiFlexItem euiFlexItem--flexGrowZero"
-                      style={
-                        Object {
-                          "width": "30%",
-                        }
-                      }
-                    >
-                      <DataSourceSelector
-                        compressed={true}
-                        disabled={false}
-                        fullWidth={true}
-                        notifications={
-                          Object {
-                            "addDanger": [MockFunction],
-                            "addSuccess": [MockFunction],
-                            "addWarning": [MockFunction] {
-                              "calls": Array [
-                                Array [
-                                  "Unable to fetch existing data sources",
-                                ],
-                              ],
-                              "results": Array [
-                                Object {
-                                  "type": "return",
-                                  "value": undefined,
-                                },
-                              ],
-                            },
-                          }
-                        }
-                        onSelectedDataSource={[Function]}
-                        savedObjectsClient={Object {}}
-                        uiSettings={Object {}}
-                      >
-                        <EuiComboBox
-                          aria-label="Select a data source"
-                          async={false}
-                          compressed={true}
-                          data-test-subj="dataSourceSelectorComboBox"
-                          fullWidth={true}
-                          isClearable={true}
-                          isDisabled={false}
-                          onChange={[Function]}
-                          options={
-                            Array [
-                              Object {
-                                "id": "",
-                                "label": "Local cluster",
-                              },
-                            ]
-                          }
-                          placeholder="Select a data source"
-                          prepend="Data source"
-                          renderOption={[Function]}
-                          selectedOptions={
-                            Array [
-                              Object {
-                                "id": "",
-                                "label": "Local cluster",
-                              },
-                            ]
-                          }
-                          singleSelection={
-                            Object {
-                              "asPlainText": true,
-                            }
-                          }
-                          sortMatchesBy="none"
-                        >
-                          <div
-                            aria-expanded={false}
-                            aria-haspopup="listbox"
-                            aria-label="Select a data source"
-                            className="euiComboBox euiComboBox--compressed euiComboBox--fullWidth"
-                            data-test-subj="dataSourceSelectorComboBox"
-                            onKeyDown={[Function]}
-                            role="combobox"
-                          >
-                            <EuiComboBoxInput
-                              autoSizeInputRef={[Function]}
-                              compressed={true}
-                              fullWidth={true}
-                              hasSelectedOptions={true}
-                              inputRef={[Function]}
-                              isDisabled={false}
-                              isListOpen={false}
-                              noIcon={false}
-                              onChange={[Function]}
-                              onClear={[Function]}
-                              onClick={[Function]}
-                              onCloseListClick={[Function]}
-                              onFocus={[Function]}
-                              onOpenListClick={[Function]}
-                              onRemoveOption={[Function]}
-                              placeholder="Select a data source"
-                              prepend="Data source"
-                              rootId={[Function]}
-                              searchValue=""
-                              selectedOptions={
-                                Array [
-                                  Object {
-                                    "id": "",
-                                    "label": "Local cluster",
-                                  },
-                                ]
-                              }
-                              singleSelection={
-                                Object {
-                                  "asPlainText": true,
-                                }
-                              }
-                              toggleButtonRef={[Function]}
-                              updatePosition={[Function]}
-                              value="Local cluster"
-                            >
-                              <EuiFormControlLayout
-                                clear={
-                                  Object {
-                                    "data-test-subj": "comboBoxClearButton",
-                                    "onClick": [Function],
-                                  }
-                                }
-                                compressed={true}
-                                fullWidth={true}
-                                icon={
-                                  Object {
-                                    "aria-label": "Open list of options",
-                                    "data-test-subj": "comboBoxToggleListButton",
-                                    "disabled": false,
-                                    "onClick": [Function],
-                                    "ref": [Function],
-                                    "side": "right",
-                                    "type": "arrowDown",
-                                  }
-                                }
-                                prepend="Data source"
-                              >
-                                <div
-                                  className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed euiFormControlLayout--group"
-                                >
-                                  <EuiFormLabel
-                                    className="euiFormControlLayout__prepend"
-                                  >
-                                    <label
-                                      className="euiFormLabel euiFormControlLayout__prepend"
-                                    >
-                                      Data source
-                                    </label>
-                                  </EuiFormLabel>
-                                  <div
-                                    className="euiFormControlLayout__childrenWrapper"
-                                  >
-                                    <div
-                                      className="euiComboBox__inputWrap euiComboBox__inputWrap--compressed euiComboBox__inputWrap--fullWidth euiComboBox__inputWrap--noWrap euiComboBox__inputWrap-isClearable euiComboBox__inputWrap--inGroup"
-                                      data-test-subj="comboBoxInput"
-                                      onClick={[Function]}
-                                      tabIndex={-1}
-                                    >
-                                      <EuiComboBoxPill
-                                        asPlainText={true}
-                                        color="hollow"
-                                        id=""
-                                        key="local cluster"
-                                        option={
-                                          Object {
-                                            "id": "",
-                                            "label": "Local cluster",
-                                          }
-                                        }
-                                      >
-                                        <span
-                                          className="euiComboBoxPill euiComboBoxPill--plainText"
-                                          id=""
-                                        >
-                                          Local cluster
-                                        </span>
-                                      </EuiComboBoxPill>
-                                      <AutosizeInput
-                                        aria-controls=""
-                                        className="euiComboBox__input"
-                                        data-test-subj="comboBoxSearchInput"
-                                        disabled={false}
-                                        injectStyles={true}
-                                        inputRef={[Function]}
-                                        minWidth={1}
-                                        onBlur={[Function]}
-                                        onChange={[Function]}
-                                        onFocus={[Function]}
-                                        role="textbox"
-                                        style={
-                                          Object {
-                                            "fontSize": 14,
-                                          }
-                                        }
-                                        value=""
-                                      >
-                                        <div
-                                          className="euiComboBox__input"
-                                          style={
-                                            Object {
-                                              "display": "inline-block",
-                                              "fontSize": 14,
-                                            }
-                                          }
-                                        >
-                                          <input
-                                            aria-controls=""
-                                            data-test-subj="comboBoxSearchInput"
-                                            disabled={false}
-                                            onBlur={[Function]}
-                                            onChange={[Function]}
-                                            onFocus={[Function]}
-                                            role="textbox"
-                                            style={
-                                              Object {
-                                                "boxSizing": "content-box",
-                                                "width": "2px",
-                                              }
-                                            }
-                                            value=""
-                                          />
-                                          <div
-                                            style={
-                                              Object {
-                                                "height": 0,
-                                                "left": 0,
-                                                "overflow": "scroll",
-                                                "position": "absolute",
-                                                "top": 0,
-                                                "visibility": "hidden",
-                                                "whiteSpace": "pre",
-                                              }
-                                            }
-                                          />
-                                        </div>
-                                      </AutosizeInput>
-                                    </div>
-                                    <EuiFormControlLayoutIcons
-                                      clear={
-                                        Object {
-                                          "data-test-subj": "comboBoxClearButton",
-                                          "onClick": [Function],
-                                        }
-                                      }
-                                      compressed={true}
-                                      icon={
-                                        Object {
-                                          "aria-label": "Open list of options",
-                                          "data-test-subj": "comboBoxToggleListButton",
-                                          "disabled": false,
-                                          "onClick": [Function],
-                                          "ref": [Function],
-                                          "side": "right",
-                                          "type": "arrowDown",
-                                        }
-                                      }
-                                    >
-                                      <div
-                                        className="euiFormControlLayoutIcons euiFormControlLayoutIcons--right"
-                                      >
-                                        <EuiFormControlLayoutClearButton
-                                          data-test-subj="comboBoxClearButton"
-                                          onClick={[Function]}
-                                          size="s"
-                                        >
-                                          <EuiI18n
-                                            default="Clear input"
-                                            token="euiFormControlLayoutClearButton.label"
-                                          >
-                                            <button
-                                              aria-label="Clear input"
-                                              className="euiFormControlLayoutClearButton euiFormControlLayoutClearButton--small"
-                                              data-test-subj="comboBoxClearButton"
-                                              onClick={[Function]}
-                                              type="button"
-                                            >
-                                              <EuiIcon
-                                                className="euiFormControlLayoutClearButton__icon"
-                                                type="cross"
-                                              >
-                                                <span
-                                                  className="euiFormControlLayoutClearButton__icon"
-                                                  data-euiicon-type="cross"
-                                                />
-                                              </EuiIcon>
-                                            </button>
-                                          </EuiI18n>
-                                        </EuiFormControlLayoutClearButton>
-                                        <EuiFormControlLayoutCustomIcon
-                                          aria-label="Open list of options"
-                                          data-test-subj="comboBoxToggleListButton"
-                                          disabled={false}
-                                          iconRef={[Function]}
-                                          onClick={[Function]}
-                                          size="s"
-                                          type="arrowDown"
-                                        >
-                                          <button
-                                            aria-label="Open list of options"
-                                            className="euiFormControlLayoutCustomIcon euiFormControlLayoutCustomIcon--clickable"
-                                            data-test-subj="comboBoxToggleListButton"
-                                            disabled={false}
-                                            onClick={[Function]}
-                                            type="button"
-                                          >
-                                            <EuiIcon
-                                              aria-hidden="true"
-                                              className="euiFormControlLayoutCustomIcon__icon"
-                                              size="s"
-                                              type="arrowDown"
-                                            >
-                                              <span
-                                                aria-hidden="true"
-                                                className="euiFormControlLayoutCustomIcon__icon"
-                                                data-euiicon-type="arrowDown"
-                                                size="s"
-                                              />
-                                            </EuiIcon>
-                                          </button>
-                                        </EuiFormControlLayoutCustomIcon>
-                                      </div>
-                                    </EuiFormControlLayoutIcons>
-                                  </div>
-                                </div>
-                              </EuiFormControlLayout>
-                            </EuiComboBoxInput>
-                          </div>
-                        </EuiComboBox>
-                      </DataSourceSelector>
-                    </div>
-                  </EuiFlexItem>
-                  <EuiFlexItem
-                    grow={true}
-                  >
-                    <div
-                      className="euiFlexItem"
-                    >
-                      <EuiCompressedFieldSearch
-                        compressed={true}
-                        fullWidth={true}
-                        incremental={false}
-                        isClearable={true}
-                        isLoading={false}
-                        onChange={[Function]}
-                        placeholder="Search..."
-                        value=""
-                      >
-                        <EuiFormControlLayout
-                          compressed={true}
-                          fullWidth={true}
-                          icon="search"
-                          isLoading={false}
-                        >
-                          <div
-                            className="euiFormControlLayout euiFormControlLayout--fullWidth euiFormControlLayout--compressed"
-                          >
-                            <div
-                              className="euiFormControlLayout__childrenWrapper"
-                            >
-                              <EuiValidatableControl>
-                                <input
-                                  className="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
-                                  onChange={[Function]}
-                                  onKeyUp={[Function]}
-                                  placeholder="Search..."
-                                  type="search"
-                                  value=""
-                                />
-                              </EuiValidatableControl>
-                              <EuiFormControlLayoutIcons
-                                compressed={true}
-                                icon="search"
-                                isLoading={false}
-                              >
-                                <div
-                                  className="euiFormControlLayoutIcons"
-                                >
-                                  <EuiFormControlLayoutCustomIcon
-                                    size="s"
-                                    type="search"
-                                  >
-                                    <span
-                                      className="euiFormControlLayoutCustomIcon"
-                                    >
-                                      <EuiIcon
-                                        aria-hidden="true"
-                                        className="euiFormControlLayoutCustomIcon__icon"
-                                        size="s"
-                                        type="search"
-                                      >
-                                        <span
-                                          aria-hidden="true"
-                                          className="euiFormControlLayoutCustomIcon__icon"
-                                          data-euiicon-type="search"
-                                          size="s"
-                                        />
-                                      </EuiIcon>
-                                    </span>
-                                  </EuiFormControlLayoutCustomIcon>
-                                </div>
-                              </EuiFormControlLayoutIcons>
-                            </div>
-                          </div>
-                        </EuiFormControlLayout>
-                      </EuiCompressedFieldSearch>
-                    </div>
-                  </EuiFlexItem>
-                </div>
-              </EuiFlexGroup>
-              <EuiSpacer
-                size="s"
-              >
-                <div
-                  className="euiSpacer euiSpacer--s"
+                <input
+                  class="euiFieldSearch euiFieldSearch--fullWidth euiFieldSearch--compressed"
+                  placeholder="Search..."
+                  type="search"
+                  value=""
                 />
-              </EuiSpacer>
-              <EuiInMemoryTable
-                allowNeutralSort={false}
-                columns={
-                  Array [
-                    Object {
-                      "field": "name",
-                      "name": "Name",
-                      "render": [Function],
-                      "sortable": true,
-                      "truncateText": true,
-                    },
-                    Object {
-                      "field": "status",
-                      "name": "Status",
-                      "render": [Function],
-                      "sortable": true,
-                      "truncateText": true,
-                    },
-                    Object {
-                      "actions": Array [
-                        Object {
-                          "data-test-subj": "action-query",
-                          "icon": "discoverApp",
-                          "isPrimary": true,
-                          "name": [Function],
-                          "onClick": [Function],
-                          "type": "icon",
-                        },
-                        Object {
-                          "available": [Function],
-                          "data-test-subj": "action-accelerate",
-                          "icon": "bolt",
-                          "isPrimary": false,
-                          "name": "Accelerate performance",
-                          "onClick": [Function],
-                          "type": "icon",
-                        },
-                        Object {
-                          "available": [Function],
-                          "data-test-subj": "action-integrate",
-                          "icon": "integrationGeneral",
-                          "isPrimary": false,
-                          "name": "Integrate data",
-                          "onClick": [Function],
-                          "type": "icon",
-                        },
-                        Object {
-                          "color": "danger",
-                          "data-test-subj": "action-delete",
-                          "description": "Delete this data source",
-                          "icon": "trash",
-                          "isPrimary": false,
-                          "name": "Delete",
-                          "onClick": [Function],
-                          "type": "icon",
-                        },
-                      ],
-                      "field": "actions",
-                      "name": "Actions",
-                    },
-                  ]
-                }
-                isSelectable={true}
-                itemId="id"
-                items={Array []}
-                pagination={
-                  Object {
-                    "initialPageSize": 10,
-                    "pageSizeOptions": Array [
-                      5,
-                      10,
-                      15,
-                    ],
-                  }
-                }
-                responsive={true}
-                tableLayout="auto"
+                <div
+                  class="euiFormControlLayoutIcons"
+                >
+                  <span
+                    class="euiFormControlLayoutCustomIcon"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiFormControlLayoutCustomIcon__icon"
+                      data-euiicon-type="search"
+                    />
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--s"
+        />
+        <div
+          class="euiBasicTable"
+        >
+          <div>
+            <div
+              class="euiTableHeaderMobile"
+            >
+              <div
+                class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
               >
-                <EuiBasicTable
-                  columns={
-                    Array [
-                      Object {
-                        "field": "name",
-                        "name": "Name",
-                        "render": [Function],
-                        "sortable": true,
-                        "truncateText": true,
-                      },
-                      Object {
-                        "field": "status",
-                        "name": "Status",
-                        "render": [Function],
-                        "sortable": true,
-                        "truncateText": true,
-                      },
-                      Object {
-                        "actions": Array [
-                          Object {
-                            "data-test-subj": "action-query",
-                            "icon": "discoverApp",
-                            "isPrimary": true,
-                            "name": [Function],
-                            "onClick": [Function],
-                            "type": "icon",
-                          },
-                          Object {
-                            "available": [Function],
-                            "data-test-subj": "action-accelerate",
-                            "icon": "bolt",
-                            "isPrimary": false,
-                            "name": "Accelerate performance",
-                            "onClick": [Function],
-                            "type": "icon",
-                          },
-                          Object {
-                            "available": [Function],
-                            "data-test-subj": "action-integrate",
-                            "icon": "integrationGeneral",
-                            "isPrimary": false,
-                            "name": "Integrate data",
-                            "onClick": [Function],
-                            "type": "icon",
-                          },
-                          Object {
-                            "color": "danger",
-                            "data-test-subj": "action-delete",
-                            "description": "Delete this data source",
-                            "icon": "trash",
-                            "isPrimary": false,
-                            "name": "Delete",
-                            "onClick": [Function],
-                            "type": "icon",
-                          },
-                        ],
-                        "field": "actions",
-                        "name": "Actions",
-                      },
-                    ]
-                  }
-                  isSelectable={true}
-                  itemId="id"
-                  items={Array []}
-                  noItemsMessage="No items found"
-                  onChange={[Function]}
-                  pagination={
-                    Object {
-                      "hidePerPageOptions": undefined,
-                      "pageIndex": 0,
-                      "pageSize": 10,
-                      "pageSizeOptions": Array [
-                        5,
-                        10,
-                        15,
-                      ],
-                      "totalItemCount": 0,
-                    }
-                  }
-                  responsive={true}
-                  tableLayout="auto"
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                />
+                <div
+                  class="euiFlexItem euiFlexItem--flexGrowZero"
+                />
+              </div>
+            </div>
+            <table
+              class="euiTable euiTable--responsive euiTable--auto"
+              id="__table_generated-id"
+              tabindex="-1"
+            >
+              <caption
+                class="euiScreenReaderOnly euiTableCaption"
+              />
+              <thead>
+                <tr>
+                  <th
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_name_0"
+                    role="columnheader"
+                    scope="col"
+                  >
+                    <span
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Name"
+                      >
+                        Name
+                      </span>
+                    </span>
+                  </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    data-test-subj="tableHeaderCell_status_1"
+                    role="columnheader"
+                    scope="col"
+                  >
+                    <span
+                      class="euiTableCellContent"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Status"
+                      >
+                        Status
+                      </span>
+                    </span>
+                  </th>
+                  <th
+                    class="euiTableHeaderCell"
+                    role="columnheader"
+                    scope="col"
+                  >
+                    <span
+                      class="euiTableCellContent euiTableCellContent--alignRight"
+                    >
+                      <span
+                        class="euiTableCellContent__text"
+                        title="Actions"
+                      >
+                        Actions
+                      </span>
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                >
+                  <td
+                    class="euiTableRowCell"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Name
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <span
+                            data-euiicon-type="s3Logo"
+                          />
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <button
+                            class="euiLink euiLink--primary"
+                            data-test-subj="connection1DataConnectionsLink"
+                            type="button"
+                          >
+                            connection1
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Status
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                    >
+                      <div
+                        class="euiHealth euiHealth--textSizeS"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                        >
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <span
+                              color="success"
+                              data-euiicon-type="dot"
+                            />
+                          </div>
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            Active
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell euiTableRowCell--hasActions"
+                  >
+                    <div
+                      class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                    >
+                      <span
+                        class="euiToolTipAnchor"
+                      >
+                        <button
+                          aria-labelledby="generated-id"
+                          class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                          data-test-subj="action-delete"
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="trash"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="generated-id"
+                        >
+                          Delete
+                        </span>
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+                <tr
+                  class="euiTableRow euiTableRow-isSelectable euiTableRow-hasActions"
+                >
+                  <td
+                    class="euiTableRowCell"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Name
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                    >
+                      <div
+                        class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow euiFlexGroup--responsive"
+                      >
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <span
+                            data-euiicon-type="s3Logo"
+                          />
+                        </div>
+                        <div
+                          class="euiFlexItem euiFlexItem--flexGrowZero"
+                        >
+                          <button
+                            class="euiLink euiLink--primary"
+                            data-test-subj="connection2DataConnectionsLink"
+                            type="button"
+                          >
+                            connection2
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell"
+                  >
+                    <div
+                      class="euiTableRowCell__mobileHeader euiTableRowCell--hideForDesktop"
+                    >
+                      Status
+                    </div>
+                    <div
+                      class="euiTableCellContent euiTableCellContent--truncateText euiTableCellContent--overflowingContent"
+                    >
+                      <div
+                        class="euiHealth euiHealth--textSizeS"
+                      >
+                        <div
+                          class="euiFlexGroup euiFlexGroup--gutterExtraSmall euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow"
+                        >
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            <span
+                              color="subdued"
+                              data-euiicon-type="dot"
+                            />
+                          </div>
+                          <div
+                            class="euiFlexItem euiFlexItem--flexGrowZero"
+                          >
+                            Inactive
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                  <td
+                    class="euiTableRowCell euiTableRowCell--hasActions"
+                  >
+                    <div
+                      class="euiTableCellContent euiTableCellContent--alignRight euiTableCellContent--showOnHover euiTableCellContent--overflowingContent"
+                    >
+                      <button
+                        aria-labelledby="generated-id"
+                        class="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                        data-test-subj="action-accelerate"
+                        type="button"
+                      >
+                        <span
+                          aria-hidden="true"
+                          class="euiButtonIcon__icon"
+                          color="inherit"
+                          data-euiicon-type="bolt"
+                        />
+                      </button>
+                      <span
+                        class="euiScreenReaderOnly"
+                        id="generated-id"
+                      >
+                        Accelerate performance
+                      </span>
+                      <span
+                        class="euiToolTipAnchor"
+                      >
+                        <button
+                          aria-labelledby="generated-id"
+                          class="euiButtonIcon euiButtonIcon--danger euiButtonIcon--empty euiButtonIcon--xSmall euiTableCellContent__hoverItem"
+                          data-test-subj="action-delete"
+                          type="button"
+                        >
+                          <span
+                            aria-hidden="true"
+                            class="euiButtonIcon__icon"
+                            color="inherit"
+                            data-euiicon-type="trash"
+                          />
+                        </button>
+                        <span
+                          class="euiScreenReaderOnly"
+                          id="generated-id"
+                        >
+                          Delete
+                        </span>
+                      </span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <div
+              class="euiSpacer euiSpacer--m"
+            />
+            <div
+              class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
+            >
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <div
+                  class="euiPopover euiPopover--anchorUpRight"
                 >
                   <div
-                    className="euiBasicTable"
+                    class="euiPopover__anchor"
                   >
-                    <div>
-                      <EuiTableHeaderMobile>
-                        <div
-                          className="euiTableHeaderMobile"
-                        >
-                          <EuiFlexGroup
-                            alignItems="baseline"
-                            justifyContent="spaceBetween"
-                            responsive={false}
-                          >
-                            <div
-                              className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsBaseline euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow"
-                            >
-                              <EuiFlexItem
-                                grow={false}
-                              >
-                                <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                                />
-                              </EuiFlexItem>
-                              <EuiFlexItem
-                                grow={false}
-                              >
-                                <div
-                                  className="euiFlexItem euiFlexItem--flexGrowZero"
-                                />
-                              </EuiFlexItem>
-                            </div>
-                          </EuiFlexGroup>
-                        </div>
-                      </EuiTableHeaderMobile>
-                      <EuiTable
-                        id="__table_generated-id"
-                        responsive={true}
-                        tableLayout="auto"
+                    <button
+                      class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--xSmall"
+                      data-test-subj="tablePaginationPopoverButton"
+                      type="button"
+                    >
+                      <span
+                        class="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                       >
-                        <table
-                          className="euiTable euiTable--responsive euiTable--auto"
-                          id="__table_generated-id"
-                          tabIndex={-1}
+                        <span
+                          class="euiButtonContent__icon"
+                          color="inherit"
+                          data-euiicon-type="arrowDown"
+                        />
+                        <span
+                          class="euiButtonEmpty__text"
                         >
-                          <EuiScreenReaderOnly>
-                            <caption
-                              className="euiScreenReaderOnly euiTableCaption"
-                            >
-                              <EuiDelayRender
-                                delay={500}
-                              />
-                            </caption>
-                          </EuiScreenReaderOnly>
-                          <EuiTableHeader>
-                            <thead>
-                              <tr>
-                                <EuiTableHeaderCell
-                                  align="left"
-                                  data-test-subj="tableHeaderCell_name_0"
-                                  key="_data_h_name_0"
-                                >
-                                  <th
-                                    className="euiTableHeaderCell"
-                                    data-test-subj="tableHeaderCell_name_0"
-                                    role="columnheader"
-                                    scope="col"
-                                    style={
-                                      Object {
-                                        "width": undefined,
-                                      }
-                                    }
-                                  >
-                                    <CellContents
-                                      className="euiTableCellContent"
-                                      showSortMsg={false}
-                                    >
-                                      <span
-                                        className="euiTableCellContent"
-                                      >
-                                        <EuiInnerText>
-                                          <EuiI18n
-                                            default="{innerText}; {description}"
-                                            token="euiTableHeaderCell.titleTextWithDesc"
-                                            values={
-                                              Object {
-                                                "description": undefined,
-                                                "innerText": "Name",
-                                              }
-                                            }
-                                          >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                              title="Name"
-                                            >
-                                              Name
-                                            </span>
-                                          </EuiI18n>
-                                        </EuiInnerText>
-                                      </span>
-                                    </CellContents>
-                                  </th>
-                                </EuiTableHeaderCell>
-                                <EuiTableHeaderCell
-                                  align="left"
-                                  data-test-subj="tableHeaderCell_status_1"
-                                  key="_data_h_status_1"
-                                >
-                                  <th
-                                    className="euiTableHeaderCell"
-                                    data-test-subj="tableHeaderCell_status_1"
-                                    role="columnheader"
-                                    scope="col"
-                                    style={
-                                      Object {
-                                        "width": undefined,
-                                      }
-                                    }
-                                  >
-                                    <CellContents
-                                      className="euiTableCellContent"
-                                      showSortMsg={false}
-                                    >
-                                      <span
-                                        className="euiTableCellContent"
-                                      >
-                                        <EuiInnerText>
-                                          <EuiI18n
-                                            default="{innerText}; {description}"
-                                            token="euiTableHeaderCell.titleTextWithDesc"
-                                            values={
-                                              Object {
-                                                "description": undefined,
-                                                "innerText": "Status",
-                                              }
-                                            }
-                                          >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                              title="Status"
-                                            >
-                                              Status
-                                            </span>
-                                          </EuiI18n>
-                                        </EuiInnerText>
-                                      </span>
-                                    </CellContents>
-                                  </th>
-                                </EuiTableHeaderCell>
-                                <EuiTableHeaderCell
-                                  align="right"
-                                  key="_actions_h_2"
-                                >
-                                  <th
-                                    className="euiTableHeaderCell"
-                                    role="columnheader"
-                                    scope="col"
-                                    style={
-                                      Object {
-                                        "width": undefined,
-                                      }
-                                    }
-                                  >
-                                    <CellContents
-                                      className="euiTableCellContent euiTableCellContent--alignRight"
-                                      showSortMsg={false}
-                                    >
-                                      <span
-                                        className="euiTableCellContent euiTableCellContent--alignRight"
-                                      >
-                                        <EuiInnerText>
-                                          <EuiI18n
-                                            default="{innerText}; {description}"
-                                            token="euiTableHeaderCell.titleTextWithDesc"
-                                            values={
-                                              Object {
-                                                "description": undefined,
-                                                "innerText": "Actions",
-                                              }
-                                            }
-                                          >
-                                            <span
-                                              className="euiTableCellContent__text"
-                                              title="Actions"
-                                            >
-                                              Actions
-                                            </span>
-                                          </EuiI18n>
-                                        </EuiInnerText>
-                                      </span>
-                                    </CellContents>
-                                  </th>
-                                </EuiTableHeaderCell>
-                              </tr>
-                            </thead>
-                          </EuiTableHeader>
-                          <EuiTableBody>
-                            <tbody>
-                              <EuiTableRow>
-                                <tr
-                                  className="euiTableRow"
-                                >
-                                  <EuiTableRowCell
-                                    align="center"
-                                    colSpan={3}
-                                    isMobileFullWidth={true}
-                                  >
-                                    <td
-                                      className="euiTableRowCell euiTableRowCell--isMobileFullWidth"
-                                      colSpan={3}
-                                      style={
-                                        Object {
-                                          "width": undefined,
-                                        }
-                                      }
-                                    >
-                                      <div
-                                        className="euiTableCellContent euiTableCellContent--alignCenter"
-                                      >
-                                        <span
-                                          className="euiTableCellContent__text"
-                                        >
-                                          No items found
-                                        </span>
-                                      </div>
-                                    </td>
-                                  </EuiTableRowCell>
-                                </tr>
-                              </EuiTableRow>
-                            </tbody>
-                          </EuiTableBody>
-                        </table>
-                      </EuiTable>
-                    </div>
+                          Rows per page: 10
+                        </span>
+                      </span>
+                    </button>
                   </div>
-                </EuiBasicTable>
-              </EuiInMemoryTable>
+                </div>
+              </div>
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero"
+              >
+                <nav
+                  class="euiPagination"
+                >
+                  <button
+                    aria-label="Previous page"
+                    class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                    data-test-subj="pagination-button-previous"
+                    disabled=""
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="arrowLeft"
+                    />
+                  </button>
+                  <ul
+                    class="euiPagination__list"
+                  >
+                    <li
+                      class="euiPagination__item"
+                    >
+                      <button
+                        aria-controls="__table_generated-id"
+                        aria-current="true"
+                        aria-label="Page 1 of 1"
+                        class="euiButtonEmpty euiButtonEmpty--text euiButtonEmpty--small euiButtonEmpty-isDisabled euiPaginationButton euiPaginationButton-isActive euiPaginationButton--hideOnMobile"
+                        data-test-subj="pagination-button-0"
+                        disabled=""
+                        type="button"
+                      >
+                        <span
+                          class="euiButtonContent euiButtonEmpty__content"
+                        >
+                          <span
+                            class="euiButtonEmpty__text"
+                          >
+                            1
+                          </span>
+                        </span>
+                      </button>
+                    </li>
+                  </ul>
+                  <button
+                    aria-label="Next page"
+                    class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall"
+                    data-test-subj="pagination-button-next"
+                    disabled=""
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="euiButtonIcon__icon"
+                      color="inherit"
+                      data-euiicon-type="arrowRight"
+                    />
+                  </button>
+                </nav>
+              </div>
             </div>
-          </EuiFlexItem>
+          </div>
         </div>
-      </EuiFlexGroup>
+      </div>
     </div>
-  </EuiPageBody>
-</ManageDirectQueryDataConnectionsTable>
+  </div>
+</DocumentFragment>
 `;

@@ -83,7 +83,7 @@ export const pplSearchStrategyProvider = (
 
         if (!rawResponse.success) {
           return {
-            type: DATA_FRAME_TYPES.DEFAULT,
+            type: DATA_FRAME_TYPES.ERROR,
             body: { error: rawResponse.data },
             took: rawResponse.took,
           } as IDataFrameError;

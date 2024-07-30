@@ -49,3 +49,9 @@ export {
 } from './query_editor';
 export { SearchBar, SearchBarProps, StatefulSearchBarProps } from './search_bar';
 export { SuggestionsComponent } from './typeahead';
+export {
+  DataSetNavigator,
+  setAsyncSessionId,
+  getAsyncSessionId,
+  setAsyncSessionIdByObj,
+} from './dataset_navigator';

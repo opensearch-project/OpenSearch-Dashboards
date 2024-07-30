@@ -28,14 +28,14 @@
  * under the License.
  */
 
-import React, { lazy } from 'react';
+import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { VisualizationContainer } from '../../visualizations/public';
 import { ExpressionRenderDefinition } from '../../expressions/common/expression_renderers';
 import { MetricVisRenderValue } from './metric_vis_fn';
+import MetricVisComponent from './components/metric_vis_component';
+
 // @ts-ignore
-const MetricVisComponent = lazy(() => import('./components/metric_vis_component'));
 
 export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRenderValue> = () => ({
   name: 'metric_vis',
@@ -47,14 +47,12 @@ export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRender
     });
 
     render(
-      <VisualizationContainer className="mtrVis" showNoResult={!visData.rows?.length}>
-        <MetricVisComponent
-          visData={visData}
-          visParams={visConfig}
-          renderComplete={handlers.done}
-          fireEvent={handlers.event}
-        />
-      </VisualizationContainer>,
+      <MetricVisComponent
+        visData={visData}
+        visParams={visConfig}
+        renderComplete={handlers.done}
+        fireEvent={handlers.event}
+      />,
       domNode
     );
   },

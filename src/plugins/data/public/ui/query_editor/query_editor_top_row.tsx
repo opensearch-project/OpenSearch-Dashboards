@@ -13,16 +13,10 @@ import {
   prettyDuration,
 } from '@elastic/eui';
 import classNames from 'classnames';
-import { compact, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import React, { useState } from 'react';
-import {
-  DataSource,
-  IDataPluginServices,
-  IIndexPattern,
-  Query,
-  TimeHistoryContract,
-  TimeRange,
-} from '../..';
+import { createPortal } from 'react-dom';
+import { IDataPluginServices, IIndexPattern, Query, TimeHistoryContract, TimeRange } from '../..';
 import {
   useOpenSearchDashboards,
   withOpenSearchDashboards,
@@ -32,14 +26,14 @@ import { getQueryLog, PersistedLog } from '../../query';
 import { Settings } from '../types';
 import { NoDataPopover } from './no_data_popover';
 import QueryEditorUI from './query_editor';
+import { useDataSetManager } from '../search_bar/lib/use_dataset_manager';
 
 const QueryEditor = withOpenSearchDashboards(QueryEditorUI);
 
 // @internal
 export interface QueryEditorTopRowProps {
   query?: Query;
-  dataSourceContainerRef?: React.RefCallback<HTMLDivElement>;
-  containerRef?: React.RefCallback<HTMLDivElement>;
+  dataSetContainerRef?: React.RefCallback<HTMLDivElement>;
   settings?: Settings;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
   onChange: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -48,7 +42,6 @@ export interface QueryEditorTopRowProps {
   disableAutoFocus?: boolean;
   screenTitle?: string;
   indexPatterns?: Array<IIndexPattern | string>;
-  dataSource?: DataSource;
   isLoading?: boolean;
   prepend?: React.ComponentProps<typeof EuiCompressedFieldText>['prepend'];
   showQueryEditor?: boolean;
@@ -64,6 +57,7 @@ export interface QueryEditorTopRowProps {
   isDirty: boolean;
   timeHistory?: TimeHistoryContract;
   indicateNoData?: boolean;
+  datePickerRef?: React.RefObject<HTMLDivElement>;
 }
 
 // Needed for React.lazy
@@ -71,9 +65,16 @@ export interface QueryEditorTopRowProps {
 export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   const [isDateRangeInvalid, setIsDateRangeInvalid] = useState(false);
   const [isQueryEditorFocused, setIsQueryEditorFocused] = useState(false);
-
   const opensearchDashboards = useOpenSearchDashboards<IDataPluginServices>();
-  const { uiSettings, storage, appName } = opensearchDashboards.services;
+  const {
+    uiSettings,
+    storage,
+    appName,
+    data: {
+      query: { dataSetManager: dataSetManager },
+    },
+  } = opensearchDashboards.services;
+  const { dataSet } = useDataSetManager({ dataSetManager: dataSetManager! });
 
   const queryLanguage = props.query && props.query.language;
   const queryUiEnhancement =
@@ -195,22 +196,13 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function getQueryStringInitialValue(language: string) {
-    const { indexPatterns, settings } = props;
+    const { settings } = props;
     const input = settings?.getQueryEnhancements(language)?.searchBar?.queryStringInput
       ?.initialValue;
 
-    if (
-      !indexPatterns ||
-      (!Array.isArray(indexPatterns) && compact(indexPatterns).length > 0) ||
-      !input
-    )
-      return '';
+    if (!input) return '';
 
-    const defaultDataSource = indexPatterns[0];
-    const dataSource =
-      typeof defaultDataSource === 'string' ? defaultDataSource : defaultDataSource.title;
-
-    return input.replace('<data_source>', dataSource);
+    return input.replace('<data_source>', dataSet?.title ?? dataSet?.title ?? '');
   }
 
   function renderQueryEditor() {
@@ -219,12 +211,10 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       <EuiFlexItem>
         <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
-          indexPatterns={props.indexPatterns!}
-          dataSource={props.dataSource}
-          prepend={props.prepend}
+          dataSet={dataSet}
+          queryActions={props.prepend}
           query={parsedQuery}
-          dataSourceContainerRef={props.dataSourceContainerRef}
-          containerRef={props.containerRef}
+          dataSetContainerRef={props.dataSetContainerRef}
           settings={props.settings!}
           screenTitle={props.screenTitle}
           onChange={onQueryChange}
@@ -265,11 +255,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
   }
 
   function shouldRenderQueryEditor(): boolean {
-    // TODO: MQL probably can modify to not care about index patterns
-    // TODO: call queryUiEnhancement?.showQueryEditor
-    return Boolean(
-      props.showQueryEditor && props.settings && props.indexPatterns && props.query && storage
-    );
+    return Boolean(props.showQueryEditor && props.settings && props.query && storage);
   }
 
   function renderUpdateButton() {
@@ -283,8 +269,9 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         data-test-subj="querySubmitButton"
         className="euiSuperUpdateButton"
         iconType="play"
+        fill
       >
-        {props.isDirty ? 'Refresh' : 'Run'}
+        Run
       </EuiButton>
     );
 
@@ -294,7 +281,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
 
     return (
       <NoDataPopover storage={storage} showNoDataPopover={props.indicateNoData}>
-        <EuiFlexGroup responsive={false} gutterSize="s">
+        <EuiFlexGroup responsive={false} gutterSize="s" alignItems="flexStart">
           {renderDatePicker()}
           <EuiFlexItem grow={false}>{button}</EuiFlexItem>
         </EuiFlexGroup>
@@ -359,6 +346,14 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     'osdQueryEditor--withDatePicker': props.showDatePicker,
   });
 
+  const datePicker = (
+    <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
+      <EuiFlexItem grow={false} className="osdQueryEditor--updateButtonWrapper">
+        {renderUpdateButton()}
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
   return (
     <EuiFlexGroup
       className={classes}
@@ -367,11 +362,9 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
       direction="column"
       justifyContent="flexEnd"
     >
-      <EuiFlexGroup justifyContent="flexEnd" gutterSize="none" responsive={false}>
-        <EuiFlexItem grow={false} className="osdQueryEditor--updateButtonWrapper">
-          {renderUpdateButton()}
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {props?.datePickerRef?.current && uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)
+        ? createPortal(datePicker, props.datePickerRef.current)
+        : datePicker}
       {renderQueryEditor()}
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="none" direction="column">

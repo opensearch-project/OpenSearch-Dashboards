@@ -25,6 +25,7 @@ interface AccessControlTabProps {
   connector: string;
   properties: unknown;
   allowedRoles: string[];
+  dataSourceMDSId: string;
 }
 
 export const AccessControlTab = (props: AccessControlTabProps) => {
@@ -34,17 +35,17 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
   const { http } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
   useEffect(() => {
-    http!
-      .get(SECURITY_ROLES)
-      .then((data) =>
+    http
+      .get(SECURITY_ROLES, { query: { dataSourceId: props.dataSourceMDSId } })
+      .then((data) => {
         setRoles(
           Object.keys(data.data).map((key) => {
             return { label: key };
           })
-        )
-      )
+        );
+      })
       .catch((err) => setHasSecurityAccess(false));
-  }, [http]);
+  }, [http, props.dataSourceMDSId]);
 
   const [selectedQueryPermissionRoles, setSelectedQueryPermissionRoles] = useState<Role[]>(
     props.allowedRoles.map((role) => {
