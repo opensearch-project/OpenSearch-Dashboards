@@ -1,2 +1,0 @@
-feat:
-- [MDS] Prevent importing of data source object when MDS is not enabled ([#6395](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/6395))
