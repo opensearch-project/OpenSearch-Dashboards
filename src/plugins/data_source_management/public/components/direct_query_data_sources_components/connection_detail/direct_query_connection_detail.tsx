@@ -459,7 +459,7 @@ export const DirectQueryDataConnectionDetail: React.FC<DirectQueryDataConnection
             >
               <QueryOrAccelerateData />
             </EuiAccordion>
-            <EuiTabbedContent tabs={tabs} />
+            <EuiTabbedContent tabs={tabs} size="s" />
           </>
         )}
 
