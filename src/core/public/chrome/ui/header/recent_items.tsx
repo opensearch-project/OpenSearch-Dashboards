@@ -20,6 +20,7 @@ import { WorkspaceObject } from '../../../workspace';
 import { createRecentNavLink } from './nav_link';
 import { HttpStart } from '../../../http';
 import { ChromeNavLink } from '../../../';
+import './recent_items.scss';
 
 export interface Props {
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
@@ -43,7 +44,7 @@ export const RecentItems = ({
   const navLinks = useObservable(navLinks$, []).filter((link) => !link.hidden);
 
   const items = useMemo(() => {
-    // Only display five most latest items
+    // Only display five most recent items
     return recentlyAccessedItems.slice(0, 5).map((item) => {
       return {
         link: createRecentNavLink(item, navLinks, basePath, navigateToUrl).href,
@@ -68,6 +69,8 @@ export const RecentItems = ({
             setIsPopoverOpen((prev) => !prev);
           }}
           data-test-subj="recentItemsSectionButton"
+          size="xs"
+          className="headerRecentItemsButton"
         >
           {/* TODO: replace this icon once there is a new icon added to OUI https://github.com/opensearch-project/OpenSearch-Dashboards/issues/7354 */}
           <EuiIcon type="recentlyViewedApp" size="m" />

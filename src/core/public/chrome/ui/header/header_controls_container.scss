@@ -1,0 +1,26 @@
+/*
+* Copyright OpenSearch Contributors
+* SPDX-License-Identifier: Apache-2.0
+*/
+
+.headerControl {
+  gap: 0 $euiSizeS;
+
+  &.headerDescriptionControl {
+    padding: 0 $euiSizeM;
+    color: $euiTextSubduedColor;
+  }
+
+  &.headerBottomControl {
+    padding: $euiSizeM;
+  }
+
+  &:empty {
+    display: none;
+  }
+
+  // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
+  .euiButton {
+    min-width: auto;
+  }
+}

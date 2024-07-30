@@ -535,6 +535,13 @@ export interface AppMountParameters<HistoryLocationState = unknown> {
    * ```
    */
   setHeaderActionMenu: (menuMount: MountPoint | undefined) => void;
+
+  setHeaderLeftControls: (menuMount: MountPoint | undefined) => void;
+  setHeaderCenterControls: (menuMount: MountPoint | undefined) => void;
+  setHeaderRightControls: (menuMount: MountPoint | undefined) => void;
+  setHeaderBadgeControls: (menuMount: MountPoint | undefined) => void;
+  setHeaderDescriptionControls: (menuMount: MountPoint | undefined) => void;
+  setHeaderBottomControls: (menuMount: MountPoint | undefined) => void;
   /**
    * Optional datasource id to pass while mounting app
    */
@@ -828,6 +835,13 @@ export interface ApplicationStart {
    * An observable that emits the current application id and each subsequent id update.
    */
   currentAppId$: Observable<string | undefined>;
+
+  setAppLeftControls: (mount: MountPoint | undefined) => void;
+  setAppCenterControls: (mount: MountPoint | undefined) => void;
+  setAppRightControls: (mount: MountPoint | undefined) => void;
+  setAppBadgeControls: (mount: MountPoint | undefined) => void;
+  setAppDescriptionControls: (mount: MountPoint | undefined) => void;
+  setAppBottomControls: (mount: MountPoint | undefined) => void;
 }
 
 /** @internal */
@@ -857,6 +871,19 @@ export interface InternalApplicationStart extends Omit<ApplicationStart, 'regist
    * @internal
    */
   currentActionMenu$: Observable<MountPoint | undefined>;
+
+  /**
+   * The potential header controls set by the currently mounted app.
+   * Consumed by the chrome header.
+   *
+   * @internal
+   */
+  currentLeftControls$: Observable<MountPoint | undefined>;
+  currentCenterControls$: Observable<MountPoint | undefined>;
+  currentRightControls$: Observable<MountPoint | undefined>;
+  currentBadgeControls$: Observable<MountPoint | undefined>;
+  currentDescriptionControls$: Observable<MountPoint | undefined>;
+  currentBottomControls$: Observable<MountPoint | undefined>;
 
   /**
    * The global history instance, exposed only to Core.
