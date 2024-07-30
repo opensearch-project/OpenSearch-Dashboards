@@ -317,11 +317,13 @@ exports[`Dashboard top nav render in embed mode 1`] = `
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
-                "dataSet": Object {
+                "dataSetManager": Object {
+                  "fetchDefaultDataSet": [MockFunction],
                   "getDataSet": [MockFunction],
                   "getDefaultDataSet": [MockFunction],
                   "getUpdates$": [MockFunction],
                   "init": [MockFunction],
+                  "initWithIndexPattern": [MockFunction],
                   "setDataSet": [MockFunction],
                 },
                 "filterManager": Object {
@@ -1338,11 +1340,13 @@ exports[`Dashboard top nav render in embed mode, and force hide filter bar 1`] =
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
-                "dataSet": Object {
+                "dataSetManager": Object {
+                  "fetchDefaultDataSet": [MockFunction],
                   "getDataSet": [MockFunction],
                   "getDefaultDataSet": [MockFunction],
                   "getUpdates$": [MockFunction],
                   "init": [MockFunction],
+                  "initWithIndexPattern": [MockFunction],
                   "setDataSet": [MockFunction],
                 },
                 "filterManager": Object {
@@ -2359,11 +2363,13 @@ exports[`Dashboard top nav render in embed mode, components can be forced show b
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
-                "dataSet": Object {
+                "dataSetManager": Object {
+                  "fetchDefaultDataSet": [MockFunction],
                   "getDataSet": [MockFunction],
                   "getDefaultDataSet": [MockFunction],
                   "getUpdates$": [MockFunction],
                   "init": [MockFunction],
+                  "initWithIndexPattern": [MockFunction],
                   "setDataSet": [MockFunction],
                 },
                 "filterManager": Object {
@@ -3380,11 +3386,13 @@ exports[`Dashboard top nav render in full screen mode with appended URL param bu
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
-                "dataSet": Object {
+                "dataSetManager": Object {
+                  "fetchDefaultDataSet": [MockFunction],
                   "getDataSet": [MockFunction],
                   "getDefaultDataSet": [MockFunction],
                   "getUpdates$": [MockFunction],
                   "init": [MockFunction],
+                  "initWithIndexPattern": [MockFunction],
                   "setDataSet": [MockFunction],
                 },
                 "filterManager": Object {
@@ -4401,11 +4409,13 @@ exports[`Dashboard top nav render in full screen mode, no componenets should be 
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
-                "dataSet": Object {
+                "dataSetManager": Object {
+                  "fetchDefaultDataSet": [MockFunction],
                   "getDataSet": [MockFunction],
                   "getDefaultDataSet": [MockFunction],
                   "getUpdates$": [MockFunction],
                   "init": [MockFunction],
+                  "initWithIndexPattern": [MockFunction],
                   "setDataSet": [MockFunction],
                 },
                 "filterManager": Object {
@@ -5422,11 +5432,13 @@ exports[`Dashboard top nav render with all components 1`] = `
               },
               "query": Object {
                 "addToQueryLog": [MockFunction],
-                "dataSet": Object {
+                "dataSetManager": Object {
+                  "fetchDefaultDataSet": [MockFunction],
                   "getDataSet": [MockFunction],
                   "getDefaultDataSet": [MockFunction],
                   "getUpdates$": [MockFunction],
                   "init": [MockFunction],
+                  "initWithIndexPattern": [MockFunction],
                   "setDataSet": [MockFunction],
                 },
                 "filterManager": Object {
