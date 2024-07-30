@@ -1,2 +1,0 @@
-feat:
-- Hide select data source panel for non dashboard admin in workspace create/edit page ([#7213](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7213))
