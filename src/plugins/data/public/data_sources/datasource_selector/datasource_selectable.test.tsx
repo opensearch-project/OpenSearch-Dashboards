@@ -15,6 +15,7 @@ import {
   defaultDataSourceMetadata,
   s3DataSourceMetadata,
 } from '../constants';
+import { IUiSettingsClient } from '../../../../../../src/core/public';
 
 describe('DataSourceSelectable', () => {
   let dataSourcesMock: DataSource[];
@@ -23,6 +24,7 @@ describe('DataSourceSelectable', () => {
   let setSelectedSourcesMock: (sources: DataSourceOption[]) => void = jest.fn();
   let setDataSourceOptionListMock: (sources: DataSourceGroup[]) => void = jest.fn();
   let onFetchDataSetErrorMock: (error: Error) => void = jest.fn();
+  let uiSettingsMock: IUiSettingsClient;
   const onRefresh: () => void = jest.fn();
 
   beforeEach(() => {
@@ -46,6 +48,27 @@ describe('DataSourceSelectable', () => {
     setSelectedSourcesMock = jest.fn();
     setDataSourceOptionListMock = jest.fn();
     onFetchDataSetErrorMock = jest.fn();
+    uiSettingsMock = {
+      get: jest.fn().mockImplementation((key) => {
+        switch (key) {
+          case 'home:useNewHomePage':
+            return true; // or false based on your test case
+          case 'query:enhancements:enabled':
+            return true; // or false based on your test case
+          default:
+            return undefined;
+        }
+      }),
+      get$: jest.fn(),
+      getAll: jest.fn(),
+      set: jest.fn(),
+      overrideLocalDefault: jest.fn(),
+      remove: jest.fn(),
+      removeMany: jest.fn(),
+      isDeclared: jest.fn(),
+      isDefault: jest.fn(),
+      isCustom: jest.fn(),
+    };
   });
 
   it('renders without crashing', () => {
@@ -58,6 +81,7 @@ describe('DataSourceSelectable', () => {
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
         onRefresh={onRefresh}
+        uiSettings={uiSettingsMock}
       />
     );
   });
@@ -73,6 +97,7 @@ describe('DataSourceSelectable', () => {
           setDataSourceOptionList={setDataSourceOptionListMock}
           onGetDataSetError={onFetchDataSetErrorMock}
           onRefresh={onRefresh}
+          uiSettings={uiSettingsMock}
         />
       );
     });
@@ -93,6 +118,7 @@ describe('DataSourceSelectable', () => {
           setDataSourceOptionList={setDataSourceOptionListMock}
           onGetDataSetError={onFetchDataSetErrorMock}
           onRefresh={onRefresh}
+          uiSettings={uiSettingsMock}
         />
       );
     });
@@ -131,6 +157,7 @@ describe('DataSourceSelectable', () => {
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
         onRefresh={onRefresh}
+        uiSettings={uiSettingsMock}
       />
     );
 
@@ -183,6 +210,7 @@ describe('DataSourceSelectable', () => {
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
         onRefresh={onRefresh}
+        uiSettings={uiSettingsMock}
       />
     );
 
@@ -235,6 +263,7 @@ describe('DataSourceSelectable', () => {
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
         onRefresh={onRefresh}
+        uiSettings={uiSettingsMock}
       />
     );
 
@@ -259,6 +288,7 @@ describe('DataSourceSelectable', () => {
         setDataSourceOptionList={setDataSourceOptionListMock}
         onGetDataSetError={onFetchDataSetErrorMock}
         onRefresh={onRefresh}
+        uiSettings={uiSettingsMock}
       />
     );
     const refreshButton = getByLabelText('sourceRefresh');
