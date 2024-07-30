@@ -103,7 +103,7 @@ export const DiscoverChart = ({
       <EuiButtonIcon
         aria-expanded={isCollapsed}
         aria-label={toggleLabel}
-        data-test-subj="queryEditorCollapseBtn"
+        data-test-subj="histogramCollapseBtn"
         onClick={() => setIsCollapsed(!isCollapsed)}
         iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
         iconSize={'s'}
@@ -124,9 +124,11 @@ export const DiscoverChart = ({
 
   const histogramHeader = (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexItem grow={false}>{hitsCounter}</EuiFlexItem>
+      <EuiFlexGroup direction="row">
+        <EuiFlexItem grow={true}>{hitsCounter}</EuiFlexItem>
+        <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
+      </EuiFlexGroup>
       <EuiFlexItem grow={false}>{isTimeBased && timeChartHeader}</EuiFlexItem>
-      <EuiFlexItem grow={false}>{discoverOptions}</EuiFlexItem>
     </EuiFlexGroup>
   );
 
