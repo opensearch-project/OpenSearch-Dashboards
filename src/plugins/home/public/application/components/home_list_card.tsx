@@ -104,7 +104,7 @@ export const HomeListCard = ({ config }: { config: Config }) => {
             {config.allLink ? (
               <EuiLink href={config.allLink} target="_blank">
                 <EuiText size="s" className="eui-displayInline">
-                  {i18n.translate('workspace.list.card.view_all', {
+                  {i18n.translate('home.list.card.view_all', {
                     defaultMessage: 'View all',
                   })}
                 </EuiText>
