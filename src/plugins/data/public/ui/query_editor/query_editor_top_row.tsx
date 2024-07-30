@@ -71,7 +71,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
     storage,
     appName,
     data: {
-      query: { dataSet: dataSetManager },
+      query: { dataSetManager: dataSetManager },
     },
   } = opensearchDashboards.services;
   const { dataSet } = useDataSetManager({ dataSetManager: dataSetManager! });
@@ -212,7 +212,7 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         <QueryEditor
           disableAutoFocus={props.disableAutoFocus}
           dataSet={dataSet}
-          prepend={props.prepend}
+          queryActions={props.prepend}
           query={parsedQuery}
           dataSetContainerRef={props.dataSetContainerRef}
           settings={props.settings!}
@@ -269,8 +269,9 @@ export default function QueryEditorTopRow(props: QueryEditorTopRowProps) {
         data-test-subj="querySubmitButton"
         className="euiSuperUpdateButton"
         iconType="play"
+        fill
       >
-        {props.isDirty ? 'Refresh' : 'Run'}
+        Run
       </EuiButton>
     );
 

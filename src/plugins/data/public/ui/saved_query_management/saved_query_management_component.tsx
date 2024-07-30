@@ -42,7 +42,6 @@ import {
   EuiText,
   EuiSpacer,
   EuiIcon,
-  EuiToolTip,
 } from '@elastic/eui';
 
 import { i18n } from '@osd/i18n';
@@ -176,15 +175,15 @@ export function SavedQueryManagementComponent({
   });
 
   const savedQueryPopoverButton = (
-    <EuiToolTip content={label} delay="long" position="bottom">
-      <EuiSmallButtonEmpty
-        onClick={handleTogglePopover}
-        aria-label={label}
-        data-test-subj="saved-query-management-popover-button"
-      >
-        <EuiIcon type="save" className="euiQuickSelectPopover__buttonText" />
-      </EuiSmallButtonEmpty>
-    </EuiToolTip>
+    <EuiSmallButtonEmpty
+      onClick={handleTogglePopover}
+      aria-label={label}
+      data-test-subj="saved-query-management-popover-button"
+      className="osdSavedQueryManagement__popoverButton"
+      title={label}
+    >
+      <EuiIcon type="save" className="euiQuickSelectPopover__buttonText" />
+    </EuiSmallButtonEmpty>
   );
 
   const savedQueryRows = () => {

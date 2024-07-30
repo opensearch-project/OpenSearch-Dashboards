@@ -5,22 +5,18 @@ exports[`Saved query management component has a popover button 1`] = `
   anchorPosition="downLeft"
   buffer={-8}
   button={
-    <EuiToolTip
-      content="See saved queries"
-      delay="long"
-      position="bottom"
+    <EuiSmallButtonEmpty
+      aria-label="See saved queries"
+      className="osdSavedQueryManagement__popoverButton"
+      data-test-subj="saved-query-management-popover-button"
+      onClick={[Function]}
+      title="See saved queries"
     >
-      <EuiSmallButtonEmpty
-        aria-label="See saved queries"
-        data-test-subj="saved-query-management-popover-button"
-        onClick={[Function]}
-      >
-        <EuiIcon
-          className="euiQuickSelectPopover__buttonText"
-          type="save"
-        />
-      </EuiSmallButtonEmpty>
-    </EuiToolTip>
+      <EuiIcon
+        className="euiQuickSelectPopover__buttonText"
+        type="save"
+      />
+    </EuiSmallButtonEmpty>
   }
   closePopover={[Function]}
   display="inlineBlock"
