@@ -54,7 +54,7 @@ export class SavedObjectsPermissionControl {
   }
 
   private generateSavedObjectKey = ({ type, id }: { type: string; id: string }) => {
-    return `${type}${id}`;
+    return `${type}:${id}`;
   };
 
   private async bulkGetSavedObjects(
