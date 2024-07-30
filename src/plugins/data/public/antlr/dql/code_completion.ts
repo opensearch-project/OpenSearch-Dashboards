@@ -122,7 +122,6 @@ export const getSuggestions = async ({
   indexPatterns,
   position,
   selectionEnd,
-  core: coreSetup,
   services,
 }: QuerySuggestionGetFnArgs) => {
   if (
@@ -132,7 +131,7 @@ export const getSuggestions = async ({
   ) {
     return [];
   }
-  const http = coreSetup?.http;
+  const http = services.http;
   const currentIndexPattern = indexPatterns[0];
 
   const inputStream = CharStream.fromString(query);

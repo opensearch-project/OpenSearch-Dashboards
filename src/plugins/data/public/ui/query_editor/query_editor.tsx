@@ -285,7 +285,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     position: monaco.Position
   ): Promise<monaco.languages.CompletionList> => {
     const indexPatterns = await this.fetchIndexPatterns();
-
     const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
       query: this.getQueryString(),
       selectionStart: model.getOffsetAt(position),

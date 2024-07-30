@@ -31,6 +31,7 @@
 import { monaco } from '@osd/monaco';
 import { CoreSetup } from 'opensearch-dashboards/public';
 import { IFieldType, IIndexPattern } from '../../../common/index_patterns';
+import { IDataPluginServices } from '../../types';
 
 export enum QuerySuggestionTypes {
   Field = 'field',
@@ -54,7 +55,7 @@ export interface QuerySuggestionGetFnArgs {
   signal?: AbortSignal;
   boolFilter?: any;
   position?: monaco.Position;
-  services?: any; // will need to add type when ConnectionService is properly exposed from queryEnhancements
+  services?: IDataPluginServices;
   core?: CoreSetup;
 }
 
