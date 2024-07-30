@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  ApplicationStart,
   HttpStart,
   IUiSettingsClient,
   NotificationsStart,
@@ -36,7 +37,11 @@ import PrometheusLogo from '../icons/prometheus_logo.svg';
 import S3Logo from '../icons/s3_logo.svg';
 import { DataSourceSelector } from '../../data_source_selector';
 import { DataSourceOption } from '../../data_source_menu/types';
-import { DATACONNECTIONS_BASE } from '../../../constants';
+import { DATACONNECTIONS_BASE, observabilityMetricsID } from '../../../constants';
+import { getRenderCreateAccelerationFlyout } from '../../../plugin';
+import { InstallIntegrationFlyout } from '../integrations/installed_integrations_table';
+import { redirectToExplorerS3 } from '../associated_object_management/utils/associated_objects_tab_utils';
+import { isPluginInstalled, getHideLocalCluster } from '../../utils';
 
 interface DataConnection {
   connectionType: DirectQueryDatasourceType;
@@ -50,6 +55,7 @@ interface ManageDirectQueryDataConnectionsTableProps {
   savedObjects: SavedObjectsStart;
   uiSettings: IUiSettingsClient;
   featureFlagStatus: boolean;
+  application: ApplicationStart;
 }
 
 // Custom truncate function
@@ -64,16 +70,24 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
   savedObjects,
   uiSettings,
   featureFlagStatus,
+  application,
 }) => {
+  const [observabilityDashboardsExists, setObservabilityDashboardsExists] = useState(false);
+  const [showIntegrationsFlyout, setShowIntegrationsFlyout] = useState(false);
+  const [integrationsFlyout, setIntegrationsFlyout] = useState<React.JSX.Element | null>(null);
+
   const [data, setData] = useState<DataConnection[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [modalLayout, setModalLayout] = useState(<EuiOverlayMask />);
-  const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | undefined>('');
+  const [selectedConnection, setSelectedConnection] = useState<string | undefined>(undefined);
+  const [selectedDataSourceId, setSelectedDataSourceId] = useState<string | undefined>(undefined);
   const [searchText, setSearchText] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const history = useHistory();
 
   const fetchDataSources = useCallback(() => {
+    if (featureFlagStatus && selectedDataSourceId === undefined) return;
+
     const endpoint =
       featureFlagStatus && selectedDataSourceId !== undefined
         ? `${DATACONNECTIONS_BASE}/dataSourceMDSId=${selectedDataSourceId}`
@@ -99,28 +113,60 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       });
   }, [http, notifications.toasts, selectedDataSourceId, featureFlagStatus]);
 
+  const deleteDataSources = useCallback(
+    (connectionName: string | undefined) => {
+      if (!connectionName || (featureFlagStatus && selectedDataSourceId === undefined)) return;
+
+      const endpoint =
+        featureFlagStatus && selectedDataSourceId !== undefined
+          ? `${DATACONNECTIONS_BASE}/${connectionName}/dataSourceMDSId=${selectedDataSourceId}`
+          : `${DATACONNECTIONS_BASE}/${connectionName}`;
+
+      setIsLoading(true);
+
+      http
+        .delete(endpoint)
+        .then(() => {
+          notifications.toasts.addSuccess(`Data connection ${connectionName} deleted successfully`);
+          setData(data.filter((connection) => connection.name !== connectionName));
+        })
+        .catch((err) => {
+          notifications.toasts.addDanger(
+            `Data connection ${connectionName} not deleted. See output for more details.`
+          );
+        })
+        .finally(() => {
+          setIsLoading(false);
+          setSelectedConnection(undefined); // Clear the selected connection after deletion
+        });
+    },
+    [http, notifications.toasts, selectedDataSourceId, featureFlagStatus, data]
+  );
+
   useEffect(() => {
     fetchDataSources();
+    isPluginInstalled('plugin:observabilityDashboards', notifications, http).then(
+      setObservabilityDashboardsExists
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetchDataSources]);
 
   const handleSelectedDataSourceChange = (e: DataSourceOption[]) => {
-    const dataSourceId = e[0] ? e[0].id : '';
+    const dataSourceId = e[0] ? e[0].id : undefined;
     setSelectedDataSourceId(dataSourceId);
   };
 
-  const deleteConnection = (connectionName: string) => {
-    setData(data.filter((connection) => !(connection.name === connectionName)));
-  };
-
   const displayDeleteModal = (connectionName: string) => {
+    setSelectedConnection(connectionName);
     setModalLayout(
       <DeleteModal
         onConfirm={() => {
           setIsModalVisible(false);
-          deleteConnection(connectionName);
+          deleteDataSources(connectionName);
         }}
         onCancel={() => {
           setIsModalVisible(false);
+          setSelectedConnection(undefined); // Clear the selected connection if cancel is clicked
         }}
         title={`Delete ${connectionName}`}
         message={`Are you sure you want to delete ${connectionName}?`}
@@ -128,6 +174,8 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
     );
     setIsModalVisible(true);
   };
+
+  const renderCreateAccelerationFlyout = getRenderCreateAccelerationFlyout();
 
   const actions = [
     {
@@ -138,7 +186,14 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       isPrimary: true,
       icon: 'discoverApp',
       type: 'icon',
-      onClick: () => {},
+      available: (datasource: DataConnection) => observabilityDashboardsExists,
+      onClick: (datasource: DataConnection) => {
+        if (datasource.connectionType === 'PROMETHEUS') {
+          application!.navigateToApp(observabilityMetricsID);
+        } else if (datasource.connectionType === 'S3GLUE') {
+          redirectToExplorerS3(datasource.name, application);
+        }
+      },
       'data-test-subj': 'action-query',
     },
     {
@@ -147,7 +202,12 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       icon: 'bolt',
       type: 'icon',
       available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
-      onClick: () => {},
+      onClick: (datasource: DataConnection) => {
+        renderCreateAccelerationFlyout({
+          dataSourceName: datasource.name,
+          dataSourceMDSId: selectedDataSourceId ?? '',
+        });
+      },
       'data-test-subj': 'action-accelerate',
     },
     {
@@ -155,8 +215,21 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
       isPrimary: false,
       icon: 'integrationGeneral',
       type: 'icon',
-      available: (datasource: DataConnection) => datasource.connectionType !== 'PROMETHEUS',
-      onClick: () => {},
+      available: (datasource: DataConnection) =>
+        !featureFlagStatus &&
+        observabilityDashboardsExists &&
+        datasource.connectionType !== 'PROMETHEUS',
+      onClick: (datasource: DataConnection) => {
+        setIntegrationsFlyout(
+          <InstallIntegrationFlyout
+            closeFlyout={() => setShowIntegrationsFlyout(false)}
+            datasourceType={datasource.connectionType}
+            datasourceName={datasource.name}
+            http={http}
+          />
+        );
+        setShowIntegrationsFlyout(true);
+      },
       'data-test-subj': 'action-integrate',
     },
     {
@@ -195,7 +268,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
             <EuiLink
               data-test-subj={`${record.name}DataConnectionsLink`}
               onClick={() =>
-                history.push(`/manage/${record.name}?dataSourceMDSId=${selectedDataSourceId}`)
+                history.push(`/manage/${record.name}?dataSourceMDSId=${selectedDataSourceId ?? ''}`)
               }
             >
               {truncate(record.name, 100)}
@@ -235,6 +308,8 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
             uiSettings={uiSettings}
             disabled={false}
             compressed={true}
+            hideLocalCluster={getHideLocalCluster().enabled}
+            isClearable={false}
           />
         </EuiFlexItem>
       )}
@@ -284,6 +359,7 @@ export const ManageDirectQueryDataConnectionsTable: React.FC<ManageDirectQueryDa
         </EuiFlexItem>
       </EuiFlexGroup>
       {isModalVisible && modalLayout}
+      {showIntegrationsFlyout && integrationsFlyout}
     </EuiPageBody>
   );
 };

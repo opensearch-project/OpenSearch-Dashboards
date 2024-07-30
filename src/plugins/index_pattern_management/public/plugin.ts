@@ -47,6 +47,7 @@ import {
 
 import { ManagementSetup } from '../../management/public';
 import { DEFAULT_NAV_GROUPS, AppStatus, DEFAULT_APP_CATEGORIES } from '../../../core/public';
+import { getScopedBreadcrumbs } from '../../opensearch_dashboards_react/public';
 
 export interface IndexPatternManagementSetupDependencies {
   management: ManagementSetup;
@@ -148,7 +149,8 @@ export class IndexPatternManagementPlugin
           {
             ...params,
             basePath: core.http.basePath.get(),
-            setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+            setBreadcrumbs: (breadCrumbs) =>
+              coreStart.chrome.setBreadcrumbs(getScopedBreadcrumbs(breadCrumbs, params.history)),
             wrapInPage: true,
           },
           () => this.indexPatternManagementService.environmentService.getEnvironment().ml(),

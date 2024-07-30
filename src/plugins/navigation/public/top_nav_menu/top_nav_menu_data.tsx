@@ -30,7 +30,6 @@
 
 import { EuiButtonProps } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { string } from 'mathjs';
 
 export type TopNavMenuAction = (anchorElement: HTMLElement) => void;
 

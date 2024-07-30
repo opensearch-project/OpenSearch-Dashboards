@@ -291,4 +291,50 @@ export function registerDataConnectionsRoute(router: IRouter, dataSourceEnabled:
       }
     }
   );
+
+  router.delete(
+    {
+      path: `${DATACONNECTIONS_BASE}/{name}/dataSourceMDSId={dataSourceMDSId?}`,
+      validate: {
+        params: schema.object({
+          name: schema.string(),
+          dataSourceMDSId: schema.maybe(schema.string({ defaultValue: '' })),
+        }),
+      },
+    },
+    async (context, request, response): Promise<any> => {
+      const dataSourceMDSId = request.params.dataSourceMDSId;
+      try {
+        let dataConnectionsresponse;
+        if (dataSourceEnabled && dataSourceMDSId) {
+          const client = await context.dataSource.opensearch.legacy.getClient(dataSourceMDSId);
+          dataConnectionsresponse = await client.callAPI('ppl.deleteDataConnection', {
+            dataconnection: request.params.name,
+          });
+        } else {
+          dataConnectionsresponse = await context.opensearch_data_source_management.dataSourceManagementClient
+            .asScoped(request)
+            .callAsCurrentUser('ppl.deleteDataConnection', {
+              dataconnection: request.params.name,
+            });
+        }
+        return response.ok({
+          body: dataConnectionsresponse,
+        });
+      } catch (error: any) {
+        console.error('Issue in deleting data sources:', error);
+        const statusCode = error.statusCode || error.body?.statusCode || 500;
+        const errorBody = error.body ||
+          error.response || { message: error.message || 'Unknown error occurred' };
+
+        return response.custom({
+          statusCode,
+          body: {
+            error: errorBody,
+            message: errorBody.message || error.message,
+          },
+        });
+      }
+    }
+  );
 }

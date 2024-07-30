@@ -39,7 +39,10 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
     application,
   } = useOpenSearchDashboards<DataSourceManagementContext>().services;
 
-  const [selectedTabId, setSelectedTabId] = useState('manageDirectQueryDataSources');
+  const defaultTabId = featureFlagStatus
+    ? 'manageOpensearchDataSources'
+    : 'manageDirectQueryDataSources';
+  const [selectedTabId, setSelectedTabId] = useState(defaultTabId);
   const canManageDataSource = !!application.capabilities?.dataSource?.canManage;
 
   useEffect(() => {
@@ -51,10 +54,6 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
   };
 
   const tabs = [
-    {
-      id: 'manageDirectQueryDataSources',
-      name: 'Direct query connections',
-    },
     ...(featureFlagStatus
       ? [
           {
@@ -63,6 +62,10 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
           },
         ]
       : []),
+    {
+      id: 'manageDirectQueryDataSources',
+      name: 'Direct query connections',
+    },
   ];
 
   const renderTabs = () => {
@@ -110,6 +113,7 @@ export const DataSourceHomePanel: React.FC<DataSourceHomePanelProps> = ({
               savedObjects={savedObjects}
               uiSettings={uiSettings}
               featureFlagStatus={featureFlagStatus}
+              application={application}
             />
           )}
         </EuiFlexItem>

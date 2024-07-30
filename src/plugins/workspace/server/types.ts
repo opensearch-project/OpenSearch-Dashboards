@@ -18,6 +18,7 @@ import {
 export interface WorkspaceAttributeWithPermission extends WorkspaceAttribute {
   permissions?: Permissions;
 }
+import { WorkspacePermissionMode } from '../common/constants';
 
 export interface WorkspaceFindOptions {
   page?: number;
@@ -26,6 +27,7 @@ export interface WorkspaceFindOptions {
   searchFields?: string[];
   sortField?: string;
   sortOrder?: string;
+  permissionModes?: WorkspacePermissionMode[];
 }
 
 export interface IRequestDetail {

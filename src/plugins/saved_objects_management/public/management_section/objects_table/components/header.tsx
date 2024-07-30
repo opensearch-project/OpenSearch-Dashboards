@@ -42,13 +42,17 @@ import { FormattedMessage } from '@osd/i18n/react';
 export const Header = ({
   onExportAll,
   onImport,
+  onDuplicate,
   onRefresh,
-  filteredCount,
+  objectCount,
+  showDuplicateAll = false,
 }: {
   onExportAll: () => void;
   onImport: () => void;
+  onDuplicate: () => void;
   onRefresh: () => void;
-  filteredCount: number;
+  objectCount: number;
+  showDuplicateAll: boolean;
 }) => (
   <Fragment>
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="baseline">
@@ -65,6 +69,22 @@ export const Header = ({
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup alignItems="baseline" gutterSize="m" responsive={false}>
+          {showDuplicateAll && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="s"
+                data-test-subj="duplicateObjects"
+                onClick={onDuplicate}
+                disabled={objectCount === 0}
+                iconType="copy"
+              >
+                <FormattedMessage
+                  id="savedObjectsManagement.objectsTable.header.duplicateAllButtonLabel"
+                  defaultMessage="Copy all objects to..."
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
@@ -74,10 +94,7 @@ export const Header = ({
             >
               <FormattedMessage
                 id="savedObjectsManagement.objectsTable.header.exportButtonLabel"
-                defaultMessage="Export {filteredCount, plural, one{# object} other {# objects}}"
-                values={{
-                  filteredCount,
-                }}
+                defaultMessage="Export all objects"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

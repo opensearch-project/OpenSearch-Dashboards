@@ -38,7 +38,7 @@ export const sqlAsyncSearchStrategyProvider = (
           const df = request.body?.df;
           request.body = {
             query: request.body.query.qs,
-            datasource: df?.meta?.queryConfig?.dataSource,
+            datasource: df?.meta?.queryConfig?.dataSourceName,
             lang: 'sql',
             sessionId: df?.meta?.sessionId,
           };
@@ -55,7 +55,7 @@ export const sqlAsyncSearchStrategyProvider = (
           const sessionId = rawResponse.data?.sessionId;
 
           const partial: PartialDataFrame = {
-            name: '',
+            ...request.body.df,
             fields: rawResponse?.data?.schema || [],
           };
           const dataFrame = createDataFrame(partial);

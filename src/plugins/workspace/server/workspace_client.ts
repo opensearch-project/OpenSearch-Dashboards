@@ -174,6 +174,7 @@ export class WorkspaceClient implements IWorkspaceClientImpl {
         {
           ...options,
           type: WORKSPACE_TYPE,
+          ACLSearchParams: { permissionModes: options.permissionModes },
         }
       );
       return {

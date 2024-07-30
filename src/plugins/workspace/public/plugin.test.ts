@@ -187,7 +187,7 @@ describe('Workspace plugin', () => {
     expect(setupMock.application.register).toHaveBeenCalledWith(
       expect.objectContaining({
         id: 'workspace_detail',
-        navLinkStatus: AppNavLinkStatus.visible,
+        navLinkStatus: AppNavLinkStatus.hidden,
       })
     );
 

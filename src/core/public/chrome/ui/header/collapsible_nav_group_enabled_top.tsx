@@ -18,6 +18,7 @@ import { i18n } from '@osd/i18n';
 import { createEuiListItem } from './nav_link';
 import { NavGroupItemInMap } from '../../nav_group';
 import { ChromeNavLink } from '../../nav_links';
+import { ALL_USE_CASE_ID } from '../../../../../core/utils';
 
 export interface CollapsibleNavTopProps {
   navLinks: ChromeNavLink[];
@@ -44,6 +45,7 @@ export const CollapsibleNavTop = ({
 
   const shouldShowBackButton = useMemo(
     () =>
+      currentNavGroup?.id !== ALL_USE_CASE_ID &&
       !shouldShrinkNavigation &&
       Object.values(navGroupsMap).filter((item) => !item.type).length > 1 &&
       currentNavGroup,

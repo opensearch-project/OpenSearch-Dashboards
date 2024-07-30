@@ -7,8 +7,6 @@ import { EuiErrorBoundary } from '@elastic/eui';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Observable } from 'rxjs';
-import { IIndexPattern } from '../../../../common';
-import { DataSource } from '../../../data_sources/datasource';
 
 interface QueryEditorExtensionProps {
   config: QueryEditorExtensionConfig;
@@ -19,17 +17,21 @@ interface QueryEditorExtensionProps {
 
 export interface QueryEditorExtensionDependencies {
   /**
-   * Currently selected index patterns.
-   */
-  indexPatterns?: Array<IIndexPattern | string>;
-  /**
-   * Currently selected data source.
-   */
-  dataSource?: DataSource;
-  /**
    * Currently selected query language.
    */
   language: string;
+  /**
+   * Change the selected query language.
+   */
+  onSelectLanguage: (language: string) => void;
+  /**
+   * Whether the query editor is collapsed.
+   */
+  isCollapsed: boolean;
+  /**
+   * Set whether the query editor is collapsed.
+   */
+  setIsCollapsed: (isCollapsed: boolean) => void;
 }
 
 export interface QueryEditorExtensionConfig {

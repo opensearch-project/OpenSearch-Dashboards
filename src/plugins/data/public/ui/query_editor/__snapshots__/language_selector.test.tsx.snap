@@ -490,6 +490,7 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
           className="languageSelector__button"
           iconSide="right"
           iconSize="s"
+          iconType="arrowDown"
           onClick={[Function]}
         >
           DQL
@@ -513,6 +514,7 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
             className="languageSelector__button"
             iconSide="right"
             iconSize="s"
+            iconType="arrowDown"
             onClick={[Function]}
           >
             <button
@@ -526,6 +528,7 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
                 className="euiButtonEmpty__content"
                 iconSide="right"
                 iconSize="m"
+                iconType="arrowDown"
                 textProps={
                   Object {
                     "className": "euiButtonEmpty__text",
@@ -535,6 +538,19 @@ exports[`LanguageSelector should select DQL if language is kuery 1`] = `
                 <span
                   className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
+                  <EuiIcon
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    size="m"
+                    type="arrowDown"
+                  >
+                    <span
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                      size="m"
+                    />
+                  </EuiIcon>
                   <span
                     className="euiButtonEmpty__text"
                   >
@@ -1041,6 +1057,7 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
           className="languageSelector__button"
           iconSide="right"
           iconSize="s"
+          iconType="arrowDown"
           onClick={[Function]}
         >
           Lucene
@@ -1064,6 +1081,7 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
             className="languageSelector__button"
             iconSide="right"
             iconSize="s"
+            iconType="arrowDown"
             onClick={[Function]}
           >
             <button
@@ -1077,6 +1095,7 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
                 className="euiButtonEmpty__content"
                 iconSide="right"
                 iconSize="m"
+                iconType="arrowDown"
                 textProps={
                   Object {
                     "className": "euiButtonEmpty__text",
@@ -1086,6 +1105,19 @@ exports[`LanguageSelector should select lucene if language is lucene 1`] = `
                 <span
                   className="euiButtonContent euiButtonContent--iconRight euiButtonEmpty__content"
                 >
+                  <EuiIcon
+                    className="euiButtonContent__icon"
+                    color="inherit"
+                    size="m"
+                    type="arrowDown"
+                  >
+                    <span
+                      className="euiButtonContent__icon"
+                      color="inherit"
+                      data-euiicon-type="arrowDown"
+                      size="m"
+                    />
+                  </EuiIcon>
                   <span
                     className="euiButtonEmpty__text"
                   >

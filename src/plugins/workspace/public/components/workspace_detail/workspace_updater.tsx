@@ -65,6 +65,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
     dataSourceManagement?: DataSourceManagementPluginSetup;
   }>();
 
+  const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const availableUseCases = useObservable(props.registeredUseCases$, []);
   const [currentWorkspaceFormData, setCurrentWorkspaceFormData] = useState<FormDataFromWorkspace>();
@@ -160,6 +161,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
               onSubmit={handleWorkspaceFormSubmit}
               operationType={WorkspaceOperationType.Update}
               savedObjects={savedObjects}
+              permissionEnabled={isPermissionEnabled}
               detailTab={props.detailTab}
               dataSourceManagement={dataSourceManagement}
               availableUseCases={availableUseCases}

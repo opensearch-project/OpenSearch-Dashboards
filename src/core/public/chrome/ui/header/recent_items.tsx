@@ -20,8 +20,6 @@ import { WorkspaceObject } from '../../../workspace';
 import { createRecentNavLink } from './nav_link';
 import { HttpStart } from '../../../http';
 import { ChromeNavLink } from '../../../';
-// TODO: replace this icon once added to OUI
-import recent_items from './assets/recent_items.svg';
 
 export interface Props {
   recentlyAccessed$: Rx.Observable<ChromeRecentlyAccessedHistoryItem[]>;
@@ -71,7 +69,8 @@ export const RecentItems = ({
           }}
           data-test-subj="recentItemsSectionButton"
         >
-          <EuiIcon type={recent_items} size="m" />
+          {/* TODO: replace this icon once there is a new icon added to OUI https://github.com/opensearch-project/OpenSearch-Dashboards/issues/7354 */}
+          <EuiIcon type="recentlyViewedApp" size="m" />
         </EuiHeaderSectionItemButton>
       }
       isOpen={isPopoverOpen}

@@ -43,6 +43,9 @@ export const OPENSEARCH_API = {
   DATA_CONNECTIONS: URI.DATA_CONNECTIONS,
 };
 
-export const UI_SETTINGS = {};
+export const UI_SETTINGS = {
+  QUERY_ENHANCEMENTS_ENABLED: 'query:enhancements:enabled',
+  STATE_STORE_IN_SESSION_STORAGE: 'state:storeInSessionStorage',
+};
 
 export const ERROR_DETAILS = { GUARDRAILS_TRIGGERED: 'guardrails triggered' };
