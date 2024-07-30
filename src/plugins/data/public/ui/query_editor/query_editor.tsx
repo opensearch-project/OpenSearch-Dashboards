@@ -5,7 +5,7 @@
 
 import { PopoverAnchorPosition } from '@elastic/eui';
 import classNames from 'classnames';
-import { isEqual } from 'lodash';
+import { debounce, isEqual } from 'lodash';
 import React, { Component, createRef, RefObject } from 'react';
 import { monaco } from '@osd/monaco';
 import { Settings } from '..';
@@ -258,33 +258,37 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
-  private fetchIndexPatterns = async () => {
-    const client = this.services.savedObjects.client;
-    const dataSet = this.queryService.dataSetManager.getDataSet();
-    const title = dataSet?.title;
+  private fetchIndexPatterns = debounce(
+    async () => {
+      const client = this.services.savedObjects.client;
+      const dataSet = this.queryService.dataSetManager.getDataSet();
+      const title = dataSet?.title;
 
-    const resp = await client.find({
-      type: 'index-pattern',
-      fields: ['title', 'timeFieldName', 'fields'],
-      search: `${title}*`,
-      searchFields: ['title'],
-      perPage: 100,
-    });
+      const resp = await client.find({
+        type: 'index-pattern',
+        fields: ['title', 'timeFieldName', 'fields'],
+        search: `${title}*`,
+        searchFields: ['title'],
+        perPage: 100,
+      });
 
-    return resp.savedObjects.map((savedObject: any) => ({
-      id: savedObject.id,
-      title: savedObject.attributes?.title,
-      timeFieldName: savedObject.attributes?.timeFieldName,
-      fields: JSON.parse(savedObject.attributes?.fields),
-      type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
-    }));
-  };
+      return resp.savedObjects.map((savedObject: any) => ({
+        id: savedObject.id,
+        title: savedObject.attributes?.title,
+        timeFieldName: savedObject.attributes?.timeFieldName,
+        fields: JSON.parse(savedObject.attributes?.fields),
+        type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
+      }));
+    },
+    1000,
+    { leading: true }
+  );
 
   provideCompletionItems = async (
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): Promise<monaco.languages.CompletionList> => {
-    const indexPatterns = await this.fetchIndexPatterns();
+    const indexPatterns = (await this.fetchIndexPatterns()) ?? [];
     const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
       query: this.getQueryString(),
       selectionStart: model.getOffsetAt(position),
