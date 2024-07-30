@@ -20,9 +20,13 @@ import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
 import { SimpleDataSet } from '../../../common';
 import { createDQLEditor, createDefaultEditor } from './editors';
+import { getQueryService, getIndexPatterns } from '../../services';
 
-const LANGUAGE_ID = 'SQL';
-monaco.languages.register({ id: LANGUAGE_ID });
+const LANGUAGE_ID_SQL = 'SQL';
+monaco.languages.register({ id: LANGUAGE_ID_SQL });
+
+const LANGUAGE_ID_KUERY = 'kuery';
+monaco.languages.register({ id: LANGUAGE_ID_KUERY });
 
 export interface QueryEditorProps {
   dataSet?: SimpleDataSet;
@@ -93,6 +97,8 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
+
+  private queryService = getQueryService();
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
@@ -230,7 +236,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
-    // this.fetchIndexPatterns().then(this.updateSuggestions);
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -252,27 +257,35 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
+  private fetchIndexPattern = async () => {
+    const dataSetTitle = this.queryService.dataSetManager.getDataSet()?.title;
+    if (!dataSetTitle) return undefined;
+    return getIndexPatterns().getByTitle(dataSetTitle);
+  };
+
   provideCompletionItems = async (
     model: monaco.editor.ITextModel,
     position: monaco.Position
   ): Promise<monaco.languages.CompletionList> => {
-    const wordUntil = model.getWordUntilPosition(position);
-    const wordRange = new monaco.Range(
-      position.lineNumber,
-      wordUntil.startColumn,
-      position.lineNumber,
-      wordUntil.endColumn
-    );
-
+    const indexPattern = await this.fetchIndexPattern();
     const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
       query: this.getQueryString(),
       selectionStart: model.getOffsetAt(position),
       selectionEnd: model.getOffsetAt(position),
       language: this.props.query.language,
-      indexPatterns: this.state.indexPatterns,
+      indexPattern,
       position,
       services: this.services,
     });
+
+    // current completion item range being given as last 'word' at pos
+    const wordUntil = model.getWordUntilPosition(position);
+    const range = new monaco.Range(
+      position.lineNumber,
+      wordUntil.startColumn,
+      position.lineNumber,
+      wordUntil.endColumn
+    );
 
     return {
       suggestions:
@@ -280,8 +293,8 @@ export default class QueryEditorUI extends Component<Props, State> {
           ? suggestions.map((s: QuerySuggestion) => ({
               label: s.text,
               kind: s.type as monaco.languages.CompletionItemKind,
-              insertText: s.text,
-              range: wordRange,
+              insertText: s.insertText ?? s.text,
+              range,
             }))
           : [],
       incomplete: false,
@@ -353,6 +366,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           disposable.dispose();
         };
       },
+      provideCompletionItems: this.provideCompletionItems,
     };
 
     const languageEditor = useQueryEditor
