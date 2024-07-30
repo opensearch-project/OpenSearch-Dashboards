@@ -33,6 +33,7 @@ import { I18nStart } from 'opensearch-dashboards/public';
 import { DataPublicPluginStart } from 'src/plugins/data/public';
 import { TopNavMenuProps, TopNavMenu } from './top_nav_menu';
 import { RegisteredTopNavMenuData } from './top_nav_menu_data';
+import { TopNavControls, TopNavControlsProps } from './top_nav_controls';
 
 export function createTopNav(
   data: DataPublicPluginStart,
@@ -48,6 +49,16 @@ export function createTopNav(
     return (
       <i18n.Context>
         <TopNavMenu {...props} data={data} config={config} />
+      </i18n.Context>
+    );
+  };
+}
+
+export function createTopNavControl(i18n: I18nStart) {
+  return (props: TopNavControlsProps) => {
+    return (
+      <i18n.Context>
+        <TopNavControls {...props} />
       </i18n.Context>
     );
   };

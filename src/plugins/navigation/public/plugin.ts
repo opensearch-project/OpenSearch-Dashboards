@@ -34,7 +34,7 @@ import {
   NavigationPublicPluginStart,
   NavigationPluginStartDependencies,
 } from './types';
-import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
+import { TopNavMenuExtensionsRegistry, createTopNav, createTopNavControl } from './top_nav_menu';
 
 export class NavigationPublicPlugin
   implements Plugin<NavigationPublicPluginSetup, NavigationPublicPluginStart> {
@@ -59,6 +59,7 @@ export class NavigationPublicPlugin
     return {
       ui: {
         TopNavMenu: createTopNav(data, extensions, i18n),
+        HeaderControl: createTopNavControl(i18n),
       },
     };
   }

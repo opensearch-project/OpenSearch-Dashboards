@@ -28,8 +28,9 @@
  * under the License.
  */
 
-export { createTopNav } from './create_top_nav_menu';
+export { createTopNav, createTopNavControl } from './create_top_nav_menu';
 export { TopNavMenu, TopNavMenuProps } from './top_nav_menu';
+export { TopNavControls, TopNavControlsProps } from './top_nav_controls';
 export { TopNavMenuData } from './top_nav_menu_data';
 export {
   TopNavMenuExtensionsRegistrySetup,
