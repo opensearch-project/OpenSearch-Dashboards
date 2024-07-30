@@ -216,7 +216,7 @@ export class SavedObjectsPermissionControl {
     };
   }
 
-  public cacheSavedObjects(
+  public addToCacheAllowlist(
     request: OpenSearchDashboardsRequest,
     savedObjects: Array<Pick<SavedObjectsBulkGetObject, 'type' | 'id'>>
   ) {

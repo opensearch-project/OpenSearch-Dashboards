@@ -226,7 +226,7 @@ describe('PermissionControl', () => {
         return clientMock;
       });
       permissionControlClient.setup(getScopedClient, mockAuth);
-      permissionControlClient.cacheSavedObjects(requestMock, [
+      permissionControlClient.addToCacheAllowlist(requestMock, [
         {
           type: 'workspace',
           id: 'foo',
@@ -262,7 +262,7 @@ describe('PermissionControl', () => {
         return clientMock;
       });
       permissionControlClient.setup(getScopedClient, mockAuth);
-      permissionControlClient.cacheSavedObjects(requestMock, [
+      permissionControlClient.addToCacheAllowlist(requestMock, [
         {
           type: 'workspace',
           id: 'foo',
@@ -305,7 +305,7 @@ describe('PermissionControl', () => {
         return clientMock;
       });
       permissionControlClient.setup(getScopedClient, mockAuth);
-      permissionControlClient.cacheSavedObjects(requestMock, [
+      permissionControlClient.addToCacheAllowlist(requestMock, [
         {
           type: 'workspace',
           id: 'foo',

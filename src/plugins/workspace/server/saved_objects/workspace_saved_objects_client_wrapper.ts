@@ -255,7 +255,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       options?: SavedObjectsBulkUpdateOptions
     ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
       const objectsToUpdate = await wrapperOptions.client.bulkGet<T>(objects, options);
-      this.permissionControl.cacheSavedObjects(
+      this.permissionControl.addToCacheAllowlist(
         wrapperOptions.request,
         getWorkspacesFromSavedObjects(objectsToUpdate.saved_objects)
       );
@@ -316,7 +316,7 @@ export class WorkspaceSavedObjectsClientWrapper {
                 throw error;
               }
             }
-            this.permissionControl.cacheSavedObjects(
+            this.permissionControl.addToCacheAllowlist(
               wrapperOptions.request,
               getWorkspacesFromSavedObjects([rawObject])
             );
@@ -414,7 +414,7 @@ export class WorkspaceSavedObjectsClientWrapper {
       options: SavedObjectsBaseOptions = {}
     ): Promise<SavedObjectsBulkResponse<T>> => {
       const objectToBulkGet = await wrapperOptions.client.bulkGet<T>(objects, options);
-      this.permissionControl.cacheSavedObjects(
+      this.permissionControl.addToCacheAllowlist(
         wrapperOptions.request,
         getWorkspacesFromSavedObjects(objectToBulkGet.saved_objects)
       );
