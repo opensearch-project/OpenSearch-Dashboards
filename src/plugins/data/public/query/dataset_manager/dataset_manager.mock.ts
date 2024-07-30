@@ -12,6 +12,8 @@ const createSetupContractMock = () => {
     setDataSet: jest.fn(),
     getUpdates$: jest.fn(),
     getDefaultDataSet: jest.fn(),
+    fetchDefaultDataSet: jest.fn(),
+    initWithIndexPattern: jest.fn(),
   };
   return dataSetManagerMock;
 };
