@@ -123,10 +123,13 @@ export const DataSourceSelectable = ({
   onGetDataSetError, //   onGetDataSetError, Callback for handling get data set errors. Ensure it's memoized.
   singleSelection = { asPlainText: true },
   onRefresh,
+  uiSettings,
   ...comboBoxProps
 }: DataSourceSelectableProps) => {
   // This effect gets data sets and prepares the datasource list for UI rendering.
   useEffect(() => {
+    const newHomePageEnabled = uiSettings.get('home:useNewHomePage');
+    const queryEnhancementsEnabled = uiSettings.get('query:enhancements:enabled');
     Promise.all(
       getAllDataSets(
         dataSources.filter((ds) => ds.getMetadata().ui.selector.displayDatasetsAsSource)
@@ -136,12 +139,14 @@ export const DataSourceSelectable = ({
         setDataSourceOptionList(
           consolidateDataSourceGroups(
             dataSetResults as DataSetWithDataSource[],
-            dataSources.filter((ds) => !ds.getMetadata().ui.selector.displayDatasetsAsSource)
+            newHomePageEnabled && !queryEnhancementsEnabled
+              ? []
+              : dataSources.filter((ds) => !ds.getMetadata().ui.selector.displayDatasetsAsSource)
           )
         );
       })
       .catch((e) => onGetDataSetError(e));
-  }, [dataSources, setDataSourceOptionList, onGetDataSetError]);
+  }, [dataSources, setDataSourceOptionList, onGetDataSetError, uiSettings]);
 
   const handleSourceChange = useCallback(
     (selectedOptions: any) => onDataSourceSelect(selectedOptions),

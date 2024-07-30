@@ -8,6 +8,7 @@
  */
 
 import { EuiComboBoxProps, EuiComboBoxSingleSelectionShape } from '@elastic/eui';
+import { IUiSettingsClient } from 'opensearch-dashboards/public';
 import { DataSource } from '../datasource/datasource';
 
 export interface DataSourceGroup {
@@ -35,4 +36,5 @@ export interface DataSourceSelectableProps extends Pick<EuiComboBoxProps<unknown
   selectedSources: DataSourceOption[];
   setDataSourceOptionList: (dataSourceList: DataSourceGroup[]) => void;
   onRefresh: () => void;
+  uiSettings: IUiSettingsClient;
 }
