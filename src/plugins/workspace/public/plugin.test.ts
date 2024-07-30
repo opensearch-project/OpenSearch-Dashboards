@@ -171,7 +171,7 @@ describe('Workspace plugin', () => {
       expect.arrayContaining([
         {
           id: 'workspace_list',
-          order:150,
+          order: 150,
           title: 'Workspace settings',
         },
       ])
