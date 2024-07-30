@@ -46,7 +46,7 @@ export const getSuggestions = async ({
   services,
 }: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
   const { api } = services.uiSettings;
-  const dataSetManager = services.data.query.dataSet;
+  const dataSetManager = services.data.query.dataSetManager;
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
     line: position?.lineNumber || selectionStart,
     column: position?.column || selectionEnd,

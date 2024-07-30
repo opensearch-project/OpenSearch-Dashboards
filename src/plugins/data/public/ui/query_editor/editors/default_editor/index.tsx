@@ -40,7 +40,7 @@ const DefaultInput: React.FC<DefaultInputProps> = ({
     <div className="defaultEditor">
       <div ref={headerRef} className="defaultEditor__header" />
       <CodeEditor
-        height={200}
+        height={100}
         languageId={languageId}
         value={value}
         onChange={onChange}

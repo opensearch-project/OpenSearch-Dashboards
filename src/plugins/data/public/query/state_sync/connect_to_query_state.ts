@@ -56,13 +56,13 @@ import { validateTimeRange } from '../timefilter';
  */
 export const connectStorageToQueryState = async (
   {
-    dataSet,
+    dataSetManager,
     filterManager,
     queryString,
     state$,
   }: Pick<
     QueryStart | QuerySetup,
-    'timefilter' | 'filterManager' | 'queryString' | 'dataSet' | 'state$'
+    'timefilter' | 'filterManager' | 'queryString' | 'dataSetManager' | 'state$'
   >,
   OsdUrlStateStorage: IOsdUrlStateStorage,
   syncConfig: {
@@ -89,7 +89,7 @@ export const connectStorageToQueryState = async (
       filters: filterManager.getAppFilters(),
       ...(uiSettings &&
         uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) && {
-          dataSet: dataSet.getDataSet(),
+          dataSet: dataSetManager.getDataSet(),
         }),
     };
 
@@ -106,13 +106,16 @@ export const connectStorageToQueryState = async (
       }
     }
 
-    if (syncConfig.dataSet && !_.isEqual(initialStateFromURL.dataSet, dataSet.getDataSet())) {
+    if (
+      syncConfig.dataSet &&
+      !_.isEqual(initialStateFromURL.dataSet, dataSetManager.getDataSet())
+    ) {
       if (initialStateFromURL.dataSet) {
-        dataSet.setDataSet(_.cloneDeep(initialStateFromURL.dataSet));
+        dataSetManager.setDataSet(_.cloneDeep(initialStateFromURL.dataSet));
       } else {
-        const defaultDataSet = await dataSet.getDefaultDataSet();
+        const defaultDataSet = await dataSetManager.getDefaultDataSet();
         if (defaultDataSet) {
-          dataSet.setDataSet(defaultDataSet);
+          dataSetManager.setDataSet(defaultDataSet);
         }
       }
     }
@@ -150,7 +153,7 @@ export const connectStorageToQueryState = async (
               }
 
               if (syncConfig.dataSet && changes.dataSet) {
-                newState.dataSet = dataSet.getDataSet();
+                newState.dataSet = dataSetManager.getDataSet();
               }
 
               return newState;
@@ -182,11 +185,11 @@ export const connectToQueryState = <S extends QueryState>(
     timefilter: { timefilter },
     filterManager,
     queryString,
-    dataSet,
+    dataSetManager,
     state$,
   }: Pick<
     QueryStart | QuerySetup,
-    'timefilter' | 'filterManager' | 'dataSet' | 'queryString' | 'state$'
+    'timefilter' | 'filterManager' | 'dataSetManager' | 'queryString' | 'state$'
   >,
   stateContainer: BaseStateContainer<S>,
   syncConfig: {
@@ -278,7 +281,7 @@ export const connectToQueryState = <S extends QueryState>(
   }
 
   if (syncConfig.dataSet && !initialState.dataSet) {
-    initialState.dataSet = dataSet.getDefaultDataSet();
+    initialState.dataSet = dataSetManager.getDefaultDataSet();
     initialDirty = true;
   }
 
@@ -320,7 +323,7 @@ export const connectToQueryState = <S extends QueryState>(
             }
           }
           if (syncConfig.dataSet && changes.dataSet) {
-            newState.dataSet = dataSet.getDataSet();
+            newState.dataSet = dataSetManager.getDataSet();
           }
           return newState;
         })
@@ -382,14 +385,14 @@ export const connectToQueryState = <S extends QueryState>(
       }
 
       if (syncConfig.dataSet) {
-        const currentDataSet = dataSet.getDataSet();
+        const currentDataSet = dataSetManager.getDataSet();
         if (!_.isEqual(state.dataSet, currentDataSet)) {
           if (state.dataSet) {
-            dataSet.setDataSet(state.dataSet);
+            dataSetManager.setDataSet(state.dataSet);
           } else {
-            const defaultDataSet = await dataSet.getDefaultDataSet();
+            const defaultDataSet = dataSetManager.getDefaultDataSet();
             if (defaultDataSet) {
-              dataSet.setDataSet(defaultDataSet);
+              dataSetManager.setDataSet(defaultDataSet);
               stateContainer.set({ ...stateContainer.get(), dataSet: defaultDataSet });
             }
           }

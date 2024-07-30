@@ -15,11 +15,11 @@ describe('DataSetManager', () => {
     service = new DataSetManager(uiSettingsMock);
   });
 
-  test('getUpdates$ emits initially and after data set changes', () => {
+  test('getUpdates$ is a cold emits only after dataset changes', () => {
     const obs$ = service.getUpdates$();
-    const emittedValues: Array<SimpleDataSet | undefined> = [];
+    const emittedValues: SimpleDataSet[] = [];
     obs$.subscribe((v) => {
-      emittedValues.push(v);
+      emittedValues.push(v!);
     });
     expect(emittedValues).toHaveLength(0);
     expect(emittedValues[0]).toEqual(undefined);
