@@ -27,7 +27,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-
 import {
   EuiHeader,
   EuiHeaderProps,
@@ -37,6 +36,7 @@ import {
   EuiHideFor,
   EuiIcon,
   EuiShowFor,
+  EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
@@ -52,28 +52,30 @@ import {
   ChromeNavLink,
   ChromeRecentlyAccessedHistoryItem,
 } from '../..';
+import type { Logos } from '../../../../common/types';
+import { WorkspaceObject } from '../../../../public/workspace';
 import { InternalApplicationStart } from '../../../application/types';
 import { HttpStart } from '../../../http';
+import { getOsdSidecarPaddingStyle, ISidecarConfig } from '../../../overlays';
 import {
-  ChromeHelpExtension,
   ChromeBranding,
   ChromeBreadcrumbEnricher,
+  ChromeHelpExtension,
 } from '../../chrome_service';
+import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
 import { OnIsLockedUpdate } from './';
 import { CollapsibleNav } from './collapsible_nav';
+import { CollapsibleNavGroupEnabled } from './collapsible_nav_group_enabled';
+import './header.scss';
+import { HeaderActionMenu } from './header_action_menu';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
+import { HeaderControlsContainer } from './header_controls_container';
 import { HeaderHelpMenu } from './header_help_menu';
-import { HomeLoader } from './home_loader';
-import { HeaderNavControls } from './header_nav_controls';
-import { HeaderActionMenu } from './header_action_menu';
 import { HeaderLogo } from './header_logo';
-import type { Logos } from '../../../../common/types';
-import { ISidecarConfig, getOsdSidecarPaddingStyle } from '../../../overlays';
-import { CollapsibleNavGroupEnabled } from './collapsible_nav_group_enabled';
-import { ChromeNavGroupServiceStartContract, NavGroupItemInMap } from '../../nav_group';
+import { HeaderNavControls } from './header_nav_controls';
+import { HomeLoader } from './home_loader';
 import { RecentItems } from './recent_items';
-import { WorkspaceObject } from '../../../../public/workspace';
 
 export interface HeaderProps {
   opensearchDashboardsVersion: string;
@@ -133,6 +135,7 @@ export function Header({
   const appId = useObservable(application.currentAppId$, '');
   const [isNavOpen, setIsNavOpen] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
+  const breadcrumbs = useObservable(observables.breadcrumbs$, []);
 
   /**
    * This is a workaround on 2.16 to hide the navigation items within left navigation
@@ -160,7 +163,10 @@ export function Header({
     <>
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
-          {useExpandedHeader && (
+          {/* Ensure an explicit check for navGroupEnabled. Without this, the useExpandedHeader is rendered
+              even though when branding sets useExpandedHeader to false in core systems, resulting in an empty header
+              with a shadow.*/}
+          {!navGroupEnabled && useExpandedHeader && (
             <EuiHeader
               className="expandedHeader"
               theme={expandedHeaderColorScheme}
@@ -203,10 +209,11 @@ export function Header({
             />
           )}
 
-          <EuiHeader position="fixed" className="primaryHeader" style={sidecarPaddingStyle}>
-            <EuiHeaderSection grow={false}>
-              {shouldHideExpandIcon ? null : (
-                <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
+          {navGroupEnabled ? (
+            <div>
+              {/* Primary header */}
+              <EuiHeader className="primaryHeader newTopNavHeader" style={sidecarPaddingStyle}>
+                {shouldHideExpandIcon || isNavOpen ? null : (
                   <EuiHeaderSectionItemButton
                     data-test-subj="toggleNavButton"
                     aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
@@ -217,6 +224,7 @@ export function Header({
                     aria-pressed={isNavOpen}
                     aria-controls={navId}
                     ref={toggleCollapsibleNavRef}
+                    className="newTopNavExpander"
                   >
                     <EuiIcon
                       type="menu"
@@ -226,72 +234,243 @@ export function Header({
                       })}
                     />
                   </EuiHeaderSectionItemButton>
-                </EuiHeaderSectionItem>
-              )}
+                )}
+                <EuiHeaderSection grow={false}>
+                  {/* Recent items */}
+                  {/* Only display recent items when navGroup is enabled */}
+                  {navGroupEnabled && (
+                    <EuiHeaderSectionItem border="none">
+                      <RecentItems
+                        recentlyAccessed$={observables.recentlyAccessed$}
+                        workspaceList$={observables.workspaceList$}
+                        navigateToUrl={application.navigateToUrl}
+                        navLinks$={observables.navLinks$}
+                        basePath={basePath}
+                      />
+                    </EuiHeaderSectionItem>
+                  )}
+                </EuiHeaderSection>
 
-              <EuiHeaderSectionItem border="right">
-                <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
-              </EuiHeaderSectionItem>
-
-              <EuiHeaderSectionItem border="right">
-                <HomeLoader
-                  href={homeHref}
-                  forceNavigation$={observables.forceAppSwitcherNavigation$}
-                  navLinks$={observables.navLinks$}
-                  navigateToApp={application.navigateToApp}
-                  branding={branding}
-                  logos={logos}
-                  loadingCount$={observables.loadingCount$}
+                {/* Header breadcrumbs */}
+                <HeaderBreadcrumbs
+                  appTitle$={observables.appTitle$}
+                  breadcrumbs$={observables.breadcrumbs$}
+                  breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
+                  navGroupEnabled={navGroupEnabled}
                 />
-              </EuiHeaderSectionItem>
-              {/* Only display recent items when navGroup is enabled */}
-              {navGroupEnabled && (
+              </EuiHeader>
+
+              {/* Secondary header */}
+              <EuiHeader className="newTopNavHeader">
+                <EuiHeaderSection side="left">
+                  <EuiHeaderSectionItem border="none" className="newTopNavApplicationTitle">
+                    <EuiText>
+                      {breadcrumbs && <h2>{breadcrumbs[breadcrumbs.length - 1]?.text}</h2>}
+                    </EuiText>
+                  </EuiHeaderSectionItem>
+
+                  {/* New top nav controls badge */}
+                  <EuiHeaderSectionItem border="none">
+                    <HeaderControlsContainer
+                      data-test-subj="headerBadgeControl"
+                      controls$={application.currentBadgeControls$}
+                    />
+                  </EuiHeaderSectionItem>
+
+                  {/* Nav controls badge */}
+                  <EuiHeaderSectionItem border="none">
+                    <HeaderBadge badge$={observables.badge$} />
+                  </EuiHeaderSectionItem>
+
+                  {/* New top nav controls left */}
+                  <EuiHeaderSectionItem border="none">
+                    <HeaderControlsContainer
+                      data-test-subj="headerLeftControl"
+                      controls$={application.currentLeftControls$}
+                    />
+                  </EuiHeaderSectionItem>
+
+                  {/* Nav controls left */}
+                  <EuiHeaderSectionItem border="none">
+                    <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
+                  </EuiHeaderSectionItem>
+                </EuiHeaderSection>
+
+                <EuiHeaderSection side="right">
+                  {/* Expanded nav controls center */}
+                  <EuiHeaderSectionItem border="none">
+                    <HeaderNavControls navControls$={observables.navControlsExpandedCenter$} />
+                  </EuiHeaderSectionItem>
+
+                  {/* New top nav controls center */}
+                  <EuiHeaderSectionItem border="none">
+                    <HeaderControlsContainer
+                      data-test-subj="headerCenterControl"
+                      controls$={application.currentCenterControls$}
+                    />
+                  </EuiHeaderSectionItem>
+
+                  {/* Nav controls center*/}
+                  <EuiHeaderSectionItem border="none">
+                    <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                  </EuiHeaderSectionItem>
+
+                  {/* Nav actions menu only for datasources */}
+                  <EuiHeaderSectionItem border="none">
+                    <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
+                  </EuiHeaderSectionItem>
+
+                  {/* Expanded nav controls right */}
+                  <EuiHeaderSectionItem border="none">
+                    <HeaderNavControls navControls$={observables.navControlsExpandedRight$} />
+                  </EuiHeaderSectionItem>
+
+                  {/* New top nav controls right */}
+                  <EuiHeaderSectionItem border="none">
+                    <HeaderControlsContainer
+                      data-test-subj="headerRightControl"
+                      controls$={application.currentRightControls$}
+                    />
+                  </EuiHeaderSectionItem>
+
+                  {/* Nav controls center right*/}
+                  {/* Contains security item and appearance item */}
+                  <EuiHeaderSectionItem border="none">
+                    <HeaderNavControls side="right" navControls$={observables.navControlsRight$} />
+                  </EuiHeaderSectionItem>
+
+                  {/* Nav help section*/}
+                  <EuiHeaderSectionItem border="left">
+                    <HeaderHelpMenu
+                      helpExtension$={observables.helpExtension$}
+                      helpSupportUrl$={observables.helpSupportUrl$}
+                      opensearchDashboardsDocLink={opensearchDashboardsDocLink}
+                      opensearchDashboardsVersion={opensearchDashboardsVersion}
+                      surveyLink={survey}
+                    />
+                  </EuiHeaderSectionItem>
+                </EuiHeaderSection>
+              </EuiHeader>
+
+              {/* New top nav description */}
+              <EuiHeader className="newTopNavHeader">
+                <HeaderControlsContainer
+                  data-test-subj="headerDescriptionControl"
+                  controls$={application.currentDescriptionControls$}
+                  className="headerDescriptionControl"
+                />
+              </EuiHeader>
+
+              {/* New top nav bottom */}
+              <EuiHeader className="newTopNavHeader">
+                <HeaderControlsContainer
+                  data-test-subj="headerBottomControl"
+                  controls$={application.currentBottomControls$}
+                  className="headerBottomControl"
+                />
+              </EuiHeader>
+            </div>
+          ) : (
+            <EuiHeader position="fixed" className="primaryHeader" style={sidecarPaddingStyle}>
+              <EuiHeaderSection grow={false}>
+                {shouldHideExpandIcon ? null : (
+                  <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
+                    <EuiHeaderSectionItemButton
+                      data-test-subj="toggleNavButton"
+                      aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                        defaultMessage: 'Toggle primary navigation',
+                      })}
+                      onClick={() => setIsNavOpen(!isNavOpen)}
+                      aria-expanded={isNavOpen}
+                      aria-pressed={isNavOpen}
+                      aria-controls={navId}
+                      ref={toggleCollapsibleNavRef}
+                    >
+                      <EuiIcon
+                        type="menu"
+                        size="m"
+                        title={i18n.translate('core.ui.primaryNav.menu', {
+                          defaultMessage: 'Menu',
+                        })}
+                      />
+                    </EuiHeaderSectionItemButton>
+                  </EuiHeaderSectionItem>
+                )}
+
+                {/* Nav controls left */}
                 <EuiHeaderSectionItem border="right">
-                  <RecentItems
-                    recentlyAccessed$={observables.recentlyAccessed$}
-                    workspaceList$={observables.workspaceList$}
-                    navigateToUrl={application.navigateToUrl}
+                  <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
+                </EuiHeaderSectionItem>
+
+                {/* Home loader left */}
+                <EuiHeaderSectionItem border="right">
+                  <HomeLoader
+                    href={homeHref}
+                    forceNavigation$={observables.forceAppSwitcherNavigation$}
                     navLinks$={observables.navLinks$}
-                    basePath={basePath}
+                    navigateToApp={application.navigateToApp}
+                    branding={branding}
+                    logos={logos}
+                    loadingCount$={observables.loadingCount$}
                   />
                 </EuiHeaderSectionItem>
-              )}
-            </EuiHeaderSection>
 
-            <HeaderBreadcrumbs
-              appTitle$={observables.appTitle$}
-              breadcrumbs$={observables.breadcrumbs$}
-              breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
-            />
+                {/* Recent items */}
+                {/* Only display recent items when navGroup is enabled */}
+                {navGroupEnabled && (
+                  <EuiHeaderSectionItem border="right">
+                    <RecentItems
+                      recentlyAccessed$={observables.recentlyAccessed$}
+                      workspaceList$={observables.workspaceList$}
+                      navigateToUrl={application.navigateToUrl}
+                      navLinks$={observables.navLinks$}
+                      basePath={basePath}
+                    />
+                  </EuiHeaderSectionItem>
+                )}
+              </EuiHeaderSection>
 
-            <EuiHeaderSectionItem border="none">
-              <HeaderBadge badge$={observables.badge$} />
-            </EuiHeaderSectionItem>
+              {/* Header breadcrumbs */}
+              <HeaderBreadcrumbs
+                appTitle$={observables.appTitle$}
+                breadcrumbs$={observables.breadcrumbs$}
+                breadcrumbsEnricher$={observables.breadcrumbsEnricher$}
+              />
 
-            <EuiHeaderSection side="right">
+              {/* Nav controls badge */}
               <EuiHeaderSectionItem border="none">
-                <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
+                <HeaderBadge badge$={observables.badge$} />
               </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem border="left">
-                <HeaderNavControls navControls$={observables.navControlsCenter$} />
-              </EuiHeaderSectionItem>
+              {/* Nav actions menu only for datasources */}
+              <EuiHeaderSection side="right">
+                <EuiHeaderSectionItem border="none">
+                  <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
+                </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem border="left">
-                <HeaderNavControls side="right" navControls$={observables.navControlsRight$} />
-              </EuiHeaderSectionItem>
+                {/* Nav controls center*/}
+                <EuiHeaderSectionItem border="left">
+                  <HeaderNavControls navControls$={observables.navControlsCenter$} />
+                </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem border="left">
-                <HeaderHelpMenu
-                  helpExtension$={observables.helpExtension$}
-                  helpSupportUrl$={observables.helpSupportUrl$}
-                  opensearchDashboardsDocLink={opensearchDashboardsDocLink}
-                  opensearchDashboardsVersion={opensearchDashboardsVersion}
-                  surveyLink={survey}
-                />
-              </EuiHeaderSectionItem>
-            </EuiHeaderSection>
-          </EuiHeader>
+                {/* Nav controls center right*/}
+                <EuiHeaderSectionItem border="left">
+                  <HeaderNavControls side="right" navControls$={observables.navControlsRight$} />
+                </EuiHeaderSectionItem>
+
+                {/* Nav help section*/}
+                <EuiHeaderSectionItem border="left">
+                  <HeaderHelpMenu
+                    helpExtension$={observables.helpExtension$}
+                    helpSupportUrl$={observables.helpSupportUrl$}
+                    opensearchDashboardsDocLink={opensearchDashboardsDocLink}
+                    opensearchDashboardsVersion={opensearchDashboardsVersion}
+                    surveyLink={survey}
+                  />
+                </EuiHeaderSectionItem>
+              </EuiHeaderSection>
+            </EuiHeader>
+          )}
         </div>
 
         {navGroupEnabled ? (
