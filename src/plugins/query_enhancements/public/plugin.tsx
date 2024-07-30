@@ -86,6 +86,7 @@ export class QueryEnhancementsPlugin
             filterable: false,
             visualizable: false,
           },
+          showDocLinks: false,
           supportedAppNames: ['discover'],
         },
       },
