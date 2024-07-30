@@ -1,19 +1,20 @@
 # Plugin for managing dynamic page creation in OSD
-Use this plugin to create pages that multiple plugins can have contribution points. A typical use case is OSD homepage, 
-the homepage can have contents contributed by different plugins, see the screenshot:
+Use this plugin to create pages that multiple plugins can contribute to. A typical use case is the OSD homepage,
+which can have contents contributed by different plugins, see the screenshot:
 
 ![image](https://github.com/user-attachments/assets/501c2433-38c5-4b53-9974-de6f63eab94d)
 
 ## Getting started
-### Add `contentManagement` to `requiredPlugins`
+### Step 1: Add `contentManagement` to `requiredPlugins`
+Ensure `contentManagement` is listed in the `requiredPlugins` array of your plugin's manifest file.
 ```json
 {
   "requiredPlugins": ["contentManagement"]
 }
 ```
 
-### Create a page with defined sections
-A section is typically a horizontal container on the page, a page could have multiple sections defined, taking homepage as example:
+### Step 2: Create a page with defined sections
+A section is typically a container on the page, and a page could have multiple sections. Using the homepage as an example:
 ```typescript
 export const HOME_PAGE_ID = 'osd_homepage';
 export enum SECTIONS {
@@ -38,19 +39,11 @@ export class MyPlugin implements Plugin {
           order: 2000,
           title: 'Recently viewed',
           kind: 'custom',
-          render: (contents) => {
-            return (
-              <>
-                {contents.map((content) => {
-                  if (content.kind === 'custom') {
-                    return content.render();
-                  }
-    
-                  return null;
-                })}
-              </>
-            );
-          },
+          render: (contents) => (
+            <>
+              {contents.map((content) => content.kind === 'custom' ? content.render() : null)}
+            </>
+          ),
         },
         {
           id: SECTIONS.GET_STARTED,
@@ -63,12 +56,12 @@ export class MyPlugin implements Plugin {
   }
 }
 ```
-Here we defined a page with three different kinds of sections: `dashboard`, `custom` and `card`, the sections will be sorted by `order` ascending.
-Each kind of section serves different purpose:
+Here we defined a page with three different kinds of sections: `dashboard`, `custom` and `card`, the sections will be sorted by `order` in ascending order.
+Each type of section serves a different purpose:
 
-### `card` section
+#### `card` section
 A `card` section is one of the pre-defined section type that renders a horizontal list of OuiCard components, to add
-contents to a `card` section, simply call `contentManagement.registerContentProvider` with `title` and `description`:
+contents to a `card` section, call `contentManagement.registerContentProvider` with a `title` and `description`:
 ```typescript
 export class MyPlugin implements Plugin {
   public start(core, { contentManagement }) {
@@ -87,9 +80,9 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-### `dashboard` section
-A `dashboard` section is typically a dashboard embeddable container, it renders visualization by given visualization id,
-it renders a saved dashboard by given a dashboard id, or it can render arbitrary React components.
+#### `dashboard` section
+A `dashboard` section is typically a dashboard embeddable container, it can render visualization or dashboard by their id,
+or it can render arbitrary React components.
 
 Add a saved visualization to a `dashboard` section **statically**
 ```typescript
@@ -197,28 +190,20 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-### `custom` section
-If the existing pre-defined section doesn't meet your needs, you could use `custom` section to customize the rendering of the contents,
-a custom section is typically defined with `kind: 'custom'` and with a `render` function to allow you to cusomize the rendering:
+#### `custom` section
+If the existing pre-defined sections do not meet your needs, you could use `custom` section to customize the rendering of the contents,
+a custom section is typically defined with `kind: 'custom'` and a `render` function:
 ```typescript
 {
   id: SECTIONS.RECENTLY_VIEWED,
   order: 2000,
   title: 'Recently viewed',
   kind: 'custom',
-  render: (contents) => {
-    return (
-      <>
-        {contents.map((content) => {
-          if (content.kind === 'custom') {
-            return content.render();
-          }
-
-          return null;
-        })}
-      </>
-    );
-  },
+  render: (contents) => (
+    <>
+      {contents.map((content) => content.kind === 'custom' ? content.render() : null)}
+    </>
+  ),
 }
 ```
 
@@ -242,10 +227,10 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-### Render the page
+### Step 3: Render the page
+Finally, render the page in your application:
 ```typescript
 <Route exact path="/">
   {contentManagement.renderPage(HOME_PAGE_ID)}
 </Route>
 ```
-
