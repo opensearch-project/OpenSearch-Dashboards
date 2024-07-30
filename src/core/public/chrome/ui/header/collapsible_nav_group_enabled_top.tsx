@@ -104,11 +104,11 @@ export const CollapsibleNavTop = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="l"
-              onClick={isInGlobalWorkspace ? homeLinkProps.onClick : onClickBack}
+              onClick={isOutsideWorkspace ? homeLinkProps.onClick : onClickBack}
               data-test-subj="collapsibleNavBackButton"
             >
               <EuiIcon type="arrowLeft" />
-              {isInGlobalWorkspace
+              {isOutsideWorkspace
                 ? i18n.translate('core.ui.primaryNav.homeButtonLabel', {
                     defaultMessage: 'Home',
                   })
