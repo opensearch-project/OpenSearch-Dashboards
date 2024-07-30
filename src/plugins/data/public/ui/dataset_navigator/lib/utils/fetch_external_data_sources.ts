@@ -18,7 +18,15 @@ export const fetchIfExternalDataSourcesEnabled = async (http: HttpStart) => {
 export const fetchExternalDataSources = async (http: HttpStart, connectedClusters: string[]) => {
   const results = await Promise.all(
     connectedClusters.map(async (cluster) => {
-      const dataSources = await http.get(`/api/dataconnections/dataSourceMDSId=${cluster}`);
+      let dataSources;
+      try {
+        dataSources = await http.get(`/api/dataconnections/dataSourceMDSId=${cluster}`);
+      } catch {
+        return [];
+      } finally {
+        console.log('dataSources', dataSources);
+      }
+
       return dataSources
         .filter((dataSource: DatasourceDetails) => dataSource.connector === 'S3GLUE')
         .map((dataSource: DatasourceDetails) => ({

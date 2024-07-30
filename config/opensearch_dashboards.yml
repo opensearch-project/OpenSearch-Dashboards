@@ -5,6 +5,7 @@
 # The default is 'localhost', which usually means remote machines will not be able to connect.
 # To allow connections from remote users, set this parameter to a non-loopback address.
 #server.host: "localhost"
+server.host: 0.0.0.0
 
 # Enables you to specify a path to mount OpenSearch Dashboards at if you are running behind a proxy.
 # Use the `server.rewriteBasePath` setting to tell OpenSearch Dashboards if it should remove the basePath
@@ -24,6 +25,7 @@
 
 # The URLs of the OpenSearch instances to use for all your queries.
 #opensearch.hosts: ["http://localhost:9200"]
+opensearch.hosts: []
 
 # OpenSearch Dashboards uses an index in OpenSearch to store saved searches, visualizations and
 # dashboards. OpenSearch Dashboards creates a new index if the index doesn't already exist.
@@ -34,11 +36,11 @@
 # opensearchDashboards.configIndex: ".opensearch_dashboards_config"
 
 # Set the value of this setting to true to enable plugin application config. By default it is disabled.
-# application_config.enabled: false
+application_config.enabled: true
 
 # Set the value of this setting to true to enable plugin CSP handler. By default it is disabled.
 # It requires the application config plugin as its dependency.
-# csp_handler.enabled: false
+csp_handler.enabled: true
 
 # The default application to load.
 #opensearchDashboards.defaultAppId: "home"
@@ -88,22 +90,6 @@
 # To disregard the validity of SSL certificates, change this setting's value to 'none'.
 #opensearch.ssl.verificationMode: full
 
-# Allowed cipher suites list can be configured below, in preference order.
-# Cipher suite names should be in OpenSSL format (https://www.openssl.org/docs/man1.1.1/man1/ciphers.html#CIPHER-SUITE-NAMES)
-# Default set of cipher suites for your system can be checked by running the following command in your terminal:
-# echo 'console.log(require("crypto").constants.defaultCoreCipherList.split(":"))' | node -
-# Below you can find an example of cipher suites considered to be secure
-# Keep in mind that older clients might not support them
-# Refer to https://ciphersuite.info/ and https://ssl-config.mozilla.org/ for more details and recommendations about cipher suites
-# Keep in mind that restricting cipher suites might disable older versions of TLS, as not all cipher suites are supported by them
-#server.ssl.cipherSuites:
-#  - TLS_AES_256_GCM_SHA384
-#  - TLS_CHACHA20_POLY1305_SHA256
-#  - TLS_AES_128_GCM_SHA256
-#  - ECDHE-ECDSA-AES256-GCM-SHA384
-#  - ECDHE-ECDSA-CHACHA20-POLY1305
-#  - ECDHE-ECDSA-AES128-GCM-SHA256
-
 # Time in milliseconds to wait for OpenSearch to respond to pings. Defaults to the value of
 # the opensearch.requestTimeout setting.
 #opensearch.pingTimeout: 1500
@@ -150,11 +136,6 @@
 
 # Enables you to specify a file where OpenSearch Dashboards stores log output.
 #logging.dest: stdout
-
-# This configuration option controls the handling of error messages in the logging stream. It is disabled by default.
-# When set to true, the 'ENOSPC' error message will not cause the OpenSearch Dashboards process to crash. Otherwise,
-# the original behavior will be maintained.
-#logging.ignoreEnospcError: false
 
 # Set the value of this setting to true to suppress all logging output.
 #logging.silent: false
@@ -268,9 +249,9 @@
 # vis_builder.enabled: false
 
 # Set the value of this setting to true to enable multiple data source feature.
-#data_source.enabled: false
+data_source.enabled: true
 # Set the value of this setting to true to hide local cluster in data source feature.
-#data_source.hideLocalCluster: false
+data_source.hideLocalCluster: true
 # Set the value of these settings to customize crypto materials to encryption saved credentials
 # in data sources.
 #data_source.encryption.wrappingKeyName: 'changeme'
@@ -313,19 +294,13 @@
 # Set enabled false to hide authentication method in OpenSearch Dashboards.
 # If this setting is commented then all 3 options will be available in OpenSearch Dashboards.
 # Default value will be considered to True.
-#data_source.authTypes:
-#   NoAuthentication:
-#     enabled: true
-#   UsernamePassword:
-#     enabled: true
-#   AWSSigV4:
-#     enabled: true
-
-# Optional setting that controls the permissions of data source to create, update and delete.
-# "none": The data source is readonly for all users.
-# "dashboard_admin": The data source can only be managed by dashboard admin.
-# "all": The data source can be managed by all users. Default to "all".
-# data_source_management.manageableBy: "all"
+data_source.authTypes:
+  NoAuthentication:
+    enabled: true
+  UsernamePassword:
+    enabled: true
+  AWSSigV4:
+    enabled: true
 
 # Set the value of this setting to false to hide the help menu link to the OpenSearch Dashboards user survey
 # opensearchDashboards.survey.url: "https://survey.opensearch.org"
@@ -333,21 +308,16 @@
 # @experimental Set the value of this setting to display navigation updates, including dev tool top right navigation
 # opensearchDashboards.futureNavigation: false
 
-# Set the value of this setting to true to enable plugin augmentation on Dashboard
+# Set the value of this setting to true to enable plugin augmentation
 # vis_augmenter.pluginAugmentationEnabled: true
 
 # Set the value to true to enable permission control for saved objects
 # Permission control depends on OpenSearch Dashboards has authentication enabled, set it to false when the security plugin is not installed,
 # if the security plugin is not installed and this config is true, permission control takes no effect.
-# savedObjects.permission.enabled: true
+savedObjects.permission.enabled: true
 
 # Set the value to true to enable workspace feature
-# Please note, workspace will not work with multi-tenancy. To enable workspace feature, you need to disable multi-tenancy first with `opensearch_security.multitenancy.enabled: false`
-# Please uncomment below uiSettings to enable new home/navigation experience when workspace is enabled
-# workspace.enabled: false
-# uiSettings:
-#   overrides:
-#     "home:useNewHomePage": true
+workspace.enabled: true
 
 # Optional settings to specify saved object types to be deleted during migration.
 # This feature can help address compatibility issues that may arise during the migration of saved objects, such as types defined by legacy applications.
@@ -359,7 +329,28 @@
 # This publishes the Application Usage and UI Metrics into the saved object, which can be accessed by /api/stats?extended=true&legacy=true&exclude_usage=false
 # usageCollection.uiMetric.enabled: false
 
-# Set the backend roles in groups or users, whoever has the backend roles or exactly match the user ids defined in this config will be regard as dashboard admin.
-# Dashboard admin will have the access to all the workspaces(workspace.enabled: true) and objects inside OpenSearch Dashboards.
-# opensearchDashboards.dashboardAdmin.groups: ["dashboard_admin"]
-# opensearchDashboards.dashboardAdmin.users: ["dashboard_admin"]
+# Neo specific configuration
+dashboardsPlugin.enabled: true
+migrations.skip: true
+
+# Config content-security-policy directives
+csp.rules:
+  [
+    "base-uri 'self'",
+    "connect-src 'self' vector-tiles.maps.search-services.aws.a2z.com maps.opensearch.org;",
+    "default-src 'self' data:;",
+    "font-src 'self'",
+    "frame-ancestors 'self' https://*.console.aws-dev.amazon.com https://*.console.aws.amazon.com;",
+    "img-src data: 'self' tiles.maps.opensearch.org;",
+    "object-src 'none'",
+    "script-src 'unsafe-eval' 'self';",
+    "style-src 'unsafe-inline' 'self'",
+    "worker-src blob: 'self'",
+  ]
+
+vis_type_timeline.enabled: false
+# Set the value of this setting to true to turn on dashboard assistant
+# assistant.chat.enabled: true
+
+# Set the value to true to enable enhancements for the data plugin
+#data.enhancements.enabled: true
