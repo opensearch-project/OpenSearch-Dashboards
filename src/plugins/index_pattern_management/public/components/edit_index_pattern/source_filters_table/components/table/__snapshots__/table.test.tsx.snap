@@ -2,19 +2,31 @@
 
 exports[`Table editing should show a save button 1`] = `
 <div>
-  <EuiButtonIcon
-    aria-label="Edit"
-    iconType="pencil"
-    onClick={[Function]}
-    size="s"
-  />
-  <EuiButtonIcon
-    aria-label="Delete"
-    color="danger"
-    iconType="trash"
-    onClick={[Function]}
-    size="s"
-  />
+  <EuiToolTip
+    content="Edit"
+    delay="long"
+    position="top"
+  >
+    <EuiButtonIcon
+      aria-label="Edit"
+      iconType="pencil"
+      onClick={[Function]}
+      size="s"
+    />
+  </EuiToolTip>
+  <EuiToolTip
+    content="Delete"
+    delay="long"
+    position="top"
+  >
+    <EuiButtonIcon
+      aria-label="Delete"
+      color="danger"
+      iconType="trash"
+      onClick={[Function]}
+      size="s"
+    />
+  </EuiToolTip>
 </div>
 `;
 
