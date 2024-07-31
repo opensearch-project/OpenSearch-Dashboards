@@ -61,7 +61,8 @@ Each type of section serves a different purpose:
 
 #### `card` section
 A `card` section is one of the pre-defined section type that renders a horizontal list of OuiCard components, to add
-contents to a `card` section, call `contentManagement.registerContentProvider` with a `title` and `description`:
+contents to a `card` section, call `contentManagement.registerContentProvider` with a `title` and `description`, and the content
+will be sorted by its `order` in ascending order.
 ```typescript
 export class MyPlugin implements Plugin {
   public start(core, { contentManagement }) {
