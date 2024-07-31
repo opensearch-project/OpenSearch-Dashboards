@@ -587,6 +587,18 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
           workspaces: ['mock-request-workspace-id'],
         });
       });
+
+      it('should not validate data source when not in workspace', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+        const result = await wrapper.get('data-source', 'workspace-1-data-source');
+        expect(result).toEqual({
+          type: DATA_SOURCE_SAVED_OBJECT_TYPE,
+          id: 'workspace-1-data-source',
+          attributes: { title: 'Workspace 1 data source' },
+          workspaces: ['workspace-1'],
+        });
+      });
     });
     describe('bulk get', () => {
       it("should call permission validate with object's workspace and throw permission error", async () => {
@@ -684,6 +696,29 @@ describe('WorkspaceSavedObjectsClientWrapper', () => {
               id: 'workspace-2-data-source',
               type: 'data-source',
               workspaces: ['mock-request-workspace-id'],
+            },
+          ],
+        });
+      });
+
+      it('should not validate data source when not in workspace', async () => {
+        const { wrapper, requestMock } = generateWorkspaceSavedObjectsClientWrapper();
+        updateWorkspaceState(requestMock, { requestWorkspaceId: undefined });
+        const result = await wrapper.bulkGet([
+          {
+            type: 'data-source',
+            id: 'workspace-1-data-source',
+          },
+        ]);
+        expect(result).toEqual({
+          saved_objects: [
+            {
+              attributes: {
+                title: 'Workspace 1 data source',
+              },
+              id: 'workspace-1-data-source',
+              type: 'data-source',
+              workspaces: ['workspace-1'],
             },
           ],
         });
