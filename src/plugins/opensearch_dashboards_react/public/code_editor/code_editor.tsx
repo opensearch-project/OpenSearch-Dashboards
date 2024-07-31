@@ -38,6 +38,14 @@ import { LIGHT_THEME, DARK_THEME } from './editor_theme';
 
 import './editor.scss';
 
+export interface LanguageSpecifiedConfiguration extends monaco.languages.LanguageConfiguration {
+  /**
+   * The language ID, meant to restrict the specified configuration for only this language. When
+   * not provided, will apply the language configuration for every language.
+   */
+  language?: string;
+}
+
 export interface Props {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
@@ -87,7 +95,7 @@ export interface Props {
    * Documentation for the provider can be found here:
    * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.languageconfiguration.html
    */
-  languageConfiguration?: monaco.languages.LanguageConfiguration;
+  languageConfiguration?: LanguageSpecifiedConfiguration;
 
   /**
    * Function called before the editor is mounted in the view
@@ -127,33 +135,6 @@ export class CodeEditor extends React.Component<Props, {}> {
       this.props.editorWillMount();
     }
 
-    monaco.languages.onLanguage(this.props.languageId, () => {
-      if (this.props.suggestionProvider) {
-        monaco.languages.registerCompletionItemProvider(
-          this.props.languageId,
-          this.props.suggestionProvider
-        );
-      }
-
-      if (this.props.signatureProvider) {
-        monaco.languages.registerSignatureHelpProvider(
-          this.props.languageId,
-          this.props.signatureProvider
-        );
-      }
-
-      if (this.props.hoverProvider) {
-        monaco.languages.registerHoverProvider(this.props.languageId, this.props.hoverProvider);
-      }
-
-      if (this.props.languageConfiguration) {
-        monaco.languages.setLanguageConfiguration(
-          this.props.languageId,
-          this.props.languageConfiguration
-        );
-      }
-    });
-
     // Register the theme
     monaco.editor.defineTheme('euiColors', this.props.useDarkTheme ? DARK_THEME : LIGHT_THEME);
   };
@@ -172,6 +153,34 @@ export class CodeEditor extends React.Component<Props, {}> {
 
   render() {
     const { languageId, value, onChange, width, height, options } = this.props;
+
+    monaco.languages.onLanguage(languageId, () => {
+      if (this.props.suggestionProvider) {
+        monaco.languages.registerCompletionItemProvider(languageId, this.props.suggestionProvider);
+      }
+
+      if (this.props.signatureProvider) {
+        monaco.languages.registerSignatureHelpProvider(languageId, this.props.signatureProvider);
+      }
+
+      if (this.props.hoverProvider) {
+        monaco.languages.registerHoverProvider(languageId, this.props.hoverProvider);
+      }
+
+      if (this.props.languageConfiguration) {
+        // if the language isn't specified or the language configuration specified language
+        // matches, use the configuration
+        if (
+          !this.props.languageConfiguration.language ||
+          this.props.languageConfiguration.language === languageId
+        ) {
+          monaco.languages.setLanguageConfiguration(
+            this.props.languageId,
+            this.props.languageConfiguration
+          );
+        }
+      }
+    });
 
     return (
       <React.Fragment>

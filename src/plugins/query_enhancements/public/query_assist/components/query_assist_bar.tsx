@@ -35,7 +35,9 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { generateQuery, loading } = useGenerateQuery();
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
-  const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet>();
+  const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet | undefined>(
+    services.data.query.dataSetManager.getDataSet()
+  );
   const selectedIndex = selectedDataSet?.title;
   const previousQuestionRef = useRef<string>();
 
@@ -85,7 +87,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   if (props.dependencies.isCollapsed) return null;
 
   return (
-    <EuiForm component="form" onSubmit={onSubmit}>
+    <EuiForm component="form" onSubmit={onSubmit} className="queryAssist queryAssist__form">
       <EuiFormRow fullWidth>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem>

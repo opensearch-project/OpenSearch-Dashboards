@@ -4,156 +4,74 @@
  */
 
 import { of } from 'rxjs';
-import { getRawSuggestionData$, fetchData, fetchTableSchemas, fetchColumnValues } from './utils';
-
-describe('getRawSuggestionData$', () => {
-  it('should return default request handler data when connection is undefined', (done) => {
-    const mockConnectionsService = {
-      getSelectedConnection$: jest.fn().mockReturnValue(of(undefined)),
-    };
-    const mockDefaultRequestHandler = jest.fn().mockResolvedValue('defaultData');
-    const mockDataSourceRequestHandler = jest.fn();
-
-    getRawSuggestionData$(
-      mockConnectionsService,
-      mockDataSourceRequestHandler,
-      mockDefaultRequestHandler
-    ).subscribe((result) => {
-      expect(result).toBe('defaultData');
-      expect(mockDefaultRequestHandler).toHaveBeenCalled();
-      expect(mockDataSourceRequestHandler).not.toHaveBeenCalled();
-      done();
-    });
-  });
-
-  it('should return data source request handler data when connection is defined', (done) => {
-    const mockConnectionsService = {
-      getSelectedConnection$: jest.fn().mockReturnValue(
-        of({
-          dataSource: { id: 'testId' },
-          attributes: { title: 'testTitle' },
-        })
-      ),
-    };
-    const mockDefaultRequestHandler = jest.fn();
-    const mockDataSourceRequestHandler = jest.fn().mockResolvedValue('dataSourceData');
-
-    getRawSuggestionData$(
-      mockConnectionsService,
-      mockDataSourceRequestHandler,
-      mockDefaultRequestHandler
-    ).subscribe((result) => {
-      expect(result).toBe('dataSourceData');
-      expect(mockDataSourceRequestHandler).toHaveBeenCalledWith({
-        dataSourceId: 'testId',
-        title: 'testTitle',
-      });
-      expect(mockDefaultRequestHandler).not.toHaveBeenCalled();
-      done();
-    });
-  });
-});
+import { fetchData } from './utils';
+import { DataSetManager } from '../../query';
 
 describe('fetchData', () => {
   it('should fetch data using the dataSourceRequestHandler', async () => {
     const mockTables = ['table1', 'table2'];
-    const mockQueryFormatter = jest.fn((table) => ({ query: `formatted ${table}` }));
+    const mockQueryFormatter = jest.fn((table, dataSourceId, title) => ({
+      query: { qs: `formatted ${table}`, format: 'jdbc' },
+      df: {
+        meta: {
+          queryConfig: {
+            dataSourceId,
+            title,
+          },
+        },
+      },
+    }));
     const mockApi = {
       http: {
         fetch: jest.fn().mockResolvedValue('fetchedData'),
       },
     };
-    const mockConnectionService = {
-      getSelectedConnection$: jest
+    const mockDataSetManager: Partial<DataSetManager> = {
+      getUpdates$: jest
         .fn()
-        .mockReturnValue(of({ id: 'testId', attributes: { title: 'testTitle' } })),
+        .mockReturnValue(of({ dataSourceRef: { id: 'testId', name: 'testTitle' } })),
+      getDataSet: jest.fn().mockReturnValue({ dataSourceRef: { id: 'testId', name: 'testTitle' } }),
     };
 
-    const result = await fetchData(mockTables, mockQueryFormatter, mockApi, mockConnectionService);
+    const result = await fetchData(
+      mockTables,
+      mockQueryFormatter,
+      mockApi,
+      mockDataSetManager as DataSetManager
+    );
     expect(result).toEqual(['fetchedData', 'fetchedData']);
-    expect(mockApi.http.fetch).toHaveBeenCalledTimes(2);
+    expect(mockQueryFormatter).toHaveBeenCalledWith('table1', 'testId', 'testTitle');
+    expect(mockQueryFormatter).toHaveBeenCalledWith('table2', 'testId', 'testTitle');
   });
 
   it('should fetch data using the defaultRequestHandler', async () => {
     const mockTables = ['table1', 'table2'];
-    const mockQueryFormatter = jest.fn((table) => ({ query: `formatted ${table}` }));
+    const mockQueryFormatter = jest.fn((table) => ({
+      query: { qs: `formatted ${table}`, format: 'jdbc' },
+      df: {
+        meta: {
+          queryConfig: {},
+        },
+      },
+    }));
     const mockApi = {
       http: {
         fetch: jest.fn().mockResolvedValue('fetchedData'),
       },
     };
-    const mockConnectionService = {
-      getSelectedConnection$: jest.fn().mockReturnValue(of(undefined)),
+    const mockDataSetManager: Partial<DataSetManager> = {
+      getUpdates$: jest.fn().mockReturnValue(of(undefined)),
+      getDataSet: jest.fn().mockReturnValue(undefined),
     };
 
-    const result = await fetchData(mockTables, mockQueryFormatter, mockApi, mockConnectionService);
+    const result = await fetchData(
+      mockTables,
+      mockQueryFormatter,
+      mockApi,
+      mockDataSetManager as DataSetManager
+    );
     expect(result).toEqual(['fetchedData', 'fetchedData']);
-    expect(mockApi.http.fetch).toHaveBeenCalledTimes(2);
-  });
-});
-
-describe('fetchTableSchemas', () => {
-  it('should fetch table schemas', async () => {
-    const mockApi = {
-      http: {
-        fetch: jest.fn().mockResolvedValue('schemaData'),
-      },
-    };
-    const mockConnectionService = {
-      getSelectedConnection$: jest
-        .fn()
-        .mockReturnValue(of({ dataSource: { id: 'testId' }, attributes: { title: 'testTitle' } })),
-    };
-
-    const result = await fetchTableSchemas(['table1'], mockApi, mockConnectionService);
-    expect(result).toEqual(['schemaData']);
-    expect(mockApi.http.fetch).toHaveBeenCalledWith({
-      method: 'POST',
-      path: '/api/enhancements/search/sql',
-      body: JSON.stringify({
-        query: { qs: 'DESCRIBE TABLES LIKE table1', format: 'jdbc' },
-        df: {
-          meta: {
-            queryConfig: {
-              dataSourceId: 'testId',
-              title: 'testTitle',
-            },
-          },
-        },
-      }),
-    });
-  });
-});
-
-describe('fetchColumnValues', () => {
-  it('should fetch column values', async () => {
-    const mockApi = {
-      http: {
-        fetch: jest.fn().mockResolvedValue('columnData'),
-      },
-    };
-    const mockConnectionService = {
-      getSelectedConnection$: jest
-        .fn()
-        .mockReturnValue(of({ dataSource: { id: 'testId' }, attributes: { title: 'testTitle' } })),
-    };
-
-    const result = await fetchColumnValues(['table1'], 'column1', mockApi, mockConnectionService);
-    expect(result).toEqual(['columnData']);
-    expect(mockApi.http.fetch).toHaveBeenCalledWith({
-      method: 'POST',
-      path: '/api/enhancements/search/sql',
-      body: JSON.stringify({
-        query: { qs: 'SELECT DISTINCT column1 FROM table1 LIMIT 10', format: 'jdbc' },
-        df: {
-          meta: {
-            queryConfig: {
-              dataSourceId: 'testId',
-              title: 'testTitle',
-            },
-          },
-        },
-      }),
-    });
+    expect(mockQueryFormatter).toHaveBeenCalledWith('table1');
+    expect(mockQueryFormatter).toHaveBeenCalledWith('table2');
   });
 });
