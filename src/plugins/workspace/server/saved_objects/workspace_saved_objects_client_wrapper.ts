@@ -195,14 +195,7 @@ export class WorkspaceSavedObjectsClientWrapper {
     request: OpenSearchDashboardsRequest
   ) => {
     const requestWorkspaceId = getWorkspaceState(request).requestWorkspaceId;
-    if (
-      requestWorkspaceId &&
-      !(object.workspaces && object.workspaces?.includes(requestWorkspaceId))
-    ) {
-      return false;
-    } else {
-      return true;
-    }
+    return !requestWorkspaceId || !!object.workspaces?.includes(requestWorkspaceId);
   };
 
   private getWorkspaceTypeEnabledClient(request: OpenSearchDashboardsRequest) {
