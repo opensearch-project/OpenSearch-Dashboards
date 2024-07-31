@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { EuiText, EuiTextColorProps } from '@elastic/eui';
-// import { monaco } from '@osd/monaco';
+import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../../opensearch_dashboards_react/public';
 import { createEditor, SingleLineInput } from '../shared';
 
@@ -24,7 +24,7 @@ interface DefaultInputProps extends React.JSX.IntrinsicAttributes {
     end?: Array<FooterItem | string>;
   };
   headerRef?: React.RefObject<HTMLDivElement>;
-  // provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
+  provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
 }
 
 const DefaultInput: React.FC<DefaultInputProps> = ({
@@ -34,7 +34,7 @@ const DefaultInput: React.FC<DefaultInputProps> = ({
   footerItems,
   editorDidMount,
   headerRef,
-  // provideCompletionItems,
+  provideCompletionItems,
 }) => {
   return (
     <div className="defaultEditor">
@@ -56,20 +56,20 @@ const DefaultInput: React.FC<DefaultInputProps> = ({
           wrappingIndent: 'same',
           lineDecorationsWidth: 0,
           lineNumbersMinChars: 2,
+          wordBasedSuggestions: false,
         }}
-        // suggestionProvider={{
-        //   provideCompletionItems,
-        // }}
-        // languageConfiguration={{
-        //   language: ,
-        //   autoClosingPairs: [
-        //     { open: '(', close: ')' },
-        //     { open: '[', close: ']' },
-        //     { open: '{', close: '}' },
-        //     { open: '"', close: '"' },
-        //     { open: "'", close: "'" },
-        //   ],
-        // }}
+        suggestionProvider={{
+          provideCompletionItems,
+        }}
+        languageConfiguration={{
+          autoClosingPairs: [
+            { open: '(', close: ')' },
+            { open: '[', close: ']' },
+            { open: '{', close: '}' },
+            { open: '"', close: '"' },
+            { open: "'", close: "'" },
+          ],
+        }}
       />
       {footerItems && (
         <div className="defaultEditor__footer">

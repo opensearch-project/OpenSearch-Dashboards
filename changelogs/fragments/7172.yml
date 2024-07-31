@@ -1,2 +1,0 @@
-fix:
-- [MDS][Version Decoupling] Add dataSourceVersion' and  'installedPlugins in viewer returns ([#7172](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7172))

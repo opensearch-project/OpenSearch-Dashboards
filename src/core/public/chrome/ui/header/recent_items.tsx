@@ -80,6 +80,7 @@ export const RecentItems = ({
       anchorPosition="downCenter"
       repositionOnScroll
       initialFocus={false}
+      panelPaddingSize="s"
     >
       <EuiTitle size="xxs">
         <h4>Recents</h4>
