@@ -46,34 +46,36 @@ export const getNoItemsMessage = (
       }
       body={
         <Fragment>
-          <p>
-            <FormattedMessage
-              id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
-              defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
-              defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
-              values={{
-                sampleDataInstallLink: (
-                  <EuiLink
-                    onClick={() =>
-                      application.navigateToApp('home', {
-                        path: '#/tutorial_directory/sampleData',
-                      })
-                    }
-                  >
-                    <FormattedMessage
-                      id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
-                      defaultMessage="Install some sample data"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
+          <EuiText size="s">
+            <p>
+              <FormattedMessage
+                id="dashboard.listing.createNewDashboard.combineDataViewFromOpenSearchDashboardsAppDescription"
+                defaultMessage="You can combine data views from any OpenSearch Dashboards app into one dashboard and see everything in one place."
+              />
+            </p>
+            <p>
+              <FormattedMessage
+                id="dashboard.listing.createNewDashboard.newToOpenSearchDashboardsDescription"
+                defaultMessage="New to OpenSearch Dashboards? {sampleDataInstallLink} to take a test drive."
+                values={{
+                  sampleDataInstallLink: (
+                    <EuiLink
+                      onClick={() =>
+                        application.navigateToApp('home', {
+                          path: '#/tutorial_directory/sampleData',
+                        })
+                      }
+                    >
+                      <FormattedMessage
+                        id="dashboard.listing.createNewDashboard.sampleDataInstallLinkText"
+                        defaultMessage="Install some sample data"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          </EuiText>
         </Fragment>
       }
       actions={

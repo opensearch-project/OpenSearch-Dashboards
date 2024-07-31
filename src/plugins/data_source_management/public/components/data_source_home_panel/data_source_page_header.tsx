@@ -23,7 +23,7 @@ export const DataSourceHeader: React.FC<DataSourceHeaderProps> = () => {
           </h2>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiText>
+        <EuiText size="s">
           <p>
             <FormattedMessage
               id="dataSourcesManagement.dataSourcesTable.description"

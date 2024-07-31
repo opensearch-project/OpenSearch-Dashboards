@@ -15,6 +15,7 @@ import {
   EuiConfirmModal,
   EuiSmallButton,
   EuiSmallButtonEmpty,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { FormattedMessage } from '@osd/i18n/react';
@@ -121,22 +122,24 @@ export const Header = ({
             defaultFocusedButton="confirm"
             data-test-subj="editDatasourceDeleteConfirmModal"
           >
-            <p>
-              {
-                <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.deleteConfirmation"
-                  defaultMessage="Any objects created using data from these sources, including Index Patterns, Visualizations, and Observability Panels, will be impacted."
-                />
-              }
-            </p>
-            <p>
-              {
-                <FormattedMessage
-                  id="dataSourcesManagement.editDataSource.deleteWarning"
-                  defaultMessage="This action cannot be undone."
-                />
-              }
-            </p>
+            <EuiText size="s">
+              <p>
+                {
+                  <FormattedMessage
+                    id="dataSourcesManagement.editDataSource.deleteConfirmation"
+                    defaultMessage="Any objects created using data from these sources, including Index Patterns, Visualizations, and Observability Panels, will be impacted."
+                  />
+                }
+              </p>
+              <p>
+                {
+                  <FormattedMessage
+                    id="dataSourcesManagement.editDataSource.deleteWarning"
+                    defaultMessage="This action cannot be undone."
+                  />
+                }
+              </p>
+            </EuiText>
           </EuiConfirmModal>
         ) : null}
       </>

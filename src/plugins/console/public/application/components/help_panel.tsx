@@ -55,7 +55,7 @@ export function HelpPanel(props: Props) {
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiText>
+        <EuiText size="s">
           <h3>
             <FormattedMessage
               defaultMessage="Request format"
@@ -75,8 +75,6 @@ export function HelpPanel(props: Props) {
               defaultMessage="Keyboard commands"
             />
           </h3>
-        </EuiText>
-        <EuiText size="s">
           <EuiSpacer />
           <dl>
             <dt>Ctrl/Cmd + I</dt>
