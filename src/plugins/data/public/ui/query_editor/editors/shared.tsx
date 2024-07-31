@@ -4,6 +4,7 @@
  */
 
 import React from 'react';
+import { monaco } from '@osd/monaco';
 import { CodeEditor } from '../../../../../opensearch_dashboards_react/public';
 
 interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
@@ -11,6 +12,7 @@ interface SingleLineInputProps extends React.JSX.IntrinsicAttributes {
   value: string;
   onChange: (value: string) => void;
   editorDidMount: (editor: any) => void;
+  provideCompletionItems: monaco.languages.CompletionItemProvider['provideCompletionItems'];
 }
 
 type CollapsedComponent<T> = React.ComponentType<T>;
@@ -60,6 +62,7 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
   value,
   onChange,
   editorDidMount,
+  provideCompletionItems,
 }) => (
   <div className="osdQuerEditor__singleLine">
     <CodeEditor
@@ -90,8 +93,10 @@ export const SingleLineInput: React.FC<SingleLineInputProps> = ({
         cursorStyle: 'line',
         wordBasedSuggestions: false,
       }}
+      suggestionProvider={{
+        provideCompletionItems,
+      }}
       languageConfiguration={{
-        language: languageId,
         autoClosingPairs: [
           {
             open: '(',

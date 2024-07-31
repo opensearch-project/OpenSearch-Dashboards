@@ -198,6 +198,14 @@ export function CollapsibleNavGroupEnabled({
   const navGroupsMap = useObservable(observables.navGroupsMap$, {});
   const currentNavGroup = useObservable(observables.currentNavGroup$, undefined);
 
+  const visibleUseCases = useMemo(
+    () =>
+      Object.values(navGroupsMap).filter(
+        (group) => group.type === undefined && group.status !== NavGroupStatus.Hidden
+      ),
+    [navGroupsMap]
+  );
+
   const navLinksForRender: ChromeNavLink[] = useMemo(() => {
     if (currentNavGroup && currentNavGroup.id !== ALL_USE_CASE_ID) {
       return fulfillRegistrationLinksToChromeNavLinks(
@@ -205,10 +213,6 @@ export function CollapsibleNavGroupEnabled({
         navLinks
       );
     }
-
-    const visibleUseCases = Object.values(navGroupsMap).filter(
-      (group) => group.type === undefined && group.status !== NavGroupStatus.Hidden
-    );
 
     if (visibleUseCases.length === 1) {
       return fulfillRegistrationLinksToChromeNavLinks(
@@ -269,7 +273,7 @@ export function CollapsibleNavGroupEnabled({
       });
 
     return fulfillRegistrationLinksToChromeNavLinks(navLinksForAll, navLinks);
-  }, [navLinks, navGroupsMap, currentNavGroup]);
+  }, [navLinks, navGroupsMap, currentNavGroup, visibleUseCases]);
 
   const width = useMemo(() => {
     if (!isNavOpen) {
@@ -332,13 +336,13 @@ export function CollapsibleNavGroupEnabled({
               <>
                 <CollapsibleNavTop
                   navLinks={navLinks}
-                  navGroupsMap={navGroupsMap}
                   navigateToApp={navigateToApp}
                   logos={logos}
                   onClickBack={() => setCurrentNavGroup(undefined)}
                   currentNavGroup={currentNavGroup}
                   shouldShrinkNavigation={!isNavOpen}
                   onClickShrink={closeNav}
+                  visibleUseCases={visibleUseCases}
                 />
                 <NavGroups
                   navLinks={navLinksForRender}

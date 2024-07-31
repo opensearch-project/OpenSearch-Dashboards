@@ -87,6 +87,10 @@ export interface ErrorToastOptions extends ToastOptions {
    * message will still be shown in the detailed error modal.
    */
   toastMessage?: string;
+  /**
+   * The id of the error.
+   */
+  id?: string;
 }
 
 const normalizeToast = (toastOrTitle: ToastInput): ToastInputFields => {
