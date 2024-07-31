@@ -75,6 +75,8 @@ export function HelpPanel(props: Props) {
               defaultMessage="Keyboard commands"
             />
           </h3>
+        </EuiText>
+        <EuiText size="s">
           <EuiSpacer />
           <dl>
             <dt>Ctrl/Cmd + I</dt>
