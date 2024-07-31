@@ -42,9 +42,11 @@ export const updateSearchSource = async ({
     dataFrame &&
     dataFrame.name &&
     dataFrame.name !== '' &&
-    dataSet.title !== dataFrame.name
+    dataSet.id !== dataFrame.name
   ) {
-    dataSet = data.indexPatterns.getByTitle(dataFrame.name, true) ?? dataSet;
+    console.log(dataSet);
+    console.log(dataFrame?.name);
+    dataSet = (await data.indexPatterns.get(dataFrame.name, true)) ?? dataSet;
     searchSource.setField('index', dataSet);
   }
 

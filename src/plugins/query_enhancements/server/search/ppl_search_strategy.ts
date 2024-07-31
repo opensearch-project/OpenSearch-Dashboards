@@ -73,7 +73,7 @@ export const pplSearchStrategyProvider = (
       try {
         const requestParams = parseRequest(request.body.query.qs);
         const source = requestParams?.map.get('source');
-        const { schema, meta } = request.body.df;
+        const { schema } = request.body.df;
 
         request.body.query =
           !schema || dataFrameHydrationStrategy === 'perQuery'
@@ -90,9 +90,8 @@ export const pplSearchStrategyProvider = (
         }
 
         const dataFrame = createDataFrame({
-          name: source,
+          ...request.body.df,
           schema: schema ?? rawResponse.data.schema,
-          meta,
           fields: getFields(rawResponse),
         });
 
