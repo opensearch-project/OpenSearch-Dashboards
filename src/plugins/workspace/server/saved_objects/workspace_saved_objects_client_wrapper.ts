@@ -189,7 +189,7 @@ export class WorkspaceSavedObjectsClientWrapper {
     return hasPermission;
   }
 
-  // Data source is a workspace level object, validate if data source has the permission to the given `workspaceIds`
+  // Data source is a workspace level object, validate if the request has access to the data source within the requested workspace.
   private validateDataSourcePermissions = (
     object: SavedObject,
     request: OpenSearchDashboardsRequest
