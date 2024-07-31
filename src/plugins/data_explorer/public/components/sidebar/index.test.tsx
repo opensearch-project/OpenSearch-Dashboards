@@ -52,21 +52,21 @@ jest.mock('../../../../opensearch_dashboards_react/public', () => {
               getEnabledQueryEnhancementsUpdated$: jest
                 .fn()
                 .mockImplementation(() => createObservable(false)),
-              uiSettings: {
-                get: jest.fn().mockImplementation((key) => {
-                  switch (key) {
-                    case 'home:useNewHomePage':
-                      return true; // or false, depending on your test scenario
-                    case 'query:enhancements:enabled':
-                      return true; // or false, depending on your test scenario
-                    default:
-                      return undefined;
-                  }
-                }),
-              },
             },
             container$: jest.fn().mockImplementation(() => createObservable(null)),
           },
+        },
+        uiSettings: {
+          get: jest.fn().mockImplementation((key) => {
+            switch (key) {
+              case 'home:useNewHomePage':
+                return true; // or false, depending on your test scenario
+              case 'query:enhancements:enabled':
+                return true; // or false, depending on your test scenario
+              default:
+                return undefined;
+            }
+          }),
         },
         notifications: {
           toasts: {
