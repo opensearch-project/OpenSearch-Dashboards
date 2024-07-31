@@ -63,9 +63,9 @@ describe('<CollapsibleNavTop />', () => {
     return {
       navLinks: mockedNavLinks,
       navigateToApp: jest.fn(),
-      navGroupsMap: {},
       logos: getLogos({}, mockBasePath.serverBasePath),
       shouldShrinkNavigation: false,
+      visibleUseCases: [],
     };
   };
   it('should render home icon', async () => {
@@ -74,23 +74,23 @@ describe('<CollapsibleNavTop />', () => {
   });
 
   it('should render back icon', async () => {
-    const { findByTestId } = render(
+    const { findByTestId, findByText } = render(
       <CollapsibleNavTop
         {...getMockedProps()}
-        navGroupsMap={{
-          navGroupFoo: {
+        visibleUseCases={[
+          {
             id: 'navGroupFoo',
             title: 'navGroupFoo',
             description: 'navGroupFoo',
             navLinks: [],
           },
-          navGroupBar: {
+          {
             id: 'navGroupBar',
             title: 'navGroupBar',
             description: 'navGroupBar',
             navLinks: [],
           },
-        }}
+        ]}
         currentNavGroup={{
           id: 'navGroupFoo',
           title: 'navGroupFoo',
@@ -100,6 +100,37 @@ describe('<CollapsibleNavTop />', () => {
       />
     );
     await findByTestId('collapsibleNavBackButton');
+    await findByText('Back');
+  });
+
+  it('should render back home icon', async () => {
+    const { findByTestId, findByText } = render(
+      <CollapsibleNavTop
+        {...getMockedProps()}
+        visibleUseCases={[
+          {
+            id: 'navGroupFoo',
+            title: 'navGroupFoo',
+            description: 'navGroupFoo',
+            navLinks: [],
+          },
+          {
+            id: 'navGroupBar',
+            title: 'navGroupBar',
+            description: 'navGroupBar',
+            navLinks: [],
+          },
+        ]}
+        currentNavGroup={{
+          id: 'global',
+          title: 'navGroupFoo',
+          description: 'navGroupFoo',
+          navLinks: [],
+        }}
+      />
+    );
+    await findByTestId('collapsibleNavBackButton');
+    await findByText('Home');
   });
 
   it('should render expand icon', async () => {

@@ -287,6 +287,29 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
   );
 
   useEffect(() => {
+    const status = databasesLoadStatus.toLowerCase();
+    if (
+      selectedDataSetState?.dataSourceRef &&
+      selectedDataSetState.dataSourceRef.type === SIMPLE_DATA_SOURCE_TYPES.EXTERNAL
+    ) {
+      const dataSourceCache = CatalogCacheManager.getOrCreateDataSource(
+        selectedDataSetState.dataSourceRef.name,
+        selectedDataSetState.dataSourceRef.id
+      );
+      if (status === DirectQueryLoadingStatus.SUCCESS) {
+        setCachedDatabases(
+          dataSourceCache.databases.map((db) => ({ id: db.name, title: db.name }))
+        );
+      } else if (
+        status === DirectQueryLoadingStatus.CANCELED ||
+        status === DirectQueryLoadingStatus.FAILED
+      ) {
+        notifications.toasts.addWarning('Error loading databases');
+      }
+    }
+  }, [databasesLoadStatus, selectedDataSetState?.dataSourceRef, notifications.toasts]);
+
+  useEffect(() => {
     if (
       selectedDataSetState?.dataSourceRef &&
       selectedDataSetState.dataSourceRef?.type === SIMPLE_DATA_SOURCE_TYPES.EXTERNAL &&
@@ -670,7 +693,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
     >
       <EuiContextMenu
         initialPanelId={0}
-        className="dataSetNavigator dataSetNavigator__menu"
+        className="dataSetNavigator__menu"
         size="s"
         panels={panels}
       />
