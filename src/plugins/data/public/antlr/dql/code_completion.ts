@@ -18,17 +18,17 @@ import { getUiService } from '../../services';
 const findCursorIndex = (
   tokenStream: TokenStream,
   cursorColumn: number,
-  cursorLine: number,
-  whitespaceToken: number
+  cursorLine: number
 ): number | undefined => {
   const actualCursorCol = cursorColumn - 1;
 
   for (let i = 0; i < tokenStream.size; i++) {
     const token = tokenStream.get(i);
-    const { startLine, endColumn, endLine } = getTokenPosition(token, whitespaceToken);
+    const { startLine, endColumn, endLine } = getTokenPosition(token, DQLParser.WS);
 
+    const moveToNextToken = [DQLParser.WS, DQLParser.EQ];
     if (endLine > cursorLine || (startLine === cursorLine && endColumn >= actualCursorCol)) {
-      if (tokenStream.get(i).type === whitespaceToken || tokenStream.get(i).type === DQLParser.EQ) {
+      if (tokenStream.get(i).type in moveToNextToken) {
         return i + 1;
       }
       return i;
@@ -153,7 +153,7 @@ export const getSuggestions = async ({
     const cursorColumn = position?.column ?? selectionEnd;
     const cursorLine = position?.lineNumber ?? 1;
 
-    const cursorIndex = findCursorIndex(tokenStream, cursorColumn, cursorLine, DQLParser.WS) ?? 0;
+    const cursorIndex = findCursorIndex(tokenStream, cursorColumn, cursorLine) ?? 0;
 
     const core = new CodeCompletionCore(parser);
 
