@@ -295,4 +295,83 @@ describe('DataSourceSelectable', () => {
     fireEvent.click(refreshButton);
     expect(onRefresh).toHaveBeenCalled();
   });
+
+  it('should not filter any data sources if newHomePageEnabled and queryEnhancementsEnabled are true', async () => {
+    (uiSettingsMock.get as jest.Mock).mockImplementation((key) => {
+      if (key === 'home:useNewHomePage') return true;
+      if (key === 'query:enhancements:enabled') return true;
+      return undefined;
+    });
+
+    await act(async () => {
+      render(
+        <DataSourceSelectable
+          dataSources={dataSourcesMock}
+          dataSourceOptionList={dataSourceOptionListMock}
+          selectedSources={selectedSourcesMock}
+          onDataSourceSelect={setSelectedSourcesMock}
+          setDataSourceOptionList={setDataSourceOptionListMock}
+          onGetDataSetError={onFetchDataSetErrorMock}
+          onRefresh={onRefresh}
+          uiSettings={uiSettingsMock}
+        />
+      );
+    });
+
+    expect(setDataSourceOptionListMock).toHaveBeenCalledWith(
+      expect.arrayContaining(dataSourcesMock)
+    );
+  });
+
+  it('should filter data sources correctly if newHomePageEnabled is true and queryEnhancementsEnabled is false', async () => {
+    (uiSettingsMock.get as jest.Mock).mockImplementation((key) => {
+      if (key === 'home:useNewHomePage') return true;
+      if (key === 'query:enhancements:enabled') return false;
+      return undefined;
+    });
+
+    await act(async () => {
+      render(
+        <DataSourceSelectable
+          dataSources={dataSourcesMock}
+          dataSourceOptionList={dataSourceOptionListMock}
+          selectedSources={selectedSourcesMock}
+          onDataSourceSelect={setSelectedSourcesMock}
+          setDataSourceOptionList={setDataSourceOptionListMock}
+          onGetDataSetError={onFetchDataSetErrorMock}
+          onRefresh={onRefresh}
+          uiSettings={uiSettingsMock}
+        />
+      );
+    });
+
+    expect(setDataSourceOptionListMock).toHaveBeenCalledWith(expect.arrayContaining([]));
+  });
+
+  it('should not filter data sources if newHomePageEnabled is false', async () => {
+    (uiSettingsMock.get as jest.Mock).mockImplementation((key) => {
+      if (key === 'home:useNewHomePage') return false;
+      if (key === 'query:enhancements:enabled') return true;
+      return undefined;
+    });
+
+    await act(async () => {
+      render(
+        <DataSourceSelectable
+          dataSources={dataSourcesMock}
+          dataSourceOptionList={dataSourceOptionListMock}
+          selectedSources={selectedSourcesMock}
+          onDataSourceSelect={setSelectedSourcesMock}
+          setDataSourceOptionList={setDataSourceOptionListMock}
+          onGetDataSetError={onFetchDataSetErrorMock}
+          onRefresh={onRefresh}
+          uiSettings={uiSettingsMock}
+        />
+      );
+    });
+
+    expect(setDataSourceOptionListMock).toHaveBeenCalledWith(
+      expect.arrayContaining([dataSourcesMock[1]])
+    );
+  });
 });
