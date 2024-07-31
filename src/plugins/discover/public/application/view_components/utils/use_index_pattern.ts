@@ -3,9 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@osd/i18n';
-import { SIMPLE_DATA_SET_TYPES } from '../../../../../data/common';
+import { SIMPLE_DATA_SET_TYPES, SimpleDataSet } from '../../../../../data/common';
 import { IndexPattern } from '../../../../../data/public';
 import { useSelector, updateIndexPattern } from '../../utils/state_management';
 import { DiscoverViewServices } from '../../../build_services';
@@ -29,84 +29,99 @@ import { QUERY_ENHANCEMENT_ENABLED_SETTING } from '../../../../common';
  */
 export const useIndexPattern = (services: DiscoverViewServices) => {
   const { data, toastNotifications, uiSettings, store } = services;
-  const { dataSet } = useDataSetManager({
-    dataSetManager: data.query.dataSet,
-  });
+  const { dataSet } = useDataSetManager({ dataSetManager: data.query.dataSetManager });
   const indexPatternIdFromState = useSelector((state) => state.metadata.indexPattern);
   const [indexPattern, setIndexPattern] = useState<IndexPattern | undefined>(undefined);
-  const isQueryEnhancementEnabled = uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING);
+  const isQueryEnhancementEnabled = useMemo(
+    () => uiSettings.get(QUERY_ENHANCEMENT_ENABLED_SETTING),
+    [uiSettings]
+  );
 
-  const fetchIndexPatternDetails = useCallback(
-    async (id: string) => {
-      return await data.indexPatterns.get(id);
+  const fetchIndexPatternDetails = useCallback((id: string) => data.indexPatterns.get(id), [
+    data.indexPatterns,
+  ]);
+
+  const createTempIndexPattern = useCallback(
+    async (dataSetFromState: SimpleDataSet) => {
+      try {
+        const tempIndexPattern = await data.indexPatterns.create(
+          {
+            id: `${dataSetFromState.dataSourceRef?.id || ''}.${dataSetFromState.title}`,
+            title: dataSetFromState.title,
+            dataSourceRef: dataSetFromState.dataSourceRef,
+            type: dataSetFromState.type,
+            timeFieldName: dataSetFromState.timeFieldName,
+            fields: dataSetFromState.fields as any,
+          },
+          true
+        );
+        data.indexPatterns.saveToCache(tempIndexPattern.id!, tempIndexPattern);
+        return tempIndexPattern;
+      } catch (error) {
+        return null;
+      }
     },
     [data.indexPatterns]
   );
 
   useEffect(() => {
-    if (isQueryEnhancementEnabled) {
-      if (dataSet) {
-        if (dataSet.type === SIMPLE_DATA_SET_TYPES.INDEX_PATTERN) {
-          fetchIndexPatternDetails(dataSet.id).then((ip) => {
-            setIndexPattern(ip);
-          });
-        }
-      }
-    }
-  }, [dataSet, fetchIndexPatternDetails, isQueryEnhancementEnabled]);
-
-  useEffect(() => {
     let isMounted = true;
 
-    const fetchIndexPattern = (id: string) => {
-      fetchIndexPatternDetails(id)
-        .then((result) => {
+    const handleIndexPattern = async () => {
+      if (isQueryEnhancementEnabled && dataSet) {
+        let pattern;
+
+        if (dataSet.type === SIMPLE_DATA_SET_TYPES.INDEX_PATTERN) {
+          pattern = await fetchIndexPatternDetails(dataSet.id);
+        } else {
+          pattern = await createTempIndexPattern(dataSet);
+        }
+
+        if (isMounted && pattern) {
+          setIndexPattern(pattern);
+        }
+      } else if (!isQueryEnhancementEnabled) {
+        if (!indexPatternIdFromState) {
+          const indexPatternList = await data.indexPatterns.getCache();
+          const newId = getIndexPatternId('', indexPatternList, uiSettings.get('defaultIndex'));
           if (isMounted) {
-            setIndexPattern(result);
+            store!.dispatch(updateIndexPattern(newId));
+            handleIndexPattern();
           }
-        })
-        .catch(() => {
-          if (isMounted) {
-            const indexPatternMissingWarning = i18n.translate(
-              'discover.valueIsNotConfiguredIndexPatternIDWarningTitle',
-              {
-                defaultMessage: '{id} is not a configured index pattern ID',
-                values: {
-                  id: `"${id}"`,
-                },
-              }
-            );
-            toastNotifications.addDanger({
-              title: indexPatternMissingWarning,
-            });
+        } else {
+          try {
+            const ip = await fetchIndexPatternDetails(indexPatternIdFromState);
+            if (isMounted) {
+              setIndexPattern(ip);
+            }
+          } catch (error) {
+            if (isMounted) {
+              const warningMessage = i18n.translate('discover.indexPatternFetchErrorWarning', {
+                defaultMessage: 'Error fetching index pattern: {error}',
+                values: { error: (error as Error).message },
+              });
+              toastNotifications.addWarning(warningMessage);
+            }
           }
-        });
+        }
+      }
     };
 
-    if (!isQueryEnhancementEnabled) {
-      if (!indexPatternIdFromState) {
-        data.indexPatterns.getCache().then((indexPatternList) => {
-          const newId = getIndexPatternId('', indexPatternList, uiSettings.get('defaultIndex'));
-          store!.dispatch(updateIndexPattern(newId));
-          fetchIndexPattern(newId);
-        });
-      } else {
-        fetchIndexPattern(indexPatternIdFromState);
-      }
-    }
+    handleIndexPattern();
 
     return () => {
       isMounted = false;
     };
   }, [
-    indexPatternIdFromState,
-    data.indexPatterns,
-    toastNotifications,
-    store,
     isQueryEnhancementEnabled,
     dataSet,
-    uiSettings,
+    indexPatternIdFromState,
     fetchIndexPatternDetails,
+    createTempIndexPattern,
+    data.indexPatterns,
+    store,
+    toastNotifications,
+    uiSettings,
   ]);
 
   return indexPattern;

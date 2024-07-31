@@ -1,0 +1,14 @@
+/*
+ * Copyright OpenSearch Contributors
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.queryAssist {
+  &.queryAssist__form {
+    padding: 0 $euiSizeXS $euiSizeXS;
+  }
+
+  &.queryAssist__callout {
+    margin-top: $euiSizeXS;
+  }
+}

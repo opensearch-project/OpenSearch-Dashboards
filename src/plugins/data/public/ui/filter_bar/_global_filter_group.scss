@@ -11,18 +11,6 @@
   padding-bottom: $euiSizeS;
 }
 
-.globalQueryEditor {
-  padding: 0 $euiSizeXS $euiSizeXS $euiSizeXS;
-}
-
-.globalQueryEditor:first-child {
-  padding-top: $euiSizeXS;
-}
-
-.globalQueryEditor:not(:empty) {
-  padding-bottom: $euiSizeXS;
-}
-
 .globalFilterGroup__filterBar {
   margin-top: $euiSizeXS;
 }

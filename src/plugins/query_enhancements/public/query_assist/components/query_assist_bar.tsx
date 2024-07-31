@@ -35,16 +35,18 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   const { generateQuery, loading } = useGenerateQuery();
   const [callOutType, setCallOutType] = useState<QueryAssistCallOutType>();
   const dismissCallout = () => setCallOutType(undefined);
-  const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet>();
+  const [selectedDataSet, setSelectedDataSet] = useState<SimpleDataSet | undefined>(
+    services.data.query.dataSetManager.getDataSet()
+  );
   const selectedIndex = selectedDataSet?.title;
   const previousQuestionRef = useRef<string>();
 
   useEffect(() => {
-    const subscription = services.data.query.dataSet.getUpdates$().subscribe((dataSet) => {
+    const subscription = services.data.query.dataSetManager.getUpdates$().subscribe((dataSet) => {
       setSelectedDataSet(dataSet);
     });
     return () => subscription.unsubscribe();
-  }, [services.data.query.dataSet]);
+  }, [services.data.query.dataSetManager]);
 
   const onSubmit = async (e: SyntheticEvent) => {
     e.preventDefault();
@@ -85,7 +87,7 @@ export const QueryAssistBar: React.FC<QueryAssistInputProps> = (props) => {
   if (props.dependencies.isCollapsed) return null;
 
   return (
-    <EuiForm component="form" onSubmit={onSubmit}>
+    <EuiForm component="form" onSubmit={onSubmit} className="queryAssist queryAssist__form">
       <EuiFormRow fullWidth>
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem>
