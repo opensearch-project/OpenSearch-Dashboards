@@ -30,7 +30,7 @@ import {
 } from '../../../common/constants';
 import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 import { ALL_USE_CASE_ID, CoreStart, WorkspaceObject } from '../../../../../core/public';
-import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
+import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import { WorkspaceUseCase } from '../../types';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
@@ -127,15 +127,7 @@ export const WorkspaceMenu = ({ coreStart, registeredUseCases$ }: Props) => {
   const getWorkspaceListGroup = (filterWorkspaceList: WorkspaceObject[], itemType: string) => {
     const listItems = filterWorkspaceList.map((workspace: WorkspaceObject) => {
       const useCase = getUseCase(workspace);
-      const appId =
-        (useCase?.id !== ALL_USE_CASE_ID && useCase?.features?.[0]) || WORKSPACE_DETAIL_APP_ID;
-      const useCaseURL = formatUrlWithWorkspaceId(
-        coreStart.application.getUrlForApp(appId, {
-          absolute: false,
-        }),
-        workspace.id,
-        coreStart.http.basePath
-      );
+      const useCaseURL = getUseCaseUrl(useCase, workspace, coreStart.application, coreStart.http);
       return (
         <EuiListGroupItem
           key={workspace.id}

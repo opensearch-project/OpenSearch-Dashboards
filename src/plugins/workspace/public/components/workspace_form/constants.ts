@@ -46,11 +46,69 @@ export const selectDataSourceTitle = i18n.translate('workspace.form.selectDataSo
 });
 
 export const usersAndPermissionsTitle = i18n.translate('workspace.form.usersAndPermissions.title', {
-  defaultMessage: 'Manage access and permissions',
+  defaultMessage: 'Team members',
 });
 
+export const detailsName = i18n.translate('workspace.form.workspaceDetails.name.label', {
+  defaultMessage: 'Name',
+});
+
+export const detailsNameHelpText = i18n.translate('workspace.form.workspaceDetails.name.helpText', {
+  defaultMessage:
+    'Valid characters are a-z, A-Z, 0-9, (), [], _ (underscore), - (hyphen) and (space).',
+});
+
+export const detailsNamePlaceholder = i18n.translate(
+  'workspace.form.workspaceDetails.name.placeholder',
+  {
+    defaultMessage: 'Enter a name',
+  }
+);
+
+export const detailsDescriptionIntroduction = i18n.translate(
+  'workspace.form.workspaceDetails.description.introduction',
+  {
+    defaultMessage:
+      'Help others understand the purpose of this workspace by providing an overview of the workspace you’re creating.',
+  }
+);
+
+export const detailsDescriptionPlaceholder = i18n.translate(
+  'workspace.form.workspaceDetails.description.placeholder',
+  {
+    defaultMessage: 'Describe the workspace',
+  }
+);
+
+export const detailsUseCaseLabel = i18n.translate('workspace.form.workspaceDetails.useCase.label', {
+  defaultMessage: 'Use case',
+});
+
+export const detailsColorLabel = i18n.translate('workspace.form.workspaceDetails.color.label', {
+  defaultMessage: 'Workspace icon color',
+});
+
+export const detailsColorHelpText = i18n.translate(
+  'workspace.form.workspaceDetails.color.helpText',
+  {
+    defaultMessage: 'Accent color for your workspace',
+  }
+);
+
 export enum DetailTab {
-  Settings = 'settings',
-  Collaborators = 'collaborators',
-  Overview = 'overview',
+  Details = 'details',
+  DataSources = 'dataSources',
+  TeamMembers = 'teamMembers',
 }
+
+export const DetailTabTitles: { [key in DetailTab]: string } = {
+  [DetailTab.Details]: i18n.translate('workspace.detail.tabTitle.details', {
+    defaultMessage: 'Details',
+  }),
+  [DetailTab.DataSources]: i18n.translate('workspace.detail.tabTitle.dataSources', {
+    defaultMessage: 'Data Sources',
+  }),
+  [DetailTab.TeamMembers]: i18n.translate('workspace.detail.tabTitle.teamMembers', {
+    defaultMessage: 'Team Members',
+  }),
+};

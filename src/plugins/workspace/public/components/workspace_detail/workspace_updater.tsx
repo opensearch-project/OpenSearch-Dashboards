@@ -28,7 +28,10 @@ import { WorkspaceUseCase } from '../../types';
 
 export interface WorkspaceUpdaterProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
-  detailTab?: DetailTab;
+  detailTab: DetailTab;
+  detailTitle: string;
+  getNumberOfChanges: any;
+  getResetFunction: any;
 }
 
 function getFormDataFromWorkspace(
@@ -144,7 +147,7 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
   }
 
   return (
-    <EuiPage>
+    <EuiPage paddingSize="none">
       <EuiPageBody>
         <EuiSpacer />
         <EuiPageContent
@@ -165,6 +168,9 @@ export const WorkspaceUpdater = (props: WorkspaceUpdaterProps) => {
               detailTab={props.detailTab}
               dataSourceManagement={dataSourceManagement}
               availableUseCases={availableUseCases}
+              detailTitle={props.detailTitle}
+              getNumberOfChanges={props.getNumberOfChanges}
+              getResetFunction={props.getResetFunction}
             />
           )}
         </EuiPageContent>
