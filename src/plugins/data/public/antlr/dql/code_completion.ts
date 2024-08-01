@@ -5,7 +5,6 @@
 
 import { CharStream, CommonTokenStream, TokenStream } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
-import { HttpSetup } from 'opensearch-dashboards/public';
 import { monaco } from '@osd/monaco';
 import { DQLLexer } from './.generated/DQLLexer';
 import { DQLParser, KeyValueExpressionContext } from './.generated/DQLParser';
@@ -29,7 +28,7 @@ const findCursorIndex = (
 
     const moveToNextToken = [DQLParser.WS, DQLParser.EQ];
     if (endLine > cursorLine || (startLine === cursorLine && endColumn >= actualCursorCol)) {
-      if (tokenStream.get(i).type in moveToNextToken) {
+      if (moveToNextToken.includes(tokenStream.get(i).type)) {
         return i + 1;
       }
       return i;
