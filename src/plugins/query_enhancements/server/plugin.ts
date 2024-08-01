@@ -84,7 +84,7 @@ export class QueryEnhancementsPlugin
       dataSourceEnabled: !!dataSource,
     }));
 
-    defineRoutes(this.logger, router, {
+    defineRoutes(this.logger, router, client, {
       ppl: pplSearchStrategy,
       sql: sqlSearchStrategy,
       sqlasync: sqlAsyncSearchStrategy,

@@ -5,20 +5,37 @@
 
 import { HttpStart } from 'opensearch-dashboards/public';
 import { DatasourceDetails } from '../types';
+import { SimpleDataSource } from 'src/plugins/data/common';
 
 export const fetchIfExternalDataSourcesEnabled = async (http: HttpStart) => {
   try {
-    await http.get('/api/dataconnections');
+    await http.get('/api/enhancements/datasource/external');
     return true;
   } catch (e) {
     return false;
   }
 };
 
-export const fetchExternalDataSources = async (http: HttpStart, connectedClusters: string[]) => {
+export const fetchExternalDataSources = async (
+  http: HttpStart,
+  connectedClusters: SimpleDataSource[]
+) => {
   const results = await Promise.all(
     connectedClusters.map(async (cluster) => {
-      const dataSources = await http.get(`/api/dataconnections/dataSourceMDSId=${cluster}`);
+      let dataSources;
+      try {
+        //dataSources = await http.get(`api/enhancements/datasource/external/${cluster}`);
+        dataSources = await http.get(`../../api/enhancements/datasource/external/${cluster.id}`, {
+          query: {
+            name: cluster.name,
+          },
+        });
+      } catch {
+        return [];
+      } finally {
+        console.log('dataSources', dataSources);
+      }
+
       return dataSources
         .filter((dataSource: DatasourceDetails) => dataSource.connector === 'S3GLUE')
         .map((dataSource: DatasourceDetails) => ({

@@ -333,13 +333,14 @@ export class CatalogCacheManager {
 
   static getExternalDataSourcesCache(): ExternalDataSourcesCacheData {
     const externalDataSourcesData = sessionStorage.getItem(this.externalDataSourcesCacheKey);
+    console.log('externalDataSourcesData', externalDataSourcesData);
 
     if (externalDataSourcesData) {
       return JSON.parse(externalDataSourcesData);
     } else {
       const defaultCacheObject: ExternalDataSourcesCacheData = {
         version: CATALOG_CACHE_VERSION,
-        externalDataSources: [],
+        dataSources: [],
         lastUpdated: '',
         status: CachedDataSourceStatus.Empty,
       };
@@ -351,7 +352,7 @@ export class CatalogCacheManager {
   static updateExternalDataSources(externalDataSources: ExternalDataSource[]): void {
     const currentTime = new Date().toUTCString();
     const cacheData = this.getExternalDataSourcesCache();
-    cacheData.externalDataSources = externalDataSources;
+    cacheData.dataSources = externalDataSources;
     cacheData.lastUpdated = currentTime;
     cacheData.status = CachedDataSourceStatus.Updated;
     this.saveExternalDataSourcesCache(cacheData);
