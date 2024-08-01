@@ -76,7 +76,7 @@ export interface VegaSpec {
   }>;
   layout?: {
     [key: string]: any;
-  };
+  } | null;
   marks: Array<{
     type: string;
     from?: any;
