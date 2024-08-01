@@ -149,8 +149,7 @@ export class CatalogCacheManager {
       (ds) =>
         ds.name === dataSource.name && (!dataSourceMDSId || ds.dataSourceMDSId === dataSourceMDSId)
     );
-    const existingCacheDataSource = cacheData.dataSources[index];
-    cacheData.dataSources.splice(index, 1, { ...existingCacheDataSource });
+    cacheData.dataSources.splice(index, 1, dataSource);
     this.saveDataSourceCache(cacheData);
   }
 

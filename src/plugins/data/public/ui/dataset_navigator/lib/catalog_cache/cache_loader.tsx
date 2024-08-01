@@ -96,7 +96,6 @@ export const updateTablesToCache = (
       );
       return;
     }
-
     const combinedData = combineSchemaAndDatarows(pollingResult.schema, pollingResult.datarows);
     const newTables = combinedData
       .filter((row: any) => !SPARK.HIVE_TABLE_REGEX.test(row.information))
@@ -344,7 +343,7 @@ export const useLoadToCache = (
       .post(`../../api/enhancements/datasource/jobs`, {
         body: JSON.stringify(requestPayload),
         query: {
-          id: dataSourceMDSId,
+          id: dataSourceMDSClientId.current,
         },
       })
       .then((result) => {
@@ -461,7 +460,6 @@ export const useLoadExternalDataSourcesToCache = (
 
     try {
       const externalDataSources = await fetchExternalDataSources(http, connectedClusters);
-      console.log('externalDataSources', externalDataSources);
       CatalogCacheManager.updateExternalDataSources(externalDataSources);
       setLoadStatus(DirectQueryLoadingStatus.SUCCESS);
       CatalogCacheManager.setExternalDataSourcesLoadingStatus(CachedDataSourceStatus.Updated);

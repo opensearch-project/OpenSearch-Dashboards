@@ -511,7 +511,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
         ),
         items: externalDataSources.map((dataSource) => ({
           name: dataSource.name,
-          onClick: () => handleSelectExternalDataSource(dataSource),
+          onClick: async () => await handleSelectExternalDataSource(dataSource),
           panel: 5,
         })),
         content: isCatalogCacheFetching(dataSourcesLoadStatus) && createLoadingSpinner(),
