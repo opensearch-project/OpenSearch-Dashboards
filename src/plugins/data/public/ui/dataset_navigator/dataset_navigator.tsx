@@ -98,7 +98,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
 
   const onRefresh = useCallback(() => {
     if (!isCatalogCacheFetching(dataSourcesLoadStatus) && dataSources.length > 0) {
-      startLoadingDataSources(dataSources.map((dataSource) => dataSource.id));
+      startLoadingDataSources(dataSources);
     }
   }, [dataSourcesLoadStatus, dataSources, startLoadingDataSources]);
 
@@ -160,16 +160,14 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
         const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
         if (externalDataSourcesCache.status === CachedDataSourceStatus.Updated) {
           setExternalDataSources(
-            externalDataSourcesCache.externalDataSources.map((ds) => ({
+            externalDataSourcesCache.dataSources.map((ds) => ({
               id: ds.dataSourceRef,
               name: ds.name,
               type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,
             }))
           );
         } else if (fetchedDataSources.length > 0) {
-          setExternalDataSources(
-            await startLoadingDataSources(fetchedDataSources.map((dataSource) => dataSource.id))
-          );
+          setExternalDataSources(await startLoadingDataSources(fetchedDataSources));
         }
 
         setIndexPatterns(fetchedIndexPatterns);
@@ -210,7 +208,7 @@ export const DataSetNavigator: React.FC<DataSetNavigatorProps> = ({
     const externalDataSourcesCache = CatalogCacheManager.getExternalDataSourcesCache();
     if (status === DirectQueryLoadingStatus.SUCCESS) {
       setExternalDataSources(
-        externalDataSourcesCache.externalDataSources.map((ds) => ({
+        externalDataSourcesCache.dataSources.map((ds) => ({
           id: ds.dataSourceRef,
           name: ds.name,
           type: SIMPLE_DATA_SOURCE_TYPES.EXTERNAL,

@@ -25,6 +25,7 @@ export const API = {
     GENERATE: `${BASE_API}/assist/generate`,
   },
   DATA_SOURCE: {
+    EXTERNAL: `${BASE_API}/datasource/external`,
     CONNECTIONS: `${BASE_API}/datasource/connections`,
   },
 };
