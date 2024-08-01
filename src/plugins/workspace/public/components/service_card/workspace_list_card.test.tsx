@@ -64,7 +64,7 @@ describe('workspace list card render normally', () => {
     expect(getByText('bar')).toBeInTheDocument();
   });
 
-  it('should render create workspace buuton when is dashboard admin and navigate to create new workspace page when clicking on plus button', () => {
+  it('should render create workspace button when is dashboard admin and navigate to create new workspace page when clicking on plus button', () => {
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
       dashboards: {
