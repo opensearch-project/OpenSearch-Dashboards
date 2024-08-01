@@ -5,7 +5,7 @@
 
 import { schema } from '@osd/config-schema';
 import { IRouter, ILegacyClusterClient } from 'opensearch-dashboards/server';
-import { API, OPENSEARCH_API } from '../../../common';
+import { API } from '../../../common';
 
 export function registerDataSourceConnectionsRoutes(
   router: IRouter,
@@ -50,23 +50,71 @@ export function registerDataSourceConnectionsRoutes(
 
   router.get(
     {
-      path: `${API.DATA_SOURCE.EXTERNAL}/{dataSourceId}/name={dataSourceName}`,
+      path: `${API.DATA_SOURCE.EXTERNAL}`,
       validate: {
-        params: schema.object({
-          dataSourceId: schema.string(),
-          dataSourceName: schema.string(),
+        query: schema.object({
+          id: schema.string(),
+          name: schema.nullable(schema.string()),
         }),
       },
     },
     async (context, request, response) => {
-      console.log('params', request.params);
-      const client = request.params.dataSourceId
-        ? context.dataSource.opensearch.legacy.getClient(request.params.dataSourceId).callAPI
+      const client = request.query.id
+        ? context.dataSource.opensearch.legacy.getClient(request.query.id).callAPI
         : defaultClient.asScoped(request).callAsCurrentUser;
-      const resp = await client('ppl.getDataConnectionById', {
-        dataconnection: request.params.dataSourceName,
+
+      const resp = request.query.name
+        ? await client('enhancements.getDataConnectionById', {
+            dataconnection: request.query.name,
+          })
+        : await client('enhancements.getDataConnections');
+      return response.ok({ body: resp });
+    }
+  );
+
+  router.get(
+    {
+      path: `${API.DATA_SOURCE.ASYNC_JOBS}`,
+      validate: {
+        query: schema.object({
+          id: schema.string(),
+          queryId: schema.nullable(schema.string()),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const client = request.query.id
+        ? context.dataSource.opensearch.legacy.getClient(request.query.id).callAPI
+        : defaultClient.asScoped(request).callAsCurrentUser;
+
+      const resp = await client('enhancements.getJobStatus', {
+        queryId: request.query.queryId,
       });
-      console.log('resp1', resp);
+      return response.ok({ body: resp });
+    }
+  );
+
+  router.post(
+    {
+      path: `${API.DATA_SOURCE.ASYNC_JOBS}`,
+      validate: {
+        query: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          query: schema.string(),
+          datasource: schema.string(),
+          lang: schema.string(),
+          sessionId: schema.nullable(schema.string()),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      const client = request.query.id
+        ? context.dataSource.opensearch.legacy.getClient(request.query.id).callAPI
+        : defaultClient.asScoped(request).callAsCurrentUser;
+
+      const resp = await client('enhancements.runDirectQuery', { body: request.body });
       return response.ok({ body: resp });
     }
   );

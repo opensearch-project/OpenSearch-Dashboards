@@ -318,10 +318,6 @@ export const VISUALIZATION_ERROR = {
 
 export const S3_DATA_SOURCE_TYPE = 's3glue';
 
-export const ASYNC_QUERY_SESSION_ID = 'async-query-session-id';
-export const ASYNC_QUERY_DATASOURCE_CACHE = 'async-query-catalog-cache';
-export const ASYNC_QUERY_ACCELERATIONS_CACHE = 'async-query-acclerations-cache';
-
 export const DIRECT_DUMMY_QUERY = 'select 1';
 
 export const DEFAULT_START_TIME = 'now-15m';

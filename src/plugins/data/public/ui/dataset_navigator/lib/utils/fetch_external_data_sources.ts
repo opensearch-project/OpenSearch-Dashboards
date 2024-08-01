@@ -4,8 +4,8 @@
  */
 
 import { HttpStart } from 'opensearch-dashboards/public';
-import { DatasourceDetails } from '../types';
-import { SimpleDataSource } from 'src/plugins/data/common';
+import { DatasourceDetails, ExternalDataSource } from '../types';
+import { SimpleDataSource } from '../../../../../common';
 
 export const fetchIfExternalDataSourcesEnabled = async (http: HttpStart) => {
   try {
@@ -19,45 +19,30 @@ export const fetchIfExternalDataSourcesEnabled = async (http: HttpStart) => {
 export const fetchExternalDataSources = async (
   http: HttpStart,
   connectedClusters: SimpleDataSource[]
-) => {
-  const results = await Promise.all(
-    connectedClusters.map(async (cluster) => {
-      let dataSources;
-      try {
-        //dataSources = await http.get(`api/enhancements/datasource/external/${cluster}`);
-        dataSources = await http.get(`../../api/enhancements/datasource/external/${cluster.id}`, {
-          query: {
-            name: cluster.name,
-          },
-        });
-      } catch {
-        return [];
-      } finally {
-        console.log('dataSources', dataSources);
-      }
+): Promise<ExternalDataSource[]> => {
+  let externalDataSources: ExternalDataSource[] = [];
 
-      return dataSources
+  for (const cluster of connectedClusters) {
+    try {
+      const response = await http.fetch(`../../api/enhancements/datasource/external`, {
+        query: {
+          id: cluster.id,
+        },
+      });
+
+      const clusterDataSources = response
         .filter((dataSource: DatasourceDetails) => dataSource.connector === 'S3GLUE')
         .map((dataSource: DatasourceDetails) => ({
           name: dataSource.name,
           status: dataSource.status,
-          dataSourceRef: cluster,
+          dataSourceRef: cluster.id,
         }));
-    })
-  );
 
-  const flattenedResults = results.flat();
-  const uniqueResults = Array.from(
-    flattenedResults
-      .reduce((map, ds) => {
-        const key = `${ds.name}-${ds.status}`;
-        if (!map.has(key) || ds.dataSourceRef === '') {
-          map.set(key, ds);
-        }
-        return map;
-      }, new Map<string, any>())
-      .values()
-  );
+      externalDataSources = externalDataSources.concat(clusterDataSources);
+    } catch (error) {
+      // Ignore error and continue with the next cluster
+    }
+  }
 
-  return uniqueResults;
+  return externalDataSources;
 };

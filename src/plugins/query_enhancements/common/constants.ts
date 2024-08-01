@@ -26,6 +26,7 @@ export const API = {
   },
   DATA_SOURCE: {
     EXTERNAL: `${BASE_API}/datasource/external`,
+    ASYNC_JOBS: `${BASE_API}/datasource/jobs`,
     CONNECTIONS: `${BASE_API}/datasource/connections`,
   },
 };
