@@ -445,7 +445,7 @@ export const useLoadExternalDataSourcesToCache = (
   );
 
   const loadExternalDataSources = async (
-    connectedClusters: string[]
+    connectedClusters: SimpleDataSource[]
   ): Promise<SimpleDataSource[]> => {
     setLoadStatus(DirectQueryLoadingStatus.SCHEDULED);
     CatalogCacheManager.setExternalDataSourcesLoadingStatus(CachedDataSourceStatus.Empty);

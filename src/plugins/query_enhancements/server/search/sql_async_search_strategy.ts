@@ -60,6 +60,7 @@ export const sqlAsyncSearchStrategyProvider = (
           };
           const dataFrame = createDataFrame(partial);
           dataFrame.meta = {
+            ...dataFrame.meta,
             query: request.body.query,
             queryId,
             sessionId,
@@ -87,6 +88,7 @@ export const sqlAsyncSearchStrategyProvider = (
           dataFrame.size = asyncResponse?.data?.datarows?.length || 0;
 
           dataFrame.meta = {
+            ...dataFrame.meta,
             status,
             queryId,
             error: status === 'FAILED' && asyncResponse.data?.error,
