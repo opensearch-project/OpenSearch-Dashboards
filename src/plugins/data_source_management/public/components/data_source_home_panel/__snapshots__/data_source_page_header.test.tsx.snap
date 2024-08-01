@@ -20,7 +20,9 @@ exports[`DataSourceHeader renders correctly 1`] = `
     <EuiSpacer
       size="s"
     />
-    <EuiText>
+    <EuiText
+      size="s"
+    >
       <p>
         <FormattedMessage
           defaultMessage="Create and manage data source connections."
