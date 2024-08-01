@@ -104,7 +104,7 @@ export const AccessControlTab = (props: AccessControlTabProps) => {
         <EuiFlexItem>
           <EuiText size="s">
             <h2 className="panel-title">Access control</h2>
-            <p> Control which OpenSearch users have access to this data source. </p>
+            Control which OpenSearch users have access to this data source.
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

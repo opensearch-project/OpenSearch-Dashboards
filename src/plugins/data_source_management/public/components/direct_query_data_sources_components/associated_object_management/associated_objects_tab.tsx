@@ -143,7 +143,7 @@ export const AssociatedObjectsTab: React.FC<AssociatedObjectsTabProps> = (props)
         <EuiFlexItem>
           <EuiText size="s">
             <h2 className="panel-title">{panelTitle}</h2>
-            <p> {panelDescription} </p>
+            {panelDescription}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
