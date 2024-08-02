@@ -11,8 +11,13 @@ import {
   EuiButtonIcon,
   EuiButtonGroup,
   EuiText,
+  EuiSelect,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@osd/i18n';
+import { label } from 'joi';
 import { WorkspacePermissionMode } from '../../../common/constants';
 import {
   WorkspacePermissionItemType,
@@ -21,39 +26,63 @@ import {
 } from './constants';
 import { getPermissionModeId } from './utils';
 
+// const permissionModeOptions = [
+//   {
+//     id: PermissionModeId.Read,
+//     label: (
+//       <EuiText size="s">
+//         {i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.read', {
+//           defaultMessage: 'Read',
+//         })}
+//       </EuiText>
+//     ),
+//   },
+//   {
+//     id: PermissionModeId.ReadAndWrite,
+//     label: (
+//       <EuiText size="s">
+//         {i18n.translate(
+//           'workspace.form.permissionSettingPanel.permissionModeOptions.readAndWrite',
+//           {
+//             defaultMessage: 'Read & Write',
+//           }
+//         )}
+//       </EuiText>
+//     ),
+//   },
+//   {
+//     id: PermissionModeId.Owner,
+//     label: (
+//       <EuiText size="s">
+//         {i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.owner', {
+//           defaultMessage: 'Owner',
+//         })}
+//       </EuiText>
+//     ),
+//   },
+// ];
+
 const permissionModeOptions = [
   {
-    id: PermissionModeId.Read,
-    label: (
-      <EuiText size="s">
-        {i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.read', {
-          defaultMessage: 'Read',
-        })}
-      </EuiText>
+    value: PermissionModeId.Read,
+    label: i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.read', {
+      defaultMessage: 'Read',
+    }),
+  },
+  {
+    value: PermissionModeId.ReadAndWrite,
+    label: i18n.translate(
+      'workspace.form.permissionSettingPanel.permissionModeOptions.readAndWrite',
+      {
+        defaultMessage: 'Read & Write',
+      }
     ),
   },
   {
-    id: PermissionModeId.ReadAndWrite,
-    label: (
-      <EuiText size="s">
-        {i18n.translate(
-          'workspace.form.permissionSettingPanel.permissionModeOptions.readAndWrite',
-          {
-            defaultMessage: 'Read & Write',
-          }
-        )}
-      </EuiText>
-    ),
-  },
-  {
-    id: PermissionModeId.Owner,
-    label: (
-      <EuiText size="s">
-        {i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.owner', {
-          defaultMessage: 'Owner',
-        })}
-      </EuiText>
-    ),
+    value: PermissionModeId.Owner,
+    label: i18n.translate('workspace.form.permissionSettingPanel.permissionModeOptions.owner', {
+      defaultMessage: 'Owner',
+    }),
   },
 ];
 
@@ -75,6 +104,9 @@ export interface WorkspacePermissionSettingInputProps {
     WorkspacePermissionMode: WorkspacePermissionMode[],
     index: number
   ) => void;
+  // onGroupOrUserTypeChange: (
+
+  // ) => void
   onDelete: (index: number) => void;
 }
 
@@ -95,7 +127,15 @@ export const WorkspacePermissionSettingInput = ({
     [group, userId]
   );
 
-  const permissionModesSelectedId = useMemo(() => getPermissionModeId(modes ?? []), [modes]);
+  // const permissionModesSelectedId = useMemo(() => getPermissionModeId(modes ?? []), [modes]);
+  const idSelected = useMemo(() => getPermissionModeId(modes ?? []), [modes]);
+  const permissionModesSelected = useMemo(() => {
+    const permissionModeSelected = permissionModeOptions.find(
+      (option) => option.value === idSelected
+    );
+    return permissionModeSelected ? [permissionModeSelected] : [];
+  }, [idSelected]);
+
   const handleGroupOrUserIdCreate = useCallback(
     (groupOrUserId) => {
       onGroupOrUserIdChange(
@@ -117,10 +157,23 @@ export const WorkspacePermissionSettingInput = ({
     [index, type, onGroupOrUserIdChange]
   );
 
+  // const handlePermissionModeOptionChange = useCallback(
+  //   (id: string) => {
+  //     if (optionIdToWorkspacePermissionModesMap[id]) {
+  //       onPermissionModesChange([...optionIdToWorkspacePermissionModesMap[id]], index);
+  //       console.log(id)
+  //     }
+  //   },
+  //   [index, onPermissionModesChange]
+  // );
   const handlePermissionModeOptionChange = useCallback(
-    (id: string) => {
-      if (optionIdToWorkspacePermissionModesMap[id]) {
-        onPermissionModesChange([...optionIdToWorkspacePermissionModesMap[id]], index);
+    (option) => {
+      if (option) {
+        const id = option[0].value;
+        if (optionIdToWorkspacePermissionModesMap[id]) {
+          onPermissionModesChange([...optionIdToWorkspacePermissionModesMap[id]], index);
+          // console.log(id);
+        }
       }
     },
     [index, onPermissionModesChange]
@@ -131,10 +184,10 @@ export const WorkspacePermissionSettingInput = ({
   }, [index, onDelete]);
 
   return (
-    <EuiFlexGroup alignItems="flexEnd" gutterSize="m">
+    <EuiFlexGroup alignItems="center" gutterSize="m">
       <EuiFlexItem style={{ maxWidth: 400 }}>
-        <EuiCompressedComboBox
-          singleSelection
+        <EuiComboBox
+          singleSelection={{ asPlainText: true }}
           selectedOptions={groupOrUserIdSelectedOptions}
           onCreateOption={handleGroupOrUserIdCreate}
           onChange={handleGroupOrUserIdChange}
@@ -148,9 +201,10 @@ export const WorkspacePermissionSettingInput = ({
                 })
           }
           isDisabled={userOrGroupDisabled}
+          prepend={<EuiPopover />}
         />
       </EuiFlexItem>
-      <EuiFlexItem style={{ maxWidth: 332 }}>
+      {/* <EuiFlexItem style={{ maxWidth: 332 }}>
         <EuiButtonGroup
           type="single"
           isDisabled={!deletable}
@@ -161,14 +215,22 @@ export const WorkspacePermissionSettingInput = ({
           buttonSize="m"
           isFullWidth
         />
-      </EuiFlexItem>
+      </EuiFlexItem> */}
+      <EuiComboBox
+        singleSelection={{ asPlainText: true }}
+        options={permissionModeOptions}
+        isDisabled={!deletable}
+        selectedOptions={permissionModesSelected}
+        onChange={handlePermissionModeOptionChange}
+        isClearable={false}
+      />
       <EuiFlexItem grow={false}>
         {deletable && (
           <EuiButtonIcon
             color="danger"
             aria-label="Delete permission setting"
             iconType="trash"
-            display="base"
+            display="empty"
             size="m"
             onClick={handleDelete}
             isDisabled={!deletable}

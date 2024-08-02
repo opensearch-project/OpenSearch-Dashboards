@@ -105,13 +105,16 @@ const UserOrGroupSection = ({
         <EuiFlexItem style={{ maxWidth: 400 }}>
           <EuiCompressedFormRow
             label={
-              type === WorkspacePermissionItemType.User
-                ? i18n.translate('workspaceForm.permissionSetting.userLabel', {
-                    defaultMessage: 'User',
-                  })
-                : i18n.translate('workspaceForm.permissionSetting.groupLabel', {
-                    defaultMessage: 'User group',
-                  })
+              // type === WorkspacePermissionItemType.User
+              //   ? i18n.translate('workspaceForm.permissionSetting.userLabel', {
+              //       defaultMessage: 'User',
+              //     })
+              //   : i18n.translate('workspaceForm.permissionSetting.groupLabel', {
+              //       defaultMessage: 'User group',
+              //     })
+              i18n.translate('workspaceForm.permissionSetting.collaboratorLabel', {
+                defaultMessage: 'Collaborator',
+              })
             }
           >
             <></>
@@ -120,7 +123,7 @@ const UserOrGroupSection = ({
         <EuiFlexItem style={{ maxWidth: 332 }}>
           <EuiCompressedFormRow
             label={i18n.translate('workspaceForm.permissionSetting.permissionLabel', {
-              defaultMessage: 'Permissions',
+              defaultMessage: 'Access level',
             })}
           >
             <></>
@@ -153,13 +156,16 @@ const UserOrGroupSection = ({
         data-test-subj={`workspaceForm-permissionSettingPanel-${type}-addNew`}
         color="secondary"
       >
-        {type === WorkspacePermissionItemType.User
+        {/* {type === WorkspacePermissionItemType.User
           ? i18n.translate('workspace.form.permissionSettingPanel.addUser', {
               defaultMessage: 'Add user',
             })
           : i18n.translate('workspace.form.permissionSettingPanel.addUserGroup', {
               defaultMessage: 'Add user group',
-            })}
+            })} */}
+        {i18n.translate('workspace.form.permissionSettingPanel.addCollaborator', {
+          defaultMessage: 'Add collaborator',
+        })}
       </EuiSmallButton>
     </div>
   );
