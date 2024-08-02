@@ -1,0 +1,2 @@
+fix:
+- Dataset nav to load external connections and update namespace ([#7609](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7609))
