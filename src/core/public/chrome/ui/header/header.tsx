@@ -51,6 +51,7 @@ import {
   ChromeNavControl,
   ChromeNavLink,
   ChromeRecentlyAccessedHistoryItem,
+  HeaderVariant,
 } from '../..';
 import type { Logos } from '../../../../common/types';
 import { WorkspaceObject } from '../../../../public/workspace';
@@ -88,6 +89,7 @@ export interface HeaderProps {
   customNavLink$: Observable<ChromeNavLink | undefined>;
   homeHref: string;
   isVisible$: Observable<boolean>;
+  headerVariant$: Observable<HeaderVariant | undefined>;
   opensearchDashboardsDocLink: string;
   navLinks$: Observable<ChromeNavLink[]>;
   recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
@@ -131,6 +133,7 @@ export function Header({
   ...observables
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
+  const headerVariant = useObservable(observables.headerVariant$, HeaderVariant.PAGE);
   const isLocked = useObservable(observables.isLocked$, false);
   const appId = useObservable(application.currentAppId$, '');
   const [isNavOpen, setIsNavOpen] = useState(false);

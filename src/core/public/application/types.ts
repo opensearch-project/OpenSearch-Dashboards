@@ -35,7 +35,7 @@ import { RecursiveReadonly } from '@osd/utility-types';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { MountPoint } from '../types';
 import { Capabilities } from './capabilities';
-import { ChromeStart } from '../chrome';
+import { ChromeStart, HeaderVariant } from '../chrome';
 import { IContextProvider } from '../context';
 import { DocLinksStart } from '../doc_links';
 import { HttpStart } from '../http';
@@ -226,6 +226,11 @@ export interface App<HistoryLocationState = unknown> {
    * Takes precedence over chrome service visibility settings.
    */
   chromeless?: boolean;
+
+  /**
+   * The application-wide header variant to use. Defaults to `page`.
+   */
+  headerVariant?: HeaderVariant;
 
   /**
    * A mount function called when the user navigates to this app's route. May have signature of {@link AppMount} or

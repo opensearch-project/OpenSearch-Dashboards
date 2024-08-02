@@ -41,7 +41,7 @@ import { HttpStart } from '../http';
 import { InjectedMetadataStart } from '../injected_metadata';
 import { NotificationsStart } from '../notifications';
 import { IUiSettingsClient } from '../ui_settings';
-import { OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK } from './constants';
+import { HeaderVariant, OPENSEARCH_DASHBOARDS_ASK_OPENSEARCH_LINK } from './constants';
 import { ChromeDocTitle, DocTitleService } from './doc_title';
 import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
@@ -119,6 +119,8 @@ type CollapsibleNavHeaderRender = () => JSX.Element | null;
 export class ChromeService {
   private isVisible$!: Observable<boolean>;
   private isForceHidden$!: BehaviorSubject<boolean>;
+  private headerVariant$!: Observable<HeaderVariant | undefined>;
+  private headerVariantOverride$!: BehaviorSubject<HeaderVariant | undefined>;
   private readonly stop$ = new ReplaySubject(1);
   private readonly navControls = new NavControlsService();
   private readonly navLinks = new NavLinksService();
@@ -161,6 +163,28 @@ export class ChromeService {
     );
   }
 
+  private initHeaderVariant(application: StartDeps['application']) {
+    this.headerVariantOverride$ = new BehaviorSubject<HeaderVariant | undefined>(undefined);
+
+    const appHeaderVariant$ = application.currentAppId$.pipe(
+      flatMap((appId) =>
+        application.applications$.pipe(
+          map(
+            (applications) =>
+              (appId && applications.has(appId) && applications.get(appId)!.headerVariant) as
+                | HeaderVariant
+                | undefined
+          )
+        )
+      )
+    );
+
+    this.headerVariant$ = combineLatest([appHeaderVariant$, this.headerVariantOverride$]).pipe(
+      map(([appHeaderVariant, headerVariantOverride]) => headerVariantOverride || appHeaderVariant),
+      takeUntil(this.stop$)
+    );
+  }
+
   public setup({ uiSettings }: SetupDeps): ChromeSetup {
     const navGroup = this.navGroup.setup({ uiSettings });
     return {
@@ -188,6 +212,7 @@ export class ChromeService {
     workspaces,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
+    this.initHeaderVariant(application);
 
     const appTitle$ = new BehaviorSubject<string>('Overview');
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
@@ -298,6 +323,7 @@ export class ChromeService {
           helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
           homeHref={application.getUrlForApp('home')}
           isVisible$={this.isVisible$}
+          headerVariant$={this.headerVariant$}
           opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
           navLinks$={navLinks.getNavLinks$()}
           recentlyAccessed$={recentlyAccessed.get$()}
@@ -327,6 +353,10 @@ export class ChromeService {
       getIsVisible$: () => this.isVisible$,
 
       setIsVisible: (isVisible: boolean) => this.isForceHidden$.next(!isVisible),
+
+      getHeaderVariant$: () => this.headerVariant$,
+
+      setHeaderVariant: (variant?: HeaderVariant) => this.headerVariantOverride$.next(variant),
 
       getApplicationClasses$: () =>
         applicationClasses$.pipe(
@@ -464,6 +494,16 @@ export interface ChromeStart {
    * with an exit button.
    */
   setIsVisible(isVisible: boolean): void;
+
+  /**
+   * Get an observable of the current header variant.
+   */
+  getHeaderVariant$(): Observable<HeaderVariant | undefined>;
+
+  /**
+   * Set or unset the temporary variant for the header.
+   */
+  setHeaderVariant(variant?: HeaderVariant): void;
 
   /**
    * Get the current set of classNames that will be set on the application container.

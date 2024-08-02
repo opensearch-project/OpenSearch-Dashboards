@@ -56,6 +56,7 @@ function mockProps() {
     breadcrumbsEnricher$: new BehaviorSubject(undefined),
     homeHref: '/',
     isVisible$: new BehaviorSubject(true),
+    headerVariant$: new BehaviorSubject(undefined),
     opensearchDashboardsDocLink: '/docs',
     navLinks$: new BehaviorSubject([]),
     customNavLink$: new BehaviorSubject(undefined),
