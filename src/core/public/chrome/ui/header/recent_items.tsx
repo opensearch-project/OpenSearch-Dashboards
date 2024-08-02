@@ -13,9 +13,10 @@ import {
   EuiTitle,
   EuiIcon,
   EuiText,
+  EuiSpacer,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import { ChromeRecentlyAccessedHistoryItem } from '../..';
+import { ChromeRecentlyAccessedHistoryItem, HeaderVariant } from '../..';
 import { WorkspaceObject } from '../../../workspace';
 import { createRecentNavLink } from './nav_link';
 import { HttpStart } from '../../../http';
@@ -28,6 +29,8 @@ export interface Props {
   navigateToUrl: (url: string) => Promise<void>;
   basePath: HttpStart['basePath'];
   navLinks$: Rx.Observable<ChromeNavLink[]>;
+  headerVariant?: HeaderVariant;
+  renderBreadcrumbs: React.JSX.Element;
 }
 
 export const RecentItems = ({
@@ -36,6 +39,8 @@ export const RecentItems = ({
   navigateToUrl,
   navLinks$,
   basePath,
+  headerVariant,
+  renderBreadcrumbs,
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -61,6 +66,8 @@ export const RecentItems = ({
     setIsPopoverOpen(false);
   };
 
+  const appendBreadcrumbs = Boolean(headerVariant === HeaderVariant.APPLICATION);
+
   return (
     <EuiPopover
       button={
@@ -85,6 +92,13 @@ export const RecentItems = ({
       initialFocus={false}
       panelPaddingSize="s"
     >
+      {appendBreadcrumbs ? (
+        <>
+          {renderBreadcrumbs}
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+
       <EuiTitle size="xxs">
         <h4>Recents</h4>
       </EuiTitle>

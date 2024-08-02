@@ -347,6 +347,8 @@ export function Header({
         navigateToUrl={application.navigateToUrl}
         navLinks$={observables.navLinks$}
         basePath={basePath}
+        headerVariant={headerVariant}
+        renderBreadcrumbs={renderBreadcrumbs()}
       />
     </EuiHeaderSectionItem>
   );
