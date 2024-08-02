@@ -230,12 +230,9 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
 export const getIsOnlyAllowEssentialUseCase = async (client: SavedObjectsStart['client']) => {
   const allDataSources = await getDataSourcesList(client, ['*']);
   if (allDataSources.length > 0) {
-    const serverlessDataSource = allDataSources.filter(
+    return allDataSources.every(
       (ds) => ds?.auth?.credentials?.service === SigV4ServiceName.OpenSearchServerless
     );
-    if (serverlessDataSource.length === allDataSources.length) {
-      return true;
-    }
   }
   return false;
 };

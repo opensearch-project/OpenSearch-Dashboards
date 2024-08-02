@@ -88,28 +88,22 @@ export const WorkspaceUseCase = ({
   const [isOnlyAllowEssential, setIsOnlyAllowEssential] = useState(false);
 
   useEffect(() => {
-    getIsOnlyAllowEssentialUseCase(savedObjects.client).then((result: boolean) => {
-      setIsOnlyAllowEssential(result);
-    });
-  }, [savedObjects]);
+    if (operationType === WorkspaceOperationType.Create) {
+      getIsOnlyAllowEssentialUseCase(savedObjects.client).then((result: boolean) => {
+        setIsOnlyAllowEssential(result);
+      });
+    }
+  }, [savedObjects, operationType]);
 
   useEffect(() => {
     let allAvailableUseCases = availableUseCases
       .filter((item) => !item.systematic)
       .concat(DEFAULT_NAV_GROUPS.all);
-    if (isOnlyAllowEssential) {
-      // When creating, only display essential use case
-      if (operationType === WorkspaceOperationType.Create) {
-        allAvailableUseCases = allAvailableUseCases.filter(
-          (item) => item.id === DEFAULT_NAV_GROUPS.analytics.id
-        );
-      } else {
-        // When updating, all use cases except essential use case are disabled.
-        allAvailableUseCases = allAvailableUseCases.map((item) => ({
-          ...item,
-          disabled: item.id === DEFAULT_NAV_GROUPS.analytics.id ? false : true,
-        }));
-      }
+    // When creating and isOnlyAllowEssential is true, only display essential use case
+    if (isOnlyAllowEssential && operationType === WorkspaceOperationType.Create) {
+      allAvailableUseCases = allAvailableUseCases.filter(
+        (item) => item.id === DEFAULT_NAV_GROUPS.analytics.id
+      );
     }
     setDisplayedUseCases(allAvailableUseCases);
   }, [availableUseCases, isOnlyAllowEssential, operationType]);

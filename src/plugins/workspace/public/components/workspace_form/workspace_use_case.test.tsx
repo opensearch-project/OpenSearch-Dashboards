@@ -83,19 +83,4 @@ describe('WorkspaceUseCase', () => {
       expect(renderResult.queryByText('Observability')).not.toBeInTheDocument();
     });
   });
-
-  it('should only disable all use cases except essential use case when updating workspace if getIsOnlyAllowEssentialUseCase returns true', async () => {
-    (getIsOnlyAllowEssentialUseCase as jest.Mock).mockResolvedValue(true);
-
-    const { renderResult } = setup({
-      operationType: WorkspaceOperationType.Update,
-    });
-    await waitFor(() => {
-      expect(renderResult.queryByText('Analytics')).not.toBeDisabled();
-      // Use case card doesn't have disable property, only has class name to compare.
-      expect(renderResult.getByText('Observability')).toHaveClass(
-        'euiCheckableCard__label-isDisabled'
-      );
-    });
-  });
 });
