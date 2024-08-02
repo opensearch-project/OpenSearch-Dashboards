@@ -28,11 +28,15 @@ export const sqlAsyncSearchStrategyProvider = (
   client: ILegacyClusterClient,
   usage?: SearchUsage
 ): ISearchStrategy<IOpenSearchDashboardsSearchRequest, IDataFrameResponse> => {
-  const sqlAsyncFacet = new Facet({ client, logger, endpoint: 'observability.runDirectQuery' });
+  const sqlAsyncFacet = new Facet({
+    client,
+    logger,
+    endpoint: 'enhancements.runDirectQuery',
+  });
   const sqlAsyncJobsFacet = new Facet({
     client,
     logger,
-    endpoint: 'observability.getJobStatus',
+    endpoint: 'enhancements.getJobStatus',
     useJobs: true,
   });
 
