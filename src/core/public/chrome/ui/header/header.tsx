@@ -161,6 +161,7 @@ export function Header({
   const navId = htmlIdGenerator()();
   const className = classnames('hide-for-sharing', 'headerGlobalNav');
   const { useExpandedHeader = true } = branding;
+  const useApplicationHeader = headerVariant === HeaderVariant.APPLICATION;
 
   const expandedHeaderColorScheme: EuiHeaderProps['theme'] = 'dark';
 
@@ -227,7 +228,13 @@ export function Header({
       aria-pressed={isNavOpen}
       aria-controls={navId}
       ref={toggleCollapsibleNavRef}
-      className={useUpdatedHeader ? 'newTopNavExpander' : undefined}
+      className={
+        useUpdatedHeader
+          ? useApplicationHeader
+            ? 'newAppTopNavExpander'
+            : 'newPageTopNavExpander'
+          : undefined
+      }
     >
       <EuiIcon
         type="menu"
@@ -304,7 +311,10 @@ export function Header({
   );
 
   const renderActionMenu = () => (
-    <EuiHeaderSectionItem border="none">
+    <EuiHeaderSectionItem
+      border="none"
+      className={useApplicationHeader ? 'stretchedActionMenu' : undefined}
+    >
       <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
     </EuiHeaderSectionItem>
   );
@@ -437,12 +447,32 @@ export function Header({
     </div>
   );
 
+  const renderApplicationHeader = () => (
+    <div>
+      <EuiHeader className="primaryApplicationHeader newTopNavHeader" style={sidecarPaddingStyle}>
+        {shouldHideExpandIcon || isNavOpen ? null : renderNavToggle()}
+        <EuiHeaderSection side="left" grow={true}>
+          {renderRecentItems()}
+          {renderActionMenu()}
+        </EuiHeaderSection>
+        <EuiHeaderSection side="right">
+          {renderRightControls()}
+          {renderHelp()}
+        </EuiHeaderSection>
+      </EuiHeader>
+    </div>
+  );
+
+  const renderHeader = () => {
+    return useApplicationHeader ? renderApplicationHeader() : renderPageHeader();
+  };
+
   return (
     <>
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars">
           {!useUpdatedHeader && useExpandedHeader && renderLegacyExpandedHeader()}
-          {useUpdatedHeader ? renderPageHeader() : renderLegacyHeader()}
+          {useUpdatedHeader ? renderHeader() : renderLegacyHeader()}
         </div>
 
         {navGroupEnabled ? (
