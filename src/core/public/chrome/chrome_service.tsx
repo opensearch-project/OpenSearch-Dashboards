@@ -31,7 +31,15 @@
 import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@osd/i18n/react';
-import { BehaviorSubject, combineLatest, merge, Observable, of, ReplaySubject } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  merge,
+  Observable,
+  of,
+  ReplaySubject,
+  Subscription,
+} from 'rxjs';
 import { flatMap, map, takeUntil } from 'rxjs/operators';
 import { EuiLink } from '@elastic/eui';
 import { mountReactNode } from '../utils/mount';
@@ -127,6 +135,8 @@ export class ChromeService {
   private readonly recentlyAccessed = new RecentlyAccessedService();
   private readonly docTitle = new DocTitleService();
   private readonly navGroup = new ChromeNavGroupService();
+  private useUpdatedHeader = false;
+  private updatedHeaderSubscription: Subscription | undefined;
   private collapsibleNavHeaderRender?: CollapsibleNavHeaderRender;
 
   constructor(private readonly params: ConstructorParams) {}
@@ -213,6 +223,12 @@ export class ChromeService {
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.initHeaderVariant(application);
+
+    this.updatedHeaderSubscription = uiSettings
+      .get$('home:useNewHomePage', false)
+      .subscribe((value) => {
+        this.useUpdatedHeader = value;
+      });
 
     const appTitle$ = new BehaviorSubject<string>('Overview');
     const applicationClasses$ = new BehaviorSubject<Set<string>>(new Set());
@@ -345,6 +361,7 @@ export class ChromeService {
           navGroupsMap$={navGroup.getNavGroupsMap$()}
           setCurrentNavGroup={navGroup.setCurrentNavGroup}
           workspaceList$={workspaces.workspaceList$}
+          useUpdatedHeader={this.useUpdatedHeader}
         />
       ),
 
@@ -415,6 +432,7 @@ export class ChromeService {
   public stop() {
     this.navLinks.stop();
     this.navGroup.stop();
+    this.updatedHeaderSubscription?.unsubscribe();
     this.stop$.next();
   }
 }
