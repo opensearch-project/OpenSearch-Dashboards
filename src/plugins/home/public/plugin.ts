@@ -205,21 +205,16 @@ export class HomePublicPlugin
       category: DEFAULT_APP_CATEGORIES.manage,
     };
 
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.all, [
-      configurationInfoForImportSampleData,
-    ]);
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
-      configurationInfoForImportSampleData,
-    ]);
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
-      configurationInfoForImportSampleData,
-    ]);
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
-      configurationInfoForImportSampleData,
-    ]);
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.search, [
-      configurationInfoForImportSampleData,
-    ]);
+    // Register sample data to all of the use cases in 2.16
+    [
+      DEFAULT_NAV_GROUPS.all,
+      DEFAULT_NAV_GROUPS.analytics,
+      DEFAULT_NAV_GROUPS['security-analytics'],
+      DEFAULT_NAV_GROUPS.observability,
+      DEFAULT_NAV_GROUPS.search,
+    ].forEach((navGroup) =>
+      core.chrome.navGroup.addNavLinksToGroup(navGroup, [configurationInfoForImportSampleData])
+    );
 
     const featureCatalogue = { ...this.featuresCatalogueRegistry.setup() };
 
