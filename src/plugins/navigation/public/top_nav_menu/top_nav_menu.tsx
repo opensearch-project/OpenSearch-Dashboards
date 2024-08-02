@@ -28,20 +28,20 @@
  * under the License.
  */
 
-import React, { ReactElement } from 'react';
-import { EuiHeaderLinks } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHeaderLinks } from '@elastic/eui';
 import classNames from 'classnames';
+import React, { ReactElement } from 'react';
 
 import { MountPoint } from '../../../../core/public';
-import { MountPointPortal } from '../../../opensearch_dashboards_react/public';
 import {
-  StatefulSearchBarProps,
   DataPublicPluginStart,
   SearchBarProps,
+  StatefulSearchBarProps,
 } from '../../../data/public';
+import { DataSourceMenuProps, createDataSourceMenu } from '../../../data_source_management/public';
+import { MountPointPortal } from '../../../opensearch_dashboards_react/public';
 import { TopNavMenuData } from './top_nav_menu_data';
 import { TopNavMenuItem } from './top_nav_menu_item';
-import { DataSourceMenuProps, createDataSourceMenu } from '../../../data_source_management/public';
 
 export type TopNavMenuProps = StatefulSearchBarProps &
   Omit<SearchBarProps, 'opensearchDashboards' | 'intl' | 'timeHistory'> & {
@@ -54,6 +54,7 @@ export type TopNavMenuProps = StatefulSearchBarProps &
     showFilterBar?: boolean;
     showDataSourceMenu?: boolean;
     data?: DataPublicPluginStart;
+    navGroupEnabled?: boolean;
     className?: string;
     datePickerRef?: any;
     /**
@@ -137,7 +138,19 @@ export function TopNavMenu(props: TopNavMenuProps): ReactElement | null {
   function renderLayout() {
     const { setMenuMountPoint } = props;
     const menuClassName = classNames('osdTopNavMenu', props.className);
-    if (setMenuMountPoint) {
+    if (setMenuMountPoint && props.navGroupEnabled) {
+      return (
+        <>
+          <MountPointPortal setMountPoint={setMenuMountPoint}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>{props.screenTitle ?? ''}</EuiFlexItem>
+              <EuiFlexItem grow={false}>{renderMenu(menuClassName)}</EuiFlexItem>
+              <EuiFlexItem>{renderSearchBar()}</EuiFlexItem>
+            </EuiFlexGroup>
+          </MountPointPortal>
+        </>
+      );
+    } else if (setMenuMountPoint) {
       return (
         <>
           <MountPointPortal setMountPoint={setMenuMountPoint}>
