@@ -46,3 +46,8 @@ export enum HeaderControlsContainer {
   DESCRIPTION = 'description',
   BOTTOM = 'bottom',
 }
+
+export enum HeaderVariant {
+  PAGE = 'page',
+  APPLICATION = 'application',
+}
