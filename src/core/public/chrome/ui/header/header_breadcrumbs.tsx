@@ -40,14 +40,14 @@ interface Props {
   appTitle$: Observable<string>;
   breadcrumbs$: Observable<ChromeBreadcrumb[]>;
   breadcrumbsEnricher$: Observable<ChromeBreadcrumbEnricher | undefined>;
-  navGroupEnabled?: boolean;
+  useUpdatedHeader?: boolean;
 }
 
 export function HeaderBreadcrumbs({
   appTitle$,
   breadcrumbs$,
   breadcrumbsEnricher$,
-  navGroupEnabled,
+  useUpdatedHeader,
 }: Props) {
   const appTitle = useObservable(appTitle$, 'OpenSearch Dashboards');
   const breadcrumbs = useObservable(breadcrumbs$, []);
@@ -82,8 +82,8 @@ export function HeaderBreadcrumbs({
     ),
   }));
 
-  const remainingCrumbs = navGroupEnabled ? crumbs.slice(0, -1) : crumbs;
-  const className = navGroupEnabled ? 'headerBreadCrumbs' : '';
+  const remainingCrumbs = useUpdatedHeader ? crumbs.slice(0, -1) : crumbs;
+  const className = useUpdatedHeader ? 'headerBreadcrumbs' : '';
 
   return (
     <EuiHeaderBreadcrumbs
