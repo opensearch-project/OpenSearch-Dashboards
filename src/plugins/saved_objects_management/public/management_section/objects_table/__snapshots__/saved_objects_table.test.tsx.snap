@@ -334,6 +334,53 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on header w
   }
   workspaces={
     Object {
+      "client$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
       "currentWorkspace$": BehaviorSubject {
         "_isScalar": false,
         "_value": Object {
@@ -512,6 +559,53 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
   selectedSavedObjects={Array []}
   workspaces={
     Object {
+      "client$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
       "currentWorkspace$": BehaviorSubject {
         "_isScalar": false,
         "_value": Object {
@@ -702,6 +796,53 @@ exports[`SavedObjectsTable duplicate should allow the user to choose on table wh
   }
   workspaces={
     Object {
+      "client$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": null,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [
+          Subscriber {
+            "_parentOrParents": null,
+            "_subscriptions": Array [
+              SubjectSubscription {
+                "_parentOrParents": [Circular],
+                "_subscriptions": null,
+                "closed": false,
+                "subject": [Circular],
+                "subscriber": [Circular],
+              },
+            ],
+            "closed": false,
+            "destination": SafeSubscriber {
+              "_complete": undefined,
+              "_context": [Circular],
+              "_error": undefined,
+              "_next": [Function],
+              "_parentOrParents": null,
+              "_parentSubscriber": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "destination": Object {
+                "closed": true,
+                "complete": [Function],
+                "error": [Function],
+                "next": [Function],
+              },
+              "isStopped": false,
+              "syncErrorThrowable": false,
+              "syncErrorThrown": false,
+              "syncErrorValue": null,
+            },
+            "isStopped": false,
+            "syncErrorThrowable": true,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+        ],
+        "thrownError": null,
+      },
       "currentWorkspace$": BehaviorSubject {
         "_isScalar": false,
         "_value": Object {

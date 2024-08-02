@@ -240,6 +240,7 @@ export class WorkspacePlugin
   ) {
     const workspaceClient = new WorkspaceClient(core.http, core.workspaces);
     await workspaceClient.init();
+    core.workspaces.setClient(workspaceClient);
     core.application.registerAppUpdater(this.appUpdater$);
     this.unregisterNavGroupUpdater = core.chrome.navGroup.registerNavGroupUpdater(
       this.navGroupUpdater$

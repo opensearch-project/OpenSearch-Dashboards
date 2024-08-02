@@ -50,7 +50,6 @@ export {
   ProcessedImportResponse,
   processImportResponse,
   FailedImport,
-  duplicateSavedObjects,
   getSavedObjectLabel,
 } from './lib';
 export { SavedObjectRelation, SavedObjectWithMetadata, SavedObjectMetadata } from './types';

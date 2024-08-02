@@ -211,6 +211,24 @@ describe('#WorkspaceClient', () => {
     expect(workspaceMock.workspaceList$.getValue()).toEqual([]);
   });
 
+  it('#copy', async () => {
+    const { workspaceClient, httpSetupMock } = getWorkspaceClient();
+    httpSetupMock.fetch.mockResolvedValue({
+      success: true,
+      result: {},
+    });
+    const body = JSON.stringify({
+      objects: [{ id: 1, type: 'url' }],
+      targetWorkspace: 'workspace-1',
+      includeReferencesDeep: false,
+    });
+    await workspaceClient.copy([{ id: 1, type: 'url' }], 'workspace-1', false);
+    expect(httpSetupMock.fetch).toBeCalledWith('/api/workspaces/_duplicate_saved_objects', {
+      body,
+      method: 'POST',
+    });
+  });
+
   it('#init with resultWithWritePermission is not success ', async () => {
     const { workspaceClient, httpSetupMock, workspaceMock } = getWorkspaceClient();
     httpSetupMock.fetch

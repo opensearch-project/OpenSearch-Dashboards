@@ -72,6 +72,7 @@ import {
   WorkspaceAttribute,
   SavedObjectsImportSuccess,
   SavedObjectsImportError,
+  IWorkspaceClient,
 } from 'src/core/public';
 import { Subscription } from 'rxjs';
 import { RedirectAppLinks } from '../../../../opensearch_dashboards_react/public';
@@ -89,7 +90,6 @@ import {
   findObject,
   extractExportDetails,
   SavedObjectsExportResultDetails,
-  duplicateSavedObjects,
 } from '../../lib';
 import { SavedObjectWithMetadata } from '../../types';
 import {
@@ -164,11 +164,13 @@ export interface SavedObjectsTableState {
   failedCopies: SavedObjectsImportError[];
   successfulCopies: SavedObjectsImportSuccess[];
   targetWorkspaceName: string;
+  workspaceClient: IWorkspaceClient | null;
 }
 export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedObjectsTableState> {
   private _isMounted = false;
   private currentWorkspaceIdSubscription?: Subscription;
   private workspacesSubscription?: Subscription;
+  private workspacesClientSubscription?: Subscription;
 
   constructor(props: SavedObjectsTableProps) {
     super(props);
@@ -201,6 +203,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
       isIncludeReferencesDeepChecked: true,
       currentWorkspaceId: this.props.workspaces.currentWorkspaceId$.getValue(),
       availableWorkspaces: this.props.workspaces.workspaceList$.getValue(),
+      workspaceClient: this.props.workspaces.client$.getValue(),
       workspaceEnabled: this.props.applications.capabilities.workspaces.enabled,
       isShowingDuplicateResultFlyout: false,
       failedCopies: [],
@@ -372,6 +375,11 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         currentWorkspaceId: workspaceId,
       })
     );
+    this.workspacesClientSubscription = workspace.client$.subscribe((client) => {
+      this.setState({
+        workspaceClient: client,
+      });
+    });
 
     this.workspacesSubscription = workspace.workspaceList$.subscribe((workspaceList) => {
       this.setState({ availableWorkspaces: workspaceList });
@@ -380,6 +388,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
   unSubscribeWorkspace = () => {
     this.currentWorkspaceIdSubscription?.unsubscribe();
+    this.workspacesClientSubscription?.unsubscribe();
     this.workspacesSubscription?.unsubscribe();
   };
 
@@ -735,12 +744,25 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
     targetWorkspace: string,
     targetWorkspaceName: string
   ) => {
-    const { http, notifications } = this.props;
+    const { notifications } = this.props;
+    const { workspaceClient } = this.state;
+
+    const showErrorNotification = () => {
+      notifications.toasts.addDanger({
+        title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
+          defaultMessage:
+            'Unable to copy {errorCount, plural, one {# saved object} other {# saved objects}}.',
+          values: { errorCount: savedObjects.length },
+        }),
+      });
+    };
+    if (!workspaceClient) {
+      showErrorNotification();
+      return;
+    }
     const objectsToDuplicate = savedObjects.map((obj) => ({ id: obj.id, type: obj.type }));
-    let result;
     try {
-      result = await duplicateSavedObjects(
-        http,
+      const result = await workspaceClient.copy(
         objectsToDuplicate,
         targetWorkspace,
         includeReferencesDeep
@@ -753,13 +775,7 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
         targetWorkspaceName,
       });
     } catch (e) {
-      notifications.toasts.addDanger({
-        title: i18n.translate('savedObjectsManagement.objectsTable.duplicate.dangerNotification', {
-          defaultMessage:
-            'Unable to copy {errorCount, plural, one {# saved object} other {# saved objects}}.',
-          values: { errorCount: savedObjects.length },
-        }),
-      });
+      showErrorNotification();
     }
     this.hideDuplicateModal();
     await this.refreshObjects();
