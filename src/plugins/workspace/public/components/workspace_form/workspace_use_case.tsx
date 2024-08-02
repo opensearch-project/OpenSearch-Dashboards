@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { i18n } from '@osd/i18n';
 import {
   EuiCheckableCard,
@@ -17,6 +17,9 @@ import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { WorkspaceUseCase as WorkspaceUseCaseObject } from '../../types';
 import { WorkspaceFormErrors } from './types';
 import './workspace_use_case.scss';
+import type { SavedObjectsStart } from '../../../../../core/public';
+import { getIsOnlyAllowEssentialUseCase } from '../../utils';
+import { WorkspaceOperationType } from './constants';
 
 interface WorkspaceUseCaseCardProps {
   id: string;
@@ -24,6 +27,7 @@ interface WorkspaceUseCaseCardProps {
   checked: boolean;
   description: string;
   onChange: (id: string) => void;
+  disabled?: boolean;
 }
 
 const WorkspaceUseCaseCard = ({
@@ -32,6 +36,7 @@ const WorkspaceUseCaseCard = ({
   description,
   checked,
   onChange,
+  disabled,
 }: WorkspaceUseCaseCardProps) => {
   const handleChange = useCallback(() => {
     onChange(id);
@@ -46,6 +51,7 @@ const WorkspaceUseCaseCard = ({
       className="workspace-use-case-item"
       onChange={handleChange}
       data-test-subj={`workspaceUseCase-${id}`}
+      disabled={disabled}
     >
       <EuiText color="subdued" size="xs">
         {description}
@@ -54,13 +60,20 @@ const WorkspaceUseCaseCard = ({
   );
 };
 
+type AvailableUseCase = Pick<
+  WorkspaceUseCaseObject,
+  'id' | 'title' | 'description' | 'systematic'
+> & {
+  disabled?: boolean;
+};
+
 export interface WorkspaceUseCaseProps {
   value: string | undefined;
   onChange: (newValue: string) => void;
   formErrors: WorkspaceFormErrors;
-  availableUseCases: Array<
-    Pick<WorkspaceUseCaseObject, 'id' | 'title' | 'description' | 'systematic'>
-  >;
+  availableUseCases: AvailableUseCase[];
+  savedObjects: SavedObjectsStart;
+  operationType: WorkspaceOperationType;
 }
 
 export const WorkspaceUseCase = ({
@@ -68,7 +81,39 @@ export const WorkspaceUseCase = ({
   onChange,
   formErrors,
   availableUseCases,
+  savedObjects,
+  operationType,
 }: WorkspaceUseCaseProps) => {
+  const [displayedUseCases, setDisplayedUseCases] = useState(availableUseCases);
+  const [isOnlyAllowEssential, setIsOnlyAllowEssential] = useState(false);
+
+  useEffect(() => {
+    getIsOnlyAllowEssentialUseCase(savedObjects.client).then((result: boolean) => {
+      setIsOnlyAllowEssential(result);
+    });
+  }, [savedObjects]);
+
+  useEffect(() => {
+    let allAvailableUseCases = availableUseCases
+      .filter((item) => !item.systematic)
+      .concat(DEFAULT_NAV_GROUPS.all);
+    if (isOnlyAllowEssential) {
+      // When creating, only display essential use case
+      if (operationType === WorkspaceOperationType.Create) {
+        allAvailableUseCases = allAvailableUseCases.filter(
+          (item) => item.id === DEFAULT_NAV_GROUPS.analytics.id
+        );
+      } else {
+        // When updating, all use cases except essential use case are disabled.
+        allAvailableUseCases = allAvailableUseCases.map((item) => ({
+          ...item,
+          disabled: item.id === DEFAULT_NAV_GROUPS.analytics.id ? false : true,
+        }));
+      }
+    }
+    setDisplayedUseCases(allAvailableUseCases);
+  }, [availableUseCases, isOnlyAllowEssential, operationType]);
+
   return (
     <EuiCompressedFormRow
       label={i18n.translate('workspace.form.workspaceUseCase.name.label', {
@@ -79,20 +124,18 @@ export const WorkspaceUseCase = ({
       fullWidth
     >
       <EuiFlexGroup>
-        {availableUseCases
-          .filter((item) => !item.systematic)
-          .concat(DEFAULT_NAV_GROUPS.all)
-          .map(({ id, title, description }) => (
-            <EuiFlexItem key={id}>
-              <WorkspaceUseCaseCard
-                id={id}
-                title={title}
-                description={description}
-                checked={value === id}
-                onChange={onChange}
-              />
-            </EuiFlexItem>
-          ))}
+        {displayedUseCases.map(({ id, title, description, disabled }) => (
+          <EuiFlexItem key={id}>
+            <WorkspaceUseCaseCard
+              id={id}
+              title={title}
+              description={description}
+              checked={value === id}
+              onChange={onChange}
+              disabled={disabled}
+            />
+          </EuiFlexItem>
+        ))}
       </EuiFlexGroup>
     </EuiCompressedFormRow>
   );
