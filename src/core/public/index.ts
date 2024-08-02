@@ -77,6 +77,7 @@ import {
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
   createRecentNavLink,
+  HeaderVariant,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -381,6 +382,7 @@ export {
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
   createRecentNavLink,
+  HeaderVariant,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';
