@@ -13,4 +13,10 @@ describe('dashboard listing table with no item', () => {
 
     expect(component).toMatchSnapshot();
   });
+
+  test('and with write controls', () => {
+    const component = mountWithIntl(getNoItemsMessage(false, jest.fn(), {} as ApplicationStart));
+
+    expect(component).toMatchSnapshot();
+  });
 });
