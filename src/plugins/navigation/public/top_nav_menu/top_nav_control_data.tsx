@@ -76,6 +76,7 @@ type TopNavControlIconData = TopNavControlButtonOrLinkOrIconData & {
   iconType: EuiIconType;
   ariaLabel: string;
   color?: EuiButtonIconProps['color'];
+  display?: EuiButtonIconProps['display'];
   run: TopNavControlAction;
   type: 'icon';
 };

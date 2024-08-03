@@ -14,6 +14,7 @@ import {
   EuiIcon,
   EuiText,
   EuiSpacer,
+  EuiHeaderSectionItemButtonProps,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { ChromeRecentlyAccessedHistoryItem, HeaderVariant } from '../..';
@@ -31,6 +32,7 @@ export interface Props {
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   headerVariant?: HeaderVariant;
   renderBreadcrumbs: React.JSX.Element;
+  buttonSize?: EuiHeaderSectionItemButtonProps['size'];
 }
 
 export const RecentItems = ({
@@ -41,6 +43,7 @@ export const RecentItems = ({
   basePath,
   headerVariant,
   renderBreadcrumbs,
+  buttonSize = 's',
 }: Props) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -76,7 +79,7 @@ export const RecentItems = ({
             setIsPopoverOpen((prev) => !prev);
           }}
           data-test-subj="recentItemsSectionButton"
-          size="xs"
+          size={buttonSize}
           className="headerRecentItemsButton"
         >
           {/* TODO: replace this icon once there is a new icon added to OUI https://github.com/opensearch-project/OpenSearch-Dashboards/issues/7354 */}

@@ -58,7 +58,7 @@ export class NavigationPublicPlugin
 
     return {
       ui: {
-        TopNavMenu: createTopNav(data, chrome.navGroup.getNavGroupEnabled(), extensions, i18n),
+        TopNavMenu: createTopNav(data, extensions, i18n, chrome.navGroup.getNavGroupEnabled()),
         HeaderControl: createTopNavControl(i18n),
       },
     };

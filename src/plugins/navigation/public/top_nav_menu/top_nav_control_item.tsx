@@ -96,7 +96,7 @@ export function TopNavControlItem(props: TopNavControlData) {
   switch (props.type) {
     case 'icon':
       delete elementProps.iconSide;
-      component = <EuiButtonIcon size="s" {...elementProps} />;
+      component = <EuiButtonIcon size="s" {...elementProps} display={props.display} />;
       break;
 
     case 'link':

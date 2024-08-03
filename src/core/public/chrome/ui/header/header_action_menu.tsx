@@ -71,5 +71,7 @@ export const HeaderActionMenu: FC<HeaderActionMenuProps> = ({ actionMenu$ }) => 
     }
   }, [mounter]);
 
-  return <div data-test-subj="headerAppActionMenu" ref={elementRef} />;
+  return (
+    <div data-test-subj="headerAppActionMenu" className="headerAppActionMenu" ref={elementRef} />
+  );
 };
