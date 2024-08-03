@@ -7,6 +7,7 @@
   margin-left: $euiSizeM;
   margin-right: $euiSizeS;
   min-width: $euiSizeL;
+  font-size: 0 !important;
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
   .euiHeaderSectionItemButton__content,

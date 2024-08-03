@@ -37,9 +37,9 @@ import { RegisteredTopNavMenuData } from './top_nav_menu_data';
 
 export function createTopNav(
   data: DataPublicPluginStart,
-  navGroupEnabled: boolean,
   extraConfig: RegisteredTopNavMenuData[],
-  i18n: I18nStart
+  i18n: I18nStart,
+  groupActions?: boolean
 ) {
   return (props: TopNavMenuProps) => {
     const relevantConfig = extraConfig.filter(
@@ -49,7 +49,7 @@ export function createTopNav(
 
     return (
       <i18n.Context>
-        <TopNavMenu {...props} data={data} navGroupEnabled={navGroupEnabled} config={config} />
+        <TopNavMenu {...props} data={data} groupActions={groupActions} config={config} />
       </i18n.Context>
     );
   };
