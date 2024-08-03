@@ -11,6 +11,7 @@ import {
   EuiPanel,
   EuiSelectable,
   EuiPopoverTitle,
+  EuiSelectableOption,
 } from '@elastic/eui';
 import {
   ApplicationStart,
@@ -37,7 +38,6 @@ import { DataSourceItem } from '../data_source_item';
 import { NoDataSource } from '../no_data_source';
 import './data_source_selectable.scss';
 import { DataSourceDropDownHeader } from '../drop_down_header';
-import '../button_title.scss';
 import './data_source_selectable.scss';
 import { DataSourceMenuPopoverButton } from '../popover_button/popover_button';
 
@@ -311,7 +311,7 @@ export class DataSourceSelectable extends React.Component<
               listProps={{
                 onFocusBadge: false,
               }}
-              options={this.state.dataSourceOptions}
+              options={this.state.dataSourceOptions as Array<EuiSelectableOption<DataSourceOption>>}
               onChange={(newOptions) => this.onChange(newOptions)}
               singleSelection={'always'}
               data-test-subj={'dataSourceSelectable'}

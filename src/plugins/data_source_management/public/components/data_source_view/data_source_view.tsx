@@ -174,6 +174,7 @@ export class DataSourceView extends React.Component<DataSourceViewProps, DataSou
             className={'dataSourceView'}
             label={label}
             onClick={this.onClick.bind(this)}
+            isDisabled
           />
         }
         isOpen={this.state.isPopoverOpen}
