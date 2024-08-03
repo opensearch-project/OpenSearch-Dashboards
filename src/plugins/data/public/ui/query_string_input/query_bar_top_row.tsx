@@ -255,6 +255,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
         aria-label={i18n.translate('data.query.queryBar.querySubmitButtonLabel', {
           defaultMessage: 'Submit query',
         })}
+        compressed={true}
       />
     );
 
@@ -320,6 +321,7 @@ export default function QueryBarTopRow(props: QueryBarTopRowProps) {
           dateFormat={uiSettings!.get('dateFormat')}
           isAutoRefreshOnly={props.showAutoRefreshOnly}
           className="osdQueryBar__datePicker"
+          compressed={true}
         />
       </EuiFlexItem>
     );

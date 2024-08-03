@@ -616,7 +616,7 @@ export default class QueryStringInputUI extends Component<Props, State> {
     };
     const ariaCombobox = { ...isSuggestionsVisible, role: 'combobox' };
     const className = classNames(
-      'euiFormControlLayout euiFormControlLayout--group osdQueryBar__wrap',
+      'euiFormControlLayout euiFormControlLayout--group euiFormControlLayout--compressed osdQueryBar__wrap',
       this.props.className
     );
 
