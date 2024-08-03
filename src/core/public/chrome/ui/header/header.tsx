@@ -311,10 +311,7 @@ export function Header({
   );
 
   const renderActionMenu = () => (
-    <EuiHeaderSectionItem
-      border="none"
-      className={useApplicationHeader ? 'stretchedActionMenu' : undefined}
-    >
+    <EuiHeaderSectionItem border="none" className="headerAppActionMenuSection">
       <HeaderActionMenu actionMenu$={application.currentActionMenu$} />
     </EuiHeaderSectionItem>
   );
@@ -359,6 +356,7 @@ export function Header({
         basePath={basePath}
         headerVariant={headerVariant}
         renderBreadcrumbs={renderBreadcrumbs()}
+        buttonSize={useApplicationHeader ? 's' : 'xs'}
       />
     </EuiHeaderSectionItem>
   );
@@ -425,7 +423,6 @@ export function Header({
           {renderCenterControls()}
           {renderActionMenu()}
           {renderRightControls()}
-          {renderHelp()}
         </EuiHeaderSection>
       </EuiHeader>
 
@@ -455,10 +452,7 @@ export function Header({
           {renderRecentItems()}
           {renderActionMenu()}
         </EuiHeaderSection>
-        <EuiHeaderSection side="right">
-          {renderRightControls()}
-          {renderHelp()}
-        </EuiHeaderSection>
+        <EuiHeaderSection side="right">{renderRightControls()}</EuiHeaderSection>
       </EuiHeader>
     </div>
   );

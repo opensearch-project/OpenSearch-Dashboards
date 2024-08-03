@@ -201,6 +201,60 @@ exports[`Header handles visibility and lock changes 1`] = `
           "thrownError": null,
         },
       },
+      "currentBadgeControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentBottomControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentCenterControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentDescriptionControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentLeftControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentRightControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "getComponent": [MockFunction],
       "getUrlForApp": [MockFunction],
       "history": Object {
@@ -225,6 +279,12 @@ exports[`Header handles visibility and lock changes 1`] = `
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
       "registerMountContext": [MockFunction],
+      "setAppBadgeControls": [MockFunction],
+      "setAppBottomControls": [MockFunction],
+      "setAppCenterControls": [MockFunction],
+      "setAppDescriptionControls": [MockFunction],
+      "setAppLeftControls": [MockFunction],
+      "setAppRightControls": [MockFunction],
     }
   }
   badge$={
@@ -300,6 +360,43 @@ exports[`Header handles visibility and lock changes 1`] = `
       "hasError": false,
       "isStopped": false,
       "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
         Subscriber {
           "_parentOrParents": null,
           "_subscriptions": Array [
@@ -500,6 +597,55 @@ exports[`Header handles visibility and lock changes 1`] = `
           "syncErrorThrown": false,
           "syncErrorValue": null,
         },
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  headerVariant$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
         Subscriber {
           "_parentOrParents": null,
           "_subscriptions": Array [
@@ -4084,6 +4230,43 @@ exports[`Header handles visibility and lock changes 1`] = `
                     "syncErrorThrown": false,
                     "syncErrorValue": null,
                   },
+                  Subscriber {
+                    "_parentOrParents": null,
+                    "_subscriptions": Array [
+                      SubjectSubscription {
+                        "_parentOrParents": [Circular],
+                        "_subscriptions": null,
+                        "closed": false,
+                        "subject": [Circular],
+                        "subscriber": [Circular],
+                      },
+                    ],
+                    "closed": false,
+                    "destination": SafeSubscriber {
+                      "_complete": undefined,
+                      "_context": [Circular],
+                      "_error": undefined,
+                      "_next": [Function],
+                      "_parentOrParents": null,
+                      "_parentSubscriber": [Circular],
+                      "_subscriptions": null,
+                      "closed": false,
+                      "destination": Object {
+                        "closed": true,
+                        "complete": [Function],
+                        "error": [Function],
+                        "next": [Function],
+                      },
+                      "isStopped": false,
+                      "syncErrorThrowable": false,
+                      "syncErrorThrown": false,
+                      "syncErrorValue": null,
+                    },
+                    "isStopped": false,
+                    "syncErrorThrowable": true,
+                    "syncErrorThrown": false,
+                    "syncErrorValue": null,
+                  },
                 ],
                 "thrownError": null,
               }
@@ -4147,6 +4330,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                   },
                 ]
               }
+              className=""
               data-test-subj="breadcrumbs"
               max={10}
             >
@@ -4258,9 +4442,10 @@ exports[`Header handles visibility and lock changes 1`] = `
             >
               <EuiHeaderSectionItem
                 border="none"
+                className="headerAppActionMenuSection"
               >
                 <div
-                  className="euiHeaderSectionItem"
+                  className="euiHeaderSectionItem headerAppActionMenuSection"
                 >
                   <HeaderActionMenu
                     actionMenu$={
@@ -4314,6 +4499,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                     }
                   >
                     <div
+                      className="headerAppActionMenu"
                       data-test-subj="headerAppActionMenu"
                     />
                   </HeaderActionMenu>
@@ -5147,6 +5333,7 @@ exports[`Header handles visibility and lock changes 1`] = `
                     opensearchDashboardsVersion="1.0.0"
                     surveyLink="/"
                     useDefaultContent={true}
+                    useUpdatedAppearance={true}
                   >
                     <HeaderHelpMenuUI
                       helpExtension$={
@@ -5953,27 +6140,20 @@ exports[`Header handles visibility and lock changes 1`] = `
                       opensearchDashboardsVersion="1.0.0"
                       surveyLink="/"
                       useDefaultContent={true}
+                      useUpdatedAppearance={true}
                     >
                       <EuiPopover
-                        anchorPosition="downRight"
+                        anchorPosition="rightDown"
                         button={
-                          <EuiToolTip
-                            content="Help"
-                            delay="long"
-                            position="bottom"
-                          >
-                            <EuiHeaderSectionItemButton
-                              aria-expanded={false}
-                              aria-haspopup="true"
-                              aria-label="Help menu"
-                              onClick={[Function]}
-                            >
-                              <EuiIcon
-                                size="m"
-                                type="questionInCircle"
-                              />
-                            </EuiHeaderSectionItemButton>
-                          </EuiToolTip>
+                          <EuiButtonIcon
+                            aria-expanded={false}
+                            aria-haspopup="true"
+                            aria-label="Help menu"
+                            color="primary"
+                            iconType="iInCircle"
+                            onClick={[Function]}
+                            size="xs"
+                          />
                         }
                         closePopover={[Function]}
                         data-test-subj="helpMenuButton"
@@ -5986,117 +6166,48 @@ exports[`Header handles visibility and lock changes 1`] = `
                         repositionOnScroll={true}
                       >
                         <div
-                          className="euiPopover euiPopover--anchorDownRight"
+                          className="euiPopover euiPopover--anchorRightDown"
                           data-test-subj="helpMenuButton"
                           id="headerHelpMenu"
                         >
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiToolTip
-                              content="Help"
-                              delay="long"
-                              position="bottom"
+                            <EuiButtonIcon
+                              aria-expanded={false}
+                              aria-haspopup="true"
+                              aria-label="Help menu"
+                              color="primary"
+                              iconType="iInCircle"
+                              onClick={[Function]}
+                              size="xs"
                             >
-                              <span
-                                className="euiToolTipAnchor"
-                                onKeyUp={[Function]}
-                                onMouseOut={[Function]}
-                                onMouseOver={[Function]}
+                              <button
+                                aria-expanded={false}
+                                aria-haspopup="true"
+                                aria-label="Help menu"
+                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
                               >
-                                <EuiHeaderSectionItemButton
-                                  aria-expanded={false}
-                                  aria-haspopup="true"
-                                  aria-label="Help menu"
-                                  onBlur={[Function]}
-                                  onClick={[Function]}
-                                  onFocus={[Function]}
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiButtonIcon__icon"
+                                  color="inherit"
+                                  size="m"
+                                  type="iInCircle"
                                 >
-                                  <EuiButtonEmpty
-                                    aria-expanded={false}
-                                    aria-haspopup="true"
-                                    aria-label="Help menu"
-                                    buttonRef={
-                                      Object {
-                                        "current": <button
-                                          aria-expanded="false"
-                                          aria-haspopup="true"
-                                          aria-label="Help menu"
-                                          class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                                          type="button"
-                                        >
-                                          <span
-                                            class="euiButtonContent euiButtonEmpty__content"
-                                          >
-                                            <span
-                                              class="euiButtonEmpty__text"
-                                            >
-                                              <span
-                                                class="euiHeaderSectionItemButton__content"
-                                              >
-                                                <span
-                                                  data-euiicon-type="questionInCircle"
-                                                />
-                                              </span>
-                                            </span>
-                                          </span>
-                                        </button>,
-                                      }
-                                    }
-                                    className="euiHeaderSectionItemButton"
-                                    color="text"
-                                    onBlur={[Function]}
-                                    onClick={[Function]}
-                                    onFocus={[Function]}
-                                  >
-                                    <button
-                                      aria-expanded={false}
-                                      aria-haspopup="true"
-                                      aria-label="Help menu"
-                                      className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                                      disabled={false}
-                                      onBlur={[Function]}
-                                      onClick={[Function]}
-                                      onFocus={[Function]}
-                                      type="button"
-                                    >
-                                      <EuiButtonContent
-                                        className="euiButtonEmpty__content"
-                                        iconSide="left"
-                                        iconSize="m"
-                                        textProps={
-                                          Object {
-                                            "className": "euiButtonEmpty__text",
-                                          }
-                                        }
-                                      >
-                                        <span
-                                          className="euiButtonContent euiButtonEmpty__content"
-                                        >
-                                          <span
-                                            className="euiButtonEmpty__text"
-                                          >
-                                            <span
-                                              className="euiHeaderSectionItemButton__content"
-                                            >
-                                              <EuiIcon
-                                                size="m"
-                                                type="questionInCircle"
-                                              >
-                                                <span
-                                                  data-euiicon-type="questionInCircle"
-                                                  size="m"
-                                                />
-                                              </EuiIcon>
-                                            </span>
-                                          </span>
-                                        </span>
-                                      </EuiButtonContent>
-                                    </button>
-                                  </EuiButtonEmpty>
-                                </EuiHeaderSectionItemButton>
-                              </span>
-                            </EuiToolTip>
+                                  <span
+                                    aria-hidden="true"
+                                    className="euiButtonIcon__icon"
+                                    color="inherit"
+                                    data-euiicon-type="iInCircle"
+                                    size="m"
+                                  />
+                                </EuiIcon>
+                              </button>
+                            </EuiButtonIcon>
                           </div>
                         </div>
                       </EuiPopover>
@@ -7223,6 +7334,60 @@ exports[`Header renders condensed header 1`] = `
           "thrownError": null,
         },
       },
+      "currentBadgeControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentBottomControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentCenterControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentDescriptionControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentLeftControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentRightControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "getComponent": [MockFunction],
       "getUrlForApp": [MockFunction],
       "history": Object {
@@ -7247,6 +7412,12 @@ exports[`Header renders condensed header 1`] = `
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
       "registerMountContext": [MockFunction],
+      "setAppBadgeControls": [MockFunction],
+      "setAppBottomControls": [MockFunction],
+      "setAppCenterControls": [MockFunction],
+      "setAppDescriptionControls": [MockFunction],
+      "setAppLeftControls": [MockFunction],
+      "setAppRightControls": [MockFunction],
     }
   }
   badge$={
@@ -7322,6 +7493,43 @@ exports[`Header renders condensed header 1`] = `
       "hasError": false,
       "isStopped": false,
       "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
         Subscriber {
           "_parentOrParents": null,
           "_subscriptions": Array [
@@ -7476,6 +7684,55 @@ exports[`Header renders condensed header 1`] = `
     BehaviorSubject {
       "_isScalar": false,
       "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  headerVariant$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -9877,6 +10134,43 @@ exports[`Header renders condensed header 1`] = `
                     "syncErrorThrown": false,
                     "syncErrorValue": null,
                   },
+                  Subscriber {
+                    "_parentOrParents": null,
+                    "_subscriptions": Array [
+                      SubjectSubscription {
+                        "_parentOrParents": [Circular],
+                        "_subscriptions": null,
+                        "closed": false,
+                        "subject": [Circular],
+                        "subscriber": [Circular],
+                      },
+                    ],
+                    "closed": false,
+                    "destination": SafeSubscriber {
+                      "_complete": undefined,
+                      "_context": [Circular],
+                      "_error": undefined,
+                      "_next": [Function],
+                      "_parentOrParents": null,
+                      "_parentSubscriber": [Circular],
+                      "_subscriptions": null,
+                      "closed": false,
+                      "destination": Object {
+                        "closed": true,
+                        "complete": [Function],
+                        "error": [Function],
+                        "next": [Function],
+                      },
+                      "isStopped": false,
+                      "syncErrorThrowable": false,
+                      "syncErrorThrown": false,
+                      "syncErrorValue": null,
+                    },
+                    "isStopped": false,
+                    "syncErrorThrowable": true,
+                    "syncErrorThrown": false,
+                    "syncErrorValue": null,
+                  },
                 ],
                 "thrownError": null,
               }
@@ -9940,6 +10234,7 @@ exports[`Header renders condensed header 1`] = `
                   },
                 ]
               }
+              className=""
               data-test-subj="breadcrumbs"
               max={10}
             >
@@ -10051,9 +10346,10 @@ exports[`Header renders condensed header 1`] = `
             >
               <EuiHeaderSectionItem
                 border="none"
+                className="headerAppActionMenuSection"
               >
                 <div
-                  className="euiHeaderSectionItem"
+                  className="euiHeaderSectionItem headerAppActionMenuSection"
                 >
                   <HeaderActionMenu
                     actionMenu$={
@@ -10107,6 +10403,7 @@ exports[`Header renders condensed header 1`] = `
                     }
                   >
                     <div
+                      className="headerAppActionMenu"
                       data-test-subj="headerAppActionMenu"
                     />
                   </HeaderActionMenu>
@@ -10940,6 +11237,7 @@ exports[`Header renders condensed header 1`] = `
                     opensearchDashboardsVersion="1.0.0"
                     surveyLink="/"
                     useDefaultContent={true}
+                    useUpdatedAppearance={true}
                   >
                     <HeaderHelpMenuUI
                       helpExtension$={
@@ -11746,27 +12044,20 @@ exports[`Header renders condensed header 1`] = `
                       opensearchDashboardsVersion="1.0.0"
                       surveyLink="/"
                       useDefaultContent={true}
+                      useUpdatedAppearance={true}
                     >
                       <EuiPopover
-                        anchorPosition="downRight"
+                        anchorPosition="rightDown"
                         button={
-                          <EuiToolTip
-                            content="Help"
-                            delay="long"
-                            position="bottom"
-                          >
-                            <EuiHeaderSectionItemButton
-                              aria-expanded={false}
-                              aria-haspopup="true"
-                              aria-label="Help menu"
-                              onClick={[Function]}
-                            >
-                              <EuiIcon
-                                size="m"
-                                type="questionInCircle"
-                              />
-                            </EuiHeaderSectionItemButton>
-                          </EuiToolTip>
+                          <EuiButtonIcon
+                            aria-expanded={false}
+                            aria-haspopup="true"
+                            aria-label="Help menu"
+                            color="primary"
+                            iconType="iInCircle"
+                            onClick={[Function]}
+                            size="xs"
+                          />
                         }
                         closePopover={[Function]}
                         data-test-subj="helpMenuButton"
@@ -11779,117 +12070,48 @@ exports[`Header renders condensed header 1`] = `
                         repositionOnScroll={true}
                       >
                         <div
-                          className="euiPopover euiPopover--anchorDownRight"
+                          className="euiPopover euiPopover--anchorRightDown"
                           data-test-subj="helpMenuButton"
                           id="headerHelpMenu"
                         >
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiToolTip
-                              content="Help"
-                              delay="long"
-                              position="bottom"
+                            <EuiButtonIcon
+                              aria-expanded={false}
+                              aria-haspopup="true"
+                              aria-label="Help menu"
+                              color="primary"
+                              iconType="iInCircle"
+                              onClick={[Function]}
+                              size="xs"
                             >
-                              <span
-                                className="euiToolTipAnchor"
-                                onKeyUp={[Function]}
-                                onMouseOut={[Function]}
-                                onMouseOver={[Function]}
+                              <button
+                                aria-expanded={false}
+                                aria-haspopup="true"
+                                aria-label="Help menu"
+                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
                               >
-                                <EuiHeaderSectionItemButton
-                                  aria-expanded={false}
-                                  aria-haspopup="true"
-                                  aria-label="Help menu"
-                                  onBlur={[Function]}
-                                  onClick={[Function]}
-                                  onFocus={[Function]}
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiButtonIcon__icon"
+                                  color="inherit"
+                                  size="m"
+                                  type="iInCircle"
                                 >
-                                  <EuiButtonEmpty
-                                    aria-expanded={false}
-                                    aria-haspopup="true"
-                                    aria-label="Help menu"
-                                    buttonRef={
-                                      Object {
-                                        "current": <button
-                                          aria-expanded="false"
-                                          aria-haspopup="true"
-                                          aria-label="Help menu"
-                                          class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                                          type="button"
-                                        >
-                                          <span
-                                            class="euiButtonContent euiButtonEmpty__content"
-                                          >
-                                            <span
-                                              class="euiButtonEmpty__text"
-                                            >
-                                              <span
-                                                class="euiHeaderSectionItemButton__content"
-                                              >
-                                                <span
-                                                  data-euiicon-type="questionInCircle"
-                                                />
-                                              </span>
-                                            </span>
-                                          </span>
-                                        </button>,
-                                      }
-                                    }
-                                    className="euiHeaderSectionItemButton"
-                                    color="text"
-                                    onBlur={[Function]}
-                                    onClick={[Function]}
-                                    onFocus={[Function]}
-                                  >
-                                    <button
-                                      aria-expanded={false}
-                                      aria-haspopup="true"
-                                      aria-label="Help menu"
-                                      className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                                      disabled={false}
-                                      onBlur={[Function]}
-                                      onClick={[Function]}
-                                      onFocus={[Function]}
-                                      type="button"
-                                    >
-                                      <EuiButtonContent
-                                        className="euiButtonEmpty__content"
-                                        iconSide="left"
-                                        iconSize="m"
-                                        textProps={
-                                          Object {
-                                            "className": "euiButtonEmpty__text",
-                                          }
-                                        }
-                                      >
-                                        <span
-                                          className="euiButtonContent euiButtonEmpty__content"
-                                        >
-                                          <span
-                                            className="euiButtonEmpty__text"
-                                          >
-                                            <span
-                                              className="euiHeaderSectionItemButton__content"
-                                            >
-                                              <EuiIcon
-                                                size="m"
-                                                type="questionInCircle"
-                                              >
-                                                <span
-                                                  data-euiicon-type="questionInCircle"
-                                                  size="m"
-                                                />
-                                              </EuiIcon>
-                                            </span>
-                                          </span>
-                                        </span>
-                                      </EuiButtonContent>
-                                    </button>
-                                  </EuiButtonEmpty>
-                                </EuiHeaderSectionItemButton>
-                              </span>
-                            </EuiToolTip>
+                                  <span
+                                    aria-hidden="true"
+                                    className="euiButtonIcon__icon"
+                                    color="inherit"
+                                    data-euiicon-type="iInCircle"
+                                    size="m"
+                                  />
+                                </EuiIcon>
+                              </button>
+                            </EuiButtonIcon>
                           </div>
                         </div>
                       </EuiPopover>
@@ -12475,6 +12697,60 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
           "thrownError": null,
         },
       },
+      "currentBadgeControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentBottomControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentCenterControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentDescriptionControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentLeftControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
+      "currentRightControls$": BehaviorSubject {
+        "_isScalar": false,
+        "_value": undefined,
+        "closed": false,
+        "hasError": false,
+        "isStopped": false,
+        "observers": Array [],
+        "thrownError": null,
+      },
       "getComponent": [MockFunction],
       "getUrlForApp": [MockFunction],
       "history": Object {
@@ -12499,6 +12775,12 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
       "navigateToApp": [MockFunction],
       "navigateToUrl": [MockFunction],
       "registerMountContext": [MockFunction],
+      "setAppBadgeControls": [MockFunction],
+      "setAppBottomControls": [MockFunction],
+      "setAppCenterControls": [MockFunction],
+      "setAppDescriptionControls": [MockFunction],
+      "setAppLeftControls": [MockFunction],
+      "setAppRightControls": [MockFunction],
     }
   }
   badge$={
@@ -12574,6 +12856,43 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
       "hasError": false,
       "isStopped": false,
       "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
         Subscriber {
           "_parentOrParents": null,
           "_subscriptions": Array [
@@ -12728,6 +13047,55 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
     BehaviorSubject {
       "_isScalar": false,
       "_value": false,
+      "closed": false,
+      "hasError": false,
+      "isStopped": false,
+      "observers": Array [
+        Subscriber {
+          "_parentOrParents": null,
+          "_subscriptions": Array [
+            SubjectSubscription {
+              "_parentOrParents": [Circular],
+              "_subscriptions": null,
+              "closed": false,
+              "subject": [Circular],
+              "subscriber": [Circular],
+            },
+          ],
+          "closed": false,
+          "destination": SafeSubscriber {
+            "_complete": undefined,
+            "_context": [Circular],
+            "_error": undefined,
+            "_next": [Function],
+            "_parentOrParents": null,
+            "_parentSubscriber": [Circular],
+            "_subscriptions": null,
+            "closed": false,
+            "destination": Object {
+              "closed": true,
+              "complete": [Function],
+              "error": [Function],
+              "next": [Function],
+            },
+            "isStopped": false,
+            "syncErrorThrowable": false,
+            "syncErrorThrown": false,
+            "syncErrorValue": null,
+          },
+          "isStopped": false,
+          "syncErrorThrowable": true,
+          "syncErrorThrown": false,
+          "syncErrorValue": null,
+        },
+      ],
+      "thrownError": null,
+    }
+  }
+  headerVariant$={
+    BehaviorSubject {
+      "_isScalar": false,
+      "_value": undefined,
       "closed": false,
       "hasError": false,
       "isStopped": false,
@@ -15129,6 +15497,43 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                     "syncErrorThrown": false,
                     "syncErrorValue": null,
                   },
+                  Subscriber {
+                    "_parentOrParents": null,
+                    "_subscriptions": Array [
+                      SubjectSubscription {
+                        "_parentOrParents": [Circular],
+                        "_subscriptions": null,
+                        "closed": false,
+                        "subject": [Circular],
+                        "subscriber": [Circular],
+                      },
+                    ],
+                    "closed": false,
+                    "destination": SafeSubscriber {
+                      "_complete": undefined,
+                      "_context": [Circular],
+                      "_error": undefined,
+                      "_next": [Function],
+                      "_parentOrParents": null,
+                      "_parentSubscriber": [Circular],
+                      "_subscriptions": null,
+                      "closed": false,
+                      "destination": Object {
+                        "closed": true,
+                        "complete": [Function],
+                        "error": [Function],
+                        "next": [Function],
+                      },
+                      "isStopped": false,
+                      "syncErrorThrowable": false,
+                      "syncErrorThrown": false,
+                      "syncErrorValue": null,
+                    },
+                    "isStopped": false,
+                    "syncErrorThrowable": true,
+                    "syncErrorThrown": false,
+                    "syncErrorValue": null,
+                  },
                 ],
                 "thrownError": null,
               }
@@ -15192,6 +15597,7 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                   },
                 ]
               }
+              className=""
               data-test-subj="breadcrumbs"
               max={10}
             >
@@ -15303,9 +15709,10 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
             >
               <EuiHeaderSectionItem
                 border="none"
+                className="headerAppActionMenuSection"
               >
                 <div
-                  className="euiHeaderSectionItem"
+                  className="euiHeaderSectionItem headerAppActionMenuSection"
                 >
                   <HeaderActionMenu
                     actionMenu$={
@@ -15359,6 +15766,7 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                     }
                   >
                     <div
+                      className="headerAppActionMenu"
                       data-test-subj="headerAppActionMenu"
                     />
                   </HeaderActionMenu>
@@ -16192,6 +16600,7 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                     opensearchDashboardsVersion="1.0.0"
                     surveyLink="/"
                     useDefaultContent={true}
+                    useUpdatedAppearance={true}
                   >
                     <HeaderHelpMenuUI
                       helpExtension$={
@@ -16998,27 +17407,20 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                       opensearchDashboardsVersion="1.0.0"
                       surveyLink="/"
                       useDefaultContent={true}
+                      useUpdatedAppearance={true}
                     >
                       <EuiPopover
-                        anchorPosition="downRight"
+                        anchorPosition="rightDown"
                         button={
-                          <EuiToolTip
-                            content="Help"
-                            delay="long"
-                            position="bottom"
-                          >
-                            <EuiHeaderSectionItemButton
-                              aria-expanded={false}
-                              aria-haspopup="true"
-                              aria-label="Help menu"
-                              onClick={[Function]}
-                            >
-                              <EuiIcon
-                                size="m"
-                                type="questionInCircle"
-                              />
-                            </EuiHeaderSectionItemButton>
-                          </EuiToolTip>
+                          <EuiButtonIcon
+                            aria-expanded={false}
+                            aria-haspopup="true"
+                            aria-label="Help menu"
+                            color="primary"
+                            iconType="iInCircle"
+                            onClick={[Function]}
+                            size="xs"
+                          />
                         }
                         closePopover={[Function]}
                         data-test-subj="helpMenuButton"
@@ -17031,117 +17433,48 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                         repositionOnScroll={true}
                       >
                         <div
-                          className="euiPopover euiPopover--anchorDownRight"
+                          className="euiPopover euiPopover--anchorRightDown"
                           data-test-subj="helpMenuButton"
                           id="headerHelpMenu"
                         >
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiToolTip
-                              content="Help"
-                              delay="long"
-                              position="bottom"
+                            <EuiButtonIcon
+                              aria-expanded={false}
+                              aria-haspopup="true"
+                              aria-label="Help menu"
+                              color="primary"
+                              iconType="iInCircle"
+                              onClick={[Function]}
+                              size="xs"
                             >
-                              <span
-                                className="euiToolTipAnchor"
-                                onKeyUp={[Function]}
-                                onMouseOut={[Function]}
-                                onMouseOver={[Function]}
+                              <button
+                                aria-expanded={false}
+                                aria-haspopup="true"
+                                aria-label="Help menu"
+                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
+                                disabled={false}
+                                onClick={[Function]}
+                                type="button"
                               >
-                                <EuiHeaderSectionItemButton
-                                  aria-expanded={false}
-                                  aria-haspopup="true"
-                                  aria-label="Help menu"
-                                  onBlur={[Function]}
-                                  onClick={[Function]}
-                                  onFocus={[Function]}
+                                <EuiIcon
+                                  aria-hidden="true"
+                                  className="euiButtonIcon__icon"
+                                  color="inherit"
+                                  size="m"
+                                  type="iInCircle"
                                 >
-                                  <EuiButtonEmpty
-                                    aria-expanded={false}
-                                    aria-haspopup="true"
-                                    aria-label="Help menu"
-                                    buttonRef={
-                                      Object {
-                                        "current": <button
-                                          aria-expanded="false"
-                                          aria-haspopup="true"
-                                          aria-label="Help menu"
-                                          class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                                          type="button"
-                                        >
-                                          <span
-                                            class="euiButtonContent euiButtonEmpty__content"
-                                          >
-                                            <span
-                                              class="euiButtonEmpty__text"
-                                            >
-                                              <span
-                                                class="euiHeaderSectionItemButton__content"
-                                              >
-                                                <span
-                                                  data-euiicon-type="questionInCircle"
-                                                />
-                                              </span>
-                                            </span>
-                                          </span>
-                                        </button>,
-                                      }
-                                    }
-                                    className="euiHeaderSectionItemButton"
-                                    color="text"
-                                    onBlur={[Function]}
-                                    onClick={[Function]}
-                                    onFocus={[Function]}
-                                  >
-                                    <button
-                                      aria-expanded={false}
-                                      aria-haspopup="true"
-                                      aria-label="Help menu"
-                                      className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
-                                      disabled={false}
-                                      onBlur={[Function]}
-                                      onClick={[Function]}
-                                      onFocus={[Function]}
-                                      type="button"
-                                    >
-                                      <EuiButtonContent
-                                        className="euiButtonEmpty__content"
-                                        iconSide="left"
-                                        iconSize="m"
-                                        textProps={
-                                          Object {
-                                            "className": "euiButtonEmpty__text",
-                                          }
-                                        }
-                                      >
-                                        <span
-                                          className="euiButtonContent euiButtonEmpty__content"
-                                        >
-                                          <span
-                                            className="euiButtonEmpty__text"
-                                          >
-                                            <span
-                                              className="euiHeaderSectionItemButton__content"
-                                            >
-                                              <EuiIcon
-                                                size="m"
-                                                type="questionInCircle"
-                                              >
-                                                <span
-                                                  data-euiicon-type="questionInCircle"
-                                                  size="m"
-                                                />
-                                              </EuiIcon>
-                                            </span>
-                                          </span>
-                                        </span>
-                                      </EuiButtonContent>
-                                    </button>
-                                  </EuiButtonEmpty>
-                                </EuiHeaderSectionItemButton>
-                              </span>
-                            </EuiToolTip>
+                                  <span
+                                    aria-hidden="true"
+                                    className="euiButtonIcon__icon"
+                                    color="inherit"
+                                    data-euiicon-type="iInCircle"
+                                    size="m"
+                                  />
+                                </EuiIcon>
+                              </button>
+                            </EuiButtonIcon>
                           </div>
                         </div>
                       </EuiPopover>
