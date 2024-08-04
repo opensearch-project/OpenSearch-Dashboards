@@ -7,6 +7,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Query, TimeRange } from 'src/plugins/data/common';
 import { createPortal } from 'react-dom';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@osd/i18n';
 import { AppMountParameters } from '../../../../../../core/public';
 import { connectStorageToQueryState, opensearchFilters } from '../../../../../data/public';
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
@@ -20,6 +21,7 @@ import { useDispatch, setSavedQuery, useSelector } from '../../utils/state_manag
 
 import './discover_canvas.scss';
 import { useDataSetManager } from '../utils/use_dataset_manager';
+import { TopNavMenuItemRenderType } from '../../../../../navigation/public';
 
 export interface TopNavProps {
   opts: {
@@ -35,6 +37,7 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
   const { services } = useOpenSearchDashboards<DiscoverViewServices>();
   const { inspectorAdapters, savedSearch, indexPattern } = useDiscoverContext();
   const [indexPatterns, setIndexPatterns] = useState<IndexPattern[] | undefined>(undefined);
+  const [screenTitle, setScreenTitle] = useState<string>('');
   const state = useSelector((s) => s.discover);
   const dispatch = useDispatch();
 
@@ -50,6 +53,8 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     osdUrlStateStorage,
     uiSettings,
   } = services;
+
+  const showActionsInGroup = uiSettings.get('home:useNewHomePage');
 
   const topNavLinks = savedSearch
     ? getTopNavLinks(services, inspectorAdapters, savedSearch, isEnhancementsEnabled)
@@ -100,6 +105,15 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
     }
   }, [chrome, getUrlForApp, savedSearch?.id, savedSearch?.title]);
 
+  useEffect(() => {
+    setScreenTitle(
+      savedSearch?.title ||
+        i18n.translate('discover.savedSearch.newTitle', {
+          defaultMessage: 'Untitled',
+        })
+    );
+  }, [savedSearch?.title]);
+
   const showDatePicker = useMemo(() => (indexPattern ? indexPattern.isTimeBased() : false), [
     indexPattern,
   ]);
@@ -134,8 +148,8 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
         className={isEnhancementsEnabled ? 'topNav hidden' : ''}
         appName={PLUGIN_ID}
         config={topNavLinks}
-        showSearchBar
-        showDatePicker={showDatePicker}
+        showSearchBar={TopNavMenuItemRenderType.IN_PLACE}
+        showDatePicker={showDatePicker && TopNavMenuItemRenderType.IN_PORTAL}
         showSaveQuery={showSaveQuery}
         useDefaultBehaviors
         setMenuMountPoint={opts.setHeaderActionMenu}
@@ -144,6 +158,8 @@ export const TopNav = ({ opts, showSaveQuery, isEnhancementsEnabled }: TopNavPro
         savedQueryId={state.savedQuery}
         onSavedQueryIdChange={updateSavedQueryId}
         datePickerRef={opts?.optionalRef?.datePickerRef}
+        groupActions={showActionsInGroup}
+        screenTitle={screenTitle}
       />
     </>
   );
