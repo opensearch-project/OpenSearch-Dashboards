@@ -7,12 +7,23 @@ import React, { useState, useMemo, useCallback } from 'react';
 import {
   EuiPage,
   EuiPageBody,
+  copyToClipboard,
+  EuiComboBoxOptionOption,
   EuiPageHeader,
   EuiPageContent,
   EuiLink,
+  EuiIcon,
+  EuiTableSelectionType,
+  EuiFilterButton,
+  EuiSelect,
+  EuiComboBox,
   EuiSmallButton,
   EuiInMemoryTable,
+  EuiToolTip,
+  EuiText,
   EuiSearchBarProps,
+  EuiCopy,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, of } from 'rxjs';
@@ -55,6 +66,13 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     pageSizeOptions: [5, 10, 20],
   });
   const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
+  const [featureFilters, setFeatureFilters] = useState<string[]>([]);
+  const [filterByFeature, setFilterByFeature] = useState<string | null>(null);
+  // eslint-disable-next-line
+  console.log('workspaceList', workspaceList);
+
+  // eslint-disable-next-line
+  console.log('featureFilters', featureFilters);
 
   const handleSwitchWorkspace = useCallback(
     (id: string) => {
@@ -65,44 +83,104 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     [application, http]
   );
 
+  const formatDate = function (dateString: string) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    const date = new Date(dateString);
+
+    const month = months[date.getUTCMonth()];
+    const day = String(date.getUTCDate()).padStart(2, '0');
+    const year = date.getUTCFullYear();
+
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+    const milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
+
+    return `${month} ${day},${year}@${hours}:${minutes}:${seconds}.${milliseconds}`;
+  };
+
+  // const handleCopyId = (id: string) => {
+  //   copyToClipboard(id);
+  // };
+
+  const addFeatureFilter = (newFeature: string) => {
+    setFeatureFilters((prevFilters) => {
+      if (!prevFilters.includes(newFeature)) {
+        return [...prevFilters, newFeature];
+      }
+      return prevFilters;
+    });
+  };
+
   const searchResult = useMemo(() => {
-    if (queryInput) {
-      const normalizedQuery = queryInput.toLowerCase();
-      const result = workspaceList.filter((item) => {
-        return (
-          item.id.toLowerCase().indexOf(normalizedQuery) > -1 ||
-          item.name.toLowerCase().indexOf(normalizedQuery) > -1
-        );
-      });
-      return result;
-    }
-    return workspaceList;
-  }, [workspaceList, queryInput]);
+    const normalizedQuery = queryInput.toLowerCase();
+
+    return workspaceList.filter((item) => {
+      const useCaseId = getFirstUseCaseOfFeatureConfigs(item.features || []);
+      const useCase =
+        useCaseId === DEFAULT_NAV_GROUPS.all.id
+          ? DEFAULT_NAV_GROUPS.all
+          : registeredUseCases?.find(({ id }) => id === useCaseId);
+
+      const filterResult = filterByFeature ? useCase?.title === filterByFeature : true;
+      const QueryResult = queryInput ? item.name.toLowerCase().includes(normalizedQuery) : true;
+
+      return filterResult && QueryResult;
+    });
+  }, [workspaceList, filterByFeature, queryInput, registeredUseCases]);
+  // if (queryInput) {
+  //   const normalizedQuery = queryInput.toLowerCase();
+  //   const result = workspaceList.filter((item) => {
+  //     return (
+  //       item.id.toLowerCase().indexOf(normalizedQuery) > -1 ||
+  //       item.name.toLowerCase().indexOf(normalizedQuery) > -1
+  //     );
+  //   });
+  //   return result;
+  // }
+  // return workspaceList;
+  // }, [workspaceList, queryInput, filterByFeature, registeredUseCases]);
+
+  // const filteredByFeatureResult = useMemo(() => {
+  //   if (filterByFeature) {
+  //     return workspaceList.filter((item) => item.features?.includes(filterByFeature));
+  //   }
+  //   return workspaceList;
+  // }, [workspaceList, filterByFeature]);
 
   const columns = [
     {
       field: 'name',
       name: 'Name',
+      width: '25%',
       sortable: true,
       render: (name: string, item: WorkspaceAttribute) => (
         <span>
-          <EuiLink onClick={() => handleSwitchWorkspace(item.id)}>{name}</EuiLink>
+          <EuiLink onClick={() => handleSwitchWorkspace(item.id)}>
+            <EuiLink>{name}</EuiLink>
+          </EuiLink>
         </span>
       ),
     },
-    {
-      field: 'id',
-      name: 'ID',
-      sortable: true,
-    },
-    {
-      field: 'description',
-      name: 'Description',
-      truncateText: true,
-    },
+
     {
       field: 'features',
       name: 'Use case',
+      width: '20%',
       isExpander: true,
       hasActions: true,
       render: (features: string[]) => {
@@ -115,29 +193,105 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
             ? DEFAULT_NAV_GROUPS.all
             : registeredUseCases?.find(({ id }) => id === useCaseId);
         if (useCase) {
+          addFeatureFilter(useCase.title);
+          // eslint-disable-next-line
+          console.log('use case', useCase);
           return useCase.title;
         }
       },
     },
+
+    {
+      field: 'description',
+      name: 'Description',
+      width: '20%',
+      // truncateText: true,
+      render: (description: string) => (
+        <EuiToolTip position="bottom" content={description}>
+          <div
+            style={{
+              maxWidth: '130px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <EuiText size="s" className="eui-textTruncate">
+              {description}
+            </EuiText>
+          </div>
+        </EuiToolTip>
+      ),
+    },
+    {
+      field: 'lastUpdatedTime',
+      name: 'Last updated',
+      width: '25%',
+      truncateText: false,
+      render: (lastUpdatedTime: string) => {
+        return formatDate(lastUpdatedTime);
+      },
+    },
+
     {
       name: 'Actions',
       field: '',
       actions: [
         {
+          name: 'Copy ID',
+          type: 'button',
+          description: 'Copy id',
+          'data-test-subj': 'workspace-list-copy-id-icon',
+          render: ({ id }: WorkspaceAttribute) => {
+            return (
+              <EuiCopy textToCopy={id}>
+                {(copy) => (
+                  <EuiButtonEmpty onClick={copy} iconType="copy" color="text">
+                    <EuiText size="m">Copy</EuiText>
+                  </EuiButtonEmpty>
+                )}
+              </EuiCopy>
+            );
+          },
+        },
+        {
           name: 'Edit',
-          icon: 'pencil',
-          type: 'icon',
+          // icon: 'pencil',
+          type: 'button',
           description: 'Edit workspace',
-          onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id),
+          // onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id),
           'data-test-subj': 'workspace-list-edit-icon',
+          render: ({ id }: WorkspaceAttribute) => {
+            return (
+              <EuiButtonEmpty
+                onClick={() => handleSwitchWorkspace(id)}
+                iconType="pencil"
+                color="text"
+              >
+                <EuiText size="m">Edit</EuiText>
+              </EuiButtonEmpty>
+            );
+          },
         },
         {
           name: 'Delete',
-          icon: 'trash',
-          type: 'icon',
+          // icon: 'trash',
+          // color: 'danger',
+          type: 'button',
           description: 'Delete workspace',
-          onClick: (item: WorkspaceAttribute) => setDeletedWorkspace(item),
+          // onClick: (item: WorkspaceAttribute) => setDeletedWorkspace(item),
           'data-test-subj': 'workspace-list-delete-icon',
+          render: (item: WorkspaceAttribute) => {
+            return (
+              <EuiButtonEmpty
+                onClick={() => setDeletedWorkspace(item)}
+                iconType="trash"
+                color="danger"
+              >
+                <EuiText size="m">Delete</EuiText>
+              </EuiButtonEmpty>
+            );
+          },
         },
       ],
     },
@@ -167,12 +321,32 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     [debouncedSetQueryInput]
   );
 
+  const handleSelectChange = (selectedOptions: EuiComboBoxOptionOption[]) => {
+    setFilterByFeature(selectedOptions.length > 0 ? selectedOptions[0].label : '');
+  };
+
+  const comboBoxOptions = featureFilters.map((feature) => ({ label: feature }));
+
   const search: EuiSearchBarProps = {
     onChange: handleSearchInput,
     box: {
-      incremental: true,
+      incremental: false,
     },
     toolsRight: [
+      <EuiComboBox
+        style={{ width: '200px' }}
+        placeholder="Use Case"
+        isClearable={true}
+        options={comboBoxOptions}
+        selectedOptions={filterByFeature ? [{ label: filterByFeature }] : []}
+        singleSelection={{ asPlainText: true }}
+        // options={[
+        //   { value: '', text: 'Use Case', disabled: true }, // Placeholder option
+        //   ...featureFilters.map((feature) => ({ value: feature, text: feature })),
+        // ]}
+        // options={featureFilters.map((feature) => ({ value: feature, text: feature }))}
+        onChange={handleSelectChange}
+      />,
       ...(isDashboardAdmin
         ? [
             <EuiSmallButton
@@ -189,6 +363,11 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     ],
   };
 
+  // const selectionValue: EuiTableSelectionType<WorkspaceAttribute> = {
+  //   onSelectionChange: (selection: WorkspaceAttribute[]) => {
+  //     setSelectionFilteredByFeatures(selection);
+  //   },
+  // };
   return (
     <EuiPage paddingSize="none">
       <EuiPageBody panelled>
@@ -204,7 +383,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
           paddingSize="none"
           panelPaddingSize="l"
           hasShadow={false}
-          style={{ width: '100%', maxWidth: 1000 }}
+          style={{ width: '100%' }}
         >
           <EuiInMemoryTable
             items={searchResult}
