@@ -15,24 +15,6 @@ import { DataSetContract } from '../../../../data/public/query';
 import { ConfigSchema } from '../../../common/config';
 import { createQueryAssistExtension } from './create_extension';
 
-const mockSimpleDataSet = {
-  id: 'mock-data-set-id',
-  title: 'mock-title',
-  dataSourceRef: {
-    id: 'mock-data-source-id',
-  },
-} as SimpleDataSet;
-
-const mockDataSetManager: jest.Mocked<DataSetContract> = {
-  getUpdates$: jest.fn().mockReturnValue(of(mockSimpleDataSet)),
-  getDataSet: jest.fn().mockReturnValue(mockSimpleDataSet),
-  setDataSet: jest.fn(),
-  getDefaultDataSet: jest.fn().mockReturnValue(mockSimpleDataSet),
-  fetchDefaultDataSet: jest.fn().mockResolvedValue(mockSimpleDataSet),
-  init: jest.fn(),
-  initWithIndexPattern: jest.fn(),
-};
-
 const coreSetupMock = coreMock.createSetup({
   pluginStartDeps: {
     data: {
@@ -41,13 +23,19 @@ const coreSetupMock = coreMock.createSetup({
   },
 });
 const httpMock = coreSetupMock.http;
-const dataMock = {
-  ...dataPluginMock.createSetupContract(),
-  query: {
-    ...dataPluginMock.createSetupContract().query,
-    dataSetManager: mockDataSetManager,
+const dataMock = dataPluginMock.createSetupContract();
+const dataSetMock = (dataMock.query.dataSetManager as unknown) as jest.Mocked<DataSetContract>;
+
+const mockSimpleDataSet = {
+  id: 'mock-data-set-id',
+  title: 'mock-title',
+  dataSourceRef: {
+    id: 'mock-data-source-id',
   },
-};
+} as SimpleDataSet;
+
+dataSetMock.getDataSet.mockReturnValue(mockSimpleDataSet);
+dataSetMock.getUpdates$.mockReturnValue(of(mockSimpleDataSet));
 
 jest.mock('../components', () => ({
   QueryAssistBar: jest.fn(() => <div>QueryAssistBar</div>),
@@ -71,17 +59,7 @@ describe('CreateExtension', () => {
 
   it('should be enabled if at least one language is configured', async () => {
     httpMock.get.mockResolvedValueOnce({ configuredLanguages: ['PPL'] });
-    const extension = createQueryAssistExtension(
-      httpMock,
-      {
-        ...dataMock,
-        query: {
-          ...dataMock.query,
-          dataSetManager: mockDataSetManager,
-        },
-      },
-      config
-    );
+    const extension = createQueryAssistExtension(httpMock, dataMock, config);
     const isEnabled = await firstValueFrom(extension.isEnabled$(dependencies));
     expect(isEnabled).toBeTruthy();
     expect(httpMock.get).toBeCalledWith('/api/enhancements/assist/languages', {

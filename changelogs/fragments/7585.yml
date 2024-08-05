@@ -1,0 +1,2 @@
+fix:
+- Do not show surround doc links for PPL ([#7585](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7585))

@@ -15,7 +15,7 @@ export function createDataSetNavigator(
   dataSetManager: DataSetContract
 ) {
   // Return a function that takes props, omitting the dependencies from the props type
-  return (props: Omit<DataSetNavigatorProps, 'savedObjectsClient' | 'http' | 'dataSet'>) => (
+  return (props: Omit<DataSetNavigatorProps, 'savedObjectsClient' | 'http' | 'dataSetManager'>) => (
     <DataSetNavigator
       {...props}
       savedObjectsClient={savedObjectsClient}

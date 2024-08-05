@@ -1,0 +1,2 @@
+fix:
+- [navigation]feat: redirect user to home in global when workspace is enabled ([#7551](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7551))
