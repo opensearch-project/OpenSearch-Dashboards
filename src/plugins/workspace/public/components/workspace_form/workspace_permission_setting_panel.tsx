@@ -213,7 +213,6 @@ export const WorkspacePermissionSettingPanel = ({
         nextIdGenerator={nextIdGenerator}
         disabledUserOrGroupInputIds={disabledUserOrGroupInputIds}
       />
-      <EuiSpacer size="m" />
     </div>
   );
 };

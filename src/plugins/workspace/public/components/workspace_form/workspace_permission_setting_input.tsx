@@ -183,7 +183,7 @@ export const WorkspacePermissionSettingInput = ({
         <EuiComboBox
           singleSelection={{ asPlainText: true }}
           options={permissionModeOptions}
-          isDisabled={!deletable}
+          isDisabled={userOrGroupDisabled}
           selectedOptions={permissionModesSelected}
           onChange={handlePermissionModeOptionChange}
           isClearable={false}
