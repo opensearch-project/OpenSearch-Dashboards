@@ -4,10 +4,6 @@
  */
 
 import { i18n } from '@osd/i18n';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../../core/server/http/router';
-// eslint-disable-next-line @osd/eslint/no-restricted-paths
-import { LegacyRequest } from '../../../../core/server/http';
 import {
   ACL,
   SavedObjectsBulkGetObject,
@@ -33,8 +29,8 @@ export class SavedObjectsPermissionControl {
   private readonly logger: Logger;
   private _getScopedClient?: SavedObjectsServiceStart['getScopedClient'];
   private auth?: HttpAuth;
-  private _savedObjectCache: WeakMap<LegacyRequest, { [key: string]: SavedObject }> = new WeakMap();
-  private _shouldCachedSavedObjects: WeakMap<LegacyRequest, string[]> = new WeakMap();
+  private _savedObjectCache: Map<string, { [key: string]: SavedObject }> = new Map();
+  private _shouldCachedSavedObjects: Map<string, string[]> = new Map();
   /**
    * Returns a saved objects client that is able to:
    * 1. Read objects whose type is `workspace` because workspace is a hidden type and the permission control client will need to get the metadata of a specific workspace to do the permission check.
@@ -61,7 +57,7 @@ export class SavedObjectsPermissionControl {
     request: OpenSearchDashboardsRequest,
     savedObjects: SavedObjectsBulkGetObject[]
   ) {
-    const requestKey = ensureRawRequest(request);
+    const requestKey = request.uuid;
     const savedObjectsToGet = savedObjects.filter(
       (savedObject) =>
         !this._savedObjectCache.get(requestKey)?.[this.generateSavedObjectKey(savedObject)]
@@ -220,7 +216,7 @@ export class SavedObjectsPermissionControl {
     request: OpenSearchDashboardsRequest,
     savedObjects: Array<Pick<SavedObjectsBulkGetObject, 'type' | 'id'>>
   ) {
-    const requestKey = ensureRawRequest(request);
+    const requestKey = request.uuid;
     this._shouldCachedSavedObjects.set(
       requestKey,
       Array.from(
@@ -233,7 +229,7 @@ export class SavedObjectsPermissionControl {
   }
 
   public clearSavedObjectsCache(request: OpenSearchDashboardsRequest) {
-    const requestKey = ensureRawRequest(request);
+    const requestKey = request.uuid;
     if (this._shouldCachedSavedObjects.has(requestKey)) {
       this._shouldCachedSavedObjects.delete(requestKey);
     }
