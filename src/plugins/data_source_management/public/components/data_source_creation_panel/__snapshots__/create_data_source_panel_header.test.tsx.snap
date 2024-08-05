@@ -20,7 +20,9 @@ exports[`CreateDataSourcePanelHeader renders correctly 1`] = `
     <EuiSpacer
       size="s"
     />
-    <EuiText>
+    <EuiText
+      size="s"
+    >
       <p>
         <FormattedMessage
           defaultMessage="Select a data source type to get started."
