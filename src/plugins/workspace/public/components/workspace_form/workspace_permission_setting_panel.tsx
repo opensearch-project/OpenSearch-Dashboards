@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import {
   EuiSmallButton,
   EuiFlexGroup,
@@ -36,12 +36,12 @@ export interface WorkspacePermissionSettingPanelProps {
 }
 
 interface UserOrGroupSectionProps extends WorkspacePermissionSettingPanelProps {
-  type: WorkspacePermissionItemType;
+  // type: WorkspacePermissionItemType;
   nextIdGenerator: () => number;
 }
 
 const UserOrGroupSection = ({
-  type,
+  // type,
   errors,
   onChange,
   nextIdGenerator,
@@ -54,11 +54,11 @@ const UserOrGroupSection = ({
       ...permissionSettings,
       {
         id: nextIdGenerator(),
-        type,
+        type: WorkspacePermissionItemType.User,
         modes: optionIdToWorkspacePermissionModesMap[PermissionModeId.Read],
       },
     ]);
-  }, [onChange, type, permissionSettings, nextIdGenerator]);
+  }, [onChange, permissionSettings, nextIdGenerator]);
 
   const handleDelete = useCallback(
     (index: number) => {
@@ -99,23 +99,34 @@ const UserOrGroupSection = ({
     [onChange, permissionSettings]
   );
 
+  const handleTypeChange = useCallback<WorkspacePermissionSettingInputProps['onTypeChange']>(
+    (type, index) => {
+      onChange?.(
+        permissionSettings.map((item, itemIndex) => {
+          if (index === itemIndex) {
+            if (type === WorkspacePermissionItemType.User) {
+              const { group, ...newItem } = { ...item, type, userId: '', group: '' };
+              return newItem;
+            } else {
+              const { userId, ...newItem } = { ...item, type, userId: '', group: '' };
+              return newItem;
+            }
+          }
+          return item;
+        })
+      );
+    },
+    [onChange, permissionSettings]
+  );
+
   return (
     <div>
       <EuiFlexGroup gutterSize="m">
         <EuiFlexItem style={{ maxWidth: 400 }}>
           <EuiCompressedFormRow
-            label={
-              // type === WorkspacePermissionItemType.User
-              //   ? i18n.translate('workspaceForm.permissionSetting.userLabel', {
-              //       defaultMessage: 'User',
-              //     })
-              //   : i18n.translate('workspaceForm.permissionSetting.groupLabel', {
-              //       defaultMessage: 'User group',
-              //     })
-              i18n.translate('workspaceForm.permissionSetting.collaboratorLabel', {
-                defaultMessage: 'Collaborator',
-              })
-            }
+            label={i18n.translate('workspaceForm.permissionSetting.collaboratorLabel', {
+              defaultMessage: 'Collaborator',
+            })}
           >
             <></>
           </EuiCompressedFormRow>
@@ -140,12 +151,13 @@ const UserOrGroupSection = ({
           >
             <WorkspacePermissionSettingInput
               {...item}
-              type={type}
+              type={item.type || WorkspacePermissionItemType.User}
               index={index}
               userOrGroupDisabled={disabledUserOrGroupInputIds.includes(item.id)}
               onDelete={handleDelete}
               onGroupOrUserIdChange={handleGroupOrUserIdChange}
               onPermissionModesChange={handlePermissionModesChange}
+              onTypeChange={handleTypeChange}
             />
           </EuiCompressedFormRow>
         </React.Fragment>
@@ -153,16 +165,9 @@ const UserOrGroupSection = ({
       <EuiSmallButton
         fullWidth={false}
         onClick={handleAddNewOne}
-        data-test-subj={`workspaceForm-permissionSettingPanel-${type}-addNew`}
+        // data-test-subj={`workspaceForm-permissionSettingPanel-${type}-addNew`}
         color="secondary"
       >
-        {/* {type === WorkspacePermissionItemType.User
-          ? i18n.translate('workspace.form.permissionSettingPanel.addUser', {
-              defaultMessage: 'Add user',
-            })
-          : i18n.translate('workspace.form.permissionSettingPanel.addUserGroup', {
-              defaultMessage: 'Add user group',
-            })} */}
         {i18n.translate('workspace.form.permissionSettingPanel.addCollaborator', {
           defaultMessage: 'Add collaborator',
         })}
@@ -177,35 +182,13 @@ export const WorkspacePermissionSettingPanel = ({
   permissionSettings,
   disabledUserOrGroupInputIds,
 }: WorkspacePermissionSettingPanelProps) => {
-  const userPermissionSettings = useMemo(
-    () =>
-      permissionSettings?.filter(
-        (permissionSettingItem) => permissionSettingItem.type === WorkspacePermissionItemType.User
-      ) ?? [],
-    [permissionSettings]
-  );
-  const groupPermissionSettings = useMemo(
-    () =>
-      permissionSettings?.filter(
-        (permissionSettingItem) => permissionSettingItem.type === WorkspacePermissionItemType.Group
-      ) ?? [],
-    [permissionSettings]
-  );
-
   const nextIdRef = useRef(generateNextPermissionSettingsId(permissionSettings));
 
-  const handleUserPermissionSettingsChange = useCallback(
+  const handlePermissionSettingsChange = useCallback(
     (newSettings) => {
-      onChange?.([...newSettings, ...groupPermissionSettings]);
+      onChange?.([...newSettings]);
     },
-    [groupPermissionSettings, onChange]
-  );
-
-  const handleGroupPermissionSettingsChange = useCallback(
-    (newSettings) => {
-      onChange?.([...userPermissionSettings, ...newSettings]);
-    },
-    [userPermissionSettings, onChange]
+    [onChange]
   );
 
   const nextIdGenerator = useCallback(() => {
@@ -225,21 +208,12 @@ export const WorkspacePermissionSettingPanel = ({
     <div>
       <UserOrGroupSection
         errors={errors}
-        onChange={handleUserPermissionSettingsChange}
-        permissionSettings={userPermissionSettings}
-        type={WorkspacePermissionItemType.User}
+        onChange={handlePermissionSettingsChange}
+        permissionSettings={permissionSettings}
         nextIdGenerator={nextIdGenerator}
         disabledUserOrGroupInputIds={disabledUserOrGroupInputIds}
       />
       <EuiSpacer size="m" />
-      <UserOrGroupSection
-        errors={errors}
-        onChange={handleGroupPermissionSettingsChange}
-        permissionSettings={groupPermissionSettings}
-        type={WorkspacePermissionItemType.Group}
-        nextIdGenerator={nextIdGenerator}
-        disabledUserOrGroupInputIds={disabledUserOrGroupInputIds}
-      />
     </div>
   );
 };
