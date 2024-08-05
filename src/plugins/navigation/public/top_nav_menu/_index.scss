@@ -15,6 +15,7 @@
   & > .euiToolTipAnchor > .euiButton,
   & > .euiToolTipAnchor > .euiButtonIcon {
     border-radius: 0;
+    border: $euiFormInputGroupBorder;
   }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
@@ -34,14 +35,15 @@
   & > .euiToolTipAnchor:not(:last-child) > .euiButtonIcon {
     border-bottom-right-radius: 0;
     border-top-right-radius: 0;
-    border-right-color: map.get($euiSwitchColors, "text") !important;
+
+    // border-right-color: map.get($euiSwitchColors, "text") !important;
   }
 
   // stylelint-disable-next-line @osd/stylelint/no_modifying_global_selectors
   & > .osdTopNavGroup-isDisabled:not(:last-child):has(+ .osdTopNavGroup-isDisabled),
   & > .osdTopNavGroup-isDisabled.euiToolTipAnchor:not(:last-child):has(+ .osdTopNavGroup-isDisabled) > .euiButton,
   & > .osdTopNavGroup-isDisabled.euiToolTipAnchor:not(:last-child):has(+ .osdTopNavGroup-isDisabled) > .euiButtonIcon {
-    border-right-color: $euiButtonColorDisabled !important;
+    // border-right-color: $euiButtonColorDisabled !important;
   }
 }
 
