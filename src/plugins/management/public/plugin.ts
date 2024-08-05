@@ -137,7 +137,9 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         const fulfilledNavLink = fulfillRegistrationLinksToChromeNavLinks(
           navLinks || [],
           coreStart.chrome.navLinks.getAll()
-        ).filter((navLink) => navLink.id !== settingsLandingPageId && !navLink.hidden);
+        ).filter(
+          (navLink) => navLink.id !== settingsLandingPageId && !navLink.hidden && !navLink.disabled
+        );
 
         return renderApp({
           mountElement: params.element,
@@ -170,7 +172,10 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         const fulfilledNavLink = fulfillRegistrationLinksToChromeNavLinks(
           navLinks || [],
           coreStart.chrome.navLinks.getAll()
-        ).filter((navLink) => navLink.id !== dataAdministrationLandingPageId && !navLink.hidden);
+        ).filter(
+          (navLink) =>
+            navLink.id !== dataAdministrationLandingPageId && !navLink.hidden && !navLink.disabled
+        );
 
         return renderApp({
           mountElement: params.element,

@@ -79,7 +79,11 @@ export function flattenLinksOrCategories(linkItems: LinkItem[]): ChromeNavLink[]
       acc.push(item.link);
     } else if (item.itemType === LinkItemType.PARENT_LINK) {
       if (item.link) {
-        acc.push(item.link);
+        // The parent item is not clickable in new left navigation
+        acc.push({
+          ...item.link,
+          disabled: true,
+        });
       }
       acc.push(...flattenLinksOrCategories(item.links));
     } else if (item.itemType === LinkItemType.CATEGORY) {
