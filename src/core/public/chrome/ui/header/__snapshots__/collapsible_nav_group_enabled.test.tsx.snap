@@ -146,7 +146,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                   class="euiSideNavItem euiSideNavItem--root euiSideNavItem--hasChildItems"
                 >
                   <div
-                    aria-label="Analytics"
+                    aria-label="Essentials"
                     class="euiSideNavItemButton"
                   >
                     <span
@@ -154,12 +154,12 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                     >
                       <span
                         class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                        title="Analytics"
+                        title="Essentials"
                       >
                         <div
                           class="nav-link-item"
                         >
-                          Analytics
+                          Essentials
                         </div>
                       </span>
                     </span>

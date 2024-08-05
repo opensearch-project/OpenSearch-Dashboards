@@ -43,7 +43,7 @@ describe('WorkspaceUseCase', () => {
     const { renderResult } = setup();
 
     expect(renderResult.getByText('Observability')).toBeInTheDocument();
-    expect(renderResult.getByText('Analytics')).toBeInTheDocument();
+    expect(renderResult.getByText('Essentials')).toBeInTheDocument();
     expect(renderResult.getByText('Security Analytics')).toBeInTheDocument();
     expect(renderResult.getByText('Search')).toBeInTheDocument();
   });
