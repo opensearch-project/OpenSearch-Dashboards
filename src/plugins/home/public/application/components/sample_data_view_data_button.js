@@ -127,7 +127,7 @@ export class SampleDataViewDataButton extends React.Component {
         anchorPosition="downCenter"
         data-test-subj={`launchSampleDataSet${this.props.id}`}
       >
-        <EuiContextMenu initialPanelId={0} panels={panels} />
+        <EuiContextMenu initialPanelId={0} panels={panels} size="s" />
       </EuiPopover>
     );
   }
