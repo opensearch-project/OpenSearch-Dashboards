@@ -154,7 +154,7 @@ describe('<CollapsibleNavGroupEnabled />', () => {
       ]),
       storage: new StubBrowserStorage(),
       onIsLockedUpdate: () => {},
-      closeNav: () => {},
+      setIsNavOpen: jest.fn(),
       navigateToApp: () => Promise.resolve(),
       navigateToUrl: () => Promise.resolve(),
       customNavLink$: new BehaviorSubject(undefined),
