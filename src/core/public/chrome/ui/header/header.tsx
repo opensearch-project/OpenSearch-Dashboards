@@ -130,16 +130,8 @@ export function Header({
 }: HeaderProps) {
   const isVisible = useObservable(observables.isVisible$, false);
   const isLocked = useObservable(observables.isLocked$, false);
-  const appId = useObservable(application.currentAppId$, '');
   const [isNavOpen, setIsNavOpen] = useState(false);
   const sidecarConfig = useObservable(observables.sidecarConfig$, undefined);
-
-  /**
-   * This is a workaround on 2.16 to hide the navigation items within left navigation
-   * when user is in homepage with workspace enabled + new navigation enabled
-   */
-  const shouldHideExpandIcon =
-    navGroupEnabled && appId === 'home' && application.capabilities.workspaces.enabled;
 
   const sidecarPaddingStyle = useMemo(() => {
     return getOsdSidecarPaddingStyle(sidecarConfig);
@@ -205,29 +197,27 @@ export function Header({
 
           <EuiHeader position="fixed" className="primaryHeader" style={sidecarPaddingStyle}>
             <EuiHeaderSection grow={false}>
-              {shouldHideExpandIcon ? null : (
-                <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
-                  <EuiHeaderSectionItemButton
-                    data-test-subj="toggleNavButton"
-                    aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
-                      defaultMessage: 'Toggle primary navigation',
+              <EuiHeaderSectionItem border="right" className="header__toggleNavButtonSection">
+                <EuiHeaderSectionItemButton
+                  data-test-subj="toggleNavButton"
+                  aria-label={i18n.translate('core.ui.primaryNav.toggleNavAriaLabel', {
+                    defaultMessage: 'Toggle primary navigation',
+                  })}
+                  onClick={() => setIsNavOpen(!isNavOpen)}
+                  aria-expanded={isNavOpen}
+                  aria-pressed={isNavOpen}
+                  aria-controls={navId}
+                  ref={toggleCollapsibleNavRef}
+                >
+                  <EuiIcon
+                    type="menu"
+                    size="m"
+                    title={i18n.translate('core.ui.primaryNav.menu', {
+                      defaultMessage: 'Menu',
                     })}
-                    onClick={() => setIsNavOpen(!isNavOpen)}
-                    aria-expanded={isNavOpen}
-                    aria-pressed={isNavOpen}
-                    aria-controls={navId}
-                    ref={toggleCollapsibleNavRef}
-                  >
-                    <EuiIcon
-                      type="menu"
-                      size="m"
-                      title={i18n.translate('core.ui.primaryNav.menu', {
-                        defaultMessage: 'Menu',
-                      })}
-                    />
-                  </EuiHeaderSectionItemButton>
-                </EuiHeaderSectionItem>
-              )}
+                  />
+                </EuiHeaderSectionItemButton>
+              </EuiHeaderSectionItem>
 
               <EuiHeaderSectionItem border="right">
                 <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
@@ -300,17 +290,12 @@ export function Header({
             id={navId}
             isLocked={isLocked}
             navLinks$={observables.navLinks$}
-            isNavOpen={shouldHideExpandIcon ? false : isNavOpen}
+            isNavOpen={isNavOpen}
             basePath={basePath}
             navigateToApp={application.navigateToApp}
             navigateToUrl={application.navigateToUrl}
             onIsLockedUpdate={onIsLockedUpdate}
-            closeNav={() => {
-              setIsNavOpen(false);
-              if (toggleCollapsibleNavRef.current) {
-                toggleCollapsibleNavRef.current.focus();
-              }
-            }}
+            setIsNavOpen={setIsNavOpen}
             customNavLink$={observables.customNavLink$}
             logos={logos}
             navGroupsMap$={observables.navGroupsMap$}

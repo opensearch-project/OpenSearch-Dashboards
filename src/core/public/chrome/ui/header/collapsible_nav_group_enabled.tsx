@@ -49,7 +49,7 @@ export interface CollapsibleNavGroupEnabledProps {
   navLinks$: Rx.Observable<ChromeNavLink[]>;
   storage?: Storage;
   onIsLockedUpdate: OnIsLockedUpdate;
-  closeNav: () => void;
+  setIsNavOpen: (isNavOpen: boolean) => void;
   navigateToApp: InternalApplicationStart['navigateToApp'];
   navigateToUrl: InternalApplicationStart['navigateToUrl'];
   customNavLink$: Rx.Observable<ChromeNavLink | undefined>;
@@ -185,7 +185,7 @@ export function CollapsibleNavGroupEnabled({
   isNavOpen,
   storage = window.localStorage,
   onIsLockedUpdate,
-  closeNav,
+  setIsNavOpen,
   navigateToApp,
   navigateToUrl,
   logos,
@@ -315,7 +315,7 @@ export function CollapsibleNavGroupEnabled({
         defaultMessage: 'Primary',
       })}
       type="push"
-      onClose={closeNav}
+      onClose={() => setIsNavOpen(false)}
       outsideClickCloses={false}
       className="context-nav-wrapper"
       size={width}
@@ -332,30 +332,30 @@ export function CollapsibleNavGroupEnabled({
             style={{ minHeight: '100%' }}
             hasShadow={false}
           >
+            <CollapsibleNavTop
+              navLinks={navLinks}
+              navigateToApp={navigateToApp}
+              logos={logos}
+              onClickBack={() => setCurrentNavGroup(undefined)}
+              currentNavGroup={currentNavGroup}
+              shouldShrinkNavigation={!isNavOpen}
+              onClickShrink={() => {
+                setIsNavOpen(!isNavOpen);
+              }}
+              visibleUseCases={visibleUseCases}
+            />
             {!isNavOpen ? null : (
-              <>
-                <CollapsibleNavTop
-                  navLinks={navLinks}
-                  navigateToApp={navigateToApp}
-                  logos={logos}
-                  onClickBack={() => setCurrentNavGroup(undefined)}
-                  currentNavGroup={currentNavGroup}
-                  shouldShrinkNavigation={!isNavOpen}
-                  onClickShrink={closeNav}
-                  visibleUseCases={visibleUseCases}
-                />
-                <NavGroups
-                  navLinks={navLinksForRender}
-                  navigateToApp={navigateToApp}
-                  onNavItemClick={(event, navItem) => {
-                    if (navItem.title === titleForSeeAll && navItem.category?.id) {
-                      const navGroup = navGroupsMap[navItem.category.id];
-                      onGroupClick(event, navGroup);
-                    }
-                  }}
-                  appId={appId}
-                />
-              </>
+              <NavGroups
+                navLinks={navLinksForRender}
+                navigateToApp={navigateToApp}
+                onNavItemClick={(event, navItem) => {
+                  if (navItem.title === titleForSeeAll && navItem.category?.id) {
+                    const navGroup = navGroupsMap[navItem.category.id];
+                    onGroupClick(event, navGroup);
+                  }
+                }}
+                appId={appId}
+              />
             )}
           </EuiPanel>
         </div>
