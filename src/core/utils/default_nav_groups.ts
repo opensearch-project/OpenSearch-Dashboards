@@ -12,7 +12,7 @@ const defaultNavGroups = {
   dataAdministration: {
     id: 'dataAdministration',
     title: i18n.translate('core.ui.group.dataAdministration.title', {
-      defaultMessage: 'data administration',
+      defaultMessage: 'Data administration',
     }),
     description: i18n.translate('core.ui.group.dataAdministration.description', {
       defaultMessage: 'Apply policies or security on your data.',
@@ -23,7 +23,7 @@ const defaultNavGroups = {
   settingsAndSetup: {
     id: 'settingsAndSetup',
     title: i18n.translate('core.ui.group.settingsAndSetup.title', {
-      defaultMessage: 'settings and setup',
+      defaultMessage: 'Settings and setup',
     }),
     description: i18n.translate('core.ui.group.settingsAndSetup.description', {
       defaultMessage: 'Set up your cluster with index patterns.',

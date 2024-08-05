@@ -171,9 +171,9 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       class="euiSideNavItem euiSideNavItem--trunk nav-link-item "
                     >
                       <button
-                        aria-label="link-in-analytics"
+                        aria-label="link-in-essentials"
                         class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                        data-test-subj="collapsibleNavAppLink-link-in-analytics"
+                        data-test-subj="collapsibleNavAppLink-link-in-essentials"
                         type="button"
                       >
                         <span
@@ -181,12 +181,12 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                         >
                           <span
                             class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                            title="link-in-analytics"
+                            title="link-in-essentials"
                           >
                             <div
                               class="euiText euiText--small"
                             >
-                              link-in-analytics
+                              link-in-essentials
                             </div>
                           </span>
                         </span>
@@ -198,7 +198,7 @@ exports[`<CollapsibleNavGroupEnabled /> should render correctly 1`] = `
                       <button
                         aria-label="See all..."
                         class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                        data-test-subj="collapsibleNavAppLink-link-in-analytics"
+                        data-test-subj="collapsibleNavAppLink-link-in-essentials"
                         type="button"
                       >
                         <span
@@ -308,9 +308,9 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
                   class="euiSideNavItem euiSideNavItem--root nav-link-item "
                 >
                   <button
-                    aria-label="link-in-analytics"
+                    aria-label="link-in-essentials"
                     class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                    data-test-subj="collapsibleNavAppLink-link-in-analytics"
+                    data-test-subj="collapsibleNavAppLink-link-in-essentials"
                     type="button"
                   >
                     <span
@@ -318,12 +318,12 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case by default and 
                     >
                       <span
                         class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                        title="link-in-analytics"
+                        title="link-in-essentials"
                       >
                         <div
                           class="euiText euiText--small"
                         >
-                          link-in-analytics
+                          link-in-essentials
                         </div>
                       </span>
                     </span>
@@ -381,9 +381,9 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case when current na
                   class="euiSideNavItem euiSideNavItem--root nav-link-item "
                 >
                   <button
-                    aria-label="link-in-analytics"
+                    aria-label="link-in-essentials"
                     class="euiSideNavItemButton euiSideNavItemButton--isClickable nav-link-item-btn"
-                    data-test-subj="collapsibleNavAppLink-link-in-analytics"
+                    data-test-subj="collapsibleNavAppLink-link-in-essentials"
                     type="button"
                   >
                     <span
@@ -391,12 +391,12 @@ exports[`<CollapsibleNavGroupEnabled /> should show all use case when current na
                     >
                       <span
                         class="euiSideNavItemButton__label euiSideNavItemButton__label--truncated"
-                        title="link-in-analytics"
+                        title="link-in-essentials"
                       >
                         <div
                           class="euiText euiText--small"
                         >
-                          link-in-analytics
+                          link-in-essentials
                         </div>
                       </span>
                     </span>
