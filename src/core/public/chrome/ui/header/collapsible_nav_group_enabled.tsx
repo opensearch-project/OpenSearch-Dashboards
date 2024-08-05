@@ -114,7 +114,11 @@ export function NavGroups({
       'aria-label': link.title,
     };
   };
-  const createSideNavItem = (navLink: LinkItem, className?: string): EuiSideNavItemType<{}> => {
+  const createSideNavItem = (
+    navLink: LinkItem,
+    level: number,
+    className?: string
+  ): EuiSideNavItemType<{}> => {
     if (navLink.itemType === LinkItemType.LINK) {
       if (navLink.link.title === titleForSeeAll) {
         const navItem = createNavItem({
@@ -135,18 +139,38 @@ export function NavGroups({
     }
 
     if (navLink.itemType === LinkItemType.PARENT_LINK && navLink.link) {
-      return {
-        ...createNavItem({ link: navLink.link }),
+      const props = createNavItem({ link: navLink.link });
+      const parentItem = {
+        ...props,
         forceOpen: true,
-        items: navLink.links.map((subNavLink) => createSideNavItem(subNavLink, 'nav-nested-item')),
+        href: undefined,
+        onClick: undefined,
+        className: classNames(props.className, 'nav-link-parent-item'),
+        buttonClassName: classNames(props.buttonClassName, 'nav-link-parent-item-button'),
+        items: navLink.links.map((subNavLink) =>
+          createSideNavItem(subNavLink, level + 1, 'nav-nested-item')
+        ),
       };
+      // The first level of SideBar will be regarded as category
+      // In order to display accordion, we need to render a fake parent category
+      if (level === 1) {
+        return {
+          className: 'nav-link-fake-item',
+          buttonClassName: 'nav-link-fake-item-button',
+          name: '',
+          items: [parentItem],
+          id: `fake_${props.id}`,
+        };
+      }
+
+      return parentItem;
     }
 
     if (navLink.itemType === LinkItemType.CATEGORY) {
       return {
         id: navLink.category?.id ?? '',
         name: <div className="nav-link-item">{navLink.category?.label ?? ''}</div>,
-        items: navLink.links?.map((link) => createSideNavItem(link)),
+        items: navLink.links?.map((link) => createSideNavItem(link, level + 1)),
         'aria-label': navLink.category?.label,
       };
     }
@@ -155,7 +179,7 @@ export function NavGroups({
   };
   const orderedLinksOrCategories = getOrderedLinksOrCategories(navLinks);
   const sideNavItems = orderedLinksOrCategories
-    .map((navLink) => createSideNavItem(navLink))
+    .map((navLink) => createSideNavItem(navLink, 1))
     .filter((item): item is EuiSideNavItemType<{}> => !!item);
   return (
     <EuiFlexItem style={style}>
