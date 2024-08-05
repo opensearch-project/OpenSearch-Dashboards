@@ -8,15 +8,17 @@ exports[`CreateDataSourcePanelHeader renders correctly 1`] = `
   <EuiFlexItem
     grow={false}
   >
-    <EuiTitle>
-      <h2>
+    <EuiText
+      size="s"
+    >
+      <h1>
         <FormattedMessage
           defaultMessage="Create Data Source"
           id="dataSourcesManagement.createDataSourcePanel.title"
           values={Object {}}
         />
-      </h2>
-    </EuiTitle>
+      </h1>
+    </EuiText>
     <EuiSpacer
       size="s"
     />

@@ -38,7 +38,6 @@ import {
   EuiText,
   EuiBadgeGroup,
   EuiPageContent,
-  EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@osd/i18n/react';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
@@ -265,9 +264,9 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
       <EuiPageContent data-test-subj="indexPatternTable" role="region" aria-label={ariaRegion}>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiTitle>
-              <h2>{title}</h2>
-            </EuiTitle>
+            <EuiText size="s">
+              <h1>{title}</h1>
+            </EuiText>
             <EuiSpacer size="s" />
             <EuiText>
               <p>
