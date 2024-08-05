@@ -180,12 +180,12 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     const props = mockProps({
       isNavOpen: true,
       navGroupsMap: {
-        [DEFAULT_NAV_GROUPS.analytics.id]: {
-          ...DEFAULT_NAV_GROUPS.analytics,
+        [DEFAULT_NAV_GROUPS.essentials.id]: {
+          ...DEFAULT_NAV_GROUPS.essentials,
           navLinks: [
             {
-              id: 'link-in-analytics',
-              title: 'link-in-analytics',
+              id: 'link-in-essentials',
+              title: 'link-in-essentials',
               showInAllNavGroup: true,
             },
           ],
@@ -209,12 +209,12 @@ describe('<CollapsibleNavGroupEnabled />', () => {
   it('should show all use case by default and able to click see all', async () => {
     const props = mockProps({
       navGroupsMap: {
-        [DEFAULT_NAV_GROUPS.analytics.id]: {
-          ...DEFAULT_NAV_GROUPS.analytics,
+        [DEFAULT_NAV_GROUPS.essentials.id]: {
+          ...DEFAULT_NAV_GROUPS.essentials,
           navLinks: [
             {
-              id: 'link-in-analytics',
-              title: 'link-in-analytics',
+              id: 'link-in-essentials',
+              title: 'link-in-essentials',
               showInAllNavGroup: true,
             },
           ],
@@ -235,12 +235,12 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     const props = mockProps({
       currentNavGroupId: ALL_USE_CASE_ID,
       navGroupsMap: {
-        [DEFAULT_NAV_GROUPS.analytics.id]: {
-          ...DEFAULT_NAV_GROUPS.analytics,
+        [DEFAULT_NAV_GROUPS.essentials.id]: {
+          ...DEFAULT_NAV_GROUPS.essentials,
           navLinks: [
             {
-              id: 'link-in-analytics',
-              title: 'link-in-analytics',
+              id: 'link-in-essentials',
+              title: 'link-in-essentials',
               showInAllNavGroup: true,
             },
           ],
@@ -261,12 +261,12 @@ describe('<CollapsibleNavGroupEnabled />', () => {
     const props = mockProps({
       currentNavGroupId: ALL_USE_CASE_ID,
       navGroupsMap: {
-        [DEFAULT_NAV_GROUPS.analytics.id]: {
-          ...DEFAULT_NAV_GROUPS.analytics,
+        [DEFAULT_NAV_GROUPS.essentials.id]: {
+          ...DEFAULT_NAV_GROUPS.essentials,
           navLinks: [
             {
-              id: 'link-in-analytics-but-hidden',
-              title: 'link-in-analytics-but-hidden',
+              id: 'link-in-essentials-but-hidden',
+              title: 'link-in-essentials-but-hidden',
               showInAllNavGroup: true,
             },
           ],

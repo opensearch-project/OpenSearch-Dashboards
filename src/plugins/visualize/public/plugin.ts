@@ -231,21 +231,21 @@ export class VisualizePlugin
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.observability, [
       {
         id: visualizeAppId,
-        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
         order: 200,
       },
     ]);
     core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS['security-analytics'], [
       {
         id: visualizeAppId,
-        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
         order: 200,
       },
     ]);
-    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.analytics, [
+    core.chrome.navGroup.addNavLinksToGroup(DEFAULT_NAV_GROUPS.essentials, [
       {
         id: visualizeAppId,
-        category: DEFAULT_APP_CATEGORIES.dashboardAndReport,
+        category: DEFAULT_APP_CATEGORIES.visualizeAndReport,
         order: 200,
       },
     ]);

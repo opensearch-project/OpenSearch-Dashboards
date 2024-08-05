@@ -137,12 +137,12 @@ export const WORKSPACE_USE_CASES = Object.freeze({
       'management',
     ] as string[],
   },
-  analytics: {
-    id: 'analytics',
-    title: i18n.translate('workspace.usecase.analytics.title', {
-      defaultMessage: 'Analytics',
+  essentials: {
+    id: 'essentials',
+    title: i18n.translate('workspace.usecase.essentials.title', {
+      defaultMessage: 'Essentials',
     }),
-    description: i18n.translate('workspace.usecase.analytics.description', {
+    description: i18n.translate('workspace.usecase.essentials.description', {
       defaultMessage:
         'Analyze data to derive insights, identify patterns and trends, and make data-driven decisions.',
     }),

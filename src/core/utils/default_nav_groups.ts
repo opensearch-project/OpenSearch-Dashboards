@@ -64,16 +64,17 @@ const defaultNavGroups = {
     }),
     order: 5000,
   },
-  analytics: {
+  essentials: {
+    // The id has to be analytics for backward compatible since we are using the term analytics in 2.16
     id: 'analytics',
-    title: i18n.translate('core.ui.group.analytics.title', {
-      defaultMessage: 'Analytics',
+    title: i18n.translate('core.ui.group.essential.title', {
+      defaultMessage: 'Essentials',
     }),
-    description: i18n.translate('core.ui.group.analytics.description', {
+    description: i18n.translate('core.ui.group.essential.description', {
       defaultMessage:
         'Analyze data to derive insights, identify patterns and trends, and make data-driven decisions.',
     }),
-    order: 6000,
+    order: 7000,
   },
   search: {
     id: 'search',
@@ -84,7 +85,7 @@ const defaultNavGroups = {
       defaultMessage:
         "Quickly find and explore relevant information across your organization's data sources.",
     }),
-    order: 7000,
+    order: 6000,
   },
 } as const;
 
