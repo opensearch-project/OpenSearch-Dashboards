@@ -65,8 +65,7 @@ const defaultNavGroups = {
     order: 5000,
   },
   essentials: {
-    // The id has to be analytics for backward compatible since we are using the term analytics in 2.16
-    id: 'analytics',
+    id: 'essentials',
     title: i18n.translate('core.ui.group.essential.title', {
       defaultMessage: 'Essentials',
     }),
