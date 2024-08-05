@@ -271,7 +271,7 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
           onMouseOver={[Function]}
         >
           <div
-            className="euiSwitch euiSwitch--compressed"
+            className="euiSwitch euiSwitch--primary euiSwitch--compressed"
           >
             <button
               aria-checked={false}
@@ -320,7 +320,7 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
           onMouseOver={[Function]}
         >
           <div
-            className="euiSwitch euiSwitch--compressed"
+            className="euiSwitch euiSwitch--primary euiSwitch--compressed"
           >
             <button
               aria-checked={false}
@@ -499,7 +499,7 @@ exports[`region_map_options renders the RegionMapOptions with custom option if c
           onMouseOver={[Function]}
         >
           <div
-            className="euiSwitch euiSwitch--compressed"
+            className="euiSwitch euiSwitch--primary euiSwitch--compressed"
           >
             <button
               aria-checked={false}
@@ -768,7 +768,7 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
           onMouseOver={[Function]}
         >
           <div
-            className="euiSwitch euiSwitch--compressed"
+            className="euiSwitch euiSwitch--primary euiSwitch--compressed"
           >
             <button
               aria-checked={false}
@@ -817,7 +817,7 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
           onMouseOver={[Function]}
         >
           <div
-            className="euiSwitch euiSwitch--compressed"
+            className="euiSwitch euiSwitch--primary euiSwitch--compressed"
           >
             <button
               aria-checked={false}
@@ -996,7 +996,7 @@ exports[`region_map_options renders the RegionMapOptions with default option if 
           onMouseOver={[Function]}
         >
           <div
-            className="euiSwitch euiSwitch--compressed"
+            className="euiSwitch euiSwitch--primary euiSwitch--compressed"
           >
             <button
               aria-checked={false}
