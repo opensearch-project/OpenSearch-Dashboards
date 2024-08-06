@@ -4,7 +4,13 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiPage, EuiPageBody, EuiPageHeader, EuiPageContent } from '@elastic/eui';
+import {
+  EuiPage,
+  EuiPageBody,
+  EuiPageHeader,
+  EuiPageContent,
+  euiPaletteColorBlind,
+} from '@elastic/eui';
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { BehaviorSubject } from 'rxjs';
@@ -107,6 +113,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               permissionEnabled={isPermissionEnabled}
               dataSourceManagement={dataSourceManagement}
               availableUseCases={availableUseCases}
+              defaultValues={{ color: euiPaletteColorBlind()[0] }}
             />
           )}
         </EuiPageContent>

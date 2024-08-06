@@ -80,6 +80,7 @@ export const useWorkspaceForm = ({
   const numberOfChanges = defaultValuesRef.current
     ? getNumberOfChanges(formData, {
         ...defaultValuesRef.current,
+        name: defaultValuesRef.current.name || '',
         // The user form will insert some empty permission rows, should ignore these rows not treated as user new added.
         permissionSettings: initialPermissionSettingsRef.current,
       })

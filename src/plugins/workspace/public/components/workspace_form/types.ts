@@ -79,7 +79,7 @@ export interface WorkspaceFormProps {
   application: ApplicationStart;
   savedObjects: SavedObjectsStart;
   onSubmit?: (formData: WorkspaceFormSubmitData) => void;
-  defaultValues?: WorkspaceFormData;
+  defaultValues?: Partial<WorkspaceFormData>;
   operationType: WorkspaceOperationType;
   permissionEnabled?: boolean;
   detailTab?: DetailTab;
