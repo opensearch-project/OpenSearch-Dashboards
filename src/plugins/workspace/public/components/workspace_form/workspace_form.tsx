@@ -4,8 +4,9 @@
  */
 
 import React, { useRef } from 'react';
-import { EuiPanel, EuiSpacer, EuiTitle, EuiForm } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiTitle, EuiForm, EuiText } from '@elastic/eui';
 
+import { i18n } from '@osd/i18n';
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
 import { WorkspaceFormProps } from './types';
 import { useWorkspaceForm } from './use_workspace_form';
@@ -97,6 +98,13 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
           <EuiTitle size="s">
             <h2>{usersAndPermissionsTitle}</h2>
           </EuiTitle>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="default">
+            {i18n.translate('workspace.form.usersAndPermissions.description', {
+              defaultMessage:
+                'You will be added as an owner to the workspace. Select additional users and user groups as workspace collaborators with different access levels.',
+            })}
+          </EuiText>
           <EuiSpacer size="m" />
           <WorkspacePermissionSettingPanel
             errors={formErrors.permissionSettings?.fields}

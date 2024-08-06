@@ -13,6 +13,7 @@ import {
   PermissionModeId,
 } from './constants';
 import { getPermissionModeId } from './utils';
+import './workspace_permission_setting_input.scss';
 
 const permissionModeOptions = [
   {
@@ -158,6 +159,7 @@ export const WorkspacePermissionSettingInput = ({
     <EuiFlexGroup alignItems="center" gutterSize="m">
       <EuiFlexItem style={{ maxWidth: 400 }}>
         <EuiComboBox
+          compressed={true}
           singleSelection={{ asPlainText: true }}
           selectedOptions={groupOrUserIdSelectedOptions}
           onCreateOption={handleGroupOrUserIdCreate}
@@ -174,13 +176,24 @@ export const WorkspacePermissionSettingInput = ({
           isDisabled={userOrGroupDisabled}
           prepend={
             <EuiFlexItem style={{ maxWidth: 100 }}>
-              <EuiSelect options={typeOptions} onChange={handleTypeChange} value={type} />
+              <EuiSelect
+                className="workspacePermissionSettingUserAndGroupSelect"
+                compressed={true}
+                options={typeOptions}
+                onChange={handleTypeChange}
+                value={type}
+                style={{
+                  boxShadow: 'none',
+                  fontWeight: 'bold',
+                }}
+              />
             </EuiFlexItem>
           }
         />
       </EuiFlexItem>
-      <EuiFlexItem style={{ maxWidth: 332 }}>
+      <EuiFlexItem style={{ maxWidth: 200 }}>
         <EuiComboBox
+          compressed={true}
           singleSelection={{ asPlainText: true }}
           options={permissionModeOptions}
           isDisabled={userOrGroupDisabled}

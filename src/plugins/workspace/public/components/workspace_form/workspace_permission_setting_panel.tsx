@@ -166,7 +166,8 @@ const UserOrGroupSection = ({
         fullWidth={false}
         onClick={handleAddNewOne}
         // data-test-subj={`workspaceForm-permissionSettingPanel-${type}-addNew`}
-        color="secondary"
+        color="primary"
+        iconType="plusInCircle"
       >
         {i18n.translate('workspace.form.permissionSettingPanel.addCollaborator', {
           defaultMessage: 'Add collaborator',
