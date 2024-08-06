@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import {
   IContainer,
@@ -13,11 +13,20 @@ import {
   ContainerOutput,
   EmbeddableStart,
 } from '../../../../embeddable/public';
+import { CardContainerInput } from './types';
 
 interface Props {
   embeddable: IContainer;
-  input: ContainerInput;
+  input: CardContainerInput;
   embeddableServices: EmbeddableStart;
+}
+
+export interface CardExplicitInput {
+  title: string;
+  description: string;
+  onClick?: () => void;
+  getIcon?: () => React.ReactElement;
+  getFooter?: () => React.ReactElement;
 }
 
 const CardListInner = ({ embeddable, input, embeddableServices }: Props) => {
@@ -30,9 +39,9 @@ const CardListInner = ({ embeddable, input, embeddableServices }: Props) => {
     );
   });
   return (
-    <EuiFlexGrid gutterSize="s" columns={4}>
-      {cards}
-    </EuiFlexGrid>
+    <EuiFlexGroup gutterSize="s">
+      {input.columns ? cards.slice(0, input.columns) : cards}
+    </EuiFlexGroup>
   );
 };
 
