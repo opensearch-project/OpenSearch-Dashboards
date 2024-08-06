@@ -44,6 +44,12 @@ export {
   TopNavMenuLegacyData,
   TopNavMenuItemRenderType,
   TopNavControlData,
+  TopNavControlButtonData,
+  TopNavControlLinkData,
+  TopNavControlIconData,
+  TopNavControlTextData,
+  TopNavControlDescriptionData,
+  TopNavControlComponentData,
 } from './top_nav_menu';
 
 export { NavigationPublicPluginSetup, NavigationPublicPluginStart } from './types';
