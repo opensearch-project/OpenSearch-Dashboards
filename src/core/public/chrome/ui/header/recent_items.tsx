@@ -100,6 +100,7 @@ export const RecentItems = ({
                 </>
               }
               color="text"
+              size="s"
             />
           ))}
         </EuiListGroup>
