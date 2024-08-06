@@ -5335,7 +5335,6 @@ exports[`Header handles visibility and lock changes 1`] = `
                     opensearchDashboardsVersion="1.0.0"
                     surveyLink="/"
                     useDefaultContent={true}
-                    useUpdatedAppearance={true}
                   >
                     <HeaderHelpMenuUI
                       helpExtension$={
@@ -6142,20 +6141,27 @@ exports[`Header handles visibility and lock changes 1`] = `
                       opensearchDashboardsVersion="1.0.0"
                       surveyLink="/"
                       useDefaultContent={true}
-                      useUpdatedAppearance={true}
                     >
                       <EuiPopover
-                        anchorPosition="rightDown"
+                        anchorPosition="downRight"
                         button={
-                          <EuiButtonIcon
-                            aria-expanded={false}
-                            aria-haspopup="true"
-                            aria-label="Help menu"
-                            color="primary"
-                            iconType="iInCircle"
-                            onClick={[Function]}
-                            size="xs"
-                          />
+                          <EuiToolTip
+                            content="Help"
+                            delay="long"
+                            position="bottom"
+                          >
+                            <EuiHeaderSectionItemButton
+                              aria-expanded={false}
+                              aria-haspopup="true"
+                              aria-label="Help menu"
+                              onClick={[Function]}
+                            >
+                              <EuiIcon
+                                size="m"
+                                type="questionInCircle"
+                              />
+                            </EuiHeaderSectionItemButton>
+                          </EuiToolTip>
                         }
                         closePopover={[Function]}
                         data-test-subj="helpMenuButton"
@@ -6168,48 +6174,117 @@ exports[`Header handles visibility and lock changes 1`] = `
                         repositionOnScroll={true}
                       >
                         <div
-                          className="euiPopover euiPopover--anchorRightDown"
+                          className="euiPopover euiPopover--anchorDownRight"
                           data-test-subj="helpMenuButton"
                           id="headerHelpMenu"
                         >
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiButtonIcon
-                              aria-expanded={false}
-                              aria-haspopup="true"
-                              aria-label="Help menu"
-                              color="primary"
-                              iconType="iInCircle"
-                              onClick={[Function]}
-                              size="xs"
+                            <EuiToolTip
+                              content="Help"
+                              delay="long"
+                              position="bottom"
                             >
-                              <button
-                                aria-expanded={false}
-                                aria-haspopup="true"
-                                aria-label="Help menu"
-                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                                disabled={false}
-                                onClick={[Function]}
-                                type="button"
+                              <span
+                                className="euiToolTipAnchor"
+                                onKeyUp={[Function]}
+                                onMouseOut={[Function]}
+                                onMouseOver={[Function]}
                               >
-                                <EuiIcon
-                                  aria-hidden="true"
-                                  className="euiButtonIcon__icon"
-                                  color="inherit"
-                                  size="m"
-                                  type="iInCircle"
+                                <EuiHeaderSectionItemButton
+                                  aria-expanded={false}
+                                  aria-haspopup="true"
+                                  aria-label="Help menu"
+                                  onBlur={[Function]}
+                                  onClick={[Function]}
+                                  onFocus={[Function]}
                                 >
-                                  <span
-                                    aria-hidden="true"
-                                    className="euiButtonIcon__icon"
-                                    color="inherit"
-                                    data-euiicon-type="iInCircle"
-                                    size="m"
-                                  />
-                                </EuiIcon>
-                              </button>
-                            </EuiButtonIcon>
+                                  <EuiButtonEmpty
+                                    aria-expanded={false}
+                                    aria-haspopup="true"
+                                    aria-label="Help menu"
+                                    buttonRef={
+                                      Object {
+                                        "current": <button
+                                          aria-expanded="false"
+                                          aria-haspopup="true"
+                                          aria-label="Help menu"
+                                          class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                          type="button"
+                                        >
+                                          <span
+                                            class="euiButtonContent euiButtonEmpty__content"
+                                          >
+                                            <span
+                                              class="euiButtonEmpty__text"
+                                            >
+                                              <span
+                                                class="euiHeaderSectionItemButton__content"
+                                              >
+                                                <span
+                                                  data-euiicon-type="questionInCircle"
+                                                />
+                                              </span>
+                                            </span>
+                                          </span>
+                                        </button>,
+                                      }
+                                    }
+                                    className="euiHeaderSectionItemButton"
+                                    color="text"
+                                    onBlur={[Function]}
+                                    onClick={[Function]}
+                                    onFocus={[Function]}
+                                  >
+                                    <button
+                                      aria-expanded={false}
+                                      aria-haspopup="true"
+                                      aria-label="Help menu"
+                                      className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                      disabled={false}
+                                      onBlur={[Function]}
+                                      onClick={[Function]}
+                                      onFocus={[Function]}
+                                      type="button"
+                                    >
+                                      <EuiButtonContent
+                                        className="euiButtonEmpty__content"
+                                        iconSide="left"
+                                        iconSize="m"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButtonEmpty__text",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="euiButtonContent euiButtonEmpty__content"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__text"
+                                          >
+                                            <span
+                                              className="euiHeaderSectionItemButton__content"
+                                            >
+                                              <EuiIcon
+                                                size="m"
+                                                type="questionInCircle"
+                                              >
+                                                <span
+                                                  data-euiicon-type="questionInCircle"
+                                                  size="m"
+                                                />
+                                              </EuiIcon>
+                                            </span>
+                                          </span>
+                                        </span>
+                                      </EuiButtonContent>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </EuiHeaderSectionItemButton>
+                              </span>
+                            </EuiToolTip>
                           </div>
                         </div>
                       </EuiPopover>
@@ -13717,7 +13792,6 @@ exports[`Header renders condensed header 1`] = `
                     opensearchDashboardsVersion="1.0.0"
                     surveyLink="/"
                     useDefaultContent={true}
-                    useUpdatedAppearance={true}
                   >
                     <HeaderHelpMenuUI
                       helpExtension$={
@@ -14524,20 +14598,27 @@ exports[`Header renders condensed header 1`] = `
                       opensearchDashboardsVersion="1.0.0"
                       surveyLink="/"
                       useDefaultContent={true}
-                      useUpdatedAppearance={true}
                     >
                       <EuiPopover
-                        anchorPosition="rightDown"
+                        anchorPosition="downRight"
                         button={
-                          <EuiButtonIcon
-                            aria-expanded={false}
-                            aria-haspopup="true"
-                            aria-label="Help menu"
-                            color="primary"
-                            iconType="iInCircle"
-                            onClick={[Function]}
-                            size="xs"
-                          />
+                          <EuiToolTip
+                            content="Help"
+                            delay="long"
+                            position="bottom"
+                          >
+                            <EuiHeaderSectionItemButton
+                              aria-expanded={false}
+                              aria-haspopup="true"
+                              aria-label="Help menu"
+                              onClick={[Function]}
+                            >
+                              <EuiIcon
+                                size="m"
+                                type="questionInCircle"
+                              />
+                            </EuiHeaderSectionItemButton>
+                          </EuiToolTip>
                         }
                         closePopover={[Function]}
                         data-test-subj="helpMenuButton"
@@ -14550,48 +14631,117 @@ exports[`Header renders condensed header 1`] = `
                         repositionOnScroll={true}
                       >
                         <div
-                          className="euiPopover euiPopover--anchorRightDown"
+                          className="euiPopover euiPopover--anchorDownRight"
                           data-test-subj="helpMenuButton"
                           id="headerHelpMenu"
                         >
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiButtonIcon
-                              aria-expanded={false}
-                              aria-haspopup="true"
-                              aria-label="Help menu"
-                              color="primary"
-                              iconType="iInCircle"
-                              onClick={[Function]}
-                              size="xs"
+                            <EuiToolTip
+                              content="Help"
+                              delay="long"
+                              position="bottom"
                             >
-                              <button
-                                aria-expanded={false}
-                                aria-haspopup="true"
-                                aria-label="Help menu"
-                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                                disabled={false}
-                                onClick={[Function]}
-                                type="button"
+                              <span
+                                className="euiToolTipAnchor"
+                                onKeyUp={[Function]}
+                                onMouseOut={[Function]}
+                                onMouseOver={[Function]}
                               >
-                                <EuiIcon
-                                  aria-hidden="true"
-                                  className="euiButtonIcon__icon"
-                                  color="inherit"
-                                  size="m"
-                                  type="iInCircle"
+                                <EuiHeaderSectionItemButton
+                                  aria-expanded={false}
+                                  aria-haspopup="true"
+                                  aria-label="Help menu"
+                                  onBlur={[Function]}
+                                  onClick={[Function]}
+                                  onFocus={[Function]}
                                 >
-                                  <span
-                                    aria-hidden="true"
-                                    className="euiButtonIcon__icon"
-                                    color="inherit"
-                                    data-euiicon-type="iInCircle"
-                                    size="m"
-                                  />
-                                </EuiIcon>
-                              </button>
-                            </EuiButtonIcon>
+                                  <EuiButtonEmpty
+                                    aria-expanded={false}
+                                    aria-haspopup="true"
+                                    aria-label="Help menu"
+                                    buttonRef={
+                                      Object {
+                                        "current": <button
+                                          aria-expanded="false"
+                                          aria-haspopup="true"
+                                          aria-label="Help menu"
+                                          class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                          type="button"
+                                        >
+                                          <span
+                                            class="euiButtonContent euiButtonEmpty__content"
+                                          >
+                                            <span
+                                              class="euiButtonEmpty__text"
+                                            >
+                                              <span
+                                                class="euiHeaderSectionItemButton__content"
+                                              >
+                                                <span
+                                                  data-euiicon-type="questionInCircle"
+                                                />
+                                              </span>
+                                            </span>
+                                          </span>
+                                        </button>,
+                                      }
+                                    }
+                                    className="euiHeaderSectionItemButton"
+                                    color="text"
+                                    onBlur={[Function]}
+                                    onClick={[Function]}
+                                    onFocus={[Function]}
+                                  >
+                                    <button
+                                      aria-expanded={false}
+                                      aria-haspopup="true"
+                                      aria-label="Help menu"
+                                      className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                      disabled={false}
+                                      onBlur={[Function]}
+                                      onClick={[Function]}
+                                      onFocus={[Function]}
+                                      type="button"
+                                    >
+                                      <EuiButtonContent
+                                        className="euiButtonEmpty__content"
+                                        iconSide="left"
+                                        iconSize="m"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButtonEmpty__text",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="euiButtonContent euiButtonEmpty__content"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__text"
+                                          >
+                                            <span
+                                              className="euiHeaderSectionItemButton__content"
+                                            >
+                                              <EuiIcon
+                                                size="m"
+                                                type="questionInCircle"
+                                              >
+                                                <span
+                                                  data-euiicon-type="questionInCircle"
+                                                  size="m"
+                                                />
+                                              </EuiIcon>
+                                            </span>
+                                          </span>
+                                        </span>
+                                      </EuiButtonContent>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </EuiHeaderSectionItemButton>
+                              </span>
+                            </EuiToolTip>
                           </div>
                         </div>
                       </EuiPopover>
@@ -22972,7 +23122,6 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                     opensearchDashboardsVersion="1.0.0"
                     surveyLink="/"
                     useDefaultContent={true}
-                    useUpdatedAppearance={true}
                   >
                     <HeaderHelpMenuUI
                       helpExtension$={
@@ -23779,20 +23928,27 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                       opensearchDashboardsVersion="1.0.0"
                       surveyLink="/"
                       useDefaultContent={true}
-                      useUpdatedAppearance={true}
                     >
                       <EuiPopover
-                        anchorPosition="rightDown"
+                        anchorPosition="downRight"
                         button={
-                          <EuiButtonIcon
-                            aria-expanded={false}
-                            aria-haspopup="true"
-                            aria-label="Help menu"
-                            color="primary"
-                            iconType="iInCircle"
-                            onClick={[Function]}
-                            size="xs"
-                          />
+                          <EuiToolTip
+                            content="Help"
+                            delay="long"
+                            position="bottom"
+                          >
+                            <EuiHeaderSectionItemButton
+                              aria-expanded={false}
+                              aria-haspopup="true"
+                              aria-label="Help menu"
+                              onClick={[Function]}
+                            >
+                              <EuiIcon
+                                size="m"
+                                type="questionInCircle"
+                              />
+                            </EuiHeaderSectionItemButton>
+                          </EuiToolTip>
                         }
                         closePopover={[Function]}
                         data-test-subj="helpMenuButton"
@@ -23805,48 +23961,117 @@ exports[`Header toggles primary navigation menu when clicked 1`] = `
                         repositionOnScroll={true}
                       >
                         <div
-                          className="euiPopover euiPopover--anchorRightDown"
+                          className="euiPopover euiPopover--anchorDownRight"
                           data-test-subj="helpMenuButton"
                           id="headerHelpMenu"
                         >
                           <div
                             className="euiPopover__anchor"
                           >
-                            <EuiButtonIcon
-                              aria-expanded={false}
-                              aria-haspopup="true"
-                              aria-label="Help menu"
-                              color="primary"
-                              iconType="iInCircle"
-                              onClick={[Function]}
-                              size="xs"
+                            <EuiToolTip
+                              content="Help"
+                              delay="long"
+                              position="bottom"
                             >
-                              <button
-                                aria-expanded={false}
-                                aria-haspopup="true"
-                                aria-label="Help menu"
-                                className="euiButtonIcon euiButtonIcon--primary euiButtonIcon--empty euiButtonIcon--xSmall"
-                                disabled={false}
-                                onClick={[Function]}
-                                type="button"
+                              <span
+                                className="euiToolTipAnchor"
+                                onKeyUp={[Function]}
+                                onMouseOut={[Function]}
+                                onMouseOver={[Function]}
                               >
-                                <EuiIcon
-                                  aria-hidden="true"
-                                  className="euiButtonIcon__icon"
-                                  color="inherit"
-                                  size="m"
-                                  type="iInCircle"
+                                <EuiHeaderSectionItemButton
+                                  aria-expanded={false}
+                                  aria-haspopup="true"
+                                  aria-label="Help menu"
+                                  onBlur={[Function]}
+                                  onClick={[Function]}
+                                  onFocus={[Function]}
                                 >
-                                  <span
-                                    aria-hidden="true"
-                                    className="euiButtonIcon__icon"
-                                    color="inherit"
-                                    data-euiicon-type="iInCircle"
-                                    size="m"
-                                  />
-                                </EuiIcon>
-                              </button>
-                            </EuiButtonIcon>
+                                  <EuiButtonEmpty
+                                    aria-expanded={false}
+                                    aria-haspopup="true"
+                                    aria-label="Help menu"
+                                    buttonRef={
+                                      Object {
+                                        "current": <button
+                                          aria-expanded="false"
+                                          aria-haspopup="true"
+                                          aria-label="Help menu"
+                                          class="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                          type="button"
+                                        >
+                                          <span
+                                            class="euiButtonContent euiButtonEmpty__content"
+                                          >
+                                            <span
+                                              class="euiButtonEmpty__text"
+                                            >
+                                              <span
+                                                class="euiHeaderSectionItemButton__content"
+                                              >
+                                                <span
+                                                  data-euiicon-type="questionInCircle"
+                                                />
+                                              </span>
+                                            </span>
+                                          </span>
+                                        </button>,
+                                      }
+                                    }
+                                    className="euiHeaderSectionItemButton"
+                                    color="text"
+                                    onBlur={[Function]}
+                                    onClick={[Function]}
+                                    onFocus={[Function]}
+                                  >
+                                    <button
+                                      aria-expanded={false}
+                                      aria-haspopup="true"
+                                      aria-label="Help menu"
+                                      className="euiButtonEmpty euiButtonEmpty--text euiHeaderSectionItemButton"
+                                      disabled={false}
+                                      onBlur={[Function]}
+                                      onClick={[Function]}
+                                      onFocus={[Function]}
+                                      type="button"
+                                    >
+                                      <EuiButtonContent
+                                        className="euiButtonEmpty__content"
+                                        iconSide="left"
+                                        iconSize="m"
+                                        textProps={
+                                          Object {
+                                            "className": "euiButtonEmpty__text",
+                                          }
+                                        }
+                                      >
+                                        <span
+                                          className="euiButtonContent euiButtonEmpty__content"
+                                        >
+                                          <span
+                                            className="euiButtonEmpty__text"
+                                          >
+                                            <span
+                                              className="euiHeaderSectionItemButton__content"
+                                            >
+                                              <EuiIcon
+                                                size="m"
+                                                type="questionInCircle"
+                                              >
+                                                <span
+                                                  data-euiicon-type="questionInCircle"
+                                                  size="m"
+                                                />
+                                              </EuiIcon>
+                                            </span>
+                                          </span>
+                                        </span>
+                                      </EuiButtonContent>
+                                    </button>
+                                  </EuiButtonEmpty>
+                                </EuiHeaderSectionItemButton>
+                              </span>
+                            </EuiToolTip>
                           </div>
                         </div>
                       </EuiPopover>

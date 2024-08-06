@@ -30,7 +30,8 @@
 
 import { EuiBreadcrumb, IconType } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from '@osd/i18n/react';
+import ReactDOM from 'react-dom';
+import { FormattedMessage, I18nProvider } from '@osd/i18n/react';
 import {
   BehaviorSubject,
   combineLatest,
@@ -55,7 +56,7 @@ import { ChromeNavControls, NavControlsService } from './nav_controls';
 import { ChromeNavLinks, NavLinksService, ChromeNavLink } from './nav_links';
 import { ChromeRecentlyAccessed, RecentlyAccessedService } from './recently_accessed';
 import { Header } from './ui';
-import { ChromeHelpExtensionMenuLink } from './ui/header/header_help_menu';
+import { ChromeHelpExtensionMenuLink, HeaderHelpMenu } from './ui/header/header_help_menu';
 import { Branding, WorkspacesStart } from '../';
 import { getLogos } from '../../common';
 import type { Logos } from '../../common/types';
@@ -270,6 +271,29 @@ export class ChromeService {
     const getIsNavDrawerLocked$ = isNavDrawerLocked$.pipe(takeUntil(this.stop$));
 
     const logos = getLogos(injectedMetadata.getBranding(), http.basePath.serverBasePath);
+
+    // Add Help menu
+    if (this.useUpdatedHeader) {
+      navControls.registerLeftBottom({
+        order: 9000,
+        mount: (element: HTMLElement) => {
+          ReactDOM.render(
+            <I18nProvider>
+              <HeaderHelpMenu
+                helpExtension$={helpExtension$.pipe(takeUntil(this.stop$))}
+                helpSupportUrl$={helpSupportUrl$.pipe(takeUntil(this.stop$))}
+                opensearchDashboardsDocLink={docLinks.links.opensearchDashboards.introduction}
+                opensearchDashboardsVersion={injectedMetadata.getOpenSearchDashboardsVersion()}
+                surveyLink={injectedMetadata.getSurvey()}
+                useUpdatedAppearance
+              />
+            </I18nProvider>,
+            element
+          );
+          return () => ReactDOM.unmountComponentAtNode(element);
+        },
+      });
+    }
 
     const isIE = () => {
       const ua = window.navigator.userAgent;
