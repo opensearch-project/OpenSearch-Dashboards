@@ -77,6 +77,9 @@ import {
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
   createRecentNavLink,
+  walkLinkItemsTree,
+  getOrderedLinksOrCategories,
+  LinkItemType,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -381,6 +384,9 @@ export {
   NavGroupItemInMap,
   fulfillRegistrationLinksToChromeNavLinks,
   createRecentNavLink,
+  walkLinkItemsTree,
+  getOrderedLinksOrCategories,
+  LinkItemType,
 };
 
 export { __osdBootstrap__ } from './osd_bootstrap';

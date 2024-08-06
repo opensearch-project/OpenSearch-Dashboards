@@ -60,4 +60,9 @@ export { ChromeNavControl, ChromeNavControls } from './nav_controls';
 export { ChromeDocTitle } from './doc_title';
 export { RightNavigationOrder } from './constants';
 export { ChromeRegistrationNavLink, ChromeNavGroupUpdater, NavGroupItemInMap } from './nav_group';
-export { fulfillRegistrationLinksToChromeNavLinks } from './utils';
+export {
+  fulfillRegistrationLinksToChromeNavLinks,
+  getOrderedLinksOrCategories,
+  walkLinkItemsTree,
+  LinkItemType,
+} from './utils';

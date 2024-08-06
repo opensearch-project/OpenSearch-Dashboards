@@ -73,25 +73,36 @@ export function fulfillRegistrationLinksToChromeNavLinks(
 export const getOrderedLinks = (navLinks: ChromeNavLink[]): ChromeNavLink[] =>
   navLinks.sort(sortBy('order'));
 
-export function flattenLinksOrCategories(linkItems: LinkItem[]): ChromeNavLink[] {
-  return linkItems.reduce((acc, item) => {
-    if (item.itemType === LinkItemType.LINK) {
-      acc.push(item.link);
-    } else if (item.itemType === LinkItemType.PARENT_LINK) {
-      if (item.link) {
-        // The parent item is not clickable in new left navigation
-        acc.push({
-          ...item.link,
-          disabled: true,
-        });
-      }
-      acc.push(...flattenLinksOrCategories(item.links));
+export function walkLinkItemsTree(
+  props: {
+    linkItems: LinkItem[];
+    parentItem?: LinkItem;
+  },
+  cb: (props: { currentItem: LinkItem; parentItem?: LinkItem }) => void
+) {
+  props.linkItems.forEach((item) => {
+    cb?.({
+      parentItem: props.parentItem,
+      currentItem: item,
+    });
+    if (item.itemType === LinkItemType.PARENT_LINK) {
+      walkLinkItemsTree(
+        {
+          linkItems: item.links,
+          parentItem: item,
+        },
+        cb
+      );
     } else if (item.itemType === LinkItemType.CATEGORY) {
-      acc.push(...flattenLinksOrCategories(item.links || []));
+      walkLinkItemsTree(
+        {
+          linkItems: item.links || [],
+          parentItem: item,
+        },
+        cb
+      );
     }
-
-    return acc;
-  }, [] as ChromeNavLink[]);
+  });
 }
 
 export const generateItemTypeByLink = (
