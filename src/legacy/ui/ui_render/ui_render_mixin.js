@@ -139,6 +139,8 @@ export function uiRenderMixin(osdServer, server, config) {
           basePath,
           regularBundlePath,
           UiSharedDeps,
+          THEME_CSS_DIST_FILENAMES: JSON.stringify(UiSharedDeps.themeCssDistFilenames),
+          KUI_CSS_DIST_FILENAMES: JSON.stringify(UiSharedDeps.kuiCssDistFilenames),
         },
       });
 
@@ -224,6 +226,7 @@ export function uiRenderMixin(osdServer, server, config) {
             configEnableUserControl,
             configDarkMode,
             configThemeVersion,
+            defaultThemeVersion: UiSharedDeps.defaultThemeVersion,
             THEME_SOURCES,
             fontText,
             fontCode,
