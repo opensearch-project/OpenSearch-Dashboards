@@ -19,9 +19,6 @@ export class Page {
   }
 
   createSection(section: Section) {
-    if (this.sections.has(section.id)) {
-      throw new Error(`Section id exists: ${section.id}`);
-    }
     this.sections.set(section.id, section);
     this.sections$.next(this.getSections());
   }
@@ -37,8 +34,14 @@ export class Page {
   addContent(sectionId: string, content: Content) {
     const sectionContents = this.contents.get(sectionId);
     if (sectionContents) {
-      if (content.kind === 'dashboard' && sectionContents.length > 0) {
-        throw new Error('Section type "dashboard" can only have one content type of "dashboard"');
+      /**
+       * `dashboard` type of content is exclusive, one section can only hold one `dashboard`
+       * if adding a `dashboard` to an existing section, it will replace the contents of section
+       * if adding a non-dashboard content to an section with `dashboard`, it will replace the dashboard
+       */
+      if (content.kind === 'dashboard' || sectionContents.some((c) => c.kind === 'dashboard')) {
+        sectionContents.length = 0;
+        console.warn('Section type "dashboard" can only have one content type of "dashboard"');
       }
       sectionContents.push(content);
       // sort content by order
@@ -48,7 +51,7 @@ export class Page {
     }
 
     if (this.contentObservables.get(sectionId)) {
-      this.contentObservables.get(sectionId)?.next(this.contents.get(sectionId) ?? []);
+      this.contentObservables.get(sectionId)?.next([...(this.contents.get(sectionId) ?? [])]);
     } else {
       this.contentObservables.set(
         sectionId,
