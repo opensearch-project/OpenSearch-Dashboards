@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useState, FormEventHandler, useRef, useMemo, useEffect } from 'react';
+import { useCallback, useState, FormEventHandler, useRef, useMemo } from 'react';
 import {
   htmlIdGenerator,
   EuiFieldTextProps,

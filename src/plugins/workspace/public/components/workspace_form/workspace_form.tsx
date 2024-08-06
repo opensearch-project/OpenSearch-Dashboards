@@ -7,7 +7,6 @@ import React, { useRef } from 'react';
 import { EuiPanel, EuiSpacer, EuiTitle, EuiForm } from '@elastic/eui';
 
 import { WorkspaceFormProps } from './types';
-import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
 import { WorkspaceUseCase } from './workspace_use_case';
 import { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
@@ -20,6 +19,7 @@ import {
   workspaceDetailsTitle,
   workspaceUseCaseTitle,
 } from './constants';
+import { useWorkspaceFormContext } from './workspace_form_context';
 
 export const WorkspaceForm = (props: WorkspaceFormProps) => {
   const {
@@ -42,7 +42,7 @@ export const WorkspaceForm = (props: WorkspaceFormProps) => {
     setPermissionSettings,
     setSelectedDataSources,
     handleDescriptionChange,
-  } = useWorkspaceForm(props);
+  } = useWorkspaceFormContext();
 
   const disabledUserOrGroupInputIdsRef = useRef(
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []

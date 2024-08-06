@@ -10,6 +10,7 @@ import { coreMock } from '../../../../../core/public/mocks';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WORKSPACE_USE_CASES } from '../../../common/constants';
 import { WorkspaceOperationType } from './constants';
+import { WorkspaceFormProvider } from './workspace_form_context';
 
 const mockCoreStart = coreMock.createStart();
 
@@ -37,13 +38,22 @@ const setup = (
   };
 
   return render(
-    <WorkspaceForm
+    <WorkspaceFormProvider
       application={application}
       savedObjects={savedObjects}
-      operationType={WorkspaceOperationType.Create}
-      availableUseCases={[WORKSPACE_USE_CASES.analytics]}
-      dataSourceManagement={dataSourceManagement}
-    />
+      operationType={WorkspaceOperationType.Update}
+      permissionEnabled={true}
+      onSubmit={jest.fn()}
+      availableUseCases={[]}
+    >
+      <WorkspaceForm
+        application={application}
+        savedObjects={savedObjects}
+        operationType={WorkspaceOperationType.Create}
+        availableUseCases={[WORKSPACE_USE_CASES.analytics]}
+        dataSourceManagement={dataSourceManagement}
+      />
+    </WorkspaceFormProvider>
   );
 };
 

@@ -205,7 +205,7 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
   return client
     .find({
       type: 'data-source',
-      fields: ['id', 'title'],
+      fields: ['id', 'title', 'description', 'dataSourceEngineType'],
       perPage: 10000,
       workspaces,
     })
@@ -215,9 +215,13 @@ export const getDataSourcesList = (client: SavedObjectsStart['client'], workspac
         return objects.map((source) => {
           const id = source.id;
           const title = source.get('title');
+          const description = source.get('description');
+          const dataSourceEngineType = source.get('dataSourceEngineType');
           return {
             id,
             title,
+            description,
+            dataSourceEngineType,
           };
         });
       } else {

@@ -86,6 +86,4 @@ export interface WorkspaceFormProps {
   dataSourceManagement?: DataSourceManagementPluginSetup;
   availableUseCases: WorkspaceUseCase[];
   detailTitle?: string;
-  getNumberOfChanges?: any;
-  getResetFunction?: any;
 }

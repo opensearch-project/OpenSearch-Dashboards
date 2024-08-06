@@ -20,14 +20,11 @@ import {
   EuiSmallButton,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { i18n } from '@osd/i18n';
 
 import { WorkspaceBottomBar } from './workspace_bottom_bar';
 import { WorkspaceFormProps } from './types';
-import { useWorkspaceForm } from './use_workspace_form';
 import { WorkspaceUseCase } from './workspace_use_case';
 import { WorkspacePermissionSettingPanel } from './workspace_permission_setting_panel';
-import { SelectDataSourcePanel } from './select_data_source_panel';
 import {
   DetailTab,
   detailsColorHelpText,
@@ -38,10 +35,10 @@ import {
   detailsNameHelpText,
   detailsNamePlaceholder,
   detailsUseCaseLabel,
-  selectDataSourceTitle,
   usersAndPermissionsTitle,
 } from './constants';
 import { WorkspaceFormErrorCallout } from './workspace_form_error_callout';
+import { useWorkspaceFormContext } from './workspace_form_context';
 
 interface FormGroupProps {
   title: React.ReactNode;
@@ -70,17 +67,7 @@ const FormGroup = ({ title, children, describe }: FormGroupProps) => (
 );
 
 export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
-  const {
-    detailTab,
-    detailTitle,
-    application,
-    savedObjects,
-    defaultValues,
-    getResetFunction,
-    availableUseCases,
-    getNumberOfChanges,
-    dataSourceManagement: isDataSourceEnabled,
-  } = props;
+  const { detailTab, detailTitle, application, defaultValues, availableUseCases } = props;
   const {
     formId,
     formData,
@@ -95,18 +82,11 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
     handleUseCaseChange,
     setPermissionSettings,
     handleNameInputChange,
-    setSelectedDataSources,
     handleDescriptionChange,
-  } = useWorkspaceForm(props);
+  } = useWorkspaceFormContext();
 
-  useEffect(() => {
-    getNumberOfChanges(numberOfChanges);
-    getResetFunction(handleResetForm);
-  }, [getNumberOfChanges, getResetFunction, handleResetForm, numberOfChanges]);
-
-  const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin;
-  const currentUseCase = availableUseCases.find((useCase) => useCase.id === formData.useCase)
-    ?.title;
+  const currentUseCase =
+    availableUseCases.find((useCase) => useCase.id === formData.useCase)?.title ?? '';
   const disabledUserOrGroupInputIdsRef = useRef(
     defaultValues?.permissionSettings?.map((item) => item.id) ?? []
   );
@@ -152,9 +132,17 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             {isEditing ? (
-              <EuiSmallButton onClick={handleResetForm}>Discard changes</EuiSmallButton>
+              <EuiSmallButton
+                onClick={handleResetForm}
+                data-test-subj="workspaceForm-workspaceDetails-discardChanges"
+              >
+                Discard changes
+              </EuiSmallButton>
             ) : (
-              <EuiSmallButton onClick={() => setIsEditing((prevIsEditing) => !prevIsEditing)}>
+              <EuiSmallButton
+                onClick={() => setIsEditing((prevIsEditing) => !prevIsEditing)}
+                data-test-subj="workspaceForm-workspaceDetails-edit"
+              >
                 Edit
               </EuiSmallButton>
             )}
@@ -232,7 +220,7 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
             </FormGroup>
           </>
         )}
-        {detailTab === DetailTab.TeamMembers && (
+        {detailTab === DetailTab.Collaborators && (
           <FormGroup title={usersAndPermissionsTitle}>
             <WorkspacePermissionSettingPanel
               errors={formErrors.permissionSettings?.fields}
@@ -240,18 +228,6 @@ export const WorkspaceDetailForm = (props: WorkspaceFormProps) => {
               permissionSettings={formData.permissionSettings}
               disabledUserOrGroupInputIds={disabledUserOrGroupInputIdsRef.current}
               data-test-subj={`workspaceForm-permissionSettingPanel`}
-              isEditing={isEditing}
-            />
-          </FormGroup>
-        )}
-        {detailTab === DetailTab.DataSources && isDashboardAdmin && isDataSourceEnabled && (
-          <FormGroup title={selectDataSourceTitle}>
-            <SelectDataSourcePanel
-              errors={formErrors.selectedDataSources}
-              onChange={setSelectedDataSources}
-              savedObjects={savedObjects}
-              selectedDataSources={formData.selectedDataSources}
-              data-test-subj="workspaceForm-dataSourcePanel"
               isEditing={isEditing}
             />
           </FormGroup>

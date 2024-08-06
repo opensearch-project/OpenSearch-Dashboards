@@ -9,8 +9,6 @@ import {
   EuiText,
   EuiCopy,
   EuiBadge,
-  EuiPanel,
-  EuiSpacer,
   EuiFlexItem,
   EuiFlexGroup,
   EuiButtonIcon,
@@ -22,16 +20,8 @@ import { WorkspaceUseCase } from '../../types';
 import { WorkspaceObject } from '../../../../../core/public';
 import { WorkspaceAttributeWithPermission } from '../../../../../core/types';
 
-const detailDescription = i18n.translate('workspace.detail.description', {
-  defaultMessage: 'Description',
-});
-
 const detailUseCase = i18n.translate('workspace.detail.useCase', {
   defaultMessage: 'Use case',
-});
-
-const detailIconColor = i18n.translate('workspace.detail.IconColor', {
-  defaultMessage: 'Icon color',
 });
 
 const detailOwner = i18n.translate('workspace.detail.owner', {
@@ -80,85 +70,72 @@ export const WorkspaceDetailPanel = ({
   };
 
   return (
-    <EuiPanel>
-      <EuiText>
-        <h4>{detailDescription}</h4>
-        <p>{currentWorkspace.description}</p>
-      </EuiText>
-      <EuiSpacer />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <EuiText>
-            <h4>{detailUseCase}</h4>
-            <p>{currentUseCase?.title}</p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <h4>{detailIconColor}</h4>
-            <p style={{ display: 'flex', alignItems: 'center' }}>
-              <EuiColorPickerSwatch
-                style={{ width: '14px', height: '14px', marginRight: '8px' }}
-                color={currentWorkspace.color}
-              />
-              {currentWorkspace.color}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <h4>{detailOwner}</h4>
-            <p>
-              {owners?.at(0)}&nbsp;
-              {owners && owners.length > 1 && (
-                <EuiBadge
-                  onClick={handleBadgeClick}
-                  onClickAriaLabel="MoveToTeamMember"
-                  color="hollow"
-                >
-                  +{owners?.length - 1} more
-                </EuiBadge>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiText>
+          <h4>{detailUseCase}</h4>
+          <p style={{ display: 'flex', alignItems: 'center' }}>
+            <EuiColorPickerSwatch
+              style={{ width: '14px', height: '14px', marginRight: '8px' }}
+              color={currentWorkspace.color}
+            />
+            {currentUseCase?.title}
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText>
+          <h4>{detailOwner}</h4>
+          <p style={{ display: 'inline-flex' }}>
+            {owners?.at(0)}&nbsp;&nbsp;
+            {owners && owners.length > 1 && (
+              <EuiBadge
+                onClick={handleBadgeClick}
+                onClickAriaLabel="MoveToTeamMember"
+                color="hollow"
+              >
+                +{owners?.length - 1} more
+              </EuiBadge>
+            )}
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText>
+          <h4>{detailLastUpdated}</h4>
+          <p>{formatDate(currentWorkspace.lastUpdatedTime || '')}</p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText>
+          <h4>{detailID}</h4>
+          <p>
+            {currentWorkspace.id}
+            <EuiCopy textToCopy={currentWorkspace.id}>
+              {(copy) => (
+                <EuiButtonIcon
+                  aria-label="copy"
+                  color="text"
+                  size="xs"
+                  iconType="copy"
+                  onClick={copy}
+                  className="eui-alignTop"
+                />
               )}
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <h4>{detailLastUpdated}</h4>
-            <p>{formatDate(currentWorkspace.lastUpdatedTime || '')}</p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <h4>{detailID}</h4>
-            <p>
-              {currentWorkspace.id}
-              <EuiCopy textToCopy={currentWorkspace.id}>
-                {(copy) => (
-                  <EuiButtonIcon
-                    aria-label="copy"
-                    color="text"
-                    size="xs"
-                    iconType="copy"
-                    onClick={copy}
-                    className="eui-alignTop"
-                  />
-                )}
-              </EuiCopy>
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <h4>{workspaceOverview}</h4>
-            <p>
-              <EuiLink href={useCaseUrl} external={true} style={{ fontWeight: 'normal' }}>
-                {overview}
-              </EuiLink>
-            </p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+            </EuiCopy>
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiText>
+          <h4>{workspaceOverview}</h4>
+          <p>
+            <EuiLink href={useCaseUrl} external={true} style={{ fontWeight: 'normal' }}>
+              {overview}
+            </EuiLink>
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

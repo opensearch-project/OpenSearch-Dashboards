@@ -472,28 +472,6 @@ export const getNumberOfChanges = (
   ) {
     count++;
   }
-  // Count all new added data source
-  count +=
-    newFormData.selectedDataSources?.reduce((prevNewAddedCount, dataSource) => {
-      if (!initialFormData.selectedDataSources?.find((item) => item.id === dataSource.id)) {
-        prevNewAddedCount += 1;
-      }
-      return prevNewAddedCount;
-    }, 0) ?? 0;
-  count +=
-    initialFormData.selectedDataSources?.reduce((prevDeletedAndModifiedCount, dataSource) => {
-      const newDataSource = newFormData.selectedDataSources?.find(
-        (item) => item.id === dataSource.id
-      );
-      if (!newDataSource) {
-        // Count all delete data source
-        prevDeletedAndModifiedCount += 1;
-      } else if (newDataSource.id !== dataSource.id) {
-        // Count all modified data source
-        prevDeletedAndModifiedCount += 1;
-      }
-      return prevDeletedAndModifiedCount;
-    }, 0) ?? 0;
   // Count all new added permission settings
   count +=
     newFormData.permissionSettings?.reduce((prevNewAddedCount, setting) => {

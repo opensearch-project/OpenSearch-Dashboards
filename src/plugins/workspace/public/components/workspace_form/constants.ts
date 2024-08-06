@@ -98,7 +98,7 @@ export const detailsColorHelpText = i18n.translate(
 export enum DetailTab {
   Details = 'details',
   DataSources = 'dataSources',
-  TeamMembers = 'teamMembers',
+  Collaborators = 'collaborators',
 }
 
 export const DetailTabTitles: { [key in DetailTab]: string } = {
@@ -108,7 +108,7 @@ export const DetailTabTitles: { [key in DetailTab]: string } = {
   [DetailTab.DataSources]: i18n.translate('workspace.detail.tabTitle.dataSources', {
     defaultMessage: 'Data Sources',
   }),
-  [DetailTab.TeamMembers]: i18n.translate('workspace.detail.tabTitle.teamMembers', {
-    defaultMessage: 'Team Members',
+  [DetailTab.Collaborators]: i18n.translate('workspace.detail.tabTitle.collaborators', {
+    defaultMessage: 'Collaborators',
   }),
 };

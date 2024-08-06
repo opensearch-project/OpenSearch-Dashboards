@@ -6,10 +6,13 @@
 import React, { useState } from 'react';
 import {
   EuiPage,
+  EuiText,
+  EuiSpacer,
   EuiFlexItem,
   EuiPageBody,
   EuiFlexGroup,
   EuiPageHeader,
+  EuiPageContent,
   EuiSmallButton,
   EuiConfirmModal,
   EuiTabbedContent,
@@ -18,20 +21,17 @@ import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { BehaviorSubject, of } from 'rxjs';
 import { WorkspaceUseCase } from '../../types';
-import { WorkspaceUpdater } from './workspace_updater';
+import { WorkspaceDetailForm, useWorkspaceFormContext } from '../workspace_form';
 import { WorkspaceDetailPanel } from './workspace_detail_panel';
 import { DeleteWorkspaceModal } from '../delete_workspace_modal';
 import { WORKSPACE_LIST_APP_ID } from '../../../common/constants';
 import { cleanWorkspaceId } from '../../../../../core/public/utils';
-import { DetailTab, DetailTabTitles } from '../workspace_form/constants';
+import { DetailTab, DetailTabTitles, WorkspaceOperationType } from '../workspace_form/constants';
 import { CoreStart, WorkspaceAttribute } from '../../../../../core/public';
 import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 import { useOpenSearchDashboards } from '../../../../opensearch_dashboards_react/public';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
-
-const workspaceDelete = i18n.translate('workspace.detail.delete', {
-  defaultMessage: 'delete',
-});
+import { SelectDataSourceDetailPanel } from './select_data_source_panel';
 
 export interface WorkspaceDetailProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -39,40 +39,32 @@ export interface WorkspaceDetailProps {
 
 export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
   const {
-    services: { workspaces, application, http, dataSourceManagement },
+    services: { workspaces, application, http, savedObjects, dataSourceManagement },
   } = useOpenSearchDashboards<{
     CoreStart: CoreStart;
     dataSourceManagement?: DataSourceManagementPluginSetup;
   }>();
 
+  const { formData } = useWorkspaceFormContext();
   const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
   const [selectedTabId, setSelectedTabId] = useState<string>(DetailTab.Details);
-  const [numberOfChanges, setNumberOfChanges] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [tabId, setTabId] = useState<string>(DetailTab.Details);
-  const [resetFunction, setResetFunction] = useState(() => () => {});
+  const { handleResetForm, numberOfChanges } = useWorkspaceFormContext();
 
   const availableUseCases = useObservable(props.registeredUseCases$, []);
-  const isDashboardAdmin = application?.capabilities?.dashboards?.isDashboardAdmin;
+  const isDashboardAdmin = !!application?.capabilities?.dashboards?.isDashboardAdmin;
   const currentWorkspace = useObservable(workspaces ? workspaces.currentWorkspace$ : of(null));
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
   const currentUseCase = availableUseCases.find(
     (useCase) => useCase.id === getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features ?? [])
   );
 
-  if (!currentWorkspace || !application || !http) {
+  if (!currentWorkspace || !application || !http || !savedObjects) {
     return null;
   }
 
   const useCaseUrl = getUseCaseUrl(currentUseCase, currentWorkspace, application, http);
-
-  const getResetFunction = (func: any) => {
-    setResetFunction(() => func);
-  };
-
-  const getNumberOfChanges = (data: number) => {
-    setNumberOfChanges(data);
-  };
 
   const handleTabClick = (tab: any) => {
     if (numberOfChanges > 0) {
@@ -84,12 +76,12 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
   };
 
   const handleBadgeClick = () => {
-    if (selectedTabId !== DetailTab.TeamMembers && numberOfChanges > 0) {
-      setTabId(DetailTab.TeamMembers);
+    if (selectedTabId !== DetailTab.Collaborators && numberOfChanges > 0) {
+      setTabId(DetailTab.Collaborators);
       setModalVisible(true);
       return;
     }
-    setSelectedTabId(DetailTab.TeamMembers);
+    setSelectedTabId(DetailTab.Collaborators);
   };
 
   const pageTitle = (
@@ -98,92 +90,85 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
     </EuiFlexGroup>
   );
 
+  const createDetailTab = (id: DetailTab, detailTitle: string) => ({
+    id,
+    name: detailTitle,
+    content: (
+      <WorkspaceDetailForm
+        application={application}
+        operationType={WorkspaceOperationType.Update}
+        savedObjects={savedObjects}
+        detailTab={id}
+        dataSourceManagement={dataSourceManagement}
+        availableUseCases={availableUseCases}
+        detailTitle={detailTitle}
+      />
+    ),
+  });
+
   const detailTabs = [
-    {
-      id: DetailTab.Details,
-      name: DetailTabTitles.details,
-      content: (
-        <WorkspaceUpdater
-          detailTab={DetailTab.Details}
-          registeredUseCases$={props.registeredUseCases$}
-          detailTitle={DetailTabTitles.details}
-          getNumberOfChanges={getNumberOfChanges}
-          getResetFunction={getResetFunction}
-        />
-      ),
-    },
-    ...(isDashboardAdmin && dataSourceManagement
+    createDetailTab(DetailTab.Details, DetailTabTitles.details),
+    // ...(isDashboardAdmin && dataSourceManagement
+    //   ? [createDetailTab(DetailTab.DataSources, DetailTabTitles.dataSources)]
+    //   : []),
+    ...(dataSourceManagement
       ? [
           {
             id: DetailTab.DataSources,
             name: DetailTabTitles.dataSources,
             content: (
-              <WorkspaceUpdater
-                detailTab={DetailTab.DataSources}
-                registeredUseCases$={props.registeredUseCases$}
+              <SelectDataSourceDetailPanel
+                savedObjects={savedObjects}
+                assignedDataSources={formData.selectedDataSources}
                 detailTitle={DetailTabTitles.dataSources}
-                getNumberOfChanges={getNumberOfChanges}
-                getResetFunction={getResetFunction}
+                isDashboardAdmin={isDashboardAdmin}
+                currentWorkspace={currentWorkspace}
               />
             ),
           },
         ]
       : []),
     ...(isPermissionEnabled
-      ? [
-          {
-            id: DetailTab.TeamMembers,
-            name: DetailTabTitles.teamMembers,
-            content: (
-              <WorkspaceUpdater
-                detailTab={DetailTab.TeamMembers}
-                registeredUseCases$={props.registeredUseCases$}
-                detailTitle={DetailTabTitles.teamMembers}
-                getNumberOfChanges={getNumberOfChanges}
-                getResetFunction={getResetFunction}
-              />
-            ),
-          },
-        ]
+      ? [createDetailTab(DetailTab.Collaborators, DetailTabTitles.collaborators)]
       : []),
   ];
 
-  const button = (
+  const deleteButton = (
     <EuiSmallButton
       color="danger"
       iconType="trash"
       onClick={() => setDeletedWorkspace(currentWorkspace)}
     >
-      {workspaceDelete}
+      {i18n.translate('workspace.detail.delete', {
+        defaultMessage: 'delete',
+      })}
     </EuiSmallButton>
   );
 
   return (
-    <>
-      <EuiPage paddingSize="l">
-        <EuiPageHeader pageTitle={pageTitle} rightSideItems={[button]} alignItems="center" />
-      </EuiPage>
-      <EuiPage paddingSize="l">
+    <EuiPage direction="column">
+      <EuiPageHeader pageTitle={pageTitle} rightSideItems={[deleteButton]} alignItems="center" />
+      <EuiPageBody>
+        <EuiText color="subdued">{currentWorkspace.description}</EuiText>
+      </EuiPageBody>
+      <EuiSpacer />
+      <EuiPageContent>
         <WorkspaceDetailPanel
           useCaseUrl={useCaseUrl}
           handleBadgeClick={handleBadgeClick}
           currentUseCase={currentUseCase}
           currentWorkspace={currentWorkspace}
         />
-      </EuiPage>
-
-      <EuiPage paddingSize="l">
-        <EuiPageBody>
-          <EuiTabbedContent
-            data-test-subj="workspaceTabs"
-            tabs={detailTabs}
-            // initialSelectedTab={detailTabs[0]}
-            selectedTab={detailTabs[detailTabs.findIndex((tab) => tab.id === selectedTabId)]}
-            // autoFocus="selected"
-            onTabClick={handleTabClick}
-          />
-        </EuiPageBody>
-      </EuiPage>
+      </EuiPageContent>
+      <EuiSpacer />
+      <EuiPageBody>
+        <EuiTabbedContent
+          data-test-subj="workspaceTabs"
+          tabs={detailTabs}
+          selectedTab={detailTabs[detailTabs.findIndex((tab) => tab.id === selectedTabId)]}
+          onTabClick={handleTabClick}
+        />
+      </EuiPageBody>
       {deletedWorkspace && (
         <DeleteWorkspaceModal
           selectedWorkspace={deletedWorkspace}
@@ -205,11 +190,11 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
         <EuiConfirmModal
           data-test-subj="workspaceForm-cancelModal"
           title={i18n.translate('workspace.form.cancelModal.title', {
-            defaultMessage: 'Navigate away',
+            defaultMessage: 'Navigate away?',
           })}
           onCancel={() => setModalVisible(false)}
           onConfirm={() => {
-            resetFunction();
+            handleResetForm();
             setModalVisible(false);
             setSelectedTabId(tabId);
           }}
@@ -217,7 +202,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
             defaultMessage: 'Cancel',
           })}
           confirmButtonText={i18n.translate('workspace.form.confirmButtonText', {
-            defaultMessage: 'navigate away',
+            defaultMessage: 'Navigate away',
           })}
           buttonColor="danger"
           defaultFocusedButton="confirm"
@@ -227,6 +212,6 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
           })}
         </EuiConfirmModal>
       )}
-    </>
+    </EuiPage>
   );
 };

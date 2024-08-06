@@ -26,10 +26,8 @@ import {
   WORKSPACE_CREATE_APP_ID,
   WORKSPACE_LIST_APP_ID,
   MAX_WORKSPACE_PICKER_NUM,
-  WORKSPACE_DETAIL_APP_ID,
 } from '../../../common/constants';
-import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
-import { ALL_USE_CASE_ID, CoreStart, WorkspaceObject } from '../../../../../core/public';
+import { CoreStart, WorkspaceObject } from '../../../../../core/public';
 import { getFirstUseCaseOfFeatureConfigs, getUseCaseUrl } from '../../utils';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
 import { WorkspaceUseCase } from '../../types';
