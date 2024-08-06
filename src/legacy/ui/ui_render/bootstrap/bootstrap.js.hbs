@@ -15,7 +15,7 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
   var kuiCssDistFilenames = {{KUI_CSS_DIST_FILENAMES}};
 
   var isDarkMode = window.__osdThemeTag__.endsWith('dark');
-  var themeDarkMode = isDarkMode ? 'dark' : 'light';
+  var themeMode = isDarkMode ? 'dark' : 'light';
   var themeVersion = window.__osdThemeTag__.replace(/(light|dark)$/, '');
   if (!themeCssDistFilenames[themeVersion]) {
     themeVersion = UiSharedDeps.defaultThemeVersion;
@@ -26,9 +26,9 @@ if (window.__osdStrictCsp__ && window.__osdCspNotEnforced__) {
 
   var styleSheetPaths = [
     '{{regularBundlePath}}/osd-ui-shared-deps/{{UiSharedDeps.baseCssDistFilename}}',
-    '{{regularBundlePath}}/osd-ui-shared-deps/' + themeCssDistFilenames[themeVersion][themeDarkMode],
-    '{{basePath}}/node_modules/@osd/ui-framework/dist/' + kuiCssDistFilenames[themeVersion][themeDarkMode],
-    '{{basePath}}/ui/legacy_' + themeDarkMode + '_theme.css',
+    '{{regularBundlePath}}/osd-ui-shared-deps/' + themeCssDistFilenames[themeVersion][themeMode],
+    '{{basePath}}/node_modules/@osd/ui-framework/dist/' + kuiCssDistFilenames[themeVersion][themeMode],
+    '{{basePath}}/ui/legacy_' + themeMode + '_theme.css',
   ];
 
   window.onload = function () {
