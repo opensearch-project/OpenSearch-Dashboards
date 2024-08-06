@@ -83,9 +83,7 @@ const defaultOnQuerySubmit = (
   queryService: QueryStart,
   currentQuery: Query
 ) => {
-  //we add the query into history
-
-  //props.settings?.addQueryToHistory(currentQuery.query);
+  props.settings?.setUserQuery(currentQuery);
   if (!props.useDefaultBehaviors) return props.onQuerySubmit;
 
   const { timefilter } = queryService.timefilter;

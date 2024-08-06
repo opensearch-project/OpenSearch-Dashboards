@@ -5,7 +5,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
-import { setOverrides as setFieldOverrides } from '../../../common';
+import { Query, setOverrides as setFieldOverrides } from '../../../common';
 import { ConfigSchema } from '../../../config';
 import { ISearchStart } from '../../search';
 import { QueryEditorExtensionConfig } from '../query_editor/query_editor_extensions';
@@ -65,6 +65,14 @@ export class Settings {
     this.isEnabled = enabled;
     this.enabledQueryEnhancementsUpdated$.next(this.isEnabled);
     return true;
+  }
+
+  getUserQuery() {
+    return this.Storage.get('userQuery');
+  }
+
+  setUserQuery(query: Query) {
+    this.Storage.set('userQuery', query);
   }
 
   getAllQueryEnhancements() {
