@@ -269,7 +269,7 @@ export const IndexPatternTable = ({ canSave, history }: Props) => {
               <h2>{title}</h2>
             </EuiTitle>
             <EuiSpacer size="s" />
-            <EuiText>
+            <EuiText size="s">
               <p>
                 <FormattedMessage
                   id="indexPatternManagement.indexPatternTable.indexPatternExplanation"

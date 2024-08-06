@@ -603,7 +603,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
         <EuiCompressedFormRow>
           <Fragment>
-            <EuiText>
+            <EuiText size="s">
               <FormattedMessage
                 id="indexPatternManagement.script.accessWithLabel"
                 defaultMessage="Access fields with {code}."
@@ -611,12 +611,14 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
               />
             </EuiText>
             <br />
-            <EuiLink onClick={this.showScriptingHelp} data-test-subj="scriptedFieldsHelpLink">
-              <FormattedMessage
-                id="indexPatternManagement.script.getHelpLabel"
-                defaultMessage="Get help with the syntax and preview the results of your script."
-              />
-            </EuiLink>
+            <EuiText size="s">
+              <EuiLink onClick={this.showScriptingHelp} data-test-subj="scriptedFieldsHelpLink">
+                <FormattedMessage
+                  id="indexPatternManagement.script.getHelpLabel"
+                  defaultMessage="Get help with the syntax and preview the results of your script."
+                />
+              </EuiLink>
+            </EuiText>
           </Fragment>
         </EuiCompressedFormRow>
       </Fragment>
