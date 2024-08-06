@@ -1,91 +1,85 @@
 /*
+ * Copyright OpenSearch Contributors
  * SPDX-License-Identifier: Apache-2.0
- *
- * The OpenSearch Contributors require contributions made to
- * this file be licensed under the Apache-2.0 license or a
- * compatible open source license.
- *
- * Any modifications Copyright OpenSearch Contributors. See
- * GitHub history for details.
- */
-
-/*
- * Licensed to Elasticsearch B.V. under one or more contributor
- * license agreements. See the NOTICE file distributed with
- * this work for additional information regarding copyright
- * ownership. Elasticsearch B.V. licenses this file to you under
- * the Apache License, Version 2.0 (the "License"); you may
- * not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied.  See the License for the
- * specific language governing permissions and limitations
- * under the License.
  */
 
 import { EuiButtonProps, EuiTextProps, EuiHeaderLinkProps, EuiButtonIconProps } from '@elastic/eui';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 
-export type TopNavControlAction = (anchorElement: HTMLElement) => void;
+export type TopNavControlAction = (targetElement: HTMLElement) => void;
+
+type RequireAtLeastOne<T, Keys extends keyof T = keyof T> = Pick<T, Exclude<keyof T, Keys>> &
+  {
+    [K in Keys]-?: Required<Pick<T, K>> & Partial<Pick<T, Exclude<Keys, K>>>;
+  }[Keys];
 
 interface TopNavControlButtonOrLinkOrIconData {
+  // @deprecated
   id?: string;
   testId?: string;
   className?: string;
-  fill?: boolean;
   isDisabled?: boolean | (() => boolean);
   tooltip?: string | (() => string | undefined);
   ariaLabel?: string;
-  emphasize?: boolean;
-  iconSide?: EuiButtonProps['iconSide'];
   iconSize?: EuiButtonProps['iconSize'];
-  type?: 'button' | 'link' | 'icon';
 }
 
-interface TopNavControlTextData {
+export type TopNavControlLinkData = TopNavControlButtonOrLinkOrIconData &
+  RequireAtLeastOne<
+    {
+      label: string;
+      isLoading?: boolean;
+      href?: string;
+      run?: TopNavControlAction;
+      iconType?: EuiHeaderLinkProps['iconType'];
+      iconSide?: EuiHeaderLinkProps['iconSide'];
+      color?: EuiHeaderLinkProps['color'];
+      controlType: 'link';
+    },
+    'href' | 'run'
+  >;
+
+export type TopNavControlButtonData = TopNavControlButtonOrLinkOrIconData &
+  RequireAtLeastOne<
+    {
+      label: string;
+      isLoading?: boolean;
+      href?: string;
+      run?: TopNavControlAction;
+      iconType?: EuiButtonProps['iconType'];
+      iconSide?: EuiButtonProps['iconSide'];
+      color?: EuiButtonProps['color'];
+      fill?: EuiButtonProps['fill'];
+      controlType?: 'button';
+    },
+    'href' | 'run'
+  >;
+
+export type TopNavControlIconData = TopNavControlButtonOrLinkOrIconData &
+  RequireAtLeastOne<
+    {
+      iconType: EuiButtonIconProps['iconType'];
+      ariaLabel: string;
+      href?: string;
+      run?: TopNavControlAction;
+      display?: EuiButtonIconProps['display'];
+      color?: EuiButtonIconProps['color'];
+      controlType: 'icon';
+    },
+    'href' | 'run'
+  >;
+
+export interface TopNavControlTextData {
   text: string;
   className?: string;
   textAlign?: EuiTextProps['textAlign'];
   color?: EuiTextProps['color'];
 }
 
-type TopNavControlLinkData = TopNavControlButtonOrLinkOrIconData & {
-  label: string;
-  isLoading?: boolean;
-  iconType?: EuiIconType;
-  href: string;
-  color?: EuiHeaderLinkProps['color'];
-  type: 'link';
-};
-
-type TopNavControlButtonData = TopNavControlButtonOrLinkOrIconData & {
-  label: string;
-  isLoading?: boolean;
-  iconType?: EuiIconType;
-  run: TopNavControlAction;
-  color?: EuiButtonProps['color'];
-  type?: 'button';
-};
-
-type TopNavControlIconData = TopNavControlButtonOrLinkOrIconData & {
-  iconType: EuiIconType;
-  ariaLabel: string;
-  color?: EuiButtonIconProps['color'];
-  display?: EuiButtonIconProps['display'];
-  run: TopNavControlAction;
-  type: 'icon';
-};
-
-interface TopNavControlDescriptionData {
+export interface TopNavControlDescriptionData {
   description: string;
 }
 
-interface TopNavControlComponentData {
+export interface TopNavControlComponentData {
   renderComponent: React.ReactElement;
 }
 
