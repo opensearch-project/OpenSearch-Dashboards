@@ -69,49 +69,73 @@ export function TopNavControlItem(props: TopNavControlData) {
     return '';
   }
 
-  function handleClick(e: MouseEvent<HTMLButtonElement>) {
+  function handleClick(e: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
     if ('run' in props && !isDisabled()) props.run?.(e.currentTarget);
   }
 
-  const elementProps = {
-    isDisabled: isDisabled(),
-    iconType: props.iconType,
-    iconSide: props.iconSide,
-    fill: props.fill,
-    'data-test-subj': props.testId,
-    className: props.className,
-    'aria-label': props.ariaLabel,
-    color: props.color,
-  };
-
-  if ('href' in props) {
-    // @ts-ignore
-    elementProps.href = props.href;
-  } else {
-    // @ts-ignore
-    elementProps.onClick = handleClick;
-  }
-
   let component;
-  switch (props.type) {
+  switch (props.controlType) {
     case 'icon':
-      delete elementProps.iconSide;
-      component = <EuiButtonIcon size="s" {...elementProps} display={props.display} />;
+      component = (
+        <EuiButtonIcon
+          size="s"
+          iconType={props.iconType}
+          iconSize={props.iconSize}
+          color={props.color}
+          className={props.className}
+          href={props.href}
+          isDisabled={isDisabled()}
+          onClick={handleClick}
+          aria-label={props.ariaLabel}
+          data-test-subj={props.testId}
+          display={props.display || 'empty'}
+        />
+      );
       break;
 
     case 'link':
       component = (
-        <EuiHeaderLink size="s" {...elementProps} isLoading={props.isLoading}>
-          {upperFirst(props.label || props.id!)}
+        <EuiHeaderLink
+          size="s"
+          iconType={props.iconType}
+          iconSide={props.iconSide}
+          iconSize={props.iconSize}
+          color={props.color}
+          className={props.className}
+          href={props.href}
+          isDisabled={isDisabled()}
+          onClick={handleClick}
+          aria-label={props.ariaLabel}
+          data-test-subj={props.testId}
+          isLoading={props.isLoading}
+        >
+          {upperFirst(props.label || props.id)}
         </EuiHeaderLink>
       );
       break;
 
     default:
       component = (
-        <EuiButton size="s" {...elementProps} isLoading={props.isLoading}>
-          {upperFirst(props.label || props.id!)}
-        </EuiButton>
+        <>
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
+          <EuiButton
+            size="s"
+            iconType={props.iconType}
+            iconSide={props.iconSide}
+            iconSize={props.iconSize}
+            color={props.color}
+            fill={props.fill}
+            className={props.className}
+            href={props.href}
+            isDisabled={isDisabled()}
+            onClick={handleClick}
+            aria-label={props.ariaLabel}
+            data-test-subj={props.testId}
+            isLoading={props.isLoading}
+          >
+            {upperFirst(props.label || props.id)}
+          </EuiButton>
+        </>
       );
   }
 
