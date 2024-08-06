@@ -27,7 +27,6 @@ interface WorkspaceUseCaseCardProps {
   checked: boolean;
   description: string;
   onChange: (id: string) => void;
-  disabled?: boolean;
 }
 
 const WorkspaceUseCaseCard = ({
@@ -36,7 +35,6 @@ const WorkspaceUseCaseCard = ({
   description,
   checked,
   onChange,
-  disabled,
 }: WorkspaceUseCaseCardProps) => {
   const handleChange = useCallback(() => {
     onChange(id);
@@ -51,7 +49,6 @@ const WorkspaceUseCaseCard = ({
       className="workspace-use-case-item"
       onChange={handleChange}
       data-test-subj={`workspaceUseCase-${id}`}
-      disabled={disabled}
     >
       <EuiText color="subdued" size="xs">
         {description}
@@ -60,12 +57,7 @@ const WorkspaceUseCaseCard = ({
   );
 };
 
-type AvailableUseCase = Pick<
-  WorkspaceUseCaseObject,
-  'id' | 'title' | 'description' | 'systematic'
-> & {
-  disabled?: boolean;
-};
+type AvailableUseCase = Pick<WorkspaceUseCaseObject, 'id' | 'title' | 'description' | 'systematic'>;
 
 export interface WorkspaceUseCaseProps {
   value: string | undefined;
@@ -118,7 +110,7 @@ export const WorkspaceUseCase = ({
       fullWidth
     >
       <EuiFlexGroup>
-        {displayedUseCases.map(({ id, title, description, disabled }) => (
+        {displayedUseCases.map(({ id, title, description }) => (
           <EuiFlexItem key={id}>
             <WorkspaceUseCaseCard
               id={id}
@@ -126,7 +118,6 @@ export const WorkspaceUseCase = ({
               description={description}
               checked={value === id}
               onChange={onChange}
-              disabled={disabled}
             />
           </EuiFlexItem>
         ))}
