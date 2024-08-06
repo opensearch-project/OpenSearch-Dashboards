@@ -4,12 +4,13 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { IStorageWrapper } from '../../../../opensearch_dashboards_utils/public';
+import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 import { setOverrides as setFieldOverrides } from '../../../common';
 import { ConfigSchema } from '../../../config';
 import { ISearchStart } from '../../search';
 import { QueryEditorExtensionConfig } from '../query_editor/query_editor_extensions';
 import { QueryEnhancement } from '../types';
+import { Storage, History, createHistory, createStorage } from '../history';
 
 export interface DataSettings {
   userQueryLanguage: string;
@@ -27,6 +28,8 @@ export class Settings {
   private isEnabled = false;
   private enabledQueryEnhancementsUpdated$ = new BehaviorSubject<boolean>(this.isEnabled);
   private enhancedAppNames: string[] = [];
+  private Storage: Storage;
+  private history: History;
 
   constructor(
     private readonly config: ConfigSchema['enhancements'],
@@ -38,6 +41,11 @@ export class Settings {
     this.isEnabled = true;
     this.setUserQueryEnhancementsEnabled(this.isEnabled);
     this.enhancedAppNames = this.isEnabled ? this.config.supportedAppNames : [];
+    this.Storage = createStorage({
+      engine: storage,
+      prefix: 'opensearchDashboards.',
+    });
+    this.history = createHistory({ storage: this.Storage });
   }
 
   supportsEnhancementsEnabled(appName: string) {
@@ -71,27 +79,28 @@ export class Settings {
     return this.queryEditorExtensionMap;
   }
 
+  //TODO: update all the prefixes to get rid of opensearchDashboards.
   getUserQueryLanguageBlocklist() {
-    return this.storage.get('opensearchDashboards.userQueryLanguageBlocklist') || [];
+    return this.Storage.get('userQueryLanguageBlocklist') || [];
   }
 
   setUserQueryLanguageBlocklist(languages: string[]) {
-    this.storage.set(
-      'opensearchDashboards.userQueryLanguageBlocklist',
+    this.Storage.set(
+      'userQueryLanguageBlocklist',
       languages.map((language) => language.toLowerCase())
     );
     return true;
   }
 
   getUserQueryLanguage() {
-    return this.storage.get('opensearchDashboards.userQueryLanguage') || 'kuery';
+    return this.Storage.get('userQueryLanguage') || 'kuery';
   }
 
   setUserQueryLanguage(language: string) {
     if (language !== this.getUserQueryLanguage()) {
       this.search.df.clear();
     }
-    this.storage.set('opensearchDashboards.userQueryLanguage', language);
+    this.Storage.set('userQueryLanguage', language);
     const queryEnhancement = this.queryEnhancements.get(language);
     this.search.__enhance({
       searchInterceptor: queryEnhancement
@@ -104,25 +113,26 @@ export class Settings {
   }
 
   getUserQueryString() {
-    return this.storage.get('opensearchDashboards.userQueryString') || '';
+    return this.Storage.get('userQueryString') || '';
   }
 
+  //TODO: create a helper func to set user query that passed in a query object
   setUserQueryString(query: string) {
-    this.storage.set('opensearchDashboards.userQueryString', query);
+    this.Storage.set('userQueryString', query);
     return true;
   }
 
   getUiOverrides() {
-    return this.storage.get('opensearchDashboards.uiOverrides') || {};
+    return this.Storage.get('uiOverrides') || {};
   }
 
   setUiOverrides(overrides?: { [key: string]: any }) {
     if (!overrides) {
-      this.storage.remove('opensearchDashboards.uiOverrides');
+      this.Storage.delete('uiOverrides');
       setFieldOverrides(undefined);
       return true;
     }
-    this.storage.set('opensearchDashboards.uiOverrides', overrides);
+    this.Storage.set('uiOverrides', overrides);
     setFieldOverrides(overrides.fields);
     return true;
   }

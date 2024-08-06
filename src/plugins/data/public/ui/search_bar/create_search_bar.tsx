@@ -42,6 +42,7 @@ import { DataPublicPluginStart } from '../../types';
 import { Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import { Settings } from '../types';
+import { settings } from '../../../../console/server/lib/spec_definitions/js/settings';
 
 interface StatefulSearchBarDeps {
   core: CoreStart;
@@ -82,6 +83,9 @@ const defaultOnQuerySubmit = (
   queryService: QueryStart,
   currentQuery: Query
 ) => {
+  //we add the query into history
+
+  //props.settings?.addQueryToHistory(currentQuery.query);
   if (!props.useDefaultBehaviors) return props.onQuerySubmit;
 
   const { timefilter } = queryService.timefilter;
