@@ -23,6 +23,7 @@ const mockStopStateSync = jest.fn();
 const mockStopQueryStateSync = jest.fn();
 
 jest.mock('../../../../opensearch_dashboards_utils/public', () => ({
+  createGetterSetter: jest.fn(() => []),
   createStateContainer: jest.fn(() => 'stateContainer'),
   syncState: jest.fn(() => ({
     start: mockStartStateSync,
