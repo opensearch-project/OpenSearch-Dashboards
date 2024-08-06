@@ -59,9 +59,8 @@ import { toMountPoint } from '../../opensearch_dashboards_react/public';
 import { SettingsIcon } from './components/settings_icon';
 import {
   fulfillRegistrationLinksToChromeNavLinks,
-  walkLinkItemsTree,
-  getOrderedLinksOrCategories,
   LinkItemType,
+  getSortedNavLinks,
 } from '../../../core/public';
 
 interface ManagementSetupDependencies {
@@ -131,24 +130,26 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         .pipe(first())
         .toPromise();
       const navLinks = navGroupMap[navGroupId]?.navLinks;
-      const allLinksNeedToDisplay: ChromeNavLink[] = [];
-      walkLinkItemsTree(
-        {
-          linkItems: getOrderedLinksOrCategories(
-            fulfillRegistrationLinksToChromeNavLinks(
-              navLinks || [],
-              coreStart.chrome.navLinks.getAll()
-            ).filter((navLink) => !navLink.hidden)
-          ),
-        },
-        (props) => {
-          const { currentItem, parentItem } = props;
+      return getSortedNavLinks(
+        fulfillRegistrationLinksToChromeNavLinks(
+          navLinks || [],
+          coreStart.chrome.navLinks.getAll()
+        ),
+        (currentItem, parentItem) => {
           if (
             currentItem.itemType === LinkItemType.LINK &&
-            parentItem?.itemType !== LinkItemType.PARENT_LINK
+            parentItem?.itemType === LinkItemType.PARENT_LINK
           ) {
-            allLinksNeedToDisplay.push(currentItem.link);
-          } else if (currentItem.itemType === LinkItemType.PARENT_LINK) {
+            return {
+              ...currentItem,
+              link: {
+                ...currentItem.link,
+                hidden: true,
+              },
+            };
+          }
+
+          if (currentItem.itemType === LinkItemType.PARENT_LINK) {
             let payload = currentItem.link;
             if (payload) {
               if (currentItem.links?.[0].itemType === LinkItemType.LINK) {
@@ -158,13 +159,17 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
                   title: payload.title,
                 };
               }
-              allLinksNeedToDisplay.push(payload);
             }
-          }
-        }
-      );
 
-      return allLinksNeedToDisplay;
+            return {
+              ...currentItem,
+              link: payload,
+            };
+          }
+
+          return currentItem;
+        }
+      ).filter((navLink) => !navLink.hidden);
     };
 
     core.application.register({

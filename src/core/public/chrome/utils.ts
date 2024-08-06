@@ -73,7 +73,7 @@ export function fulfillRegistrationLinksToChromeNavLinks(
 export const getOrderedLinks = (navLinks: ChromeNavLink[]): ChromeNavLink[] =>
   navLinks.sort(sortBy('order'));
 
-export function walkLinkItemsTree(
+function walkLinkItemsTree(
   props: {
     linkItems: LinkItem[];
     parentItem?: LinkItem;
@@ -188,3 +188,28 @@ export function getOrderedLinksOrCategories(
 
   return result.sort(sortBy('order'));
 }
+
+export const getSortedNavLinks = (
+  navLinks: ChromeNavLink[],
+  enricher?: (currentItem: LinkItem, parentItem?: LinkItem) => LinkItem
+) => {
+  const sortedNavLinksTree = getOrderedLinksOrCategories(navLinks);
+  const acc: ChromeNavLink[] = [];
+  walkLinkItemsTree(
+    {
+      linkItems: sortedNavLinksTree,
+    },
+    (props) => {
+      const { currentItem, parentItem } = props;
+      const enricheredResult = enricher ? enricher(currentItem, parentItem) : currentItem;
+      if (enricheredResult.itemType === LinkItemType.LINK) {
+        acc.push(enricheredResult.link);
+      } else if (enricheredResult.itemType === LinkItemType.PARENT_LINK) {
+        if (enricheredResult.link) {
+          acc.push(enricheredResult.link);
+        }
+      }
+    }
+  );
+  return acc;
+};

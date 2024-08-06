@@ -14,12 +14,7 @@ import {
 import { map, switchMap, takeUntil } from 'rxjs/operators';
 import { i18n } from '@osd/i18n';
 import { IUiSettingsClient } from '../../ui_settings';
-import {
-  fulfillRegistrationLinksToChromeNavLinks,
-  getOrderedLinksOrCategories,
-  LinkItemType,
-  walkLinkItemsTree,
-} from '../utils';
+import { fulfillRegistrationLinksToChromeNavLinks, getSortedNavLinks } from '../utils';
 import { ChromeNavLinks } from '../nav_links';
 import { InternalApplicationStart } from '../../application';
 import { NavGroupStatus } from '../../../../core/types';
@@ -118,26 +113,9 @@ export class ChromeNavGroupService {
     navGroup: NavGroupItemInMap,
     allValidNavLinks: Array<Readonly<ChromeNavLink>>
   ) {
-    const sortedNavLinksTree = getOrderedLinksOrCategories(
+    return getSortedNavLinks(
       fulfillRegistrationLinksToChromeNavLinks(navGroup.navLinks, allValidNavLinks)
     );
-    const acc: ChromeNavLink[] = [];
-    walkLinkItemsTree(
-      {
-        linkItems: sortedNavLinksTree,
-      },
-      (props) => {
-        const { currentItem } = props;
-        if (currentItem.itemType === LinkItemType.LINK) {
-          acc.push(currentItem.link);
-        } else if (currentItem.itemType === LinkItemType.PARENT_LINK) {
-          if (currentItem.link) {
-            acc.push(currentItem.link);
-          }
-        }
-      }
-    );
-    return acc;
   }
 
   private getSortedNavGroupsMap$() {
