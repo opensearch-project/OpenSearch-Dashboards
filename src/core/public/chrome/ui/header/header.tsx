@@ -411,7 +411,11 @@ export function Header({
       {/* Secondary header */}
       <EuiHeader className="newTopNavHeader">
         <EuiHeaderSection side="left">
-          <EuiHeaderSectionItem border="none" className="newTopNavApplicationTitle">
+          <EuiHeaderSectionItem
+            border="none"
+            className="newTopNavApplicationTitle"
+            data-test-subj="headerApplicationTitle"
+          >
             <EuiText>{breadcrumbs && <h2>{breadcrumbs[breadcrumbs.length - 1]?.text}</h2>}</EuiText>
           </EuiHeaderSectionItem>
 
