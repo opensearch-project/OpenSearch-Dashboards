@@ -21,14 +21,6 @@ interface Props {
   embeddableServices: EmbeddableStart;
 }
 
-export interface CardExplicitInput {
-  title: string;
-  description: string;
-  onClick?: () => void;
-  getIcon?: () => React.ReactElement;
-  getFooter?: () => React.ReactElement;
-}
-
 const CardListInner = ({ embeddable, input, embeddableServices }: Props) => {
   const cards = Object.values(input.panels).map((panel) => {
     const child = embeddable.getChild(panel.explicitInput.id);

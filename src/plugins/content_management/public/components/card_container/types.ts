@@ -1,4 +1,11 @@
 import { ContainerInput } from '../../../../embeddable/public';
-import { CardExplicitInput } from './card_list';
+
+export interface CardExplicitInput {
+  title: string;
+  description: string;
+  onClick?: () => void;
+  getIcon?: () => React.ReactElement;
+  getFooter?: () => React.ReactElement;
+}
 
 export type CardContainerInput = ContainerInput<CardExplicitInput> & { columns?: number };
