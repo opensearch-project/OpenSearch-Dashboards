@@ -43,6 +43,7 @@ export {
   TopNavMenuIconData,
   TopNavMenuLegacyData,
   TopNavMenuItemRenderType,
+  TopNavControls,
   TopNavControlData,
   TopNavControlButtonData,
   TopNavControlLinkData,
