@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import moment from 'moment';
 import {
   EuiPage,
@@ -19,11 +19,16 @@ import {
   EuiButtonEmpty,
   EuiButton,
   EuiEmptyPrompt,
+  EuiBadge,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, of } from 'rxjs';
 import { i18n } from '@osd/i18n';
-import { DEFAULT_NAV_GROUPS, WorkspaceAttribute } from '../../../../../core/public';
+import {
+  DEFAULT_NAV_GROUPS,
+  WorkspaceAttribute,
+  WorkspaceAttributeWithPermission,
+} from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
 
@@ -33,6 +38,9 @@ import { DeleteWorkspaceModal } from '../delete_workspace_modal';
 import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
 import { WorkspaceUseCase } from '../../types';
 import { NavigationPublicPluginStart } from '../../../../../plugins/navigation/public';
+import { WorkspacePermissionMode } from '../../../common/constants';
+import { getDataSourcesList } from '../../utils';
+import { DataSourceAttributesWithWorkspaces } from '../../types';
 
 export interface WorkspaceListProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -50,6 +58,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       http,
       navigationUI: { HeaderControl },
       uiSettings,
+      savedObjects,
     },
   } = useOpenSearchDashboards<{
     navigationUI: NavigationPublicPluginStart['ui'];
@@ -165,6 +174,16 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     copyToClipboard(id);
   };
 
+  const [allDataSources, setAllDataSources] = useState<DataSourceAttributesWithWorkspaces[]>([]);
+
+  useEffect(() => {
+    if (savedObjects) {
+      getDataSourcesList(savedObjects.client, ['*']).then((data) => {
+        setAllDataSources(data);
+      });
+    }
+  }, [savedObjects]);
+
   const handleSwitchWorkspace = useCallback(
     (id: string) => {
       if (application && http) {
@@ -241,13 +260,21 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     toolsLeft: renderToolsLeft(),
   };
 
+  const renderMoreAmountBadge = (amount: number) => {
+    return (
+      <EuiBadge color="hollow" iconType="cross" iconSide="right">
+        + {amount} more
+      </EuiBadge>
+    );
+  };
+
   const columns = [
     {
       field: 'name',
       name: 'Name',
       width: '25%',
       sortable: true,
-      render: (name: string, item: WorkspaceAttribute) => (
+      render: (name: string, item: WorkspaceAttributeWithPermission) => (
         <span>
           <EuiLink onClick={() => handleSwitchWorkspace(item.id)}>
             <EuiLink>{name}</EuiLink>
@@ -288,7 +315,26 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
         return moment(lastUpdatedTime).format(dateFormat);
       },
     },
+    {
+      field: 'permissions',
+      name: 'Owners',
+      render: (permissions: WorkspaceAttributeWithPermission['permissions']) => {
+        const owners = permissions?.[WorkspacePermissionMode.Write]?.users ?? [];
+        return owners;
+      },
+    },
 
+    {
+      field: 'id',
+      name: 'Data sources',
+      render: (id: string) => {
+        const associatedDataSources = allDataSources.filter(
+          (ds) => ds.workspaces && ds.workspaces.includes(id)
+        );
+        const dataSourcesTitles = associatedDataSources.map((ds) => ds.title);
+        return dataSourcesTitles;
+      },
+    },
     {
       name: 'Actions',
       field: '',
