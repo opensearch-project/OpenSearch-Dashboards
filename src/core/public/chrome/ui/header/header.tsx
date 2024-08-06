@@ -342,6 +342,7 @@ export function Header({
         opensearchDashboardsDocLink={opensearchDashboardsDocLink}
         opensearchDashboardsVersion={opensearchDashboardsVersion}
         surveyLink={survey}
+        useUpdatedAppearance
       />
     </EuiHeaderSectionItem>
   );
