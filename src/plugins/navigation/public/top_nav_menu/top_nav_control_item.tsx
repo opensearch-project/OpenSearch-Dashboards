@@ -84,6 +84,7 @@ export function TopNavControlItem(props: TopNavControlData) {
           color={props.color}
           className={props.className}
           href={props.href}
+          target={props.target}
           isDisabled={isDisabled()}
           onClick={handleClick}
           aria-label={props.ariaLabel}
@@ -103,6 +104,7 @@ export function TopNavControlItem(props: TopNavControlData) {
           color={props.color}
           className={props.className}
           href={props.href}
+          target={props.target}
           isDisabled={isDisabled()}
           onClick={handleClick}
           aria-label={props.ariaLabel}
@@ -127,6 +129,7 @@ export function TopNavControlItem(props: TopNavControlData) {
             fill={props.fill}
             className={props.className}
             href={props.href}
+            target={props.target}
             isDisabled={isDisabled()}
             onClick={handleClick}
             aria-label={props.ariaLabel}
