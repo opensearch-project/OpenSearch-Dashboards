@@ -67,6 +67,8 @@ const createMock = () => {
   };
 
   mocked.setup.mockReturnValue(createSetupContractMock());
+  // UiSettings.start returns the client that is returned by setup
+  mocked.start.mockReturnValue(createSetupContractMock());
   return mocked;
 };
 
