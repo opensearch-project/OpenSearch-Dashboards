@@ -134,7 +134,7 @@ export class ManagementPlugin implements Plugin<ManagementSetup, ManagementStart
         fulfillRegistrationLinksToChromeNavLinks(
           navLinks || [],
           coreStart.chrome.navLinks.getAll()
-        ).filter(item => !item.hidden),
+        ).filter((item) => !item.hidden),
         (currentItem, parentItem) => {
           if (
             currentItem.itemType === LinkItemType.LINK &&
