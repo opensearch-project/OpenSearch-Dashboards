@@ -10,8 +10,8 @@ import { Content, Section } from '../services';
 import { ViewMode } from '../../../embeddable/public';
 import { DashboardContainerInput, SavedObjectDashboard } from '../../../dashboard/public';
 import { CUSTOM_CONTENT_EMBEDDABLE } from './custom_content_embeddable';
-import { CardContainerInput } from './card_container/card_container';
 import { CARD_EMBEDDABLE } from './card_container/card_embeddable';
+import { CardContainerInput } from './card_container/types';
 
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
 
@@ -30,6 +30,7 @@ export const createCardInput = (
     title: section.title ?? '',
     hidePanelTitles: true,
     viewMode: ViewMode.VIEW,
+    columns: section.columns,
     panels,
   };
 
