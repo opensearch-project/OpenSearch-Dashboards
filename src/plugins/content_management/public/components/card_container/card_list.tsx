@@ -30,6 +30,8 @@ const CardListInner = ({ embeddable, input, embeddableServices }: Props) => {
       </EuiFlexItem>
     );
   });
+
+  // TODO: we should perhaps display the cards in multiple rows when the actual number of cards exceed the column size
   return (
     <EuiFlexGroup gutterSize="s">
       {input.columns ? cards.slice(0, input.columns) : cards}
