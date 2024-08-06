@@ -20,6 +20,7 @@ interface TopNavControlButtonOrLinkOrIconData {
   isDisabled?: boolean | (() => boolean);
   tooltip?: string | (() => string | undefined);
   ariaLabel?: string;
+  target?: '_blank';
   iconSize?: EuiButtonProps['iconSize'];
 }
 
