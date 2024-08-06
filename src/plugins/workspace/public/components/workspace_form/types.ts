@@ -86,3 +86,7 @@ export interface WorkspaceFormProps {
   dataSourceManagement?: DataSourceManagementPluginSetup;
   availableUseCases: WorkspaceUseCase[];
 }
+
+export interface WorkspaceDetailedFormProps extends WorkspaceFormProps {
+  defaultValues?: WorkspaceFormData;
+}

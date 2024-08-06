@@ -454,7 +454,7 @@ export const getNumberOfChanges = (
       Pick<WorkspacePermissionSetting, 'id'> & Partial<WorkspacePermissionSetting>
     >;
   },
-  initialFormData: Omit<WorkspaceFormData, 'id'>
+  initialFormData: Omit<Partial<WorkspaceFormData>, 'id'>
 ) => {
   let count = 0;
   if (newFormData.name !== initialFormData.name) {
