@@ -15,16 +15,30 @@ export const navigateToWorkspaceDetail = (
   id: string,
   tabId: string = DetailTab.Details
 ) => {
+  navigateToAppWithinWorkspace(
+    { application, http },
+    id,
+    WORKSPACE_DETAIL_APP_ID,
+    `/?tab=${tabId}`
+  );
+};
+
+export const navigateToAppWithinWorkspace = (
+  { application, http }: Core,
+  workspaceId: string,
+  appId: string,
+  hash: string
+) => {
   const newUrl = formatUrlWithWorkspaceId(
-    application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
+    application.getUrlForApp(appId, {
       absolute: true,
     }),
-    id,
+    workspaceId,
     http.basePath
   );
   if (newUrl) {
     const url = new URL(newUrl);
-    url.hash = `/?tab=${tabId}`;
+    url.hash = hash;
     application.navigateToUrl(url.toString());
   }
 };
