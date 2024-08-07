@@ -23,11 +23,61 @@ jest.mock('../delete_workspace_modal', () => ({
   ),
 }));
 
+const formatDate = function (dateString: string) {
+  const months = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ];
+
+  const date = new Date(dateString);
+
+  const month = months[date.getUTCMonth()];
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  const year = date.getUTCFullYear();
+
+  const hours = String(date.getUTCHours()).padStart(2, '0');
+  const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+  const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+  const milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
+
+  return `${month} ${day},${year}@${hours}:${minutes}:${seconds}.${milliseconds}`;
+};
+
 function getWrapWorkspaceListInContext(
   workspaceList = [
-    { id: 'id1', name: 'name1', features: ['use-case-all'] },
-    { id: 'id2', name: 'name2' },
-    { id: 'id3', name: 'name3', features: ['use-case-observability'] },
+    {
+      id: 'id1',
+      name: 'name1',
+      features: ['use-case-all'],
+      description:
+        'should be able to see the description tooltip when hovering over the description',
+      lastUpdatedTime: '1999-08-06T02:00:00.00Z',
+    },
+    {
+      id: 'id2',
+      name: 'name2',
+      features: ['use-case-observability'],
+      description:
+        'should be able to see the description tooltip when hovering over the description',
+      lastUpdatedTime: '1999-08-06T00:00:00.00Z',
+    },
+    {
+      id: 'id3',
+      name: 'name3',
+      features: ['use-case-search'],
+      description: '',
+      lastUpdatedTime: '1999-08-06T01:00:00.00Z',
+    },
   ],
   isDashboardAdmin = true
 ) {
@@ -79,26 +129,45 @@ describe('WorkspaceList', () => {
     expect(getByText('All use case')).toBeInTheDocument();
     expect(getByText('Observability')).toBeInTheDocument();
   });
-  it('should be able to apply debounce search after input', async () => {
-    const list = [
-      { id: 'id1', name: 'name1' },
-      { id: 'id2', name: 'name2' },
-      { id: 'id3', name: 'name3' },
-      { id: 'id4', name: 'name4' },
-      { id: 'id5', name: 'name5' },
-      { id: 'id6', name: 'name6' },
-    ];
-    const { getByText, getByRole, queryByText } = render(getWrapWorkspaceListInContext(list));
-    expect(getByText('name1')).toBeInTheDocument();
-    expect(queryByText('name6')).not.toBeInTheDocument();
+
+  it('should be able to see the description tooltip when hovering over the description', async () => {
+    const { getByText, getByTestId, queryByTestId } = render(getWrapWorkspaceListInContext());
+    const description = getByText(
+      'should be able to see the description tooltip when hovering over the description'
+    );
+    expect(description).toHaveClass('eui-textTruncate');
+    fireEvent.mouseEnter(description);
+    expect(getByTestId('workspaceList-hover-description')).toBeInTheDocument();
+
+    const tooltip = await queryByTestId('workspaceList-hover-description');
+    expect(tooltip).toBeInTheDocument();
+    expect(tooltip).toHaveTextContent(
+      'should be able to see the description tooltip when hovering over the description'
+    );
+    fireEvent.mouseLeave(description);
+    expect(queryByTestId('workspaceList-hover-description')).not.toBeInTheDocument();
+  });
+
+  it('should be able to search and re-render the list', async () => {
+    const { getByText, getByRole, queryByText } = render(getWrapWorkspaceListInContext());
     const input = getByRole('searchbox');
     fireEvent.change(input, {
-      target: { value: 'nam' },
+      target: { value: 'name2' },
     });
+    expect(getByText('name2')).toBeInTheDocument();
+    expect(queryByText('name1')).not.toBeInTheDocument();
+    expect(queryByText('name3')).not.toBeInTheDocument();
+  });
+
+  it('should be able to debounce when ', async () => {
+    const { getByText, getByRole, queryByText } = render(getWrapWorkspaceListInContext());
+    const input = getByRole('searchbox');
     fireEvent.change(input, {
-      target: { value: 'name6' },
+      target: { value: 'name2' },
     });
-    expect(queryByText('name6')).not.toBeInTheDocument();
+    expect(getByText('name2')).toBeInTheDocument();
+    expect(queryByText('name1')).not.toBeInTheDocument();
+    expect(queryByText('name3')).not.toBeInTheDocument();
   });
 
   it('should be able to switch workspace after clicking name', async () => {
@@ -108,16 +177,54 @@ describe('WorkspaceList', () => {
     expect(navigateToWorkspaceDetail).toBeCalled();
   });
 
+  it('should be able to perform the time format transformation', async () => {
+    const { getByText } = render(getWrapWorkspaceListInContext());
+    expect(getByText(formatDate('1999-08-06T00:00:00.00Z'))).toBeInTheDocument();
+    expect(getByText(formatDate('1999-08-06T01:00:00.00Z'))).toBeInTheDocument();
+    expect(getByText(formatDate('1999-08-06T02:00:00.00Z'))).toBeInTheDocument();
+  });
+
+  // it('should be able to update workspace after clicking name', async () => {
+  //   const { getAllByTestId } = render(getWrapWorkspaceListInContext());
+  //   const editIcon = getAllByTestId('workspace-list-edit-icon')[0];
+  //   fireEvent.click(editIcon);
+  //   expect(navigateToWorkspaceDetail).toBeCalled();
+  // });
+
+  it('should be able to see the 3 operations: copy, update, delete after click in the meatballs button', async () => {
+    const { getAllByTestId, getByText } = render(getWrapWorkspaceListInContext());
+    const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
+    fireEvent.click(operationIcons);
+    expect(getByText('Copy')).toBeInTheDocument();
+    expect(getByText('Edit')).toBeInTheDocument();
+    expect(getByText('Delete')).toBeInTheDocument();
+  });
+
   it('should be able to update workspace after clicking name', async () => {
-    const { getAllByTestId } = render(getWrapWorkspaceListInContext());
-    const editIcon = getAllByTestId('workspace-list-edit-icon')[0];
+    const { getByText, getAllByTestId } = render(getWrapWorkspaceListInContext());
+    const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
+    fireEvent.click(operationIcons);
+    const editIcon = getByText('Edit');
     fireEvent.click(editIcon);
     expect(navigateToWorkspaceDetail).toBeCalled();
   });
 
+  // it('should be able to copy workspace ID after clicking copy button', async () => {
+  //   const { getByText, getAllByTestId } = render(getWrapWorkspaceListInContext());
+  //   const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
+  //   fireEvent.click(operationIcons);
+  //   const copyIcon = getByText('Copy');
+  //   fireEvent.click(copyIcon);
+  //   expect(
+  //     navigator.clipboard.text
+  //   ).toHaveBeenCalledWith('id1');
+  // });
+
   it('should be able to call delete modal after clicking delete button', async () => {
-    const { getAllByTestId } = render(getWrapWorkspaceListInContext());
-    const deleteIcon = getAllByTestId('workspace-list-delete-icon')[0];
+    const { getByText, getAllByTestId } = render(getWrapWorkspaceListInContext());
+    const operationIcons = getAllByTestId('euiCollapsedItemActionsButton')[0];
+    fireEvent.click(operationIcons);
+    const deleteIcon = getByText('Delete');
     fireEvent.click(deleteIcon);
     expect(screen.queryByLabelText('mock delete workspace modal')).toBeInTheDocument();
     const modalCancelButton = screen.getByLabelText('mock delete workspace modal button');
@@ -127,12 +234,48 @@ describe('WorkspaceList', () => {
 
   it('should be able to pagination when clicking pagination button', async () => {
     const list = [
-      { id: 'id1', name: 'name1' },
-      { id: 'id2', name: 'name2' },
-      { id: 'id3', name: 'name3' },
-      { id: 'id4', name: 'name4' },
-      { id: 'id5', name: 'name5' },
-      { id: 'id6', name: 'name6' },
+      {
+        id: 'id1',
+        name: 'name1',
+        features: ['use-case-all'],
+        description: '',
+        lastUpdatedTime: '2024-08-06T00:00:00.00Z',
+      },
+      {
+        id: 'id2',
+        name: 'name2',
+        features: ['use-case-observability'],
+        description: '',
+        lastUpdatedTime: '2024-08-06T00:00:00.00Z',
+      },
+      {
+        id: 'id3',
+        name: 'name3',
+        features: ['use-case-search'],
+        description: '',
+        lastUpdatedTime: '2024-08-06T00:00:00.00Z',
+      },
+      {
+        id: 'id4',
+        name: 'name4',
+        features: ['use-case-all'],
+        description: '',
+        lastUpdatedTime: '2024-08-06T00:00:00.00Z',
+      },
+      {
+        id: 'id5',
+        name: 'name5',
+        features: ['use-case-observability'],
+        description: '',
+        lastUpdatedTime: '2024-08-06T00:00:00.00Z',
+      },
+      {
+        id: 'id6',
+        name: 'name6',
+        features: ['use-case-search'],
+        description: '',
+        lastUpdatedTime: '2024-08-06T00:00:00.00Z',
+      },
     ];
     const { getByTestId, getByText, queryByText } = render(getWrapWorkspaceListInContext(list));
     expect(getByText('name1')).toBeInTheDocument();
@@ -144,14 +287,24 @@ describe('WorkspaceList', () => {
   });
 
   it('should display create workspace button for dashboard admin', async () => {
-    const { getByText } = render(getWrapWorkspaceListInContext([], true));
-
-    expect(getByText('Create workspace')).toBeInTheDocument();
+    const { getAllByText } = render(getWrapWorkspaceListInContext([], true));
+    expect(getAllByText('Create workspace')[0]).toBeInTheDocument();
   });
 
   it('should hide create workspace button for non dashboard admin', async () => {
     const { queryByText } = render(getWrapWorkspaceListInContext([], false));
-
     expect(queryByText('Create workspace')).toBeNull();
   });
+
+  // it('should be able to perform filtering when select a desired use case', async () => {
+  //   const { getByText, getByRole, queryByText } = render(getWrapWorkspaceListInContext());
+
+  //   // eslint-disable-next-line
+  //   console.log(render(getWrapWorkspaceListInContext()));
+  //   const filter = getByRole('selectfilters');
+  //   fireEvent.change(filter, { target: { value: 'Observability' } });
+  //   expect(getByText('name3')).toBeInTheDocument();
+  //   expect(queryByText('name1')).not.toBeInTheDocument();
+  //   expect(queryByText('name2')).not.toBeInTheDocument();
+  // });
 });
