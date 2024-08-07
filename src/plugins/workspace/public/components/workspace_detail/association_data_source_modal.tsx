@@ -15,6 +15,7 @@ import {
   EuiText,
   EuiSelectable,
 } from '@elastic/eui';
+import { FormattedMessage } from 'react-intl';
 import { DataSource } from '../../../common/types';
 import { SavedObjectsStart } from '../../../../../core/public';
 import { getDataSourcesList } from '../../utils';
@@ -62,19 +63,27 @@ export const AssociationDataSourceModal = ({
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <h1>Associate OpenSearch connections</h1>
+          <h1>
+            <FormattedMessage
+              id="workspace.detail.dataSources.associateModal.title"
+              defaultMessage="Associate OpenSearch connections"
+            />
+          </h1>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiText size="s" color="subdued">
-          Add OpenSearch connections that will be available in the workspace.
+          <FormattedMessage
+            id="workspace.detail.dataSources.associateModal.message"
+            defaultMessage="Add OpenSearch connections that will be available in the workspace."
+          />
         </EuiText>
         <EuiSelectable
-          aria-label="Searchable example"
+          aria-label="Searchable"
           searchable
           listProps={{ bordered: true }}
           searchProps={{
-            'data-test-subj': 'selectableSearchHere',
+            'data-test-subj': 'workspace-detail-dataSources-associateModal-search',
           }}
           options={options}
           onChange={(newOptions) => setOptions(newOptions)}
@@ -90,10 +99,16 @@ export const AssociationDataSourceModal = ({
 
       <EuiModalFooter>
         <EuiButton onClick={closeModal} fill>
-          Close
+          <FormattedMessage
+            id="workspace.detail.dataSources.associateModal.close.button"
+            defaultMessage="Close"
+          />
         </EuiButton>
         <EuiButton onClick={() => handleAssignDataSources(selectedDataSources)} fill>
-          Save changes
+          <FormattedMessage
+            id="workspace.detail.dataSources.associateModal.save.button"
+            defaultMessage="Save changes"
+          />
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
