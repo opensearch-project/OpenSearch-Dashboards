@@ -15,15 +15,14 @@ import {
   EuiToolTip,
   EuiText,
   EuiSearchBarProps,
-  EuiCopy,
+  copyToClipboard,
   EuiButtonEmpty,
   EuiEmptyPrompt,
-  EuiTableSelectionType,
 } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject, of } from 'rxjs';
 import { i18n } from '@osd/i18n';
-import { debounce, DEFAULT_NAV_GROUPS } from '../../../../../core/public';
+import { DEFAULT_NAV_GROUPS } from '../../../../../core/public';
 import { WorkspaceAttribute } from '../../../../../core/public';
 import { useOpenSearchDashboards } from '../../../../../plugins/opensearch_dashboards_react/public';
 import { navigateToWorkspaceDetail } from '../utils/workspace';
@@ -44,6 +43,10 @@ export interface WorkspaceListProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
 }
 
+interface WorkspaceAttributeWithUseCaseID extends WorkspaceAttribute {
+  useCase: string[];
+}
+
 export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   const {
     services: { workspaces, application, http },
@@ -53,7 +56,21 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   const initialSortField = 'name';
   const initialSortDirection = 'asc';
   const workspaceList = useObservable(workspaces?.workspaceList$ ?? of([]), []);
-  const [queryInput, setQueryInput] = useState<string>('');
+
+  const newWorkspaceList: WorkspaceAttributeWithUseCaseID[] = useMemo(() => {
+    return workspaceList.map(
+      (workspace): WorkspaceAttributeWithUseCaseID => ({
+        ...workspace,
+        useCase: [...(workspace.features || [])],
+      })
+    );
+  }, [workspaceList]);
+
+  // eslint-disable-next-line
+  console.log('newWorkspaceList', newWorkspaceList);
+  // eslint-disable-next-line
+  console.log('WorkspaceList', workspaceList);
+
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 5,
@@ -61,6 +78,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
   });
   const [deletedWorkspace, setDeletedWorkspace] = useState<WorkspaceAttribute | null>(null);
   const [featureFilters, setFeatureFilters] = useState<string[]>([]);
+
   const workspaceCreateUrl = useMemo(() => {
     if (!application || !http) {
       return '';
@@ -95,6 +113,10 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       }
     />
   );
+
+  const handleCopyId = (id: string) => {
+    copyToClipboard(id);
+  };
 
   const handleSwitchWorkspace = useCallback(
     (id: string) => {
@@ -144,27 +166,14 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     });
   };
 
-  // const debouncedSetQueryInput = useMemo(() => {
-  //   return debounce(setQueryInput, 300);
-  // }, [setQueryInput]);
-
-  // const handleSearchInput: EuiSearchBarProps['onChange'] = useCallback(
-  //   ({ query }) => {
-  //     debouncedSetQueryInput(query?.text ?? '');
-  //   },
-  //   [debouncedSetQueryInput]
-  // );
-
   const transformIDtoName = (useCaseId: string) => {
     const useCase =
       useCaseId === DEFAULT_NAV_GROUPS.all.id
         ? DEFAULT_NAV_GROUPS.all
         : registeredUseCases?.find(({ id }) => id === useCaseId);
-
-    // eslint-disable-next-line
-    console.log('useCase', useCase);
     return useCase?.title;
   };
+
   const search: EuiSearchBarProps = {
     box: {
       incremental: true,
@@ -172,7 +181,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     filters: [
       {
         type: 'field_value_selection',
-        field: 'features',
+        field: 'useCase',
         name: 'Use Case',
         multiSelect: false,
         options: featureFilters.map((feature) => ({
@@ -198,59 +207,6 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     ],
   };
 
-  // const searchResult = useMemo(() => {
-  //   const filterQuery =
-  //     queryInput && queryInput.trim().startsWith('features:')
-  //       ? queryInput
-  //           .trim()
-  //           .split(':')[1]
-  //           .toLowerCase()
-  //           .replace(/^['"]+|['"]+$/g, '')
-  //       : '';
-
-  //   // if (filterQuery !== '') setQueryInput('');
-  //   const normalizedQuery = queryInput.toLowerCase();
-
-  //   const result = workspaceList.filter((item) => {
-  //     const useCaseId = getFirstUseCaseOfFeatureConfigs(item.features || []);
-  //     const useCase =
-  //       useCaseId === DEFAULT_NAV_GROUPS.all.id
-  //         ? DEFAULT_NAV_GROUPS.all
-  //         : registeredUseCases?.find(({ id }) => id === useCaseId);
-
-  //     // eslint-disable-next-line
-  //     console.log('useCase', useCase);
-
-  //     const filterResult = filterQuery ? useCase?.title.toLowerCase() === filterQuery : true;
-  //     const queryResult =
-  //       queryInput && !queryInput.startsWith('features:')
-  //         ? item.name.toLowerCase().includes(normalizedQuery)
-  //         : true;
-  //     return filterResult && queryResult;
-  //   });
-  //   if (result.length === 0 && workspaceList.length > 0) {
-  //     setMessage(
-  //       <EuiEmptyPrompt
-  //         title={<h3>No workspace found</h3>}
-  //         titleSize="s"
-  //         body="No workspace found with the current search criteria."
-  //       />
-  //     );
-  //   }
-  //   return result;
-  // }, [workspaceList, queryInput, registeredUseCases]);
-
-  // const searchResult = useMemo(() => {
-  //   if (queryInput) {
-  //     const normalizedQuery = queryInput.toLowerCase();
-  //     const result = workspaceList.filter((item) => {
-  //       return item.name.toLowerCase().indexOf(normalizedQuery) > -1;
-  //     });
-  //     return result;
-  //   }
-  //   return workspaceList;
-  // }, [workspaceList, queryInput]);
-
   const columns = [
     {
       field: 'name',
@@ -267,25 +223,25 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     },
 
     {
-      field: 'features',
+      field: 'useCase',
       name: 'Use case',
       width: '20%',
       isExpander: true,
       hasActions: true,
-      render: (features: string[]) => {
-        if (!features || features.length === 0) {
+      render: (useCase: string[]) => {
+        if (!useCase || useCase.length === 0) {
           return '';
         }
-        const useCaseId = getFirstUseCaseOfFeatureConfigs(features);
+        const useCaseId = getFirstUseCaseOfFeatureConfigs(useCase);
         if (useCaseId) {
           addFeatureFilter(useCaseId);
         }
-        const useCase =
+        const usecase =
           useCaseId === DEFAULT_NAV_GROUPS.all.id
             ? DEFAULT_NAV_GROUPS.all
             : registeredUseCases?.find(({ id }) => id === useCaseId);
-        if (useCase) {
-          return useCase.title;
+        if (usecase) {
+          return usecase.title;
         }
       },
     },
@@ -294,21 +250,16 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
       field: 'description',
       name: 'Description',
       width: '20%',
-      // truncateText: true,
       render: (description: string) => (
-        <EuiToolTip position="bottom" content={description}>
-          <div
-            style={{
-              maxWidth: '130px',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            <EuiText size="s" className="eui-textTruncate">
-              {description}
-            </EuiText>
-          </div>
+        <EuiToolTip
+          position="bottom"
+          content={description}
+          data-test-subj="workspaceList-hover-description"
+        >
+          {/* Here I need to set width mannuly since there is  */}
+          <EuiText size="s" className="eui-textTruncate" style={{ maxWidth: 150 }}>
+            {description}
+          </EuiText>
         </EuiToolTip>
       ),
     },
@@ -333,26 +284,31 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
           'data-test-subj': 'workspace-list-copy-id-icon',
           render: ({ id }: WorkspaceAttribute) => {
             return (
-              <EuiCopy textToCopy={id}>
-                {(copy) => (
-                  <EuiButtonEmpty onClick={copy} iconType="copy" color="text">
-                    <EuiText size="m">Copy</EuiText>
-                  </EuiButtonEmpty>
-                )}
-              </EuiCopy>
+              <EuiButtonEmpty
+                onClick={() => handleCopyId(id)}
+                size="xs"
+                iconType="copy"
+                color="text"
+              >
+                <EuiText size="m">Copy</EuiText>
+              </EuiButtonEmpty>
             );
           },
         },
         {
           name: 'Edit',
-          type: 'button',
+          type: 'icon',
+          icon: 'edit',
+          color: 'danger',
           description: 'Edit workspace',
           'data-test-subj': 'workspace-list-edit-icon',
+          onClick: ({ id }: WorkspaceAttribute) => handleSwitchWorkspace(id),
           render: ({ id }: WorkspaceAttribute) => {
             return (
               <EuiButtonEmpty
                 onClick={() => handleSwitchWorkspace(id)}
                 iconType="pencil"
+                size="xs"
                 color="text"
               >
                 <EuiText size="m">Edit</EuiText>
@@ -371,6 +327,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
                 onClick={() => {
                   setDeletedWorkspace(item);
                 }}
+                size="xs"
                 iconType="trash"
                 color="danger"
               >
@@ -383,40 +340,15 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
     },
   ];
 
-  useEffect(() => {
+  useMemo(() => {
     setFeatureFilters([]);
-    workspaceList.forEach((workspace) => {
-      // eslint-disable-next-line
-      console.log('workspacelist', workspaceList);
-      const useCaseId = getFirstUseCaseOfFeatureConfigs(workspace.features || []);
+    newWorkspaceList.forEach((workspace) => {
+      const useCaseId = getFirstUseCaseOfFeatureConfigs(workspace.useCase || []);
       if (useCaseId) {
         addFeatureFilter(useCaseId);
       }
     });
-    if (workspaceList && workspaceList.length === 0) {
-      setMessage(
-        <EuiEmptyPrompt
-          iconType="spacesApp"
-          title={<h3>No workspace available</h3>}
-          titleSize="s"
-          body="There are no workspace to display. Create workspace to get started."
-          actions={
-            isDashboardAdmin && (
-              <EuiSmallButton
-                href={workspaceCreateUrl}
-                key="create_workspace"
-                data-test-subj="workspaceList-create-workspace"
-              >
-                {i18n.translate('workspace.workspaceList.buttons.createWorkspace', {
-                  defaultMessage: 'Create workspace',
-                })}
-              </EuiSmallButton>
-            )
-          }
-        />
-      );
-    }
-  }, [workspaceList, registeredUseCases, message, isDashboardAdmin, workspaceCreateUrl]);
+  }, [newWorkspaceList]);
 
   return (
     <EuiPage paddingSize="none">
@@ -436,7 +368,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
           style={{ width: '100%' }}
         >
           <EuiInMemoryTable
-            items={workspaceList}
+            items={newWorkspaceList}
             columns={columns}
             itemId="id"
             message={message}
