@@ -113,13 +113,13 @@ export class EmbeddablePanel extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     const { embeddable } = this.props;
-    const viewMode = embeddable.getInput().viewMode ?? ViewMode.EDIT;
-    const hidePanelTitle =
-      Boolean(embeddable.parent?.getInput()?.hidePanelTitles) ||
-      Boolean(embeddable.getInput()?.hidePanelTitles);
+    const input = embeddable.getInput();
+    const parentInput = embeddable.parent?.getInput();
+
+    const viewMode = input?.viewMode ?? ViewMode.EDIT;
+    const hidePanelTitle = Boolean(parentInput?.hidePanelTitles) || Boolean(input?.hidePanelTitles);
     const hidePanelAction =
-      Boolean(embeddable.parent?.getInput()?.hidePanelActions) ||
-      Boolean(embeddable.getInput()?.hidePanelActions);
+      Boolean(parentInput?.hidePanelActions) || Boolean(input?.hidePanelActions);
 
     this.state = {
       panels: [],
@@ -187,15 +187,15 @@ export class EmbeddablePanel extends React.Component<Props, State> {
     if (parent) {
       this.parentSubscription = parent.getInput$().subscribe(async () => {
         if (this.mounted && parent) {
+          const input = embeddable.getInput();
+          const parentInput = parent.getInput();
           this.setState({
             hidePanelTitle:
-              Boolean(embeddable.parent?.getInput()?.hidePanelTitles) ||
-              Boolean(embeddable.getInput()?.hidePanelTitles),
+              Boolean(parentInput?.hidePanelTitles) || Boolean(input?.hidePanelTitles),
           });
           this.setState({
             hidePanelAction:
-              Boolean(embeddable.parent?.getInput()?.hidePanelActions) ||
-              Boolean(embeddable.getInput()?.hidePanelActions),
+              Boolean(parentInput?.hidePanelActions) || Boolean(input?.hidePanelActions),
           });
 
           this.refreshBadges();
