@@ -24,6 +24,7 @@ import { convertPermissionSettingsToPermissions } from '../workspace_form';
 import { DataSource } from '../../../common/types';
 import { DataSourceManagementPluginSetup } from '../../../../../plugins/data_source_management/public';
 import { WorkspaceUseCase } from '../../types';
+import { WorkspaceFormData } from '../workspace_form/types';
 
 export interface WorkspaceCreatorProps {
   registeredUseCases$: BehaviorSubject<WorkspaceUseCase[]>;
@@ -43,6 +44,11 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
     workspaceClient: WorkspaceClient;
     dataSourceManagement?: DataSourceManagementPluginSetup;
   }>();
+
+  const defaultWorkspaceFormValues: Partial<WorkspaceFormData> = {
+    color: euiPaletteColorBlind()[0],
+  };
+
   const isPermissionEnabled = application?.capabilities.workspaces.permissionEnabled;
   const availableUseCases = useObservable(props.registeredUseCases$, []);
 
@@ -113,7 +119,7 @@ export const WorkspaceCreator = (props: WorkspaceCreatorProps) => {
               permissionEnabled={isPermissionEnabled}
               dataSourceManagement={dataSourceManagement}
               availableUseCases={availableUseCases}
-              defaultValues={{ color: euiPaletteColorBlind()[0] }}
+              defaultValues={defaultWorkspaceFormValues}
             />
           )}
         </EuiPageContent>
