@@ -77,6 +77,8 @@ const titleForSeeAll = i18n.translate('core.ui.primaryNav.seeAllLabel', {
   defaultMessage: 'See all...',
 });
 
+const LEVEL_FOR_ROOT_ITEMS = 1;
+
 export function NavGroups({
   navLinks,
   suffix,
@@ -151,9 +153,11 @@ export function NavGroups({
           createSideNavItem(subNavLink, level + 1, 'nav-nested-item')
         ),
       };
-      // The first level of SideBar will be regarded as category
-      // In order to display accordion, we need to render a fake parent category
-      if (level === 1) {
+      /**
+       * OuiSideBar will never render items of first level as accordion,
+       * in order to display accordion, we need to render a fake parent item.
+       */
+      if (level === LEVEL_FOR_ROOT_ITEMS) {
         return {
           className: 'nav-link-fake-item',
           buttonClassName: 'nav-link-fake-item-button',
@@ -179,7 +183,7 @@ export function NavGroups({
   };
   const orderedLinksOrCategories = getOrderedLinksOrCategories(navLinks);
   const sideNavItems = orderedLinksOrCategories
-    .map((navLink) => createSideNavItem(navLink, 1))
+    .map((navLink) => createSideNavItem(navLink, LEVEL_FOR_ROOT_ITEMS))
     .filter((item): item is EuiSideNavItemType<{}> => !!item);
   return (
     <EuiFlexItem style={style}>

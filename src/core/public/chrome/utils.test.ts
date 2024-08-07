@@ -47,6 +47,15 @@ const mockedNavLinkB = {
   order: 5,
 };
 
+const mockedSubNavLinkA = {
+  id: 'sub_a',
+  parentNavLinkId: 'a',
+  title: 'sub_a',
+  baseUrl: '',
+  href: '',
+  order: 10,
+};
+
 describe('getAllCategories', () => {
   it('should return all categories', () => {
     const links = {
@@ -126,12 +135,13 @@ describe('getOrderedLinksOrCategories', () => {
 
 describe('getSortedNavLinks', () => {
   it('should return flattened links', () => {
-    const navLinks = [mockedNonCategoryLink, mockedNavLinkA, mockedNavLinkB];
-    const flattenedLinks = getSortedNavLinks(navLinks);
-    expect(flattenedLinks.map((item) => item.id)).toEqual([
+    const navLinks = [mockedNonCategoryLink, mockedNavLinkA, mockedNavLinkB, mockedSubNavLinkA];
+    const sortedNavLinks = getSortedNavLinks(navLinks);
+    expect(sortedNavLinks.map((item) => item.id)).toEqual([
       mockedNavLinkB.id,
       mockedNonCategoryLink.id,
       mockedNavLinkA.id,
+      mockedSubNavLinkA.id,
     ]);
   });
 });
