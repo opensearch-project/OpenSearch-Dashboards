@@ -251,7 +251,7 @@ export const WorkspaceList = ({ registeredUseCases$ }: WorkspaceListProps) => {
           content={description}
           data-test-subj="workspaceList-hover-description"
         >
-          {/* Here I need to set width mannuly as the tooltip affects the property : truncateText '  */}
+          {/* Here I need to set width mannuly as the tooltip will ineffect the property : truncateText ',  */}
           <EuiText size="s" className="eui-textTruncate" style={{ maxWidth: 150 }}>
             {description}
           </EuiText>
