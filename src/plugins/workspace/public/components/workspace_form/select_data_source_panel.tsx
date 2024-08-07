@@ -26,7 +26,6 @@ export interface SelectDataSourcePanelProps {
   savedObjects: SavedObjectsStart;
   selectedDataSources: DataSource[];
   onChange: (value: DataSource[]) => void;
-  isEditing?: boolean;
 }
 
 export const SelectDataSourcePanel = ({
@@ -34,7 +33,6 @@ export const SelectDataSourcePanel = ({
   onChange,
   selectedDataSources,
   savedObjects,
-  isEditing = true,
 }: SelectDataSourcePanelProps) => {
   const [dataSourcesOptions, setDataSourcesOptions] = useState<EuiComboBoxOptionOption[]>([]);
   useEffect(() => {
@@ -121,37 +119,33 @@ export const SelectDataSourcePanel = ({
                 }
                 onChange={(selectedOptions) => handleSelect(selectedOptions, index)}
                 placeholder="Select"
-                isDisabled={!isEditing}
               />
             </EuiFlexItem>
-            {isEditing && (
-              <EuiFlexItem style={{ maxWidth: 332 }}>
-                <EuiButtonIcon
-                  color="danger"
-                  aria-label="Delete data source"
-                  iconType="trash"
-                  display="empty"
-                  size="m"
-                  onClick={() => handleDelete(index)}
-                />
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem style={{ maxWidth: 332 }}>
+              <EuiButtonIcon
+                color="danger"
+                aria-label="Delete data source"
+                iconType="trash"
+                display="empty"
+                size="m"
+                onClick={() => handleDelete(index)}
+                isDisabled={false}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiCompressedFormRow>
       ))}
 
-      {isEditing && (
-        <EuiSmallButton
-          fill
-          fullWidth={false}
-          onClick={handleAddNewOne}
-          data-test-subj={`workspaceForm-select-dataSource-addNew`}
-        >
-          {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
-            defaultMessage: 'Add New',
-          })}
-        </EuiSmallButton>
-      )}
+      <EuiSmallButton
+        fill
+        fullWidth={false}
+        onClick={handleAddNewOne}
+        data-test-subj={`workspaceForm-select-dataSource-addNew`}
+      >
+        {i18n.translate('workspace.form.selectDataSourcePanel.addNew', {
+          defaultMessage: 'Add New',
+        })}
+      </EuiSmallButton>
     </div>
   );
 };
