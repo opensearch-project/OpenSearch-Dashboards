@@ -12,6 +12,7 @@ import { createOpenSearchDashboardsReactContext } from '../../../../opensearch_d
 import { WORKSPACE_USE_CASES } from '../../../common/constants';
 import { WorkspaceDetail } from './workspace_detail';
 import { WorkspaceFormProvider, WorkspaceOperationType } from '../workspace_form';
+import { MemoryRouter } from 'react-router-dom';
 
 // all applications
 const PublicAPPInfoMap = new Map([
@@ -115,23 +116,50 @@ const WorkspaceDetailPage = (props: any) => {
     WORKSPACE_USE_CASES.search,
   ]);
   return (
-    <WorkspaceFormProvider
-      application={mockCoreStart.application}
-      savedObjects={mockCoreStart.savedObjects}
-      operationType={WorkspaceOperationType.Update}
-      permissionEnabled={true}
-      onSubmit={jest.fn()}
-      defaultValues={values}
-      availableUseCases={[]}
-    >
-      <Provider>
-        <WorkspaceDetail registeredUseCases$={registeredUseCases$} {...props} />
-      </Provider>
-    </WorkspaceFormProvider>
+    <MemoryRouter>
+      <WorkspaceFormProvider
+        application={mockCoreStart.application}
+        savedObjects={mockCoreStart.savedObjects}
+        operationType={WorkspaceOperationType.Update}
+        permissionEnabled={true}
+        onSubmit={jest.fn()}
+        defaultValues={values}
+        availableUseCases={[]}
+      >
+        <Provider>
+          <WorkspaceDetail registeredUseCases$={registeredUseCases$} {...props} />
+        </Provider>
+      </WorkspaceFormProvider>
+    </MemoryRouter>
   );
 };
 
 describe('WorkspaceDetail', () => {
+  let mockHistoryPush: jest.Mock;
+  let mockLocation: Partial<Location>;
+  beforeEach(() => {
+    mockHistoryPush = jest.fn();
+    mockLocation = {
+      pathname: '/current-path',
+      search: '',
+      hash: '',
+      state: null,
+    };
+
+    jest.mock('react-router-dom', () => ({
+      ...jest.requireActual('react-router-dom'),
+      useHistory: jest.fn().mockReturnValue({
+        push: mockHistoryPush,
+        location: mockLocation,
+      }),
+      useLocation: jest.fn().mockReturnValue(mockLocation),
+    }));
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('render workspace detail page normally', async () => {
     const { container } = render(WorkspaceDetailPage({}));
     expect(container).toMatchSnapshot();
@@ -146,18 +174,14 @@ describe('WorkspaceDetail', () => {
   it('click on Collaborators tab when user has permission', async () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
     const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    await waitFor(() => {
-      fireEvent.click(getByText('Collaborators'));
-    });
+    fireEvent.click(getByText('Collaborators'));
     expect(document.querySelector('#collaborators')).toHaveClass('euiTab-isSelected');
   });
 
   it('click on Data Sources tab when dataSource enabled', async () => {
     const workspaceService = createWorkspacesSetupContractMockWithValue(workspaceObject);
     const { getByText } = render(WorkspaceDetailPage({ workspacesService: workspaceService }));
-    await act(async () => {
-      fireEvent.click(getByText('Data Sources'));
-    });
+    fireEvent.click(getByText('Data Sources'));
     expect(document.querySelector('#dataSources')).toHaveClass('euiTab-isSelected');
   });
 

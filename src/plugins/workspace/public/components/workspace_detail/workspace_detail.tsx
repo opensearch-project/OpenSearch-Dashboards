@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiPage,
   EuiText,
@@ -20,6 +20,7 @@ import {
 import { i18n } from '@osd/i18n';
 import { useObservable } from 'react-use';
 import { BehaviorSubject, of } from 'rxjs';
+import { useHistory, useLocation } from 'react-router-dom';
 import { WorkspaceUseCase } from '../../types';
 import { WorkspaceDetailForm, useWorkspaceFormContext } from '../workspace_form';
 import { WorkspaceDetailPanel } from './workspace_detail_panel';
@@ -59,6 +60,16 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
   const currentUseCase = availableUseCases.find(
     (useCase) => useCase.id === getFirstUseCaseOfFeatureConfigs(currentWorkspace?.features ?? [])
   );
+  const history = useHistory();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab) {
+      setSelectedTabId(tab);
+    }
+  }, [location.search]);
 
   if (!currentWorkspace || !application || !http || !savedObjects) {
     return null;
@@ -72,6 +83,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
       setModalVisible(true);
       return;
     }
+    history.push(`?tab=${tab.id}`);
     setSelectedTabId(tab.id);
   };
 
@@ -81,6 +93,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
       setModalVisible(true);
       return;
     }
+    history.push(`?tab=${DetailTab.Collaborators}`);
     setSelectedTabId(DetailTab.Collaborators);
   };
 
@@ -108,9 +121,6 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
 
   const detailTabs = [
     createDetailTab(DetailTab.Details, DetailTabTitles.details),
-    // ...(isDashboardAdmin && dataSourceManagement
-    //   ? [createDetailTab(DetailTab.DataSources, DetailTabTitles.dataSources)]
-    //   : []),
     ...(dataSourceManagement
       ? [
           {
@@ -196,6 +206,7 @@ export const WorkspaceDetail = (props: WorkspaceDetailProps) => {
           onConfirm={() => {
             handleResetForm();
             setModalVisible(false);
+            history.push(`?tab=${tabId}`);
             setSelectedTabId(tabId);
           }}
           cancelButtonText={i18n.translate('workspace.form.cancelButtonText', {
