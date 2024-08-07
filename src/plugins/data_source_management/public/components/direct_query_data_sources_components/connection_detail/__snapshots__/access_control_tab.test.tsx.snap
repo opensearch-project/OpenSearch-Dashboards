@@ -46,7 +46,7 @@ exports[`AccessControlTab Component matches snapshot 1`] = `
         class="euiFlexItem"
       >
         <div
-          class="euiText euiText--medium"
+          class="euiText euiText--small"
         >
           <h2
             class="panel-title"
