@@ -1,2 +1,2 @@
-fix:
-- Set default color ([#7627](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7627))
+feat:
+- [Workspace] Set default color for workspace create form ([#7627](https://github.com/opensearch-project/OpenSearch-Dashboards/pull/7627))
