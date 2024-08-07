@@ -5,7 +5,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
-import { Query, setOverrides as setFieldOverrides } from '../../../common';
+import { Query, setOverrides as setFieldOverrides, TimeRange } from '../../../common';
 import { ConfigSchema } from '../../../config';
 import { ISearchStart } from '../../search';
 import { QueryEditorExtensionConfig } from '../query_editor/query_editor_extensions';
@@ -67,12 +67,12 @@ export class Settings {
     return true;
   }
 
-  getUserQuery() {
-    return this.Storage.get('userQuery');
-  }
+  // getUserQuery() {
+  //   return this.Storage.get('userQuery');
+  // }
 
-  setUserQuery(query: Query) {
-    this.Storage.set('userQuery', query);
+  setUserQuery(query: Query, timeRange?: TimeRange) {
+    this.history.addQueryToHistory(query, timeRange);
   }
 
   getAllQueryEnhancements() {

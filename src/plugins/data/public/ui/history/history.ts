@@ -11,6 +11,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { Storage } from './storage';
+import { Query, TimeRange } from '../..';
 
 export class History {
   constructor(private readonly storage: Storage) {}
@@ -20,7 +21,7 @@ export class History {
   getHistoryKeys() {
     return this.storage
       .keys()
-      .filter((key: string) => key.indexOf('hist_query_elem') === 0)
+      .filter((key: string) => key.indexOf('query_') === 0)
       .sort()
       .reverse();
   }
@@ -39,7 +40,7 @@ export class History {
     return () => subscription.unsubscribe();
   }
 
-  addToHistory(endpoint: string, method: string, data: any) {
+  addQueryToHistory(query: Query, dateRange?: TimeRange) {
     const keys = this.getHistoryKeys();
     keys.splice(0, 500); // only maintain most recent X;
     keys.forEach((key) => {
@@ -47,12 +48,11 @@ export class History {
     });
 
     const timestamp = new Date().getTime();
-    const k = 'hist_elem_' + timestamp;
+    const k = 'query_' + timestamp;
     this.storage.set(k, {
       time: timestamp,
-      endpoint,
-      method,
-      data,
+      query,
+      dateRange,
     });
 
     this.changeEmitter.next(this.getHistory());

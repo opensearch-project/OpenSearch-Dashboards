@@ -371,6 +371,9 @@ class SearchBarUI extends Component<SearchBarProps, State> {
         }
       }
     );
+    if (queryAndDateRange.query) {
+      this.props.settings?.setUserQuery(queryAndDateRange.query, queryAndDateRange.dateRange);
+    }
   };
 
   public onLoadSavedQuery = (savedQuery: SavedQuery) => {

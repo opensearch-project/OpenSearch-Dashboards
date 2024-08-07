@@ -42,8 +42,6 @@ import { DataPublicPluginStart } from '../../types';
 import { Filter, Query, TimeRange } from '../../../common';
 import { useQueryStringManager } from './lib/use_query_string_manager';
 import { Settings } from '../types';
-import { settings } from '../../../../console/server/lib/spec_definitions/js/settings';
-
 interface StatefulSearchBarDeps {
   core: CoreStart;
   data: Omit<DataPublicPluginStart, 'ui'>;
@@ -83,7 +81,6 @@ const defaultOnQuerySubmit = (
   queryService: QueryStart,
   currentQuery: Query
 ) => {
-  props.settings?.setUserQuery(currentQuery);
   if (!props.useDefaultBehaviors) return props.onQuerySubmit;
 
   const { timefilter } = queryService.timefilter;
@@ -192,7 +189,7 @@ export function createSearchBar({
         },
         true
       );
-    }, [query, timeRange, useDefaultBehaviors]);
+    }, [props.settings, query, timeRange, useDefaultBehaviors]);
 
     return (
       <OpenSearchDashboardsContextProvider
