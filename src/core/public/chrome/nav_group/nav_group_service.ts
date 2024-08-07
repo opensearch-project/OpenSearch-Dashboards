@@ -261,14 +261,17 @@ export class ChromeNavGroupService {
       if (appId && navGroupMap) {
         const appIdNavGroupMap = new Map<string, Set<string>>();
         // iterate navGroupMap
-        Object.keys(navGroupMap).forEach((navGroupId) => {
-          navGroupMap[navGroupId].navLinks.forEach((navLink) => {
-            const navLinkId = navLink.id;
-            const navGroupSet = appIdNavGroupMap.get(navLinkId) || new Set();
-            navGroupSet.add(navGroupId);
-            appIdNavGroupMap.set(navLinkId, navGroupSet);
+        Object.keys(navGroupMap)
+          // Nav group of Hidden status should be filtered out when counting navGroups the currentApp belongs to
+          .filter((navGroupId) => navGroupMap[navGroupId].status !== NavGroupStatus.Hidden)
+          .forEach((navGroupId) => {
+            navGroupMap[navGroupId].navLinks.forEach((navLink) => {
+              const navLinkId = navLink.id;
+              const navGroupSet = appIdNavGroupMap.get(navLinkId) || new Set();
+              navGroupSet.add(navGroupId);
+              appIdNavGroupMap.set(navLinkId, navGroupSet);
+            });
           });
-        });
 
         const navGroups = appIdNavGroupMap.get(appId);
         if (navGroups && navGroups.size === 1) {
