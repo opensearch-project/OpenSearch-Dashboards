@@ -22,6 +22,11 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { CoreStart } from 'opensearch-dashboards/public';
+import {
+  defaultThemeVersion,
+  themeVersionLabelMap,
+  themeVersionValueMap,
+} from '@osd/ui-shared-deps/theme_config';
 import { useOpenSearchDashboards, useUiSetting$ } from '../../opensearch_dashboards_react/public';
 
 export const HeaderUserThemeMenu = () => {
@@ -31,17 +36,10 @@ export const HeaderUserThemeMenu = () => {
       uiSettings,
     },
   } = useOpenSearchDashboards<CoreStart>();
-  // TODO: move to central location?
-  const themeOptions = [
-    {
-      value: 'v7',
-      text: 'v7',
-    },
-    {
-      value: 'next',
-      text: 'Next (preview)',
-    },
-  ];
+  const themeOptions = Object.keys(themeVersionLabelMap).map((v) => ({
+    value: v,
+    text: themeVersionLabelMap[v],
+  }));
   const screenModeOptions = [
     {
       value: 'light',
@@ -62,7 +60,10 @@ export const HeaderUserThemeMenu = () => {
   const [themeVersion, setThemeVersion] = useUiSetting$<string>('theme:version');
   const [isPopoverOpen, setPopover] = useState(false);
   // TODO: improve naming?
-  const [theme, setTheme] = useState(themeOptions.find((t) => t.text === themeVersion)?.value);
+  const [theme, setTheme] = useState(
+    themeOptions.find((t) => t.value === themeVersionValueMap[themeVersion])?.value ||
+      defaultThemeVersion
+  );
   const [screenMode, setScreenMode] = useState(
     prefersAutomatic
       ? screenModeOptions[2].value
@@ -87,7 +88,7 @@ export const HeaderUserThemeMenu = () => {
   };
 
   const onAppearanceSubmit = async (e: SyntheticEvent) => {
-    const actions = [setThemeVersion(themeOptions.find((t) => theme === t.value)?.text ?? '')];
+    const actions = [setThemeVersion(themeOptions.find((t) => theme === t.value)?.value ?? '')];
 
     if (screenMode === 'automatic') {
       const browserMode = window.matchMedia('(prefers-color-scheme: dark)').matches;

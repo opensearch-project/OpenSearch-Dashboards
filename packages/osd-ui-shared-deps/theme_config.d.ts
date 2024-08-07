@@ -22,6 +22,18 @@ export const themeTags: ThemeTags;
 export const defaultThemeVersion: string;
 
 /**
+ * Map of themeVersion values to labels
+ * Note: this is used for ui display
+ */
+export const themeVersionLabelMap: Record<string, string>;
+
+/**
+ * Map of labels and versions to themeVersion values
+ * Note: this is used to correct incorrectly persisted ui settings
+ */
+export const themeVersionValueMap: Record<string, string>;
+
+/**
  * Returns passed themeTag if valid, default if not
  */
 export function resolveThemeTag(themeTag: string): ThemeTag;

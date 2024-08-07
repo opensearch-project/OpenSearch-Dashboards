@@ -30,6 +30,7 @@
 
 import { schema, TypeOf } from '@osd/config-schema';
 import { ConfigDeprecationProvider } from 'src/core/server';
+import { defaultThemeVersion } from '@osd/ui-shared-deps';
 import { ServiceConfigDescriptor } from '../internal_types';
 
 const deprecations: ConfigDeprecationProvider = ({ unused, renameFromRoot }) => [
@@ -56,7 +57,7 @@ const configSchema = schema.object({
   overrides: schema.object({}, { unknowns: 'allow' }),
   defaults: schema.object({
     'theme:darkMode': schema.maybe(schema.boolean({ defaultValue: false })),
-    'theme:version': schema.maybe(schema.string({ defaultValue: 'v8' })),
+    'theme:version': schema.maybe(schema.string({ defaultValue: defaultThemeVersion })),
   }),
 });
 

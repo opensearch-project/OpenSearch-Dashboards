@@ -31,10 +31,12 @@ if ({{configEnableUserControl}}) {
 }
 
 var themeSources = {{THEME_SOURCES}};
+var themeVersionValueMap = {{THEME_VERSION_VALUE_MAP}};
 
 // TODO: source of truth for mapping should be elsewhere
 var darkMode = rawDarkMode ? 'dark' : 'light';
-var themeVersion = themeSources[rawThemeVersion] ? rawThemeVersion : '{{defaultThemeVersion}}';
+var resolvedThemeVersion = themeVersionValueMap[rawThemeVersion];
+var themeVersion = themeSources[resolvedThemeVersion] ? resolvedThemeVersion : '{{defaultThemeVersion}}';
 
 window.__osdThemeTag__ = themeVersion + darkMode;
 

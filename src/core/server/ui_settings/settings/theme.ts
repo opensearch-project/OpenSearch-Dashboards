@@ -30,6 +30,8 @@
 
 import { schema } from '@osd/config-schema';
 import { i18n } from '@osd/i18n';
+import { defaultThemeVersion, themeVersionLabelMap } from '@osd/ui-shared-deps';
+import type { Type } from '@osd/config-schema';
 import { UiSettingsParams } from '../../../types';
 
 export const getThemeSettings = (): Record<string, UiSettingsParams> => {
@@ -65,9 +67,9 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       name: i18n.translate('core.ui_settings.params.themeVersionTitle', {
         defaultMessage: 'Theme version',
       }),
-      value: 'Next (preview)',
+      value: themeVersionLabelMap[defaultThemeVersion],
       type: 'select',
-      options: ['v7', 'Next (preview)'],
+      options: Object.values(themeVersionLabelMap),
       description: i18n.translate('core.ui_settings.params.themeVersionText', {
         defaultMessage: `<p>Switch between the themes used for the current and next versions of OpenSearch Dashboards. A page refresh is required for the setting to be applied.</p><p><a href="{href}">{linkText}</a></p>`,
         values: {
@@ -78,7 +80,11 @@ export const getThemeSettings = (): Record<string, UiSettingsParams> => {
       requiresPageReload: true,
       preferBrowserSetting: true,
       category: ['appearance'],
-      schema: schema.oneOf([schema.literal('v7'), schema.literal('Next (preview)')]),
+      schema: schema.oneOf(
+        Object.keys(themeVersionLabelMap).map((v) => schema.literal(themeVersionLabelMap[v])) as [
+          Type<string>
+        ]
+      ),
     },
   };
 };

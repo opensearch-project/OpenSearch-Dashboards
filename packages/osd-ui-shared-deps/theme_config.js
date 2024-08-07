@@ -11,10 +11,24 @@
 const DEFAULT_THEME_TAG = 'v8light';
 const DEFAULT_THEME_VERSION = 'v8';
 const THEME_MODES = ['light', 'dark'];
-const THEME_VERSIONS = ['v7', 'v8'];
+const THEME_VERSION_LABEL_MAP = {
+  v7: 'v7',
+  v8: 'Next (preview)',
+};
+const THEME_VERSION_VALUE_MAP = {
+  // allow version lookup by label ...
+  ...Object.fromEntries(Object.entries(THEME_VERSION_LABEL_MAP).map((a) => a.reverse())),
+  // ... or by the version itself
+  ...Object.fromEntries(Object.keys(THEME_VERSION_LABEL_MAP).map((v) => [v, v])),
+};
+const THEME_VERSIONS = Object.keys(THEME_VERSION_LABEL_MAP);
 const THEME_TAGS = THEME_VERSIONS.flatMap((v) => THEME_MODES.map((m) => `${v}${m}`));
 
 exports.defaultThemeVersion = DEFAULT_THEME_VERSION;
+
+exports.themeVersionLabelMap = THEME_VERSION_LABEL_MAP;
+
+exports.themeVersionValueMap = THEME_VERSION_VALUE_MAP;
 
 exports.themeTags = THEME_TAGS;
 
