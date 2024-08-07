@@ -21,6 +21,7 @@ import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
 import { SimpleDataSet } from '../../../common';
 import { createDQLEditor, createDefaultEditor } from './editors';
 import { getQueryService, getIndexPatterns } from '../../services';
+import { RecentQuery } from '../history/recent_query';
 
 const LANGUAGE_ID_SQL = 'SQL';
 monaco.languages.register({ id: LANGUAGE_ID_SQL });
@@ -375,6 +376,10 @@ export default class QueryEditorUI extends Component<Props, State> {
           filterBar: this.props.filterBar,
         });
 
+    const recentQueries = () => {
+      return <RecentQuery settings={this.props.settings} />;
+    };
+
     return (
       <div
         className={classNames(
@@ -409,6 +414,8 @@ export default class QueryEditorUI extends Component<Props, State> {
         {!this.state.isCollapsed && (
           <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
         )}
+
+        {recentQueries()}
 
         {/*  <EuiFlexGroup gutterSize="xs" direction="column">
            <EuiFlexItem grow={false}>

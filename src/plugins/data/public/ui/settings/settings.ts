@@ -71,8 +71,22 @@ export class Settings {
   //   return this.Storage.get('userQuery');
   // }
 
-  setUserQuery(query: Query, timeRange?: TimeRange) {
-    this.history.addQueryToHistory(query, timeRange);
+  setQuery(query: Query, timeRange?: TimeRange) {
+    if (query.query) {
+      this.history.addQueryToHistory(query, timeRange);
+    }
+  }
+
+  getQueryHistory() {
+    return this.history.getHistory();
+  }
+
+  clearQueryHistory() {
+    this.history.clearHistory();
+  }
+
+  changeQueryHistory(listener: (reqs: any[]) => void) {
+    return this.history.change(listener);
   }
 
   getAllQueryEnhancements() {

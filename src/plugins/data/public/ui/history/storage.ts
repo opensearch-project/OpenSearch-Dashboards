@@ -9,7 +9,7 @@
  * GitHub history for details.
  */
 
-import { transform, keys, startsWith } from 'lodash';
+import { transform, startsWith } from 'lodash';
 import { parse, stringify } from '@osd/std';
 import { IStorageWrapper } from 'src/plugins/opensearch_dashboards_utils/public';
 
@@ -62,7 +62,7 @@ export class Storage {
   }
 
   keys(): string[] {
-    return transform(keys(this.engine), (ours, key) => {
+    return transform(this.engine.keys(), (ours, key) => {
       const ourKey = this.decodeKey(key);
       if (ourKey != null) ours.push(ourKey);
     });

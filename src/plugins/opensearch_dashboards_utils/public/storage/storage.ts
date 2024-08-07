@@ -28,6 +28,7 @@
  * under the License.
  */
 
+import { keys } from 'lodash';
 import { IStorage, IStorageWrapper } from './types';
 
 export class Storage implements IStorageWrapper {
@@ -68,5 +69,9 @@ export class Storage implements IStorageWrapper {
 
   public clear = () => {
     return this.store.clear();
+  };
+
+  public keys = (): string[] => {
+    return keys(this.store);
   };
 }

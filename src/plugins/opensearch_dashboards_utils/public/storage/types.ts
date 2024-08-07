@@ -33,6 +33,7 @@ export interface IStorageWrapper<T = any, S = void> {
   set: (key: string, value: T) => S;
   remove: (key: string) => T | null;
   clear: () => void;
+  keys: () => string[];
 }
 
 export interface IStorage<T = any, S = void> {
