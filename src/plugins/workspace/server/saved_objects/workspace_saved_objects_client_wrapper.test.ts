@@ -129,6 +129,7 @@ const generateWorkspaceSavedObjectsClientWrapper = (role = NO_DASHBOARD_ADMIN) =
     getPrincipalsFromRequest: jest.fn().mockImplementation(() => {
       return { users: ['user-1'] };
     }),
+    addToCacheAllowlist: jest.fn(),
   };
 
   const wrapper = new WorkspaceSavedObjectsClientWrapper(permissionControlMock);
