@@ -34,7 +34,7 @@ const defaultNavGroups = {
   all: {
     id: ALL_USE_CASE_ID,
     title: i18n.translate('core.ui.group.all.title', {
-      defaultMessage: 'Analytics(all)',
+      defaultMessage: 'Analytics (All)',
     }),
     description: i18n.translate('core.ui.group.all.description', {
       defaultMessage: 'This is a use case contains all the features.',

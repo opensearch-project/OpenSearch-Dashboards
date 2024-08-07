@@ -76,7 +76,7 @@ describe('WorkspaceList', () => {
     expect(getByText('name2')).toBeInTheDocument();
 
     // should display use case
-    expect(getByText('Analytics(all)')).toBeInTheDocument();
+    expect(getByText('Analytics (All)')).toBeInTheDocument();
     expect(getByText('Observability')).toBeInTheDocument();
   });
   it('should be able to apply debounce search after input', async () => {

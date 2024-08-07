@@ -221,7 +221,7 @@ describe('WorkspaceUpdater', () => {
     });
 
     fireEvent.click(getByTestId('workspaceUseCase-observability'));
-    fireEvent.click(getByTestId('workspaceUseCase-essentials'));
+    fireEvent.click(getByTestId('workspaceUseCase-analytics'));
 
     act(() => {
       fireEvent.click(getAllByLabelText('Delete data source')[0]);
@@ -234,7 +234,7 @@ describe('WorkspaceUpdater', () => {
         name: 'test workspace name',
         color: '#000000',
         description: 'test workspace description',
-        features: expect.arrayContaining(['use-case-essentials']),
+        features: expect.arrayContaining(['use-case-analytics']),
       }),
       {
         permissions: {
