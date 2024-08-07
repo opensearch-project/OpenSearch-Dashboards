@@ -78,10 +78,10 @@ function walkLinkItemsTree(
     linkItems: LinkItem[];
     parentItem?: LinkItem;
   },
-  cb: (props: { currentItem: LinkItem; parentItem?: LinkItem }) => void
+  callback: (props: { currentItem: LinkItem; parentItem?: LinkItem }) => void
 ) {
   props.linkItems.forEach((item) => {
-    cb?.({
+    callback({
       parentItem: props.parentItem,
       currentItem: item,
     });
@@ -91,7 +91,7 @@ function walkLinkItemsTree(
           linkItems: item.links,
           parentItem: item,
         },
-        cb
+        callback
       );
     } else if (item.itemType === LinkItemType.CATEGORY) {
       walkLinkItemsTree(
@@ -99,7 +99,7 @@ function walkLinkItemsTree(
           linkItems: item.links || [],
           parentItem: item,
         },
-        cb
+        callback
       );
     }
   });
