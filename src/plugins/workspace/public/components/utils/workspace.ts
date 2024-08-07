@@ -10,11 +10,19 @@ import { formatUrlWithWorkspaceId } from '../../../../../core/public/utils';
 type Core = Pick<CoreStart, 'application' | 'http'>;
 
 export const navigateToWorkspaceDetail = ({ application, http }: Core, id: string) => {
+  navigateToAppWithinWorkspace({ application, http }, id, WORKSPACE_DETAIL_APP_ID);
+};
+
+export const navigateToAppWithinWorkspace = (
+  { application, http }: Core,
+  workspaceId: string,
+  appId: string
+) => {
   const newUrl = formatUrlWithWorkspaceId(
-    application.getUrlForApp(WORKSPACE_DETAIL_APP_ID, {
+    application.getUrlForApp(appId, {
       absolute: true,
     }),
-    id,
+    workspaceId,
     http.basePath
   );
   if (newUrl) {

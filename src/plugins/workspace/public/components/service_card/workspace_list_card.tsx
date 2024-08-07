@@ -22,11 +22,13 @@ import {
 import { i18n } from '@osd/i18n';
 import moment from 'moment';
 import { orderBy } from 'lodash';
-import { CoreStart, WorkspaceObject } from '../../../../../core/public';
-import { navigateToWorkspaceDetail } from '../utils/workspace';
+import { useObservable } from 'react-use';
+import { CoreStart, WorkspaceAvailability, WorkspaceObject } from '../../../../../core/public';
 
 import { WORKSPACE_CREATE_APP_ID, WORKSPACE_LIST_APP_ID } from '../../../common/constants';
 import { recentWorkspaceManager } from '../../recent_workspace_manager';
+import { getFirstUseCaseOfFeatureConfigs } from '../../utils';
+import { navigateToAppWithinWorkspace } from '../utils/workspace';
 
 const WORKSPACE_LIST_CARD_DESCRIPTION = i18n.translate('workspace.list.card.description', {
   defaultMessage:
@@ -42,6 +44,7 @@ export interface WorkspaceListCardProps {
 export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
   const [availableWorkspaces, setAvailableWorkspaces] = useState<WorkspaceObject[]>([]);
   const [filter, setFilter] = useState('viewed');
+  const navGroups = useObservable(props.core.chrome.navGroup.getNavGroupsMap$());
 
   useEffect(() => {
     const workspaceSub = props.core.workspaces.workspaceList$.subscribe((list) => {
@@ -77,8 +80,15 @@ export const WorkspaceListCard = (props: WorkspaceListCardProps) => {
 
   const handleSwitchWorkspace = (id: string) => {
     const { application, http } = props.core;
-    if (application && http) {
-      navigateToWorkspaceDetail({ application, http }, id);
+    const workspaceObj = availableWorkspaces.find((item) => item.id === id);
+    const useCase = getFirstUseCaseOfFeatureConfigs(workspaceObj?.features || []);
+    if (useCase && navGroups) {
+      // should be workspace use case overview page
+      const availableLinks = navGroups[useCase].navLinks?.filter(
+        (navLink) => navLink.workspaceAvailability !== WorkspaceAvailability.outsideWorkspace
+      );
+      const appId = availableLinks?.[0].id;
+      navigateToAppWithinWorkspace({ application, http }, id, appId);
     }
   };
 
