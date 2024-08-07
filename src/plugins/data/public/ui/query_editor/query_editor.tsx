@@ -20,9 +20,13 @@ import { QueryEditorExtensions } from './query_editor_extensions';
 import { QueryEditorBtnCollapse } from './query_editor_btn_collapse';
 import { SimpleDataSet } from '../../../common';
 import { createDQLEditor, createDefaultEditor } from './editors';
+import { getQueryService, getIndexPatterns } from '../../services';
 
-const LANGUAGE_ID = 'SQL';
-monaco.languages.register({ id: LANGUAGE_ID });
+const LANGUAGE_ID_SQL = 'SQL';
+monaco.languages.register({ id: LANGUAGE_ID_SQL });
+
+const LANGUAGE_ID_KUERY = 'kuery';
+monaco.languages.register({ id: LANGUAGE_ID_KUERY });
 
 export interface QueryEditorProps {
   dataSet?: SimpleDataSet;
@@ -93,6 +97,8 @@ export default class QueryEditorUI extends Component<Props, State> {
   };
 
   public inputRef: monaco.editor.IStandaloneCodeEditor | null = null;
+
+  private queryService = getQueryService();
 
   private persistedLog: PersistedLog | undefined;
   private abortController?: AbortController;
@@ -230,7 +236,6 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
 
     this.initPersistedLog();
-    // this.fetchIndexPatterns().then(this.updateSuggestions);
   }
 
   public componentDidUpdate(prevProps: Props) {
@@ -252,59 +257,49 @@ export default class QueryEditorUI extends Component<Props, State> {
     }
   };
 
-  getCodeEditorSuggestionsType = (columnType: string) => {
-    switch (columnType) {
-      case 'text':
-        return monaco.languages.CompletionItemKind.Text;
-      case 'function':
-        return monaco.languages.CompletionItemKind.Function;
-      case 'object':
-        return monaco.languages.CompletionItemKind.Struct;
-      case 'field':
-        return monaco.languages.CompletionItemKind.Field;
-      case 'value':
-        return monaco.languages.CompletionItemKind.Value;
-      default:
-        return monaco.languages.CompletionItemKind.Text;
-    }
+  private fetchIndexPattern = async () => {
+    const dataSetTitle = this.queryService.dataSetManager.getDataSet()?.title;
+    if (!dataSetTitle) return undefined;
+    return getIndexPatterns().getByTitle(dataSetTitle);
   };
 
-  // provideCompletionItems = async (
-  //   model: monaco.editor.ITextModel,
-  //   position: monaco.Position
-  // ): Promise<monaco.languages.CompletionList> => {
-  //   const wordUntil = model.getWordUntilPosition(position);
-  //   const wordRange = new monaco.Range(
-  //     position.lineNumber,
-  //     wordUntil.startColumn,
-  //     position.lineNumber,
-  //     wordUntil.endColumn
-  //   );
-  //   const enhancements = this.props.settings.getQueryEnhancements(this.props.query.language);
-  //   const connectionService = enhancements?.connectionService;
-  //   const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
-  //     query: this.getQueryString(),
-  //     selectionStart: model.getOffsetAt(position),
-  //     selectionEnd: model.getOffsetAt(position),
-  //     language: this.props.query.language,
-  //     indexPatterns: this.state.indexPatterns,
-  //     position,
-  //     connectionService,
-  //   });
+  provideCompletionItems = async (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position
+  ): Promise<monaco.languages.CompletionList> => {
+    const indexPattern = await this.fetchIndexPattern();
+    const suggestions = await this.services.data.autocomplete.getQuerySuggestions({
+      query: this.getQueryString(),
+      selectionStart: model.getOffsetAt(position),
+      selectionEnd: model.getOffsetAt(position),
+      language: this.props.query.language,
+      indexPattern,
+      position,
+      services: this.services,
+    });
 
-  //   return {
-  //     suggestions:
-  //       suggestions && suggestions.length > 0
-  //         ? suggestions.map((s) => ({
-  //             label: s.text,
-  //             kind: this.getCodeEditorSuggestionsType(s.type),
-  //             insertText: s.text,
-  //             range: wordRange,
-  //           }))
-  //         : [],
-  //     incomplete: false,
-  //   };
-  // };
+    // current completion item range being given as last 'word' at pos
+    const wordUntil = model.getWordUntilPosition(position);
+    const range = new monaco.Range(
+      position.lineNumber,
+      wordUntil.startColumn,
+      position.lineNumber,
+      wordUntil.endColumn
+    );
+
+    return {
+      suggestions:
+        suggestions && suggestions.length > 0
+          ? suggestions.map((s: QuerySuggestion) => ({
+              label: s.text,
+              kind: s.type as monaco.languages.CompletionItemKind,
+              insertText: s.insertText ?? s.text,
+              range,
+            }))
+          : [],
+      incomplete: false,
+    };
+  };
 
   public render() {
     const className = classNames(this.props.className);
@@ -337,10 +332,10 @@ export default class QueryEditorUI extends Component<Props, State> {
       footerItems: {
         start: [
           `${this.state.lineCount} ${this.state.lineCount === 1 ? 'line' : 'lines'}`,
-          typeof this.props.dataSet?.timeFieldName || '',
+          this.props.dataSet?.timeFieldName || '',
         ],
       },
-      // provideCompletionItems: this.provideCompletionItems,
+      provideCompletionItems: this.provideCompletionItems,
     };
 
     const singleLineInputProps = {
@@ -371,6 +366,7 @@ export default class QueryEditorUI extends Component<Props, State> {
           disposable.dispose();
         };
       },
+      provideCompletionItems: this.provideCompletionItems,
     };
 
     const languageEditor = useQueryEditor
@@ -397,7 +393,7 @@ export default class QueryEditorUI extends Component<Props, State> {
             onClick={() => this.setState({ isCollapsed: !this.state.isCollapsed })}
             isCollapsed={!this.state.isCollapsed}
           />
-          <div ref={this.props.dataSetContainerRef} className="osdQueryEditor__datasetPicker" />
+          <div ref={this.props.dataSetContainerRef} className="osdQueryEditor__dataSetPicker" />
           <div className="osdQueryEditor__input">
             {this.state.isCollapsed
               ? languageEditor.TopBar.Collapsed()
@@ -406,6 +402,10 @@ export default class QueryEditorUI extends Component<Props, State> {
           {languageSelector}
           {this.props.queryActions}
         </div>
+        <div
+          ref={this.headerRef}
+          className={classNames('osdQueryEditor__header', this.props.headerClassName)}
+        />
         {!this.state.isCollapsed && (
           <div className="osdQueryEditor__body">{languageEditor.Body()}</div>
         )}
@@ -505,7 +505,6 @@ export default class QueryEditorUI extends Component<Props, State> {
            </EuiFlexItem>
 
            <EuiFlexItem onClick={this.onClickInput} grow={true}>
-             <div ref={this.headerRef} className={headerClassName} />
              {!this.state.isCollapsed && useQueryEditor && (
                <CodeEditor
                  height={70}

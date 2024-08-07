@@ -25,3 +25,38 @@ describe('<HomeListCard />', () => {
     expect(baseElement).toMatchSnapshot();
   });
 });
+
+it('should render View All button when allLink is provided', () => {
+  const mockConfig = {
+    title: `What's New`,
+    list: [
+      {
+        label: 'Quickstart guide',
+        href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
+        target: '_blank',
+        description: 'Get started in minutes with OpenSearch Dashboards',
+      },
+    ],
+    allLink: 'https://opensearch.org/docs/latest/',
+  };
+
+  const { getByText } = render(<HomeListCard config={mockConfig} />);
+  expect(getByText('View all')).toBeInTheDocument();
+});
+
+it('should not show View All button when allLink is not provided', () => {
+  const mockConfig = {
+    title: `What's New`,
+    list: [
+      {
+        label: 'Quickstart guide',
+        href: 'https://opensearch.org/docs/latest/dashboards/quickstart/',
+        target: '_blank',
+        description: 'Get started in minutes with OpenSearch Dashboards',
+      },
+    ],
+  };
+
+  const { queryByText } = render(<HomeListCard config={mockConfig} />);
+  expect(queryByText('View all')).not.toBeInTheDocument();
+});

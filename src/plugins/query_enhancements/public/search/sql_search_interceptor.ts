@@ -20,8 +20,6 @@ import {
   ISearchOptions,
   SearchInterceptor,
   SearchInterceptorDeps,
-  getAsyncSessionId,
-  setAsyncSessionId,
 } from '../../../data/public';
 import {
   API,
@@ -36,6 +34,7 @@ import { QueryEnhancementsPluginStartDependencies } from '../types';
 export class SQLSearchInterceptor extends SearchInterceptor {
   protected queryService!: DataPublicPluginStart['query'];
   protected aggsService!: DataPublicPluginStart['search']['aggs'];
+  protected uiService!: DataPublicPluginStart['ui'];
 
   constructor(deps: SearchInterceptorDeps) {
     super(deps);
@@ -43,6 +42,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     deps.startServices.then(([coreStart, depsStart]) => {
       this.queryService = (depsStart as QueryEnhancementsPluginStartDependencies).data.query;
       this.aggsService = (depsStart as QueryEnhancementsPluginStartDependencies).data.search.aggs;
+      this.uiService = (depsStart as QueryEnhancementsPluginStartDependencies).data.ui;
     });
   }
 
@@ -66,10 +66,10 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       ...dataFrame.meta,
       queryConfig: {
         ...dataFrame.meta.queryConfig,
-        ...(this.queryService.dataSet.getDataSet() && {
-          dataSourceId: this.queryService.dataSet.getDataSet()?.dataSourceRef?.id,
-          dataSourceName: this.queryService.dataSet.getDataSet()?.dataSourceRef?.name,
-          timeFieldName: this.queryService.dataSet.getDataSet()?.timeFieldName,
+        ...(this.queryService.dataSetManager.getDataSet() && {
+          dataSourceId: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.id,
+          dataSourceName: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.name,
+          timeFieldName: this.queryService.dataSetManager.getDataSet()?.timeFieldName,
         }),
       },
     };
@@ -109,10 +109,10 @@ export class SQLSearchInterceptor extends SearchInterceptor {
     }
 
     const queryString = getRawQueryString(searchRequest) ?? '';
-    const dataSourceRef = this.queryService.dataSet.getDataSet()
+    const dataSourceRef = this.queryService.dataSetManager.getDataSet()
       ? {
-          dataSourceId: this.queryService.dataSet.getDataSet()?.dataSourceRef?.id,
-          dataSourceName: this.queryService.dataSet.getDataSet()?.dataSourceRef?.name,
+          dataSourceId: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.id,
+          dataSourceName: this.queryService.dataSetManager.getDataSet()?.dataSourceRef?.name,
         }
       : {};
 
@@ -122,7 +122,9 @@ export class SQLSearchInterceptor extends SearchInterceptor {
         ...dataFrame.meta.queryConfig,
         ...dataSourceRef,
       },
-      sessionId: dataSourceRef ? getAsyncSessionId(dataSourceRef.dataSourceName!) : {},
+      sessionId: dataSourceRef
+        ? this.uiService.Settings.getUserQuerySessionId(dataSourceRef.dataSourceName!)
+        : {},
     };
 
     const onPollingSuccess = (pollingResult: any) => {
@@ -162,7 +164,10 @@ export class SQLSearchInterceptor extends SearchInterceptor {
       concatMap((jobResponse) => {
         const df = jobResponse.body;
         if (dataSourceRef?.dataSourceName && df?.meta?.sessionId) {
-          setAsyncSessionId(dataSourceRef.dataSourceName, df?.meta?.sessionId);
+          this.uiService.Settings.setUserQuerySessionId(
+            dataSourceRef.dataSourceName,
+            df?.meta?.sessionId
+          );
         }
         const dataFramePolling = new DataFramePolling<any, any>(
           () => fetchDataFramePolling(dfContext, df),
@@ -182,7 +187,7 @@ export class SQLSearchInterceptor extends SearchInterceptor {
   }
 
   public search(request: IOpenSearchDashboardsSearchRequest, options: ISearchOptions) {
-    const dataSet = this.queryService.dataSet.getDataSet();
+    const dataSet = this.queryService.dataSetManager.getDataSet();
     if (dataSet?.type === SIMPLE_DATA_SET_TYPES.TEMPORARY_ASYNC) {
       return this.runSearchAsync(request, options.abortSignal, SEARCH_STRATEGY.SQL_ASYNC);
     }

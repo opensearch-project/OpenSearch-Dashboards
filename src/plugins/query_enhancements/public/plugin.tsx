@@ -7,7 +7,7 @@ import moment from 'moment';
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '../../../core/public';
 import { IStorageWrapper, Storage } from '../../opensearch_dashboards_utils/public';
 import { ConfigSchema } from '../common/config';
-import { ConnectionsService, setData, setStorage } from './services';
+import { setData, setStorage } from './services';
 import { createQueryAssistExtension } from './query_assist';
 import { PPLSearchInterceptor, SQLSearchInterceptor } from './search';
 import {
@@ -16,6 +16,7 @@ import {
   QueryEnhancementsPluginStart,
   QueryEnhancementsPluginStartDependencies,
 } from './types';
+import { UI_SETTINGS } from '../common';
 
 export class QueryEnhancementsPlugin
   implements
@@ -27,7 +28,6 @@ export class QueryEnhancementsPlugin
     > {
   private readonly storage: IStorageWrapper;
   private readonly config: ConfigSchema;
-  private connectionsService!: ConnectionsService;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigSchema>();
@@ -38,9 +38,17 @@ export class QueryEnhancementsPlugin
     core: CoreSetup<QueryEnhancementsPluginStartDependencies>,
     { data }: QueryEnhancementsPluginSetupDependencies
   ): QueryEnhancementsPluginSetup {
-    this.connectionsService = new ConnectionsService({
-      startServices: core.getStartServices(),
-      http: core.http,
+    core.uiSettings.getUpdate$().subscribe(({ key, newValue }) => {
+      if (key === UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED) {
+        if (newValue) {
+          core.uiSettings.set(UI_SETTINGS.STATE_STORE_IN_SESSION_STORAGE, true);
+        }
+      }
+      if (key === UI_SETTINGS.STATE_STORE_IN_SESSION_STORAGE) {
+        if (!newValue) {
+          core.uiSettings.set(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED, false);
+        }
+      }
     });
 
     const pplSearchInterceptor = new PPLSearchInterceptor({
@@ -78,8 +86,8 @@ export class QueryEnhancementsPlugin
             filterable: false,
             visualizable: false,
           },
+          showDocLinks: false,
           supportedAppNames: ['discover'],
-          connectionService: this.connectionsService,
         },
       },
     });
@@ -102,7 +110,6 @@ export class QueryEnhancementsPlugin
           },
           showDocLinks: false,
           supportedAppNames: ['discover'],
-          connectionService: this.connectionsService,
         },
       },
     });

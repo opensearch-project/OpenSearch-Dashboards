@@ -2819,6 +2819,8 @@ describe('SavedObjectsRepository', () => {
               'migrationVersion',
               'updated_at',
               'originId',
+              'workspaces',
+              'permissions',
               'title',
             ],
           }),

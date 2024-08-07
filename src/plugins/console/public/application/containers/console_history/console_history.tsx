@@ -41,6 +41,7 @@ import {
   EuiFlexGroup,
   EuiSmallButtonEmpty,
   EuiSmallButton,
+  EuiText,
 } from '@elastic/eui';
 
 import { useServicesContext } from '../../contexts';
@@ -192,7 +193,9 @@ export function ConsoleHistory({ close }: Props) {
                   })}
                   aria-selected={isSelected}
                 >
-                  {reqDescription}
+                  <EuiText size="s">
+                    {reqDescription}
+                  </EuiText>
                   <span className="conHistory__reqIcon">
                     <EuiIcon type="arrowRight" />
                   </span>

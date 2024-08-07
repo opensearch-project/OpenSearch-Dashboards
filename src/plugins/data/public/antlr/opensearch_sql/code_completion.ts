@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { monaco } from 'packages/osd-monaco/target';
+import { monaco } from '@osd/monaco';
 import { Lexer as LexerType, ParserRuleContext, Parser as ParserType } from 'antlr4ng';
 import { CodeCompletionCore } from 'antlr4-c3';
 import {
@@ -23,7 +23,8 @@ import { findCursorTokenIndex } from '../shared/cursor';
 import { openSearchSqlAutocompleteData } from './opensearch_sql_autocomplete';
 import { SQL_SYMBOLS } from './constants';
 import { QuerySuggestion, QuerySuggestionGetFnArgs } from '../../autocomplete';
-import { fetchColumnValues, fetchTableSchemas } from '../shared/utils';
+import { fetchTableSchemas } from '../shared/utils';
+import { IDataFrameResponse, IFieldType } from '../../../common';
 
 export interface SuggestionParams {
   position: monaco.Position;
@@ -46,81 +47,60 @@ export const getSuggestions = async ({
   services,
 }: QuerySuggestionGetFnArgs): Promise<QuerySuggestion[]> => {
   const { api } = services.uiSettings;
-  const dataSetManager = services.data.query.dataSet;
+  const dataSetManager = services.data.query.dataSetManager;
+  const { lineNumber, column } = position || {};
   const suggestions = getOpenSearchSqlAutoCompleteSuggestions(query, {
-    line: position?.lineNumber || selectionStart,
-    column: position?.column || selectionEnd,
+    line: lineNumber || selectionStart,
+    column: column || selectionEnd,
   });
 
-  const finalSuggestions = [];
+  const finalSuggestions: QuerySuggestion[] = [];
 
   try {
     // Fetch columns and values
-    if ('suggestColumns' in suggestions && (suggestions.suggestColumns?.tables?.length ?? 0) > 0) {
-      const tableNames = suggestions.suggestColumns?.tables?.map((table) => table.name) ?? [];
-      const schemas = await fetchTableSchemas(tableNames, api, services);
+    if (suggestions.suggestColumns?.tables?.length) {
+      const tableNames = suggestions.suggestColumns.tables.map((table) => table.name);
+      const schemas = await fetchTableSchemas(tableNames, api, dataSetManager);
 
-      schemas.forEach((schema) => {
-        if (schema.body?.fields?.length > 0) {
-          const columns = schema.body.fields.find((col: any) => col.name === 'COLUMN_NAME');
-          const fieldTypes = schema.body.fields.find((col: any) => col.name === 'DATA_TYPE');
+      (schemas as IDataFrameResponse[]).forEach((schema: IDataFrameResponse) => {
+        if ('body' in schema && schema.body && 'fields' in schema.body) {
+          const columns = schema.body.fields.find((col: IFieldType) => col.name === 'COLUMN_NAME');
+          const fieldTypes = schema.body.fields.find((col: IFieldType) => col.name === 'DATA_TYPE');
+
           if (columns && fieldTypes) {
             finalSuggestions.push(
-              ...columns.values.map((col: string, index: number) => ({
+              ...columns.values.map((col: string) => ({
                 text: col,
-                type: 'field',
-                fieldType: fieldTypes.values[index],
+                type: monaco.languages.CompletionItemKind.Field,
               }))
             );
           }
         }
       });
-
-      if (
-        'suggestValuesForColumn' in suggestions &&
-        /\S/.test(suggestions.suggestValuesForColumn as string) &&
-        suggestions.suggestValuesForColumn !== undefined
-      ) {
-        const values = await fetchColumnValues(
-          tableNames,
-          suggestions.suggestValuesForColumn as string,
-          api,
-          services
-        );
-        values.forEach((value) => {
-          if (value.body?.fields?.length > 0) {
-            finalSuggestions.push(
-              ...value.body.fields[0].values.map((colVal: string) => ({
-                text: `'${colVal}'`,
-                type: 'value',
-              }))
-            );
-          }
-        });
-      }
     }
 
     // Fill in aggregate functions
-    if ('suggestAggregateFunctions' in suggestions && suggestions.suggestAggregateFunctions) {
+    if (suggestions.suggestAggregateFunctions) {
       finalSuggestions.push(
         ...SQL_SYMBOLS.AGREGATE_FUNCTIONS.map((af) => ({
           text: af,
-          type: 'function',
+          type: monaco.languages.CompletionItemKind.Function,
         }))
       );
     }
 
     // Fill in SQL keywords
-    if ('suggestKeywords' in suggestions && (suggestions.suggestKeywords?.length ?? 0) > 0) {
+    if (suggestions.suggestKeywords?.length) {
       finalSuggestions.push(
-        ...(suggestions.suggestKeywords ?? []).map((sk) => ({
+        ...suggestions.suggestKeywords.map((sk) => ({
           text: sk.value,
-          type: 'keyword',
+          type: monaco.languages.CompletionItemKind.Keyword,
         }))
       );
     }
   } catch (error) {
-    // TODO: pipe error to the UI
+    // TODO: Handle errors appropriately, possibly logging or displaying a message to the user
+    return [];
   }
 
   return finalSuggestions;

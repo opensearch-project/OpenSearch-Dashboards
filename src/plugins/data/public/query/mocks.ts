@@ -42,7 +42,7 @@ const createSetupContractMock = () => {
     filterManager: createFilterManagerMock(),
     timefilter: timefilterServiceMock.createSetupContract(),
     queryString: queryStringManagerMock.createSetupContract(),
-    dataSet: dataSetManagerMock.createSetupContract(),
+    dataSetManager: dataSetManagerMock.createSetupContract(),
     state$: new Observable(),
   };
 
@@ -57,7 +57,7 @@ const createStartContractMock = () => {
     savedQueries: jest.fn() as any,
     state$: new Observable(),
     timefilter: timefilterServiceMock.createStartContract(),
-    dataSet: dataSetManagerMock.createStartContract(),
+    dataSetManager: dataSetManagerMock.createStartContract(),
     getOpenSearchQuery: jest.fn(),
   };
 

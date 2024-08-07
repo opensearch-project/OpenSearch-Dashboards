@@ -20,7 +20,6 @@ import { IndexPatternField, UI_SETTINGS, opensearchFilters } from '../../../../.
 import { useOpenSearchDashboards } from '../../../../../opensearch_dashboards_react/public';
 import { DiscoverViewServices } from '../../../build_services';
 import { popularizeField } from '../../helpers/popularize_field';
-import { getDataSet } from '../../helpers/get_data_set';
 import { buildColumns } from '../../utils/columns';
 
 // eslint-disable-next-line import/no-default-export
@@ -101,13 +100,6 @@ export default function DiscoverPanel(props: ViewProps) {
     });
   }, [application, fetchState.title, indexPattern?.title]);
 
-  const onNormalize = useCallback(async () => {
-    if (!fetchState.title) return;
-    if (fetchState.title === indexPattern?.title) return;
-    const dataSet = getDataSet(indexPattern, fetchState, indexPatterns);
-    await indexPatterns.refreshFields(dataSet!, true);
-  }, [fetchState, indexPattern, indexPatterns]);
-
   const isEnhancementsEnabledOverride = services.uiSettings.get(
     UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED
   );
@@ -118,9 +110,8 @@ export default function DiscoverPanel(props: ViewProps) {
       fieldCounts={fetchState.fieldCounts || {}}
       hits={fetchState.rows || []}
       onAddField={(fieldName, index) => {
-        const dataSet = getDataSet(indexPattern, fetchState, indexPatterns);
-        if (dataSet && capabilities.discover?.save) {
-          popularizeField(dataSet, fieldName, indexPatterns);
+        if (indexPattern && capabilities.discover?.save) {
+          popularizeField(indexPattern, fieldName, indexPatterns);
         }
 
         dispatch(
@@ -131,9 +122,8 @@ export default function DiscoverPanel(props: ViewProps) {
         );
       }}
       onRemoveField={(fieldName) => {
-        const dataSet = getDataSet(indexPattern, fetchState, indexPatterns);
-        if (dataSet && capabilities.discover?.save) {
-          popularizeField(dataSet, fieldName, indexPatterns);
+        if (indexPattern && capabilities.discover?.save) {
+          popularizeField(indexPattern, fieldName, indexPatterns);
         }
 
         dispatch(removeColumn(fieldName));
@@ -146,9 +136,9 @@ export default function DiscoverPanel(props: ViewProps) {
           })
         );
       }}
-      selectedIndexPattern={getDataSet(indexPattern, fetchState, indexPatterns)}
+      selectedIndexPattern={indexPattern}
       onCreateIndexPattern={onCreateIndexPattern}
-      onNormalize={onNormalize}
+      onNormalize={() => {}}
       onAddFilter={onAddFilter}
       isEnhancementsEnabledOverride={isEnhancementsEnabledOverride}
     />

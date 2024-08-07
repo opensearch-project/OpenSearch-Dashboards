@@ -7,6 +7,7 @@ import { BehaviorSubject } from 'rxjs';
 import { CoreStart } from 'opensearch-dashboards/public';
 import { skip } from 'rxjs/operators';
 import {
+  IndexPattern,
   SIMPLE_DATA_SET_TYPES,
   SimpleDataSet,
   SimpleDataSource,
@@ -24,9 +25,33 @@ export class DataSetManager {
   }
 
   public init = async (indexPatterns: IndexPatternsContract) => {
+    if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
     this.indexPatterns = indexPatterns;
     this.defaultDataSet = await this.fetchDefaultDataSet();
-    return this.defaultDataSet;
+  };
+
+  public initWithIndexPattern = (indexPattern: IndexPattern | null) => {
+    if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
+    if (!indexPattern || !indexPattern.id) {
+      return undefined;
+    }
+
+    this.defaultDataSet = {
+      id: indexPattern.id,
+      title: indexPattern.title,
+      type: SIMPLE_DATA_SET_TYPES.INDEX_PATTERN,
+      timeFieldName: indexPattern.timeFieldName,
+      fields: indexPattern.fields,
+      ...(indexPattern.dataSourceRef
+        ? {
+            dataSourceRef: {
+              id: indexPattern.dataSourceRef?.id,
+              name: indexPattern.dataSourceRef?.name,
+              type: indexPattern.dataSourceRef?.type,
+            } as SimpleDataSource,
+          }
+        : {}),
+    };
   };
 
   public getUpdates$ = () => {
@@ -43,6 +68,13 @@ export class DataSetManager {
    */
   public setDataSet = (dataSet: SimpleDataSet | undefined) => {
     if (!this.uiSettings.get(UI_SETTINGS.QUERY_ENHANCEMENTS_ENABLED)) return;
+
+    // if (dataSet) {
+    //   const { fields, ...dataSetWithoutFields } = dataSet;
+    //   this.dataSet$.next(dataSetWithoutFields);
+    // } else {
+    //   this.dataSet$.next(undefined);
+    // }
     this.dataSet$.next(dataSet);
   };
 
@@ -57,11 +89,7 @@ export class DataSetManager {
     }
 
     const indexPattern = await this.indexPatterns?.get(defaultIndexPatternId);
-    if (!indexPattern) {
-      return undefined;
-    }
-
-    if (!indexPattern.id) {
+    if (!indexPattern || !indexPattern.id) {
       return undefined;
     }
 

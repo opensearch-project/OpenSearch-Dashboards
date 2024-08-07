@@ -10,12 +10,22 @@
   &__icon {
     margin-right: 4px;
   }
+
+  &__loading {
+    padding: $euiSizeS;
+  }
+
+  &__menu {
+    width: 365px;
+
+    .euiContextMenu__panel > div {
+      @include euiYScrollWithShadows;
+
+      max-height: 60vh;
+    }
+  }
 }
 
 .dataSetNavigatorFormWrapper {
-  padding: $euiSizeS;
-}
-
-.dataSetNavigator__loading {
   padding: $euiSizeS;
 }

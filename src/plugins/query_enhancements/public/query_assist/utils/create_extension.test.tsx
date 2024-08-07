@@ -24,7 +24,7 @@ const coreSetupMock = coreMock.createSetup({
 });
 const httpMock = coreSetupMock.http;
 const dataMock = dataPluginMock.createSetupContract();
-const dataSetMock = dataMock.query.dataSet as jest.Mocked<DataSetContract>;
+const dataSetMock = (dataMock.query.dataSetManager as unknown) as jest.Mocked<DataSetContract>;
 
 const mockSimpleDataSet = {
   id: 'mock-data-set-id',
@@ -34,6 +34,7 @@ const mockSimpleDataSet = {
   },
 } as SimpleDataSet;
 
+dataSetMock.getDataSet.mockReturnValue(mockSimpleDataSet);
 dataSetMock.getUpdates$.mockReturnValue(of(mockSimpleDataSet));
 
 jest.mock('../components', () => ({

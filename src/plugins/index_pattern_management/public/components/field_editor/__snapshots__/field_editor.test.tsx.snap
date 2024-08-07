@@ -164,7 +164,9 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
       />
     </eui-compressed-form-row>
     <eui-compressed-form-row>
-      <eui-text>
+      <eui-text
+        size="s"
+      >
         <FormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
@@ -178,16 +180,20 @@ exports[`FieldEditor should render create new scripted field correctly 1`] = `
         />
       </eui-text>
       <br />
-      <eui-link
-        data-test-subj="scriptedFieldsHelpLink"
-        onClick={[Function]}
+      <eui-text
+        size="s"
       >
-        <FormattedMessage
-          defaultMessage="Get help with the syntax and preview the results of your script."
-          id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
-        />
-      </eui-link>
+        <eui-link
+          data-test-subj="scriptedFieldsHelpLink"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Get help with the syntax and preview the results of your script."
+            id="indexPatternManagement.script.getHelpLabel"
+            values={Object {}}
+          />
+        </eui-link>
+      </eui-text>
     </eui-compressed-form-row>
     <eui-compressed-form-row>
       <eui-flex-group>
@@ -382,7 +388,9 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
       />
     </eui-compressed-form-row>
     <eui-compressed-form-row>
-      <eui-text>
+      <eui-text
+        size="s"
+      >
         <FormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
@@ -396,16 +404,20 @@ exports[`FieldEditor should render edit scripted field correctly 1`] = `
         />
       </eui-text>
       <br />
-      <eui-link
-        data-test-subj="scriptedFieldsHelpLink"
-        onClick={[Function]}
+      <eui-text
+        size="s"
       >
-        <FormattedMessage
-          defaultMessage="Get help with the syntax and preview the results of your script."
-          id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
-        />
-      </eui-link>
+        <eui-link
+          data-test-subj="scriptedFieldsHelpLink"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Get help with the syntax and preview the results of your script."
+            id="indexPatternManagement.script.getHelpLabel"
+            values={Object {}}
+          />
+        </eui-link>
+      </eui-text>
     </eui-compressed-form-row>
     <eui-compressed-form-row>
       <eui-flex-group>
@@ -661,7 +673,9 @@ exports[`FieldEditor should show conflict field warning 1`] = `
       />
     </eui-compressed-form-row>
     <eui-compressed-form-row>
-      <eui-text>
+      <eui-text
+        size="s"
+      >
         <FormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
@@ -675,16 +689,20 @@ exports[`FieldEditor should show conflict field warning 1`] = `
         />
       </eui-text>
       <br />
-      <eui-link
-        data-test-subj="scriptedFieldsHelpLink"
-        onClick={[Function]}
+      <eui-text
+        size="s"
       >
-        <FormattedMessage
-          defaultMessage="Get help with the syntax and preview the results of your script."
-          id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
-        />
-      </eui-link>
+        <eui-link
+          data-test-subj="scriptedFieldsHelpLink"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Get help with the syntax and preview the results of your script."
+            id="indexPatternManagement.script.getHelpLabel"
+            values={Object {}}
+          />
+        </eui-link>
+      </eui-text>
     </eui-compressed-form-row>
     <eui-compressed-form-row>
       <eui-flex-group>
@@ -960,7 +978,9 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
       />
     </eui-compressed-form-row>
     <eui-compressed-form-row>
-      <eui-text>
+      <eui-text
+        size="s"
+      >
         <FormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
@@ -974,16 +994,20 @@ exports[`FieldEditor should show deprecated lang warning 1`] = `
         />
       </eui-text>
       <br />
-      <eui-link
-        data-test-subj="scriptedFieldsHelpLink"
-        onClick={[Function]}
+      <eui-text
+        size="s"
       >
-        <FormattedMessage
-          defaultMessage="Get help with the syntax and preview the results of your script."
-          id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
-        />
-      </eui-link>
+        <eui-link
+          data-test-subj="scriptedFieldsHelpLink"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Get help with the syntax and preview the results of your script."
+            id="indexPatternManagement.script.getHelpLabel"
+            values={Object {}}
+          />
+        </eui-link>
+      </eui-text>
     </eui-compressed-form-row>
     <eui-compressed-form-row>
       <eui-flex-group>
@@ -1295,7 +1319,9 @@ exports[`FieldEditor should show multiple type field warning with a table contai
       />
     </eui-compressed-form-row>
     <eui-compressed-form-row>
-      <eui-text>
+      <eui-text
+        size="s"
+      >
         <FormattedMessage
           defaultMessage="Access fields with {code}."
           id="indexPatternManagement.script.accessWithLabel"
@@ -1309,16 +1335,20 @@ exports[`FieldEditor should show multiple type field warning with a table contai
         />
       </eui-text>
       <br />
-      <eui-link
-        data-test-subj="scriptedFieldsHelpLink"
-        onClick={[Function]}
+      <eui-text
+        size="s"
       >
-        <FormattedMessage
-          defaultMessage="Get help with the syntax and preview the results of your script."
-          id="indexPatternManagement.script.getHelpLabel"
-          values={Object {}}
-        />
-      </eui-link>
+        <eui-link
+          data-test-subj="scriptedFieldsHelpLink"
+          onClick={[Function]}
+        >
+          <FormattedMessage
+            defaultMessage="Get help with the syntax and preview the results of your script."
+            id="indexPatternManagement.script.getHelpLabel"
+            values={Object {}}
+          />
+        </eui-link>
+      </eui-text>
     </eui-compressed-form-row>
     <eui-compressed-form-row>
       <eui-flex-group>

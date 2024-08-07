@@ -6,45 +6,65 @@ exports[`<HomeListCard /> should render static content normally 1`] = `
     <div
       class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow euiPanel--noBorder"
     >
-      <h4
-        class="euiTitle euiTitle--medium"
-      >
-        What's New
-      </h4>
       <div
-        class="euiSpacer euiSpacer--l"
-      />
-      <dl
-        class="euiDescriptionList euiDescriptionList--row"
+        class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionColumn euiFlexGroup--responsive"
+        style="height: 100%;"
       >
-        <dt
-          class="euiDescriptionList__title"
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
         >
-          <a
-            class="euiLink euiLink--primary"
-            href="https://opensearch.org/docs/latest/dashboards/quickstart/"
-            rel="noopener noreferrer"
-            target="_blank"
+          <h4
+            class="euiTitle euiTitle--medium"
           >
-            Quickstart guide
-            <span
-              aria-label="External link"
-              class="euiLink__externalIcon"
-              data-euiicon-type="popout"
-            />
-            <span
-              class="euiScreenReaderOnly"
-            >
-              (opens in a new tab or window)
-            </span>
-          </a>
-        </dt>
-        <dd
-          class="euiDescriptionList__description"
+            What's New
+          </h4>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiFlexItem"
+          style="overflow: auto;"
         >
-          Get started in minutes with OpenSearch Dashboards
-        </dd>
-      </dl>
+          <dl
+            class="euiDescriptionList euiDescriptionList--row"
+          >
+            <dt
+              class="euiDescriptionList__title"
+            >
+              <a
+                class="euiLink euiLink--primary"
+                href="https://opensearch.org/docs/latest/dashboards/quickstart/"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                Quickstart guide
+                <span
+                  aria-label="External link"
+                  class="euiLink__externalIcon"
+                  data-euiicon-type="popout"
+                />
+                <span
+                  class="euiScreenReaderOnly"
+                >
+                  (opens in a new tab or window)
+                </span>
+              </a>
+            </dt>
+            <dd
+              class="euiDescriptionList__description"
+            >
+              Get started in minutes with OpenSearch Dashboards
+            </dd>
+          </dl>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiFlexItem euiFlexItem--flexGrowZero"
+        />
+      </div>
     </div>
   </div>
 </body>
